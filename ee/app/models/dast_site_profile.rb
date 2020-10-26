@@ -8,9 +8,17 @@ class DastSiteProfile < ApplicationRecord
   validates :project_id, :dast_site_id, presence: true
   validate :dast_site_project_id_fk
 
-  scope :with_dast_site, -> { includes(:dast_site) }
+  scope :with_dast_site_and_validation, -> { includes(dast_site: :dast_site_validation) }
 
   after_destroy :cleanup_dast_site
+
+  delegate :dast_site_validation, to: :dast_site, allow_nil: true
+
+  def status
+    return DastSiteValidation::INITIAL_STATE unless dast_site_validation
+
+    dast_site_validation.state
+  end
 
   private
 

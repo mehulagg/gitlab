@@ -9,6 +9,8 @@ module EE
       before_action :log_download_export_audit_event, only: [:download_export]
       before_action :log_archive_audit_event, only: [:archive]
       before_action :log_unarchive_audit_event, only: [:unarchive]
+
+      feature_category :projects, [:restore]
     end
 
     def restore
@@ -118,7 +120,7 @@ module EE
         attrs << :merge_requests_disable_committers_approval
       end
 
-      if can?(current_user, :modify_approvers_rules, project)
+      if can?(current_user, :modify_overriding_approvers_per_merge_request_setting, project)
         attrs << :disable_overriding_approvers_per_merge_request
       end
 

@@ -11,7 +11,7 @@ module Mutations
             null: true,
             description: 'Project that was added to the Instance Security Dashboard'
 
-      argument :id, GraphQL::ID_TYPE,
+      argument :id, ::Types::GlobalIDType[::Project],
                required: true,
                description: 'ID of the project to be added to Instance Security Dashboard'
 
@@ -29,7 +29,10 @@ module Mutations
       private
 
       def find_object(id:)
-        GitlabSchema.object_from_id(id)
+        # TODO: remove explicit coercion once compatibility layer has been removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        id = ::Types::GlobalIDType[::Project].coerce_isolated_input(id)
+        GitlabSchema.find_by_gid(id)
       end
 
       def add_project(project)

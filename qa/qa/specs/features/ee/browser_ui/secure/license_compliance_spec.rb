@@ -3,9 +3,9 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:approved_license_name) { "MIT License" }
-    let(:denied_license_name) { "WTFPL" }
+    let(:denied_license_name) { "Apache License 2.0" }
 
     describe 'License Compliance page' do
       after(:all) do

@@ -2,8 +2,10 @@
 
 module API
   module Ci
-    class Runner < Grape::API::Instance
+    class Runner < ::API::Base
       helpers ::API::Helpers::Runner
+
+      content_type :txt, 'text/plain'
 
       resource :runners do
         desc 'Registers a new Runner' do
@@ -72,6 +74,7 @@ module API
         post '/verify' do
           authenticate_runner!
           status 200
+          body "200"
         end
       end
 
@@ -181,7 +184,9 @@ module API
             .new(job, declared_params(include_missing: false))
 
           service.execute.then do |result|
+            header 'X-GitLab-Trace-Update-Interval', result.backoff
             status result.status
+            body result.status.to_s
           end
         end
 
@@ -292,6 +297,7 @@ module API
 
           if result[:status] == :success
             status :created
+            body "201"
           else
             render_api_error!(result[:message], result[:http_status])
           end

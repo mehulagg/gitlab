@@ -184,6 +184,33 @@ RSpec.describe ContainerRepository do
     end
   end
 
+  describe '#start_expiration_policy!' do
+    subject { repository.start_expiration_policy! }
+
+    it 'sets the expiration policy started at to now' do
+      Timecop.freeze do
+        expect { subject }
+          .to change { repository.expiration_policy_started_at }.from(nil).to(Time.zone.now)
+      end
+    end
+  end
+
+  describe '#reset_expiration_policy_started_at!' do
+    subject { repository.reset_expiration_policy_started_at! }
+
+    before do
+      repository.start_expiration_policy!
+    end
+
+    it 'resets the expiration policy started at' do
+      started_at = repository.expiration_policy_started_at
+
+      expect(started_at).not_to be_nil
+      expect { subject }
+          .to change { repository.expiration_policy_started_at }.from(started_at).to(nil)
+    end
+  end
+
   describe '.build_from_path' do
     let(:registry_path) do
       ContainerRegistry::Path.new(project.full_path + '/some/image')
@@ -324,5 +351,21 @@ RSpec.describe ContainerRepository do
     subject { described_class.search_by_name('my_image') }
 
     it { is_expected.to contain_exactly(repository) }
+  end
+
+  describe '.for_project_id' do
+    subject { described_class.for_project_id(project.id) }
+
+    it { is_expected.to contain_exactly(repository) }
+  end
+
+  describe '.waiting_for_cleanup' do
+    let_it_be(:repository_cleanup_scheduled) { create(:container_repository, :cleanup_scheduled) }
+    let_it_be(:repository_cleanup_unfinished) { create(:container_repository, :cleanup_unfinished) }
+    let_it_be(:repository_cleanup_ongoing) { create(:container_repository, :cleanup_ongoing) }
+
+    subject { described_class.waiting_for_cleanup }
+
+    it { is_expected.to contain_exactly(repository_cleanup_scheduled, repository_cleanup_unfinished) }
   end
 end

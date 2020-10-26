@@ -43,6 +43,18 @@ RSpec.describe GroupMember do
           expect(group_member.errors[:user]).to include("email 'unverified@gitlab.com' is not a verified email.")
         end
 
+        context 'with project bot users' do
+          let_it_be(:project_bot) { create(:user, :project_bot, email: "bot@example.com") }
+
+          it 'bot user email does not match' do
+            expect(group.allowed_email_domains.include?(project_bot.email)).to be_falsey
+          end
+
+          it 'allows the project bot user' do
+            expect(build(:group_member, group: group, user: project_bot)).to be_valid
+          end
+        end
+
         context 'with group SAML users' do
           let(:saml_provider) { create(:saml_provider, group: group) }
 
@@ -104,6 +116,50 @@ RSpec.describe GroupMember do
 
         it 'user emails does not have to be verified' do
           expect(build(:group_member, group: group, user: unconfirmed_gitlab_user)).to be_valid
+        end
+      end
+    end
+
+    describe 'access level inclusion' do
+      let(:group) { create(:group) }
+
+      context 'when minimal access user feature switched on' do
+        before do
+          stub_licensed_features(minimal_access_role: true)
+        end
+
+        it 'users can have access levels from minimal access to owner' do
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MINIMAL_ACCESS)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::OWNER)).to be_valid
+        end
+
+        context 'when group is a subgroup' do
+          let(:subgroup) { create(:group, parent: group) }
+
+          it 'users cannot have minimal access level' do
+            expect(build(:group_member, group: subgroup, user: create(:user), access_level: ::Gitlab::Access::MINIMAL_ACCESS)).to be_invalid
+          end
+        end
+      end
+
+      context 'when minimal access user feature switched off' do
+        before do
+          stub_licensed_features(minimal_access_role: false)
+        end
+
+        it 'users can have access levels from guest to owner' do
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MINIMAL_ACCESS)).to be_invalid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::OWNER)).to be_valid
         end
       end
     end

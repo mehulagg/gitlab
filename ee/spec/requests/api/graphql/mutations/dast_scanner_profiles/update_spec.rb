@@ -11,6 +11,9 @@ RSpec.describe 'Update a DAST Scanner Profile' do
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
+  let(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }
+  let(:new_use_ajax_spider) { !dast_scanner_profile.use_ajax_spider }
+  let(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
   let(:mutation_name) { :dast_scanner_profile_update }
   let(:mutation) do
@@ -20,7 +23,10 @@ RSpec.describe 'Update a DAST Scanner Profile' do
       id: dast_scanner_profile.to_global_id.to_s,
       profile_name: new_profile_name,
       target_timeout: new_target_timeout,
-      spider_timeout: new_spider_timeout
+      spider_timeout: new_spider_timeout,
+      scan_type: new_scan_type.upcase,
+      use_ajax_spider: new_use_ajax_spider,
+      show_debug_messages: new_show_debug_messages
     )
   end
 
@@ -40,6 +46,9 @@ RSpec.describe 'Update a DAST Scanner Profile' do
         expect(dast_scanner_profile.name).to eq(new_profile_name)
         expect(dast_scanner_profile.target_timeout).to eq(new_target_timeout)
         expect(dast_scanner_profile.spider_timeout).to eq(new_spider_timeout)
+        expect(dast_scanner_profile.scan_type).to eq(new_scan_type)
+        expect(dast_scanner_profile.use_ajax_spider).to eq(new_use_ajax_spider)
+        expect(dast_scanner_profile.show_debug_messages).to eq(new_show_debug_messages)
       end
     end
 
@@ -65,7 +74,10 @@ RSpec.describe 'Update a DAST Scanner Profile' do
           id: dast_scanner_profile.to_global_id.to_s,
           profile_name: new_profile_name,
           target_timeout: new_target_timeout,
-          spider_timeout: new_spider_timeout
+          spider_timeout: new_spider_timeout,
+          scan_type: new_scan_type.upcase,
+          use_ajax_spider: new_use_ajax_spider,
+          show_debug_messages: new_show_debug_messages
         )
       end
 

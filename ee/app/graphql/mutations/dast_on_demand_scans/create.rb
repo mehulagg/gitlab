@@ -30,6 +30,10 @@ module Mutations
       def resolve(full_path:, dast_site_profile_id:, **args)
         project = authorized_find_project!(full_path: full_path)
 
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        dast_site_profile_id = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(dast_site_profile_id)
+
         dast_site_profile = find_dast_site_profile(project: project, dast_site_profile_id: dast_site_profile_id)
         dast_site = dast_site_profile.dast_site
         dast_scanner_profile = find_dast_scanner_profile(project: project, dast_scanner_profile_id: args[:dast_scanner_profile_id])
@@ -40,7 +44,10 @@ module Mutations
           branch: project.default_branch,
           target_url: dast_site.url,
           spider_timeout: dast_scanner_profile&.spider_timeout,
-          target_timeout: dast_scanner_profile&.target_timeout
+          target_timeout: dast_scanner_profile&.target_timeout,
+          full_scan_enabled: dast_scanner_profile&.full_scan_enabled?,
+          use_ajax_spider: dast_scanner_profile&.use_ajax_spider,
+          show_debug_messages: dast_scanner_profile&.show_debug_messages
         )
 
         if result.success?
@@ -62,6 +69,11 @@ module Mutations
 
       def find_dast_scanner_profile(project:, dast_scanner_profile_id:)
         return unless dast_scanner_profile_id
+
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        dast_scanner_profile_id = ::Types::GlobalIDType[::DastScannerProfile]
+          .coerce_isolated_input(dast_scanner_profile_id)
 
         project
           .dast_scanner_profiles

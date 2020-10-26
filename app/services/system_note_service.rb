@@ -41,6 +41,10 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_assignees(old_assignees)
   end
 
+  def change_issuable_reviewers(issuable, project, author, old_reviewers)
+    ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_reviewers(old_reviewers)
+  end
+
   def relate_issue(noteable, noteable_ref, user)
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).relate_issue(noteable_ref)
   end
@@ -126,12 +130,12 @@ module SystemNoteService
     ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).abort_merge_when_pipeline_succeeds(reason)
   end
 
-  def handle_merge_request_wip(noteable, project, author)
-    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).handle_merge_request_wip
+  def handle_merge_request_draft(noteable, project, author)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).handle_merge_request_draft
   end
 
-  def add_merge_request_wip_from_commit(noteable, project, author, commit)
-    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).add_merge_request_wip_from_commit(commit)
+  def add_merge_request_draft_from_commit(noteable, project, author, commit)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).add_merge_request_draft_from_commit(commit)
   end
 
   def resolve_all_discussions(merge_request, project, author)
@@ -306,6 +310,10 @@ module SystemNoteService
 
   def create_new_alert(alert, monitoring_tool)
     ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).create_new_alert(monitoring_tool)
+  end
+
+  def change_incident_severity(incident, author)
+    ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
   end
 
   private

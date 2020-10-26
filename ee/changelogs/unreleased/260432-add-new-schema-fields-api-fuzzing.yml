@@ -1,0 +1,5 @@
+---
+title: Add new security report schema fields to backend for API Fuzzing
+merge_request: 44800
+author:
+type: changed

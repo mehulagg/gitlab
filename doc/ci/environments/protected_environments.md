@@ -9,8 +9,6 @@ type: concepts, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6303) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
 
-## Overview
-
 [Environments](../environments/index.md) can be used for different reasons:
 
 - Some of them are just for testing.
@@ -74,8 +72,7 @@ they have the following privileges:
 Users granted access to a protected environment, but not push or merge access
 to the branch deployed to it, are only granted access to deploy the environment.
 
-NOTE: **Note:**
-Deployment-only access is the only possible access level for users with
+Note that deployment-only access is the only possible access level for users with
 [Reporter permissions](../../user/permissions.md).
 
 ## Modifying and unprotecting environments
@@ -86,7 +83,6 @@ Maintainers can:
   **Allowed to Deploy** dropdown menu.
 - Unprotect a protected environment by clicking the **Unprotect** button for that environment.
 
-NOTE: **Note:**
 After an environment is unprotected, all access entries are deleted and must
 be re-entered if the environment is re-protected.
 

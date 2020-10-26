@@ -1,7 +1,0 @@
----
-name: update_target_approvers
-introduced_by_url: 
-rollout_issue_url: 
-group: 
-type: development
-default_enabled: false

@@ -33,7 +33,9 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include EachBatch
   extend Gitlab::Cache::RequestCache
+  extend Gitlab::Utils::Override
 
   extend Gitlab::ConfigHelper
 
@@ -198,6 +200,7 @@ class Project < ApplicationRecord
   has_one :import_export_upload, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :export_jobs, class_name: 'ProjectExportJob'
   has_one :project_repository, inverse_of: :project
+  has_one :tracing_setting, class_name: 'ProjectTracingSetting'
   has_one :incident_management_setting, inverse_of: :project, class_name: 'IncidentManagement::ProjectIncidentManagementSetting'
   has_one :error_tracking_setting, inverse_of: :project, class_name: 'ErrorTracking::ProjectErrorTrackingSetting'
   has_one :metrics_setting, inverse_of: :project, class_name: 'ProjectMetricsSetting'
@@ -245,7 +248,6 @@ class Project < ApplicationRecord
   has_many :lfs_file_locks
   has_many :project_group_links
   has_many :invited_groups, through: :project_group_links, source: :group
-  has_many :pages_domains
   has_many :todos
   has_many :notification_settings, as: :source, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
@@ -269,6 +271,7 @@ class Project < ApplicationRecord
   has_many :metrics_users_starred_dashboards, class_name: 'Metrics::UsersStarredDashboard', inverse_of: :project
 
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :project
+  has_many :alert_management_http_integrations, class_name: 'AlertManagement::HttpIntegration', inverse_of: :project
 
   # Container repositories need to remove data from the container registry,
   # which is not managed by the DB. Hence we're still using dependent: :destroy
@@ -295,6 +298,7 @@ class Project < ApplicationRecord
   # bulk that doesn't involve loading the rows into memory. As a result we're
   # still using `dependent: :destroy` here.
   has_many :builds, class_name: 'Ci::Build', inverse_of: :project, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :processables, class_name: 'Ci::Processable', inverse_of: :project
   has_many :build_trace_section_names, class_name: 'Ci::BuildTraceSectionName'
   has_many :build_trace_chunks, class_name: 'Ci::BuildTraceChunk', through: :builds, source: :trace_chunks
   has_many :build_report_results, class_name: 'Ci::BuildReportResult', inverse_of: :project
@@ -327,8 +331,6 @@ class Project < ApplicationRecord
   has_many :sourced_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_project_id
   has_many :source_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :project_id
 
-  has_one :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
-
   has_many :import_failures, inverse_of: :project
   has_many :jira_imports, -> { order 'jira_imports.created_at' }, class_name: 'JiraImportState', inverse_of: :project
 
@@ -338,6 +340,13 @@ class Project < ApplicationRecord
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
+
+  has_many :terraform_states, class_name: 'Terraform::State', inverse_of: :project
+
+  # GitLab Pages
+  has_many :pages_domains
+  has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
+  has_many :pages_deployments
 
   # Can be too many records. We need to implement delete_all in batches.
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/228637
@@ -359,6 +368,7 @@ class Project < ApplicationRecord
                                 allow_destroy: true,
                                 reject_if: ->(attrs) { attrs[:id].blank? && attrs[:url].blank? }
 
+  accepts_nested_attributes_for :tracing_setting, update_only: true, allow_destroy: true
   accepts_nested_attributes_for :incident_management_setting, update_only: true
   accepts_nested_attributes_for :error_tracking_setting, update_only: true
   accepts_nested_attributes_for :metrics_setting, update_only: true, allow_destroy: true
@@ -390,7 +400,7 @@ class Project < ApplicationRecord
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?,
@@ -430,6 +440,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_by_group, if: :should_validate_visibility_level?
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
+  validate :changing_shared_runners_enabled_is_allowed
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
@@ -558,6 +569,7 @@ class Project < ApplicationRecord
   }
 
   scope :imported_from, -> (type) { where(import_type: type) }
+  scope :with_tracing_enabled, -> { joins(:tracing_setting) }
 
   enum auto_cancel_pending_pipelines: { disabled: 0, enabled: 1 }
 
@@ -593,7 +605,7 @@ class Project < ApplicationRecord
     return public_to_user unless user
 
     if user.is_a?(DeployToken)
-      user.projects
+      user.accessible_projects
     else
       where('EXISTS (?) OR projects.visibility_level IN (?)',
             user.authorizations_for_projects(min_access_level: min_access_level),
@@ -665,8 +677,6 @@ class Project < ApplicationRecord
   scope :joins_import_state, -> { joins("INNER JOIN project_mirror_data import_state ON import_state.project_id = projects.id") }
   scope :for_group, -> (group) { where(group: group) }
   scope :for_group_and_its_subgroups, ->(group) { where(namespace_id: group.self_and_descendants.select(:id)) }
-  scope :for_repository_storage, -> (repository_storage) { where(repository_storage: repository_storage) }
-  scope :excluding_repository_storage, -> (repository_storage) { where.not(repository_storage: repository_storage) }
 
   class << self
     # Searches for a list of projects based on the query given in `query`.
@@ -840,6 +850,7 @@ class Project < ApplicationRecord
     end
   end
 
+  override :lfs_enabled?
   def lfs_enabled?
     return namespace.lfs_enabled? if self[:lfs_enabled].nil?
 
@@ -940,7 +951,7 @@ class Project < ApplicationRecord
     latest_pipeline = ci_pipelines.latest_successful_for_ref(ref)
     return unless latest_pipeline
 
-    latest_pipeline.builds.latest.with_downloadable_artifacts.find_by(name: job_name)
+    latest_pipeline.build_with_artifacts_in_self_and_descendants(job_name)
   end
 
   def latest_successful_build_for_sha(job_name, sha)
@@ -949,7 +960,7 @@ class Project < ApplicationRecord
     latest_pipeline = ci_pipelines.latest_successful_for_sha(sha)
     return unless latest_pipeline
 
-    latest_pipeline.builds.latest.with_downloadable_artifacts.find_by(name: job_name)
+    latest_pipeline.build_with_artifacts_in_self_and_descendants(job_name)
   end
 
   def latest_successful_build_for_ref!(job_name, ref = default_branch)
@@ -989,9 +1000,6 @@ class Project < ApplicationRecord
     job_id =
       if forked?
         RepositoryForkWorker.perform_async(id)
-      elsif gitlab_project_import?
-        # Do not retry on Import/Export until https://gitlab.com/gitlab-org/gitlab-foss/issues/26189 is solved.
-        RepositoryImportWorker.set(retry: false).perform_async(self.id)
       else
         RepositoryImportWorker.perform_async(self.id)
       end
@@ -1184,6 +1192,15 @@ class Project < ApplicationRecord
     end
   end
 
+  def changing_shared_runners_enabled_is_allowed
+    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
+
+    if shared_runners_enabled && group && group.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group does not allow it'))
+    end
+  end
+
   def to_param
     if persisted? && errors.include?(:path)
       path_was
@@ -1323,7 +1340,8 @@ class Project < ApplicationRecord
   end
 
   def find_or_initialize_services
-    available_services_names = Service.available_services_names - disabled_services
+    available_services_names =
+      Service.available_services_names + Service.project_specific_services_names - disabled_services
 
     available_services_names.map do |service_name|
       find_or_initialize_service(service_name)
@@ -1467,6 +1485,12 @@ class Project < ApplicationRecord
     return unless forked?
 
     forked_from_project || fork_network&.root_project
+  end
+
+  def lfs_objects_for_repository_types(*types)
+    LfsObject
+      .joins(:lfs_objects_projects)
+      .where(lfs_objects_projects: { project: self, repository_type: types })
   end
 
   def lfs_objects_oids(oids: [])
@@ -2066,21 +2090,36 @@ class Project < ApplicationRecord
     (auto_devops || build_auto_devops)&.predefined_variables
   end
 
-  # Tries to set repository as read_only, checking for existing Git transfers in progress beforehand
+  RepositoryReadOnlyError = Class.new(StandardError)
+
+  # Tries to set repository as read_only, checking for existing Git transfers in
+  # progress beforehand. Setting a repository read-only will fail if it is
+  # already in that state.
   #
-  # @return [Boolean] true when set to read_only or false when an existing git transfer is in progress
+  # @return nil. Failures will raise an exception
   def set_repository_read_only!
     with_lock do
-      break false if git_transfer_in_progress?
+      raise RepositoryReadOnlyError, _('Git transfer in progress') if
+        git_transfer_in_progress?
 
-      update_column(:repository_read_only, true)
+      raise RepositoryReadOnlyError, _('Repository already read-only') if
+        self.class.where(id: id).pick(:repository_read_only)
+
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, true)
+
+      nil
     end
   end
 
-  # Set repository as writable again
+  # Set repository as writable again. Unlike setting it read-only, this will
+  # succeed if the repository is already writable.
   def set_repository_writable!
     with_lock do
-      update_column(:repository_read_only, false)
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, false)
+
+      nil
     end
   end
 
@@ -2282,6 +2321,10 @@ class Project < ApplicationRecord
 
   def licensed_features
     []
+  end
+
+  def mark_primary_write_location
+    # Overriden in EE
   end
 
   def toggle_ci_cd_settings!(settings_attribute)
@@ -2487,10 +2530,23 @@ class Project < ApplicationRecord
     ci_config_path.presence || Ci::Pipeline::DEFAULT_CONFIG_PATH
   end
 
+  def ci_config_for(sha)
+    repository.gitlab_ci_yml_for(sha, ci_config_path_or_default)
+  end
+
   def enabled_group_deploy_keys
     return GroupDeployKey.none unless group
 
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
+  end
+
+  def feature_flags_client_token
+    instance = operations_feature_flags_client || create_operations_feature_flags_client!
+    instance.token
+  end
+
+  def tracing_external_url
+    tracing_setting&.external_url
   end
 
   private
@@ -2501,10 +2557,10 @@ class Project < ApplicationRecord
 
   def build_from_instance_or_template(name)
     instance = find_service(services_instances, name)
-    return Service.build_from_integration(id, instance) if instance
+    return Service.build_from_integration(instance, project_id: id) if instance
 
     template = find_service(services_templates, name)
-    return Service.build_from_integration(id, template) if template
+    return Service.build_from_integration(template, project_id: id) if template
   end
 
   def services_templates

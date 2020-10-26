@@ -1,6 +1,6 @@
 <script>
-import { sanitize } from 'dompurify';
 import { GlFormTextarea, GlButton } from '@gitlab/ui';
+import { sanitize } from '~/lib/dompurify';
 
 export default {
   components: { GlFormTextarea, GlButton },

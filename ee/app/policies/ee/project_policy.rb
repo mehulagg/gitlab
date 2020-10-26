@@ -227,6 +227,7 @@ module EE
         enable :admin_path_locks
         enable :update_approvers
         enable :modify_approvers_rules
+        enable :modify_overriding_approvers_per_merge_request_setting
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
@@ -306,7 +307,7 @@ module EE
       end
 
       rule { regulated_merge_request_approval_settings }.policy do
-        prevent :modify_approvers_rules
+        prevent :modify_overriding_approvers_per_merge_request_setting
         prevent :modify_merge_request_author_setting
         prevent :modify_merge_request_committer_setting
       end
@@ -349,6 +350,14 @@ module EE
       return ::Gitlab::Access::NO_ACCESS if visual_review_bot?
 
       super
+    end
+
+    # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
+    override :resource_access_token_available?
+    def resource_access_token_available?
+      return true unless ::Gitlab.com?
+
+      project.namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

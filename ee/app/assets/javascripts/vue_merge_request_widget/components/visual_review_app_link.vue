@@ -214,7 +214,7 @@ export default {
           data-track-label="review_app"
           @click="ok"
         >
-          <gl-search-box-by-type v-model.trim="changesSearchTerm" class="gl-m-3" />
+          <gl-search-box-by-type v-model.trim="changesSearchTerm" />
           <template #button-content>
             {{ s__('VisualReviewApp|Open review app') }}
             <gl-icon class="fgray" name="external-link" />

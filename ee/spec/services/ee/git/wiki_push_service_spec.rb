@@ -48,7 +48,8 @@ RSpec.describe Git::WikiPushService do
       end
 
       context 'with a group wiki' do
-        let_it_be(:wiki) { build(:group_wiki) }
+        let_it_be(:group) { create(:group) }
+        let_it_be(:wiki) { build(:group_wiki, group: group) }
 
         it 'does not trigger a wiki update' do
           expect(wiki).not_to receive(:index_wiki_blobs)

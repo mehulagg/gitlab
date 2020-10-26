@@ -62,10 +62,20 @@ class SearchService
   end
 
   def search_objects(preload_method = nil)
-    @search_objects ||= redact_unauthorized_results(search_results.objects(scope, page: params[:page], per_page: per_page, preload_method: preload_method))
+    @search_objects ||= redact_unauthorized_results(
+      search_results.objects(scope, page: page, per_page: per_page, preload_method: preload_method)
+    )
+  end
+
+  def search_highlight
+    search_results.highlight_map(scope)
   end
 
   private
+
+  def page
+    [1, params[:page].to_i].max
+  end
 
   def per_page
     per_page_param = params[:per_page].to_i

@@ -33,23 +33,6 @@ RSpec.describe 'getting merge request listings (EE) nested in a project' do
     post_graphql(query, current_user: current_user)
   end
 
-  context 'when requesting `approved_by`' do
-    let(:search_params) { { iids: [merge_request_a.iid.to_s, merge_request_b.iid.to_s] } }
-    let(:extra_iid_for_second_query) { merge_request_c.iid.to_s }
-    let(:requested_fields) { query_graphql_field(:approved_by, nil, query_graphql_field(:nodes, nil, [:username])) }
-
-    it 'exposes approver username' do
-      merge_request_a.approver_users << current_user
-
-      execute_query
-
-      user_data = { 'username' => current_user.username }
-      expect(results).to include(a_hash_including('approvedBy' => { 'nodes' => array_including(user_data) }))
-    end
-
-    include_examples 'N+1 query check'
-  end
-
   context 'when requesting approval fields' do
     let(:search_params) { { iids: [merge_request_a.iid.to_s] } }
     let(:requested_fields) { [:approved, :approvals_left, :approvals_required] }

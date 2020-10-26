@@ -8,8 +8,6 @@ module EE
 
       override :execute
       def execute
-        return false if prevent_elasticsearch_indexing_update?
-
         # Repository size limit comes as MB from the view
         limit = params.delete(:repository_size_limit)
         application_setting.repository_size_limit = ::Gitlab::Utils.try_megabytes_to_bytes(limit) if limit
@@ -18,6 +16,7 @@ module EE
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 
         if result = super
+          find_or_create_index
           update_elasticsearch_containers(ElasticsearchIndexedNamespace, elasticsearch_namespace_ids)
           update_elasticsearch_containers(ElasticsearchIndexedProject, elasticsearch_project_ids)
         end
@@ -43,10 +42,13 @@ module EE
 
       private
 
-      def prevent_elasticsearch_indexing_update?
-        !application_setting.elasticsearch_indexing &&
-          ::Gitlab::Utils.to_boolean(params[:elasticsearch_indexing]) &&
-          !::Gitlab::Elastic::Helper.default.index_exists?
+      def find_or_create_index
+        # The order of checks is important. We should not attempt to create a new index
+        # unless elasticsearch_indexing is enabled
+        return unless application_setting.elasticsearch_indexing
+        return if ::Gitlab::Elastic::Helper.default.index_exists?
+
+        ::Gitlab::Elastic::Helper.default.create_empty_index
       end
     end
   end

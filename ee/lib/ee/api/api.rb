@@ -14,15 +14,12 @@ module EE
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
         mount ::API::ProjectApprovalSettings
-        mount ::API::Unleash
         mount ::API::DependencyProxy
         mount ::API::EpicIssues
         mount ::API::EpicLinks
         mount ::API::Epics
         mount ::API::ElasticsearchIndexedNamespaces
-        mount ::API::FeatureFlags
-        mount ::API::FeatureFlagsUserLists
-        mount ::API::FeatureFlagScopes
+        mount ::API::Experiments
         mount ::API::Geo
         mount ::API::GeoReplication
         mount ::API::GeoNodes
@@ -51,6 +48,7 @@ module EE
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents
         mount ::API::ResourceIterationEvents
+        mount ::API::Iterations
       end
     end
   end

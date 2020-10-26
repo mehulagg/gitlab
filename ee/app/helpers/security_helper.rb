@@ -9,7 +9,7 @@ module SecurityHelper
       empty_state_svg_path: image_path('illustrations/operations-dashboard_empty.svg'),
       project_add_endpoint: security_projects_path,
       project_list_endpoint: security_projects_path,
-      instance_dashboard_settings_path: security_settings_dashboard_path,
+      instance_dashboard_settings_path: settings_security_dashboard_path,
       vulnerability_feedback_help_path: help_page_path('user/application_security/index', anchor: 'interacting-with-the-vulnerabilities'),
       vulnerabilities_export_endpoint: expose_path(api_v4_security_vulnerability_exports_path)
     }

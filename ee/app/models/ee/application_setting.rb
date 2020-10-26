@@ -7,10 +7,10 @@ module EE
   # and be prepended in the `ApplicationSetting` model
   module ApplicationSetting
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
-      INSTANCE_REVIEW_MIN_USERS = 50
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
 
       belongs_to :file_template_project, class_name: "Project"
@@ -105,6 +105,7 @@ module EE
       def defaults
         super.merge(
           allow_group_owners_to_manage_ldap: true,
+          automatic_purchased_storage_allocation: false,
           custom_project_templates_group_id: nil,
           default_project_deletion_protection: false,
           deletion_adjourned_period: DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL,
@@ -150,8 +151,6 @@ module EE
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
 
-      return elasticsearch_limited_project_exists?(project) unless ::Feature.enabled?(:elasticsearch_indexes_project_cache, default_enabled: true)
-
       ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:project, project.id) do
         elasticsearch_limited_project_exists?(project)
       end
@@ -160,8 +159,6 @@ module EE
     def elasticsearch_indexes_namespace?(namespace)
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
-
-      elasticsearch_limited_namespaces.exists?(namespace.id) unless ::Feature.enabled?(:elasticsearch_indexes_namespace_cache, default_enabled: true)
 
       ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:namespace, namespace.id) do
         elasticsearch_limited_namespaces.exists?(namespace.id)
@@ -302,14 +299,11 @@ module EE
       ::Project.where(namespace_id: group_id)
     end
 
+    override :instance_review_permitted?
     def instance_review_permitted?
-      return if License.current
+      return false if License.current
 
-      users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
-        ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
-      end
-
-      users_count >= INSTANCE_REVIEW_MIN_USERS
+      super
     end
 
     def max_personal_access_token_lifetime_from_now

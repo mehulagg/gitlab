@@ -1,5 +1,0 @@
----
-title: Use GitLab utility classes for the alert component instead of Bootstrap
-merge_request: 41974
-author:
-type: changed

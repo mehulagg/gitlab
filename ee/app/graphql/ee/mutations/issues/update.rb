@@ -7,12 +7,9 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          argument :health_status,
-                   ::Types::HealthStatusEnum,
-                   required: false,
-                   description: 'The desired health status'
-          argument :epic_id,
-                   GraphQL::ID_TYPE,
+          include ::Mutations::Issues::CommonEEMutationArguments
+
+          argument :epic_id, GraphQL::ID_TYPE,
                    required: false,
                    description: 'The ID of the parent epic. NULL when removing the association'
         end

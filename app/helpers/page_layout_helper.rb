@@ -40,6 +40,14 @@ module PageLayoutHelper
     end
   end
 
+  def page_canonical_link(link = nil)
+    if link
+      @page_canonical_link = link
+    else
+      @page_canonical_link
+    end
+  end
+
   def favicon
     Gitlab::Favicon.main
   end
@@ -49,7 +57,10 @@ module PageLayoutHelper
 
     subject = @project || @user || @group
 
-    image = subject.avatar_url if subject.present?
+    args = {}
+    args[:only_path] = false if Feature.enabled?(:avatar_with_host)
+
+    image = subject.avatar_url(args) if subject.present?
     image || default
   end
 

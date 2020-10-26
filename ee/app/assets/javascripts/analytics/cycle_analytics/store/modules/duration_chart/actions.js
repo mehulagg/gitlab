@@ -31,7 +31,7 @@ export const fetchDurationData = ({ dispatch, commit, rootGetters }) => {
         groupId: currentGroupPath,
         valueStreamId: currentValueStreamId,
         stageId: slug,
-        cycleAnalyticsRequestParams,
+        params: cycleAnalyticsRequestParams,
       })
         .then(checkForDataError)
         .then(({ data }) => ({ slug, selected: true, data }));

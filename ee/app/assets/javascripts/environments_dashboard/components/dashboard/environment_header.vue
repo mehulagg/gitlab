@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlDeprecatedBadge as GlBadge, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlLink, GlBadge, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 
@@ -59,7 +59,7 @@ export default {
       >
         <span class="js-environment-name bold"> {{ environment.name }}</span>
       </gl-link>
-      <gl-badge v-if="environment.within_folder" :pill="true" class="dashboard-card-icon">{{
+      <gl-badge v-if="environment.within_folder" class="dashboard-card-icon">{{
         environment.size
       }}</gl-badge>
     </div>

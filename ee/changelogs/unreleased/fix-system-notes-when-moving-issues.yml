@@ -1,5 +1,0 @@
----
-title: Create resource weight event when setting the weight during issue creation
-merge_request: 41087
-author:
-type: fixed

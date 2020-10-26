@@ -1,5 +1,0 @@
----
-title: Add ability to sort vulnerabilities by severity in GraphQL API
-merge_request: 40856
-author:
-type: added

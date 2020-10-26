@@ -1,13 +1,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import Sortable from 'sortablejs';
-import isWipLimitsOn from 'ee_else_ce/boards/mixins/is_wip_limits';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import Tooltip from '~/vue_shared/directives/tooltip';
 import EmptyComponent from '~/vue_shared/components/empty_component';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import BoardBlankState from './board_blank_state.vue';
 import BoardList from './board_list.vue';
+import BoardListNew from './board_list_new.vue';
 import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
 import { getBoardSortableDefaultOptions, sortableEnd } from '../mixins/sortable_default_options';
@@ -16,14 +14,10 @@ import { ListType } from '../constants';
 export default {
   components: {
     BoardPromotionState: EmptyComponent,
-    BoardBlankState,
     BoardListHeader,
-    BoardList,
+    BoardList: gon.features?.graphqlBoardLists ? BoardListNew : BoardList,
   },
-  directives: {
-    Tooltip,
-  },
-  mixins: [isWipLimitsOn, glFeatureFlagMixin()],
+  mixins: [glFeatureFlagMixin()],
   props: {
     list: {
       type: Object,
@@ -42,7 +36,7 @@ export default {
   },
   inject: {
     boardId: {
-      type: String,
+      default: '',
     },
   },
   data() {
@@ -54,7 +48,7 @@ export default {
   computed: {
     ...mapGetters(['getIssues']),
     showBoardListAndBoardInfo() {
-      return this.list.type !== ListType.blank && this.list.type !== ListType.promotion;
+      return this.list.type !== ListType.promotion;
     },
     uniqueKey() {
       // eslint-disable-next-line @gitlab/require-i18n-strings
@@ -74,7 +68,7 @@ export default {
     filter: {
       handler() {
         if (this.shouldFetchIssues) {
-          this.fetchIssuesForList(this.list.id);
+          this.fetchIssuesForList({ listId: this.list.id });
         } else {
           this.list.page = 1;
           this.list.getIssues(true).catch(() => {
@@ -87,7 +81,7 @@ export default {
   },
   mounted() {
     if (this.shouldFetchIssues) {
-      this.fetchIssuesForList(this.list.id);
+      this.fetchIssuesForList({ listId: this.list.id });
     }
 
     const instance = this;
@@ -133,7 +127,7 @@ export default {
       'board-type-assignee': list.type === 'assignee',
     }"
     :data-id="list.id"
-    class="board gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal"
+    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal"
     data-qa-selector="board_list"
   >
     <div
@@ -146,9 +140,7 @@ export default {
         :disabled="disabled"
         :issues="listIssues"
         :list="list"
-        :loading="list.loading"
       />
-      <board-blank-state v-if="canAdminList && list.id === 'blank'" />
 
       <!-- Will be only available in EE -->
       <board-promotion-state v-if="list.id === 'promotion'" />

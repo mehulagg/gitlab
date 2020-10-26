@@ -5,16 +5,19 @@ require 'spec_helper'
 RSpec.describe Gitlab::ImportExport::Group::RelationFactory do
   let(:group) { create(:group) }
   let(:members_mapper) { double('members_mapper').as_null_object }
-  let(:user) { create(:admin) }
+  let(:admin) { create(:admin) }
+  let(:importer_user) { admin }
   let(:excluded_keys) { [] }
   let(:created_object) do
-    described_class.create(relation_sym:   relation_sym,
-                           relation_hash:  relation_hash,
-                           members_mapper: members_mapper,
-                           object_builder: Gitlab::ImportExport::Group::ObjectBuilder,
-                           user:           user,
-                           importable:     group,
-                           excluded_keys:  excluded_keys)
+    described_class.create(
+      relation_sym: relation_sym,
+      relation_hash: relation_hash,
+      members_mapper: members_mapper,
+      object_builder: Gitlab::ImportExport::Group::ObjectBuilder,
+      user: importer_user,
+      importable: group,
+      excluded_keys: excluded_keys
+    )
   end
 
   context 'epic object' do
@@ -24,15 +27,15 @@ RSpec.describe Gitlab::ImportExport::Group::RelationFactory do
 
     let(:relation_hash) do
       {
-        'id'           => id,
+        'id' => id,
         'milestone_id' => nil,
-        'group_id'     => original_group_id,
-        'assignee_id'  => nil,
-        'created_at'   => 'Wed, 20 Nov 2019 11:02:24 UTC +00:00',
-        'updated_at'   => 'Wed, 20 Nov 2019 11:02:24 UTC +00:00',
-        'title'        => 'Title',
-        'description'  => 'Description',
-        'state_id'     => 'opened'
+        'group_id' => original_group_id,
+        'assignee_id' => nil,
+        'created_at' => 'Wed, 20 Nov 2019 11:02:24 UTC +00:00',
+        'updated_at' => 'Wed, 20 Nov 2019 11:02:24 UTC +00:00',
+        'title' => 'Title',
+        'description' => 'Description',
+        'state_id' => 'opened'
       }
     end
 
@@ -65,57 +68,27 @@ RSpec.describe Gitlab::ImportExport::Group::RelationFactory do
     end
   end
 
-  context 'Notes user references' do
-    let(:relation_sym) { :notes }
-    let(:new_user) { create(:user) }
-    let(:exported_member) do
-      {
-        'id'                 => 111,
-        'access_level'       => 30,
-        'source_id'          => 1,
-        'source_type'        => 'Namespace',
-        'user_id'            => 3,
-        'notification_level' => 3,
-        'created_at'         => '2016-11-18T09:29:42.634Z',
-        'updated_at'         => '2016-11-18T09:29:42.634Z',
-        'user'               => {
-          'id'       => 999,
-          'email'    => new_user.email,
-          'username' => new_user.username
-        }
-      }
-    end
-
+  it_behaves_like 'Notes user references' do
+    let(:importable) { group }
     let(:relation_hash) do
       {
-        'id'            => 4947,
-        'note'          => 'note',
+        'id' => 4947,
+        'note' => 'note',
         'noteable_type' => 'Epic',
-        'author_id'     => 999,
-        'created_at'    => '2016-11-18T09:29:42.634Z',
-        'updated_at'    => '2016-11-18T09:29:42.634Z',
-        'project_id'    => 1,
-        'attachment'    => {
+        'author_id' => 999,
+        'created_at' => '2016-11-18T09:29:42.634Z',
+        'updated_at' => '2016-11-18T09:29:42.634Z',
+        'project_id' => 1,
+        'attachment' => {
           'url' => nil
         },
-        'noteable_id'   => 377,
-        'system'        => true,
-        'author'        => {
+        'noteable_id' => 377,
+        'system' => true,
+        'author' => {
           'name' => 'Administrator'
         },
         'events' => []
       }
-    end
-
-    let(:members_mapper) do
-      Gitlab::ImportExport::MembersMapper.new(
-        exported_members: [exported_member],
-        user:             user,
-        importable:       group)
-    end
-
-    it 'maps the right author to the imported note' do
-      expect(created_object.author).to eq(new_user)
     end
   end
 

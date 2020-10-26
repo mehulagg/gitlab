@@ -69,6 +69,16 @@ RSpec.describe VulnerabilitiesHelper do
         can_modify_related_issues: false
       )
     end
+
+    context 'when the issues are disabled for the project' do
+      before do
+        allow(project).to receive(:issues_enabled?).and_return(false)
+      end
+
+      it 'has `create_issue_url` set as nil' do
+        expect(subject).to include(create_issue_url: nil)
+      end
+    end
   end
 
   describe '#vulnerability_details' do
@@ -151,7 +161,10 @@ RSpec.describe VulnerabilitiesHelper do
         evidence: kind_of(String),
         scanner: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         request: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
-        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder)
+        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
+        evidence_source: anything,
+        assets: kind_of(Array),
+        supporting_messages: kind_of(Array)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))

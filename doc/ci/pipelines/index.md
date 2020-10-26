@@ -10,7 +10,7 @@ type: reference
 
 > Introduced in GitLab 8.8.
 
-NOTE: **Tip:**
+TIP: **Tip:**
 Watch the
 ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to see a comprehensive demo of a GitLab CI/CD pipeline.
@@ -79,6 +79,27 @@ You can also configure specific aspects of your pipelines through the GitLab UI.
 - [Pipeline schedules](schedules.md).
 - [Custom CI/CD variables](../variables/README.md#custom-environment-variables).
 
+### Ref Specs for Runners
+
+When a runner picks a pipeline job, GitLab provides that job's metadata. This includes the [Git refspecs](https://git-scm.com/book/en/v2/Git-Internals-The-Refspec),
+which indicate which ref (branch, tag, and so on) and commit (SHA1) are checked out from your
+project repository.
+
+This table lists the refspecs injected for each pipeline type:
+
+| Pipeline type                                                      | Refspecs                                                                                       |
+|---------------                                                     |----------------------------------------                                                        |
+| Pipeline for Branches                                              | `+refs/pipelines/<id>:refs/pipelines/<id>` and `+refs/heads/<name>:refs/remotes/origin/<name>` |
+| pipeline for Tags                                                  | `+refs/pipelines/<id>:refs/pipelines/<id>` and `+refs/tags/<name>:refs/tags/<name>`            |
+| [Pipeline for Merge Requests](../merge_request_pipelines/index.md) | `+refs/pipelines/<id>:refs/pipelines/<id>`                                                     |
+
+The refs `refs/heads/<name>` and `refs/tags/<name>` exist in your
+project repository. GitLab generates the special ref `refs/pipelines/<id>` during a
+running pipeline job. This ref can be created even after the associated branch or tag has been
+deleted. It's therefore useful in some features such as [automatically stopping an environment](../environments/index.md#automatically-stopping-an-environment),
+and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md)
+that might run pipelines after branch deletion.
+
 ### View pipelines
 
 You can find the current and historical pipeline runs under your project's
@@ -101,8 +122,8 @@ you can filter the pipeline list by:
 
 - Trigger author
 - Branch name
-- Status ([since GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
-- Tag ([since GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Status ([GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Tag ([GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
 
 ### Run a pipeline manually
 
@@ -114,7 +135,7 @@ operation of the pipeline.
 To execute a pipeline manually:
 
 1. Navigate to your project's **CI/CD > Pipelines**.
-1. Click on the **Run Pipeline** button.
+1. Select the **Run Pipeline** button.
 1. On the **Run Pipeline** page:
     1. Select the branch to run the pipeline for in the **Create for** field.
     1. Enter any [environment variables](../variables/README.md) required for the pipeline run.
@@ -157,7 +178,7 @@ For each `var` or `file_var`, a key and value are required.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7931) in GitLab 8.15.
 
-Manual actions, configured using the [`when:manual`](../yaml/README.md#whenmanual) parameter,
+Manual actions, configured using the [`when:manual`](../yaml/README.md#whenmanual) keyword,
 allow you to require manual interaction before moving forward in the pipeline.
 
 You can do this straight from the pipeline graph. Just click the play button
@@ -394,7 +415,7 @@ for a single run of the manual job.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21767) in GitLab 11.4.
 
-When you do not want to run a job immediately, you can use the [`when:delayed`](../yaml/README.md#whendelayed) parameter to
+When you do not want to run a job immediately, you can use the [`when:delayed`](../yaml/README.md#whendelayed) keyword to
 delay a job's execution for a certain period.
 
 This is especially useful for timed incremental rollout where new code is rolled out gradually.
@@ -461,6 +482,28 @@ this line should be hidden when collapsed
 section_end:1560896353:my_first_section\r\e[0K
 ```
 
+#### Pre-collapse sections
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/198413) in GitLab 13.5.
+
+You can make the job log automatically collapse collapsible sections by adding the `collapsed` option to the section start.
+Add `[collapsed=true]` after the section name and before the `\r`. The section end marker
+remains unchanged:
+
+- Section start marker with `[collapsed=true]`: `section_start:UNIX_TIMESTAMP:SECTION_NAME[collapsed=true]\r\e[0K` + `TEXT_OF_SECTION_HEADER`
+- Section end marker: `section_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
+
+Add the updated section start text to the CI configuration. For example,
+using `echo`:
+
+```yaml
+job1:
+  script:
+    - echo -e "section_start:`date +%s`:my_first_section[collapsed=true]\r\e[0KHeader of the 1st collapsible section"
+    - echo 'this line should be hidden automatically after loading the job log'
+    - echo -e "section_end:`date +%s`:my_first_section\r\e[0K"
+```
+
 ## Visualize pipelines
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5742) in GitLab 8.11.
@@ -473,7 +516,6 @@ and their statuses.
 Pipeline graphs can be displayed in two different ways, depending on the page you
 access the graph from.
 
-NOTE: **Note:**
 GitLab capitalizes the stages' names in the pipeline graphs.
 
 ### Regular pipeline graphs

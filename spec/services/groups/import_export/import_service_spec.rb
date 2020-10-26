@@ -10,6 +10,15 @@ RSpec.describe Groups::ImportExport::ImportService do
     context 'when the job can be successfully scheduled' do
       subject(:import_service) { described_class.new(group: group, user: user) }
 
+      it 'creates group import state' do
+        import_service.async_execute
+
+        import_state = group.import_state
+
+        expect(import_state.user).to eq(user)
+        expect(import_state.group).to eq(group)
+      end
+
       it 'enqueues an import job' do
         expect(GroupImportWorker).to receive(:perform_async).with(user.id, group.id)
 
@@ -54,7 +63,7 @@ RSpec.describe Groups::ImportExport::ImportService do
     before do
       stub_feature_flags(group_import_ndjson: false)
 
-      ImportExportUpload.create(group: group, import_file: import_file)
+      ImportExportUpload.create!(group: group, import_file: import_file)
 
       allow(Gitlab::Import::Logger).to receive(:build).and_return(import_logger)
       allow(import_logger).to receive(:error)
@@ -96,7 +105,7 @@ RSpec.describe Groups::ImportExport::ImportService do
       subject { service.execute }
 
       before do
-        ImportExportUpload.create(group: group, import_file: import_file)
+        ImportExportUpload.create!(group: group, import_file: import_file)
 
         allow(Gitlab::Import::Logger).to receive(:build).and_return(import_logger)
         allow(import_logger).to receive(:error)
@@ -207,7 +216,7 @@ RSpec.describe Groups::ImportExport::ImportService do
       subject { service.execute }
 
       before do
-        ImportExportUpload.create(group: group, import_file: import_file)
+        ImportExportUpload.create!(group: group, import_file: import_file)
 
         allow(Gitlab::Import::Logger).to receive(:build).and_return(import_logger)
         allow(import_logger).to receive(:error)

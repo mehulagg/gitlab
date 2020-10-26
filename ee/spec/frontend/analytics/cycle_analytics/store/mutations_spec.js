@@ -7,7 +7,6 @@ import {
   codeStage,
   stagingStage,
   reviewStage,
-  totalStage,
   startDate,
   endDate,
   selectedProjects,
@@ -63,7 +62,6 @@ describe('Cycle analytics mutations', () => {
   it.each`
     mutation                                   | payload                                  | expectedState
     ${types.SET_FEATURE_FLAGS}                 | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_GROUP}                | ${{ fullPath: 'cool-beans' }}            | ${{ selectedGroup: { fullPath: 'cool-beans' }, selectedProjects: [] }}
     ${types.SET_SELECTED_PROJECTS}             | ${selectedProjects}                      | ${{ selectedProjects }}
     ${types.SET_DATE_RANGE}                    | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
     ${types.SET_SELECTED_STAGE}                | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
@@ -98,9 +96,9 @@ describe('Cycle analytics mutations', () => {
 
   describe('with value streams available', () => {
     it.each`
-      mutation                           | payload               | expectedState
-      ${types.SET_SELECTED_VALUE_STREAM} | ${valueStreams[1].id} | ${{ selectedValueStream: valueStreams[1] }}
-      ${types.SET_SELECTED_VALUE_STREAM} | ${'fake-id'}          | ${{ selectedValueStream: {} }}
+      mutation                           | payload            | expectedState
+      ${types.SET_SELECTED_VALUE_STREAM} | ${valueStreams[1]} | ${{ selectedValueStream: valueStreams[1] }}
+      ${types.SET_SELECTED_VALUE_STREAM} | ${'fake-id'}       | ${{ selectedValueStream: {} }}
     `(
       '$mutation with payload $payload will update state with $expectedState',
       ({ mutation, payload, expectedState }) => {
@@ -130,7 +128,7 @@ describe('Cycle analytics mutations', () => {
       });
 
       it('will convert the stats object to stages', () => {
-        [issueStage, planStage, codeStage, stagingStage, reviewStage, totalStage].forEach(stage => {
+        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach(stage => {
           expect(state.stages).toContainEqual(stage);
         });
       });
@@ -177,7 +175,6 @@ describe('Cycle analytics mutations', () => {
     it.each`
       stateKey              | expectedState
       ${'isLoading'}        | ${true}
-      ${'selectedGroup'}    | ${initialData.group}
       ${'selectedProjects'} | ${initialData.selectedProjects}
       ${'startDate'}        | ${initialData.createdAfter}
       ${'endDate'}          | ${initialData.createdBefore}

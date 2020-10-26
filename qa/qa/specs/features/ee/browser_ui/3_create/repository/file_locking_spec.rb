@@ -144,7 +144,7 @@ module QA
 
       def expect_error_on_push(for_file: 'file', as_user:)
         expect { push branch: 'master', file: for_file, as_user: as_user }.to raise_error(
-          QA::Git::Repository::RepositoryCommandError)
+          QA::Support::Run::CommandError)
       end
 
       def expect_no_error_on_push(for_file: 'file', as_user:)

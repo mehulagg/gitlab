@@ -1,6 +1,6 @@
 <script>
 import produce from 'immer';
-import { GlAlert, GlButton, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/instance_vulnerabilities.graphql';
@@ -10,7 +10,6 @@ import { preparePageInfo } from '../helpers';
 export default {
   components: {
     GlAlert,
-    GlButton,
     GlIntersectionObserver,
     GlLoadingIcon,
     VulnerabilityList,
@@ -33,7 +32,7 @@ export default {
     };
   },
   computed: {
-    isQueryLoading() {
+    isLoadingQuery() {
       return this.$apollo.queries.vulnerabilities.loading;
     },
     sort() {
@@ -117,10 +116,7 @@ export default {
       class="text-center"
       @appear="fetchNextPage"
     >
-      <gl-button :disabled="isFirstResultLoading" @click="fetchNextPage">
-        <gl-loading-icon v-if="isQueryLoading" size="md" />
-        <template v-else>{{ s__('SecurityReports|Load more vulnerabilities') }}</template>
-      </gl-button>
+      <gl-loading-icon v-if="isLoadingQuery" size="md" />
     </gl-intersection-observer>
   </div>
 </template>

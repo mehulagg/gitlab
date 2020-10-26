@@ -77,7 +77,7 @@ RSpec.describe Projects::DestroyService do
             details: {
               remove: 'project',
               author_name: user.name,
-              target_id: project.full_path,
+              target_id: project.id,
               target_type: 'Project',
               target_details: project.full_path
             }

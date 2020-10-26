@@ -32,8 +32,16 @@ module SnowplowHelpers
   #     end
   #   end
   def expect_snowplow_event(category:, action:, **kwargs)
-    expect(Gitlab::Tracking).to have_received(:event)
-      .with(category, action, **kwargs).at_least(:once)
+    # This check will no longer be needed with Ruby 2.7 which
+    # would not pass any arguments when using **kwargs.
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/263430
+    if kwargs.present?
+      expect(Gitlab::Tracking).to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+        .with(category, action, **kwargs).at_least(:once)
+    else
+      expect(Gitlab::Tracking).to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+        .with(category, action).at_least(:once)
+    end
   end
 
   # Asserts that no call to `Gitlab::Tracking#event` was made.
@@ -48,6 +56,6 @@ module SnowplowHelpers
   #     end
   #   end
   def expect_no_snowplow_event
-    expect(Gitlab::Tracking).not_to have_received(:event)
+    expect(Gitlab::Tracking).not_to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
   end
 end

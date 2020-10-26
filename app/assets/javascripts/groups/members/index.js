@@ -1,32 +1,31 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
+import { GlToast } from '@gitlab/ui';
+import { parseDataAttributes } from 'ee_else_ce/groups/members/utils';
 import App from './components/app.vue';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import membersModule from '~/vuex_shared/modules/members';
 
-export default el => {
+export const initGroupMembersApp = (el, tableFields, requestFormatter) => {
   if (!el) {
     return () => {};
   }
 
+  Vue.use(Vuex);
+  Vue.use(GlToast);
+
+  const store = new Vuex.Store({
+    ...membersModule({
+      ...parseDataAttributes(el),
+      currentUserId: gon.current_user_id || null,
+      tableFields,
+      requestFormatter,
+    }),
+  });
+
   return new Vue({
     el,
     components: { App },
-    data() {
-      const { members, groupId, currentUserId } = this.$options.el.dataset;
-
-      return {
-        members: convertObjectPropsToCamelCase(JSON.parse(members), { deep: true }),
-        groupId: parseInt(groupId, 10),
-        ...(currentUserId ? { currentUserId: parseInt(currentUserId, 10) } : {}),
-      };
-    },
-    render(createElement) {
-      return createElement('app', {
-        props: {
-          members: this.members,
-          groupId: this.groupId,
-          currentUserId: this.currentUserId,
-        },
-      });
-    },
+    store,
+    render: createElement => createElement('app'),
   });
 };

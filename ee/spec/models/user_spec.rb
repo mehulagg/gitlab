@@ -316,8 +316,8 @@ RSpec.describe User do
       context 'when group has custom project templates' do
         let!(:private_project) { create :project, :private, namespace: group, name: 'private_project' }
         let!(:internal_project) { create :project, :internal, namespace: group, name: 'internal_project' }
-        let!(:public_project) { create :project, :public, namespace: group, name: 'public_project' }
-        let!(:public_project_two) { create :project, :public, namespace: group, name: 'public_project_second' }
+        let!(:public_project) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public_project' }
+        let!(:public_project_two) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public_project_second' }
 
         it 'returns public projects' do
           expect(user.available_custom_project_templates).to include public_project
@@ -341,8 +341,22 @@ RSpec.describe User do
           end
         end
 
-        it 'returns internal projects' do
-          expect(user.available_custom_project_templates).to include internal_project
+        context 'returns internal projects if user' do
+          it 'is a member of the project' do
+            expect(user.available_custom_project_templates).not_to include internal_project
+
+            internal_project.add_developer(user)
+
+            expect(user.available_custom_project_templates).to include internal_project
+          end
+
+          it 'is a member of the group' do
+            expect(user.available_custom_project_templates).not_to include internal_project
+
+            group.add_developer(user)
+
+            expect(user.available_custom_project_templates).to include internal_project
+          end
         end
 
         it 'allows to search available project templates by name' do
@@ -369,6 +383,22 @@ RSpec.describe User do
 
           expect(projects.count).to eq 0
         end
+      end
+
+      it 'returns project with disabled features' do
+        public_project = create(:project, :public, :metrics_dashboard_enabled, namespace: group)
+        disabled_issues_project = create(:project, :public, :metrics_dashboard_enabled, :issues_disabled, namespace: group)
+
+        expect(user.available_custom_project_templates).to include public_project
+        expect(user.available_custom_project_templates).to include disabled_issues_project
+      end
+
+      it 'does not return project with private issues' do
+        accessible_project = create(:project, :public, :metrics_dashboard_enabled, namespace: group)
+        restricted_features_project = create(:project, :public, :metrics_dashboard_enabled, :issues_private, namespace: group)
+
+        expect(user.available_custom_project_templates).to include accessible_project
+        expect(user.available_custom_project_templates).not_to include restricted_features_project
       end
     end
   end
@@ -877,126 +907,6 @@ RSpec.describe User do
     end
   end
 
-  describe '#ab_feature_enabled?' do
-    let(:experiment_user) { create(:user) }
-    let(:new_user) { create(:user) }
-    let(:new_fresh_user) { create(:user) }
-    let(:control_user) { create(:user) }
-    let(:users_of_different_groups) { [experiment_user, new_user, new_fresh_user, control_user] }
-
-    before do
-      create(:user_preference, user: experiment_user, feature_filter_type: UserPreference::FEATURE_FILTER_EXPERIMENT)
-      create(:user_preference, user: new_user, feature_filter_type: UserPreference::FEATURE_FILTER_UNKNOWN)
-      create(:user_preference, user: new_fresh_user, feature_filter_type: nil)
-      create(:user_preference, user: control_user, feature_filter_type: UserPreference::FEATURE_FILTER_CONTROL)
-    end
-
-    context 'when not on Gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(false)
-      end
-
-      it 'returns false' do
-        users_of_different_groups.each do |user|
-          expect(user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-        end
-      end
-    end
-
-    context 'when on Gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-      end
-
-      context 'when on a secondary Geo' do
-        before do
-          allow(Gitlab::Geo).to receive(:secondary?).and_return(true)
-        end
-
-        it 'returns false' do
-          users_of_different_groups.each do |user|
-            expect(user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-          end
-        end
-      end
-
-      context 'when not on a secondary Geo' do
-        before do
-          allow(Gitlab::Geo).to receive(:secondary?).and_return(false)
-        end
-
-        context 'for any feature except discover_security' do
-          it 'raises runtime error' do
-            users_of_different_groups.each do |user|
-              expect do
-                user.ab_feature_enabled?(:any_other_feature, percentage: 100)
-              end.to raise_error(RuntimeError, 'Currently only discover_security feature is supported')
-            end
-          end
-        end
-
-        context 'when discover_security feature flag is disabled' do
-          before do
-            stub_feature_flags(discover_security: false)
-          end
-
-          it 'returns false' do
-            users_of_different_groups.each do |user|
-              expect(user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-            end
-          end
-        end
-
-        context 'when discover_security feature flag is enabled' do
-          it 'returns false when in control group' do
-            expect(control_user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-          end
-
-          it 'returns true for experiment group' do
-            expect(experiment_user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(true)
-          end
-
-          it 'assigns to control or experiment group when feature_filter_type is nil' do
-            new_fresh_user.ab_feature_enabled?(:discover_security, percentage: 100)
-
-            expect(new_fresh_user.user_preference.feature_filter_type).not_to eq(UserPreference::FEATURE_FILTER_UNKNOWN)
-          end
-
-          it 'assigns to control or experiment group when feature_filter_type is zero' do
-            new_user.ab_feature_enabled?(:discover_security, percentage: 100)
-
-            expect(new_user.user_preference.feature_filter_type).not_to eq(UserPreference::FEATURE_FILTER_UNKNOWN)
-          end
-
-          it 'returns false for zero percentage' do
-            expect(experiment_user.ab_feature_enabled?(:discover_security, percentage: 0)).to eq(false)
-          end
-
-          it 'returns false when no percentage is provided' do
-            expect(experiment_user.ab_feature_enabled?(:discover_security)).to eq(false)
-          end
-
-          it 'returns true when 100% control percentage is provided' do
-            Feature.enable_percentage_of_time(:discover_security_control, 100)
-
-            expect(experiment_user.ab_feature_enabled?(:discover_security)).to eq(true)
-            expect(experiment_user.user_preference.feature_filter_type).to eq(UserPreference::FEATURE_FILTER_EXPERIMENT)
-          end
-
-          it 'returns false if flipper returns nil for non-existing feature' do
-            # The following setup ensures that if the Feature interface changes
-            # it does not break any user-facing screens
-            allow(Feature).to receive(:get).with(:discover_security).and_return(nil)
-            allow(Feature).to receive(:enabled?).and_return(true)
-            allow(Feature).to receive(:get).with(:discover_security_control).and_return(nil)
-
-            expect(experiment_user.ab_feature_enabled?(:discover_security)).to eq(false)
-          end
-        end
-      end
-    end
-  end
-
   describe '#manageable_groups_eligible_for_subscription' do
     let_it_be(:user) { create(:user) }
     let_it_be(:licensed_group) { create(:group, gitlab_subscription: create(:gitlab_subscription, :bronze)) }
@@ -1114,6 +1024,56 @@ RSpec.describe User do
       end
 
       it { is_expected.to eq [non_trialed_group_a] }
+    end
+  end
+
+  describe '#authorized_groups' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:private_group) { create(:group) }
+    let_it_be(:child_group) { create(:group, parent: private_group) }
+    let_it_be(:minimal_access_group) { create(:group) }
+
+    let_it_be(:project_group) { create(:group) }
+    let_it_be(:project) { create(:project, group: project_group) }
+
+    before do
+      private_group.add_user(user, Gitlab::Access::MAINTAINER)
+      project.add_maintainer(user)
+      create(:group_member, :minimal_access, user: user, source: minimal_access_group)
+    end
+
+    subject { user.authorized_groups }
+
+    context 'with minimal access role feature unavailable' do
+      it { is_expected.to contain_exactly private_group, project_group }
+    end
+
+    context 'with minimal access feature available' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      context 'feature turned on for all groups' do
+        before do
+          allow(Gitlab::CurrentSettings)
+            .to receive(:should_check_namespace_plan?)
+            .and_return(false)
+        end
+
+        it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+      end
+
+      context 'feature available for specific groups only' do
+        before do
+          allow(Gitlab::CurrentSettings)
+            .to receive(:should_check_namespace_plan?)
+            .and_return(true)
+          create(:gitlab_subscription, :gold, namespace: minimal_access_group)
+          create(:group_member, :minimal_access, user: user, source: create(:group))
+        end
+
+        it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+      end
     end
   end
 
@@ -1256,31 +1216,151 @@ RSpec.describe User do
 
     context 'based on user type' do
       before do
+        allow(Gitlab).to receive(:com?).and_return(true)
         gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
       end
 
       context 'when user is a bot' do
-        let(:user) { build(:user, user_type: :alert_bot) }
+        let(:user) { create(:user, user_type: :alert_bot) }
 
         it { is_expected.to be false }
       end
 
       context 'when user is ghost' do
-        let(:user) { build(:user, :ghost) }
+        let(:user) { create(:user, :ghost) }
 
         it { is_expected.to be false }
       end
     end
 
     context 'when `:gitlab_employee_badge` feature flag is disabled' do
-      let(:user) { build(:user) }
+      let(:user) { create(:user) }
 
       before do
+        allow(Gitlab).to receive(:com?).and_return(true)
         stub_feature_flags(gitlab_employee_badge: false)
         gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
       end
 
       it { is_expected.to be false }
+    end
+  end
+
+  describe '#gitlab_bot?' do
+    subject { user.gitlab_bot? }
+
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
+
+    context 'based on group membership' do
+      context 'when user belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user does not belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          random_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'based on user type' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+        gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+      end
+
+      context 'when user is a bot' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user is a human' do
+        let(:user) { create(:user, user_type: :human) }
+
+        it { is_expected.to be false }
+      end
+
+      context 'when user is ghost' do
+        let(:user) { create(:user, :ghost) }
+
+        it { is_expected.to be false }
+      end
+    end
+  end
+
+  describe '#gitlab_service_user?' do
+    subject { user.gitlab_service_user? }
+
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
+
+    context 'based on group membership' do
+      context 'when user belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :service_user) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user does not belong to gitlab-com group' do
+        let(:user) { create(:user, user_type: :service_user) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          random_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'based on user type' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:is_com, :user_type, :answer) do
+        true  | :service_user | true
+        true  | :alert_bot    | false
+        true  | :human        | false
+        true  | :ghost        | false
+        false | :service_user | false
+        false | :alert_bot    | false
+        false | :human        | false
+        false | :ghost        | false
+      end
+
+      with_them do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(is_com)
+        end
+
+        let(:user) do
+          user = create(:user, user_type: user_type)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+          user
+        end
+
+        it "returns if the user is a GitLab-owned service user" do
+          expect(subject).to be answer
+        end
+      end
     end
   end
 
@@ -1336,6 +1416,28 @@ RSpec.describe User do
       user.namespace.plans.reload
 
       expect(subject).to be false
+    end
+  end
+
+  describe '#find_or_init_board_epic_preference' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:board) { create(:board) }
+    let_it_be(:epic) { create(:epic) }
+
+    subject(:preference) { user.find_or_init_board_epic_preference(board_id: board.id, epic_id: epic.id) }
+
+    it 'returns new board epic user preference' do
+      expect(preference.persisted?).to be_falsey
+      expect(preference.user).to eq(user)
+    end
+
+    context 'when preference already exists' do
+      let_it_be(:epic_user_preference) { create(:epic_user_preference, board: board, epic: epic, user: user) }
+
+      it 'returns the existing board' do
+        expect(preference.persisted?).to be_truthy
+        expect(preference).to eq(epic_user_preference)
+      end
     end
   end
 end

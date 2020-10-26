@@ -60,6 +60,7 @@ export default {
       v-for="entity in entities"
       ref="fields"
       :key="entity.field"
+      :disabled="disabled"
       v-bind="entity"
       @input="onInput(entity.field, $event)"
     />

@@ -1,6 +1,5 @@
-import $ from 'jquery';
 import Vue from 'vue';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
@@ -11,7 +10,7 @@ import toggleLabels from 'ee_else_ce/boards/toggle_labels';
 import toggleEpicsSwimlanes from 'ee_else_ce/boards/toggle_epics_swimlanes';
 import {
   setPromotionState,
-  setWeigthFetchingState,
+  setWeightFetchingState,
   setEpicFetchingState,
   getMilestoneTitle,
   getBoardsModalData,
@@ -19,6 +18,7 @@ import {
 
 import VueApollo from 'vue-apollo';
 import BoardContent from '~/boards/components/board_content.vue';
+import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
@@ -84,8 +84,12 @@ export default () => {
     },
     provide: {
       boardId: $boardApp.dataset.boardId,
-      groupId: Number($boardApp.dataset.groupId) || null,
+      groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
+      canUpdate: $boardApp.dataset.canUpdate,
+      labelsFetchPath: $boardApp.dataset.labelsFetchPath,
+      labelsManagePath: $boardApp.dataset.labelsManagePath,
+      labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
     },
     store,
     apolloProvider,
@@ -104,6 +108,7 @@ export default () => {
     },
     computed: {
       ...mapState(['isShowingEpicsSwimlanes']),
+      ...mapGetters(['shouldUseGraphQL']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
@@ -131,6 +136,7 @@ export default () => {
       eventHub.$on('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$on('toggleSubscription', this.toggleSubscription);
       eventHub.$on('performSearch', this.performSearch);
+      eventHub.$on('initialBoardLoad', this.initialBoardLoad);
     },
     beforeDestroy() {
       eventHub.$off('updateTokens', this.updateTokens);
@@ -138,6 +144,7 @@ export default () => {
       eventHub.$off('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$off('toggleSubscription', this.toggleSubscription);
       eventHub.$off('performSearch', this.performSearch);
+      eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
       this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
@@ -147,7 +154,20 @@ export default () => {
 
       boardsStore.disabled = this.disabled;
 
-      if (!gon.features.graphqlBoardLists) {
+      if (!this.shouldUseGraphQL) {
+        this.initialBoardLoad();
+      }
+    },
+    methods: {
+      ...mapActions([
+        'setInitialBoardData',
+        'setFilters',
+        'fetchEpicsSwimlanes',
+        'resetIssues',
+        'resetEpics',
+        'fetchLists',
+      ]),
+      initialBoardLoad() {
         boardsStore
           .all()
           .then(res => res.data)
@@ -160,30 +180,26 @@ export default () => {
           .catch(() => {
             Flash(__('An error occurred while fetching the board lists. Please try again.'));
           });
-      }
-    },
-    methods: {
-      ...mapActions([
-        'setInitialBoardData',
-        'setFilters',
-        'fetchEpicsSwimlanes',
-        'fetchIssuesForAllLists',
-      ]),
+      },
       updateTokens() {
         this.filterManager.updateTokens();
       },
       performSearch() {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
         if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
-          this.fetchEpicsSwimlanes(false);
-          this.fetchIssuesForAllLists();
+          this.resetEpics();
+          this.resetIssues();
+          this.fetchEpicsSwimlanes({});
+        } else if (gon.features.graphqlBoardLists && !this.isShowingEpicsSwimlanes) {
+          this.fetchLists();
+          this.resetIssues();
         }
       },
       updateDetailIssue(newIssue, multiSelect = false) {
         const { sidebarInfoEndpoint } = newIssue;
         if (sidebarInfoEndpoint && newIssue.subscribed === undefined) {
           newIssue.setFetchingState('subscriptions', true);
-          setWeigthFetchingState(newIssue, true);
+          setWeightFetchingState(newIssue, true);
           setEpicFetchingState(newIssue, true);
           boardsStore
             .getIssueInfo(sidebarInfoEndpoint)
@@ -201,7 +217,7 @@ export default () => {
               } = convertObjectPropsToCamelCase(data);
 
               newIssue.setFetchingState('subscriptions', false);
-              setWeigthFetchingState(newIssue, false);
+              setWeightFetchingState(newIssue, false);
               setEpicFetchingState(newIssue, false);
               newIssue.updateData({
                 humanTimeSpent: humanTotalTimeSpent,
@@ -216,7 +232,7 @@ export default () => {
             })
             .catch(() => {
               newIssue.setFetchingState('subscriptions', false);
-              setWeigthFetchingState(newIssue, false);
+              setWeightFetchingState(newIssue, false);
               Flash(__('An error occurred while fetching sidebar data'));
             });
         }
@@ -300,63 +316,32 @@ export default () => {
           }
           return !this.store.lists.filter(list => !list.preset).length;
         },
-        tooltipTitle() {
-          if (this.disabled) {
-            return __('Please add a list to your board first');
-          }
-
-          return '';
-        },
-      },
-      watch: {
-        disabled() {
-          this.updateTooltip();
-        },
-      },
-      mounted() {
-        this.updateTooltip();
       },
       methods: {
-        updateTooltip() {
-          const $tooltip = $(this.$refs.addIssuesButton);
-
-          this.$nextTick(() => {
-            if (this.disabled) {
-              $tooltip.tooltip();
-            } else {
-              $tooltip.tooltip('dispose');
-            }
-          });
-        },
         openModal() {
           if (!this.disabled) {
             this.toggleModal(true);
           }
         },
       },
-      template: `
-        <div class="board-extra-actions">
-          <button
-            class="btn btn-success gl-ml-3"
-            type="button"
-            data-placement="bottom"
-            data-track-event="click_button"
-            data-track-label="board_add_issues"
-            ref="addIssuesButton"
-            :class="{ 'disabled': disabled }"
-            :title="tooltipTitle"
-            :aria-disabled="disabled"
-            v-if="canAdminList"
-            @click="openModal">
-            Add issues
-          </button>
-        </div>
-      `,
+      render(createElement) {
+        return createElement(BoardExtraActions, {
+          props: {
+            canAdminList: this.$options.el.hasAttribute('data-can-admin-list'),
+            openModal: this.openModal,
+            disabled: this.disabled,
+          },
+        });
+      },
     });
   }
 
   toggleFocusMode(ModalStore, boardsStore);
   toggleLabels();
-  toggleEpicsSwimlanes();
+
+  if (gon.features?.swimlanes) {
+    toggleEpicsSwimlanes();
+  }
+
   mountMultipleBoardsSwitcher();
 };

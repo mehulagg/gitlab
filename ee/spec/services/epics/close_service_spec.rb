@@ -42,33 +42,12 @@ RSpec.describe Epics::CloseService do
             expect { subject.execute(epic) }.to change { epic.closed_at }
           end
 
-          context 'when state event tracking is enabled' do
-            before do
-              stub_feature_flags(track_resource_state_change_events: true)
-            end
+          it 'creates a resource state event' do
+            expect { subject.execute(epic) }.to change { epic.resource_state_events.count }.by(1)
 
-            it 'creates a resource state event' do
-              expect { subject.execute(epic) }.to change { epic.resource_state_events.count }.by(1)
+            event = epic.resource_state_events.last
 
-              event = epic.resource_state_events.last
-
-              expect(event.state).to eq('closed')
-            end
-          end
-
-          context 'when state event tracking is disabled' do
-            before do
-              stub_feature_flags(track_resource_state_change_events: false)
-            end
-
-            it 'creates a system note about epic close' do
-              expect { subject.execute(epic) }.to change { epic.notes.count }.by(1)
-
-              note = epic.notes.last
-
-              expect(note.note).to eq('closed')
-              expect(note.system_note_metadata.action).to eq('closed')
-            end
+            expect(event.state).to eq('closed')
           end
 
           it 'notifies the subscribers' do

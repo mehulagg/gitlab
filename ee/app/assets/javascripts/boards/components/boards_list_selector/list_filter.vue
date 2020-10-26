@@ -31,7 +31,7 @@ export default {
       class="dropdown-input-field"
       @keyup="handleInputChange"
     />
-    <i class="fa fa-search dropdown-input-search" aria-hidden="true" data-hidden="true"></i>
+    <gl-icon name="search" class="dropdown-input-search" aria-hidden="true" data-hidden="true" />
     <gl-icon
       name="close"
       class="dropdown-input-clear"

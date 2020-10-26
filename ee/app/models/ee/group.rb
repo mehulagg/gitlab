@@ -27,6 +27,7 @@ module EE
       has_one :scim_oauth_access_token
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+      has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
 
       has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
@@ -222,6 +223,12 @@ module EE
       ensure_saml_discovery_token!
     end
 
+    def saml_enabled?
+      return false unless saml_provider
+
+      saml_provider.persisted? && saml_provider.enabled?
+    end
+
     override :multiple_issue_boards_available?
     def multiple_issue_boards_available?
       feature_available?(:multiple_group_issue_boards)
@@ -406,6 +413,21 @@ module EE
 
     def minimal_member_access_level
       minimal_access_role_allowed? ? ::Gitlab::Access::MINIMAL_ACCESS : ::Gitlab::Access::GUEST
+    end
+
+    override :access_level_roles
+    def access_level_roles
+      levels = ::GroupMember.access_level_roles
+      return levels unless minimal_access_role_allowed?
+
+      levels.merge(::Gitlab::Access::MINIMAL_ACCESS_HASH)
+    end
+
+    override :users_count
+    def users_count
+      return all_group_members.count unless minimal_access_role_allowed?
+
+      members.count
     end
 
     private

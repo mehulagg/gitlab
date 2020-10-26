@@ -1,5 +1,6 @@
 <script>
 import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DynamicFields from './dynamic_fields.vue';
 import { isValidAnalyzerEntity } from './utils';
 
@@ -9,6 +10,7 @@ export default {
     GlFormCheckbox,
     DynamicFields,
   },
+  mixins: [glFeatureFlagsMixin()],
   model: {
     prop: 'entity',
     event: 'input',
@@ -22,8 +24,11 @@ export default {
     },
   },
   computed: {
-    hasConfiguration() {
-      return this.entity.configuration?.length > 0;
+    variables() {
+      return this.entity.variables?.nodes ?? [];
+    },
+    hasVariables() {
+      return this.variables.length > 0;
     },
   },
   methods: {
@@ -31,8 +36,8 @@ export default {
       const entity = { ...this.entity, enabled };
       this.$emit('input', entity);
     },
-    onConfigurationUpdate(configuration) {
-      const entity = { ...this.entity, configuration };
+    onVariablesUpdate(variables) {
+      const entity = { ...this.entity, variables: { nodes: variables } };
       this.$emit('input', entity);
     },
   },
@@ -47,11 +52,11 @@ export default {
     </gl-form-checkbox>
 
     <dynamic-fields
-      v-if="hasConfiguration"
+      v-if="hasVariables"
       :disabled="!entity.enabled"
-      class="gl-ml-6"
-      :entities="entity.configuration"
-      @input="onConfigurationUpdate"
+      class="gl-ml-6 gl-mb-0"
+      :entities="variables"
+      @input="onVariablesUpdate"
     />
   </gl-form-group>
 </template>

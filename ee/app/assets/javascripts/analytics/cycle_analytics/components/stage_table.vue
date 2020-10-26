@@ -113,7 +113,7 @@ export default {
 };
 </script>
 <template>
-  <div class="stage-panel-container">
+  <div class="stage-panel-container" data-testid="vsa-stage-table">
     <div
       v-if="isLoading"
       class="gl-display-flex gl-justify-content-center gl-align-items-center gl-w-full"

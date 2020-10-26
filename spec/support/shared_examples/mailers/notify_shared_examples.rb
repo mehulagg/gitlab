@@ -267,3 +267,18 @@ RSpec.shared_examples 'appearance header and footer not enabled' do
     end
   end
 end
+
+RSpec.shared_examples 'no email is sent' do
+  it 'does not send an email' do
+    expect(subject.message).to be_a_kind_of(ActionMailer::Base::NullMail)
+  end
+end
+
+RSpec.shared_examples 'does not render a manage notifications link' do
+  it do
+    aggregate_failures do
+      expect(subject).not_to have_body_text("Manage all notifications")
+      expect(subject).not_to have_body_text(profile_notifications_url)
+    end
+  end
+end

@@ -1,15 +1,25 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :state].freeze
+  SEARCH_GENERIC_PARAMS = [
+    :search,
+    :scope,
+    :project_id,
+    :group_id,
+    :repository_ref,
+    :snippets,
+    :sort,
+    :force_search_results
+  ].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
 
     resources_results = [
-      recent_issues_autocomplete(term),
+      recent_items_autocomplete(term),
       groups_autocomplete(term),
-      projects_autocomplete(term)
+      projects_autocomplete(term),
+      issue_autocomplete(term)
     ].flatten
 
     search_pattern = Regexp.new(Regexp.escape(term), "i")
@@ -24,6 +34,10 @@ module SearchHelper
     ].flatten.uniq do |item|
       item[:label]
     end
+  end
+
+  def recent_items_autocomplete(term)
+    recent_merge_requests_autocomplete(term) + recent_issues_autocomplete(term)
   end
 
   def search_entries_info(collection, scope, term)
@@ -85,13 +99,18 @@ module SearchHelper
     }).html_safe
   end
 
+  def repository_ref(project)
+    # Always #to_s the repository_ref param in case the value is also a number
+    params[:repository_ref].to_s.presence || project.default_branch
+  end
+
   # Overridden in EE
   def search_blob_title(project, path)
     path
   end
 
   def search_service
-    @search_service ||= ::SearchService.new(current_user, params)
+    @search_service ||= ::SearchService.new(current_user, params.merge(confidential: Gitlab::Utils.to_boolean(params[:confidential])))
   end
 
   private
@@ -122,8 +141,7 @@ module SearchHelper
       { category: "Help", label: _("Rake Tasks Help"),    url: help_page_path("raketasks/README") },
       { category: "Help", label: _("SSH Keys Help"),      url: help_page_path("ssh/README") },
       { category: "Help", label: _("System Hooks Help"),  url: help_page_path("system_hooks/system_hooks") },
-      { category: "Help", label: _("Webhooks Help"),      url: help_page_path("user/project/integrations/webhooks") },
-      { category: "Help", label: _("Workflow Help"),      url: help_page_path("workflow/README") }
+      { category: "Help", label: _("Webhooks Help"),      url: help_page_path("user/project/integrations/webhooks") }
     ]
   end
 
@@ -164,6 +182,24 @@ module SearchHelper
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
+  def issue_autocomplete(term)
+    return [] unless @project.present? && current_user && term =~ /\A#{Issue.reference_prefix}\d+\z/
+
+    iid = term.sub(Issue.reference_prefix, '').to_i
+    issue = @project.issues.find_by_iid(iid)
+    return [] unless issue && Ability.allowed?(current_user, :read_issue, issue)
+
+    [
+        {
+            category: 'In this project',
+            id: issue.id,
+            label: search_result_sanitize("#{issue.title} (#{issue.to_reference})"),
+            url: issue_path(issue),
+            avatar_url: issue.project.avatar_url || ''
+        }
+    ]
+  end
+
   # Autocomplete results for the current user's projects
   # rubocop: disable CodeReuse/ActiveRecord
   def projects_autocomplete(term, limit = 5)
@@ -180,10 +216,24 @@ module SearchHelper
     end
   end
 
-  def recent_issues_autocomplete(term, limit = 5)
+  def recent_merge_requests_autocomplete(term)
     return [] unless current_user
 
-    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).limit(limit).map do |i|
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).map do |mr|
+      {
+        category: "Recent merge requests",
+        id: mr.id,
+        label: search_result_sanitize(mr.title),
+        url: merge_request_path(mr),
+        avatar_url: mr.project.avatar_url || ''
+      }
+    end
+  end
+
+  def recent_issues_autocomplete(term)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).map do |i|
       {
         category: "Recent issues",
         id: i.id,
@@ -203,7 +253,7 @@ module SearchHelper
     search_params = params
       .merge(search)
       .merge({ scope: scope })
-      .permit(SEARCH_PERMITTED_PARAMS)
+      .permit(SEARCH_GENERIC_PARAMS)
 
     if @scope == scope
       li_class = 'active'
@@ -240,11 +290,15 @@ module SearchHelper
       opts[:data]['labels-endpoint'] = project_labels_path(@project)
       opts[:data]['milestones-endpoint'] = project_milestones_path(@project)
       opts[:data]['releases-endpoint'] = project_releases_path(@project)
+      opts[:data]['environments-endpoint'] =
+        unfoldered_environment_names_project_path(@project)
     elsif @group.present?
       opts[:data]['group-id'] = @group.id
       opts[:data]['labels-endpoint'] = group_labels_path(@group)
       opts[:data]['milestones-endpoint'] = group_milestones_path(@group)
       opts[:data]['releases-endpoint'] = group_releases_path(@group)
+      opts[:data]['environments-endpoint'] =
+        unfoldered_environment_names_group_path(@group)
     else
       opts[:data]['labels-endpoint'] = dashboard_labels_path
       opts[:data]['milestones-endpoint'] = dashboard_milestones_path
@@ -279,9 +333,25 @@ module SearchHelper
     sanitize(html, tags: %w(a p ol ul li pre code))
   end
 
-  def show_user_search_tab?
-    return false if Feature.disabled?(:users_search, default_enabled: true)
+  def simple_search_highlight_and_truncate(text, phrase, options = {})
+    text = Truncato.truncate(
+      text,
+      count_tags: false,
+      count_tail: false,
+      max_length: options.delete(:length) { 200 }
+    )
 
+    highlight(text, phrase.split, options)
+  end
+
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    return unless issue.description.present?
+
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
+  end
+
+  def show_user_search_tab?
     if @project
       project_search_tabs?(:members)
     else

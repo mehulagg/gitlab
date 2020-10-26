@@ -23,7 +23,6 @@ export default {
   },
   inject: {
     projectPath: {
-      type: String,
       default: '',
     },
   },

@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Secure Coding Guidelines
 
 This document contains descriptions and guidelines for addressing security
@@ -82,7 +89,8 @@ This Ruby Regex specialty can have security impact, as often regular expressions
 
 #### Examples
 
-GitLab specific examples can be found [here](https://gitlab.com/gitlab-org/gitlab/-/issues/36029#note_251262187) and [there](https://gitlab.com/gitlab-org/gitlab/-/issues/33569).
+GitLab-specific examples can be found in the following [path traversal](https://gitlab.com/gitlab-org/gitlab/-/issues/36029#note_251262187)
+and [open redirect](https://gitlab.com/gitlab-org/gitlab/-/issues/33569) issues.
 
 Another example would be this fictional Ruby on Rails controller:
 
@@ -303,6 +311,7 @@ Specifically, the following options are dangerous because they mark strings as t
 |----------------------|-------------------------------|
 | HAML templates       | `html_safe`, `raw`, `!=`      |
 | Embedded Ruby (ERB)  | `html_safe`, `raw`, `<%== %>` |
+
 In case you want to sanitize user-controlled values against XSS vulnerabilities, you can use
 [`ActionView::Helpers::SanitizeHelper`](https://api.rubyonrails.org/classes/ActionView/Helpers/SanitizeHelper.html).
 Calling `link_to` and `redirect_to` with user-controlled parameters can also lead to cross-site scripting.
@@ -392,5 +401,107 @@ In order to prevent Path Traversal vulnerabilities, user-controlled filenames or
 
 #### GitLab specific validations
 
-- [`Gitlab::Utils.check_path_traversal`](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/gitlab/utils.rb#L12-24) can be used to validate user input against Path Traversal vulnerabilities. Remember to add further validation when setting the `allowed_absolute` option to `true`.
-- [`file_path` API validator](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/api/validations/validators/file_path.rb) to validate user input when working with the Grape gem.
+The methods `Gitlab::Utils.check_path_traversal!()` and `Gitlab::Utils.check_allowed_absolute_path!()`
+can be used to validate user-supplied paths and prevent vulnerabilities.
+`check_path_traversal!()` will detect their Path Traversal payloads and accepts URL-encoded paths.
+`check_allowed_absolute_path!()` will check if a path is absolute and whether it is inside the allowed path list. By default, absolute
+paths are not allowed, so you need to pass a list of allowed absolute paths to the `path_allowlist`
+parameter when using `check_allowed_absolute_path!()`.
+
+To use a combination of both checks, follow the example below:
+
+```ruby
+path = Gitlab::Utils.check_path_traversal!(path)
+Gitlab::Utils.check_allowed_absolute_path!(path, path_allowlist)
+```
+
+In the REST API, we have the [`FilePath`](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/api/validations/validators/file_path.rb)
+validator that can be used to perform the checking on any file path argument the endpoints have.
+It can be used as follows:
+
+```ruby
+requires :file_path, type: String, file_path: { allowlist: ['/foo/bar/', '/home/foo/', '/app/home'] }
+```
+
+The Path Traversal check can also be used to forbid any absolute path:
+
+```ruby
+requires :file_path, type: String, file_path: true
+```
+
+NOTE: **Note:**
+Absolute paths are not allowed by default. If allowing an absolute path is required, you
+need to provide an array of paths to the parameter `allowlist`.  
+
+## OS command injection guidelines
+
+Command injection is an issue in which an attacker is able to execute arbitrary commands on the host
+operating system through a vulnerable application. Such attacks don't always provide feedback to a
+user, but the attacker can use simple commands like `curl` to obtain an answer.
+
+### Impact
+
+The impact of command injection greatly depends on the user context running the commands, as well as
+how data is validated and sanitized. It can vary from low impact because the user running the
+injected commands has limited rights, to critical impact if running as the root user.
+
+Potential impacts include:
+
+- Execution of arbitrary commands on the host machine.
+- Unauthorized access to sensitive data, including passwords and tokens in secrets or configuration
+  files.
+- Exposure of sensitive system files on the host machine, such as `/etc/passwd/` or `/etc/shadow`.
+- Compromise of related systems and services gained through access to the host machine.
+
+You should be aware of and take steps to prevent command injection when working with user-controlled
+data that are used to run OS commands.
+
+### Mitigation and prevention
+
+To prevent OS command injections, user-supplied data shouldn't be used within OS commands. In cases
+where you can't avoid this:
+
+- Validate user-supplied data against an allowlist.
+- Ensure that user-supplied data only contains alphanumeric characters (and no syntax or whitespace
+  characters, for example).
+- Always use `--` to separate options from arguments.
+
+### Ruby
+
+Consider using `system("command", "arg0", "arg1", ...)` whenever you can. This prevents an attacker
+from concatenating commands.
+
+For more examples on how to use shell commands securely, consult
+[Guidelines for shell commands in the GitLab codebase](shell_commands.md).
+It contains various examples on how to securely call OS commands.
+
+### Go
+
+Go has built-in protections that usually prevent an attacker from successfully injecting OS commands.
+
+Consider the following example:
+
+```golang
+package main
+
+import (
+  "fmt"
+  "os/exec"
+)
+
+func main() {
+  cmd := exec.Command("echo", "1; cat /etc/passwd")
+  out, _ := cmd.Output()
+  fmt.Printf("%s", out)
+}
+```
+
+This echoes `"1; cat /etc/passwd"`.
+
+**Do not** use `sh`, as it bypasses internal protections:
+
+```golang
+out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
+```
+
+This outputs `1` followed by the content of `/etc/passwd`.

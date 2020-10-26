@@ -113,11 +113,13 @@ RSpec.describe Vulnerabilities::Finding do
     let!(:vulnerability_secret_detection) { create(:vulnerabilities_finding, report_type: :secret_detection) }
     let!(:vulnerability_dast) { create(:vulnerabilities_finding, report_type: :dast) }
     let!(:vulnerability_depscan) { create(:vulnerabilities_finding, report_type: :dependency_scanning) }
+    let!(:vulnerability_covfuzz) { create(:vulnerabilities_finding, report_type: :coverage_fuzzing) }
+    let!(:vulnerability_apifuzz) { create(:vulnerabilities_finding, report_type: :api_fuzzing) }
 
     subject { described_class.by_report_types(param) }
 
     context 'with one param' do
-      let(:param) { 0 }
+      let(:param) { Vulnerabilities::Finding::REPORT_TYPES['sast'] }
 
       it 'returns found record' do
         is_expected.to contain_exactly(vulnerability_sast)
@@ -125,15 +127,28 @@ RSpec.describe Vulnerabilities::Finding do
     end
 
     context 'with array of params' do
-      let(:param) { [1, 3, 4] }
+      let(:param) do
+        [
+          Vulnerabilities::Finding::REPORT_TYPES['dependency_scanning'],
+          Vulnerabilities::Finding::REPORT_TYPES['dast'],
+          Vulnerabilities::Finding::REPORT_TYPES['secret_detection'],
+          Vulnerabilities::Finding::REPORT_TYPES['coverage_fuzzing'],
+          Vulnerabilities::Finding::REPORT_TYPES['api_fuzzing']
+        ]
+      end
 
       it 'returns found records' do
-        is_expected.to contain_exactly(vulnerability_dast, vulnerability_depscan, vulnerability_secret_detection)
+        is_expected.to contain_exactly(
+          vulnerability_dast,
+          vulnerability_depscan,
+          vulnerability_secret_detection,
+          vulnerability_covfuzz,
+          vulnerability_apifuzz)
       end
     end
 
     context 'without found record' do
-      let(:param) { 2 }
+      let(:param) { Vulnerabilities::Finding::REPORT_TYPES['container_scanning']}
 
       it 'returns empty collection' do
         is_expected.to be_empty
@@ -249,6 +264,44 @@ RSpec.describe Vulnerabilities::Finding do
 
     it 'returns non-dismissed findings for project' do
       expect(project2.vulnerability_findings.undismissed).to contain_exactly(finding3)
+    end
+  end
+
+  describe '.dismissed' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:project2) { create(:project) }
+    let!(:finding1) { create(:vulnerabilities_finding, project: project) }
+    let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
+    let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
+
+    before do
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project: finding1.project,
+        project_fingerprint: finding1.project_fingerprint
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project_fingerprint: finding2.project_fingerprint,
+        project: project2
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        category: :sast,
+        project_fingerprint: finding2.project_fingerprint,
+        project: finding2.project
+      )
+    end
+
+    it 'returns all dismissed findings' do
+      expect(described_class.dismissed).to contain_exactly(finding1)
+    end
+
+    it 'returns dismissed findings for project' do
+      expect(project.vulnerability_findings.dismissed).to contain_exactly(finding1)
     end
   end
 
@@ -590,15 +643,75 @@ RSpec.describe Vulnerabilities::Finding do
         is_expected.to match a_hash_including(
           summary: evidence['summary'],
           request: {
-            headers: evidence['request']['headers'],
+            headers: [
+              {
+                name: evidence['request']['headers'][0]['name'],
+                value: evidence['request']['headers'][0]['value']
+              }
+            ],
             url: evidence['request']['url'],
-            method: evidence['request']['method']
+            method: evidence['request']['method'],
+            body: evidence['request']['body']
           },
           response: {
-            headers: evidence['response']['headers'],
+            headers: [
+              {
+                name: evidence['response']['headers'][0]['name'],
+                value: evidence['response']['headers'][0]['value']
+              }
+            ],
             reason_phrase: evidence['response']['reason_phrase'],
-            status_code: evidence['response']['status_code']
-          })
+            status_code: evidence['response']['status_code'],
+            body: evidence['request']['body']
+          },
+          source: {
+            id: evidence.dig('source', 'id'),
+            name: evidence.dig('source', 'name'),
+            url: evidence.dig('source', 'url')
+          },
+          supporting_messages: [
+            {
+              name: evidence.dig('supporting_messages')[0].dig('name'),
+              request: {
+                headers: [
+                  {
+                    name: evidence.dig('supporting_messages')[0].dig('request', 'headers')[0].dig('name'),
+                    value: evidence.dig('supporting_messages')[0].dig('request', 'headers')[0].dig('value')
+                  }
+                ],
+                url: evidence.dig('supporting_messages')[0].dig('request', 'url'),
+                method: evidence.dig('supporting_messages')[0].dig('request', 'method'),
+                body: evidence.dig('supporting_messages')[0].dig('request', 'body')
+              },
+              response: evidence.dig('supporting_messages')[0].dig('response')
+            },
+            {
+              name: evidence.dig('supporting_messages')[1].dig('name'),
+              request: {
+                headers: [
+                  {
+                    name: evidence.dig('supporting_messages')[1].dig('request', 'headers')[0].dig('name'),
+                    value: evidence.dig('supporting_messages')[1].dig('request', 'headers')[0].dig('value')
+                  }
+                ],
+                url: evidence.dig('supporting_messages')[1].dig('request', 'url'),
+                method: evidence.dig('supporting_messages')[1].dig('request', 'method'),
+                body: evidence.dig('supporting_messages')[1].dig('request', 'body')
+              },
+              response: {
+                headers: [
+                  {
+                    name: evidence.dig('supporting_messages')[1].dig('response', 'headers')[0].dig('name'),
+                    value: evidence.dig('supporting_messages')[1].dig('response', 'headers')[0].dig('value')
+                  }
+                ],
+                reason_phrase: evidence.dig('supporting_messages')[1].dig('response', 'reason_phrase'),
+                status_code: evidence.dig('supporting_messages')[1].dig('response', 'status_code'),
+                body: evidence.dig('supporting_messages')[1].dig('response', 'body')
+              }
+            }
+          ]
+        )
       end
     end
 
@@ -608,16 +721,10 @@ RSpec.describe Vulnerabilities::Finding do
       it do
         is_expected.to match a_hash_including(
           summary: nil,
-          request: {
-            headers: [],
-            url: nil,
-            method: nil
-          },
-          response: {
-            headers: [],
-            reason_phrase: nil,
-            status_code: nil
-          })
+          source: nil,
+          supporting_messages: [],
+          request: nil,
+          response: nil)
       end
     end
   end
@@ -631,13 +738,44 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to eql(expected_message) }
   end
 
-  describe '#cve' do
+  describe '#cve_value' do
     let(:finding) { build(:vulnerabilities_finding) }
-    let(:expected_cve) { finding.metadata['cve'] }
+    let(:expected_cve) { 'CVE-2020-0000' }
 
-    subject { finding.cve }
+    subject { finding.cve_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cve', name: expected_cve)
+    end
 
     it { is_expected.to eql(expected_cve) }
+  end
+
+  describe '#cwe_value' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_cwe) { 'CWE-0000' }
+
+    subject { finding.cwe_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cwe', name: expected_cwe)
+    end
+
+    it { is_expected.to eql(expected_cwe) }
+  end
+
+  describe '#other_identifier_values' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_values) { ['ID 1', 'ID 2'] }
+
+    subject { finding.other_identifier_values }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'foo', name: expected_values.first)
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'bar', name: expected_values.second)
+    end
+
+    it { is_expected.to match_array(expected_values) }
   end
 
   describe "#metadata" do

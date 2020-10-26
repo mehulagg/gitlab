@@ -57,8 +57,15 @@ module EE
       onboarding_issues_experiment_enabled? ? continue : get_started
     end
 
-    def onboarding_issues_experiment_enabled?
-      experiment_enabled?(:onboarding_issues)
+    def data_attributes_for_progress_bar_js_component
+      {
+        is_in_subscription_flow: in_subscription_flow?.to_s,
+        is_onboarding_issues_experiment_enabled: onboarding_issues_experiment_enabled?.to_s
+      }
+    end
+
+    def skip_setup_for_company?
+      current_user.members.any?
     end
 
     private
@@ -68,6 +75,10 @@ module EE
         redirect_to = session['user_return_to']
         URI.parse(redirect_to).path if redirect_to
       end
+    end
+
+    def onboarding_issues_experiment_enabled?
+      experiment_enabled?(:onboarding_issues)
     end
   end
 end

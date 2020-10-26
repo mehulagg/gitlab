@@ -1,6 +1,0 @@
----
-title: Add ability to filter vulnerabilitiesSeveritiesCount in GraphQL for Project,
-  Group and Instance Security Dashboard
-merge_request: 41067
-author:
-type: added

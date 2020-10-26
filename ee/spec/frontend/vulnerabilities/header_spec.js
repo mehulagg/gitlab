@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlBadge } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
@@ -69,7 +69,7 @@ describe('Vulnerability Header', () => {
 
   const findGlButton = () => wrapper.find(GlButton);
   const findSplitButton = () => wrapper.find(SplitButton);
-  const findBadge = () => wrapper.find({ ref: 'badge' });
+  const findBadge = () => wrapper.find(GlBadge);
   const findResolutionAlert = () => wrapper.find(ResolutionAlert);
   const findStatusDescription = () => wrapper.find(StatusDescription);
 
@@ -77,6 +77,9 @@ describe('Vulnerability Header', () => {
     wrapper = shallowMount(Header, {
       propsData: {
         initialVulnerability: { ...defaultVulnerability, ...vulnerability },
+      },
+      stubs: {
+        GlBadge,
       },
     });
   };
@@ -107,7 +110,7 @@ describe('Vulnerability Header', () => {
     });
 
     it('when the vulnerability state dropdown emits a change event, the state badge updates', () => {
-      const newState = 'dismiss';
+      const newState = 'dismissed';
       mockAxios.onPost().reply(201, { state: newState });
       expect(findBadge().text()).not.toBe(newState);
 
@@ -121,7 +124,7 @@ describe('Vulnerability Header', () => {
     });
 
     it('when the vulnerability state dropdown emits a change event, the vulnerabilities event bus event is emitted with the proper event', () => {
-      const newState = 'dismiss';
+      const newState = 'dismissed';
       mockAxios.onPost().reply(201, { state: newState });
       expect(findBadge().text()).not.toBe(newState);
 
@@ -253,12 +256,19 @@ describe('Vulnerability Header', () => {
   });
 
   describe('state badge', () => {
-    it.each(vulnerabilityStateEntries)(
+    const badgeVariants = {
+      confirmed: 'danger',
+      resolved: 'success',
+      detected: 'warning',
+      dismissed: 'neutral',
+    };
+
+    it.each(Object.entries(badgeVariants))(
       'the vulnerability state badge has the correct style for the %s state',
-      (state, stateObject) => {
+      (state, variant) => {
         createWrapper({ state });
 
-        expect(findBadge().classes()).toContain(`status-box-${stateObject.statusBoxStyle}`);
+        expect(findBadge().props('variant')).toBe(variant);
         expect(findBadge().text()).toBe(state);
       },
     );

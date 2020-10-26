@@ -1,11 +1,10 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -91,25 +90,20 @@ export default {
     <a
       v-for="pipeline in linkedPipelinesTrimmed"
       :key="pipeline.id"
-      v-tooltip
+      v-gl-tooltip="{ title: pipelineTooltipText(pipeline) }"
       :href="pipeline.path"
-      :title="pipelineTooltipText(pipeline)"
       :class="triggerButtonClass(pipeline.details.status.group)"
       class="linked-pipeline-mini-item"
-      data-placement="top"
-      data-container="body"
     >
       <gl-icon :name="getStatusIcon(pipeline.details.status.icon)" />
     </a>
 
     <a
       v-if="shouldRenderCounter"
-      v-tooltip
+      v-gl-tooltip="{ title: counterTooltipText }"
       :title="counterTooltipText"
       :href="pipelinePath"
       class="linked-pipelines-counter linked-pipeline-mini-item"
-      data-placement="top"
-      data-container="body"
     >
       {{ counterLabel }}
     </a>

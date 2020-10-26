@@ -55,10 +55,15 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
 
           resources :dashboard, only: [:index], controller: :dashboard
+          resources :vulnerability_report, only: [:index], controller: :vulnerability_report
 
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
             resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :dast_profiles, only: [:show] do
+              resources :dast_site_profiles, only: [:new, :edit]
+              resources :dast_scanner_profiles, only: [:new, :edit]
+            end
           end
 
           resource :discover, only: [:show], controller: :discover
@@ -80,7 +85,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :analytics do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
-          resource :merge_request_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.project_merge_request_analytics_enabled? }
+          resource :merge_request_analytics, only: :show
         end
 
         resources :approvers, only: :destroy
@@ -90,13 +95,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :dependencies, only: [:index]
         resources :licenses, only: [:index, :create, :update]
 
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
+
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
-          scope :profiles do
-            root 'dast_profiles#index', as: 'profiles'
-            resources :dast_site_profiles, only: [:new, :edit]
-            resources :dast_scanner_profiles, only: [:new, :edit]
-          end
         end
 
         namespace :integrations do
@@ -122,8 +126,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           post :toggle
         end
       end
-
-      resource :tracing, only: [:show]
 
       post '/restore' => '/projects#restore', as: :restore
 

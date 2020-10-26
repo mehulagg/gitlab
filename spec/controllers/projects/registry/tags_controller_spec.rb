@@ -40,7 +40,7 @@ RSpec.describe Projects::Registry::TagsController do
       end
 
       it 'tracks the event' do
-        expect(Gitlab::Tracking).to receive(:event).with(anything, 'list_tags', {})
+        expect(Gitlab::Tracking).to receive(:event).with(anything, 'list_tags')
 
         get_tags
       end
@@ -150,7 +150,7 @@ RSpec.describe Projects::Registry::TagsController do
 
         it 'tracks the event' do
           expect_delete_tags(tags)
-          expect(Gitlab::Tracking).to receive(:event).with(anything, 'delete_tag_bulk', {})
+          expect(Gitlab::Tracking).to receive(:event).with(anything, 'delete_tag_bulk')
 
           bulk_destroy_tags(tags)
         end

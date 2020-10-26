@@ -6,10 +6,6 @@ export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
     state.featureFlags = featureFlags;
   },
-  [types.SET_SELECTED_GROUP](state, group) {
-    state.selectedGroup = convertObjectPropsToCamelCase(group, { deep: true });
-    state.selectedProjects = [];
-  },
   [types.SET_SELECTED_PROJECTS](state, projects) {
     state.selectedProjects = projects;
   },
@@ -91,15 +87,17 @@ export default {
   [types.INITIALIZE_CYCLE_ANALYTICS](
     state,
     {
-      group: selectedGroup = null,
+      group = null,
       createdAfter: startDate = null,
       createdBefore: endDate = null,
       selectedProjects = [],
+      selectedValueStream = {},
     } = {},
   ) {
     state.isLoading = true;
-    state.selectedGroup = selectedGroup;
+    state.currentGroup = group;
     state.selectedProjects = selectedProjects;
+    state.selectedValueStream = selectedValueStream;
     state.startDate = startDate;
     state.endDate = endDate;
   },
@@ -142,8 +140,8 @@ export default {
     state.isDeletingValueStream = false;
     state.deleteValueStreamError = null;
   },
-  [types.SET_SELECTED_VALUE_STREAM](state, streamId) {
-    state.selectedValueStream = state.valueStreams?.find(({ id }) => id === streamId) || null;
+  [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
+    state.selectedValueStream = valueStream;
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoadingValueStreams = true;

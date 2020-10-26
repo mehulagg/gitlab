@@ -1,4 +1,5 @@
 - size_checker = project.repository_size_checker
 - if size_checker.above_size_limit?
-  .alert.alert-warning.d-none.d-sm-block
+  .gl-alert.gl-alert-warning.gl-display-none.gl-display-sm-block
+    = sprite_icon('warning', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
     = size_checker.error_message.above_size_limit_message

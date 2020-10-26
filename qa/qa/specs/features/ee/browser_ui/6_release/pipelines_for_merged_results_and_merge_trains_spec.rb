@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  RSpec.describe 'Release', :docker, :runner do
+  RSpec.describe 'Release', :runner do
     describe 'Pipelines for merged results and merge trains' do
       let(:group) { Resource::Group.fabricate_via_api! }
 

@@ -75,7 +75,7 @@ sudo touch /etc/gitlab/disable-postgresql-upgrade
 
 ## Updating to GitLab 12.7
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Only upgrade to GitLab 12.7.5 or later. Do not upgrade to versions 12.7.0
 through 12.7.4 because there is [an initialization order
 bug](https://gitlab.com/gitlab-org/gitlab/-/issues/199672) that causes Geo
@@ -139,7 +139,7 @@ sudo touch /etc/gitlab/disable-postgresql-upgrade
 
 ## Updating to GitLab 12.3
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 If the existing PostgreSQL server version is 9.6.x, it is recommended to
 upgrade to GitLab 12.4 or newer. By default, GitLab 12.3 will attempt to
 automatically update the embedded PostgreSQL server to 10.9 from 9.6. In
@@ -155,7 +155,7 @@ for the recommended procedure.
 
 ## Updating to GitLab 12.2
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 If the existing PostgreSQL server version is 9.6.x, it is recommended to
 upgrade to GitLab 12.4 or newer. By default, GitLab 12.2 will attempt to
 automatically update the embedded PostgreSQL server to 10.9 from 9.6. In
@@ -187,7 +187,7 @@ The restart avoids a version mismatch when PostgreSQL tries to load the FDW exte
 
 ## Updating to GitLab 12.1
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 If the existing PostgreSQL server version is 9.6.x, it is recommended to
 upgrade to GitLab 12.4 or newer. By default, GitLab 12.1 will attempt to
 automatically update the embedded PostgreSQL server to 10.9 from 9.6. In
@@ -397,7 +397,7 @@ existing repositories was added in GitLab 10.1.
 
 ## Updating to GitLab 10.0
 
-Since GitLab 10.0, we require all **Geo** systems to [use SSH key lookups via
+In GitLab 10.0 and later, we require all **Geo** systems to [use SSH key lookups via
 the database](../../operations/fast_ssh_key_lookup.md) to avoid having to maintain consistency of the
 `authorized_keys` file for SSH access. Failing to do this will prevent users
 from being able to clone via SSH.
@@ -447,8 +447,8 @@ Omnibus is the following:
 
 > **IMPORTANT**:
 With GitLab 9.0, the PostgreSQL version is updated to 9.6 and manual steps are
-required in order to update the **secondary** nodes and keep the Streaming
-Replication working. Downtime is required, so plan ahead.
+required to update the **secondary** nodes and keep the Streaming Replication
+working. Downtime is required, so plan ahead.
 
 The following steps apply only if you update from a 8.17 GitLab version to
 9.0+. For previous versions, update to GitLab 8.17 first before attempting to
@@ -611,9 +611,9 @@ is prepended with the relevant node for better clarity:
 
 ### Update tracking database on **secondary** node
 
-After updating a **secondary** node, you might need to run migrations on
-the tracking database. The tracking database was added in GitLab 9.1,
-and it is required since 10.0.
+After updating a **secondary** node, you might need to run migrations on the
+tracking database. The tracking database was added in GitLab 9.1, and is
+required in GitLab 10.0 and later.
 
 1. Run database migrations on tracking database:
 

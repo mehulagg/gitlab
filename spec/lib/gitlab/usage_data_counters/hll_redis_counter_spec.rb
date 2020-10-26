@@ -15,12 +15,12 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
     # depending on which day of the week test is run.
     # Monday 6th of June
     reference_time = Time.utc(2020, 6, 1)
-    Timecop.freeze(reference_time) { example.run }
+    travel_to(reference_time) { example.run }
   end
 
   describe '.categories' do
     it 'gets all unique category names' do
-      expect(described_class.categories).to contain_exactly('analytics', 'compliance', 'ide_edit', 'search', 'source_code', 'incident_management', 'issues_edit')
+      expect(described_class.categories).to contain_exactly('analytics', 'compliance', 'ide_edit', 'search', 'source_code', 'incident_management', 'issues_edit', 'testing')
     end
   end
 
@@ -75,6 +75,12 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       context 'when usage_ping is enabled' do
         before do
           stub_application_setting(usage_ping_enabled: true)
+        end
+
+        it 'tracks event when using symbol' do
+          expect(Gitlab::Redis::HLL).to receive(:add)
+
+          described_class.track_event(entity1, :g_analytics_contribution)
         end
 
         it "raise error if metrics don't have same aggregation" do
@@ -201,6 +207,10 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
         it { expect(described_class.unique_events(event_names: weekly_event, start_date: 4.weeks.ago, end_date: 3.weeks.ago)).to eq(1) }
       end
 
+      context 'when using symbol as parameter' do
+        it { expect(described_class.unique_events(event_names: weekly_event.to_sym, start_date: 4.weeks.ago, end_date: 3.weeks.ago)).to eq(1) }
+      end
+
       context 'when using daily aggregation' do
         it { expect(described_class.unique_events(event_names: daily_event, start_date: 7.days.ago, end_date: Date.current)).to eq(2) }
         it { expect(described_class.unique_events(event_names: daily_event, start_date: 28.days.ago, end_date: Date.current)).to eq(3) }
@@ -238,16 +248,20 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
 
     it 'returns the number of unique events for all known events' do
       results = {
-       'category1' => {
-          'event1_slot' => 1,
-          'event2_slot' => 1,
-          'category1_total_unique_counts_weekly' => 2,
-          'category1_total_unique_counts_monthly' => 3
-       },
-       'category2' => {
-          'event3' => 1,
-          'event4' => 1
-       }
+        "category1" => {
+          "event1_slot_weekly" => 1,
+          "event1_slot_monthly" => 1,
+          "event2_slot_weekly" => 1,
+          "event2_slot_monthly" => 2,
+          "category1_total_unique_counts_weekly" => 2,
+          "category1_total_unique_counts_monthly" => 3
+        },
+        "category2" => {
+          "event3_weekly" => 1,
+          "event3_monthly" => 1,
+          "event4_weekly" => 1,
+          "event4_monthly" => 1
+        }
       }
 
       expect(subject.unique_events_data).to eq(results)

@@ -6,10 +6,10 @@ RSpec.describe 'Requirements list', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:user_guest) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:requirement1) { create(:requirement, project: project, title: 'Some requirement-1', author: user, created_at: 5.days.ago, updated_at: 2.days.ago) }
-  let_it_be(:requirement2) { create(:requirement, project: project, title: 'Some requirement-2', author: user, created_at: 6.days.ago, updated_at: 2.days.ago) }
-  let_it_be(:requirement3) { create(:requirement, project: project, title: 'Some requirement-3', author: user, created_at: 7.days.ago, updated_at: 2.days.ago) }
-  let_it_be(:requirement_archived) { create(:requirement, project: project, title: 'Some requirement-3', state: :archived, author: user, created_at: 8.days.ago, updated_at: 2.days.ago) }
+  let_it_be(:requirement1) { create(:requirement, project: project, title: 'Some requirement-1', description: 'Sample description', author: user, created_at: 5.days.ago, updated_at: 2.days.ago) }
+  let_it_be(:requirement2) { create(:requirement, project: project, title: 'Some requirement-2', description: 'Sample description', author: user, created_at: 6.days.ago, updated_at: 2.days.ago) }
+  let_it_be(:requirement3) { create(:requirement, project: project, title: 'Some requirement-3', description: 'Sample description', author: user, created_at: 7.days.ago, updated_at: 2.days.ago) }
+  let_it_be(:requirement_archived) { create(:requirement, project: project, title: 'Some requirement-3', description: 'Sample description', state: :archived, author: user, created_at: 8.days.ago, updated_at: 2.days.ago) }
 
   def create_requirement(title)
     page.within('.nav-controls') do
@@ -26,7 +26,6 @@ RSpec.describe 'Requirements list', :js do
 
   before do
     stub_licensed_features(requirements: true)
-    stub_feature_flags(requirements_management: [project])
     project.add_maintainer(user)
     project.add_guest(user_guest)
 
@@ -132,34 +131,51 @@ RSpec.describe 'Requirements list', :js do
         end
       end
 
+      it 'shows title and description along with edit button in drawer' do
+        find('.requirements-list li.requirement', match: :first).click
+
+        page.within('.requirement-form-drawer') do
+          expect(page.find('.title-container')).to have_content(requirement1.title)
+          expect(page.find('.title-container')).to have_selector('button.btn-edit')
+          expect(page.find('.description-container')).to have_content(requirement1.description)
+        end
+      end
+
       it 'shows edit form when edit button is clicked for a requirement' do
+        page.within('.requirements-list li.requirement', match: :first) do
+          find('li.requirement-edit button[title="Edit"]').click
+        end
+
+        page.within('.requirement-form-drawer') do
+          expect(page.find('.gl-drawer-header span', match: :first)).to have_content("REQ-#{requirement1.iid}")
+          expect(page.find('textarea#requirementTitle')['value']).to have_content("#{requirement1.title}")
+          expect(page.find('textarea#requirementDescription')['value']).to have_content("#{requirement1.description}")
+          expect(page.find('input[type="checkbox"]')['checked']).to eq(requirement1.last_test_report_state)
+          expect(page.find('.js-requirement-save')).to have_content('Save changes')
+        end
+      end
+
+      it 'updates requirement using edit form' do
         requirement_title = 'Foobar'
+        requirement_description = 'Baz'
 
         page.within('.requirements-list li.requirement', match: :first) do
           find('li.requirement-edit button[title="Edit"]').click
         end
 
-        page.within('.requirement-form') do
+        page.within('.requirement-form-drawer') do
           find('textarea#requirementTitle').native.send_keys requirement_title
-          find('button.js-requirement-save').click
+          find('textarea#requirementDescription').native.send_keys requirement_description
+          find('input[type="checkbox"]').click
+
+          click_button 'Save changes'
 
           wait_for_all_requests
         end
 
         page.within('.requirements-list li.requirement', match: :first) do
           expect(page.find('.issue-title-text')).to have_content(requirement_title)
-        end
-      end
-
-      it 'saves updated title for requirement using edit form' do
-        page.within('.requirements-list li.requirement', match: :first) do
-          find('li.requirement-edit button[title="Edit"]').click
-        end
-
-        page.within('.requirement-form') do
-          expect(page.find('span', match: :first)).to have_content("REQ-#{requirement1.iid}")
-          expect(page.find('textarea#requirementTitle')['value']).to have_content("#{requirement1.title}")
-          expect(page.find('.js-requirement-save')).to have_content('Save changes')
+          expect(page.find('.requirement-status-badge')).to have_content('satisfied')
         end
       end
 

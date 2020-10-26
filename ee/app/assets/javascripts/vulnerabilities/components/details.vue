@@ -91,7 +91,12 @@ export default {
     },
     shouldShowLocation() {
       return (
-        this.location.crash_address || this.location.crash_type || this.location.stacktrace_snippet
+        this.location.crash_address ||
+        this.location.crash_type ||
+        this.location.stacktrace_snippet ||
+        this.location.file ||
+        this.location.image ||
+        this.location.operating_system
       );
     },
   },
@@ -123,12 +128,7 @@ export default {
       <detail-item :sprintf-message="__('%{labelStart}Severity:%{labelEnd} %{severity}')">
         <severity-badge :severity="vulnerability.severity" class="gl-display-inline ml-1" />
       </detail-item>
-      <detail-item
-        v-if="vulnerability.evidence"
-        :sprintf-message="__('%{labelStart}Evidence:%{labelEnd} %{evidence}')"
-        >{{ vulnerability.evidence }}
-      </detail-item>
-      <detail-item :sprintf-message="__('%{labelStart}Report Type:%{labelEnd} %{reportType}')"
+      <detail-item :sprintf-message="__('%{labelStart}Scan Type:%{labelEnd} %{reportType}')"
         >{{ vulnerability.report_type }}
       </detail-item>
       <detail-item
@@ -151,20 +151,42 @@ export default {
         </component>
       </detail-item>
       <detail-item
-        v-if="location.image"
-        :sprintf-message="__('%{labelStart}Image:%{labelEnd} %{image}')"
-        >{{ location.image }}
+        v-if="location.class"
+        :sprintf-message="__('%{labelStart}Class:%{labelEnd} %{class}')"
+        >{{ location.class }}
       </detail-item>
       <detail-item
-        v-if="location.operating_system"
-        :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
-        >{{ location.operating_system }}
+        v-if="location.method"
+        :sprintf-message="__('%{labelStart}Method:%{labelEnd} %{method}')"
+      >
+        <code>{{ location.method }}</code>
+      </detail-item>
+      <detail-item
+        v-if="vulnerability.evidence"
+        :sprintf-message="__('%{labelStart}Evidence:%{labelEnd} %{evidence}')"
+        >{{ vulnerability.evidence }}
       </detail-item>
     </ul>
 
     <template v-if="shouldShowLocation">
       <h3>{{ __('Location') }}</h3>
       <ul>
+        <detail-item
+          v-if="location.image"
+          :sprintf-message="__('%{labelStart}Image:%{labelEnd} %{image}')"
+          >{{ location.image }}
+        </detail-item>
+        <detail-item
+          v-if="location.operating_system"
+          :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
+          >{{ location.operating_system }}
+        </detail-item>
+        <detail-item
+          v-if="location.file"
+          :sprintf-message="__('%{labelStart}File:%{labelEnd} %{file}')"
+        >
+          <gl-link :href="fileUrl" target="_blank">{{ fileText }}</gl-link>
+        </detail-item>
         <detail-item
           v-if="location.crash_address"
           :sprintf-message="__('%{labelStart}Crash Address:%{labelEnd} %{crash_address}')"
@@ -179,30 +201,14 @@ export default {
       </ul>
     </template>
 
-    <template v-if="location.file">
-      <h3>{{ __('Location') }}</h3>
-      <ul>
-        <detail-item :sprintf-message="__('%{labelStart}File:%{labelEnd} %{file}')">
-          <gl-link :href="fileUrl" target="_blank">{{ fileText }}</gl-link>
-        </detail-item>
-        <detail-item
-          v-if="location.class"
-          :sprintf-message="__('%{labelStart}Class:%{labelEnd} %{class}')"
-          >{{ location.class }}
-        </detail-item>
-        <detail-item
-          v-if="location.method"
-          :sprintf-message="__('%{labelStart}Method:%{labelEnd} %{method}')"
-        >
-          <code>{{ location.method }}</code>
-        </detail-item>
-      </ul>
-    </template>
-
     <template v-if="vulnerability.links && vulnerability.links.length">
       <h3>{{ __('Links') }}</h3>
       <ul>
-        <li v-for="(link, index) in vulnerability.links" :key="`${index}:${link.url}`">
+        <li
+          v-for="(link, index) in vulnerability.links"
+          :key="`${index}:${link.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
           <gl-link
             :href="link.url"
             data-testid="link"
@@ -222,6 +228,7 @@ export default {
         <li
           v-for="(identifier, index) in vulnerability.identifiers"
           :key="`${index}:${identifier.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
         >
           <gl-link :href="identifier.url" data-testid="identifier" target="_blank">
             {{ identifier.name }}

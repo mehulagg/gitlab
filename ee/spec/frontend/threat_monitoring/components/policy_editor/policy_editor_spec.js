@@ -53,6 +53,7 @@ describe('PolicyEditorApp component', () => {
   const findPolicyName = () => wrapper.find("[id='policyName']");
   const findSavePolicy = () => wrapper.find("[data-testid='save-policy']");
   const findDeletePolicy = () => wrapper.find("[data-testid='delete-policy']");
+  const findEditorModeToggle = () => wrapper.find("[data-testid='editor-mode']");
 
   beforeEach(() => {
     factory();
@@ -189,7 +190,7 @@ spec:
 
   it('updates yaml editor value on switch to yaml editor', async () => {
     findPolicyName().vm.$emit('input', 'test-policy');
-    wrapper.find("[data-testid='editor-mode']").vm.$emit('input', EditorModeYAML);
+    findEditorModeToggle().vm.$emit('input', EditorModeYAML);
     await wrapper.vm.$nextTick();
 
     const editor = findNetworkPolicyEditor();
@@ -212,8 +213,26 @@ spec:
       expect(findYAMLParsingAlert().exists()).toBe(true);
     });
 
-    it('disables add rule button', () => {
-      expect(findAddRuleButton().props('disabled')).toBe(true);
+    it('disables rule builder', () => {
+      expect(wrapper.find("[data-testid='rule-builder-container']").props().disabled).toBe(true);
+    });
+
+    it('disables action picker', () => {
+      expect(wrapper.find("[data-testid='policy-action-container']").props().disabled).toBe(true);
+    });
+
+    it('disables policy preview', () => {
+      expect(wrapper.find("[data-testid='policy-preview-container']").props().disabled).toBe(true);
+    });
+
+    it('does not update yaml editor value on switch to yaml editor', async () => {
+      findPolicyName().vm.$emit('input', 'test-policy');
+      findEditorModeToggle().vm.$emit('input', EditorModeYAML);
+      await wrapper.vm.$nextTick();
+
+      const editor = findNetworkPolicyEditor();
+      expect(editor.exists()).toBe(true);
+      expect(editor.props('value')).toEqual('');
     });
   });
 

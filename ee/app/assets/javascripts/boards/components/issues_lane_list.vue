@@ -33,15 +33,15 @@ export default {
       required: false,
       default: false,
     },
-    isLoading: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     canAdminList: {
       type: Boolean,
       required: false,
       default: false,
+    },
+    epicId: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   data() {
@@ -50,9 +50,9 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId']),
+    ...mapState(['activeId', 'filterParams', 'canAdminEpic', 'listsFlags']),
     treeRootWrapper() {
-      return this.canAdminList ? Draggable : 'ul';
+      return this.canAdminList && this.canAdminEpic ? Draggable : 'ul';
     },
     treeRootOptions() {
       const options = {
@@ -61,11 +61,26 @@ export default {
         group: 'board-epics-swimlanes',
         tag: 'ul',
         'ghost-class': 'board-card-drag-active',
+        'data-epic-id': this.epicId,
         'data-list-id': this.list.id,
         value: this.issues,
       };
 
       return this.canAdminList ? options : {};
+    },
+    isLoadingMore() {
+      return this.listsFlags[this.list.id]?.isLoadingMore;
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        if (this.isUnassignedIssuesLane) {
+          this.fetchIssuesForList({ listId: this.list.id, noEpicIssues: true });
+        }
+      },
+      deep: true,
+      immediate: true,
     },
   },
   created() {
@@ -75,7 +90,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['setActiveId', 'moveIssue']),
+    ...mapActions(['setActiveId', 'moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -97,10 +112,10 @@ export default {
 
       // If issue is being moved within the same list
       if (from === to) {
-        if (newIndex > oldIndex) {
+        if (newIndex > oldIndex && children.length > 1) {
           // If issue is being moved down we look for the issue that ends up before
           moveBeforeId = Number(children[newIndex].dataset.issueId);
-        } else if (newIndex < oldIndex) {
+        } else if (newIndex < oldIndex && children.length > 1) {
           // If issue is being moved up we look for the issue that ends up after
           moveAfterId = Number(children[newIndex].dataset.issueId);
         } else {
@@ -126,6 +141,7 @@ export default {
         toListId: to.dataset.listId,
         moveBeforeId,
         moveAfterId,
+        epicId: from.dataset.epicId !== to.dataset.epicId ? to.dataset.epicId || null : undefined,
       });
     },
   },
@@ -138,7 +154,6 @@ export default {
     :class="{ 'is-collapsed': !list.isExpanded }"
   >
     <div class="board-inner gl-rounded-base gl-relative gl-w-full">
-      <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       <board-new-issue
         v-if="list.type !== 'closed' && showIssueForm && isUnassignedIssuesLane"
         :list="list"
@@ -147,7 +162,7 @@ export default {
         :is="treeRootWrapper"
         v-if="list.isExpanded"
         v-bind="treeRootOptions"
-        class="gl-p-2 gl-m-0"
+        class="board-cell gl-p-2 gl-m-0 gl-h-full"
         @end="handleDragOnEnd"
       >
         <board-card-layout
@@ -157,9 +172,11 @@ export default {
           :index="index"
           :list="list"
           :issue="issue"
+          :disabled="disabled || !canAdminEpic"
           :is-active="isActiveIssue(issue)"
           @show="showIssue(issue)"
         />
+        <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
       </component>
     </div>
   </div>

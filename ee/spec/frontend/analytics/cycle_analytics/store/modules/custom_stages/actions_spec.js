@@ -5,7 +5,7 @@ import * as actions from 'ee/analytics/cycle_analytics/store/modules/custom_stag
 import * as types from 'ee/analytics/cycle_analytics/store/modules/custom_stages/mutation_types';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
-import { selectedGroup, endpoints, rawCustomStage } from '../../../mock_data';
+import { currentGroup, endpoints, rawCustomStage } from '../../../mock_data';
 
 jest.mock('~/flash');
 
@@ -25,7 +25,7 @@ describe('Custom stage actions', () => {
 
   afterEach(() => {
     mock.restore();
-    state = { selectedGroup: null };
+    state = { currentGroup: null };
   });
 
   describe('createStage', () => {
@@ -37,7 +37,7 @@ describe('Custom stage actions', () => {
       };
 
       beforeEach(() => {
-        state = { ...state, selectedGroup };
+        state = { ...state, currentGroup };
         mock.onPost(endpoints.baseStagesEndpointstageData).reply(201, customStageData);
       });
 
@@ -70,7 +70,7 @@ describe('Custom stage actions', () => {
       };
 
       beforeEach(() => {
-        state = { ...state, selectedGroup };
+        state = { ...state, currentGroup };
         mock
           .onPost(endpoints.baseStagesEndpointstageData)
           .reply(httpStatusCodes.UNPROCESSABLE_ENTITY, {

@@ -1,9 +1,12 @@
-import * as Sentry from '@sentry/browser';
-import { GlAlert } from '@gitlab/ui';
+import { merge } from 'lodash';
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
 import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
+import ExpandableSection from 'ee/security_configuration/sast/components/expandable_section.vue';
 import configureSastMutation from 'ee/security_configuration/sast/graphql/configure_sast.mutation.graphql';
+import * as Sentry from '~/sentry/wrapper';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { makeEntities, makeSastCiConfiguration } from './helpers';
 
@@ -12,6 +15,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const projectPath = 'group/project';
+const sastAnalyzersDocumentationPath = '/help/sast/analyzers';
 const securityConfigurationPath = '/security/configuration';
 const newMergeRequestPath = '/merge_request/new';
 
@@ -24,32 +28,39 @@ describe('ConfigurationForm component', () => {
     pendingPromiseResolvers.forEach(resolve => resolve());
   };
 
-  const createComponent = ({ mutationResult } = {}) => {
+  const createComponent = ({ mutationResult, ...options } = {}) => {
     sastCiConfiguration = makeSastCiConfiguration();
 
-    wrapper = shallowMount(ConfigurationForm, {
-      provide: {
-        projectPath,
-        securityConfigurationPath,
-      },
-      propsData: {
-        sastCiConfiguration,
-      },
-      mocks: {
-        $apollo: {
-          mutate: jest.fn(
-            () =>
-              new Promise(resolve => {
-                pendingPromiseResolvers.push(() =>
-                  resolve({
-                    data: { configureSast: mutationResult },
+    wrapper = shallowMount(
+      ConfigurationForm,
+      merge(
+        {
+          provide: {
+            projectPath,
+            securityConfigurationPath,
+            sastAnalyzersDocumentationPath,
+          },
+          propsData: {
+            sastCiConfiguration,
+          },
+          mocks: {
+            $apollo: {
+              mutate: jest.fn(
+                () =>
+                  new Promise(resolve => {
+                    pendingPromiseResolvers.push(() =>
+                      resolve({
+                        data: { configureSast: mutationResult },
+                      }),
+                    );
                   }),
-                );
-              }),
-          ),
+              ),
+            },
+          },
         },
-      },
-    });
+        options,
+      ),
+    );
   };
 
   const findForm = () => wrapper.find('form');
@@ -57,6 +68,8 @@ describe('ConfigurationForm component', () => {
   const findErrorAlert = () => wrapper.find(GlAlert);
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findDynamicFieldsComponents = () => wrapper.findAll(DynamicFields);
+  const findAnalyzerConfigurations = () => wrapper.findAll(AnalyzerConfiguration);
+  const findAnalyzersSection = () => wrapper.find('[data-testid="analyzers-section"]');
 
   const expectPayloadForEntities = () => {
     const expectedPayload = {
@@ -77,6 +90,19 @@ describe('ConfigurationForm component', () => {
                 field: 'field1',
                 defaultValue: 'defaultValue1',
                 value: 'value1',
+              },
+            ],
+            analyzers: [
+              {
+                name: 'nameValue0',
+                enabled: true,
+                variables: [
+                  {
+                    field: 'field2',
+                    defaultValue: 'defaultValue2',
+                    value: 'value2',
+                  },
+                ],
               },
             ],
           },
@@ -132,6 +158,55 @@ describe('ConfigurationForm component', () => {
     });
   });
 
+  describe('the analyzers section', () => {
+    beforeEach(() => {
+      createComponent({
+        stubs: {
+          ExpandableSection,
+        },
+      });
+    });
+
+    it('renders', () => {
+      const analyzersSection = findAnalyzersSection();
+      expect(analyzersSection.exists()).toBe(true);
+      expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersHeading);
+      expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersSubHeading);
+    });
+
+    it('has a link to the documentation', () => {
+      const link = findAnalyzersSection().find(GlLink);
+      expect(link.exists()).toBe(true);
+      expect(link.attributes('href')).toBe(sastAnalyzersDocumentationPath);
+    });
+
+    it('renders each analyzer', () => {
+      const analyzerEntities = sastCiConfiguration.analyzers.nodes;
+      const analyzerComponents = findAnalyzerConfigurations();
+      analyzerEntities.forEach((entity, i) => {
+        expect(analyzerComponents.at(i).props()).toEqual({ entity });
+      });
+    });
+
+    describe('when an AnalyzerConfiguration emits an input event', () => {
+      let analyzer;
+      let updatedEntity;
+
+      beforeEach(() => {
+        analyzer = findAnalyzerConfigurations().at(0);
+        updatedEntity = {
+          ...sastCiConfiguration.analyzers.nodes[0],
+          value: 'new value',
+        };
+        analyzer.vm.$emit('input', updatedEntity);
+      });
+
+      it('updates the entity binding', () => {
+        expect(analyzer.props('entity')).toBe(updatedEntity);
+      });
+    });
+  });
+
   describe('when submitting the form', () => {
     beforeEach(() => {
       jest.spyOn(Sentry, 'captureException').mockImplementation();
@@ -153,7 +228,9 @@ describe('ConfigurationForm component', () => {
         findForm().trigger('submit');
       });
 
-      it('includes the value of each entity in the payload', expectPayloadForEntities);
+      it('includes the value of each entity in the payload', () => {
+        expectPayloadForEntities();
+      });
 
       it(`sets the submit button's loading prop to true`, () => {
         expect(findSubmitButton().props('loading')).toBe(true);
@@ -204,7 +281,9 @@ describe('ConfigurationForm component', () => {
         findForm().trigger('submit');
       });
 
-      it('includes the value of each entity in the payload', expectPayloadForEntities);
+      it('includes the value of each entity in the payload', () => {
+        expectPayloadForEntities();
+      });
 
       it(`sets the submit button's loading prop to true`, () => {
         expect(findSubmitButton().props().loading).toBe(true);

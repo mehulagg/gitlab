@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
   include GraphqlHelpers
 
-  let_it_be(:dast_site_profile) { create(:dast_site_profile) }
-  let_it_be(:project) { dast_site_profile.project }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:current_user) { create(:user) }
 
   let(:query) do
@@ -76,7 +76,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
       expect(first_dast_site_profile_response['id']).to eq(dast_site_profile.to_global_id.to_s)
     end
 
-    it 'eager loads the dast site' do
+    it 'eager loads the dast site and dast site validation' do
       control = ActiveRecord::QueryRecorder.new do
         post_graphql(
           query,

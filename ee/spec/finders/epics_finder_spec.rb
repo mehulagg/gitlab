@@ -7,7 +7,7 @@ RSpec.describe EpicsFinder do
   let_it_be(:search_user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:another_group) { create(:group) }
-  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago) }
+  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago, end_date: 10.days.ago) }
   let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.ago, author: user, start_date: 2.days.ago, end_date: 3.days.from_now) }
   let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.ago, end_date: 3.days.ago) }
   let_it_be(:epic4) { create(:epic, :closed, group: another_group) }
@@ -471,6 +471,11 @@ RSpec.describe EpicsFinder do
 
               expect(filtered_epics).to contain_exactly(labeled_epic)
             end
+
+            it 'filters correctly by short expressions when sorting by due date' do
+              expect(epics(attempt_group_search_optimizations: true, search: 'aw', sort: 'end_date_desc'))
+                .to eq([epic3, epic1])
+            end
           end
         end
 
@@ -657,6 +662,16 @@ RSpec.describe EpicsFinder do
       results = described_class.new(search_user, group_id: group.id).count_by_state
 
       expect(results).to eq('opened' => 2, 'closed' => 1, 'all' => 3)
+    end
+
+    it 'returns -1 if the query times out' do
+      finder = described_class.new(search_user, group_id: group.id)
+
+      expect_next_instance_of(described_class) do |subfinder|
+        expect(subfinder).to receive(:execute).and_raise(ActiveRecord::QueryCanceled)
+      end
+
+      expect(finder.row_count).to eq(-1)
     end
 
     context 'when using group cte for search' do

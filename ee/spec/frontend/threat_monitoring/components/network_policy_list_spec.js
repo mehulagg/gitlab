@@ -70,6 +70,17 @@ describe('NetworkPolicyList component', () => {
     expect(wrapper.find(PolicyDrawer).exists()).toBe(false);
   });
 
+  it('fetches policies', () => {
+    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', -1);
+  });
+
+  it('fetches policies on environment change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
+
+    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', 2);
+  });
+
   it('does not render edit button', () => {
     expect(wrapper.find('[data-testid="edit-button"]').exists()).toBe(false);
   });
@@ -110,6 +121,19 @@ spec:
 
   it('renders policies table', () => {
     expect(findPoliciesTable().element).toMatchSnapshot();
+  });
+
+  describe('with allEnvironments enabled', () => {
+    beforeEach(() => {
+      wrapper.vm.$store.state.threatMonitoring.allEnvironments = true;
+    });
+
+    it('renders policies table', () => {
+      const namespaceHeader = findPoliciesTable()
+        .findAll('[role="columnheader"]')
+        .at(1);
+      expect(namespaceHeader.text()).toBe('Namespace');
+    });
   });
 
   it('renders closed editor drawer', () => {

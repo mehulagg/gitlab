@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix design repository failures with selective sync, and make container repository updates more robust'
-merge_request: 40643
-author:
-type: fixed

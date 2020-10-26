@@ -1,6 +1,0 @@
----
-title: Fix Approval Rules table in Merge Requests bursting out of the layout in some
-  scenarios
-merge_request: 39753
-author:
-type: fixed

@@ -60,6 +60,12 @@ RSpec.describe 'search/_results' do
 
           expect(rendered).to have_selector('#js-search-filter-by-state')
         end
+
+        it 'renders the confidential drop down' do
+          render
+
+          expect(rendered).to have_selector('#js-search-filter-by-confidential')
+        end
       end
     end
   end

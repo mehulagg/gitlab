@@ -15,7 +15,7 @@ RSpec.describe GitlabSubscription do
 
   describe 'default values' do
     it do
-      Timecop.freeze(Date.today + 30) do
+      travel_to(Date.today + 30) do
         expect(subject.start_date).to eq(Date.today)
       end
     end

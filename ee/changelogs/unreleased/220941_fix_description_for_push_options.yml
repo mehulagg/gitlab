@@ -1,5 +1,0 @@
----
-title: "Don't overwrite user's description by default template description"
-merge_request: 40609
-author:
-type: fixed

@@ -1,5 +1,0 @@
----
-title: Mark RunDASTScan mutation as deprecated
-merge_request: 42544
-author:
-type: deprecated

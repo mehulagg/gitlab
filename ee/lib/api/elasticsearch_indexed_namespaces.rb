@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ElasticsearchIndexedNamespaces < Grape::API::Instance
+  class ElasticsearchIndexedNamespaces < ::API::Base
     before { authenticated_as_admin! }
 
     resource :elasticsearch_indexed_namespaces do

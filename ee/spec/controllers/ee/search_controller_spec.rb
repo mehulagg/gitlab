@@ -18,7 +18,7 @@ RSpec.describe SearchController do
 
       context 'i_search_advanced' do
         it_behaves_like 'tracking unique hll events', :search_track_unique_users do
-          subject { get :show, params: { scope: 'projects', search: 'term' }, format: format }
+          subject(:request) { get :show, params: { scope: 'projects', search: 'term' } }
 
           let(:target_id) { 'i_search_advanced' }
           let(:expected_type) { instance_of(String) }
@@ -38,7 +38,7 @@ RSpec.describe SearchController do
           end
 
           it_behaves_like 'tracking unique hll events', :search_track_unique_users do
-            subject { get :show, params: request_params, format: format }
+            subject(:request) { get :show, params: request_params }
 
             let(:expected_type) { instance_of(String) }
           end
@@ -55,7 +55,7 @@ RSpec.describe SearchController do
             end
 
             it_behaves_like 'tracking unique hll events', :search_track_unique_users do
-              subject { get :show, params: request_params, format: format }
+              subject(:request) { get :show, params: request_params }
 
               let(:expected_type) { instance_of(String) }
             end

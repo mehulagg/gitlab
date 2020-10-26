@@ -1,6 +1,10 @@
 ---
 comments: false
-description: 'Learn how to contribute to GitLab.'
+type: index, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+description: "Development Guidelines: learn how to contribute to GitLab."
 ---
 
 # Contributor and Development Docs
@@ -43,6 +47,7 @@ For information on how to install, configure, update, and upgrade your own GitLa
 
 **Must-reads:**
 
+- [Guide on adapting existing and introducing new components](architecture.md#adapting-existing-and-introducing-new-components)
 - [Code review guidelines](code_review.md) for reviewing code and having code reviewed
 - [Database review guidelines](database_review.md) for reviewing database-related changes and complex SQL queries, and having them reviewed
 - [Secure coding guidelines](secure_coding_guidelines.md)
@@ -58,6 +63,19 @@ Complementary reads:
 - [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
 - [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
 - [Adding a new service component to GitLab](adding_service_component.md)
+
+### Development guidelines review
+
+When you submit a change to GitLab's development guidelines, request a review
+from:
+
+- A member of your team or group, to check for technical accuracy.
+- For **significant** changes or proposals, request review from:
+  - Engineering managers (FE, BE, DB, Security, UX, and others), according to the subject or process you're proposing.
+  - The VP of Development (DRI) ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
+  final approval of the new or changed guidelines.
+- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
+  to review the content for consistency and adherence to documentation guidelines.
 
 ## UX and Frontend guides
 
@@ -92,7 +110,6 @@ Complementary reads:
 - [Working with Merge Request diffs](diffs.md)
 - [Kubernetes integration guidelines](kubernetes.md)
 - [Permissions](permissions.md)
-- [Prometheus](prometheus.md)
 - [Guidelines for reusing abstractions](reusing_abstractions.md)
 - [DeclarativePolicy framework](policies.md)
 - [How Git object deduplication works in GitLab](git_object_deduplication.md)
@@ -115,6 +132,7 @@ Complementary reads:
 - [Code Intelligence](code_intelligence/index.md)
 - [Approval Rules](approval_rules.md)
 - [Feature categorization](feature_categorization/index.md)
+- [Wikis development guide](wikis.md)
 
 ## Performance guides
 
@@ -163,11 +181,11 @@ See [database guidelines](database/index.md).
 - [Externalization](i18n/externalization.md)
 - [Translation](i18n/translation.md)
 
-## Telemetry guides
+## Product Analytics guides
 
-- [Telemetry guide](telemetry/index.md)
-- [Usage Ping guide](telemetry/usage_ping.md)
-- [Snowplow guide](telemetry/snowplow.md)
+- [Product Analytics guide](product_analytics/index.md)
+- [Usage Ping guide](product_analytics/usage_ping.md)
+- [Snowplow guide](product_analytics/snowplow.md)
 
 ## Experiment guide
 

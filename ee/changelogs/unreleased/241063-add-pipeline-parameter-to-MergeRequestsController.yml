@@ -1,5 +1,0 @@
----
-title: Disable loading vulnerabilities in MR when pipeline is running
-merge_request: 41539
-author: Justin Zeng
-type: fixed

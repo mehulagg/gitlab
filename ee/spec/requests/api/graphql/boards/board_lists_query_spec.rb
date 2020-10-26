@@ -6,14 +6,16 @@ RSpec.describe 'get board lists' do
   include GraphqlHelpers
 
   let_it_be(:current_user)       { create(:user) }
-  let_it_be(:project)            { create(:project, creator_id: current_user.id, namespace: current_user.namespace ) }
   let_it_be(:group)              { create(:group, :private) }
+  let_it_be(:project)            { create(:project, creator_id: current_user.id, group: group) }
   let_it_be(:project_milestone)  { create(:milestone, project: project) }
   let_it_be(:project_milestone2) { create(:milestone, project: project) }
   let_it_be(:group_milestone)    { create(:milestone, group: group) }
   let_it_be(:group_milestone2)   { create(:milestone, group: group) }
   let_it_be(:assignee)           { create(:assignee) }
   let_it_be(:assignee2)          { create(:assignee) }
+  let_it_be(:label)              { create(:group_label, group: group) }
+  let_it_be(:label2)             { create(:group_label, group: group) }
 
   let(:params)            { '' }
   let(:board)             { }
@@ -118,6 +120,24 @@ RSpec.describe 'get board lists' do
           expect(list['limitMetric']).to eq('issue_count')
           expect(list['maxIssueCount']).to eq(10)
           expect(list['maxIssueWeight']).to eq(4)
+        end
+      end
+
+      describe 'total issue count and weight' do
+        it 'returns total count and weight of issues matching issue filters' do
+          label_list = create(:list, board: board, label: label, position: 10)
+          create(:issue, project: project, labels: [label, label2], weight: 2)
+          create(:issue, project: project, labels: [label], weight: 2)
+
+          post_graphql(query(id: global_id_of(label_list), issueFilters: { labelName: label2.title }), current_user: current_user)
+
+          aggregate_failures do
+            list_node = lists_data[0]['node']
+
+            expect(list_node['title']).to eq label_list.title
+            expect(list_node['issuesCount']).to eq 1
+            expect(list_node['totalWeight']).to eq 2
+          end
         end
       end
     end

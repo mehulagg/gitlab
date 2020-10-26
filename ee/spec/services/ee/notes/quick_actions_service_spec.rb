@@ -121,6 +121,16 @@ RSpec.describe Notes::QuickActionsService do
         end
       end
 
+      context 'on a test case' do
+        before do
+          issue.update!(issue_type: :test_case)
+        end
+
+        it 'leaves the note empty' do
+          expect(execute(note)).to be_empty
+        end
+      end
+
       context 'on a merge request' do
         let(:note_mr) { create(:note_on_merge_request, project: project, note: note_text) }
 

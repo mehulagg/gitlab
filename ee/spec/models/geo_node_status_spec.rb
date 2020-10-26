@@ -1147,10 +1147,10 @@ RSpec.describe GeoNodeStatus, :geo do
   end
 
   where(:replicator, :model_factory, :registry_factory) do
-    Geo::MergeRequestDiffReplicator | :external_merge_request_diff | :geo_merge_request_diff_registry
-    Geo::PackageFileReplicator | :package_file | :geo_package_file_registry
-    Geo::TerraformStateReplicator | :terraform_state | :geo_terraform_state_registry
-    Geo::SnippetRepositoryReplicator | :snippet_repository | :geo_snippet_repository_registry
+    Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
+    Geo::PackageFileReplicator           | :package_file                | :geo_package_file_registry
+    Geo::TerraformStateVersionReplicator | :terraform_state_version     | :geo_terraform_state_version_registry
+    Geo::SnippetRepositoryReplicator     | :snippet_repository          | :geo_snippet_repository_registry
   end
 
   with_them do

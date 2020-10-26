@@ -285,6 +285,18 @@ RSpec.describe Groups::EpicsController do
           expect(response).to render_template 'groups/epics/show'
         end
 
+        it 'logs the view with Gitlab::Search::RecentEpics' do
+          group.add_developer(user)
+
+          recent_epics_double = instance_double(::Gitlab::Search::RecentEpics, log_view: nil)
+          expect(::Gitlab::Search::RecentEpics).to receive(:new).with(user: user).and_return(recent_epics_double)
+
+          show_epic
+
+          expect(response).to be_successful
+          expect(recent_epics_double).to have_received(:log_view).with(epic)
+        end
+
         context 'with unauthorized user' do
           it 'returns a not found 404 response' do
             show_epic

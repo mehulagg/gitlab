@@ -3,53 +3,45 @@
 require 'spec_helper'
 
 RSpec.describe Security::StoreScansService do
-  let(:build) { create(:ci_build) }
+  let_it_be(:pipeline) { create(:ci_pipeline) }
 
-  subject { Security::StoreScansService.new(build).execute }
+  describe '.execute' do
+    let(:mock_service_object) { instance_double(described_class, execute: true) }
 
-  before do
-    allow(Security::StoreFindingsMetadataService).to receive(:execute)
-  end
+    subject(:execute) { described_class.execute(pipeline) }
 
-  context 'build has security reports' do
     before do
-      create(:ee_ci_job_artifact, :dast, job: build)
-      create(:ee_ci_job_artifact, :sast, job: build)
-      create(:ee_ci_job_artifact, :codequality, job: build)
+      allow(described_class).to receive(:new).with(pipeline).and_return(mock_service_object)
     end
 
-    it 'saves security scans' do
-      subject
+    it 'delegates the call to an instance of `Security::StoreScansService`' do
+      execute
 
-      scans = Security::Scan.where(build: build)
-      expect(scans.count).to be(2)
-      expect(scans.sast.count).to be(1)
-      expect(scans.dast.count).to be(1)
-    end
-
-    it 'calls the StoreFindingsMetadataService' do
-      subject
-
-      expect(Security::StoreFindingsMetadataService).to have_received(:execute).twice
+      expect(described_class).to have_received(:new).with(pipeline)
+      expect(mock_service_object).to have_received(:execute)
     end
   end
 
-  context 'scan already exists' do
+  describe '#execute' do
+    let(:service_object) { described_class.new(pipeline) }
+
+    let_it_be(:sast_build) { create(:ee_ci_build, pipeline: pipeline) }
+    let_it_be(:dast_build) { create(:ee_ci_build, pipeline: pipeline) }
+    let_it_be(:sast_artifact) { create(:ee_ci_job_artifact, :sast, job: sast_build) }
+    let_it_be(:dast_artifact) { create(:ee_ci_job_artifact, :dast, job: dast_build) }
+
+    subject(:store_group_of_artifacts) { service_object.execute }
+
     before do
-      create(:ee_ci_job_artifact, :dast, job: build)
-      create(:security_scan, build: build, scan_type: 'dast')
+      allow(Security::StoreGroupedScansService).to receive(:execute)
+      stub_licensed_features(sast: true, dast: false)
     end
 
-    it 'does not save' do
-      subject
+    it 'executes Security::StoreGroupedScansService for each group of artifacts if the feature is available' do
+      store_group_of_artifacts
 
-      expect(Security::Scan.where(build: build).count).to be(1)
-    end
-
-    it 'calls the StoreFindingsMetadataService' do
-      subject
-
-      expect(Security::StoreFindingsMetadataService).to have_received(:execute).once
+      expect(Security::StoreGroupedScansService).to have_received(:execute).with([sast_artifact])
+      expect(Security::StoreGroupedScansService).not_to have_received(:execute).with([dast_artifact])
     end
   end
 end

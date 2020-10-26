@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class PersonalAccessTokens < Grape::API::Instance
+  class PersonalAccessTokens < ::API::Base
     include ::API::PaginationParams
 
     desc 'Get all Personal Access Tokens' do

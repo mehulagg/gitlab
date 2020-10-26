@@ -1,16 +1,16 @@
 import Vue from 'vue';
-import { escapeFileUrl, joinPaths, webIDEUrl } from '../lib/utils/url_utility';
+import { escapeFileUrl } from '../lib/utils/url_utility';
 import createRouter from './router';
 import App from './components/app.vue';
 import Breadcrumbs from './components/breadcrumbs.vue';
 import LastCommit from './components/last_commit.vue';
 import TreeActionLink from './components/tree_action_link.vue';
-import WebIdeLink from '~/vue_shared/components/web_ide_link.vue';
+import initWebIdeLink from '~/pages/projects/shared/web_ide_link';
 import DirectoryDownloadLinks from './components/directory_download_links.vue';
 import apolloProvider from './graphql';
 import { setTitle } from './utils/title';
 import { updateFormAction } from './utils/dom';
-import { convertObjectPropsToCamelCase, parseBoolean } from '../lib/utils/common_utils';
+import { parseBoolean } from '../lib/utils/common_utils';
 import { __ } from '../locale';
 
 export default function setupVueRepositoryList() {
@@ -28,6 +28,22 @@ export default function setupVueRepositoryList() {
       commits: [],
     },
   });
+
+  const initLastCommitApp = () =>
+    new Vue({
+      el: document.getElementById('js-last-commit'),
+      router,
+      apolloProvider,
+      render(h) {
+        return h(LastCommit, {
+          props: {
+            currentPath: this.$route.params.path,
+          },
+        });
+      },
+    });
+
+  initLastCommitApp();
 
   router.afterEach(({ params: { path } }) => {
     setTitle(path, ref, fullName);
@@ -77,20 +93,6 @@ export default function setupVueRepositoryList() {
     });
   }
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: document.getElementById('js-last-commit'),
-    router,
-    apolloProvider,
-    render(h) {
-      return h(LastCommit, {
-        props: {
-          currentPath: this.$route.params.path,
-        },
-      });
-    },
-  });
-
   const treeHistoryLinkEl = document.getElementById('js-tree-history-link');
   const { historyLink } = treeHistoryLinkEl.dataset;
 
@@ -110,29 +112,7 @@ export default function setupVueRepositoryList() {
     },
   });
 
-  const webIdeLinkEl = document.getElementById('js-tree-web-ide-link');
-
-  if (webIdeLinkEl) {
-    const { ideBasePath, ...options } = convertObjectPropsToCamelCase(
-      JSON.parse(webIdeLinkEl.dataset.options),
-    );
-
-    // eslint-disable-next-line no-new
-    new Vue({
-      el: webIdeLinkEl,
-      router,
-      render(h) {
-        return h(WebIdeLink, {
-          props: {
-            webIdeUrl: webIDEUrl(
-              joinPaths('/', ideBasePath, 'edit', ref, '-', this.$route.params.path || '', '/'),
-            ),
-            ...options,
-          },
-        });
-      },
-    });
-  }
+  initWebIdeLink({ el: document.getElementById('js-tree-web-ide-link'), router });
 
   const directoryDownloadLinks = document.getElementById('js-directory-downloads');
 

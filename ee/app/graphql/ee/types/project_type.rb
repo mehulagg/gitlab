@@ -19,7 +19,7 @@ module EE
             resolve: -> (project, _args, _ctx) do
               return DastScannerProfile.none unless ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true)
 
-              project.dast_scanner_profiles
+              DastScannerProfilesFinder.new(project_ids: [project.id]).execute
             end
 
         field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
@@ -52,17 +52,18 @@ module EE
                resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
 
         field :requirement, ::Types::RequirementsManagement::RequirementType, null: true,
-              description: 'Find a single requirement. Available only when feature flag `requirements_management` is enabled.',
+              description: 'Find a single requirement',
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver.single
 
         field :requirements, ::Types::RequirementsManagement::RequirementType.connection_type, null: true,
-              description: 'Find requirements. Available only when feature flag `requirements_management` is enabled.',
+              description: 'Find requirements',
+              extras: [:lookahead],
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver
 
         field :requirement_states_count, ::Types::RequirementsManagement::RequirementStatesCountType, null: true,
               description: 'Number of requirements for the project by their state',
               resolve: -> (project, args, ctx) do
-                return unless requirements_available?(project, ctx[:current_user])
+                return unless Ability.allowed?(ctx[:current_user], :read_requirement, project)
 
                 Hash.new(0).merge(project.requirements.counts_by_state)
               end
@@ -87,7 +88,10 @@ module EE
               ::Types::DastSiteProfileType,
               null: true,
               resolve: -> (obj, args, _ctx) do
-                DastSiteProfilesFinder.new(project_id: obj.id, id: args[:id].model_id).execute.first
+                # TODO: remove this coercion when the compatibility layer is removed
+                # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+                gid = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(args[:id])
+                DastSiteProfilesFinder.new(project_id: obj.id, id: gid.model_id).execute.first
               end,
               description: 'DAST Site Profile associated with the project' do
                 argument :id, ::Types::GlobalIDType[::DastSiteProfile], required: true, description: 'ID of the site profile'
@@ -97,7 +101,22 @@ module EE
               ::Types::DastSiteProfileType.connection_type,
               null: true,
               description: 'DAST Site Profiles associated with the project',
-              resolve: -> (obj, _args, _ctx) { obj.dast_site_profiles.with_dast_site }
+              resolve: -> (obj, _args, _ctx) { DastSiteProfilesFinder.new(project_id: obj.id).execute }
+
+        field :dast_site_validation,
+              ::Types::DastSiteValidationType,
+              null: true,
+              resolve: -> (project, args, _ctx) do
+                unless ::Feature.enabled?(:security_on_demand_scans_site_validation, project)
+                  raise ::Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled'
+                end
+
+                url_base = DastSiteValidation.get_normalized_url_base(args.target_url)
+                DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base).execute.first
+              end,
+              description: 'DAST Site Validation associated with the project' do
+                argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
+              end
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,
@@ -112,8 +131,35 @@ module EE
               description: 'Cluster agents associated with the project',
               resolver: ::Resolvers::Clusters::AgentsResolver
 
-        def self.requirements_available?(project, user)
-          ::Feature.enabled?(:requirements_management, project, default_enabled: true) && Ability.allowed?(user, :read_requirement, project)
+        field :repository_size_excess,
+              GraphQL::FLOAT_TYPE,
+              null: true,
+              description: 'Size of repository that exceeds the limit in bytes'
+
+        field :actual_repository_size_limit,
+              GraphQL::FLOAT_TYPE,
+              null: true,
+              description: 'Size limit for the repository in bytes',
+              resolve: -> (obj, _args, _ctx) { obj.actual_size_limit }
+
+        field :code_coverage_summary,
+              ::Types::Ci::CodeCoverageSummaryType,
+              null: true,
+              description: 'Code coverages summary associated with the project',
+              feature_flag: :group_coverage_data_report
+
+        def code_coverage_summary
+          BatchLoader::GraphQL.for(project.id).batch do |project_ids, loader|
+            results = ::Ci::DailyBuildGroupReportResult
+              .by_projects(project_ids)
+              .with_coverage
+              .latest
+              .summaries_per_project
+
+            results.each do |project_id, summary|
+              loader.call(project_id, summary)
+            end
+          end
         end
 
         def self.sast_ci_configuration(project)

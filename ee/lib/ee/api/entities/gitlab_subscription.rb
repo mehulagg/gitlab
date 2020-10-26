@@ -14,9 +14,9 @@ module EE
 
         expose :usage do
           expose :seats, as: :seats_in_subscription
-          expose :calculate_seats_in_use, as: :seats_in_use
+          expose :seats_in_use
           expose :max_seats_used
-          expose :calculate_seats_owed, as: :seats_owed
+          expose :seats_owed
         end
 
         expose :billing do

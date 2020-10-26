@@ -26,7 +26,7 @@ module RequirementsManagement
     end
 
     def whitelisted_requirement_params
-      params.slice(:title, :state)
+      params.slice(:title, :description, :state)
     end
   end
 end

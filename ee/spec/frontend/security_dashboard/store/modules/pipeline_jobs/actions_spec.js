@@ -54,6 +54,26 @@ describe('pipeling jobs actions', () => {
     });
   });
 
+  describe('setPipelineId', () => {
+    const pipelineId = 123;
+
+    it('should commit the SET_PIPELINE_ID mutation', done => {
+      testAction(
+        actions.setPipelineId,
+        pipelineId,
+        state,
+        [
+          {
+            type: types.SET_PIPELINE_ID,
+            payload: pipelineId,
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
   describe('fetchPipelineJobs', () => {
     let mock;
     const jobs = [{}, {}];
@@ -67,12 +87,39 @@ describe('pipeling jobs actions', () => {
       mock.restore();
     });
 
-    describe('on success', () => {
+    describe('on success with pipeline path', () => {
       beforeEach(() => {
         mock.onGet(state.pipelineJobsPath).replyOnce(200, jobs);
       });
 
       it('should commit the request and success mutations', done => {
+        testAction(
+          actions.fetchPipelineJobs,
+          {},
+          state,
+          [
+            { type: types.REQUEST_PIPELINE_JOBS },
+            {
+              type: types.RECEIVE_PIPELINE_JOBS_SUCCESS,
+              payload: jobs,
+            },
+          ],
+          [],
+          done,
+        );
+      });
+    });
+
+    describe('on success with pipeline id and project id', () => {
+      beforeEach(() => {
+        mock.onGet('/api/undefined/projects/123/pipelines/321/jobs').replyOnce(200, jobs);
+      });
+
+      it('should commit the request and success mutations', done => {
+        state.pipelineJobsPath = '';
+        state.projectId = 123;
+        state.pipelineId = 321;
+
         testAction(
           actions.fetchPipelineJobs,
           {},
@@ -97,6 +144,31 @@ describe('pipeling jobs actions', () => {
 
       it('should commit RECEIVE_PIPELINE_JOBS_ERROR mutation', done => {
         state.pipelineJobsPath = '';
+
+        testAction(
+          actions.fetchPipelineJobs,
+          {},
+          state,
+          [
+            {
+              type: types.RECEIVE_PIPELINE_JOBS_ERROR,
+            },
+          ],
+          [],
+          done,
+        );
+      });
+    });
+
+    describe('without projectId or pipelineId set', () => {
+      beforeEach(() => {
+        mock.onGet(state.pipelineJobsPath).replyOnce(200, jobs);
+      });
+
+      it('should commit RECEIVE_PIPELINE_JOBS_ERROR mutation', done => {
+        state.pipelineJobsPath = '';
+        state.projectId = undefined;
+        state.pipelineId = undefined;
 
         testAction(
           actions.fetchPipelineJobs,

@@ -122,7 +122,6 @@ graph RL;
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -228,7 +227,6 @@ graph RL;
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -620,7 +618,7 @@ each pipeline includes default variables defined in
 
 Most of the jobs [extend from a few CI definitions](../ci/yaml/README.md#extends)
 defined in [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml)
-that are scoped to a single [configuration parameter](../ci/yaml/README.md#configuration-parameters).
+that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-keywords).
 
 | Job definitions  | Description |
 |------------------|-------------|

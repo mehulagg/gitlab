@@ -46,8 +46,9 @@ GitLab is a Git-based platform that integrates a great number of essential tools
 - Building, testing, and deploying with built-in [Continuous Integration](../ci/README.md).
 - Deploying personal and professional static websites with [GitLab Pages](project/pages/index.md).
 - Integrating with Docker by using [GitLab Container Registry](packages/container_registry/index.md).
-- Tracking the development lifecycle by using [GitLab Value Stream Analytics](project/cycle_analytics.md).
+- Tracking the development lifecycle by using [GitLab Value Stream Analytics](analytics/value_stream_analytics.md).
 - Provide support with [Service Desk](project/service_desk.md).
+- [Export issues as CSV](project/issues/csv_export.md).
 
 With GitLab Enterprise Edition, you can also:
 
@@ -60,8 +61,7 @@ With GitLab Enterprise Edition, you can also:
 - Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Search](search/advanced_global_search.md) and [Advanced Search Syntax](search/advanced_search_syntax.md) for faster, more advanced code search across your entire GitLab instance.
 - [Authenticate users with Kerberos](../integration/kerberos.md).
 - [Mirror a repository](project/repository/repository_mirroring.md) from elsewhere on your local server.
-- [Export issues as CSV](project/issues/csv_export.md).
-- View your entire CI/CD pipeline involving more than one project with [Multiple-Project Pipelines](../ci/multi_project_pipeline_graphs.md).
+- View your entire CI/CD pipeline involving more than one project with [Multiple-Project Pipelines](../ci/multi_project_pipelines.md).
 - [Lock files](project/file_lock.md) to prevent conflicts.
 - View the current health and status of each CI environment running on Kubernetes with [Deploy Boards](project/deploy_boards.md).
 - Leverage continuous delivery method with [Canary Deployments](project/canary_deployments.md).
@@ -83,18 +83,6 @@ it all at once, from one single project.
   reviews, live preview changes per branch, and request approvals with Merge Requests.
 - [Milestones](project/milestones/index.md): Work on multiple issues and merge
   requests towards the same target date with Milestones.
-
-## GitLab CI/CD
-
-Use built-in [GitLab CI/CD](../ci/README.md) to test, build, and deploy your applications
-directly from GitLab. No third-party integrations needed.
-
-- [GitLab Auto Deploy](../topics/autodevops/stages.md#auto-deploy): Deploy your application out-of-the-box with GitLab Auto Deploy.
-- [Review Apps](../ci/review_apps/index.md): Live-preview the changes introduced by a merge request with Review Apps.
-- [GitLab Pages](project/pages/index.md): Publish your static site directly from
-  GitLab with GitLab Pages. You can build, test, and deploy any Static Site Generator with Pages.
-- [GitLab Container Registry](packages/container_registry/index.md): Build and deploy Docker
-  images with Container Registry.
 
 ## Account
 
@@ -150,6 +138,11 @@ requests you're assigned to.
 [Snippets](snippets.md) are code blocks that you want to store in GitLab, from which
 you have quick access to. You can also gather feedback on them through
 [Discussions](#discussions).
+
+## GitLab CI/CD
+
+Use built-in [GitLab CI/CD](../ci/README.md) to test, build, and deploy your applications
+directly from GitLab. No third-party integrations needed.
 
 ## Features behind feature flags
 

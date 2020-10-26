@@ -6,12 +6,17 @@ module QA
       let(:file_content_primary) { 'This is a Geo project! Commit from primary.' }
       let(:file_content_secondary) { 'This is a Geo project! Commit from secondary.' }
 
+      key = nil
+
+      after do
+        key&.remove_via_api!
+      end
+
       context 'regular git commit' do
         it 'is proxied to the primary and ultimately replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/698' do
           file_name = 'README.md'
           key_title = "Geo SSH to 2nd #{Time.now.to_f}"
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user
@@ -95,7 +100,6 @@ module QA
           file_name_primary = 'README.md'
           file_name_secondary = 'README_MORE.md'
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user

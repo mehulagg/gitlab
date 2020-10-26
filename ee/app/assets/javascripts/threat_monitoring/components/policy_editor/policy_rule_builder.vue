@@ -152,7 +152,9 @@ export default {
         </template>
 
         <template #isLabel="{ content }">
-          <label for="direction" class="gl-mr-4 gl-mb-5!">{{ content }}</label>
+          <label for="direction" class="gl-mr-4 gl-mb-5! gl-font-weight-normal">{{
+            content
+          }}</label>
         </template>
 
         <template #ruleDirection>
@@ -178,7 +180,7 @@ export default {
           <gl-form-input
             v-if="shouldShowEndpointLabels"
             data-testid="endpoint-labels"
-            class="gl-mr-4 gl-mb-5"
+            class="gl-mr-4 gl-mb-5 gl-bg-white!"
             placeholder="key:value"
             :value="endpointLabels"
             :disabled="endpointSelectorDisabled"
@@ -188,7 +190,7 @@ export default {
         </template>
 
         <template #directionLabel="{ content }">
-          <label for="ruleMode" class="gl-mr-4 gl-mb-5!">{{ content }}</label>
+          <label for="ruleMode" class="gl-mr-4 gl-mb-5! gl-font-weight-normal">{{ content }}</label>
         </template>
 
         <template #rule>
@@ -204,7 +206,9 @@ export default {
         </template>
 
         <template #portsLabel="{ content }">
-          <label for="portMatch" class="gl-mr-4 gl-mb-5!">{{ content }}</label>
+          <label for="portMatch" class="gl-mr-4 gl-mb-5! gl-font-weight-normal">{{
+            content
+          }}</label>
         </template>
 
         <template #ports>
@@ -220,7 +224,7 @@ export default {
             v-if="shouldShowPorts"
             v-model="rule.ports"
             data-testid="ports"
-            class="gl-mr-4 gl-mb-5"
+            class="gl-mr-4 gl-mb-5 gl-bg-white!"
             placeholder="80/tcp"
           />
           <!-- eslint-enable @gitlab/vue-require-i18n-attribute-strings -->

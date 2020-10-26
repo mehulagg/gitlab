@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GroupHooks < Grape::API::Instance
+  class GroupHooks < ::API::Base
     include ::API::PaginationParams
 
     before { authenticate! }
@@ -101,7 +101,9 @@ module API
       delete ":id/hooks/:hook_id" do
         hook = user_group.hooks.find(params.delete(:hook_id))
 
-        destroy_conditionally!(hook)
+        destroy_conditionally!(hook) do
+          WebHooks::DestroyService.new(current_user).execute(hook)
+        end
       end
     end
   end

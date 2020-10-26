@@ -2,11 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Project do
+RSpec.describe Project, factory_default: :keep do
   include ProjectForksHelper
   include GitHelpers
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
+
+  let_it_be(:namespace) { create_default(:namespace) }
 
   it_behaves_like 'having unique enum values'
 
@@ -72,6 +74,7 @@ RSpec.describe Project do
     it { is_expected.to have_one(:last_event).class_name('Event') }
     it { is_expected.to have_one(:forked_from_project).through(:fork_network_member) }
     it { is_expected.to have_one(:auto_devops).class_name('ProjectAutoDevops') }
+    it { is_expected.to have_one(:tracing_setting).class_name('ProjectTracingSetting') }
     it { is_expected.to have_one(:error_tracking_setting).class_name('ErrorTracking::ProjectErrorTrackingSetting') }
     it { is_expected.to have_one(:project_setting) }
     it { is_expected.to have_one(:alerting_setting).class_name('Alerting::ProjectAlertingSetting') }
@@ -85,7 +88,6 @@ RSpec.describe Project do
     it { is_expected.to have_many(:runners) }
     it { is_expected.to have_many(:variables) }
     it { is_expected.to have_many(:triggers) }
-    it { is_expected.to have_many(:pages_domains) }
     it { is_expected.to have_many(:labels).class_name('ProjectLabel') }
     it { is_expected.to have_many(:users_star_projects) }
     it { is_expected.to have_many(:repository_languages) }
@@ -117,6 +119,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:prometheus_alert_events) }
     it { is_expected.to have_many(:self_managed_prometheus_alert_events) }
     it { is_expected.to have_many(:alert_management_alerts) }
+    it { is_expected.to have_many(:alert_management_http_integrations) }
     it { is_expected.to have_many(:jira_imports) }
     it { is_expected.to have_many(:metrics_users_starred_dashboards).inverse_of(:project) }
     it { is_expected.to have_many(:repository_storage_moves) }
@@ -124,11 +127,18 @@ RSpec.describe Project do
     it { is_expected.to have_many(:packages).class_name('Packages::Package') }
     it { is_expected.to have_many(:package_files).class_name('Packages::PackageFile') }
     it { is_expected.to have_many(:pipeline_artifacts) }
+    it { is_expected.to have_many(:terraform_states).class_name('Terraform::State').inverse_of(:project) }
+
+    # GitLab Pages
+    it { is_expected.to have_many(:pages_domains) }
+    it { is_expected.to have_one(:pages_metadatum) }
+    it { is_expected.to have_many(:pages_deployments) }
 
     it_behaves_like 'model with repository' do
       let_it_be(:container) { create(:project, :repository, path: 'somewhere') }
       let(:stubbed_container) { build_stubbed(:project) }
       let(:expected_full_path) { "#{container.namespace.full_path}/somewhere" }
+      let(:expected_lfs_enabled) { true }
     end
 
     it_behaves_like 'model with wiki' do
@@ -2901,6 +2911,20 @@ RSpec.describe Project do
     end
   end
 
+  describe '#lfs_objects_for_repository_types' do
+    let(:project) { create(:project) }
+
+    it 'returns LFS objects of the specified type only' do
+      none, design, wiki = *[nil, :design, :wiki].map do |type|
+        create(:lfs_objects_project, project: project, repository_type: type).lfs_object
+      end
+
+      expect(project.lfs_objects_for_repository_types(nil)).to contain_exactly(none)
+      expect(project.lfs_objects_for_repository_types(nil, :wiki)).to contain_exactly(none, wiki)
+      expect(project.lfs_objects_for_repository_types(:design)).to contain_exactly(design)
+    end
+  end
+
   context 'forks' do
     include ProjectForksHelper
 
@@ -2981,14 +3005,23 @@ RSpec.describe Project do
   describe '#set_repository_read_only!' do
     let(:project) { create(:project) }
 
-    it 'returns true when there is no existing git transfer in progress' do
-      expect(project.set_repository_read_only!).to be_truthy
+    it 'makes the repository read-only' do
+      expect { project.set_repository_read_only! }
+        .to change(project, :repository_read_only?)
+        .from(false)
+        .to(true)
     end
 
-    it 'returns false when there is an existing git transfer in progress' do
+    it 'raises an error if the project is already read-only' do
+      project.set_repository_read_only!
+
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
+    end
+
+    it 'raises an error when there is an existing git transfer in progress' do
       allow(project).to receive(:git_transfer_in_progress?) { true }
 
-      expect(project.set_repository_read_only!).to be_falsey
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
     end
   end
 
@@ -4311,7 +4344,7 @@ RSpec.describe Project do
       end
 
       it 'schedules HashedStorage::ProjectMigrateWorker with delayed start when the wiki repo is in use' do
-        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project)).increase
+        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project.wiki)).increase
 
         expect(HashedStorage::ProjectMigrateWorker).to receive(:perform_in)
 
@@ -4957,15 +4990,21 @@ RSpec.describe Project do
     context "with an empty repository" do
       let_it_be(:project) { create(:project_empty_repo) }
 
-      context "Gitlab::CurrentSettings.default_branch_name is unavailable" do
+      context "group.default_branch_name is available" do
+        let(:project_group) { create(:group) }
+        let(:project) { create(:project, path: 'avatar', namespace: project_group) }
+
         before do
           expect(Gitlab::CurrentSettings)
+            .not_to receive(:default_branch_name)
+
+          expect(project.group)
             .to receive(:default_branch_name)
-            .and_return(nil)
+            .and_return('example_branch')
         end
 
-        it "returns that value" do
-          expect(project.default_branch).to be_nil
+        it "returns the group default value" do
+          expect(project.default_branch).to eq("example_branch")
         end
       end
 
@@ -4973,11 +5012,23 @@ RSpec.describe Project do
         before do
           expect(Gitlab::CurrentSettings)
             .to receive(:default_branch_name)
-            .and_return('example_branch')
+            .and_return(example_branch_name)
         end
 
-        it "returns that value" do
-          expect(project.default_branch).to eq("example_branch")
+        context "is missing or nil" do
+          let(:example_branch_name) { nil }
+
+          it "returns nil" do
+            expect(project.default_branch).to be_nil
+          end
+        end
+
+        context "is present" do
+          let(:example_branch_name) { "example_branch_name" }
+
+          it "returns the expected branch name" do
+            expect(project.default_branch).to eq(example_branch_name)
+          end
         end
       end
     end
@@ -5469,12 +5520,13 @@ RSpec.describe Project do
   describe '#find_or_initialize_services' do
     it 'returns only enabled services' do
       allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
+      allow(Service).to receive(:project_specific_services_names).and_return(%w[asana])
       allow(subject).to receive(:disabled_services).and_return(%w[prometheus])
 
       services = subject.find_or_initialize_services
 
-      expect(services.count).to eq(2)
-      expect(services.map(&:title)).to eq(['JetBrains TeamCity CI', 'Pushover'])
+      expect(services.count).to eq(3)
+      expect(services.map(&:title)).to eq(['Asana', 'JetBrains TeamCity CI', 'Pushover'])
     end
   end
 
@@ -5542,32 +5594,6 @@ RSpec.describe Project do
       project = create(:project, namespace: group)
 
       expect(described_class.for_group(group)).to eq([project])
-    end
-  end
-
-  describe '.for_repository_storage' do
-    it 'returns the projects for a given repository storage' do
-      stub_storage_settings('test_second_storage' => {
-        'path' => TestEnv::SECOND_STORAGE_PATH,
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
-      })
-      expected_project = create(:project, repository_storage: 'default')
-      create(:project, repository_storage: 'test_second_storage')
-
-      expect(described_class.for_repository_storage('default')).to eq([expected_project])
-    end
-  end
-
-  describe '.excluding_repository_storage' do
-    it 'returns the projects excluding the given repository storage' do
-      stub_storage_settings('test_second_storage' => {
-        'path' => TestEnv::SECOND_STORAGE_PATH,
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
-      })
-      expected_project = create(:project, repository_storage: 'test_second_storage')
-      create(:project, repository_storage: 'default')
-
-      expect(described_class.excluding_repository_storage('default')).to eq([expected_project])
     end
   end
 
@@ -5790,6 +5816,38 @@ RSpec.describe Project do
         project.check_personal_projects_limit
 
         expect(project.errors).to be_empty
+      end
+    end
+  end
+
+  describe 'validation #changing_shared_runners_enabled_is_allowed' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
+      'enabled'                    | true  | true
+      'enabled'                    | false | true
+      'disabled_with_override'     | true  | true
+      'disabled_with_override'     | false | true
+      'disabled_and_unoverridable' | true  | false
+      'disabled_and_unoverridable' | false | true
+    end
+
+    with_them do
+      let(:group) { create(:group) }
+      let(:project) { build(:project, namespace: group, shared_runners_enabled: project_shared_runners_enabled) }
+
+      before do
+        allow_next_found_instance_of(Group) do |group|
+          allow(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
+        end
+      end
+
+      it 'validates the configuration' do
+        expect(project.valid?).to eq(valid_record)
+
+        unless valid_record
+          expect(project.errors[:shared_runners_enabled]).to contain_exactly('cannot be enabled because parent group does not allow it')
+        end
       end
     end
   end

@@ -52,6 +52,10 @@ a {
   margin-top: 0;
 }
 
+.invite-body {
+  width: 360px;
+}
+
 .invite-actions {
   margin-top: 24px;
 }
@@ -62,6 +66,15 @@ a {
   cursor: pointer;
   background-color: $purple;
   color: $white;
+}
+
+.invite-btn-decline {
+  border-radius: $border-radius-default;
+  border: 1px solid $purple;
+  padding: $gl-btn-vert-padding $gl-btn-horz-padding;
+  cursor: pointer;
+  color: $purple;
+  margin-left: 4px;
 }
 
 tr td {
@@ -129,5 +142,22 @@ tr.footer td {
   .help-link {
     color: $mailer-link-color;
     text-decoration: none;
+  }
+
+  .gitlab-info {
+    padding: $gl-padding-24 0;
+  }
+
+  .gitlab-info-text {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    color: $gray-400;
+    font-size: $gl-font-size-small;
+  }
+
+  .footer-logo {
+    width: 90px;
+    height: 33px;
   }
 }

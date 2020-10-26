@@ -34,13 +34,11 @@ RSpec.describe Projects::Alerting::NotifyService do
 
     let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
 
-    subject { service.execute(token) }
+    subject { service.execute(token, nil) }
 
-    context 'with activated Alerts Service' do
-      let_it_be_with_reload(:alerts_service) { create(:alerts_service, project: project) }
-
+    shared_examples 'notifcations are handled correctly' do
       context 'with valid token' do
-        let(:token) { alerts_service.token }
+        let(:token) { integration.token }
         let(:incident_management_setting) { double(send_email?: email_enabled, create_issue?: issue_enabled, auto_close_incident?: auto_close_enabled) }
         let(:email_enabled) { false }
         let(:issue_enabled) { false }
@@ -62,7 +60,7 @@ RSpec.describe Projects::Alerting::NotifyService do
                 title: payload_raw.fetch(:title),
                 started_at: Time.zone.parse(payload_raw.fetch(:start_time)),
                 severity: payload_raw.fetch(:severity),
-                status: AlertManagement::Alert::STATUSES[:triggered],
+                status: AlertManagement::Alert.status_value(:triggered),
                 events: 1,
                 hosts: payload_raw.fetch(:hosts),
                 payload: payload_raw.with_indifferent_access,
@@ -89,6 +87,7 @@ RSpec.describe Projects::Alerting::NotifyService do
 
           it 'creates a system note corresponding to alert creation' do
             expect { subject }.to change(Note, :count).by(1)
+            expect(Note.last.note).to include(payload_raw.fetch(:monitoring_tool))
           end
 
           context 'existing alert with same fingerprint' do
@@ -127,23 +126,8 @@ RSpec.describe Projects::Alerting::NotifyService do
                   let(:alert) { create(:alert_management_alert, :with_issue, project: project, fingerprint: fingerprint_sha) }
                   let(:issue) { alert.issue }
 
-                  context 'state_tracking is enabled' do
-                    before do
-                      stub_feature_flags(track_resource_state_change_events: true)
-                    end
-
-                    it { expect { subject }.to change { issue.reload.state }.from('opened').to('closed') }
-                    it { expect { subject }.to change(ResourceStateEvent, :count).by(1) }
-                  end
-
-                  context 'state_tracking is disabled' do
-                    before do
-                      stub_feature_flags(track_resource_state_change_events: false)
-                    end
-
-                    it { expect { subject }.to change { issue.reload.state }.from('opened').to('closed') }
-                    it { expect { subject }.to change(Note, :count).by(1) }
-                  end
+                  it { expect { subject }.to change { issue.reload.state }.from('opened').to('closed') }
+                  it { expect { subject }.to change(ResourceStateEvent, :count).by(1) }
                 end
               end
             end
@@ -194,7 +178,7 @@ RSpec.describe Projects::Alerting::NotifyService do
                 title: payload_raw.fetch(:title),
                 started_at: Time.zone.parse(payload_raw.fetch(:start_time)),
                 severity: 'critical',
-                status: AlertManagement::Alert::STATUSES[:triggered],
+                status: AlertManagement::Alert.status_value(:triggered),
                 events: 1,
                 hosts: [],
                 payload: payload_raw.with_indifferent_access,
@@ -208,15 +192,19 @@ RSpec.describe Projects::Alerting::NotifyService do
                 environment_id: nil
               )
             end
+
+            it 'creates a system note corresponding to alert creation' do
+              expect { subject }.to change(Note, :count).by(1)
+              expect(Note.last.note).to include(source)
+            end
           end
         end
 
         context 'with overlong payload' do
-          let(:payload_raw) do
-            {
-              title: 'a' * Gitlab::Utils::DeepSize::DEFAULT_MAX_SIZE,
-              start_time: starts_at.rfc3339
-            }
+          let(:deep_size_object) { instance_double(Gitlab::Utils::DeepSize, valid?: false) }
+
+          before do
+            allow(Gitlab::Utils::DeepSize).to receive(:new).and_return(deep_size_object)
           end
 
           it_behaves_like 'does not process incident issues due to error', http_status: :bad_request
@@ -229,17 +217,6 @@ RSpec.describe Projects::Alerting::NotifyService do
           let(:issue_enabled) { true }
 
           it_behaves_like 'processes incident issues'
-
-          context 'with an invalid payload' do
-            before do
-              allow(Gitlab::Alerting::NotificationPayloadParser)
-                .to receive(:call)
-                .and_raise(Gitlab::Alerting::NotificationPayloadParser::BadPayloadError)
-            end
-
-            it_behaves_like 'does not process incident issues due to error', http_status: :bad_request
-            it_behaves_like 'does not an create alert management alert'
-          end
 
           context 'when alert already exists' do
             let(:fingerprint_sha) { Digest::SHA1.hexdigest(fingerprint) }
@@ -268,13 +245,40 @@ RSpec.describe Projects::Alerting::NotifyService do
         it_behaves_like 'does not process incident issues due to error', http_status: :unauthorized
         it_behaves_like 'does not an create alert management alert'
       end
+    end
+
+    context 'with an Alerts Service' do
+      let_it_be_with_reload(:integration) { create(:alerts_service, project: project) }
+
+      it_behaves_like 'notifcations are handled correctly' do
+        let(:source) { 'Generic Alert Endpoint' }
+      end
 
       context 'with deactivated Alerts Service' do
         before do
-          alerts_service.update!(active: false)
+          integration.update!(active: false)
         end
 
         it_behaves_like 'does not process incident issues due to error', http_status: :forbidden
+        it_behaves_like 'does not an create alert management alert'
+      end
+    end
+
+    context 'with an HTTP Integration' do
+      let_it_be_with_reload(:integration) { create(:alert_management_http_integration, project: project) }
+
+      subject { service.execute(token, integration) }
+
+      it_behaves_like 'notifcations are handled correctly' do
+        let(:source) { integration.name }
+      end
+
+      context 'with deactivated HTTP Integration' do
+        before do
+          integration.update!(active: false)
+        end
+
+        it_behaves_like 'does not process incident issues due to error', http_status: :unauthorized
         it_behaves_like 'does not an create alert management alert'
       end
     end

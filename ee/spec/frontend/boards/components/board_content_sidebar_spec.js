@@ -17,6 +17,11 @@ describe('ee/BoardContentSidebar', () => {
         rootPath: '',
       },
       store,
+      stubs: {
+        'board-sidebar-epic-select': '<div></div>',
+        'board-sidebar-weight-input': '<div></div>',
+        'board-sidebar-labels-select': '<div></div>',
+      },
     });
   };
 

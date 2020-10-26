@@ -29,7 +29,7 @@ directly from a repository in GitLab.
 </ul>
 </p>
 </div>
-<div class="col-md-3"><img src="img/ssgs_pages.png" alt="Examples of SSGs supported by Pages" class="image-noshadow middle display-block"></div>
+<div class="col-md-3"><img src="img/ssgs_pages.png" alt="Examples of SSGs supported by Pages" class="middle display-block"></div>
 </div>
 
 To publish a website with Pages, you can use any SSG,
@@ -89,7 +89,7 @@ need admin access to your domain's registrar (or control panel) to set it up wit
 
 The following diagrams show the workflows you might follow to get started with Pages.
 
-<img src="img/new_project_for_pages_v12_5.png" alt="New projects for GitLab Pages" class="image-noshadow">
+<img src="img/new_project_for_pages_v12_5.png" alt="New projects for GitLab Pages">
 
 ## Access to your Pages site
 
@@ -124,3 +124,24 @@ If you are running a self-managed instance of GitLab (GitLab Community Edition a
 [follow the administration steps](../../../administration/pages/index.md) to configure Pages.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> Watch a [video tutorial](https://www.youtube.com/watch?v=dD8c7WNcc6s) about how to get started with GitLab Pages administration.
+
+## Security for GitLab Pages
+
+If your username is `foo`, your GitLab Pages website is located at `foo.gitlab.io`.
+GitLab allows usernames to contain a `.`, so a user named `bar.foo` could create
+a GitLab Pages website `bar.foo.gitlab.io` that effectively is a subdomain of your
+`foo.gitlab.io` website. Be careful if you use JavaScript to set cookies for your website.
+The safe way to manually set cookies with JavaScript is to not specify the `domain` at all:
+
+```javascript
+// Safe: This cookie is only visible to foo.gitlab.io
+document.cookie = "key=value";
+
+// Unsafe: This cookie is visible to foo.gitlab.io and its subdomains,
+// regardless of the presence of the leading dot.
+document.cookie = "key=value;domain=.foo.gitlab.io";
+document.cookie = "key=value;domain=foo.gitlab.io";
+```
+
+This issue doesn't affect users with a custom domain, or users who don't set any
+cookies manually with JavaScript.

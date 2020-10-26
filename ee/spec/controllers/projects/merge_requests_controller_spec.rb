@@ -586,6 +586,79 @@ RSpec.describe Projects::MergeRequestsController do
     it_behaves_like 'authorize read pipeline'
   end
 
+  describe 'GET #coverage_fuzzing_reports' do
+    let(:merge_request) { create(:ee_merge_request, :with_coverage_fuzzing_reports, source_project: project, author: create(:user)) }
+
+    let(:params) do
+      {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      }
+    end
+
+    subject { get :coverage_fuzzing_reports, params: params, format: :json }
+
+    before do
+      allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
+        .with(::Ci::CompareSecurityReportsService, viewer, 'coverage_fuzzing').and_return(comparison_status)
+    end
+
+    it_behaves_like 'pending pipeline response'
+
+    context 'when comparison is being processed' do
+      let(:comparison_status) { { status: :parsing } }
+
+      it 'sends polling interval' do
+        expect(::Gitlab::PollingInterval).to receive(:set_header)
+
+        subject
+      end
+
+      it 'returns 204 HTTP status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:no_content)
+      end
+    end
+
+    context 'when comparison is done' do
+      let(:comparison_status) { { status: :parsed, data: { added: [], fixed: [], existing: [] } } }
+
+      it 'does not send polling interval' do
+        expect(::Gitlab::PollingInterval).not_to receive(:set_header)
+
+        subject
+      end
+
+      it 'returns 200 HTTP status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({ "added" => [], "fixed" => [], "existing" => [] })
+      end
+    end
+
+    context 'when user created corrupted vulnerability reports' do
+      let(:comparison_status) { { status: :error, status_reason: 'Failed to parse coverage fuzzing reports' } }
+
+      it 'does not send polling interval' do
+        expect(::Gitlab::PollingInterval).not_to receive(:set_header)
+
+        subject
+      end
+
+      it 'returns 400 HTTP status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response).to eq({ 'status_reason' => 'Failed to parse coverage fuzzing reports' })
+      end
+    end
+
+    it_behaves_like 'authorize read pipeline'
+  end
+
   describe 'GET #secret_detection_reports' do
     let(:merge_request) { create(:ee_merge_request, :with_secret_detection_reports, source_project: project, author: create(:user)) }
     let(:params) do
@@ -733,6 +806,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   describe 'GET #license_scanning_reports' do
     let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
+    let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
 
     let(:params) do
       {
@@ -745,11 +819,34 @@ RSpec.describe Projects::MergeRequestsController do
     subject { get :license_scanning_reports, params: params, format: :json }
 
     before do
+      stub_licensed_features(license_scanning: true)
       allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
         .with(::Ci::CompareLicenseScanningReportsService, viewer).and_return(comparison_status)
     end
 
-    it_behaves_like 'pending pipeline response'
+    context 'when the pipeline is running' do
+      before do
+        allow(::Gitlab::PollingInterval).to receive(:set_header)
+        merge_request.head_pipeline.update!(status: :running)
+
+        subject
+      end
+
+      context 'when the report is being parsed' do
+        let(:comparison_status) { { status: :parsing } }
+
+        specify { expect(::Gitlab::PollingInterval).to have_received(:set_header) }
+        specify { expect(response).to have_gitlab_http_status(:no_content) }
+      end
+
+      context 'when the report is ready' do
+        let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+
+        specify { expect(::Gitlab::PollingInterval).not_to have_received(:set_header) }
+        specify { expect(response).to have_gitlab_http_status(:ok) }
+        specify { expect(json_response).to eq({ "new_licenses" => [], "existing_licenses" => [], "removed_licenses" => [] }) }
+      end
+    end
 
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
@@ -801,8 +898,48 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context "when authorizing access to license scan reports" do
-      it_behaves_like 'authorize read pipeline'
+    context "when a user is NOT authorized to read licenses on a project" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:viewer) { create(:user) }
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context "when a user is authorized to read the licenses" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:viewer) { create(:user) }
+
+      before do
+        project.add_reporter(viewer)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+
+    context "when a maintainer is authorized to read licenses on a merge request from a forked project" do
+      let(:project) { create(:project, :repository, :public, :builds_private) }
+      let(:forked_project) { fork_project(project, nil, repository: true) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: forked_project, target_project: project) }
+      let(:viewer) { create(:user) }
+
+      before do
+        project.add_maintainer(viewer)
+        forked_project.add_maintainer(user)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
     end
   end
 

@@ -40,8 +40,11 @@ import {
   DIFF_WHITESPACE_COOKIE_NAME,
   SHOW_WHITESPACE,
   NO_SHOW_WHITESPACE,
+  DIFF_FILE_MANUAL_COLLAPSE,
+  DIFF_FILE_AUTOMATIC_COLLAPSE,
 } from '../constants';
 import { diffViewerModes } from '~/ide/constants';
+import { isCollapsed } from '../diff_file';
 
 export const setBaseConfig = ({ commit }, options) => {
   const {
@@ -103,7 +106,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
             commit(types.VIEW_DIFF_FILE, state.diffFiles[0].file_hash);
           }
 
-          if (gon.features?.codeNavigation) {
+          if (state.diffFiles?.length) {
             // eslint-disable-next-line promise/catch-or-return,promise/no-nesting
             import('~/code_navigation').then(m =>
               m.default({
@@ -236,9 +239,16 @@ export const renderFileForDiscussionId = ({ commit, rootState, state }, discussi
         commit(types.RENDER_FILE, file);
       }
 
-      if (file.viewer.collapsed) {
+      if (file.viewer.automaticallyCollapsed) {
         eventHub.$emit(`loadCollapsedDiff/${file.file_hash}`);
         scrollToElement(document.getElementById(file.file_hash));
+      } else if (file.viewer.manuallyCollapsed) {
+        commit(types.SET_FILE_COLLAPSED, {
+          filePath: file.file_path,
+          collapsed: false,
+          trigger: DIFF_FILE_AUTOMATIC_COLLAPSE,
+        });
+        eventHub.$emit('scrollToDiscussion');
       } else {
         eventHub.$emit('scrollToDiscussion');
       }
@@ -252,7 +262,7 @@ export const startRenderDiffsQueue = ({ state, commit }) => {
       const nextFile = state.diffFiles.find(
         file =>
           !file.renderIt &&
-          (file.viewer && (!file.viewer.collapsed || file.viewer.name !== diffViewerModes.text)),
+          (file.viewer && (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text)),
       );
 
       if (nextFile) {
@@ -631,7 +641,7 @@ export function switchToFullDiffFromRenamedFile({ commit, dispatch, state }, { d
         filePath: diffFile.file_path,
         viewer: {
           ...diffFile.alternate_viewer,
-          collapsed: false,
+          automaticallyCollapsed: false,
         },
       });
       commit(types.SET_CURRENT_VIEW_DIFF_FILE_LINES, { filePath: diffFile.file_path, lines });
@@ -640,8 +650,9 @@ export function switchToFullDiffFromRenamedFile({ commit, dispatch, state }, { d
     });
 }
 
-export const setFileCollapsed = ({ commit }, { filePath, collapsed }) =>
-  commit(types.SET_FILE_COLLAPSED, { filePath, collapsed });
+export const setFileCollapsedByUser = ({ commit }, { filePath, collapsed }) => {
+  commit(types.SET_FILE_COLLAPSED, { filePath, collapsed, trigger: DIFF_FILE_MANUAL_COLLAPSE });
+};
 
 export const setSuggestPopoverDismissed = ({ commit, state }) =>
   axios

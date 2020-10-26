@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHelpers do
   include PartitioningHelpers
   include TriggerHelpers
+  include TableSchemaHelpers
 
   let(:migration) do
     ActiveRecord::Migration.new.extend(described_class)
@@ -213,7 +214,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
         it 'creates partitions including the next month from today' do
           today = Date.new(2020, 5, 8)
 
-          Timecop.freeze(today) do
+          travel_to(today) do
             migration.partition_table_by_date source_table, partition_column, min_date: min_date
 
             expect_range_partitions_for(partitioned_table, {
@@ -233,7 +234,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
       context 'without min_date, max_date' do
         it 'creates partitions for the current and next month' do
           current_date = Date.new(2020, 05, 22)
-          Timecop.freeze(current_date.to_time) do
+          travel_to(current_date.to_time) do
             migration.partition_table_by_date source_table, partition_column
 
             expect_range_partitions_for(partitioned_table, {
@@ -514,6 +515,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
         allow(migration).to receive(:table_exists?).with(partitioned_table).and_return(true)
         allow(migration).to receive(:copy_missed_records)
         allow(migration).to receive(:execute).with(/VACUUM/)
+        allow(migration).to receive(:execute).with(/^(RE)?SET/)
       end
 
       it 'finishes remaining jobs for the correct table' do
@@ -567,6 +569,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
 
         allow(Gitlab::BackgroundMigration).to receive(:steal)
         allow(migration).to receive(:execute).with(/VACUUM/)
+        allow(migration).to receive(:execute).with(/^(RE)?SET/)
       end
 
       it 'idempotently cleans up after failed background migrations' do
@@ -624,6 +627,76 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
 
         migration.finalize_backfilling_partitioned_table source_table
       end
+    end
+  end
+
+  describe '#replace_with_partitioned_table' do
+    let(:archived_table) { "#{source_table}_archived" }
+
+    before do
+      migration.partition_table_by_date source_table, partition_column, min_date: min_date, max_date: max_date
+    end
+
+    it 'replaces the original table with the partitioned table' do
+      expect(table_type(source_table)).to eq('normal')
+      expect(table_type(partitioned_table)).to eq('partitioned')
+      expect(table_type(archived_table)).to be_nil
+
+      expect_table_to_be_replaced { migration.replace_with_partitioned_table(source_table) }
+
+      expect(table_type(source_table)).to eq('partitioned')
+      expect(table_type(archived_table)).to eq('normal')
+      expect(table_type(partitioned_table)).to be_nil
+    end
+
+    it 'moves the trigger from the original table to the new table' do
+      expect_function_to_exist(function_name)
+      expect_valid_function_trigger(source_table, trigger_name, function_name, after: %w[delete insert update])
+
+      expect_table_to_be_replaced { migration.replace_with_partitioned_table(source_table) }
+
+      expect_function_to_exist(function_name)
+      expect_valid_function_trigger(source_table, trigger_name, function_name, after: %w[delete insert update])
+    end
+
+    def expect_table_to_be_replaced(&block)
+      super(original_table: source_table, replacement_table: partitioned_table, archived_table: archived_table, &block)
+    end
+  end
+
+  describe '#rollback_replace_with_partitioned_table' do
+    let(:archived_table) { "#{source_table}_archived" }
+
+    before do
+      migration.partition_table_by_date source_table, partition_column, min_date: min_date, max_date: max_date
+
+      migration.replace_with_partitioned_table source_table
+    end
+
+    it 'replaces the partitioned table with the non-partitioned table' do
+      expect(table_type(source_table)).to eq('partitioned')
+      expect(table_type(archived_table)).to eq('normal')
+      expect(table_type(partitioned_table)).to be_nil
+
+      expect_table_to_be_replaced { migration.rollback_replace_with_partitioned_table(source_table) }
+
+      expect(table_type(source_table)).to eq('normal')
+      expect(table_type(partitioned_table)).to eq('partitioned')
+      expect(table_type(archived_table)).to be_nil
+    end
+
+    it 'moves the trigger from the partitioned table to the non-partitioned table' do
+      expect_function_to_exist(function_name)
+      expect_valid_function_trigger(source_table, trigger_name, function_name, after: %w[delete insert update])
+
+      expect_table_to_be_replaced { migration.rollback_replace_with_partitioned_table(source_table) }
+
+      expect_function_to_exist(function_name)
+      expect_valid_function_trigger(source_table, trigger_name, function_name, after: %w[delete insert update])
+    end
+
+    def expect_table_to_be_replaced(&block)
+      super(original_table: source_table, replacement_table: archived_table, archived_table: partitioned_table, &block)
     end
   end
 

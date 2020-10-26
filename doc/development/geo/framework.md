@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Geo self-service framework (alpha)
 
 NOTE: **Note:**
@@ -91,8 +97,6 @@ module Geo
       ::Packages::PackageFile
     end
 
-    # Change this to `true` to release replication of this model. Then remove
-    # this override in the next release.
     # The feature flag follows the format `geo_#{replicable_name}_replication`,
     # so here it would be `geo_package_file_replication`
     def self.replication_enabled_by_default?
@@ -193,13 +197,20 @@ For example, to add support for files referenced by a `Widget` model with a
        file_store == ObjectStorage::Store::LOCAL
      end
 
-     def self.replicables_for_geo_node
+     # @param primary_key_in [Range, Widget] arg to pass to primary_key_in scope
+     # @return [ActiveRecord::Relation<Widget>] everything that should be synced to this node, restricted by primary key
+     def self.replicables_for_current_secondary(primary_key_in)
        # Should be implemented. The idea of the method is to restrict
        # the set of synced items depending on synchronization settings
      end
      ...
    end
    ```
+
+   NOTE: **Note:**
+
+   If there is a common constraint for records to be available for replication,
+   make sure to also overwrite the `available_replicables` scope.
 
 1. Create `ee/app/replicators/geo/widget_replicator.rb`. Implement the
    `#carrierwave_uploader` method which should return a `CarrierWave::Uploader`.
@@ -220,8 +231,6 @@ For example, to add support for files referenced by a `Widget` model with a
          model_record.file
        end
 
-       # Change this to `true` to release replication of this model. Then remove
-       # this override in the next release.
        # The feature flag follows the format `geo_#{replicable_name}_replication`,
        # so here it would be `geo_widget_replication`
        def self.replication_enabled_by_default?
@@ -556,6 +565,10 @@ Metrics are gathered by `Geo::MetricsUpdateWorker`, persisted in
    end
    ```
 
+1. Make sure the factory also allows setting a `project` attribute. If the model
+   does not have a direct relation to a project, you can use a `transient`
+   attribute. Check out `spec/factories/merge_request_diffs.rb` for an example.
+
 Widget replication and verification metrics should now be available in the API,
 the Admin Area UI, and Prometheus!
 
@@ -637,7 +650,7 @@ the Admin Area UI, and Prometheus!
          include ::Types::Geo::RegistryType
 
          graphql_name 'WidgetRegistry'
-         description 'Represents the sync and verification state of a widget'
+         description 'Represents the Geo sync and verification state of a widget'
 
          field :widget_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Widget'
        end
@@ -676,6 +689,12 @@ the Admin Area UI, and Prometheus!
    }
    ```
 
+1. Update the GraphQL reference documentation:
+
+   ```shell
+   bundle exec rake gitlab:graphql:compile_docs
+   ```
+
 Individual widget synchronization and verification data should now be available
 via the GraphQL API!
 
@@ -693,3 +712,33 @@ To do: This should be done as part of
 
 Widget sync and verification data (aggregate and individual) should now be
 available in the Admin UI!
+
+#### Releasing the feature
+
+1. In `ee/app/replicators/geo/widget_replicator.rb`, delete the `self.replication_enabled_by_default?` method:
+
+   ```ruby
+   module Geo
+     class WidgetReplicator < Gitlab::Geo::Replicator
+       ...
+
+       # REMOVE THIS METHOD
+       def self.replication_enabled_by_default?
+         false
+       end
+       # REMOVE THIS METHOD
+
+       ...
+     end
+   end
+   ```
+
+1. In `ee/app/graphql/types/geo/geo_node_type.rb`, remove the `feature_flag` option for the released type:
+
+   ```ruby
+   field :widget_registries, ::Types::Geo::WidgetRegistryType.connection_type,
+         null: true,
+         resolver: ::Resolvers::Geo::WidgetRegistriesResolver,
+         description: 'Find widget registries on this Geo node',
+         feature_flag: :geo_widget_replication # REMOVE THIS LINE
+   ```

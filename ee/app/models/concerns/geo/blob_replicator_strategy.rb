@@ -13,6 +13,7 @@ module Geo
     end
 
     def handle_after_create_commit
+      return false unless Gitlab::Geo.enabled?
       return unless self.class.enabled?
 
       publish(:created, **created_params)
@@ -21,7 +22,7 @@ module Geo
 
     # Called by Gitlab::Geo::Replicator#consume
     def consume_event_created(**params)
-      return unless in_replicables_for_geo_node?
+      return unless in_replicables_for_current_secondary?
 
       download
     end

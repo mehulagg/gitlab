@@ -7,6 +7,7 @@ RSpec.describe Terraform::StateVersion do
 
   it { is_expected.to belong_to(:terraform_state).required }
   it { is_expected.to belong_to(:created_by_user).class_name('User').optional }
+  it { is_expected.to belong_to(:build).class_name('Ci::Build').optional }
 
   describe 'scopes' do
     describe '.ordered_by_version_desc' do
@@ -29,7 +30,7 @@ RSpec.describe Terraform::StateVersion do
     subject { create(:terraform_state_version) }
 
     before do
-      stub_terraform_state_object_storage(Terraform::StateUploader)
+      stub_terraform_state_object_storage
     end
 
     describe '#file' do

@@ -1,8 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlBanner } from '@gitlab/ui';
+import Cookies from 'js-cookie';
 import FirstClassProjectSecurityDashboard from 'ee/security_dashboard/components/first_class_project_security_dashboard.vue';
+import AutoFixUserCallout from 'ee/security_dashboard/components/auto_fix_user_callout.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from 'ee/security_dashboard/components/project_vulnerabilities.vue';
 import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
@@ -11,6 +14,11 @@ import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.
 const props = {
   notEnabledScannersHelpPath: '/help/docs/',
   noPipelineRunScannersHelpPath: '/new/pipeline',
+  pipeline: {
+    createdAt: '2020-10-06T20:08:07Z',
+    id: '214',
+    path: '/mixed-vulnerabilities/dependency-list-test-01/-/pipelines/214',
+  },
   projectFullPath: '/group/project',
   securityDashboardHelpPath: '/security/dashboard/help-path',
   vulnerabilitiesExportEndpoint: '/vulnerabilities/exports',
@@ -18,7 +26,11 @@ const props = {
 
 const provide = {
   dashboardDocumentation: '/help/docs',
+  autoFixDocumentation: '/auto/fix/documentation',
   emptyStateSvgPath: '/svgs/empty/svg',
+  glFeatures: {
+    securityAutoFix: true,
+  },
 };
 
 const filters = { foo: 'bar' };
@@ -27,10 +39,12 @@ describe('First class Project Security Dashboard component', () => {
   let wrapper;
 
   const findFilters = () => wrapper.find(Filters);
+  const findProjectPipelineStatus = () => wrapper.find(ProjectPipelineStatus);
   const findVulnerabilities = () => wrapper.find(ProjectVulnerabilitiesApp);
   const findVulnerabilityCountList = () => wrapper.find(VulnerabilityCountList);
   const findUnconfiguredState = () => wrapper.find(ReportsNotConfigured);
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
+  const findAutoFixUserCallout = () => wrapper.find(AutoFixUserCallout);
 
   const createComponent = options => {
     wrapper = shallowMount(FirstClassProjectSecurityDashboard, {
@@ -88,6 +102,65 @@ describe('First class Project Security Dashboard component', () => {
         props.vulnerabilitiesExportEndpoint,
       );
     });
+
+    it('should display the project pipeline status', () => {
+      expect(findProjectPipelineStatus()).toExist();
+    });
+  });
+
+  describe('auto-fix user callout', () => {
+    describe('feature flag disabled', () => {
+      beforeEach(() => {
+        createComponent({
+          props: { hasVulnerabilities: true },
+          provide: {
+            ...provide,
+            glFeatures: {
+              securityAutoFix: false,
+            },
+          },
+        });
+      });
+
+      it('does not show user callout', () => {
+        expect(findAutoFixUserCallout().exists()).toBe(false);
+      });
+    });
+
+    describe('cookie not set', () => {
+      beforeEach(() => {
+        jest.spyOn(Cookies, 'set');
+        createComponent({
+          props: { hasVulnerabilities: true },
+        });
+      });
+
+      it('shows user callout by default', () => {
+        expect(findAutoFixUserCallout().exists()).toBe(true);
+      });
+
+      it('when dismissed, hides the user callout and sets the cookie', async () => {
+        await findAutoFixUserCallout().vm.$emit('close');
+
+        expect(findAutoFixUserCallout().exists()).toBe(false);
+        expect(Cookies.set).toHaveBeenCalledWith('auto_fix_user_callout_dismissed', 'true');
+      });
+    });
+
+    describe('cookie set', () => {
+      beforeEach(() => {
+        jest.doMock('js-cookie', () => ({
+          get: jest.fn().mockReturnValue(true),
+        }));
+        createComponent({
+          props: { hasVulnerabilities: true },
+        });
+      });
+
+      it('does not show user callout', () => {
+        expect(findAutoFixUserCallout().exists()).toBe(false);
+      });
+    });
   });
 
   describe('with filter data', () => {
@@ -95,6 +168,7 @@ describe('First class Project Security Dashboard component', () => {
       createComponent({
         props: {
           hasVulnerabilities: true,
+          pipeline: { id: '214' },
         },
         data() {
           return { filters };
@@ -118,6 +192,24 @@ describe('First class Project Security Dashboard component', () => {
 
     it('displays the unconfigured state', () => {
       expect(findUnconfiguredState().exists()).toBe(true);
+    });
+
+    it('does not display the project pipeline status', () => {
+      expect(findProjectPipelineStatus().exists()).toBe(false);
+    });
+  });
+
+  describe('when there is no pipeline data', () => {
+    beforeEach(() => {
+      createComponent({
+        props: {
+          pipeline: undefined,
+        },
+      });
+    });
+
+    it('does not display the project pipeline status', () => {
+      expect(findProjectPipelineStatus().exists()).toBe(false);
     });
   });
 });

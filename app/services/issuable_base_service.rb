@@ -19,6 +19,7 @@ class IssuableBaseService < BaseService
 
   def filter_params(issuable)
     unless can_admin_issuable?(issuable)
+      params.delete(:milestone)
       params.delete(:milestone_id)
       params.delete(:labels)
       params.delete(:add_label_ids)
@@ -321,7 +322,7 @@ class IssuableBaseService < BaseService
 
   def change_severity(issuable)
     if severity = params.delete(:severity)
-      issuable.update_severity(severity)
+      ::IncidentManagement::Incidents::UpdateSeverityService.new(issuable, current_user, severity).execute
     end
   end
 
@@ -365,6 +366,7 @@ class IssuableBaseService < BaseService
       }
     associations[:total_time_spent] = issuable.total_time_spent if issuable.respond_to?(:total_time_spent)
     associations[:description] = issuable.description
+    associations[:reviewers] = issuable.reviewers.to_a if issuable.allows_reviewers?
 
     associations
   end

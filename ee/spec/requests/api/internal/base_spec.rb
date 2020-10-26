@@ -3,14 +3,15 @@ require 'spec_helper'
 
 RSpec.describe API::Internal::Base do
   include EE::GeoHelpers
+  include APIInternalBaseHelpers
 
   let_it_be(:primary_url) { 'http://primary.example.com' }
   let_it_be(:secondary_url) { 'http://secondary.example.com' }
   let_it_be(:primary_node, reload: true) { create(:geo_node, :primary, url: primary_url) }
   let_it_be(:secondary_node, reload: true) { create(:geo_node, url: secondary_url) }
+  let_it_be(:user) { create(:user) }
 
   describe 'POST /internal/post_receive', :geo do
-    let_it_be(:user) { create(:user) }
     let(:key) { create(:key, user: user) }
     let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
     let(:secret_token) { Gitlab::Shell.secret_token }
@@ -72,7 +73,6 @@ RSpec.describe API::Internal::Base do
   end
 
   describe "POST /internal/allowed" do
-    let_it_be(:user) { create(:user) }
     let_it_be(:key) { create(:key, user: user) }
     let(:secret_token) { Gitlab::Shell.secret_token }
 
@@ -243,10 +243,41 @@ RSpec.describe API::Internal::Base do
         end
       end
     end
+
+    context 'maintenance mode enabled' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      before do
+        stub_application_setting(maintenance_mode: true)
+
+        project.add_developer(user)
+      end
+
+      context 'when action is git push' do
+        it 'returns forbidden' do
+          push(key, project)
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
+          expect(json_response["status"]).to be_falsey
+          expect(json_response["message"]).to eq(
+            'Git push is not allowed because this GitLab instance is currently in (read-only) maintenance mode.'
+          )
+          expect(user.reload.last_activity_on).to be_nil
+        end
+      end
+
+      context 'when action is not git push' do
+        it 'returns success' do
+          pull(key, project)
+
+          expect(response).to have_gitlab_http_status(:success)
+          expect(json_response["status"]).to be_truthy
+        end
+      end
+    end
   end
 
   describe "POST /internal/lfs_authenticate", :geo do
-    let(:user) { create(:user) }
     let(:project) { create(:project, :repository) }
     let(:secret_token) { Gitlab::Shell.secret_token }
 
@@ -279,7 +310,6 @@ RSpec.describe API::Internal::Base do
   end
 
   describe 'POST /internal/personal_access_token' do
-    let_it_be(:user) { create(:user) }
     let_it_be(:key) { create(:key, user: user) }
 
     let(:instance_level_max_personal_access_token_lifetime) { nil }

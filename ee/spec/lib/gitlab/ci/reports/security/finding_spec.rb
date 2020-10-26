@@ -24,6 +24,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         raw_metadata: 'I am a stringified json object',
         report_type: :sast,
         scanner: scanner,
+        scan: nil,
         severity: :high,
         uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38'
       }
@@ -90,6 +91,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         raw_metadata: occurrence.raw_metadata,
         report_type: occurrence.report_type,
         scanner: occurrence.scanner,
+        scan: occurrence.scan,
         severity: occurrence.severity,
         uuid: occurrence.uuid
       })
@@ -169,6 +171,14 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     end
 
     subject { finding.eql?(other_finding) }
+
+    context 'when the primary_identifier is nil' do
+      let(:identifier) { nil }
+
+      it 'does not raise an exception' do
+        expect { subject }.not_to raise_error
+      end
+    end
 
     context 'when the other finding has same `report_type`' do
       let(:report_type) { :sast }
@@ -265,5 +275,22 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     context 'when all required attributes present' do
       it { is_expected.to be_truthy }
     end
+  end
+
+  describe '#keys' do
+    let(:identifier_1) { build(:ci_reports_security_identifier) }
+    let(:identifier_2) { build(:ci_reports_security_identifier) }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:finding) { build(:ci_reports_security_finding, identifiers: [identifier_1, identifier_2], location: location) }
+    let(:expected_keys) do
+      [
+        build(:ci_reports_security_finding_key, location_fingerprint: location.fingerprint, identifier_fingerprint: identifier_1.fingerprint),
+        build(:ci_reports_security_finding_key, location_fingerprint: location.fingerprint, identifier_fingerprint: identifier_2.fingerprint)
+      ]
+    end
+
+    subject { finding.keys }
+
+    it { is_expected.to match_array(expected_keys) }
   end
 end

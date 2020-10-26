@@ -124,7 +124,6 @@ export default {
     return {
       treeWidth,
       diffFilesLength: 0,
-      collapsedWarningDismissed: false,
     };
   },
   computed: {
@@ -153,7 +152,7 @@ export default {
       'canMerge',
       'hasConflicts',
     ]),
-    ...mapGetters('diffs', ['hasCollapsedFile', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -206,11 +205,7 @@ export default {
         visible = this.$options.alerts.ALERT_OVERFLOW_HIDDEN;
       } else if (this.isDiffHead && this.hasConflicts) {
         visible = this.$options.alerts.ALERT_MERGE_CONFLICT;
-      } else if (
-        this.hasCollapsedFile &&
-        !this.collapsedWarningDismissed &&
-        !this.viewDiffsFileByFile
-      ) {
+      } else if (this.whichCollapsedTypes.automatic && !this.viewDiffsFileByFile) {
         visible = this.$options.alerts.ALERT_COLLAPSED_FILES;
       }
 
@@ -429,9 +424,6 @@ export default {
         this.toggleShowTreeList(false);
       }
     },
-    dismissCollapsedWarning() {
-      this.collapsedWarningDismissed = true;
-    },
   },
   minTreeWidth: MIN_TREE_WIDTH,
   maxTreeWidth: MAX_TREE_WIDTH,
@@ -464,7 +456,6 @@ export default {
       <collapsed-files-warning
         v-if="visibleWarning == $options.alerts.ALERT_COLLAPSED_FILES"
         :limited="isLimitedContainer"
-        @dismiss="dismissCollapsedWarning"
       />
 
       <div
@@ -474,7 +465,7 @@ export default {
         <div
           v-if="showTreeList"
           :style="{ width: `${treeWidth}px` }"
-          class="diff-tree-list js-diff-tree-list mr-3"
+          class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
           <panel-resizer
             :size.sync="treeWidth"
@@ -487,7 +478,7 @@ export default {
           <tree-list :hide-file-stats="hideFileStats" />
         </div>
         <div
-          class="diff-files-holder"
+          class="col-12 col-md-auto diff-files-holder"
           :class="{
             [CENTERED_LIMITED_CONTAINER_CLASSES]: isLimitedContainer,
           }"

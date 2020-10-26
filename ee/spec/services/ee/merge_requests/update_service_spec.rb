@@ -36,6 +36,11 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       let(:parent) { project }
     end
 
+    it_behaves_like 'service with multiple reviewers' do
+      let(:opts) { {} }
+      let(:execute) { update_merge_request(opts) }
+    end
+
     def update_merge_request(opts)
       described_class.new(project, user, opts).execute(merge_request)
     end
@@ -224,7 +229,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     context 'when reassigned' do
       it 'schedules for analytics metric update' do
         expect(Analytics::CodeReviewMetricsWorker)
-          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id, {})
+          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id)
 
         update_merge_request({ assignee_ids: [user2.id] })
       end

@@ -1195,7 +1195,7 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  shared_examples 'merge request rules' do
+  shared_examples 'regulated merge request approval settings' do
     let(:project) { private_project }
 
     using RSpec::Parameterized::TableSyntax
@@ -1258,19 +1258,45 @@ RSpec.describe ProjectPolicy do
   end
 
   describe ':modify_approvers_rules' do
-    it_behaves_like 'merge request rules' do
-      let(:policy) { :modify_approvers_rules }
+    let(:policy) { :modify_approvers_rules }
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:role, :admin_mode, :allowed) do
+      :guest      | nil    | false
+      :reporter   | nil    | false
+      :developer  | nil    | false
+      :maintainer | nil    | true
+      :owner      | nil    | true
+      :admin      | false  | false
+      :admin      | true   | true
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
+
+  describe ':modify_overriding_approvers_per_merge_request_setting' do
+    it_behaves_like 'regulated merge request approval settings' do
+      let(:policy) { :modify_overriding_approvers_per_merge_request_setting }
     end
   end
 
   describe ':modify_merge_request_author_setting' do
-    it_behaves_like 'merge request rules' do
+    it_behaves_like 'regulated merge request approval settings' do
       let(:policy) { :modify_merge_request_author_setting }
     end
   end
 
   describe ':modify_merge_request_committer_setting' do
-    it_behaves_like 'merge request rules' do
+    it_behaves_like 'regulated merge request approval settings' do
       let(:policy) { :modify_merge_request_committer_setting }
     end
   end
@@ -1378,4 +1404,37 @@ RSpec.describe ProjectPolicy do
   end
 
   include_examples 'analytics report embedding'
+
+  context 'project access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with maintainer' do
+        let(:current_user) { maintainer }
+
+        before do
+          project.add_maintainer(maintainer)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          project.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
 end

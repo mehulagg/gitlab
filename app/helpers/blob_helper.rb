@@ -1,12 +1,6 @@
 # frozen_string_literal: true
 
 module BlobHelper
-  def highlight(file_name, file_content, language: nil, plain: false)
-    highlighted = Gitlab::Highlight.highlight(file_name, file_content, plain: plain, language: language)
-
-    raw %(<pre class="code highlight"><code>#{highlighted}</code></pre>)
-  end
-
   def no_highlight_files
     %w(credits changelog news copying copyright license authors)
   end
@@ -32,12 +26,39 @@ module BlobHelper
     File.join(segments)
   end
 
-  def ide_fork_and_edit_path(project = @project, ref = @ref, path = @path, options = {})
-    if current_user
-      project_forks_path(project,
-                        namespace_key: current_user&.namespace&.id,
-                        continue: edit_blob_fork_params(ide_edit_path(project, ref, path)))
+  def ide_merge_request_path(merge_request, path = '')
+    target_project = merge_request.target_project
+    source_project = merge_request.source_project
+
+    if merge_request.merged?
+      branch = merge_request.target_branch_exists? ? merge_request.target_branch : target_project.default_branch
+
+      return ide_edit_path(target_project, branch, path)
     end
+
+    if target_project != source_project
+      params = { target_project: target_project.full_path }
+    end
+
+    result = File.join(ide_path, 'project', source_project.full_path, 'merge_requests', merge_request.to_param)
+    result += "?#{params.to_query}" unless params.nil?
+    result
+  end
+
+  def ide_fork_and_edit_path(project = @project, ref = @ref, path = @path, options = {})
+    fork_path_for_current_user(project, ide_edit_path(project, ref, path))
+  end
+
+  def fork_and_edit_path(project = @project, ref = @ref, path = @path, options = {})
+    fork_path_for_current_user(project, edit_blob_path(project, ref, path, options))
+  end
+
+  def fork_path_for_current_user(project, path)
+    return unless current_user
+
+    project_forks_path(project,
+                      namespace_key: current_user.namespace&.id,
+                      continue: edit_blob_fork_params(path))
   end
 
   def encode_ide_path(path)
@@ -148,7 +169,7 @@ module BlobHelper
   # mode - File unix mode
   # mode - File name
   def blob_icon(mode, name)
-    icon("#{file_type_icon_class('file', mode, name)} fw")
+    sprite_icon(file_type_icon_class('file', mode, name))
   end
 
   def blob_raw_url(**kwargs)

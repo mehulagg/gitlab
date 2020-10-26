@@ -3,6 +3,7 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
 import * as types from './mutation_types';
+import { FETCH_VALUE_STREAM_DATA } from '../constants';
 import {
   removeFlash,
   throwIfUserForbidden,
@@ -14,27 +15,17 @@ import {
 const appendExtension = path => (path.indexOf('.') > -1 ? path : `${path}.json`);
 
 export const setPaths = ({ dispatch }, options) => {
-  const { group, milestonesPath = '', labelsPath = '' } = options;
-  // TODO: After we remove instance VSA we can rely on the paths from the BE
-  // https://gitlab.com/gitlab-org/gitlab/-/issues/223735
-  const groupPath = group?.parentId || group?.fullPath || '';
-  const milestonesEndpoint = milestonesPath || `/groups/${groupPath}/-/milestones`;
-  const labelsEndpoint = labelsPath || `/groups/${groupPath}/-/labels`;
+  const { groupPath, milestonesPath = '', labelsPath = '' } = options;
 
   return dispatch('filters/setEndpoints', {
-    labelsEndpoint: appendExtension(labelsEndpoint),
-    milestonesEndpoint: appendExtension(milestonesEndpoint),
+    labelsEndpoint: appendExtension(labelsPath),
+    milestonesEndpoint: appendExtension(milestonesPath),
     groupEndpoint: groupPath,
   });
 };
 
 export const setFeatureFlags = ({ commit }, featureFlags) =>
   commit(types.SET_FEATURE_FLAGS, featureFlags);
-
-export const setSelectedGroup = ({ commit, dispatch }, group) => {
-  commit(types.SET_SELECTED_GROUP, group);
-  return dispatch('filters/initialize', { groupPath: group.full_path });
-};
 
 export const setSelectedProjects = ({ commit }, projects) =>
   commit(types.SET_SELECTED_PROJECTS, projects);
@@ -71,7 +62,7 @@ export const fetchStageData = ({ dispatch, getters }, stageId) => {
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
     stageId,
-    cycleAnalyticsRequestParams,
+    params: cycleAnalyticsRequestParams,
   })
     .then(checkForDataError)
     .then(({ data }) => dispatch('receiveStageDataSuccess', data))
@@ -114,7 +105,7 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
         groupId: currentGroupPath,
         valueStreamId: currentValueStreamId,
         stageId,
-        cycleAnalyticsRequestParams,
+        params: cycleAnalyticsRequestParams,
       }),
     ),
   )
@@ -193,7 +184,7 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
   return Api.cycleAnalyticsGroupStagesAndEvents({
     groupId,
     valueStreamId,
-    data: {
+    params: {
       start_date: created_after,
       project_ids,
     },
@@ -293,12 +284,13 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
     selectedMilestone,
     selectedAssigneeList,
     selectedLabelList,
+    group,
   } = initialData;
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
-  if (initialData.group?.fullPath) {
+  if (group?.fullPath) {
     return Promise.all([
-      dispatch('setPaths', { group: initialData.group, milestonesPath, labelsPath }),
+      dispatch('setPaths', { group, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
         selectedMilestone,
@@ -311,6 +303,7 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       .then(() => dispatch('fetchCycleAnalyticsData'))
       .then(() => dispatch('initializeCycleAnalyticsSuccess'));
   }
+
   return dispatch('initializeCycleAnalyticsSuccess');
 };
 
@@ -381,16 +374,19 @@ export const fetchValueStreamData = ({ dispatch }) =>
 
 export const setSelectedValueStream = ({ commit, dispatch }, streamId) => {
   commit(types.SET_SELECTED_VALUE_STREAM, streamId);
-  return dispatch('fetchValueStreamData');
+  return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
-export const receiveValueStreamsSuccess = ({ commit, dispatch }, data = []) => {
+export const receiveValueStreamsSuccess = (
+  { state: { selectedValueStream = null }, commit, dispatch },
+  data = [],
+) => {
   commit(types.RECEIVE_VALUE_STREAMS_SUCCESS, data);
-  if (data.length) {
+  if (!selectedValueStream && data.length) {
     const [firstStream] = data;
-    return dispatch('setSelectedValueStream', firstStream.id);
+    return dispatch('setSelectedValueStream', firstStream);
   }
-  return Promise.resolve();
+  return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
 export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
@@ -412,7 +408,7 @@ export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
         throw error;
       });
   }
-  return dispatch('fetchValueStreamData');
+  return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
 export const setFilters = ({ dispatch }) => {

@@ -195,6 +195,16 @@ RSpec.describe Project do
       end
     end
 
+    describe '.with_enabled_incident_sla' do
+      it 'returns the correct project' do
+        project_with_enabled_incident_sla = create(:project_incident_management_setting, :sla_enabled).project
+        project_without_enabled_incident_sla = create(:project_incident_management_setting).project
+
+        expect(described_class.with_enabled_incident_sla).to include(project_with_enabled_incident_sla)
+        expect(described_class.with_enabled_incident_sla).not_to include(project_without_enabled_incident_sla)
+      end
+    end
+
     describe '.with_shared_runners_limit_enabled' do
       let(:public_cost_factor) { 1.0 }
 
@@ -784,12 +794,6 @@ RSpec.describe Project do
     it "returns false" do
       project.namespace.update(share_with_group_lock: true)
       expect(project.allowed_to_share_with_group?).to be_falsey
-    end
-  end
-
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { create(:project) }
     end
   end
 
@@ -2188,6 +2192,25 @@ RSpec.describe Project do
     end
   end
 
+  describe '#actual_size_limit' do
+    context 'when repository_size_limit is set on the project' do
+      it 'returns the repository_size_limit' do
+        project = build(:project, repository_size_limit: 10)
+
+        expect(project.actual_size_limit).to eq(10)
+      end
+    end
+
+    context 'when repository_size_limit is not set on the project' do
+      it 'returns the actual_size_limit of the namespace' do
+        group = build(:group, repository_size_limit: 20)
+        project = build(:project, namespace: group, repository_size_limit: nil)
+
+        expect(project.actual_size_limit).to eq(20)
+      end
+    end
+  end
+
   describe '#repository_size_checker' do
     let(:project) { build(:project) }
     let(:checker) { project.repository_size_checker }
@@ -2254,6 +2277,32 @@ RSpec.describe Project do
           end
         end
       end
+    end
+  end
+
+  describe '#repository_size_excess' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { project.repository_size_excess }
+
+    let_it_be(:statistics) { create(:project_statistics) }
+    let_it_be(:project) { statistics.project }
+
+    where(:total_repository_size, :size_limit, :result) do
+      50 | nil | 0
+      50 | 0   | 0
+      50 | 60  | 0
+      50 | 50  | 0
+      50 | 10  | 40
+    end
+
+    with_them do
+      before do
+        allow(project).to receive(:actual_size_limit).and_return(size_limit)
+        allow(statistics).to receive(:total_repository_size).and_return(total_repository_size)
+      end
+
+      it { is_expected.to eq(result) }
     end
   end
 
@@ -2582,6 +2631,14 @@ RSpec.describe Project do
         expect(project.jira_import?).to be false
         expect { project.remove_import_data }.not_to change { ProjectImportData.count }
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 end

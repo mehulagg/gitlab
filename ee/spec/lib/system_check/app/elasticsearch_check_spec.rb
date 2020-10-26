@@ -34,7 +34,8 @@ RSpec.describe SystemCheck::App::ElasticsearchCheck do
       '5.3.1' | false
       '5.6.0' | false
       '5.6.6' | false
-      '6.0.0' | true
+      '6.0.0' | false
+      '6.3.0' | false
       '6.4.2' | true
       '7.1.0' | true
       '7.5.1' | true

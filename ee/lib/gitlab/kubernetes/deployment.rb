@@ -7,7 +7,7 @@ module Gitlab
 
       STABLE_TRACK_VALUE = 'stable'.freeze
 
-      def initialize(attributes = {}, pods: {})
+      def initialize(attributes = {}, pods: [])
         @attributes = attributes
         @pods = pods
       end

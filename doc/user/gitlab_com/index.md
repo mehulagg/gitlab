@@ -38,6 +38,14 @@ The IP address for `mg.gitlab.com` is subject to change at any time.
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
 
+There are several ways to perform backups of your content on GitLab.com.
+
+Projects can be backed up in their entirety by exporting them either [through the UI](../project/settings/import_export.md) or [API](../../api/project_import_export.md#schedule-an-export), the latter of which can be used to programmatically upload exports to a storage platform such as AWS S3.
+
+With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
+
+Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki will come with it [if they were uploaded after 2020-08-22](../project/wiki/index.md#creating-a-new-wiki-page).
+
 ## Alternative SSH port
 
 GitLab.com can be reached via a [different SSH port](https://about.gitlab.com/blog/2016/02/18/gitlab-dot-com-now-supports-an-alternate-git-plus-ssh-port/) for `git+ssh`.
@@ -77,6 +85,7 @@ which is part of [GitLab CI/CD](#gitlab-cicd).
 ## GitLab CI/CD
 
 Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
+Any settings or feature limits not listed here are using the defaults listed in the related documentation.
 
 | Setting                 | GitLab.com        | Default       |
 | -----------             | ----------------- | ------------- |
@@ -86,8 +95,8 @@ Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
-| [Max number of instance level variables](../../administration/instance_limits.md#number-of-instance-level-variables) | `25` | `25` |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
+| Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
 
 ## Account and limit settings
 
@@ -255,26 +264,23 @@ sentry_dsn = "X"
 
 ### Windows shared runners (beta)
 
-The Windows shared runners are currently in
-[beta](https://about.gitlab.com/handbook/product/#beta) and should not be used
-for production workloads.
+The Windows shared runners are in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta)
+and shouldn't be used for production workloads.
 
-During the beta period, the
-[shared runner pipeline quota](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
-will apply for groups and projects in the same way as Linux runners.
-This may change when the beta period ends, as discussed in this
-[related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/30834).
+During this beta period, the [shared runner pipeline quota](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
+applies for groups and projects in the same manner as Linux runners. This may
+change when the beta period ends, as discussed in this [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/30834).
 
-Windows shared runners on GitLab.com automatically autoscale by
-launching virtual machines on the Google Cloud Platform. This solution uses
-a new [autoscaling driver](https://gitlab.com/gitlab-org/ci-cd/custom-executor-drivers/autoscaler/tree/master/docs/readme.md)
+Windows shared runners on GitLab.com autoscale by launching virtual machines on
+the Google Cloud Platform. This solution uses an
+[autoscaling driver](https://gitlab.com/gitlab-org/ci-cd/custom-executor-drivers/autoscaler/tree/master/docs/readme.md)
 developed by GitLab for the [custom executor](https://docs.gitlab.com/runner/executors/custom.html).
-Windows shared runners execute your CI/CD jobs on `n1-standard-2` instances with 2
-vCPUs and 7.5GB RAM. You can find a full list of available Windows packages in the
-[package documentation](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/gcp/windows-containers/blob/master/cookbooks/preinstalled-software/README.md).
+Windows shared runners execute your CI/CD jobs on `n1-standard-2` instances with
+2 vCPUs and 7.5 GB RAM. You can find a full list of available Windows packages in
+the [package documentation](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/gcp/windows-containers/blob/master/cookbooks/preinstalled-software/README.md).
 
 We want to keep iterating to get Windows shared runners in a stable state and
-[generally available](https://about.gitlab.com/handbook/product/#generally-available-ga).
+[generally available](https://about.gitlab.com/handbook/product/gitlab-the-product/#generally-available-ga).
 You can follow our work towards this goal in the
 [related epic](https://gitlab.com/groups/gitlab-org/-/epics/2162).
 
@@ -283,7 +289,7 @@ You can follow our work towards this goal in the
 The full contents of our `config.toml` are:
 
 NOTE: **Note:**
-Settings that are not public are shown as `X`.
+Settings that aren't public are shown as `X`.
 
 ```toml
 concurrent = X
@@ -474,6 +480,10 @@ More information on this particular change can be found at
 of proposed changes can be found at
 <https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=database&label_name[]=change>.
 
+## Puma
+
+GitLab.com uses the default of 60 seconds for [Puma request timeouts](https://docs.gitlab.com/omnibus/settings/puma.html#worker-timeout).
+
 ## Unicorn
 
 GitLab.com adjusts the memory limits for the [unicorn-worker-killer](https://rubygems.org/gems/unicorn-worker-killer) gem.
@@ -529,9 +539,9 @@ Source:
 For performance reasons, if a query returns more than 10,000 records, GitLab
 doesn't return the following headers:
 
-- `X-Total`.
-- `X-Total-Pages`.
-- `rel="last"` `Link`.
+- `x-total`.
+- `x-total-pages`.
+- `rel="last"` `link`.
 
 ### Rack Attack initializer
 
@@ -596,6 +606,11 @@ dropped and users get
 
 To help avoid abuse, project and group imports, exports, and export downloads are rate limited. See [Project import/export rate limits](../../user/project/settings/import_export.md#rate-limits) and [Group import/export rate limits](../../user/group/settings/import_export.md#rate-limits) for details.
 
+### Non-configurable limits
+
+See [non-configurable limits](../../security/rate_limits.md#non-configurable-limits) for information on
+rate limits that are not configurable, and therefore also used on GitLab.com.
+
 ## GitLab.com Logging
 
 We use [Fluentd](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#fluentd) to parse our logs. Fluentd sends our logs to
@@ -608,6 +623,13 @@ You can view more information in our runbooks such as:
 - A [detailed list of what we're logging](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#what-are-we-logging)
 - Our [current log retention policies](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#retention)
 - A [diagram of our logging infrastructure](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#logging-infrastructure-overview)
+
+### Job Logs
+
+By default, GitLab does not expire job logs. Job logs are retained indefinitely,
+and can't be configured on GitLab.com to expire. You can erase job logs
+[manually with the Jobs API](../../api/jobs.md#erase-a-job) or by
+[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline). 
 
 ## GitLab.com at scale
 

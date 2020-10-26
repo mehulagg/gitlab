@@ -42,7 +42,7 @@ import {
   fetchFullDiff,
   toggleFullDiff,
   switchToFullDiffFromRenamedFile,
-  setFileCollapsed,
+  setFileCollapsedByUser,
   setExpandedDiffLines,
   setSuggestPopoverDismissed,
   changeCurrentCommit,
@@ -483,14 +483,14 @@ describe('DiffsStoreActions', () => {
             id: 1,
             renderIt: false,
             viewer: {
-              collapsed: false,
+              automaticallyCollapsed: false,
             },
           },
           {
             id: 2,
             renderIt: false,
             viewer: {
-              collapsed: false,
+              automaticallyCollapsed: false,
             },
           },
         ],
@@ -967,7 +967,7 @@ describe('DiffsStoreActions', () => {
         {
           file_hash: 'HASH',
           viewer: {
-            collapsed,
+            automaticallyCollapsed: collapsed,
           },
           renderIt,
         },
@@ -1167,7 +1167,7 @@ describe('DiffsStoreActions', () => {
       file_hash: 'testhash',
       alternate_viewer: { name: updatedViewerName },
     };
-    const updatedViewer = { name: updatedViewerName, collapsed: false };
+    const updatedViewer = { name: updatedViewerName, automaticallyCollapsed: false };
     const testData = [{ rich_text: 'test' }, { rich_text: 'file2' }];
     let renamedFile;
     let mock;
@@ -1216,13 +1216,18 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('setFileCollapsed', () => {
+  describe('setFileUserCollapsed', () => {
     it('commits SET_FILE_COLLAPSED', done => {
       testAction(
-        setFileCollapsed,
+        setFileCollapsedByUser,
         { filePath: 'test', collapsed: true },
         null,
-        [{ type: types.SET_FILE_COLLAPSED, payload: { filePath: 'test', collapsed: true } }],
+        [
+          {
+            type: types.SET_FILE_COLLAPSED,
+            payload: { filePath: 'test', collapsed: true, trigger: 'manual' },
+          },
+        ],
         [],
         done,
       );

@@ -7,20 +7,18 @@ module Gitlab
 
       DEFAULT_PER_PAGE = Gitlab::SearchResults::DEFAULT_PER_PAGE
 
-      attr_reader :current_user, :query, :public_and_internal_projects, :filters
+      attr_reader :current_user, :query, :public_and_internal_projects, :sort, :filters
 
       # Limit search results by passed projects
       # It allows us to search only for projects user has access to
-      attr_reader :limit_projects
+      attr_reader :limit_project_ids
 
-      delegate :users, to: :generic_search_results
-      delegate :limited_users_count, to: :generic_search_results
-
-      def initialize(current_user, query, limit_projects = nil, public_and_internal_projects: true, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, sort: nil, filters: {})
         @current_user = current_user
         @query = query
-        @limit_projects = limit_projects
+        @limit_project_ids = limit_project_ids
         @public_and_internal_projects = public_and_internal_projects
+        @sort = sort
         @filters = filters
       end
 
@@ -44,15 +42,28 @@ module Gitlab
           wiki_blobs(page: page, per_page: per_page)
         when 'commits'
           commits(page: page, per_page: per_page, preload_method: preload_method)
-        when 'users'
-          users.page(page).per(per_page)
         else
           Kaminari.paginate_array([])
         end
       end
 
-      def generic_search_results
-        @generic_search_results ||= Gitlab::SearchResults.new(current_user, query, limit_projects)
+      # Pull the highlight attribute out of Elasticsearch results
+      # and map it to the result id
+      def highlight_map(scope)
+        results = case scope
+                  when 'projects'
+                    projects
+                  when 'issues'
+                    issues
+                  when 'merge_requests'
+                    merge_requests
+                  when 'milestones'
+                    milestones
+                  when 'notes'
+                    notes
+                  end
+
+        results.to_h { |x| [x[:_source][:id], x[:highlight]] } if results.present?
       end
 
       def formatted_count(scope)
@@ -73,8 +84,6 @@ module Gitlab
           merge_requests_count.to_s
         when 'milestones'
           milestones_count.to_s
-        when 'users'
-          generic_search_results.formatted_count('users')
         end
       end
 
@@ -121,10 +130,6 @@ module Gitlab
       alias_method :limited_merge_requests_count, :merge_requests_count
       alias_method :limited_milestones_count, :milestones_count
 
-      def single_commit_result?
-        false
-      end
-
       def self.parse_search_result(result, project)
         ref = result["_source"]["blob"]["commit_sha"]
         path = result["_source"]["blob"]["path"]
@@ -134,16 +139,12 @@ module Gitlab
         project_id = result['_source']['project_id'].to_i
         total_lines = content.lines.size
 
-        term =
-          if result['highlight']
-            highlighted = result['highlight']['blob.content']
-            highlighted && highlighted[0].match(/gitlabelasticsearch→(.*?)←gitlabelasticsearch/)[1]
-          end
+        highlight_content = result.dig('highlight', 'blob.content')&.first || ''
 
         found_line_number = 0
 
-        content.each_line.each_with_index do |line, index|
-          if term && line.include?(term)
+        highlight_content.each_line.each_with_index do |line, index|
+          if line.include?(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG)
             found_line_number = index
             break
           end
@@ -176,20 +177,6 @@ module Gitlab
 
       private
 
-      # Convert the `limit_projects` to a list of ids for Elasticsearch
-      def limit_project_ids
-        strong_memoize(:limit_project_ids) do
-          case limit_projects
-          when :any then :any
-          when ActiveRecord::Relation
-            limit_projects.pluck_primary_key if limit_projects.model == Project
-          when Array
-            limit_projects.all? { |x| x.is_a?(Project) } ? limit_projects.map(&:id) : []
-          else []
-          end
-        end
-      end
-
       # Apply some eager loading to the `records` of an ES result object without
       # losing pagination information. Also, take advantage of preload method if
       # provided by the caller.
@@ -199,7 +186,7 @@ module Gitlab
         relation = relation.public_send(preload_method) if preload_method # rubocop:disable GitlabSecurity/PublicSend
 
         Kaminari.paginate_array(
-          relation,
+          relation.to_a,
           total_count: paginated_base.total_count,
           limit: per_page,
           offset: per_page * (page - 1)
@@ -210,7 +197,8 @@ module Gitlab
         {
           current_user: current_user,
           project_ids: limit_project_ids,
-          public_and_internal_projects: public_and_internal_projects
+          public_and_internal_projects: public_and_internal_projects,
+          sort: sort
         }
       end
 
@@ -222,8 +210,7 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          options = base_options
-          options[:state] = filters[:state] if filters.key?(:state)
+          options = base_options.merge(filters.slice(:sort, :confidential, :state))
 
           Issue.elastic_search(query, options: options)
         end
@@ -244,8 +231,7 @@ module Gitlab
 
       def merge_requests
         strong_memoize(:merge_requests) do
-          options = base_options
-          options[:state] = filters[:state] if filters.key?(:state)
+          options = base_options.merge(filters.slice(:sort, :state))
 
           MergeRequest.elastic_search(query, options: options)
         end

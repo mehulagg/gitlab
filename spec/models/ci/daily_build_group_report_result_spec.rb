@@ -81,4 +81,47 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
       end
     end
   end
+
+  describe 'scopes' do
+    let_it_be(:project) { create(:project) }
+    let(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project) }
+    let(:old_build_group_report_result) do
+      create(:ci_daily_build_group_report_result, date: 1.week.ago, project: project)
+    end
+
+    describe '.by_projects' do
+      subject { described_class.by_projects([project.id]) }
+
+      it 'returns records by projects' do
+        expect(subject).to contain_exactly(recent_build_group_report_result, old_build_group_report_result)
+      end
+    end
+
+    describe '.with_coverage' do
+      subject { described_class.with_coverage }
+
+      it 'returns data with coverage' do
+        expect(subject).to contain_exactly(recent_build_group_report_result, old_build_group_report_result)
+      end
+    end
+
+    describe '.with_default_branch' do
+      subject(:coverages) { described_class.with_default_branch }
+
+      context 'when coverage for the default branch exist' do
+        let!(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project) }
+        let!(:coverage_feature_branch) { create(:ci_daily_build_group_report_result, :on_feature_branch, project: project) }
+
+        it 'returns coverage with the default branch' do
+          expect(coverages).to contain_exactly(recent_build_group_report_result)
+        end
+      end
+
+      context 'when coverage for the default branch does not exist' do
+        it 'returns an empty collection' do
+          expect(coverages).to be_empty
+        end
+      end
+    end
+  end
 end

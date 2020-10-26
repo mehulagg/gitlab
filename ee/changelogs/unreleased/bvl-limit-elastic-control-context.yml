@@ -1,5 +1,0 @@
----
-title: Limit the context for paused elasticsearch jobs
-merge_request: 41297
-author:
-type: performance

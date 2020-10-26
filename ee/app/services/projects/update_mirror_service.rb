@@ -2,11 +2,13 @@
 
 module Projects
   class UpdateMirrorService < BaseService
+    include Gitlab::Utils::StrongMemoize
+
     Error = Class.new(StandardError)
     UpdateError = Class.new(Error)
 
     def execute
-      if project.import_url && Gitlab::UrlBlocker.blocked_url?(CGI.unescape(Gitlab::UrlSanitizer.sanitize(project.import_url)))
+      if project.import_url && Gitlab::UrlBlocker.blocked_url?(normalized_url(project.import_url))
         return error("The import URL is invalid.")
       end
 
@@ -46,6 +48,12 @@ module Projects
     end
 
     private
+
+    def normalized_url(url)
+      strong_memoize(:normalized_url) do
+        CGI.unescape(Gitlab::UrlSanitizer.sanitize(url))
+      end
+    end
 
     def update_branches
       local_branches = repository.branches.each_with_object({}) { |branch, branches| branches[branch.name] = branch }

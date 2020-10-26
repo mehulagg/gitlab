@@ -19,6 +19,7 @@ import NetworkPolicyEditor from '../network_policy_editor.vue';
 import PolicyRuleBuilder from './policy_rule_builder.vue';
 import PolicyPreview from './policy_preview.vue';
 import PolicyActionPicker from './policy_action_picker.vue';
+import DimDisableContainer from './dim_disable_container.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
@@ -46,6 +47,7 @@ export default {
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
+    DimDisableContainer,
   },
   directives: { GlModal: GlModalDirective },
   props: {
@@ -146,7 +148,7 @@ export default {
       }
     },
     changeEditorMode(mode) {
-      if (mode === EditorModeYAML) {
+      if (mode === EditorModeYAML && !this.hasParsingError) {
         this.yamlEditorValue = toYaml(this.policy);
       }
 
@@ -249,43 +251,80 @@ export default {
     <hr />
     <div v-if="shouldShowRuleEditor" class="row" data-testid="rule-editor">
       <div class="col-sm-12 col-md-6 col-lg-7 col-xl-8">
-        <gl-alert v-if="hasParsingError" data-testid="parsing-alert" :dismissible="false">{{
-          $options.parsingErrorMessage
-        }}</gl-alert>
+        <gl-alert
+          v-if="hasParsingError"
+          class="gl-z-index-1"
+          data-testid="parsing-alert"
+          :dismissible="false"
+          >{{ $options.parsingErrorMessage }}</gl-alert
+        >
 
-        <h4>{{ s__('NetworkPolicies|Rules') }}</h4>
-        <policy-rule-builder
-          v-for="(rule, idx) in policy.rules"
-          :key="idx"
-          class="gl-mb-4"
-          :rule="rule"
-          :endpoint-match-mode="policy.endpointMatchMode"
-          :endpoint-labels="policy.endpointLabels"
-          :endpoint-selector-disabled="idx > 0"
-          @rule-type-change="updateRuleType(idx, $event)"
-          @endpoint-match-mode-change="updateEndpointMatchMode"
-          @endpoint-labels-change="updateEndpointLabels"
-          @remove="removeRule(idx)"
-        />
+        <dim-disable-container data-testid="rule-builder-container" :disabled="hasParsingError">
+          <template #title>
+            <h4>{{ s__('NetworkPolicies|Rules') }}</h4>
+          </template>
 
-        <div class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5">
-          <gl-button
-            variant="link"
-            category="primary"
-            data-testid="add-rule"
-            :disabled="hasParsingError"
-            @click="addRule"
-            >{{ s__('Network Policy|New rule') }}</gl-button
+          <template #disabled>
+            <div
+              class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-6"
+            ></div>
+          </template>
+
+          <policy-rule-builder
+            v-for="(rule, idx) in policy.rules"
+            :key="idx"
+            class="gl-mb-4"
+            :rule="rule"
+            :endpoint-match-mode="policy.endpointMatchMode"
+            :endpoint-labels="policy.endpointLabels"
+            :endpoint-selector-disabled="idx > 0"
+            @rule-type-change="updateRuleType(idx, $event)"
+            @endpoint-match-mode-change="updateEndpointMatchMode"
+            @endpoint-labels-change="updateEndpointLabels"
+            @remove="removeRule(idx)"
+          />
+
+          <div
+            class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5"
           >
-        </div>
+            <gl-button variant="link" category="primary" data-testid="add-rule" @click="addRule">{{
+              s__('Network Policy|New rule')
+            }}</gl-button>
+          </div>
+        </dim-disable-container>
 
-        <h4>{{ s__('NetworkPolicies|Actions') }}</h4>
-        <p>{{ s__('NetworkPolicies|Traffic that does not match any rule will be blocked.') }}</p>
-        <policy-action-picker />
+        <dim-disable-container data-testid="policy-action-container" :disabled="hasParsingError">
+          <template #title>
+            <h4>{{ s__('NetworkPolicies|Actions') }}</h4>
+            <p>
+              {{ s__('NetworkPolicies|Traffic that does not match any rule will be blocked.') }}
+            </p>
+          </template>
+
+          <template #disabled>
+            <div
+              class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-6"
+            ></div>
+          </template>
+
+          <policy-action-picker />
+        </dim-disable-container>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-5 col-xl-4">
-        <h5>{{ s__('NetworkPolicies|Policy preview') }}</h5>
-        <policy-preview :policy-yaml="policyYaml" :policy-description="humanizedPolicy" />
+        <dim-disable-container data-testid="policy-preview-container" :disabled="hasParsingError">
+          <template #title>
+            <h5>{{ s__('NetworkPolicies|Policy preview') }}</h5>
+          </template>
+
+          <template #disabled>
+            <policy-preview
+              :policy-yaml="s__('NetworkPolicies|Unable to parse policy')"
+              policy-description=""
+            />
+          </template>
+
+          <policy-preview :policy-yaml="policyYaml" :policy-description="humanizedPolicy" />
+        </dim-disable-container>
       </div>
     </div>
     <div v-if="shouldShowYamlEditor" class="row" data-testid="yaml-editor">

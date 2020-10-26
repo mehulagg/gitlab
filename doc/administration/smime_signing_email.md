@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Signing outgoing email with S/MIME
 
 Notification emails sent by GitLab can be signed with S/MIME for improved
@@ -75,8 +81,8 @@ extensions), which contain the following in a single encrypted file:
 - Intermediate certificates (if any)
 - Private key
 
-In order to export the required files in PEM encoding from the PKCS#12 file,
-the `openssl` command can be used:
+To export the required files in PEM encoding from the PKCS#12 file, the
+`openssl` command can be used:
 
 ```shell
 #-- Extract private key in PEM encoding (no password, unencrypted)

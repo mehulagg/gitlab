@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::CoverageReportsController < Groups::Analytics::ApplicationController
-  check_feature_flag Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG
-
   COVERAGE_PARAM = 'coverage'.freeze
 
   before_action :load_group

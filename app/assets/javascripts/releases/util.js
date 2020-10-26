@@ -15,15 +15,13 @@ import {
 export const releaseToApiJson = (release, createFrom = null) => {
   const name = release.name?.trim().length > 0 ? release.name.trim() : null;
 
-  const milestones = release.milestones ? release.milestones.map(milestone => milestone.title) : [];
-
   return convertObjectPropsToSnakeCase(
     {
       name,
       tagName: release.tagName,
       ref: createFrom,
       description: release.description,
-      milestones,
+      milestones: release.milestones,
       assets: release.assets,
     },
     { deep: true },
@@ -107,7 +105,24 @@ const convertMilestones = graphQLRelease => ({
 });
 
 /**
- * Converts the response from the GraphQL endpoint into the
+ * Converts a single release object fetched from GraphQL
+ * into a release object that matches the shape of the REST API
+ * (the same shape that is returned by `apiJsonToRelease` above.)
+ *
+ * @param graphQLRelease The release object returned from a GraphQL query
+ */
+export const convertGraphQLRelease = graphQLRelease => ({
+  ...convertScalarProperties(graphQLRelease),
+  ...convertAssets(graphQLRelease),
+  ...convertEvidences(graphQLRelease),
+  ...convertLinks(graphQLRelease),
+  ...convertCommit(graphQLRelease),
+  ...convertAuthor(graphQLRelease),
+  ...convertMilestones(graphQLRelease),
+});
+
+/**
+ * Converts the response from all_releases.query.graphql into the
  * same shape as is returned from the Releases REST API.
  *
  * This allows the release components to use the response
@@ -115,16 +130,27 @@ const convertMilestones = graphQLRelease => ({
  *
  * @param response The response received from the GraphQL endpoint
  */
-export const convertGraphQLResponse = response => {
-  const releases = response.data.project.releases.nodes.map(r => ({
-    ...convertScalarProperties(r),
-    ...convertAssets(r),
-    ...convertEvidences(r),
-    ...convertLinks(r),
-    ...convertCommit(r),
-    ...convertAuthor(r),
-    ...convertMilestones(r),
-  }));
+export const convertAllReleasesGraphQLResponse = response => {
+  const releases = response.data.project.releases.nodes.map(convertGraphQLRelease);
 
-  return { data: releases };
+  const paginationInfo = {
+    ...response.data.project.releases.pageInfo,
+  };
+
+  return { data: releases, paginationInfo };
+};
+
+/**
+ * Converts the response from one_release.query.graphql into the
+ * same shape as is returned from the Releases REST API.
+ *
+ * This allows the release components to use the response
+ * from either endpoint interchangeably.
+ *
+ * @param response The response received from the GraphQL endpoint
+ */
+export const convertOneReleaseGraphQLResponse = response => {
+  const release = convertGraphQLRelease(response.data.project.release);
+
+  return { data: release };
 };

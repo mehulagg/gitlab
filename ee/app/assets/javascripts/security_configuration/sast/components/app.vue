@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import sastCiConfigurationQuery from '../graphql/sast_ci_configuration.query.graphql';
 import ConfigurationForm from './configuration_form.vue';
 
@@ -12,6 +13,7 @@ export default {
     GlLoadingIcon,
     GlSprintf,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     sastDocumentationPath: {
       from: 'sastDocumentationPath',

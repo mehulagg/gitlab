@@ -77,14 +77,6 @@
   }
 }
 
-.issuable-filter-count {
-  span {
-    display: block;
-    margin-bottom: -16px;
-    padding: 13px 0;
-  }
-}
-
 .issuable-show-labels {
   .gl-label {
     margin-bottom: 5px;
@@ -117,7 +109,8 @@
   }
 }
 
-.assignee {
+.assignee,
+.reviewer {
   .merge-icon {
     color: $orange-400;
     position: absolute;
@@ -239,16 +232,6 @@
 
     .avatar {
       margin-left: 0;
-    }
-
-    a.edit-link:not([href]):hover {
-      color: rgba($gray-normal, 0.2);
-    }
-
-    .confidential-edit,
-    .lock-edit,
-    .edit-link {
-      @extend .btn-link;
     }
   }
 
@@ -671,12 +654,6 @@
   }
 }
 
-.issuable-form-padding-top {
-  @include media-breakpoint-up(sm) {
-    padding-top: 7px;
-  }
-}
-
 .issuable-status-box {
   align-self: stretch;
   display: flex;
@@ -731,7 +708,6 @@
     .issuable-info-container {
       flex: 1;
       display: flex;
-      padding-right: $gl-padding;
 
       .issuable-main-info {
         flex: 1 auto;

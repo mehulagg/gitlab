@@ -332,6 +332,12 @@ FactoryBot.define do
       end
     end
 
+    trait :test_reports_with_duplicate_failed_test_names do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :junit_with_duplicate_failed_test_names, job: build)
+      end
+    end
+
     trait :accessibility_reports do
       after(:build) do |build|
         build.job_artifacts << create(:ci_job_artifact, :accessibility, job: build)
@@ -384,7 +390,8 @@ FactoryBot.define do
             key: 'cache_key',
             untracked: false,
             paths: ['vendor/*'],
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           }
         }
       end

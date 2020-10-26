@@ -479,18 +479,11 @@ $mr-widget-min-height: 69px;
 
 .mr-list {
   .merge-request {
-    padding: 10px 0 10px 15px;
-    position: relative;
+    padding: 10px $gl-padding;
     display: flex;
 
     .issuable-info-container {
       flex: 1;
-    }
-
-    .issuable-meta {
-      .author-link {
-        display: inline-block;
-      }
     }
 
     .merge-request-title {
@@ -759,14 +752,6 @@ $mr-widget-min-height: 69px;
     border-bottom: 0;
   }
 
-  .comments-disabled-notif {
-    line-height: 28px;
-
-    .btn {
-      margin-left: 5px;
-    }
-  }
-
   .mr-version-dropdown,
   .mr-version-compare-dropdown {
     margin: 0 7px;
@@ -786,8 +771,14 @@ $mr-widget-min-height: 69px;
     position: -webkit-sticky;
     position: sticky;
     top: $header-height + $mr-tabs-height;
-    margin-left: -16px;
-    width: calc(100% + 32px);
+
+    .with-system-header & {
+      top: $header-height + $mr-tabs-height + $system-header-height;
+    }
+
+    .with-system-header.with-performance-bar & {
+      top: $header-height + $mr-tabs-height + $system-header-height + $performance-bar-height;
+    }
 
     .mr-version-menus-container {
       flex-wrap: nowrap;
@@ -805,6 +796,14 @@ $mr-widget-min-height: 69px;
   z-index: 250;
   background-color: $white;
   border-bottom: 1px solid $border-color;
+
+  .with-system-header & {
+    top: $header-height + $system-header-height;
+  }
+
+  .with-system-header.with-performance-bar & {
+    top: $header-height + $system-header-height + $performance-bar-height;
+  }
 
   @include media-breakpoint-up(sm) {
     position: -webkit-sticky;
@@ -881,6 +880,13 @@ $mr-widget-min-height: 69px;
 
   .merge-request-tabs {
     height: $grid-size * 6;
+  }
+}
+
+.container-fluid {
+  // Negative margins for mobile/tablet screen
+  .diffs.tab-pane {
+    margin: 0 (-$gl-padding);
   }
 }
 

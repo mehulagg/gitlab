@@ -77,14 +77,14 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
 
     describe 'edit_path field' do
       it 'is the relative path to edit the dast_site_profile' do
-        path = "/#{project.full_path}/-/on_demand_scans/profiles/dast_site_profiles/#{dast_site_profile.id}/edit"
+        path = "/#{project.full_path}/-/security/configuration/dast_profiles/dast_site_profiles/#{dast_site_profile.id}/edit"
 
         expect(first_dast_site_profile['editPath']).to eq(path)
       end
     end
 
     describe 'validation_status field' do
-      it 'is a placeholder validation status' do
+      it 'is the validation status' do
         expect(first_dast_site_profile['validationStatus']).to eq('PENDING_VALIDATION')
       end
     end

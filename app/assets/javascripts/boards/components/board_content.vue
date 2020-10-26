@@ -1,5 +1,6 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { sortBy } from 'lodash';
 import BoardColumn from 'ee_else_ce/boards/components/board_column.vue';
 import { GlAlert } from '@gitlab/ui';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -30,17 +31,18 @@ export default {
     ...mapState(['boardLists', 'error']),
     ...mapGetters(['isSwimlanesOn']),
     boardListsToUse() {
-      return this.glFeatures.graphqlBoardLists ? this.boardLists : this.lists;
+      const lists =
+        this.glFeatures.graphqlBoardLists || this.isSwimlanesOn ? this.boardLists : this.lists;
+      return sortBy([...Object.values(lists)], 'position');
     },
   },
   mounted() {
     if (this.glFeatures.graphqlBoardLists) {
-      this.fetchLists();
       this.showPromotionList();
     }
   },
   methods: {
-    ...mapActions(['fetchLists', 'showPromotionList']),
+    ...mapActions(['showPromotionList']),
   },
 };
 </script>
@@ -68,7 +70,7 @@ export default {
     <template v-else>
       <epics-swimlanes
         ref="swimlanes"
-        :lists="boardLists"
+        :lists="boardListsToUse"
         :can-admin-list="canAdminList"
         :disabled="disabled"
       />

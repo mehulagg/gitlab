@@ -1,6 +1,0 @@
----
-title: Fix the size of chart placeholder on Analytics pages for Merge Requests, Insights and Value stream, so it matches the actual charts.
-  the size of the real chart shown afterwards
-merge_request: 41904
-author:
-type: fixed

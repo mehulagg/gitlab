@@ -1,5 +1,0 @@
----
-title: Allow fetching agent tokens from cluster agent GraphQL endpoint
-merge_request: 40779
-author:
-type: added

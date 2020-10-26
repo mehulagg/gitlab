@@ -23,9 +23,9 @@ export const isValidAnalyzerEntity = object => {
     return false;
   }
 
-  const { name, label, description, enabled } = object;
+  const { name, label, enabled } = object;
 
-  return isString(name) && isString(label) && isString(description) && isBoolean(enabled);
+  return isString(name) && isString(label) && isBoolean(enabled);
 };
 
 /**
@@ -39,3 +39,20 @@ export const toSastCiConfigurationEntityInput = ({ field, defaultValue, value })
   defaultValue,
   value,
 });
+
+/**
+ * Given a SastCiConfigurationAnalyzersEntity, returns
+ * a SastCiConfigurationAnalyzerEntityInput suitable for use in the
+ * configureSast GraphQL mutation.
+ * @param {SastCiConfigurationAnalyzersEntity}
+ * @returns {SastCiConfigurationAnalyzerEntityInput}
+ */
+export const toSastCiConfigurationAnalyzerEntityInput = ({ name, enabled, variables }) => {
+  const entity = { name, enabled };
+
+  if (enabled && variables) {
+    entity.variables = variables.nodes.map(toSastCiConfigurationEntityInput);
+  }
+
+  return entity;
+};

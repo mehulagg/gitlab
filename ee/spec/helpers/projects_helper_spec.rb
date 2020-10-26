@@ -142,11 +142,7 @@ RSpec.describe ProjectsHelper do
     end
 
     context 'project with vulnerabilities' do
-      before do
-        create(:vulnerability, project: project)
-      end
-
-      let(:expected_values) do
+      let(:base_values) do
         {
           has_vulnerabilities: 'true',
           project: { id: project.id, name: project.name },
@@ -158,11 +154,48 @@ RSpec.describe ProjectsHelper do
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
-          no_pipeline_run_scanners_help_path: new_project_pipeline_path(project)
+          no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
         }
       end
 
-      it { is_expected.to match(expected_values) }
+      before do
+        create(:vulnerability, project: project)
+      end
+
+      context 'without pipeline' do
+        before do
+          allow(project).to receive(:latest_pipeline_with_security_reports).and_return(nil)
+        end
+
+        it { is_expected.to match(base_values) }
+      end
+
+      context 'with pipeline' do
+        let(:pipeline_created_at) { '1881-05-19T00:00:00Z' }
+        let(:pipeline) { build_stubbed(:ci_pipeline, project: project, created_at: pipeline_created_at) }
+        let(:pipeline_values) do
+          {
+            pipeline: {
+              id: pipeline.id,
+              path: "/#{project.full_path}/-/pipelines/#{pipeline.id}",
+              created_at: pipeline_created_at,
+              security_builds: {
+                failed: {
+                  count: 0,
+                  path: "/#{project.full_path}/-/pipelines/#{pipeline.id}/failures"
+                }
+              }
+            }
+          }
+        end
+
+        before do
+          allow(project).to receive(:latest_pipeline_with_security_reports).and_return(pipeline)
+        end
+
+        it { is_expected.to match(base_values.merge!(pipeline_values)) }
+      end
     end
   end
 
@@ -259,7 +292,6 @@ RSpec.describe ProjectsHelper do
     let(:user) { create(:user) }
 
     where(
-      ab_feature_enabled?: [true, false],
       gitlab_com?: [true, false],
        user?: [true, false],
       security_dashboard_feature_available?: [true, false],
@@ -269,13 +301,11 @@ RSpec.describe ProjectsHelper do
     with_them do
       it 'returns the expected value' do
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(user).to receive(:ab_feature_enabled?) { ab_feature_enabled? }
         allow(helper).to receive(:current_user) { user? ? user : nil }
         allow(project).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_namespace? }
 
-        expected_value = user? && gitlab_com? &&
-                         ab_feature_enabled? && !security_dashboard_feature_available? && can_admin_namespace?
+        expected_value = user? && gitlab_com? && !security_dashboard_feature_available? && can_admin_namespace?
 
         expect(helper.show_discover_project_security?(project)).to eq(expected_value)
       end

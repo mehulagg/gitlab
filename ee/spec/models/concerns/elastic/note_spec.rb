@@ -55,6 +55,14 @@ RSpec.describe Note, :elastic do
     expect(described_class.elastic_search('bla-bla', options: { project_ids: :any }).records).to contain_exactly(outside_note)
   end
 
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries("doc:is_a:note",
+                         "note:match:search_terms",
+                         "note:authorized")
+  end
+
   it "indexes && searches diff notes" do
     notes = []
 
@@ -154,7 +162,7 @@ RSpec.describe Note, :elastic do
 
     shared_examples 'notes finder' do |user_type, no_of_notes|
       it "finds #{no_of_notes} notes for #{user_type}", :sidekiq_might_not_need_inline do
-        superuser = create(user_type)
+        superuser = create(user_type) # rubocop:disable Rails/SaveBang
         issue = create(:issue, :confidential, author: create(:user))
 
         Sidekiq::Testing.inline! do

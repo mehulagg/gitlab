@@ -11,14 +11,7 @@ RSpec.describe 'Project navbar' do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
-    stub_feature_flags(project_iterations: false)
-
     insert_package_nav(_('Operations'))
-    insert_after_sub_nav_item(
-      _('Kubernetes'),
-      within: _('Operations'),
-      new_sub_nav_item_name: _('Feature Flags')
-    )
 
     project.add_maintainer(user)
     sign_in(user)
@@ -89,7 +82,6 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-      stub_feature_flags(requirements_management: true)
 
       insert_after_nav_item(
         _('Merge Requests'),
@@ -97,23 +89,6 @@ RSpec.describe 'Project navbar' do
           nav_item: _('Requirements'),
           nav_sub_items: [_('List')]
         }
-      )
-
-      visit project_path(project)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when iterations is available' do
-    before do
-      stub_licensed_features(iterations: true)
-      stub_feature_flags(project_iterations: true)
-
-      insert_after_sub_nav_item(
-        _('Milestones'),
-        within: _('Issues'),
-        new_sub_nav_item_name: _('Iterations')
       )
 
       visit project_path(project)

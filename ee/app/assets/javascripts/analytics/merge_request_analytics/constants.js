@@ -1,7 +1,7 @@
 import { __ } from '~/locale';
 
 export const DEFAULT_NUMBER_OF_DAYS = 365;
-export const MAX_RECORDS = 100;
+export const PER_PAGE = 20;
 export const ASSIGNEES_VISIBLE = 2;
 export const AVATAR_SIZE = 24;
 
@@ -42,6 +42,7 @@ export const THROUGHPUT_TABLE_TEST_IDS = {
   ASSIGNEES: 'assigneesCol',
   COMMITS: 'commitsCol',
   COMMENT_COUNT: 'commentCount',
+  APPROVED: 'approvedStatus',
 };
 
 export const PIPELINE_STATUS_ICON_CLASSES = {
