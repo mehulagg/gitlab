@@ -175,7 +175,7 @@ RSpec.describe MergeRequest do
       :license_scanning    | :with_license_management_reports  | :license_scanning
       :license_scanning    | :with_license_scanning_reports    | :license_scanning
       :coverage_fuzzing    | :with_coverage_fuzzing_reports    | :coverage_fuzzing
-      :api_fuzzing         | :with_api_fuzzing_report          | :api_fuzzing
+      :api_fuzzing         | :with_api_fuzzing_reports         | :api_fuzzing
     end
 
     with_them do
