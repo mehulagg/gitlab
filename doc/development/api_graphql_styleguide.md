@@ -22,6 +22,7 @@ Everything covered in this deep dive was accurate as of GitLab 11.9, and while s
 details may have changed since then, it should still serve as a good introduction.
 
 ## GraphiQL
+
 GraphiQL is an interactive GraphQL API explorer where you can play around with existing queries.
 You can access it in any GitLab environment on `https://<your-gitlab-site.com>/-/graphql-explorer`.
 For example, the one for [GitLab.com](https://gitlab.com/-/graphql-explorer).
