@@ -1,6 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
+  GlForm,
   GlFormInput,
   GlFormCheckbox,
   GlIcon,
