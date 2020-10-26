@@ -31,6 +31,7 @@ packages, which can be easily consumed as a dependency in downstream projects.
 | [RPM](https://gitlab.com/gitlab-org/gitlab/-/issues/5932) | [Accepting Merge Requests](../../development/packages.md) |
 | [RubyGems](https://gitlab.com/gitlab-org/gitlab/-/issues/803) | [Accepting Merge Requests](../../development/packages.md) |
 | [SBT](https://gitlab.com/gitlab-org/gitlab/-/issues/36898) | [Accepting Merge Requests](../../development/packages.md) |
+| [Terraform](https://gitlab.com/gitlab-org/gitlab/issues/31770) | [WIP: Community Contribution](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18834) |
 | [Vagrant](https://gitlab.com/gitlab-org/gitlab/-/issues/36899) | [Accepting Merge Requests](../../development/packages.md) |
 
 You can also use the [API](../../api/packages.md) to administer the Package Registry.
