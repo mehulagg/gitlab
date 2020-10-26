@@ -326,6 +326,7 @@ export default {
         :pipeline-path="mr.pipeline.path"
         :pipeline-id="mr.securityReportsPipelineId"
         :pipeline-iid="mr.securityReportsPipelineIid"
+        :project-id="mr.targetProjectId"
         :project-full-path="mr.sourceProjectFullPath"
         :diverged-commits-count="mr.divergedCommitsCount"
         :mr-state="mr.state"

@@ -9,8 +9,8 @@ module EE
       @display_namespace_storage_limit_alert = true
     end
 
-    def display_namespace_storage_limit_alert?
-      @display_namespace_storage_limit_alert
+    def display_namespace_storage_limit_alert?(namespace)
+      @display_namespace_storage_limit_alert && !usage_quota_page?(namespace)
     end
 
     def namespace_storage_alert(namespace)
@@ -72,6 +72,10 @@ module EE
     end
 
     private
+
+    def usage_quota_page?(namespace)
+      current_page?(group_usage_quotas_path(namespace)) || current_page?(profile_usage_quotas_path)
+    end
 
     def check_storage_size_service(namespace)
       if namespace.additional_repo_storage_by_namespace_enabled?

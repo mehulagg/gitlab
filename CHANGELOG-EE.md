@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.5.1 (2020-10-22)
+
+- No changes.
+
 ## 13.5.0 (2020-10-22)
 
 ### Removed (1 change, 1 of them is from the community)

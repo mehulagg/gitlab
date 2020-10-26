@@ -9,6 +9,8 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
   let(:total_repository_size_excess) { 150.megabytes }
   let(:additional_purchased_storage_size) { 100 }
   let(:storage_allocation_enabled) { true }
+  let(:actual_size_limit) { 10.gigabytes }
+  let(:locked_project_count) { 1 }
 
   subject(:response) { service.execute }
 
@@ -17,6 +19,8 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
 
     allow(namespace).to receive(:root_ancestor).and_return(namespace)
     allow(namespace).to receive(:total_repository_size_excess).and_return(total_repository_size_excess)
+    allow(namespace).to receive(:actual_size_limit).and_return(actual_size_limit)
+    allow(namespace).to receive(:repository_size_excess_project_count).and_return(locked_project_count)
   end
 
   context 'without limit enforcement' do
@@ -165,8 +169,18 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
       let(:contains_locked_projects) { true }
 
       context 'when there is additional storage' do
-        it 'returns message about containing a locked project' do
-          expect(response).to include("contains a locked project")
+        context 'with one locked project' do
+          it 'returns message about containing a locked project' do
+            expect(response).to include("#{locked_project_count} locked project")
+          end
+        end
+
+        context 'with multiple projects' do
+          let(:locked_project_count) { 3 }
+
+          it 'returns a pluralized message about locked projects' do
+            expect(response).to include("#{locked_project_count} locked projects")
+          end
         end
       end
 
@@ -174,12 +188,8 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
         let(:additional_purchased_storage_size) { 0 }
         let(:locked_project_count) { 3 }
 
-        before do
-          allow(namespace).to receive(:repository_size_excess_project_count).and_return(locked_project_count)
-        end
-
         it 'returns message to have reached the free storage limit' do
-          expect(response).to include("You have reached the free storage limit of 10GB")
+          expect(response).to include("You have reached the free storage limit of 10 GB")
           expect(response).to include("#{locked_project_count} projects")
         end
       end

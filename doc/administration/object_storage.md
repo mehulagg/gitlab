@@ -106,7 +106,7 @@ See the section on [ETag mismatch errors](#etag-mismatch) for more details.
     # OPTIONAL: The following lines are only needed if server side encryption is required
     gitlab_rails['object_store']['storage_options'] = {
       'server_side_encryption' => '<AES256 or aws:kms>',
-      'server_side_encryption_kms_key_id' => '<arn:s3:aws:xxx>'
+      'server_side_encryption_kms_key_id' => '<arn:aws:kms:xxx>'
     }
     gitlab_rails['object_store']['objects']['artifacts']['bucket'] = '<artifacts>'
     gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = '<external-diffs>'
@@ -145,7 +145,7 @@ See the section on [ETag mismatch errors](#etag-mismatch) for more details.
        region: <eu-central-1>
      storage_options:
        server_side_encryption: <AES256 or aws:kms>
-       server_side_encryption_key_kms_id: <arn:s3:aws:xxx>
+       server_side_encryption_key_kms_id: <arn:aws:kms:xxx>
      objects:
        artifacts:
          bucket: <artifacts>
@@ -287,6 +287,11 @@ gitlab_rails['object_store']['connection'] = {
 Although Azure uses the word `container` to denote a collection of
 blobs, GitLab standardizes on the term `bucket`. Be sure to configure
 Azure container names in the `bucket` settings.
+
+Azure Blob storage can only be used with the [consolidated form](#consolidated-object-storage-configuration)
+because a single set of credentials are used to access multiple
+containers. The [storage-specific form](#storage-specific-configuration)
+is not supported. For more details, see [how to transition to consolidated form](#transition-to-consolidated-form).
 
 The following are the valid connection parameters for Azure. Read the
 [Azure Blob storage documentation](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)

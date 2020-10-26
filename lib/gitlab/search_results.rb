@@ -129,12 +129,12 @@ module Gitlab
     # rubocop: disable CodeReuse/ActiveRecord
     def apply_sort(scope)
       case sort
-      when 'oldest'
+      when 'created_asc'
         scope.reorder('created_at ASC')
-      when 'newest'
+      when 'created_desc'
         scope.reorder('created_at DESC')
       else
-        scope
+        scope.reorder('created_at DESC')
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
@@ -215,7 +215,7 @@ module Gitlab
 
         params[:state] = filters[:state] if filters.key?(:state)
 
-        if [true, false].include?(filters[:confidential]) && Feature.enabled?(:search_filter_by_confidential)
+        if [true, false].include?(filters[:confidential])
           params[:confidential] = filters[:confidential]
         end
       end

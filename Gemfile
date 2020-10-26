@@ -98,6 +98,7 @@ gem 'graphql', '~> 1.11.4'
 gem 'graphiql-rails', '~> 1.4.10'
 gem 'apollo_upload_server', '~> 2.0.2'
 gem 'graphql-docs', '~> 1.6.0', group: [:development, :test]
+gem 'graphlient', '~> 0.4.0' # Used by BulkImport feature (group::import)
 
 gem 'hashie'
 # Disable strong_params so that Mash does not respond to :permitted?
@@ -307,10 +308,13 @@ gem 'rack-attack', '~> 6.3.0'
 # Sentry integration
 gem 'sentry-raven', '~> 3.0'
 
+# PostgreSQL query parsing
+gem 'gitlab-pg_query', '~> 1.3', require: 'pg_query'
+
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.12.2'
+gem 'gitlab-labkit', '0.13.1'
 
 # I18n
 gem 'ruby_parser', '~> 3.8', require: false
@@ -407,7 +411,7 @@ end
 group :test do
   gem 'fuubar', '~> 2.2.0'
   gem 'rspec-retry', '~> 0.6.1'
-  gem 'rspec_profiling', '~> 0.0.5'
+  gem 'rspec_profiling', '~> 0.0.6'
   gem 'rspec-parameterized', require: false
 
   gem 'capybara', '~> 3.33.0'

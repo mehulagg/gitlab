@@ -18,6 +18,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
+      code_coverage_summary
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -193,6 +194,7 @@ RSpec.describe GitlabSchema.types['Project'] do
         query {
           project(fullPath: "#{project.full_path}") {
             clusterAgents {
+              count
               nodes {
                 id
                 name
@@ -227,6 +229,12 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(agents.first['updatedAt']).to be_present
       expect(agents.first['project']['id']).to eq(project.to_global_id.to_s)
     end
+
+    it 'returns count of cluster agents' do
+      count = subject.dig('data', 'project', 'clusterAgents', 'count')
+
+      expect(count).to be(project.cluster_agents.size)
+    end
   end
 
   describe 'cluster_agent' do
@@ -240,6 +248,7 @@ RSpec.describe GitlabSchema.types['Project'] do
               id
 
               tokens {
+                count
                 nodes {
                   id
                 }
@@ -267,5 +276,18 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(tokens.count).to be(1)
       expect(tokens.first['id']).to eq(agent_token.to_global_id.to_s)
     end
+
+    it 'returns count of agent tokens' do
+      agent = subject.dig('data', 'project', 'clusterAgent')
+      count = agent.dig('tokens', 'count')
+
+      expect(cluster_agent.agent_tokens.size).to be(count)
+    end
+  end
+
+  describe 'code coverage summary field' do
+    subject { described_class.fields['codeCoverageSummary'] }
+
+    it { is_expected.to have_graphql_type(Types::Ci::CodeCoverageSummaryType) }
   end
 end

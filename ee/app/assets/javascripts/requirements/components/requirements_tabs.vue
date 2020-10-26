@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';
+import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
 
 import { FilterState } from '../constants';
 
@@ -53,7 +53,7 @@ export default {
           @click="$emit('click-tab', { filterBy: $options.FilterState.opened })"
         >
           {{ __('Open') }}
-          <gl-badge class="badge-pill">{{ requirementsCount.OPENED }}</gl-badge>
+          <gl-badge>{{ requirementsCount.OPENED }}</gl-badge>
         </gl-link>
       </li>
       <li :class="{ active: isArchivedTab }">
@@ -64,7 +64,7 @@ export default {
           @click="$emit('click-tab', { filterBy: $options.FilterState.archived })"
         >
           {{ __('Archived') }}
-          <gl-badge class="badge-pill">{{ requirementsCount.ARCHIVED }}</gl-badge>
+          <gl-badge>{{ requirementsCount.ARCHIVED }}</gl-badge>
         </gl-link>
       </li>
       <li :class="{ active: isAllTab }">
@@ -75,7 +75,7 @@ export default {
           @click="$emit('click-tab', { filterBy: $options.FilterState.all })"
         >
           {{ __('All') }}
-          <gl-badge class="badge-pill">{{ requirementsCount.ALL }}</gl-badge>
+          <gl-badge>{{ requirementsCount.ALL }}</gl-badge>
         </gl-link>
       </li>
     </ul>

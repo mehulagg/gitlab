@@ -58,6 +58,7 @@ RSpec.describe Vulnerabilities::FindingEntity do
       expect(subject).to include(:description, :links, :location, :remediations, :solution, :evidence)
       expect(subject).to include(:blob_path, :request, :response)
       expect(subject).to include(:scan)
+      expect(subject).to include(:assets, :evidence_source, :supporting_messages)
     end
 
     context 'when not allowed to admin vulnerability feedback' do

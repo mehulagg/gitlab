@@ -85,6 +85,7 @@ which is part of [GitLab CI/CD](#gitlab-cicd).
 ## GitLab CI/CD
 
 Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
+Any settings or feature limits not listed here are using the defaults listed in the related documentation.
 
 | Setting                 | GitLab.com        | Default       |
 | -----------             | ----------------- | ------------- |
@@ -94,7 +95,6 @@ Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
-| [Max number of instance level variables](../../administration/instance_limits.md#number-of-instance-level-variables) | `25` | `25` |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 | Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
 
@@ -623,6 +623,13 @@ You can view more information in our runbooks such as:
 - A [detailed list of what we're logging](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#what-are-we-logging)
 - Our [current log retention policies](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#retention)
 - A [diagram of our logging infrastructure](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#logging-infrastructure-overview)
+
+### Job Logs
+
+By default, GitLab does not expire job logs. Job logs are retained indefinitely,
+and can't be configured on GitLab.com to expire. You can erase job logs
+[manually with the Jobs API](../../api/jobs.md#erase-a-job) or by
+[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline). 
 
 ## GitLab.com at scale
 
