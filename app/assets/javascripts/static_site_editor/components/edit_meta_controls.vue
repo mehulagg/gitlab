@@ -57,7 +57,7 @@ export default {
         @input="onUpdate('title', $event)"
       />
     </gl-form-group>
-
+    <hr />
     <gl-form-group
       key="description"
       :label="__('Goal of the changes and what reviewers should be aware of')"
