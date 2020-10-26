@@ -13,12 +13,9 @@ export default {
   props: {
     pipeline: { type: Object, required: true },
   },
-  inject: {
-    pipelineSecurityBuildsFailedCount: { type: Number, default: 0 },
-  },
   computed: {
-    shouldShowPipelineStatusBadge() {
-      return this.pipelineSecurityBuildsFailedCount > 0;
+    shouldShowPipelineStatus() {
+      return this.pipeline.createdAt && this.pipeline.id && this.pipeline.path;
     },
   },
   i18n: {
@@ -31,7 +28,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div v-if="shouldShowPipelineStatus">
     <h6 class="gl-font-weight-normal">{{ $options.i18n.title }}</h6>
     <div
       class="gl-display-flex gl-align-items-center gl-border-solid gl-border-1 gl-border-gray-100 gl-p-6"
@@ -39,7 +36,7 @@ export default {
       <span class="gl-font-weight-bold">{{ $options.i18n.label }}</span>
       <time-ago-tooltip class="gl-px-3" :time="pipeline.createdAt" />
       <gl-link :href="pipeline.path" target="_blank">#{{ pipeline.id }}</gl-link>
-      <pipeline-status-badge v-if="shouldShowPipelineStatusBadge" class="gl-ml-3" />
+      <pipeline-status-badge :pipeline="pipeline" class="gl-ml-3" />
     </div>
   </div>
 </template>

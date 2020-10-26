@@ -59,11 +59,6 @@ export default {
     };
   },
   inject: ['dashboardDocumentation', 'autoFixDocumentation'],
-  computed: {
-    shouldShowPipelineStatus() {
-      return Object.values(this.pipeline).every(Boolean);
-    },
-  },
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;
@@ -90,7 +85,7 @@ export default {
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
-          <project-pipeline-status v-if="shouldShowPipelineStatus" :pipeline="pipeline" />
+          <project-pipeline-status :pipeline="pipeline" />
           <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
