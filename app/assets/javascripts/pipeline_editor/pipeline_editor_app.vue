@@ -1,26 +1,40 @@
 <script>
-import { GlEmptyState } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
+import Api from '~/api';
+import PipelineTextEditor from './components/pipeline_text_editor.vue';
 
 export default {
   components: {
-    GlEmptyState,
+    PipelineTextEditor,
   },
-  i18n: {
-    title: s__('Pipelines|Pipeline Editor'),
-    description: s__(
-      'Pipelines|We are beginning our work around building the foundation for our dedicated pipeline editor.',
-    ),
-    primaryButtonText: __('Learn more'),
+  props: {
+    projectId: {
+      type: String,
+      required: true,
+    },
+    ciConfigPath: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      content: '',
+    };
+  },
+  mounted() {
+    Api.getRawFile(this.projectId, this.ciConfigPath)
+      .then(({ data }) => {
+        this.content = data;
+      })
+      .catch(() => {
+        // TODO
+      });
   },
 };
 </script>
 
 <template>
-  <gl-empty-state
-    :title="$options.i18n.title"
-    :description="$options.i18n.description"
-    :primary-button-text="$options.i18n.primaryButtonText"
-    primary-button-link="https://about.gitlab.com/direction/verify/pipeline_authoring/"
-  />
+  <div>
+    <pipeline-text-editor v-model="content" />
+  </div>
 </template>
