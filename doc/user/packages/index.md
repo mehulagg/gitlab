@@ -53,10 +53,10 @@ are adding support for [PHP](https://gitlab.com/gitlab-org/gitlab/-/merge_reques
 | Terraform | [WIP: Merge Request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18834) |
 | Vagrant   | [#36899](https://gitlab.com/gitlab-org/gitlab/-/issues/36899) |
 
-# Container Registry
+## Container Registry
 
 The GitLab [Container Registry](container_registry/index.md) is a secure and private registry for container images. It's built on open source software and completely integrated within GitLab. Use GitLab CI/CD to create and publish images. Use the GitLab [API](../../api/container_registry.md) to manage the registry across groups and projects.
 
-# Dependency Proxy
+## Dependency Proxy
 
 The [Dependency Proxy](dependency_proxy/index.md) is a local proxy for frequently-used upstream images and packages.
