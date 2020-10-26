@@ -287,15 +287,10 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       let(:known_events) do
         [
           { name: 'event1_slot', redis_slot: "slot", category: 'category1', aggregation: "weekly" },
-          { name: 'event2_slot', redis_slot: "slot", category: 'category2', aggregation: "weekly" },
-          { name: 'event3', category: 'category2', aggregation: "weekly" }
-        ].map(&:with_indifferent_access)
-      end
-
-      let(:combined_events) do
-        [
-          { name: 'gmau_1', events: %w[event1_slot event2_slot], operator: "ANY" },
-          { name: 'gmau_2', events: %w[event3], operator: "ANY" }
+          { name: 'event2_slot', redis_slot: "slot", category: 'category1', aggregation: "weekly" },
+          { name: 'event3_slot', redis_slot: "slot", category: 'category1', aggregation: "weekly" },
+          { name: 'event5_slot', redis_slot: "slot", category: 'category1', aggregation: "weekly" },
+          { name: 'event4', category: 'category2', aggregation: "weekly" }
         ].map(&:with_indifferent_access)
       end
 
@@ -304,22 +299,57 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
         allow(described_class).to receive(:combined_events).and_return(combined_events)
 
         described_class.track_event(entity1, 'event1_slot', 2.days.ago)
+        described_class.track_event(entity2, 'event1_slot', 2.days.ago)
+        described_class.track_event(entity3, 'event1_slot', 2.days.ago)
         described_class.track_event(entity1, 'event2_slot', 2.days.ago)
+        described_class.track_event(entity2, 'event2_slot', 3.days.ago)
         described_class.track_event(entity3, 'event2_slot', 3.days.ago)
+        described_class.track_event(entity1, 'event3_slot', 3.days.ago)
+        described_class.track_event(entity2, 'event3_slot', 3.days.ago)
+        described_class.track_event(entity2, 'event5_slot', 3.days.ago)
 
         # events in different slots
-        described_class.track_event(entity1, 'event3', 2.days.ago)
-        described_class.track_event(entity2, 'event3', 2.days.ago)
-        described_class.track_event(entity4, 'event3', 2.days.ago)
+        described_class.track_event(entity1, 'event4', 2.days.ago)
+        described_class.track_event(entity2, 'event4', 2.days.ago)
+        described_class.track_event(entity4, 'event4', 2.days.ago)
       end
 
-      it 'returns the number of unique events for all known events' do
-        results = {
-          'gmau_1' => 2,
-          'gmau_2' => 3
-        }
+      context 'with ANY operator' do
+        let(:combined_events) do
+          [
+            { name: 'gmau_1', events: %w[event1_slot event2_slot], operator: "ANY" },
+            { name: 'gmau_2', events: %w[event4], operator: "ANY" }
+          ].map(&:with_indifferent_access)
+        end
 
-        expect(subject.combined_events_data).to eq(results)
+        it 'returns the number of unique events for all known events' do
+          results = {
+            'gmau_1' => 2,
+            'gmau_2' => 3
+          }
+
+          expect(subject.combined_events_data).to eq(results)
+        end
+      end
+
+      context 'with ALL operator' do
+        let(:combined_events) do
+          [
+            { name: 'gmau_1', events: %w[event1_slot event2_slot], operator: "ALL" },
+            { name: 'gmau_2', events: %w[event1_slot event2_slot event3_slot], operator: "ALL" },
+            { name: 'gmau_3', events: %w[event3], operator: "ALL" }
+          ].map(&:with_indifferent_access)
+        end
+
+        it 'returns the number of unique events for all known events' do
+          results = {
+            'gmau_1' => 2,
+            'gmau_1' => 3,
+            'gmau_3' => 3
+          }
+          binding.pry
+          expect(subject.combined_events_data).to eq(results)
+        end
       end
     end
   end

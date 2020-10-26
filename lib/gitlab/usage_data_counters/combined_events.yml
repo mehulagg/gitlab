@@ -7,3 +7,6 @@
 - name: product_analytics_test_combined_events
   operator: ANY
   events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+- name: product_analytics_test_combined_events
+  operator: ALL
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']

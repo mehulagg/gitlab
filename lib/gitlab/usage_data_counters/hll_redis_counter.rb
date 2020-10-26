@@ -18,7 +18,9 @@ module Gitlab
       KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events.yml'
       COMBINED_EVENTS_PATH = 'lib/gitlab/usage_data_counters/combined_events.yml'
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
-      ALLOWED_COMBINED_EVENTS_AGGREGATIONS = %w[ANY].freeze
+      UNION_OF_COMBINED_EVENTS = 'ANY'
+      INTERSECTION_OF_COMBINED_EVENTS = 'ALL'
+      ALLOWED_COMBINED_EVENTS_AGGREGATIONS = [UNION_OF_COMBINED_EVENTS, INTERSECTION_OF_COMBINED_EVENTS].freeze
 
       # Track event on entity_id
       # Increment a Redis HLL counter for unique event_name and entity_id
@@ -96,15 +98,89 @@ module Gitlab
           end
         end
 
+        # to calculate intersection of 'n' sets based on inclusion exclusion principle https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle
+        # we need to calculate
+        def calculate_events_intersections(event_names:, start_date:, end_date:)
+          events_counts = event_names.size
+
+          if events_counts == 2
+            return calculate_two_events_intersection(event_1: event_names.first, event_2: event_names.last, start_date: start_date, end_date: end_date)
+          elsif events_counts == 1
+            return unique_events(event_names: event_names, start_date: start_date, end_date: end_date)
+          end
+
+          data = []
+
+          1.upto(events_counts) do |k|
+            if k == 1
+              data[k - 1] = event_names.map { |event| unique_events(event_names: event, start_date: start_date, end_date: end_date) }.sum
+            elsif k == 2
+              # data[k - 1] = event_names[(0..-2)].map.with_index do |event_1, index|
+              #   event_names[((index + 1)..)].map do |event_2|
+              #     calculate_two_events_intersection(event_1: event_1, event_2: event_2, start_date: start_date, end_date: end_date)
+              #   end.sum
+              # end.sum
+
+              data[k - 1] = event_names.combination(2).sum do |event_1, event_2|
+                calculate_two_events_intersection(event_1: event_1, event_2: event_2, start_date: start_date, end_date: end_date)
+              end
+
+            elsif k == 3
+              size_of_union_of_all_events = unique_events(event_names: event_names, start_date: start_date, end_date: end_date)
+              sum_of_sizes_of_each_event = data[0]
+              sum_of_size_of_intersections_of_each_event_subset = data[1]
+
+              data[k - 1] = size_of_union_of_all_events - sum_of_sizes_of_each_event + sum_of_size_of_intersections_of_each_event_subset
+            elsif k == 4
+              #|A + B + C + D| = (|a| + |b| + |c| + |d|) - (|a & b| + |a & c| + .. + |c & d|) + (|a & b & c| + |b & c & d|) - |a & b & c & d| =>
+              #|a & b & c & d| = (|a| + |b| + |c| + |d|) - (|a & b| + |a & c| + .. + |c & d|) + (|a & b & c| + |b & c & d|) - |A + B + C + D|
+
+              size_of_union_of_all_events = unique_events(event_names: event_names, start_date: start_date, end_date: end_date)
+              sum_of_sizes_of_each_event = data[0]
+              sum_of_size_of_intersections_of_each_event_pair = data[1]
+              sum_of_size_of_intersections_of_each_event_trio = event_names.combination(3).sum do |events|
+                calculate_events_intersections(event_names: events, start_date: start_date, end_date: end_date)
+              end
+
+              data[k - 1] = sum_of_sizes_of_each_event - sum_of_size_of_intersections_of_each_event_pair + sum_of_size_of_intersections_of_each_event_trio - size_of_union_of_all_events
+            elsif k > 3
+              #|A + B + C + D| = (|a| + |b| + |c| + |d|) - (|a & b| + |a & c| + .. + |c & d|) + (|a & b & c| + |b & c & d|) - |a & b & c & d| =>
+              #|a & b & c & d| = (|a| + |b| + |c| + |d|) - (|a & b| + |a & c| + .. + |c & d|) + (|a & b & c| + |b & c & d|) - |A + B + C + D|
+
+              size_of_union_of_all_events = unique_events(event_names: event_names, start_date: start_date, end_date: end_date)
+           
+              sum_of_size_of_intersections_of_each_event_trio = event_names.combination(3).sum do |events|
+                calculate_events_intersections(event_names: events, start_date: start_date, end_date: end_date)
+              end
+
+              # data[k - 1] = sum_of_sizes_of_each_event - sum_of_size_of_intersections_of_each_event_pair + sum_of_size_of_intersections_of_each_event_trio - size_of_union_of_all_events
+              data[k - 1] = data[(0..(k - 2))].sum.with_index { |value, index| index.odd? ? value : -value } - size_of_union_of_all_events
+            end
+          end
+
+          data.last
+        end
+
         private
 
         def calculate_count_for_combination(combination)
-          validate_aggregation_operator!(combination[:operator])
-
-          count_unique_events(event_names: combination[:events], start_date: 4.weeks.ago.to_date, end_date: Date.current) do |events|
-            raise SlotMismatch, events unless events_in_same_slot?(events)
-            raise AggregationMismatch, events unless events_same_aggregation?(events)
+          case combination[:operator]
+          when UNION_OF_COMBINED_EVENTS
+            count_unique_events(event_names: combination[:events], start_date: 4.weeks.ago.to_date, end_date: Date.current) do |events|
+              raise SlotMismatch, events unless events_in_same_slot?(events)
+              raise AggregationMismatch, events unless events_same_aggregation?(events)
+            end
+          when INTERSECTION_OF_COMBINED_EVENTS
+            calculate_events_intersections(event_names: combination[:events], start_date: 4.weeks.ago.to_date, end_date: Date.current)
+          else
+            raise UnknownAggregationOperator, "Events should be aggregated with one of operators #{ALLOWED_COMBINED_EVENTS_AGGREGATIONS}"
           end
+        end
+
+        def calculate_two_events_intersection(event_1:, event_2:, start_date:, end_date:)
+          unique_events(event_names: event_1, start_date: start_date, end_date: end_date) +
+            unique_events(event_names: event_2, start_date: start_date, end_date: end_date) -
+            unique_events(event_names: [event_1, event_2], start_date: start_date, end_date: end_date)
         end
 
         def count_unique_events(event_names:, start_date:, end_date:)
@@ -212,12 +288,6 @@ module Gitlab
           (start_date.to_date..end_date.to_date).map do |date|
             events.map { |event| redis_key(event, date) }
           end.flatten
-        end
-
-        def validate_aggregation_operator!(operator)
-          return true if ALLOWED_COMBINED_EVENTS_AGGREGATIONS.include?(operator)
-
-          raise UnknownAggregationOperator.new("Events should be aggregated with one of operators #{ALLOWED_COMBINED_EVENTS_AGGREGATIONS}")
         end
 
         def weekly_redis_keys(events:, start_date:, end_date:)
