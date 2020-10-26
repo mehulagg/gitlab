@@ -18,8 +18,8 @@ packages, which can be easily consumed as a dependency in downstream projects.
 | [Go](go_proxy/index.md) | 13.1+  |
 | [Maven](maven_repository/index.md) | 11.3+  |
 | [NPM](npm_registry/index.md) | 11.8+  |
-| [NuGet](nuget_repository/index.md) | 12.10+  |
-| [PyPI](pypi_repository/index.md) | [Accepting Merge Requests](../../development/packages.md)  |
+| [NuGet](nuget_repository/index.md) | 12.8+  |
+| [PyPI](pypi_repository/index.md) | 12.10+  |
 | [Chef](https://gitlab.com/gitlab-org/gitlab/-/issues/36889) | [Accepting Merge Requests](../../development/packages.md) |
 | [CocoaPods](https://gitlab.com/gitlab-org/gitlab/-/issues/36890) | [Accepting Merge Requests](../../development/packages.md) |
 | [Conda](https://gitlab.com/gitlab-org/gitlab/-/issues/36891) | [Accepting Merge Requests](../../development/packages.md) |
