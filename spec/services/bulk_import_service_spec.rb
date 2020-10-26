@@ -43,7 +43,13 @@ RSpec.describe BulkImportService do
       expect { subject.execute }.to change { BulkImports::Configuration.count }.by(1)
     end
 
-    it 'updates bulk import state' do
+    it 'enqueues BulkImportWorker' do
+      expect(BulkImportWorker).to receive(:perform_async)
+
+      subject.execute
+    end
+
+    it 'starts bulk import state' do
       expect_next_instance_of(BulkImport) do |bulk_import|
         expect(bulk_import).to receive(:start!)
       end
@@ -51,8 +57,12 @@ RSpec.describe BulkImportService do
       subject.execute
     end
 
-    it 'enqueues BulkImportWorker' do
-      expect(BulkImportWorker).to receive(:perform_async)
+    it 'does not start bulk import if job fails to be enqueued' do
+      expect(BulkImportWorker).to receive(:perform_async).and_raise(StandardError)
+      expect_next_instance_of(BulkImport) do |bulk_import|
+        expect(bulk_import).not_to receive(:start!)
+        expect(bulk_import).to receive(:fail_op)
+      end
 
       subject.execute
     end

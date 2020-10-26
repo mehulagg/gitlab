@@ -11,9 +11,12 @@ class BulkImportService
 
   def execute
     bulk_import = create_bulk_import
-    bulk_import.start!
 
     BulkImportWorker.perform_async(bulk_import.id)
+
+    bulk_import.start!
+  rescue => e
+    bulk_import&.fail_op
   end
 
   private
