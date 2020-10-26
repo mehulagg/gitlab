@@ -22,7 +22,6 @@ Everything covered in this deep dive was accurate as of GitLab 11.9, and while s
 details may have changed since then, it should still serve as a good introduction.
 
 ## GraphiQL
-
 GraphiQL is an interactive GraphQL API explorer where you can play around with existing queries.
 You can access it in any GitLab environment on `https://<your-gitlab-site.com>/-/graphql-explorer`.
 For example, the one for [GitLab.com](https://gitlab.com/-/graphql-explorer).
@@ -1380,6 +1379,20 @@ it 'returns a successful response' do
    expect(graphql_mutation_response(:merge_request_set_wip)['errors']).to be_empty
 end
 ```
+
+NOTE: **Note:**
+Authenticating a user with the `current_user:` argument for `post_graphql`
+generates more queries on the first request than on subsequent requests that use
+the same user. If you are testing for N+1 queries using
+[QueryRecorder](query_recorder.md), use a **different** user for each request in
+order to avoid a false positive.
+
+NOTE: **Note:**
+The folder structure of the request specs should mimic the folder structure of
+`app/graphql/types`. For example, tests for fields on `Types::Ci::PipelineType`
+in `app/graphql/types/ci/pipeline_type.rb` should live in
+`spec/requests/api/graphql/ci/pipeline_spec.rb` regardless of the query being
+used to fetch the pipeline data.
 
 ## Notes about Query flow and GraphQL infrastructure
 
