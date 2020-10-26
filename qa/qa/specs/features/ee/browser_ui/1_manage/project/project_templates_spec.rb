@@ -70,7 +70,7 @@ module QA
       # Originally quarantined only on staging
       # { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/228624' }
       # quarantining due to failures on master
-      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/247874', type: :investigating } do
+      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/247874', type: :bug } do
         before do
           Flow::Login.sign_in_as_admin
 
