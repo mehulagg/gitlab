@@ -139,6 +139,7 @@ export default {
   [types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS](state) {
     state.isDeletingValueStream = false;
     state.deleteValueStreamError = null;
+    state.selectedValueStream = null;
   },
   [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
     state.selectedValueStream = valueStream;
