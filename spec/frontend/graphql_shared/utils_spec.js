@@ -12,7 +12,7 @@ describe('getIdFromGraphQLId', () => {
     },
     {
       input: 2,
-      output: '2',
+      output: 2,
     },
     {
       input: 'gid://',
