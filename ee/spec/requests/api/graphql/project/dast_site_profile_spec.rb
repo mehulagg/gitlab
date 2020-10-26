@@ -98,5 +98,13 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
         expect(dast_site_profile_response).to be_nil
       end
     end
+
+    context 'when there is no associated dast_site_validation' do
+      it 'returns a pending validation status' do
+        dast_site_profile.dast_site_validation.destroy!
+
+        expect(dast_site_profile_response['validationStatus']).to eq('PENDING_VALIDATION')
+      end
+    end
   end
 end
