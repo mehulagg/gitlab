@@ -40,6 +40,7 @@ export const i18n = {
 };
 
 export const integrationTypes = [
+  { value: '', text: s__('AlertSettings|Select integration type') },
   { value: 'generic', text: s__('AlertSettings|HTTP Endpoint') },
   { value: 'prometheus', text: s__('AlertSettings|External Prometheus') },
   { value: 'opsgenie', text: s__('AlertSettings|Opsgenie') },
@@ -55,9 +56,9 @@ export const sectionHash = 'js-alert-management-settings';
 /* eslint-disable @gitlab/require-i18n-strings */
 
 /**
- * Tracks snowplow event when user views alerts intergration list
+ * Tracks snowplow event when user views alerts integration list
  */
-export const trackAlertIntergrationsViewsOptions = {
-  category: 'Alert Intergrations',
+export const trackAlertIntegrationsViewsOptions = {
+  category: 'Alert Integrations',
   action: 'view_alert_integrations_list',
 };

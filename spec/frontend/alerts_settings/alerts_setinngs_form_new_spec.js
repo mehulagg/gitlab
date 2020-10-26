@@ -9,6 +9,10 @@ describe('AlertsSettingsFormNew', () => {
   let wrapper;
 
   const createComponent = ({ methods } = {}, data) => {
+    if (wrapper) {
+      throw new Error('wrapper already exists');
+    }
+
     wrapper = shallowMount(AlertsSettingsForm, {
       data() {
         return { ...data };
@@ -48,13 +52,11 @@ describe('AlertsSettingsFormNew', () => {
       expect(findFormSteps().attributes('visible')).toBeUndefined();
     });
 
-    it('shows the rest of the form when the dropdown is used', () => {
-      createComponent(
-        {},
-        {
-          selectedIntegration: 'prometheus',
-        },
-      );
+    it('shows the rest of the form when the dropdown is used', async () => {
+      findSelect.vm.$emit('change', 'prometheus');
+
+      await wrapper.vm.$nextTick();
+
       expect(findFormName().isVisible()).toBe(true);
     });
   });

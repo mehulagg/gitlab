@@ -11,6 +11,10 @@ describe('AlertsSettingsFormNew', () => {
   let wrapper;
 
   const createComponent = (data = {}, provide = {}) => {
+    if (wrapper) {
+      throw new Error('wrapper already exists');
+    }
+
     wrapper = shallowMount(AlertsSettingsWrapper, {
       data() {
         return { ...data };
@@ -31,10 +35,6 @@ describe('AlertsSettingsFormNew', () => {
   });
 
   describe('with default values', () => {
-    beforeEach(() => {
-      createComponent();
-    });
-
     it('renders alerts integrations list and old form by default', () => {
       createComponent();
       expect(wrapper.find(IntegrationsList).exists()).toBe(true);

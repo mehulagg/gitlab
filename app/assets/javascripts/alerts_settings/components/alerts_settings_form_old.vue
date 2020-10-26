@@ -56,7 +56,7 @@ export default {
   data() {
     return {
       loading: false,
-      selectedIntegration: integrationTypes[0].value,
+      selectedIntegration: integrationTypes[1].value,
       options: integrationTypes,
       active: false,
       authKey: '',

@@ -12,6 +12,10 @@ describe('AlertsSettingsForm', () => {
   let wrapper;
 
   const createComponent = ({ methods } = {}, data) => {
+    if (wrapper) {
+      throw new Error('wrapper already exists');
+    }
+
     wrapper = shallowMount(AlertsSettingsForm, {
       data() {
         return { ...data };

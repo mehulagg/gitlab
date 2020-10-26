@@ -40,7 +40,11 @@ export default {
   },
   methods: {
     onIntegrationTypeSelect() {
-      this.formVisible = true;
+      if (this.selectedIntegration === integrationTypes[0].value) {
+        this.formVisible = false;
+      } else {
+        this.formVisible = true;
+      }
     },
     onSubmit() {
       // TODO Add GraphQL method
@@ -90,11 +94,17 @@ export default {
         />
       </gl-form-group>
       <div class="gl-display-flex gl-justify-content-end">
-        <gl-button type="reset" class="gl-mr-3">{{ __('Cancel') }}</gl-button>
-        <gl-button type="submit" category="secondary" variant="success">{{
-          __('Save and test payload')
+        <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
+        <gl-button
+          type="submit"
+          category="secondary"
+          variant="success"
+          class="gl-mr-1 js-no-auto-disable"
+          >{{ __('Save and test payload') }}</gl-button
+        >
+        <gl-button type="submit" variant="success" class="js-no-auto-disable">{{
+          __('Save integration')
         }}</gl-button>
-        <gl-button type="submit" variant="success">{{ __('Save integration') }}</gl-button>
       </div>
     </gl-collapse>
   </gl-form>
