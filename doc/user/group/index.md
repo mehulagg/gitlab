@@ -757,6 +757,8 @@ For performance reasons, we may delay the update up to 1 hour and 30 minutes.
 
 If your namespace shows `N/A` as the total storage usage, you can trigger a recalculation by pushing a commit to any project in that namespace.
 
+##### Purchasing 
+
 #### Group push rules **(STARTER)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34370) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
