@@ -1,0 +1,5 @@
+---
+title: Fix broken rake task test:index_size
+merge_request: 45960
+author:
+type: fixed

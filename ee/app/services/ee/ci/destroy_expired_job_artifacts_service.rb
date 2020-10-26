@@ -3,8 +3,13 @@
 module EE
   module Ci
     module DestroyExpiredJobArtifactsService
-      def run_after_destroy(artifacts)
-        destroy_security_findings_for(artifacts) if artifacts.first.is_a?(::Ci::JobArtifact)
+      extend ::Gitlab::Utils::Override
+
+      private
+
+      override :destroy_related_records_for
+      def destroy_related_records_for(artifacts)
+        destroy_security_findings_for(artifacts)
       end
 
       def destroy_security_findings_for(artifacts)

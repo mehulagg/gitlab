@@ -47,6 +47,13 @@ export default {
   <chart-skeleton-loader v-if="isLoading" size="md" class="gl-my-4 gl-py-4" />
   <div v-else class="gl-display-flex gl-flex-direction-column" data-testid="vsa-duration-chart">
     <h4 class="gl-mt-0">{{ s__('CycleAnalytics|Days to completion') }}</h4>
+    <p>
+      {{
+        s__(
+          'CycleAnalytics|The total time spent in the selected stage for the items that were completed on each date. Data limited to the last 500 items.',
+        )
+      }}
+    </p>
     <stage-dropdown-filter
       v-if="stages.length"
       class="gl-ml-auto"

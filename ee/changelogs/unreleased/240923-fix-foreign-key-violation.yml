@@ -1,5 +1,0 @@
----
-title: Fix unnecessary Sidekiq errors/retries when project is deleted during indexing
-merge_request: 45249
-author:
-type: fixed

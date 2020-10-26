@@ -9,8 +9,9 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
   let_it_be(:primary) { create(:geo_node, :primary) }
   let_it_be(:secondary) { create(:geo_node) }
 
-  let(:worker_class) { described_class }
   let(:batch_size) { described_class::BATCH_SIZE }
+
+  subject(:job) { described_class.new }
 
   before do
     stub_current_geo_node(secondary)
@@ -31,9 +32,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       allow(subject).to receive(:sleep) # faster tests
     end
 
-    it_behaves_like 'it is rate limited to 1 call per', 5.seconds do
-      let(:rate_limited_method) { subject.perform }
-    end
+    it_behaves_like '#perform is rate limited to 1 call per', 5.seconds
 
     context 'when RegistryConsistencyService#execute returns true at least once' do
       before do

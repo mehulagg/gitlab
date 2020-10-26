@@ -14,6 +14,7 @@ module Gitlab
 
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :checksum_failed, -> { where.not(verification_failure: nil) }
+        scope :available_replicables, -> { all }
 
         sha_attribute :verification_checksum
       end

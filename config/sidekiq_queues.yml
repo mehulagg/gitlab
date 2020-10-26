@@ -44,6 +44,8 @@
   - 3
 - - background_migration
   - 1
+- - bulk_import
+  - 1
 - - chaos
   - 2
 - - chat_notification
@@ -251,6 +253,8 @@
 - - propagate_integration_group
   - 1
 - - propagate_integration_inherit
+  - 1
+- - propagate_integration_inherit_descendant
   - 1
 - - propagate_integration_project
   - 1

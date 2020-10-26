@@ -1,5 +1,0 @@
----
-title: Update RemoveProjectFromSecurityDashboard mutation to use new Global IDs
-merge_request: 45500
-author:
-type: changed

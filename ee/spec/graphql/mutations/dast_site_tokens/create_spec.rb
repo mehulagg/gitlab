@@ -67,7 +67,7 @@ RSpec.describe Mutations::DastSiteTokens::Create do
         end
 
         it 'returns the dast_site_token status' do
-          expect(subject[:status]).to eq('PENDING_VALIDATION')
+          expect(subject[:status]).to eq('pending')
         end
 
         it 'returns the dast_site_token token' do
@@ -83,7 +83,7 @@ RSpec.describe Mutations::DastSiteTokens::Create do
               target_url: target_url
             )
 
-            expect(result[:status]).to eq('FAILED_VALIDATION')
+            expect(result[:status]).to eq('failed')
           end
         end
 

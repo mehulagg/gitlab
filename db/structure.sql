@@ -9294,9 +9294,12 @@ CREATE TABLE application_settings (
     require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
     help_page_documentation_base_url text,
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
+    encrypted_ci_jwt_signing_key text,
+    encrypted_ci_jwt_signing_key_iv text,
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
+    CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
     CONSTRAINT check_d820146492 CHECK ((char_length(spam_check_endpoint_url) <= 255)),
@@ -10652,6 +10655,38 @@ CREATE SEQUENCE ci_subscriptions_projects_id_seq
     CACHE 1;
 
 ALTER SEQUENCE ci_subscriptions_projects_id_seq OWNED BY ci_subscriptions_projects.id;
+
+CREATE TABLE ci_test_case_failures (
+    id bigint NOT NULL,
+    failed_at timestamp with time zone,
+    test_case_id bigint NOT NULL,
+    build_id bigint NOT NULL
+);
+
+CREATE SEQUENCE ci_test_case_failures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_test_case_failures_id_seq OWNED BY ci_test_case_failures.id;
+
+CREATE TABLE ci_test_cases (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    key_hash text NOT NULL,
+    CONSTRAINT check_dd3c5d1c15 CHECK ((char_length(key_hash) <= 64))
+);
+
+CREATE SEQUENCE ci_test_cases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_test_cases_id_seq OWNED BY ci_test_cases.id;
 
 CREATE TABLE ci_trigger_requests (
     id integer NOT NULL,
@@ -14397,6 +14432,8 @@ CREATE TABLE pages_deployments (
     file_store smallint NOT NULL,
     size integer NOT NULL,
     file text NOT NULL,
+    file_count integer NOT NULL,
+    file_sha256 bytea NOT NULL,
     CONSTRAINT check_f0fe8032dd CHECK ((char_length(file) <= 255))
 );
 
@@ -14639,6 +14676,48 @@ CREATE VIEW postgres_indexes AS
      JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
      JOIN pg_indexes ON ((pg_class.relname = pg_indexes.indexname)))
   WHERE ((pg_namespace.nspname <> 'pg_catalog'::name) AND (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])));
+
+CREATE VIEW postgres_partitioned_tables AS
+ SELECT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
+    pg_class.oid,
+    pg_namespace.nspname AS schema,
+    pg_class.relname AS name,
+        CASE partitioned_tables.partstrat
+            WHEN 'l'::"char" THEN 'list'::text
+            WHEN 'r'::"char" THEN 'range'::text
+            WHEN 'h'::"char" THEN 'hash'::text
+            ELSE NULL::text
+        END AS strategy,
+    array_agg(pg_attribute.attname) AS key_columns
+   FROM (((( SELECT pg_partitioned_table.partrelid,
+            pg_partitioned_table.partstrat,
+            unnest(pg_partitioned_table.partattrs) AS column_position
+           FROM pg_partitioned_table) partitioned_tables
+     JOIN pg_class ON ((partitioned_tables.partrelid = pg_class.oid)))
+     JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
+     JOIN pg_attribute ON (((pg_attribute.attrelid = pg_class.oid) AND (pg_attribute.attnum = partitioned_tables.column_position))))
+  WHERE (pg_namespace.nspname = "current_schema"())
+  GROUP BY (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text), pg_class.oid, pg_namespace.nspname, pg_class.relname,
+        CASE partitioned_tables.partstrat
+            WHEN 'l'::"char" THEN 'list'::text
+            WHEN 'r'::"char" THEN 'range'::text
+            WHEN 'h'::"char" THEN 'hash'::text
+            ELSE NULL::text
+        END;
+
+CREATE VIEW postgres_partitions AS
+ SELECT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
+    pg_class.oid,
+    pg_namespace.nspname AS schema,
+    pg_class.relname AS name,
+    (((parent_namespace.nspname)::text || '.'::text) || (parent_class.relname)::text) AS parent_identifier,
+    pg_get_expr(pg_class.relpartbound, pg_inherits.inhrelid) AS condition
+   FROM ((((pg_class
+     JOIN pg_namespace ON ((pg_namespace.oid = pg_class.relnamespace)))
+     JOIN pg_inherits ON ((pg_class.oid = pg_inherits.inhrelid)))
+     JOIN pg_class parent_class ON ((pg_inherits.inhparent = parent_class.oid)))
+     JOIN pg_namespace parent_namespace ON ((parent_class.relnamespace = parent_namespace.oid)))
+  WHERE (pg_class.relispartition AND (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])));
 
 CREATE TABLE postgres_reindex_actions (
     id bigint NOT NULL,
@@ -15857,6 +15936,7 @@ CREATE TABLE security_findings (
     confidence smallint NOT NULL,
     project_fingerprint text NOT NULL,
     deduplicated boolean DEFAULT false NOT NULL,
+    "position" integer,
     CONSTRAINT check_b9508c6df8 CHECK ((char_length(project_fingerprint) <= 40))
 );
 
@@ -16109,7 +16189,8 @@ CREATE TABLE snippets (
     description_html text,
     encrypted_secret_token character varying(255),
     encrypted_secret_token_iv character varying(255),
-    secret boolean DEFAULT false NOT NULL
+    secret boolean DEFAULT false NOT NULL,
+    repository_read_only boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE snippets_id_seq
@@ -16373,6 +16454,7 @@ CREATE TABLE terraform_state_versions (
     verified_at timestamp with time zone,
     verification_checksum bytea,
     verification_failure text,
+    ci_build_id bigint,
     CONSTRAINT check_0824bb7bbd CHECK ((char_length(file) <= 255)),
     CONSTRAINT tf_state_versions_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
@@ -17486,6 +17568,10 @@ ALTER TABLE ONLY ci_stages ALTER COLUMN id SET DEFAULT nextval('ci_stages_id_seq
 
 ALTER TABLE ONLY ci_subscriptions_projects ALTER COLUMN id SET DEFAULT nextval('ci_subscriptions_projects_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_test_case_failures ALTER COLUMN id SET DEFAULT nextval('ci_test_case_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_test_cases ALTER COLUMN id SET DEFAULT nextval('ci_test_cases_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('ci_trigger_requests_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_triggers ALTER COLUMN id SET DEFAULT nextval('ci_triggers_id_seq'::regclass);
@@ -18298,6 +18384,9 @@ ALTER TABLE ONLY analytics_cycle_analytics_project_stages
 ALTER TABLE ONLY analytics_instance_statistics_measurements
     ADD CONSTRAINT analytics_instance_statistics_measurements_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY analytics_language_trend_repository_languages
+    ADD CONSTRAINT analytics_language_trend_repository_languages_pkey PRIMARY KEY (programming_language_id, project_id, snapshot_date);
+
 ALTER TABLE ONLY appearances
     ADD CONSTRAINT appearances_pkey PRIMARY KEY (id);
 
@@ -18327,6 +18416,9 @@ ALTER TABLE ONLY approval_project_rules_groups
 
 ALTER TABLE ONLY approval_project_rules
     ADD CONSTRAINT approval_project_rules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY approval_project_rules_protected_branches
+    ADD CONSTRAINT approval_project_rules_protected_branches_pkey PRIMARY KEY (approval_project_rule_id, protected_branch_id);
 
 ALTER TABLE ONLY approval_project_rules_users
     ADD CONSTRAINT approval_project_rules_users_pkey PRIMARY KEY (id);
@@ -18430,6 +18522,9 @@ ALTER TABLE ONLY ci_build_trace_chunks
 ALTER TABLE ONLY ci_build_trace_section_names
     ADD CONSTRAINT ci_build_trace_section_names_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY ci_build_trace_sections
+    ADD CONSTRAINT ci_build_trace_sections_pkey PRIMARY KEY (build_id, section_name_id);
+
 ALTER TABLE ONLY ci_builds_metadata
     ADD CONSTRAINT ci_builds_metadata_pkey PRIMARY KEY (id);
 
@@ -18516,6 +18611,12 @@ ALTER TABLE ONLY ci_stages
 
 ALTER TABLE ONLY ci_subscriptions_projects
     ADD CONSTRAINT ci_subscriptions_projects_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_test_case_failures
+    ADD CONSTRAINT ci_test_case_failures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_test_cases
+    ADD CONSTRAINT ci_test_cases_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_trigger_requests
     ADD CONSTRAINT ci_trigger_requests_pkey PRIMARY KEY (id);
@@ -18636,6 +18737,9 @@ ALTER TABLE ONLY deploy_tokens
 
 ALTER TABLE ONLY deployment_clusters
     ADD CONSTRAINT deployment_clusters_pkey PRIMARY KEY (deployment_id);
+
+ALTER TABLE ONLY deployment_merge_requests
+    ADD CONSTRAINT deployment_merge_requests_pkey PRIMARY KEY (deployment_id, merge_request_id);
 
 ALTER TABLE ONLY deployments
     ADD CONSTRAINT deployments_pkey PRIMARY KEY (id);
@@ -18835,6 +18939,9 @@ ALTER TABLE ONLY issuable_severities
 ALTER TABLE ONLY issuable_slas
     ADD CONSTRAINT issuable_slas_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY issue_assignees
+    ADD CONSTRAINT issue_assignees_pkey PRIMARY KEY (issue_id, user_id);
+
 ALTER TABLE ONLY issue_email_participants
     ADD CONSTRAINT issue_email_participants_pkey PRIMARY KEY (id);
 
@@ -18852,6 +18959,12 @@ ALTER TABLE ONLY issue_user_mentions
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT issues_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY issues_prometheus_alert_events
+    ADD CONSTRAINT issues_prometheus_alert_events_pkey PRIMARY KEY (issue_id, prometheus_alert_event_id);
+
+ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
+    ADD CONSTRAINT issues_self_managed_prometheus_alert_events_pkey PRIMARY KEY (issue_id, self_managed_prometheus_alert_event_id);
 
 ALTER TABLE ONLY sprints
     ADD CONSTRAINT iteration_start_and_due_daterange_group_id_constraint EXCLUDE USING gist (group_id WITH =, daterange(start_date, due_date, '[]'::text) WITH &&) WHERE ((group_id IS NOT NULL));
@@ -18916,8 +19029,14 @@ ALTER TABLE ONLY merge_request_blocks
 ALTER TABLE ONLY merge_request_context_commits
     ADD CONSTRAINT merge_request_context_commits_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY merge_request_diff_commits
+    ADD CONSTRAINT merge_request_diff_commits_pkey PRIMARY KEY (merge_request_diff_id, relative_order);
+
 ALTER TABLE ONLY merge_request_diff_details
     ADD CONSTRAINT merge_request_diff_details_pkey PRIMARY KEY (merge_request_diff_id);
+
+ALTER TABLE ONLY merge_request_diff_files
+    ADD CONSTRAINT merge_request_diff_files_pkey PRIMARY KEY (merge_request_diff_id, relative_order);
 
 ALTER TABLE ONLY merge_request_diffs
     ADD CONSTRAINT merge_request_diffs_pkey PRIMARY KEY (id);
@@ -18945,6 +19064,9 @@ ALTER TABLE ONLY metrics_dashboard_annotations
 
 ALTER TABLE ONLY metrics_users_starred_dashboards
     ADD CONSTRAINT metrics_users_starred_dashboards_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY milestone_releases
+    ADD CONSTRAINT milestone_releases_pkey PRIMARY KEY (milestone_id, release_id);
 
 ALTER TABLE ONLY milestones
     ADD CONSTRAINT milestones_pkey PRIMARY KEY (id);
@@ -19099,6 +19221,9 @@ ALTER TABLE ONLY project_alerting_settings
 ALTER TABLE ONLY project_aliases
     ADD CONSTRAINT project_aliases_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY project_authorizations
+    ADD CONSTRAINT project_authorizations_pkey PRIMARY KEY (user_id, project_id, access_level);
+
 ALTER TABLE ONLY project_auto_devops
     ADD CONSTRAINT project_auto_devops_pkey PRIMARY KEY (id);
 
@@ -19143,6 +19268,9 @@ ALTER TABLE ONLY project_metrics_settings
 
 ALTER TABLE ONLY project_mirror_data
     ADD CONSTRAINT project_mirror_data_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY project_pages_metadata
+    ADD CONSTRAINT project_pages_metadata_pkey PRIMARY KEY (project_id);
 
 ALTER TABLE ONLY project_repositories
     ADD CONSTRAINT project_repositories_pkey PRIMARY KEY (id);
@@ -19201,6 +19329,9 @@ ALTER TABLE ONLY protected_tag_create_access_levels
 ALTER TABLE ONLY protected_tags
     ADD CONSTRAINT protected_tags_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY push_event_payloads
+    ADD CONSTRAINT push_event_payloads_pkey PRIMARY KEY (event_id);
+
 ALTER TABLE ONLY push_rules
     ADD CONSTRAINT push_rules_pkey PRIMARY KEY (id);
 
@@ -19218,6 +19349,9 @@ ALTER TABLE ONLY releases
 
 ALTER TABLE ONLY remote_mirrors
     ADD CONSTRAINT remote_mirrors_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY repository_languages
+    ADD CONSTRAINT repository_languages_pkey PRIMARY KEY (project_id, programming_language_id);
 
 ALTER TABLE ONLY required_code_owners_sections
     ADD CONSTRAINT required_code_owners_sections_pkey PRIMARY KEY (id);
@@ -19384,6 +19518,9 @@ ALTER TABLE ONLY user_details
 ALTER TABLE ONLY user_highest_roles
     ADD CONSTRAINT user_highest_roles_pkey PRIMARY KEY (user_id);
 
+ALTER TABLE ONLY user_interacted_projects
+    ADD CONSTRAINT user_interacted_projects_pkey PRIMARY KEY (project_id, user_id);
+
 ALTER TABLE ONLY user_preferences
     ADD CONSTRAINT user_preferences_pkey PRIMARY KEY (id);
 
@@ -19398,6 +19535,9 @@ ALTER TABLE ONLY users_ops_dashboard_projects
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY users_security_dashboard_projects
+    ADD CONSTRAINT users_security_dashboard_projects_pkey PRIMARY KEY (project_id, user_id);
 
 ALTER TABLE ONLY users_star_projects
     ADD CONSTRAINT users_star_projects_pkey PRIMARY KEY (id);
@@ -19604,8 +19744,6 @@ CREATE INDEX analytics_index_events_on_created_at_and_author_id ON events USING 
 
 CREATE INDEX analytics_repository_languages_on_project_id ON analytics_language_trend_repository_languages USING btree (project_id);
 
-CREATE UNIQUE INDEX analytics_repository_languages_unique_index ON analytics_language_trend_repository_languages USING btree (programming_language_id, project_id, snapshot_date);
-
 CREATE UNIQUE INDEX any_approver_merge_request_rule_type_unique_index ON approval_merge_request_rules USING btree (merge_request_id, rule_type) WHERE (rule_type = 4);
 
 CREATE UNIQUE INDEX any_approver_project_rule_type_unique_index ON approval_project_rules USING btree (project_id) WHERE (rule_type = 3);
@@ -19647,8 +19785,6 @@ CREATE INDEX idx_ci_pipelines_artifacts_locked ON ci_pipelines USING btree (ci_r
 CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at_enabled ON container_expiration_policies USING btree (project_id, next_run_at, enabled);
 
 CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON deployment_clusters USING btree (cluster_id, kubernetes_namespace);
-
-CREATE UNIQUE INDEX idx_deployment_merge_requests_unique_index ON deployment_merge_requests USING btree (deployment_id, merge_request_id);
 
 CREATE UNIQUE INDEX idx_environment_merge_requests_unique_index ON deployment_merge_requests USING btree (environment_id, merge_request_id);
 
@@ -19818,8 +19954,6 @@ CREATE INDEX index_approval_project_rules_on_rule_type ON approval_project_rules
 
 CREATE INDEX index_approval_project_rules_protected_branches_pb_id ON approval_project_rules_protected_branches USING btree (protected_branch_id);
 
-CREATE UNIQUE INDEX index_approval_project_rules_protected_branches_unique ON approval_project_rules_protected_branches USING btree (approval_project_rule_id, protected_branch_id);
-
 CREATE UNIQUE INDEX index_approval_project_rules_users_1 ON approval_project_rules_users USING btree (approval_project_rule_id, user_id);
 
 CREATE INDEX index_approval_project_rules_users_2 ON approval_project_rules_users USING btree (user_id);
@@ -19944,8 +20078,6 @@ CREATE UNIQUE INDEX index_ci_build_trace_chunks_on_build_id_and_chunk_index ON c
 
 CREATE UNIQUE INDEX index_ci_build_trace_section_names_on_project_id_and_name ON ci_build_trace_section_names USING btree (project_id, name);
 
-CREATE UNIQUE INDEX index_ci_build_trace_sections_on_build_id_and_section_name_id ON ci_build_trace_sections USING btree (build_id, section_name_id);
-
 CREATE INDEX index_ci_build_trace_sections_on_project_id ON ci_build_trace_sections USING btree (project_id);
 
 CREATE INDEX index_ci_build_trace_sections_on_section_name_id ON ci_build_trace_sections USING btree (section_name_id);
@@ -20023,8 +20155,6 @@ CREATE INDEX index_ci_job_artifacts_on_expire_at_and_job_id ON ci_job_artifacts 
 CREATE INDEX index_ci_job_artifacts_on_file_store ON ci_job_artifacts USING btree (file_store);
 
 CREATE UNIQUE INDEX index_ci_job_artifacts_on_job_id_and_file_type ON ci_job_artifacts USING btree (job_id, file_type);
-
-CREATE INDEX index_ci_job_artifacts_on_license_compliance_file_types ON ci_job_artifacts USING btree (job_id, file_type) WHERE ((file_type = 10) OR (file_type = 101));
 
 CREATE INDEX index_ci_job_artifacts_on_project_id ON ci_job_artifacts USING btree (project_id);
 
@@ -20152,6 +20282,10 @@ CREATE INDEX index_ci_subscriptions_projects_on_upstream_project_id ON ci_subscr
 
 CREATE UNIQUE INDEX index_ci_subscriptions_projects_unique_subscription ON ci_subscriptions_projects USING btree (downstream_project_id, upstream_project_id);
 
+CREATE INDEX index_ci_test_case_failures_on_build_id ON ci_test_case_failures USING btree (build_id);
+
+CREATE UNIQUE INDEX index_ci_test_cases_on_project_id_and_key_hash ON ci_test_cases USING btree (project_id, key_hash);
+
 CREATE INDEX index_ci_trigger_requests_on_commit_id ON ci_trigger_requests USING btree (commit_id);
 
 CREATE INDEX index_ci_trigger_requests_on_trigger_id_and_id ON ci_trigger_requests USING btree (trigger_id, id DESC);
@@ -20262,7 +20396,7 @@ CREATE INDEX index_dast_site_tokens_on_project_id ON dast_site_tokens USING btre
 
 CREATE INDEX index_dast_site_validations_on_dast_site_token_id ON dast_site_validations USING btree (dast_site_token_id);
 
-CREATE INDEX index_dast_site_validations_on_url_base ON dast_site_validations USING btree (url_base);
+CREATE INDEX index_dast_site_validations_on_url_base_and_state ON dast_site_validations USING btree (url_base, state);
 
 CREATE INDEX index_dast_sites_on_dast_site_validation_id ON dast_sites USING btree (dast_site_validation_id);
 
@@ -20654,8 +20788,6 @@ CREATE UNIQUE INDEX index_issuable_severities_on_issue_id ON issuable_severities
 
 CREATE UNIQUE INDEX index_issuable_slas_on_issue_id ON issuable_slas USING btree (issue_id);
 
-CREATE UNIQUE INDEX index_issue_assignees_on_issue_id_and_user_id ON issue_assignees USING btree (issue_id, user_id);
-
 CREATE INDEX index_issue_assignees_on_user_id ON issue_assignees USING btree (user_id);
 
 CREATE UNIQUE INDEX index_issue_email_participants_on_issue_id_and_email ON issue_email_participants USING btree (issue_id, email);
@@ -20812,13 +20944,9 @@ CREATE INDEX index_merge_request_assignees_on_user_id ON merge_request_assignees
 
 CREATE INDEX index_merge_request_blocks_on_blocked_merge_request_id ON merge_request_blocks USING btree (blocked_merge_request_id);
 
-CREATE UNIQUE INDEX index_merge_request_diff_commits_on_mr_diff_id_and_order ON merge_request_diff_commits USING btree (merge_request_diff_id, relative_order);
-
 CREATE INDEX index_merge_request_diff_commits_on_sha ON merge_request_diff_commits USING btree (sha);
 
 CREATE INDEX index_merge_request_diff_details_on_merge_request_diff_id ON merge_request_diff_details USING btree (merge_request_diff_id);
-
-CREATE UNIQUE INDEX index_merge_request_diff_files_on_mr_diff_id_and_order ON merge_request_diff_files USING btree (merge_request_diff_id, relative_order);
 
 CREATE INDEX index_merge_request_diffs_by_id_partial ON merge_request_diffs USING btree (id) WHERE ((files_count > 0) AND ((NOT stored_externally) OR (stored_externally IS NULL)));
 
@@ -20921,8 +21049,6 @@ CREATE UNIQUE INDEX index_milestones_on_project_id_and_iid ON milestones USING b
 CREATE INDEX index_milestones_on_title ON milestones USING btree (title);
 
 CREATE INDEX index_milestones_on_title_trigram ON milestones USING gin (title gin_trgm_ops);
-
-CREATE UNIQUE INDEX index_miletone_releases_on_milestone_and_release ON milestone_releases USING btree (milestone_id, release_id);
 
 CREATE INDEX index_mirror_data_on_next_execution_and_retry_count ON project_mirror_data USING btree (next_execution_timestamp, retry_count);
 
@@ -21166,8 +21292,6 @@ CREATE INDEX index_project_aliases_on_project_id ON project_aliases USING btree 
 
 CREATE INDEX index_project_authorizations_on_project_id ON project_authorizations USING btree (project_id);
 
-CREATE UNIQUE INDEX index_project_authorizations_on_user_id_project_id_access_level ON project_authorizations USING btree (user_id, project_id, access_level);
-
 CREATE UNIQUE INDEX index_project_auto_devops_on_project_id ON project_auto_devops USING btree (project_id);
 
 CREATE UNIQUE INDEX index_project_ci_cd_settings_on_project_id ON project_ci_cd_settings USING btree (project_id);
@@ -21219,8 +21343,6 @@ CREATE INDEX index_project_mirror_data_on_status ON project_mirror_data USING bt
 CREATE INDEX index_project_pages_metadata_on_artifacts_archive_id ON project_pages_metadata USING btree (artifacts_archive_id);
 
 CREATE INDEX index_project_pages_metadata_on_pages_deployment_id ON project_pages_metadata USING btree (pages_deployment_id);
-
-CREATE UNIQUE INDEX index_project_pages_metadata_on_project_id ON project_pages_metadata USING btree (project_id);
 
 CREATE INDEX index_project_pages_metadata_on_project_id_and_deployed_is_true ON project_pages_metadata USING btree (project_id) WHERE (deployed = true);
 
@@ -21394,8 +21516,6 @@ CREATE INDEX index_protected_tags_on_project_id ON protected_tags USING btree (p
 
 CREATE UNIQUE INDEX index_protected_tags_on_project_id_and_name ON protected_tags USING btree (project_id, name);
 
-CREATE UNIQUE INDEX index_push_event_payloads_on_event_id ON push_event_payloads USING btree (event_id);
-
 CREATE INDEX index_push_rules_on_is_sample ON push_rules USING btree (is_sample) WHERE is_sample;
 
 CREATE INDEX index_push_rules_on_project_id ON push_rules USING btree (project_id);
@@ -21419,8 +21539,6 @@ CREATE INDEX index_releases_on_project_id_and_tag ON releases USING btree (proje
 CREATE INDEX index_remote_mirrors_on_last_successful_update_at ON remote_mirrors USING btree (last_successful_update_at);
 
 CREATE INDEX index_remote_mirrors_on_project_id ON remote_mirrors USING btree (project_id);
-
-CREATE UNIQUE INDEX index_repository_languages_on_project_and_languages_id ON repository_languages USING btree (project_id, programming_language_id);
 
 CREATE INDEX index_required_code_owners_sections_on_protected_branch_id ON required_code_owners_sections USING btree (protected_branch_id);
 
@@ -21498,6 +21616,8 @@ CREATE INDEX index_reviews_on_merge_request_id ON reviews USING btree (merge_req
 
 CREATE INDEX index_reviews_on_project_id ON reviews USING btree (project_id);
 
+CREATE INDEX index_route_on_name_trigram ON routes USING gin (name gin_trgm_ops);
+
 CREATE UNIQUE INDEX index_routes_on_path ON routes USING btree (path);
 
 CREATE INDEX index_routes_on_path_text_pattern_ops ON routes USING btree (path varchar_pattern_ops);
@@ -21527,6 +21647,8 @@ CREATE INDEX index_security_findings_on_confidence ON security_findings USING bt
 CREATE INDEX index_security_findings_on_project_fingerprint ON security_findings USING btree (project_fingerprint);
 
 CREATE INDEX index_security_findings_on_scan_id_and_deduplicated ON security_findings USING btree (scan_id, deduplicated);
+
+CREATE UNIQUE INDEX index_security_findings_on_scan_id_and_position ON security_findings USING btree (scan_id, "position");
 
 CREATE INDEX index_security_findings_on_scanner_id ON security_findings USING btree (scanner_id);
 
@@ -21561,8 +21683,6 @@ CREATE UNIQUE INDEX index_services_on_type_and_instance_partial ON services USIN
 CREATE UNIQUE INDEX index_services_on_type_and_template_partial ON services USING btree (type, template) WHERE (template = true);
 
 CREATE INDEX index_services_on_type_id_when_active_and_project_id_not_null ON services USING btree (type, id) WHERE ((active = true) AND (project_id IS NOT NULL));
-
-CREATE INDEX index_services_on_type_id_when_active_not_instance_not_template ON services USING btree (type, id) WHERE ((active = true) AND (instance = false) AND (template = false));
 
 CREATE UNIQUE INDEX index_services_on_unique_group_id_and_type ON services USING btree (group_id, type);
 
@@ -21658,6 +21778,8 @@ CREATE INDEX index_term_agreements_on_term_id ON term_agreements USING btree (te
 
 CREATE INDEX index_term_agreements_on_user_id ON term_agreements USING btree (user_id);
 
+CREATE INDEX index_terraform_state_versions_on_ci_build_id ON terraform_state_versions USING btree (ci_build_id);
+
 CREATE INDEX index_terraform_state_versions_on_created_by_user_id ON terraform_state_versions USING btree (created_by_user_id);
 
 CREATE UNIQUE INDEX index_terraform_state_versions_on_state_id_and_version ON terraform_state_versions USING btree (terraform_state_id, version);
@@ -21669,6 +21791,8 @@ CREATE INDEX index_terraform_states_on_locked_by_user_id ON terraform_states USI
 CREATE UNIQUE INDEX index_terraform_states_on_project_id_and_name ON terraform_states USING btree (project_id, name);
 
 CREATE UNIQUE INDEX index_terraform_states_on_uuid ON terraform_states USING btree (uuid);
+
+CREATE UNIQUE INDEX index_test_case_failures_unique_columns ON ci_test_case_failures USING btree (test_case_id, failed_at DESC, build_id);
 
 CREATE INDEX index_timelogs_on_issue_id ON timelogs USING btree (issue_id);
 
@@ -21733,8 +21857,6 @@ CREATE UNIQUE INDEX index_user_custom_attributes_on_user_id_and_key ON user_cust
 CREATE UNIQUE INDEX index_user_details_on_user_id ON user_details USING btree (user_id);
 
 CREATE INDEX index_user_highest_roles_on_user_id_and_highest_access_level ON user_highest_roles USING btree (user_id, highest_access_level);
-
-CREATE UNIQUE INDEX index_user_interacted_projects_on_project_id_and_user_id ON user_interacted_projects USING btree (project_id, user_id);
 
 CREATE INDEX index_user_interacted_projects_on_user_id ON user_interacted_projects USING btree (user_id);
 
@@ -21930,10 +22052,6 @@ CREATE INDEX issue_id_issues_prometheus_alert_events_index ON issues_prometheus_
 
 CREATE INDEX issue_id_issues_self_managed_rometheus_alert_events_index ON issues_self_managed_prometheus_alert_events USING btree (self_managed_prometheus_alert_event_id);
 
-CREATE UNIQUE INDEX issue_id_prometheus_alert_event_id_index ON issues_prometheus_alert_events USING btree (issue_id, prometheus_alert_event_id);
-
-CREATE UNIQUE INDEX issue_id_self_managed_prometheus_alert_event_id_index ON issues_self_managed_prometheus_alert_events USING btree (issue_id, self_managed_prometheus_alert_event_id);
-
 CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_and_note_id_index ON issue_user_mentions USING btree (issue_id, note_id);
 
 CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_index ON issue_user_mentions USING btree (issue_id) WHERE (note_id IS NULL);
@@ -21989,8 +22107,6 @@ CREATE INDEX tmp_idx_index_issues_with_outdate_blocking_count ON issues USING bt
 CREATE INDEX tmp_index_for_email_unconfirmation_migration ON emails USING btree (id) WHERE (confirmed_at IS NOT NULL);
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
-
-CREATE UNIQUE INDEX users_security_dashboard_projects_unique_index ON users_security_dashboard_projects USING btree (project_id, user_id);
 
 CREATE UNIQUE INDEX vulnerability_feedback_unique_idx ON vulnerability_feedback USING btree (project_id, category, feedback_type, project_fingerprint);
 
@@ -22265,6 +22381,12 @@ ALTER TABLE ONLY clusters_applications_runners
 
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_03c671965c FOREIGN KEY (design_id) REFERENCES design_management_designs(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY terraform_state_versions
+    ADD CONSTRAINT fk_04b91e4a9f FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_test_cases
+    ADD CONSTRAINT fk_0526c30ded FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_05f1e72feb FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -22778,6 +22900,9 @@ ALTER TABLE ONLY ci_sources_pipelines
 
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_d5af95fcd9 FOREIGN KEY (lfs_object_deleted_event_id) REFERENCES geo_lfs_object_deleted_events(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_test_case_failures
+    ADD CONSTRAINT fk_d69404d827 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_d6cf4279f7 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -24071,6 +24196,9 @@ ALTER TABLE ONLY merge_request_blocks
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_e9eb8dc025 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_test_case_failures
+    ADD CONSTRAINT fk_rails_eab6349715 FOREIGN KEY (test_case_id) REFERENCES ci_test_cases(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY alert_management_alert_user_mentions
     ADD CONSTRAINT fk_rails_eb2de0cdef FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;

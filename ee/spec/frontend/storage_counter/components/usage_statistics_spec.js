@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlButton, GlLink } from '@gitlab/ui';
+import { GlButton, GlSprintf } from '@gitlab/ui';
 import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
 import UsageStatisticsCard from 'ee/storage_counter/components/usage_statistics_card.vue';
 import { withRootStorageStatistics } from '../mock_data';
@@ -10,11 +10,16 @@ describe('Usage Statistics component', () => {
   const createComponent = () => {
     wrapper = shallowMount(UsageStatistics, {
       propsData: {
-        rootStorageStatistics: withRootStorageStatistics.rootStorageStatistics,
+        rootStorageStatistics: {
+          totalRepositorySize: withRootStorageStatistics.totalRepositorySize,
+          actualRepositorySizeLimit: withRootStorageStatistics.actualRepositorySizeLimit,
+          totalRepositorySizeExcess: withRootStorageStatistics.totalRepositorySizeExcess,
+          additionalPurchasedStorageSize: withRootStorageStatistics.additionalPurchasedStorageSize,
+        },
       },
       stubs: {
         UsageStatisticsCard,
-        GlLink,
+        GlSprintf,
       },
     });
   };
@@ -34,15 +39,30 @@ describe('Usage Statistics component', () => {
     expect(getStatisticsCards()).toHaveLength(3);
   });
 
-  it.each`
-    cardName            | componentName | componentType
-    ${'totalUsage'}     | ${'GlLink'}   | ${GlLink}
-    ${'excessUsage'}    | ${'GlLink'}   | ${GlLink}
-    ${'purchasedUsage'} | ${'GlButton'} | ${GlButton}
-  `('renders $componentName in $cardName', ({ cardName, componentType }) => {
+  it('renders text in total usage card footer', () => {
     expect(
-      getStatisticsCard(cardName)
-        .find(componentType)
+      getStatisticsCard('totalUsage')
+        .find('[data-testid="statisticsCardFooter"]')
+        .text(),
+    ).toMatchInterpolatedText(
+      'This is the total amount of storage used across your projects within this namespace.',
+    );
+  });
+
+  it('renders text in excess usage card footer', () => {
+    expect(
+      getStatisticsCard('excessUsage')
+        .find('[data-testid="statisticsCardFooter"]')
+        .text(),
+    ).toMatchInterpolatedText(
+      'This is the total amount of storage used by projects above the free 978.8KiB storage limit.',
+    );
+  });
+
+  it('renders button in purchased usage card footer', () => {
+    expect(
+      getStatisticsCard('purchasedUsage')
+        .find(GlButton)
         .exists(),
     ).toBe(true);
   });

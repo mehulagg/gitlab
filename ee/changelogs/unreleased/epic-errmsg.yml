@@ -1,5 +1,0 @@
----
-title: Return more specific error message when moving issue in GraphQL API
-merge_request: 44296
-author:
-type: changed

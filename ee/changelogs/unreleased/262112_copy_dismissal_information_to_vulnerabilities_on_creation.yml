@@ -1,0 +1,5 @@
+---
+title: Copy dismissal information to vulnerability while creating the record
+merge_request: 45688
+author:
+type: fixed

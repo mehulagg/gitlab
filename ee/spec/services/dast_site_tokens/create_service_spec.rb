@@ -53,7 +53,7 @@ RSpec.describe DastSiteTokens::CreateService do
       end
 
       it 'contains a status' do
-        expect(subject.payload[:status]).to eq('PENDING_VALIDATION')
+        expect(subject.payload[:status]).to eq('pending')
       end
 
       context 'when an invalid target_url is supplied' do

@@ -148,15 +148,15 @@ RSpec.describe RegistrationsController do
                 update_registration
               end
 
-              it 'tracks a signed_up event' do
-                expect(Gitlab::Tracking).to receive(:event).with(
-                  'Growth::Conversion::Experiment::OnboardingIssues',
-                  'signed_up',
+              it 'tracks a signed_up event', :snowplow do
+                update_registration
+
+                expect_snowplow_event(
+                  category: 'Growth::Conversion::Experiment::OnboardingIssues',
+                  action: 'signed_up',
                   label: anything,
                   property: "#{group_type}_group"
                 )
-
-                update_registration
               end
             end
           end
@@ -176,10 +176,10 @@ RSpec.describe RegistrationsController do
                 update_registration
               end
 
-              it 'does not track a signed_up event' do
-                expect(Gitlab::Tracking).not_to receive(:event)
-
+              it 'does not track a signed_up event', :snowplow do
                 update_registration
+
+                expect_no_snowplow_event
               end
             end
           end
@@ -196,10 +196,10 @@ RSpec.describe RegistrationsController do
             update_registration
           end
 
-          it 'does not track a signed_up event' do
-            expect(Gitlab::Tracking).not_to receive(:event)
-
+          it 'does not track a signed_up event', :snowplow do
             update_registration
+
+            expect_no_snowplow_event
           end
         end
       end

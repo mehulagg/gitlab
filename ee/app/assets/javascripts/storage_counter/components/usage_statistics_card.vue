@@ -60,8 +60,11 @@ export default {
     <p class="gl-border-b-2 gl-border-b-solid gl-border-b-gray-100 gl-font-weight-bold gl-pb-3">
       {{ description }}
     </p>
-    <p class="gl-mb-0">
-      <slot v-bind="{ link }" name="link">
+    <p
+      class="gl-mb-0 gl-text-gray-900 gl-font-sm gl-white-space-normal"
+      data-testid="statisticsCardFooter"
+    >
+      <slot v-bind="{ link }" name="footer">
         <gl-link target="_blank" :href="link.url">
           <span class="text-truncate">{{ link.text }}</span>
           <gl-icon name="external-link" class="gl-ml-2 gl-flex-shrink-0 gl-text-black-normal" />

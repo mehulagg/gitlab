@@ -20,8 +20,9 @@
         %tr
           %th= _("Project")
           %th= _("Author")
+          %th
       %tbody
-        - @project.upstream_projects.each do |project|
-          = render 'projects/settings/subscriptions/project', project: project
-        - @project.downstream_projects.each do |project|
-          = render 'projects/settings/subscriptions/project', project: project
+        - @project.upstream_project_subscriptions.each do |subscription|
+          = render 'projects/settings/subscriptions/project', project: subscription.upstream_project, subscription: subscription
+        - @project.downstream_project_subscriptions.each do |subscription|
+          = render 'projects/settings/subscriptions/project', project: subscription.downstream_project, subscription: subscription

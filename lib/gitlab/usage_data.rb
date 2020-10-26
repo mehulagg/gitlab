@@ -40,8 +40,11 @@ module Gitlab
 
         with_finished_at(:recording_ce_finished_at) do
           license_usage_data
+            .merge(system_usage_data_license)
+            .merge(system_usage_data_settings)
             .merge(system_usage_data)
             .merge(system_usage_data_monthly)
+            .merge(system_usage_data_weekly)
             .merge(features_usage_data)
             .merge(components_usage_data)
             .merge(cycle_analytics_usage_data)
@@ -221,6 +224,24 @@ module Gitlab
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def system_usage_data_license
+        {
+          license: {}
+        }
+      end
+
+      def system_usage_data_settings
+        {
+          settings: {}
+        }
+      end
+
+      def system_usage_data_weekly
+        {
+          counts_weekly: {}
+        }
+      end
 
       def cycle_analytics_usage_data
         Gitlab::CycleAnalytics::UsageData.new.to_json
@@ -564,6 +585,9 @@ module Gitlab
           users_created: count(::User.where(time_period), start: user_minimum_id, finish: user_maximum_id),
           omniauth_providers: filtered_omniauth_provider_names.reject { |name| name == 'group_saml' },
           user_auth_by_provider: distinct_count_user_auth_by_provider(time_period),
+          bulk_imports: {
+            gitlab: distinct_count(::BulkImport.where(time_period, source_type: :gitlab), :user_id)
+          },
           projects_imported: {
             gitlab_project: projects_imported_count('gitlab_project', time_period),
             gitlab: projects_imported_count('gitlab', time_period),

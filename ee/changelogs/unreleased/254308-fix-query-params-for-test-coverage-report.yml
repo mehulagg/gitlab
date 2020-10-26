@@ -1,5 +1,0 @@
----
-title: Fix project_ids query param for group test coverage report
-merge_request: 42880
-author:
-type: fixed
