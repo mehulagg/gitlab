@@ -67,22 +67,6 @@ $mr-widget-min-height: 69px;
     background-color: $gray-100;
     cursor: pointer;
   }
-
-  .mr-widget-extension-button {
-    // Styles loading button without border
-    // Can be removed after https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1029 is complete
-    &[disabled] {
-      box-shadow: none !important;
-  
-      .gl-button-loading-indicator {
-        margin-right: 0 !important;
-      }
-
-      svg {
-        display: none;
-      }
-    }  
-  }
 }
 
 .mr-widget-workflow {
