@@ -279,7 +279,7 @@ export default {
         mutation: updateAssignees,
         variables: {
           iid: getters.getActiveIssue.iid,
-          projectPath: 'h5bp/html5-boilerplate',
+          projectPath: getters.getActiveIssue.referencePath.split('#')[0],
           assigneeUsernames,
         },
       })
@@ -292,7 +292,7 @@ export default {
       });
   },
 
-  getIssueParticipants: ({}, id) => {
+  getIssueParticipants: (_, id) => {
     return gqlClient.query({
       query: getIssueParticipants,
       variables: {

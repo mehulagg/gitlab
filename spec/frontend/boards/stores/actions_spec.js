@@ -13,6 +13,8 @@ import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
 import { inactiveId, ListType } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
+import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
 
 const expectNotImplemented = action => {
@@ -552,6 +554,60 @@ describe('moveIssue', () => {
             toListId: 'gid://gitlab/List/2',
             originalIndex: 0,
           },
+        },
+      ],
+      [],
+      done,
+    );
+  });
+});
+
+describe('getParticipants', () => {
+  it('calls query with the correct values', async () => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue({});
+
+    await actions.getIssueParticipants(null, '123');
+
+    expect(gqlClient.query).toHaveBeenCalledWith({
+      query: getIssueParticipants,
+      variables: { id: '123' },
+    });
+  });
+});
+
+describe('setAssignees', () => {
+  const node = { username: 'name' };
+  const name = 'username';
+  const refPath = 'h/h#3';
+  const iid = '1';
+
+  beforeEach(() => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: { issueSetAssignees: { issue: { assignees: { edges: [{ node }] } } } },
+    });
+  });
+
+  it('calls mutate with the correct values', async () => {
+    await actions.setAssignees(
+      { commit: () => {}, getters: { getActiveIssue: { iid, referencePath: refPath } } },
+      [name],
+    );
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: updateAssignees,
+      variables: { iid, assigneeUsernames: [name], projectPath: refPath.split('#')[0] },
+    });
+  });
+
+  it('calls the correct mutation with the correct values', done => {
+    testAction(
+      actions.setAssignees,
+      {},
+      { getActiveIssue: { iid, referencePath: refPath }, commit: () => {} },
+      [
+        {
+          type: 'UPDATE_ISSUE_BY_ID',
+          payload: { prop: 'assignees', issueId: undefined, value: [node] },
         },
       ],
       [],
