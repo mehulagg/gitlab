@@ -2,7 +2,6 @@
 
 class AuditEvent < ApplicationRecord
   include CreatedAtFilterable
-  include IgnorableColumns
   include BulkInsertSafe
   include EachBatch
 
@@ -13,8 +12,6 @@ class AuditEvent < ApplicationRecord
     :target_type,
     :target_id
   ].freeze
-
-  ignore_column :type, remove_with: '13.6', remove_after: '2020-11-22'
 
   serialize :details, Hash # rubocop:disable Cop/ActiveRecordSerialize
 
