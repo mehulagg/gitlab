@@ -180,6 +180,11 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       let(:release_fields) do
         query_graphql_field(:links, nil, %{
           selfUrl
+          openMergeRequestsUrl
+          mergedMergeRequestsUrl
+          closedMergeRequestsUrl
+          openIssuesUrl
+          closedIssuesUrl
           mergeRequestsUrl
           issuesUrl
         })
@@ -188,11 +193,14 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       it 'finds all release links' do
         post_query
 
-        expect(data).to eq(
-          'selfUrl' => project_release_url(project, release),
-          'mergeRequestsUrl' => project_merge_requests_url(project, params_for_issues_and_mrs),
-          'issuesUrl' => project_issues_url(project, params_for_issues_and_mrs)
-        )
+        expect(data['selfUrl']).to eq(project_release_url(project, release))
+        expect(data['openMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
+        expect(data['mergedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=merged/)
+        expect(data['closedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=closed/)
+        expect(data['openIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
+        expect(data['closedIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=closed/)
+        expect(data['mergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
+        expect(data['issuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
       end
     end
 

@@ -37,6 +37,11 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           }
           links {
             selfUrl
+            openMergeRequestsUrl
+            mergedMergeRequestsUrl
+            closedMergeRequestsUrl
+            openIssuesUrl
+            closedIssuesUrl
             mergeRequestsUrl
             issuesUrl
           }
@@ -83,7 +88,7 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           { 'sha' => e.sha }
         end
 
-        expect(data).to eq(
+        expect(data).to include(
           'tagName' => release.tag,
           'tagPath' => project_tag_path(project, release.tag),
           'name' => release.name,
@@ -98,13 +103,19 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           },
           'evidences' => {
             'nodes' => expected_evidences
-          },
-          'links' => {
-            'selfUrl' => project_release_url(project, release),
-            'mergeRequestsUrl' => project_merge_requests_url(project, params_for_issues_and_mrs),
-            'issuesUrl' => project_issues_url(project, params_for_issues_and_mrs)
           }
         )
+
+        links = data['links']
+
+        expect(links['selfUrl']).to eq(project_release_url(project, release))
+        expect(links['openMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
+        expect(links['mergedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=merged/)
+        expect(links['closedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=closed/)
+        expect(links['openIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
+        expect(links['closedIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=closed/)
+        expect(links['mergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
+        expect(links['issuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
       end
     end
 

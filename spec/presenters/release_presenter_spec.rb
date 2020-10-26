@@ -59,11 +59,11 @@ RSpec.describe ReleasePresenter do
     end
   end
 
-  describe '#merge_requests_url' do
-    subject { presenter.merge_requests_url }
+  describe '#open_merge_requests_url' do
+    subject { presenter.open_merge_requests_url }
 
-    it 'returns merge requests url' do
-      is_expected.to match /#{project_merge_requests_url(project)}/
+    it 'returns merge requests url with state=open' do
+      is_expected.to match /#{project_merge_requests_url(project)}.*\?.*state=open/
     end
 
     context 'when release_mr_issue_urls feature flag is disabled' do
@@ -75,11 +75,59 @@ RSpec.describe ReleasePresenter do
     end
   end
 
-  describe '#issues_url' do
-    subject { presenter.issues_url }
+  describe '#merged_merge_requests_url' do
+    subject { presenter.merged_merge_requests_url }
 
-    it 'returns merge requests url' do
-      is_expected.to match /#{project_issues_url(project)}/
+    it 'returns merge requests url with state=merged' do
+      is_expected.to match /#{project_merge_requests_url(project)}.*\?.*state=merged/
+    end
+
+    context 'when release_mr_issue_urls feature flag is disabled' do
+      before do
+        stub_feature_flags(release_mr_issue_urls: false)
+      end
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#closed_merge_requests_url' do
+    subject { presenter.closed_merge_requests_url }
+
+    it 'returns merge requests url with state=closed' do
+      is_expected.to match /#{project_merge_requests_url(project)}.*\?.*state=closed/
+    end
+
+    context 'when release_mr_issue_urls feature flag is disabled' do
+      before do
+        stub_feature_flags(release_mr_issue_urls: false)
+      end
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#open_issues_url' do
+    subject { presenter.open_issues_url }
+
+    it 'returns issues url with state=open' do
+      is_expected.to match /#{project_issues_url(project)}.*\?.*state=open/
+    end
+
+    context 'when release_mr_issue_urls feature flag is disabled' do
+      before do
+        stub_feature_flags(release_mr_issue_urls: false)
+      end
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#closed_issues_url' do
+    subject { presenter.closed_issues_url }
+
+    it 'returns issues url with state=closed' do
+      is_expected.to match /#{project_issues_url(project)}.*\?.*state=closed/
     end
 
     context 'when release_mr_issue_urls feature flag is disabled' do
