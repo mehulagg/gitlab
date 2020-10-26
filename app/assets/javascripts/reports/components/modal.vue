@@ -1,12 +1,12 @@
 <script>
 // import { sprintf, __ } from '~/locale';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import { GlModal } from '@gitlab/ui';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { fieldTypes } from '../constants';
 
 export default {
   components: {
-    Modal: DeprecatedModal2,
+    GlModal,
     CodeBlock,
   },
   props: {
@@ -23,8 +23,8 @@ export default {
 };
 </script>
 <template>
-  <modal
-    id="modal-mrwidget-reports"
+  <gl-modal
+    modal-id="modal-mrwidget-reports"
     :header-title-text="title"
     class="modal-security-report-dast modal-hide-footer"
   >
@@ -57,5 +57,5 @@ export default {
       </div>
     </slot>
     <div slot="footer"></div>
-  </modal>
+  </gl-modal>
 </template>
