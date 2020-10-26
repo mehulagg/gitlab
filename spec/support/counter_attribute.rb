@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.configure do |config|
-  config.before(:each, :counter_attribute) do
+  config.before(:example, :counter_attribute) do
     stub_const('CounterAttributeModel', Class.new(ProjectStatistics))
 
     CounterAttributeModel.class_eval do

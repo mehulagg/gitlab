@@ -9,11 +9,11 @@ RSpec.configure do |config|
     block_dns!
   end
 
-  config.before(:each, :permit_dns) do
+  config.before(:example, :permit_dns) do
     permit_dns!
   end
 
-  config.before(:each, :stub_invalid_dns_only) do
+  config.before(:example, :stub_invalid_dns_only) do
     permit_dns!
     stub_invalid_dns!
   end

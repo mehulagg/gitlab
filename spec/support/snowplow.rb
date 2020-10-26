@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.configure do |config|
-  config.before(:each, :snowplow) do
+  config.before(:example, :snowplow) do
     # Using a high buffer size to not cause early flushes
     buffer_size = 100
     # WebMock is set up to allow requests to `localhost`
@@ -16,7 +16,7 @@ RSpec.configure do |config|
     allow(Gitlab::Tracking).to receive(:event).and_call_original # rubocop:disable RSpec/ExpectGitlabTracking
   end
 
-  config.after(:each, :snowplow) do
+  config.after(:example, :snowplow) do
     Gitlab::Tracking.send(:snowplow).flush
   end
 end

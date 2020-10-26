@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.configure do |config|
-  config.after(:each, :redis) do
+  config.after(:example, :redis) do
     Sidekiq.redis do |connection|
       connection.redis.flushdb
     end
   end
 
-  config.around(:each, :clean_gitlab_redis_cache) do |example|
+  config.around(:example, :clean_gitlab_redis_cache) do |example|
     redis_cache_cleanup!
 
     example.run
@@ -15,7 +15,7 @@ RSpec.configure do |config|
     redis_cache_cleanup!
   end
 
-  config.around(:each, :clean_gitlab_redis_shared_state) do |example|
+  config.around(:example, :clean_gitlab_redis_shared_state) do |example|
     redis_shared_state_cleanup!
 
     example.run
@@ -23,7 +23,7 @@ RSpec.configure do |config|
     redis_shared_state_cleanup!
   end
 
-  config.around(:each, :clean_gitlab_redis_queues) do |example|
+  config.around(:example, :clean_gitlab_redis_queues) do |example|
     redis_queues_cleanup!
 
     example.run

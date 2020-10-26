@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.configure do |config|
-  config.before(:each, :broken_storage) do
+  config.before(:example, :broken_storage) do
     allow(Gitlab::GitalyClient).to receive(:call) do
       raise GRPC::Unavailable.new('Gitaly broken in this spec')
     end

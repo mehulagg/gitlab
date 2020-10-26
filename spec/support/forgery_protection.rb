@@ -12,7 +12,7 @@ module ForgeryProtection
 end
 
 RSpec.configure do |config|
-  config.around(:each, :allow_forgery_protection) do |example|
+  config.around(:example, :allow_forgery_protection) do |example|
     ForgeryProtection.with_forgery_protection do
       example.call
     end

@@ -17,7 +17,7 @@ RSpec.configure do |config|
   end
 
   # Each example may call `migrate!`, so we must ensure we are migrated down every time
-  config.before(:each, :migration) do
+  config.before(:example, :migration) do
     use_fake_application_settings
 
     schema_migrate_down!

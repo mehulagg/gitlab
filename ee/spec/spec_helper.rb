@@ -21,7 +21,7 @@ RSpec.configure do |config|
     TestLicense.init
   end
 
-  config.around(:each, :geo_tracking_db) do |example|
+  config.around(:example, :geo_tracking_db) do |example|
     example.run if Gitlab::Geo.geo_database_configured?
   end
 end

@@ -68,7 +68,7 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
 
   # Add :full_backtrace tag to an example if full_backtrace output is desired
-  config.before(:each, full_backtrace: true) do |example|
+  config.before(:example, full_backtrace: true) do |example|
     config.full_backtrace = true
   end
 
@@ -366,7 +366,7 @@ RSpec.configure do |config|
 
   # This makes sure the `ApplicationController#can?` method is stubbed with the
   # original implementation for all view specs.
-  config.before(:each, type: :view) do
+  config.before(:example, type: :view) do
     allow(view).to receive(:can?) do |*args|
       Ability.allowed?(*args)
     end

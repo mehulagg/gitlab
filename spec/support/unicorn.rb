@@ -16,7 +16,7 @@ def request_body_class
 end
 
 RSpec.configure do |config|
-  config.before(:each, :unicorn) do
+  config.before(:example, :unicorn) do
     REQUEST_CLASSES.each do |request_class|
       allow_any_instance_of(request_class)
         .to receive(:body).and_wrap_original do |m, *args|
