@@ -35,7 +35,7 @@ export default {
 <template>
   <a
     :href="authorUrl"
-    :v-tooltip="showAuthorTooltip"
+    :v-gl-tooltip="showAuthorTooltip"
     :title="author.name"
     class="author-link inline"
   >
