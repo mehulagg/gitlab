@@ -1,11 +1,10 @@
 /* eslint-disable no-param-reassign */
-/* global ace */
 
 import Vue from 'vue';
+import { debounce } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
-import getModeByFileExtension from '~/lib/utils/ace_utils';
 
 (global => {
   global.mergeConflicts = global.mergeConflicts || {};
@@ -28,7 +27,6 @@ import getModeByFileExtension from '~/lib/utils/ace_utils';
     data() {
       return {
         saved: false,
-        loading: false,
         fileLoaded: false,
         originalContent: '',
       };
@@ -37,7 +35,6 @@ import getModeByFileExtension from '~/lib/utils/ace_utils';
       classObject() {
         return {
           saved: this.saved,
-          'is-loading': this.loading,
         };
       },
     },
@@ -45,11 +42,13 @@ import getModeByFileExtension from '~/lib/utils/ace_utils';
       'file.showEditor': function showEditorWatcher(val) {
         this.resetEditorContent();
 
-        if (!val || this.fileLoaded || this.loading) {
+        if (!val || this.fileLoaded) {
           return;
         }
 
-        this.loadEditor();
+        this.$nextTick(() => {
+          this.loadEditor();
+        });
       },
     },
     mounted() {
@@ -59,30 +58,33 @@ import getModeByFileExtension from '~/lib/utils/ace_utils';
     },
     methods: {
       loadEditor() {
-        this.loading = true;
+        this.editor = null;
 
-        axios
-          .get(this.file.content_path)
-          .then(({ data }) => {
-            const content = this.$el.querySelector('pre');
-            const fileContent = document.createTextNode(data.content);
+        const EditorPromise = import(/* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite');
+        const DataPromise = axios.get(this.file.content_path);
 
-            content.textContent = fileContent.textContent;
-
+        Promise.all([EditorPromise, DataPromise])
+          .then(([{ default: EditorLite }, { data }]) => {
+            const content = document.createTextNode(data.content).textContent;
+            const path = data.new_path;
             this.originalContent = data.content;
             this.fileLoaded = true;
-            this.editor = ace.edit(content);
-            this.editor.$blockScrolling = Infinity; // Turn off annoying warning
-            this.editor.getSession().setMode(getModeByFileExtension(data.new_path));
-            this.editor.on('change', () => {
-              this.saveDiffResolution();
+
+            const contentEl = this.$el.querySelector('.editor');
+
+            this.editor = new EditorLite().createInstance({
+              el: contentEl,
+              blobPath: path || '',
+              blobContent: content || '',
+              dimensions: {
+                height: contentEl.offsetHeight,
+                width: contentEl.offsetWidth,
+              },
             });
-            this.saveDiffResolution();
-            this.loading = false;
+            this.editor.onDidChangeModelContent(debounce(this.saveDiffResolution.bind(this), 250));
           })
           .catch(() => {
             flash(__('An error occurred while loading the file'));
-            this.loading = false;
           });
       },
       saveDiffResolution() {
