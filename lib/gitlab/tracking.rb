@@ -5,6 +5,7 @@ require 'snowplow-tracker'
 module Gitlab
   module Tracking
     SNOWPLOW_NAMESPACE = 'gl'
+    SNOWPLOW_DESTINATION = Gitlab::Tracking::Destinations::Snowplow.new
 
     module ControllerConcern
       extend ActiveSupport::Concern
@@ -21,25 +22,17 @@ module Gitlab
       end
     end
 
-    DESTINATIONS = [
-      Gitlab::Tracking::Destinations::Snowplow.new
-    ].freeze
-
     class << self
       def enabled?
         Gitlab::CurrentSettings.snowplow_enabled?
       end
 
       def event(category, action, label: nil, property: nil, value: nil, context: nil)
-        DESTINATIONS.each do |destination|
-          destination.event(category, action, label, property, value, context)
-        end
+        SNOWPLOW_DESTINATION.event(category, action, label: label, property: property, value: value, context: context)
       end
 
       def self_describing_event(schema_url, event_data_json, context: nil)
-        DESTINATIONS.each do |destination|
-          destination.self_describing_event(schema_url, event_data_json, context)
-        end
+        SNOWPLOW_DESTINATION.self_describing_event(schema_url, event_data_json, context: context)
       end
 
       def snowplow_options(group)
