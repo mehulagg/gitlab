@@ -178,7 +178,7 @@ export default {
       return this.$emit('create-new-integration', integrationPayload);
     },
     onReset() {
-      this.integrationForm = this.defaultFormState;
+      this.integrationForm = this.$options.defaultFormState;
       this.selectedIntegration = integrationTypesNew[0].value;
       this.onIntegrationTypeSelect();
     },
@@ -294,7 +294,7 @@ export default {
             :value="integrationForm.token"
           >
             <template #append>
-              <clipboard-button :text="integrationForm.token" :title="__('Copy')" class="gl-m-0!" />
+              <clipboard-button :text="integrationForm.token || ''" :title="__('Copy')" class="gl-m-0!" />
             </template>
           </gl-form-input-group>
 
