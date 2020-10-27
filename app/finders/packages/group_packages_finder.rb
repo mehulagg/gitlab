@@ -36,6 +36,10 @@ module Packages
     end
 
     def group_projects_visible_to_current_user
+      # according to project_policy.rb
+      # access to packages is ruled by:
+      # - project is public or the current user has access to it with at least the reporter level
+      # - the repository feature is available to the current_user
       ::Project
         .in_namespace(groups)
         .public_or_visible_to_user(current_user, Gitlab::Access::REPORTER)

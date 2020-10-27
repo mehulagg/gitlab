@@ -112,7 +112,9 @@ RSpec.describe Packages::GroupPackagesFinder do
             count = ActiveRecord::QueryRecorder.new { subject }
                                                .count
 
-            create_list(:nuget_package, 5, project: create(:project, namespace: subgroup))
+            Packages::Package.package_types.keys.each do |package_type|
+              create("#{package_type}_package", project: create(:project, namespace: subgroup))
+            end
 
             expect { described_class.new(user, group, params).execute }.not_to exceed_query_limit(count)
           end
