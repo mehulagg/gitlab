@@ -329,7 +329,7 @@ describe('AlertsSettingsWrapper', () => {
       expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
     });
 
-    it('shows an error alert when integration test payload fails ', async () => {
+    it('shows an error alert when integration test payload fails ', () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -338,9 +338,9 @@ describe('AlertsSettingsWrapper', () => {
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('test-payload-failure');
 
-      await waitForPromises();
-      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
-      expect(createFlash).toHaveBeenCalledTimes(1);
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
+      });
     });
   });
 
@@ -373,11 +373,9 @@ describe('AlertsSettingsWrapper', () => {
 
       await destroyHttpIntegration(wrapper);
 
-      await wrapper.vm.$nextTick(); // kick off the DOM update
-      await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-      await wrapper.vm.$nextTick(); // kick off the DOM update for flash
-
-      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
+      expect(createFlash).toHaveBeenCalledTimes(1);
     });
   });
 });
