@@ -125,3 +125,10 @@ weights are used to determine the storage location the repository will be create
 
 Beginning with GitLab 8.13.4, multiple paths can be chosen. New repositories
 will be randomly placed on one of the selected paths.
+
+## Moving a repository to a different repository path
+
+There is currently no way to move a repository to a different repository path through the UI.
+We have to use the [Edit project API](../api/projects.html#edit-project) to move the repository to a different repository path.
+
+After calling the API to update the project's `repository_storage`, the project will remain in read-only mode until GitLab finished moving the repository.
