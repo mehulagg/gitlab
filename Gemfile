@@ -523,6 +523,7 @@ gem 'ipaddress', '~> 0.8.3'
 
 # Secure-related
 gem 'ctags4ruby', '0.0.0',
-  :path => "/home/james/ws/dev/gitlab/vr/ctags4ruby"
+  :path => '/home/james/ws/dev/gitlab/vr/ctags4ruby'
+  #:branch => "useffi"
   #:git => 'git@gitlab.com:gitlab-org/secure/vulnerability-research/pocs/ctags4ruby.git',
   #:tag => 'v0.0.0'

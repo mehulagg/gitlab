@@ -7,7 +7,6 @@ module Gitlab
         class Finding
           UNSAFE_SEVERITIES = %w[unknown high critical].freeze
 
-          attr_reader :compare_key
           attr_reader :confidence
           attr_reader :identifiers
           attr_reader :location
@@ -24,8 +23,7 @@ module Gitlab
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
-            @compare_key = compare_key
+          def initialize(identifiers:, location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
             @confidence = confidence
             @identifiers = identifiers
             @location = location
@@ -43,7 +41,6 @@ module Gitlab
 
           def to_hash
             %i[
-              compare_key
               confidence
               identifiers
               location

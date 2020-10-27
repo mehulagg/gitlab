@@ -12,9 +12,13 @@ module Gitlab
               other.fingerprint == fingerprint
             end
 
+            def fingerprint_type
+              ""
+            end
+
             def fingerprint
               strong_memoize(:fingerprint) do
-                Digest::SHA1.hexdigest(fingerprint_data)
+                "#{fingerprint_type}:#{Digest::SHA1.hexdigest(fingerprint_data)}"
               end
             end
 
