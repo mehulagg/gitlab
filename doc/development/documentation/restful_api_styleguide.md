@@ -144,6 +144,19 @@ quotes.
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data '{"path": "my-group", "name": "My group"}' "https://gitlab.example.com/api/v4/groups"
 ```
 
+For readability, you can also set up the `--data` in JSON format:
+
+```shell
+curl --request POST \
+  --url "https://gitlab.example.com/api/v4/groups" \
+  --header "content-type: application/json" \
+  --header "PRIVATE-TOKEN: <your_access_token>" \
+  --data '{
+    "path": "my-group",
+    "name": "My group"
+}'
+```
+
 ### Post data using form-data
 
 Instead of using JSON or urlencode you can use multipart/form-data which
