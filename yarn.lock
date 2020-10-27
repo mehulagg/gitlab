@@ -866,10 +866,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.173.0.tgz#4030cdbb8efb7386941169fc9cefda1bae75b282"
   integrity sha512-EmfoLgh0Jnz7i28zHROnwvpOcdPaavAXJEpSg8JfbYw9KcWlJyr4Zm5V6h38dNU5AcUFG1/qjUtFbfgmyBx4gA==
 
-"@gitlab/ui@21.35.2":
-  version "21.35.2"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-21.35.2.tgz#2409b3f2979f470b4072e42e32393f024a70630e"
-  integrity sha512-2/kdx7wXVC59UJjk2tC+HViLhDGVm0Jj/FeIQLHeJYVn0R2ZaEYAkevjyXRN33TuOcRHnInQjVXwSclCdQ7K5A==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/813174927/artifacts/raw/gitlab-ui.fix-disappearing-modal-slots.tgz":
+  version "21.38.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/813174927/artifacts/raw/gitlab-ui.fix-disappearing-modal-slots.tgz#9d555ffd3db1c3684532ac220803dfedb724ea4f"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
