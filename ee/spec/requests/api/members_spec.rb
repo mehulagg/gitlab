@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe API::Members do
   context 'group members endpoints for group with minimal access feature' do
     let_it_be(:group) { create(:group) }
-    let(:owner) { create(:user) }
     let_it_be(:minimal_access_member) { create(:group_member, :minimal_access, source: group) }
+    let_it_be(:owner) { create(:user) }
 
     before do
       group.add_owner(owner)

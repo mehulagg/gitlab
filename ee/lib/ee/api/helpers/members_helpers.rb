@@ -33,6 +33,7 @@ module EE
         def source_members(source)
           return super if source.is_a?(Project)
           return super unless source.minimal_access_role_allowed?
+
           source.all_group_members.where.not(user_id: nil)
         end
         # rubocop: enable CodeReuse/ActiveRecord
