@@ -27,7 +27,6 @@ RSpec.describe ProjectsController do
         allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
           expect(checker).to receive(:above_size_limit?).and_return(true)
         end
-        allow(controller).to receive(:current_user).and_return(user)
 
         subject
 
@@ -44,7 +43,6 @@ RSpec.describe ProjectsController do
         allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
           expect(checker).to receive(:above_size_limit?).and_return(true)
         end
-        allow(controller).to receive(:current_user).and_return(user)
 
         subject
 
