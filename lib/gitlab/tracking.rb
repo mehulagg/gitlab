@@ -33,10 +33,7 @@ module Gitlab
       end
 
       def self_describing_event(schema_url, event_data_json, context: nil)
-        return unless enabled?
-
-        event_json = SnowplowTracker::SelfDescribingJson.new(schema_url, event_data_json)
-        snowplow.track_self_describing_event(event_json, context, (Time.now.to_f * 1000).to_i)
+        @destination.self_describing_event(schema_url, event_data_json, context: nil)
       end
 
       def snowplow_options(group)
@@ -49,24 +46,6 @@ module Gitlab
           form_tracking: additional_features,
           link_click_tracking: additional_features
         }.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
-      end
-
-      private
-
-      def snowplow
-        @snowplow ||= SnowplowTracker::Tracker.new(
-          emitter,
-          SnowplowTracker::Subject.new,
-          SNOWPLOW_NAMESPACE,
-          Gitlab::CurrentSettings.snowplow_app_id
-        )
-      end
-
-      def emitter
-        SnowplowTracker::AsyncEmitter.new(
-          Gitlab::CurrentSettings.snowplow_collector_hostname,
-          protocol: 'https'
-        )
       end
     end
   end

@@ -7,6 +7,10 @@ module Gitlab
         def event(category, action, label: nil, property: nil, value: nil, context: nil)
           raise NotImplementedError, "#{self} does not implement #{__method__}"
         end
+
+        def self_describing_event(schema_url, event_data_json, context: nil)
+          raise NotImplementedError, "#{self} does not implement #{__method__}"
+        end
       end
     end
   end

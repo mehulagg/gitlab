@@ -14,6 +14,11 @@ module Gitlab
           snowplow.track_struct_event(category, action, label, property, value, context, (Time.now.to_f * 1000).to_i)
         end
 
+        override :self_describing_event
+        def self_describing_event(schema_url, event_data_json, context: nil)
+          # NOOP
+        end
+
         private
 
         def event_allowed?(category, action)
