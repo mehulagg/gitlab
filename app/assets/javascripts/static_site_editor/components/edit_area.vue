@@ -41,6 +41,10 @@ export default {
       type: Array,
       required: true,
     },
+    project: {
+      type: String,
+      required: true,
+    },
     imageRoot: {
       type: String,
       required: false,
@@ -137,6 +141,7 @@ export default {
       :content="editableContent"
       :initial-edit-type="editorMode"
       :image-root="imageRoot"
+      :options="{ mounts, project }"
       class="mb-9 pb-6 h-100"
       @modeChange="onModeChange"
       @input="onInputChange"

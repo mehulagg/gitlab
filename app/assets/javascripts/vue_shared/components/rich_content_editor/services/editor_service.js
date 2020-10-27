@@ -87,8 +87,9 @@ export const registerHTMLToMarkdownRenderer = editorApi => {
 };
 
 export const getEditorOptions = externalOptions => {
+  const { customRenderers, mounts, project } = externalOptions;
   return defaults({
-    customHTMLRenderer: buildCustomHTMLRenderer(externalOptions?.customRenderers),
+    customHTMLRenderer: buildCustomHTMLRenderer(customRenderers, { mounts, project }),
     toolbarItems: TOOLBAR_ITEM_CONFIGS.map(toolbarItem => generateToolbarItem(toolbarItem)),
     customHTMLSanitizer: html => sanitizeHTML(html),
   });

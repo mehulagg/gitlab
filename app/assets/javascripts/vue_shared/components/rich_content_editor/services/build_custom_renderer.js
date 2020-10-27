@@ -7,6 +7,7 @@ import renderFontAwesomeHtmlInline from './renderers/render_font_awesome_html_in
 import renderSoftbreak from './renderers/render_softbreak';
 import renderAttributeDefinition from './renderers/render_attribute_definition';
 import renderListItem from './renderers/render_list_item';
+import renderImage from './renderers/render_image';
 
 const htmlInlineRenderers = [renderFontAwesomeHtmlInline];
 const htmlBlockRenderers = [renderBlockHtml];
@@ -15,14 +16,15 @@ const paragraphRenderers = [renderIdentifierParagraph, renderBlockHtml];
 const textRenderers = [renderIdentifierInstanceText, renderAttributeDefinition];
 const listItemRenderers = [renderListItem];
 const softbreakRenderers = [renderSoftbreak];
+const imageRenderers = [renderImage];
 
-const executeRenderer = (renderers, node, context) => {
+const executeRenderer = (renderers, node, context, meta) => {
   const availableRenderer = renderers.find(renderer => renderer.canRender(node, context));
 
-  return availableRenderer ? availableRenderer.render(node, context) : context.origin();
+  return availableRenderer ? availableRenderer.render(node, context, meta) : context.origin();
 };
 
-const buildCustomHTMLRenderer = customRenderers => {
+const buildCustomHTMLRenderer = (customRenderers, meta) => {
   const renderersByType = {
     ...customRenderers,
     htmlBlock: union(htmlBlockRenderers, customRenderers?.htmlBlock),
@@ -32,10 +34,11 @@ const buildCustomHTMLRenderer = customRenderers => {
     paragraph: union(paragraphRenderers, customRenderers?.paragraph),
     text: union(textRenderers, customRenderers?.text),
     softbreak: union(softbreakRenderers, customRenderers?.softbreak),
+    image: union(imageRenderers, customRenderers?.image),
   };
 
   return mapValues(renderersByType, renderers => {
-    return (node, context) => executeRenderer(renderers, node, context);
+    return (node, context) => executeRenderer(renderers, node, context, meta);
   });
 };
 
