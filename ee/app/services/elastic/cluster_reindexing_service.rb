@@ -90,7 +90,13 @@ module Elastic
     def check_task_status
       save_documents_count!(refresh: false)
 
-      task_status = elastic_helper.task_status(task_id: current_task.elastic_task)
+      task_status = begin
+                      elastic_helper.task_status(task_id: current_task.elastic_task)
+                    rescue
+                      abort_reindexing!("Couldn't load task status")
+                      return false
+                    end
+
       return false unless task_status['completed']
 
       reindexing_error = task_status.dig('error', 'type')
