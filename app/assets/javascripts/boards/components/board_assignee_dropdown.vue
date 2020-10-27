@@ -31,23 +31,25 @@ export default {
         return !this.selectedUserNames.includes(username);
       });
     },
+    selectedIsEmpty() {
+      return this.selected.length === 0;
+    },
     selectedUserNames() {
-      if (this.selected.length === 0) {
+      if (this.selectedIsEmpty) {
         return [];
       }
 
       return this.selected.map(({ username }) => username);
     },
-    selectedIsEmpty() {
-      return this.selected.length === 0;
-    },
   },
   mounted() {
-    this.getIssueParticipants(`gid://gitlab/Issue/${this.getActiveIssue.iid}`).then(({ data }) => {
-      this.list = data.issue.participants.edges.map(node => {
-        return node.node;
-      });
-    });
+    this.getIssueParticipants(`gid://gitlab/Issue/${this.getActiveIssue.iid}`)
+      .then(({ data }) => {
+        this.list = data.issue.participants.edges.map(({ node }) => {
+          return node;
+        });
+      })
+      .catch(e => console.log(e));
   },
   methods: {
     ...mapActions(['getIssueParticipants', 'setAssignees']),
@@ -84,8 +86,12 @@ export default {
     <template #default>
       <assignees-dropdown class="w-100" text="Assignees" header-text="Assign To">
         <template #items>
-          <gl-dropdown-item :is-checked="selectedIsEmpty" class="mt-2" @click="selectAssignee()"
-            ><li>{{ $options.unassignText }}</li></gl-dropdown-item
+          <gl-dropdown-item
+            :is-checked="selectedIsEmpty"
+            data-testid="unassign"
+            class="mt-2"
+            @click="selectAssignee()"
+            >{{ $options.unassignText }}</gl-dropdown-item
           >
           <gl-dropdown-divider />
           <gl-dropdown-item
@@ -108,6 +114,7 @@ export default {
           <gl-dropdown-item
             v-for="unselectedUser in unSelectedFiltered"
             :key="unselectedUser.id"
+            :data-testid="`item_${unselectedUser.name}`"
             :user="unselectedUser"
             @click="selectAssignee(unselectedUser)"
           >
