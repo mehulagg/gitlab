@@ -73,6 +73,12 @@ RSpec.shared_examples 'project access tokens available #create' do
       end
     end
 
+    it 'does not create the token' do
+      expect { subject }.not_to change { User.count }
+      expect { subject }.not_to change { Member.count }
+      expect { subject }.not_to change { PersonalAccessToken.count }
+    end
+
     it 'shows a failure alert' do
       subject
 
