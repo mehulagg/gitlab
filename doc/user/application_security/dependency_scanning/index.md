@@ -146,6 +146,9 @@ gemnasium-dependency_scanning:
 Dependency scanning can be [configured](#customizing-the-dependency-scanning-settings)
 using environment variables.
 
+Dependency Scanning analyzers might support CI variables that are not listed in this documentation.
+These variables should be considered as experimental, and can be renamed or removed at any time.
+
 #### Configuring dependency scanning
 
 The following variables allow configuration of global dependency scanning settings.
