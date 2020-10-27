@@ -7,6 +7,15 @@ import { joinPaths } from '~/lib/utils/url_utility';
 import { clearDomElement } from './utils';
 import { EDITOR_LITE_INSTANCE_ERROR_NO_EL, URI_PREFIX } from './constants';
 
+// Code taken from: https://gist.github.com/6174/6062387
+const getRandomString = () =>
+  Math.random()
+  .toString(36)
+  .substring(2, 15) +
+  Math.random()
+  .toString(36)
+  .substring(2, 15);
+
 export default class Editor {
   constructor(options = {}) {
     this.instances = [];
@@ -72,7 +81,7 @@ export default class Editor {
     el = undefined,
     blobPath = '',
     blobContent = '',
-    blobGlobalId = '',
+    blobGlobalId = getRandomString(),
     extensions = [],
     ...instanceOptions
   } = {}) {
