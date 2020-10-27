@@ -106,7 +106,7 @@ curl --header 'Content-Type: application/json' --request POST --data '{"name": "
 | `deploy_access_levels`          | array          | yes | Array of access levels allowed to deploy, with each described by a hash. |
 
 Elements in the `deploy_access_levels` array should be one of `user_id`, `group_id` or
-`access_level` and take the form `{user_id: integer}`, `{group_id: integer}` or
+`access_level`, and take the form `{user_id: integer}`, `{group_id: integer}` or
 `{access_level: integer}`.
 Each user must have access to the project and each group must [have this project shared](../user/project/members/share_project_with_groups.md).
 
