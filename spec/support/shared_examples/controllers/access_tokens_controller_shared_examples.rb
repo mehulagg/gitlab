@@ -73,7 +73,11 @@ RSpec.shared_examples 'project access tokens available #create' do
       end
     end
 
-    it { expect(subject).to render_template(:index) }
+    it 'shows a failure alert' do
+      subject
+
+      expect(response.flash[:alert]).to match("Failed to create new project access token: Failed!")
+    end
   end
 end
 
