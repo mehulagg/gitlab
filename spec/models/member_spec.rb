@@ -477,7 +477,7 @@ RSpec.describe Member do
           end
 
           context 'when called with an unknown user email starting with a number' do
-            it 'creates an invited member', :aggregate_failures do
+            it 'creates an invited member' do
               email_starting_with_number = "#{user.id}_email@example.com"
 
               described_class.add_user(source, email_starting_with_number, :maintainer)

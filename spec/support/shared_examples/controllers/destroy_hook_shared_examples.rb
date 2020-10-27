@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Web hook destroyer' do
-  it 'displays a message about synchronous delete', :aggregate_failures do
+  it 'displays a message about synchronous delete' do
     expect_next_instance_of(WebHooks::DestroyService) do |instance|
       expect(instance).to receive(:execute).with(anything).and_call_original
     end
@@ -12,7 +12,7 @@ RSpec.shared_examples 'Web hook destroyer' do
     expect(flash[:notice]).to eq("#{hook.model_name.human} was deleted")
   end
 
-  it 'displays a message about async delete', :aggregate_failures do
+  it 'displays a message about async delete' do
     expect_next_instance_of(WebHooks::DestroyService) do |instance|
       expect(instance).to receive(:execute).with(anything).and_return({ status: :success, async: true } )
     end
@@ -23,7 +23,7 @@ RSpec.shared_examples 'Web hook destroyer' do
     expect(flash[:notice]).to eq("#{hook.model_name.human} was scheduled for deletion")
   end
 
-  it 'displays an error if deletion failed', :aggregate_failures do
+  it 'displays an error if deletion failed' do
     expect_next_instance_of(WebHooks::DestroyService) do |instance|
       expect(instance).to receive(:execute).with(anything).and_return({ status: :error, async: true, message: "failed" } )
     end

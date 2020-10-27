@@ -9,7 +9,7 @@ RSpec.describe API::Entities::SSHKey do
     let(:key) { create(:key, user: create(:user)) }
     let(:entity) { described_class.new(key) }
 
-    it 'includes basic fields', :aggregate_failures do
+    it 'includes basic fields' do
       is_expected.to include(
         id: key.id,
         title: key.title,

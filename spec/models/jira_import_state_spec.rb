@@ -174,7 +174,7 @@ RSpec.describe JiraImportState do
     context 'when jira import has no error_message' do
       let(:jira_import) { build(:jira_import_state, project: project)}
 
-      it 'does not run the callback', :aggregate_failures do
+      it 'does not run the callback' do
         expect { jira_import.save }.to change { JiraImportState.count }.by(1)
         expect(jira_import.reload.error_message).to be_nil
       end
@@ -183,7 +183,7 @@ RSpec.describe JiraImportState do
     context 'when jira import error_message does not exceed the limit' do
       let(:jira_import) { build(:jira_import_state, project: project, error_message: 'error')}
 
-      it 'does not run the callback', :aggregate_failures do
+      it 'does not run the callback' do
         expect { jira_import.save }.to change { JiraImportState.count }.by(1)
         expect(jira_import.reload.error_message).to eq('error')
       end
@@ -192,7 +192,7 @@ RSpec.describe JiraImportState do
     context 'when error_message exceeds limit' do
       let(:jira_import) { build(:jira_import_state, project: project, error_message: 'error message longer than the limit')}
 
-      it 'truncates error_message to the limit', :aggregate_failures do
+      it 'truncates error_message to the limit' do
         expect { jira_import.save! }.to change { JiraImportState.count }.by(1)
         expect(jira_import.reload.error_message.size).to eq 10
       end

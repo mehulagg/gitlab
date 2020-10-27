@@ -42,7 +42,7 @@ RSpec.describe 'Projects > Activity > User sees design Activity', :js do
       expect(page).to have_content(design_activity(archiver, 'archived'))
     end
 
-    it 'allows filtering out the design events', :aggregate_failures do
+    it 'allows filtering out the design events' do
       visit activity_project_path(project, event_filter: EventFilter::ISSUE)
 
       expect(page).not_to have_content(design_activity(uploader, 'uploaded'))
@@ -51,7 +51,7 @@ RSpec.describe 'Projects > Activity > User sees design Activity', :js do
       expect(page).not_to have_content(design_activity(archiver, 'archived'))
     end
 
-    it 'allows filtering in the design events', :aggregate_failures do
+    it 'allows filtering in the design events' do
       visit activity_project_path(project, event_filter: EventFilter::DESIGNS)
 
       expect(page).not_to have_content('joined project')

@@ -23,7 +23,7 @@ RSpec.describe IncidentManagement::Incidents::CreateService do
         expect { create_incident }.to change(Issue, :count).by(1)
       end
 
-      it 'created issue has correct attributes', :aggregate_failures do
+      it 'created issue has correct attributes' do
         create_incident
 
         expect(new_issue.title).to eq(title)

@@ -643,7 +643,7 @@ RSpec.describe Project, factory_default: :keep do
       end
 
       context 'when full is true' do
-        it 'returns complete path to the project', :aggregate_failures do
+        it 'returns complete path to the project' do
           be_full_path = eq('sample-namespace/sample-project')
 
           expect(project.to_reference_base(full: true)).to be_full_path

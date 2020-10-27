@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'misconfigured dashboard service response' do |status_code, message = nil|
-  it 'returns an appropriate message and status code', :aggregate_failures do
+  it 'returns an appropriate message and status code' do
     result = service_call
 
     expect(result.keys).to contain_exactly(:message, :http_status, :status)
@@ -100,7 +100,7 @@ RSpec.shared_examples 'valid dashboard cloning process' do |dashboard_template, 
       }
     end
 
-    it 'delegates commit creation to Files::CreateService', :aggregate_failures do
+    it 'delegates commit creation to Files::CreateService' do
       service_instance = instance_double(::Files::CreateService)
       allow(::Gitlab::Metrics::Dashboard::Processor).to receive(:new).and_return(double(process: file_content_hash))
       expect(::Files::CreateService).to receive(:new).with(project, user, dashboard_attrs).and_return(service_instance)
@@ -110,7 +110,7 @@ RSpec.shared_examples 'valid dashboard cloning process' do |dashboard_template, 
     end
 
     context 'user has defined custom metrics' do
-      it 'uses external service to includes them into new file content', :aggregate_failures do
+      it 'uses external service to includes them into new file content' do
         service_instance = double(::Gitlab::Metrics::Dashboard::Processor)
         expect(::Gitlab::Metrics::Dashboard::Processor).to receive(:new).with(project, file_content_hash, sequence, {}).and_return(service_instance)
         expect(service_instance).to receive(:process).and_return(file_content_hash)
@@ -134,7 +134,7 @@ RSpec.shared_examples 'valid dashboard update process' do
     }
   end
 
-  it 'delegates commit creation to Files::UpdateService', :aggregate_failures do
+  it 'delegates commit creation to Files::UpdateService' do
     service_instance = instance_double(::Files::UpdateService)
     expect(::Files::UpdateService).to receive(:new).with(project, user, dashboard_attrs).and_return(service_instance)
     expect(service_instance).to receive(:execute).and_return(status: :success)
@@ -144,7 +144,7 @@ RSpec.shared_examples 'valid dashboard update process' do
 end
 
 RSpec.shared_examples 'misconfigured dashboard service response with stepable' do |status_code, message = nil|
-  it 'returns an appropriate message and status code', :aggregate_failures do
+  it 'returns an appropriate message and status code' do
     result = service_call
 
     expect(result.keys).to contain_exactly(:message, :http_status, :status, :last_step)

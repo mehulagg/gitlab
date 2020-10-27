@@ -281,7 +281,7 @@ RSpec.describe API::Services do
       )
     end
 
-    it 'accepts branches_to_be_notified for update', :aggregate_failures do
+    it 'accepts branches_to_be_notified for update' do
       put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(branches_to_be_notified: 'all')
 
       expect(response).to have_gitlab_http_status(:ok)

@@ -132,7 +132,7 @@ RSpec.describe Groups::ContributionAnalyticsController do
       create_push_event(user3, project)
     end
 
-    it 'sets instance variables properly', :aggregate_failures do
+    it 'sets instance variables properly' do
       get :show, params: { group_id: group.path }
 
       expect(response).to have_gitlab_http_status(:ok)

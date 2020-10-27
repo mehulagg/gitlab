@@ -34,7 +34,7 @@ RSpec.describe Gitlab::Metrics::SidekiqMiddleware do
       expect(message).to include(db_count: 1, db_write_count: 0, db_cached_count: 0)
     end
 
-    it 'tracks the transaction (for messages without `enqueued_at`)', :aggregate_failures do
+    it 'tracks the transaction (for messages without `enqueued_at`)' do
       worker = double(:worker, class: double(:class, name: 'TestWorker'))
 
       expect(Gitlab::Metrics::BackgroundTransaction).to receive(:new)
@@ -47,7 +47,7 @@ RSpec.describe Gitlab::Metrics::SidekiqMiddleware do
       middleware.call(worker, {}, :test) { nil }
     end
 
-    it 'tracks any raised exceptions', :aggregate_failures, :request_store do
+    it 'tracks any raised exceptions', :request_store do
       worker = double(:worker, class: double(:class, name: 'TestWorker'))
 
       expect_any_instance_of(Gitlab::Metrics::Transaction)

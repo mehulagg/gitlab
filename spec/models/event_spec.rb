@@ -493,10 +493,10 @@ RSpec.describe Event do
       end
     end
 
-    context 'wiki-page event', :aggregate_failures do
+    context 'wiki-page event' do
       let(:event) { create(:wiki_page_event, project: project) }
 
-      context 'on private project', :aggregate_failures do
+      context 'on private project' do
         let(:project) { create(:project, :wiki_repo) }
 
         context 'when admin mode enabled', :enable_admin_mode do
@@ -512,7 +512,7 @@ RSpec.describe Event do
         end
       end
 
-      context 'wiki-page event on public project', :aggregate_failures do
+      context 'wiki-page event on public project' do
         let(:project) { create(:project, :public, :wiki_repo) }
 
         include_examples 'visibility examples' do
@@ -738,7 +738,7 @@ RSpec.describe Event do
       end.to_h
     end
 
-    it 'passes a sanity check', :aggregate_failures do
+    it 'passes a sanity check' do
       expect(all_valid_events.values).to all(be_valid)
     end
 
@@ -754,7 +754,7 @@ RSpec.describe Event do
       end
 
       context 'for any other event' do
-        it 'has no wiki_page and is not a wiki_page', :aggregate_failures do
+        it 'has no wiki_page and is not a wiki_page' do
           all_valid_events.each do |k, event|
             next if k == :wiki_page_meta
 
@@ -774,7 +774,7 @@ RSpec.describe Event do
       end
 
       context 'for any other event' do
-        it 'has no design and is not a design', :aggregate_failures do
+        it 'has no design and is not a design' do
           all_valid_events.each do |k, event|
             next if k == :design
 

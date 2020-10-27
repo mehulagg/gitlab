@@ -171,7 +171,7 @@ RSpec.describe Issues::UpdateService do
           group.add_maintainer(user)
         end
 
-        context 'when EpicIssues::CreateService returns failure', :aggregate_failures do
+        context 'when EpicIssues::CreateService returns failure' do
           it 'does not send usage data for added or changed epic action' do
             link_sevice = double
             expect(EpicIssues::CreateService).to receive(:new)
@@ -285,7 +285,7 @@ RSpec.describe Issues::UpdateService do
             subject
           end
 
-          context 'but EpicIssues::DestroyService returns failure', :aggregate_failures do
+          context 'but EpicIssues::DestroyService returns failure' do
             it 'does not send usage data for removed epic action' do
               link_sevice = double
               expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)

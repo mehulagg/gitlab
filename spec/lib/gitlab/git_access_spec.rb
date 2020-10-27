@@ -234,7 +234,7 @@ RSpec.describe Gitlab::GitAccess do
         stub_application_setting(rsa_key_restriction: 4096)
       end
 
-      it 'does not allow keys which are too small', :aggregate_failures do
+      it 'does not allow keys which are too small' do
         expect(actor).not_to be_valid
         expect { pull_access_check }.to raise_forbidden('Your SSH key must be at least 4096 bits.')
         expect { push_access_check }.to raise_forbidden('Your SSH key must be at least 4096 bits.')
@@ -246,7 +246,7 @@ RSpec.describe Gitlab::GitAccess do
         stub_application_setting(rsa_key_restriction: ApplicationSetting::FORBIDDEN_KEY_VALUE)
       end
 
-      it 'does not allow keys which are too small', :aggregate_failures do
+      it 'does not allow keys which are too small' do
         expect(actor).not_to be_valid
         expect { pull_access_check }.to raise_forbidden(/Your SSH key type is forbidden/)
         expect { push_access_check }.to raise_forbidden(/Your SSH key type is forbidden/)
@@ -1085,13 +1085,13 @@ RSpec.describe Gitlab::GitAccess do
          -> { push_access_check }]
       end
 
-      it 'blocks access when the user did not accept terms', :aggregate_failures do
+      it 'blocks access when the user did not accept terms' do
         actions.each do |action|
           expect { action.call }.to raise_forbidden(/must accept the Terms of Service in order to perform this action/)
         end
       end
 
-      it 'allows access when the user accepted the terms', :aggregate_failures do
+      it 'allows access when the user accepted the terms' do
         accept_terms(user)
 
         actions.each do |action|

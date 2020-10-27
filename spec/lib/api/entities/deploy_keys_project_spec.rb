@@ -9,7 +9,7 @@ RSpec.describe API::Entities::DeployKeysProject do
     let(:deploy_keys_project) { create(:deploy_keys_project, :write_access) }
     let(:entity) { described_class.new(deploy_keys_project) }
 
-    it 'includes basic fields', :aggregate_failures do
+    it 'includes basic fields' do
       deploy_key = deploy_keys_project.deploy_key
 
       is_expected.to include(

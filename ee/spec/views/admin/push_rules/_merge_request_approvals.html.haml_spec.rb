@@ -22,7 +22,7 @@ RSpec.describe 'admin/push_rules/_merge_request_approvals' do
       allow(view).to receive(:show_compliance_merge_request_approval_settings?).and_return(true)
     end
 
-    it 'shows compliance framework content', :aggregate_failures do
+    it 'shows compliance framework content' do
       render
 
       expect(rendered).to have_content('Regulate approvals by authors/committers')
@@ -35,7 +35,7 @@ RSpec.describe 'admin/push_rules/_merge_request_approvals' do
       allow(view).to receive(:show_compliance_merge_request_approval_settings?).and_return(false)
     end
 
-    it 'shows non-compliance framework content', :aggregate_failures do
+    it 'shows non-compliance framework content' do
       render
 
       expect(rendered).to have_content('Settings to prevent self-approval across all projects')

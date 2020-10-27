@@ -22,7 +22,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   end
 
   shared_examples 'successful creation' do
-    it 'creates bridge jobs correctly', :aggregate_failures do
+    it 'creates bridge jobs correctly' do
       pipeline = create_pipeline!
 
       test = pipeline.statuses.find_by(name: 'test')

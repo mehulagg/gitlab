@@ -59,13 +59,13 @@ RSpec.describe DesignManagement::SaveDesignsService do
   let(:response) { run_service }
 
   shared_examples 'a service error' do
-    it 'returns an error', :aggregate_failures do
+    it 'returns an error' do
       expect(response).to match(a_hash_including(status: :error))
     end
   end
 
   shared_examples 'an execution error' do
-    it 'returns an error', :aggregate_failures do
+    it 'returns an error' do
       expect { service.execute }.to raise_error(some_error)
     end
   end
@@ -102,7 +102,7 @@ RSpec.describe DesignManagement::SaveDesignsService do
         end
       end
 
-      it 'creates a commit, an event in the activity stream and updates the creation count', :aggregate_failures do
+      it 'creates a commit, an event in the activity stream and updates the creation count' do
         counter = Gitlab::UsageDataCounters::DesignsCounter
 
         expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_designs_added_action).with(author: user)

@@ -17,7 +17,7 @@ RSpec.describe Gitlab::Metrics::Dashboard::Stages::PanelIdsInserter do
     let(:dashboard) { load_sample_dashboard.deep_symbolize_keys }
 
     context 'when dashboard panels are present' do
-      it 'assigns unique ids to each panel using PerformanceMonitoring::PrometheusPanel', :aggregate_failures do
+      it 'assigns unique ids to each panel using PerformanceMonitoring::PrometheusPanel' do
         dashboard.fetch(:panel_groups).each do |group|
           group.fetch(:panels).each do |panel|
             panel_double = instance_double(::PerformanceMonitoring::PrometheusPanel)

@@ -409,7 +409,7 @@ RSpec.describe NotificationService, :mailer do
             reset_delivered_emails!
           end
 
-          it 'sends emails to recipients', :aggregate_failures do
+          it 'sends emails to recipients' do
             subject
 
             expect_delivery_jobs_count(10)
@@ -1799,7 +1799,7 @@ RSpec.describe NotificationService, :mailer do
         update_custom_notification(:change_reviewer_merge_request, @u_custom_global)
       end
 
-      it 'sends emails to relevant users only', :aggregate_failures do
+      it 'sends emails to relevant users only' do
         notification.changed_reviewer_of_merge_request(merge_request, current_user, [reviewer])
 
         merge_request.reviewers.each { |reviewer| should_email(reviewer) }

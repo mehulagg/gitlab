@@ -26,7 +26,7 @@ RSpec.describe Releases::UpdateService do
             stub_licensed_features(group_milestone_project_releases: true)
           end
 
-          it 'adds the group milestone', :aggregate_failures do
+          it 'adds the group milestone' do
             result = service.execute
             release.reload
 
@@ -36,7 +36,7 @@ RSpec.describe Releases::UpdateService do
         end
 
         context 'when unlicensed' do
-          it 'returns an error', :aggregate_failures do
+          it 'returns an error' do
             result = service.execute
 
             expect(result[:status]).to eq(:error)
@@ -58,7 +58,7 @@ RSpec.describe Releases::UpdateService do
             stub_licensed_features(group_milestone_project_releases: true)
           end
 
-          it 'replaces the project milestone with the group milestone', :aggregate_failures do
+          it 'replaces the project milestone with the group milestone' do
             result = service.execute
             release.reload
 
@@ -68,7 +68,7 @@ RSpec.describe Releases::UpdateService do
         end
 
         context 'when unlicensed' do
-          it 'returns an error', :aggregate_failures do
+          it 'returns an error' do
             result = service.execute
 
             expect(result[:status]).to eq(:error)
@@ -85,7 +85,7 @@ RSpec.describe Releases::UpdateService do
           release.milestones << project_milestone
         end
 
-        it 'clears the milestone array', :aggregate_failures do
+        it 'clears the milestone array' do
           result = service.execute
           release.reload
 

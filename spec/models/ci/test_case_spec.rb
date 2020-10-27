@@ -16,7 +16,7 @@ RSpec.describe Ci::TestCase do
   end
 
   describe '.find_or_create_by_batch' do
-    it 'finds or creates records for the given test case keys', :aggregate_failures do
+    it 'finds or creates records for the given test case keys' do
       project = create(:project)
       existing_tc = create(:ci_test_case, project: project)
       new_key = Digest::SHA256.hexdigest(SecureRandom.hex)

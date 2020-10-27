@@ -43,7 +43,7 @@ RSpec.describe UserRecentEventsFinder do
       let_it_be(:event_a) { create(:design_event, author: project_owner) }
       let_it_be(:event_b) { create(:design_event, author: project_owner) }
 
-      it 'only includes design events', :aggregate_failures do
+      it 'only includes design events' do
         events = finder.execute
 
         expect(events).to include(event_a)

@@ -89,7 +89,7 @@ RSpec.describe Projects::TransferService do
       execute_transfer
     end
 
-    it 'moves the disk path', :aggregate_failures do
+    it 'moves the disk path' do
       old_path = project.repository.disk_path
       old_full_path = project.repository.full_path
 
@@ -377,7 +377,7 @@ RSpec.describe Projects::TransferService do
       group.add_owner(user)
     end
 
-    it 'does not move the disk path', :aggregate_failures do
+    it 'does not move the disk path' do
       new_full_path = "#{group.full_path}/#{project.path}"
 
       execute_transfer
@@ -391,7 +391,7 @@ RSpec.describe Projects::TransferService do
       expect(project.disk_path).to eq(old_disk_path)
     end
 
-    it 'does not move the disk path when the transfer fails', :aggregate_failures do
+    it 'does not move the disk path when the transfer fails' do
       old_full_path = project.full_path
 
       expect_next_instance_of(described_class) do |service|
@@ -474,7 +474,7 @@ RSpec.describe Projects::TransferService do
           )
         end
 
-        it 'does not move the repository when an error occurs', :aggregate_failures do
+        it 'does not move the repository when an error occurs' do
           allow(subject).to receive(:execute_system_hooks).and_raise('foo')
           expect { subject.execute(group) }.to raise_error('foo')
 

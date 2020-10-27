@@ -220,7 +220,7 @@ RSpec.describe Gitlab::CodeOwners::File do
         expect(entry.owner_line).to include('root-docs')
       end
 
-      it 'allows matching files nested anywhere in the repository', :aggregate_failures do
+      it 'allows matching files nested anywhere in the repository' do
         lib_entry = file.entry_for_path('lib/gitlab/git/repository.rb').first
         other_lib_entry = file.entry_for_path('ee/lib/gitlab/git/repository.rb').first
 
@@ -228,7 +228,7 @@ RSpec.describe Gitlab::CodeOwners::File do
         expect(other_lib_entry.owner_line).to include('lib-owner')
       end
 
-      it 'allows allows limiting the matching files to the root of the repository', :aggregate_failures do
+      it 'allows allows limiting the matching files to the root of the repository' do
         config_entry = file.entry_for_path('config/database.yml').first
         other_config_entry = file.entry_for_path('other/config/database.yml').first
 

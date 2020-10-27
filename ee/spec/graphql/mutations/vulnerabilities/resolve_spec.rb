@@ -28,7 +28,7 @@ RSpec.describe Mutations::Vulnerabilities::Resolve do
           vulnerability.project.add_developer(user)
         end
 
-        it 'returns the resolveed vulnerability', :aggregate_failures do
+        it 'returns the resolveed vulnerability' do
           expect(mutated_vulnerability).to eq(vulnerability)
           expect(mutated_vulnerability).to be_resolved
           expect(subject[:errors]).to be_empty

@@ -14,7 +14,7 @@ RSpec.describe ApplicationSetting::TermPolicy do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
   end
 
-  it 'has the correct permissions', :aggregate_failures do
+  it 'has the correct permissions' do
     is_expected.to be_allowed(:accept_terms)
     is_expected.to be_allowed(:decline_terms)
   end
@@ -22,7 +22,7 @@ RSpec.describe ApplicationSetting::TermPolicy do
   context 'for anonymous users' do
     let(:user) { nil }
 
-    it 'has the correct permissions', :aggregate_failures do
+    it 'has the correct permissions' do
       is_expected.to be_disallowed(:accept_terms)
       is_expected.to be_disallowed(:decline_terms)
     end
@@ -33,7 +33,7 @@ RSpec.describe ApplicationSetting::TermPolicy do
       create(:term)
     end
 
-    it 'has the correct permissions', :aggregate_failures do
+    it 'has the correct permissions' do
       is_expected.to be_disallowed(:accept_terms)
       is_expected.to be_disallowed(:decline_terms)
     end
@@ -44,7 +44,7 @@ RSpec.describe ApplicationSetting::TermPolicy do
       accept_terms(user)
     end
 
-    it 'has the correct permissions', :aggregate_failures do
+    it 'has the correct permissions' do
       is_expected.to be_disallowed(:accept_terms)
       is_expected.to be_allowed(:decline_terms)
     end

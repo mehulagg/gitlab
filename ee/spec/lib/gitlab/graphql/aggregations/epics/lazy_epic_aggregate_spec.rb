@@ -14,20 +14,20 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
   let(:child_epic_id) { 38 }
 
   describe '#initialize' do
-    it 'requires either :weight_sum or :count as a facet', :aggregate_failures do
+    it 'requires either :weight_sum or :count as a facet' do
       expect { described_class.new(query_ctx, epic_id, :nonsense) }.to raise_error(ArgumentError, /Invalid aggregate facet/)
       expect { described_class.new(query_ctx, epic_id, nil) }.to raise_error(ArgumentError, /No aggregate facet/)
       expect { described_class.new(query_ctx, epic_id, "") }.to raise_error(ArgumentError, /No aggregate facet/)
     end
 
     context 'with valid facets :weight_sum or :count' do
-      specify 'as a symbol', :aggregate_failures do
+      specify 'as a symbol' do
         [WEIGHT_SUM, COUNT].each do |valid_facet|
           expect { described_class.new(query_ctx, epic_id, valid_facet) }.not_to raise_error
         end
       end
 
-      specify 'as a string', :aggregate_failures do
+      specify 'as a string' do
         %w(weight_sum count).each do |valid_facet|
           expect { described_class.new(query_ctx, epic_id, valid_facet) }.not_to raise_error
         end
@@ -109,7 +109,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
         end
       end
 
-      it 'creates the parent-child associations', :aggregate_failures do
+      it 'creates the parent-child associations' do
         subject.epic_aggregate
 
         expect(tree[child_epic_id].parent_id).to eq epic_id
@@ -117,7 +117,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
       end
 
       context 'for a parent-child relationship' do
-        it 'assembles recursive sums for the parent', :aggregate_failures do
+        it 'assembles recursive sums for the parent' do
           subject.epic_aggregate
 
           expect(tree[epic_id]).to have_aggregate(ISSUE_TYPE, COUNT, OPENED_ISSUE_STATE, 2)
@@ -129,7 +129,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
       end
 
       context 'for a standalone epic with no issues' do
-        it 'assembles recursive sums', :aggregate_failures do
+        it 'assembles recursive sums' do
           subject.epic_aggregate
 
           expect(tree[other_epic_id]).to have_aggregate(ISSUE_TYPE, COUNT, OPENED_ISSUE_STATE, 0)

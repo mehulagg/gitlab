@@ -106,7 +106,7 @@ RSpec.describe Ci::PipelineTriggerService do
         let(:params) { { token: job.token, ref: 'master', variables: nil } }
         let(:job) { create(:ci_build, :success, pipeline: pipeline, user: user) }
 
-        it 'does nothing', :aggregate_failures do
+        it 'does nothing' do
           expect { result }.not_to change { Ci::Pipeline.count }
           expect(result[:message]).to eq('Job is not running')
           expect(result[:http_status]).to eq(401)
@@ -117,7 +117,7 @@ RSpec.describe Ci::PipelineTriggerService do
         let(:params) { { token: job.token, ref: 'master', variables: nil } }
         let(:job) { create(:ci_build, status: :running, pipeline: pipeline, user: user) }
 
-        it 'does nothing', :aggregate_failures do
+        it 'does nothing' do
           job.update!(project: nil)
 
           expect { result }.not_to change { Ci::Pipeline.count }

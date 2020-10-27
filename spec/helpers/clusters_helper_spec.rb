@@ -84,7 +84,7 @@ RSpec.describe ClustersHelper do
       expect(subject[:endpoint]).to eq('/path')
     end
 
-    it 'generates svg image data', :aggregate_failures do
+    it 'generates svg image data' do
       expect(subject.dig(:img_tags, :aws, :path)).to match(%r(/illustrations/logos/amazon_eks|svg))
       expect(subject.dig(:img_tags, :default, :path)).to match(%r(/illustrations/logos/kubernetes|svg))
       expect(subject.dig(:img_tags, :gcp, :path)).to match(%r(/illustrations/logos/google_gke|svg))

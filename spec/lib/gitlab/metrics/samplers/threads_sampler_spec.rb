@@ -45,7 +45,7 @@ RSpec.describe Gitlab::Metrics::Samplers::ThreadsSampler do
         subject.sample
       end
 
-      context 'thread names', :aggregate_failures do
+      context 'thread names' do
         where(:thread_names, :expected_names) do
           [
             [[nil], %w(unnamed)],

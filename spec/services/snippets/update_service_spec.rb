@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Snippets::UpdateService do
-  describe '#execute', :aggregate_failures do
+  describe '#execute' do
     let_it_be(:user) { create(:user) }
     let_it_be(:admin) { create :user, admin: true }
     let(:visibility_level) { Gitlab::VisibilityLevel::PRIVATE }

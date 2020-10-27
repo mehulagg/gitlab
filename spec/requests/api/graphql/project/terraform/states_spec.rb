@@ -35,7 +35,7 @@ RSpec.describe 'query terraform states' do
     post_graphql(query, current_user: current_user)
   end
 
-  it 'returns terraform state data', :aggregate_failures do
+  it 'returns terraform state data' do
     state = data.dig('nodes', 0)
 
     expect(state['id']).to eq(terraform_state.to_global_id.to_s)

@@ -22,7 +22,7 @@ RSpec.describe 'ClusterAgents', :js do
         visit project_clusters_path(project)
       end
 
-      it 'does not display agent information', :aggregate_failures do
+      it 'does not display agent information' do
         expect(page).to have_content('Integrate with a cluster certificate')
         expect(page).not_to have_content('GitLab Agent managed clusters')
       end
@@ -42,7 +42,7 @@ RSpec.describe 'ClusterAgents', :js do
         visit project_clusters_path(empty_project)
       end
 
-      it 'displays empty state', :aggregate_failures do
+      it 'displays empty state' do
         click_link 'GitLab Agent managed clusters'
         expect(page).to have_link('Integrate with the GitLab Agent')
         expect(page).to have_selector('.empty-state')
@@ -54,7 +54,7 @@ RSpec.describe 'ClusterAgents', :js do
         visit project_clusters_path(project)
       end
 
-      it 'displays a table with agent', :aggregate_failures do
+      it 'displays a table with agent' do
         click_link 'GitLab Agent managed clusters'
         expect(page).to have_content(agent.name)
         expect(page).to have_selector('[data-testid="cluster-agent-list-table"] tbody tr', count: 1)

@@ -13,7 +13,7 @@ RSpec.describe 'bin/sidekiq-cluster' do
     end
 
     with_them do
-      it 'runs successfully', :aggregate_failures do
+      it 'runs successfully' do
         cmd = %w[bin/sidekiq-cluster --dryrun] + args
 
         output, status = Gitlab::Popen.popen(cmd, Rails.root.to_s)
@@ -31,7 +31,7 @@ RSpec.describe 'bin/sidekiq-cluster' do
       %w[*],
       %w[--experimental-queue-selector *]
     ].each do |args|
-      it "runs successfully with `#{args}`", :aggregate_failures do
+      it "runs successfully with `#{args}`" do
         cmd = %w[bin/sidekiq-cluster --dryrun] + args
 
         output, status = Gitlab::Popen.popen(cmd, Rails.root.to_s)

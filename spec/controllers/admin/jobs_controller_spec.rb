@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Admin::JobsController do
   describe 'GET #index' do
     context 'with an authenticated admin user' do
-      it 'paginates builds without a total count', :aggregate_failures do
+      it 'paginates builds without a total count' do
         stub_const("Admin::JobsController::BUILDS_PER_PAGE", 1)
 
         sign_in(create(:admin))

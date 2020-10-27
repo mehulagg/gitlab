@@ -21,18 +21,18 @@ RSpec.describe IncidentManagement::ApplyIncidentSlaExceededLabelWorker do
       incident.labels << label
     end
 
-    it 'does not add a label', :aggregate_failures do
+    it 'does not add a label' do
       expect { subject }.not_to change { incident.labels.reload.count }
       expect(incident.labels.reload).to include(label)
     end
   end
 
-  it 'adds a label to the incident', :aggregate_failures do
+  it 'adds a label to the incident' do
     expect { perform }.to change { incident.labels.reload.count }.by(1)
     expect(incident.labels.reload).to include(label)
   end
 
-  it 'adds a note that the label was added', :aggregate_failures do
+  it 'adds a note that the label was added' do
     expect { subject }.to change { incident.resource_label_events.reload.count }
 
     event = incident.resource_label_events.first

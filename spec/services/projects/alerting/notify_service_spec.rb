@@ -114,7 +114,7 @@ RSpec.describe Projects::Alerting::NotifyService do
               context 'auto_close_enabled setting enabled' do
                 let(:auto_close_enabled) { true }
 
-                it 'resolves the alert and sets the end time', :aggregate_failures do
+                it 'resolves the alert and sets the end time' do
                   subject
                   alert.reload
 

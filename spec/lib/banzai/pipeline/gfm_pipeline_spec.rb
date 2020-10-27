@@ -8,7 +8,7 @@ RSpec.describe Banzai::Pipeline::GfmPipeline do
 
     context 'when internal issue tracker is enabled' do
       context 'when shorthand pattern #ISSUE_ID is used' do
-        it 'links an internal issues and keep updated nodes in result[:reference_filter_nodes]', :aggregate_failures do
+        it 'links an internal issues and keep updated nodes in result[:reference_filter_nodes]' do
           issue = create(:issue, project: project)
           markdown = "text #{issue.to_reference(project, full: true)}"
 
@@ -21,7 +21,7 @@ RSpec.describe Banzai::Pipeline::GfmPipeline do
         end
       end
 
-      it 'executes :each_node only once for first reference filter', :aggregate_failures do
+      it 'executes :each_node only once for first reference filter' do
         issue = create(:issue, project: project)
         markdown = "text #{issue.to_reference(project, full: true)}"
 

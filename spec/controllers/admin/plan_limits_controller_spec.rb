@@ -19,7 +19,7 @@ RSpec.describe Admin::PlanLimitsController do
     context 'with an authenticated admin user' do
       let(:file_size) { 10.megabytes }
 
-      it 'updates the plan limits', :aggregate_failures do
+      it 'updates the plan limits' do
         sign_in(create(:admin))
 
         post :create, params: params

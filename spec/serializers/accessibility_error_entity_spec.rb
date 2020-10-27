@@ -22,7 +22,7 @@ RSpec.describe AccessibilityErrorEntity do
         }
       end
 
-      it 'contains correct accessibility error details', :aggregate_failures do
+      it 'contains correct accessibility error details' do
         expect(subject[:code]).to eq("WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.A.NoContent")
         expect(subject[:type]).to eq("error")
         expect(subject[:type_code]).to eq(1)

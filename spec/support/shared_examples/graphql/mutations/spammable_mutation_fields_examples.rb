@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.shared_examples 'spam flag is present' do
-  specify :aggregate_failures do
+  specify do
     subject
 
     expect(mutation_response).to have_key('spam')

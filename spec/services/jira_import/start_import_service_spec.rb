@@ -85,7 +85,7 @@ RSpec.describe JiraImport::StartImportService do
             expect(project.latest_jira_import).to be_scheduled
           end
 
-          it 'creates Jira import data', :aggregate_failures do
+          it 'creates Jira import data' do
             jira_import = subject.payload[:import_data]
 
             expect(jira_import.jira_project_xid).to eq(0)

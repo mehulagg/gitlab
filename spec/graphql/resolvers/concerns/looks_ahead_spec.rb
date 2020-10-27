@@ -94,7 +94,7 @@ RSpec.describe LooksAhead do
   end
 
   shared_examples 'a working query on the test schema' do
-    it 'has a good test setup', :aggregate_failures do
+    it 'has a good test setup' do
       expected_label_ids = [label_a, label_b].cycle.take(4).map(&:id)
       issue_titles = [issue_a, issue_b, issue_c].map(&:title)
 

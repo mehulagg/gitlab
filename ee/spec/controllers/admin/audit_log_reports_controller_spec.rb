@@ -49,7 +49,7 @@ RSpec.describe Admin::AuditLogReportsController do
             .with(ActionController::Parameters.new(params).permit!)
         end
 
-        it 'returns success status with correct headers', :aggregate_failures do
+        it 'returns success status with correct headers' do
           freeze_time do
             subject
 
@@ -60,7 +60,7 @@ RSpec.describe Admin::AuditLogReportsController do
           end
         end
 
-        it 'returns a csv file in response', :aggregate_failures do
+        it 'returns a csv file in response' do
           subject
 
           expect(csv_response).to eq([

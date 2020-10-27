@@ -201,7 +201,7 @@ RSpec.describe Ci::CreateJobArtifactsService do
           job.update!(user: user)
         end
 
-        it 'calls cluster applications parse service with job and job user', :aggregate_failures do
+        it 'calls cluster applications parse service with job and job user' do
           expect(Clusters::ParseClusterApplicationsArtifactService).to receive(:new).with(job, user).and_call_original
 
           subject

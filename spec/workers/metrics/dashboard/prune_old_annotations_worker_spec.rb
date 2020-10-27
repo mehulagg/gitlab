@@ -9,7 +9,7 @@ RSpec.describe Metrics::Dashboard::PruneOldAnnotationsWorker do
   let_it_be(:month_old_annotation) { create(:metrics_dashboard_annotation, starting_at: now.advance(months: -1)) }
 
   describe '#perform' do
-    it 'removes all annotations older than cut off', :aggregate_failures do
+    it 'removes all annotations older than cut off' do
       Timecop.freeze(now) do
         described_class.new.perform
 

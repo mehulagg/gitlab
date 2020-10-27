@@ -54,14 +54,14 @@ RSpec.describe IncidentManagement::Incidents::CreateSlaService do
         it_behaves_like 'no issuable sla created'
       end
 
-      it 'creates the issuable sla with the given offset', :aggregate_failures do
+      it 'creates the issuable sla with the given offset' do
         expect { subject }.to change(IssuableSla, :count)
 
         offset_time = incident.created_at + setting.sla_timer_minutes.minutes
         expect(response_payload_sla.due_at).to eq(offset_time)
       end
 
-      it 'returns a success with the sla', :aggregate_failures do
+      it 'returns a success with the sla' do
         expect(create_issuable_sla_response.success?).to eq(true)
         expect(response_payload_sla).to be_a(IssuableSla)
       end
@@ -80,7 +80,7 @@ RSpec.describe IncidentManagement::Incidents::CreateSlaService do
           expect { subject }.not_to change(IssuableSla, :count)
         end
 
-        it 'returns an error', :aggregate_failures do
+        it 'returns an error' do
           expect(create_issuable_sla_response.error?).to eq(true)
           expect(response_payload_message).to include('Issue error message')
         end

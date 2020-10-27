@@ -21,7 +21,7 @@ RSpec.describe API::Metrics::Dashboard::Annotations do
     context "with :source_type == #{source_type.pluralize}" do
       context 'with correct permissions' do
         context 'with valid parameters' do
-          it 'creates a new annotation', :aggregate_failures do
+          it 'creates a new annotation' do
             post api(url, user), params: params
 
             expect(response).to have_gitlab_http_status(:created)
@@ -69,7 +69,7 @@ RSpec.describe API::Metrics::Dashboard::Annotations do
               }
             end
 
-            it 'unescapes the dashboard_path', :aggregate_failures do
+            it 'unescapes the dashboard_path' do
               expect(::Metrics::Dashboard::Annotations::CreateService).to receive(:new).with(user, expected_params)
 
               post api(url, user), params: params

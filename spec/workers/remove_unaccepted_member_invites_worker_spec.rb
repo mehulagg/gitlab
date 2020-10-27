@@ -11,7 +11,7 @@ RSpec.describe RemoveUnacceptedMemberInvitesWorker do
         stub_const("#{described_class}::EXPIRATION_THRESHOLD", 1.day)
       end
 
-      it 'removes unaccepted members', :aggregate_failures do
+      it 'removes unaccepted members' do
         unaccepted_group_invitee = create(
           :group_member, invite_token: 't0ken',
                          invite_email: 'group_invitee@example.com',
@@ -31,7 +31,7 @@ RSpec.describe RemoveUnacceptedMemberInvitesWorker do
     end
 
     context 'invited members still within expiration threshold' do
-      it 'leaves invited members', :aggregate_failures do
+      it 'leaves invited members' do
         group_invitee = create(
           :group_member, invite_token: 't0ken',
                          invite_email: 'group_invitee@example.com',
@@ -53,7 +53,7 @@ RSpec.describe RemoveUnacceptedMemberInvitesWorker do
         stub_const("#{described_class}::EXPIRATION_THRESHOLD", 1.day)
       end
 
-      it 'leaves accepted members', :aggregate_failures do
+      it 'leaves accepted members' do
         user = create(:user)
         accepted_group_invitee = create(
           :group_member, invite_token: 't0ken',

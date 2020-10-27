@@ -186,12 +186,12 @@ RSpec.describe 'getting group information' do
         post_multiplex(queries, current_user: user)
       end
 
-      it 'finds vulnerability grades for only projects that were added to instance security dashboard', :aggregate_failures do
+      it 'finds vulnerability grades for only projects that were added to instance security dashboard' do
         expect(first_graphql_data.dig('group', 'vulnerabilityGrades')).to match_array(expected_private_group_response)
         expect(second_graphql_data.dig('group', 'vulnerabilityGrades')).to match_array(expected_public_group_response)
       end
 
-      it 'returns a successful response', :aggregate_failures do
+      it 'returns a successful response' do
         expect(response).to have_gitlab_http_status(:success)
         expect(graphql_errors).to eq([nil, nil])
       end

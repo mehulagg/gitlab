@@ -10,7 +10,7 @@ RSpec.shared_examples 'Gitlab-style deprecations' do
       )
     end
 
-    it 'raises an error if a required property is missing', :aggregate_failures do
+    it 'raises an error if a required property is missing' do
       expect { subject(deprecated: { milestone: '1.10' }) }.to raise_error(
         ArgumentError,
         'Please provide a `reason` within `deprecated`'
@@ -21,7 +21,7 @@ RSpec.shared_examples 'Gitlab-style deprecations' do
       )
     end
 
-    it 'raises an error if milestone is not a String', :aggregate_failures do
+    it 'raises an error if milestone is not a String' do
       expect { subject(deprecated: { milestone: 1.10, reason: 'Deprecation reason' }) }.to raise_error(
         ArgumentError,
         '`milestone` must be a `String`'

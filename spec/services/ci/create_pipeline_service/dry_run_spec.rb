@@ -58,7 +58,7 @@ RSpec.describe Ci::CreatePipelineService do
 
         it_behaves_like 'returns a non persisted pipeline'
 
-        it 'returns a pipeline with errors', :aggregate_failures do
+        it 'returns a pipeline with errors' do
           error_message = 'jobs:rspec config contains unknown keys: something'
 
           expect(subject.error_messages.map(&:content)).to eq([error_message])
@@ -82,7 +82,7 @@ RSpec.describe Ci::CreatePipelineService do
 
         it_behaves_like 'returns a non persisted pipeline'
 
-        it 'returns a pipeline with errors', :aggregate_failures do
+        it 'returns a pipeline with errors' do
           error_message = 'build job: need test is not defined in prior stages'
 
           expect(subject.error_messages.map(&:content)).to eq([error_message])
@@ -107,7 +107,7 @@ RSpec.describe Ci::CreatePipelineService do
 
         it_behaves_like 'returns a non persisted pipeline'
 
-        it 'returns a pipeline with errors', :aggregate_failures do
+        it 'returns a pipeline with errors' do
           error_message = "test: needs 'build'"
 
           expect(subject.error_messages.map(&:content)).to eq([error_message])

@@ -22,7 +22,7 @@ RSpec.describe 'User creates release', :js do
     wait_for_requests
   end
 
-  it 'renders the breadcrumbs', :aggregate_failures do
+  it 'renders the breadcrumbs' do
     within('.breadcrumbs') do
       expect(page).to have_content("#{project.creator.name} #{project.name} New Release")
 
@@ -47,7 +47,7 @@ RSpec.describe 'User creates release', :js do
       fill_out_form_and_submit
     end
 
-    it 'creates a new release when "Create release" is clicked', :aggregate_failures do
+    it 'creates a new release when "Create release" is clicked' do
       release = project.releases.last
 
       expect(release.tag).to eq(tag_name)

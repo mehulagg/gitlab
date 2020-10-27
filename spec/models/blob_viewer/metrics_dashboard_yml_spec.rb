@@ -30,7 +30,7 @@ RSpec.describe BlobViewer::MetricsDashboardYml do
           viewer.valid?
         end
 
-        it 'processes dashboard yaml and returns true', :aggregate_failures do
+        it 'processes dashboard yaml and returns true' do
           yml = ::Gitlab::Config::Loader::Yaml.new(data).load_raw!
 
           expect_next_instance_of(::Gitlab::Config::Loader::Yaml, data) do |loader|
@@ -139,7 +139,7 @@ RSpec.describe BlobViewer::MetricsDashboardYml do
           viewer.valid?
         end
 
-        it 'processes dashboard yaml and returns true', :aggregate_failures do
+        it 'processes dashboard yaml and returns true' do
           yml = ::Gitlab::Config::Loader::Yaml.new(data).load_raw!
 
           expect_next_instance_of(::Gitlab::Config::Loader::Yaml, data) do |loader|

@@ -55,7 +55,7 @@ RSpec.describe "Every controller" do
       expect(routes_unknown_category).to be_empty, "#{routes_unknown_category.first(10)} had an unknown category"
     end
 
-    it "doesn't define or exclude categories on removed actions", :aggregate_failures do
+    it "doesn't define or exclude categories on removed actions" do
       controller_actions.group_by(&:first).each do |controller, controller_action|
         existing_actions = controller_action.map(&:last)
         used_actions = actions_defined_in_feature_category_config(controller)

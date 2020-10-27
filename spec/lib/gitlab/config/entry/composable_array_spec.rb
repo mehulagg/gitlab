@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Config::Entry::ComposableArray, :aggregate_failures do
+RSpec.describe Gitlab::Config::Entry::ComposableArray do
   let(:valid_config) do
     [
       {

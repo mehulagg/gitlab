@@ -11,7 +11,7 @@ RSpec.describe TestSuiteEntity do
   subject { described_class.new(test_suite, request: request).as_json }
 
   context 'when details option is not present' do
-    it 'does not expose suite error and test cases', :aggregate_failures do
+    it 'does not expose suite error and test cases' do
       expect(subject).not_to include(:test_cases)
       expect(subject).not_to include(:suite_error)
     end

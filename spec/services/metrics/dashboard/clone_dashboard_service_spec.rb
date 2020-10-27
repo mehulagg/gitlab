@@ -66,7 +66,7 @@ RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memor
           }
         end
 
-        it 'strips target file name to safe value', :aggregate_failures do
+        it 'strips target file name to safe value' do
           allow(::Gitlab::Metrics::Dashboard::Processor).to receive(:new).and_return(double(process: file_content_hash))
           service_instance = instance_double(::Files::CreateService)
           expect(::Files::CreateService).to receive(:new).with(project, user, dashboard_attrs).and_return(service_instance)
@@ -108,7 +108,7 @@ RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memor
           # temporary not available function for first iteration
           # follow up issue https://gitlab.com/gitlab-org/gitlab/issues/196237 which
           # require this feature
-          # it 'pass correct params to Files::CreateService', :aggregate_failures do
+          # it 'pass correct params to Files::CreateService' do
           #   project.repository.add_branch(user, branch, 'master')
           #
           #   service_instance = instance_double(::Files::CreateService)
@@ -162,7 +162,7 @@ RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memor
             service_call
           end
 
-          it 'returns success', :aggregate_failures do
+          it 'returns success' do
             result = service_call
             dashboard_details = {
               path: '.gitlab/dashboards/custom_dashboard.yml',

@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::EpicNode do
       context 'with no child issues', :aggregate_results do
         let(:flat_info) { [] }
 
-        it 'has the correct aggregates', :aggregate_failures do
+        it 'has the correct aggregates' do
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, OPENED_ISSUE_STATE, 0)
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, CLOSED_ISSUE_STATE, 0)
           expect(subject).to have_aggregate(ISSUE_TYPE, WEIGHT_SUM, OPENED_ISSUE_STATE, 0)
@@ -69,7 +69,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::EpicNode do
           ]
         end
 
-        it 'has the correct aggregates', :aggregate_failures do
+        it 'has the correct aggregates' do
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, OPENED_ISSUE_STATE, 1)
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, CLOSED_ISSUE_STATE, 0)
           expect(subject).to have_aggregate(ISSUE_TYPE, WEIGHT_SUM, OPENED_ISSUE_STATE, 0)
@@ -89,7 +89,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::EpicNode do
           ]
         end
 
-        it 'has the correct aggregates', :aggregate_failures do
+        it 'has the correct aggregates' do
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, OPENED_ISSUE_STATE, 1)
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, CLOSED_ISSUE_STATE, 0)
           expect(subject).to have_aggregate(ISSUE_TYPE, WEIGHT_SUM, OPENED_ISSUE_STATE, 2)
@@ -133,7 +133,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::EpicNode do
           ]
         end
 
-        it 'has the correct aggregates', :aggregate_failures do
+        it 'has the correct aggregates' do
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, OPENED_ISSUE_STATE, 1)
           expect(subject).to have_aggregate(ISSUE_TYPE, COUNT, CLOSED_ISSUE_STATE, 0)
           expect(subject).to have_aggregate(ISSUE_TYPE, WEIGHT_SUM, OPENED_ISSUE_STATE, 2)

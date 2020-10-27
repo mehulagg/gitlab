@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe RspecFlaky::Config, :aggregate_failures do
+RSpec.describe RspecFlaky::Config do
   before do
     # Stub these env variables otherwise specs don't behave the same on the CI
     stub_env('FLAKY_RSPEC_GENERATE_REPORT', nil)

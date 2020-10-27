@@ -36,7 +36,7 @@ RSpec.describe 'Delete a cluster agent' do
       project.add_maintainer(current_user)
     end
 
-    it 'deletes a cluster agent', :aggregate_failures do
+    it 'deletes a cluster agent' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.to change { Clusters::Agent.count }.by(-1)
       expect(mutation_response['errors']).to eq([])
     end

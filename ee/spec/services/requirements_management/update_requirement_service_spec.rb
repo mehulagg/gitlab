@@ -27,7 +27,7 @@ RSpec.describe RequirementsManagement::UpdateRequirementService do
         project.add_reporter(user)
       end
 
-      it 'updates the requirement with only permitted params', :aggregate_failures do
+      it 'updates the requirement with only permitted params' do
         is_expected.to have_attributes(
           errors: be_empty,
           title: params[:title],

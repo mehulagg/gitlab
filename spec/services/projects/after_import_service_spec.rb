@@ -111,7 +111,7 @@ RSpec.describe Projects::AfterImportService do
           .not_to include(%r{\Arefs/pull/})
       end
 
-      it 'records the failures in the database', :aggregate_failures do
+      it 'records the failures in the database' do
         import_failure = ImportFailure.last
 
         expect(import_failure.source).to eq('delete_all_refs')

@@ -23,7 +23,7 @@ RSpec.describe API::Entities::ProjectImportStatus do
       let(:project) { create(:project, :import_scheduled, import_correlation_id: correlation_id) }
       let(:entity) { described_class.new(project) }
 
-      it 'includes basic fields and no failures', :aggregate_failures do
+      it 'includes basic fields and no failures' do
         expect(subject[:import_status]).to eq('scheduled')
         expect(subject[:correlation_id]).to eq(correlation_id)
         expect(subject[:import_error]).to be_nil
@@ -35,7 +35,7 @@ RSpec.describe API::Entities::ProjectImportStatus do
       let(:project) { create(:project, :import_finished, import_correlation_id: correlation_id) }
       let(:entity) { described_class.new(project) }
 
-      it 'includes basic fields with failed relations', :aggregate_failures do
+      it 'includes basic fields with failed relations' do
         create(:import_failure, :hard_failure, project: project, correlation_id_value: correlation_id)
 
         expect(subject[:import_status]).to eq('finished')
@@ -49,7 +49,7 @@ RSpec.describe API::Entities::ProjectImportStatus do
       let(:project) { create(:project, :import_failed, import_correlation_id: correlation_id, import_last_error: 'error') }
       let(:entity) { described_class.new(project) }
 
-      it 'includes basic fields with import error', :aggregate_failures do
+      it 'includes basic fields with import error' do
         expect(subject[:import_status]).to eq('failed')
         expect(subject[:correlation_id]).to eq(correlation_id)
         expect(subject[:import_error]).to eq('error')

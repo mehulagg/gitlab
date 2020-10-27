@@ -101,7 +101,7 @@ RSpec.describe API::Internal::Kubernetes do
       let(:agent) { agent_token.agent }
       let(:project) { agent.project }
 
-      it 'returns expected data', :aggregate_failures do
+      it 'returns expected data' do
         send_request(headers: { 'Authorization' => "Bearer #{agent_token.token}" })
 
         expect(response).to have_gitlab_http_status(:success)
@@ -144,7 +144,7 @@ RSpec.describe API::Internal::Kubernetes do
       context 'project is public' do
         let(:project) { create(:project, :public) }
 
-        it 'returns expected data', :aggregate_failures do
+        it 'returns expected data' do
           send_request(params: { id: project.id }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
 
           expect(response).to have_gitlab_http_status(:success)

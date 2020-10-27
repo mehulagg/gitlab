@@ -14,7 +14,7 @@ RSpec.describe EE::UserProjectAccessChangedService do
                                             .and_return(10)
     end
 
-    it 'sticks all the updated users and returns the original result', :aggregate_failures do
+    it 'sticks all the updated users and returns the original result' do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:bulk_stick).with(:user, [1, 2])
 
       expect(service.execute).to eq(10)

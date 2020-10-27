@@ -42,7 +42,7 @@ RSpec.describe ScheduleEpicIssuesAfterEpicsMove do
     stub_const("#{described_class}::BATCH_SIZE", 2)
   end
 
-  it 'schedules background migrations at correct time', :aggregate_failures do
+  it 'schedules background migrations at correct time' do
     Sidekiq::Testing.fake! do
       Timecop.freeze do
         migrate!

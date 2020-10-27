@@ -21,12 +21,12 @@ RSpec.describe AwardEmojis::CopyService do
 
     subject(:execute_service) { described_class.new(from_awardable, to_awardable).execute }
 
-    it 'copies AwardEmojis', :aggregate_failures do
+    it 'copies AwardEmojis' do
       expect { execute_service }.to change { AwardEmoji.count }.by(2)
       expect(to_awardable.award_emoji.map(&:name)).to match_array(%w(thumbsup thumbsdown))
     end
 
-    it 'returns success', :aggregate_failures do
+    it 'returns success' do
       expect(execute_service).to be_kind_of(ServiceResponse)
       expect(execute_service).to be_success
     end

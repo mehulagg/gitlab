@@ -12,7 +12,7 @@ RSpec.describe AlertManagement::Alerts::Todo::CreateService do
     subject(:result) { AlertManagement::Alerts::Todo::CreateService.new(alert, current_user).execute }
 
     shared_examples 'permissions error' do
-      it 'returns an error', :aggregate_failures do
+      it 'returns an error' do
         expect(result.error?).to be(true)
         expect(result.message).to eq('You have insufficient permissions to create a Todo for this alert')
         expect(result.payload[:todo]).to be(nil)
@@ -39,7 +39,7 @@ RSpec.describe AlertManagement::Alerts::Todo::CreateService do
         expect { result }.to change { Todo.count }.by(1)
       end
 
-      it 'returns the alert and todo in the payload', :aggregate_failures do
+      it 'returns the alert and todo in the payload' do
         expect(result.success?).to be(true)
         expect(result.payload[:alert][:id]).to be(alert.id)
         expect(result.payload[:todo][:id]).to be(Todo.last.id)
@@ -62,7 +62,7 @@ RSpec.describe AlertManagement::Alerts::Todo::CreateService do
             expect { result }.not_to change { Todo.count }
           end
 
-          it 'returns an error', :aggregate_failures do
+          it 'returns an error' do
             expect(result.error?).to be(true)
             expect(result.message).to be('You already have pending todo for this alert')
             expect(result.payload[:todo]).to be(nil)

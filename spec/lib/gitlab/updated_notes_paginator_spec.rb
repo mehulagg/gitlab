@@ -29,7 +29,7 @@ RSpec.describe Gitlab::UpdatedNotesPaginator do
   describe 'last_fetched_at: start of time' do
     let(:last_fetched_at) { Time.at(0) }
 
-    it 'calculates the first page of notes', :aggregate_failures do
+    it 'calculates the first page of notes' do
       expect(paginator.notes).to match_array(page_1)
       expect(paginator.metadata).to match(
         more: true,
@@ -41,7 +41,7 @@ RSpec.describe Gitlab::UpdatedNotesPaginator do
   describe 'last_fetched_at: start of final page' do
     let(:last_fetched_at) { page_1_boundary }
 
-    it 'calculates a final page', :aggregate_failures do
+    it 'calculates a final page' do
       expect(paginator.notes).to match_array(page_2)
       expect(paginator.metadata).to match(
         more: false,

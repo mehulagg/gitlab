@@ -322,7 +322,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
     end
   end
 
-  it 'can return the count of actions per user deduplicated', :aggregate_failures do
+  it 'can return the count of actions per user deduplicated' do
     described_class.track_issue_title_changed_action(author: user1)
     described_class.track_issue_description_changed_action(author: user1)
     described_class.track_issue_assignee_changed_action(author: user1)

@@ -21,7 +21,7 @@ RSpec.describe Metrics::Dashboard::Annotations::CreateService do
   end
 
   shared_examples 'executed annotation creation' do
-    it 'returns success response', :aggregate_failures do
+    it 'returns success response' do
       annotation = instance_double(::Metrics::Dashboard::Annotation)
       allow(::Metrics::Dashboard::Annotation).to receive(:new).and_return(annotation)
       allow(annotation).to receive(:save).and_return(true)
@@ -32,7 +32,7 @@ RSpec.describe Metrics::Dashboard::Annotations::CreateService do
       expect(response[:annotation]).to be annotation
     end
 
-    it 'creates annotation', :aggregate_failures do
+    it 'creates annotation' do
       annotation = instance_double(::Metrics::Dashboard::Annotation)
 
       expect(::Metrics::Dashboard::Annotation)
@@ -44,7 +44,7 @@ RSpec.describe Metrics::Dashboard::Annotations::CreateService do
   end
 
   shared_examples 'prevented annotation creation' do |message|
-    it 'returns error response', :aggregate_failures do
+    it 'returns error response' do
       response = service_instance.execute
 
       expect(response[:status]).to be :error
@@ -59,7 +59,7 @@ RSpec.describe Metrics::Dashboard::Annotations::CreateService do
   end
 
   shared_examples 'annotation creation failure' do
-    it 'returns error response', :aggregate_failures do
+    it 'returns error response' do
       annotation = instance_double(::Metrics::Dashboard::Annotation)
 
       expect(annotation).to receive(:errors).and_return('Model validation error')

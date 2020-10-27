@@ -47,7 +47,7 @@ RSpec.describe AccessibilityReportsComparerEntity do
         head_report.add_url(url, different_error)
       end
 
-      it 'contains correct compared accessibility report details', :aggregate_failures do
+      it 'contains correct compared accessibility report details' do
         expect(subject[:status]).to eq(Gitlab::Ci::Reports::AccessibilityReportsComparer::STATUS_FAILED)
         expect(subject[:resolved_errors].first).to include(:code, :type, :type_code, :message, :context, :selector, :runner, :runner_extras)
         expect(subject[:new_errors].first).to include(:code, :type, :type_code, :message, :context, :selector, :runner, :runner_extras)
@@ -62,7 +62,7 @@ RSpec.describe AccessibilityReportsComparerEntity do
         head_report.add_url(url, single_error)
       end
 
-      it 'contains correct compared accessibility report details', :aggregate_failures do
+      it 'contains correct compared accessibility report details' do
         expect(subject[:status]).to eq(Gitlab::Ci::Reports::AccessibilityReportsComparer::STATUS_FAILED)
         expect(subject[:new_errors]).to be_empty
         expect(subject[:resolved_errors]).to be_empty
@@ -76,7 +76,7 @@ RSpec.describe AccessibilityReportsComparerEntity do
         head_report.add_url(url, single_error)
       end
 
-      it 'contains correct compared accessibility report details', :aggregate_failures do
+      it 'contains correct compared accessibility report details' do
         expect(subject[:status]).to eq(Gitlab::Ci::Reports::AccessibilityReportsComparer::STATUS_FAILED)
         expect(subject[:resolved_errors]).to be_empty
         expect(subject[:existing_errors]).to be_empty

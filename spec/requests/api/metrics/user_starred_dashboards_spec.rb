@@ -22,7 +22,7 @@ RSpec.describe API::Metrics::UserStarredDashboards do
     context 'with correct permissions' do
       context 'with valid parameters' do
         context 'dashboard_path as url param url escaped' do
-          it 'creates a new user starred metrics dashboard', :aggregate_failures do
+          it 'creates a new user starred metrics dashboard' do
             post api(url, user), params: params
 
             expect(response).to have_gitlab_http_status(:created)
@@ -39,7 +39,7 @@ RSpec.describe API::Metrics::UserStarredDashboards do
             }
           end
 
-          it 'creates a new user starred metrics dashboard', :aggregate_failures do
+          it 'creates a new user starred metrics dashboard' do
             post api(url, user), params: params
 
             expect(response).to have_gitlab_http_status(:created)
@@ -98,7 +98,7 @@ RSpec.describe API::Metrics::UserStarredDashboards do
     context 'with correct permissions' do
       context 'with valid parameters' do
         context 'dashboard_path as url param url escaped' do
-          it 'deletes given user starred metrics dashboard', :aggregate_failures do
+          it 'deletes given user starred metrics dashboard' do
             delete api(url, user), params: params
 
             expect(response).to have_gitlab_http_status(:ok)
@@ -114,7 +114,7 @@ RSpec.describe API::Metrics::UserStarredDashboards do
             }
           end
 
-          it 'deletes given user starred metrics dashboard', :aggregate_failures do
+          it 'deletes given user starred metrics dashboard' do
             delete api(url, user), params: params
 
             expect(response).to have_gitlab_http_status(:ok)
@@ -124,7 +124,7 @@ RSpec.describe API::Metrics::UserStarredDashboards do
         end
 
         context 'dashboard_path has not been specified' do
-          it 'deletes all starred dashboards for that user within given project', :aggregate_failures do
+          it 'deletes all starred dashboards for that user within given project' do
             delete api(url, user), params: {}
 
             expect(response).to have_gitlab_http_status(:ok)

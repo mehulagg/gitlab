@@ -9,7 +9,7 @@ RSpec.describe MergeRequests::ExportCsvService do
   subject { described_class.new(MergeRequest.where(id: merge_request.id), merge_request.project) }
 
   describe 'csv_data' do
-    it 'contains the correct information', :aggregate_failures do
+    it 'contains the correct information' do
       expect(csv['MR IID']).to eq(merge_request.iid.to_s)
       expect(csv['Title']).to eq(merge_request.title)
       expect(csv['State']).to eq(merge_request.state)

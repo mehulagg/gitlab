@@ -141,7 +141,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         let(:nginx_results) { empty_response }
         let(:modsec_results) { empty_response }
 
-        it 'returns results', :aggregate_failures do
+        it 'returns results' do
           results = subject.execute
 
           expect(results.fetch(:status)).to eq :success
@@ -151,7 +151,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         end
 
         context 'when totals_only is set to true' do
-          it 'returns totals only', :aggregate_failures do
+          it 'returns totals only' do
             results = subject.execute(totals_only: true)
 
             expect(results).to eq(total_traffic: 0.0, total_anomalous_traffic: 0.0)
@@ -163,7 +163,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         let(:nginx_results) { nginx_response }
         let(:modsec_results) { empty_response }
 
-        it 'returns results', :aggregate_failures do
+        it 'returns results' do
           results = subject.execute
 
           expect(results.fetch(:status)).to eq :success
@@ -173,7 +173,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         end
 
         context 'when totals_only is set to true' do
-          it 'returns totals only', :aggregate_failures do
+          it 'returns totals only' do
             results = subject.execute(totals_only: true)
 
             expect(results).to eq(total_traffic: 3.0, total_anomalous_traffic: 0.0)
@@ -185,7 +185,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         let(:nginx_results) { nginx_response }
         let(:modsec_results) { modsec_response }
 
-        it 'returns results', :aggregate_failures do
+        it 'returns results' do
           results = subject.execute
 
           expect(results.fetch(:status)).to eq :success
@@ -195,7 +195,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         end
 
         context 'when totals_only is set to true' do
-          it 'returns totals only', :aggregate_failures do
+          it 'returns totals only' do
             results = subject.execute(totals_only: true)
 
             expect(results).to eq(total_traffic: 3.0, total_anomalous_traffic: 1.0)
@@ -209,7 +209,7 @@ RSpec.describe Security::WafAnomalySummaryService do
         let(:nginx_results) { nginx_response_es6 }
         let(:modsec_results) { modsec_response_es6 }
 
-        it 'returns results', :aggregate_failures do
+        it 'returns results' do
           results = subject.execute
 
           expect(results.fetch(:status)).to eq :success

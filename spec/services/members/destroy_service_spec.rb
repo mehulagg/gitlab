@@ -46,7 +46,7 @@ RSpec.describe Members::DestroyService do
   shared_examples 'a service destroying a member with access' do
     it_behaves_like 'a service destroying a member'
 
-    it 'invalidates cached counts for assigned issues and merge requests', :aggregate_failures, :sidekiq_might_not_need_inline do
+    it 'invalidates cached counts for assigned issues and merge requests', :sidekiq_might_not_need_inline do
       create(:issue, project: group_project, assignees: [member_user])
       create(:merge_request, source_project: group_project, assignees: [member_user])
       create(:todo, :pending, project: group_project, user: member_user)

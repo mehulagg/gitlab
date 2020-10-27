@@ -11,7 +11,7 @@ RSpec.describe API::Entities::Branch do
     let(:branch) { repository.find_branch('master') }
     let(:entity) { described_class.new(branch, project: project) }
 
-    it 'includes basic fields', :aggregate_failures do
+    it 'includes basic fields' do
       is_expected.to include(
         name: 'master',
         commit: a_kind_of(Hash),

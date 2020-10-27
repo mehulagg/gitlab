@@ -48,7 +48,7 @@ RSpec.describe Resolvers::Projects::JiraProjectsResolver do
         context 'when Jira connection is valid' do
           include_context 'Jira projects request context'
 
-          it 'returns Jira projects', :aggregate_failures do
+          it 'returns Jira projects' do
             resolver = resolve_jira_projects
             jira_projects = resolver.items
             project_keys = jira_projects.map(&:key)
@@ -63,7 +63,7 @@ RSpec.describe Resolvers::Projects::JiraProjectsResolver do
           end
 
           context 'when filtering projects by name' do
-            it 'returns Jira projects', :aggregate_failures do
+            it 'returns Jira projects' do
               resolver = resolve_jira_projects({ name: 'ABC' })
               jira_projects = resolver.items
               project_keys = jira_projects.map(&:key)

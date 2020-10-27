@@ -46,7 +46,7 @@ RSpec.describe Clusters::Agents::CreateService do
         expect { service.execute(name: 'with-license-and-user') }.to change { ::Clusters::Agent.count }.by(1)
       end
 
-      it 'returns success status', :aggregate_failures do
+      it 'returns success status' do
         result = service.execute(name: 'success')
 
         expect(result[:status]).to eq(:success)

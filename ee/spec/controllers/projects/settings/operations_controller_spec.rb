@@ -247,7 +247,7 @@ RSpec.describe Projects::Settings::OperationsController do
       it_behaves_like 'user without write access', :private, :maintainer
       it_behaves_like 'user without write access', :internal, :maintainer
 
-      it 'cannot update sla timer settings', :aggregate_failures do
+      it 'cannot update sla timer settings' do
         default_attributes = attributes_for(:project_incident_management_setting)
 
         sla_settings = {

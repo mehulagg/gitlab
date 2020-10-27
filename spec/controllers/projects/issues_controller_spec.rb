@@ -191,7 +191,7 @@ RSpec.describe Projects::IssuesController do
         project.add_developer(user)
       end
 
-      it 'builds a new issue', :aggregate_failures do
+      it 'builds a new issue' do
         get :new, params: { namespace_id: project.namespace, project_id: project }
 
         expect(assigns(:issue)).to be_a_new(Issue)
@@ -329,7 +329,7 @@ RSpec.describe Projects::IssuesController do
     end
 
     context 'there are no related branches' do
-      it 'assigns empty arrays', :aggregate_failures do
+      it 'assigns empty arrays' do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -369,7 +369,7 @@ RSpec.describe Projects::IssuesController do
         end
       end
 
-      it 'finds and assigns the appropriate branch information', :aggregate_failures do
+      it 'finds and assigns the appropriate branch information' do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -1106,7 +1106,7 @@ RSpec.describe Projects::IssuesController do
       project.issues.first
     end
 
-    it 'creates the issue successfully', :aggregate_failures do
+    it 'creates the issue successfully' do
       issue = post_new_issue
 
       expect(issue).to be_a(Issue)

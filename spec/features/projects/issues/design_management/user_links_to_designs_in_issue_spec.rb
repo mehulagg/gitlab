@@ -37,7 +37,7 @@ RSpec.describe 'viewing issues with design references' do
       enable_design_management
     end
 
-    it 'shows the issue description and design references', :aggregate_failures do
+    it 'shows the issue description and design references' do
       visit_page_with_design_references
 
       expect(page).to have_text('The designs I mentioned')
@@ -56,7 +56,7 @@ RSpec.describe 'viewing issues with design references' do
   context 'the user does not have access to a private project' do
     let(:project) { private_project }
 
-    it 'redacts inaccessible design references', :aggregate_failures do
+    it 'redacts inaccessible design references' do
       visit_page_with_design_references
 
       expect(page).to have_text('The designs I mentioned')
@@ -78,7 +78,7 @@ RSpec.describe 'viewing issues with design references' do
     it_behaves_like 'successful use of design link references'
 
     context 'design management is entirely disabled' do
-      it 'processes design links as issue references', :aggregate_failures do
+      it 'processes design links as issue references' do
         enable_design_management(false)
 
         visit_page_with_design_references

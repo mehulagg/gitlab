@@ -80,7 +80,7 @@ RSpec.describe UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker do
       include_examples 'updates only paid plans'
     end
 
-    context 'with a paid plan', :aggregate_failures do
+    context 'with a paid plan' do
       before do
         gitlab_subscription.update!(hosted_plan: bronze_plan)
         gitlab_subscription_2.update!(hosted_plan: bronze_plan)

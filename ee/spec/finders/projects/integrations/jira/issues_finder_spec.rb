@@ -47,7 +47,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
           expect(client).to receive(:get).and_raise(Timeout::Error)
         end
 
-        it 'raises error', :aggregate_failures do
+        it 'raises error' do
           expect { subject }.to raise_error(Projects::Integrations::Jira::IssuesFinder::RequestError)
         end
       end
@@ -63,7 +63,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
           )
         end
 
-        it 'return service response with issues', :aggregate_failures do
+        it 'return service response with issues' do
           expect(issues.size).to eq 2
           expect(service.total_count).to eq 375
           expect(issues.map(&:key)).to eq(%w[TEST-1 TEST-2])

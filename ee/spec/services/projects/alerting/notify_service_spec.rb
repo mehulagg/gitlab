@@ -57,7 +57,7 @@ RSpec.describe Projects::Alerting::NotifyService do
             expect { subject }.not_to change(AlertManagement::Alert, :count)
           end
 
-          it 'resolves the existing alert', :aggregate_failures do
+          it 'resolves the existing alert' do
             expect { subject }.to change { existing_alert.reload.resolved? }.from(false).to(true)
             expect(existing_alert.ended_at).to eq(payload['end_time'])
           end

@@ -24,7 +24,7 @@ RSpec.describe Resolvers::Metrics::DashboardResolver do
         project.add_developer(current_user)
       end
 
-      it 'use ActiveModel class to find matching dashboard', :aggregate_failures do
+      it 'use ActiveModel class to find matching dashboard' do
         expected_arguments = { project: project, user: current_user, path: args[:path], options: { environment: parent_object } }
 
         expect(PerformanceMonitoring::PrometheusDashboard).to receive(:find_for).with(expected_arguments).and_return(PerformanceMonitoring::PrometheusDashboard.new)
@@ -34,7 +34,7 @@ RSpec.describe Resolvers::Metrics::DashboardResolver do
       context 'without parent object' do
         let(:parent_object) { nil }
 
-        it 'returns nil', :aggregate_failures do
+        it 'returns nil' do
           expect(PerformanceMonitoring::PrometheusDashboard).not_to receive(:find_for)
           expect(resolve_dashboard).to be_nil
         end

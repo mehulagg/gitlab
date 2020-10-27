@@ -313,7 +313,7 @@ RSpec.describe Banzai::Filter::IterationReferenceFilter do
       expect(doc.css('a').first.text).to eq(urls.iteration_url(iteration))
     end
 
-    it 'does not support cross-project references', :aggregate_failures do
+    it 'does not support cross-project references' do
       another_group = create(:group)
       another_project = create(:project, :public, group: group)
       project_reference = another_project.to_reference_base(project)

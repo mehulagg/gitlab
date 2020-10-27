@@ -23,7 +23,7 @@ RSpec.describe Mutations::Terraform::State::Lock do
     subject { mutation.resolve(id: global_id) }
 
     context 'user does not have permission' do
-      it 'raises an error', :aggregate_failures do
+      it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         expect(state.reload).not_to be_locked
       end
@@ -34,7 +34,7 @@ RSpec.describe Mutations::Terraform::State::Lock do
         state.project.add_maintainer(user)
       end
 
-      it 'locks the state', :aggregate_failures do
+      it 'locks the state' do
         expect(subject).to eq(errors: [])
 
         expect(state.reload).to be_locked
@@ -47,7 +47,7 @@ RSpec.describe Mutations::Terraform::State::Lock do
         let(:locked_by_user) { create(:user) }
         let(:state) { create(:terraform_state, :locked, locked_by_user: locked_by_user) }
 
-        it 'does not modify the existing lock', :aggregate_failures do
+        it 'does not modify the existing lock' do
           expect(subject).to eq(errors: ['state is already locked'])
 
           expect(state.reload).to be_locked
@@ -59,7 +59,7 @@ RSpec.describe Mutations::Terraform::State::Lock do
     context 'with invalid params' do
       let(:global_id) { user.to_global_id }
 
-      it 'raises an error', :aggregate_failures do
+      it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         expect(state.reload).not_to be_locked
       end

@@ -53,7 +53,7 @@ RSpec.shared_examples 'Wikis::CreateAttachmentService#execute' do |container_typ
       service_execute
     end
 
-    it 'returns related information', :aggregate_failures do
+    it 'returns related information' do
       expect(service_execute[:file_name]).to eq file_name
       expect(service_execute[:file_path]).to eq 'uploads/fixed_hex/filename.txt'
       expect(service_execute[:branch]).to eq wiki.default_branch

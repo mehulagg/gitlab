@@ -610,7 +610,7 @@ RSpec.describe Service do
     let_it_be(:project_integration1) { create(:prometheus_service, group: nil, project: project1, inherit_from_id: group_integration.id) }
     let_it_be(:project_integration2) { create(:prometheus_service, group: nil, project: project2, inherit_from_id: subgroup_integration2.id) }
 
-    it 'returns the groups and projects inheriting from integration ancestors', :aggregate_failures do
+    it 'returns the groups and projects inheriting from integration ancestors' do
       expect(described_class.inherited_descendants_from_self_or_ancestors_from(group_integration)).to eq([subgroup_integration1, project_integration1])
       expect(described_class.inherited_descendants_from_self_or_ancestors_from(subgroup_integration2)).to eq([project_integration2])
     end

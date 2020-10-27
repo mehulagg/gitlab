@@ -8,7 +8,7 @@ RSpec.shared_examples 'measurable service' do
       stub_feature_flags(feature_flag => true)
     end
 
-    it 'measure service execution with Gitlab::Utils::Measuring', :aggregate_failures do
+    it 'measure service execution with Gitlab::Utils::Measuring' do
       expect(Gitlab::Utils::Measuring).to receive(:new).with(base_log_data).and_return(measuring)
       expect(measuring).to receive(:with_measuring).and_call_original
     end

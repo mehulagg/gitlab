@@ -70,7 +70,7 @@ RSpec.describe Metrics::Dashboard::UpdateDashboardService, :use_clean_rails_memo
           allow(::Files::UpdateService).to receive(:new).and_return(double(execute: { status: :success }))
         end
 
-        it 'returns success', :aggregate_failures do
+        it 'returns success' do
           dashboard_details = {
             path: '.gitlab/dashboards/custom_dashboard.yml',
             display_name: 'custom_dashboard.yml',
@@ -98,7 +98,7 @@ RSpec.describe Metrics::Dashboard::UpdateDashboardService, :use_clean_rails_memo
             end
           end
 
-          it 'returns an appropriate message and status code', :aggregate_failures do
+          it 'returns an appropriate message and status code' do
             result = service_call
 
             expect(result.keys).to contain_exactly(:message, :http_status, :status, :last_step)
@@ -111,7 +111,7 @@ RSpec.describe Metrics::Dashboard::UpdateDashboardService, :use_clean_rails_memo
         context 'with escaped characters in file name' do
           let(:file_name) { "custom_dashboard%26copy.yml" }
 
-          it 'escapes the special characters', :aggregate_failures do
+          it 'escapes the special characters' do
             dashboard_details = {
               path: '.gitlab/dashboards/custom_dashboard&copy.yml',
               display_name: 'custom_dashboard&copy.yml',
@@ -128,7 +128,7 @@ RSpec.describe Metrics::Dashboard::UpdateDashboardService, :use_clean_rails_memo
         context 'when pushing to the default branch' do
           let(:branch) { 'master' }
 
-          it 'does not create a merge request', :aggregate_failures do
+          it 'does not create a merge request' do
             dashboard_details = {
               path: '.gitlab/dashboards/custom_dashboard.yml',
               display_name: 'custom_dashboard.yml',

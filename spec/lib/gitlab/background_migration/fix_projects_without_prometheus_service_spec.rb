@@ -78,13 +78,13 @@ RSpec.describe Gitlab::BackgroundMigration::FixProjectsWithoutPrometheusService,
       end
 
       context 'prometheus integration services do not exist' do
-        it 'creates missing services entries', :aggregate_failures do
+        it 'creates missing services entries' do
           expect { subject.perform(project.id, project.id + 1) }.to change { services.count }.by(1)
           expect([service_params_for(project.id, active: true)]).to eq services.order(:id).map { |row| row.attributes.slice(*columns).symbolize_keys }
         end
 
         context 'template is present for prometheus services' do
-          it 'creates missing services entries', :aggregate_failures do
+          it 'creates missing services entries' do
             services.create(service_params_for(nil, template: true, properties: { 'from_template' => true }.to_json))
 
             expect { subject.perform(project.id, project.id + 1) }.to change { services.count }.by(1)

@@ -311,7 +311,7 @@ RSpec.describe Gitlab::GitalyClient do
         expect(kword_args[:metadata][:deadline_type]).to eq("regular")
       end
 
-      it 'limits the deadline do the request deadline if that is closer', :aggregate_failures do
+      it 'limits the deadline do the request deadline if that is closer' do
         kword_args = described_class.request_kwargs('default', timeout: 15)
 
         expect(kword_args[:deadline]).to eq(request_deadline)

@@ -755,7 +755,7 @@ RSpec.describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     context 'when applications are created' do
       let(:cluster) { create(:cluster, :with_all_applications) }
 
-      it 'returns a list of created applications', :aggregate_failures do
+      it 'returns a list of created applications' do
         is_expected.to have_attributes(size: described_class::APPLICATIONS.size)
         is_expected.to all(be_kind_of(::Clusters::Concerns::ApplicationCore))
         is_expected.to all(be_persisted)
@@ -773,7 +773,7 @@ RSpec.describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     end
 
     context 'when none of applications are created' do
-      it 'returns the new application', :aggregate_failures do
+      it 'returns the new application' do
         described_class::APPLICATIONS.values.each do |application_class|
           application = cluster.find_or_build_application(application_class)
 
@@ -786,7 +786,7 @@ RSpec.describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     context 'when application is persisted' do
       let(:cluster) { create(:cluster, :with_all_applications) }
 
-      it 'returns the persisted application', :aggregate_failures do
+      it 'returns the persisted application' do
         described_class::APPLICATIONS.each_value do |application_class|
           application = cluster.find_or_build_application(application_class)
 

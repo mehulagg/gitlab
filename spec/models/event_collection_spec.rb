@@ -30,7 +30,7 @@ RSpec.describe EventCollection do
       let_it_be(:design_event) { create(:design_event, project: project) }
       let(:push_events) { push_event_payloads.map(&:event) }
 
-      it 'returns an Array of events', :aggregate_failures do
+      it 'returns an Array of events' do
         most_recent_20_events = [
           wiki_page_event,
           design_event,

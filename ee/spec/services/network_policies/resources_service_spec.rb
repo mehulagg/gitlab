@@ -82,7 +82,7 @@ RSpec.describe NetworkPolicies::ResourcesService do
         )
       end
 
-      it 'returns success response with policies from two deployment namespaces', :aggregate_failures do
+      it 'returns success response with policies from two deployment namespaces' do
         expect(kubeclient).to receive(:get_network_policies).with(namespace: cluster_kubernetes_namespace.namespace) { [policy.generate] }
         expect(kubeclient).to receive(:get_cilium_network_policies).with(namespace: cluster_kubernetes_namespace.namespace) { [cilium_policy.generate] }
         expect(kubeclient).to receive(:get_network_policies).with(namespace: cluster_kubernetes_namespace_2.namespace) { [policy_2.generate] }

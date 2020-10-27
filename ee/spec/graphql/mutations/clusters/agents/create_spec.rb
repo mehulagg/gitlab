@@ -42,7 +42,7 @@ RSpec.describe Mutations::Clusters::Agents::Create do
         project.add_maintainer(user)
       end
 
-      it 'creates a new clusters_agent', :aggregate_failures do
+      it 'creates a new clusters_agent' do
         expect { subject }.to change { ::Clusters::Agent.count }.by(1)
         expect(subject[:cluster_agent].name).to eq('test-agent')
         expect(subject[:errors]).to eq([])
@@ -51,7 +51,7 @@ RSpec.describe Mutations::Clusters::Agents::Create do
       context 'invalid params' do
         subject { mutation.resolve(project_path: project.full_path, name: '@bad_name!') }
 
-        it 'generates an error message when name is invalid', :aggregate_failures do
+        it 'generates an error message when name is invalid' do
           expect(subject[:clusters_agent]).to be_nil
           expect(subject[:errors]).to eq(["Name can contain only lowercase letters, digits, and '-', but cannot start or end with '-'"])
         end

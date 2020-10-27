@@ -115,7 +115,7 @@ RSpec.describe API::Events do
       end
 
       context 'when the list of events includes wiki page events' do
-        it 'returns information about the wiki event', :aggregate_failures do
+        it 'returns information about the wiki event' do
           page = create(:wiki_page, project: private_project)
           [:created, :updated, :destroyed].each do |action|
             create(:wiki_page_event, wiki_page: page, action: action, author: user)

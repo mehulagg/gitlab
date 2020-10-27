@@ -4655,7 +4655,7 @@ RSpec.describe User do
     end
 
     shared_examples_for 'notification_settings_for_groups method' do
-      it 'returns NotificationSetting objects for provided groups', :aggregate_failures do
+      it 'returns NotificationSetting objects for provided groups' do
         expect(subject.count).to eq(groups.count)
         expect(subject.map(&:source_id)).to match_array(groups.map(&:id))
       end
@@ -4859,7 +4859,7 @@ RSpec.describe User do
     describe 'create user' do
       subject { create(:user) }
 
-      it 'schedules a job in the future', :aggregate_failures, :clean_gitlab_redis_shared_state do
+      it 'schedules a job in the future', :clean_gitlab_redis_shared_state do
         allow_next_instance_of(Gitlab::ExclusiveLease) do |instance|
           allow(instance).to receive(:try_obtain).and_return('uuid')
         end

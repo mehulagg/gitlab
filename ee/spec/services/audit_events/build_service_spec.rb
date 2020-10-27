@@ -27,7 +27,7 @@ RSpec.describe AuditEvents::BuildService do
         stub_licensed_features(admin_audit_log: true)
       end
 
-      it 'sets correct attributes', :aggregate_failures do
+      it 'sets correct attributes' do
         freeze_time do
           expect(event).to have_attributes(
             author_id: author.id,
@@ -65,7 +65,7 @@ RSpec.describe AuditEvents::BuildService do
         stub_licensed_features(admin_audit_log: false)
       end
 
-      it 'sets correct attributes', :aggregate_failures do
+      it 'sets correct attributes' do
         freeze_time do
           expect(event).to have_attributes(
             author_id: author.id,

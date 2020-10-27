@@ -759,7 +759,7 @@ RSpec.describe 'project routing' do
   end
 
   describe Projects::StaticSiteEditorController, 'routing' do
-    it 'routes to static_site_editor#show', :aggregate_failures do
+    it 'routes to static_site_editor#show' do
       expect(get('/gitlab/gitlabhq/-/sse/master%2FCONTRIBUTING.md')).to route_to('projects/static_site_editor#show', namespace_id: 'gitlab', project_id: 'gitlabhq', id: 'master/CONTRIBUTING.md')
       expect(get('/gitlab/gitlabhq/-/sse/master%2FCONTRIBUTING.md/')).to route_to('projects/static_site_editor#show', namespace_id: 'gitlab', project_id: 'gitlabhq', id: 'master/CONTRIBUTING.md')
       expect(get('/gitlab/gitlabhq/-/sse/master%2FREADME/unsupported/error')).to route_to('projects/static_site_editor#show', namespace_id: 'gitlab', project_id: 'gitlabhq', id: 'master/README', vueroute: 'unsupported/error')

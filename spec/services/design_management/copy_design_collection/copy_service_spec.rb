@@ -16,7 +16,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
   end
 
   shared_examples 'service error' do |message:|
-    it 'returns an error response', :aggregate_failures do
+    it 'returns an error response' do
       expect(subject).to be_kind_of(ServiceResponse)
       expect(subject).to be_error
       expect(subject.message).to eq(message)
@@ -24,7 +24,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
   end
 
   shared_examples 'service success' do
-    it 'returns a success response', :aggregate_failures do
+    it 'returns a success response' do
       expect(subject).to be_kind_of(ServiceResponse)
       expect(subject).to be_success
     end
@@ -82,7 +82,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             include_examples 'service success'
           end
 
-          it 'copies the designs correctly', :aggregate_failures do
+          it 'copies the designs correctly' do
             expect { subject }.to change { target_issue.designs.count }.by(3)
 
             old_designs = issue.designs.ordered
@@ -98,7 +98,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             end
           end
 
-          it 'copies the design versions correctly', :aggregate_failures do
+          it 'copies the design versions correctly' do
             expect { subject }.to change { target_issue.design_versions.count }.by(3)
 
             old_versions = issue.design_versions.ordered
@@ -114,7 +114,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             end
           end
 
-          it 'copies the design actions correctly', :aggregate_failures do
+          it 'copies the design actions correctly' do
             expect { subject }.to change { DesignManagement::Action.count }.by(3)
 
             old_actions = issue.design_versions.ordered.flat_map(&:actions)
@@ -132,7 +132,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             end
           end
 
-          it 'copies design notes correctly', :aggregate_failures, :sidekiq_inline do
+          it 'copies design notes correctly', :sidekiq_inline do
             old_notes = [
               create(:diff_note_on_design, note: 'first note', noteable: designs.first, project: project, author: create(:user)),
               create(:diff_note_on_design, note: 'second note', noteable: designs.first, project: project, author: create(:user))
@@ -159,7 +159,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             expect { subject }.to change { target_issue.project.lfs_objects.count }.by(3)
           end
 
-          it 'copies the Git repository data', :aggregate_failures do
+          it 'copies the Git repository data' do
             subject
 
             commit_shas = target_repository.commits('master', limit: 99).map(&:id)
@@ -187,7 +187,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
 
             include_examples 'service error', message: 'Designs were unable to be copied successfully'
 
-            it 'rollsback all PostgreSQL data created', :aggregate_failures do
+            it 'rollsback all PostgreSQL data created' do
               expect { subject }.not_to change {
                 [
                   DesignManagement::Design.count,
@@ -206,7 +206,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
               expect(collections).to all(be_empty)
             end
 
-            it 'does not alter master branch', :aggregate_failures do
+            it 'does not alter master branch' do
               # Add some Git data to the target_repository, so we are testing
               # that any original data remains
               issue_2 = create(:issue, project: target_issue.project)
@@ -228,7 +228,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
     end
   end
 
-  describe 'Alert if schema changes', :aggregate_failures do
+  describe 'Alert if schema changes' do
     let_it_be(:config_file) { Rails.root.join('lib/gitlab/design_management/copy_design_collection_model_attributes.yml') }
     let_it_be(:config) { YAML.load_file(config_file).symbolize_keys }
 

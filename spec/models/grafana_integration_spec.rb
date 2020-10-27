@@ -75,12 +75,12 @@ RSpec.describe GrafanaIntegration do
         expect(grafana_integration.encrypted_token).not_to be_nil
       end
 
-      it 'locks access to raw value in private method', :aggregate_failures do
+      it 'locks access to raw value in private method' do
         expect { grafana_integration.token }.to raise_error(NoMethodError, /private method .token. called/)
         expect(grafana_integration.send(:token)).to eql('super-secret')
       end
 
-      it 'prevents overriding token value with its encrypted or masked version', :aggregate_failures do
+      it 'prevents overriding token value with its encrypted or masked version' do
         expect { grafana_integration.update(token: grafana_integration.encrypted_token) }.not_to change { grafana_integration.reload.send(:token) }
         expect { grafana_integration.update(token: grafana_integration.masked_token) }.not_to change { grafana_integration.reload.send(:token) }
       end

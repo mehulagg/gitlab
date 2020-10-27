@@ -68,7 +68,7 @@ RSpec.describe Projects::PerformanceMonitoring::DashboardsController do
               end
 
               context 'Metrics::Dashboard::CloneDashboardService failure' do
-                it 'returns json with failure message', :aggregate_failures do
+                it 'returns json with failure message' do
                   allow(::Metrics::Dashboard::CloneDashboardService).to receive(:new).and_return(double(execute: { status: :error, message: 'something went wrong', http_status: :bad_request }))
 
                   post :create, params: params
@@ -82,7 +82,7 @@ RSpec.describe Projects::PerformanceMonitoring::DashboardsController do
                 context "param #{param} is missing" do
                   let(param.to_s) { nil }
 
-                  it 'responds with bad request status and error message', :aggregate_failures do
+                  it 'responds with bad request status and error message' do
                     post :create, params: params
 
                     expect(response).to have_gitlab_http_status :bad_request
@@ -94,7 +94,7 @@ RSpec.describe Projects::PerformanceMonitoring::DashboardsController do
               context "param branch_name is missing" do
                 let(:branch_name) { nil }
 
-                it 'responds with bad request status and error message', :aggregate_failures do
+                it 'responds with bad request status and error message' do
                   post :create, params: params
 
                   expect(response).to have_gitlab_http_status :bad_request

@@ -10,7 +10,7 @@ RSpec.describe Gitlab::TabWidth, lib: true do
       expect(css_class).to eq('tab-width-8')
     end
 
-    it "returns CSS class for user's tab width", :aggregate_failures do
+    it "returns CSS class for user's tab width" do
       [1, 6, 12].each do |i|
         user = double('user', tab_width: i)
         css_class = described_class.css_class_for_user(user)
@@ -19,7 +19,7 @@ RSpec.describe Gitlab::TabWidth, lib: true do
       end
     end
 
-    it 'raises if tab width is out of valid range', :aggregate_failures do
+    it 'raises if tab width is out of valid range' do
       [0, 13, 'foo', nil].each do |i|
         expect do
           user = double('user', tab_width: i)

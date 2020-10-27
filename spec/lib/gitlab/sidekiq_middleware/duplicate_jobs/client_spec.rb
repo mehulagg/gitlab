@@ -30,7 +30,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Client, :clean_gitlab_r
     describe '#call' do
       include_context 'deduplication worker class', strategy, false
 
-      it 'adds a correct duplicate tag to the jobs', :aggregate_failures do
+      it 'adds a correct duplicate tag to the jobs' do
         TestDeduplicationWorker.bulk_perform_async([['args1'], ['args2'], ['args1']])
 
         job1, job2, job3 = TestDeduplicationWorker.jobs
@@ -59,7 +59,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Client, :clean_gitlab_r
           stub_const('TestDeduplicationWorker', worker_class)
         end
 
-        it 'adds a correct duplicate tag to the jobs', :aggregate_failures do
+        it 'adds a correct duplicate tag to the jobs' do
           TestDeduplicationWorker.perform_async('args1')
           TestDeduplicationWorker.perform_at(1.day.from_now, 'args1')
           TestDeduplicationWorker.perform_in(3.hours, 'args1')

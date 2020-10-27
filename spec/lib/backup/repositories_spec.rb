@@ -20,7 +20,7 @@ RSpec.describe Backup::Repositories do
     let_it_be(:projects) { create_list(:project, 5, :repository) }
 
     RSpec.shared_examples 'creates repository bundles' do
-      specify :aggregate_failures do
+      specify do
         # Add data to the wiki, design repositories, and snippets, so they will be included in the dump.
         create(:wiki_page, container: project)
         create(:design, :with_file, issue: create(:issue, project: project))
@@ -172,7 +172,7 @@ RSpec.describe Backup::Repositories do
       ].to_enum
     end
 
-    it 'restores repositories from bundles', :aggregate_failures do
+    it 'restores repositories from bundles' do
       allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
         allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
       end

@@ -11,7 +11,7 @@ RSpec.describe Clusters::ParseClusterApplicationsArtifactService do
   end
 
   describe 'RELEASE_NAMES' do
-    it 'is included in Cluster application names', :aggregate_failures do
+    it 'is included in Cluster application names' do
       described_class::RELEASE_NAMES.each do |release_name|
         expect(Clusters::Cluster::APPLICATIONS).to include(release_name)
       end
@@ -21,7 +21,7 @@ RSpec.describe Clusters::ParseClusterApplicationsArtifactService do
   describe '.new' do
     let(:job) { build(:ci_build) }
 
-    it 'sets the project and current user', :aggregate_failures do
+    it 'sets the project and current user' do
       service = described_class.new(job, user)
 
       expect(service.project).to eq(job.project)

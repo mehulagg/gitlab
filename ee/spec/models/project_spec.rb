@@ -1771,7 +1771,7 @@ RSpec.describe Project do
           .and_return(design_updated_service)
       end
 
-      it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node', :aggregate_failures do
+      it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
         stub_primary_node
 
         expect(repository_updated_service).to receive(:execute).once
@@ -1781,7 +1781,7 @@ RSpec.describe Project do
         project.after_import
       end
 
-      it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node', :aggregate_failures do
+      it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node' do
         expect(repository_updated_service).not_to receive(:execute)
         expect(wiki_updated_service).not_to receive(:execute)
         expect(design_updated_service).not_to receive(:execute)

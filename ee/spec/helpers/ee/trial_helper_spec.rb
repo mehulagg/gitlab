@@ -81,7 +81,7 @@ RSpec.describe EE::TrialHelper do
     subject { helper.namespace_options_for_select }
 
     context 'when there are no eligible group or user namespaces' do
-      it 'returns just the "New" option group', :aggregate_failures do
+      it 'returns just the "New" option group' do
         is_expected.to match(new_optgroup_regex)
         is_expected.not_to match(groups_optgroup_regex)
         is_expected.not_to match(users_optgroup_regex)
@@ -91,7 +91,7 @@ RSpec.describe EE::TrialHelper do
     context 'when only group namespaces are eligible' do
       let(:trial_group_namespaces) { [group1, group2] }
 
-      it 'returns the "New" and "Groups" option groups', :aggregate_failures do
+      it 'returns the "New" and "Groups" option groups' do
         is_expected.to match(new_optgroup_regex)
         is_expected.to match(groups_optgroup_regex)
         is_expected.not_to match(users_optgroup_regex)
@@ -101,7 +101,7 @@ RSpec.describe EE::TrialHelper do
     context 'when only the user namespace is eligible' do
       let(:trial_user_namespaces) { [user.namespace] }
 
-      it 'returns the "New" and "Users" option groups', :aggregate_failures do
+      it 'returns the "New" and "Users" option groups' do
         is_expected.to match(new_optgroup_regex)
         is_expected.to match(users_optgroup_regex)
         is_expected.not_to match(groups_optgroup_regex)
@@ -112,7 +112,7 @@ RSpec.describe EE::TrialHelper do
       let(:trial_group_namespaces) { [group1, group2] }
       let(:trial_user_namespaces) { [user.namespace] }
 
-      it 'returns the "New", "Groups", and "Users" option groups', :aggregate_failures do
+      it 'returns the "New", "Groups", and "Users" option groups' do
         is_expected.to match(new_optgroup_regex)
         is_expected.to match(groups_optgroup_regex)
         is_expected.to match(users_optgroup_regex)

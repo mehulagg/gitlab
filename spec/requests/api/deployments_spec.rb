@@ -466,7 +466,7 @@ RSpec.describe API::Deployments do
 
       subject { get api("/projects/#{project.id}/deployments?order_by=updated_at&sort=asc", user) }
 
-      it 'succeeds', :aggregate_failures do
+      it 'succeeds' do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -474,7 +474,7 @@ RSpec.describe API::Deployments do
       end
 
       context 'with 10 more records' do
-        it 'does not increase the query count', :aggregate_failures do
+        it 'does not increase the query count' do
           create_list(:deployment, 10, :success, project: project)
 
           expect { subject }.not_to be_n_plus_1_query

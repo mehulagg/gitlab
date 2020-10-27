@@ -7,7 +7,7 @@ RSpec.describe Metrics::Dashboard::Annotations::DeleteService do
   let(:service_instance) { described_class.new(user, annotation) }
 
   shared_examples 'executed annotation deletion' do
-    it 'returns success response', :aggregate_failures do
+    it 'returns success response' do
       expect(annotation).to receive(:destroy).and_return(true)
 
       response = service_instance.execute
@@ -17,7 +17,7 @@ RSpec.describe Metrics::Dashboard::Annotations::DeleteService do
   end
 
   shared_examples 'prevented annotation deletion' do |message|
-    it 'returns error response', :aggregate_failures do
+    it 'returns error response' do
       response = service_instance.execute
 
       expect(response[:status]).to be :error
@@ -48,7 +48,7 @@ RSpec.describe Metrics::Dashboard::Annotations::DeleteService do
         it_behaves_like 'executed annotation deletion'
 
         context 'annotation failed to delete' do
-          it 'returns error response', :aggregate_failures do
+          it 'returns error response' do
             allow(annotation).to receive(:destroy).and_return(false)
 
             response = service_instance.execute

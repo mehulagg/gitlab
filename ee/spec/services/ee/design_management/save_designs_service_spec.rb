@@ -30,14 +30,14 @@ RSpec.describe DesignManagement::SaveDesignsService do
         project.add_developer(user)
       end
 
-      it 'calls repository#log_geo_updated_event', :aggregate_failures do
+      it 'calls repository#log_geo_updated_event' do
         expect(design_repository).to receive(:log_geo_updated_event)
         expect(response).to include(status: :success)
       end
     end
 
     context 'when service errors' do
-      it 'does not call repository#log_geo_updated_event', :aggregate_failures do
+      it 'does not call repository#log_geo_updated_event' do
         expect(design_repository).not_to receive(:log_geo_updated_event)
         expect(response).to include(status: :error)
       end

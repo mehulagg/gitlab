@@ -41,14 +41,14 @@ RSpec.describe 'A Todoable that implements the CurrentUserTodos interface' do
     )
   end
 
-  it 'does not return todos of another user', :aggregate_failures do
+  it 'does not return todos of another user' do
     post_graphql(query, current_user: create(:user))
 
     expect(response).to have_gitlab_http_status(:success)
     expect(todoable_response).to be_empty
   end
 
-  it 'does not error when there is no logged in user', :aggregate_failures do
+  it 'does not error when there is no logged in user' do
     post_graphql(query)
 
     expect(response).to have_gitlab_http_status(:success)

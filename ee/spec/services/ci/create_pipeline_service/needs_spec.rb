@@ -108,7 +108,7 @@ RSpec.describe Ci::CreatePipelineService do
       stub_licensed_features(cross_project_pipelines: true)
     end
 
-    it 'has dependencies and variables', :aggregate_failures do
+    it 'has dependencies and variables' do
       job = execute.builds.first
 
       expect(job).to be_present

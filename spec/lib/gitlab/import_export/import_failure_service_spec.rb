@@ -88,11 +88,11 @@ RSpec.describe Gitlab::ImportExport::ImportFailureService do
               .and_raise(exception.new)
           end
 
-          it 'retries the number of times allowed and raise exception', :aggregate_failures do
+          it 'retries the number of times allowed and raise exception' do
             expect { perform_retry }.to raise_exception(exception)
           end
 
-          it 'logs import failure each time and raise exception', :aggregate_failures do
+          it 'logs import failure each time and raise exception' do
             maximum_retry_count.times do |index|
               retry_count = index + 1
 
@@ -112,7 +112,7 @@ RSpec.describe Gitlab::ImportExport::ImportFailureService do
     context 'when exception is not retriable' do
       let(:exception) { StandardError.new }
 
-      it 'raise the exception', :aggregate_failures do
+      it 'raise the exception' do
         expect(label).to receive(:save!).once.and_raise(exception)
         expect(subject).not_to receive(:log_import_failure)
         expect { perform_retry }.to raise_exception(exception)

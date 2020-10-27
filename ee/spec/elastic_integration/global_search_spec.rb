@@ -21,7 +21,7 @@ RSpec.describe 'GlobalSearch', :elastic do
     project.add_guest(guest)
   end
 
-  context "Respect feature visibility levels", :aggregate_failures do
+  context "Respect feature visibility levels" do
     context "Private projects" do
       let(:project) { create(:project, :private, :repository, :wiki_repo) }
 
@@ -127,7 +127,7 @@ RSpec.describe 'GlobalSearch', :elastic do
         expect_items_to_be_found(nil)
       end
 
-      it "shows items to member only if features are private", :aggregate_failures do
+      it "shows items to member only if features are private" do
         create_items(project, feature_settings(:private))
 
         expect_items_to_be_found(admin)

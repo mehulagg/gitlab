@@ -22,20 +22,20 @@ RSpec.describe DesignManagement::DeleteDesignsService do
   let(:response) { run_service }
 
   shared_examples 'a service error' do
-    it 'returns an error', :aggregate_failures do
+    it 'returns an error' do
       expect(response).to include(status: :error)
     end
   end
 
   shared_examples 'a top-level error' do
     let(:expected_error) { StandardError }
-    it 'raises an en expected error', :aggregate_failures do
+    it 'raises an en expected error' do
       expect { run_service }.to raise_error(expected_error)
     end
   end
 
   shared_examples 'a success' do
-    it 'returns successfully', :aggregate_failures do
+    it 'returns successfully' do
       expect(response).to include(status: :success)
     end
 

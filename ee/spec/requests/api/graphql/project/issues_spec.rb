@@ -95,7 +95,7 @@ RSpec.describe 'getting an issue list for a project' do
       post_graphql(single_issue_query, current_user: current_user)
     end
 
-    it 'returns the correct results', :aggregate_failures do
+    it 'returns the correct results' do
       post_graphql(query, current_user: current_user)
 
       result = graphql_data.dig('project', 'issues', 'nodes')

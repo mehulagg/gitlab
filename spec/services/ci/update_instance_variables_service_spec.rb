@@ -68,7 +68,7 @@ RSpec.describe Ci::UpdateInstanceVariablesService do
           .not_to change { Ci::InstanceVariable.count }
       end
 
-      it 'updates the records in place', :aggregate_failures do
+      it 'updates the records in place' do
         subject.execute
 
         expect(var_a.reload).to have_attributes(secret_value: 'new_dummy_value_for_a')
@@ -104,7 +104,7 @@ RSpec.describe Ci::UpdateInstanceVariablesService do
           .to change { Ci::InstanceVariable.count }.by 1
       end
 
-      it 'persists all the records', :aggregate_failures do
+      it 'persists all the records' do
         subject.execute
         var_b = Ci::InstanceVariable.find_by(key: 'var_b')
 
@@ -142,7 +142,7 @@ RSpec.describe Ci::UpdateInstanceVariablesService do
 
       it { expect(subject.execute).to be_truthy }
 
-      it 'persists all the records', :aggregate_failures do
+      it 'persists all the records' do
         subject.execute
         var_c = Ci::InstanceVariable.find_by(key: 'var_c')
 

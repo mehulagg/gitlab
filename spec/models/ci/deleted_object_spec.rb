@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::DeletedObject, :aggregate_failures do
+RSpec.describe Ci::DeletedObject do
   describe 'attributes' do
     it { is_expected.to respond_to(:file) }
     it { is_expected.to respond_to(:store_dir) }

@@ -40,7 +40,7 @@ RSpec.shared_examples 'a system note' do |params|
   let(:expected_noteable) { noteable }
   let(:commit_count)      { nil }
 
-  it 'has the correct attributes', :aggregate_failures do
+  it 'has the correct attributes' do
     exclude_project = !params.nil? && params[:exclude_project]
 
     expect(subject).to be_valid

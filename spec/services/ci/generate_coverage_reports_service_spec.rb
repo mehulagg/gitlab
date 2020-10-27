@@ -15,7 +15,7 @@ RSpec.describe Ci::GenerateCoverageReportsService do
       let!(:head_pipeline) { merge_request.head_pipeline }
       let!(:base_pipeline) { nil }
 
-      it 'returns status and data', :aggregate_failures do
+      it 'returns status and data' do
         expect_any_instance_of(Ci::PipelineArtifact) do |instance|
           expect(instance).to receive(:present)
           expect(instance).to receive(:for_files).with(merge_request.new_paths).and_call_original

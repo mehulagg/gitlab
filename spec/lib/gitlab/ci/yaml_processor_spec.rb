@@ -501,7 +501,7 @@ module Gitlab
 
         context 'when error is raised after composing the config with warnings' do
           shared_examples 'has warnings and expected error' do |error_message|
-            it 'returns errors and warnings', :aggregate_failures do
+            it 'returns errors and warnings' do
               expect(subject.errors).to include(error_message)
               expect(subject.warnings).to be_present
             end

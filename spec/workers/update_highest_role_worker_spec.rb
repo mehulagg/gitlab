@@ -9,7 +9,7 @@ RSpec.describe UpdateHighestRoleWorker, :clean_gitlab_redis_shared_state do
 
   describe '#perform' do
     context 'when user is not found' do
-      it 'does not update or deletes any highest role', :aggregate_failures do
+      it 'does not update or deletes any highest role' do
         expect { worker.perform(-1) }.not_to change(UserHighestRole, :count)
       end
     end

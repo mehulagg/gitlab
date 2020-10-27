@@ -39,7 +39,7 @@ RSpec.describe Banzai::Filter::DesignReferenceFilter do
     let(:href) { url_for_design(design) }
     let(:title) { design.filename }
 
-    it 'produces a good link', :aggregate_failures do
+    it 'produces a good link' do
       expect(link.attr('href')).to eq(href)
       expect(link.attr('title')).to eq(title)
       expect(link.attr('class')).to eq('gfm gfm-design has-tooltip')
@@ -164,7 +164,7 @@ RSpec.describe Banzai::Filter::DesignReferenceFilter do
           let(:design) { create(:design, :with_versions, filename: filename, issue: issue) }
           let(:link) { doc.css('a').first }
 
-          it 'replaces the content with the reference, but keeps the link', :aggregate_failures do
+          it 'replaces the content with the reference, but keeps the link' do
             expect(doc.text).to eq(CGI.unescapeHTML("Added #{design.to_reference}"))
             expect(link.attr('title')).to eq(design.filename)
             expect(link.attr('href')).to eq(design_url)

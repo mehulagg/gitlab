@@ -87,7 +87,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       end
     end
 
-    it 'Allows limiting projects and namespaces to index', :aggregate_failures, :js do
+    it 'Allows limiting projects and namespaces to index', :js do
       project = create(:project)
       namespace = create(:namespace)
 
@@ -130,7 +130,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.exists?(project_id: project.id)).to be_truthy
     end
 
-    it 'Allows removing all namespaces and projects', :aggregate_failures, :js do
+    it 'Allows removing all namespaces and projects', :js do
       stub_ee_application_setting(elasticsearch_limit_indexing: true)
 
       namespace = create(:elasticsearch_indexed_namespace).namespace

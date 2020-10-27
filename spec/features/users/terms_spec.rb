@@ -17,7 +17,7 @@ RSpec.describe 'Users > Terms' do
     expect(page).to have_content('By accepting, you promise to be nice!')
   end
 
-  it 'does not show buttons to accept, decline or sign out', :aggregate_failures do
+  it 'does not show buttons to accept, decline or sign out' do
     visit terms_path
 
     expect(page).not_to have_css('.footer-block')

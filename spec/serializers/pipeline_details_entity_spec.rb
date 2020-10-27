@@ -167,7 +167,7 @@ RSpec.describe PipelineDetailsEntity do
         create(:ci_sources_pipeline, source_job: bridge, pipeline: cross_project_pipeline)
       end
 
-      it 'contains an information about dependent pipeline', :aggregate_failures do
+      it 'contains an information about dependent pipeline' do
         expect(subject[:triggered]).to be_a(Array)
         expect(subject[:triggered].length).to eq(2)
         expect(subject[:triggered].first[:path]).not_to be_nil

@@ -35,7 +35,7 @@ RSpec.describe 'Create a new cluster agent token' do
       cluster_agent.project.add_maintainer(current_user)
     end
 
-    it 'does not create a token and returns error message', :aggregate_failures do
+    it 'does not create a token and returns error message' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Clusters::AgentToken, :count)
       expect(mutation_response['errors']).to eq(['This feature is only available for premium plans'])
     end
@@ -47,7 +47,7 @@ RSpec.describe 'Create a new cluster agent token' do
       cluster_agent.project.add_maintainer(current_user)
     end
 
-    it 'creates a new token', :aggregate_failures do
+    it 'creates a new token' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.to change { Clusters::AgentToken.count }.by(1)
       expect(mutation_response['secret']).not_to be_nil
       expect(mutation_response['errors']).to eq([])

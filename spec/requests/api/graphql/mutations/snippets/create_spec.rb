@@ -81,7 +81,7 @@ RSpec.describe 'Creating a Snippet' do
     end
 
     shared_examples 'creates snippet' do
-      it 'returns the created Snippet', :aggregate_failures do
+      it 'returns the created Snippet' do
         expect do
           subject
         end.to change { Snippet.count }.by(1)

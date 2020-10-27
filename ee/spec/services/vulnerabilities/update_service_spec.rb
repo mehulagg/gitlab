@@ -27,7 +27,7 @@ RSpec.describe Vulnerabilities::UpdateService do
     it_behaves_like 'calls Vulnerabilities::HistoricalStatistics::UpdateService'
 
     context 'when neither severity nor confidence are overridden' do
-      it 'updates the vulnerability from updated finding (title, severity and confidence only)', :aggregate_failures do
+      it 'updates the vulnerability from updated finding (title, severity and confidence only)' do
         expect { subject }.not_to change { project.vulnerabilities.count }
         expect(vulnerability.previous_changes.keys).to contain_exactly(*%w[updated_at title title_html severity confidence])
         expect(vulnerability).to(

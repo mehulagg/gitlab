@@ -943,7 +943,7 @@ RSpec.describe ApplicationController do
         allow(controller).to receive(:session).and_return({ impersonator_id: impersonator.id })
       end
 
-      it 'returns a User with impersonator', :aggregate_failures do
+      it 'returns a User with impersonator' do
         get :index
 
         expect(controller.current_user).to be_a(User)
@@ -956,7 +956,7 @@ RSpec.describe ApplicationController do
         allow(controller).to receive(:session).and_return({})
       end
 
-      it 'returns a User', :aggregate_failures do
+      it 'returns a User' do
         get :index
 
         expect(controller.current_user).to be_a(User)

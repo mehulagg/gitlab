@@ -11,14 +11,14 @@ RSpec.shared_examples 'update highest role with exclusive lease' do
   end
 
   context 'when lease is obtained', :clean_gitlab_redis_shared_state do
-    it 'takes the lease but does not release it', :aggregate_failures do
+    it 'takes the lease but does not release it' do
       expect_to_obtain_exclusive_lease(lease_key, 'uuid', timeout: described_class::HIGHEST_ROLE_LEASE_TIMEOUT)
       expect(Gitlab::ExclusiveLease).not_to receive(:cancel).with(lease_key, 'uuid')
 
       subject
     end
 
-    it 'schedules a job in the future', :aggregate_failures do
+    it 'schedules a job in the future' do
       allow_next_instance_of(Gitlab::ExclusiveLease) do |instance|
         allow(instance).to receive(:try_obtain).and_return('uuid')
       end

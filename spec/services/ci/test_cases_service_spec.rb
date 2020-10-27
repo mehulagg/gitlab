@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::TestCasesService, :aggregate_failures do
+RSpec.describe Ci::TestCasesService do
   describe '#execute' do
     subject(:execute_service) { described_class.new.execute(build) }
 

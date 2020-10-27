@@ -27,7 +27,7 @@ RSpec.describe Resolvers::Metrics::Dashboards::AnnotationResolver do
       context 'with annotation records' do
         let_it_be(:annotation_1) { create(:metrics_dashboard_annotation, environment: environment, starting_at: 9.minutes.ago, dashboard_path: path) }
 
-        it 'loads annotations with usage of finder class', :aggregate_failures do
+        it 'loads annotations with usage of finder class' do
           expect_next_instance_of(::Metrics::Dashboards::AnnotationsFinder, dashboard: dashboard, params: args) do |finder|
             expect(finder).to receive(:execute).and_return [annotation_1]
           end
@@ -38,7 +38,7 @@ RSpec.describe Resolvers::Metrics::Dashboards::AnnotationResolver do
         context 'dashboard is missing' do
           let(:dashboard) { nil }
 
-          it 'returns empty array', :aggregate_failures do
+          it 'returns empty array' do
             expect(::Metrics::Dashboards::AnnotationsFinder).not_to receive(:new)
 
             expect(resolve_annotations).to be_empty

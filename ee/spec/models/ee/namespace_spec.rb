@@ -1049,7 +1049,7 @@ RSpec.describe Namespace do
                                         shared_group: group })
           end
 
-          it 'includes active users from the shared group to the billed members', :aggregate_failures do
+          it 'includes active users from the shared group to the billed members' do
             expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id])
             expect(shared_group.billed_user_ids).not_to include([developer.id])
           end
@@ -1071,7 +1071,7 @@ RSpec.describe Namespace do
                                             shared_group: subgroup })
               end
 
-              it 'includes all the active and non guest users from the shared group', :aggregate_failures do
+              it 'includes all the active and non guest users from the shared group' do
                 expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id, another_shared_group_developer.id])
                 expect(shared_group.billed_user_ids).not_to include([developer.id])
                 expect(another_shared_group.billed_user_ids).not_to include([developer.id, shared_group_developer.id])
@@ -1162,7 +1162,7 @@ RSpec.describe Namespace do
                                           shared_group: group })
             end
 
-            it 'includes active users from the shared group including guests', :aggregate_failures do
+            it 'includes active users from the shared group including guests' do
               expect(group.billed_user_ids).to match_array([developer.id, guest.id, shared_group_developer.id, shared_group_guest.id])
               expect(shared_group.billed_user_ids).to match_array([shared_group_developer.id, shared_group_guest.id])
             end

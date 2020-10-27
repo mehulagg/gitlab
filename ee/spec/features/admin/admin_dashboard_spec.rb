@@ -54,7 +54,7 @@ RSpec.describe 'Admin Dashboard' do
       end
     end
 
-    it 'shows correct amounts of users', :aggregate_failures do
+    it 'shows correct amounts of users' do
       visit admin_dashboard_stats_path
 
       expect(page).to have_content("Users without a Group and Project 23")

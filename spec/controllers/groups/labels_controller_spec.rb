@@ -52,7 +52,7 @@ RSpec.describe Groups::LabelsController do
       context 'when include_ancestor_groups false' do
         let(:params) { { group_id: subgroup, only_group_labels: true } }
 
-        it 'does not return ancestor group labels', :aggregate_failures do
+        it 'does not return ancestor group labels' do
           get :index, params: params, format: :json
 
           label_ids = json_response.map {|label| label['title']}

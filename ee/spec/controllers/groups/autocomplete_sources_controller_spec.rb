@@ -53,7 +53,7 @@ RSpec.describe Groups::AutocompleteSourcesController do
     end
 
     with_them do
-      it 'returns the correct response', :aggregate_failures do
+      it 'returns the correct response' do
         issues = Array(expected).flat_map { |sym| public_send(sym) }
         params = { group_id: group, issue_types: issue_types }.compact
 

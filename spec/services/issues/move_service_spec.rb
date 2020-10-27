@@ -222,7 +222,7 @@ RSpec.describe Issues::MoveService do
           subject
         end
 
-        it 'logs if QueueService returns an error', :aggregate_failures do
+        it 'logs if QueueService returns an error' do
           error_message = 'error'
 
           expect_next_instance_of(DesignManagement::CopyDesignCollection::QueueService) do |service|
@@ -237,7 +237,7 @@ RSpec.describe Issues::MoveService do
 
         # Perform a small integration test to ensure the services and worker
         # can correctly create designs.
-        it 'copies the design and its notes', :sidekiq_inline, :aggregate_failures do
+        it 'copies the design and its notes', :sidekiq_inline do
           new_issue = subject
 
           expect(new_issue.designs.size).to eq(1)

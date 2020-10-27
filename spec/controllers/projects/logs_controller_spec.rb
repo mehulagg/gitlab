@@ -119,7 +119,7 @@ RSpec.describe Projects::LogsController do
       end
 
       context 'with gitlab managed apps logs' do
-        it 'uses cluster finder services to select cluster', :aggregate_failures do
+        it 'uses cluster finder services to select cluster' do
           cluster_list = [cluster]
           service_params = { params: ActionController::Parameters.new(pod_name: pod_name).permit! }
           request_params = {

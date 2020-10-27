@@ -105,7 +105,7 @@ RSpec.describe ObjectStorage::DirectUpload do
     end
   end
 
-  describe '#to_hash', :aggregate_failures do
+  describe '#to_hash' do
     subject { direct_upload.to_hash }
 
     shared_examples 'a valid S3 upload' do

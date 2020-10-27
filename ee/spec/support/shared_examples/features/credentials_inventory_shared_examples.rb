@@ -18,7 +18,7 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
       visit credentials_path
     end
 
-    it 'shows the details', :aggregate_failures do
+    it 'shows the details' do
       expect(first_row.text).to include('David')
       expect(first_row.text).to include('api')
       expect(first_row.text).to include('2019-12-10')
@@ -69,7 +69,7 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
       visit credentials_path
     end
 
-    it 'shows the details with a revoked date', :aggregate_failures do
+    it 'shows the details with a revoked date' do
       expect(first_row.text).to include('2020-06-22')
 
       unless group_managed_account
@@ -95,7 +95,7 @@ RSpec.shared_examples_for 'credentials inventory SSH keys' do |group_managed_acc
       visit credentials_path
     end
 
-    it 'shows the details', :aggregate_failures do
+    it 'shows the details' do
       expect(first_row.text).to include('David')
       expect(first_row.text).to include('2019-12-09')
       expect(first_row.text).to include('2019-12-10')

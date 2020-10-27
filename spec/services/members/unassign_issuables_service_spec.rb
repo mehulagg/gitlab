@@ -14,7 +14,7 @@ RSpec.describe Members::UnassignIssuablesService do
 
   describe '#execute' do
     RSpec.shared_examples 'un-assigning issuables' do |issue_count, mr_count, open_issue_count, open_mr_count|
-      it 'removes issuable assignments', :aggregate_failures do
+      it 'removes issuable assignments' do
         expect(user.assigned_issues.count).to eq(issue_count)
         expect(user.assigned_merge_requests.count).to eq(mr_count)
 
@@ -24,7 +24,7 @@ RSpec.describe Members::UnassignIssuablesService do
         expect(user.assigned_merge_requests.count).to eq(0)
       end
 
-      it 'invalidates user cache', :aggregate_failures, :clean_gitlab_redis_cache do
+      it 'invalidates user cache', :clean_gitlab_redis_cache do
         expect(user.assigned_open_merge_requests_count).to eq(open_mr_count)
         expect(user.assigned_open_issues_count).to eq(open_issue_count)
 

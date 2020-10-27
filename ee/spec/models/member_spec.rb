@@ -14,7 +14,7 @@ RSpec.describe Member, type: :model do
     end
   end
 
-  describe '#is_using_seat', :aggregate_failures do
+  describe '#is_using_seat' do
     let(:user) { build :user }
     let(:group) { create :group }
     let(:member) { build :group_member, group: group, user: user }

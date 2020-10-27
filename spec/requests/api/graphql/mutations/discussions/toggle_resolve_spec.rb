@@ -26,7 +26,7 @@ RSpec.describe 'Toggling the resolve status of a discussion' do
   context 'when user has permission' do
     let_it_be(:current_user) { create(:user, developer_projects: [project]) }
 
-    it 'returns the discussion without errors', :aggregate_failures do
+    it 'returns the discussion without errors' do
       post_graphql_mutation(mutation, current_user: current_user)
 
       expect(response).to have_gitlab_http_status(:success)

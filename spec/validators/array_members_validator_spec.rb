@@ -41,7 +41,7 @@ RSpec.describe ArrayMembersValidator do
     end
 
     context 'with default object name' do
-      it 'uses attribute name', :aggregate_failures do
+      it 'uses attribute name' do
         test_class.class_eval do
           validates :children, array_members: { member_class: child_class }
         end
@@ -54,7 +54,7 @@ RSpec.describe ArrayMembersValidator do
     end
 
     context 'with custom object name' do
-      it 'uses that name', :aggregate_failures do
+      it 'uses that name' do
         test_class.class_eval do
           validates :children, array_members: { member_class: child_class, object_name: 'test' }
         end

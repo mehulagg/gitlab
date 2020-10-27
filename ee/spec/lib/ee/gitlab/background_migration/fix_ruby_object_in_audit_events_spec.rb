@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::BackgroundMigration::FixRubyObjectInAuditEvents, :migration, schema: 20200518114540 do
   let(:audit_events) { table(:audit_events) }
 
-  it 'cleans up ruby/object in details field', :aggregate_failures do
+  it 'cleans up ruby/object in details field' do
     tainted_audit_event = audit_events.create!(
       author_id: -1,
       entity_id: 1,

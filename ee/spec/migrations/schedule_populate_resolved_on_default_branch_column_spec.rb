@@ -48,7 +48,7 @@ RSpec.describe SchedulePopulateResolvedOnDefaultBranchColumn do
       stub_const("#{described_class.name}::BATCH_SIZE", 1)
     end
 
-    it 'schedules the background jobs', :aggregate_failures do
+    it 'schedules the background jobs' do
       migrate!
 
       expect(BackgroundMigrationWorker.jobs.size).to be(2)

@@ -49,7 +49,7 @@ RSpec.describe 'Every API endpoint' do
       expect(routes_with_multiple_paths).to be_empty, "#{failure_routes} have multiple paths"
     end
 
-    it "doesn't define or exclude categories on removed actions", :aggregate_failures do
+    it "doesn't define or exclude categories on removed actions" do
       api_endpoints.group_by(&:first).each do |klass, paths|
         existing_paths = paths.map(&:last)
         used_paths = paths_defined_in_feature_category_config(klass)

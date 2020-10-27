@@ -262,9 +262,6 @@ end
 Be careful doing this, as this sacrifices clarity and test independence for
 performance gains.
 
-When combining tests, consider using `:aggregate_failures`, so that the full
-results are available, and not just the first failure.
-
 ### General guidelines
 
 - Use a single, top-level `RSpec.describe ClassName` block.
@@ -284,7 +281,6 @@ results are available, and not just the first failure.
 - When using `evaluate_script("$('.js-foo').testSomething()")` (or `execute_script`) which acts on a given element,
   use a Capybara matcher beforehand (e.g. `find('.js-foo')`) to ensure the element actually exists.
 - Use `focus: true` to isolate parts of the specs you want to run.
-- Use [`:aggregate_failures`](https://relishapp.com/rspec/rspec-core/docs/expectation-framework-integration/aggregating-failures) when there is more than one expectation in a test.
 - For [empty test description blocks](https://github.com/rubocop-hq/rspec-style-guide#it-and-specify), use `specify` rather than `it do` if the test is self-explanatory.
 - Use `non_existing_record_id`/`non_existing_record_iid`/`non_existing_record_access_level`
   when you need an ID/IID/access level that doesn't actually exists. Using 123, 1234,

@@ -383,7 +383,7 @@ RSpec.describe Banzai::Filter::IssueReferenceFilter do
       enable_design_management
     end
 
-    it 'includes the word "designs" after the reference in the text content', :aggregate_failures do
+    it 'includes the word "designs" after the reference in the text content' do
       expect(link.attr('title')).to eq(issue.title)
       expect(link.attr('href')).to eq(designs_tab_url)
       expect(link.text).to eq("#{issue.to_reference} (designs)")

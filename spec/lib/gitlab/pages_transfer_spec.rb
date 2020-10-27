@@ -7,7 +7,7 @@ RSpec.describe Gitlab::PagesTransfer do
     let(:async) { subject.async }
 
     context 'when receiving an allowed method' do
-      it 'schedules a PagesTransferWorker', :aggregate_failures do
+      it 'schedules a PagesTransferWorker' do
         described_class::Async::METHODS.each do |meth|
           expect(PagesTransferWorker)
             .to receive(:perform_async).with(meth, %w[foo bar])

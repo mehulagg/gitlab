@@ -455,7 +455,7 @@ RSpec.describe API::MergeRequests do
           create(:label_link, label: label2, target: merge_request2)
         end
 
-        it 'returns merge requests without any of the labels given', :aggregate_failures do
+        it 'returns merge requests without any of the labels given' do
           get api(endpoint_path, user), params: { not: { labels: ["#{label.title}, #{label2.title}"] } }
 
           expect(response).to have_gitlab_http_status(:ok)
@@ -466,7 +466,7 @@ RSpec.describe API::MergeRequests do
           end
         end
 
-        it 'returns merge requests without any of the milestones given', :aggregate_failures do
+        it 'returns merge requests without any of the milestones given' do
           get api(endpoint_path, user), params: { not: { milestone: milestone.title } }
 
           expect(response).to have_gitlab_http_status(:ok)
@@ -477,7 +477,7 @@ RSpec.describe API::MergeRequests do
           end
         end
 
-        it 'returns merge requests without the author given', :aggregate_failures do
+        it 'returns merge requests without the author given' do
           get api(endpoint_path, user), params: { not: { author_id: user2.id } }
 
           expect(response).to have_gitlab_http_status(:ok)
@@ -488,7 +488,7 @@ RSpec.describe API::MergeRequests do
           end
         end
 
-        it 'returns merge requests without the assignee given', :aggregate_failures do
+        it 'returns merge requests without the assignee given' do
           get api(endpoint_path, user), params: { not: { assignee_id: user2.id } }
 
           expect(response).to have_gitlab_http_status(:ok)

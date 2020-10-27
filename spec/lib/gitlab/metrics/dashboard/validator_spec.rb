@@ -65,7 +65,7 @@ RSpec.describe Gitlab::Metrics::Dashboard::Validator do
 
   describe '#validate!' do
     shared_examples 'validation failed' do |errors_message|
-      it 'raises error with corresponding messages', :aggregate_failures do
+      it 'raises error with corresponding messages' do
         expect { subject }.to raise_error do |error|
           expect(error).to be_kind_of(Gitlab::Metrics::Dashboard::Validator::Errors::InvalidDashboardError)
           expect(error.message).to eq(errors_message)

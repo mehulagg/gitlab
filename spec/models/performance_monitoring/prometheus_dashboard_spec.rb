@@ -39,7 +39,7 @@ RSpec.describe PerformanceMonitoring::PrometheusDashboard do
 
     describe 'validations' do
       shared_examples 'validation failed' do |errors_messages|
-        it 'raises error with corresponding messages', :aggregate_failures do
+        it 'raises error with corresponding messages' do
           expect { subject }.to raise_error do |error|
             expect(error).to be_kind_of(ActiveModel::ValidationError)
             expect(error.model.errors.messages).to eq(errors_messages)
@@ -184,7 +184,7 @@ RSpec.describe PerformanceMonitoring::PrometheusDashboard do
     let(:path) { ::Metrics::Dashboard::SystemDashboardService::DASHBOARD_PATH }
 
     context 'dashboard has been found' do
-      it 'uses dashboard finder to find and load dashboard data and returns dashboard instance', :aggregate_failures do
+      it 'uses dashboard finder to find and load dashboard data and returns dashboard instance' do
         expect(Gitlab::Metrics::Dashboard::Finder).to receive(:find).with(project, user, environment: environment, dashboard_path: path).and_return(status: :success, dashboard: json_content)
 
         dashboard_instance = described_class.find_for(project: project, user: user, path: path, options: { environment: environment })
@@ -205,7 +205,7 @@ RSpec.describe PerformanceMonitoring::PrometheusDashboard do
       end
     end
 
-    context 'dashboard has invalid schema', :aggregate_failures do
+    context 'dashboard has invalid schema' do
       it 'still returns dashboard object' do
         expect(Gitlab::Metrics::Dashboard::Finder).to receive(:find).and_return(http_status: :unprocessable_entity)
 

@@ -23,7 +23,7 @@ RSpec.describe Releases::CreateService do
           stub_licensed_features(group_milestone_project_releases: true)
         end
 
-        it 'adds the group milestone', :aggregate_failures do
+        it 'adds the group milestone' do
           result = service.execute
 
           expect(result[:status]).to eq(:success)
@@ -32,7 +32,7 @@ RSpec.describe Releases::CreateService do
       end
 
       context 'when unlicensed' do
-        it 'returns an error', :aggregate_failures do
+        it 'returns an error' do
           result = service.execute
 
           expect(result[:status]).to eq(:error)
@@ -47,7 +47,7 @@ RSpec.describe Releases::CreateService do
       let(:supergroup_milestone) { create(:milestone, group: supergroup, title: 'sg1') }
       let(:params_with_milestones) { params.merge({ milestones: [supergroup_milestone.title] }) }
 
-      it 'raises an error', :aggregate_failures do
+      it 'raises an error' do
         result = service.execute
 
         expect(result[:status]).to eq(:error)

@@ -9,7 +9,7 @@ RSpec.describe API::Entities::ProjectImportFailedRelation do
     let(:import_failure) { build(:import_failure) }
     let(:entity) { described_class.new(import_failure) }
 
-    it 'includes basic fields', :aggregate_failures do
+    it 'includes basic fields' do
       expect(subject).to eq(
         id: import_failure.id,
         created_at: import_failure.created_at,

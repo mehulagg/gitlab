@@ -19,7 +19,7 @@ RSpec.describe Vulnerabilities::HistoricalStatistics::AdjustmentService do
       allow(described_class).to receive(:new).and_return(mock_service_object)
     end
 
-    it 'instantiates the service object for given project ids and calls `execute` on them', :aggregate_failures do
+    it 'instantiates the service object for given project ids and calls `execute` on them' do
       execute_for_project_ids
 
       expect(described_class).to have_received(:new).with([1, 2, 3])

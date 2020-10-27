@@ -56,7 +56,7 @@ RSpec.shared_examples 'resource routing' do
   let(:actions) { default_actions.keys }
   let(:additional_actions) { {} }
 
-  it 'routes resource actions', :aggregate_failures do
+  it 'routes resource actions' do
     selected_actions = default_actions.slice(*actions).merge(additional_actions)
 
     selected_actions.each do |action, (method, action_path)|

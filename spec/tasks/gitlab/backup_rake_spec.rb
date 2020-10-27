@@ -299,7 +299,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       end
 
       shared_examples 'includes repositories in all repository storages' do
-        specify :aggregate_failures do
+        specify do
           project_a = create(:project, :repository)
           project_a.track_project_repository
           project_snippet_a = create(:project_snippet, :repository, project: project_a, author: project_a.owner)

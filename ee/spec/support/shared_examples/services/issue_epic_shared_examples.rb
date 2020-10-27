@@ -35,7 +35,7 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       expect { execute }.to raise_error(Gitlab::Access::AccessDeniedError)
     end
 
-    it 'does not send usage data for added epic action', :aggregate_failures do
+    it 'does not send usage data for added epic action' do
       expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_added_epic_action)
 
       expect { execute }.to raise_error(Gitlab::Access::AccessDeniedError)

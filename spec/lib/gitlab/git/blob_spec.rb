@@ -395,7 +395,7 @@ RSpec.describe Gitlab::Git::Blob, :seed_helper do
     end
   end
 
-  describe 'encoding', :aggregate_failures do
+  describe 'encoding' do
     context 'file with russian text' do
       let(:blob) { Gitlab::Git::Blob.find(repository, SeedRepo::Commit::ID, "encoding/russian.rb") }
 

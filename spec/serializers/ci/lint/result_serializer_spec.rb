@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::Lint::ResultSerializer, :aggregate_failures do
+RSpec.describe Ci::Lint::ResultSerializer do
   let_it_be(:project) { create(:project, :repository) }
   let(:result) do
     Gitlab::Ci::Lint

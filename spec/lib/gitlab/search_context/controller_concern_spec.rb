@@ -34,7 +34,7 @@ RSpec.describe Gitlab::SearchContext::ControllerConcern, type: :controller do
   end
 
   shared_examples 'has the proper context' do
-    it :aggregate_failures do
+    it do
       expected_group = project ? project.group : group
       expected_snippets = [snippet, *snippets].compact
 

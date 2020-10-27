@@ -62,7 +62,7 @@ RSpec.describe AuditEvent, type: :model do
               )
             end
 
-            it 'sets both values to be the same', :aggregate_failures do
+            it 'sets both values to be the same' do
               expect(audit_event.send(field_name)).to eq(values[expected_value])
               expect(audit_event.details[field_name]).to eq(values[expected_value])
             end
@@ -74,7 +74,7 @@ RSpec.describe AuditEvent, type: :model do
             create(:audit_event, field_name => nil, details: {})
           end
 
-          it 'does not set', :aggregate_failures do
+          it 'does not set' do
             expect(audit_event.send(field_name)).to be_nil
             expect(audit_event.details).not_to have_key(field_name)
           end

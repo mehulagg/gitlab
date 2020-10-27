@@ -23,7 +23,7 @@ RSpec.describe Gitlab::Audit::Auditor do
   subject(:auditor) { described_class }
 
   describe '.audit', :request_store do
-    it 'interacts with the event queue in correct order', :aggregate_failures do
+    it 'interacts with the event queue in correct order' do
       allow(Gitlab::Audit::EventQueue).to receive(:begin!).and_call_original
       allow(Gitlab::Audit::EventQueue).to receive(:end!).and_call_original
 
@@ -33,7 +33,7 @@ RSpec.describe Gitlab::Audit::Auditor do
       expect(Gitlab::Audit::EventQueue).to have_received(:end!).ordered
     end
 
-    it 'records audit events in correct order', :aggregate_failures do
+    it 'records audit events in correct order' do
       expect { auditor.audit(context, &operation) }.to change { AuditEvent.count }.by(2)
 
       event_messages = AuditEvent.all.order(created_at: :desc).map { |event| event.details[:custom_message] }
@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Audit::Auditor do
       expect(AuditEvent).to have_received(:bulk_insert!)
     end
 
-    it 'logs audit events to database', :aggregate_failures do
+    it 'logs audit events to database' do
       auditor.audit(context, &operation)
 
       audit_event = AuditEvent.last

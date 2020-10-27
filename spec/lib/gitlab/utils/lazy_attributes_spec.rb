@@ -34,7 +34,7 @@ RSpec.describe Gitlab::Utils::LazyAttributes do
     end
 
     context 'reading attributes' do
-      it 'returns the correct values for procs', :aggregate_failures do
+      it 'returns the correct values for procs' do
         expect(instance.number).to eq(1)
         expect(instance.reader_2).to eq('reader_2')
         expect(instance.accessor_2).to eq('accessor_2')
@@ -44,7 +44,7 @@ RSpec.describe Gitlab::Utils::LazyAttributes do
         expect(instance.incorrect_type).to be_nil
       end
 
-      it 'only calls the block once even if it returned `nil`', :aggregate_failures do
+      it 'only calls the block once even if it returned `nil`' do
         expect(instance.instance_variable_get('@number')).to receive(:call).once.and_call_original
         expect(instance.instance_variable_get('@accessor_2')).to receive(:call).once.and_call_original
         expect(instance.instance_variable_get('@incorrect_type')).to receive(:call).once.and_call_original
@@ -58,7 +58,7 @@ RSpec.describe Gitlab::Utils::LazyAttributes do
     end
 
     context 'writing attributes' do
-      it 'sets the correct values', :aggregate_failures do
+      it 'sets the correct values' do
         instance.string_attribute = -> { 'updated 1' }
         instance.accessor_2 = nil
 

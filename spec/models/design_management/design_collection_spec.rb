@@ -64,7 +64,7 @@ RSpec.describe DesignManagement::DesignCollection do
     end
 
     with_them do
-      it "maintains state machine transition rules", :aggregate_failures do
+      it "maintains state machine transition rules" do
         collection.copy_state = state
 
         expect(collection.can_start_copy?).to eq(can_start)
@@ -85,14 +85,14 @@ RSpec.describe DesignManagement::DesignCollection do
         end
       end
 
-      it "clears the cached state on end_copy!", :aggregate_failures do
+      it "clears the cached state on end_copy!" do
         fire_state_events(:start)
 
         expect { collection.end_copy! }.to change { redis_copy_state }.from("in_progress").to(nil)
         expect(collection).to be_copy_ready
       end
 
-      it "clears the cached state on reset_copy!", :aggregate_failures do
+      it "clears the cached state on reset_copy!" do
         fire_state_events(:start, :error)
 
         expect { collection.reset_copy! }.to change { redis_copy_state }.from("error").to(nil)

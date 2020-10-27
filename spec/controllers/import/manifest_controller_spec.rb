@@ -18,7 +18,7 @@ RSpec.describe Import::ManifestController, :clean_gitlab_redis_shared_state do
 
   describe 'POST upload' do
     context 'with a valid manifest' do
-      it 'saves the manifest and redirects to the status page', :aggregate_failures do
+      it 'saves the manifest and redirects to the status page' do
         post :upload, params: {
                group_id: group.id,
                manifest: fixture_file_upload('spec/fixtures/aosp_manifest.xml')

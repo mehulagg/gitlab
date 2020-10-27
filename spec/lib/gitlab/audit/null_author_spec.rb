@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Audit::NullAuthor do
       expect(subject.for(666, 'Old Hat')).to be_a(Gitlab::Audit::DeletedAuthor)
     end
 
-    it 'returns an UnauthenticatedAuthor when id equals -1', :aggregate_failures do
+    it 'returns an UnauthenticatedAuthor when id equals -1' do
       expect(subject.for(-1, 'Frank')).to be_a(Gitlab::Audit::UnauthenticatedAuthor)
       expect(subject.for(-1, 'Frank')).to have_attributes(id: -1, name: 'Frank')
     end

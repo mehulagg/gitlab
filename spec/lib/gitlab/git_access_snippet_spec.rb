@@ -70,7 +70,7 @@ RSpec.describe Gitlab::GitAccessSnippet do
     end
   end
 
-  context 'terms are enforced', :aggregate_failures do
+  context 'terms are enforced' do
     before do
       enforce_terms
     end
@@ -98,7 +98,7 @@ RSpec.describe Gitlab::GitAccessSnippet do
     end
   end
 
-  context 'project snippet accessibility', :aggregate_failures do
+  context 'project snippet accessibility' do
     let(:snippet) { create(:project_snippet, :private, :repository, project: project) }
     let(:user) { membership == :author ? snippet.author : create_user_from_membership(project, membership) }
 
@@ -203,7 +203,7 @@ RSpec.describe Gitlab::GitAccessSnippet do
     end
   end
 
-  context 'personal snippet accessibility', :aggregate_failures do
+  context 'personal snippet accessibility' do
     let(:snippet) { create(:personal_snippet, snippet_level, :repository) }
     let(:user) { membership == :author ? snippet.author : create_user_from_membership(nil, membership) }
 

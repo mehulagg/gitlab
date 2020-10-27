@@ -30,7 +30,7 @@ RSpec.describe ExclusiveLeaseGuard, :clean_gitlab_redis_shared_state do
   describe '#try_obtain_lease' do
     let(:subject) { subject_class.new }
 
-    it 'obtains the lease, calls internal_method and releases the lease', :aggregate_failures do
+    it 'obtains the lease, calls internal_method and releases the lease' do
       expect(subject).to receive(:internal_method).and_call_original
 
       subject.call do
@@ -49,7 +49,7 @@ RSpec.describe ExclusiveLeaseGuard, :clean_gitlab_redis_shared_state do
         subject.exclusive_lease.cancel
       end
 
-      it 'does not call internal_method but logs error', :aggregate_failures do
+      it 'does not call internal_method but logs error' do
         expect(subject).not_to receive(:internal_method)
         expect(Gitlab::AppLogger).to receive(:error).with("Cannot obtain an exclusive lease for #{subject.class.name}. There must be another instance already in execution.")
 
@@ -68,7 +68,7 @@ RSpec.describe ExclusiveLeaseGuard, :clean_gitlab_redis_shared_state do
 
       let(:subject) { overwritten_subject_class.new }
 
-      it 'does not release the lease after execution', :aggregate_failures do
+      it 'does not release the lease after execution' do
         subject.call do
           expect(subject.exclusive_lease.exists?).to be_truthy
         end

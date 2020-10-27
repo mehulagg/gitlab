@@ -73,7 +73,7 @@ RSpec.describe SearchHelper do
         expect(result.keys).to match_array(%i[category id label url avatar_url])
       end
 
-      it 'includes the users recently viewed issues', :aggregate_failures do
+      it 'includes the users recently viewed issues' do
         recent_issues = instance_double(::Gitlab::Search::RecentIssues)
         expect(::Gitlab::Search::RecentIssues).to receive(:new).with(user: user).and_return(recent_issues)
         project1 = create(:project, :with_avatar, namespace: user.namespace)
@@ -104,7 +104,7 @@ RSpec.describe SearchHelper do
         })
       end
 
-      it 'includes the users recently viewed merge requests', :aggregate_failures do
+      it 'includes the users recently viewed merge requests' do
         recent_merge_requests = instance_double(::Gitlab::Search::RecentMergeRequests)
         expect(::Gitlab::Search::RecentMergeRequests).to receive(:new).with(user: user).and_return(recent_merge_requests)
         project1 = create(:project, :with_avatar, namespace: user.namespace)
@@ -145,7 +145,7 @@ RSpec.describe SearchHelper do
           @project = create(:project, :repository)
         end
 
-        it "includes project-specific sections", :aggregate_failures do
+        it "includes project-specific sections" do
           expect(search_autocomplete_opts("Files").size).to eq(1)
           expect(search_autocomplete_opts("Commits").size).to eq(1)
         end
@@ -164,7 +164,7 @@ RSpec.describe SearchHelper do
             @project = create(:project, :repository, namespace: user.namespace)
           end
 
-          it 'includes issues by iid', :aggregate_failures do
+          it 'includes issues by iid' do
             issue = create(:issue, project: @project, title: 'test title')
             results = search_autocomplete_opts("\##{issue.iid}")
 

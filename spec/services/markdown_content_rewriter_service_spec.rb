@@ -19,7 +19,7 @@ RSpec.describe MarkdownContentRewriterService do
   describe '#execute' do
     subject { described_class.new(user, content, source_parent, target_parent).execute }
 
-    it 'calls the rewriter classes successfully', :aggregate_failures do
+    it 'calls the rewriter classes successfully' do
       [Gitlab::Gfm::ReferenceRewriter, Gitlab::Gfm::UploadsRewriter].each do |rewriter_class|
         service = double
 

@@ -912,7 +912,7 @@ RSpec.describe 'Git HTTP requests' do
       enforce_terms
     end
 
-    it 'blocks git access when the user did not accept terms', :aggregate_failures do
+    it 'blocks git access when the user did not accept terms' do
       clone_get(path, env) do |response|
         expect(response).to have_gitlab_http_status(:forbidden)
       end

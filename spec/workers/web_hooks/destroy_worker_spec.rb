@@ -19,7 +19,7 @@ RSpec.describe WebHooks::DestroyWorker do
       let!(:log) { create(:web_hook_log, web_hook: hook) }
       let!(:other_log) { create(:web_hook_log, web_hook: other_hook) }
 
-      it "deletes the Web hook and logs", :aggregate_failures do
+      it "deletes the Web hook and logs" do
         expect { subject.perform(user.id, hook.id) }
           .to change { WebHookLog.count }.from(2).to(1)
           .and change { WebHook.count }.from(2).to(1)

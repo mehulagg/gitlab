@@ -222,7 +222,7 @@ RSpec.describe EventCreateService do
         )
       end
 
-      it 'is idempotent', :aggregate_failures do
+      it 'is idempotent' do
         event = nil
         expect { event = create_event }.to change(Event, :count).by(1)
         duplicate = nil

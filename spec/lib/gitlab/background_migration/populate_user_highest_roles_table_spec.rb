@@ -51,7 +51,7 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateUserHighestRolesTable, schem
   end
 
   describe '#perform' do
-    it 'creates user_highest_roles rows according to users', :aggregate_failures do
+    it 'creates user_highest_roles rows according to users' do
       expect { subject.perform(1, 8) }.to change(UserHighestRole, :count).from(1).to(4)
 
       created_or_updated_rows = [

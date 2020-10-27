@@ -17,7 +17,7 @@ RSpec.describe 'projects/issues/_related_branches' do
     render
   end
 
-  it 'shows the related branches with their build status', :aggregate_failures do
+  it 'shows the related branches with their build status' do
     expect(rendered).to have_text('feature')
     expect(rendered).to have_text('other')
     expect(rendered).to have_link(href: 'link-to-feature')

@@ -168,7 +168,7 @@ RSpec.describe API::GroupPushRule, 'GroupPushRule', api: true do
           expect { subject }.to change { PushRule.count }.by(1)
         end
 
-        it 'creates record with appropriate attributes', :aggregate_failures do
+        it 'creates record with appropriate attributes' do
           subject
 
           push_rule = group.reload.push_rule

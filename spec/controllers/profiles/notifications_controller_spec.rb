@@ -75,7 +75,7 @@ RSpec.describe Profiles::NotificationsController do
 
         let_it_be(:public_group) { create(:group, :public) }
 
-        it 'does not show public groups', :aggregate_failures do
+        it 'does not show public groups' do
           get :show
 
           # Let's make sure we're grabbing all groups in one page, just in case

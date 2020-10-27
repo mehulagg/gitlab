@@ -35,14 +35,14 @@ RSpec.describe 'Projects > Activity > User sees design comment', :js do
     expect(page).to have_content(design_activity)
   end
 
-  it 'allows to filter out the design event with the "event_filter=issue" URL param', :aggregate_failures do
+  it 'allows to filter out the design event with the "event_filter=issue" URL param' do
     visit activity_project_path(project, event_filter: EventFilter::ISSUE)
 
     expect(page).not_to have_content(design_activity)
     expect(page).to have_content(issue_activity)
   end
 
-  it 'allows to filter in the event with the "event_filter=comments" URL param', :aggregate_failures do
+  it 'allows to filter in the event with the "event_filter=comments" URL param' do
     visit activity_project_path(project, event_filter: EventFilter::COMMENTS)
 
     expect(page).to have_content(design_activity)

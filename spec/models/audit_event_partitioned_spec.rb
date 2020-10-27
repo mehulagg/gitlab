@@ -20,7 +20,7 @@ RSpec.describe AuditEventPartitioned do
     expect(constraints_from_partitioned_table.to_a).to match_array(constraints_from_source_table.to_a)
   end
 
-  it 'inserts the same record as the one in the source table', :aggregate_failures do
+  it 'inserts the same record as the one in the source table' do
     expect { create(:audit_event) }.to change { partitioned_table.count }.by(1)
 
     event_from_source_table = source_table.connection.select_one(

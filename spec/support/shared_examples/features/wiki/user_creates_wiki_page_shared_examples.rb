@@ -142,7 +142,7 @@ RSpec.shared_examples 'User creates wiki page' do
       end
     end
 
-    it 'creates a wiki page with Org markup', :aggregate_failures do
+    it 'creates a wiki page with Org markup' do
       org_content = <<~ORG
         * Heading
         ** Subheading

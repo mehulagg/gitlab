@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe RspecFlaky::Report, :aggregate_failures do
+RSpec.describe RspecFlaky::Report do
   let(:thirty_one_days) { 3600 * 24 * 31 }
   let(:collection_hash) do
     {

@@ -37,7 +37,7 @@ RSpec.describe AuditEventService do
     context 'create user access' do
       let(:details) { { action: :create } }
 
-      it 'stores author name', :aggregate_failures do
+      it 'stores author name' do
         expect(event_details[:author_name]).to eq(user.name)
         expect(event.author_name).to eq(user.name)
       end

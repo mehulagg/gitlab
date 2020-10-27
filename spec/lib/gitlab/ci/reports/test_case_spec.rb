@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Ci::Reports::TestCase do
       let(:job) { build(:ci_build) }
       let(:params) { attributes_for(:report_test_case).merge!(job: job) }
 
-      it 'initializes an instance', :aggregate_failures do
+      it 'initializes an instance' do
         expect { test_case }.not_to raise_error
 
         expect(test_case).to have_attributes(

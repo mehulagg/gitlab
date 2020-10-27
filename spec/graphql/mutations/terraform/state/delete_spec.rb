@@ -23,7 +23,7 @@ RSpec.describe Mutations::Terraform::State::Delete do
     subject { mutation.resolve(id: global_id) }
 
     context 'user does not have permission' do
-      it 'raises an error', :aggregate_failures do
+      it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         expect { state.reload }.not_to raise_error
       end
@@ -34,7 +34,7 @@ RSpec.describe Mutations::Terraform::State::Delete do
         state.project.add_maintainer(user)
       end
 
-      it 'deletes the state', :aggregate_failures do
+      it 'deletes the state' do
         expect do
           expect(subject).to eq(errors: [])
         end.to change { ::Terraform::State.count }.by(-1)
@@ -46,7 +46,7 @@ RSpec.describe Mutations::Terraform::State::Delete do
     context 'with invalid params' do
       let(:global_id) { user.to_global_id }
 
-      it 'raises an error', :aggregate_failures do
+      it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         expect { state.reload }.not_to raise_error
       end

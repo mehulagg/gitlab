@@ -10,7 +10,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::None do
   subject(:strategy) { described_class.new(fake_duplicate_job) }
 
   describe '#schedule' do
-    it 'yields without checking for duplicates', :aggregate_failures do
+    it 'yields without checking for duplicates' do
       expect(fake_duplicate_job).not_to receive(:scheduled?)
       expect(fake_duplicate_job).not_to receive(:duplicate?)
       expect(fake_duplicate_job).not_to receive(:check!)
@@ -20,7 +20,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::None do
   end
 
   describe '#perform' do
-    it 'does not delete any locks before executing', :aggregate_failures do
+    it 'does not delete any locks before executing' do
       expect(fake_duplicate_job).not_to receive(:delete!)
 
       expect { |b| strategy.perform({}, &b) }.to yield_control

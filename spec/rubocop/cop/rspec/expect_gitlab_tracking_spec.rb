@@ -45,7 +45,7 @@ RSpec.describe RuboCop::Cop::RSpec::ExpectGitlabTracking do
 
   bad_samples.each do |bad|
     context "bad: #{bad}" do
-      it 'registers an offense', :aggregate_failures do
+      it 'registers an offense' do
         inspect_source(bad, source_file)
 
         expect(cop.offenses.size).to eq(1)

@@ -15,7 +15,7 @@ RSpec.describe 'Every Sidekiq worker' do
     expect(Gitlab::SidekiqConfig.cron_workers.map(&:queue)).to all(start_with('cronjob:'))
   end
 
-  it 'has its queue in Gitlab::SidekiqConfig::QUEUE_CONFIG_PATHS', :aggregate_failures do
+  it 'has its queue in Gitlab::SidekiqConfig::QUEUE_CONFIG_PATHS' do
     file_worker_queues = Gitlab::SidekiqConfig.worker_queues.to_set
 
     worker_queues = Gitlab::SidekiqConfig.workers.map(&:queue).to_set
@@ -29,7 +29,7 @@ RSpec.describe 'Every Sidekiq worker' do
     expect(unnecessarily_in_file).to be_empty, "expected #{unnecessarily_in_file.to_a.inspect} not to be in Gitlab::SidekiqConfig::QUEUE_CONFIG_PATHS"
   end
 
-  it 'has its queue or namespace in config/sidekiq_queues.yml', :aggregate_failures do
+  it 'has its queue or namespace in config/sidekiq_queues.yml' do
     config_queues = Gitlab::SidekiqConfig.config_queues.to_set
 
     Gitlab::SidekiqConfig.workers.each do |worker|
@@ -54,7 +54,7 @@ RSpec.describe 'Every Sidekiq worker' do
     # All Sidekiq worker classes should declare a valid `feature_category`
     # or explicitly be excluded with the `feature_category_not_owned!` annotation.
     # Please see doc/development/sidekiq_style_guide.md#feature-categorization for more details.
-    it 'has a feature_category or feature_category_not_owned! attribute', :aggregate_failures do
+    it 'has a feature_category or feature_category_not_owned! attribute' do
       workers_without_defaults.each do |worker|
         expect(worker.get_feature_category).to be_a(Symbol), "expected #{worker.inspect} to declare a feature_category or feature_category_not_owned!"
       end
@@ -63,7 +63,7 @@ RSpec.describe 'Every Sidekiq worker' do
     # All Sidekiq worker classes should declare a valid `feature_category`.
     # The category should match a value in `config/feature_categories.yml`.
     # Please see doc/development/sidekiq_style_guide.md#feature-categorization for more details.
-    it 'has a feature_category that maps to a value in feature_categories.yml', :aggregate_failures do
+    it 'has a feature_category that maps to a value in feature_categories.yml' do
       workers_with_feature_categories = workers_without_defaults
                   .select(&:get_feature_category)
                   .reject(&:feature_category_not_owned?)
@@ -78,7 +78,7 @@ RSpec.describe 'Every Sidekiq worker' do
     # GitLab.com, when a large number of memory-bound jobs arrive at once, we let them queue up
     # rather than scaling the hardware to meet the SLO. For this reason, memory-bound,
     # high urgency jobs are explicitly discouraged and disabled.
-    it 'is (exclusively) memory-bound or high urgency, not both', :aggregate_failures do
+    it 'is (exclusively) memory-bound or high urgency, not both' do
       high_urgency_workers = workers_without_defaults
                                .select { |worker| worker.get_urgency == :high }
 
@@ -95,7 +95,7 @@ RSpec.describe 'Every Sidekiq worker' do
     # on other high urgency jobs, leading to degradation through the GitLab application.
     # Please see doc/development/sidekiq_style_guide.md#jobs-with-external-dependencies for more
     # details.
-    it 'has (exclusively) external dependencies or is high urgency, not both', :aggregate_failures do
+    it 'has (exclusively) external dependencies or is high urgency, not both' do
       high_urgency_workers = workers_without_defaults
                                .select { |worker| worker.get_urgency == :high }
 

@@ -9,7 +9,7 @@ RSpec.describe ::API::Admin::Ci::Variables do
   describe 'GET /admin/ci/variables' do
     let!(:variable) { create(:ci_instance_variable) }
 
-    it 'returns instance-level variables for admins', :aggregate_failures do
+    it 'returns instance-level variables for admins' do
       get api('/admin/ci/variables', admin)
 
       expect(response).to have_gitlab_http_status(:ok)
@@ -32,7 +32,7 @@ RSpec.describe ::API::Admin::Ci::Variables do
   describe 'GET /admin/ci/variables/:key' do
     let!(:variable) { create(:ci_instance_variable) }
 
-    it 'returns instance-level variable details for admins', :aggregate_failures do
+    it 'returns instance-level variable details for admins' do
       get api("/admin/ci/variables/#{variable.key}", admin)
 
       expect(response).to have_gitlab_http_status(:ok)
@@ -64,7 +64,7 @@ RSpec.describe ::API::Admin::Ci::Variables do
     context 'authorized user with proper permissions' do
       let!(:variable) { create(:ci_instance_variable) }
 
-      it 'creates variable for admins', :aggregate_failures do
+      it 'creates variable for admins' do
         expect do
           post api('/admin/ci/variables', admin),
             params: {
@@ -83,7 +83,7 @@ RSpec.describe ::API::Admin::Ci::Variables do
         expect(json_response['variable_type']).to eq('env_var')
       end
 
-      it 'creates variable with optional attributes', :aggregate_failures do
+      it 'creates variable with optional attributes' do
         expect do
           post api('/admin/ci/variables', admin),
             params: {
@@ -147,7 +147,7 @@ RSpec.describe ::API::Admin::Ci::Variables do
     let!(:variable) { create(:ci_instance_variable) }
 
     context 'authorized user with proper permissions' do
-      it 'updates variable data', :aggregate_failures do
+      it 'updates variable data' do
         put api("/admin/ci/variables/#{variable.key}", admin),
           params: {
             variable_type: 'file',

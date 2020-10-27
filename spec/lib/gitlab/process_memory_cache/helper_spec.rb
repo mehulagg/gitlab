@@ -32,7 +32,7 @@ RSpec.describe Gitlab::ProcessMemoryCache::Helper, :use_clean_rails_memory_store
       end
     end
 
-    it 'resets the cache when the shared key is missing', :aggregate_failures do
+    it 'resets the cache when the shared key is missing' do
       expect(Rails.cache).to receive(:read).with(:cached_content_instance_key).twice.and_return(nil)
       is_expected.to receive(:expensive_computation).thrice.and_return(1, 2, 3)
 

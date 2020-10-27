@@ -177,7 +177,7 @@ RSpec.describe 'Query.instanceSecurityDashboard.projects' do
           post_graphql(query, current_user: current_user)
         end
 
-        it 'finds vulnerability grades for only projects that were added to instance security dashboard', :aggregate_failures do
+        it 'finds vulnerability grades for only projects that were added to instance security dashboard' do
           expect(graphql_data.dig('instanceSecurityDashboard', 'allGrades')).to match_array(expected_response['allGrades'])
           expect(graphql_data.dig('instanceSecurityDashboard', 'withVulnerabilitiesByState')).to match_array(expected_response['withVulnerabilitiesByState'])
         end

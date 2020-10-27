@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Group overview', :js, :aggregate_failures do
+RSpec.describe 'Group overview', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:empty_project) { create(:project, namespace: group) }

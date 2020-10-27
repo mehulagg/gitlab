@@ -56,7 +56,7 @@ RSpec.describe 'Updating a Requirement' do
         stub_licensed_features(requirements: true)
       end
 
-      it 'updates the requirement', :aggregate_failures do
+      it 'updates the requirement' do
         post_graphql_mutation(mutation, current_user: current_user)
 
         requirement_hash = mutation_response['requirement']

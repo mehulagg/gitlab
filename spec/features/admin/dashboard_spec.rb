@@ -30,7 +30,7 @@ RSpec.describe 'admin visits dashboard' do
     let_it_be(:users_statistics) { create(:users_statistics) }
     let_it_be(:users_count_label) { Gitlab.ee? ? 'Billable users 71' : 'Active users 71' }
 
-    it 'shows correct amounts of users', :aggregate_failures do
+    it 'shows correct amounts of users' do
       visit admin_dashboard_stats_path
 
       expect(page).to have_content('Users without a Group and Project 23')

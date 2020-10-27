@@ -9,7 +9,7 @@ RSpec.describe Gitlab::RepositoryCacheAdapter do
   let(:redis_set_cache) { repository.send(:redis_set_cache) }
   let(:redis_hash_cache) { repository.send(:redis_hash_cache) }
 
-  describe '.cache_method_output_as_redis_set', :clean_gitlab_redis_cache, :aggregate_failures do
+  describe '.cache_method_output_as_redis_set', :clean_gitlab_redis_cache do
     let(:klass) do
       Class.new do
         include Gitlab::RepositoryCacheAdapter # can't use described_class here

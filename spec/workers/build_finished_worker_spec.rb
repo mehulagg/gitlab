@@ -11,7 +11,7 @@ RSpec.describe BuildFinishedWorker do
     context 'when build exists' do
       let!(:build) { create(:ci_build) }
 
-      it 'calculates coverage and calls hooks', :aggregate_failures do
+      it 'calculates coverage and calls hooks' do
         trace_worker = double('trace worker')
         coverage_worker = double('coverage worker')
 

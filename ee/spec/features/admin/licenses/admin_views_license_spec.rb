@@ -43,7 +43,7 @@ RSpec.describe "Admin views license" do
       end
     end
 
-    context "when viewing license history", :aggregate_failures do
+    context "when viewing license history" do
       it "shows licensee" do
         license_history = page.find("#license_history")
 
@@ -52,7 +52,7 @@ RSpec.describe "Admin views license" do
         end
       end
 
-      it "highlights the current license with a css class", :aggregate_failures do
+      it "highlights the current license with a css class" do
         license_history = page.find("#license_history")
         highlighted_license_row = license_history.find("[data-testid='license-current']")
 
@@ -98,13 +98,13 @@ RSpec.describe "Admin views license" do
         expect(license_history).to have_content(license.licensee.each_value.first)
       end
 
-      it "has no highlighted license", :aggregate_failures do
+      it "has no highlighted license" do
         license_history = page.find("#license_history")
 
         expect(license_history).not_to have_selector("[data-testid='license-current']")
       end
 
-      it "shows only the future-dated license", :aggregate_failures do
+      it "shows only the future-dated license" do
         license_history = page.find("#license_history")
         license_history_row = license_history.find('tbody tr', match: :first)
 

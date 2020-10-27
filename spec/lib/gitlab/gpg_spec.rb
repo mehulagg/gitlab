@@ -214,7 +214,7 @@ RSpec.describe Gitlab::Gpg do
         described_class.using_tmp_keychain {}
       end
 
-      it 'tries at least 2 times to remove the tmp dir before raising', :aggregate_failures do
+      it 'tries at least 2 times to remove the tmp dir before raising' do
         expect(Retriable).to receive(:sleep).at_least(:twice)
         expect(FileUtils).to receive(:remove_entry).with(tmp_dir).at_least(:twice).and_raise('Deletion failed')
 

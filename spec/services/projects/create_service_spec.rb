@@ -614,7 +614,7 @@ RSpec.describe Projects::CreateService, '#execute' do
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
       end
 
-      it 'creates PrometheusService record', :aggregate_failures do
+      it 'creates PrometheusService record' do
         project = create_project(user, opts.merge!(namespace_id: group.id))
         service = project.prometheus_service
 
@@ -631,7 +631,7 @@ RSpec.describe Projects::CreateService, '#execute' do
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
       end
 
-      it 'creates PrometheusService record', :aggregate_failures do
+      it 'creates PrometheusService record' do
         project = create_project(user, opts)
         service = project.prometheus_service
 
@@ -640,7 +640,7 @@ RSpec.describe Projects::CreateService, '#execute' do
         expect(service.persisted?).to be true
       end
 
-      it 'cleans invalid record and logs warning', :aggregate_failures do
+      it 'cleans invalid record and logs warning' do
         invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
         allow_next_instance_of(Project) do |instance|
           allow(instance).to receive(:build_prometheus_service).and_return(invalid_service_record)
@@ -654,7 +654,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     end
 
     context 'shared Prometheus application is not available' do
-      it 'does not persist PrometheusService record', :aggregate_failures do
+      it 'does not persist PrometheusService record' do
         project = create_project(user, opts)
 
         expect(project.prometheus_service).to be_nil

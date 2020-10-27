@@ -63,7 +63,7 @@ RSpec.describe 'Updating an Iteration' do
         stub_licensed_features(iterations: true)
       end
 
-      it 'updates the iteration', :aggregate_failures do
+      it 'updates the iteration' do
         post_graphql_mutation(mutation, current_user: current_user)
 
         # Let's check that the mutation response is good

@@ -46,7 +46,7 @@ RSpec.describe 'Create test case' do
                                'or you don\'t have permission to perform this action'
                               ]
 
-      context 'with authorized logged user', :aggregate_failures do
+      context 'with authorized logged user' do
         before_all do
           project.add_reporter(current_user)
         end
@@ -65,7 +65,7 @@ RSpec.describe 'Create test case' do
           project.add_reporter(current_user)
         end
 
-        it 'creates new test case', :aggregate_failures do
+        it 'creates new test case' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.to change { Issue.count }.by(1)
           test_case = mutation_response['testCase']
           expect(test_case).not_to be_nil

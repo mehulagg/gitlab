@@ -188,7 +188,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
       expect(doc.text).to eq 'See ?g.fm&'
     end
 
-    it 'does not include trailing punctuation', :aggregate_failures do
+    it 'does not include trailing punctuation' do
       ['.', ', ok?', '...', '?', '!', ': is that ok?'].each do |trailing_punctuation|
         doc = filter("Label #{reference}#{trailing_punctuation}")
         expect(doc.to_html).to match(%r(<span.+><a.+><span.+>\?g\.fm&amp;</span></a></span>#{Regexp.escape(trailing_punctuation)}))

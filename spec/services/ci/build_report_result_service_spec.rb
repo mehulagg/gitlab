@@ -9,7 +9,7 @@ RSpec.describe Ci::BuildReportResultService do
     context 'when build is finished' do
       let(:build) { create(:ci_build, :success, :test_reports) }
 
-      it 'creates a build report result entry', :aggregate_failures do
+      it 'creates a build report result entry' do
         expect(build_report_result.tests_name).to eq("test")
         expect(build_report_result.tests_success).to eq(2)
         expect(build_report_result.tests_failed).to eq(2)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::UsageData, :aggregate_failures do
+RSpec.describe Gitlab::UsageData do
   include UsageDataHelpers
 
   before do
@@ -667,7 +667,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     describe '.features_usage_data_ce' do
       subject { described_class.features_usage_data_ce }
 
-      it 'gathers feature usage data', :aggregate_failures do
+      it 'gathers feature usage data' do
         expect(subject[:instance_auto_devops_enabled]).to eq(Gitlab::CurrentSettings.auto_devops_enabled?)
         expect(subject[:mattermost_enabled]).to eq(Gitlab.config.mattermost.enabled)
         expect(subject[:signup_enabled]).to eq(Gitlab::CurrentSettings.allow_signup?)

@@ -310,7 +310,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         sign_in(admin)
       end
 
-      it 'returns HTML data', :aggregate_failures do
+      it 'returns HTML data' do
         get :seat_link_payload, format: :html
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -323,7 +323,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         expect(body).to include("<span class=\"mi\">#{current_count}</span>")
       end
 
-      it 'returns JSON data', :aggregate_failures do
+      it 'returns JSON data' do
         get :seat_link_payload, format: :json
 
         expect(response).to have_gitlab_http_status(:ok)

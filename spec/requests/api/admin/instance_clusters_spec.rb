@@ -194,7 +194,7 @@ RSpec.describe ::API::Admin::InstanceClusters do
           expect(response).to have_gitlab_http_status(:created)
         end
 
-        it 'creates a new Clusters::Cluster', :aggregate_failures do
+        it 'creates a new Clusters::Cluster' do
           cluster_result = Clusters::Cluster.find(json_response["id"])
           platform_kubernetes = cluster_result.platform
           expect(cluster_result).to be_user

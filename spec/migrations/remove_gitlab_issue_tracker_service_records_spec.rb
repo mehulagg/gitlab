@@ -11,7 +11,7 @@ RSpec.describe RemoveGitlabIssueTrackerServiceRecords do
     services.create!(type: 'SomeOtherType')
   end
 
-  it 'removes services records of type GitlabIssueTrackerService', :aggregate_failures do
+  it 'removes services records of type GitlabIssueTrackerService' do
     expect { migrate! }.to change { services.count }.from(6).to(1)
     expect(services.first.type).to eq('SomeOtherType')
     expect(services.where(type: 'GitlabIssueTrackerService')).to be_empty

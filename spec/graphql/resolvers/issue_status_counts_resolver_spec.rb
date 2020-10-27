@@ -30,7 +30,7 @@ RSpec.describe Resolvers::IssueStatusCountsResolver do
     specify { expect(subject.project).to eq(project) }
 
     shared_examples 'returns expected results' do
-      it 'returns expected results', :aggregate_failures do
+      it 'returns expected results' do
         result = resolve_issue_status_counts
 
         expect(result.all).to eq 2
@@ -53,7 +53,7 @@ RSpec.describe Resolvers::IssueStatusCountsResolver do
       it_behaves_like 'returns expected results'
     end
 
-    it 'filters by search', :aggregate_failures do
+    it 'filters by search' do
       result = resolve_issue_status_counts(search: issue.title)
 
       expect(result.all).to eq 1
@@ -61,7 +61,7 @@ RSpec.describe Resolvers::IssueStatusCountsResolver do
       expect(result.closed).to eq 0
     end
 
-    it 'filters by issue type', :aggregate_failures do
+    it 'filters by issue type' do
       result = resolve_issue_status_counts(issue_types: ['incident'])
 
       expect(result.all).to eq 1
@@ -70,7 +70,7 @@ RSpec.describe Resolvers::IssueStatusCountsResolver do
     end
 
     # The state param is ignored in IssuableFinder#count_by_state
-    it 'ignores state filter', :aggregate_failures do
+    it 'ignores state filter' do
       result = resolve_issue_status_counts(state: 'closed')
 
       expect(result.all).to eq 2

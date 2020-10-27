@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
         end
 
         context 'when RequestStore is enabled' do
-          it 'caches db count value', :request_store, :aggregate_failures do
+          it 'caches db count value', :request_store do
             subscriber.sql(event)
 
             described_class::DB_COUNTERS.each do |counter|

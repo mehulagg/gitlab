@@ -39,7 +39,7 @@ RSpec.describe Mutations::RequirementsManagement::UpdateRequirement do
           stub_licensed_features(requirements: true)
         end
 
-        it 'updates new requirement', :aggregate_failures do
+        it 'updates new requirement' do
           expect(subject[:requirement]).to have_attributes(
             title: 'foo',
             description: 'some desc',

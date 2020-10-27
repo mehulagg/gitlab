@@ -349,7 +349,7 @@ RSpec.describe 'getting an issue list for a project' do
       issues.map(&:labels).flatten.map(&:to_global_id).map(&:to_s)
     end
 
-    it 'avoids N+1 queries', :aggregate_failures do
+    it 'avoids N+1 queries' do
       control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
       expect(issues_data.count).to eq(2)
       expect(response_label_ids(issues_data)).to match_array(labels_as_global_ids(issues))
@@ -399,7 +399,7 @@ RSpec.describe 'getting an issue list for a project' do
       issues.map(&:assignees).flatten.map(&:to_global_id).map(&:to_s)
     end
 
-    it 'avoids N+1 queries', :aggregate_failures do
+    it 'avoids N+1 queries' do
       control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
       expect(issues_data.count).to eq(2)
       expect(response_assignee_ids(issues_data)).to match_array(assignees_as_global_ids(issues))

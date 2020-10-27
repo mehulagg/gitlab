@@ -43,7 +43,7 @@ RSpec.shared_examples 'diff file entity' do
     context 'when diff_view is parallel' do
       let(:options) { { diff_view: :parallel } }
 
-      it 'contains only the parallel diff lines', :aggregate_failures do
+      it 'contains only the parallel diff lines' do
         expect(subject).to include(:parallel_diff_lines)
         expect(subject).not_to include(:highlighted_diff_lines)
       end
@@ -52,7 +52,7 @@ RSpec.shared_examples 'diff file entity' do
     context 'when diff_view is parallel' do
       let(:options) { { diff_view: :inline } }
 
-      it 'contains only the inline diff lines', :aggregate_failures do
+      it 'contains only the inline diff lines' do
         expect(subject).not_to include(:parallel_diff_lines)
         expect(subject).to include(:highlighted_diff_lines)
       end

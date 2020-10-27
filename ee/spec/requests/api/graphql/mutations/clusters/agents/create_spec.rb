@@ -34,7 +34,7 @@ RSpec.describe 'Create a new cluster agent' do
       project.add_maintainer(current_user)
     end
 
-    it 'does not create cluster agent and returns error message', :aggregate_failures do
+    it 'does not create cluster agent and returns error message' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Clusters::Agent, :count)
       expect(mutation_response['errors']).to eq(['This feature is only available for premium plans'])
     end
@@ -46,7 +46,7 @@ RSpec.describe 'Create a new cluster agent' do
       project.add_maintainer(current_user)
     end
 
-    it 'creates a new cluster agent', :aggregate_failures do
+    it 'creates a new cluster agent' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.to change { Clusters::Agent.count }.by(1)
       expect(mutation_response.dig('clusterAgent', 'name')).to eq(project_name)
       expect(mutation_response['errors']).to eq([])

@@ -397,7 +397,7 @@ RSpec.describe WikiPage do
     describe "#create" do
       subject { build_wiki_page }
 
-      it "saves the wiki page and returns true", :aggregate_failures do
+      it "saves the wiki page and returns true" do
         attributes = { title: title, content: "Home Page", format: "markdown" }
 
         expect(subject.create(attributes)).to eq(true)
@@ -408,7 +408,7 @@ RSpec.describe WikiPage do
     describe '#update' do
       subject { create_wiki_page(title: title) }
 
-      it 'updates the content of the page and returns true', :aggregate_failures do
+      it 'updates the content of the page and returns true' do
         expect(subject.update(content: 'new content')).to be_truthy
 
         page = wiki.find_page(title)
@@ -610,7 +610,7 @@ RSpec.describe WikiPage do
   end
 
   describe "#delete" do
-    it "deletes the page and returns true", :aggregate_failures do
+    it "deletes the page and returns true" do
       page = create_wiki_page
 
       expect do

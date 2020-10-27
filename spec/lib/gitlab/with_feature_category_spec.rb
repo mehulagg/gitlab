@@ -29,7 +29,7 @@ RSpec.describe Gitlab::WithFeatureCategory do
       expect(base_controller.feature_category_for_action("hello")).to be_nil
     end
 
-    it "returns the expected category", :aggregate_failures do
+    it "returns the expected category" do
       expect(controller.feature_category_for_action("update")).to eq(:foo)
       expect(controller.feature_category_for_action("index")).to eq(:bar)
       expect(controller.feature_category_for_action("destroy")).to eq(:quux)

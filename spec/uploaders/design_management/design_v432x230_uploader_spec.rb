@@ -39,7 +39,7 @@ RSpec.describe DesignManagement::DesignV432x230Uploader do
     it_behaves_like 'migrates', from_store: described_class::Store::REMOTE, to_store: described_class::Store::LOCAL
   end
 
-  it 'resizes images', :aggregate_failures do
+  it 'resizes images' do
     image_loader = CarrierWave::Test::Matchers::ImageLoader
     original_file = fixture_file_upload('spec/fixtures/dk.png')
     uploader.store!(original_file)

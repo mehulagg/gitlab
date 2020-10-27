@@ -97,7 +97,7 @@ RSpec.describe Metrics::Dashboards::AnnotationsFinder do
       context 'dashboard environment is missing' do
         let(:dashboard) { PerformanceMonitoring::PrometheusDashboard.new(path: path, environment: nil) }
 
-        it 'returns empty relation', :aggregate_failures do
+        it 'returns empty relation' do
           expect(annotations).to be_kind_of ::ActiveRecord::Relation
           expect(annotations).to be_empty
         end

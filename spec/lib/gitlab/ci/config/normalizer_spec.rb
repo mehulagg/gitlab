@@ -200,7 +200,7 @@ RSpec.describe Gitlab::Ci::Config::Normalizer do
         expect(subject.values).to all(include(:instance))
       end
 
-      it 'sets job variables', :aggregate_failures do
+      it 'sets job variables' do
         expect(subject.values[0]).to match(
           a_hash_including(variables: { VAR_1: 'A', VAR_2: 'B', USER_VARIABLE: 'user value' })
         )

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::PipelineSchedulesHelper, :aggregate_failures do
+RSpec.describe Ci::PipelineSchedulesHelper do
   describe '#timezone_data' do
     subject { helper.timezone_data }
 

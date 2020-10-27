@@ -85,7 +85,7 @@ RSpec.describe Projects::LabelsController do
       end
 
       RSpec.shared_examples 'returns ancestor group labels' do
-        it 'returns ancestor group labels', :aggregate_failures do
+        it 'returns ancestor group labels' do
           get :index, params: params
 
           expect(assigns(:labels)).to match_array([subgroup_label_1] + group_labels + project_labels)
@@ -101,7 +101,7 @@ RSpec.describe Projects::LabelsController do
         context 'when include_ancestor_groups false' do
           let(:params) { { namespace_id: project.namespace.to_param, project_id: project } }
 
-          it 'does not return ancestor group labels', :aggregate_failures do
+          it 'does not return ancestor group labels' do
             get :index, params: params
 
             expect(assigns(:labels)).to match_array([subgroup_label_1] + project_labels)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::Lint::JobEntity, :aggregate_failures do
+RSpec.describe Ci::Lint::JobEntity do
   describe '#represent' do
     let(:job) do
       {

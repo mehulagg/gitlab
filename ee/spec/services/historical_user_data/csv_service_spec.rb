@@ -99,7 +99,7 @@ RSpec.describe HistoricalUserData::CsvService do
       expect(csv[7]).to contain_exactly('Date', 'Active User Count')
     end
 
-    it 'includes proper values for each column type', :aggregate_failures do
+    it 'includes proper values for each column type' do
       expect(csv[8]).to contain_exactly(
         historical_datum.date.to_s(:db),
         historical_datum.active_user_count.to_s

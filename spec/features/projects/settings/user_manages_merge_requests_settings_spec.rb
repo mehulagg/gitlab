@@ -28,7 +28,7 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
     end
   end
 
-  it 'shows Squash commit options', :aggregate_failures do
+  it 'shows Squash commit options' do
     page.within '#js-merge-request-settings' do
       expect(page).to have_content 'Do not allow'
       expect(page).to have_content 'Squashing is never performed and the checkbox is hidden.'

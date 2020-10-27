@@ -30,7 +30,7 @@ RSpec.describe Gitlab::Ci::Lint do
         YAML
       end
 
-      it 'returns a valid result', :aggregate_failures do
+      it 'returns a valid result' do
         expect(subject).to be_valid
 
         expect(subject.errors).to be_empty

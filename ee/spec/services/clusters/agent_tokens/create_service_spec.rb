@@ -35,7 +35,7 @@ RSpec.describe Clusters::AgentTokens::CreateService do
           expect { service.execute(cluster_agent) }.not_to change(::Clusters::AgentToken, :count)
         end
 
-        it 'returns permission errors', :aggregate_failures do
+        it 'returns permission errors' do
           result = service.execute(cluster_agent)
 
           expect(result.status).to eq(:error)
@@ -51,7 +51,7 @@ RSpec.describe Clusters::AgentTokens::CreateService do
             expect { service.execute(cluster_agent) }.to change { ::Clusters::AgentToken.count }.by(1)
           end
 
-          it 'returns success status', :aggregate_failures do
+          it 'returns success status' do
             result = service.execute(cluster_agent)
 
             expect(result.status).to eq(:success)

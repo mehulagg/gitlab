@@ -53,7 +53,7 @@ RSpec.describe ConfluenceService do
     end
 
     context 'when the project wiki is not enabled' do
-      it 'returns nil when both active or inactive', :aggregate_failures do
+      it 'returns nil when both active or inactive' do
         project = create(:project, :wiki_disabled)
         subject.project = project
 

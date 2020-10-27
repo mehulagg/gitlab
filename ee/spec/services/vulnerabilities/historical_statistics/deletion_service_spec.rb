@@ -56,7 +56,7 @@ RSpec.describe Vulnerabilities::HistoricalStatistics::DeletionService do
           create(:vulnerability_historical_statistic, project: other_project, date: 368.days.ago)
         end
 
-        it 'deletes historical statistics older than 365 days', :aggregate_failures do
+        it 'deletes historical statistics older than 365 days' do
           expect { delete_historical_statistics }.to change { Vulnerabilities::HistoricalStatistic.count }.by(-6)
           expect(Vulnerabilities::HistoricalStatistic.pluck(:date)).to all(be >= 365.days.ago.to_date)
         end

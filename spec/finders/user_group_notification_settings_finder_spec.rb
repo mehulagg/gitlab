@@ -15,7 +15,7 @@ RSpec.describe UserGroupNotificationSettingsFinder do
     context 'when the groups have no ancestors' do
       let_it_be(:groups) { create_list(:group, 3) }
 
-      it 'will be a default Global notification setting', :aggregate_failures do
+      it 'will be a default Global notification setting' do
         expect(subject.count).to eq(3)
         expect(attributes(&:notification_email)).to eq([nil])
         expect(attributes(&:level)).to eq(['global'])
@@ -64,7 +64,7 @@ RSpec.describe UserGroupNotificationSettingsFinder do
           create(:notification_setting, user: user, source: ancestor, level: 'global', notification_email: ancestor_email.email)
         end
 
-        it 'has the same email and level set', :aggregate_failures do
+        it 'has the same email and level set' do
           expect(subject.count).to eq(1)
           expect(attributes(&:level)).to eq(['global'])
           expect(attributes(&:notification_email)).to eq(['ancestor@example.com'])
@@ -108,7 +108,7 @@ RSpec.describe UserGroupNotificationSettingsFinder do
         end
       end
 
-      it 'does not cause an N+1', :aggregate_failures do
+      it 'does not cause an N+1' do
         parent = create(:group)
         child = create(:group, parent: parent)
 

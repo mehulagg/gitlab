@@ -37,7 +37,7 @@ RSpec.describe DropdownsHelper do
       expect(content).to include('data-default-label="foo"')
     end
 
-    it 'returns the dropdown toggle text', :aggregate_failures do
+    it 'returns the dropdown toggle text' do
       expect(content).to include('dropdown-toggle-text is-default')
       expect(content).to include('foo')
     end
@@ -121,7 +121,7 @@ RSpec.describe DropdownsHelper do
     context 'with a back and close button' do
       let(:content) { helper.dropdown_title('Foo', options: { back: true, close: true }) }
 
-      it 'applies the justification class to the container', :aggregate_failures do
+      it 'applies the justification class to the container' do
         expect(content).to match(/"dropdown-title.*gl-justify-content-space-between"/)
       end
 
@@ -181,7 +181,7 @@ RSpec.describe DropdownsHelper do
       expect(content).to include('dropdown-input')
     end
 
-    it 'returns the search input', :aggregate_failures do
+    it 'returns the search input' do
       expect(content).to include('dropdown-input-field')
       expect(content).to include('placeholder="foo"')
     end

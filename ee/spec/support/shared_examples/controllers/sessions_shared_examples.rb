@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'an auditable failed authentication' do
-  it 'log an audit event', :aggregate_failures do
+  it 'log an audit event' do
     audit_event_service = instance_spy(AuditEventService)
     allow(AuditEventService).to receive(:new).and_return(audit_event_service)
 

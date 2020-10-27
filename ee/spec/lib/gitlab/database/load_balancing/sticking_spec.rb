@@ -129,7 +129,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
 
   RSpec.shared_examples 'sticking' do
     context 'when sticking is disabled' do
-      it 'does not perform any sticking', :aggregate_failures do
+      it 'does not perform any sticking' do
         expect(described_class).not_to receive(:set_write_location_for)
         expect(Gitlab::Database::LoadBalancing::Session.current).not_to receive(:use_primary!)
 
@@ -146,7 +146,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
         allow(described_class).to receive(:load_balancer).and_return(lb)
       end
 
-      it 'sticks an entity to the primary', :aggregate_failures do
+      it 'sticks an entity to the primary' do
         ids.each do |id|
           expect(described_class).to receive(:set_write_location_for)
                                        .with(:user, id, 'foo')

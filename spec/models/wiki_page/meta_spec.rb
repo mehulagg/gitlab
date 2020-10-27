@@ -190,7 +190,7 @@ RSpec.describe WikiPage::Meta do
     end
 
     shared_examples 'metadata examples' do
-      it 'establishes the correct state', :aggregate_failures do
+      it 'establishes the correct state' do
         create_context
 
         meta = find_record

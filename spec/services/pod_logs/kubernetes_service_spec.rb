@@ -95,7 +95,7 @@ RSpec.describe ::PodLogs::KubernetesService do
     end
   end
 
-  describe '#encode_logs_to_utf8', :aggregate_failures do
+  describe '#encode_logs_to_utf8' do
     let(:service) { create(:cluster_platform_kubernetes, :configured) }
     let(:expected_logs) { '2019-12-13T14:04:22.123456Z ✔ Started logging errors to Sentry' }
     let(:raw_logs) { expected_logs.dup.force_encoding(Encoding::ASCII_8BIT) }

@@ -33,7 +33,7 @@ RSpec.describe Geo::UploadRegistry, :geo do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns untracked IDs as well as tracked IDs that are unused', :aggregate_failures do
+    it 'returns untracked IDs as well as tracked IDs that are unused' do
       max_id = Upload.maximum(:id)
       create(:geo_upload_registry, :avatar, file_id: upload_1.id)
       create(:geo_upload_registry, :file, file_id: upload_3.id)

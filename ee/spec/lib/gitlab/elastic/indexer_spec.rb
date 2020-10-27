@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
       expect(indexer.find_indexable_commit(project.repository.commit.sha)).to be_an_instance_of(::Commit)
     end
 
-    it 'is falsey for unreachable commits', :aggregate_failures do
+    it 'is falsey for unreachable commits' do
       expect(indexer.find_indexable_commit(Gitlab::Git::BLANK_SHA)).to be_nil
       expect(indexer.find_indexable_commit(Gitlab::Git::EMPTY_TREE_ID)).to be_nil
     end

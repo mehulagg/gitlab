@@ -77,7 +77,7 @@ RSpec.describe Gitlab::UsageData do
       ))
     end
 
-    it 'gathers usage counts', :aggregate_failures do
+    it 'gathers usage counts' do
       expect(count_data[:boards]).to eq(1)
       expect(count_data[:projects]).to eq(3)
 
@@ -148,7 +148,7 @@ RSpec.describe Gitlab::UsageData do
       expect(count_data[:dast_on_demand_pipelines]).to eq(1)
     end
 
-    it 'gathers group overview preferences usage data', :aggregate_failures do
+    it 'gathers group overview preferences usage data' do
       expect(subject[:counts][:user_preferences_group_overview_details]).to eq(User.active.count - 2) # we have exactly 2 active users with security dashboard set
       expect(subject[:counts][:user_preferences_group_overview_security_dashboard]).to eq 2
     end
@@ -257,7 +257,7 @@ RSpec.describe Gitlab::UsageData do
       ))
     end
 
-    it 'bases counts on active users', :aggregate_failures do
+    it 'bases counts on active users' do
       expect(subject[:operations_dashboard_default_dashboard]).to eq(1)
       expect(subject[:operations_dashboard_users_with_projects_added]).to eq(2)
     end
@@ -287,7 +287,7 @@ RSpec.describe Gitlab::UsageData do
   end
 
   describe 'usage_activity_by_stage_create' do
-    it 'includes accurate usage_activity_by_stage data', :aggregate_failures do
+    it 'includes accurate usage_activity_by_stage data' do
       for_defined_days_back do
         user = create(:user)
         project = create(:project, :repository_private, :github_imported,

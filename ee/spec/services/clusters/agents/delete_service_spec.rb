@@ -11,7 +11,7 @@ RSpec.describe Clusters::Agents::DeleteService do
 
   describe '#execute' do
     context 'without user permissions' do
-      it 'fails to delete when the user has no permissions', :aggregate_failures do
+      it 'fails to delete when the user has no permissions' do
         response = service.execute(cluster_agent)
 
         expect(response.status).to eq(:error)
@@ -26,7 +26,7 @@ RSpec.describe Clusters::Agents::DeleteService do
         project.add_maintainer(user)
       end
 
-      it 'deletes a cluster agent', :aggregate_failures do
+      it 'deletes a cluster agent' do
         expect { service.execute(cluster_agent) }.to change { ::Clusters::Agent.count }.by(-1)
         expect { cluster_agent.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end

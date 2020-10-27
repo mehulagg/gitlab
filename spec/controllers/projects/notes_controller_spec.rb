@@ -84,7 +84,7 @@ RSpec.describe Projects::NotesController do
       end
     end
 
-    context 'for multiple pages of notes', :aggregate_failures do
+    context 'for multiple pages of notes' do
       # 3 pages worth: 1 normal page, 1 oversized due to clashing updated_at,
       # and a final, short page
       let!(:page_1) { create_list(:note, 2, noteable: issue, project: project, updated_at: 3.days.ago) }

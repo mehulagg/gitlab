@@ -708,7 +708,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           let(:trigger_name) { model.rename_trigger_name(:users, :id, :new) }
           let(:user) { create(:user) }
 
-          it 'copies the value to the new column using the type_cast_function', :aggregate_failures do
+          it 'copies the value to the new column using the type_cast_function' do
             expect(model).to receive(:copy_indexes).with(:users, :id, :new)
             expect(model).to receive(:add_not_null_constraint).with(:users, :new)
             expect(model).to receive(:execute).with("UPDATE \"users\" SET \"new\" = cast_to_jsonb_with_default(\"users\".\"id\") WHERE \"users\".\"id\" >= #{user.id}")

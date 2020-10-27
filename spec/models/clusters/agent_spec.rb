@@ -39,7 +39,7 @@ RSpec.describe Clusters::Agent do
 
   describe 'validation' do
     describe 'name validation' do
-      it 'rejects names that do not conform to RFC 1123', :aggregate_failures do
+      it 'rejects names that do not conform to RFC 1123' do
         %w[Agent agentA agentAagain gent- -agent agent.a agent/a agent>a].each do |name|
           agent = build(:cluster_agent, name: name)
 
@@ -48,7 +48,7 @@ RSpec.describe Clusters::Agent do
         end
       end
 
-      it 'accepts valid names', :aggregate_failures do
+      it 'accepts valid names' do
         %w[agent agent123 agent-123].each do |name|
           agent = build(:cluster_agent, name: name)
 

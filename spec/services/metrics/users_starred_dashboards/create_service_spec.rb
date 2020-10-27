@@ -16,7 +16,7 @@ RSpec.describe Metrics::UsersStarredDashboards::CreateService do
   end
 
   shared_examples 'prevented starred dashboard creation' do |message|
-    it 'returns error response', :aggregate_failures do
+    it 'returns error response' do
       expect(Metrics::UsersStarredDashboard).not_to receive(:new)
 
       response = service_instance.execute
@@ -43,7 +43,7 @@ RSpec.describe Metrics::UsersStarredDashboards::CreateService do
       end
 
       context 'with valid dashboard path' do
-        it 'creates starred dashboard and returns success response', :aggregate_failures do
+        it 'creates starred dashboard and returns success response' do
           expect_next_instance_of(Metrics::UsersStarredDashboard, starred_dashboard_params) do |starred_dashboard|
             expect(starred_dashboard).to receive(:save).and_return true
           end
@@ -54,7 +54,7 @@ RSpec.describe Metrics::UsersStarredDashboards::CreateService do
         end
 
         context 'Metrics::UsersStarredDashboard has validation errors' do
-          it 'returns error response', :aggregate_failures do
+          it 'returns error response' do
             expect_next_instance_of(Metrics::UsersStarredDashboard, starred_dashboard_params) do |starred_dashboard|
               expect(starred_dashboard).to receive(:save).and_return(false)
               expect(starred_dashboard).to receive(:errors).and_return(double(messages: { base: ['Model validation error'] }))

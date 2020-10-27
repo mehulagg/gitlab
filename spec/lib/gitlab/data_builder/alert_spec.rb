@@ -12,7 +12,7 @@ RSpec.describe Gitlab::DataBuilder::Alert do
     it { expect(data).to be_a(Hash) }
     it { expect(data[:object_kind]).to eq('alert') }
 
-    it 'contains the correct object attributes', :aggregate_failures do
+    it 'contains the correct object attributes' do
       object_attributes = data[:object_attributes]
 
       expect(object_attributes[:title]).to eq(alert.title)

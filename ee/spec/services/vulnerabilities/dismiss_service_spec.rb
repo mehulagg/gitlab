@@ -39,7 +39,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:comment) { 'Dismissal Comment' }
       let(:service) { described_class.new(user, vulnerability, comment) }
 
-      it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
+      it 'dismisses a vulnerability and its associated findings with comment' do
         Timecop.freeze do
           dismiss_vulnerability
 

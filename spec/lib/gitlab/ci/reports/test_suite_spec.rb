@@ -164,7 +164,7 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
         expect(subject.total_time).to eq(3.33)
       end
 
-      it 'merges tests cases hash', :aggregate_failures do
+      it 'merges tests cases hash' do
         test_suite_2.add_test_case(create_test_case_java_success)
 
         failed_keys  = test_suite.test_cases['failed'].keys

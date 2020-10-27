@@ -42,7 +42,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
         cluster_agent.project.add_maintainer(user)
       end
 
-      it 'creates a new token', :aggregate_failures do
+      it 'creates a new token' do
         expect { subject }.to change { ::Clusters::AgentToken.count }.by(1)
         expect(subject[:secret]).not_to be_nil
         expect(subject[:errors]).to eq([])
@@ -51,7 +51,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
       context 'invalid params' do
         subject { mutation.resolve(cluster_agent_id: cluster_agent.id) }
 
-        it 'generates an error message when id invalid', :aggregate_failures do
+        it 'generates an error message when id invalid' do
           expect { subject }.to raise_error(::GraphQL::CoercionError)
         end
       end

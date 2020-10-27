@@ -394,7 +394,7 @@ RSpec.describe Projects::Operations::UpdateService do
           }
         end
 
-        it 'uses Project#find_or_initialize_service to include instance defined defaults and pass them to Projects::UpdateService', :aggregate_failures do
+        it 'uses Project#find_or_initialize_service to include instance defined defaults and pass them to Projects::UpdateService' do
           project_update_service = double(Projects::UpdateService)
 
           expect(project)
@@ -416,7 +416,7 @@ RSpec.describe Projects::Operations::UpdateService do
       context 'prometheus params were not passed into service' do
         let(:params) { { something: :else } }
 
-        it 'does not pass any prometheus params into Projects::UpdateService', :aggregate_failures do
+        it 'does not pass any prometheus params into Projects::UpdateService' do
           project_update_service = double(Projects::UpdateService)
 
           expect(project).not_to receive(:find_or_initialize_service)

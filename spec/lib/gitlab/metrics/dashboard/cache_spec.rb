@@ -44,7 +44,7 @@ RSpec.describe Gitlab::Metrics::Dashboard::Cache, :use_clean_rails_memory_store_
   end
 
   describe '#delete_all!' do
-    it 'deletes keys of the given project', :aggregate_failures do
+    it 'deletes keys of the given project' do
       cache1.delete_all!
 
       expect(Rails.cache.exist?(project1_key1)).to be(false)
@@ -65,7 +65,7 @@ RSpec.describe Gitlab::Metrics::Dashboard::Cache, :use_clean_rails_memory_store_
   end
 
   context 'multiple fetches and deletes' do
-    specify :aggregate_failures do
+    specify do
       cache1.delete_all!
 
       expect(Rails.cache.exist?(project1_key1)).to be(false)

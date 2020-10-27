@@ -22,7 +22,7 @@ RSpec.describe Mutations::Clusters::Agents::Delete do
     subject { mutation.resolve(id: cluster_agent.to_global_id) }
 
     context 'without user permissions' do
-      it 'fails to delete the cluster agent', :aggregate_failures do
+      it 'fails to delete the cluster agent' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         expect { cluster_agent.reload }.not_to raise_error
       end
@@ -33,7 +33,7 @@ RSpec.describe Mutations::Clusters::Agents::Delete do
         project.add_maintainer(user)
       end
 
-      it 'deletes a cluster agent', :aggregate_failures do
+      it 'deletes a cluster agent' do
         expect { subject }.to change { ::Clusters::Agent.count }.by(-1)
         expect { cluster_agent.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
@@ -42,7 +42,7 @@ RSpec.describe Mutations::Clusters::Agents::Delete do
     context 'with invalid params' do
       subject { mutation.resolve(id: cluster_agent.id) }
 
-      it 'raises an error if the cluster agent id is invalid', :aggregate_failures do
+      it 'raises an error if the cluster agent id is invalid' do
         expect { subject }.to raise_error(::GraphQL::CoercionError)
         expect { cluster_agent.reload }.not_to raise_error
       end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Config::Entry::ComposableHash, :aggregate_failures do
+RSpec.describe Gitlab::Config::Entry::ComposableHash do
   let(:valid_config) do
     {
       DATABASE_SECRET: 'passw0rd',

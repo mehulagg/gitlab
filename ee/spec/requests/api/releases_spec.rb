@@ -77,7 +77,7 @@ RSpec.describe API::Releases do
       context 'succesfully adds a group milestone' do
         let(:milestone_params) { { milestones: [group_milestone.title] } }
 
-        it 'adds the milestone', :aggregate_failures do
+        it 'adds the milestone' do
           post api("/projects/#{project.id}/releases", maintainer), params: params
 
           expect(response).to have_gitlab_http_status(:created)
@@ -88,7 +88,7 @@ RSpec.describe API::Releases do
       context 'fails to add a group milestone if project does not belong to this group' do
         let(:milestone_params) { { milestones: ['abc1'] } }
 
-        it 'returns a 400 error as milestone not found', :aggregate_failures do
+        it 'returns a 400 error as milestone not found' do
           post api("/projects/#{project.id}/releases", maintainer), params: params
 
           expect(response).to have_gitlab_http_status(:bad_request)
@@ -100,7 +100,7 @@ RSpec.describe API::Releases do
         let(:project_milestone) { create(:milestone, project: project, title: 'v1.0') }
         let(:milestone_params) { { milestones: [group_milestone.title, project_milestone.title] } }
 
-        it 'adds the milestone', :aggregate_failures do
+        it 'adds the milestone' do
           post api("/projects/#{project.id}/releases", maintainer), params: params
 
           expect(response).to have_gitlab_http_status(:created)
@@ -119,7 +119,7 @@ RSpec.describe API::Releases do
           params.merge!(milestone_params)
         end
 
-        it 'returns a 400 error as milestone not found', :aggregate_failures do
+        it 'returns a 400 error as milestone not found' do
           post api("/projects/#{project.id}/releases", maintainer), params: params
 
           expect(response).to have_gitlab_http_status(:bad_request)
@@ -232,7 +232,7 @@ RSpec.describe API::Releases do
         let(:params) { { milestones: [group_milestone.title] } }
 
         context 'when there is no project milestone' do
-          it 'adds the group milestone', :aggregate_failures do
+          it 'adds the group milestone' do
             expect(response).to have_gitlab_http_status(:ok)
             expect(json_response['milestones'].map {|m| m['title']}).to match_array([group_milestone.title])
           end
@@ -245,7 +245,7 @@ RSpec.describe API::Releases do
             release.milestones << project_milestone
           end
 
-          it 'replaces the project milestone with the group milestone', :aggregate_failures do
+          it 'replaces the project milestone with the group milestone' do
             expect(response).to have_gitlab_http_status(:ok)
             expect(json_response['milestones'].map {|m| m['title']}).to match_array([group_milestone.title])
           end
