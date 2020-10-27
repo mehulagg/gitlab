@@ -43,7 +43,7 @@ describe('AlertsSettingsFormNew', () => {
 
   describe('with default values', () => {
     beforeEach(() => {
-      createComponent();
+      createComponent({});
     });
 
     it('renders the initial template', () => {

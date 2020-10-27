@@ -12,6 +12,7 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
+import { debounce } from 'lodash';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -309,6 +310,112 @@ export default {
           rows="6"
           max-rows="10"
           @input="validateJson"
+        />
+      </gl-form-group>
+      <gl-form-group
+        id="integration-webhook"
+        :label="$options.i18n.integrationFormSteps.step3.label"
+        label-for="integration-webhook"
+      >
+        <alert-settings-form-help-block
+          :message="$options.i18n.integrationFormSteps.step3.help"
+          link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
+        />
+
+        <gl-toggle
+          v-model="integrationForm.active"
+          :is-loading="loading"
+          :label="__('Active')"
+          class="gl-my-4 gl-font-weight-normal"
+        />
+
+        <div v-if="selectedIntegration === 'PROMETHEUS'" class="gl-my-4">
+          <span>
+            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
+          </span>
+
+          <gl-form-input
+            id="integration-apiUrl"
+            v-model="integrationForm.apiUrl"
+            type="text"
+            :placeholder="s__('AlertSettings|http://prometheus.example.com/')"
+          />
+
+          <span class="gl-text-gray-400">
+            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
+          </span>
+        </div>
+
+        <div class="gl-my-4">
+          <span>
+            {{ s__('AlertSettings|Webhook URL') }}
+          </span>
+
+          <gl-form-input-group id="url" readonly :value="selectedIntegrationType.url">
+            <template #append>
+              <clipboard-button
+                :text="selectedIntegrationType.url || ''"
+                :title="__('Copy')"
+                class="gl-m-0!"
+              />
+            </template>
+          </gl-form-input-group>
+        </div>
+
+        <div class="gl-my-4">
+          <span>
+            {{ s__('AlertSettings|Authorization key') }}
+          </span>
+
+          <gl-form-input-group
+            id="authorization-key"
+            class="gl-mb-2"
+            readonly
+            :value="selectedIntegrationType.authKey"
+          >
+            <template #append>
+              <clipboard-button
+                :text="selectedIntegrationType.authKey || ''"
+                :title="__('Copy')"
+                class="gl-m-0!"
+              />
+            </template>
+          </gl-form-input-group>
+
+          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
+            s__('AlertSettings|Reset Key')
+          }}</gl-button>
+          <gl-modal
+            modal-id="authKeyModal"
+            :title="__('Reset Key')"
+            :ok-title="__('Reset Key')"
+            ok-variant="danger"
+            @ok="() => {}"
+          >
+            {{ s__('AlertSettings|Reset Key') }}
+          </gl-modal>
+        </div>
+      </gl-form-group>
+      <gl-form-group
+        id="test-integration"
+        :label="$options.i18n.integrationFormSteps.step4.label"
+        label-for="test-integration"
+        :invalid-feedback="integrationForm.integrationTestPayload.error"
+      >
+        <alert-settings-form-help-block
+          :message="$options.i18n.integrationFormSteps.step4.help"
+          :link="generic.alertsUsageUrl"
+        />
+
+        <gl-form-textarea
+          id="test-integration"
+          v-model.trim="integrationForm.integrationTestPayload.json"
+          :disabled="!integrationForm.active"
+          :state="jsonIsValid"
+          :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
+          class="gl-my-4"
+          rows="6"
+          max-rows="10"
         />
       </gl-form-group>
 

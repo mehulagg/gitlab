@@ -2623,6 +2623,9 @@ msgstr ""
 msgid "AlertSettings|Your integration was successfully updated."
 msgstr ""
 
+msgid "AlertSettings|http://prometheus.example.com/"
+msgstr ""
+
 msgid "Alerts"
 msgstr ""
 
@@ -22856,6 +22859,9 @@ msgid "Resend invite"
 msgstr ""
 
 msgid "Resend it"
+msgstr ""
+
+msgid "Reset Key"
 msgstr ""
 
 msgid "Reset authorization key"
