@@ -32,14 +32,14 @@ using [Seat Link](#seat-link).
 
 ### Billable users
 
-Every user that occupies a seat is considered a _billable user_, with the following exceptions. Each billable user is counted against the number of subscription seats.
+A _billable user_ counts against the number of subscription seats. Every user is considered a
+billable user, with the following exceptions:
 
-The following users are excluded from the count of billable users:
-
-- [Deactivated](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user), [pending approval](../../user/admin_area/approving_users.md) and
+- [Deactivated](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) and
   [blocked](../../user/admin_area/blocking_unblocking_users.md) users who are restricted prior to the
-  renewal of a subscription are not counted as billable users for the renewal subscription. They may
+  renewal of a subscription are not counted as billable users for the renewal of a subscription. They may
   count as billable users in the subscription period in which they were originally added.
+- Users [pending approval](../../user/admin_area/approving_users.md).
 - Members with Guest permissions on an Ultimate subscription.
 - GitLab-created service accounts: `Ghost User` and bots (`Support Bot`, [`Project bot users`](../../user/project/settings/project_access_tokens.md#project-bot-users), and so on).
 
