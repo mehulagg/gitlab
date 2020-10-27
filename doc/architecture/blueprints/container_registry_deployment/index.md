@@ -249,6 +249,6 @@ DRIs:
 
 | Role                         | Who
 |------------------------------|------------------------|
-| Product                      |                        |
+| Product                      |    @trizzi                     |
 | Leadership                   |                        |
 | Engineering                  |                        |
