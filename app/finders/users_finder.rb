@@ -64,7 +64,7 @@ class UsersFinder
   end
 
   def by_admins(users)
-    return users unless params[:admins_only]
+    return users unless params[:admins]
 
     users.admins
   end

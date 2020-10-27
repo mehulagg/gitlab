@@ -90,7 +90,7 @@ RSpec.describe UsersFinder do
       end
 
       it 'does not filter by admins' do
-        users = described_class.new(user, admins_only: true).execute
+        users = described_class.new(user, admins: true).execute
         expect(users).to eq([])
       end
     end
@@ -111,7 +111,7 @@ RSpec.describe UsersFinder do
       end
 
       it 'returns only admins' do
-        users = described_class.new(admin, admins_only: true).execute
+        users = described_class.new(admin, admins: true).execute
 
         expect(users).to contain_exactly(admin)
       end
