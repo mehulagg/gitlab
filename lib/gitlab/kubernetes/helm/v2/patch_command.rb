@@ -26,6 +26,7 @@ module Gitlab
 
           def generate_script
             super + [
+              init_command,
               repository_command,
               repository_update_command,
               upgrade_command
