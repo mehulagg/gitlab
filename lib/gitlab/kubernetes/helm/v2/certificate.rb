@@ -44,8 +44,8 @@ module Gitlab
 
             cert.issuer = signed_by&.cert&.subject || subject
 
-            cert.not_before = Time.now
-            cert.not_after = expires_in.from_now
+            cert.not_before = Time.now.utc
+            cert.not_after = expires_in.from_now.utc
             cert.public_key = public_key
             cert.serial = 0x0
             cert.version = 2
