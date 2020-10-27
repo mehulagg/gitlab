@@ -87,16 +87,29 @@ export default {
             </gl-button>
           </template>
           <template #newFileButton="{content}">
-            <gl-button variant="link" category="primary" class="markdown-selector gl-vertical-align-baseline">
+            <gl-button
+              variant="link"
+              category="primary"
+              class="markdown-selector gl-vertical-align-baseline"
+            >
               {{ content }}
             </gl-button>
           </template>
         </gl-sprintf>
       </span>
-      <gl-button icon="media" variant="link" category="primary" class="markdown-selector gl-vertical-align-text-bottom">
+      <gl-button
+        icon="media"
+        variant="link"
+        category="primary"
+        class="markdown-selector gl-vertical-align-text-bottom"
+      >
         {{ __('Attach a file') }}
       </gl-button>
-      <gl-button variant="link" category="primary" class="button-cancel-uploading-files gl-vertical-align-baseline hide">
+      <gl-button
+        variant="link"
+        category="primary"
+        class="button-cancel-uploading-files gl-vertical-align-baseline hide"
+      >
         {{ __('Cancel') }}
       </gl-button>
     </span>
