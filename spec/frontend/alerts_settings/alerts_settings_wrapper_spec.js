@@ -1,21 +1,24 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import { GlLoadingIcon } from '@gitlab/ui';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import AlertsSettingsFormOld from '~/alerts_settings/components/alerts_settings_form_old.vue';
 import AlertsSettingsFormNew from '~/alerts_settings/components/alerts_settings_form_new.vue';
 import IntegrationsList from '~/alerts_settings/components/alerts_integrations_list.vue';
 import { defaultAlertSettingsConfig } from './util';
+import mockIntegrations from './mocks/integrations.json';
 
-jest.mock('~/alerts_settings/services');
-
-describe('AlertsSettingsFormNew', () => {
+describe('AlertsSettingsWrapper', () => {
   let wrapper;
 
-  const createComponent = (data = {}, provide = {}) => {
+  const findLoader = () => wrapper.find(IntegrationsList).find(GlLoadingIcon);
+  const findIntegrations = () => wrapper.find(IntegrationsList).findAll('table tbody tr');
+
+  const createComponent = ({ data = {}, provide = {}, loading = false }) => {
     if (wrapper) {
       throw new Error('wrapper already exists');
     }
 
-    wrapper = shallowMount(AlertsSettingsWrapper, {
+    wrapper = mount(AlertsSettingsWrapper, {
       data() {
         return { ...data };
       },
@@ -23,6 +26,16 @@ describe('AlertsSettingsFormNew', () => {
         ...defaultAlertSettingsConfig,
         glFeatures: { httpIntegrationsList: false },
         ...provide,
+      },
+      mocks: {
+        $apollo: {
+          query: jest.fn(),
+          queries: {
+            integrations: {
+              loading,
+            },
+          },
+        },
       },
     });
   };
@@ -34,19 +47,41 @@ describe('AlertsSettingsFormNew', () => {
     }
   });
 
-  describe('with default values', () => {
-    it('renders alerts integrations list and old form by default', () => {
-      createComponent();
+  describe('without httpIntegrationsList feature flag enabled', () => {
+    it('renders data driven alerts integrations list and old form by default', () => {
+      createComponent({});
       expect(wrapper.find(IntegrationsList).exists()).toBe(true);
       expect(wrapper.find(AlertsSettingsFormOld).exists()).toBe(true);
       expect(wrapper.find(AlertsSettingsFormNew).exists()).toBe(false);
     });
+  });
 
-    it('renders alerts integrations list and new form when httpIntegrationsList feature flag is enabled', () => {
-      createComponent({}, { glFeatures: { httpIntegrationsList: true } });
+  describe('with httpIntegrationsList feature flag enabled', () => {
+    it('renders the GraphQL alerts integrations list and new form', () => {
+      createComponent({ provide: { glFeatures: { httpIntegrationsList: true } } });
       expect(wrapper.find(IntegrationsList).exists()).toBe(true);
       expect(wrapper.find(AlertsSettingsFormOld).exists()).toBe(false);
       expect(wrapper.find(AlertsSettingsFormNew).exists()).toBe(true);
+    });
+
+    it('uses a loading state inside the IntegrationsList table', () => {
+      createComponent({
+        data: { integrations: {} },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: true,
+      });
+      expect(wrapper.find(IntegrationsList).exists()).toBe(true);
+      expect(findLoader().exists()).toBe(true);
+    });
+
+    it('renders the IntegrationsList table using the API data', () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+      expect(findLoader().exists()).toBe(false);
+      expect(findIntegrations()).toHaveLength(mockIntegrations.length);
     });
   });
 });
