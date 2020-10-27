@@ -37,6 +37,14 @@ class AutocompleteController < ApplicationController
     render json: MoveToProjectSerializer.new.represent(projects)
   end
 
+  def project_groups
+    groups = ::Autocomplete::ProjectInvitedGroupsFinder
+      .new(current_user, params)
+      .execute
+
+    render json: InvitedGroupSerializer.new.represent(groups)
+  end
+
   def award_emojis
     render json: AwardEmojis::CollectUserEmojiService.new(current_user).execute
   end

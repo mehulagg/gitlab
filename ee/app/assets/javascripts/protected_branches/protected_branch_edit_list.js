@@ -13,8 +13,7 @@ export default class ProtectedBranchEditList {
     // Build edit forms
     this.$wrap.find('.js-protected-branch-edit-form').each((i, el) => {
       new ProtectedBranchEdit({
-        $wrap: $(el),
-        hasLicense: true,
+        $wrap: $(el)
       });
     });
   }

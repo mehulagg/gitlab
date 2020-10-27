@@ -31,7 +31,7 @@ describe('EE ProtectedBranchEdit', () => {
       findCodeOwnerToggle().classList.add(IS_CHECKED_CLASS);
     }
 
-    return new ProtectedBranchEdit({ $wrap: $('#wrap'), hasLicense: true });
+    return new ProtectedBranchEdit({ $wrap: $('#wrap') });
   };
 
   afterEach(() => {

@@ -9,14 +9,6 @@ module EE
       feature_category :projects, [:project_routes]
     end
 
-    def project_groups
-      groups = ::Autocomplete::ProjectInvitedGroupsFinder
-        .new(current_user, params)
-        .execute
-
-      render json: InvitedGroupSerializer.new.represent(groups)
-    end
-
     def project_routes
       routes = ::Autocomplete::RoutesFinder::ProjectsOnly
                  .new(current_user, params)

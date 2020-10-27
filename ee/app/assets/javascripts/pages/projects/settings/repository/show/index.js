@@ -23,13 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initSettingsPanels();
 
   if (document.querySelector('.js-protected-refs-for-users')) {
-    new ProtectedBranchCreate({ hasLicense: true });
+    new ProtectedBranchCreate();
     new ProtectedBranchEditList();
 
     new ProtectedTagCreate();
     new ProtectedTagEditList();
   } else {
-    new ProtectedBranchCreate({ hasLicense: false });
+    new ProtectedBranchCreate();
     new CEProtectedBranchEditList();
 
     new CEProtectedTagCreate();

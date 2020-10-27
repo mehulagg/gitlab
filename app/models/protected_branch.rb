@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ProtectedBranch < ApplicationRecord
-  include ProtectedRef
+  include EE::ProtectedRef
   include Gitlab::SQL::Pattern
 
   scope :requiring_code_owner_approval,

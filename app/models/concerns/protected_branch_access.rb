@@ -2,7 +2,7 @@
 
 module ProtectedBranchAccess
   extend ActiveSupport::Concern
-  include ProtectedRefAccess
+  include EE::ProtectedRefAccess
 
   included do
     belongs_to :protected_branch

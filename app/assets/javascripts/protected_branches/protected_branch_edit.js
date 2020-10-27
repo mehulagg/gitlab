@@ -7,8 +7,6 @@ import { __ } from '~/locale';
 
 export default class ProtectedBranchEdit {
   constructor(options) {
-    this.hasLicense = options.hasLicense;
-
     this.$wraps = {};
     this.hasChanges = false;
     this.$wrap = options.$wrap;
@@ -28,9 +26,7 @@ export default class ProtectedBranchEdit {
   }
 
   bindEvents() {
-    if (this.hasLicense) {
-      this.$codeOwnerToggle.on('click', this.onCodeOwnerToggleClick.bind(this));
-    }
+    this.$codeOwnerToggle.on('click', this.onCodeOwnerToggleClick.bind(this));
   }
 
   onCodeOwnerToggleClick() {
@@ -64,8 +60,7 @@ export default class ProtectedBranchEdit {
       accessLevelsData: gon.merge_access_levels,
       $dropdown: this.$allowedToMergeDropdown,
       onSelect: this.onSelectOption.bind(this),
-      onHide: this.onDropdownHide.bind(this),
-      hasLicense: this.hasLicense,
+      onHide: this.onDropdownHide.bind(this)
     });
 
     // Allowed to push dropdown
@@ -74,8 +69,7 @@ export default class ProtectedBranchEdit {
       accessLevelsData: gon.push_access_levels,
       $dropdown: this.$allowedToPushDropdown,
       onSelect: this.onSelectOption.bind(this),
-      onHide: this.onDropdownHide.bind(this),
-      hasLicense: this.hasLicense,
+      onHide: this.onDropdownHide.bind(this)
     });
   }
 
