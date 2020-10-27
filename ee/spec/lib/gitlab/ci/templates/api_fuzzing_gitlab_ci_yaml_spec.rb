@@ -43,7 +43,7 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
       end
 
       it 'includes job to display error' do
-        expect(build_names).to match_array(%w[apifuzzer_fuzz_license])
+        expect(build_names).to match_array(%w[apifuzzer_fuzz_unlicensed])
       end
     end
 
