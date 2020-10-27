@@ -90,7 +90,7 @@ To authenticate to the Package Registry, you must use one of the following:
 - A [deploy token](./../../project/deploy_tokens/index.md), with the scope set to `read_package_registry`, `write_package_registry`, or both.
 - It's not recommended, but you can use [OAuth tokens](../../../api/oauth2.md#resource-owner-password-credentials-flow).
   Standard OAuth tokens cannot authenticate to the GitLab NPM Registry. You must use a personal access token with OAuth headers.
-- A [CI job token](authenticate-with-a-ci-job-token).
+- A [CI job token](#authenticate-with-a-ci-job-token).
 
 ### Authenticate with a personal access token or deploy token
 
