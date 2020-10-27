@@ -18,21 +18,44 @@ RSpec.describe ProjectsController do
 
     subject { get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path } }
 
-    it 'shows the over size limit warning message if above_size_limit' do
-      allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
-        expect(checker).to receive(:above_size_limit?).and_return(true)
+    context 'with additional_repo_storage_by_namespace_enabled? enabled' do
+      before do
+        allow(public_project.namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(true)
       end
-      allow(controller).to receive(:current_user).and_return(user)
 
-      subject
+      it 'does not show over size limit warning when above_size_limit' do
+        allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+          expect(checker).to receive(:above_size_limit?).and_return(true)
+        end
+        allow(controller).to receive(:current_user).and_return(user)
 
-      expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+        subject
+
+        expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+      end
     end
 
-    it 'does not show an over size warning if not above_size_limit' do
-      subject
+    context 'with additional_repo_storage_by_namespace_enabled? disabled' do
+      before do
+        allow(public_project.namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(false)
+      end
 
-      expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      it 'shows the over size limit warning message if above_size_limit' do
+        allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+          expect(checker).to receive(:above_size_limit?).and_return(true)
+        end
+        allow(controller).to receive(:current_user).and_return(user)
+
+        subject
+
+        expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+      end
+
+      it 'does not show an over size warning if not above_size_limit' do
+        subject
+
+        expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      end
     end
 
     context 'namespace storage limit' do
