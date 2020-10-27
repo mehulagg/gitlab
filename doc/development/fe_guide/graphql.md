@@ -935,6 +935,14 @@ query getPermissions($projectPath: ID!) {
 - if queries contain fragments, you need to move fragments to the query file directly instead of importing them:
 
 ```javascript
+fragment PageInfo on PageInfo {
+  __typename
+  hasNextPage
+  hasPreviousPage
+  startCursor
+  endCursor
+}
+
 query getFiles(
   $projectPath: ID!
   $path: String
