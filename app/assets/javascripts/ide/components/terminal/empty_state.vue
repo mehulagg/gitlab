@@ -42,7 +42,7 @@ export default {
 };
 </script>
 <template>
-  <div class="text-center p-3">
+  <div class="gl-text-center gl-p-5">
     <div v-if="illustrationPath" class="svg-content svg-130"><img :src="illustrationPath" /></div>
     <h4>{{ __('Web Terminal') }}</h4>
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
@@ -59,7 +59,7 @@ export default {
           {{ __('Start Web Terminal') }}
         </gl-button>
       </p>
-      <div v-if="!isValid && message" class="bs-callout text-left" v-html="message"></div>
+      <div v-if="!isValid && message" class="bs-callout gl-text-left" v-html="message"></div>
       <p v-else>
         <a
           v-if="helpPath"
