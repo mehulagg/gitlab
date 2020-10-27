@@ -15,7 +15,10 @@ module ResourceAccessTokens
       user = create_user
 
       return error(user.errors.full_messages.to_sentence) unless user.persisted?
-      return error("Failed to provide maintainer access") unless provision_access(resource, user)
+
+      member = create_membership(resource, user)
+
+      return error("Failed to provide maintainer access") unless member.persisted?
 
       token_response = create_personal_access_token(user)
 
@@ -88,9 +91,8 @@ module ResourceAccessTokens
       Gitlab::Auth.resource_bot_scopes
     end
 
-    def provision_access(resource, user)
+    def create_membership(resource, user)
       resource.add_user(user, :maintainer, expires_at: params[:expires_at])
-      user.persisted?
     end
 
     def error(message)
