@@ -1750,7 +1750,7 @@ the primary and secondary voters to agree.
 
 Occasionally, features are given end-of-life status and removed from the product. Since this is a
 breaking change, it's important to display prominently in the documentation. Do so with a
-`DANGER: **Important:**` [alert](#alert-boxes) directly below the feature's header in the
+<!-- vale gitlab.AlertBoxStyle = NO -->`DANGER: **Important:**`<!-- vale gitlab.AlertBoxStyle = YES --> [alert](#alert-boxes) directly below the feature's header in the
 documentation. Link to the deprecation/removal issues if possible.
 
 For example:
