@@ -1746,6 +1746,23 @@ The voting strategy (in GitLab 13.4 and later) requires
 the primary and secondary voters to agree.
 ```
 
+#### Text for end-of-life features
+
+Occasionally, features are given end-of-life status and removed from the product. Since this is a
+breaking change, it's important to display prominently in the documentation. Do so with a
+`DANGER: **Important:**` [alert](#alert-boxes) directly below the feature's header in the
+documentation. Link to the deprecation/removal issues if possible.
+
+For example:
+
+```markdown
+## Feature X
+
+DANGER: **Important:**
+This feature is in its end-of-life process. It is [deprecated](link-to-issue) for use in GitLab
+13.6, and is planned for [removal](link-to-issue) in GitLab 14.0.
+```
+
 ### Versions in the past or future
 
 When describing functionality available in past or future versions, use:
