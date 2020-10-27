@@ -11,7 +11,7 @@ export default {
     GlModal,
   },
   directives: {
-    GlTooltip: GlTooltipDirective
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     fileList: {
