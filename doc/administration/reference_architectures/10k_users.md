@@ -46,7 +46,7 @@ is recommended instead of using NFS. Using an object storage service also
 doesn't require you to provision and maintain a node.
 
 NOTE: **Note:**
-[Gitaly Cluster](../gitaly/praefect.html) support
+[Gitaly Cluster](../gitaly/praefect.md) support
 for the Reference Architectures is being
 worked on as a collaborative effort between [the Quality Engineering and Gitaly teams](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1). When this component has been verified
 some Architecture specs will likely change as a result to support the new
@@ -1343,7 +1343,7 @@ To configure the Sentinel Queues server:
 ## Configure Gitaly
 
 NOTE: **Note:**
-[Gitaly Cluster](../gitaly/praefect.html) support
+[Gitaly Cluster](../gitaly/praefect.md) support
 for the Reference Architectures is in development and is currently being
 worked on as a collaborative effort between [the Quality Engineering and Gitaly teams](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1)
 
