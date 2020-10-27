@@ -1,7 +1,6 @@
 /* eslint-disable no-shadow, no-param-reassign,consistent-return */
 /* global List */
 /* global ListIssue */
-import $ from 'jquery';
 import { sortBy, pick } from 'lodash';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
@@ -120,9 +119,10 @@ const boardsStore = {
       });
   },
   updateNewListDropdown(listId) {
+    // eslint-disable-next-line no-unused-expressions
     document
       .querySelector(`.js-board-list-${getIdFromGraphQLId(listId)}`)
-      .classList.remove('is-active');
+      ?.classList.remove('is-active');
   },
   shouldAddBlankState() {
     // Decide whether to add the blank state
