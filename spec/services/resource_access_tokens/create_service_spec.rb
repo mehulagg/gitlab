@@ -165,13 +165,16 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
       context 'when access provisioning fails' do
         before do
-          allow(resource).to receive(:add_user).and_return(nil)
+          allow_next_instance_of(ResourceAccessTokens::CreateService) do |create_service|
+            allow(create_service).to receive(:provision_access).and_return(false)
+          end
         end
 
         it 'returns error' do
           response = subject
 
           expect(response.error?).to be true
+          expect(response.message).to eq("Failed to provide maintainer access")
         end
       end
     end

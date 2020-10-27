@@ -90,6 +90,7 @@ module ResourceAccessTokens
 
     def provision_access(resource, user)
       resource.add_user(user, :maintainer, expires_at: params[:expires_at])
+      user.persisted?
     end
 
     def error(message)
