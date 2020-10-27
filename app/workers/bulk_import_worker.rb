@@ -10,18 +10,42 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
   worker_has_external_dependencies!
 
   def perform(bulk_import_id)
-    bulk_import = BulkImport.find_by_id(bulk_import_id)
+    @bulk_import = BulkImport.find_by_id(bulk_import_id)
 
-    return unless bulk_import
+    return unless @bulk_import
 
-    bulk_import.entities.each do |entity|
-      entity.start!
+    created_top_level_entities.each { |entity| BulkImports::SubgroupEntitiesCreator.new(entity.id).execute }
 
-      BulkImports::Importers::GroupImporter.new(entity.id).execute
+    while (group_entity = next_eligible_entity)
+      group_entity.start!
 
-      entity.finish!
+      BulkImports::Importers::GroupImporter.new(group_entity.id).execute
+
+      group_entity.finish!
     end
 
-    bulk_import.finish!
+    @bulk_import.finish!
+  end
+
+  private
+
+  def next_eligible_entity
+    return created_top_level_entities.sample if created_top_level_entities.any?
+
+    finished_entity_ids = finished_entities.pluck(:id)
+
+    created_entities.with_parent(finished_entity_ids).sample
+  end
+
+  def created_entities
+    @bulk_import.entities.groups.created
+  end
+
+  def finished_entities
+    @bulk_import.entities.groups.finished
+  end
+
+  def created_top_level_entities
+    created_entities.top_level
   end
 end

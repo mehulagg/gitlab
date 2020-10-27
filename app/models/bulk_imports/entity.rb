@@ -36,6 +36,12 @@ class BulkImports::Entity < ApplicationRecord
 
   enum source_type: { group_entity: 0, project_entity: 1 }
 
+  scope :top_level, -> { where(parent_id: nil) }
+  scope :groups, -> { where(source_type: 0) }
+  scope :with_parent, ->(ids) { where(parent_id: ids) }
+  scope :created, -> { where(status: 0) }
+  scope :finished, -> { where(status: 2) }
+
   state_machine :status, initial: :created do
     state :created, value: 0
     state :started, value: 1
