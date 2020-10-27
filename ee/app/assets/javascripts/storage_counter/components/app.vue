@@ -110,7 +110,10 @@ export default {
       :actual-repository-size-limit="namespace.actualRepositorySizeLimit"
     />
     <div v-if="isAdditionalStorageFlagEnabled && storageStatistics">
-      <usage-statistics :root-storage-statistics="storageStatistics" />
+      <usage-statistics
+        :root-storage-statistics="storageStatistics"
+        :purchase-storage-url="purchaseStorageUrl"
+      />
     </div>
     <div v-else class="gl-py-4 gl-px-2 gl-m-0">
       <div class="gl-display-flex gl-align-items-center">

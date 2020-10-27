@@ -16,6 +16,7 @@ describe('Usage Statistics component', () => {
           totalRepositorySizeExcess: withRootStorageStatistics.totalRepositorySizeExcess,
           additionalPurchasedStorageSize: withRootStorageStatistics.additionalPurchasedStorageSize,
         },
+        purchaseStorageUrl: 'some-url',
       },
       stubs: {
         UsageStatisticsCard,
