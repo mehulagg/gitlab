@@ -46236,6 +46236,16 @@
                   "defaultValue": "created_desc"
                 },
                 {
+                  "name": "admins",
+                  "description": "Return only admin users",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -59352,6 +59362,24 @@
           "name": "User",
           "description": null,
           "fields": [
+            {
+              "name": "admin",
+              "description": "Whether this user is an admin",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "assignedMergeRequests",
               "description": "Merge Requests assigned to the user",
