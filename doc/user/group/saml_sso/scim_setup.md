@@ -204,7 +204,7 @@ graph TD
 
 This section contains possible solutions for problems you might encounter.
 
-## How come I can't add a user after I removed them?
+### How come I can't add a user after I removed them?
 
 As outlined in the [Blocking access section](#blocking-access), when you remove a user, they are removed from the group. However, their account is not deleted.
 
