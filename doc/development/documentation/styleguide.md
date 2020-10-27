@@ -1748,14 +1748,14 @@ the primary and secondary voters to agree.
 
 #### Text for end-of-life features
 
-<!-- vale gitlab.AlertBoxStyle = NO -->
+<!-- vale off -->
 
 Occasionally, features are given end-of-life status and removed from the product. Since this is a
 breaking change, it's important to display prominently in the documentation. Do so with a
 `DANGER: **Important:**` [alert](#alert-boxes) directly below the feature's header in the
 documentation. Link to the deprecation/removal issues if possible.
 
-<!-- vale gitlab.AlertBoxStyle = YES -->
+<!-- vale on -->
 
 For example:
 
