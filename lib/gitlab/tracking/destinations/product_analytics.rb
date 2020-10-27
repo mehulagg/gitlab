@@ -27,6 +27,7 @@ module Gitlab
         end
 
         def enabled?
+          # TODO: Check feature flag as well?
           Gitlab::CurrentSettings.usage_ping_enabled?
         end
 

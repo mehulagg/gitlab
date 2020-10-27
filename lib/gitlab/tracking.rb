@@ -21,7 +21,9 @@ module Gitlab
       end
     end
 
-    @destination = Gitlab::Tracking::Destinations::Snowplow.new
+    DESTINATIONS = [
+      Gitlab::Tracking::Destinations::Snowplow.new
+    ].freeze
 
     class << self
       def enabled?
@@ -29,11 +31,15 @@ module Gitlab
       end
 
       def event(category, action, label: nil, property: nil, value: nil, context: nil)
-        @destination.event(category, action, label: label, property: property, value: value, context: context)
+        DESTINATIONS.each do |destination|
+          destination.event(category, action, label, property, value, context)
+        end
       end
 
       def self_describing_event(schema_url, event_data_json, context: nil)
-        @destination.self_describing_event(schema_url, event_data_json, context: nil)
+        DESTINATIONS.each do |destination|
+          destination.self_describing_event(schema_url, event_data_json, context)
+        end
       end
 
       def snowplow_options(group)
