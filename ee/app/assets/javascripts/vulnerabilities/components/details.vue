@@ -54,7 +54,13 @@ export default {
       };
     },
     requestData() {
-      const { request: { method, url, headers = [] } = {} } = this.vulnerability;
+      if (!this.vulnerability.request) {
+        return [];
+      }
+
+      const {
+        request: { method, url, headers = [] },
+      } = this.vulnerability;
 
       return [
         {
@@ -73,8 +79,12 @@ export default {
       ].filter(x => x.content);
     },
     responseData() {
+      if (!this.vulnerability.response) {
+        return [];
+      }
+
       const {
-        response: { status_code: statusCode, reason_phrase: reasonPhrase, headers = [] } = {},
+        response: { status_code: statusCode, reason_phrase: reasonPhrase, headers = [] },
       } = this.vulnerability;
 
       return [
