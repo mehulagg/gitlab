@@ -1,0 +1,5 @@
+---
+title: Fix epic creation form submission as it was causing errors on Safari
+merge_request: 45721
+author:
+type: fixed

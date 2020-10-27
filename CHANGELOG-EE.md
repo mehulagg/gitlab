@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.5.1 (2020-10-22)
+
+- No changes.
+
 ## 13.5.0 (2020-10-22)
 
 ### Removed (1 change, 1 of them is from the community)
@@ -487,6 +491,16 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Remove without_index_namespace_callback trait. !42082 (Andrei Cirnici @acirnici)
 - Adjust Color of Low Severity Symbol. !42153 (Kev @KevSlashNull)
 - Elasticsearch reindexing: add confirmation popup and change color scheme. !42209
+
+
+## 13.3.8 (2020-10-21)
+
+### Fixed (4 changes)
+
+- Geo: Permanently enable package_file_registries field. !43436
+- Geo - Fix wikis with no repository on the primary trying to sync over and over. !43765
+- Handle 500 error for GraphQL configureSast mutation. !43936
+- Geo: Fix "Project repo not able to resync after storage move". !44172
 
 
 ## 13.3.4 (2020-09-02)

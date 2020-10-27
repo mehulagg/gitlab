@@ -38,13 +38,12 @@ export default {
 
 <template>
   <div>
-    <strong>{{ s__('SecurityReports|Download Report') }}</strong>
+    <slot name="label"></slot>
     <gl-dropdown
       v-if="hasDropdown"
       class="d-block mt-1"
       :text="$options.i18n.FUZZING_ARTIFACTS"
       category="secondary"
-      variant="info"
       size="small"
     >
       <gl-deprecated-dropdown-item
@@ -58,7 +57,6 @@ export default {
       v-else
       class="d-block mt-1"
       category="secondary"
-      variant="info"
       size="small"
       :href="artifactDownloadUrl(jobs[0])"
     >

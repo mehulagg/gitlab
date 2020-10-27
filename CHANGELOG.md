@@ -2,6 +2,13 @@
 documentation](doc/development/changelog.md) for instructions on adding your own
 entry.
 
+## 13.5.1 (2020-10-22)
+
+### Other (1 change)
+
+- Update GitLab Shell to v13.11.0. !45660
+
+
 ## 13.5.0 (2020-10-22)
 
 ### Security (1 change)
@@ -1232,6 +1239,22 @@ entry.
 - Add instance statistics visits to usage data. !42211
 - Modify DevOps Score UI Text. !42256
 - Expand the visible highlight for collapsed diffs (re: !41393). !42343
+
+
+## 13.3.8 (2020-10-21)
+
+### Fixed (2 changes)
+
+- Make SSH keys publicly accessible. !42288
+- Revert required encryption on CI runner tokens. !42623
+
+### Added (1 change)
+
+- Add missing fontawesome file icon classes. !43091
+
+### Other (1 change)
+
+- GitLab-managed apps: Use GitLab's repo as replacement for the Helm stable repo. !44875
 
 
 ## 13.3.4 (2020-09-02)

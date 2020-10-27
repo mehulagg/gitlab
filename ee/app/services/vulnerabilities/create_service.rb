@@ -3,6 +3,7 @@
 module Vulnerabilities
   class CreateService
     include Gitlab::Allowable
+    include Gitlab::Utils::StrongMemoize
 
     def initialize(project, author, finding_id:)
       @project = project
@@ -16,9 +17,6 @@ module Vulnerabilities
       vulnerability = Vulnerability.new
 
       Vulnerabilities::Finding.transaction(requires_new: true) do
-        # we're using `lock` instead of `with_lock` to avoid extra call to `find` under the hood
-        finding = @project.vulnerability_findings.lock_for_confirmation!(@finding_id)
-
         save_vulnerability(vulnerability, finding)
         Statistics::UpdateService.update_for(vulnerability)
         HistoricalStatistics::UpdateService.update_for(@project)
@@ -42,9 +40,21 @@ module Vulnerabilities
         severity_overridden: false,
         confidence: finding.confidence,
         confidence_overridden: false,
-        report_type: finding.report_type
+        report_type: finding.report_type,
+        dismissed_at: existing_dismissal_feedback&.created_at,
+        dismissed_by_id: existing_dismissal_feedback&.author_id
       )
+
       vulnerability.save && vulnerability.findings << finding
+    end
+
+    def existing_dismissal_feedback
+      strong_memoize(:existing_dismissal_feedback) { finding.dismissal_feedback }
+    end
+
+    def finding
+      # we're using `lock` instead of `with_lock` to avoid extra call to `find` under the hood
+      @finding ||= @project.vulnerability_findings.lock_for_confirmation!(@finding_id)
     end
   end
 end

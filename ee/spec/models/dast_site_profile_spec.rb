@@ -79,7 +79,7 @@ RSpec.describe DastSiteProfile, type: :model do
 
         aggregate_failures do
           expect(subject.dast_site_validation).to be_nil
-          expect(subject.status).to eq(:pending)
+          expect(subject.status).to eq('pending')
         end
       end
     end

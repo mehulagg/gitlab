@@ -4,7 +4,7 @@ import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
 import { __ } from '~/locale';
 import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
-import { setUrlParams, removeParams } from '~/lib/utils/url_utility';
+import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
 import { EpicFilterType, GroupByParamType } from '../constants';
@@ -307,7 +307,7 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      historyPushState(setUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
+      historyPushState(mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
       dispatch('fetchEpicsSwimlanes', {});
     } else if (!gon.features.graphqlBoardLists) {
       historyPushState(removeParams(['group_by']));

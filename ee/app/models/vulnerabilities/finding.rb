@@ -263,19 +263,67 @@ module Vulnerabilities
       metadata.dig('remediations')
     end
 
+    def build_evidence_request(data)
+      return if data.nil?
+
+      {
+        headers: data.fetch('headers', []).map do |request_header|
+          {
+            name: request_header['name'],
+            value: request_header['value']
+          }
+        end,
+        method: data['method'],
+        url: data['url'],
+        body: data['body']
+      }
+    end
+
+    def build_evidence_response(data)
+      return if data.nil?
+
+      {
+        headers: data.fetch('headers', []).map do |header_data|
+          {
+            name: header_data['name'],
+            value: header_data['value']
+          }
+        end,
+        status_code: data['status_code'],
+        reason_phrase: data['reason_phrase'],
+        body: data['body']
+      }
+    end
+
+    def build_evidence_supporting_messages(data)
+      return [] if data.nil?
+
+      data.map do |message|
+        {
+          name: message['name'],
+          request: build_evidence_request(message['request']),
+          response: build_evidence_response(message['response'])
+        }
+      end
+    end
+
+    def build_evidence_source(data)
+      return if data.nil?
+
+      {
+        id: data['id'],
+        name: data['name'],
+        url: data['url']
+      }
+    end
+
     def evidence
       {
         summary: metadata.dig('evidence', 'summary'),
-        request: {
-          headers: metadata.dig('evidence', 'request', 'headers') || [],
-          method: metadata.dig('evidence', 'request', 'method'),
-          url: metadata.dig('evidence', 'request', 'url')
-        },
-        response: {
-          headers: metadata.dig('evidence', 'response', 'headers') || [],
-          status_code: metadata.dig('evidence', 'response', 'status_code'),
-          reason_phrase: metadata.dig('evidence', 'response', 'reason_phrase')
-        }
+        request: build_evidence_request(metadata.dig('evidence', 'request')),
+        response: build_evidence_response(metadata.dig('evidence', 'response')),
+        source: build_evidence_source(metadata.dig('evidence', 'source')),
+        supporting_messages: build_evidence_supporting_messages(metadata.dig('evidence', 'supporting_messages'))
       }
     end
 
@@ -293,6 +341,16 @@ module Vulnerabilities
 
     def other_identifier_values
       identifiers.select(&:other?).map(&:name)
+    end
+
+    def assets
+      metadata.fetch('assets', []).map do |asset_data|
+        {
+          name: asset_data['name'],
+          type: asset_data['type'],
+          url: asset_data['url']
+        }
+      end
     end
 
     alias_method :==, :eql? # eql? is necessary in some cases like array intersection

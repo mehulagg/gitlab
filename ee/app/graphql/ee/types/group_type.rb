@@ -65,9 +65,7 @@ module EE
               [::Types::VulnerableProjectsByGradeType],
               null: false,
               description: 'Represents vulnerable project counts for each grade',
-              resolve: -> (obj, _args, ctx) {
-                ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate.new(ctx, obj)
-              }
+              resolver: ::Resolvers::VulnerabilitiesGradeResolver
       end
     end
   end

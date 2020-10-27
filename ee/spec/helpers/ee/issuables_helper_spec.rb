@@ -27,7 +27,6 @@ RSpec.describe IssuablesHelper do
           canDestroy: true,
           canAdmin: true,
           issuableRef: "&#{epic.iid}",
-          issuableStatus: "opened",
           markdownPreviewPath: "/groups/#{@group.full_path}/preview_markdown",
           markdownDocsPath: '/help/user/markdown',
           issuableTemplateNamesPath: '',

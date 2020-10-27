@@ -16,9 +16,7 @@ RSpec.describe Mutations::Issues::SetEpic do
 
     subject { mutation.resolve(project_path: issue.project.full_path, iid: issue.iid, epic: epic) }
 
-    it 'raises an error if the resource is not accessible to the user' do
-      expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-    end
+    it_behaves_like 'permission level for issue mutation is correctly verified', true
 
     context 'when the user can update the issue' do
       before do

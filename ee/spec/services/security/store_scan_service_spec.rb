@@ -49,16 +49,16 @@ RSpec.describe Security::StoreScanService do
 
     context 'when the security scan already exists for the artifact' do
       let_it_be(:security_scan) { create(:security_scan, build: artifact.job, scan_type: :sast) }
-      let_it_be(:duplicated_security_finding) do
-        create(:security_finding,
-               scan: security_scan,
-               project_fingerprint: 'd533c3a12403b6c6033a50b53f9c73f894a40fc6')
-      end
-
       let_it_be(:unique_security_finding) do
         create(:security_finding,
                scan: security_scan,
-               project_fingerprint: 'b9c0d1cdc7cb9c180ebb6981abbddc2df0172509')
+               position: 0)
+      end
+
+      let_it_be(:duplicated_security_finding) do
+        create(:security_finding,
+               scan: security_scan,
+               position: 5)
       end
 
       it 'does not create a new security scan' do
@@ -89,12 +89,12 @@ RSpec.describe Security::StoreScanService do
     end
 
     context 'when the security scan does not exist for the artifact' do
-      let(:duplicated_finding_attribute) do
-        -> { Security::Finding.by_project_fingerprint('d533c3a12403b6c6033a50b53f9c73f894a40fc6').first&.deduplicated }
+      let(:unique_finding_attribute) do
+        -> { Security::Finding.by_position(0).first&.deduplicated }
       end
 
-      let(:unique_finding_attribute) do
-        -> { Security::Finding.by_project_fingerprint('b9c0d1cdc7cb9c180ebb6981abbddc2df0172509').first&.deduplicated }
+      let(:duplicated_finding_attribute) do
+        -> { Security::Finding.by_position(5).first&.deduplicated }
       end
 
       before do

@@ -151,7 +151,6 @@ RSpec.describe API::Search do
 
         context 'filter by confidentiality' do
           before do
-            stub_feature_flags(search_filter_by_confidential: true)
             create(:issue, project: project, author: user, title: 'awesome non-confidential issue')
             create(:issue, :confidential, project: project, author: user, title: 'awesome confidential issue')
           end
@@ -513,6 +512,14 @@ RSpec.describe API::Search do
           end
 
           include_examples 'pagination', scope: :issues
+        end
+      end
+
+      context 'when requesting basic search' do
+        it 'passes the parameter to search service' do
+          expect(SearchService).to receive(:new).with(user, hash_including(basic_search: 'true'))
+
+          get api(endpoint, user), params: { scope: 'issues', search: 'awesome', basic_search: 'true' }
         end
       end
 

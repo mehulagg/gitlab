@@ -1,7 +1,16 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :sort, :state, :confidential].freeze
+  SEARCH_GENERIC_PARAMS = [
+    :search,
+    :scope,
+    :project_id,
+    :group_id,
+    :repository_ref,
+    :snippets,
+    :sort,
+    :force_search_results
+  ].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
@@ -9,7 +18,8 @@ module SearchHelper
     resources_results = [
       recent_items_autocomplete(term),
       groups_autocomplete(term),
-      projects_autocomplete(term)
+      projects_autocomplete(term),
+      issue_autocomplete(term)
     ].flatten
 
     search_pattern = Regexp.new(Regexp.escape(term), "i")
@@ -172,6 +182,24 @@ module SearchHelper
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
+  def issue_autocomplete(term)
+    return [] unless @project.present? && current_user && term =~ /\A#{Issue.reference_prefix}\d+\z/
+
+    iid = term.sub(Issue.reference_prefix, '').to_i
+    issue = @project.issues.find_by_iid(iid)
+    return [] unless issue && Ability.allowed?(current_user, :read_issue, issue)
+
+    [
+        {
+            category: 'In this project',
+            id: issue.id,
+            label: search_result_sanitize("#{issue.title} (#{issue.to_reference})"),
+            url: issue_path(issue),
+            avatar_url: issue.project.avatar_url || ''
+        }
+    ]
+  end
+
   # Autocomplete results for the current user's projects
   # rubocop: disable CodeReuse/ActiveRecord
   def projects_autocomplete(term, limit = 5)
@@ -225,7 +253,7 @@ module SearchHelper
     search_params = params
       .merge(search)
       .merge({ scope: scope })
-      .permit(SEARCH_PERMITTED_PARAMS)
+      .permit(SEARCH_GENERIC_PARAMS)
 
     if @scope == scope
       li_class = 'active'

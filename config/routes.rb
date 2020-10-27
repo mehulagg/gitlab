@@ -122,7 +122,6 @@ Rails.application.routes.draw do
 
     get 'ide' => 'ide#index'
     get 'ide/*vueroute' => 'ide#index', format: false
-    get 'ide/project/:namespace/:project/merge_requests/:id' => 'ide#index', format: false, as: :ide_merge_request
 
     draw :operations
     draw :jira_connect
@@ -175,9 +174,8 @@ Rails.application.routes.draw do
     resources :abuse_reports, only: [:new, :create]
 
     # JWKS (JSON Web Key Set) endpoint
-    # Used by third parties to verify CI_JOB_JWT, placeholder route
-    # in case we decide to move away from doorkeeper-openid_connect
-    get 'jwks' => 'doorkeeper/openid_connect/discovery#keys'
+    # Used by third parties to verify CI_JOB_JWT
+    get 'jwks' => 'jwks#index'
 
     draw :snippets
     draw :profile

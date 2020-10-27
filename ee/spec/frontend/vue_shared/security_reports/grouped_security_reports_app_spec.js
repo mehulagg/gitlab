@@ -1,9 +1,8 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
-import state from 'ee/vue_shared/security_reports/store/state';
+import appStore from 'ee/vue_shared/security_reports/store';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
-import sastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
 import { mount } from '@vue/test-utils';
 import { waitForMutation } from 'helpers/vue_test_utils_helper';
@@ -29,6 +28,7 @@ const CONTAINER_SCANNING_DIFF_ENDPOINT = 'container_scanning.json';
 const DEPENDENCY_SCANNING_DIFF_ENDPOINT = 'dependency_scanning.json';
 const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
+const PIPELINE_JOBS_ENDPOINT = 'jobs.json';
 const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_detection.json';
 const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
@@ -51,6 +51,7 @@ describe('Grouped security reports app', () => {
     vulnerabilityFeedbackHelpPath: 'path',
     coverageFuzzingHelpPath: 'path',
     pipelineId: 123,
+    projectId: 321,
     projectFullPath: 'path',
   };
 
@@ -78,6 +79,7 @@ describe('Grouped security reports app', () => {
           },
         },
       },
+      store: appStore(),
     });
   };
 
@@ -87,10 +89,6 @@ describe('Grouped security reports app', () => {
   });
 
   afterEach(() => {
-    wrapper.vm.$store.replaceState({
-      ...state(),
-      sast: sastState(),
-    });
     wrapper.vm.$destroy();
     mock.restore();
   });
@@ -169,6 +167,7 @@ describe('Grouped security reports app', () => {
 
     describe('while loading', () => {
       beforeEach(() => {
+        mock.onGet(PIPELINE_JOBS_ENDPOINT).reply(200, {});
         mock.onGet(CONTAINER_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {});
@@ -606,7 +605,7 @@ describe('Grouped security reports app', () => {
           });
         });
 
-        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+        it(`${shouldShowFuzzing ? 'renders' : 'does not render'} security row`, () => {
           expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
             shouldShowFuzzing,
           );

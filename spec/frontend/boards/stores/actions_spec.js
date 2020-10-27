@@ -11,7 +11,7 @@ import {
 } from '../mock_data';
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
-import { inactiveId, ListType } from '~/boards/constants';
+import { inactiveId } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
@@ -118,7 +118,7 @@ describe('fetchLists', () => {
           payload: formattedLists,
         },
       ],
-      [{ type: 'showWelcomeList' }],
+      [{ type: 'generateDefaultLists' }],
       done,
     );
   });
@@ -148,14 +148,15 @@ describe('fetchLists', () => {
           payload: formattedLists,
         },
       ],
-      [{ type: 'createList', payload: { backlog: true } }, { type: 'showWelcomeList' }],
+      [{ type: 'createList', payload: { backlog: true } }, { type: 'generateDefaultLists' }],
       done,
     );
   });
 });
 
-describe('showWelcomeList', () => {
-  it('should dispatch addList action', done => {
+describe('generateDefaultLists', () => {
+  let store;
+  beforeEach(() => {
     const state = {
       endpoints: { fullPath: 'gitlab-org', boardId: '1' },
       boardType: 'group',
@@ -163,26 +164,19 @@ describe('showWelcomeList', () => {
       boardLists: [{ type: 'backlog' }, { type: 'closed' }],
     };
 
-    const blankList = {
-      id: 'blank',
-      listType: ListType.blank,
-      title: 'Welcome to your issue board!',
-      position: 0,
-    };
-
-    testAction(
-      actions.showWelcomeList,
-      {},
+    store = {
+      commit: jest.fn(),
+      dispatch: jest.fn(() => Promise.resolve()),
       state,
-      [],
-      [{ type: 'addList', payload: blankList }],
-      done,
-    );
+    };
   });
-});
 
-describe('generateDefaultLists', () => {
-  expectNotImplemented(actions.generateDefaultLists);
+  it('should dispatch fetchLabels', () => {
+    return actions.generateDefaultLists(store).then(() => {
+      expect(store.dispatch.mock.calls[0]).toEqual(['fetchLabels', 'to do']);
+      expect(store.dispatch.mock.calls[1]).toEqual(['fetchLabels', 'doing']);
+    });
+  });
 });
 
 describe('createList', () => {

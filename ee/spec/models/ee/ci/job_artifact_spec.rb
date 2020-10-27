@@ -256,7 +256,9 @@ RSpec.describe Ci::JobArtifact do
       clear_security_report
       job_artifact.security_report
 
-      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).once
+      # This entity class receives the call twice
+      # because of the way MergeReportsService is implemented.
+      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).twice
     end
   end
 end

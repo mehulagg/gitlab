@@ -28,14 +28,28 @@ RSpec.describe EE::Namespace::RootExcessStorageSize do
     context 'when limit enforcement is on' do
       let(:storage_allocation_enabled) { true }
 
-      context 'when below limit' do
-        it { is_expected.to eq(false) }
+      context 'with feature flag :namespace_storage_limit disabled' do
+        before do
+          stub_feature_flags(namespace_storage_limit: false)
+        end
+
+        context 'when below limit' do
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when above limit' do
+          let(:total_repository_size_excess) { 101.megabytes }
+
+          it { is_expected.to eq(true) }
+        end
       end
 
-      context 'when above limit' do
-        let(:total_repository_size_excess) { 101.megabytes }
+      context 'with feature flag :additional_repo_storage_by_namespace disabled' do
+        before do
+          stub_feature_flags(additional_repo_storage_by_namespace: false)
+        end
 
-        it { is_expected.to eq(true) }
+        it { is_expected.to eq(false) }
       end
     end
   end
@@ -91,12 +105,22 @@ RSpec.describe EE::Namespace::RootExcessStorageSize do
       allow(Gitlab::CurrentSettings).to receive(:automatic_purchased_storage_allocation?) { storage_allocation_enabled }
     end
 
-    it { is_expected.to eq(true) }
-
     context 'with application setting is disabled' do
       let(:storage_allocation_enabled) { false }
 
       it { is_expected.to eq(false) }
+    end
+
+    context 'with feature flags (:namespace_storage_limit & :additional_repo_storage_by_namespace) enabled' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it { is_expected.to eq(true) }
     end
 
     context 'with feature flag :additional_repo_storage_by_namespace disabled' do

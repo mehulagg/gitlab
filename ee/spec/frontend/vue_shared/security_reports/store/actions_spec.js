@@ -94,6 +94,7 @@ const createNonDismissedVulnerability = options =>
     ...options,
     isDismissed: false,
     dismissalFeedback: null,
+    dismissal_feedback: null,
   });
 
 const createDismissedVulnerability = options =>

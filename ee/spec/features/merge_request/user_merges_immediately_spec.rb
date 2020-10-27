@@ -41,7 +41,7 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
     def open_warning_dialog
       find('.mr-widget-body .dropdown-toggle').click
 
-      click_link 'Merge immediately'
+      click_button 'Merge immediately'
 
       expect(page).to have_selector('#merge-immediately-confirmation-dialog')
     end

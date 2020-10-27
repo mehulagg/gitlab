@@ -16,6 +16,46 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
+  describe '#display_namespace_storage_limit_alert?' do
+    let_it_be(:namespace) { build_stubbed(:namespace) }
+
+    before do
+      assign(:display_namespace_storage_limit_alert, display_namespace_storage_limit_alert)
+    end
+
+    context 'when display_namespace_storage_limit_alert is true' do
+      let(:display_namespace_storage_limit_alert) { true }
+
+      it 'returns false when in profile usage quota path' do
+        allow(@request).to receive(:path) { profile_usage_quotas_path }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(false)
+      end
+
+      it 'returns false when in namespace usage quota path' do
+        allow(@request).to receive(:path) { group_usage_quotas_path(namespace) }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(false)
+      end
+
+      it 'returns true when in other namespace path' do
+        allow(@request).to receive(:path) { group_path(namespace) }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(true)
+      end
+    end
+
+    context 'when display_namespace_storage_limit_alert is false' do
+      let(:display_namespace_storage_limit_alert) { false }
+
+      it 'returns false' do
+        allow(@request).to receive(:path) { group_path(namespace) }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(false)
+      end
+    end
+  end
+
   describe '#namespace_storage_usage_link' do
     subject { helper.namespace_storage_usage_link(namespace) }
 
@@ -166,33 +206,33 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
   describe '#can_purchase_storage_for_namespace?' do
     subject { helper.can_purchase_storage_for_namespace?(namespace) }
 
-    let(:namespace) { build(:namespace) }
+    let_it_be(:namespace) { build(:namespace) }
 
-    where(:is_dev_or_com, :auto_storage_allocation_enabled, :buy_storage_link_enabled, :additional_storage_enabled, :result) do
-      true  | true  | true  | true  | true
-      true  | true  | true  | false | false
-      true  | true  | false | true  | false
-      true  | true  | false | false | false
-      true  | false | true  | true  | false
-      true  | false | true  | false | false
-      true  | false | false | true  | false
-      true  | false | false | false | false
-      false | true  | true  | true  | false
-      false | true  | true  | false | false
-      false | true  | false | true  | false
-      false | true  | false | false | false
-      false | false | true  | true  | false
-      false | false | true  | false | false
-      false | false | false | true  | false
-      false | false | false | false | false
-    end
+    where(
+      is_dev_or_com: [true, false],
+      auto_storage_allocation_enabled: [true, false],
+      buy_storage_link_enabled: [true, false],
+      namespace_storage_limit_enabled: [true, false],
+      additional_storage_enabled: [true, false]
+    )
 
     with_them do
+      let(:result) do
+        is_dev_or_com &&
+          auto_storage_allocation_enabled &&
+          buy_storage_link_enabled &&
+          !namespace_storage_limit_enabled &&
+          additional_storage_enabled
+      end
+
       before do
         allow(::Gitlab).to receive(:dev_env_or_com?).and_return(is_dev_or_com)
         stub_application_setting(automatic_purchased_storage_allocation: auto_storage_allocation_enabled)
-        stub_feature_flags(additional_repo_storage_by_namespace: additional_storage_enabled)
-        stub_feature_flags(buy_storage_link: buy_storage_link_enabled)
+        stub_feature_flags(
+          namespace_storage_limit: namespace_storage_limit_enabled,
+          additional_repo_storage_by_namespace: additional_storage_enabled,
+          buy_storage_link: buy_storage_link_enabled
+        )
       end
 
       it { is_expected.to eq(result) }

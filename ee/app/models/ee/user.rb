@@ -322,7 +322,7 @@ module EE
 
     def gitlab_service_user?
       strong_memoize(:gitlab_service_user) do
-        service_user? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+        service_user? && ::Gitlab::Com.gitlab_com_group_member?(id)
       end
     end
 

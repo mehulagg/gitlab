@@ -623,6 +623,7 @@ RSpec.describe Namespace do
     subject { namespace.any_project_with_shared_runners_enabled? }
 
     context 'subgroup with shared runners enabled project' do
+      let(:namespace) { create(:group) }
       let(:subgroup) { create(:group, parent: namespace) }
       let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
 

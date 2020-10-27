@@ -104,6 +104,8 @@ module Security
 
       name = uuid_v5_name_components.values.join('-')
 
+      Gitlab::AppLogger.debug(message: "Generating UUIDv5 with name: #{name}") if Gitlab.dev_env_or_com?
+
       Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 

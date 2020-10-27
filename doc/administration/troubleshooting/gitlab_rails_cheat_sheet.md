@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -483,6 +486,16 @@ user.max_member_access_for_group group.id
 ```
 
 ## Groups
+
+### Transfer group to another location
+
+```ruby
+user = User.find_by_username('<username>')
+group = Group.find_by_name("<group_name>")
+parent_group = Group.find_by(id: "") # empty string amounts to root as parent
+service = ::Groups::TransferService.new(group, user)
+service.execute(parent_group)
+```
 
 ### Count unique users in a group and sub-groups
 

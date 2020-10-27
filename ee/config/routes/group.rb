@@ -69,6 +69,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resource :notification_setting, only: [:update]
 
     resources :ldap_group_links, only: [:index, :create, :destroy]
+    resources :saml_group_links, only: [:index, :create, :destroy]
     resources :audit_events, only: [:index]
     resources :usage_quotas, only: [:index]
 

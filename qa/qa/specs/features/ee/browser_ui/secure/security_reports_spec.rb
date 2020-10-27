@@ -23,6 +23,7 @@ module QA
         @project = Resource::Project.fabricate_via_api! do |p|
           p.name = Runtime::Env.auto_devops_project_name || 'project-with-secure'
           p.description = 'Project with Secure'
+          p.group = Resource::Group.fabricate_via_api!
         end
 
         @runner = Resource::Runner.fabricate! do |runner|
@@ -49,7 +50,7 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 
@@ -74,7 +75,7 @@ module QA
         end
       end
 
-      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
+      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
         Page::Project::Menu.perform(&:click_project)
         Page::Project::Menu.perform(&:click_on_security_dashboard)
 
@@ -97,7 +98,7 @@ module QA
         end
       end
 
-      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567' do
+      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
         Page::Main::Menu.perform(&:go_to_groups)
         Page::Dashboard::Groups.perform do |groups|
           groups.click_group @project.group.path

@@ -2774,10 +2774,6 @@ Otherwise cache content can be overwritten.
 
 > Introduced in GitLab Runner v1.0.0.
 
-The cache is shared between jobs, so if you're using different
-paths for different jobs, you should also set a different `cache:key`.
-Otherwise cache content can be overwritten.
-
 The `key` keyword defines the affinity of caching between jobs.
 You can have a single cache for all jobs, cache per-job, cache per-branch,
 or any other way that fits your workflow. This way, you can fine tune caching,
@@ -3574,9 +3570,6 @@ There can be from 2 to 50 jobs.
 
 [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
 you can have one-dimensional matrices with a single job.
-The ability to have one-dimensional matrices is [deployed behind a feature flag](../../user/feature_flags.md),
-enabled by default. It's enabled on GitLab.com. For self-managed GitLab instances,
-administrators can opt to disable it by [disabling the `one_dimensional_matrix:` feature flag](../../administration/feature_flags.md). **(CORE ONLY)**
 
 Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-environment-variables) value, and a unique `CI_NODE_INDEX` value.
 
