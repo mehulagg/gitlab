@@ -227,3 +227,23 @@
 .popover.suggest-gitlab-ci-yml {
   z-index: $header-zindex - 1;
 }
+
+.pipeline-stage-pill {
+  width: 10rem;
+}
+
+.pipeline-job-pill {
+  width: 8rem;
+}
+
+.stage-rounded {
+  border-radius: 2rem;
+}
+
+.stage-left-rounded {
+  border-radius: 2rem 0 0 2rem;
+}
+
+.stage-right-rounded {
+  border-radius: 0 2rem 2rem 0;
+}
