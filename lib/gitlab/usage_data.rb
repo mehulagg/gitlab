@@ -521,6 +521,7 @@ module Gitlab
           key => {
             configure: usage_activity_by_stage_configure(time_period),
             create: usage_activity_by_stage_create(time_period),
+            enablement: usage_activity_by_stage_enablement(time_period),
             manage: usage_activity_by_stage_manage(time_period),
             monitor: usage_activity_by_stage_monitor(time_period),
             package: usage_activity_by_stage_package(time_period),
@@ -575,6 +576,10 @@ module Gitlab
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def usage_activity_by_stage_enablement(_)
+        {}
+      end
 
       # Omitted because no user, creator or author associated: `campaigns_imported_from_github`, `ldap_group_links`
       # rubocop: disable CodeReuse/ActiveRecord
