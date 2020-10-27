@@ -88,6 +88,11 @@ RSpec.describe UsersFinder do
 
         expect(users).to eq([normal_user, blocked_user, omniauth_user, internal_user, user])
       end
+
+      it 'does not filter by admins' do
+        users = described_class.new(user, admins_only: true).execute
+        expect(users).to eq([])
+      end
     end
 
     context 'with an admin user' do
@@ -103,6 +108,12 @@ RSpec.describe UsersFinder do
         users = described_class.new(admin).execute
 
         expect(users).to contain_exactly(admin, normal_user, blocked_user, external_user, omniauth_user, internal_user)
+      end
+
+      it 'returns only admins' do
+        users = described_class.new(admin, admins_only: true).execute
+
+        expect(users).to contain_exactly(admin)
       end
 
       it 'filters by custom attributes' do
