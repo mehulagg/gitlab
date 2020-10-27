@@ -37,8 +37,6 @@ export const scannerFilter = {
 };
 
 export const getProjectFilter = projects => {
-  if (!projects?.length) return undefined;
-
   return {
     name: s__('SecurityReports|Project'),
     id: 'projectId',

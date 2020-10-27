@@ -1,7 +1,12 @@
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
 import StandardFilter from 'ee/security_dashboard/components/filters/standard_filter.vue';
-import { mount } from '@vue/test-utils';
+import { createLocalVue, mount } from '@vue/test-utils';
 import { trimText } from 'helpers/text_helper';
+import VueRouter from 'vue-router';
+
+const localVue = createLocalVue();
+localVue.use(VueRouter);
+const router = new VueRouter();
 
 const generateOption = index => ({
   name: `Option ${index}`,
@@ -16,7 +21,7 @@ describe('Standard Filter component', () => {
   let wrapper;
 
   const createWrapper = propsData => {
-    wrapper = mount(StandardFilter, { propsData });
+    wrapper = mount(StandardFilter, { localVue, router, propsData });
   };
 
   const findSearchBox = () => wrapper.find(GlSearchBoxByType);
@@ -36,7 +41,7 @@ describe('Standard Filter component', () => {
         name: 'Severity',
         id: 'severity',
         options,
-        selection: new Set([options[0].id, options[1].id, options[2].id]),
+        defaultOptions: [options[0], options[1], options[2]],
       };
       createWrapper({ filter });
     });
