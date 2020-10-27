@@ -109,9 +109,8 @@ module Gitlab
           # return found user that was authenticated first for given login credentials
           authenticated_user = authenticators.find do |auth|
             authenticated_user = auth.login(login, password)
+            Gitlab::AppLogger.info("User Auth: username=#{login} failed authentication") if ! authenticated_user
             break authenticated_user if authenticated_user
-            Gitlab::AppLogger.info("User Auth: username=#{login} failed authentication")
-            break authenticated_user
           end
 
           user_auth_attempt!(user, success: !!authenticated_user) if increment_failed_attempts
