@@ -49,7 +49,7 @@ NOTE: **Note:**
 [Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) support
 for the Reference Architectures is being
 worked on as a collaborative effort between [the Quality Engineering and Gitaly teams](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1). When this component has been verified
-the Architecture specs will likely change notably as a result to support the new
+some Architecture specs will likely change as a result to support the new
 and improved designed.
 
 ## Setup components
