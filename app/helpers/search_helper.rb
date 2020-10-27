@@ -92,11 +92,19 @@ module SearchHelper
     end
   end
 
-  def search_entries_empty_message(scope, term)
-    (s_("SearchResults|We couldn't find any %{scope} matching %{term}") % {
-      scope: search_entries_scope_label(scope, 0),
-      term: "<code>#{h(term)}</code>"
-    }).html_safe
+  def search_entries_empty_message(scope, term, group, project)
+    if project
+      (s_("SearchResults|We couldn't find any %{scope} matching %{term} in project %{project}") % {
+        scope: search_entries_scope_label(scope, 0),
+        term: "<code>#{h(term)}</code>",
+        project: "<a target=\"_blank\" href=\"#{project_path(project)}\">#{project.full_path}</a>"
+      }).html_safe
+    else
+      (s_("SearchResults|We couldn't find any %{scope} matching %{term}") % {
+        scope: search_entries_scope_label(scope, 0),
+        term: "<code>#{h(term)}</code>"
+      }).html_safe
+    end
   end
 
   def repository_ref(project)
