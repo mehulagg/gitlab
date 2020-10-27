@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe API::Members do
-  context 'group members endpoint for group with minimal access feature' do
+  context 'group members endpoints for group with minimal access feature' do
     let_it_be(:group) { create(:group) }
     let(:owner) { create(:user) }
     let_it_be(:minimal_access_member) { create(:group_member, :minimal_access, source: group) }
@@ -12,12 +12,12 @@ RSpec.describe API::Members do
       group.add_owner(owner)
     end
 
-    subject do
-      get api("/groups/#{group.id}/members", owner)
-      json_response
-    end
-
     describe "GET /groups/:id/members" do
+      subject do
+        get api("/groups/#{group.id}/members", owner)
+        json_response
+      end
+
       it 'returns user with minimal access when feature is available' do
         stub_licensed_features(minimal_access_role: true)
 
@@ -28,6 +28,89 @@ RSpec.describe API::Members do
         stub_licensed_features(minimal_access_role: false)
 
         expect(subject.map { |u| u['id'] }).to match_array [owner.id]
+      end
+    end
+
+    describe 'POST /groups/:id/members' do
+      let(:stranger) { create(:user) }
+
+      subject do
+        post api("/groups/#{group.id}/members", owner),
+             params: { user_id: stranger.id, access_level: Member::MINIMAL_ACCESS }
+      end
+
+      context 'when minimal access role is not available' do
+        it 'does not create a member' do
+          expect do
+            subject
+          end.not_to change { group.all_group_members.count }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq({ 'access_level' => ['is not included in the list'] })
+        end
+      end
+
+      context 'when minimal access role is available' do
+        it 'creates a member' do
+          stub_licensed_features(minimal_access_role: true)
+
+          expect do
+            subject
+          end.to change { group.all_group_members.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(json_response['id']).to eq(stranger.id)
+        end
+      end
+    end
+
+    describe 'PUT /groups/:id/members/:user_id' do
+      let(:expires_at) { 2.days.from_now.to_date }
+
+      context 'when minimal access role is available' do
+        it 'updates the member' do
+          stub_licensed_features(minimal_access_role: true)
+
+          put api("/groups/#{group.id}/members/#{minimal_access_member.id}", owner),
+              params: {  expires_at: expires_at, access_level: Member::MINIMAL_ACCESS }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['id']).to eq(minimal_access_member.id)
+          expect(json_response['expires_at']).to eq(expires_at.to_s)
+        end
+      end
+
+      context 'when minimal access role is not available' do
+        it 'updates the member' do
+          put api("/groups/#{group.id}/members/#{minimal_access_member.id}", owner),
+              params: {  expires_at: expires_at, access_level: Member::MINIMAL_ACCESS }
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    describe 'DELETE /groups/:id/members/:user_id' do
+      context 'when minimal access role is available' do
+        it 'deletes the member' do
+          stub_licensed_features(minimal_access_role: true)
+
+          expect do
+            delete api("/groups/#{group.id}/members/#{minimal_access_member.id}", owner)
+
+            expect(response).to have_gitlab_http_status(:no_content)
+          end.to change { group.all_group_members.count }.by(-1)
+        end
+      end
+
+      context 'when minimal access role is not available' do
+        it 'does not delete the member' do
+          expect do
+            delete api("/groups/#{group.id}/members/#{minimal_access_member.id}", owner)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end.not_to change { group.all_group_members.count }
+        end
       end
     end
   end
