@@ -963,6 +963,35 @@ query getFiles(
   }
 }
 ```
+
+If the fragment is used only once, we can also remove the fragment altogether:
+
+```javascript
+query getFiles(
+  $projectPath: ID!
+  $path: String
+  $ref: String!
+) {
+  project(fullPath: $projectPath) {
+    __typename
+    repository {
+      __typename
+      tree(path: $path, ref: $ref) {
+        __typename
+          pageInfo {
+            __typename
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 - add startup call(s) with correct variables to the HAML file that serves as a view for your application. To add GraphQL startup calls, we use `add_page_startup_graphql_call` helper where the first parameter is a path to the query, the second one is an object containing query variables. Path to the query is relative to `app/graphql/queries` folder: for example, if we need a `app/graphql/queries/repository/files.query.graphql` query, the path will be `repository/files`
 
 ```yaml
