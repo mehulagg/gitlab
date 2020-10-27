@@ -91,6 +91,19 @@ describe('Board Store Mutations', () => {
     });
   });
 
+  describe('DISMISS_MESSAGE', () => {
+    it('clears message text and variant', () => {
+      state.message = {
+        text: 'a message about boards',
+        variant: 'error',
+      };
+
+      mutations.DISMISS_MESSAGE(state);
+
+      expect(state.message).toEqual({});
+    });
+  });
+
   describe('SET_FILTERS', () => {
     it('updates filterParams to be the value that is passed', () => {
       const filterParams = { labelName: 'label' };
@@ -170,6 +183,17 @@ describe('Board Store Mutations', () => {
       mutations[types.REMOVE_LIST](state, list.id);
 
       expect(state.boardLists).toEqual(expected);
+    });
+  });
+
+  describe('REMOVE_LIST_SUCCESS', () => {
+    it('sets success message', () => {
+      mutations[types.REMOVE_LIST_SUCCESS](state);
+
+      expect(state.message).toEqual({
+        text: 'Removed list from board',
+        variant: 'info',
+      });
     });
   });
 

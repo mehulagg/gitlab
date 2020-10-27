@@ -17,12 +17,16 @@ describe('BoardContent', () => {
     isShowingEpicsSwimlanes: false,
     boardLists: mockListsWithModel,
     error: undefined,
+    message: {},
   };
 
   const createStore = (state = defaultState) => {
     return new Vuex.Store({
       getters,
       state,
+      mutations: {
+        DISMISS_MESSAGE: jest.fn(),
+      },
     });
   };
 
@@ -57,5 +61,27 @@ describe('BoardContent', () => {
   it('does not display EpicsSwimlanes component', () => {
     expect(wrapper.find(EpicsSwimlanes).exists()).toBe(false);
     expect(wrapper.find(GlAlert).exists()).toBe(false);
+  });
+
+  describe('with message from store', () => {
+    beforeEach(() => {
+      jest.spyOn(wrapper.vm.$store, 'commit').mockImplementation();
+
+      wrapper.vm.$store.state.message = {
+        text: 'List removed from board',
+        variant: 'info',
+      };
+    });
+
+    it('shows message in alert', () => {
+      expect(wrapper.find(GlAlert).exists()).toBe(true);
+      expect(wrapper.find(GlAlert).props('variant')).toBe('info');
+    });
+
+    it('dismisses message on close', () => {
+      wrapper.find(GlAlert).vm.$emit('dismiss');
+
+      expect(wrapper.vm.$store.commit).toHaveBeenCalledWith('DISMISS_MESSAGE');
+    });
   });
 });

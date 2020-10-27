@@ -349,18 +349,29 @@ describe('removeList', () => {
     expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
   });
 
-  it('keeps the updated list if remove succeeded', async () => {
-    const commit = jest.fn();
-    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-      data: {
-        errors: [],
-      },
+  describe('remove succeeded', () => {
+    beforeEach(() => {
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: {
+          destroyBoardList: { errors: [] },
+        },
+      });
     });
 
-    await actions.removeList({ commit, state }, listId);
+    it('shows success message', async () => {
+      const commit = jest.fn();
+      await actions.removeList({ commit, state }, listId);
 
-    expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
-    expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
+      expect(commit.mock.calls[1]).toEqual([types.REMOVE_LIST_SUCCESS]);
+    });
+
+    it('keeps the updated list', async () => {
+      const commit = jest.fn();
+      await actions.removeList({ commit, state }, listId);
+
+      expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
+      expect(commit.mock.calls[0]).toEqual([types.REMOVE_LIST, listId]);
+    });
   });
 
   it('restores the previous list if update fails', async () => {
