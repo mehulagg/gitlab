@@ -1,7 +1,7 @@
 <script>
 import { isEmpty } from 'lodash';
-import { mapActions, mapState } from 'vuex';
-import { GlLink, GlButton, GlIcon } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { GlButton, GlIcon, GlLink } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
@@ -42,6 +42,7 @@ export default {
   },
   computed: {
     ...mapState(['job', 'stages', 'jobs', 'selectedStage']),
+    ...mapGetters(['hasForwardDeploymentFailure']),
     coverage() {
       return `${this.job.coverage}%`;
     },
@@ -96,16 +97,10 @@ export default {
       return !isEmpty(this.job.trigger);
     },
     hasStages() {
-      return (
-        (this.job &&
-          this.job.pipeline &&
-          this.job.pipeline.stages &&
-          this.job.pipeline.stages.length > 0) ||
-        false
-      );
+      return this?.job?.pipeline?.stages?.length > 0;
     },
     commit() {
-      return this.job.pipeline && this.job.pipeline.commit ? this.job.pipeline.commit : {};
+      return this?.job?.pipeline?.commit ?? {};
     },
   },
   methods: {
@@ -131,22 +126,22 @@ export default {
               data-method="post"
               data-qa-selector="retry_button"
               rel="nofollow"
-              >{{ __('Retry') }}</gl-link
-            >
+              >{{ __('Retry') }}
+            </gl-link>
             <gl-link
               v-if="job.cancel_path"
               :href="job.cancel_path"
               class="js-cancel-job btn btn-default"
               data-method="post"
               rel="nofollow"
-              >{{ __('Cancel') }}</gl-link
-            >
+              >{{ __('Cancel') }}
+            </gl-link>
           </div>
 
           <gl-button
             :aria-label="__('Toggle Sidebar')"
-            class="d-md-none gl-ml-2 js-sidebar-build-toggle"
             category="tertiary"
+            class="d-md-none gl-ml-2 js-sidebar-build-toggle"
             icon="chevron-double-lg-right"
             @click="toggleSidebar"
           />
@@ -158,15 +153,16 @@ export default {
             :href="job.new_issue_path"
             class="btn btn-success btn-inverted float-left mr-2"
             data-testid="job-new-issue"
-            >{{ __('New issue') }}</gl-link
-          >
+            >{{ __('New issue') }}
+          </gl-link>
           <gl-link
             v-if="job.terminal_path"
             :href="job.terminal_path"
             class="js-terminal-link btn btn-primary btn-inverted visible-md-block visible-lg-block float-left"
             target="_blank"
           >
-            {{ __('Debug') }} <gl-icon name="external-link" :size="14" />
+            {{ __('Debug') }}
+            <gl-icon :size="14" name="external-link" />
           </gl-link>
         </div>
 
@@ -215,20 +211,20 @@ export default {
         <artifacts-block v-if="hasArtifact" :artifact="job.artifact" :help-url="artifactHelpUrl" />
         <trigger-block v-if="hasTriggers" :trigger="job.trigger" />
         <commit-block
-          :is-last-block="hasStages"
           :commit="commit"
+          :is-last-block="hasStages"
           :merge-request="job.merge_request"
         />
 
         <stages-dropdown
-          :stages="stages"
           :pipeline="job.pipeline"
           :selected-stage="selectedStage"
+          :stages="stages"
           @requestSidebarStageDropdown="fetchJobsForStage"
         />
       </div>
 
-      <jobs-container v-if="jobs.length" :jobs="jobs" :job-id="job.id" />
+      <jobs-container v-if="jobs.length" :job-id="job.id" :jobs="jobs" />
     </div>
   </aside>
 </template>
