@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -18,6 +18,7 @@ export default {
   components: {
     DiffFileHeader,
     DiffContent,
+    GlButton,
     GlLoadingIcon,
   },
   directives: {
@@ -54,6 +55,8 @@ export default {
     ...DIFF_FILE,
     genericError: GENERIC_ERROR,
   },
+  alertingBodyClasses:
+    'gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base',
   computed: {
     ...mapState('diffs', ['currentDiffFileId']),
     ...mapGetters(['isNotesFetched']),
@@ -253,20 +256,27 @@ export default {
           class="diff-content loading gl-my-0 gl-pt-3"
           data-testid="loader-icon"
         />
-        <div v-else-if="errorMessage" class="diff-viewer">
+        <div v-else-if="errorMessage" class="diff-viewer" :class="$options.alertingBodyClasses">
           <div v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
-          <div v-show="showWarning" class="nothing-here-block diff-collapsed">
-            {{ $options.i18n.collapsed }}
-            <a
-              class="click-to-expand"
-              data-testid="toggle-link"
-              href="#"
+          <div
+            v-show="showWarning"
+            class="collapsed-file-warning"
+            :class="$options.alertingBodyClasses"
+          >
+            <p class="gl-mb-8 gl-mt-5">
+              {{ $options.i18n.collapsed }}
+            </p>
+            <gl-button
+              class="gl-mb-5"
+              data-testid="expand-button"
+              category="secondary"
+              variant="warning"
               @click.prevent="handleToggle"
             >
               {{ $options.i18n.expand }}
-            </a>
+            </gl-button>
           </div>
           <diff-content
             v-show="showContent"
