@@ -325,7 +325,7 @@ describe('updateList', () => {
   });
 });
 
-describe('deleteList', () => {
+describe('removeList', () => {
   let state;
   const list = mockLists[0];
   const listId = list.id;
@@ -342,14 +342,14 @@ describe('deleteList', () => {
     };
   });
 
-  it('optimistically deletes the list', () => {
+  it('optimistically removes the list', () => {
     const commit = jest.fn();
-    actions.deleteList({ commit, state }, listId);
+    actions.removeList({ commit, state }, listId);
 
     expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
   });
 
-  it('keeps the updated list if delete succeeds', async () => {
+  it('keeps the updated list if remove succeeded', async () => {
     const commit = jest.fn();
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
@@ -357,17 +357,17 @@ describe('deleteList', () => {
       },
     });
 
-    await actions.deleteList({ commit, state }, listId);
+    await actions.removeList({ commit, state }, listId);
 
     expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
     expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
   });
 
-  it('restores the list if update fails', async () => {
+  it('restores the previous list if update fails', async () => {
     const commit = jest.fn();
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue(Promise.reject());
 
-    await actions.deleteList({ commit, state }, listId);
+    await actions.removeList({ commit, state }, listId);
 
     expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
     expect(commit.mock.calls).toEqual([

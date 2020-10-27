@@ -58,6 +58,10 @@ export default {
     state.filterParams = filterParams;
   },
 
+  [mutationTypes.DISMISS_MESSAGE](state) {
+    state.message = {};
+  },
+
   [mutationTypes.CREATE_LIST_FAILURE]: state => {
     state.error = s__('Boards|An error occurred while creating the list. Please try again.');
   },
@@ -87,6 +91,13 @@ export default {
 
   [mutationTypes.REMOVE_LIST]: (state, listId) => {
     Vue.delete(state.boardLists, listId);
+  },
+
+  [mutationTypes.REMOVE_LIST_SUCCESS](state) {
+    state.message = {
+      text: s__(`Boards|Removed list from board`),
+      variant: 'info',
+    };
   },
 
   [mutationTypes.REMOVE_LIST_FAILURE](state, listsBackup) {

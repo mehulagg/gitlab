@@ -15,6 +15,10 @@ export default () => ({
   issues: {},
   filterParams: {},
   error: undefined,
+  message: {
+    text: '',
+    variant: 'error', // success | info | error, etc. Whatever gl-alert supports
+  },
   // TODO: remove after ce/ee split of board_content.vue
   isShowingEpicsSwimlanes: false,
 });

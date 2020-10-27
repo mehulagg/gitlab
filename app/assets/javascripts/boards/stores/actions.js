@@ -48,6 +48,10 @@ export default {
     dispatch('setActiveId', { id: inactiveId, sidebarType: '' });
   },
 
+  closeMessage({ state }) {
+    state.message = {};
+  },
+
   setFilters: ({ commit }, filters) => {
     const filterParams = pick(filters, [
       'assigneeUsername',
@@ -192,7 +196,7 @@ export default {
       });
   },
 
-  deleteList: ({ state, commit }, listId) => {
+  removeList: ({ state, commit }, listId) => {
     const listsBackup = { ...state.boardLists };
 
     commit(types.REMOVE_LIST, listId);
@@ -204,10 +208,11 @@ export default {
           listId,
         },
       })
-      .then(errors => {
+      .then(({ data: { destroyBoardList: { errors } } }) => {
         if (errors?.length > 0) {
           commit(types.REMOVE_LIST_FAILURE, listsBackup);
         }
+        commit(types.REMOVE_LIST_SUCCESS, listId);
       })
       .catch(() => {
         commit(types.REMOVE_LIST_FAILURE, listsBackup);

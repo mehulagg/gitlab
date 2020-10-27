@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { sortBy } from 'lodash';
 import BoardColumn from 'ee_else_ce/boards/components/board_column.vue';
 import { GlAlert } from '@gitlab/ui';
@@ -28,7 +28,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['boardLists', 'error']),
+    ...mapState(['boardLists', 'error', 'message']),
     ...mapGetters(['isSwimlanesOn']),
     boardListsToUse() {
       const lists =
@@ -44,6 +44,7 @@ export default {
   },
   methods: {
     ...mapActions(['fetchLists', 'showPromotionList']),
+    ...mapMutations(['DISMISS_MESSAGE']),
   },
 };
 </script>
@@ -52,6 +53,9 @@ export default {
   <div>
     <gl-alert v-if="error" variant="danger" :dismissible="false">
       {{ error }}
+    </gl-alert>
+    <gl-alert v-if="message.text" :variant="message.variant" @dismiss="DISMISS_MESSAGE">
+      {{ message.text }}
     </gl-alert>
     <div
       v-if="!isSwimlanesOn"

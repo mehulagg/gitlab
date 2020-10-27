@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlDrawer, GlLabel } from '@gitlab/ui';
-import { mapActions, mapState, mapGetters } from 'vuex';
+import { mapActions, mapState, mapGetters, mapMutations } from 'vuex';
 import { __ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
 import eventHub from '~/sidebar/event_hub';
@@ -11,11 +11,14 @@ import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 // NOTE: need to revisit how we handle headerHeight, because we have so many different header and footer options.
 export default {
   headerHeight: process.env.NODE_ENV === 'development' ? '75px' : '40px',
-  listSettingsText: __('List settings'),
+  i18n: {
+    labelList: __('Label'),
+    listSettings: __('List settings'),
+    removeConfirm: __('Are you sure you want to remove this list?'),
+  },
   assignee: 'assignee',
   milestone: 'milestone',
   label: 'label',
-  labelListText: __('Label'),
   components: {
     GlButton,
     GlDrawer,
@@ -53,7 +56,7 @@ export default {
       return this.activeList.type || null;
     },
     listTypeTitle() {
-      return this.$options.labelListText;
+      return this.$options.i18n.labelList;
     },
     showSidebar() {
       return this.sidebarType === LIST;
@@ -66,15 +69,17 @@ export default {
     eventHub.$off('sidebar.closeAll', this.unsetActiveId);
   },
   methods: {
-    ...mapActions(['unsetActiveId', 'deleteList']),
+    ...mapActions(['unsetActiveId', 'removeList']),
+    ...mapMutations(['DISMISS_MESSAGE']),
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
     deleteBoard() {
+      this.DISMISS_MESSAGE();
       // eslint-disable-next-line no-alert
-      if (window.confirm(__('Are you sure you want to delete this list?'))) {
+      if (window.confirm(this.$options.i18n.removeConfirm)) {
         if (this.shouldUseGraphQL) {
-          this.deleteList(this.activeId);
+          this.removeList(this.activeId);
         } else {
           this.activeList.destroy();
         }
@@ -93,7 +98,7 @@ export default {
     :header-height="$options.headerHeight"
     @close="unsetActiveId"
   >
-    <template #header>{{ $options.listSettingsText }}</template>
+    <template #header>{{ $options.i18n.listSettings }}</template>
     <template v-if="isSidebarOpen">
       <div v-if="boardListType === $options.label">
         <label class="js-list-label gl-display-block">{{ listTypeTitle }}</label>
