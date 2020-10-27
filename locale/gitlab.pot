@@ -2491,6 +2491,12 @@ msgstr ""
 msgid "AlertSettings|2. Name integration"
 msgstr ""
 
+msgid "AlertSettings|3. Set up webhook"
+msgstr ""
+
+msgid "AlertSettings|4. Test integration(optional)"
+msgstr ""
+
 msgid "AlertSettings|5. Map fields (optional)"
 msgstr ""
 
@@ -2545,6 +2551,15 @@ msgstr ""
 msgid "AlertSettings|Opsgenie"
 msgstr ""
 
+msgid "AlertSettings|Prometheus API base URL"
+msgstr ""
+
+msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to intergrate with to send a test alert to the %{linkStart}alerts page%{linkEnd}. This payload can be used to test the intergration using the \"save and test payload\" button."
+msgstr ""
+
+msgid "AlertSettings|Reset Key"
+msgstr ""
+
 msgid "AlertSettings|Reset key"
 msgstr ""
 
@@ -2552,6 +2567,9 @@ msgid "AlertSettings|Resetting the authorization key for this project will requi
 msgstr ""
 
 msgid "AlertSettings|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgstr ""
+
+msgid "AlertSettings|Save and test payload"
 msgstr ""
 
 msgid "AlertSettings|Save integration"
@@ -2581,6 +2599,9 @@ msgstr ""
 msgid "AlertSettings|URL cannot be blank and must start with http or https"
 msgstr ""
 
+msgid "AlertSettings|Utilize the URL and authorization key below to authorize an external service to send Alerts to GitLab. Review your choosen services documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgstr ""
+
 msgid "AlertSettings|Webhook URL"
 msgstr ""
 
@@ -2591,6 +2612,9 @@ msgid "AlertSettings|You must provide this URL and authorization key to authoriz
 msgstr ""
 
 msgid "AlertSettings|Your integration was successfully updated."
+msgstr ""
+
+msgid "AlertSettings|http://prometheus.example.com/"
 msgstr ""
 
 msgid "Alerts"
@@ -22750,6 +22774,9 @@ msgstr ""
 msgid "Resend it"
 msgstr ""
 
+msgid "Reset Key"
+msgstr ""
+
 msgid "Reset authorization key"
 msgstr ""
 
@@ -23208,9 +23235,6 @@ msgid "Save Changes"
 msgstr ""
 
 msgid "Save Push Rules"
-msgstr ""
-
-msgid "Save and test payload"
 msgstr ""
 
 msgid "Save anyway"
