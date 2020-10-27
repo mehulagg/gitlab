@@ -43,6 +43,12 @@ class Packages::Package < ApplicationRecord
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
   validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
   validates :version, format: { with: Gitlab::Regex.prefixed_semver_regex }, if: :golang?
+  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: :composer_tag_version?
+
+  def composer_tag_version?
+    composer? && !Gitlab::Regex.composer_dev_version_regex.match(version.to_s)
+  end
+
   validates :version,
     presence: true,
     format: { with: Gitlab::Regex.generic_package_version_regex },
