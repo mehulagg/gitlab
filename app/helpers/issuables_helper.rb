@@ -87,8 +87,8 @@ module IssuablesHelper
         data: issuable_templates(issuable),
         field_name: 'issuable_template',
         selected: selected_template(issuable),
-        project_path: ref_project.path,
-        namespace_path: ref_project.namespace.full_path
+        project_path: ref_project&.group&.checked_file_template_project&.path || ref_project.path,
+        namespace_path: ref_project&.group&.checked_file_template_project&.namespace&.full_path || ref_project.namespace.full_path
       }
     }
 
@@ -373,9 +373,9 @@ module IssuablesHelper
     @issuable_templates ||=
       case issuable
       when Issue
-        ref_project.repository.issue_template_names
+        ref_project&.group&.checked_file_template_project&.repository&.issue_template_names || ref_project.repository.issue_template_names
       when MergeRequest
-        ref_project.repository.merge_request_template_names
+        ref_project&.group&.checked_file_template_project&.repository&.merge_request_template_names || ref_project.repository.merge_request_template_names
       end
   end
 

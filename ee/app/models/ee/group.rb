@@ -272,17 +272,10 @@ module EE
     # Overrides a method defined in `::EE::Namespace`
     override :checked_file_template_project
     def checked_file_template_project(*args, &blk)
-      project = file_template_project(*args, &blk)
-
-      return unless project && (
-          project_ids.include?(project.id) || shared_project_ids.include?(project.id))
-
-      # The license check would normally be the cheapest to perform, so would
-      # come first. In this case, the method is carefully designed to perform
-      # no SQL at all, but `feature_available?` will cause an ApplicationSetting
-      # to be created if it doesn't already exist! This is mostly a problem in
-      # the specs, but best avoided in any case.
       return unless feature_available?(:custom_file_templates_for_namespace)
+
+      project_id = closest_setting(:file_template_project_id)
+      project = ::Project.find(project_id) if project_id
 
       project
     end
