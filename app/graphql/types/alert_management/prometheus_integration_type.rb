@@ -23,7 +23,7 @@ module Types
       end
 
       def token
-        prometheus_service.project&.alerting_setting&.token
+        prometheus_service.project.alerting_setting&.token
       end
 
       def url
