@@ -12,6 +12,11 @@ module Clusters
 
         after_initialize :set_initial_status
 
+        def helm_command_module
+          # TODO: Use retrieve helm major version from cluster
+          Gitlab::Kubernetes::Helm::V2
+        end
+
         def set_initial_status
           return unless not_installable?
 

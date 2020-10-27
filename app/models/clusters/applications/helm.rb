@@ -4,6 +4,8 @@ require 'openssl'
 
 module Clusters
   module Applications
+    # DEPRECATED: This model represents the Helm 2 Tiller server, and is no longer being actively used.
+    # It is being kept around for a potential cleanup of the unused Tiller server.
     class Helm < ApplicationRecord
       self.table_name = 'clusters_applications_helm'
 

@@ -30,7 +30,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::V2::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: 'fluentd',
           repository: repository,
           version: VERSION,
