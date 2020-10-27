@@ -21,9 +21,9 @@ module Gitlab
       end
     end
 
-    class << self
-      @destination = Gitlab::Tracking::Destinations::Snowplow.new
+    @destination = Gitlab::Tracking::Destinations::Snowplow.new
 
+    class << self
       def enabled?
         Gitlab::CurrentSettings.snowplow_enabled?
       end
