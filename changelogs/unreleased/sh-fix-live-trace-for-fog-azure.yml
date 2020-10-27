@@ -1,0 +1,5 @@
+---
+title: Fix live job logs not working with Azure
+merge_request: 46209
+author:
+type: fixed
