@@ -5,7 +5,6 @@ module Gitlab
     module Helm
       module V3
         class InstallCommand < BaseCommand
-
           attr_reader :chart, :repository, :preinstall, :postinstall
           attr_accessor :version
 

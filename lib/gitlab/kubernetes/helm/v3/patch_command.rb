@@ -7,7 +7,6 @@ module Gitlab
     module Helm
       module V3
         class PatchCommand < BaseCommand
-
           attr_reader :chart, :repository
           attr_accessor :version
 

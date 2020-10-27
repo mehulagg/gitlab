@@ -5,7 +5,6 @@ module Gitlab
     module Helm
       module V3
         class DeleteCommand < BaseCommand
-
           attr_reader :predelete, :postdelete
 
           def initialize(predelete: nil, postdelete: nil, **args)
