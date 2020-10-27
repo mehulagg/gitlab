@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { GlDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem, GlAvatarLink, GlAvatarLabeled } from '@gitlab/ui';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
@@ -15,7 +15,6 @@ describe('BoardCardAssigneeDropdown', () => {
       store,
       provide: {
         canUpdate: true,
-        rootPath: '',
       },
     });
   };
@@ -57,6 +56,15 @@ describe('BoardCardAssigneeDropdown', () => {
                   avatarUrl: '',
                 },
               },
+              {
+                node: {
+                  id: '2',
+                  username: 'hello',
+                  name: 'hello',
+                  avatar: '',
+                  avatarUrl: '',
+                },
+              },
             ],
           },
         },
@@ -78,7 +86,40 @@ describe('BoardCardAssigneeDropdown', () => {
       expect(store.dispatch).toHaveBeenCalledWith('getIssueParticipants', 'gid://gitlab/Issue/111');
     });
 
-    // it('sets list to returned data', () => {});
+    it.each`
+      text
+      ${'hello'}
+      ${'test'}
+    `('finds item with $text', ({ text }) => {
+      const item = findByText(text);
+
+      expect(item.exists()).toBe(true);
+    });
+
+    it('renders gl-avatar-link in gl-dropdown-item', () => {
+      const item = findByText('hello');
+
+      expect(item.find(GlAvatarLink).exists()).toBe(true);
+    });
+
+    it('renders gl-avatar-labeled in gl-avatar-link', () => {
+      const item = findByText('hello');
+
+      expect(
+        item
+          .find(GlAvatarLink)
+          .find(GlAvatarLabeled)
+          .exists(),
+      ).toBe(true);
+    });
+  });
+
+  describe('when selected users are present', () => {
+    it('renders a divider', () => {
+      createComponent();
+
+      expect(wrapper.find('[data-testid="selected-user-divider"]').exists()).toBe(true);
+    });
   });
 
   describe('when collapsed', () => {
@@ -162,5 +203,11 @@ describe('BoardCardAssigneeDropdown', () => {
         expect(wrapper.find(IssuableAssignees).isVisible()).toBe(true);
       });
     });
+  });
+
+  it('renders divider after unassign', () => {
+    createComponent();
+
+    expect(wrapper.find('[data-testid="unassign-divider"]').exists()).toBe(true);
   });
 });

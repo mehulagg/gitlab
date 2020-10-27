@@ -93,7 +93,7 @@ export default {
             @click="selectAssignee()"
             >{{ $options.unassignText }}</gl-dropdown-item
           >
-          <gl-dropdown-divider />
+          <gl-dropdown-divider data-testid="unassign-divider" />
           <gl-dropdown-item
             v-for="item in selected"
             :key="item.id"
@@ -110,7 +110,7 @@ export default {
               />
             </gl-avatar-link>
           </gl-dropdown-item>
-          <gl-dropdown-divider v-if="selected.length > 0" />
+          <gl-dropdown-divider v-if="selected.length > 0" data-testid="selected-user-divider" />
           <gl-dropdown-item
             v-for="unselectedUser in unSelectedFiltered"
             :key="unselectedUser.id"
