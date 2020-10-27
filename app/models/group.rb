@@ -347,6 +347,12 @@ class Group < Namespace
     end
   end
 
+  def self_and_descendants_ids
+    strong_memoize(:self_and_descendants_ids) do
+      self_and_descendants.pluck(:id)
+    end
+  end
+
   def members_with_parents
     # Avoids an unnecessary SELECT when the group has no parents
     source_ids =

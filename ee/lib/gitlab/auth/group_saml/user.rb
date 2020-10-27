@@ -7,7 +7,7 @@ module Gitlab
         attr_reader :auth_hash, :saml_provider
 
         def initialize(auth_hash, saml_provider)
-          @auth_hash = auth_hash
+          self.auth_hash = auth_hash
           @saml_provider = saml_provider
         end
 
@@ -39,6 +39,14 @@ module Gitlab
           return unless user_from_identity
 
           MembershipUpdater.new(user_from_identity, saml_provider).execute
+        end
+
+        def auth_hash=(auth_hash)
+          @auth_hash = Gitlab::Auth::Saml::AuthHash.new(auth_hash)
+        end
+
+        def sync_groups
+          auth_hash.groups
         end
       end
     end
