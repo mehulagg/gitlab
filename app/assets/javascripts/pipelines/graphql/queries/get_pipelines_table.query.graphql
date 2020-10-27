@@ -1,0 +1,52 @@
+query getPipelinesTable($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    pipelines(first: 20) {
+      nodes {
+        id
+        configSource
+        duration
+        sha
+        detailedStatus {
+          detailsPath
+          favicon
+          hasDetails
+          icon
+          text
+          tooltip
+        }
+        user {
+          avatarUrl
+          webPath
+          name
+        }
+        stages {
+          nodes {
+            name
+            detailedStatus {
+              icon
+              tooltip
+              text
+            }
+            groups {
+              nodes {
+                name
+                jobs {
+                  nodes {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      finishedAt
+      retryable
+      cancelable
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

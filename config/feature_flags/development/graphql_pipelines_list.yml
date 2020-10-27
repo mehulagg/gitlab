@@ -1,0 +1,7 @@
+---
+name: graphql_pipelines_list
+introduced_by_url:
+rollout_issue_url:
+type: development
+group: group::continuous integration
+default_enabled: false
