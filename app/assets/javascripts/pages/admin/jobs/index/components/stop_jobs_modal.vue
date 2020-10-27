@@ -1,7 +1,7 @@
 <script>
+import { GlModal } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { GlModal } from '@gitlab/ui';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 
@@ -42,11 +42,14 @@ export default {
 <template>
   <gl-modal
     modal-id="stop-jobs-modal"
-    :header-title-text="s__('AdminArea|Stop all jobs?')"
-    :footer-primary-button-text="s__('AdminArea|Stop jobs')"
-    footer-primary-button-variant="danger"
-    @submit="onSubmit"
+    :action-primary="{
+      text: s__('AdminArea|Stop jobs'),
+      attributes: [{ variant: 'danger' }],
+    }"
+    :action-cancel="{ text: __('Cancel') }"
+    @primary="onSubmit"
   >
+    <template #modal-title>{{ s__('AdminArea|Stop all jobs?') }}</template>
     {{ text }}
   </gl-modal>
 </template>
