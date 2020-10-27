@@ -24,7 +24,7 @@ module Gitlab
 
       # This parser is very basic as it only knows about `Disallow:`
       # and `Allow:` lines, and simply ignores all other lines.
-      # 
+      #
       # Patterns ending in `$`, and `*` for 0 or more characters are recognized.
       #
       # It is case insensitive and `Allow` rules takes precedence
