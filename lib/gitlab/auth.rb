@@ -42,6 +42,9 @@ module Gitlab
 
         raise IpBlacklisted if !skip_rate_limit?(login: login) && rate_limiter.banned?
 
+        # Log user auth request and IP address
+        Gitlab::AppLogger.info("User Auth: Authentication request for username=#{login} from IP #{ip}")
+
         # `user_with_password_for_git` should be the last check
         # because it's the most expensive, especially when LDAP
         # is enabled.
@@ -107,6 +110,8 @@ module Gitlab
           authenticated_user = authenticators.find do |auth|
             authenticated_user = auth.login(login, password)
             break authenticated_user if authenticated_user
+            Gitlab::AppLogger.info("User Auth: username=#{login} failed authentication")
+            break authenticated_user
           end
 
           user_auth_attempt!(user, success: !!authenticated_user) if increment_failed_attempts
