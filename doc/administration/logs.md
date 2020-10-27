@@ -584,6 +584,8 @@ This file lives in `/var/log/gitlab/gitlab-rails/grpc.log` for Omnibus GitLab pa
 
 ### `gitaly_ruby_json.log`
 
+> [Introduced](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/2678) in GitLab 13.6.
+
 This file lives in `/var/log/gitlab/gitaly/gitaly_ruby_json.log` and is produced by [`gitaly-ruby`](gitaly/reference.md#gitaly-ruby). It contains an access log of gRPC calls made by Gitaly to `gitaly-ruby`.
 
 ## Puma Logs
