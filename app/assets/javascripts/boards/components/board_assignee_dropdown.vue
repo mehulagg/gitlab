@@ -49,6 +49,7 @@ export default {
           return node;
         });
       })
+      // eslint-disable-next-line no-console
       .catch(e => console.log(e));
   },
   methods: {
@@ -78,7 +79,7 @@ export default {
 </script>
 
 <template>
-  <board-editable-item @close="saveAssignees" :title="$options.assigneeText">
+  <board-editable-item :title="$options.assigneeText" @close="saveAssignees">
     <template #collapsed>
       <issuable-assignees :users="getActiveIssue.assignees" />
     </template>
@@ -110,7 +111,7 @@ export default {
               />
             </gl-avatar-link>
           </gl-dropdown-item>
-          <gl-dropdown-divider v-if="selected.length > 0" data-testid="selected-user-divider" />
+          <gl-dropdown-divider v-if="!selectedIsEmpty" data-testid="selected-user-divider" />
           <gl-dropdown-item
             v-for="unselectedUser in unSelectedFiltered"
             :key="unselectedUser.id"
