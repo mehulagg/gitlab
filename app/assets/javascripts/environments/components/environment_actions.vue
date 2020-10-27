@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 import { formatTime } from '~/lib/utils/datetime_utility';
 import eventHub from '../event_hub';
@@ -10,6 +10,8 @@ export default {
   },
   components: {
     GlButton,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
     GlLoadingIcon,
   },
@@ -75,7 +77,6 @@ export default {
       :disabled="isLoading"
       class="dropdown dropdown-new js-environment-actions-dropdown"
       data-container="body"
-      data-toggle="dropdown"
       data-testid="environment-actions-button"
     >
       <span>
@@ -85,8 +86,8 @@ export default {
       </span>
     </gl-button>
 
-    <ul class="dropdown-menu dropdown-menu-right">
-      <li v-for="(action, i) in actions" :key="i" class="gl-display-flex">
+    <gl-dropdown right>
+      <gl-dropdown-item v-for="(action, i) in actions" :key="i" class="gl-display-flex">
         <gl-button
           :class="{ disabled: isActionDisabled(action) }"
           :disabled="isActionDisabled(action)"
@@ -100,7 +101,7 @@ export default {
             {{ remainingTime(action) }}
           </span>
         </gl-button>
-      </li>
-    </ul>
+      </gl-dropdown-item>
+    </gl-dropdown>
   </div>
 </template>
