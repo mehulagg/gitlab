@@ -6,16 +6,23 @@ type: index, reference
 
 You can install, administer, and maintain your own GitLab instance.
 
-In this page we'll go through the details of your GitLab self-managed subscription.
+This page covers the details of your GitLab self-managed subscription.
 
-## Choose a GitLab tier
+## Subscription
+
+The cost of a GitLab self-managed subscription is determined by the following:
+
+- GitLab tier
+- Subscription seats
+
+## GitLab tier
 
 Pricing is [tier-based](https://about.gitlab.com/pricing/), allowing you to choose
 the features which fit your budget. For information on what features are available
 at each tier, see the
 [GitLab self-managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/).
 
-## Choose the number of users
+## Subscription seats
 
 A self-managed subscription uses a hybrid model. You pay for a subscription
 according to the maximum number of users enabled during the subscription period.
@@ -23,14 +30,18 @@ For instances that aren't offline or on a closed network, the maximum number of
 simultaneous users in the self-managed installation is checked each quarter,
 using [Seat Link](#seat-link).
 
-Every occupied seat is counted in the subscription, with the following exceptions:
+### Billable users
+
+Every user that occupies a seat is considered a _billable user_, with the following exceptions. Each billable user is counted against the number of subscription seats.
+
+The following users are excluded from the count of billable users:
 
 - [Deactivated](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user), [pending approval](../../user/admin_area/approving_users.md) and
   [blocked](../../user/admin_area/blocking_unblocking_users.md) users who are restricted prior to the
-  renewal of a subscription won't be counted as active users for the renewal subscription. They may
-  count as active users in the subscription period in which they were originally added.
+  renewal of a subscription are not counted as billable users for the renewal subscription. They may
+  count as billable users in the subscription period in which they were originally added.
 - Members with Guest permissions on an Ultimate subscription.
-- GitLab-created service accounts: `Ghost User` and bots (`Support Bot`, [`Project bot users`](../../user/project/settings/project_access_tokens.md#project-bot-users), etc.).
+- GitLab-created service accounts: `Ghost User` and bots (`Support Bot`, [`Project bot users`](../../user/project/settings/project_access_tokens.md#project-bot-users), and so on).
 
 ### Users statistics
 
