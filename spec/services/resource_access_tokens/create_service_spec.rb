@@ -163,18 +163,28 @@ RSpec.describe ResourceAccessTokens::CreateService do
         end
       end
 
+
       context 'when access provisioning fails' do
+        let(:group) { create(:group_with_managed_accounts, :private) }
+        let(:project) { create(:project, namespace: group)}
+
         before do
-          allow_next_instance_of(ResourceAccessTokens::CreateService) do |create_service|
-            allow(create_service).to receive(:provision_access).and_return(false)
-          end
+          stub_feature_flags(group_managed_accounts: true)
         end
 
-        it 'returns error' do
-          response = subject
+        context 'enforced group managed account enabled' do
+          before do
+            stub_licensed_features(group_saml: true)
+          end
 
-          expect(response.error?).to be true
-          expect(response.message).to eq("Failed to provide maintainer access")
+          it 'does not add the the project bot' do
+            response = subject
+            bot_user = response.payload[:access_token].user
+            member = project.add_developer(bot_user)
+
+            expect(member).not_to be_valid
+            expect(member.errors.messages[:user]).to include("Failed to provide maintainer access")
+          end
         end
       end
     end
