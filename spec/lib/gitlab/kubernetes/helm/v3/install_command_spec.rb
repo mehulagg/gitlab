@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
+RSpec.describe Gitlab::Kubernetes::Helm::V3::InstallCommand do
   subject(:install_command) do
     described_class.new(
       name: 'app-name',
@@ -26,9 +26,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
   it_behaves_like 'helm command generator' do
     let(:commands) do
       <<~EOS
-      export HELM_HOST="localhost:44134"
-      tiller -listen ${HELM_HOST} -alsologtostderr &
-      helm init --client-only
       helm repo add app-name https://repository.example.com
       helm repo update
       #{helm_install_comand}
@@ -56,9 +53,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
     it_behaves_like 'helm command generator' do
       let(:commands) do
         <<~EOS
-        export HELM_HOST="localhost:44134"
-        tiller -listen ${HELM_HOST} -alsologtostderr &
-        helm init --client-only
         helm repo add app-name https://repository.example.com
         helm repo update
         #{helm_install_command}
@@ -87,9 +81,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
     it_behaves_like 'helm command generator' do
       let(:commands) do
         <<~EOS
-        export HELM_HOST="localhost:44134"
-        tiller -listen ${HELM_HOST} -alsologtostderr &
-        helm init --client-only
         helm repo add app-name https://repository.example.com
         helm repo update
         /bin/date
@@ -120,9 +111,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
     it_behaves_like 'helm command generator' do
       let(:commands) do
         <<~EOS
-        export HELM_HOST="localhost:44134"
-        tiller -listen ${HELM_HOST} -alsologtostderr &
-        helm init --client-only
         helm repo add app-name https://repository.example.com
         helm repo update
         #{helm_install_command}
@@ -153,9 +141,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
     it_behaves_like 'helm command generator' do
       let(:commands) do
         <<~EOS
-        export HELM_HOST="localhost:44134"
-        tiller -listen ${HELM_HOST} -alsologtostderr &
-        helm init --client-only
         helm repo add app-name https://repository.example.com
         helm repo update
         #{helm_install_command}
@@ -184,9 +169,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::InstallCommand do
     it_behaves_like 'helm command generator' do
       let(:commands) do
         <<~EOS
-        export HELM_HOST="localhost:44134"
-        tiller -listen ${HELM_HOST} -alsologtostderr &
-        helm init --client-only
         helm repo add app-name https://repository.example.com
         helm repo update
         #{helm_install_command}

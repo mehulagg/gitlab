@@ -30,7 +30,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        Gitlab::Kubernetes::Helm::V2::InstallCommand.new(
           name: 'certmanager',
           repository: repository,
           version: VERSION,
@@ -43,7 +43,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        Gitlab::Kubernetes::Helm::V2::DeleteCommand.new(
           name: 'certmanager',
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,

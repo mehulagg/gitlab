@@ -15,7 +15,7 @@ RSpec.describe Clusters::Applications::ElasticStack do
 
     subject { elastic_stack.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::InstallCommand) }
 
     it 'is initialized with elastic stack arguments' do
       expect(subject.name).to eq('elastic-stack')
@@ -123,7 +123,7 @@ RSpec.describe Clusters::Applications::ElasticStack do
 
     subject { elastic_stack.uninstall_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::DeleteCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::DeleteCommand) }
 
     it 'is initialized with elastic stack arguments' do
       expect(subject.name).to eq('elastic-stack')

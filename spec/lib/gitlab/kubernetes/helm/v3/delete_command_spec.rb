@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Kubernetes::Helm::DeleteCommand do
+RSpec.describe Gitlab::Kubernetes::Helm::V3::DeleteCommand do
   subject(:delete_command) { described_class.new(name: app_name, rbac: rbac, files: files) }
 
   let(:app_name) { 'app-name' }
@@ -12,9 +12,6 @@ RSpec.describe Gitlab::Kubernetes::Helm::DeleteCommand do
   it_behaves_like 'helm command generator' do
     let(:commands) do
       <<~EOS
-      export HELM_HOST="localhost:44134"
-      tiller -listen ${HELM_HOST} -alsologtostderr &
-      helm init --client-only
       helm delete --purge app-name
       EOS
     end

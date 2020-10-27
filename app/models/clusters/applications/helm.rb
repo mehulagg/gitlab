@@ -49,7 +49,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InitCommand.new(
+        Gitlab::Kubernetes::Helm::V2::InitCommand.new(
           name: name,
           files: files,
           rbac: cluster.platform_kubernetes_rbac?
@@ -57,7 +57,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::ResetCommand.new(
+        Gitlab::Kubernetes::Helm::V2::ResetCommand.new(
           name: name,
           files: files,
           rbac: cluster.platform_kubernetes_rbac?
@@ -86,19 +86,19 @@ module Clusters
       end
 
       def create_keys_and_certs
-        ca_cert = Gitlab::Kubernetes::Helm::Certificate.generate_root
+        ca_cert = Gitlab::Kubernetes::Helm::V2::Certificate.generate_root
         self.ca_key = ca_cert.key_string
         self.ca_cert = ca_cert.cert_string
       end
 
       def tiller_cert
-        @tiller_cert ||= ca_cert_obj.issue(expires_in: Gitlab::Kubernetes::Helm::Certificate::INFINITE_EXPIRY)
+        @tiller_cert ||= ca_cert_obj.issue(expires_in: Gitlab::Kubernetes::Helm::V2::Certificate::INFINITE_EXPIRY)
       end
 
       def ca_cert_obj
         return unless has_ssl?
 
-        Gitlab::Kubernetes::Helm::Certificate
+        Gitlab::Kubernetes::Helm::V2::Certificate
           .from_strings(ca_key, ca_cert)
       end
     end

@@ -26,7 +26,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        Gitlab::Kubernetes::Helm::V2::InstallCommand.new(
           name: 'elastic-stack',
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
@@ -39,7 +39,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        Gitlab::Kubernetes::Helm::V2::DeleteCommand.new(
           name: 'elastic-stack',
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,
@@ -116,7 +116,7 @@ module Clusters
         # Chart version 3.0.0 moves to our own chart at https://gitlab.com/gitlab-org/charts/elastic-stack
         # and is not compatible with pre-existing resources. We first remove them.
         [
-          Gitlab::Kubernetes::Helm::DeleteCommand.new(
+          Gitlab::Kubernetes::Helm::V2::DeleteCommand.new(
             name: 'elastic-stack',
             rbac: cluster.platform_kubernetes_rbac?,
             files: files
