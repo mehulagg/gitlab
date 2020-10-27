@@ -112,4 +112,21 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
       expect(project.security_setting.auto_fix_container_scanning).to be_truthy
     end
   end
+  
+  describe 'push_rules' do
+    let_it_be(:project) { create(:project, name: 'project', path: 'project') }
+    let(:user) { create(:user)}
+
+    before do
+      setup_import_export_config('complex', 'ee')
+    end
+
+    it 'creates push rules' do
+      project = Project.find_by_path('project')
+      # binding.pry
+      expect(project.push_rule.member_check).to be_truthy
+    end
+  end
+
+
 end

@@ -33,5 +33,8 @@
     "auto_fix_sast": false,
     "auto_fix_coverage_fuzzing": false,
     "auto_fix_api_fuzzing": false
+  },
+  "push_rule": {
+    "member_check": true
   }
 }
