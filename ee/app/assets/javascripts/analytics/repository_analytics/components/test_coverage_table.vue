@@ -17,7 +17,7 @@ export default {
     TimeAgoTooltip,
   },
   apollo: {
-    coverageData: {
+    projects: {
       query: getProjectsTestCoverage,
       debounce: 500,
       variables() {
@@ -28,7 +28,15 @@ export default {
       result({ data }) {
         // Keep data from all queries so that we don't
         // fetch the same data more than once
-        this.allCoverageData = [...this.allCoverageData, ...data.projects.nodes];
+        this.allCoverageData = [...this.allCoverageData, ...data.projects.nodes.map(project => ({
+          ...project,
+          // if a project has no code coverage, set to default values
+          codeCoverageSummary: project.codeCoverageSummary || {
+            averageCoverage: 0,
+            coverageCount: 0,
+            lastUpdatedAt: '', // empty string will default to "just now" in table
+          }
+        }))];
       },
       error() {
         this.handleError();
@@ -183,14 +191,14 @@ export default {
         <div :data-testid="`${item.id}-name`">{{ item.name }}</div>
       </template>
       <template #cell(coverage)="{ item }">
-        <div :data-testid="`${item.id}-average`">{{ item.codeCoverage.average }}%</div>
+        <div :data-testid="`${item.id}-average`">{{ item.codeCoverageSummary.averageCoverage }}%</div>
       </template>
       <template #cell(numberOfCoverages)="{ item }">
-        <div :data-testid="`${item.id}-count`">{{ item.codeCoverage.count }}</div>
+        <div :data-testid="`${item.id}-count`">{{ item.codeCoverageSummary.coverageCount }}</div>
       </template>
       <template #cell(lastUpdate)="{ item }">
         <time-ago-tooltip
-          :time="item.codeCoverage.lastUpdatedAt"
+          :time="item.codeCoverageSummary.lastUpdatedAt"
           :data-testid="`${item.id}-date`"
         />
       </template>

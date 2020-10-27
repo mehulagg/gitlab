@@ -32,7 +32,7 @@ describe('Test coverage table component', () => {
       mocks: {
         $apollo: {
           queries: {
-            coverageData: {
+            projects: {
               query: jest.fn().mockResolvedValue(),
             },
           },
@@ -65,8 +65,8 @@ describe('Test coverage table component', () => {
     it('renders coverage table', () => {
       const id = 'gid://gitlab/Project/1';
       const name = 'GitLab';
-      const average = '74.35';
-      const count = '5';
+      const averageCoverage = '74.35';
+      const coverageCount = '5';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
@@ -76,9 +76,9 @@ describe('Test coverage table component', () => {
             {
               id,
               name,
-              codeCoverage: {
-                average,
-                count,
+              codeCoverageSummary: {
+                averageCoverage,
+                coverageCount,
                 lastUpdatedAt: yesterday.toISOString(),
               },
             },
@@ -92,8 +92,8 @@ describe('Test coverage table component', () => {
 
       expect(findTable().exists()).toBe(true);
       expect(findProjectNameById(id).text()).toBe(name);
-      expect(findProjectAverageById(id).text()).toBe(`${average}%`);
-      expect(findProjectCountById(id).text()).toBe(count);
+      expect(findProjectAverageById(id).text()).toBe(`${averageCoverage}%`);
+      expect(findProjectCountById(id).text()).toBe(coverageCount);
       expect(findProjectDateById(id).text()).toBe('1 day ago');
     });
   });
