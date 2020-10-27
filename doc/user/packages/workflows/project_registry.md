@@ -69,14 +69,14 @@ to your project using your project ID, then adding a section to your `package.js
 Follow
 the instructions in the [GitLab NPM Registry documentation](../npm_registry/index.md#authenticate-to-the-package-registry). After
 you do this, you can push your NPM package to your project using `npm publish`, as described in the
-[uploading packages](../npm_registry/index.md#uploading-packages) section of the docs.
+[publishing packages](../npm_registry/index.md#publish-an-npm-package) section of the docs.
 
 #### Maven
 
 If you are using Maven, this involves updating your `pom.xml` file with distribution sections, including the
 appropriate URL for your project, as described in the [GitLab Maven Repository documentation](../maven_repository/index.md#project-level-maven-endpoint).
 Then, you need to add a `settings.xml` file and [include your access token](../maven_repository/index.md#authenticate-with-a-personal-access-token).
-Now you can [deploy Maven packages](../maven_repository/index.md#publish-an-npm-package) to your project.
+Now you can [deploy Maven packages](../maven_repository/index.md#uploading-packages) to your project.
 
 #### Conan
 
