@@ -148,16 +148,16 @@ highest role Maintainer_.
 
 The following totals are also included:
 
-- Active users
+- Billable users
 - Blocked users
 - Total users
 
-GitLab billing is based on the number of **Active users**, calculated as **Total users** -
-**Blocked users**. For details of active users, see
-[Choosing the number of users](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+GitLab billing is based on the number of **Billable users**, calculated as **Total users** minus
+**Blocked users**. For more details, see
+[Billable users](../../subscriptions/self_managed/index.md#billable-users).
 
 NOTE: **Note:**
-Users statistics are calculated daily, so user changes made since the last update won't be
+Users statistics are calculated daily, so user changes made since the last update are not
 reflected in the statistics.
 
 ### Administering Groups

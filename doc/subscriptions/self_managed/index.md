@@ -107,7 +107,7 @@ It's important to regularly review your user accounts, because:
 #### Users over License
 
 A GitLab subscription is valid for a specific number of users. For details, see
-[Choose the number of users](#choose-the-number-of-users). If the active user
+[Billable users](#billable-users). If the active user
 count exceeds the number included in the subscription, known as the number of
 _users over license_, you must pay for the excess number of users either before
 renewal, or at the time of renewal. This is also known the _true up_ process.
