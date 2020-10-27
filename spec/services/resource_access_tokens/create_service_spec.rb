@@ -179,11 +179,8 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
           it 'does not add the the project bot' do
             response = subject
-            bot_user = response.payload[:access_token].user
-            member = project.add_developer(bot_user)
 
-            expect(member).not_to be_valid
-            expect(member.errors.messages[:user]).to include("Failed to provide maintainer access")
+            expect(response.error?).to be true
           end
         end
       end
