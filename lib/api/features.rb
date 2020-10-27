@@ -54,6 +54,7 @@ module API
         optional :user, type: String, desc: 'A GitLab username'
         optional :group, type: String, desc: "A GitLab group's path, such as 'gitlab-org'"
         optional :project, type: String, desc: 'A projects path, like gitlab-org/gitlab-ce'
+        optional :force, type: Boolean, desc: 'Skip feature flag validation checks, ie. YAML definition'
 
         mutually_exclusive :key, :feature_group
         mutually_exclusive :key, :user
@@ -61,7 +62,7 @@ module API
         mutually_exclusive :key, :project
       end
       post ':name' do
-        validate_feature_flag_name!(params[:name])
+        validate_feature_flag_name!(params[:name]) unless params[:force]
 
         feature = Feature.get(params[:name]) # rubocop:disable Gitlab/AvoidFeatureGet
         targets = gate_targets(params)
@@ -102,7 +103,14 @@ module API
 
     helpers do
       def validate_feature_flag_name!(name)
-        # no-op
+        unless ::Feature::Definition.has_definition?(name)
+          bad_request!(
+            "The '#{name}' does not have feature flag definition, " \
+            "and thus it cannot be used as a feature flag name. " \
+            "Use `rails console` or `--force` to set this feature flag " \
+            "regardless of this check."
+          )
+        end
       end
     end
   end

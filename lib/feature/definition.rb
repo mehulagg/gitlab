@@ -94,6 +94,10 @@ class Feature
         @definitions = load_all!
       end
 
+      def has_definition?(key)
+        definitions.has_key?(key.to_sym)
+      end
+
       def valid_usage!(key, type:, default_enabled:)
         if definition = definitions[key.to_sym]
           definition.valid_usage!(type_in_code: type, default_enabled_in_code: default_enabled)

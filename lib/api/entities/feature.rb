@@ -17,6 +17,10 @@ module API
           { key: gate.key, value: value }
         end.compact
       end
+
+      expose :has_definition do |feature|
+        ::Feature::Definition.has_definition?(feature.name)
+      end
     end
   end
 end

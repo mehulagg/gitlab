@@ -43,6 +43,14 @@ RSpec.describe API::Features, stub_feature_flags: false do
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
+
+      context 'when force=1 is set' do
+        it 'allows to change state' do
+          post api("/features/#{feature_name}", admin), params: { value: 'true', force: true }
+  
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
     end
   end
 
