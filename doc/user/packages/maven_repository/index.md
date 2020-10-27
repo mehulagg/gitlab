@@ -62,7 +62,7 @@ published to the GitLab Package Registry.
 
    - `DgroupId`: A unique string that identifies your package. Follow
    the [Maven naming conventions](https://maven.apache.org/guides/mini/guide-naming-conventions.html).
-   - `DartifactId`: The name of the JAR, appended to the end of the `DgroupId`.
+   - `DartifactId`: The name of the `JAR`, appended to the end of the `DgroupId`.
    - `DarchetypeArtifactId`: The archetype used to create the initial structure of
    the project.
    - `DinteractiveMode`: Create the project using batch mode (optional).
@@ -352,14 +352,7 @@ repositories {
 
 ## Use the GitLab endpoint for Maven packages
 
-To publish and install packages from GitLab, you need a `repository` and
-`distributionManagement` section in your `pom.xml` file.
-
-If you're following the steps in this document, add the following information to your
-`my-project/pom.xml` file.
-
-Depending on your workflow and the number of Maven packages you have, there are
-three ways to configure your project to use the GitLab endpoint for Maven packages:
+To use the GitLab endpoint for Maven packages, choose an option:
 
 - **Project-level**: Use when you have few Maven packages and they are not in
   the same GitLab group.
@@ -368,8 +361,12 @@ three ways to configure your project to use the GitLab endpoint for Maven packag
 - **Instance-level**: Use when you have many Maven packages in different
   GitLab groups or in their own namespace.
 
-In all cases, you need a project-specific URL for publishing a package in
-the `distributionManagement` section.
+The option you choose determines the settings you'll add to your `pom.xml` file.
+
+In all cases, to publish a package, you need:
+
+- A project-specific URL in the `distributionManagement` section.
+- A `repository` and `distributionManagement` section.
 
 ### Project-level Maven endpoint
 
@@ -755,7 +752,7 @@ user's home location. In this example:
 You can create a package each time the `master` branch
 is updated.
 
-1. Use the `Job-Token` authentication as described in [Authenticating with a CI job token in Gradle](#authenticate-with-a-ci-job-token-in-gradle).
+1. Authenticate with [a CI job token in Gradle](#authenticate-with-a-ci-job-token-in-gradle).
 
 1. Add a `deploy` job to your `.gitlab-ci.yml` file:
 
@@ -768,7 +765,9 @@ is updated.
        - master
    ```
 
-1. Push those files to your repository.
+1. Commit files to your repository.
+
+When the pipeline is successful, the package is created.
 
 ### Version validation
 
@@ -800,7 +799,7 @@ When you set these options, all network requests are logged and a large amount o
 ### Useful Maven command-line options
 
 There are some [Maven command-line options](https://maven.apache.org/ref/current/maven-embedder/cli.html)
-that may be useful when performing tasks with GitLab CI/CD.
+that you can use when performing tasks with GitLab CI/CD.
 
 - File transfer progress can make the CI logs hard to read.
   Option `-ntp,--no-transfer-progress` was added in
@@ -808,7 +807,7 @@ that may be useful when performing tasks with GitLab CI/CD.
   Alternatively, look at `-B,--batch-mode`
   [or lower level logging changes.](https://stackoverflow.com/questions/21638697/disable-maven-download-progress-indication)
 
-- Specify where to find the POM file (`-f,--file`):
+- Specify where to find the `pom.xml` file (`-f,--file`):
 
    ```yaml
    package:
@@ -827,9 +826,8 @@ that may be useful when performing tasks with GitLab CI/CD.
 
 ### Verify your Maven settings
 
-If you encounter issues within CI/CD that relate to the `settings.xml` file, it might be useful
-to add an additional script task or job to
-[verify the effective settings](https://maven.apache.org/plugins/maven-help-plugin/effective-settings-mojo.html).
+If you encounter issues within CI/CD that relate to the `settings.xml` file, try adding
+an additional script task or job to [verify the effective settings](https://maven.apache.org/plugins/maven-help-plugin/effective-settings-mojo.html).
 
 The help plugin can also provide
 [system properties](https://maven.apache.org/plugins/maven-help-plugin/system-mojo.html), including environment variables:
