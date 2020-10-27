@@ -40,6 +40,8 @@ module Types
     field :starred_projects, Types::ProjectType.connection_type, null: true,
           description: 'Projects starred by the user',
           resolver: Resolvers::UserStarredProjectsResolver
+    field :admin, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Whether this user is an admin'
 
     # Merge request field: MRs can be either authored or assigned:
     field :authored_merge_requests, Types::MergeRequestType.connection_type, null: true,

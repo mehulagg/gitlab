@@ -18,10 +18,13 @@ module Resolvers
              required: false,
              default_value: 'created_desc'
 
-    def resolve(ids: nil, usernames: nil, sort: nil)
+    argument :admins, GraphQL::BOOLEAN_TYPE, required: false,
+              description: 'Return only admin users'
+
+    def resolve(ids: nil, usernames: nil, sort: nil, admins: false)
       authorize!
 
-      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort)).execute
+      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort, admins)).execute
     end
 
     def ready?(**args)
@@ -42,11 +45,12 @@ module Resolvers
 
     private
 
-    def finder_params(ids, usernames, sort)
+    def finder_params(ids, usernames, sort, admins)
       params = {}
       params[:sort] = sort if sort
       params[:username] = usernames if usernames
       params[:id] = parse_gids(ids) if ids
+      params[:admins] = admins if admins
       params
     end
 
