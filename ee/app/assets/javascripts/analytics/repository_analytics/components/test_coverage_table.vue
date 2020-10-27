@@ -28,15 +28,18 @@ export default {
       result({ data }) {
         // Keep data from all queries so that we don't
         // fetch the same data more than once
-        this.allCoverageData = [...this.allCoverageData, ...data.projects.nodes.map(project => ({
-          ...project,
-          // if a project has no code coverage, set to default values
-          codeCoverageSummary: project.codeCoverageSummary || {
-            averageCoverage: 0,
-            coverageCount: 0,
-            lastUpdatedAt: '', // empty string will default to "just now" in table
-          }
-        }))];
+        this.allCoverageData = [
+          ...this.allCoverageData,
+          ...data.projects.nodes.map(project => ({
+            ...project,
+            // if a project has no code coverage, set to default values
+            codeCoverageSummary: project.codeCoverageSummary || {
+              averageCoverage: 0,
+              coverageCount: 0,
+              lastUpdatedAt: '', // empty string will default to "just now" in table
+            },
+          })),
+        ];
       },
       error() {
         this.handleError();
@@ -120,6 +123,7 @@ export default {
     },
   ],
   text: {
+    header: s__('RepositoriesAnalytics|Latest Project Test Coverage'),
     emptyStateTitle: s__('RepositoriesAnalytics|Please select projects to display.'),
     emptyStateDescription: s__(
       'RepositoriesAnalytics|Please select a project or multiple projects to display their most recent test coverage data.',
@@ -139,12 +143,15 @@ export default {
 <template>
   <gl-card>
     <template #header>
-      <select-projects-dropdown
-        class="gl-w-quarter"
-        @projects-query-error="handleError"
-        @select-all-projects="selectAllProjects"
-        @select-project="toggleProject"
-      />
+      <div class="gl-display-flex gl-justify-content-space-between">
+        <h5>{{ $options.text.header }}</h5>
+        <select-projects-dropdown
+          class="gl-w-quarter"
+          @projects-query-error="handleError"
+          @select-all-projects="selectAllProjects"
+          @select-project="toggleProject"
+        />
+      </div>
     </template>
 
     <template v-if="isLoading">
@@ -191,7 +198,9 @@ export default {
         <div :data-testid="`${item.id}-name`">{{ item.name }}</div>
       </template>
       <template #cell(coverage)="{ item }">
-        <div :data-testid="`${item.id}-average`">{{ item.codeCoverageSummary.averageCoverage }}%</div>
+        <div :data-testid="`${item.id}-average`">
+          {{ item.codeCoverageSummary.averageCoverage }}%
+        </div>
       </template>
       <template #cell(numberOfCoverages)="{ item }">
         <div :data-testid="`${item.id}-count`">{{ item.codeCoverageSummary.coverageCount }}</div>

@@ -22376,6 +22376,9 @@ msgstr ""
 msgid "RepositoriesAnalytics|Last Update"
 msgstr ""
 
+msgid "RepositoriesAnalytics|Latest Project Test Coverage"
+msgstr ""
+
 msgid "RepositoriesAnalytics|Number of Coverages"
 msgstr ""
 
