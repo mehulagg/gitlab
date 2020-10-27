@@ -1,0 +1,7 @@
+name: test_feature_flag
+type: experiment
+group: group::retention
+introduced_by_url: 
+rollout_issue_url: 
+milestone: 
+default_enabled: false

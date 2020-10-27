@@ -1,0 +1,7 @@
+---
+name: gitlab_experiment_null_hypothesis
+introduced_by_url:
+rollout_issue_url:
+type: experiment
+group: group::retention
+default_enabled: false

@@ -1,14 +1,5 @@
 # frozen_string_literal: true
 
-# Make Gitlab::Experiment::Context respond to flipper_id so we can pass it to
-# flipper nicely while we build out the flipper resolver strategy that has
-# context migration built in.
-class Gitlab::Experiment::Context
-  def flipper_id
-    "Experiment;#{@experiment.name};#{signature[:key]}"
-  end
-end
-
 Gitlab::Experiment.configure do |config|
   # Prefix all experiment names with a given value. Use `nil` for none.
   config.name_prefix = 'gitlab_experiment'
@@ -25,9 +16,11 @@ Gitlab::Experiment.configure do |config|
     # Return the variant if one was requested in code:
     break requested_variant if requested_variant.present?
 
-    # Use Flipper to determine variant by passing the experiment, which
-    # responds to `flipper_id`:
-    Feature.enabled?(name, context, type: :experiment) ? variant_names.first || 'control' : 'control'
+    # Use Feature interface to determine the variant by passing the experiment,
+    # which responds to `flipper_id` and `session_id` to accommodate adapters.
+    resolved = 'control'
+    resolved = variant_names.first if Feature.enabled?(name, self, type: :experiment)
+    resolved
   end
 
   # Tracking behavior can be implemented to link an event to an experiment.
@@ -56,6 +49,7 @@ Gitlab::Experiment.configure do |config|
     # Push the experiment knowledge into the front end. The signature contains
     # the context key, and the variant that has been determined.
     Gon.push({ experiment: { name => signature } }, true)
+
     # Log using our logging system, so the result (which can be large) can be
     # reviewed later if we want to.
     #

@@ -1,0 +1,7 @@
+name: <%= file_name %>
+type: <%= options[:type] %>
+group: <%= options[:group] %>
+introduced_by_url: <%= options[:introduced_by_url] %>
+rollout_issue_url: <%= options[:rollout_issue_url] %>
+milestone: <%= options[:milestone] %>
+default_enabled: <%= options[:default_enabled] %>

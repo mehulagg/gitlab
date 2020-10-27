@@ -62,6 +62,13 @@ RSpec.describe Projects::IssuesController do
           expect(response).to have_gitlab_http_status(:moved_permanently)
         end
       end
+
+      it 'runs and tracks the null hypothesis experiment' do
+        expect(experiment = Gitlab::Experiment.new(:double)).to receive(:track).with('index')
+        expect(controller).to receive(:experiment).with(:null_hypothesis, project: project).and_yield(experiment)
+
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+      end
     end
 
     context 'internal issue tracker' do
