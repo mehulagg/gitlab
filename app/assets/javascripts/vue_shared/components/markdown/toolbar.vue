@@ -70,7 +70,7 @@ export default {
       </span>
       <span class="uploading-error-container hide">
         <span class="uploading-error-icon">
-            <gl-icon name="media" />
+          <gl-icon name="media" />
         </span>
         <span class="uploading-error-message"></span>
 

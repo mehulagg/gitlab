@@ -732,7 +732,7 @@ msgstr[1] ""
 msgid "%{reportType} %{status} detected no vulnerabilities."
 msgstr ""
 
-msgid "%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}"
+msgid "%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}."
 msgstr ""
 
 msgid "%{seconds}s"
@@ -1040,6 +1040,9 @@ msgid "- of - weight completed"
 msgstr ""
 
 msgid "- show less"
+msgstr ""
+
+msgid "."
 msgstr ""
 
 msgid "0 bytes"
