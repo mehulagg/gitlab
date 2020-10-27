@@ -55,7 +55,7 @@ class Projects::ImportsController < Projects::ApplicationController
   end
 
   def require_namespace_project_creation_permission
-    render_404 unless current_user.can?(:admin_project, @project) || current_user.can?(:create_projects, @project.namespace)
+    render_404 unless current_user&.can?(:admin_project, @project) || current_user&.can?(:create_projects, @project.namespace)
   end
 
   def redirect_if_progress
