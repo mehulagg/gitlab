@@ -150,7 +150,7 @@ Amazon Elastic Kubernetes Service (EKS) at the project, group, or instance level
    - [Google GKE](add_gke_clusters.md#creating-the-cluster-on-gke).
 
 After creating a cluster, you can install runners for it as described in
-[GitLab Managed Apps](applications.md).
+[GitLab Managed Apps](../../clusters/applications.md).
 
 ## Add existing cluster
 
@@ -162,7 +162,7 @@ Kubernetes integration isn't supported for arm64 clusters. See the issue
 for details.
 
 After adding an existing cluster, you can install runners for it as described in
-[GitLab Managed Apps](applications.md).
+[GitLab Managed Apps](../../clusters/applications.md).
 
 ### Existing Kubernetes cluster
 
