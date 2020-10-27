@@ -918,7 +918,7 @@ To improve performance, sometimes we want to make initial GraphQL queries early.
 - move all the queries you need initially in your application to `app/graphql/queries`;
 - add `__typename` property to every nested query level:
 
-```js
+```javascript
 query getPermissions($projectPath: ID!) {
   project(fullPath: $projectPath) {
     __typename
@@ -934,7 +934,7 @@ query getPermissions($projectPath: ID!) {
 
 - if queries contain fragments, you need to move fragments to the query file directly instead of importing them:
 
-```js
+```javascript
 query getFiles(
   $projectPath: ID!
   $path: String
@@ -957,7 +957,7 @@ query getFiles(
 ```
 - add startup call(s) with correct variables to the HAML file that serves as a view for your application. To add GraphQL startup calls, we use `add_page_startup_graphql_call` helper where the first parameter is a path to the query, the second one is an object containing query variables. Path to the query is relative to `app/graphql/queries` folder: for example, if we need a `app/graphql/queries/repository/files.query.graphql` query, the path will be `repository/files`
 
-```
+```yaml
 - current_route_path = request.fullpath.match(/-\/tree\/[^\/]+\/(.+$)/).to_a[1]
 - add_page_startup_graphql_call('repository/path_last_commit', { projectPath: @project.full_path, ref: current_ref, path: current_route_path || "" })
 - add_page_startup_graphql_call('repository/permissions', { projectPath: @project.full_path })
