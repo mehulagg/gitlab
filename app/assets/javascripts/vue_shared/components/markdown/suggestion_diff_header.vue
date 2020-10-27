@@ -47,6 +47,11 @@ export default {
       required: false,
       default: 0,
     },
+    isSuggestionsLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -99,7 +104,7 @@ export default {
 <template>
   <div class="md-suggestion-header border-bottom-0 mt-2">
     <div class="qa-suggestion-diff-header js-suggestion-diff-header font-weight-bold">
-      {{ __('Suggested change') }}
+      {{ __('Suggested change') }} {{ isSuggestionsLoading }}
       <a v-if="helpPagePath" :href="helpPagePath" :aria-label="__('Help')" class="js-help-btn">
         <gl-icon name="question-o" css-classes="link-highlight" />
       </a>

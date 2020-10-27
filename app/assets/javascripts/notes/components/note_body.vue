@@ -53,6 +53,7 @@ export default {
     },
     ...mapState({
       batchSuggestionsInfo: state => state.notes.batchSuggestionsInfo,
+      isSuggestionsLoading: state => state.notes.isSuggestionsLoading,
     }),
     noteBody() {
       return this.note.note;
@@ -88,6 +89,7 @@ export default {
       'submitSuggestionBatch',
       'addSuggestionInfoToBatch',
       'removeSuggestionInfoFromBatch',
+      'toggleSuggestionsLoading',
     ]),
     renderGFM() {
       $(this.$refs['note-body']).renderGFM();
@@ -100,9 +102,18 @@ export default {
     },
     applySuggestion({ suggestionId, flashContainer, callback = () => {} }) {
       const { discussion_id: discussionId, id: noteId } = this.note;
+      this.toggleSuggestionsLoading();
+
+      // return this.submitSuggestion({ discussionId, noteId, suggestionId, flashContainer }).then(
+      //   this.toggleSuggestionsLoading()
+      //   callback,
+      // );
 
       return this.submitSuggestion({ discussionId, noteId, suggestionId, flashContainer }).then(
-        callback,
+        () => {
+          this.toggleSuggestionsLoading();
+          callback();
+        },
       );
     },
     applySuggestionBatch({ flashContainer }) {
@@ -130,6 +141,7 @@ export default {
       :note-html="note.note_html"
       :line-type="lineType"
       :help-page-path="helpPagePath"
+      :is-suggestions-loading="isSuggestionsLoading"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"

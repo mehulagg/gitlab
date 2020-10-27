@@ -47,6 +47,7 @@ export default () => ({
     unresolvedDiscussionsCount: 0,
     descriptionVersions: {},
     isTimelineEnabled: false,
+    isSuggestionsLoading: false,
   },
   actions,
   getters,

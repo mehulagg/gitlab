@@ -43,6 +43,11 @@ export default {
       required: false,
       default: 0,
     },
+    isSuggestionsLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -73,6 +78,8 @@ export default {
         Flash(__('Unable to apply suggestions to a deleted line.'), 'alert', this.$el);
       }
 
+      console.log('suggestionElements', suggestionElements);
+
       suggestionElements.forEach((suggestionEl, i) => {
         const suggestionParentEl = suggestionEl.parentElement;
         const diffComponent = this.generateDiff(i);
@@ -82,12 +89,26 @@ export default {
       this.isRendered = true;
     },
     generateDiff(suggestionIndex) {
-      const { suggestions, disabled, batchSuggestionsInfo, helpPagePath, suggestionsCount } = this;
+      const {
+        suggestions,
+        disabled,
+        batchSuggestionsInfo,
+        helpPagePath,
+        suggestionsCount,
+        isSuggestionsLoading,
+      } = this;
       const suggestion =
         suggestions && suggestions[suggestionIndex] ? suggestions[suggestionIndex] : {};
       const SuggestionDiffComponent = Vue.extend(SuggestionDiff);
       const suggestionDiff = new SuggestionDiffComponent({
-        propsData: { disabled, suggestion, batchSuggestionsInfo, helpPagePath, suggestionsCount },
+        propsData: {
+          disabled,
+          suggestion,
+          batchSuggestionsInfo,
+          helpPagePath,
+          suggestionsCount,
+          isSuggestionsLoading,
+        },
       });
 
       suggestionDiff.$on('apply', ({ suggestionId, callback }) => {
@@ -124,6 +145,7 @@ export default {
 <template>
   <div>
     <div class="flash-container js-suggestions-flash"></div>
+    {{ isSuggestionsLoading }}
     <div v-show="isRendered" ref="container" v-safe-html="noteHtml" class="md"></div>
   </div>
 </template>

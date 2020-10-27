@@ -567,6 +567,8 @@ export const startTaskList = ({ dispatch }) =>
 export const updateResolvableDiscussionsCounts = ({ commit }) =>
   commit(types.UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS);
 
+export const toggleSuggestionsLoading = ({ commit }) => commit(types.TOGGLE_SUGGESTIONS_LOADING);
+
 export const submitSuggestion = (
   { commit, dispatch },
   { discussionId, noteId, suggestionId, flashContainer },

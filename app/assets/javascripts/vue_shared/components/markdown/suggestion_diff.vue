@@ -4,6 +4,7 @@ import SuggestionDiffRow from './suggestion_diff_row.vue';
 import { selectDiffLines } from '../lib/utils/diff_utils';
 
 export default {
+  name: 'SuggestionDiff',
   components: {
     SuggestionDiffHeader,
     SuggestionDiffRow,
@@ -31,6 +32,11 @@ export default {
       type: Number,
       required: false,
       default: 0,
+    },
+    isSuggestionsLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -75,6 +81,7 @@ export default {
       :batch-suggestions-count="batchSuggestionsCount"
       :help-page-path="helpPagePath"
       :inapplicable-reason="suggestion.inapplicable_reason"
+      :is-suggestions-loading="isSuggestionsLoading"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"

@@ -222,6 +222,10 @@ export default {
     }
   },
 
+  [types.TOGGLE_SUGGESTIONS_LOADING](state) {
+    Object.assign(state, { isSuggestionsLoading: !state.isSuggestionsLoading });
+  },
+
   [types.APPLY_SUGGESTION](state, { noteId, discussionId, suggestionId }) {
     const noteObj = utils.findNoteObjectById(state.discussions, discussionId);
     const comment = utils.findNoteObjectById(noteObj.notes, noteId);
