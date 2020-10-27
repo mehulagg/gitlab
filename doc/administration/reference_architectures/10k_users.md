@@ -45,6 +45,13 @@ uploads, or artifacts), using an [object storage service](#configure-the-object-
 is recommended instead of using NFS. Using an object storage service also
 doesn't require you to provision and maintain a node.
 
+NOTE: **Note:**
+[Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) support
+for the Reference Architectures is being
+worked on as a collaborative effort between [the Quality Engineering and Gitaly teams](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1). When this component has been verified
+the Architecture specs will likely change notably as a result to support the new
+and improved designed.
+
 ## Setup components
 
 To set up GitLab and its components to accommodate up to 10,000 users:
@@ -1334,6 +1341,11 @@ To configure the Sentinel Queues server:
 </div>
 
 ## Configure Gitaly
+
+NOTE: **Note:**
+[Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) support
+for the Reference Architectures is in development and is currently being
+worked on as a collaborative effort between [the Quality Engineering and Gitaly teams](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1)
 
 [Gitaly](../gitaly/index.md) server node requirements are dependent on data,
 specifically the number of projects and those projects' sizes. It's recommended
