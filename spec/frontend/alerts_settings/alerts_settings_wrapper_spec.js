@@ -327,6 +327,78 @@ describe('AlertsSettingsWrapper', () => {
       await waitForPromises();
       expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
     });
+
+    it('shows error alert when integration token reset fails ', async () => {
+      const errorMsg = 'Something went wrong';
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {});
+      await wrapper.vm.$nextTick();
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      });
+    });
+
+    it('shows error alert when integration update fails ', async () => {
+      const errorMsg = 'Something went wrong';
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-update-integration', {});
+      await wrapper.vm.$nextTick();
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      });
+    });
+
+    it('shows error alert when integration token reset fails ', async () => {
+      const errorMsg = 'Something went wrong';
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {});
+      await wrapper.vm.$nextTick();
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      });
+    });
+
+    it('shows error alert when integration update fails ', async () => {
+      const errorMsg = 'Something went wrong';
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-update-integration', {});
+      await wrapper.vm.$nextTick();
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      });
+    });
   });
 
   describe('with mocked Apollo client', () => {
