@@ -9,7 +9,11 @@ RSpec.describe Projects::TerraformHelper do
     subject { helper.js_terraform_list_data(project) }
 
     it 'displays image path' do
-      expect(subject[:empty_state_image]).to match(%r(/illustrations/empty-state/empty-serverless-lg|svg))
+      image_path = ActionController::Base.helpers.image_path(
+        'illustrations/empty-state/empty-serverless-lg.svg'
+      )
+
+      expect(subject[:empty_state_image]).to eq(image_path)
     end
 
     it 'displays project path' do

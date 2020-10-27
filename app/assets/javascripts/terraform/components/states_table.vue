@@ -37,14 +37,14 @@ export default {
 <template>
   <gl-table :items="states" :fields="fields" data-testid="terraform-states-table">
     <template #cell(name)="{ item }">
-      <strong>
+      <p class="gl-font-weight-bold gl-m-0 gl-text-gray-900">
         {{ item.name }}
-      </strong>
 
-      <gl-badge v-if="item.lockedAt">
-        <gl-icon name="lock" />
-        {{ s__('Terraform|Locked') }}
-      </gl-badge>
+        <gl-badge v-if="item.lockedAt">
+          <gl-icon name="lock" />
+          {{ s__('Terraform|Locked') }}
+        </gl-badge>
+      </p>
     </template>
 
     <template #cell(updated)="{ item }">

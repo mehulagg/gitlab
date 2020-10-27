@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Projects::TerraformController < Projects::ApplicationController
-  before_action :authenticate_user!
   before_action :authorize_can_read_terraform_state!
 
   feature_category :infrastructure_as_code

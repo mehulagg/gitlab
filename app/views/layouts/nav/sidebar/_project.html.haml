@@ -269,7 +269,7 @@
                     = _('Serverless')
 
             - if project_nav_tab? :terraform
-              = nav_link(controller: :terraform, action: [:index]) do
+              = nav_link(controller: :terraform) do
                 = link_to project_terraform_index_path(@project), title: _('Terraform') do
                   %span
                     = _('Terraform')

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require('spec_helper')
+require 'spec_helper'
 
 RSpec.describe Projects::TerraformController do
   let_it_be(:project) { create(:project) }
