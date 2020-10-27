@@ -163,20 +163,16 @@ RSpec.describe ResourceAccessTokens::CreateService do
         end
       end
 
-
-      context 'when access provisioning fails' do
+      context 'with enforced group managed account enabled' do
         let(:group) { create(:group_with_managed_accounts, :private) }
-        let(:project) { create(:project, namespace: group)}
+        let(:resource) { create(:project, group: group)}
 
         before do
           stub_feature_flags(group_managed_accounts: true)
+          stub_licensed_features(group_saml: true)
         end
 
         context 'enforced group managed account enabled' do
-          before do
-            stub_licensed_features(group_saml: true)
-          end
-
           it 'does not add the the project bot' do
             response = subject
 
