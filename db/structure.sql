@@ -8749,6 +8749,7 @@ CREATE TABLE abuse_reports (
 );
 
 CREATE SEQUENCE abuse_reports_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9006,6 +9007,7 @@ CREATE TABLE appearances (
 );
 
 CREATE SEQUENCE appearances_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9022,6 +9024,7 @@ CREATE TABLE application_setting_terms (
 );
 
 CREATE SEQUENCE application_setting_terms_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9260,8 +9263,8 @@ CREATE TABLE application_settings (
     namespace_storage_size_limit bigint DEFAULT 0 NOT NULL,
     seat_link_enabled boolean DEFAULT true NOT NULL,
     container_expiration_policies_enable_historic_entries boolean DEFAULT false NOT NULL,
-    issues_create_limit integer DEFAULT 0 NOT NULL,
     push_rule_id bigint,
+    issues_create_limit integer DEFAULT 0 NOT NULL,
     group_owners_can_manage_default_branch_protection boolean DEFAULT true NOT NULL,
     container_registry_vendor text DEFAULT ''::text NOT NULL,
     container_registry_version text DEFAULT ''::text NOT NULL,
@@ -9309,6 +9312,7 @@ CREATE TABLE application_settings (
 );
 
 CREATE SEQUENCE application_settings_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9463,6 +9467,7 @@ CREATE TABLE approvals (
 );
 
 CREATE SEQUENCE approvals_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9481,6 +9486,7 @@ CREATE TABLE approver_groups (
 );
 
 CREATE SEQUENCE approver_groups_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9499,6 +9505,7 @@ CREATE TABLE approvers (
 );
 
 CREATE SEQUENCE approvers_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9560,6 +9567,7 @@ CREATE TABLE audit_events (
 );
 
 CREATE SEQUENCE audit_events_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9600,6 +9608,7 @@ CREATE TABLE award_emoji (
 );
 
 CREATE SEQUENCE award_emoji_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9665,6 +9674,7 @@ CREATE TABLE badges (
 );
 
 CREATE SEQUENCE badges_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9680,6 +9690,7 @@ CREATE TABLE board_assignees (
 );
 
 CREATE SEQUENCE board_assignees_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9713,6 +9724,7 @@ CREATE TABLE board_labels (
 );
 
 CREATE SEQUENCE board_labels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9788,6 +9800,7 @@ CREATE SEQUENCE boards_epic_user_preferences_id_seq
 ALTER SEQUENCE boards_epic_user_preferences_id_seq OWNED BY boards_epic_user_preferences.id;
 
 CREATE SEQUENCE boards_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9813,6 +9826,7 @@ CREATE TABLE broadcast_messages (
 );
 
 CREATE SEQUENCE broadcast_messages_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9902,6 +9916,7 @@ CREATE TABLE chat_names (
 );
 
 CREATE SEQUENCE chat_names_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9920,6 +9935,7 @@ CREATE TABLE chat_teams (
 );
 
 CREATE SEQUENCE chat_teams_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -9936,6 +9952,7 @@ CREATE TABLE ci_build_needs (
 );
 
 CREATE SEQUENCE ci_build_needs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10004,6 +10021,7 @@ CREATE TABLE ci_build_trace_section_names (
 );
 
 CREATE SEQUENCE ci_build_trace_section_names_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10078,6 +10096,7 @@ CREATE TABLE ci_builds (
 );
 
 CREATE SEQUENCE ci_builds_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10102,6 +10121,7 @@ CREATE TABLE ci_builds_metadata (
 );
 
 CREATE SEQUENCE ci_builds_metadata_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10168,11 +10188,14 @@ ALTER SEQUENCE ci_deleted_objects_id_seq OWNED BY ci_deleted_objects.id;
 CREATE TABLE ci_freeze_periods (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
-    freeze_start character varying(998) NOT NULL,
-    freeze_end character varying(998) NOT NULL,
-    cron_timezone character varying(255) NOT NULL,
+    freeze_start text NOT NULL,
+    freeze_end text NOT NULL,
+    cron_timezone text NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_4a7939e04e CHECK ((char_length(freeze_end) <= 998)),
+    CONSTRAINT check_a92607bd2b CHECK ((char_length(freeze_start) <= 998)),
+    CONSTRAINT check_b14055adc3 CHECK ((char_length(cron_timezone) <= 255))
 );
 
 CREATE SEQUENCE ci_freeze_periods_id_seq
@@ -10200,6 +10223,7 @@ CREATE TABLE ci_group_variables (
 );
 
 CREATE SEQUENCE ci_group_variables_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10248,6 +10272,7 @@ CREATE TABLE ci_job_artifacts (
 );
 
 CREATE SEQUENCE ci_job_artifacts_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10347,6 +10372,7 @@ CREATE TABLE ci_pipeline_schedule_variables (
 );
 
 CREATE SEQUENCE ci_pipeline_schedule_variables_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10370,6 +10396,7 @@ CREATE TABLE ci_pipeline_schedules (
 );
 
 CREATE SEQUENCE ci_pipeline_schedules_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10390,6 +10417,7 @@ CREATE TABLE ci_pipeline_variables (
 );
 
 CREATE SEQUENCE ci_pipeline_variables_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10446,6 +10474,7 @@ CREATE SEQUENCE ci_pipelines_config_pipeline_id_seq
 ALTER SEQUENCE ci_pipelines_config_pipeline_id_seq OWNED BY ci_pipelines_config.pipeline_id;
 
 CREATE SEQUENCE ci_pipelines_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10530,6 +10559,7 @@ CREATE TABLE ci_runner_namespaces (
 );
 
 CREATE SEQUENCE ci_runner_namespaces_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10547,6 +10577,7 @@ CREATE TABLE ci_runner_projects (
 );
 
 CREATE SEQUENCE ci_runner_projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10581,6 +10612,7 @@ CREATE TABLE ci_runners (
 );
 
 CREATE SEQUENCE ci_runners_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10599,6 +10631,7 @@ CREATE TABLE ci_sources_pipelines (
 );
 
 CREATE SEQUENCE ci_sources_pipelines_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10636,6 +10669,7 @@ CREATE TABLE ci_stages (
 );
 
 CREATE SEQUENCE ci_stages_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10701,6 +10735,7 @@ CREATE TABLE ci_trigger_requests (
 );
 
 CREATE SEQUENCE ci_trigger_requests_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10721,6 +10756,7 @@ CREATE TABLE ci_triggers (
 );
 
 CREATE SEQUENCE ci_triggers_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10744,6 +10780,7 @@ CREATE TABLE ci_variables (
 );
 
 CREATE SEQUENCE ci_variables_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10795,6 +10832,7 @@ CREATE TABLE cluster_groups (
 );
 
 CREATE SEQUENCE cluster_groups_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10820,6 +10858,7 @@ CREATE TABLE cluster_platforms_kubernetes (
 );
 
 CREATE SEQUENCE cluster_platforms_kubernetes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10837,6 +10876,7 @@ CREATE TABLE cluster_projects (
 );
 
 CREATE SEQUENCE cluster_projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10897,6 +10937,7 @@ CREATE TABLE cluster_providers_gcp (
 );
 
 CREATE SEQUENCE cluster_providers_gcp_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10921,7 +10962,8 @@ CREATE TABLE clusters (
     namespace_per_environment boolean DEFAULT true NOT NULL,
     management_project_id integer,
     cleanup_status smallint DEFAULT 1 NOT NULL,
-    cleanup_status_reason text
+    cleanup_status_reason text,
+    helm_major_version integer DEFAULT 3 NOT NULL
 );
 
 CREATE TABLE clusters_applications_cert_managers (
@@ -10936,6 +10978,7 @@ CREATE TABLE clusters_applications_cert_managers (
 );
 
 CREATE SEQUENCE clusters_applications_cert_managers_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -10974,6 +11017,7 @@ CREATE TABLE clusters_applications_crossplane (
 );
 
 CREATE SEQUENCE clusters_applications_crossplane_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11039,6 +11083,7 @@ CREATE TABLE clusters_applications_helm (
 );
 
 CREATE SEQUENCE clusters_applications_helm_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11064,6 +11109,7 @@ CREATE TABLE clusters_applications_ingress (
 );
 
 CREATE SEQUENCE clusters_applications_ingress_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11085,6 +11131,7 @@ CREATE TABLE clusters_applications_jupyter (
 );
 
 CREATE SEQUENCE clusters_applications_jupyter_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11107,6 +11154,7 @@ CREATE TABLE clusters_applications_knative (
 );
 
 CREATE SEQUENCE clusters_applications_knative_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11130,6 +11178,7 @@ CREATE TABLE clusters_applications_prometheus (
 );
 
 CREATE SEQUENCE clusters_applications_prometheus_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11151,6 +11200,7 @@ CREATE TABLE clusters_applications_runners (
 );
 
 CREATE SEQUENCE clusters_applications_runners_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11160,6 +11210,7 @@ CREATE SEQUENCE clusters_applications_runners_id_seq
 ALTER SEQUENCE clusters_applications_runners_id_seq OWNED BY clusters_applications_runners.id;
 
 CREATE SEQUENCE clusters_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11256,6 +11307,7 @@ CREATE TABLE container_repositories (
 );
 
 CREATE SEQUENCE container_repositories_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11301,6 +11353,7 @@ CREATE TABLE conversational_development_index_metrics (
 );
 
 CREATE SEQUENCE conversational_development_index_metrics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11468,6 +11521,7 @@ CREATE TABLE dependency_proxy_blobs (
 );
 
 CREATE SEQUENCE dependency_proxy_blobs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11485,6 +11539,7 @@ CREATE TABLE dependency_proxy_group_settings (
 );
 
 CREATE SEQUENCE dependency_proxy_group_settings_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11503,6 +11558,7 @@ CREATE TABLE deploy_keys_projects (
 );
 
 CREATE SEQUENCE deploy_keys_projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11529,6 +11585,7 @@ CREATE TABLE deploy_tokens (
 );
 
 CREATE SEQUENCE deploy_tokens_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11569,6 +11626,7 @@ CREATE TABLE deployments (
 );
 
 CREATE SEQUENCE deployments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11616,11 +11674,11 @@ CREATE SEQUENCE design_management_designs_id_seq
 ALTER SEQUENCE design_management_designs_id_seq OWNED BY design_management_designs.id;
 
 CREATE TABLE design_management_designs_versions (
-    id bigint NOT NULL,
     design_id bigint NOT NULL,
     version_id bigint NOT NULL,
     event smallint DEFAULT 0 NOT NULL,
-    image_v432x230 character varying(255)
+    image_v432x230 character varying(255),
+    id bigint NOT NULL
 );
 
 CREATE SEQUENCE design_management_designs_versions_id_seq
@@ -11765,6 +11823,7 @@ CREATE TABLE emails (
 );
 
 CREATE SEQUENCE emails_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11787,6 +11846,7 @@ CREATE TABLE environments (
 );
 
 CREATE SEQUENCE environments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11803,6 +11863,7 @@ CREATE TABLE epic_issues (
 );
 
 CREATE SEQUENCE epic_issues_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11819,6 +11880,7 @@ CREATE TABLE epic_metrics (
 );
 
 CREATE SEQUENCE epic_metrics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11877,12 +11939,13 @@ CREATE TABLE epics (
     state_id smallint DEFAULT 1 NOT NULL,
     start_date_sourcing_epic_id integer,
     due_date_sourcing_epic_id integer,
-    confidential boolean DEFAULT false NOT NULL,
     external_key character varying(255),
+    confidential boolean DEFAULT false NOT NULL,
     CONSTRAINT check_fcfb4a93ff CHECK ((lock_version IS NOT NULL))
 );
 
 CREATE SEQUENCE epics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11906,6 +11969,7 @@ CREATE TABLE events (
 );
 
 CREATE SEQUENCE events_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11999,6 +12063,7 @@ CREATE TABLE feature_gates (
 );
 
 CREATE SEQUENCE feature_gates_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12015,6 +12080,7 @@ CREATE TABLE features (
 );
 
 CREATE SEQUENCE features_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12031,6 +12097,7 @@ CREATE TABLE fork_network_members (
 );
 
 CREATE SEQUENCE fork_network_members_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12046,6 +12113,7 @@ CREATE TABLE fork_networks (
 );
 
 CREATE SEQUENCE fork_networks_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12206,6 +12274,7 @@ CREATE TABLE geo_node_namespace_links (
 );
 
 CREATE SEQUENCE geo_node_namespace_links_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12273,6 +12342,7 @@ CREATE TABLE geo_node_statuses (
 );
 
 CREATE SEQUENCE geo_node_statuses_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12306,6 +12376,7 @@ CREATE TABLE geo_nodes (
 );
 
 CREATE SEQUENCE geo_nodes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12500,6 +12571,7 @@ CREATE TABLE gpg_key_subkeys (
 );
 
 CREATE SEQUENCE gpg_key_subkeys_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12519,6 +12591,7 @@ CREATE TABLE gpg_keys (
 );
 
 CREATE SEQUENCE gpg_keys_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12542,6 +12615,7 @@ CREATE TABLE gpg_signatures (
 );
 
 CREATE SEQUENCE gpg_signatures_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12580,6 +12654,7 @@ CREATE TABLE group_custom_attributes (
 );
 
 CREATE SEQUENCE group_custom_attributes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12710,6 +12785,7 @@ CREATE TABLE historical_data (
 );
 
 CREATE SEQUENCE historical_data_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12730,6 +12806,7 @@ CREATE TABLE identities (
 );
 
 CREATE SEQUENCE identities_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12748,6 +12825,7 @@ CREATE TABLE import_export_uploads (
 );
 
 CREATE SEQUENCE import_export_uploads_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12792,6 +12870,7 @@ CREATE TABLE index_statuses (
 );
 
 CREATE SEQUENCE index_statuses_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12807,6 +12886,7 @@ CREATE TABLE insights (
 );
 
 CREATE SEQUENCE insights_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12910,6 +12990,7 @@ CREATE TABLE issue_links (
 );
 
 CREATE SEQUENCE issue_links_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -12929,6 +13010,7 @@ CREATE TABLE issue_metrics (
 );
 
 CREATE SEQUENCE issue_metrics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13016,6 +13098,7 @@ CREATE TABLE issues (
 );
 
 CREATE SEQUENCE issues_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13147,6 +13230,7 @@ CREATE TABLE keys (
 );
 
 CREATE SEQUENCE keys_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13165,6 +13249,7 @@ CREATE TABLE label_links (
 );
 
 CREATE SEQUENCE label_links_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13183,6 +13268,7 @@ CREATE TABLE label_priorities (
 );
 
 CREATE SEQUENCE label_priorities_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13207,6 +13293,7 @@ CREATE TABLE labels (
 );
 
 CREATE SEQUENCE labels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13227,6 +13314,7 @@ CREATE TABLE ldap_group_links (
 );
 
 CREATE SEQUENCE ldap_group_links_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13244,6 +13332,7 @@ CREATE TABLE lfs_file_locks (
 );
 
 CREATE SEQUENCE lfs_file_locks_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13264,6 +13353,7 @@ CREATE TABLE lfs_objects (
 );
 
 CREATE SEQUENCE lfs_objects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13282,6 +13372,7 @@ CREATE TABLE lfs_objects_projects (
 );
 
 CREATE SEQUENCE lfs_objects_projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13298,6 +13389,7 @@ CREATE TABLE licenses (
 );
 
 CREATE SEQUENCE licenses_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13340,6 +13432,7 @@ CREATE TABLE lists (
 );
 
 CREATE SEQUENCE lists_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13369,6 +13462,7 @@ CREATE TABLE members (
 );
 
 CREATE SEQUENCE members_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13517,6 +13611,7 @@ CREATE TABLE merge_request_diffs (
 );
 
 CREATE SEQUENCE merge_request_diffs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13553,6 +13648,7 @@ CREATE TABLE merge_request_metrics (
 );
 
 CREATE SEQUENCE merge_request_metrics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13649,6 +13745,7 @@ CREATE TABLE merge_requests_closing_issues (
 );
 
 CREATE SEQUENCE merge_requests_closing_issues_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13658,6 +13755,7 @@ CREATE SEQUENCE merge_requests_closing_issues_id_seq
 ALTER SEQUENCE merge_requests_closing_issues_id_seq OWNED BY merge_requests_closing_issues.id;
 
 CREATE SEQUENCE merge_requests_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13751,6 +13849,7 @@ CREATE TABLE milestones (
 );
 
 CREATE SEQUENCE milestones_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13801,6 +13900,7 @@ CREATE TABLE namespace_statistics (
 );
 
 CREATE SEQUENCE namespace_statistics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13862,6 +13962,7 @@ CREATE TABLE namespaces (
 );
 
 CREATE SEQUENCE namespaces_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13884,6 +13985,7 @@ CREATE TABLE note_diff_files (
 );
 
 CREATE SEQUENCE note_diff_files_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13922,6 +14024,7 @@ CREATE TABLE notes (
 );
 
 CREATE SEQUENCE notes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13954,13 +14057,14 @@ CREATE TABLE notification_settings (
     issue_due boolean,
     new_epic boolean,
     notification_email character varying,
-    fixed_pipeline boolean,
     new_release boolean,
+    fixed_pipeline boolean,
     moved_project boolean DEFAULT true NOT NULL,
     change_reviewer_merge_request boolean
 );
 
 CREATE SEQUENCE notification_settings_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13982,6 +14086,7 @@ CREATE TABLE oauth_access_grants (
 );
 
 CREATE SEQUENCE oauth_access_grants_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14003,6 +14108,7 @@ CREATE TABLE oauth_access_tokens (
 );
 
 CREATE SEQUENCE oauth_access_tokens_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14027,6 +14133,7 @@ CREATE TABLE oauth_applications (
 );
 
 CREATE SEQUENCE oauth_applications_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14042,6 +14149,7 @@ CREATE TABLE oauth_openid_requests (
 );
 
 CREATE SEQUENCE oauth_openid_requests_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14495,6 +14603,7 @@ CREATE TABLE pages_domains (
 );
 
 CREATE SEQUENCE pages_domains_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14535,6 +14644,7 @@ CREATE TABLE path_locks (
 );
 
 CREATE SEQUENCE path_locks_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14561,6 +14671,7 @@ CREATE TABLE personal_access_tokens (
 );
 
 CREATE SEQUENCE personal_access_tokens_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14639,6 +14750,7 @@ CREATE TABLE plans (
 );
 
 CREATE SEQUENCE plans_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14751,6 +14863,7 @@ CREATE TABLE programming_languages (
 );
 
 CREATE SEQUENCE programming_languages_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14803,6 +14916,7 @@ CREATE TABLE project_auto_devops (
 );
 
 CREATE SEQUENCE project_auto_devops_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14821,6 +14935,7 @@ CREATE TABLE project_ci_cd_settings (
 );
 
 CREATE SEQUENCE project_ci_cd_settings_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14855,6 +14970,7 @@ CREATE TABLE project_custom_attributes (
 );
 
 CREATE SEQUENCE project_custom_attributes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14887,6 +15003,7 @@ CREATE TABLE project_deploy_tokens (
 );
 
 CREATE SEQUENCE project_deploy_tokens_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14946,6 +15063,7 @@ CREATE TABLE project_features (
 );
 
 CREATE SEQUENCE project_features_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14965,6 +15083,7 @@ CREATE TABLE project_group_links (
 );
 
 CREATE SEQUENCE project_group_links_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -14983,6 +15102,7 @@ CREATE TABLE project_import_data (
 );
 
 CREATE SEQUENCE project_import_data_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15007,6 +15127,7 @@ CREATE TABLE project_incident_management_settings (
 );
 
 CREATE SEQUENCE project_incident_management_settings_project_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15037,6 +15158,7 @@ CREATE TABLE project_mirror_data (
 );
 
 CREATE SEQUENCE project_mirror_data_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15084,6 +15206,7 @@ CREATE TABLE project_repository_states (
 );
 
 CREATE SEQUENCE project_repository_states_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15133,15 +15256,14 @@ CREATE SEQUENCE project_security_settings_project_id_seq
 ALTER SEQUENCE project_security_settings_project_id_seq OWNED BY project_security_settings.project_id;
 
 CREATE TABLE project_settings (
-    project_id integer NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    project_id integer NOT NULL,
     push_rule_id bigint,
-    show_default_award_emojis boolean DEFAULT true,
+    show_default_award_emojis boolean DEFAULT true NOT NULL,
     allow_merge_on_skipped_pipeline boolean,
     squash_option smallint DEFAULT 3,
-    has_confluence boolean DEFAULT false NOT NULL,
-    CONSTRAINT check_bde223416c CHECK ((show_default_award_emojis IS NOT NULL))
+    has_confluence boolean DEFAULT false NOT NULL
 );
 
 CREATE TABLE project_statistics (
@@ -15162,6 +15284,7 @@ CREATE TABLE project_statistics (
 );
 
 CREATE SEQUENCE project_statistics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15273,6 +15396,7 @@ CREATE TABLE projects (
 );
 
 CREATE SEQUENCE projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15314,6 +15438,7 @@ CREATE TABLE prometheus_alerts (
 );
 
 CREATE SEQUENCE prometheus_alerts_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15340,6 +15465,7 @@ CREATE TABLE prometheus_metrics (
 );
 
 CREATE SEQUENCE prometheus_metrics_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15359,6 +15485,7 @@ CREATE TABLE protected_branch_merge_access_levels (
 );
 
 CREATE SEQUENCE protected_branch_merge_access_levels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15379,6 +15506,7 @@ CREATE TABLE protected_branch_push_access_levels (
 );
 
 CREATE SEQUENCE protected_branch_push_access_levels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15396,6 +15524,7 @@ CREATE TABLE protected_branch_unprotect_access_levels (
 );
 
 CREATE SEQUENCE protected_branch_unprotect_access_levels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15414,6 +15543,7 @@ CREATE TABLE protected_branches (
 );
 
 CREATE SEQUENCE protected_branches_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15433,6 +15563,7 @@ CREATE TABLE protected_environment_deploy_access_levels (
 );
 
 CREATE SEQUENCE protected_environment_deploy_access_levels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15450,6 +15581,7 @@ CREATE TABLE protected_environments (
 );
 
 CREATE SEQUENCE protected_environments_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15469,6 +15601,7 @@ CREATE TABLE protected_tag_create_access_levels (
 );
 
 CREATE SEQUENCE protected_tag_create_access_levels_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15486,6 +15619,7 @@ CREATE TABLE protected_tags (
 );
 
 CREATE SEQUENCE protected_tags_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15529,6 +15663,7 @@ CREATE TABLE push_rules (
 );
 
 CREATE SEQUENCE push_rules_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15565,6 +15700,7 @@ CREATE TABLE redirect_routes (
 );
 
 CREATE SEQUENCE redirect_routes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15609,6 +15745,7 @@ CREATE TABLE releases (
 );
 
 CREATE SEQUENCE releases_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15639,6 +15776,7 @@ CREATE TABLE remote_mirrors (
 );
 
 CREATE SEQUENCE remote_mirrors_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15844,6 +15982,7 @@ CREATE TABLE routes (
 );
 
 CREATE SEQUENCE routes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15884,6 +16023,7 @@ CREATE TABLE saml_providers (
 );
 
 CREATE SEQUENCE saml_providers_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -15924,6 +16064,7 @@ CREATE TABLE scim_oauth_access_tokens (
 );
 
 CREATE SEQUENCE scim_oauth_access_tokens_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16007,6 +16148,7 @@ CREATE TABLE sent_notifications (
 );
 
 CREATE SEQUENCE sent_notifications_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16080,6 +16222,7 @@ CREATE TABLE services (
 );
 
 CREATE SEQUENCE services_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16094,6 +16237,7 @@ CREATE TABLE shards (
 );
 
 CREATE SEQUENCE shards_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16114,6 +16258,7 @@ CREATE TABLE slack_integrations (
 );
 
 CREATE SEQUENCE slack_integrations_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16139,8 +16284,8 @@ CREATE SEQUENCE smartcard_identities_id_seq
 ALTER SEQUENCE smartcard_identities_id_seq OWNED BY smartcard_identities.id;
 
 CREATE TABLE snippet_repositories (
-    snippet_id bigint NOT NULL,
     shard_id bigint NOT NULL,
+    snippet_id bigint NOT NULL,
     disk_path character varying(80) NOT NULL,
     verification_retry_count smallint,
     verification_retry_at timestamp with time zone,
@@ -16219,6 +16364,7 @@ CREATE TABLE snippets (
 );
 
 CREATE SEQUENCE snippets_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16237,6 +16383,7 @@ CREATE TABLE software_license_policies (
 );
 
 CREATE SEQUENCE software_license_policies_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16252,6 +16399,7 @@ CREATE TABLE software_licenses (
 );
 
 CREATE SEQUENCE software_licenses_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16276,6 +16424,7 @@ CREATE TABLE spam_logs (
 );
 
 CREATE SEQUENCE spam_logs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16363,6 +16512,7 @@ CREATE TABLE subscriptions (
 );
 
 CREATE SEQUENCE subscriptions_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16404,6 +16554,7 @@ CREATE TABLE system_note_metadata (
 );
 
 CREATE SEQUENCE system_note_metadata_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16424,6 +16575,7 @@ CREATE TABLE taggings (
 );
 
 CREATE SEQUENCE taggings_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16439,6 +16591,7 @@ CREATE TABLE tags (
 );
 
 CREATE SEQUENCE tags_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16457,6 +16610,7 @@ CREATE TABLE term_agreements (
 );
 
 CREATE SEQUENCE term_agreements_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16536,6 +16690,7 @@ CREATE TABLE timelogs (
 );
 
 CREATE SEQUENCE timelogs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16562,6 +16717,7 @@ CREATE TABLE todos (
 );
 
 CREATE SEQUENCE todos_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16576,6 +16732,7 @@ CREATE TABLE trending_projects (
 );
 
 CREATE SEQUENCE trending_projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16597,6 +16754,7 @@ CREATE TABLE u2f_registrations (
 );
 
 CREATE SEQUENCE u2f_registrations_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16621,6 +16779,7 @@ CREATE TABLE uploads (
 );
 
 CREATE SEQUENCE uploads_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16641,6 +16800,7 @@ CREATE TABLE user_agent_details (
 );
 
 CREATE SEQUENCE user_agent_details_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16657,6 +16817,7 @@ CREATE TABLE user_callouts (
 );
 
 CREATE SEQUENCE user_callouts_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16692,6 +16853,7 @@ CREATE TABLE user_custom_attributes (
 );
 
 CREATE SEQUENCE user_custom_attributes_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16704,9 +16866,9 @@ CREATE TABLE user_details (
     user_id bigint NOT NULL,
     job_title character varying(200) DEFAULT ''::character varying NOT NULL,
     bio character varying(255) DEFAULT ''::character varying NOT NULL,
+    webauthn_xid text,
     bio_html text,
     cached_markdown_version integer,
-    webauthn_xid text,
     CONSTRAINT check_245664af82 CHECK ((char_length(webauthn_xid) <= 100))
 );
 
@@ -16720,8 +16882,8 @@ CREATE SEQUENCE user_details_user_id_seq
 ALTER SEQUENCE user_details_user_id_seq OWNED BY user_details.user_id;
 
 CREATE TABLE user_highest_roles (
-    user_id bigint NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    user_id bigint NOT NULL,
     highest_access_level integer
 );
 
@@ -16760,6 +16922,7 @@ CREATE TABLE user_preferences (
 );
 
 CREATE SEQUENCE user_preferences_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16777,6 +16940,7 @@ CREATE TABLE user_statuses (
 );
 
 CREATE SEQUENCE user_statuses_user_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16795,6 +16959,7 @@ CREATE TABLE user_synced_attributes_metadata (
 );
 
 CREATE SEQUENCE user_synced_attributes_metadata_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16889,6 +17054,7 @@ CREATE TABLE users (
 );
 
 CREATE SEQUENCE users_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -16928,6 +17094,7 @@ CREATE TABLE users_star_projects (
 );
 
 CREATE SEQUENCE users_star_projects_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -17045,6 +17212,7 @@ CREATE TABLE vulnerability_feedback (
 );
 
 CREATE SEQUENCE vulnerability_feedback_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -17257,6 +17425,7 @@ CREATE TABLE web_hook_logs (
 );
 
 CREATE SEQUENCE web_hook_logs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -17294,6 +17463,7 @@ CREATE TABLE web_hooks (
 );
 
 CREATE SEQUENCE web_hooks_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -17334,6 +17504,7 @@ CREATE TABLE wiki_page_meta (
 );
 
 CREATE SEQUENCE wiki_page_meta_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -17352,6 +17523,7 @@ CREATE TABLE wiki_page_slugs (
 );
 
 CREATE SEQUENCE wiki_page_slugs_id_seq
+    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -19786,7 +19958,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
@@ -20470,6 +20642,8 @@ CREATE INDEX index_deployments_on_environment_id_and_iid_and_project_id ON deplo
 
 CREATE INDEX index_deployments_on_environment_id_and_status ON deployments USING btree (environment_id, status);
 
+CREATE INDEX index_deployments_on_id_and_cluster_id ON deployments USING btree (id, cluster_id) WHERE (cluster_id IS NOT NULL);
+
 CREATE INDEX index_deployments_on_id_and_status_and_created_at ON deployments USING btree (id, status, created_at);
 
 CREATE INDEX index_deployments_on_id_where_cluster_id_present ON deployments USING btree (id) WHERE (cluster_id IS NOT NULL);
@@ -20541,8 +20715,6 @@ CREATE UNIQUE INDEX index_emails_on_email ON emails USING btree (email);
 CREATE INDEX index_emails_on_user_id ON emails USING btree (user_id);
 
 CREATE INDEX index_enabled_clusters_on_id ON clusters USING btree (id) WHERE (enabled = true);
-
-CREATE INDEX index_environments_on_auto_stop_at ON environments USING btree (auto_stop_at) WHERE (auto_stop_at IS NOT NULL);
 
 CREATE INDEX index_environments_on_name_varchar_pattern_ops ON environments USING btree (name varchar_pattern_ops);
 
@@ -22096,8 +22268,6 @@ CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_index ON issue_user_mentions
 
 CREATE UNIQUE INDEX kubernetes_namespaces_cluster_and_namespace ON clusters_kubernetes_namespaces USING btree (cluster_id, namespace);
 
-CREATE INDEX merge_request_mentions_temp_index ON merge_requests USING btree (id) WHERE ((description ~~ '%@%'::text) OR ((title)::text ~~ '%@%'::text));
-
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_and_note_id_index ON merge_request_user_mentions USING btree (merge_request_id, note_id);
 
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_index ON merge_request_user_mentions USING btree (merge_request_id) WHERE (note_id IS NULL);
@@ -22117,6 +22287,8 @@ CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_b
 CREATE INDEX partial_index_deployments_for_legacy_successful_deployments ON deployments USING btree (id) WHERE ((finished_at IS NULL) AND (status = 2));
 
 CREATE INDEX partial_index_deployments_for_project_id_and_tag ON deployments USING btree (project_id) WHERE (tag IS TRUE);
+
+CREATE INDEX snippet_mentions_temp_index ON notes USING btree (id) WHERE ((note ~~ '%@%'::text) AND ((noteable_type)::text = 'Snippet'::text));
 
 CREATE INDEX snippet_repositories_verification_checksum_partial ON snippet_repositories USING btree (verification_checksum) WHERE (verification_checksum IS NOT NULL);
 
