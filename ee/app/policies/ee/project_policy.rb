@@ -357,7 +357,10 @@ module EE
     def resource_access_token_available?
       return true unless ::Gitlab.com?
 
-      project.namespace.feature_available_non_trial?(:resource_access_token)
+      group = project.namespace
+
+      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
+        group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end
