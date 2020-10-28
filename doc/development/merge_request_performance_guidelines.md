@@ -152,6 +152,71 @@ objects_to_update.update_all(some_field: some_value)
 This uses ActiveRecord's `update_all` method to update all rows in a single
 query. This in turn makes it much harder for this code to overload a database.
 
+## Cached Queries
+
+**Summary:** a merge request **should not** execute duplicated cached queries.
+
+Rails provides a [SQL query cache](https://guides.rubyonrails.org/caching_with_rails.html#sql-caching), 
+used to cache the results of database queries for the duration of the request. 
+If Rails encounters the same query again for that request,
+it will use the cached result set as opposed to running the query against the database again.
+The query results are only cached for the duration of that single request, it does not persist across multiple requests.
+
+The cached queries help with reducing DB load, but they still:
+- Consume memory
+- Require as to re-instantiate each ActiveRecord object
+- Require as to re-instantiate each relation of the object
+- Makes us spend additional CPU-cycles to look into a list of cached queries.
+
+We should treat the Cached queries the same as 
+[N+1 queries](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations).
+They are cheaper, but they are not cheap at all from `memory` perspective.
+
+The code modified or added by a merge request should not execute duplicated cached queries.
+
+As an example, say we have a Ci pipeline. All pipeline builds belong to the same pipeline,
+thus they also belong to the same project (`pipeline.project`).
+But it turns out that associated objects do not point to the same in-memory objects.
+
+```ruby
+pipeline_project = pipeline.project
+# Project Load (0.6ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+build = pipeline.builds.first
+
+build.project == pipeline_project
+# CACHE Project Load (0.0ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+# => true
+```
+When we call `build.project`, it will not hit the database, it will use the cached result, but it will re-instantiate
+project object.
+
+If we try to serialize each build:
+
+```ruby
+pipeline.builds.each do |build|
+  build.to_json(only: [:name], include: [project: { only: [:name]}])
+end
+```
+
+It will re-instantiate project object for each build, instead of using the same in-memory object.
+
+When building features you could use [Performance bar](performance_bar.md) in order to detect duplicated cached queries.
+You can write a test with [QueryRecoder](query_recorder.md) to detect multiple cached queries and prevent regressions.
+
+In this particular case the workaround is fairly easy:
+
+```ruby
+
+pipeline.builds.each do |build|                               
+  build.project = pipeline.project
+  build.to_json(only: [:name], include: [project: { only: [:name]}])
+end
+```
+
+We can assign `pipeline.project` to each `build.project`. 
+This will allow us that each build point to the same in-memory project, 
+avoiding the cached SQL query and re-instantiation of the project object for each build.
+
 ## Executing Queries in Loops
 
 **Summary:** SQL queries **must not** be executed in a loop unless absolutely
