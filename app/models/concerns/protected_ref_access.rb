@@ -13,12 +13,16 @@ module ProtectedRefAccess
       [
         Gitlab::Access::MAINTAINER,
         Gitlab::Access::DEVELOPER,
-        Gitlab::Access::NO_ACCESS
+        Gitlab::Access::NO_ACCESS,
+        Gitlab::Access::ADMIN
       ]
     end
   end
 
   included do
+    belongs_to :user
+    belongs_to :group
+
     scope :maintainer, -> { where(access_level: Gitlab::Access::MAINTAINER) }
     scope :developer, -> { where(access_level: Gitlab::Access::DEVELOPER) }
     scope :by_user, -> (user) { where(user_id: user ) }
@@ -27,35 +31,70 @@ module ProtectedRefAccess
     scope :for_user, -> { where.not(user_id: nil) }
     scope :for_group, -> { where.not(group_id: nil) }
 
-    validates :access_level, presence: true, if: :role?, inclusion: {
-      in: self.allowed_access_levels
-    }
+    protected_type = self.module_parent.model_name.singular
+    validates :group_id, uniqueness: { scope: protected_type, allow_nil: true }
+    validates :user_id, uniqueness: { scope: protected_type, allow_nil: true }
+    validates :access_level, uniqueness: { scope: protected_type, if: :role?,
+                                            conditions: -> { where(user_id: nil, group_id: nil) } }
+    validates :group, :user,
+              absence: true,
+              unless: :protected_refs_for_users_required_and_available
+
+    validate :validate_group_membership, if: :protected_refs_for_users_required_and_available
+    validate :validate_user_membership, if: :protected_refs_for_users_required_and_available
   end
 
   def humanize
+    return self.user.name if self.user.present?
+    return self.group.name if self.group.present?
+
     HUMAN_ACCESS_LEVELS[self.access_level]
   end
 
-  # CE access levels are always role-based,
-  # where as EE allows groups and users too
+  def type
+    if self.user.present?
+      :user
+    elsif self.group.present?
+      :group
+    else
+      :role
+    end
+  end
+
   def role?
-    true
+    type == :role
   end
 
   def check_access(user)
     return true if user.admin?
+    return user.id == self.user_id if self.user.present?
+    return group.users.exists?(user.id) if self.group.present?
 
     user.can?(:push_code, project) &&
       project.team.max_member_access(user.id) >= access_level
   end
+
+  def protected_refs_for_users_required_and_available
+    type != :role && project.feature_available?(:protected_refs_for_users)
+  end
+
+  # We don't need to validate the license if this access applies to a role.
+  #
+  # If it applies to a user/group we can only skip validation `nil`-validation
+  # if the feature is available
+  def validate_group_membership
+    return unless group
+
+    unless project.project_group_links.where(group: group).exists?
+      self.errors.add(:group, 'does not have access to the project')
+    end
+  end
+
+  def validate_user_membership
+    return unless user
+
+    unless project.team.member?(user)
+      self.errors.add(:user, 'is not a member of the project')
+    end
+  end
 end
-
-ProtectedRefAccess.include_if_ee('EE::ProtectedRefAccess::Scopes')
-ProtectedRefAccess.prepend_if_ee('EE::ProtectedRefAccess')
-
-# When using `prepend` (or `include` for that matter), the `ClassMethods`
-# constants are not merged. This means that `class_methods` in
-# `EE::ProtectedRefAccess` would be ignored.
-#
-# To work around this, we prepend the `ClassMethods` constant manually.
-ProtectedRefAccess::ClassMethods.prepend_if_ee('EE::ProtectedRefAccess::ClassMethods')
