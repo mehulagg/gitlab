@@ -117,8 +117,8 @@ npm config set '//gitlab.example.com/api/v4/projects/<your_project_id>/packages/
 
 You should now be able to publish and install NPM packages in your project.
 
-If you encounter an error message with [Yarn](https://classic.yarnpkg.com/en/), see the
-[troubleshooting section](#troubleshooting).
+If you encounter an error with [Yarn](https://classic.yarnpkg.com/en/), view
+[troubleshooting steps](#troubleshooting).
 
 ### Authenticate with a CI job token
 
@@ -239,44 +239,43 @@ deploy:
     - npm publish
 ```
 
-## Publish a package with the same version twice
+## Publishing packages with the same name or version
 
-You cannot publish a package with the same name and version twice, unless you
-delete the existing package first. This aligns with npmjs.org's behavior. However,
-npmjs.org does not ever let you publish the same version more than once, even if it has been deleted.
+You cannot publish a package if a package of the same name and version already exists.
+You must delete the existing package first.
+
+This aligns with npmjs.org's behavior. However, npmjs.org does not ever let you publish
+the same version more than once, even if it has been deleted.
 
 ## Install a package
 
-NPM packages are commonly installed by using the `npm` or `yarn` commands
-inside a JavaScript project. If you haven't already, set the
-URL for scoped packages. You can do this with the following command:
+NPM packages are commonly-installed by using the `npm` or `yarn` commands
+in a JavaScript project.
 
-```shell
-npm config set @foo:registry https://gitlab.example.com/api/v4/packages/npm/
-```
+1. Set the URL for scoped packages by running:
 
-Replace `@foo` with your scope.
+   ```shell
+   npm config set @foo:registry https://gitlab.example.com/api/v4/packages/npm/
+   ```
 
-Next, you need to ensure [authentication](#authenticate-to-the-package-registry)
-is setup so you can successfully install the package. Once this has been
-completed, you can run the following command inside your project to install a
-package:
+   Replace `@foo` with your scope.
 
-```shell
-npm install @my-project-scope/my-package
-```
+1. Ensure [authentication](#authenticate-to-the-package-registry) is configured.
+   
+1. In your project, to install a package, run:
 
-Or if you're using Yarn:
+   ```shell
+   npm install @my-project-scope/my-package
+   ```
 
-```shell
-yarn add @my-project-scope/my-package
-```
+   Or if you're using Yarn:
 
-### Forward requests to npmjs.org
+   ```shell
+   yarn add @my-project-scope/my-package
+   ```
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/55344) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9.
-
-By default, when an NPM package is not found in the GitLab NPM Registry, the request is forwarded to [npmjs.com](https://www.npmjs.com/).
+In [GitLab 12.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/55344),
+when an NPM package is not found in the Package Registry, the request is forwarded to [npmjs.com](https://www.npmjs.com/).
 
 Administrators can disable this behavior in the [Continuous Integration settings](../../admin_area/settings/continuous_integration.md).
 
@@ -296,6 +295,49 @@ and use your organization's URL. The name is case-sensitive and must match the n
 //gitlab.example.com/api/v4/packages/npm/:_authToken= "<your_token>"
 //gitlab.example.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
 ```
+
+### NPM dependencies metadata
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11867) in GitLab Premium 12.6.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+
+In GitLab 12.6 and later, packages published to the Package Registry expose the following attributes to the NPM client:
+
+- name
+- version
+- dist-tags
+- dependencies
+  - dependencies
+  - devDependencies
+  - bundleDependencies
+  - peerDependencies
+  - deprecated
+
+## Add NPM distribution tags
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9425) in GitLab Premium 12.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+
+You can add [distribution tags](https://docs.npmjs.com/cli/dist-tag) to newly-published packages.
+Tags are optional and can be assigned to only one package at a time.
+
+When you publish a package without a tag, the `latest` tag is added by default.
+When you install a package without specifying the tag or version, the `latest` tag is used.
+
+Examples of the supported `dist-tag` commands:
+
+```shell
+npm publish @scope/package --tag               # Publish a package with new tag
+npm dist-tag add @scope/package@version my-tag # Add a tag to an existing package
+npm dist-tag ls @scope/package                 # List all tags under the package
+npm dist-tag rm @scope/package@version my-tag  # Delete a tag from the package
+npm install @scope/package@my-tag              # Install a specific tag
+```
+
+You cannot use your `CI_JOB_TOKEN` or deploy token with the `npm dist-tag` commands.
+View [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/258835) for details.
+
+Due to a bug in NPM 6.9.0, deleting distribution tags fails. Make sure your NPM version is 6.9.1 or later.
 
 ## Troubleshooting
 
@@ -358,7 +400,7 @@ And the `.npmrc` file should look like:
 
 ### `npm install` returns `Error: Failed to replace env in config: ${NPM_TOKEN}`
 
-You do not need a token to run `npm install` unless your project is private (the token is only required to publish). If the `.npmrc` file was checked in with a reference to `$NPM_TOKEN`, you can remove it. If you prefer to leave the reference in, you need to set a value prior to running `npm install` or set the value using [GitLab environment variables](./../../../ci/variables/README.md):
+You do not need a token to run `npm install` unless your project is private. The token is only required to publish. If the `.npmrc` file was checked in with a reference to `$NPM_TOKEN`, you can remove it. If you prefer to leave the reference in, you must set a value prior to running `npm install` or set the value by using [GitLab environment variables](./../../../ci/variables/README.md):
 
 ```shell
 NPM_TOKEN=<your_token> npm install
@@ -366,49 +408,11 @@ NPM_TOKEN=<your_token> npm install
 
 ### `npm install` returns `npm ERR! 403 Forbidden`
 
-- Check that your token is not expired and has appropriate permissions.
-- Check that [your token does not begin with `-`](https://gitlab.com/gitlab-org/gitlab/-/issues/235473).
-- Check if you have attempted to publish a package with a name that already exists within a given scope.
-- Ensure the scoped packages URL includes a trailing slash:
+If you get this error, ensure that:
+
+- Your token is not expired and has appropriate permissions.
+- [Your token does not begin with `-`](https://gitlab.com/gitlab-org/gitlab/-/issues/235473).
+- A package with the same name doesn't already exist within the given scope.
+- The scoped packages URL includes a trailing slash:
   - Correct: `//gitlab.example.com/api/v4/packages/npm/`
   - Incorrect: `//gitlab.example.com/api/v4/packages/npm`
-
-## NPM dependencies metadata
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11867) in GitLab Premium 12.6.
-
-Starting from GitLab 12.6, new packages published to the GitLab NPM Registry expose the following attributes to the NPM client:
-
-- name
-- version
-- dist-tags
-- dependencies
-  - dependencies
-  - devDependencies
-  - bundleDependencies
-  - peerDependencies
-  - deprecated
-
-## NPM distribution tags
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9425) in GitLab Premium 12.8.
-
-You can add [distribution tags](https://docs.npmjs.com/cli/dist-tag) for newly published packages.
-They follow NPM's convention where they are optional, and each tag can only be assigned to one
-package at a time. The `latest` tag is added by default when a package is published without a tag.
-The same applies to installing a package without specifying the tag or version.
-
-Examples of the supported `dist-tag` commands and using tags in general:
-
-```shell
-npm publish @scope/package --tag               # Publish new package with new tag
-npm dist-tag add @scope/package@version my-tag # Add a tag to an existing package
-npm dist-tag ls @scope/package                 # List all tags under the package
-npm dist-tag rm @scope/package@version my-tag  # Delete a tag from the package
-npm install @scope/package@my-tag              # Install a specific tag
-```
-
-You cannot use your `CI_JOB_TOKEN` or deploy token with the `npm dist-tag` commands.
-View [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/258835) for details.
-
-Due to a bug in NPM 6.9.0, deleting dist tags fails. Make sure your NPM version is greater than 6.9.1.
