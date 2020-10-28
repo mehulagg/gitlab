@@ -77,8 +77,12 @@ RSpec.describe 'Users' do
           post_graphql(query, current_user: admin)
 
           expect(graphql_data.dig('users', 'nodes').count).to eq(2)
+
+          # rubocop: disable Lint/DuplicatedHashKey
           expect(graphql_data.dig('users', 'nodes')).to include(
-            a_hash_including("id" => user1.to_global_id.to_s, "id" => admin.to_global_id.to_s))
+            a_hash_including("id" => user1.to_global_id.to_s,
+                             "id" => admin.to_global_id.to_s))
+          # rubocop: enable Lint/DuplicatedHashKey
         end
       end
     end
