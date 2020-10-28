@@ -117,6 +117,9 @@ For a demo of the Azure SAML setup including SCIM, see [SCIM Provisioning on Azu
 | Identity provider single sign-on URL | Login URL |
 | Certificate fingerprint | Thumbprint |
 
+NOTE: **Note:**
+The 'GitLab single sign-on URL' value appears in the GitLab set up screen after clicking **Save changes**.
+
 We recommend:
 
 - **Unique User Identifier (Name identifier)** set to `user.objectID`.
@@ -135,6 +138,9 @@ For a demo of the Okta SAML setup including SCIM, see [Demo: Okta Group SAML & S
 | Identity provider single sign-on URL | Identity Provider Single Sign-On URL |
 
 Under Okta's **Single sign-on URL** field, check the option **Use this for Recipient URL and Destination URL**.
+
+NOTE: **Note:**
+The 'GitLab single sign-on URL' value appears in the GitLab set up screen after clicking **Save changes**.
 
 We recommend:
 
@@ -155,7 +161,11 @@ For GitLab.com, use a generic SAML Test Connector such as the SAML Test Connecto
 | GitLab single sign-on URL | Login URL |
 | Identity provider single sign-on URL | SAML 2.0 Endpoint |
 
-Recommended `NameID` value: `OneLogin ID`.
+NOTE: **Note:**
+The 'GitLab single sign-on URL' value appears in the GitLab set up screen after clicking **Save changes**.
+
+We recommend:
+- `NameID` value: `OneLogin ID`.
 
 ### Additional providers and setup options
 
@@ -220,7 +230,7 @@ On subsequent visits, you should be able to go [sign in to GitLab.com with SAML]
 
 ### Role
 
-Starting from [GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/214523), group owners can set a 'Default membership role' other than 'Guest'. To do so, [configure the SAML SSO for the group](#configuring-gitlab). That role becomes the starting access level of all users added to the group.
+Starting from [GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/214523), group owners can set a 'Default membership role' other than 'Guest'. To do so, [configure the SAML SSO for the group](#configuring-gitlab) and select a role from the **Default membership role** field. That role becomes the starting access level of all users added to the group.
 
 Existing members with appropriate privileges can promote or demote users, as needed.
 
