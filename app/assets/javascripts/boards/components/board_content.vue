@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { sortBy } from 'lodash';
 import BoardColumn from 'ee_else_ce/boards/components/board_column.vue';
 import { GlAlert } from '@gitlab/ui';
@@ -43,8 +43,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['fetchLists', 'showPromotionList']),
-    ...mapMutations(['DISMISS_MESSAGE']),
+    ...mapActions(['dismissMessage', 'fetchLists', 'showPromotionList']),
   },
 };
 </script>
@@ -54,7 +53,7 @@ export default {
     <gl-alert v-if="error" variant="danger" :dismissible="false">
       {{ error }}
     </gl-alert>
-    <gl-alert v-if="message.text" :variant="message.variant" @dismiss="DISMISS_MESSAGE">
+    <gl-alert v-if="message.text" :variant="message.variant" @dismiss="dismissMessage">
       {{ message.text }}
     </gl-alert>
     <div

@@ -24,8 +24,8 @@ describe('BoardContent', () => {
     return new Vuex.Store({
       getters,
       state,
-      mutations: {
-        DISMISS_MESSAGE: jest.fn(),
+      actions: {
+        dismissMessage: jest.fn(),
       },
     });
   };
@@ -65,7 +65,7 @@ describe('BoardContent', () => {
 
   describe('with message from store', () => {
     beforeEach(() => {
-      jest.spyOn(wrapper.vm.$store, 'commit').mockImplementation();
+      jest.spyOn(wrapper.vm.$store, 'dispatch').mockImplementation();
 
       wrapper.vm.$store.state.message = {
         text: 'List removed from board',
@@ -81,7 +81,7 @@ describe('BoardContent', () => {
     it('dismisses message on close', () => {
       wrapper.find(GlAlert).vm.$emit('dismiss');
 
-      expect(wrapper.vm.$store.commit).toHaveBeenCalledWith('DISMISS_MESSAGE');
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('dismissMessage');
     });
   });
 });

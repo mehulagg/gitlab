@@ -60,6 +60,10 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
+  dismissMessage({ commit }) {
+    commit(types.DISMISS_MESSAGE);
+  },
+
   fetchLists: ({ commit, state, dispatch }) => {
     const { endpoints, boardType, filterParams } = state;
     const { fullPath, boardId } = endpoints;

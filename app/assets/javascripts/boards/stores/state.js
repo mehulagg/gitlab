@@ -17,7 +17,7 @@ export default () => ({
   error: undefined,
   message: {
     text: '',
-    variant: 'error', // success | info | error, etc. Whatever gl-alert supports
+    variant: 'error', //  success | info | error | warning | tip
   },
   // TODO: remove after ce/ee split of board_content.vue
   isShowingEpicsSwimlanes: false,

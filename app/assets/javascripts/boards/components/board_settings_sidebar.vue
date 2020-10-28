@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlDrawer, GlLabel } from '@gitlab/ui';
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import { __ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
 import eventHub from '~/sidebar/event_hub';
@@ -69,13 +69,12 @@ export default {
     eventHub.$off('sidebar.closeAll', this.unsetActiveId);
   },
   methods: {
-    ...mapActions(['unsetActiveId', 'removeList']),
-    ...mapMutations(['DISMISS_MESSAGE']),
+    ...mapActions(['dismissMessage', 'removeList', 'unsetActiveId']),
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
     deleteBoard() {
-      this.DISMISS_MESSAGE();
+      this.dismissMessage();
       // eslint-disable-next-line no-alert
       if (window.confirm(this.$options.i18n.removeConfirm)) {
         if (this.shouldUseGraphQL) {
