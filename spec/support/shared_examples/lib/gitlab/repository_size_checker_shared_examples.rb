@@ -10,17 +10,6 @@ RSpec.shared_examples 'checker size above limit' do
   end
 end
 
-RSpec.shared_examples 'checker size above limit (with additional storage, that would bring it under the limit)' do
-  context 'when size is above the limit' do
-    let(:current_size) { 100 }
-    let(:additional_purchased_storage) { 60 }
-
-    it 'returns true' do
-      expect(subject.above_size_limit?).to eq(true)
-    end
-  end
-end
-
 RSpec.shared_examples 'checker size not over limit' do
   it 'returns false when not over the limit' do
     expect(subject.above_size_limit?).to eq(false)
