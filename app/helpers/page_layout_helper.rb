@@ -44,7 +44,8 @@ module PageLayoutHelper
     if link
       @page_canonical_link = link
     elsif Feature.enabled?(:global_canonical, current_user)
-      @page_canonical_link ||= url_for(:only_path => false)
+      # rescue ActionController::UrlGenerationError
+      @page_canonical_link ||= url_for(safe_params.merge(only_path: false))
     else
       @page_canonical_link
     end

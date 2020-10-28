@@ -137,4 +137,45 @@ RSpec.describe PageLayoutHelper do
       end
     end
   end
+
+  describe '#page_canonical_link' do
+    let(:user) { build(:user) }
+
+    subject { helper.page_canonical_link(link) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'when link is passed' do
+      let(:link) { 'https://gitlab.com' }
+
+      it 'stores and returns the link value' do
+        expect(subject).to eq link
+        expect(helper.page_canonical_link(nil)).to eq link
+      end
+    end
+
+    context 'when no link is provided' do
+      let(:link) { nil }
+
+      before do
+        controller.params[:controller] = 'users'
+        controller.params[:action] = 'show'
+        controller.params[:username] = user.username
+      end
+
+      it 'generates the canonical link using the params in the context' do
+        expect(subject).to eq user_url(user)
+      end
+
+      context 'when feature flag global_canonical is disabled' do
+        it 'returns nil' do
+          stub_feature_flags(global_canonical: false)
+
+          expect(subject).to be_nil
+        end
+      end
+    end
+  end
 end
