@@ -103,8 +103,10 @@
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/qa.gitlab-ci.yml"
 
-.yaml-patterns: &yaml-patterns
-  - "**/*.yml"
+.ci-yaml-patterns: &ci-yaml-patterns
+  - ".gitlab-ci.yml"
+  - ".gitlab/ci/**/*"
+  - "lib/gitlab/ci/**/*.yml"
 
 .docs-patterns: &docs-patterns
   - ".gitlab/route-map.yml"
@@ -905,10 +907,10 @@
     - <<: *if-dot-com-ee-schedule
       changes: *code-backstage-patterns
 
-##############
-# YAML rules #
-##############
-.yaml:rules:
+#################
+# CI YAML rules #
+#################
+.ci-yaml:rules:
   rules:
     - <<: *if-default-refs
-      changes: *yaml-patterns
+      changes: *ci-yaml-patterns

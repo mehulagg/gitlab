@@ -3,7 +3,7 @@
 lint-ci-gitlab:
   extends:
     - .default-retry
-    - .yaml:rules
+    - .ci-yaml:rules
   image: pipelinecomponents/yamllint:latest
   stage: test
   needs: []
