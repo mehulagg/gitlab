@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+if $LOADED_FEATURES.include?(File.expand_path('spec_helper.rb', __dir__))
+  # There's no need to load anything here if spec_helper is already loaded
+  return
+end
+
 require 'bundler/setup'
 
 ENV['GITLAB_ENV'] = 'test'
