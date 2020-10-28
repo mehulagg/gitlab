@@ -10,19 +10,26 @@ module ApprovableBase
 
     scope :without_approvals, -> { left_outer_joins(:approvals).where(approvals: { id: nil }) }
     scope :with_approvals, -> { joins(:approvals) }
+
     scope :approved_by_users_with_ids, -> (*user_ids) do
-      with_approvals
-        .merge(Approval.with_user)
-        .where(users: { id: user_ids })
-        .group(:id)
-        .having("COUNT(users.id) = ?", user_ids.size)
+      user_ids.reduce(all) do |items, user_id|
+        items.where('EXISTS (?)',
+          Approval
+            .select(1)
+            .where('approvals.merge_request_id = merge_requests.id AND approvals.user_id = :user_id', user_id: user_id)
+        )
+      end
     end
+
     scope :approved_by_users_with_usernames, -> (*usernames) do
-      with_approvals
-        .merge(Approval.with_user)
-        .where(users: { username: usernames })
-        .group(:id)
-        .having("COUNT(users.id) = ?", usernames.size)
+      usernames.reduce(all) do |items, username|
+        items.where('EXISTS (?)',
+          Approval
+            .select(1)
+            .joins(:user)
+            .where('approvals.merge_request_id = merge_requests.id AND users.username = :username', username: username)
+        )
+      end
     end
   end
 

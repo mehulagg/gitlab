@@ -58,33 +58,76 @@ module MergeRequests
     end
 
     def find_approvers_by_names(items)
-      with_users_filtered_by_criteria(items) do |items_with_users|
-        find_approvers_by_query(items_with_users, :username, usernames)
-      end
+      with_users_filtered_by_criteria(items, :username, usernames)
     end
 
     def find_approvers_by_ids(items)
-      with_users_filtered_by_criteria(items) do |items_with_users|
-        find_approvers_by_query(items_with_users, :id, ids)
+      with_users_filtered_by_criteria(items, :id, ids)
+    end
+
+    def with_users_filtered_by_criteria(items, field, values)
+      items.select_from_union(
+        [
+          users_mrs(items, field, values),
+          group_users_mrs(items, field, values),
+          project_users_mrs(mrs_without_overridden_rules(items), field, values),
+          project_group_users_mrs(mrs_without_overridden_rules(items), field, values)
+        ]
+      )
+    end
+
+    def users_mrs(items, field, values)
+      filter_by_existence(items, values) do |value|
+        # rubocop:disable GitlabSecurity/SqlInjection`
+        # field is not user provided input
+        ApprovalMergeRequestRule
+          .joins(:users)
+          .where("approval_merge_request_rules.merge_request_id = merge_requests.id AND users.#{field} = ?", value)
+        # rubocop:enable GitlabSecurity/SqlInjection`
       end
     end
 
-    def find_approvers_by_query(items, field, values)
-      items
-        .where(users: { field => values })
-        .group('merge_requests.id')
-        .having("COUNT(users.id) = ?", values.size)
+    def group_users_mrs(items, field, values)
+      filter_by_existence(items, values) do |value|
+        # rubocop:disable GitlabSecurity/SqlInjection`
+        # field is not user provided input
+        ApprovalMergeRequestRule
+          .joins(groups: :users)
+          .where("approval_merge_request_rules.merge_request_id = merge_requests.id AND users.#{field} = ?", value)
+        # rubocop:enable GitlabSecurity/SqlInjection`
+      end
     end
 
-    def with_users_filtered_by_criteria(items)
-      users_mrs = yield(items.joins(approval_rules: :users))
-      group_users_mrs = yield(items.joins(approval_rules: { groups: :users }))
+    def mrs_without_overridden_rules(items)
+      items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
+    end
 
-      mrs_without_overridden_rules = items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
-      project_users_mrs = yield(mrs_without_overridden_rules.joins(target_project: { approval_rules: :users }))
-      project_group_users_mrs = yield(mrs_without_overridden_rules.joins(target_project: { approval_rules: { groups: :users } }))
+    def project_users_mrs(items, field, values)
+      filter_by_existence(items, values) do |value|
+        # rubocop:disable GitlabSecurity/SqlInjection`
+        # field is not user provided input
+        Project
+          .joins(approval_rules: :users)
+          .where("projects.id = merge_requests.target_project_id AND users.#{field} = ?", value)
+        # rubocop:enable GitlabSecurity/SqlInjection`
+      end
+    end
 
-      items.select_from_union([users_mrs, group_users_mrs, project_users_mrs, project_group_users_mrs])
+    def project_group_users_mrs(items, field, values)
+      filter_by_existence(items, values) do |value|
+        # rubocop:disable GitlabSecurity/SqlInjection`
+        # field is not user provided input
+        Project
+          .joins(approval_rules: { groups: :users })
+          .where("projects.id = merge_requests.target_project_id AND users.#{field} = ?", value)
+        # rubocop:enable GitlabSecurity/SqlInjection`
+      end
+    end
+
+    def filter_by_existence(items, values)
+      values.reduce(items) do |items, value|
+        items.where('EXISTS (?)', yield(value))
+      end
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end

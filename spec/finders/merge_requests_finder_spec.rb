@@ -587,6 +587,27 @@ RSpec.describe MergeRequestsFinder do
           expect(mrs).to eq([mr2])
         end
       end
+
+      it 'does not raise any exception with complex filters' do
+        # available filters from MergeRequest dashboard UI
+        params = {
+          project_id: project1.id,
+          scope: 'authored',
+          state: 'opened',
+          author_username: user.username,
+          assignee_username: user.username,
+          approver_usernames: [user.username],
+          approved_by_usernames: [user.username],
+          milestone_title: 'none',
+          release_tag: 'none',
+          label_names: 'none',
+          my_reaction_emoji: 'none',
+          draft: 'no'
+        }
+
+        merge_requests = described_class.new(user, params).execute
+        expect { merge_requests.load }.not_to raise_error
+      end
     end
 
     describe '#row_count', :request_store do
