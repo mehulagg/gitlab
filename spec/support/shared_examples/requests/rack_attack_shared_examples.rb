@@ -93,8 +93,8 @@ RSpec.shared_examples 'rate-limited token-authenticated requests' do
         request_method: request_method,
         path: request_args.first,
         user_id: user.id,
-        username: user.username,
-        throttle_type: throttle_types[throttle_setting_prefix]
+        'meta.user' => user.username,
+        matched: throttle_types[throttle_setting_prefix]
       }
 
       expect(Gitlab::AuthLogger).to receive(:error).with(arguments).once
@@ -222,8 +222,8 @@ RSpec.shared_examples 'rate-limited web authenticated requests' do
         request_method: request_method,
         path: url_that_requires_authentication,
         user_id: user.id,
-        username: user.username,
-        throttle_type: throttle_types[throttle_setting_prefix]
+        'meta.user' => user.username,
+        matched: throttle_types[throttle_setting_prefix]
       }
 
       expect(Gitlab::AuthLogger).to receive(:error).with(arguments).once
