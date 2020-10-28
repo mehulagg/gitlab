@@ -129,10 +129,6 @@ module QA
           has_element?(:blob_viewer_content, text: text)
         end
 
-        def last_commit_content
-          find_element(:commit_content).text
-        end
-
         def new_merge_request
           wait_until(reload: true) do
             has_css?(element_selector_css(:create_merge_request))

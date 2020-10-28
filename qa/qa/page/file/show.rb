@@ -7,14 +7,27 @@ module QA
         include Shared::CommitMessage
         include Project::SubMenus::Settings
         include Project::SubMenus::Common
+        include Layout::Flash
 
         view 'app/helpers/blob_helper.rb' do
           element :edit_button, "_('Edit')" # rubocop:disable QA/ElementWithPattern
           element :delete_button, '_("Delete")' # rubocop:disable QA/ElementWithPattern
         end
 
+        view 'app/views/projects/blob/_header_content.html.haml' do
+          element :file_name_content
+        end
+
         view 'app/views/projects/blob/_remove.html.haml' do
           element :delete_file_button, "button_tag 'Delete file'" # rubocop:disable QA/ElementWithPattern
+        end
+
+        view 'app/views/projects/commits/_commit.html.haml' do
+          element :commit_content
+        end
+
+        view 'app/views/shared/_file_highlight.html.haml' do
+          element :file_content
         end
 
         def click_edit
@@ -27,6 +40,18 @@ module QA
 
         def click_delete_file
           click_on 'Delete file'
+        end
+
+        def has_commit_message?(text)
+          has_element?(:commit_content, text: text)
+        end
+
+        def has_file_name?(name)
+          has_element?(:file_name_content, text: name)
+        end
+
+        def has_file_content?(text)
+          has_element?(:file_content, text: text)
         end
       end
     end

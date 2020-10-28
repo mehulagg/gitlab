@@ -4,8 +4,7 @@ module QA
   RSpec.describe 'Create' do
     describe 'Files management' do
       it 'user creates, edits and deletes a file via the Web', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/451' do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         # Create
         file_name = 'QA Test - File name'
@@ -18,9 +17,11 @@ module QA
           file.commit_message = commit_message_for_create
         end
 
-        expect(page).to have_content(file_name)
-        expect(page).to have_content(file_content)
-        expect(page).to have_content(commit_message_for_create)
+        Page::File::Show.perform do |file|
+          expect(file).to have_file_name(file_name)
+          expect(file).to have_file_content(file_content)
+          expect(file).to have_commit_message(commit_message_for_create)
+        end
 
         # Edit
         updated_file_content = 'QA Test - Updated file content'
@@ -28,29 +29,31 @@ module QA
 
         Page::File::Show.perform(&:click_edit)
 
-        Page::File::Form.act do
-          remove_content
-          add_content(updated_file_content)
-          add_commit_message(commit_message_for_update)
-          commit_changes
+        Page::File::Form.perform do |file|
+          file.remove_content
+          file.add_content(updated_file_content)
+          file.add_commit_message(commit_message_for_update)
+          file.commit_changes
         end
 
-        expect(page).to have_content('Your changes have been successfully committed.')
-        expect(page).to have_content(updated_file_content)
-        expect(page).to have_content(commit_message_for_update)
+        Page::File::Show.perform do |file|
+          expect(file).to have_notice('Your changes have been successfully committed.')
+          expect(file).to have_file_content(updated_file_content)
+          expect(file).to have_commit_message(commit_message_for_update)
+        end
 
         # Delete
         commit_message_for_delete = 'QA Test - Delete file'
 
-        Page::File::Show.act do
-          click_delete
-          add_commit_message(commit_message_for_delete)
-          click_delete_file
-        end
+        Page::File::Show.perform do |file|
+          file.click_delete
+          file.add_commit_message(commit_message_for_delete)
+          file.click_delete_file
 
-        expect(page).to have_content('The file has been successfully deleted.')
-        expect(page).to have_content(commit_message_for_delete)
-        expect(page).to have_no_content(file_name)
+          expect(file).to have_notice('The file has been successfully deleted.')
+          expect(file).to have_commit_message(commit_message_for_delete)
+          expect(file).not_to have_file_name(file_name)
+        end
       end
     end
   end
