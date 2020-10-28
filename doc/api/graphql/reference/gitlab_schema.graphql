@@ -15843,6 +15843,16 @@ type Query {
     Returns the last _n_ elements from the list.
     """
     last: Int
+
+    """
+    Measurement recorded after this date
+    """
+    recordedAfter: Time
+
+    """
+    Measurement recorded before this date
+    """
+    recordedBefore: Time
   ): InstanceStatisticsMeasurementConnection
 
   """

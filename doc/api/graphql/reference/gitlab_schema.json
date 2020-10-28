@@ -45912,6 +45912,26 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "recordedAfter",
+                  "description": "Measurement recorded after this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "recordedBefore",
+                  "description": "Measurement recorded before this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
