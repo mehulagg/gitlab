@@ -75,24 +75,6 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
     end
   end
 
-  context 'when only failed pipeline exists' do
-    before do
-      create_pipeline do |pipeline|
-        create(:ci_build, :failed, pipeline: pipeline, coverage: 10)
-      end
-    end
-
-    it_behaves_like 'unknown coverage report'
-
-    context 'particular job specified' do
-      let(:job_name) { 'nonexistent' }
-
-      it 'retruns nil' do
-        expect(badge.status).to be_nil
-      end
-    end
-  end
-
   context 'pipeline does not exist' do
     it_behaves_like 'unknown coverage report'
   end
