@@ -712,7 +712,7 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context 'when user created corrupted vulnerability reports' do
+    context 'when user created corrupted fuzzing reports' do
       let(:comparison_status) { { status: :error, status_reason: 'Failed to parse api fuzzing reports' } }
 
       it 'does not send polling interval' do

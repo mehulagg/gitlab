@@ -929,7 +929,7 @@ RSpec.describe MergeRequest do
                 .to receive(:latest?).and_return(false)
           end
 
-          it 'raises and InvalidateReactiveCache error' do
+          it 'raises an InvalidateReactiveCache error' do
             expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
           end
         end
