@@ -3,6 +3,7 @@ query getPipelinesTable($fullPath: ID!) {
     pipelines(first: 20) {
       nodes {
         id
+        iid
         configSource
         duration
         sha
@@ -13,10 +14,11 @@ query getPipelinesTable($fullPath: ID!) {
           icon
           text
           tooltip
+          group
         }
         user {
           avatarUrl
-          webPath
+          webUrl
           name
         }
         stages {
@@ -26,6 +28,7 @@ query getPipelinesTable($fullPath: ID!) {
               icon
               tooltip
               text
+              group
             }
             groups {
               nodes {

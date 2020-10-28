@@ -12,20 +12,16 @@ export default {
   props: {
     finishedTime: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     duration: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   computed: {
-    hasDuration() {
-      return this.duration > 0;
-    },
-    hasFinishedTime() {
-      return this.finishedTime !== '';
-    },
     durationFormatted() {
       const date = new Date(this.duration * 1000);
 
@@ -53,12 +49,12 @@ export default {
   <div class="table-section section-15">
     <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Duration') }}</div>
     <div class="table-mobile-content">
-      <p v-if="hasDuration" class="duration">
+      <p v-if="duration" class="duration">
         <gl-icon name="timer" class="gl-vertical-align-baseline!" aria-hidden="true" />
         {{ durationFormatted }}
       </p>
 
-      <p v-if="hasFinishedTime" class="finished-at d-none d-md-block">
+      <p v-if="finishedTime" class="finished-at d-none d-md-block">
         <gl-icon name="calendar" class="gl-vertical-align-baseline!" aria-hidden="true" />
 
         <time

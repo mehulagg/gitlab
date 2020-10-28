@@ -38,7 +38,7 @@ export default {
 <template>
   <div class="table-section section-10 d-none d-md-block pipeline-tags">
     <gl-link
-      :href="pipeline.path"
+      :href="pipeline.detailedStatus.detailsPath"
       class="js-pipeline-url-link js-onboarding-pipeline-item"
       data-testid="pipeline-url-link"
       data-qa-selector="pipeline_url_link"
@@ -57,7 +57,7 @@ export default {
         </span>
       </gl-link>
       <span
-        v-if="pipeline.flags.latest"
+        v-if="pipeline.latest"
         v-gl-tooltip
         :title="__('Latest pipeline for the most recent commit on this branch')"
         class="js-pipeline-url-latest badge badge-success"
@@ -66,7 +66,7 @@ export default {
         {{ __('latest') }}
       </span>
       <span
-        v-if="pipeline.flags.yaml_errors"
+        v-if="pipeline.yaml_errors"
         v-gl-tooltip
         :title="pipeline.yaml_errors"
         class="js-pipeline-url-yaml badge badge-danger"
@@ -75,7 +75,7 @@ export default {
         {{ __('yaml invalid') }}
       </span>
       <span
-        v-if="pipeline.flags.failure_reason"
+        v-if="pipeline.failure_reason"
         v-gl-tooltip
         :title="pipeline.failure_reason"
         class="js-pipeline-url-failure badge badge-danger"
@@ -84,7 +84,7 @@ export default {
         {{ __('error') }}
       </span>
       <gl-link
-        v-if="pipeline.flags.auto_devops"
+        v-if="pipeline.auto_devops"
         :id="`pipeline-url-autodevops-${pipeline.id}`"
         tabindex="0"
         class="js-pipeline-url-autodevops badge badge-info autodevops-badge"
@@ -117,14 +117,14 @@ export default {
         </gl-link>
       </gl-popover>
       <span
-        v-if="pipeline.flags.stuck"
+        v-if="pipeline.stuck"
         class="js-pipeline-url-stuck badge badge-warning"
         data-testid="pipeline-url-stuck"
       >
         {{ __('stuck') }}
       </span>
       <span
-        v-if="pipeline.flags.detached_merge_request_pipeline"
+        v-if="pipeline.detached_merge_request_pipeline"
         v-gl-tooltip
         :title="
           __(

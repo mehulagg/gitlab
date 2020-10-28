@@ -10,6 +10,7 @@ import NavigationTabs from '~/vue_shared/components/navigation_tabs.vue';
 import NavigationControls from './nav_controls.vue';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import CIPaginationMixin from '~/vue_shared/mixins/ci_pagination_api_mixin';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import PipelinesFilteredSearch from './pipelines_filtered_search.vue';
 import { validateParams } from '../../utils';
 import PipelinesTable from './pipelines_table.vue';
@@ -118,6 +119,8 @@ export default {
 
         // temporary mock data added until graphql api is updated
         pipelines.forEach(pipeline => {
+          const primaryKeyId = getIdFromGraphQLId(pipeline.id);
+          pipeline.id = primaryKeyId;
           pipeline.commit = {
             id: 'c402956496ee23e976133755510076093fd2f3e8',
             short_id: 'c4029564',
@@ -370,7 +373,7 @@ export default {
 
     <div class="content-list pipelines">
       <gl-loading-icon
-        v-if="stateToRender === $options.stateMap.loading"
+        v-if="$apollo.loading"
         :label="s__('Pipelines|Loading Pipelines')"
         size="lg"
         class="prepend-top-20"
@@ -410,7 +413,7 @@ export default {
       </div>
 
       <table-pagination
-        v-if="shouldRenderPagination"
+        v-if="!$apollo.loading"
         :change="onChangePage"
         :page-info="state.pageInfo"
       />

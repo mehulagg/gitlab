@@ -210,11 +210,7 @@ export default {
      * @return {type}  description
      */
     pipelineDuration() {
-      if (this.pipeline.detailedStatus.hasDetails && this.pipeline.detailedStatus.duration) {
-        return this.pipeline.detailedStatus.duration;
-      }
-
-      return 0;
+      return this.pipeline.duration;
     },
 
     /**
@@ -223,16 +219,12 @@ export default {
      * @return {String}
      */
     pipelineFinishedAt() {
-      if (this.pipeline.details && this.pipeline.details.finished_at) {
-        return this.pipeline.details.finished_at;
-      }
-
-      return '';
+      return this.pipeline.finishedAt;
     },
 
     pipelineStatus() {
-      if (this.pipeline.details && this.pipeline.details.status) {
-        return this.pipeline.details.status;
+      if (this.pipeline.detailedStatus.hasDetails && this.pipeline.detailedStatus.text) {
+        return this.pipeline.detailedStatus;
       }
       return {};
     },
@@ -293,6 +285,7 @@ export default {
       :pipeline-schedule-url="pipelineScheduleUrl"
       :auto-devops-help-path="autoDevopsHelpPath"
     />
+
     <pipeline-triggerer :pipeline="pipeline" />
 
     <div class="table-section section-wrap section-20">

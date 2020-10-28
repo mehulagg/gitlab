@@ -37,13 +37,11 @@ export default {
       type: Object,
       required: true,
     },
-
     updateDropdown: {
       type: Boolean,
       required: false,
       default: false,
     },
-
     type: {
       type: String,
       required: false,
@@ -66,11 +64,14 @@ export default {
     },
 
     triggerButtonClass() {
-      return `ci-status-icon-${this.stage.status.group}`;
+      return `ci-status-icon-${this.stage.detailedStatus.group}`;
     },
 
     borderlessIcon() {
-      return `${this.stage.status.icon}_borderless`;
+      return `${this.stage.detailedStatus.icon}_borderless`;
+    },
+    title() {
+      return `${this.stage.name}: ${this.stage.detailedStatus.tooltip}`;
     },
   },
 
@@ -98,6 +99,8 @@ export default {
     },
 
     fetchJobs() {
+      // change to graphql query
+
       axios
         .get(this.stage.dropdown_path)
         .then(({ data }) => {
@@ -159,7 +162,7 @@ export default {
       ref="dropdown"
       v-gl-tooltip.hover
       :class="triggerButtonClass"
-      :title="stage.title"
+      :title="title"
       class="mini-pipeline-graph-dropdown-toggle js-builds-dropdown-button"
       data-toggle="dropdown"
       data-display="static"
@@ -168,7 +171,7 @@ export default {
       aria-expanded="false"
       @click="onClickStage"
     >
-      <span :aria-label="stage.title" aria-hidden="true" class="no-pointer-events">
+      <span :aria-label="title" aria-hidden="true" class="no-pointer-events">
         <gl-icon :name="borderlessIcon" />
       </span>
     </button>

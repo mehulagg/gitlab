@@ -22,8 +22,8 @@ export default {
   <div class="table-section section-10 d-none d-md-block pipeline-triggerer">
     <user-avatar-link
       v-if="user"
-      :link-href="user.path"
-      :img-src="user.avatar_url"
+      :link-href="user.webUrl"
+      :img-src="user.avatarUrl"
       :img-size="26"
       :tooltip-text="user.name"
       class="gl-ml-3 js-pipeline-url-user"
