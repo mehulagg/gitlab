@@ -21,6 +21,7 @@ module BulkImports
         )
 
         BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
+        BulkImports::Epics::Pipelines::EpicPipeline.new.run(context)
       end
     end
   end
