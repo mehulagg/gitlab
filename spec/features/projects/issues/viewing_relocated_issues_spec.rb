@@ -10,10 +10,10 @@ RSpec.describe 'issues canonical link' do
   let_it_be(:canonical_issue)  { create(:issue) }
   let_it_be(:canonical_url)    { issue_url(canonical_issue, Gitlab::Application.routes.default_url_options) }
 
-  it "doesn't show the canonical URL" do
+  it "shows the canonical URL for the original issue" do
     visit(issue_path(original_issue))
 
-    expect(page).not_to have_any_canonical_links
+    expect(page).to have_any_canonical_links(original_issue)
   end
 
   context 'when the issue was moved' do
