@@ -13,7 +13,7 @@ RSpec.describe 'issues canonical link' do
   it "shows the canonical URL for the original issue" do
     visit(issue_path(original_issue))
 
-    expect(page).to have_any_canonical_links(original_issue)
+    expect(page).to have_canonical_link(issue_url(original_issue))
   end
 
   context 'when the issue was moved' do

@@ -1,6 +1,8 @@
 - @can_bulk_update = can?(current_user, :admin_merge_request, @project)
 - merge_project = merge_request_source_project_for_project(@project)
 - new_merge_request_path = project_new_merge_request_path(merge_project) if merge_project
+- if params[:state] == 'opened'
+  - page_canonical_link project_merge_requests_url(@project)
 
 - page_title _("Merge Requests")
 - new_merge_request_email = @project.new_issuable_address(current_user, 'merge_request')
