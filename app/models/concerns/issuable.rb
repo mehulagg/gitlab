@@ -427,6 +427,16 @@ module Issuable
     end
   end
 
+  def user_discussions_count
+    if notes.loaded?
+      # Use the in-memory association to select and count to avoid hitting the db
+      notes.to_a.uniq { |note| note.discussion_id }.count { |note| !note.system? }
+    else
+      # do the count query
+      notes.user.select(:discussion_id).distinct.count
+    end
+  end
+
   def subscribed_without_subscriptions?(user, project)
     participants(user).include?(user)
   end

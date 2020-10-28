@@ -59,6 +59,8 @@ module Types
           description: 'Number of downvotes the issue has received'
     field :user_notes_count, GraphQL::INT_TYPE, null: false,
           description: 'Number of user notes of the issue'
+    field :user_discussions_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of user discussions of the issue'
     field :web_path, GraphQL::STRING_TYPE, null: false, method: :issue_path,
           description: 'Web path of the issue'
     field :web_url, GraphQL::STRING_TYPE, null: false,
@@ -109,6 +111,30 @@ module Types
 
     field :severity, Types::IssuableSeverityEnum, null: true,
           description: 'Severity level of the incident'
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def user_notes_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :issue_user_notes_count) do |ids, loader, args|
+        counts = Note.where(noteable_type: 'Issue', noteable_id: ids).user.group(:noteable_id).count
+
+        ids.each do |id|
+          loader.call(id, counts[id] || 0)
+        end
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def user_discussions_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :issue_user_discussions_count) do |ids, loader, args|
+        counts = Note.where(noteable_type: 'Issue', noteable_id: ids).user.group(:noteable_id).select(:discussion_id).distinct.count
+
+        ids.each do |id|
+          loader.call(id, counts[id] || 0)
+        end
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def author
       Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find

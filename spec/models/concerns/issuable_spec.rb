@@ -579,6 +579,27 @@ RSpec.describe Issuable do
     end
   end
 
+  describe '#user_discussions_count' do
+    let(:project) { create(:project) }
+    let(:issue1) { create(:issue, project: project) }
+    let(:issue2) { create(:issue, project: project) }
+
+    before do
+      discussion_id_1 = SecureRandom.hex(20)
+      create_list(:discussion_note_on_issue, 3, noteable: issue1, project: project, discussion_id: discussion_id_1)
+      create_list(:discussion_note_on_issue, 2, :system, noteable: issue1, project: project, discussion_id: discussion_id_1)
+      discussion_id_2 = SecureRandom.hex(20)
+      create_list(:discussion_note_on_issue, 4, noteable: issue1, project: project, discussion_id: discussion_id_2)
+      discussion_id_3 = SecureRandom.hex(20)
+      create_list(:discussion_note_on_issue, 5, noteable: issue2, project: project, discussion_id: discussion_id_3)
+    end
+
+    it 'counts the user discussions' do
+      expect(issue1.user_discussions_count).to eq(2)
+      expect(issue2.user_discussions_count).to eq(1)
+    end
+  end
+
   describe "votes" do
     let(:project) { issue.project }
 
