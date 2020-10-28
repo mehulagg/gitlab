@@ -148,12 +148,12 @@ For readability, you can also set up the `--data` in JSON format:
 
 ```shell
 curl --request POST \
-  --url "https://gitlab.example.com/api/v4/groups" \
-  --header "content-type: application/json" \
-  --header "PRIVATE-TOKEN: <your_access_token>" \
-  --data '{
-    "path": "my-group",
-    "name": "My group"
+--url "https://gitlab.example.com/api/v4/groups" \
+--header "content-type: application/json" \
+--header "PRIVATE-TOKEN: <your_access_token>" \
+--data '{
+  "path": "my-group",
+  "name": "My group"
 }'
 ```
 
