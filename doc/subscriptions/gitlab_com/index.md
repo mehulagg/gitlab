@@ -293,10 +293,10 @@ Be aware that:
   be deducted from your Additional Minutes quota immediately after your purchase of additional
   minutes.
 
-## Project Storage
+## Project storage
 If you are using GitLab.com, each repository in a project is provided with 10GB of complimentary storage. When this limit is reached you will no longer be able to commit to the repository.
 
-### Purchasing Additional Storage
+### Purchasing additional storage
 
 You can find pricing for additional storage in the [GitLab Customers Portal](https://customers.gitlab.com/plans)
 
