@@ -828,6 +828,7 @@ module Ci
       Gitlab::Ci::Build::Credentials::Factory.new(self).create!
     end
 
+    # TODO: this can be a private method
     def all_dependencies
       dependencies.all
     end

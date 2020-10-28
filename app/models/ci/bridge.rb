@@ -204,7 +204,17 @@ module Ci
     end
 
     def dependency_variables
-      []
+      return [] unless ::Feature.enabled?(:ci_bridge_dependency_variables, project)
+      return [] if all_dependencies.empty?
+
+      Gitlab::Ci::Variables::Collection.new.concat(
+        Ci::JobVariable.where(job: all_dependencies).dotenv_source
+      )
+    end
+
+    # TODO: this can be a private method
+    def all_dependencies
+      dependencies.all
     end
 
     def target_revision_ref
@@ -246,6 +256,12 @@ module Ci
           merge_request: parent_pipeline.merge_request
         }
       }
+    end
+
+    def dependencies
+      strong_memoize(:dependencies) do
+        Ci::BuildDependencies.new(self)
+      end
     end
   end
 end
