@@ -43,13 +43,21 @@ export default {
       isAuthEnabled: false,
     };
   },
+  computed: {
+    eventData() {
+      const { form, isAuthEnabled } = this;
+      return {
+        form,
+        isAuthEnabled,
+      };
+    },
+  },
   watch: {
     form: { handler: 'emitUpdate', immediate: true, deep: true },
   },
   methods: {
     emitUpdate() {
-      const { form, isAuthEnabled } = this;
-      this.$emit('input', { form, isAuthEnabled });
+      this.$emit('input', this.eventData);
     },
   },
 };
@@ -58,9 +66,9 @@ export default {
 <template>
   <section>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-toggle v-model="isAuthEnabled" data-testid="auth-section-toggle" />
+      <gl-toggle v-model="isAuthEnabled" data-testid="auth-toggle" />
     </gl-form-group>
-    <div v-if="isAuthEnabled">
+    <div v-if="isAuthEnabled" data-testid="auth-form">
       <div class="row">
         <gl-form-group
           :label="s__('DastProfiles|Authentication URL')"
