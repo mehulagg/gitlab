@@ -110,7 +110,7 @@ you list:
    sudo gitlab-ctl reconfigure
    ```
 
-## Queue selector (experimental) **(STARTER ONLY)**
+## Queue selector (experimental)
 
 > [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/45) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
 
@@ -119,7 +119,7 @@ As this is marked as **experimental**, it is subject to change at any
 time, including **breaking backwards compatibility**. This is so that we
 can react to changes we need for our GitLab.com deployment. We have a
 tracking issue open to [remove the experimental
-designation](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/260)
+designation](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/147)
 from this feature; please comment there if you are interested in using
 this in your own deployment.
 
