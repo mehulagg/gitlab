@@ -54,6 +54,34 @@ RSpec.describe 'Users' do
         )
       end
     end
+
+    context 'when admins is true' do
+      let(:query) { graphql_query_for(:users, { admins: true }, 'nodes { id }') }
+
+      context 'current user is not an admin' do
+        let(:post_query) { post_graphql(query, current_user: current_user) }
+
+        it_behaves_like 'a failure to find anything'
+      end
+
+      context 'when current user is an admin' do
+        let_it_be(:admin) { create(:user, :admin) }
+
+        before do
+          user1.update!(admin: true)
+        end
+
+        it_behaves_like 'a working users query'
+
+        it 'includes only admins', :aggregate_failures do
+          post_graphql(query, current_user: admin)
+
+          expect(graphql_data.dig('users', 'nodes').count).to eq(2)
+          expect(graphql_data.dig('users', 'nodes')).to include(
+            a_hash_including("id" => user1.to_global_id.to_s, "id" => admin.to_global_id.to_s))
+        end
+      end
+    end
   end
 
   describe 'sorting and pagination' do
