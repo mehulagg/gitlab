@@ -86,9 +86,7 @@ class PostReceiveService
       banner = scoped_messages.last
     end
 
-    unless banner
-      banner = BroadcastMessage.current_banner_messages.last
-    end
+    banner ||= BroadcastMessage.current_banner_messages.last
 
     banner&.message
   end
