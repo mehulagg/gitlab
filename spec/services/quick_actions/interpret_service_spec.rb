@@ -312,8 +312,8 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
-    shared_examples 'wip command' do
-      it 'returns wip_event: "wip" if content contains /wip' do
+    shared_examples 'draft command' do
+      it 'returns wip_event: "wip" if content contains /draft' do
         _, updates, _ = service.execute(content, issuable)
 
         expect(updates).to eq(wip_event: 'wip')
@@ -326,8 +326,8 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
-    shared_examples 'unwip command' do
-      it 'returns wip_event: "unwip" if content contains /wip' do
+    shared_examples 'undraft command' do
+      it 'returns wip_event: "unwip" if content contains /draft' do
         issuable.update!(title: issuable.wip_title)
         _, updates, _ = service.execute(content, issuable)
 
@@ -1026,22 +1026,22 @@ RSpec.describe QuickActions::InterpretService do
       let(:issuable) { issue }
     end
 
-    it_behaves_like 'wip command' do
+    it_behaves_like 'draft command' do
       let(:content) { '/wip' }
       let(:issuable) { merge_request }
     end
 
-    it_behaves_like 'unwip command' do
+    it_behaves_like 'undraft command' do
       let(:content) { '/wip' }
       let(:issuable) { merge_request }
     end
 
-    it_behaves_like 'wip command' do
+    it_behaves_like 'draft command' do
       let(:content) { '/draft' }
       let(:issuable) { merge_request }
     end
 
-    it_behaves_like 'unwip command' do
+    it_behaves_like 'undraft command' do
       let(:content) { '/draft' }
       let(:issuable) { merge_request }
     end
@@ -1906,13 +1906,13 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
-    describe 'wip command' do
-      let(:content) { '/wip' }
+    describe 'draft command' do
+      let(:content) { '/draft' }
 
       it 'includes the new status' do
         _, explanations = service.explain(content, merge_request)
 
-        expect(explanations).to eq(['Marks this merge request as Work In Progress.'])
+        expect(explanations).to eq(['Marks this merge request as Draft.'])
       end
     end
 
