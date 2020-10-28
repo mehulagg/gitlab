@@ -6,6 +6,7 @@ module Types
     class CodeCoverageSummaryType < BaseObject
       graphql_name 'CodeCoverageSummary'
       description 'Represents the code coverage summary for a project'
+      # https://docs.gitlab.com/ee/development/api_graphql_styleguide.html#type-authorization
 
       field :average_coverage, GraphQL::FLOAT_TYPE, null: true,
             description: 'Average percentage of the different code coverage results available for the project.'
