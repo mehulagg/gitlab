@@ -101,7 +101,7 @@ export default {
         icon="media"
         variant="link"
         category="primary"
-        class="markdown-selector gl-vertical-align-text-bottom"
+        class="markdown-selector button-attach-file gl-vertical-align-text-bottom"
       >
         {{ __('Attach a file') }}
       </gl-button>
