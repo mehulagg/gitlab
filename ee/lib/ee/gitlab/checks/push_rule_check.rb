@@ -41,18 +41,23 @@ module EE
           check_file_size!
         end
 
-        # Run the checks in separate threads for performance benefits
+        # Run the checks in separate threads for performance benefits.
+        #
+        # The git hook environment is currently set in the current thread
+        # in lib/api/internal/base.rb. This needs to be passed into the
+        # child threads we spawn here.
         #
         # @return [Nil] returns nil unless an error is raised
         # @raise [Gitlab::GitAccess::ForbiddenError] if any check fails
         def run_checks_in_parallel!
+          git_env = ::Gitlab::Git::HookEnv.all(project.repository.gl_repository)
           @threads = []
 
-          parallelize do
+          parallelize(git_env) do
             check_tag_or_branch!
           end
 
-          parallelize do
+          parallelize(git_env) do
             check_file_size!
           end
 
@@ -73,8 +78,9 @@ module EE
         # Runs a block inside a new thread. This thread will
         # exit immediately upon an exception being raised.
         #
+        # @param git_env [Hash] the current git environment
         # @raise [Gitlab::GitAccess::ForbiddenError]
-        def parallelize
+        def parallelize(git_env)
           @threads << Thread.new do
             Thread.current.tap do |t|
               t.name = "push_rule_check"
@@ -82,7 +88,11 @@ module EE
               t.report_on_exception = false
             end
 
-            yield
+            ::Gitlab::WithRequestStore.with_request_store do
+              ::Gitlab::Git::HookEnv.set(project.repository.gl_repository, git_env)
+
+              yield
+            end
           ensure # rubocop: disable Layout/RescueEnsureAlignment
             ActiveRecord::Base.clear_active_connections!
           end

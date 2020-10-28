@@ -69,4 +69,31 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
       it_behaves_like "push checks"
     end
   end
+
+  describe "#parallelize" do
+    let(:parallelize) do
+      subject.send(:parallelize, git_env) do
+        Thread.current[:test_env] = Thread.current[:request_store][:gitlab_git_env]
+      end
+    end
+
+    let(:git_env) do
+      {
+        "GIT_OBJECT_DIRECTORY_RELATIVE" => "foo",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES_RELATIVE" => "bar"
+      }
+    end
+
+    before do
+      subject.instance_variable_set(:@threads, [])
+    end
+
+    it "returns the git env" do
+      parallelize.each do |thread|
+        thread.join
+
+        expect(thread[:test_env]).to eq({ project.repository.gl_repository => git_env })
+      end
+    end
+  end
 end
