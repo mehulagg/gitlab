@@ -112,7 +112,7 @@ you list:
 
 ## Queue selector (experimental)
 
-> [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/45) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
+> [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/260 in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
 
 CAUTION: **Caution:**
 As this is marked as **experimental**, it is subject to change at any
