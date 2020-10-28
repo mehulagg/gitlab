@@ -17,11 +17,7 @@ module Clusters
           when 3
             Gitlab::Kubernetes::Helm::V3
           when 2
-            if cluster.applications.empty?
-              Gitlab::Kubernetes::Helm::V3
-            else
-              Gitlab::Kubernetes::Helm::V2
-            end
+            Gitlab::Kubernetes::Helm::V2
           else
             raise "Invalid Helm major version"
           end
