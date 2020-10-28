@@ -183,10 +183,14 @@ un-threaded and ordered chronologically, newest to oldest:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241663) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
 
-After enabling **Incident SLA** in the Incident Management configuration, newly-created
-incidents display a SLA (Service Level Agreement) timer showing the time remaining before
-the SLA period expires. If the incident is not closed before the SLA period ends, GitLab
-adds a `missed::SLA` label to the incident.
+You can enable the Service Level Agreement Countdown timer on incidents to track the Service Level Agreements (SLAs) you hold with your customers. The timer is automatically started when the incident is created and it will show the time remaining before the SLA period expires. To configure the timer:
+
+1. Navigate to **Settings > Operations > Incidents > Incident settings**
+2. Select to Activate "time to SLA" countdown timer
+3. Set a time limit in increments of 15 minutes
+4. Save your changes
+
+When you enable the SLA countdown timer, the **Time to SLA** attribute will appear as a column in the Incidents List and as a field on newly created Incidents. If the incident is not closed before the SLA period ends, GitLab adds a `missed::SLA` label to the incident.
 
 ## Incident Actions
 
