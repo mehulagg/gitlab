@@ -3,9 +3,6 @@
 require './spec/simplecov_env'
 SimpleCovEnv.start!
 
-require './spec/crystalball_env'
-CrystalballEnv.start!
-
 ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'

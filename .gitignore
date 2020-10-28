@@ -75,7 +75,6 @@ eslint-report.html
 /.gitlab_pages_secret
 /.gitlab_kas_secret
 /webpack-report/
-/crystalball/
 /knapsack/
 /rspec_flaky/
 /locale/**/LC_MESSAGES
