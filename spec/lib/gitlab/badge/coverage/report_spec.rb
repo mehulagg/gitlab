@@ -3,15 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Badge::Coverage::Report do
-  let(:project) { build(:project) }
+  let_it_be(:project)  { create(:project) }
+  let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+  let_it_be(:builds) do
+    [
+      create(:ci_build, :success, pipeline: pipeline, coverage: 40, name: 'first'),
+      create(:ci_build, :success, pipeline: pipeline, coverage: 60)
+    ]
+  end
 
   let(:badge) do
     described_class.new(project, 'master', opts: { job: job_name })
   end
 
-  let(:pipeline) { nil }
   let(:job_name) { nil }
-  let(:builds) { [] }
 
   describe '#entity' do
     it 'describes a coverage' do
@@ -37,6 +43,8 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
     end
 
     context 'with no pipeline' do
+      let(:pipeline) { nil }
+
       it 'returns nil' do
         expect(badge.status).to be_nil
       end
@@ -52,14 +60,6 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
 
     context 'with an unmatching job name specified' do
       let(:job_name) { 'incorrect name' }
-      let(:pipeline) { create(:ci_pipeline, :success, builds: builds) }
-
-      let(:builds) do
-        [
-          create(:ci_build, :success, name: 'first', coverage: 40),
-          create(:ci_build, :success, coverage: 60)
-        ]
-      end
 
       it 'returns nil' do
         expect(badge.status).to eq(nil)
@@ -68,14 +68,6 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
 
     context 'with a matching job name specified' do
       let(:job_name) { 'first' }
-      let(:pipeline) { create(:ci_pipeline, :success, builds: builds) }
-
-      let(:builds) do
-        [
-          create(:ci_build, :success, name: 'first', coverage: 40),
-          create(:ci_build, :success, coverage: 60)
-        ]
-      end
 
       it 'returns nil' do
         expect(badge.status).to eq(40.00)
