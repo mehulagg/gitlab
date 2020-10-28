@@ -329,7 +329,7 @@ Running Sidekiq cluster is the default in GitLab 13.0 and later.
 `min_concurrency` and `max_concurrency` are independent; one can be set without
 the other. Setting `min_concurrency` to `0` will disable the limit.
 
-For each queue group, let N be one more than the number of queues. The
+For each queue group, let `N` be one more than the number of queues. The
 concurrency factor will be set to:
 
 1. `N`, if it's between `min_concurrency` and `max_concurrency`.
