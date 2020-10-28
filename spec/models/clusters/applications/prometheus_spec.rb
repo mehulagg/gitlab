@@ -195,7 +195,7 @@ RSpec.describe Clusters::Applications::Prometheus do
 
     subject { prometheus.uninstall_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::DeleteCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand) }
 
     it 'has the application name' do
       expect(subject.name).to eq('prometheus')

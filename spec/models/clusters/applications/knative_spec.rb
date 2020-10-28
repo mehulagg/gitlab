@@ -171,7 +171,7 @@ RSpec.describe Clusters::Applications::Knative do
   describe '#uninstall_command' do
     subject { knative.uninstall_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::DeleteCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand) }
 
     it "removes knative deployed services before uninstallation" do
       2.times do |i|
