@@ -17,6 +17,6 @@ RSpec.configure do |config|
   end
 
   config.after(:each, :snowplow) do
-    Gitlab::Tracking.send(:snowplow).flush
+    Gitlab::Tracking.send(:snowplow).send(:tracker)
   end
 end
