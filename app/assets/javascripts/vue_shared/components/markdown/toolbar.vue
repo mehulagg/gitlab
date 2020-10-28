@@ -90,7 +90,7 @@ export default {
             <gl-button
               variant="link"
               category="primary"
-              class="markdown-selector gl-vertical-align-baseline"
+              class="markdown-selector attach-new-file gl-vertical-align-baseline"
             >
               {{ content }}
             </gl-button>
