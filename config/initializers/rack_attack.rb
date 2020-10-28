@@ -120,7 +120,7 @@ class Rack::Attack
     end
   end
 
-  safelist('safelist_bypass_header') do |req|
+  safelist('safelist_rate_limit_bypass_header') do |req|
     Gitlab::Throttle.bypass_header.present? &&
       req.get_header(Gitlab::Throttle.bypass_header) == '1'
   end
