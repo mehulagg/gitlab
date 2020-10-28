@@ -26,7 +26,7 @@ module Gitlab
           end
 
           def delete_command
-            ['helm', 'delete', '--purge', name].shelljoin
+            ['helm', 'delete', name].shelljoin
           end
         end
       end
