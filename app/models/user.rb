@@ -726,6 +726,10 @@ class User < ApplicationRecord
     def single_user
       User.non_internal.first if single_user?
     end
+
+    def current_active
+      active.without_bots
+    end
   end
 
   #

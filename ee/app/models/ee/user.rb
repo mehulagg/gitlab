@@ -140,6 +140,16 @@ module EE
           all
         end
       end
+
+      override :current_active
+      def current_active
+        scope = super
+        license = License.current
+
+        return scope unless license&.ultimate?
+
+        scope.excluding_guests
+      end
     end
 
     def cannot_be_admin_and_auditor

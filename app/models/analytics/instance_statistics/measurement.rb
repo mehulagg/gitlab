@@ -15,7 +15,8 @@ module Analytics
         pipelines_succeeded: 7,
         pipelines_failed: 8,
         pipelines_canceled: 9,
-        pipelines_skipped: 10
+        pipelines_skipped: 10,
+        current_active_users: 11
       }
 
       IDENTIFIER_QUERY_MAPPING = {
@@ -28,7 +29,8 @@ module Analytics
         identifiers[:pipelines_succeeded] => -> { Ci::Pipeline.success },
         identifiers[:pipelines_failed] => -> { Ci::Pipeline.failed },
         identifiers[:pipelines_canceled] => -> { Ci::Pipeline.canceled },
-        identifiers[:pipelines_skipped] => -> { Ci::Pipeline.skipped }
+        identifiers[:pipelines_skipped] => -> { Ci::Pipeline.skipped },
+        identifiers[:current_active_users] => -> { User.current_active }
       }.freeze
 
       validates :recorded_at, :identifier, :count, presence: true

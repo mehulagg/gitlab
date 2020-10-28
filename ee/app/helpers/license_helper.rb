@@ -7,7 +7,7 @@ module LicenseHelper
   delegate :new_admin_license_path, to: 'Gitlab::Routing.url_helpers'
 
   def current_active_user_count
-    License.current&.current_active_users_count || active_user_count
+    ::Analytics::InstanceStatistics::Measurement.with_identifier(:current_active_users).order_by_latest.first&.count
   end
 
   def maximum_user_count
@@ -50,10 +50,4 @@ module LicenseHelper
   end
 
   extend self
-
-  private
-
-  def active_user_count
-    License.current_active_users.count
-  end
 end
