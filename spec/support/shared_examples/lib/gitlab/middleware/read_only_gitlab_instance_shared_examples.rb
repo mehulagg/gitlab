@@ -128,7 +128,7 @@ RSpec.shared_examples 'write access for a read-only GitLab instance' do
         'LFS request to locks create' | '/root/rouge.git/info/lfs/locks'
         'LFS request to locks unlock' | '/root/rouge.git/info/lfs/locks/1/unlock'
         'request to git-upload-pack'  | '/root/rouge.git/git-upload-pack'
-        # 'request to git-receive-pack' | '/root/rouge.git/git-receive-pack'
+        'request to git-receive-pack' | '/root/rouge.git/git-receive-pack'
       end
 
       with_them do
@@ -176,20 +176,3 @@ RSpec.shared_examples 'write access for a read-only GitLab instance' do
     end
   end
 end
-
-# RSpec.shared_examples 'allows git-upload-pack' do
-#   include Rack::Test::Methods
-#   using RSpec::Parameterized::TableSyntax
-
-#   include_context 'with a mocked GitLab instance'
-
-#   let(:fake_app) { lambda { |env| [200, { 'Content-Type' => 'text/plain' }, ['OK']] } }
-
-#   it "expects a POST request to git-upload-pack URL to be allowed" do
-#     expect(Rails.application.routes).to receive(:recognize_path).and_call_original
-#     response = request.post('/root/rouge.git/git-upload-pack')
-
-#     expect(response).not_to be_redirect
-#     expect(subject).not_to disallow_request
-#   end
-# end
