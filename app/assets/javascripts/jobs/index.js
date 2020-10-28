@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import { pick } from 'lodash';
 import JobApp from './components/job_app.vue';
 import createStore from './store';
 
@@ -17,34 +18,20 @@ export default () => {
       JobApp,
     },
     render(createElement) {
-      const {
-        artifactHelpUrl,
-        deploymentHelpUrl,
-        runnerHelpUrl,
-        runnerSettingsUrl,
-        variablesSettingsUrl,
-        subscriptionsMoreMinutesUrl,
-        endpoint,
-        pagePath,
-        logState,
-        buildStatus,
-        projectPath,
-      } = element.dataset;
-
       return createElement('job-app', {
-        props: {
-          artifactHelpUrl,
-          deploymentHelpUrl,
-          runnerHelpUrl,
-          runnerSettingsUrl,
-          variablesSettingsUrl,
-          subscriptionsMoreMinutesUrl,
-          endpoint,
-          pagePath,
-          logState,
-          buildStatus,
-          projectPath,
-        },
+        props: pick(element.dataset, [
+          'artifactHelpUrl',
+          'deploymentHelpUrl',
+          'runnerHelpUrl',
+          'runnerSettingsUrl',
+          'variablesSettingsUrl',
+          'subscriptionsMoreMinutesUrl',
+          'endpoint',
+          'pagePath',
+          'logState',
+          'buildStatus',
+          'projectPath',
+        ]),
       });
     },
   });

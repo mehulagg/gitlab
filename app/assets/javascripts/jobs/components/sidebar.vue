@@ -1,33 +1,30 @@
+\
 <script>
 import { isEmpty } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlLink } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
-import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
-import DetailRow from './sidebar_detail_row.vue';
 import ArtifactsBlock from './artifacts_block.vue';
 import TriggerBlock from './trigger_block.vue';
 import CommitBlock from './commit_block.vue';
 import StagesDropdown from './stages_dropdown.vue';
 import JobsContainer from './jobs_container.vue';
+import SidebarJobDetailsContainer from './sidebar_job_details_container.vue';
 
 export default {
   name: 'JobSidebar',
   components: {
     ArtifactsBlock,
     CommitBlock,
-    DetailRow,
     GlIcon,
     TriggerBlock,
     StagesDropdown,
     JobsContainer,
     GlLink,
     GlButton,
+    SidebarJobDetailsContainer,
     TooltipOnTruncate,
   },
-  mixins: [timeagoMixin],
   props: {
     artifactHelpUrl: {
       type: String,
@@ -43,52 +40,11 @@ export default {
   computed: {
     ...mapState(['job', 'stages', 'jobs', 'selectedStage']),
     ...mapGetters(['hasForwardDeploymentFailure']),
-    coverage() {
-      return `${this.job.coverage}%`;
-    },
-    duration() {
-      return timeIntervalInWords(this.job.duration);
-    },
-    queued() {
-      return timeIntervalInWords(this.job.queued);
-    },
-    runnerId() {
-      return `${this.job.runner.description} (#${this.job.runner.id})`;
-    },
     retryButtonClass() {
       let className = 'js-retry-button btn btn-retry';
       className +=
         this.job.status && this.job.recoverable ? ' btn-primary' : ' btn-inverted-secondary';
       return className;
-    },
-    hasTimeout() {
-      return this.job.metadata != null && this.job.metadata.timeout_human_readable !== null;
-    },
-    timeout() {
-      if (this.job.metadata == null) {
-        return '';
-      }
-
-      let t = this.job.metadata.timeout_human_readable;
-      if (this.job.metadata.timeout_source !== '') {
-        t += sprintf(__(` (from %{timeoutSource})`), {
-          timeoutSource: this.job.metadata.timeout_source,
-        });
-      }
-
-      return t;
-    },
-    renderBlock() {
-      return (
-        this.job.duration ||
-        this.job.finished_at ||
-        this.job.erased_at ||
-        this.job.queued ||
-        this.hasTimeout ||
-        this.job.runner ||
-        this.job.coverage ||
-        this.job.tags.length
-      );
     },
     hasArtifact() {
       return !isEmpty(this.job.artifact);
@@ -97,10 +53,10 @@ export default {
       return !isEmpty(this.job.trigger);
     },
     hasStages() {
-      return this?.job?.pipeline?.stages?.length > 0;
+      return this.job?.pipeline?.stages?.length > 0;
     },
     commit() {
-      return this?.job?.pipeline?.commit ?? {};
+      return this.job?.pipeline?.commit ?? {};
     },
   },
   methods: {
@@ -165,49 +121,7 @@ export default {
             <gl-icon :size="14" name="external-link" />
           </gl-link>
         </div>
-
-        <div v-if="renderBlock" class="block">
-          <detail-row
-            v-if="job.duration"
-            :value="duration"
-            class="js-job-duration"
-            title="Duration"
-          />
-          <detail-row
-            v-if="job.finished_at"
-            :value="timeFormatted(job.finished_at)"
-            class="js-job-finished"
-            title="Finished"
-          />
-          <detail-row
-            v-if="job.erased_at"
-            :value="timeFormatted(job.erased_at)"
-            class="js-job-erased"
-            title="Erased"
-          />
-          <detail-row v-if="job.queued" :value="queued" class="js-job-queued" title="Queued" />
-          <detail-row
-            v-if="hasTimeout"
-            :help-url="runnerHelpUrl"
-            :value="timeout"
-            class="js-job-timeout"
-            title="Timeout"
-          />
-          <detail-row v-if="job.runner" :value="runnerId" class="js-job-runner" title="Runner" />
-          <detail-row
-            v-if="job.coverage"
-            :value="coverage"
-            class="js-job-coverage"
-            title="Coverage"
-          />
-          <p v-if="job.tags.length" class="build-detail-row js-job-tags">
-            <span class="font-weight-bold">{{ __('Tags:') }}</span>
-            <span v-for="(tag, i) in job.tags" :key="i" class="badge badge-primary mr-1">{{
-              tag
-            }}</span>
-          </p>
-        </div>
-
+        <sidebar-job-details-container :runner-help-url="runnerHelpUrl" />
         <artifacts-block v-if="hasArtifact" :artifact="job.artifact" :help-url="artifactHelpUrl" />
         <trigger-block v-if="hasTriggers" :trigger="job.trigger" />
         <commit-block
@@ -217,6 +131,7 @@ export default {
         />
 
         <stages-dropdown
+          v-if="job.pipeline"
           :pipeline="job.pipeline"
           :selected-stage="selectedStage"
           :stages="stages"
