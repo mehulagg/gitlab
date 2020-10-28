@@ -1,5 +1,6 @@
 - breadcrumb_title _("Details")
 - @content_class = "limit-container-width" unless fluid_layout
+- page_canonical_link group_url(@group)
 
 - if show_invite_banner?(@group)
   = content_for :group_invite_members_banner do

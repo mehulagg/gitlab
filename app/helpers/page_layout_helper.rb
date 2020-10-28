@@ -43,6 +43,8 @@ module PageLayoutHelper
   def page_canonical_link(link = nil)
     if link
       @page_canonical_link = link
+    elsif Feature.enabled?(:global_canonical, current_user)
+      @page_canonical_link ||= url_for(:only_path => false)
     else
       @page_canonical_link
     end
