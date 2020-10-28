@@ -40,6 +40,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
       expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
+      expect(json_response['rate_limit_bypass_header']).to be_nil
     end
   end
 
@@ -119,7 +120,8 @@ RSpec.describe API::Settings, 'Settings' do
             spam_check_endpoint_url: 'https://example.com/spam_check',
             disabled_oauth_sign_in_sources: 'unknown',
             import_sources: 'github,bitbucket',
-            wiki_page_max_content_bytes: 12345
+            wiki_page_max_content_bytes: 12345,
+            rate_limit_bypass_header: 'gitlab-bypass-rate-limiting'
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -163,6 +165,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['disabled_oauth_sign_in_sources']).to eq([])
         expect(json_response['import_sources']).to match_array(%w(github bitbucket))
         expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
+        expect(json_response['rate_limit_bypass_header']).to eq('gitlab-bypass-rate-limiting')
       end
     end
 
