@@ -4,15 +4,13 @@ mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $proje
   ) {
     issue {
       assignees {
-        edges {
-          node {
-            name
-            username
-            id
-            name
-            webUrl
-            avatarUrl
-          }
+        nodes {
+          name
+          username
+          id
+          name
+          webUrl
+          avatarUrl
         }
       }
     }

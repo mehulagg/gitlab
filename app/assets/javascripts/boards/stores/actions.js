@@ -306,7 +306,7 @@ export default {
         commit('UPDATE_ISSUE_BY_ID', {
           issueId: getters.getActiveIssue.id,
           prop: 'assignees',
-          value: data.issueSetAssignees.issue.assignees.edges.map(({ node }) => node),
+          value: data.issueSetAssignees.issue.assignees.nodes,
         });
       });
   },

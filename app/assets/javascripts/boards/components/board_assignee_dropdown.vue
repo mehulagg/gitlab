@@ -7,8 +7,10 @@ import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.v
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
 
 export default {
-  unassignText: __('Unassign'),
-  assigneeText: __('Assignee'),
+  i18n: {
+    unassignText: __('Unassign'),
+    assigneeText: __('Assignee'),
+  },
   components: {
     BoardEditableItem,
     IssuableAssignees,
@@ -35,19 +37,13 @@ export default {
       return this.selected.length === 0;
     },
     selectedUserNames() {
-      if (this.selectedIsEmpty) {
-        return [];
-      }
-
       return this.selected.map(({ username }) => username);
     },
   },
   mounted() {
     this.getIssueParticipants(`gid://gitlab/Issue/${this.getActiveIssue.iid}`)
       .then(({ data }) => {
-        this.list = data.issue.participants.edges.map(({ node }) => {
-          return node;
-        });
+        this.list = data.issue.participants.nodes;
       })
       // eslint-disable-next-line no-console
       .catch(e => console.log(e));
@@ -79,7 +75,7 @@ export default {
 </script>
 
 <template>
-  <board-editable-item :title="$options.assigneeText" @close="saveAssignees">
+  <board-editable-item :title="$options.i18n.assigneeText" @close="saveAssignees">
     <template #collapsed>
       <issuable-assignees :users="getActiveIssue.assignees" />
     </template>
@@ -92,7 +88,7 @@ export default {
             data-testid="unassign"
             class="mt-2"
             @click="selectAssignee()"
-            >{{ $options.unassignText }}</gl-dropdown-item
+            >{{ $options.i18n.unassignText }}</gl-dropdown-item
           >
           <gl-dropdown-divider data-testid="unassign-divider" />
           <gl-dropdown-item

@@ -23,7 +23,7 @@ export default {
     },
     avatarUrl() {
       return (
-        this.user.avatar || this.user.avatar_url || this.user.avatarUrl || gon.default_avatar_url
+        this.user.avatarUrl || this.user.avatar || this.user.avatar_url || gon.default_avatar_url
       );
     },
     isMergeRequest() {
