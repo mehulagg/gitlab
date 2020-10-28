@@ -80,7 +80,7 @@ describe('Pipeline Schedule Callout', () => {
     });
 
     it('updates calloutDismissed when close button is clicked', done => {
-      calloutComponent.$el.querySelector('#dismiss-callout-btn').click();
+      calloutComponent.$el.querySelector('.gl-button').click();
 
       Vue.nextTick(() => {
         expect(calloutComponent.calloutDismissed).toBe(true);

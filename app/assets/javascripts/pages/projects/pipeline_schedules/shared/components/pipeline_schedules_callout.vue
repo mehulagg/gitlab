@@ -1,7 +1,7 @@
 <script>
 import Vue from 'vue';
 import Cookies from 'js-cookie';
-import { GlIcon, GlButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import Translate from '../../../../../vue_shared/translate';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
@@ -12,7 +12,6 @@ const cookieKey = 'pipeline_schedules_callout_dismissed';
 export default {
   name: 'PipelineSchedulesCallout',
   components: {
-    GlIcon,
     GlButton,
   },
   data() {
@@ -36,7 +35,7 @@ export default {
       <gl-button
         category="tertiary"
         icon="close"
-        aria-label="Dismiss"
+        :aria-label="__('Dismiss')"
         class="gl-absolute gl-top-2 gl-right-2"
         @click="dismissCallout"
       />
