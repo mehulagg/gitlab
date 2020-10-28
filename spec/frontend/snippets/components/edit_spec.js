@@ -1,7 +1,9 @@
-import { ApolloMutation } from 'vue-apollo';
+import VueApollo, { ApolloMutation } from 'vue-apollo';
 import { GlLoadingIcon } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import GetSnippetQuery from 'shared_queries/snippet/snippet.query.graphql';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import * as urlUtils from '~/lib/utils/url_utility';
 import SnippetEditApp from '~/snippets/components/edit.vue';
@@ -13,6 +15,7 @@ import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.
 import { SNIPPET_VISIBILITY_PRIVATE } from '~/snippets/constants';
 import UpdateSnippetMutation from '~/snippets/mutations/updateSnippet.mutation.graphql';
 import CreateSnippetMutation from '~/snippets/mutations/createSnippet.mutation.graphql';
+import defaultVisibilityQuery from '~/snippets/queries/snippet_visibility.query.graphql';
 import { testEntries } from '../test_utils';
 
 jest.mock('~/flash');
@@ -47,8 +50,10 @@ const createTestSnippet = () => ({
 
 describe('Snippet Edit app', () => {
   let wrapper;
+  let fakeApollo;
   const relativeUrlRoot = '/foo/';
   const originalRelativeUrlRoot = gon.relative_url_root;
+  const GetSnippetQuerySpy = jest.fn().mockResolvedValue(createTestSnippet());
 
   const mutationTypes = {
     RESOLVE: jest.fn().mockResolvedValue({
@@ -78,12 +83,9 @@ describe('Snippet Edit app', () => {
     props = {},
     loading = false,
     mutationRes = mutationTypes.RESOLVE,
+    withApollo = false,
   } = {}) {
-    if (wrapper) {
-      throw new Error('wrapper already exists');
-    }
-
-    wrapper = shallowMount(SnippetEditApp, {
+    let componentData = {
       mocks: {
         $apollo: {
           queries: {
@@ -92,6 +94,36 @@ describe('Snippet Edit app', () => {
           mutate: mutationRes,
         },
       },
+    };
+
+    if (wrapper) {
+      throw new Error('wrapper already exists');
+    }
+
+    if (withApollo) {
+      const localVue = createLocalVue();
+      localVue.use(VueApollo);
+
+      const requestHandlers = [
+        [GetSnippetQuery, GetSnippetQuerySpy],
+        [
+          defaultVisibilityQuery,
+          jest.fn().mockResolvedValue({
+            visibilityLevels: expect.anything(),
+            selectedLevel: SNIPPET_VISIBILITY_PRIVATE,
+            multipleLevelsRestricted: expect.anything(),
+          }),
+        ],
+      ];
+      fakeApollo = createMockApollo(requestHandlers);
+      componentData = {
+        localVue,
+        apolloProvider: fakeApollo,
+      };
+    }
+
+    wrapper = shallowMount(SnippetEditApp, {
+      ...componentData,
       stubs: {
         ApolloMutation,
         FormFooterActions,
@@ -152,16 +184,13 @@ describe('Snippet Edit app', () => {
     if (nodes.length) {
       wrapper.setData({
         snippet: nodes[0],
+        newSnippet: false,
+      });
+    } else {
+      wrapper.setData({
+        newSnippet: true,
       });
     }
-
-    wrapper.vm.onSnippetFetch({
-      data: {
-        snippets: {
-          nodes,
-        },
-      },
-    });
   };
 
   describe('rendering', () => {
@@ -182,6 +211,15 @@ describe('Snippet Edit app', () => {
         expect(findBlobActions().exists()).toBe(true);
       },
     );
+
+    it('does not make the query to fetch snippet on create', async () => {
+      createComponent({ props: { snippetGid: '' }, withApollo: true });
+
+      jest.runOnlyPendingTimers();
+      await wrapper.vm.$nextTick();
+
+      expect(GetSnippetQuerySpy).not.toHaveBeenCalled();
+    });
 
     it.each`
       title    | actions                                          | shouldDisable
