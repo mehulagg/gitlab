@@ -14,17 +14,24 @@ module ResourceAccessTokens
 
       user = create_user
 
-      return error(user.errors.full_messages.to_sentence) unless user.persisted?
+      if !user.persisted?
+        delete_failed_user(user)
+        return error(user.errors.full_messages.to_sentence)
+      end
 
       member = create_membership(resource, user)
 
-      return error("Failed to provide maintainer access") unless member.persisted?
+      if !member.persisted?
+        delete_failed_user(user)
+        return error("Failed to provide maintainer access")
+      end
 
       token_response = create_personal_access_token(user)
 
       if token_response.success?
         success(token_response.payload[:personal_access_token])
       else
+        delete_failed_user(user)
         error(token_response.message)
       end
     end
@@ -44,6 +51,10 @@ module ResourceAccessTokens
       # to create a new user in the system.
 
       Users::CreateService.new(current_user, default_user_params).execute(skip_authorization: true)
+    end
+
+    def delete_failed_user(user)
+      Users::DestroyService.new(current_user).execute(user, skip_authorization: true)
     end
 
     def default_user_params
