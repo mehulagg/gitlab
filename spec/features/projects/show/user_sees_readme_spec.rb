@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+
 require 'spec_helper'
 
 RSpec.describe 'Projects > Show > User sees README' do
