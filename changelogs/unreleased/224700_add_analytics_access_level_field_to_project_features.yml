@@ -1,0 +1,5 @@
+---
+title: Add analytics_access_level field to project_features table
+merge_request: 46011
+author:
+type: added
