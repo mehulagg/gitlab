@@ -13,8 +13,18 @@ module Clusters
         after_initialize :set_initial_status
 
         def helm_command_module
-          # TODO: Use retrieve helm major version from cluster
-          Gitlab::Kubernetes::Helm::V2
+          case cluster.helm_major_version
+          when 3
+            Gitlab::Kubernetes::Helm::V3
+          when 2
+            if cluster.applications.empty?
+              Gitlab::Kubernetes::Helm::V3
+            else
+              Gitlab::Kubernetes::Helm::V2
+            end
+          else
+            raise "Invalid Helm major version"
+          end
         end
 
         def set_initial_status
