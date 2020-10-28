@@ -47,8 +47,10 @@ All users that are not logged-in will be redirected to the page represented by t
 All users will be redirect to the page represented by the configured "After sign out path"
 after sign out if value is not empty.
 
-If a "Sign in text" in Markdown format is provided, then every user will be presented with
-this message after logging-in.
+If a "Sign in text" in Markdown format is provided, it will add this message on the Sign-in page between the description and the (optional) help message.
+
+![Sign-in page](img/custom_sign_in_page.png)
+
 
 <!-- ## Troubleshooting
 
