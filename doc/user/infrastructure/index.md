@@ -326,7 +326,7 @@ location. You can then go back to running it from within GitLab CI.
 
 ## Removing a State file 
 
-Currently removing a state file is only available by makinga request to the API.
+Currently, removing a state file is only available by making a request to the API.
 
 Use the following command:
 
