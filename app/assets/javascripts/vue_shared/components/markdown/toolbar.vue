@@ -82,7 +82,11 @@ export default {
           "
         >
           <template #retryButton="{content}">
-            <gl-button variant="link" category="primary" class="retry-uploading-link gl-vertical-align-baseline">
+            <gl-button
+              variant="link"
+              category="primary"
+              class="retry-uploading-link gl-vertical-align-baseline"
+            >
               {{ content }}
             </gl-button>
           </template>
