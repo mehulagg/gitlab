@@ -4,10 +4,7 @@ import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
 
 export default {
-  components: {
-    FilterBody,
-    FilterItem,
-  },
+  components: { FilterBody, FilterItem },
   props: {
     filter: {
       type: Object,
@@ -17,7 +14,8 @@ export default {
   data() {
     return {
       searchTerm: '',
-      selectedOptions: [],
+      selectedOptions: this.filter.defaultOptions || [],
+      shouldUpdateRouteQuery: true,
     };
   },
   computed: {
@@ -28,9 +26,9 @@ export default {
       const { selectedOptions, filter } = this;
       if (filter.allOption) {
         return selectedOptions.length ? selectedOptions : [filter.allOption];
-      } else {
-        return selectedOptions;
       }
+
+      return selectedOptions;
     },
     queryObject() {
       return { [this.filter.id]: this.selectedOptionsOrAll.map(x => x.id) };
@@ -47,39 +45,52 @@ export default {
       const keys = this.$route.query[this.filter.id] || [];
       return Array.isArray(keys) ? keys : [keys];
     },
+    routeQueryOptions() {
+      return this.filter.options.filter(x => this.routeQuery.includes(x.id));
+    },
   },
   watch: {
     selectedOptions() {
       this.$emit('filter-changed', this.filterObject);
+
+      if (this.shouldUpdateRouteQuery) {
+        this.updateRouteQuery();
+      }
     },
   },
   created() {
     // Select the options based on the querystring.
-    this.selectedOptions = this.routeQuery.length
-      ? this.filter.options.filter(x => this.routeQuery.includes(x.id))
-      : this.filter.defaultOptions || [];
-    this.updateRouteQuery(true);
+    if (this.routeQueryOptions.length) {
+      // SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
+      this.selectedOptions = this.routeQueryOptions;
+    }
 
+    // WHEN USER CLICKS FORWARD/BACK BUTTON, SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
     window.addEventListener('popstate', () => {
-      this.selectedOptions = this.filter.options.filter(x => this.routeQuery.includes(x.id));
+      this.shouldUpdateRouteQuery = false;
+      this.selectedOptions = this.routeQueryOptions;
+
+      this.$nextTick(() => {
+        this.shouldUpdateRouteQuery = true;
+      });
     });
   },
   methods: {
     toggleOption(option) {
       // Toggle the option's existence in the array.
       this.selectedOptions = xor(this.selectedOptions, [option]);
-      this.updateRouteQuery();
     },
     deselectAllOptions() {
       this.selectedOptions = [];
-      this.updateRouteQuery();
     },
-    updateRouteQuery(replaceRoute) {
-      const method = replaceRoute ? this.$router.replace : this.$router.push;
+    updateRouteQuery() {
       const query = { query: { ...this.$route.query, ...this.queryObject } };
 
-      if (!isEqual(this.routeQuery, this.queryObject[this.filter.id])) {
-        method.call(this.$router, query);
+      if (!isEqual(this.routeQuery, Object.values(this.queryObject))) {
+        console.log('ROUTE IS NOT EQUAL, UPDATING ROUTE!', query);
+        this.$router.push(query);
+      } else {
+        console.log('ROUTE IS EQUAL, DOING NOTHING!');
       }
     },
     isSelected(option) {
