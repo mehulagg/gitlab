@@ -1036,6 +1036,16 @@ RSpec.describe QuickActions::InterpretService do
       let(:issuable) { merge_request }
     end
 
+    it_behaves_like 'wip command' do
+      let(:content) { '/draft' }
+      let(:issuable) { merge_request }
+    end
+
+    it_behaves_like 'unwip command' do
+      let(:content) { '/draft' }
+      let(:issuable) { merge_request }
+    end
+
     it_behaves_like 'empty command' do
       let(:content) { '/remove_due_date' }
       let(:issuable) { merge_request }
