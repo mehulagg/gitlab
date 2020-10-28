@@ -9,6 +9,17 @@ import ProgressBar from '../components/progress_bar.vue';
 
 export default () => {
   const el = document.getElementById('progress-bar');
+  const emailUpdatesForm = document.querySelector('.js-email-opt-in');
+  const setupForCompany = document.querySelector('.js-setup-for-company');
+  const setupForMe = document.querySelector('.js-setup-for-me');
+
+  setupForCompany.addEventListener('change', () => {
+    emailUpdatesForm.classList.add('hidden')
+  });
+
+  setupForMe.addEventListener('change', () => {
+    emailUpdatesForm.classList.remove('hidden')
+  });
 
   if (!el) return null;
 
@@ -34,3 +45,4 @@ export default () => {
     },
   });
 };
+

@@ -9739,6 +9739,9 @@ msgstr ""
 msgid "Email the pipelines status to a list of recipients."
 msgstr ""
 
+msgid "Email updates (optional)"
+msgstr ""
+
 msgid "EmailError|It appears that the email is blank. Make sure your reply is at the top of the email, we can't process inline replies."
 msgstr ""
 
@@ -13528,7 +13531,7 @@ msgstr ""
 msgid "I have read and agree to the Let's Encrypt %{link_start}Terms of Service%{link_end} (PDF)"
 msgstr ""
 
-msgid "I'd like to receive updates via email about GitLab"
+msgid "I'd like to receive updates about GitLab via email"
 msgstr ""
 
 msgid "ID"
