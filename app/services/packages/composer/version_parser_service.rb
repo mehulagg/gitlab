@@ -9,7 +9,7 @@ module Packages
 
       def execute
         if @tag_name.present?
-          @tag_name.match(Gitlab::Regex.composer_package_version_regex).captures[0]
+          @tag_name[0] == 'v' ? @tag_name[1..-1] : @tag_name
         elsif @branch_name.present?
           branch_sufix_or_prefix(@branch_name.match(Gitlab::Regex.composer_package_version_regex))
         end
