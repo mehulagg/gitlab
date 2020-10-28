@@ -11,6 +11,8 @@ RSpec.describe Vulnerabilities::DismissService do
 
   let_it_be(:user) { create(:user) }
   let(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
+  let!(:pipeline) { create(:ci_pipeline, :success, project: project) }
+  let!(:build) { create(:ee_ci_build, :sast, pipeline: pipeline) }
   let(:vulnerability) { create(:vulnerability, :with_findings, project: project) }
   let(:service) { described_class.new(user, vulnerability) }
 
@@ -46,7 +48,7 @@ RSpec.describe Vulnerabilities::DismissService do
               have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
             expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
             expect(vulnerability.findings.map(&:dismissal_feedback)).to(
-              all(have_attributes(comment: comment, comment_author: user, comment_timestamp: be_like_time(Time.current))))
+              all(have_attributes(comment: comment, comment_author: user, comment_timestamp: be_like_time(Time.current), pipeline_id: pipeline.id)))
           end
         end
       end

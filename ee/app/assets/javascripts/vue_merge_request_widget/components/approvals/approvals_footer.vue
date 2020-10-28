@@ -1,14 +1,13 @@
 <script>
-import { GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlButton, GlDeprecatedButton } from '@gitlab/ui';
 import { __ } from '~/locale';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import ApprovalsList from './approvals_list.vue';
 
 export default {
   components: {
-    GlIcon,
+    GlButton,
     GlDeprecatedButton,
-    GlLoadingIcon,
     UserAvatarList,
     ApprovalsList,
   },
@@ -55,6 +54,9 @@ export default {
     suggestedApproversTrimmed() {
       return this.suggestedApprovers.slice(0, Math.min(5, this.suggestedApprovers.length));
     },
+    shouldShowLoadingSpinner() {
+      return !this.isCollapsed && this.isLoadingRules;
+    },
   },
   methods: {
     toggle() {
@@ -67,15 +69,16 @@ export default {
 <template>
   <div>
     <div class="mr-widget-extension d-flex align-items-center pl-3">
-      <button
-        class="btn btn-blank square s32 gl-mr-3"
-        type="button"
+      <!-- TODO: simplify button classes once https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1029 is completed -->
+      <gl-button
+        class="gl-mr-3"
+        :class="{ 'gl-shadow-none!': shouldShowLoadingSpinner }"
         :aria-label="ariaLabel"
+        :loading="shouldShowLoadingSpinner"
+        :icon="angleIcon"
+        category="tertiary"
         @click="toggle"
-      >
-        <gl-loading-icon v-if="!isCollapsed && isLoadingRules" />
-        <gl-icon v-else :name="angleIcon" :size="16" />
-      </button>
+      />
       <template v-if="isCollapsed">
         <user-avatar-list :items="suggestedApproversTrimmed" :breakpoint="0" empty-text="" />
         <gl-deprecated-button variant="link" @click="toggle">{{

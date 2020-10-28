@@ -37,20 +37,35 @@ RSpec.describe EE::SamlProvidersHelper do
   describe '#show_saml_group_links_in_sidebar?' do
     subject { helper.show_saml_group_links_in_sidebar?(group) }
 
-    context 'when the user can admin saml group links' do
+    context 'when the feature is disabled' do
       before do
+        stub_feature_flags(saml_group_links: false)
         stub_can(:admin_saml_group_links, true)
       end
 
-      it { is_expected.to eq(true) }
+      it { is_expected.to eq(false) }
     end
 
-    context 'when the user cannot admin saml group links' do
+    context 'when the feature is enabled' do
       before do
-        stub_can(:admin_saml_group_links, false)
+        stub_feature_flags(saml_group_links: true)
       end
 
-      it { is_expected.to eq(false) }
+      context 'when the user can admin saml group links' do
+        before do
+          stub_can(:admin_saml_group_links, true)
+        end
+
+        it { is_expected.to eq(true) }
+      end
+
+      context 'when the user cannot admin saml group links' do
+        before do
+          stub_can(:admin_saml_group_links, false)
+        end
+
+        it { is_expected.to eq(false) }
+      end
     end
   end
 end

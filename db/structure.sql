@@ -9297,12 +9297,17 @@ CREATE TABLE application_settings (
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
     container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
+    secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
+    secret_detection_token_revocation_url text,
+    encrypted_secret_detection_token_revocation_token text,
+    encrypted_secret_detection_token_revocation_token_iv text,
     new_user_signups_cap integer,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
     CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
+    CONSTRAINT check_9a719834eb CHECK ((char_length(secret_detection_token_revocation_url) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
     CONSTRAINT check_d820146492 CHECK ((char_length(spam_check_endpoint_url) <= 255)),
@@ -11236,11 +11241,11 @@ CREATE TABLE container_expiration_policies (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     next_run_at timestamp with time zone,
-    name_regex character varying(255),
+    name_regex character varying(255) DEFAULT '.*'::character varying,
     cadence character varying(12) DEFAULT '1d'::character varying NOT NULL,
     older_than character varying(12) DEFAULT '90d'::character varying,
     keep_n integer DEFAULT 10,
-    enabled boolean DEFAULT true NOT NULL,
+    enabled boolean DEFAULT false NOT NULL,
     name_regex_keep text,
     CONSTRAINT container_expiration_policies_name_regex_keep CHECK ((char_length(name_regex_keep) <= 255))
 );
@@ -15959,8 +15964,7 @@ CREATE TABLE security_scans (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     build_id bigint NOT NULL,
-    scan_type smallint NOT NULL,
-    scanned_resources_count integer
+    scan_type smallint NOT NULL
 );
 
 CREATE SEQUENCE security_scans_id_seq
