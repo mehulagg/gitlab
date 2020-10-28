@@ -428,15 +428,15 @@ end
 
 ### Code in `app/graphql/`
 
-EE-specific mutations, resolvers and types should be added to
+EE-specific mutations, resolvers, and types should be added to
 `ee/app/graphql/{mutations,resolvers,types}`.
 
-To override a CE mutation, resolver or type, create the file in
+To override a CE mutation, resolver, or type, create the file in
 `ee/app/graphql/ee/{mutations,resolvers,types}` and add new code to a
 `prepended` block.
 
 For example, if CE has a mutation called `Mutations::Tanukis::Create` and you
-wanted to add a new argument, you would place the EE override in
+wanted to add a new argument, place the EE override in
 `ee/app/graphql/ee/mutations/tanukis/create.rb`:
 
 ```ruby

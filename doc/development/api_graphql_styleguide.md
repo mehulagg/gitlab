@@ -1275,9 +1275,8 @@ deprecated aliased mutations.
 
 #### Deprecating EE mutations
 
-EE mutations should follow the same process. The merge request
-[!42588](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42588) can be
-referred to as an example of this.
+EE mutations should follow the same process. For an example of the merge request
+process, read [merge request !42588](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42588).
 
 ## Pagination implementation
 
