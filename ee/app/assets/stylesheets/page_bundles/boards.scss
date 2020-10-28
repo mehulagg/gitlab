@@ -72,7 +72,6 @@
 .board-type-assignee {
   .board-title-sub-text {
     color: var(--gl-text-color-secondary, $gl-text-color-secondary);
-    font-weight: normal;
   }
 }
 
@@ -86,11 +85,6 @@
   }
 }
 
-
-.form-section-title {
-  font-size: 16px;
-}
-
 .board-config-modal {
   width: 440px;
 
@@ -101,5 +95,27 @@
     + .block {
       border-top: solid 1px var(--border-color, $border-color);
     }
+  }
+}
+
+.board-swimlanes {
+  overflow-x: auto;
+}
+
+$epic-icons-spacing: 40px;
+
+.board-epic-lane {
+  max-width: calc(100vw - #{$contextual-sidebar-width} - #{$epic-icons-spacing});
+
+  .page-with-icon-sidebar & {
+    max-width: calc(100vw - #{$contextual-sidebar-collapsed-width} - #{$epic-icons-spacing});
+  }
+
+  .page-with-icon-sidebar .is-compact & {
+    max-width: calc(100vw - #{$contextual-sidebar-collapsed-width} - #{$gutter-width} - #{$epic-icons-spacing});
+  }
+
+  .is-compact & {
+    max-width: calc(100vw - #{$contextual-sidebar-width} - #{$gutter-width} - #{$epic-icons-spacing});
   }
 }

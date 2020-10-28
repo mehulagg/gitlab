@@ -1,7 +1,6 @@
-#repeat-trial-info.bs-callout.bs-callout-info.alert.alert-dismissible.fade.in.show{ role: "alert" }
-  %button.close{ type: "button", 'data-dismiss': "alert", 'aria-label': "Close" }
-    %span
-      = sprite_icon('close')
+#repeat-trial-info.bs-callout.bs-callout-info.gl-alert.fade.in.show{ role: "alert" }
+  %button.js-close.gl-alert-dismiss{ type: 'button', 'aria-label' => _('Dismiss') }
+    = sprite_icon('close', size: 16, css_class: 'gl-icon')
   %h4
     = _('Free Trial')
   %p

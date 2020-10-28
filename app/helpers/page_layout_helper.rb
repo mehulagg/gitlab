@@ -57,7 +57,7 @@ module PageLayoutHelper
 
     subject = @project || @user || @group
 
-    image = subject.avatar_url if subject.present?
+    image = subject.avatar_url(only_path: false) if subject.present?
     image || default
   end
 

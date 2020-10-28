@@ -9296,10 +9296,17 @@ CREATE TABLE application_settings (
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
+    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
+    secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
+    secret_detection_token_revocation_url text,
+    encrypted_secret_detection_token_revocation_token text,
+    encrypted_secret_detection_token_revocation_token_iv text,
+    CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
     CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
+    CONSTRAINT check_9a719834eb CHECK ((char_length(secret_detection_token_revocation_url) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
     CONSTRAINT check_d820146492 CHECK ((char_length(spam_check_endpoint_url) <= 255)),
@@ -10132,7 +10139,8 @@ CREATE TABLE ci_daily_build_group_report_results (
     last_pipeline_id bigint NOT NULL,
     ref_path text NOT NULL,
     group_name text NOT NULL,
-    data jsonb NOT NULL
+    data jsonb NOT NULL,
+    default_branch boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE ci_daily_build_group_report_results_id_seq
@@ -11232,11 +11240,11 @@ CREATE TABLE container_expiration_policies (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     next_run_at timestamp with time zone,
-    name_regex character varying(255),
+    name_regex character varying(255) DEFAULT '.*'::character varying,
     cadence character varying(12) DEFAULT '1d'::character varying NOT NULL,
     older_than character varying(12) DEFAULT '90d'::character varying,
     keep_n integer DEFAULT 10,
-    enabled boolean DEFAULT true NOT NULL,
+    enabled boolean DEFAULT false NOT NULL,
     name_regex_keep text,
     CONSTRAINT container_expiration_policies_name_regex_keep CHECK ((char_length(name_regex_keep) <= 255))
 );
@@ -11248,7 +11256,8 @@ CREATE TABLE container_repositories (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     status smallint,
-    expiration_policy_started_at timestamp with time zone
+    expiration_policy_started_at timestamp with time zone,
+    expiration_policy_cleanup_status smallint DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE container_repositories_id_seq
@@ -15954,8 +15963,7 @@ CREATE TABLE security_scans (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     build_id bigint NOT NULL,
-    scan_type smallint NOT NULL,
-    scanned_resources_count integer
+    scan_type smallint NOT NULL
 );
 
 CREATE SEQUENCE security_scans_id_seq
@@ -16145,6 +16153,27 @@ CREATE TABLE snippet_repositories (
     verification_failure text,
     CONSTRAINT snippet_repositories_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
+
+CREATE TABLE snippet_repository_storage_moves (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    snippet_id bigint NOT NULL,
+    state smallint DEFAULT 1 NOT NULL,
+    source_storage_name text NOT NULL,
+    destination_storage_name text NOT NULL,
+    CONSTRAINT snippet_repository_storage_moves_destination_storage_name CHECK ((char_length(destination_storage_name) <= 255)),
+    CONSTRAINT snippet_repository_storage_moves_source_storage_name CHECK ((char_length(source_storage_name) <= 255))
+);
+
+CREATE SEQUENCE snippet_repository_storage_moves_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE snippet_repository_storage_moves_id_seq OWNED BY snippet_repository_storage_moves.id;
 
 CREATE TABLE snippet_statistics (
     snippet_id bigint NOT NULL,
@@ -18048,6 +18077,8 @@ ALTER TABLE ONLY slack_integrations ALTER COLUMN id SET DEFAULT nextval('slack_i
 
 ALTER TABLE ONLY smartcard_identities ALTER COLUMN id SET DEFAULT nextval('smartcard_identities_id_seq'::regclass);
 
+ALTER TABLE ONLY snippet_repository_storage_moves ALTER COLUMN id SET DEFAULT nextval('snippet_repository_storage_moves_id_seq'::regclass);
+
 ALTER TABLE ONLY snippet_user_mentions ALTER COLUMN id SET DEFAULT nextval('snippet_user_mentions_id_seq'::regclass);
 
 ALTER TABLE ONLY snippets ALTER COLUMN id SET DEFAULT nextval('snippets_id_seq'::regclass);
@@ -19434,6 +19465,9 @@ ALTER TABLE ONLY smartcard_identities
 ALTER TABLE ONLY snippet_repositories
     ADD CONSTRAINT snippet_repositories_pkey PRIMARY KEY (snippet_id);
 
+ALTER TABLE ONLY snippet_repository_storage_moves
+    ADD CONSTRAINT snippet_repository_storage_moves_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY snippet_statistics
     ADD CONSTRAINT snippet_statistics_pkey PRIMARY KEY (snippet_id);
 
@@ -19783,6 +19817,8 @@ CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_ev
 CREATE INDEX idx_ci_pipelines_artifacts_locked ON ci_pipelines USING btree (ci_ref_id, id) WHERE (locked = 1);
 
 CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at_enabled ON container_expiration_policies USING btree (project_id, next_run_at, enabled);
+
+CREATE INDEX idx_container_repositories_on_exp_cleanup_status_and_start_date ON container_repositories USING btree (expiration_policy_cleanup_status, expiration_policy_started_at);
 
 CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON deployment_clusters USING btree (cluster_id, kubernetes_namespace);
 
@@ -20138,6 +20174,8 @@ CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON ci_builds_runn
 
 CREATE INDEX index_ci_daily_build_group_report_results_on_last_pipeline_id ON ci_daily_build_group_report_results USING btree (last_pipeline_id);
 
+CREATE INDEX index_ci_daily_build_group_report_results_on_project_and_date ON ci_daily_build_group_report_results USING btree (project_id, date DESC) WHERE ((default_branch = true) AND ((data -> 'coverage'::text) IS NOT NULL));
+
 CREATE INDEX index_ci_deleted_objects_on_pick_up_at ON ci_deleted_objects USING btree (pick_up_at);
 
 CREATE INDEX index_ci_freeze_periods_on_project_id ON ci_freeze_periods USING btree (project_id);
@@ -20371,6 +20409,8 @@ CREATE UNIQUE INDEX index_commit_user_mentions_on_note_id ON commit_user_mention
 CREATE INDEX index_container_expiration_policies_on_next_run_at_and_enabled ON container_expiration_policies USING btree (next_run_at, enabled);
 
 CREATE INDEX index_container_repositories_on_project_id ON container_repositories USING btree (project_id);
+
+CREATE INDEX index_container_repositories_on_project_id_and_id ON container_repositories USING btree (project_id, id);
 
 CREATE UNIQUE INDEX index_container_repositories_on_project_id_and_name ON container_repositories USING btree (project_id, name);
 
@@ -21699,6 +21739,8 @@ CREATE INDEX index_smartcard_identities_on_user_id ON smartcard_identities USING
 CREATE UNIQUE INDEX index_snippet_repositories_on_disk_path ON snippet_repositories USING btree (disk_path);
 
 CREATE INDEX index_snippet_repositories_on_shard_id ON snippet_repositories USING btree (shard_id);
+
+CREATE INDEX index_snippet_repository_storage_moves_on_snippet_id ON snippet_repository_storage_moves USING btree (snippet_id);
 
 CREATE UNIQUE INDEX index_snippet_user_mentions_on_note_id ON snippet_user_mentions USING btree (note_id) WHERE (note_id IS NOT NULL);
 
@@ -23407,6 +23449,9 @@ ALTER TABLE ONLY ci_pipeline_artifacts
 
 ALTER TABLE ONLY group_deletion_schedules
     ADD CONSTRAINT fk_rails_4b8c694a6c FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY snippet_repository_storage_moves
+    ADD CONSTRAINT fk_rails_4b950f5b94 FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY design_management_designs
     ADD CONSTRAINT fk_rails_4bb1073360 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

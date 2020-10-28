@@ -12,6 +12,7 @@ const createComponent = (propsData = {}) => {
   wrapper = shallowMount(ProjectWithExcessStorage, {
     propsData: {
       project: projects[0],
+      additionalPurchasedStorageSize: 0,
       ...propsData,
     },
     directives: {
@@ -34,67 +35,113 @@ describe('Storage Counter project component', () => {
     wrapper.destroy();
   });
 
-  it('renders project avatar', () => {
-    expect(wrapper.find(ProjectAvatar).exists()).toBe(true);
+  describe('without extra storage purchased', () => {
+    it('renders project avatar', () => {
+      expect(wrapper.find(ProjectAvatar).exists()).toBe(true);
+    });
+
+    it('renders project name', () => {
+      expect(wrapper.text()).toContain(projects[0].nameWithNamespace);
+    });
+
+    it('renders formatted storage size', () => {
+      expect(wrapper.text()).toContain(formatUsageSize(projects[0].statistics.storageSize));
+    });
+
+    it('does not render the warning icon if project is not in error state', () => {
+      expect(findWarningIcon().exists()).toBe(false);
+    });
+
+    it('render row without error state background', () => {
+      expect(findTableRow().classes('gl-bg-red-50')).toBe(false);
+    });
+
+    describe('renders the row in error state', () => {
+      beforeEach(() => {
+        createComponent({ project: projects[2] });
+      });
+
+      it('with error state background', () => {
+        expect(findTableRow().classes('gl-bg-red-50')).toBe(true);
+      });
+
+      it('with project link in error state', () => {
+        expect(findProjectLink().classes('gl-text-red-500!')).toBe(true);
+      });
+
+      it('with error icon', () => {
+        expect(findWarningIcon().exists()).toBe(true);
+      });
+
+      it('with tooltip', () => {
+        expect(getWarningIconTooltipText().title).toBe(
+          'This project is locked because it is using 97.7KiB of free storage and there is no purchased storage available.',
+        );
+      });
+    });
+
+    describe('renders the row in warning state', () => {
+      beforeEach(() => {
+        createComponent({ project: projects[1] });
+      });
+
+      it('with warning state background', () => {
+        expect(findTableRow().classes('gl-bg-orange-50')).toBe(true);
+      });
+
+      it('with project link in default gray state', () => {
+        expect(findProjectLink().classes('gl-text-gray-900!')).toBe(true);
+      });
+
+      it('with warning icon', () => {
+        expect(findWarningIcon().exists()).toBe(true);
+      });
+
+      it('with tooltip', () => {
+        expect(getWarningIconTooltipText().title).toBe(
+          'This project is near the free 97.7KiB limit and at risk of being locked.',
+        );
+      });
+    });
   });
 
-  it('renders project name', () => {
-    expect(wrapper.text()).toContain(projects[0].nameWithNamespace);
-  });
+  describe('with extra storage purchased', () => {
+    describe('if projects is in error state', () => {
+      beforeEach(() => {
+        createComponent({
+          project: projects[2],
+          additionalPurchasedStorageSize: 100000,
+        });
+      });
 
-  it('renders formatted storage size', () => {
-    expect(wrapper.text()).toContain(formatUsageSize(projects[0].statistics.storageSize));
-  });
+      afterEach(() => {
+        wrapper.destroy();
+      });
 
-  it('does not render the warning icon if project is not in error state', () => {
-    expect(findWarningIcon().exists()).toBe(false);
-  });
-
-  it('render row without error state background', () => {
-    expect(findTableRow().classes('gl-bg-red-50')).toBe(false);
-  });
-
-  describe('renders the row in error state', () => {
-    beforeEach(() => {
-      createComponent({ project: projects[2] });
+      it('renders purchased storage specific error tooltip ', () => {
+        expect(getWarningIconTooltipText().title).toBe(
+          'This project is locked because it used 97.7KiB of free storage and all the purchased storage.',
+        );
+      });
     });
 
-    it('with error state background', () => {
-      expect(findTableRow().classes('gl-bg-red-50')).toBe(true);
-    });
+    describe('if projects is in warning state', () => {
+      beforeEach(() => {
+        createComponent({
+          project: projects[1],
+          additionalPurchasedStorageSize: 100000,
+        });
+      });
 
-    it('with project link in error state', () => {
-      expect(findProjectLink().classes('gl-text-red-500!')).toBe(true);
-    });
+      afterEach(() => {
+        wrapper.destroy();
+      });
 
-    it('with error icon', () => {
-      expect(findWarningIcon().exists()).toBe(true);
-    });
-
-    it('with tooltip', () => {
-      expect(getWarningIconTooltipText().title).toBe('This project is locked.');
-    });
-  });
-
-  describe('renders the row in warning state', () => {
-    beforeEach(() => {
-      createComponent({ project: projects[1] });
-    });
-
-    it('with warning state background', () => {
-      expect(findTableRow().classes('gl-bg-orange-50')).toBe(true);
-    });
-
-    it('with project link in default gray state', () => {
-      expect(findProjectLink().classes('gl-text-gray-900!')).toBe(true);
-    });
-
-    it('with warning icon', () => {
-      expect(findWarningIcon().exists()).toBe(true);
-    });
-
-    it('with tooltip', () => {
-      expect(getWarningIconTooltipText().title).toBe('This project is at risk of being locked.');
+      it('renders purchased storage specific warning tooltip ', () => {
+        expect(getWarningIconTooltipText().title).toBe(
+          'This project is at risk of being locked because purchased storage is running low.',
+        );
+      });
     });
   });
 });

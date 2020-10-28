@@ -118,7 +118,7 @@ export default {
           'is-collapsed': !list.isExpanded,
           'is-draggable': !list.preset,
         }"
-        class="board gl-px-3 gl-vertical-align-top gl-white-space-normal"
+        class="board gl-display-inline-block gl-px-3 gl-vertical-align-top gl-white-space-normal"
         :data-list-id="list.id"
         data-testid="board-header-container"
       >

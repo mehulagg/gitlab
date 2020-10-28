@@ -90,7 +90,7 @@ module QA
           tag = Resource::Tag.fabricate_via_api! do |tag|
             tag.project = @project
             tag.ref = 'master'
-            tag.name = 'test_tag'
+            tag.name = "test_tag_#{SecureRandom.hex(8)}"
           end
 
           expect_error_on_push(file: standard_file, tag: tag.name,

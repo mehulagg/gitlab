@@ -52,6 +52,7 @@ describe('Cycle analytics mutations', () => {
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'isDeletingValueStream'}   | ${false}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'deleteValueStreamError'}  | ${null}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'selectedValueStream'}     | ${null}
     ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS}  | ${'isLoading'}               | ${false}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
@@ -60,15 +61,16 @@ describe('Cycle analytics mutations', () => {
   });
 
   it.each`
-    mutation                                   | payload                                  | expectedState
-    ${types.SET_FEATURE_FLAGS}                 | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_PROJECTS}             | ${selectedProjects}                      | ${{ selectedProjects }}
-    ${types.SET_DATE_RANGE}                    | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
-    ${types.SET_SELECTED_STAGE}                | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR} | ${{ errors: { name: ['is required'] } }} | ${{ createValueStreamErrors: { name: ['is required'] }, isCreatingValueStream: false }}
-    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR} | ${'Some error occurred'}                 | ${{ deleteValueStreamError: 'Some error occurred' }}
-    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}     | ${valueStreams}                          | ${{ valueStreams, isLoadingValueStreams: false }}
-    ${types.SET_SELECTED_VALUE_STREAM}         | ${valueStreams[1].id}                    | ${{ selectedValueStream: {} }}
+    mutation                                     | payload                                  | expectedState
+    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
+    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                      | ${{ selectedProjects }}
+    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
+    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${{ errors: { name: ['is required'] } }} | ${{ createValueStreamErrors: { name: ['is required'] }, isCreatingValueStream: false }}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}                 | ${{ deleteValueStreamError: 'Some error occurred' }}
+    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}                          | ${{ valueStreams, isLoadingValueStreams: false }}
+    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}                    | ${{ selectedValueStream: {} }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                       | ${{ selectedValueStream: valueStreams[1] }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {

@@ -18,6 +18,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
+      code_coverage_summary
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -282,5 +283,11 @@ RSpec.describe GitlabSchema.types['Project'] do
 
       expect(cluster_agent.agent_tokens.size).to be(count)
     end
+  end
+
+  describe 'code coverage summary field' do
+    subject { described_class.fields['codeCoverageSummary'] }
+
+    it { is_expected.to have_graphql_type(Types::Ci::CodeCoverageSummaryType) }
   end
 end

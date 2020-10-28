@@ -65,7 +65,10 @@ module VulnerabilitiesHelper
       :scanner,
       :solution,
       :request,
-      :response
+      :response,
+      :evidence_source,
+      :supporting_messages,
+      :assets
     )
 
     if data[:location]['file']

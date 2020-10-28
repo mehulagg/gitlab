@@ -76,7 +76,6 @@ module IssuablesHelper
                        when Issue
                          IssueSerializer
                        when MergeRequest
-                         opts[:experiment_enabled] = :suggest_pipeline if experiment_enabled?(:suggest_pipeline) && opts[:serializer] == 'widget'
                          MergeRequestSerializer
                        end
 
@@ -275,7 +274,6 @@ module IssuablesHelper
       canUpdate: can?(current_user, :"update_#{issuable.to_ability_name}", issuable),
       canDestroy: can?(current_user, :"destroy_#{issuable.to_ability_name}", issuable),
       issuableRef: issuable.to_reference,
-      issuableStatus: issuable.state,
       markdownPreviewPath: preview_markdown_path(parent),
       markdownDocsPath: help_page_path('user/markdown'),
       lockVersion: issuable.lock_version,
@@ -379,7 +377,12 @@ module IssuablesHelper
   end
 
   def issuable_display_type(issuable)
-    issuable.model_name.human.downcase
+    case issuable
+    when Issue
+      issuable.issue_type.downcase
+    when MergeRequest
+      issuable.model_name.human.downcase
+    end
   end
 
   def has_filter_bar_param?

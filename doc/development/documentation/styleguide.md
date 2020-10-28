@@ -12,7 +12,7 @@ files.
 
 For broader information about the documentation, see the [Documentation guidelines](index.md).
 
-For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages) section.
+For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
 
 For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](index.md#testing).
 
@@ -25,7 +25,7 @@ If you can't find what you need:
 - View the GitLab Handbook for [writing style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines) that apply to all GitLab content.
 - Refer to one of the following:
 
-  - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/).
+  - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/).
   - [Google Developer Documentation Style Guide](https://developers.google.com/style).
 
 If you have questions about style, mention `@tw-style` in an issue or merge request, or, if you have access to the GitLab Slack workspace, use `#docs-process`.
@@ -740,7 +740,7 @@ This is a list of available features:
 
 - Don't add commas (`,`) or semicolons (`;`) to the ends of list items.
 - Only add periods to the end of a list item if the item consists of a complete
-  sentence. The [definition of full sentence](https://www2.le.ac.uk/offices/ld/all-resources/writing/grammar/grammar-guides/sentence)
+  sentence. The [definition of full sentence](https://www.le.ac.uk/oerresources/ssds/grammarguides/page_02.htm)
   is: _"a complete sentence always contains a verb, expresses a complete idea, and makes sense standing alone"_.
 - Be consistent throughout the list: if the majority of the items do not end in
   a period, do not end any of the items in a period, even if they consist of a
@@ -1693,7 +1693,7 @@ own line and surrounded by blank lines.
   - `> [Introduced](<link-to-issue>) in GitLab 11.3.`.
 
 - If the feature is only available in GitLab Enterprise Edition, mention
-  the [paid tier](https://about.gitlab.com/handbook/marketing/product-marketing/#tiers)
+  the [paid tier](https://about.gitlab.com/handbook/marketing/strategic-marketing/tiers/)
   the feature is available in:
   - `> [Introduced](<link-to-issue>) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.3.`.
 
@@ -1744,6 +1744,21 @@ Including the issue link is encouraged, but isn't a requirement. For example:
 ```markdown
 The voting strategy (in GitLab 13.4 and later) requires
 the primary and secondary voters to agree.
+```
+
+#### End-of-life for features or products
+
+Whenever a feature or product enters the end-of-life process, indicate its
+status by using the `Danger` [alert](#alert-boxes) with the `**Important**`
+keyword directly below the feature or product's header (which can include H1
+page titles). Link to the deprecation and removal issues, if possible.
+
+For example:
+
+```markdown
+DANGER: **Important:**
+This feature is in its end-of-life process. It is [deprecated](link-to-issue)
+for use in GitLab X.X, and is planned for [removal](link-to-issue) in GitLab X.X.
 ```
 
 ### Versions in the past or future

@@ -199,6 +199,7 @@ describe('Vulnerability Details', () => {
 
     it.each`
       request                                                    | expectedData
+      ${null}                                                    | ${null}
       ${{}}                                                      | ${null}
       ${{ headers: TEST_HEADERS }}                               | ${[EXPECT_HEADERS]}
       ${{ headers: TEST_HEADERS, method: 'GET' }}                | ${[{ label: 'Method:', content: 'GET' }, EXPECT_HEADERS]}
@@ -212,6 +213,7 @@ describe('Vulnerability Details', () => {
 
     it.each`
       response                                                            | expectedData
+      ${null}                                                             | ${null}
       ${{}}                                                               | ${null}
       ${{ headers: TEST_HEADERS }}                                        | ${[EXPECT_HEADERS]}
       ${{ headers: TEST_HEADERS, status_code: 200 }}                      | ${[EXPECT_HEADERS]}

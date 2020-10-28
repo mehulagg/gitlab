@@ -56,18 +56,58 @@ FactoryBot.define do
             url: 'https://crypto.stackexchange.com/questions/31428/pbewithmd5anddes-cipher-does-not-check-for-integrity-first'
           }
         ],
+        assets: [
+          {
+            type: "postman",
+            name: "Test Postman Collection",
+            url: "http://localhost/test.collection"
+          }
+        ],
         evidence: {
           summary: 'Credit card detected',
           request: {
             headers: [{ name: 'Accept', value: '*/*' }],
             method: 'GET',
-            url: 'http://goat:8080/WebGoat/logout'
+            url: 'http://goat:8080/WebGoat/logout',
+            body: nil
           },
           response: {
             headers: [{ name: 'Content-Length', value: '0' }],
             reason_phrase: 'OK',
-            status_code: 200
-          }
+            status_code: 200,
+            body: nil
+          },
+          source: {
+            id: 'assert:Response Body Analysis',
+            name: 'Response Body Analysis',
+            url: 'htpp://hostname/documentation'
+          },
+          supporting_messages: [
+            {
+              name: 'Origional',
+              request: {
+                headers: [{ name: 'Accept', value: '*/*' }],
+                method: 'GET',
+                url: 'http://goat:8080/WebGoat/logout',
+                body: ''
+              }
+            },
+            {
+              name: 'Recorded',
+              request: {
+                headers: [{ name: 'Accept', value: '*/*' }],
+                method: 'GET',
+                url: 'http://goat:8080/WebGoat/logout',
+                body: ''
+              },
+              response: {
+                headers: [{ name: 'Content-Length', value: '0' }],
+                reason_phrase: 'OK',
+                status_code: 200,
+                body: ''
+              }
+            }
+          ]
         }
       }.to_json
     end

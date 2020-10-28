@@ -25,7 +25,8 @@ module API
                     Gitlab::GrapeLogging::Loggers::QueueDurationLogger.new,
                     Gitlab::GrapeLogging::Loggers::PerfLogger.new,
                     Gitlab::GrapeLogging::Loggers::CorrelationIdLogger.new,
-                    Gitlab::GrapeLogging::Loggers::ContextLogger.new
+                    Gitlab::GrapeLogging::Loggers::ContextLogger.new,
+                    Gitlab::GrapeLogging::Loggers::ContentLogger.new
                   ]
 
     allow_access_with_scope :api
@@ -48,11 +49,17 @@ module API
     before do
       coerce_nil_params_to_array!
 
+      api_endpoint = env['api.endpoint']
+      feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
+
+      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
+
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin
+        caller_id: route.origin,
+        feature_category: feature_category
       )
     end
 

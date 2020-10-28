@@ -2266,6 +2266,9 @@ msgstr ""
 msgid "Administration"
 msgstr ""
 
+msgid "Adoption"
+msgstr ""
+
 msgid "Advanced"
 msgstr ""
 
@@ -5318,9 +5321,6 @@ msgstr ""
 msgid "CiVariable|Create wildcard"
 msgstr ""
 
-msgid "CiVariable|Error occurred while saving variables"
-msgstr ""
-
 msgid "CiVariable|Masked"
 msgstr ""
 
@@ -5337,9 +5337,6 @@ msgid "CiVariable|Toggle masked"
 msgstr ""
 
 msgid "CiVariable|Toggle protected"
-msgstr ""
-
-msgid "CiVariable|Validation failed"
 msgstr ""
 
 msgid "Classification Label (optional)"
@@ -5474,7 +5471,7 @@ msgstr ""
 msgid "Closed this %{quick_action_target}."
 msgstr ""
 
-msgid "Closed: %{closedIssuesCount}"
+msgid "Closed: %{closed}"
 msgstr ""
 
 msgid "Closes this %{quick_action_target}."
@@ -9218,6 +9215,9 @@ msgstr ""
 msgid "DevOps Report"
 msgstr ""
 
+msgid "DevOps Score"
+msgstr ""
+
 msgid "Diff content limits"
 msgstr ""
 
@@ -12906,6 +12906,12 @@ msgstr ""
 msgid "GroupRoadmap|To widen your search, change or remove filters; from %{startDate} to %{endDate}."
 msgstr ""
 
+msgid "GroupSAML|Active SAML Group Links (%{count})"
+msgstr ""
+
+msgid "GroupSAML|Are you sure you want to remove the SAML group link?"
+msgstr ""
+
 msgid "GroupSAML|Certificate fingerprint"
 msgstr ""
 
@@ -12913,6 +12919,9 @@ msgid "GroupSAML|Configuration"
 msgstr ""
 
 msgid "GroupSAML|Copy SAML Response XML"
+msgstr ""
+
+msgid "GroupSAML|Could not create SAML group link: %{errors}."
 msgstr ""
 
 msgid "GroupSAML|Default membership role"
@@ -12960,10 +12969,28 @@ msgstr ""
 msgid "GroupSAML|NameID Format"
 msgstr ""
 
+msgid "GroupSAML|New SAML group link saved."
+msgstr ""
+
+msgid "GroupSAML|No active SAML group links"
+msgstr ""
+
 msgid "GroupSAML|Prohibit outer forks"
 msgstr ""
 
 msgid "GroupSAML|Prohibit outer forks for this group."
+msgstr ""
+
+msgid "GroupSAML|Role to assign members of this SAML group."
+msgstr ""
+
+msgid "GroupSAML|SAML Group Links"
+msgstr ""
+
+msgid "GroupSAML|SAML Group Name"
+msgstr ""
+
+msgid "GroupSAML|SAML Group Name: %{saml_group_name}"
 msgstr ""
 
 msgid "GroupSAML|SAML Response Output"
@@ -12978,6 +13005,9 @@ msgstr ""
 msgid "GroupSAML|SAML Single Sign On Settings"
 msgstr ""
 
+msgid "GroupSAML|SAML group link was successfully removed."
+msgstr ""
+
 msgid "GroupSAML|SCIM API endpoint URL"
 msgstr ""
 
@@ -12988,6 +13018,9 @@ msgid "GroupSAML|SHA1 fingerprint of the SAML token signing certificate. Get thi
 msgstr ""
 
 msgid "GroupSAML|The SCIM token is now hidden. To see the value of the token again, you need to "
+msgstr ""
+
+msgid "GroupSAML|The case-sensitive group name that will be sent by the SAML identity provider."
 msgstr ""
 
 msgid "GroupSAML|This will be set as the access level of users added to the group."
@@ -13012,6 +13045,9 @@ msgid "GroupSAML|With prohibit outer forks flag enabled group members will be ab
 msgstr ""
 
 msgid "GroupSAML|Your SCIM token"
+msgstr ""
+
+msgid "GroupSAML|as %{access_level}"
 msgstr ""
 
 msgid "GroupSAML|must match stored NameID of \"%{extern_uid}\" as we use this to identify users. If the NameID changes users will be unable to sign in."
@@ -14423,6 +14459,9 @@ msgid "Invite member"
 msgstr ""
 
 msgid "Invite teammates (optional)"
+msgstr ""
+
+msgid "Invite your team"
 msgstr ""
 
 msgid "InviteEmail|%{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}"
@@ -16592,6 +16631,9 @@ msgstr ""
 msgid "Merged this merge request."
 msgstr ""
 
+msgid "Merged: %{merged}"
+msgstr ""
+
 msgid "Merges this merge request immediately."
 msgstr ""
 
@@ -17391,8 +17433,10 @@ msgstr ""
 msgid "Namespace:"
 msgstr ""
 
-msgid "NamespaceStorageSize|%{namespace_name} contains a locked project"
-msgstr ""
+msgid "NamespaceStorageSize|%{namespace_name} contains %{locked_project_count} locked project"
+msgid_plural "NamespaceStorageSize|%{namespace_name} contains %{locked_project_count} locked projects"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "NamespaceStorageSize|%{namespace_name} is now read-only. You cannot: %{base_message}"
 msgstr ""
@@ -17400,17 +17444,19 @@ msgstr ""
 msgid "NamespaceStorageSize|If you reach 100%% storage capacity, you will not be able to: %{base_message}"
 msgstr ""
 
-msgid "NamespaceStorageSize|Please purchase additional storage to unlock your projects over the free 10GB project limit. You can't %{base_message}"
+msgid "NamespaceStorageSize|Please purchase additional storage to unlock your projects over the free %{free_size_limit} project limit. You can't %{base_message}"
 msgstr ""
 
-msgid "NamespaceStorageSize|You have consumed all of your additional storage, please purchase more to unlock your projects over the free 10GB limit. You can't %{base_message}"
+msgid "NamespaceStorageSize|You have consumed all of your additional storage, please purchase more to unlock your projects over the free %{free_size_limit} limit. You can't %{base_message}"
 msgstr ""
 
 msgid "NamespaceStorageSize|You have reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})"
 msgstr ""
 
-msgid "NamespaceStorageSize|You have reached the free storage limit of 10GB on %{locked_project_count} projects. To unlock them, please purchase additional storage"
-msgstr ""
+msgid "NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on %{locked_project_count} project. To unlock it, please purchase additional storage"
+msgid_plural "NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on %{locked_project_count} projects. To unlock them, please purchase additional storage"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "NamespaceStorageSize|push to your repository, create pipelines, create issues or add comments. To reduce storage capacity, delete unused repositories, artifacts, wikis, issues, and pipelines."
 msgstr ""
@@ -17668,6 +17714,9 @@ msgid "Never"
 msgstr ""
 
 msgid "New"
+msgstr ""
+
+msgid "New %{display_issuable_type}"
 msgstr ""
 
 msgid "New Application"
@@ -18583,10 +18632,7 @@ msgstr ""
 msgid "Open sidebar"
 msgstr ""
 
-msgid "Open: %{openIssuesCount}"
-msgstr ""
-
-msgid "Open: %{open} • Closed: %{closed}"
+msgid "Open: %{open}"
 msgstr ""
 
 msgid "Opened"
@@ -23001,9 +23047,6 @@ msgstr ""
 msgid "Save space and find tags in the Container Registry more easily. Enable the cleanup policy to remove stale tags and keep only the ones you need."
 msgstr ""
 
-msgid "Save variables"
-msgstr ""
-
 msgid "Saved scan settings and target site settings which are reusable."
 msgstr ""
 
@@ -25417,6 +25460,9 @@ msgstr ""
 msgid "Submit a review"
 msgstr ""
 
+msgid "Submit as spam"
+msgstr ""
+
 msgid "Submit changes"
 msgstr ""
 
@@ -26873,7 +26919,7 @@ msgstr ""
 msgid "This action cannot be undone, and will permanently delete the %{key} SSH key"
 msgstr ""
 
-msgid "This action cannot be undone. You will lose the project's repository and all content: issues, merge requests, etc."
+msgid "This action cannot be undone. You will lose this project's repository and all content: issues, merge requests, etc."
 msgstr ""
 
 msgid "This action has been performed too many times. Try again later."
@@ -28668,10 +28714,16 @@ msgstr ""
 msgid "UsageQuota|This namespace has no projects which use shared runners"
 msgstr ""
 
-msgid "UsageQuota|This project is at risk of being locked."
+msgid "UsageQuota|This project is at risk of being locked because purchased storage is running low."
 msgstr ""
 
-msgid "UsageQuota|This project is locked."
+msgid "UsageQuota|This project is locked because it is using %{actualRepositorySizeLimit} of free storage and there is no purchased storage available."
+msgstr ""
+
+msgid "UsageQuota|This project is locked because it used %{actualRepositorySizeLimit} of free storage and all the purchased storage."
+msgstr ""
+
+msgid "UsageQuota|This project is near the free %{actualRepositorySizeLimit} limit and at risk of being locked."
 msgstr ""
 
 msgid "UsageQuota|Total excess storage used"
