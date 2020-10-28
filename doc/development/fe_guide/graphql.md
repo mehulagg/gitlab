@@ -976,7 +976,7 @@ query getFiles(
 }
 ```
 
-If the fragment is used only once, we can also remove the fragment altogether:
+- If the fragment is used only once, we can also remove the fragment altogether:
 
 ```javascript
 query getFiles(
