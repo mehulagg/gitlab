@@ -3,11 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Badge::Coverage::Report do
-  let(:project) { create(:project, :repository) }
-  let(:job_name) { nil }
+  let(:project) { double('project') }
+
+  let_it_be(:successful_pipeline) do
+    create(:ci_pipeline, :success)
+  end
 
   let(:badge) do
-    described_class.new(project, 'master', opts: { job: job_name })
+    described_class.new(project, 'master', opts: { job: job_name }).tap do |new_badge|
+      allow(new_badge).to receive(:pipeline).and_return(successful_pipeline)
+    end
+  end
+
+  let(:job_name) { nil }
+  let(:builds) { [] }
+
+  before do
+    allow(successful_pipeline).to receive(:builds).and_return(Ci::Build.where(id: builds.map(&:id)))
   end
 
   describe '#entity' do
@@ -47,15 +59,11 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
   end
 
   context 'when latest successful pipeline exists' do
-    before do
-      create_pipeline do |pipeline|
-        create(:ci_build, :success, pipeline: pipeline, name: 'first', coverage: 40)
+    let(:builds) do
+      [
+        create(:ci_build, :success, pipeline: pipeline, name: 'first', coverage: 40),
         create(:ci_build, :success, pipeline: pipeline, coverage: 60)
-      end
-
-      create_pipeline do |pipeline|
-        create(:ci_build, :failed, pipeline: pipeline, coverage: 10)
-      end
+      ]
     end
 
     context 'when particular job specified' do
@@ -77,14 +85,5 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
 
   context 'pipeline does not exist' do
     it_behaves_like 'unknown coverage report'
-  end
-
-  def create_pipeline
-    opts = { project: project, sha: project.commit.id, ref: 'master' }
-
-    create(:ci_pipeline, opts).tap do |pipeline|
-      yield pipeline
-      ::Ci::ProcessPipelineService.new(pipeline).execute
-    end
   end
 end
