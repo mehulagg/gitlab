@@ -319,4 +319,53 @@ RSpec.describe 'Rack Attack global throttles' do
       it_behaves_like 'rate-limited web authenticated requests'
     end
   end
+
+  describe 'rate limit bypass header' do
+    let(:url_that_does_not_require_authentication) { '/users/sign_in' }
+    let(:bypass_header) { 'gitlab-bypass-rate-limiting' }
+
+    before do
+      # Disabling protected paths throttle, otherwise requests to
+      # '/users/sign_in' are caught by this throttle.
+      settings_to_set[:throttle_protected_paths_enabled] = false
+
+      # Set low limits
+      settings_to_set[:throttle_unauthenticated_requests_per_period] = requests_per_period
+      settings_to_set[:throttle_unauthenticated_period_in_seconds] = period_in_seconds
+
+      settings_to_set[:rate_limit_bypass_header] = bypass_header
+      settings_to_set[:throttle_unauthenticated_enabled] = true
+
+      stub_application_setting(settings_to_set)
+    end
+
+    it 'rejects requests over the rate limit' do
+      # At first, allow requests under the rate limit.
+      requests_per_period.times do
+        get url_that_does_not_require_authentication
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      # the last straw
+      expect_rejection { get url_that_does_not_require_authentication }
+    end
+
+    it 'allows requests that have the header set to 1' do
+      (1 + requests_per_period).times do
+        get url_that_does_not_require_authentication, headers: { bypass_header => '1' }
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+
+    it 'rejects requests that have the header set to other values' do
+      # At first, allow requests under the rate limit.
+      requests_per_period.times do
+        get url_that_does_not_require_authentication, headers: { bypass_header => '0' }
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      # the last straw
+      expect_rejection { get url_that_does_not_require_authentication }
+    end
+  end
 end
