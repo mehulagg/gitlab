@@ -1390,6 +1390,46 @@ end
   same user. If you are testing for N+1 queries using
   [QueryRecorder](query_recorder.md), use a **different** user for each request.
 
+  The below example shows how a test for avoiding N+1 queries should look:
+
+  ```ruby
+  RSpec.describe 'Query.project(fullPath).pipelines' do
+    include GraphqlHelpers
+
+    let(:project) { create(:project) }
+
+    let(:query) do
+      %(
+        {
+          project(fullPath: "#{project.full_path}") {
+            pipelines {
+              nodes {
+                id
+              }
+            }
+          }
+        }
+      )
+    end
+
+    it 'avoids N+1 queries' do
+      first_user = create(:user)
+      second_user = create(:user)
+      create(:ci_pipeline, project: project)
+
+      control_count = ActiveRecord::QueryRecorder.new do
+        post_graphql(query, current_user: first_user)
+      end
+
+      create(:ci_pipeline, project: project)
+
+      expect do
+        post_graphql(query, current_user: second_user)
+      end.not_to exceed_query_limit(control_count)
+    end
+  end
+  ```
+
 - Mimic the folder structure of `app/graphql/types`:
 
   For example, tests for fields on `Types::Ci::PipelineType`
