@@ -5,8 +5,9 @@ import { __ } from '~/locale';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 import pipelineGraph from './components/graph/graph_component.vue';
 import createDagApp from './pipeline_details_dag';
+// import createPipelinesDetailApp from './pipeline_details_graph';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
-import PipelinesMediator from './pipeline_details_mediator';
+// import PipelinesMediator from './pipeline_details_mediator';
 import legacyPipelineHeader from './components/legacy_header_component.vue';
 import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
@@ -22,7 +23,7 @@ const SELECTORS = {
   PIPELINE_TESTS: '#js-pipeline-tests-detail',
 };
 
-const createPipelinesDetailApp = mediator => {
+const createLegacyPipelinesDetailApp = mediator => {
   if (!document.querySelector(SELECTORS.PIPELINE_GRAPH)) {
     return;
   }
@@ -127,18 +128,42 @@ const createTestDetails = () => {
   });
 };
 
-export default () => {
+export default async function initAll() {
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
-  const mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
-  mediator.fetchPipeline();
+  let mediator;
 
-  createPipelinesDetailApp(mediator);
+  if (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails) {
+    try {
+      const { default: PipelinesMediator } = await import(/* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator');
+      mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
+      mediator.fetchPipeline();
+    } catch {
+      Flash(__('An error occurred while loading the pipeline.'))
+    }
+  }
+
+  if (gon.features.graphqlPipelineDetails) {
+    try {
+      const createPipelinesDetailApp = await import(/* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph');
+      createPipelinesDetailApp.default();
+    } catch {
+      Flash(__('An error occurred while loading the pipeline.'))
+    }
+  } else {
+    createLegacyPipelinesDetailApp(mediator);
+  }
 
   if (gon.features.graphqlPipelineHeader) {
-    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
+    try {
+      const { createPipelineHeaderApp } = await import(/* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header') ;
+      createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
+    } catch {
+      Flash(__('An error occurred while loading a section of this page.'))
+    }
   } else {
     createLegacyPipelineHeaderApp(mediator);
   }
+
   createTestDetails();
   createDagApp();
 };
