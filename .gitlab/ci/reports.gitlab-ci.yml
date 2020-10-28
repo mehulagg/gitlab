@@ -167,7 +167,7 @@ package_hunter:
     - du -hcs ./*
     - cd .. && tar -I "gzip --best" -cf gitlab.tgz ./gitlab
     - du -hcs gitlab.tgz
-    - DEBUG=* node /usr/src/app/cli.js --help
+    - DEBUG=* node /usr/src/app/cli.js analyze --help
     - DEBUG=* HTR_user=$PACKAGE_HUNTER_USER HTR_pass=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze --format gitlab gitlab.tgz | tee $CI_PROJECT_DIR/gl-dependency-scanning-report.json
     - echo $CI_PROJECT_DIR
     - ls $CI_PROJECT_DIR
