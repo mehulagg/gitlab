@@ -294,7 +294,7 @@ Pipeline configuration begins with jobs. Jobs are the most fundamental element o
 Jobs are:
 
 - Defined with constraints stating under what conditions they should be executed.
-- Top-level elements with an arbitrary name and must contain at least the [`script`](#script) clause.
+- Top-level elements with an arbitrary name and must contain at least the [`script`](../yaml/README.md#script) clause.
 - Not limited in how many can be defined.
 
 For example:
