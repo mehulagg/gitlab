@@ -13,8 +13,8 @@ This document lists the configuration options for your GitLab `.gitlab-ci.yml` f
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/README.md).
 - To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
-While you are configuring your `.gitlab-ci.yml` file, you can test whether it's valid
-by using an embedded debug tool called Lint. Find Lint on the `ci/lint` page of your
+While you are authoring your `.gitlab-ci.yml` file, you can validate it
+by using a debug tool called **Lint**. Find Lint on the `ci/lint` page of your
 project namespace. For example, `https://gitlab.example.com/gitlab-org/project-123/-/ci/lint`.
 
 ## Job keywords
