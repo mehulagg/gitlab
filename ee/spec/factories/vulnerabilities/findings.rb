@@ -25,7 +25,7 @@ FactoryBot.define do
     end
   end
 
-  factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding', aliases: [:vulnerabilities_occurrence] do
+  factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding' do
     name { 'Cipher with no integrity' }
     project
     sequence(:uuid) { generate(:vulnerability_finding_uuid) }

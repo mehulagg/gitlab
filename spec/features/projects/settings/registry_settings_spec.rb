@@ -15,10 +15,10 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
 
   before do
     project.update!(container_registry_enabled: container_registry_enabled_on_project)
+    project.container_expiration_policy.update!(enabled: true)
 
     sign_in(user)
     stub_container_registry_config(enabled: container_registry_enabled)
-    stub_feature_flags(new_variables_ui: false)
   end
 
   context 'as owner' do

@@ -7545,8 +7545,8 @@
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
-                  "kind": "ENUM",
-                  "name": "ProjectSettingEnum",
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 }
               },
@@ -17214,14 +17214,18 @@
             },
             {
               "name": "path",
-              "description": "The path to the environment. Will always return null if `expose_environment_path_in_alert_details` feature flag is disabled",
+              "description": "The path to the environment.",
               "args": [
 
               ],
               "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -19038,6 +19042,20 @@
               "deprecationReason": null
             },
             {
+              "name": "blockedByCount",
+              "description": "Count of issues blocking this issue",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "closedAt",
               "description": "Timestamp of when the issue was closed",
               "args": [
@@ -19861,6 +19879,20 @@
                   "name": "Time",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedBy",
+              "description": "User that last updated the issue",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -24966,6 +24998,20 @@
               "deprecationReason": null
             },
             {
+              "name": "blockedByCount",
+              "description": "Count of issues blocking this issue",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "closedAt",
               "description": "Timestamp of when the issue was closed",
               "args": [
@@ -25761,6 +25807,20 @@
                   "name": "Time",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedBy",
+              "description": "User that last updated the issue",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -27834,6 +27894,18 @@
             {
               "name": "PUBLISHED_DESC",
               "description": "Published issues shown first",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SLA_DUE_AT_ASC",
+              "description": "Issues with earliest SLA due time shown first",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SLA_DUE_AT_DESC",
+              "description": "Issues with latest SLA due time shown first",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -45491,47 +45563,6 @@
           "possibleTypes": null
         },
         {
-          "kind": "ENUM",
-          "name": "ProjectSettingEnum",
-          "description": "Names of compliance frameworks that can be assigned to a Project",
-          "fields": null,
-          "inputFields": null,
-          "interfaces": null,
-          "enumValues": [
-            {
-              "name": "gdpr",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "hipaa",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "pci_dss",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "soc_2",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "sox",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "possibleTypes": null
-        },
-        {
           "kind": "OBJECT",
           "name": "ProjectStatistics",
           "description": null,
@@ -61224,7 +61255,7 @@
         {
           "kind": "OBJECT",
           "name": "VulnerabilitiesCountByDay",
-          "description": "Represents the count of vulnerabilities by severity on a particular day",
+          "description": "Represents the count of vulnerabilities by severity on a particular day. This data is retained for 365 days",
           "fields": [
             {
               "name": "critical",
@@ -61381,7 +61412,7 @@
         {
           "kind": "OBJECT",
           "name": "VulnerabilitiesCountByDayAndSeverity",
-          "description": "Represents the number of vulnerabilities for a particular severity on a particular day",
+          "description": "Represents the number of vulnerabilities for a particular severity on a particular day. This data is retained for 365 days",
           "fields": [
             {
               "name": "count",

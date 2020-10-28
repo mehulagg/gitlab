@@ -1,0 +1,5 @@
+---
+title: Fix return type of DastSiteProfile#status
+merge_request: 46180
+author:
+type: fixed

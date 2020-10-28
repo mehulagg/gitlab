@@ -9,6 +9,7 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
     let(:template_filename) { Rails.root.join("lib/gitlab/ci/templates/" + template.full_name) }
     let(:contents) { File.read(template_filename) }
     let(:production_registry) { 'registry.gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing:${FUZZAPI_VERSION}-engine' }
+    let(:staging_registry) { 'registry.gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing-src:${FUZZAPI_VERSION}-engine' }
 
     # Make sure future changes to the template use the production container registry.
     #
@@ -18,6 +19,10 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
     # easy to miss during review.
     it 'uses the production repository' do
       expect( contents.include?(production_registry) ).to be true
+    end
+
+    it 'doesn\'t use the staging repository' do
+      expect( contents.include?(staging_registry) ).to be false
     end
   end
 
@@ -55,12 +60,12 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
       end
 
       context 'by default' do
-        it 'includes no jobs' do
+        it 'includes no job' do
           expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
         end
       end
 
-      context 'when FUZZAPI_HAR is present' do
+      context 'when configured with HAR' do
         before do
           create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
           create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
@@ -71,9 +76,9 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
         end
       end
 
-      context 'when FUZZAPI_OPENAPI is present' do
+      context 'when configured with OpenAPI' do
         before do
-          create(:ci_variable, project: project, key: 'FUZZAPI_OPENAPI', value: 'openapi.json')
+          create(:ci_variable, project: project, key: 'FUZZAPI_OPENAPI', value: 'testing.json')
           create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
         end
 
@@ -81,13 +86,38 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
           expect(build_names).to match_array(%w[apifuzzer_fuzz])
         end
       end
+
+      context 'when FUZZAPI_D_TARGET_IMAGE is present' do
+        before do
+          create(:ci_variable, project: project, key: 'FUZZAPI_D_TARGET_IMAGE', value: 'imagename:latest')
+          create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
+          create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
+        end
+
+        it 'includes dnd job' do
+          expect(build_names).to match_array(%w[apifuzzer_fuzz_dnd])
+        end
+      end
     end
 
     context 'when API_FUZZING_DISABLED=1' do
       before do
+        create(:ci_variable, project: project, key: 'API_FUZZING_DISABLED', value: '1')
         create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
         create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
+      end
+
+      it 'includes no jobs' do
+        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+      end
+    end
+
+    context 'when API_FUZZING_DISABLED=1 with DnD' do
+      before do
         create(:ci_variable, project: project, key: 'API_FUZZING_DISABLED', value: '1')
+        create(:ci_variable, project: project, key: 'FUZZAPI_D_TARGET_IMAGE', value: 'imagename:latest')
+        create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
+        create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
       end
 
       it 'includes no jobs' do

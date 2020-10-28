@@ -12,7 +12,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   include SourcegraphDecorator
   include DiffHelper
 
-  skip_before_action :merge_request, only: [:index, :bulk_update]
+  skip_before_action :merge_request, only: [:index, :bulk_update, :export_csv]
   before_action :apply_diff_view_cookie!, only: [:show]
   before_action :whitelist_query_limiting, only: [:assign_related_issues, :update]
   before_action :authorize_update_issuable!, only: [:close, :edit, :update, :remove_wip, :sort]
@@ -27,7 +27,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
-    push_frontend_experiment(:suggest_pipeline)
+    push_frontend_feature_flag(:suggest_pipeline, default_enabled: true)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
     push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
     push_frontend_feature_flag(:multiline_comments, @project, default_enabled: true)
@@ -316,6 +316,16 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     merge_request.discussions_diffs.load_highlight
 
     super
+  end
+
+  def export_csv
+    return render_404 unless Feature.enabled?(:export_merge_requests_as_csv, project)
+
+    IssuableExportCsvWorker.perform_async(:merge_request, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
+
+    index_path = project_merge_requests_path(project)
+    message = _('Your CSV export has started. It will be emailed to %{email} when complete.') % { email: current_user.notification_email }
+    redirect_to(index_path, notice: message)
   end
 
   protected
