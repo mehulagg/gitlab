@@ -6,7 +6,7 @@
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: substitution
 message: "CAUTION: alert boxes must be of the format 'CAUTION: **Caution:**'. 'Caution' can be replaced with 'Warning' or 'Important'."
-level: warning
+level: suggestion
 nonword: true
 scope: raw
 swap:
