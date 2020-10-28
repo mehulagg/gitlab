@@ -73,6 +73,7 @@ RSpec.describe 'getting an issue list for a project' do
         nodes {
           id
           blocked
+          blockedByCount
         }
       QUERY
     end
@@ -95,19 +96,21 @@ RSpec.describe 'getting an issue list for a project' do
       post_graphql(single_issue_query, current_user: current_user)
     end
 
-    it 'returns the correct results', :aggregate_failures do
+    it 'returns the correct result', :aggregate_failures do
+      check_result(blocked_issue1, true, 1)
+      check_result(blocked_issue2, true, 1)
+      check_result(blocking_issue1, false, 0)
+      check_result(blocking_issue2, false, 0)
+    end
+
+    def check_result(issue, expected_blocked, expected_blocked_count)
       post_graphql(query, current_user: current_user)
 
-      result = graphql_data.dig('project', 'issues', 'nodes')
+      nodes = graphql_data.dig('project', 'issues', 'nodes')
+      node = nodes.find { |r| r['id'] == issue.to_global_id.to_s }
 
-      expect(find_result(result, blocked_issue1)).to eq true
-      expect(find_result(result, blocked_issue2)).to eq true
-      expect(find_result(result, blocking_issue1)).to eq false
-      expect(find_result(result, blocking_issue2)).to eq false
+      expect(node['blocked']).to eq expected_blocked
+      expect(node['blockedByCount']).to eq expected_blocked_count
     end
-  end
-
-  def find_result(result, issue)
-    result.find { |r| r['id'] == issue.to_global_id.to_s }['blocked']
   end
 end
