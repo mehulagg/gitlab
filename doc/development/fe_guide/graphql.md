@@ -1004,7 +1004,13 @@ query getFiles(
 }
 ```
 
-- add startup call(s) with correct variables to the HAML file that serves as a view for your application. To add GraphQL startup calls, we use `add_page_startup_graphql_call` helper where the first parameter is a path to the query, the second one is an object containing query variables. Path to the query is relative to `app/graphql/queries` folder: for example, if we need a `app/graphql/queries/repository/files.query.graphql` query, the path will be `repository/files`
+- Add startup call(s) with correct variables to the HAML file that serves as a view
+for your application. To add GraphQL startup calls, we use
+`add_page_startup_graphql_call` helper where the first parameter is a path to the
+query, the second one is an object containing query variables. Path to the query is
+relative to `app/graphql/queries` folder: for example, if we need a
+`app/graphql/queries/repository/files.query.graphql` query, the path will be
+`repository/files`.
 
 ```yaml
 - current_route_path = request.fullpath.match(/-\/tree\/[^\/]+\/(.+$)/).to_a[1]
