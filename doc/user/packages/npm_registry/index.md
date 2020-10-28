@@ -207,6 +207,12 @@ for NPM. To do this, add the following section to the bottom of `package.json`:
 - `@foo` is your scope.
 - Replace `gitlab.example.com` with your domain name.
 
+DANGER: **Warning:**
+The `publishConfig` entry in the `package.json` file is not respected, because of a
+[bug in NPM](https://github.com/npm/cli/issues/1994) version `7.x` and later. You must
+use an earlier version of NPM, or temporarily set your `.npmrc` scope to
+`@foo:registry=https://gitlab.example.com/api/v4/projects/<project_id>/packages/npm`.
+
 After you have set up [authentication](#authenticate-to-the-package-registry),
 you can upload an NPM package to your project:
 
@@ -214,9 +220,9 @@ you can upload an NPM package to your project:
 npm publish
 ```
 
-To view the package, to your project's **Packages & Registries**.
+To view the package, go to your project's **Packages & Registries**.
 
-If you try to publish a package [with a name that already exists](#publish-a-package-with-the-same-version-twice) within
+If you try to publish a package [with a name that already exists](#publishing-packages-with-the-same-name-or-version) within
 a given scope, you get a `403 Forbidden!` error.
 
 ## Publish an NPM package by using CI/CD
