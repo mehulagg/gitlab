@@ -29,11 +29,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
 
       it 'does not create a project bot user', :sidekiq_inline do
-        first_count = User.count
-        subject
-        new_count = User.count
-        expect(new_count).to eq(first_count)
-       # expect { subject }.not_to change{ User.count }
+        expect { subject }.not_to change{ User.count }
       end
     end
   end
