@@ -147,14 +147,16 @@ RSpec.describe Namespace do
   end
 
   describe '.search' do
-    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:namespace) { create(:namespace, path: 'old-path') }
+    let_it_be(:other_namespace) { create(:namespace, path: 'new-path') }
+    let_it_be(:project_with_same_path) { create(:project, id: other_namespace.id, path: namespace.path) }
 
     it 'returns namespaces with a matching name' do
       expect(described_class.search(namespace.name)).to eq([namespace])
     end
 
     it 'returns namespaces with a partially matching name' do
-      expect(described_class.search(namespace.name[0..2])).to eq([namespace])
+      expect(described_class.search(namespace.name[3..-1])).to eq([namespace])
     end
 
     it 'returns namespaces with a matching name regardless of the casing' do
