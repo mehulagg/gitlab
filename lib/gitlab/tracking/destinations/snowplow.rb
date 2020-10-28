@@ -7,6 +7,7 @@ module Gitlab
     module Destinations
       class Snowplow < Base
         extend ::Gitlab::Utils::Override
+        include Gitlab::Utils::StrongMemoize
 
         override :event
         def event(category, action, label: nil, property: nil, value: nil, context: nil)
@@ -30,12 +31,14 @@ module Gitlab
         end
 
         def snowplow
-          @snowplow ||= SnowplowTracker::Tracker.new(
-            emitter,
-            SnowplowTracker::Subject.new,
-            Gitlab::Tracking::SNOWPLOW_NAMESPACE,
-            Gitlab::CurrentSettings.snowplow_app_id
-          )
+          strong_memoize(:snowplow) do
+            SnowplowTracker::Tracker.new(
+              emitter,
+              SnowplowTracker::Subject.new,
+              Gitlab::Tracking::SNOWPLOW_NAMESPACE,
+              Gitlab::CurrentSettings.snowplow_app_id
+            )
+          end
         end
 
         def emitter

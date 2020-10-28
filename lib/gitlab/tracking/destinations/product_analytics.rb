@@ -5,6 +5,7 @@ module Gitlab
     module Destinations
       class ProductAnalytics < Base
         extend ::Gitlab::Utils::Override
+        include Gitlab::Utils::StrongMemoize
 
         override :event
         def event(category, action, label: nil, property: nil, value: nil, context: nil)
