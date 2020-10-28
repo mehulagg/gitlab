@@ -6,7 +6,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
   subject { described_class.new(user, resource).execute }
 
   describe '#execute' do
-    context 'with enforced group managed account enabled', :sidekiq_inline do
+    context 'with enforced group managed account enabled' do
       let(:group) { create(:group_with_managed_accounts, :private) }
       let(:resource) { create(:project, group: group)}
       let(:user) { create(:user, :group_managed, managing_group: group) }
