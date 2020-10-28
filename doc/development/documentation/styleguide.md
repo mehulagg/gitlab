@@ -557,10 +557,11 @@ tenses, words, and phrases:
   - Exceptions to this rule include commonly accepted technical terms, such as
     CI/CD and TCP/IP.
 - <!-- vale gitlab.LatinTerms = NO -->
-  We discourage use of Latin abbreviations, such as "e.g.," "i.e.," or "etc.,"
+  We discourage use of Latin abbreviations, such as "e.g.," "i.e.," or "etc., and "via"
   as even native users of English might misunderstand them.
   (Tested in [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml).)
   - Instead of "i.e.," use "that is."
+  - Instead of "via" use "through"
   - Instead of "e.g.," use "for example," "such as," "for instance," or "like."
   - Instead of "etc.," either use "and so on" or consider editing it out, since
     it can be vague.
