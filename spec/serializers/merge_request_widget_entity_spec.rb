@@ -106,8 +106,8 @@ RSpec.describe MergeRequestWidgetEntity do
       let(:merge_base_job_id) { merge_base_pipeline.builds.first.id }
 
       it 'has head_path and base_path entries' do
-        expect(subject[:codeclimate][:head_path]).to be_present
-        expect(subject[:codeclimate][:base_path]).to be_present
+        expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+        expect(subject[:codeclimate][:base_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
       end
 
       context 'on pipelines for merged results' do
@@ -117,17 +117,6 @@ RSpec.describe MergeRequestWidgetEntity do
           it 'returns URLs from the head_pipeline and merge_base_pipeline' do
             expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
             expect(subject[:codeclimate][:base_path]).to include("/jobs/#{merge_base_job_id}/artifacts/download?file_type=codequality")
-          end
-        end
-
-        context 'with merge_base_pipelines disabled' do
-          before do
-            stub_feature_flags(merge_base_pipelines: false)
-          end
-
-          it 'returns URLs from the head_pipeline and base_pipeline' do
-            expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
-            expect(subject[:codeclimate][:base_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
           end
         end
       end
