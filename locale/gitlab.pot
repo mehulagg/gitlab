@@ -8256,6 +8256,12 @@ msgstr ""
 msgid "DastProfiles|Are you sure you want to delete this profile?"
 msgstr ""
 
+msgid "DastProfiles|Authentication"
+msgstr ""
+
+msgid "DastProfiles|Authentication URL"
+msgstr ""
+
 msgid "DastProfiles|Could not create site validation token. Please refresh the page, or try again later."
 msgstr ""
 
@@ -8352,6 +8358,12 @@ msgstr ""
 msgid "DastProfiles|Passive"
 msgstr ""
 
+msgid "DastProfiles|Password"
+msgstr ""
+
+msgid "DastProfiles|Password form field"
+msgstr ""
+
 msgid "DastProfiles|Please enter a valid timeout value"
 msgstr ""
 
@@ -8419,6 +8431,12 @@ msgid "DastProfiles|The maximum number of seconds allowed for the site under tes
 msgstr ""
 
 msgid "DastProfiles|Turn on AJAX spider"
+msgstr ""
+
+msgid "DastProfiles|User Name"
+msgstr ""
+
+msgid "DastProfiles|Username form field"
 msgstr ""
 
 msgid "DastProfiles|Validate"
