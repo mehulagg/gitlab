@@ -119,7 +119,7 @@ RSpec.describe Clusters::Applications::Knative do
 
   shared_examples 'a command' do
     it 'is an instance of Helm::InstallCommand' do
-      expect(subject).to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::InstallCommand)
+      expect(subject).to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand)
     end
 
     it 'is initialized with knative arguments' do

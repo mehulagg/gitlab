@@ -148,7 +148,7 @@ RSpec.describe Clusters::Applications::Prometheus do
 
     subject { prometheus.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with 3 arguments' do
       expect(subject.name).to eq('prometheus')

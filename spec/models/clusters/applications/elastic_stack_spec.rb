@@ -15,7 +15,7 @@ RSpec.describe Clusters::Applications::ElasticStack do
 
     subject { elastic_stack.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with elastic stack arguments' do
       expect(subject.name).to eq('elastic-stack')
