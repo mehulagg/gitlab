@@ -1753,7 +1753,7 @@ RSpec.describe Namespace do
     it 'sets a date' do
       namespace = build(:namespace)
 
-      Timecop.freeze do
+      freeze_time do
         namespace.enable_temporary_storage_increase!
 
         expect(namespace.temporary_storage_increase_ends_on).to eq(30.days.from_now.to_date)

@@ -298,7 +298,7 @@ RSpec.describe Admin::ApplicationSettingsController do
       let_it_be(:current_count) { 10 }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       before_all do

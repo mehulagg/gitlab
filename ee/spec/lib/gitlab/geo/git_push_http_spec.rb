@@ -24,7 +24,7 @@ RSpec.describe Gitlab::Geo::GitPushHttp, :geo, :use_clean_rails_memory_store_cac
         end
 
         it 'stores the ID with an expiration' do
-          Timecop.freeze do
+          freeze_time do
             subject.cache_referrer_node(secondary.id)
 
             Timecop.travel(described_class::EXPIRES_IN + 20.seconds) do

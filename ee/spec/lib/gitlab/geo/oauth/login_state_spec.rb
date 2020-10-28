@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Geo::Oauth::LoginState do
   let(:timestamp) { Time.utc(2019, 2, 10, 19, 0, 0) }
 
   around do |example|
-    Timecop.freeze(timestamp) { example.run }
+    freeze_time(timestamp) { example.run }
   end
 
   before do
@@ -73,7 +73,7 @@ RSpec.describe Gitlab::Geo::Oauth::LoginState do
 
       # Needs to be at least 120 seconds, because the default expiry is
       # 60 seconds with an additional 60 second leeway.
-      Timecop.freeze(timestamp + 125) do
+      freeze_time(timestamp + 125) do
         expect(subject.valid?).to eq(false)
       end
     end

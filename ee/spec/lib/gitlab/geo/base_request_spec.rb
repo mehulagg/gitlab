@@ -25,7 +25,7 @@ RSpec.describe Gitlab::Geo::BaseRequest, :geo do
     end
 
     it 'defaults to 1-minute expiration time' do
-      Timecop.freeze do
+      freeze_time do
         expect(jwt.first['exp']).to eq((Time.now + 1.minute).to_i)
       end
     end

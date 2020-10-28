@@ -24,7 +24,7 @@ RSpec.describe Vulnerabilities::ResolveService do
     it_behaves_like 'calls vulnerability statistics utility services in order'
 
     it 'resolves a vulnerability' do
-      Timecop.freeze do
+      freeze_time do
         resolve_vulnerability
 
         expect(vulnerability.reload).to(

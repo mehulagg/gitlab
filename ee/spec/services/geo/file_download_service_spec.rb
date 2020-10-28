@@ -194,7 +194,7 @@ RSpec.describe Geo::FileDownloadService do
             end
 
             it 'sets a retry date and increments the retry count' do
-              Timecop.freeze do
+              freeze_time do
                 execute!
 
                 expect(registry.last.reload.retry_count).to eq(1)
@@ -223,7 +223,7 @@ RSpec.describe Geo::FileDownloadService do
             end
 
             it 'sets a retry date and increments the retry count' do
-              Timecop.freeze do
+              freeze_time do
                 execute!
 
                 expect(registry.last.reload.retry_count).to eq(1)
@@ -315,7 +315,7 @@ RSpec.describe Geo::FileDownloadService do
           end
 
           it 'sets a retry date and increments the retry count' do
-            Timecop.freeze do
+            freeze_time do
               execute!
 
               expect(registry_entry.reload.retry_count).to eq(4)
@@ -326,7 +326,7 @@ RSpec.describe Geo::FileDownloadService do
           it 'sets a retry date with a maximum of about 7 days' do
             registry_entry.update!(retry_count: 100, retry_at: 7.days.from_now)
 
-            Timecop.freeze do
+            freeze_time do
               execute!
 
               expect(registry_entry.reload.retry_at < 8.days.from_now).to be_truthy
@@ -354,7 +354,7 @@ RSpec.describe Geo::FileDownloadService do
           end
 
           it 'sets a retry date and increments the retry count' do
-            Timecop.freeze do
+            freeze_time do
               execute!
 
               expect(registry_entry.reload.retry_count).to eq(4)
@@ -365,7 +365,7 @@ RSpec.describe Geo::FileDownloadService do
           it 'sets a retry date with a maximum of about 7 days' do
             registry_entry.update!(retry_count: 100, retry_at: 7.days.from_now)
 
-            Timecop.freeze do
+            freeze_time do
               execute!
 
               expect(registry_entry.reload.retry_at < 8.days.from_now).to be_truthy

@@ -26,7 +26,7 @@ RSpec.describe Vulnerabilities::DismissService do
     it_behaves_like 'calls vulnerability statistics utility services in order'
 
     it 'dismisses a vulnerability and its associated findings' do
-      Timecop.freeze do
+      freeze_time do
         dismiss_vulnerability
 
         expect(vulnerability.reload).to(
@@ -40,7 +40,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:service) { described_class.new(user, vulnerability, comment) }
 
       it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           aggregate_failures do

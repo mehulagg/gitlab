@@ -18,7 +18,7 @@ RSpec.describe Vulnerabilities::RevertToDetectedService do
 
   shared_examples 'reverts vulnerability' do
     it 'reverts a vulnerability and its associated findings to detected state' do
-      Timecop.freeze do
+      freeze_time do
         revert_vulnerability_to_detected
 
         expect(vulnerability.reload).to(

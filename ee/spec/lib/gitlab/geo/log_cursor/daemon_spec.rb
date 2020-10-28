@@ -80,7 +80,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state 
 
           is_expected.to receive(:find_and_handle_events!).and_raise('any error').twice
 
-          Timecop.freeze do
+          freeze_time do
             daemon.run_once!
 
             Timecop.travel(described_class::MAX_ERROR_DURATION + 1.second) do
@@ -94,7 +94,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state 
         it 'does not call `#exit!`' do
           is_expected.not_to receive(:exit!)
 
-          Timecop.freeze do
+          freeze_time do
             is_expected.to receive(:find_and_handle_events!).and_raise('any error')
             daemon.run_once!
 

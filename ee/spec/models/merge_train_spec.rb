@@ -540,7 +540,7 @@ RSpec.describe MergeTrain do
           expect(merge_train.duration).to be_nil
           expect(merge_train.merged_at).to be_nil
 
-          Timecop.freeze(1.hour.from_now) do
+          freeze_time(1.hour.from_now) do
             merge_train.finish_merge!
 
             merge_train.reload

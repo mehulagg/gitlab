@@ -116,7 +116,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   end
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before(:all) do

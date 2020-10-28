@@ -22,7 +22,7 @@ RSpec.describe 'Issue Boards', :js do
   let(:card2) { find('.board:nth-child(2)').find('.board-card:nth-child(1)') }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before do
