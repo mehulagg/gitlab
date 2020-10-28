@@ -1381,19 +1381,22 @@ it 'returns a successful response' do
 end
 ```
 
-NOTE: **Note:**
-Authenticating a user with the `current_user:` argument for `post_graphql`
-generates more queries on the first request than on subsequent requests that use
-the same user. If you are testing for N+1 queries using
-[QueryRecorder](query_recorder.md), use a **different** user for each request in
-order to avoid a false positive.
+### Testing tips and tricks
 
-NOTE: **Note:**
-The folder structure of the request specs should mimic the folder structure of
-`app/graphql/types`. For example, tests for fields on `Types::Ci::PipelineType`
-in `app/graphql/types/ci/pipeline_type.rb` should live in
-`spec/requests/api/graphql/ci/pipeline_spec.rb` regardless of the query being
-used to fetch the pipeline data.
+- Avoid false positives:
+
+  Authenticating a user with the `current_user:` argument for `post_graphql`
+  generates more queries on the first request than on subsequent requests on that
+  same user. If you are testing for N+1 queries using
+  [QueryRecorder](query_recorder.md), use a **different** user for each request.
+
+- Mimic the folder structure of `app/graphql/types`:
+
+  For example, tests for fields on `Types::Ci::PipelineType`
+  in `app/graphql/types/ci/pipeline_type.rb` should live in
+  `spec/requests/api/graphql/ci/pipeline_spec.rb` regardless of the query being
+  used to fetch the pipeline data.
+
 
 ## Notes about Query flow and GraphQL infrastructure
 
