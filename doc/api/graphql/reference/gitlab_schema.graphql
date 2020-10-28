@@ -6910,6 +6910,11 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   blocked: Boolean!
 
   """
+  Count of issues blocking this issue
+  """
+  blockedByCount: Int
+
+  """
   Timestamp of when the issue was closed
   """
   closedAt: Time
@@ -9171,6 +9176,11 @@ type Issue implements CurrentUserTodos & Noteable {
   Indicates the issue is blocked
   """
   blocked: Boolean!
+
+  """
+  Count of issues blocking this issue
+  """
+  blockedByCount: Int
 
   """
   Timestamp of when the issue was closed

@@ -1115,6 +1115,7 @@ Relationship between an epic and an issue.
 | `alertManagementAlert` | AlertManagementAlert | Alert associated to this issue |
 | `author` | User! | User that created the issue |
 | `blocked` | Boolean! | Indicates the issue is blocked |
+| `blockedByCount` | Int | Count of issues blocking this issue |
 | `closedAt` | Time | Timestamp of when the issue was closed |
 | `confidential` | Boolean! | Indicates the issue is confidential |
 | `createdAt` | Time! | Timestamp of when the issue was created |
@@ -1310,6 +1311,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `alertManagementAlert` | AlertManagementAlert | Alert associated to this issue |
 | `author` | User! | User that created the issue |
 | `blocked` | Boolean! | Indicates the issue is blocked |
+| `blockedByCount` | Int | Count of issues blocking this issue |
 | `closedAt` | Time | Timestamp of when the issue was closed |
 | `confidential` | Boolean! | Indicates the issue is confidential |
 | `createdAt` | Time! | Timestamp of when the issue was created |

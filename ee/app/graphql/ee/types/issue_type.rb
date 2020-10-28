@@ -26,7 +26,7 @@ module EE
               }
 
         field :blocked_by_count, GraphQL::INT_TYPE, null: true,
-              description: 'Indicates how many issues the issue is blocked by',
+              description: 'Count of issues blocking this issue',
               resolve: -> (obj, _args, ctx) {
                 ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(ctx, obj.id) do |count|
                   count || 0
