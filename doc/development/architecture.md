@@ -531,7 +531,7 @@ NGINX has an Ingress port for all HTTP requests and routes them to the appropria
   - [Omnibus](../administration/postgresql/replication_and_failover.md#patroni)
 - Layer: Core Service (Data)
 - Process: `patroni`
-- Gitlab.com: [Database Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#database-architecture)
+- GitLab.com: [Database Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#database-architecture)
 
 #### PgBouncer
 
