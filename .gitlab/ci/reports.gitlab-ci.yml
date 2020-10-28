@@ -168,7 +168,9 @@ package_hunter:
     - cd .. && tar -I "gzip --best" -cf gitlab.tgz ./gitlab
     - du -hcs gitlab.tgz
     - DEBUG=* node /usr/src/app/cli.js --help
-    - DEBUG=* HTR_user=$PACKAGE_HUNTER_USER HTR_pass=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze --format gitlab gitlab.tgz > gl-dependency-scanning-report.json
+    - DEBUG=* HTR_user=$PACKAGE_HUNTER_USER HTR_pass=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze --format gitlab gitlab.tgz | tee gl-dependency-scanning-report.json
+    - echo $CI_PROJECT_DIR
+    - ls $CI_PROJECT_DIR
   artifacts:
     paths:
       - gl-dependency-scanning-report.json  # GitLab-specific
