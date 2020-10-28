@@ -916,7 +916,7 @@ const defaultClient = createDefaultClient(
 To improve performance, sometimes we want to make initial GraphQL queries early. In order to do this, we can add them to **startup calls** with the following steps:
 
 - Move all the queries you need initially in your application to `app/graphql/queries`;
-- add `__typename` property to every nested query level:
+- Add `__typename` property to every nested query level:
 
 ```javascript
 query getPermissions($projectPath: ID!) {
