@@ -215,6 +215,7 @@ possible selectors include:
 ```javascript
 import { getByRole, getByText } from '@testing-library/dom'
 
+// In this example, `wrapper` is a `@vue/test-utils` wrapper returned from `mount` or `shallowMount`.
 it('exists', () => {
   // Best (especially for integration tests)
   getByRole(wrapper.element, 'link', { name: /Click Me/i })
