@@ -953,12 +953,27 @@ RSpec.describe Group do
           expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
         end
 
-        it 'does not enable two_factor_requirement for ancestor group member' do
+        it 'enable two_factor_requirement for ancestor group member' do
           ancestor_group = create(:group)
           ancestor_group.add_user(indirect_user, GroupMember::OWNER)
           group.update!(parent: ancestor_group)
 
           group.update!(require_two_factor_authentication: true)
+
+          expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+        end
+
+        it 'disables two_factor_requirement for ancestor group member' do
+          ancestor_group = create(:group)
+          ancestor_group.add_user(indirect_user, GroupMember::OWNER)
+          ancestor_group.update!(require_two_factor_authentication: true)
+          group.update!(parent: ancestor_group)
+          group.update!(require_two_factor_authentication: true)
+
+          expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+
+          ancestor_group.update!(require_two_factor_authentication: false)
+          group.update!(require_two_factor_authentication: false)
 
           expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
         end
