@@ -1424,7 +1424,7 @@ end
       create(:ci_pipeline, project: project)
 
       expect do
-        post_graphql(query, current_user: second_user)
+        post_graphql(query, current_user: second_user)  # use a different user to avoid a false positive from authentication queries
       end.not_to exceed_query_limit(control_count)
     end
   end
