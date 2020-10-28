@@ -123,24 +123,24 @@ document from the Kubernetes team also has some great points regarding this.
 
 ### Commit messages guidelines
 
-When writing commit messages, please follow the guidelines below:
+Commit messages should follow the guidelines below, for reasons explained by Chris Beams in [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/):
 
-- The commit subject must contain at least 3 words.
-- The commit subject must not be longer than 72 characters.
-- The commit subject must start with a capital letter.
-- The commit subject must not end with a period.
 - The commit subject and body must be separated by a blank line.
+- The commit subject must start with a capital letter.
+- The commit subject must not be longer than 72 characters.
+- The commit subject must not end with a period.
 - The commit body must not contain more than 72 characters per line.
 - Commits that change 30 or more lines across at least 3 files must
   describe these changes in the commit body.
 - The commit subject or body must not contain Emojis.
 - Use issues and merge requests' full URLs instead of short references,
   as they are displayed as plain text outside of GitLab.
-- The merge request must not contain more than 10 commit messages.
+- The merge request should not contain more than 10 commit messages.
+- The commit subject should contain at least 3 words.
 
+CAUTION: **Caution:**
 If the guidelines are not met, the MR will not pass the
 [Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
-For more information see [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/).
 
 Example commit message template that can be used on your machine that embodies the above (guide for [how to apply template](https://codeinthehole.com/tips/a-useful-template-for-commit-messages/)):
 
