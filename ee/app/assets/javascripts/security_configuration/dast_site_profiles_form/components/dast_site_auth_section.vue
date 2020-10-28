@@ -58,7 +58,7 @@ export default {
 <template>
   <section>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-toggle v-model="isAuthEnabled" />
+      <gl-toggle v-model="isAuthEnabled" data-testid="auth-section-toggle" />
     </gl-form-group>
     <div v-if="isAuthEnabled">
       <div class="row">
