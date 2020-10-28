@@ -140,6 +140,7 @@ RSpec.describe PageLayoutHelper do
 
   describe '#page_canonical_link' do
     let(:user) { build(:user) }
+    let(:controller_name) { 'users' }
 
     subject { helper.page_canonical_link(link) }
 
@@ -160,7 +161,7 @@ RSpec.describe PageLayoutHelper do
       let(:link) { nil }
 
       before do
-        controller.params[:controller] = 'users'
+        controller.params[:controller] = controller_name
         controller.params[:action] = 'show'
         controller.params[:username] = user.username
       end
@@ -173,6 +174,14 @@ RSpec.describe PageLayoutHelper do
         it 'returns nil' do
           stub_feature_flags(global_canonical: false)
 
+          expect(subject).to be_nil
+        end
+      end
+
+      context 'when url cannot be generated' do
+        let(:controller_name) { 'foobar' }
+
+        it 'returns nil' do
           expect(subject).to be_nil
         end
       end
