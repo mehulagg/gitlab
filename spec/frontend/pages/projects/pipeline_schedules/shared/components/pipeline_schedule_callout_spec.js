@@ -98,7 +98,7 @@ describe('Pipeline Schedule Callout', () => {
     });
 
     it('is hidden when close button is clicked', done => {
-      calloutComponent.$el.querySelector('#dismiss-callout-btn').click();
+      calloutComponent.$el.querySelector('.gl-button').click();
 
       Vue.nextTick(() => {
         expect(calloutComponent.$el.childNodes.length).toBe(0);

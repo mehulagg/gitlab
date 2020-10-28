@@ -1,7 +1,7 @@
 <script>
 import Vue from 'vue';
 import Cookies from 'js-cookie';
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlButton } from '@gitlab/ui';
 import Translate from '../../../../../vue_shared/translate';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
@@ -13,6 +13,7 @@ export default {
   name: 'PipelineSchedulesCallout',
   components: {
     GlIcon,
+    GlButton,
   },
   data() {
     return {
@@ -32,9 +33,13 @@ export default {
 <template>
   <div v-if="!calloutDismissed" class="pipeline-schedules-user-callout user-callout">
     <div class="bordered-box landing content-block">
-      <button id="dismiss-callout-btn" class="btn btn-default close" @click="dismissCallout">
-        <gl-icon name="close" aria-hidden="true" />
-      </button>
+      <gl-button
+        category="tertiary"
+        icon="close"
+        aria-label="Dismiss"
+        class="gl-absolute gl-top-2 gl-right-2"
+        @click="dismissCallout"
+      />
       <div class="svg-container">
         <img :src="imageUrl" />
       </div>
