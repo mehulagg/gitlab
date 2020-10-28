@@ -51,7 +51,6 @@ If a "Sign in text" in Markdown format is provided, it will add this message on 
 
 ![Sign-in page](img/custom_sign_in_page.png)
 
-
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
