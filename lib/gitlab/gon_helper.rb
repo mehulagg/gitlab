@@ -67,6 +67,13 @@ module Gitlab
       gon.push({ features: { var_name => enabled } }, true)
     end
 
+    def push_frontend_ability(ability, *args)
+      name = ability.name
+      value = ability.enabled?(*args)
+
+      gon.push({ abilities: { name => value } }, true)
+    end
+
     def default_avatar_url
       # We can't use ActionController::Base.helpers.image_url because it
       # doesn't return an actual URL because request is nil for some reason.
