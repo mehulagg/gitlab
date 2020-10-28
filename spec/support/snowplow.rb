@@ -7,16 +7,16 @@ RSpec.configure do |config|
     # WebMock is set up to allow requests to `localhost`
     host = 'localhost'
 
-    allow(Gitlab::Tracking::SNOWPLOW_DESTINATION)
+    allow(Gitlab::Tracking.send(:snowplow))
       .to receive(:emitter)
       .and_return(SnowplowTracker::Emitter.new(host, buffer_size: buffer_size))
 
     stub_application_setting(snowplow_enabled: true)
 
-    allow(Gitlab::Tracking::SNOWPLOW_DESTINATION).to receive(:event).and_call_original
+    allow(Gitlab::Tracking).to receive(:event).and_call_original # rubocop:disable RSpec/ExpectGitlabTracking
   end
 
   config.after(:each, :snowplow) do
-    Gitlab::Tracking::SNOWPLOW_DESTINATION.send(:snowplow).flush
+    Gitlab::Tracking.send(:snowplow).flush
   end
 end
