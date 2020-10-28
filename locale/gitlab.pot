@@ -2838,6 +2838,9 @@ msgstr ""
 msgid "An error occurred when toggling the notification subscription"
 msgstr ""
 
+msgid "An error occurred when updating the issue due date"
+msgstr ""
+
 msgid "An error occurred when updating the issue weight"
 msgstr ""
 

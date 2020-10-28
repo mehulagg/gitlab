@@ -9,6 +9,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
+import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -19,6 +20,7 @@ export default {
     BoardSidebarEpicSelect,
     BoardSidebarWeightInput,
     BoardSidebarLabelsSelect,
+    BoardSidebarDueDate,
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
@@ -50,6 +52,7 @@ export default {
       <board-sidebar-epic-select />
       <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
       <board-sidebar-labels-select />
+      <board-sidebar-due-date />
     </template>
   </gl-drawer>
 </template>
