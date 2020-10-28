@@ -1437,7 +1437,6 @@ end
   `spec/requests/api/graphql/ci/pipeline_spec.rb` regardless of the query being
   used to fetch the pipeline data.
 
-
 ## Notes about Query flow and GraphQL infrastructure
 
 GitLab's GraphQL infrastructure can be found in `lib/gitlab/graphql`.
