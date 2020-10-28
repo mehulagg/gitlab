@@ -81,7 +81,9 @@ RSpec.shared_examples 'rate-limited token-authenticated requests' do
     end
 
     it 'logs RackAttack info into structured logs' do
-      requests_per_period.times do
+      control_count = ActiveRecord::QueryRecorder.new { make_request(request_args) }.count
+
+      requests_per_period.pred.times do
         make_request(request_args)
         expect(response).not_to have_gitlab_http_status(:too_many_requests)
       end
@@ -99,7 +101,9 @@ RSpec.shared_examples 'rate-limited token-authenticated requests' do
 
       expect(Gitlab::AuthLogger).to receive(:error).with(arguments).once
 
-      expect_rejection { make_request(request_args) }
+      expect_rejection do
+        expect { make_request(request_args) }.not_to exceed_query_limit(control_count)
+      end
     end
   end
 
