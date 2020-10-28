@@ -110,7 +110,7 @@ you list:
    sudo gitlab-ctl reconfigure
    ```
 
-## Queue selector (experimental)
+## Queue selector (experimental) **(STARTER ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/260) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
 
