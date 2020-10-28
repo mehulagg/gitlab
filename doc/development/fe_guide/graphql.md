@@ -930,7 +930,19 @@ query getPermissions($projectPath: ID!) {
     }
   }
 }
-```
+  ```javascript
+  query getPermissions($projectPath: ID!) {
+    project(fullPath: $projectPath) {
+      __typename
+      userPermissions {
+        __typename
+        pushCode
+        forkProject
+        createMergeRequestIn
+      }
+    }
+  }
+  ```
 
 - if queries contain fragments, you need to move fragments to the query file directly instead of importing them:
 
