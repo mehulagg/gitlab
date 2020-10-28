@@ -8,6 +8,7 @@ module QA
         include Project::SubMenus::Settings
         include Project::SubMenus::Common
         include Layout::Flash
+        include HaveFileMatcher
 
         view 'app/helpers/blob_helper.rb' do
           element :edit_button, "_('Edit')" # rubocop:disable QA/ElementWithPattern
@@ -20,10 +21,6 @@ module QA
 
         view 'app/views/projects/blob/_remove.html.haml' do
           element :delete_file_button, "button_tag 'Delete file'" # rubocop:disable QA/ElementWithPattern
-        end
-
-        view 'app/views/projects/commits/_commit.html.haml' do
-          element :commit_content
         end
 
         view 'app/views/shared/_file_highlight.html.haml' do
@@ -42,12 +39,12 @@ module QA
           click_on 'Delete file'
         end
 
-        def has_commit_message?(text)
-          has_element?(:commit_content, text: text)
+        def has_file?(name)
+          has_element?(:file_name_content, text: name)
         end
 
-        def has_file_name?(name)
-          has_element?(:file_name_content, text: name)
+        def has_no_file?(name)
+          has_no_element?(:file_name_content, text: name)
         end
 
         def has_file_content?(text)

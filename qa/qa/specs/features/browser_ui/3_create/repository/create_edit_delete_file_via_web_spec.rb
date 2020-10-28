@@ -18,7 +18,7 @@ module QA
         end
 
         Page::File::Show.perform do |file|
-          expect(file).to have_file_name(file_name)
+          expect(file).to have_file(file_name)
           expect(file).to have_file_content(file_content)
           expect(file).to have_commit_message(commit_message_for_create)
         end
@@ -49,10 +49,12 @@ module QA
           file.click_delete
           file.add_commit_message(commit_message_for_delete)
           file.click_delete_file
+        end
 
-          expect(file).to have_notice('The file has been successfully deleted.')
-          expect(file).to have_commit_message(commit_message_for_delete)
-          expect(file).not_to have_file_name(file_name)
+        Page::Project::Show.perform do |project|
+          expect(project).to have_notice('The file has been successfully deleted.')
+          expect(project).to have_commit_message(commit_message_for_delete)
+          expect(project).not_to have_file(file_name)
         end
       end
     end

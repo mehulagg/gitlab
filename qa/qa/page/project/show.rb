@@ -4,9 +4,12 @@ module QA
   module Page
     module Project
       class Show < Page::Base
+        include HaveFileMatcher
+        include Layout::Flash
         include Page::Component::ClonePanel
         include Page::Component::Breadcrumbs
         include Page::Project::SubMenus::Settings
+        include Page::File::Shared::CommitMessage
 
         view 'app/assets/javascripts/repository/components/preview/index.vue' do
           element :blob_viewer_content
@@ -118,6 +121,12 @@ module QA
         def has_file?(name)
           within_element(:file_tree_table) do
             has_element?(:file_name_link, text: name)
+          end
+        end
+
+        def has_no_file?(name)
+          within_element(:file_tree_table) do
+            has_no_element?(:file_name_link, text: name)
           end
         end
 
