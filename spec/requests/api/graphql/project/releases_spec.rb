@@ -10,6 +10,11 @@ RSpec.describe 'Query.project(fullPath).releases()' do
   let_it_be(:reporter) { create(:user) }
   let_it_be(:developer) { create(:user) }
 
+  let(:base_url_params) { { scope: 'all', release_tag: release.tag } }
+  let(:opened_url_params) { { state: 'opened', **base_url_params } }
+  let(:merged_url_params) { { state: 'merged', **base_url_params } }
+  let(:closed_url_params) { { state: 'closed', **base_url_params } }
+
   let(:query) do
     graphql_query_for(:project, { fullPath: project.full_path },
     %{
@@ -88,7 +93,7 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           { 'sha' => e.sha }
         end
 
-        expect(data).to include(
+        expect(data).to eq(
           'tagName' => release.tag,
           'tagPath' => project_tag_path(project, release.tag),
           'name' => release.name,
@@ -103,19 +108,18 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           },
           'evidences' => {
             'nodes' => expected_evidences
+          },
+          'links' => {
+            'selfUrl' => project_release_url(project, release),
+            'openMergeRequestsUrl' => project_merge_requests_url(project, opened_url_params),
+            'mergedMergeRequestsUrl' => project_merge_requests_url(project, merged_url_params),
+            'closedMergeRequestsUrl' => project_merge_requests_url(project, closed_url_params),
+            'openIssuesUrl' => project_issues_url(project, opened_url_params),
+            'closedIssuesUrl' => project_issues_url(project, closed_url_params),
+            'mergeRequestsUrl' => project_merge_requests_url(project, opened_url_params),
+            'issuesUrl' => project_issues_url(project, opened_url_params)
           }
         )
-
-        links = data['links']
-
-        expect(links['selfUrl']).to eq(project_release_url(project, release))
-        expect(links['openMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
-        expect(links['mergedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=merged/)
-        expect(links['closedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=closed/)
-        expect(links['openIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
-        expect(links['closedIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=closed/)
-        expect(links['mergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
-        expect(links['issuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
       end
     end
 

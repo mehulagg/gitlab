@@ -13,7 +13,11 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
   let_it_be(:link_filepath) { '/direct/asset/link/path' }
   let_it_be(:released_at) { Time.now - 1.day }
 
-  let(:params_for_issues_and_mrs) { { scope: 'all', state: 'opened', release_tag: release.tag } }
+  let(:base_url_params) { { scope: 'all', release_tag: release.tag } }
+  let(:opened_url_params) { { state: 'opened', **base_url_params } }
+  let(:merged_url_params) { { state: 'merged', **base_url_params } }
+  let(:closed_url_params) { { state: 'closed', **base_url_params } }
+
   let(:post_query) { post_graphql(query, current_user: current_user) }
   let(:path_prefix) { %w[project release] }
   let(:data) { graphql_data.dig(*path) }
@@ -193,14 +197,16 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       it 'finds all release links' do
         post_query
 
-        expect(data['selfUrl']).to eq(project_release_url(project, release))
-        expect(data['openMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
-        expect(data['mergedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=merged/)
-        expect(data['closedMergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=closed/)
-        expect(data['openIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
-        expect(data['closedIssuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=closed/)
-        expect(data['mergeRequestsUrl']).to match(/#{project_merge_requests_url(project)}.*\?.*state=open/)
-        expect(data['issuesUrl']).to match(/#{project_issues_url(project)}.*\?.*state=open/)
+        expect(data).to eq(
+          'selfUrl' => project_release_url(project, release),
+          'openMergeRequestsUrl' => project_merge_requests_url(project, opened_url_params),
+          'mergedMergeRequestsUrl' => project_merge_requests_url(project, merged_url_params),
+          'closedMergeRequestsUrl' => project_merge_requests_url(project, closed_url_params),
+          'openIssuesUrl' => project_issues_url(project, opened_url_params),
+          'closedIssuesUrl' => project_issues_url(project, closed_url_params),
+          'mergeRequestsUrl' => project_merge_requests_url(project, opened_url_params),
+          'issuesUrl' => project_issues_url(project, opened_url_params)
+        )
       end
     end
 
