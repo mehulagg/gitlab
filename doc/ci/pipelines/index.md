@@ -68,7 +68,7 @@ Pipelines can be configured in many different ways:
 
 Pipelines and their component jobs and stages are defined in the CI/CD pipeline configuration file for each project.
 
-- Jobs are the [basic configuration](../yaml/README.md#introduction) component.
+- Jobs are the [basic configuration](#about-jobs) component.
 - Stages are defined by using the [`stages`](../yaml/README.md#stages) keyword.
 
 For a list of configuration options in the CI pipeline file, see the [GitLab CI/CD Pipeline Configuration Reference](../yaml/README.md).
