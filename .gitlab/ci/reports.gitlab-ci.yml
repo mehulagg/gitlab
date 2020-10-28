@@ -158,7 +158,7 @@ package_hunter:
   # - .reports:schedule-dast
   stage: test
   image:
-    name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli
+    name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli:latest
     entrypoint: [""]
   needs: []
   script:
