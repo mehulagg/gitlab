@@ -33,8 +33,8 @@ module DastSiteValidations
     end
 
     def make_http_request!
-      Gitlab::UrlBlocker.validate!(dast_site_validation.validation_url)
-      Gitlab::HTTP.get(dast_site_validation.validation_url)
+      uri, _ = Gitlab::UrlBlocker.validate!(dast_site_validation.validation_url, dns_rebind_protection: false)
+      Gitlab::HTTP.get(uri)
     end
 
     def token_found?(response)
