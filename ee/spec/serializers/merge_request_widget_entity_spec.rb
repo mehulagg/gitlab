@@ -31,6 +31,7 @@ RSpec.describe MergeRequestWidgetEntity do
   end
 
   it 'avoids N+1 queries', :request_store do
+    stub_feature_flags(include_child_pipeline_jobs_in_reports: false)
     allow(pipeline).to receive(:available_licensed_report_type?).and_return(true)
     allow(merge_request).to receive_messages(base_pipeline: pipeline, head_pipeline: pipeline)
     create_all_artifacts

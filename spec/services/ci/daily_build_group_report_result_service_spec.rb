@@ -185,4 +185,119 @@ RSpec.describe Ci::DailyBuildGroupReportResultService, '#execute' do
       end
     end
   end
+
+  context 'when pipeline is a child pipeline' do
+    before do
+      pipeline.update!(source: :parent_pipeline)
+    end
+
+    it 'does not do anything' do
+      expect(::Ci::DailyBuildGroupReportResult).not_to receive(:upsert_reports)
+
+      described_class.new.execute(pipeline)
+    end
+  end
+
+  context 'when pipeline has dependent child pipelines containing coverage reports' do
+    let!(:child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: true, created_at: '2020-02-06 00:01:10') }
+    let!(:child_rspec_job) { create(:ci_build, pipeline: child_pipeline, name: '2/3 rspec', coverage: 60) }
+    let!(:child_other_job) { create(:ci_build, pipeline: child_pipeline, name: 'other', coverage: 20) }
+
+    it 'finds coverage reports also in its child pipelines' do
+      described_class.new.execute(pipeline)
+
+      Ci::DailyBuildGroupReportResult.find_by(group_name: 'rspec').tap do |coverage|
+        expect(coverage).to have_attributes(
+          project_id: pipeline.project.id,
+          last_pipeline_id: pipeline.id,
+          ref_path: pipeline.source_ref_path,
+          group_name: rspec_job.group_name,
+          data: { 'coverage' => 70 },
+          date: pipeline.created_at.to_date
+        )
+      end
+
+      Ci::DailyBuildGroupReportResult.find_by(group_name: 'other').tap do |coverage|
+        expect(coverage).to have_attributes(
+          project_id: pipeline.project.id,
+          last_pipeline_id: pipeline.id,
+          ref_path: pipeline.source_ref_path,
+          group_name: child_other_job.group_name,
+          data: { 'coverage' => 20 },
+          date: pipeline.created_at.to_date
+        )
+      end
+    end
+  end
+
+  context 'when pipeline has non-dependent child pipelines containing coverage reports' do
+    let!(:child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: false, created_at: '2020-02-06 00:01:10') }
+    let!(:child_rspec_job) { create(:ci_build, pipeline: child_pipeline, name: '2/3 rspec', coverage: 60) }
+    let!(:child_other_job) { create(:ci_build, pipeline: child_pipeline, name: 'other', coverage: 20) }
+
+    it 'ignores coverage reports from non-dependent child pipelines' do
+      described_class.new.execute(pipeline)
+
+      Ci::DailyBuildGroupReportResult.find_by(group_name: 'rspec').tap do |coverage|
+        expect(coverage).to have_attributes(
+          project_id: pipeline.project.id,
+          last_pipeline_id: pipeline.id,
+          ref_path: pipeline.source_ref_path,
+          group_name: rspec_job.group_name,
+          data: { 'coverage' => 80 },
+          date: pipeline.created_at.to_date
+        )
+      end
+    end
+  end
+
+  context 'when feature flag `include_child_pipeline_jobs_in_reports` is disabled' do
+    before do
+      stub_feature_flags(include_child_pipeline_jobs_in_reports: false)
+    end
+
+    context 'when pipeline is a child pipeline' do
+      before do
+        pipeline.update!(source: :parent_pipeline)
+      end
+
+      it 'collects the coverage results' do
+        described_class.new.execute(pipeline)
+
+        Ci::DailyBuildGroupReportResult.find_by(group_name: 'rspec').tap do |coverage|
+          expect(coverage).to have_attributes(
+            project_id: pipeline.project.id,
+            last_pipeline_id: pipeline.id,
+            ref_path: pipeline.source_ref_path,
+            group_name: rspec_job.group_name,
+            data: { 'coverage' => 80 },
+            date: pipeline.created_at.to_date
+          )
+        end
+      end
+    end
+
+    context 'when pipeline has dependent child pipelines containing coverage reports' do
+      let!(:child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: true, created_at: '2020-02-06 00:01:10') }
+      let!(:child_rspec_job) { create(:ci_build, pipeline: child_pipeline, name: '2/3 rspec', coverage: 60) }
+      let!(:child_other_job) { create(:ci_build, pipeline: child_pipeline, name: 'other', coverage: 20) }
+
+      it 'ignores reports from child pipelines' do
+        described_class.new.execute(pipeline)
+
+        Ci::DailyBuildGroupReportResult.find_by(group_name: 'rspec').tap do |coverage|
+          expect(coverage).to have_attributes(
+            project_id: pipeline.project.id,
+            last_pipeline_id: pipeline.id,
+            ref_path: pipeline.source_ref_path,
+            group_name: rspec_job.group_name,
+            data: { 'coverage' => 80 },
+            date: pipeline.created_at.to_date
+          )
+        end
+
+        expect(Ci::DailyBuildGroupReportResult.find_by(group_name: 'other')).to be_nil
+      end
+    end
+  end
 end

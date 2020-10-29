@@ -3,6 +3,10 @@
 module Ci
   class DailyBuildGroupReportResultService
     def execute(pipeline)
+      # We don't process dangling pipelines (e.g. child pipelines) directly
+      # because they should not affect the ref status.
+      return if include_child_pipeline_reports?(pipeline) && pipeline.dangling?
+
       DailyBuildGroupReportResult.upsert_reports(coverage_reports(pipeline))
     end
 
@@ -17,23 +21,33 @@ module Ci
         default_branch: pipeline.default_branch?
       }
 
-      aggregate(pipeline.builds.with_coverage).map do |group_name, group|
+      builds_with_coverage(pipeline).group_by(&:group_name).map do |group_name, builds|
         base_attrs.merge(
           group_name: group_name,
           data: {
-            'coverage' => average_coverage(group)
+            'coverage' => average_coverage(builds)
           }
         )
       end
     end
 
-    def aggregate(builds)
-      builds.group_by(&:group_name)
+    def builds_with_coverage(pipeline)
+      if include_child_pipeline_reports?(pipeline)
+        # Include any possible builds from dependent child pipelines. Child pipelines
+        # created without `strategy:depend` won't have their reports discovered.
+        pipeline.builds_in_self_and_descendants(while_dependent: true).with_coverage
+      else
+        pipeline.builds_with_coverage
+      end
     end
 
-    def average_coverage(group)
-      total_coverage = group.reduce(0.0) { |sum, build| sum + build.coverage }
-      (total_coverage / group.size).round(2)
+    def average_coverage(builds)
+      total_coverage = builds.reduce(0.0) { |sum, build| sum + build.coverage }
+      (total_coverage / builds.size).round(2)
+    end
+
+    def include_child_pipeline_reports?(pipeline)
+      Gitlab::Ci::Features.include_child_pipeline_jobs_in_reports?(pipeline.project)
     end
   end
 end
