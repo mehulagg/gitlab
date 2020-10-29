@@ -18,15 +18,16 @@ module QA
             commit.add_files(
               [
                 {
-                    file_path: '.gitlab-ci.yml',
-                    content: <<~YAML
-                      #{job_name}:
-                        tags:
-                          - #{project.name}
-                        script: echo 'OK'
-                        only:
-                          - web
-                    YAML
+                  file_path: '.gitlab-ci.yml',
+                  content: <<~YAML
+                    #{job_name}:
+                      tags:
+                        - #{project.name}
+                      script: echo 'OK'
+                      only:
+                        - web
+
+                  YAML
                 }
               ]
             )
