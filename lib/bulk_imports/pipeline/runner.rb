@@ -6,12 +6,11 @@ module BulkImports
       extend ActiveSupport::Concern
 
       included do
-        attr_reader :extractors, :transformers, :loaders
-
         def initialize
           @extractors = self.class.extractors.map(&method(:instantiate))
           @transformers = self.class.transformers.map(&method(:instantiate))
           @loaders = self.class.loaders.map(&method(:instantiate))
+          @after_run = self.class.after_run_callback
 
           super
         end
@@ -28,7 +27,13 @@ module BulkImports
               end
             end
           end
+
+          after_run.call(context) if after_run.present?
         end
+
+        private
+
+        attr_reader :extractors, :transformers, :loaders, :after_run
 
         def instantiate(class_config)
           class_config[:klass].new(class_config[:options])

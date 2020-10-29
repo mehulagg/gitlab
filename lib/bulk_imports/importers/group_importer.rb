@@ -19,6 +19,9 @@ module BulkImports
         )
 
         BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
+        if Gitlab.ee?
+          'BulkImports::EE::Groups::Pipelines::EpicsPipeline'.constantize.new.run(context)
+        end
         BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline.new.run(context)
 
         entity.finish!

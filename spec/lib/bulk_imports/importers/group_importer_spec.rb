@@ -26,6 +26,7 @@ RSpec.describe BulkImports::Importers::GroupImporter do
     it "starts the entity and run its pipelines" do
       expect(bulk_import_entity).to receive(:start).and_call_original
       expect_to_run_pipeline BulkImports::Groups::Pipelines::GroupPipeline, context: context
+      expect_to_run_pipeline BulkImports::EE::Groups::Pipelines::EpicsPipeline, context: context
       expect_to_run_pipeline BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline, context: context
 
       subject.execute
