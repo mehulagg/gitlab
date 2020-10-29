@@ -41,7 +41,7 @@ module Elastic
 
         current_user = options[:current_user]
         scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
-        return super if scoped_project_ids == :any || scoped_project_ids.empty?
+        return super if scoped_project_ids == :any
 
         context.name(:project) do
           query_hash[:query][:bool][:filter] ||= []
