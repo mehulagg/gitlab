@@ -65,6 +65,58 @@ RSpec.describe License do
       end
     end
 
+    describe 'threshold for users overage' do
+      let(:current_active_users_count) { 0 }
+      let(:new_license) do
+        gl_license = build(
+          :gitlab_license,
+          starts_at: Date.today,
+          restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
+        )
+
+        build(:license, data: gl_license.export)
+      end
+
+      context 'when current active users count is above the limit set by the license' do
+        before do
+          create_list(:user, current_active_users_count)
+          HistoricalData.track!
+        end
+
+        context 'when license is from a fresh subscription' do
+          let(:previous_user_count) { nil }
+
+          context 'when current active users count is under the threshold' do
+            let(:current_active_users_count) { 11 }
+
+            it 'accepts the license' do
+              expect(new_license).to be_valid
+            end
+          end
+
+          context 'when current active users count is above the threshold' do
+            let(:current_active_users_count) { 12 }
+
+            it 'does not accept the license' do
+              expect(new_license).not_to be_valid
+            end
+          end
+        end
+
+        context 'when license is from a renewal' do
+          let(:previous_user_count) { 1 }
+
+          context 'when current active users count is under the threshold' do
+            let(:current_active_users_count) { 11 }
+
+            it 'accepts the license' do
+              expect(new_license).not_to be_valid
+            end
+          end
+        end
+      end
+    end
+
     describe "Historical active user count" do
       let(:active_user_count) { described_class.current_active_users.count + 10 }
       let(:date)              { described_class.current.starts_at }
