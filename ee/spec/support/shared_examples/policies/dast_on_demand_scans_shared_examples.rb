@@ -24,6 +24,14 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
       it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
     end
 
+    context 'when the user is a reporter' do
+      before do
+        project.add_reporter(user)
+      end
+
+      it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
+    end
+
     context 'when the user is a developer' do
       before do
         project.add_developer(user)
