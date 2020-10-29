@@ -33,8 +33,6 @@ export default {
         password: initField(),
         userNameFormField: initField(),
         passwordFormField: initField(),
-        excludedURLs: initField(),
-        additionalRequestHeaders: initField(),
       },
     };
 
@@ -53,6 +51,7 @@ export default {
     },
   },
   watch: {
+    isAuthEnabled: 'emitUpdate',
     form: { handler: 'emitUpdate', immediate: true, deep: true },
   },
   methods: {

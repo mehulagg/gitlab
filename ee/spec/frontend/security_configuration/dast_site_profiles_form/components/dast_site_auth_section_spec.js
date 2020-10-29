@@ -16,9 +16,15 @@ describe('DastSiteAuthSection', () => {
   const findByTestId = testId => wrapper.find(`[data-testid=${testId}]`);
   const findAuthToggle = () => findByTestId('auth-toggle');
   const findAuthForm = () => findByTestId('auth-form');
-  const enableAuthToggle = () => {
-    findAuthToggle().trigger('click');
+
+  const setAuthToggle = ({ enabled }) => {
+    findAuthToggle().vm.$emit('change', enabled);
     return wrapper.vm.$nextTick();
+  };
+  const getLatestInputEventPayload = () => {
+    const latestInputEvent = [...wrapper.emitted('input')].pop();
+    const [payload] = latestInputEvent;
+    return payload;
   };
 
   describe('authentication toggle', () => {
@@ -28,31 +34,62 @@ describe('DastSiteAuthSection', () => {
 
     it('controls the visibility of the authentication-fields form', async () => {
       expect(findByTestId('auth-form').exists()).toBe(false);
-      await enableAuthToggle();
+      await setAuthToggle({ enabled: true });
       expect(findAuthForm().exists()).toBe(true);
     });
+
+    it.each([true, false])(
+      'makes the component emit an "input" event when changed',
+      async enabled => {
+        await setAuthToggle({ enabled });
+        expect(getLatestInputEventPayload().isAuthEnabled).toBe(enabled);
+      },
+    );
   });
 
   describe('authentication form', () => {
     beforeEach(async () => {
-      await enableAuthToggle();
+      await setAuthToggle({ enabled: true });
     });
 
-    const inputFields = ['authenticationUrl', 'password', 'userNameFormField', 'passwordFormField'];
+    const inputFieldsWithValues = {
+      authenticationUrl: 'http://www.gitlab.com',
+      userName: 'foo',
+      password: 'foo',
+      userNameFormField: 'foo',
+      passwordFormField: 'foo',
+    };
 
-    describe.each(inputFields)('input field "%s"', inputField => {
+    const inputFieldNames = Object.keys(inputFieldsWithValues);
+
+    describe.each(inputFieldNames)('input field "%s"', inputFieldName => {
       it('is rendered', () => {
-        expect(findByNameAttribute(inputField).exists()).toBe(true);
+        expect(findByNameAttribute(inputFieldName).exists()).toBe(true);
       });
 
       it('makes the component emit an "input" event when its value changes', () => {
-        const input = findByNameAttribute(inputField);
+        const input = findByNameAttribute(inputFieldName);
         const newValue = 'foo';
 
         input.setValue(newValue);
 
-        const [[firstCallArgument]] = wrapper.emitted('input');
-        expect(firstCallArgument.form.fields[inputField].value).toBe(newValue);
+        expect(getLatestInputEventPayload().form.fields[inputFieldName].value).toBe(newValue);
+      });
+    });
+
+    describe('validity', () => {
+      it('is not valid per default', () => {
+        expect(getLatestInputEventPayload().form.state).toBe(false);
+      });
+
+      it('is valid once all fields have been entered correctly', () => {
+        Object.entries(inputFieldsWithValues).forEach(([inputFieldName, inputFieldValue]) => {
+          const input = findByNameAttribute(inputFieldName);
+          input.setValue(inputFieldValue);
+          input.trigger('blur');
+        });
+
+        expect(getLatestInputEventPayload().form.state).toBe(true);
       });
     });
   });
