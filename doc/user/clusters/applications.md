@@ -630,7 +630,7 @@ To install applications using GitLab CI/CD:
    Kubernetes, or Docker Machine executor.
 
    To install to a specific cluster, read
-   [Override environment or cluster scope](#override-environment-or-cluster-scope).
+   [Use the template with a custom environment](#use-the-template-with-a-custom-environment).
 
 1. Add a `.gitlab/managed-apps/config.yaml` file to define which
   applications you would like to install. Define the `installed` key as
