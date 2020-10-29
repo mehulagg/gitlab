@@ -11,6 +11,7 @@ module EE
         before_action only: [:show] do
           push_frontend_feature_flag(:anonymous_visual_review_feedback)
           push_frontend_feature_flag(:missing_mr_security_scan_types, @project)
+          push_frontend_feature_flag(:coverage_fuzzing_mr_widget, @project)
         end
 
         before_action :whitelist_query_limiting_ee_merge, only: [:merge]
@@ -23,7 +24,7 @@ module EE
         feature_category :code_review, [:delete_description_version, :description_diff]
         feature_category :container_scanning, [:container_scanning_reports]
         feature_category :dependency_scanning, [:dependency_scanning_reports]
-        feature_category :fuzz_testing, [:coverage_fuzzing_reports]
+        feature_category :fuzz_testing, [:coverage_fuzzing_reports, :api_fuzzing_reports]
         feature_category :license_compliance, [:license_scanning_reports]
         feature_category :static_application_security_testing, [:sast_reports]
         feature_category :secret_detection, [:secret_detection_reports]

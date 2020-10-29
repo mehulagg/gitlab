@@ -84,16 +84,6 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
         end
       end
 
-      context 'when security_on_demand_scans_feature_flag is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
       context 'when on demand scan licensed feature is not available' do
         it 'raises an exception' do
           stub_licensed_features(security_on_demand_scans: false)

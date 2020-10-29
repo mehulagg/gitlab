@@ -33,6 +33,24 @@ RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |
             expect(response).to redirect_to(credentials_path)
             expect(flash[:notice]).to eql 'User key was successfully removed.'
           end
+
+          it 'notifies the key owner' do
+            expect(CredentialsInventoryMailer).to receive_message_chain(:ssh_key_deleted_email, :deliver_later)
+
+            subject
+          end
+
+          context 'when credentials_inventory_revocation_emails is disabled' do
+            before do
+              stub_feature_flags(credentials_inventory_revocation_emails: false)
+            end
+
+            it 'does not notify the key owner' do
+              expect(CredentialsInventoryMailer).not_to receive(:ssh_key_deleted_email)
+
+              subject
+            end
+          end
         end
 
         context 'and it fails to remove the key' do

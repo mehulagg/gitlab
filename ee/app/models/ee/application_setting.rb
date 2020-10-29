@@ -119,6 +119,10 @@ module EE
           elasticsearch_shards: 5,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
           elasticsearch_client_request_timeout: 0,
+          elasticsearch_analyzers_smartcn_enabled: false,
+          elasticsearch_analyzers_smartcn_search: false,
+          elasticsearch_analyzers_kuromoji_enabled: false,
+          elasticsearch_analyzers_kuromoji_search: false,
           email_additional_text: nil,
           enforce_namespace_storage_limit: false,
           enforce_pat_expiration: true,
@@ -393,7 +397,7 @@ module EE
     end
 
     def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::ComplianceFramework::FRAMEWORKS.value?(value) }
+      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map(&:id).include?(value) }
         errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
       end
     end

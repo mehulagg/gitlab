@@ -4,8 +4,12 @@ require 'spec_helper'
 
 RSpec.describe Ci::BuildTraceChunks::Fog do
   let(:data_store) { described_class.new }
+  let(:bucket) { 'artifacts' }
+  let(:connection_params) { Gitlab.config.artifacts.object_store.connection.symbolize_keys }
+  let(:connection) { ::Fog::Storage.new(connection_params) }
 
   before do
+    stub_object_storage(connection_params: connection_params, remote_directory: bucket)
     stub_artifacts_object_storage
   end
 
@@ -148,17 +152,17 @@ RSpec.describe Ci::BuildTraceChunks::Fog do
     end
 
     it 'deletes multiple data' do
-      ::Fog::Storage.new(JobArtifactUploader.object_store_credentials).tap do |connection|
-        expect(connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/0.log")[:body]).to be_present
-        expect(connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/1.log")[:body]).to be_present
-      end
+      files = connection.directories.new(key: bucket).files
+
+      expect(files.count).to eq(2)
+      expect(files[0].body).to be_present
+      expect(files[1].body).to be_present
 
       subject
 
-      ::Fog::Storage.new(JobArtifactUploader.object_store_credentials).tap do |connection|
-        expect { connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/0.log")[:body] }.to raise_error(Excon::Error::NotFound)
-        expect { connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/1.log")[:body] }.to raise_error(Excon::Error::NotFound)
-      end
+      files.reload
+
+      expect(files.count).to eq(0)
     end
   end
 end

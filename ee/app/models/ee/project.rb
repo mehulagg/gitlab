@@ -235,10 +235,7 @@ module EE
 
     def has_regulated_settings?
       strong_memoize(:has_regulated_settings) do
-        next false unless compliance_framework_setting
-
-        compliance_framework_id = ::ComplianceManagement::ComplianceFramework::FRAMEWORKS[compliance_framework_setting.framework.to_sym]
-        ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(compliance_framework_id)
+        compliance_framework_setting&.compliance_management_framework&.merge_request_approval_rules_enforced?
       end
     end
 

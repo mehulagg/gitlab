@@ -12,7 +12,7 @@ files.
 
 For broader information about the documentation, see the [Documentation guidelines](index.md).
 
-For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages) section.
+For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
 
 For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](index.md#testing).
 
@@ -25,7 +25,7 @@ If you can't find what you need:
 - View the GitLab Handbook for [writing style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines) that apply to all GitLab content.
 - Refer to one of the following:
 
-  - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/).
+  - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/).
   - [Google Developer Documentation Style Guide](https://developers.google.com/style).
 
 If you have questions about style, mention `@tw-style` in an issue or merge request, or, if you have access to the GitLab Slack workspace, use `#docs-process`.
@@ -557,12 +557,13 @@ tenses, words, and phrases:
   - Exceptions to this rule include commonly accepted technical terms, such as
     CI/CD and TCP/IP.
 - <!-- vale gitlab.LatinTerms = NO -->
-  We discourage use of Latin abbreviations, such as "e.g.," "i.e.," or "etc.,"
-  as even native users of English might misunderstand them.
-  (Tested in [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml).)
-  - Instead of "i.e.," use "that is."
-  - Instead of "e.g.," use "for example," "such as," "for instance," or "like."
-  - Instead of "etc.," either use "and so on" or consider editing it out, since
+  We discourage the use of Latin abbreviations and terms, such as _e.g._,
+  _i.e._, _etc._, or _via_, as even native users of English can misunderstand
+  those terms. (Tested in [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml).)
+  - Instead of _i.e._, use _that is_.
+  - Instead of _via_, use _through_.
+  - Instead of _e.g._, use _for example_, _such as_, _for instance_, or _like_.
+  - Instead of _etc._, either use _and so on_ or consider editing it out, since
     it can be vague.
     <!-- vale gitlab.LatinTerms = YES -->
 - Avoid using the word *currently* when talking about the product or its
@@ -740,8 +741,7 @@ This is a list of available features:
 
 - Don't add commas (`,`) or semicolons (`;`) to the ends of list items.
 - Only add periods to the end of a list item if the item consists of a complete
-  sentence. The [definition of full sentence](https://www2.le.ac.uk/offices/ld/all-resources/writing/grammar/grammar-guides/sentence)
-  is: _"a complete sentence always contains a verb, expresses a complete idea, and makes sense standing alone"_.
+  sentence (with a subject and a verb).
 - Be consistent throughout the list: if the majority of the items do not end in
   a period, do not end any of the items in a period, even if they consist of a
   complete sentence. The opposite is also valid: if the majority of the items
@@ -1693,7 +1693,7 @@ own line and surrounded by blank lines.
   - `> [Introduced](<link-to-issue>) in GitLab 11.3.`.
 
 - If the feature is only available in GitLab Enterprise Edition, mention
-  the [paid tier](https://about.gitlab.com/handbook/marketing/product-marketing/#tiers)
+  the [paid tier](https://about.gitlab.com/handbook/marketing/strategic-marketing/tiers/)
   the feature is available in:
   - `> [Introduced](<link-to-issue>) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.3.`.
 
@@ -1744,6 +1744,21 @@ Including the issue link is encouraged, but isn't a requirement. For example:
 ```markdown
 The voting strategy (in GitLab 13.4 and later) requires
 the primary and secondary voters to agree.
+```
+
+#### End-of-life for features or products
+
+Whenever a feature or product enters the end-of-life process, indicate its
+status by using the `Danger` [alert](#alert-boxes) with the `**Important**`
+keyword directly below the feature or product's header (which can include H1
+page titles). Link to the deprecation and removal issues, if possible.
+
+For example:
+
+```markdown
+DANGER: **Important:**
+This feature is in its end-of-life process. It is [deprecated](link-to-issue)
+for use in GitLab X.X, and is planned for [removal](link-to-issue) in GitLab X.X.
 ```
 
 ### Versions in the past or future

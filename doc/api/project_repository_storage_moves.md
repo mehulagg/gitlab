@@ -24,7 +24,16 @@ of `state` are:
 - `replicated`
 - `cleanup_failed`
 
+To ensure data integrity, projects are put in a temporary read-only state for the
+duration of the move. During this time, users receive a `The repository is temporarily
+read-only. Please try again later.` message if they try to push new commits.
+
 This API requires you to [authenticate yourself](README.md#authentication) as an administrator.
+
+## Limitations
+
+- The repositories associated with snippets [can't be moved with the API](https://gitlab.com/groups/gitlab-org/-/epics/3393).
+- Group-level wikis [can't be moved with the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
 
 ## Retrieve all project repository storage moves
 

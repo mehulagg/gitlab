@@ -59,16 +59,6 @@ RSpec.describe DastSites::FindOrCreateService do
         end
       end
 
-      context 'when on demand scan feature is disabled' do
-        it 'raises an exception' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-          expect { subject }.to raise_error(DastSites::FindOrCreateService::PermissionsError) do |err|
-            expect(err.message).to include('Insufficient permissions')
-          end
-        end
-      end
-
       context 'when on demand scan licensed feature is not available' do
         it 'raises an exception' do
           stub_licensed_features(security_on_demand_scans: false)

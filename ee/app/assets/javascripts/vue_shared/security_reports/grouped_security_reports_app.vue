@@ -231,14 +231,8 @@ export default {
       return this.enabledReports.dast;
     },
     hasCoverageFuzzingReports() {
-      /*
-       * Fixes bug https://gitlab.com/gitlab-org/gitlab/-/issues/255183
-       * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343 change to:
-       * return this.enabledReports.coverageFuzzing;
-       */
-      return (
-        gl?.mrWidgetData?.coverage_fuzzing_comparison_path && this.enabledReports.coverageFuzzing
-      );
+      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
+      return this.enabledReports.coverageFuzzing && this.glFeatures.coverageFuzzingMrWidget;
     },
     hasSastReports() {
       return this.enabledReports.sast;

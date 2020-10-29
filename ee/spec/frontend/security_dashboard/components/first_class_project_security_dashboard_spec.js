@@ -19,12 +19,12 @@ const props = {
     id: '214',
     path: '/mixed-vulnerabilities/dependency-list-test-01/-/pipelines/214',
   },
-  projectFullPath: '/group/project',
   securityDashboardHelpPath: '/security/dashboard/help-path',
   vulnerabilitiesExportEndpoint: '/vulnerabilities/exports',
 };
 
 const provide = {
+  projectFullPath: '/group/project',
   dashboardDocumentation: '/help/docs',
   autoFixDocumentation: '/auto/fix/documentation',
   emptyStateSvgPath: '/svgs/empty/svg',
@@ -168,7 +168,6 @@ describe('First class Project Security Dashboard component', () => {
       createComponent({
         props: {
           hasVulnerabilities: true,
-          pipeline: { id: '214' },
         },
         data() {
           return { filters };
@@ -192,24 +191,6 @@ describe('First class Project Security Dashboard component', () => {
 
     it('displays the unconfigured state', () => {
       expect(findUnconfiguredState().exists()).toBe(true);
-    });
-
-    it('does not display the project pipeline status', () => {
-      expect(findProjectPipelineStatus().exists()).toBe(false);
-    });
-  });
-
-  describe('when there is no pipeline data', () => {
-    beforeEach(() => {
-      createComponent({
-        props: {
-          pipeline: undefined,
-        },
-      });
-    });
-
-    it('does not display the project pipeline status', () => {
-      expect(findProjectPipelineStatus().exists()).toBe(false);
     });
   });
 });
