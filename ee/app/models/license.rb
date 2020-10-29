@@ -139,6 +139,7 @@ class License < ApplicationRecord
     personal_access_token_api_management
     personal_access_token_expiration_policy
     enforce_pat_expiration
+    group_saml_group_sync
     prometheus_alerts
     pseudonymizer
     release_evidence_test_artifacts
