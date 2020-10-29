@@ -227,7 +227,7 @@ conjunction with multiple servers, as it can only
 perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
-CAUTION: **Caution:**:
+CAUTION: **Caution:**
 If the secondary node [has been paused](../../geo/#pausing-and-resuming-replication), this will perform a point in time recovery to the last known state.
 Data that was created on the primary while the secondary is paused will be lost.
 
