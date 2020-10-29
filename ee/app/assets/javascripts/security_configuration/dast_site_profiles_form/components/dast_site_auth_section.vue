@@ -1,5 +1,5 @@
 <script>
-import { GlFormGroup, GlFormInput, GlToggle } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import validation from '~/vue_shared/directives/validation';
 
 const initField = value => ({
@@ -12,7 +12,7 @@ export default {
   components: {
     GlFormGroup,
     GlFormInput,
-    GlToggle,
+    GlFormCheckbox,
   },
   directives: {
     validation: validation(),
@@ -84,7 +84,9 @@ export default {
 <template>
   <section>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-toggle v-model="isAuthEnabled" data-testid="auth-toggle" />
+      <gl-form-checkbox v-model="isAuthEnabled" data-testid="auth-checkbox">{{
+        s__('DastProfiles|Enable Authentication')
+      }}</gl-form-checkbox>
     </gl-form-group>
     <div v-if="isAuthEnabled" data-testid="auth-form">
       <div class="row">

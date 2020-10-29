@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { GlFormCheckbox } from '@gitlab/ui';
 import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_auth_section.vue';
 
 describe('DastSiteAuthSection', () => {
@@ -23,11 +24,11 @@ describe('DastSiteAuthSection', () => {
 
   const findByNameAttribute = name => wrapper.find(`[name="${name}"]`);
   const findByTestId = testId => wrapper.find(`[data-testid=${testId}]`);
-  const findAuthToggle = () => findByTestId('auth-toggle');
   const findAuthForm = () => findByTestId('auth-form');
+  const findAuthCheckbox = () => wrapper.find(GlFormCheckbox);
 
-  const setAuthToggle = ({ enabled }) => {
-    findAuthToggle().vm.$emit('change', enabled);
+  const setAuthentication = ({ enabled }) => {
+    findAuthCheckbox().vm.$emit('input', enabled);
     return wrapper.vm.$nextTick();
   };
   const getLatestInputEventPayload = () => {
@@ -43,20 +44,20 @@ describe('DastSiteAuthSection', () => {
       authEnabled => {
         createComponent({ authEnabled });
 
-        expect(findAuthToggle().props('value')).toBe(authEnabled);
+        expect(findAuthCheckbox().vm.$attrs.checked).toBe(authEnabled);
       },
     );
 
     it('controls the visibility of the authentication-fields form', async () => {
       expect(findByTestId('auth-form').exists()).toBe(false);
-      await setAuthToggle({ enabled: true });
+      await setAuthentication({ enabled: true });
       expect(findAuthForm().exists()).toBe(true);
     });
 
     it.each([true, false])(
       'makes the component emit an "input" event when changed',
       async enabled => {
-        await setAuthToggle({ enabled });
+        await setAuthentication({ enabled });
         expect(getLatestInputEventPayload().isAuthEnabled).toBe(enabled);
       },
     );
@@ -64,7 +65,7 @@ describe('DastSiteAuthSection', () => {
 
   describe('authentication form', () => {
     beforeEach(async () => {
-      await setAuthToggle({ enabled: true });
+      await setAuthentication({ enabled: true });
     });
 
     const inputFieldsWithValues = {
@@ -100,7 +101,7 @@ describe('DastSiteAuthSection', () => {
       it('is valid when correct values are passed in via the "fields" prop', async () => {
         createComponent({ fields: inputFieldsWithValues });
 
-        await setAuthToggle({ enabled: true });
+        await setAuthentication({ enabled: true });
 
         expect(getLatestInputEventPayload().form.state).toBe(true);
       });
