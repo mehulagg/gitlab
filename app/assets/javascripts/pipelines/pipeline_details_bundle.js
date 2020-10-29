@@ -5,9 +5,7 @@ import { __ } from '~/locale';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 import pipelineGraph from './components/graph/graph_component.vue';
 import createDagApp from './pipeline_details_dag';
-// import createPipelinesDetailApp from './pipeline_details_graph';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
-// import PipelinesMediator from './pipeline_details_mediator';
 import legacyPipelineHeader from './components/legacy_header_component.vue';
 import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
@@ -128,7 +126,7 @@ const createTestDetails = () => {
   });
 };
 
-export default async function initAll() {
+export default async function () {
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
   let mediator;
 
