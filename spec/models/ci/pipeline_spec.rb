@@ -2988,9 +2988,64 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
-  describe '#builds_in_self_and_descendants' do
-    subject(:builds) { pipeline.builds_in_self_and_descendants }
+  describe '#self_and_descendants' do
+    subject(:pipelines) { pipeline.self_and_descendants(while_dependent: while_dependent) }
 
+    let(:while_dependent) { false }
+
+    let!(:pipeline) { create(:ci_pipeline, project: project) }
+
+    context 'when pipeline is standalone' do
+      it 'contains only itself' do
+        expect(pipelines).to contain_exactly(pipeline)
+      end
+    end
+
+    context 'when pipeline is parent of another pipeline' do
+      let!(:child_pipeline) { create(:ci_pipeline, child_of: pipeline) }
+
+      it 'returns parent and child pipelines' do
+        expect(pipelines).to contain_exactly(pipeline, child_pipeline)
+      end
+
+      context 'when child pipeline is parent of another child pipeline' do
+        let!(:child_of_child_pipeline) { create(:ci_pipeline, child_of: child_pipeline) }
+
+        it 'includes the child of child pipeline' do
+          expect(pipelines).to contain_exactly(pipeline, child_pipeline, child_of_child_pipeline)
+        end
+
+        context 'when `while_dependent: true' do
+          let(:while_dependent) { true }
+
+          let(:dependent_child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: true) }
+          let(:dependent_child_of_child_pipeline) { create(:ci_pipeline, child_of: dependent_child_pipeline, strategy_depend: true) }
+
+          it 'returns the pipelines in the hierarchy following dependent child pipelines' do
+            expect(pipelines).to contain_exactly(pipeline, dependent_child_pipeline, dependent_child_of_child_pipeline)
+          end
+
+          it 'does not include pipelines having their parent non-dependent' do
+            expect(pipelines).not_to include(child_pipeline, child_of_child_pipeline)
+          end
+        end
+      end
+    end
+
+    context 'when pipeline has a parent pipeline' do
+      let!(:parent_pipeline) { create(:ci_pipeline, project: project) }
+      let!(:pipeline) { create(:ci_pipeline, child_of: parent_pipeline) }
+
+      it 'does not include the parent' do
+        expect(pipelines).to contain_exactly(pipeline)
+      end
+    end
+  end
+
+  describe '#builds_in_self_and_descendants' do
+    subject(:builds) { pipeline.builds_in_self_and_descendants(while_dependent: while_dependent) }
+
+    let(:while_dependent) { false }
     let(:pipeline) { create(:ci_pipeline, project: project) }
     let!(:build) { create(:ci_build, pipeline: pipeline) }
 
@@ -3017,6 +3072,27 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
       it 'returns the list of builds' do
         expect(builds).to contain_exactly(build, child_build, child_of_child_build)
+      end
+
+      context 'when `while_depend: true`' do
+        let(:while_dependent) { true }
+
+        let(:dependent_child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: true) }
+        let!(:dependent_child_build) { create(:ci_build, pipeline: dependent_child_pipeline) }
+
+        let(:dependent_child_of_child_pipeline) { create(:ci_pipeline, child_of: dependent_child_pipeline, strategy_depend: true) }
+        let!(:dependent_child_of_child_build) { create(:ci_build, pipeline: dependent_child_of_child_pipeline) }
+
+        let(:not_reacheable_pipeline) { create(:ci_pipeline, child_of: child_pipeline, strategy_depend: true) }
+        let!(:not_reacheable_build) { create(:ci_build, pipeline: not_reacheable_pipeline) }
+
+        it 'returns the build in the hierarchy following dependent child pipelines' do
+          expect(builds).to contain_exactly(build, dependent_child_build, dependent_child_of_child_build)
+        end
+
+        it 'does not include builds from dependent child pipelines having their parent non-dependent' do
+          expect(builds).not_to include(not_reacheable_build)
+        end
       end
     end
   end
@@ -3078,36 +3154,123 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   end
 
   describe '#batch_lookup_report_artifact_for_file_type' do
-    context 'with code quality report artifact' do
-      let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+    before do
+      stub_feature_flags(include_child_pipeline_jobs_in_reports: feature_flag_status)
+    end
 
-      it "returns the code quality artifact" do
-        expect(pipeline.batch_lookup_report_artifact_for_file_type(:codequality)).to eq(pipeline.job_artifacts.sample)
+    subject(:artifact) { pipeline.batch_lookup_report_artifact_for_file_type(:codequality) }
+
+    let!(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+
+    context 'when feature flag `include_child_pipeline_jobs_in_reports` is enabled' do
+      let(:feature_flag_status) { true }
+
+      context 'with report artifact' do
+        it 'returns the report artifact' do
+          expect(artifact).to eq(pipeline.job_artifacts.sample)
+        end
+      end
+
+      context 'with report artifact in dependent child pipeline' do
+        let!(:child_pipeline) { create(:ci_pipeline, :with_codequality_report, child_of: pipeline, strategy_depend: true) }
+
+        it 'returns the child report artifact' do
+          expect(artifact).to eq(child_pipeline.job_artifacts.sample)
+        end
+      end
+
+      context 'with report artifact in non dependent child pipeline' do
+        let!(:child_pipeline) { create(:ci_pipeline, :with_codequality_report, child_of: pipeline, strategy_depend: false) }
+
+        it 'returns the parent report artifact' do
+          expect(artifact).to eq(pipeline.job_artifacts.sample)
+        end
+      end
+    end
+
+    context 'when feature flag `include_child_pipeline_jobs_in_reports` is disabled' do
+      let(:feature_flag_status) { false }
+
+      context 'with report artifact' do
+        it 'returns the report artifact' do
+          expect(artifact).to eq(pipeline.job_artifacts.sample)
+        end
+      end
+
+      context 'with report artifact in dependent child pipeline' do
+        let!(:child_pipeline) { create(:ci_pipeline, :with_codequality_report, child_of: pipeline, strategy_depend: true) }
+
+        it 'always returns parent report artifact' do
+          expect(artifact).to eq(pipeline.job_artifacts.sample)
+        end
       end
     end
   end
 
   describe '#latest_report_builds' do
-    it 'returns build with test artifacts' do
-      test_build = create(:ci_build, :test_reports, pipeline: pipeline, project: project)
-      coverage_build = create(:ci_build, :coverage_reports, pipeline: pipeline, project: project)
-      create(:ci_build, :artifacts, pipeline: pipeline, project: project)
+    let!(:test_build) { create(:ci_build, :test_reports, pipeline: pipeline) }
+    let!(:coverage_build) { create(:ci_build, :coverage_reports, pipeline: pipeline) }
+    let!(:other_build) { create(:ci_build, :artifacts, pipeline: pipeline) }
 
-      expect(pipeline.latest_report_builds).to contain_exactly(test_build, coverage_build)
+    shared_examples 'returns report builds from current pipeline' do
+      it 'returns builds with test artifacts' do
+        expect(pipeline.latest_report_builds).to contain_exactly(test_build, coverage_build)
+      end
+
+      it 'filters builds by scope' do
+        expect(pipeline.latest_report_builds(Ci::JobArtifact.test_reports)).to contain_exactly(test_build)
+      end
+
+      it 'only returns not retried builds' do
+        create(:ci_build, :test_reports, :retried, pipeline: pipeline)
+
+        expect(pipeline.latest_report_builds).to contain_exactly(test_build, coverage_build)
+      end
     end
 
-    it 'filters builds by scope' do
-      test_build = create(:ci_build, :test_reports, pipeline: pipeline, project: project)
-      create(:ci_build, :coverage_reports, pipeline: pipeline, project: project)
+    context 'when feature flag `include_child_pipeline_jobs_in_reports` is enabled' do
+      before do
+        stub_feature_flags(include_child_pipeline_jobs_in_reports: true)
+      end
 
-      expect(pipeline.latest_report_builds(Ci::JobArtifact.test_reports)).to contain_exactly(test_build)
+      it_behaves_like 'returns report builds from current pipeline'
+
+      context 'when pipeline has reports in child pipelines' do
+        context 'when child pipeline is dependent' do
+          let(:child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: true) }
+          let!(:child_build) { create(:ci_build, :test_reports, pipeline: child_pipeline) }
+
+          it 'returns also builds from child pipelines' do
+            expect(pipeline.latest_report_builds).to contain_exactly(test_build, coverage_build, child_build)
+          end
+        end
+
+        context 'when child pipeline is not dependent' do
+          let(:child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: false) }
+          let!(:child_build) { create(:ci_build, :test_reports, pipeline: child_pipeline) }
+
+          it 'returns only builds from parent pipeline' do
+            expect(pipeline.latest_report_builds).to contain_exactly(test_build, coverage_build)
+          end
+        end
+      end
     end
 
-    it 'only returns not retried builds' do
-      test_build = create(:ci_build, :test_reports, pipeline: pipeline, project: project)
-      create(:ci_build, :test_reports, :retried, pipeline: pipeline, project: project)
+    context 'when feature flag `include_child_pipeline_jobs_in_reports` is disabled' do
+      before do
+        stub_feature_flags(include_child_pipeline_jobs_in_reports: false)
+      end
 
-      expect(pipeline.latest_report_builds).to contain_exactly(test_build)
+      it_behaves_like 'returns report builds from current pipeline'
+
+      context 'when pipeline has reports in child pipelines' do
+        let(:child_pipeline) { create(:ci_pipeline, child_of: pipeline, strategy_depend: true) }
+        let!(:child_build) { create(:ci_build, :test_reports, pipeline: child_pipeline) }
+
+        it 'returns only builds from parent pipeline' do
+          expect(pipeline.latest_report_builds).to contain_exactly(test_build, coverage_build)
+        end
+      end
     end
   end
 

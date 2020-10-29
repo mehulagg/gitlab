@@ -11,14 +11,25 @@ RSpec.describe Gitlab::Ci::PipelineObjectHierarchy do
   let_it_be(:child) { create(:ci_pipeline, project: project) }
   let_it_be(:cousin_parent) { create(:ci_pipeline, project: project) }
   let_it_be(:cousin) { create(:ci_pipeline, project: project) }
+  let_it_be(:cousin_child) { create(:ci_pipeline, project: project) }
   let_it_be(:triggered_pipeline) { create(:ci_pipeline) }
 
-  before_all do
-    create_source_pipeline(ancestor, parent)
-    create_source_pipeline(ancestor, cousin_parent)
-    create_source_pipeline(parent, child)
-    create_source_pipeline(cousin_parent, cousin)
-    create_source_pipeline(child, triggered_pipeline)
+  let(:ci_build_metadata_config_status) { false }
+
+  before do
+    # The use of this Feature Flag affects where options are stored and in particular
+    # the `strategy:depend` config used by `while_dependent:true` option.
+    stub_feature_flags(ci_build_metadata_config: ci_build_metadata_config_status)
+
+    # ancestor
+    #   - parent -> child -> triggered_pipeline
+    #   - cousin_parent -> cousin -> cousin_child
+    create_source_pipeline(ancestor, parent, strategy: :depend)
+    create_source_pipeline(ancestor, cousin_parent, strategy: :depend)
+    create_source_pipeline(parent, child, strategy: :depend)
+    create_source_pipeline(cousin_parent, cousin, strategy: nil)
+    create_source_pipeline(cousin, cousin_child, strategy: :depend)
+    create_source_pipeline(child, triggered_pipeline, strategy: nil)
   end
 
   describe '#base_and_ancestors' do
@@ -80,11 +91,33 @@ RSpec.describe Gitlab::Ci::PipelineObjectHierarchy do
           parent.id => 2,
           cousin_parent.id => 2,
           child.id => 3,
-          cousin.id => 3
+          cousin.id => 3,
+          cousin_child.id => 4
         }
 
         relation.each do |object|
           expect(object.depth).to eq(object_depths[object.id])
+        end
+      end
+    end
+
+    context 'when while_dependent is true' do
+      let(:relation) do
+        described_class.new(
+          ::Ci::Pipeline.where(id: ancestor.id),
+          options: { same_project: true, while_dependent: true }
+        ).base_and_descendants
+      end
+
+      it 'returns pipelines as long as they use strategy:depend' do
+        expect(relation).to contain_exactly(ancestor, parent, child, cousin_parent)
+      end
+
+      context 'when feature flag ci_build_metadata_config is enabled' do
+        let(:ci_build_metadata_config_status) { true }
+
+        it 'returns pipelines as long as they use strategy:depend' do
+          expect(relation).to contain_exactly(ancestor, parent, child, cousin_parent)
         end
       end
     end
@@ -105,7 +138,7 @@ RSpec.describe Gitlab::Ci::PipelineObjectHierarchy do
         options: { same_project: true }
       ).all_objects
 
-      expect(relation).to contain_exactly(ancestor, parent, cousin_parent, child, cousin)
+      expect(relation).to contain_exactly(ancestor, parent, cousin_parent, child, cousin, cousin_child)
     end
   end
 end

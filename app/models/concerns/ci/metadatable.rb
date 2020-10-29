@@ -23,6 +23,27 @@ module Ci
       before_create :ensure_metadata
     end
 
+    class_methods do
+      # Tables to join in Arel statements when querying for the options
+      def tables_from_builds_to_options
+        if Feature.enabled?(:ci_build_metadata_config)
+          [::Ci::Build.arel_table, ::Ci::BuildMetadata.arel_table]
+        else
+          [::Ci::Build.arel_table]
+        end
+      end
+
+      def arel_with_strategy_depend_condition
+        if Feature.enabled?(:ci_build_metadata_config)
+          ::Ci::Build.arel_table[:id]
+            .eq(::Ci::BuildMetadata.arel_table[:build_id])
+            .and(Arel.sql("(ci_builds_metadata.config_options->'trigger'->>'strategy' = 'depend')"))
+        else
+          Arel.sql('"ci_builds"."options" LIKE \'%strategy: depend%\'')
+        end
+      end
+    end
+
     def ensure_metadata
       metadata || build_metadata(project: project)
     end

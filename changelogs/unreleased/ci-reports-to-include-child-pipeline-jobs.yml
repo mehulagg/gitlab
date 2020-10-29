@@ -1,0 +1,5 @@
+---
+title: Make parent pipelines list reports from child pipelines in MR widgets
+merge_request: 46576
+author:
+type: added

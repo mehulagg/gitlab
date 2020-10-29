@@ -1,0 +1,7 @@
+---
+name: include_child_pipeline_jobs_in_reports
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4657
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/273200
+type: development
+group: group::continuous integration
+default_enabled: false

@@ -74,6 +74,10 @@ module Gitlab
       def self.ci_pipeline_editor_page_enabled?(project)
         ::Feature.enabled?(:ci_pipeline_editor_page, project, default_enabled: false)
       end
+
+      def self.include_child_pipeline_jobs_in_reports?(project)
+        ::Feature.enabled?(:include_child_pipeline_jobs_in_reports, project, default_enabled: false)
+      end
     end
   end
 end

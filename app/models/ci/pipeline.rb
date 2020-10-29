@@ -603,30 +603,6 @@ module Ci
         .last
     end
 
-    # This batch loads the latest reports for each CI job artifact
-    # type (e.g. sast, dast, etc.) in a single SQL query to eliminate
-    # the need to do N different `job_artifacts.where(file_type:
-    # X).last` calls.
-    #
-    # Return a hash of file type => array of 1 job artifact
-    def latest_report_artifacts
-      ::Gitlab::SafeRequestStore.fetch("pipeline:#{self.id}:latest_report_artifacts") do
-        # Note we use read_attribute(:project_id) to read the project
-        # ID instead of self.project_id. The latter appears to load
-        # the Project model. This extra filter doesn't appear to
-        # affect query plan but included to ensure we don't leak the
-        # wrong informaiton.
-        ::Ci::JobArtifact.where(
-          id: job_artifacts.with_reports
-            .select('max(ci_job_artifacts.id) as id')
-            .where(project_id: self.read_attribute(:project_id))
-            .group(:file_type)
-        )
-          .preload(:job)
-          .group_by(&:file_type)
-      end
-    end
-
     def has_kubernetes_active?
       project.deployment_platform&.active?
     end
@@ -841,15 +817,18 @@ module Ci
         .find_by_name(name)
     end
 
-    def builds_in_self_and_descendants
-      Ci::Build.latest.where(pipeline: self_and_descendants)
+    def builds_in_self_and_descendants(while_dependent: false)
+      Ci::Build.latest
+        .where(pipeline: self_and_descendants(while_dependent: while_dependent))
     end
 
     # Without using `unscoped`, caller scope is also included into the query.
     # Using `unscoped` here will be redundant after Rails 6.1
-    def self_and_descendants
+    def self_and_descendants(while_dependent: false)
       ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+        .new(
+          self.class.unscoped.where(id: id),
+          options: { same_project: true, while_dependent: while_dependent })
         .base_and_descendants
     end
 
@@ -891,7 +870,15 @@ module Ci
     end
 
     def latest_report_builds(reports_scope = ::Ci::JobArtifact.with_reports)
-      builds.latest.with_reports(reports_scope)
+      if include_child_pipeline_jobs_in_reports?
+        # list reports also from child pipelines using `strategy:depend`.
+        # we filter other child pipelines because we can't guarantee those
+        # finish before the parent pipeline as they run asynchronously.
+        builds_in_self_and_descendants(while_dependent: true)
+          .with_reports(reports_scope)
+      else
+        builds.latest.with_reports(reports_scope)
+      end
     end
 
     def builds_with_coverage
@@ -1104,6 +1091,44 @@ module Ci
     # rubocop:enable Rails/FindEach
 
     private
+
+    # This batch loads the latest reports for each CI job artifact
+    # type (e.g. sast, dast, etc.) in a single SQL query to eliminate
+    # the need to do N different `job_artifacts.where(file_type:
+    # X).last` calls.
+    #
+    # Return a hash of file type => array of 1 job artifact
+    def latest_report_artifacts
+      ::Gitlab::SafeRequestStore.fetch("pipeline:#{self.id}:latest_report_artifacts") do
+        # Note we use read_attribute(:project_id) to read the project
+        # ID instead of self.project_id. The latter appears to load
+        # the Project model. This extra filter doesn't appear to
+        # affect query plan but included to ensure we don't leak the
+        # wrong informaiton.
+        ::Ci::JobArtifact.where(
+          id: job_artifacts_in_self_and_descendants.with_reports
+            .select('max(ci_job_artifacts.id) as id')
+            .where(project_id: self.read_attribute(:project_id))
+            .group(:file_type)
+        )
+          .preload(:job)
+          .group_by(&:file_type)
+      end
+    end
+
+    def job_artifacts_in_self_and_descendants
+      if include_child_pipeline_jobs_in_reports?
+        ::Ci::JobArtifact.where(job: builds_in_self_and_descendants(while_dependent: true))
+      else
+        job_artifacts
+      end
+    end
+
+    def include_child_pipeline_jobs_in_reports?
+      strong_memoize(:include_child_pipeline_jobs_in_reports) do
+        Gitlab::Ci::Features.include_child_pipeline_jobs_in_reports?(project)
+      end
+    end
 
     def add_message(severity, content)
       return unless Gitlab::Ci::Features.store_pipeline_messages?(project)

@@ -16,6 +16,7 @@ FactoryBot.define do
     transient { head_pipeline_of { nil } }
 
     transient { child_of { nil } }
+    transient { strategy_depend { false } }
 
     after(:build) do |pipeline, evaluator|
       if evaluator.child_of
@@ -29,7 +30,9 @@ FactoryBot.define do
       merge_request&.update!(head_pipeline: pipeline)
 
       if evaluator.child_of
-        bridge = create(:ci_bridge, pipeline: evaluator.child_of)
+        bridge_traits = evaluator.strategy_depend ? [:strategy_depend] : []
+        bridge = create(:ci_bridge, *bridge_traits, pipeline: evaluator.child_of)
+
         create(:ci_sources_pipeline,
           source_job: bridge,
           pipeline: pipeline)
