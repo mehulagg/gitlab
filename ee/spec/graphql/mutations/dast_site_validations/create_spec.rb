@@ -38,12 +38,6 @@ RSpec.describe Mutations::DastSiteValidations::Create do
         end
       end
 
-      context 'when the user is not associated with the project' do
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
       context 'when the user can run a dast scan' do
         before do
           project.add_developer(user)
