@@ -230,9 +230,7 @@ export default {
       try {
         const {
           data: {
-            project: {
-              dastSiteValidation: { status },
-            },
+            project: { dastSiteValidation },
           },
         } = await this.$apollo.query({
           query: dastSiteValidationQuery,
@@ -242,7 +240,7 @@ export default {
           },
           fetchPolicy: fetchPolicies.NETWORK_ONLY,
         });
-        this.validationStatus = status;
+        this.validationStatus = dastSiteValidation?.status || null;
 
         if (this.validationStatusMatches(INPROGRESS)) {
           await new Promise(resolve => {
@@ -269,7 +267,7 @@ export default {
           },
         } = await this.$apollo.mutate({
           mutation: dastSiteTokenCreateMutation,
-          variables: { projectFullPath: this.fullPath, targetUrl: this.form.targetUrl.value },
+          variables: { fullPath: this.fullPath, targetUrl: this.form.targetUrl.value },
         });
         if (errors.length) {
           this.showErrors({ message: errorMessage, errors });
