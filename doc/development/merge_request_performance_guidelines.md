@@ -141,7 +141,7 @@ end
 This will end up running one query for every object to update. This code can
 easily overload a database given enough rows to update or many instances of this
 code running in parallel. This particular problem is known as the
-["N+1 query problem"](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations). You can write a test with [QueryRecoder](query_recorder.md) to detect this and prevent regressions.
+["N+1 query problem"](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations). You can write a test with [QueryRecorder](query_recorder.md) to detect this and prevent regressions.
 
 In this particular case the workaround is fairly easy:
 
@@ -202,8 +202,8 @@ end
 
 It will re-instantiate project object for each build, instead of using the same in-memory object.
 
-When building features you could use [Performance bar](performance_bar.md) in order to detect duplicated cached queries.
-You can write a test with [QueryRecoder](query_recorder.md) to detect multiple cached queries and prevent regressions.
+When building features you could use [Performance bar](../administration/monitoring/performance/performance_bar.md) in order to detect duplicated cached queries.
+You can write a test with [QueryRecorder](query_recorder.md) to detect multiple cached queries and prevent regressions.
 
 In this particular case the workaround is fairly easy:
 
