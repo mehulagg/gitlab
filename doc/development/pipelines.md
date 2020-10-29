@@ -420,10 +420,10 @@ We are using a custom mapping between source file to test files, maintained in t
 
 | Where? | PostgreSQL version |
 | ------ | ------ |
-| MRs | 11 |
-| `master` (non-scheduled pipelines) | 11 |
-| 2-hourly scheduled pipelines | 11 |
-| `nightly` scheduled pipelines | 11, 12 |
+| MRs | 12 |
+| `master` (non-scheduled pipelines) | 12 |
+| 2-hourly scheduled pipelines | 12 |
+| `nightly` scheduled pipelines | 12, 11 |
 
 #### Long-term plan
 
@@ -479,17 +479,19 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
 
 1. All jobs must only pull caches by default.
 1. All jobs must be able to pass with an empty cache. In other words, caches are only there to speed up jobs.
-1. We currently have 6 different caches defined in
+1. We currently have several different caches defined in
    [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml),
    with fixed keys:
    - `.rails-cache`.
    - `.static-analysis-cache`.
+   - `.coverage-cache`.
    - `.qa-cache`
    - `.yarn-cache`.
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
 1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
    - `update-rails-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
+   - `update-coverage-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-qa-cache`, defined in [`.gitlab/ci/qa.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/qa.gitlab-ci.yml).
    - `update-assets-compile-production-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
    - `update-assets-compile-test-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
