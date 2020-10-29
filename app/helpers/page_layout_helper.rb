@@ -44,7 +44,7 @@ module PageLayoutHelper
     if link
       @page_canonical_link = link
     else
-      @page_canonical_link
+      @page_canonical_link ||= generic_canonical_url
     end
   end
 
@@ -146,5 +146,19 @@ module PageLayoutHelper
     end
 
     css_class.join(' ')
+  end
+
+  private
+
+  def generic_canonical_url
+    return unless request.get? || request.head?
+    # For the main domain it doesn't matter whether there is
+    # a trailing slash or not, they're not considered different
+    # pages
+    return if request.path == '/'
+    return unless Feature.enabled?(:generic_canonical, current_user)
+
+    # Request#url builds the url without the trailing slash
+    request.url
   end
 end
