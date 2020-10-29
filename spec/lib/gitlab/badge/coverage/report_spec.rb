@@ -69,7 +69,7 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
     context 'with a matching job name specified' do
       let(:job_name) { 'first' }
 
-      it 'returns nil' do
+      it 'returns the pipeline coverage value' do
         expect(badge.status).to eq(40.00)
       end
     end
