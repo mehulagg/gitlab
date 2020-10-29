@@ -1,3 +1,5 @@
+- return unless Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true)
+
 .form-group
   = form.label :new_user_signups_cap, s_('AdminArea|User cap'), class: 'label-bold'
   = form.number_field :new_user_signups_cap, class: 'form-control', max: License.current&.restricted_user_count
