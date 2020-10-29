@@ -63,12 +63,9 @@ RSpec.describe Pages::LookupPath do
         project.mark_pages_as_deployed(artifacts_archive: artifacts_archive)
       end
 
-      it 'sets the source type to "zip"' do
-        expect(lookup_path.source[:type]).to eq('zip')
-      end
-
-      it 'sets the source path to the artifacts archive URL' do
+      it 'uses artifacts object storage', :aggregate_failures do
         Timecop.freeze do
+          expect(lookup_path.source[:type]).to eq('zip')
           expect(lookup_path.source[:path]).to eq(artifacts_archive.file.url(expire_at: 1.day.from_now))
           expect(lookup_path.source[:path]).to include("Expires=86400")
         end
