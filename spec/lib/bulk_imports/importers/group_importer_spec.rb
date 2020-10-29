@@ -11,7 +11,7 @@ RSpec.describe BulkImports::Importers::GroupImporter do
     instance_double(
       BulkImports::Pipeline::Context,
       current_user: user,
-      entities: [bulk_import_entity],
+      entity: bulk_import_entity,
       configuration: bulk_import_configuration
     )
   end

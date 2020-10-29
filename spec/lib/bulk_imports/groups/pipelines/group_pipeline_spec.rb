@@ -15,12 +15,11 @@ RSpec.describe BulkImports::Groups::Pipelines::GroupPipeline do
       )
     end
 
-    let(:entities) { [entity] }
     let(:context) do
       instance_double(
         BulkImports::Pipeline::Context,
         current_user: user,
-        entities: entities
+        entity: import_entity
       )
     end
 

@@ -1,5 +1,30 @@
 # frozen_string_literal: true
 
+# Entry point of the BulkImport feature.
+# This service receives a Gitlab Instance connectin params
+# and a list of groups to be imported.
+#
+# Process topography:
+#
+#       sync      |   async
+#                 |
+#  User +--> P1 +----> Pn +---+
+#                 |     ^     | Enqueue new job
+#                 |     +-----+
+#
+# P1 (sync)
+#
+# - Creates a BulkImport record
+# - Creates a BulkImport::Entity for each group to be imported
+# - Enqueue a BulkImportWorker job (P2) to import the given groups (entities)
+#
+# Pn (async)
+#
+# - For each group to be imported (BulkImport::Entity.with_status(:created))
+#   - Imports the group data
+#   - Create entities for each subgroup of the imported group.
+#   - Enqueues a BulkImportService job (Pn) to import the new entities (sugroups)
+#
 class BulkImportService
   attr_reader :current_user, :params, :credentials
 
@@ -11,7 +36,6 @@ class BulkImportService
 
   def execute
     bulk_import = create_bulk_import
-    bulk_import.start!
 
     BulkImportWorker.perform_async(bulk_import.id)
   end
@@ -29,7 +53,8 @@ class BulkImportService
           source_type: entity[:source_type],
           source_full_path: entity[:source_full_path],
           destination_name: entity[:destination_name],
-          destination_namespace: entity[:destination_namespace]
+          destination_namespace: entity[:destination_namespace],
+          parent_id: entity[:parent_id]
         )
       end
 
