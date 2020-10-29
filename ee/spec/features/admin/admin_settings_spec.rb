@@ -274,6 +274,10 @@ RSpec.describe 'Admin updates EE-only settings' do
 
   context 'sign up settings' do
     context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
       it 'does not render user cap form group' do
         visit general_admin_application_settings_path
 
@@ -283,7 +287,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     context 'when feature flag is enabled' do
       before do
-        # stub_ee_application_setting(admin_new_user_signups_cap: true)
+        stub_feature_flags(admin_new_user_signups_cap: true)
       end
 
       context 'when license has active user count' do
