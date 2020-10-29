@@ -7,14 +7,18 @@ module EE
     prepended do
       extend ::Gitlab::Utils::Override
 
-      validate :sso_enforcement, if: :group
-      validate :gma_enforcement, if: :group
+      validate :sso_enforcement, if: :group, unless: :project_bot_user
+      validate :gma_enforcement, if: :group, unless: :project_bot_user
 
       before_destroy :delete_member_branch_protection
     end
 
     def group
       source&.group
+    end
+
+    def project_bot_user
+      user.project_bot?
     end
 
     def delete_member_branch_protection
