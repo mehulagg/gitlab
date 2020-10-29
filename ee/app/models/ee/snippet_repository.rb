@@ -15,7 +15,7 @@ module EE
       # @return [ActiveRecord::Relation<SnippetRepository>] everything that should be synced to this node, restricted by primary key
       def replicables_for_current_secondary(primary_key_in)
         # Not implemented yet. Should be responsible for selective sync
-        all
+        self.primary_key_in(primary_key_in)
       end
     end
 
