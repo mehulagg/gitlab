@@ -58,6 +58,18 @@ class Label < ApplicationRecord
       .distinct
   }
 
+  scope :sorted_by_similarity_desc, -> (search, include_in_select: false) do
+    order_expression = Gitlab::Database::SimilarityScore.build_expression(search: search, rules: [
+      { column: arel_table["title"], multiplier: 1 },
+      { column: arel_table["description"], multiplier: 0.2 }
+    ])
+
+    query = reorder(order_expression.desc, arel_table['id'].desc)
+
+    query = query.select(*query.arel.projections, order_expression.as('similarity')) if include_in_select
+    query
+  end
+
   def self.prioritized(project)
     joins(:priorities)
       .where(label_priorities: { project_id: project })

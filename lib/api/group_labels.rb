@@ -26,6 +26,8 @@ module API
                  desc: 'Toggle to include only group labels or also project labels. This feature was added in GitLab 13.6'
         optional :search, type: String,
                  desc: 'Keyword to filter labels by. This feature was added in GitLab 13.6'
+        optional :by_similarity, type: Boolean, default: false,
+                 desc: 'Search and sort labels by similarity results. This feature was added in GitLab 13.6'
         use :pagination
       end
       get ':id/labels' do

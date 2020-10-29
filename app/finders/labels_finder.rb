@@ -59,6 +59,10 @@ class LabelsFinder < UnionFinder
 
   # rubocop: disable CodeReuse/ActiveRecord
   def sort(items)
+    if params[:by_similarity] && params[:search] && Feature.enabled?(:labels_finder_similarity_sort)
+      return items.sorted_by_similarity_desc(params[:search])
+    end
+
     if params[:sort]
       items.order_by(params[:sort])
     else
@@ -79,7 +83,11 @@ class LabelsFinder < UnionFinder
   def by_search(labels)
     return labels unless search?
 
-    labels.search(params[:search])
+    if params[:by_similarity] && search? && Feature.enabled?(:labels_finder_similarity_sort)
+      labels.where("similarity(title, ?) > 0.1", params[:search])
+    else
+      labels.search(params[:search])
+    end
   end
 
   def by_subscription(labels)
