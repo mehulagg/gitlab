@@ -2,6 +2,8 @@
 
 module API
   class Lint < ::API::Base
+    feature_category :continuous_integration
+
     namespace :ci do
       desc 'Validation of .gitlab-ci.yml content'
       params do
