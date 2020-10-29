@@ -10,7 +10,6 @@ import legacyPipelineHeader from './components/legacy_header_component.vue';
 import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
 import createTestReportsStore from './stores/test_reports';
-import { createPipelineHeaderApp } from './pipeline_details_header';
 
 Vue.use(Translate);
 
@@ -126,26 +125,30 @@ const createTestDetails = () => {
   });
 };
 
-export default async function () {
+export default async function() {
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
   let mediator;
 
   if (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails) {
     try {
-      const { default: PipelinesMediator } = await import(/* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator');
+      const { default: PipelinesMediator } = await import(
+        /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
+      );
       mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
       mediator.fetchPipeline();
     } catch {
-      Flash(__('An error occurred while loading the pipeline.'))
+      Flash(__('An error occurred while loading the pipeline.'));
     }
   }
 
   if (gon.features.graphqlPipelineDetails) {
     try {
-      const createPipelinesDetailApp = await import(/* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph');
+      const createPipelinesDetailApp = await import(
+        /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
+      );
       createPipelinesDetailApp.default();
     } catch {
-      Flash(__('An error occurred while loading the pipeline.'))
+      Flash(__('An error occurred while loading the pipeline.'));
     }
   } else {
     createLegacyPipelinesDetailApp(mediator);
@@ -153,10 +156,12 @@ export default async function () {
 
   if (gon.features.graphqlPipelineHeader) {
     try {
-      const { createPipelineHeaderApp } = await import(/* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header') ;
+      const { createPipelineHeaderApp } = await import(
+        /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
+      );
       createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
     } catch {
-      Flash(__('An error occurred while loading a section of this page.'))
+      Flash(__('An error occurred while loading a section of this page.'));
     }
   } else {
     createLegacyPipelineHeaderApp(mediator);
@@ -164,4 +169,4 @@ export default async function () {
 
   createTestDetails();
   createDagApp();
-};
+}
