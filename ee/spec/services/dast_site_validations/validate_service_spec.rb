@@ -44,7 +44,7 @@ RSpec.describe DastSiteValidations::ValidateService do
 
         aggregate_failures do
           expect(Gitlab::UrlBlocker).to receive(:validate!).and_return([uri, nil])
-          expect(Gitlab::HTTP).to receive(:get).with(dast_site_validation.validation_url).and_return(double('response', body: token))
+          expect(Gitlab::HTTP).to receive(:get).with(uri).and_return(double('response', body: token))
         end
 
         subject
