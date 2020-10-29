@@ -4,23 +4,35 @@ import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.v
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
 import store from '~/boards/stores';
+import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import { participants } from '../mock_data';
 
 describe('BoardCardAssigneeDropdown', () => {
   let wrapper;
   const iid = '111';
   const activeIssueName = 'test';
+  const anotherIssueName = 'hello';
 
   const createComponent = () => {
     wrapper = mount(BoardAssigneeDropdown, {
+      data() {
+        return {
+          selected: store.getters.getActiveIssue.assignees,
+          participants,
+        };
+      },
       store,
       provide: {
         canUpdate: true,
+        rootPath: '',
       },
     });
   };
 
-  const unassign = () => {
+  const unassign = async () => {
     wrapper.find('[data-testid="unassign"]').trigger('click');
+
+    await wrapper.vm.$nextTick();
   };
 
   const openDropdown = async () => {
@@ -42,34 +54,7 @@ describe('BoardCardAssigneeDropdown', () => {
       },
     };
 
-    jest.spyOn(store, 'dispatch').mockResolvedValue({
-      data: {
-        issue: {
-          participants: {
-            edges: [
-              {
-                node: {
-                  id: '1',
-                  username: activeIssueName,
-                  name: activeIssueName,
-                  avatar: '',
-                  avatarUrl: '',
-                },
-              },
-              {
-                node: {
-                  id: '2',
-                  username: 'hello',
-                  name: 'hello',
-                  avatar: '',
-                  avatarUrl: '',
-                },
-              },
-            ],
-          },
-        },
-      },
-    });
+    jest.spyOn(store, 'dispatch').mockResolvedValue();
   });
 
   afterEach(() => {
@@ -82,14 +67,10 @@ describe('BoardCardAssigneeDropdown', () => {
       createComponent();
     });
 
-    it('calls getParticipants', () => {
-      expect(store.dispatch).toHaveBeenCalledWith('getIssueParticipants', 'gid://gitlab/Issue/111');
-    });
-
     it.each`
       text
-      ${'hello'}
-      ${'test'}
+      ${anotherIssueName}
+      ${activeIssueName}
     `('finds item with $text', ({ text }) => {
       const item = findByText(text);
 
@@ -134,9 +115,7 @@ describe('BoardCardAssigneeDropdown', () => {
     beforeEach(async () => {
       createComponent();
 
-      openDropdown();
-
-      await wrapper.vm.$nextTick();
+      await openDropdown();
     });
 
     it('shows assignees dropdown', async () => {
@@ -150,17 +129,15 @@ describe('BoardCardAssigneeDropdown', () => {
 
     describe('when "Unassign" is clicked', () => {
       it('unassigns assignees', async () => {
-        unassign();
-
-        await wrapper.vm.$nextTick();
+        await unassign();
 
         expect(findByText('Unassign').props('isChecked')).toBe(true);
       });
     });
 
     describe('when an unselected item is clicked', () => {
-      beforeEach(() => {
-        unassign();
+      beforeEach(async () => {
+        await unassign();
       });
 
       it('assigns assignee in the dropdown', async () => {
@@ -186,9 +163,7 @@ describe('BoardCardAssigneeDropdown', () => {
 
     describe('when the user off clicks', () => {
       beforeEach(async () => {
-        unassign();
-
-        await wrapper.vm.$nextTick();
+        await unassign();
 
         document.body.click();
 
@@ -209,5 +184,29 @@ describe('BoardCardAssigneeDropdown', () => {
     createComponent();
 
     expect(wrapper.find('[data-testid="unassign-divider"]').exists()).toBe(true);
+  });
+
+  describe('Apollo Schema', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('returns the correct query', () => {
+      expect(wrapper.vm.$options.apollo.participants.query).toEqual(getIssueParticipants);
+    });
+
+    it('contains the correct variables', () => {
+      const { variables } = wrapper.vm.$options.apollo.participants;
+      const boundVariable = variables.bind(wrapper.vm);
+
+      expect(boundVariable()).toEqual({ id: 'gid://gitlab/Issue/111' });
+    });
+
+    it('returns the correct data from update', () => {
+      const node = { test: 1 };
+      const { update } = wrapper.vm.$options.apollo.participants;
+
+      expect(update({ issue: { participants: { nodes: [node] } } })).toEqual([node]);
+    });
   });
 });

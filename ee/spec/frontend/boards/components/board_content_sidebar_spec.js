@@ -14,6 +14,7 @@ describe('ee/BoardContentSidebar', () => {
   const createComponent = () => {
     wrapper = mount(BoardContentSidebar, {
       provide: {
+        canUpdate: true,
         rootPath: '',
       },
       store,

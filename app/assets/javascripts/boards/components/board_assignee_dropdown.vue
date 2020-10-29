@@ -5,11 +5,14 @@ import { __ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
+import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 
 export default {
   i18n: {
-    unassignText: __('Unassign'),
-    assigneeText: __('Assignee'),
+    unassign: __('Unassign'),
+    assignee: __('Assignee'),
+    assignees: __('Assignees'),
+    assignTo: __('Assign to'),
   },
   components: {
     BoardEditableItem,
@@ -22,14 +25,27 @@ export default {
   },
   data() {
     return {
-      list: [],
+      participants: [],
       selected: this.$store.getters.getActiveIssue.assignees,
     };
+  },
+  apollo: {
+    participants: {
+      query: getIssueParticipants,
+      variables() {
+        return {
+          id: `gid://gitlab/Issue/${this.getActiveIssue.iid}`,
+        };
+      },
+      update(data) {
+        return data.issue?.participants?.nodes || [];
+      },
+    },
   },
   computed: {
     ...mapGetters(['getActiveIssue']),
     unSelectedFiltered() {
-      return this.list.filter(({ username }) => {
+      return this.participants.filter(({ username }) => {
         return !this.selectedUserNames.includes(username);
       });
     },
@@ -39,14 +55,6 @@ export default {
     selectedUserNames() {
       return this.selected.map(({ username }) => username);
     },
-  },
-  mounted() {
-    this.getIssueParticipants(`gid://gitlab/Issue/${this.getActiveIssue.iid}`)
-      .then(({ data }) => {
-        this.list = data.issue.participants.nodes;
-      })
-      // eslint-disable-next-line no-console
-      .catch(e => console.log(e));
   },
   methods: {
     ...mapActions(['getIssueParticipants', 'setAssignees']),
@@ -61,7 +69,7 @@ export default {
 
       this.selected = this.selected.concat(name);
     },
-    unSelect(name) {
+    unselect(name) {
       this.selected = this.selected.filter(user => user.username !== name);
     },
     saveAssignees() {
@@ -75,20 +83,24 @@ export default {
 </script>
 
 <template>
-  <board-editable-item :title="$options.i18n.assigneeText" @close="saveAssignees">
+  <board-editable-item :title="$options.i18n.assignee" @close="saveAssignees">
     <template #collapsed>
       <issuable-assignees :users="getActiveIssue.assignees" />
     </template>
 
     <template #default>
-      <assignees-dropdown class="w-100" text="Assignees" header-text="Assign To">
+      <assignees-dropdown
+        class="w-100"
+        :text="$options.i18n.assignees"
+        :header-text="$options.i18n.assignTo"
+      >
         <template #items>
           <gl-dropdown-item
             :is-checked="selectedIsEmpty"
             data-testid="unassign"
             class="mt-2"
             @click="selectAssignee()"
-            >{{ $options.i18n.unassignText }}</gl-dropdown-item
+            >{{ $options.i18n.unassign }}</gl-dropdown-item
           >
           <gl-dropdown-divider data-testid="unassign-divider" />
           <gl-dropdown-item
@@ -96,7 +108,7 @@ export default {
             :key="item.id"
             :user="item"
             :is-checked="isChecked(item.username)"
-            @click="unSelect(item.username)"
+            @click="unselect(item.username)"
           >
             <gl-avatar-link>
               <gl-avatar-labeled
