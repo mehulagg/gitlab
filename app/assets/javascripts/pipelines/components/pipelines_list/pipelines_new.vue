@@ -13,6 +13,7 @@ import CIPaginationMixin from '~/vue_shared/mixins/ci_pagination_api_mixin';
 import PipelinesFilteredSearch from './pipelines_filtered_search.vue';
 import { validateParams } from '../../utils';
 import { ANY_TRIGGER_AUTHOR, RAW_TEXT_WARNING, FILTER_TAG_IDENTIFIER } from '../../constants';
+import getPipelinesTableData from '../../graphql/queries/get_pipelines_table_data.query.graphql';
 
 export default {
   components: {
@@ -97,6 +98,23 @@ export default {
       type: Object,
       required: true,
     },
+    pipelinesProjectPath: {
+      type: String,
+      required: true,
+    },
+  },
+  apollo: {
+    pipelines: {
+      query: getPipelinesTableData,
+      variables() {
+        return {
+          fullPath: this.pipelinesProjectPath,
+        };
+      },
+      update(data) {
+        return data.project.pipelines.nodes;
+      },
+    },
   },
   data() {
     return {
@@ -107,6 +125,7 @@ export default {
       page: getParameterByName('page') || '1',
       requestData: {},
       isResetCacheButtonLoading: false,
+      pipelines: null,
     };
   },
   stateMap: {
