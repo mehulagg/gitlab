@@ -94,3 +94,24 @@ export const generateJobNeedsDict = ({ jobs }) => {
     return { ...acc, [jobs[value].id]: uniqueValues };
   }, {});
 };
+
+/**
+ * This function takes a the needs object generated from
+ * `generateJobNeedsDict` and returns a flat array of all
+ * the jobs that either have needs or are a need of another
+ * job.
+ * @param {Object} needsObject
+ * @returns {Array} - Array of all the jobs with links
+ */
+export const generateJobsWithLinksArray = needsObject => {
+  return Array.from(
+    new Set(
+      Object.keys(needsObject).reduce((acc, val) => {
+        if (needsObject[val].length > 0) {
+          return [...acc, ...needsObject[val], val];
+        }
+        return [...acc];
+      }, []),
+    ),
+  );
+};

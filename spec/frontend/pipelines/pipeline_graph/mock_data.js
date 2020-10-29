@@ -91,3 +91,12 @@ export const pipelineData = {
     [jobId4]: {},
   },
 };
+
+export const needsData = {
+  job1: [],
+  job2: ['job1'],
+  job3: [],
+  job4: ['job1', 'job2'],
+  job5: ['job4', 'job1', 'job2'],
+  job6: [],
+};

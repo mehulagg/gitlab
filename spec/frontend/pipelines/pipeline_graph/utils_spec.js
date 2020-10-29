@@ -1,7 +1,9 @@
+import { needsData } from './mock_data';
 import {
   preparePipelineGraphData,
   createUniqueJobId,
   generateJobNeedsDict,
+  generateJobsWithLinksArray,
 } from '~/pipelines/utils';
 
 describe('utils functions', () => {
@@ -206,6 +208,16 @@ describe('utils functions', () => {
         [uniqueJobName3]: [uniqueJobName1, uniqueJobName2],
         [uniqueJobName4]: [uniqueJobName3, uniqueJobName1, uniqueJobName2],
       });
+    });
+  });
+
+  describe('generateJobsWithLinksArray', () => {
+    it('returns an empty array of there are no jobs as params', () => {
+      expect(generateJobsWithLinksArray({})).toEqual([]);
+    });
+
+    it('returns a flat array with all the jobs that have needs or are a need', () => {
+      expect(generateJobsWithLinksArray(needsData)).toEqual(['job1', 'job2', 'job4', 'job5']);
     });
   });
 });

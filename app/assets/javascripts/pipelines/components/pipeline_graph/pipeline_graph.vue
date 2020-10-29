@@ -7,7 +7,7 @@ import StagePill from './stage_pill.vue';
 import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
 import { DRAW_FAILURE, DEFAULT } from '../../constants';
-import { generateJobNeedsDict } from '../../utils';
+import { generateJobNeedsDict, generateJobsWithLinksArray } from '../../utils';
 
 export default {
   components: {
@@ -41,6 +41,9 @@ export default {
   computed: {
     isPipelineDataEmpty() {
       return isEmpty(this.pipelineData);
+    },
+    isNeedsDictCreated() {
+      return Boolean(this.needsObject);
     },
     hasError() {
       return this.failureType;
@@ -79,6 +82,10 @@ export default {
       return [];
     },
   },
+  created() {
+    this.needsObject = generateJobNeedsDict(this.pipelineData) ?? {};
+    this.jobsWithLinks = generateJobsWithLinksArray(this.needsObject);
+  },
   mounted() {
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
@@ -111,12 +118,6 @@ export default {
       return '';
     },
     highlightNeeds(uniqueJobId) {
-      // The first time we hover, we create the object where
-      // we store all the data to properly highlight the needs.
-      if (!this.needsObject) {
-        this.needsObject = generateJobNeedsDict(this.pipelineData) ?? {};
-      }
-
       this.highlightedJob = uniqueJobId;
     },
     removeHighlightNeeds() {
@@ -152,6 +153,9 @@ export default {
         this.isLinkHighlighted(link.ref) ? 'gl-stroke-blue-400' : 'gl-stroke-gray-200',
         { 'gl-opacity-3': this.hasHighlightedJob && !this.isLinkHighlighted(link.ref) },
       ];
+    },
+    hasJobLinks(jobName) {
+      return !this.jobsWithLinks.includes(jobName);
     },
   },
 };
@@ -195,13 +199,14 @@ export default {
           <stage-pill :stage-name="stage.name" :is-empty="stage.groups.length === 0" />
         </div>
         <div
-          class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full gl-px-8"
+          class="gl-relative gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full gl-px-8"
         >
           <job-pill
             v-for="group in stage.groups"
             :key="group.name"
             :job-id="group.id"
             :job-name="group.name"
+            :has-no-links="hasJobLinks(group.id)"
             :is-highlighted="hasHighlightedJob && isJobHighlighted(group.id)"
             :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
             @on-mouse-enter="highlightNeeds"
