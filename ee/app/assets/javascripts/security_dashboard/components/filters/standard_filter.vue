@@ -19,7 +19,7 @@ export default {
   data() {
     return {
       searchTerm: '',
-      selectedOptions: this.filter.defaultOptions || [],
+      selectedOptions: this.filter.defaultOptions,
     };
   },
   computed: {
@@ -27,18 +27,14 @@ export default {
       return new Set(this.selectedOptions);
     },
     selectedOptionsOrAll() {
-      const { selectedOptions, filter } = this;
-
-      if (filter.allOption) {
-        return selectedOptions.length ? selectedOptions : [filter.allOption];
-      }
-
-      return selectedOptions;
+      return this.selectedOptions.length ? this.selectedOptions : [this.filter.allOption];
     },
     queryObject() {
+      // This is the object used to update the querystring.
       return { [this.filter.id]: this.selectedOptionsOrAll.map(x => x.id) };
     },
     filterObject() {
+      // This is the object used by the GraphQL query.
       return { [this.filter.id]: this.selectedOptions.map(x => x.id) };
     },
     filteredOptions() {
@@ -46,18 +42,19 @@ export default {
         option.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
       );
     },
-    routeQuery() {
-      const keys = this.$route.query[this.filter.id] || [];
-      return Array.isArray(keys) ? keys : [keys];
+    routeQueryIds() {
+      const ids = this.$route.query[this.filter.id] || [];
+      return Array.isArray(ids) ? ids : [ids];
     },
     routeQueryOptions() {
-      if (this.routeQuery.includes(this.filter.allOption?.id)) {
-        return [];
+      const options = this.filter.options.filter(x => this.routeQueryIds.includes(x.id));
+      const hasAllId = this.routeQueryIds.includes(this.filter.allOption.id);
+
+      if (options.length && !hasAllId) {
+        return options;
       }
 
-      const options = this.filter.options.filter(x => this.routeQuery.includes(x.id));
-
-      return options.length ? options : this.filter.defaultOptions || [];
+      return hasAllId ? [] : this.filter.defaultOptions;
     },
   },
   watch: {
@@ -66,10 +63,8 @@ export default {
     },
   },
   created() {
-    // SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
     this.selectedOptions = this.routeQueryOptions;
-
-    // WHEN USER CLICKS FORWARD/BACK BUTTON, SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
+    // When the user clicks the forward/back browser buttons, update the selected options.
     window.addEventListener('popstate', () => {
       this.selectedOptions = this.routeQueryOptions;
     });
@@ -86,8 +81,8 @@ export default {
     },
     updateRouteQuery() {
       const query = { query: { ...this.$route.query, ...this.queryObject } };
-
-      if (!isEqual(this.routeQuery, this.queryObject[this.filter.id])) {
+      // To avoid a console error, don't update the querystring if it's the same as the current one.
+      if (!isEqual(this.routeQueryIds, this.queryObject[this.filter.id])) {
         this.$router.push(query);
       }
     },

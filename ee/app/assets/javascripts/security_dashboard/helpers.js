@@ -27,6 +27,7 @@ export const severityFilter = {
   id: 'severity',
   options: parseOptions(SEVERITY_LEVELS),
   allOption: BASE_FILTERS.severity,
+  defaultOptions: [],
 };
 
 export const scannerFilter = {
@@ -34,6 +35,7 @@ export const scannerFilter = {
   id: 'reportType',
   options: parseOptions(REPORT_TYPES),
   allOption: BASE_FILTERS.report_type,
+  defaultOptions: [],
 };
 
 export const getProjectFilter = projects => {
@@ -42,6 +44,7 @@ export const getProjectFilter = projects => {
     id: 'projectId',
     options: mapProjects(projects),
     allOption: BASE_FILTERS.project_id,
+    defaultOptions: [],
   };
 };
 

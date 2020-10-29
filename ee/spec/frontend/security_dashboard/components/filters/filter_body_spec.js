@@ -33,17 +33,19 @@ describe('Filter Body component', () => {
 
   describe('dropdown button', () => {
     it('shows the selected option name if only one option is selected', () => {
-      const props = { selectedOptions: ['Some Selected Option'] };
+      const option = { name: 'Some Selected Option' };
+      const props = { selectedOptions: [option] };
       createComponent(props);
 
-      expect(dropdownButton().text()).toBe(props.selectedOptions[0]);
+      expect(dropdownButton().text()).toBe(option.name);
     });
 
     it('shows the selected option name and "+x more" if more than one option is selected', () => {
-      const props = { selectedOptions: ['Option 1', 'Option 2', 'Option 3'] };
+      const options = [{ name: 'Option 1' }, { name: 'Option 2' }, { name: 'Option 3' }];
+      const props = { selectedOptions: options };
       createComponent(props);
 
-      expect(dropdownButton().text()).toMatch(/Option 1\s+\+2 more/);
+      expect(dropdownButton().text()).toMatchInterpolatedText('Option 1 +2 more');
     });
   });
 
