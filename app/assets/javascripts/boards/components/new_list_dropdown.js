@@ -59,7 +59,12 @@ export default function initNewListDropdown() {
           });
       },
       renderRow(label) {
-        const active = boardsStore.findListByLabelId(label.id);
+        let active;
+        if (store.getters.shouldUseGraphQL) {
+          active = store.getters.getListByLabelId(fullLabelId(label));
+        } else {
+          active = boardsStore.findListByLabelId(label.id);
+        }
         const $li = $('<li />');
         const $a = $('<a />', {
           class: active ? `is-active js-board-list-${getIdFromGraphQLId(active.id)}` : '',
