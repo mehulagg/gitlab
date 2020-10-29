@@ -1,4 +1,4 @@
-# Yamllint of CI-related yaml and EE changelogs.
+# Yamllint of CI-related yaml and changelogs.
 # This uses rules from project root `.yamllint`.
 lint-yaml:
   extends:
