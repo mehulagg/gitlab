@@ -1,0 +1,26 @@
+diff --git a/node_modules/monaco-editor/esm/vs/editor/editor.api.js b/node_modules/monaco-editor/esm/vs/editor/editor.api.js
+index 225acdb..a9136f6 100644
+--- a/node_modules/monaco-editor/esm/vs/editor/editor.api.js
++++ b/node_modules/monaco-editor/esm/vs/editor/editor.api.js
+@@ -6,7 +6,7 @@ import { EditorOptions } from './common/config/editorOptions.js';
+ import { createMonacoBaseAPI } from './common/standalone/standaloneBase.js';
+ import { createMonacoEditorAPI } from './standalone/browser/standaloneEditor.js';
+ import { createMonacoLanguagesAPI } from './standalone/browser/standaloneLanguages.js';
+-const global = self;
++const g = self;
+ // Set defaults for standalone editor
+ EditorOptions.wrappingIndent.defaultValue = 0 /* None */;
+ EditorOptions.glyphMargin.defaultValue = false;
+@@ -29,9 +29,9 @@ export const Uri = api.Uri;
+ export const Token = api.Token;
+ export const editor = api.editor;
+ export const languages = api.languages;
+-global.monaco = api;
+-if (typeof global.require !== 'undefined' && typeof global.require.config === 'function') {
+-    global.require.config({
++g.monaco = api;
++if (typeof g.require !== 'undefined' && typeof g.require.config === 'function') {
++    g.require.config({
+         ignoreDuplicateModules: [
+             'vscode-languageserver-types',
+             'vscode-languageserver-types/main',
