@@ -18,7 +18,7 @@ module EE
     end
 
     def project_bot
-      user&.project_bot?
+      user.project_bot?
     end
 
     def delete_member_branch_protection
