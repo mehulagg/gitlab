@@ -10,6 +10,7 @@ RSpec.describe BulkImports::Groups::Loaders::GroupLoader do
     let(:context) do
       instance_double(
         BulkImports::Pipeline::Context,
+        entity: instance_double(BulkImports::Entity, update!: true),
         current_user: user
       )
     end
