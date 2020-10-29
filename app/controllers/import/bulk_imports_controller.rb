@@ -16,9 +16,11 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def status
+    data = importable_data
+
     respond_to do |format|
       format.json do
-        render json: { importable_data: serialized_importable_data }
+        render json: { importable_data: data }
       end
 
       format.html
