@@ -891,9 +891,6 @@
 .test-metadata:rules:retrieve-tests-metadata:
   rules:
     - <<: *if-default-refs
-      changes: *code-backstage-patterns
-      when: on_success
-    - <<: *if-merge-request-title-run-all-rspec
 
 .test-metadata:rules:update-tests-metadata:
   rules:
