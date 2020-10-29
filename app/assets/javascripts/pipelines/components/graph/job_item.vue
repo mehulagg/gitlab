@@ -119,7 +119,7 @@ export default {
     },
   },
   methods: {
-    hideTooltips(){
+    hideTooltips() {
       this.$root.$emit('bv::hide::tooltip');
     },
     pipelineActionRequestComplete() {
