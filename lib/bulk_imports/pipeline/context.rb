@@ -9,7 +9,7 @@ module BulkImports
 
       PIPELINE_ATTRIBUTES = [
         Attribute.new(:current_user, User),
-        Attribute.new(:entities, Array),
+        Attribute.new(:entity, Array),
         Attribute.new(:configuration, ::BulkImports::Configuration)
       ].freeze
 

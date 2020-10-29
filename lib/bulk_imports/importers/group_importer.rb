@@ -12,18 +12,17 @@ module BulkImports
       end
 
       def execute
-        return if entity.parent
-
         bulk_import = entity.bulk_import
         configuration = bulk_import.configuration
 
         context = BulkImports::Pipeline::Context.new(
           current_user: bulk_import.user,
-          entities: [entity],
+          entity: entity,
           configuration: configuration
         )
 
         BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
+        # BulkImports::Groups::Pipelines::SubgroupsPipeline.new.run(context)
       end
 
       def entity
