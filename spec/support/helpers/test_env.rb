@@ -529,7 +529,6 @@ module TestEnv
     true
   end
 
-  # b8bbf57dd40b43fa35e70d3c3f1220ac8cb76657 is old
   def component_ahead_of_target?(component_folder, expected_version)
     # The HEAD of the component_folder will be used as heuristic for the version
     # of the binaries, allowing to use Git to determine if HEAD is later than
