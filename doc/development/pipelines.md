@@ -426,10 +426,10 @@ We are using a custom mapping between source file to test files, maintained in t
 
 | Where? | PostgreSQL version |
 | ------ | ------ |
-| MRs | 11 |
-| `master` (non-scheduled pipelines) | 11 |
-| 2-hourly scheduled pipelines | 11 |
-| `nightly` scheduled pipelines | 11, 12 |
+| MRs | 12 |
+| `master` (non-scheduled pipelines) | 12 |
+| 2-hourly scheduled pipelines | 12 |
+| `nightly` scheduled pipelines | 12, 11 |
 
 #### Long-term plan
 

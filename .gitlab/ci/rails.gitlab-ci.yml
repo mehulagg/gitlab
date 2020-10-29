@@ -59,11 +59,11 @@
     - .rspec-base
     - .use-pg12
 
-.rspec-base-pg11-as-if-foss:
+.rspec-base-pg12-as-if-foss:
   extends:
     - .rspec-base
     - .as-if-foss
-    - .use-pg11
+    - .use-pg12
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss"]
 
 .rspec-ee-base-pg11:
@@ -96,7 +96,7 @@
   extends:
     - .rails-job-base
     - .rails:rules:ee-and-foss-migration
-    - .use-pg11
+    - .use-pg12
   stage: test
   needs: ["setup-test-env"]
 # rspec job base specs
@@ -139,7 +139,7 @@ setup-test-env:
   extends:
     - .rails-job-base
     - .rails:rules:default-refs-code-backstage-qa
-    - .use-pg11
+    - .use-pg12
   stage: prepare
   variables:
     GITLAB_TEST_EAGER_LOAD: "0"
@@ -234,33 +234,33 @@ downtime_check:
   script:
     - bundle exec rake downtime_check
 
-rspec migration pg11:
+rspec migration pg12:
   extends:
-    - .rspec-base-pg11
+    - .rspec-base-pg12
     - .rspec-base-migration
     - .rspec-migration-parallel
 
-rspec unit pg11:
+rspec unit pg12:
   extends:
-    - .rspec-base-pg11
+    - .rspec-base-pg12
     - .rails:rules:ee-and-foss-unit
     - .rspec-unit-parallel
 
-rspec integration pg11:
+rspec integration pg12:
   extends:
-    - .rspec-base-pg11
+    - .rspec-base-pg12
     - .rails:rules:ee-and-foss-integration
     - .rspec-integration-parallel
 
-rspec system pg11:
+rspec system pg12:
   extends:
-    - .rspec-base-pg11
+    - .rspec-base-pg12
     - .rails:rules:ee-and-foss-system
     - .rspec-system-parallel
 
 rspec fast_spec_helper:
   extends:
-    - .rspec-base-pg11
+    - .rspec-base-pg12
     - .rails:rules:ee-and-foss-fast_spec_helper
   script:
     - bin/rspec spec/fast_spec_helper.rb
@@ -351,17 +351,17 @@ rspec:coverage:
   # so we use `dependencies` here.
   dependencies:
     - setup-test-env
-    - rspec migration pg11
-    - rspec unit pg11
-    - rspec integration pg11
-    - rspec system pg11
-    - rspec-ee migration pg11
-    - rspec-ee unit pg11
-    - rspec-ee integration pg11
-    - rspec-ee system pg11
-    - rspec-ee unit pg11 geo
-    - rspec-ee integration pg11 geo
-    - rspec-ee system pg11 geo
+    - rspec migration pg12
+    - rspec unit pg12
+    - rspec integration pg12
+    - rspec system pg12
+    - rspec-ee migration pg12
+    - rspec-ee unit pg12
+    - rspec-ee integration pg12
+    - rspec-ee system pg12
+    - rspec-ee unit pg12 geo
+    - rspec-ee integration pg12 geo
+    - rspec-ee system pg12 geo
     - memory-static
     - memory-on-boot
   script:
@@ -389,17 +389,17 @@ rspec:feature-flags:
   # so we use `dependencies` here.
   dependencies:
     - setup-test-env
-    - rspec migration pg11
-    - rspec unit pg11
-    - rspec integration pg11
-    - rspec system pg11
-    - rspec-ee migration pg11
-    - rspec-ee unit pg11
-    - rspec-ee integration pg11
-    - rspec-ee system pg11
-    - rspec-ee unit pg11 geo
-    - rspec-ee integration pg11 geo
-    - rspec-ee system pg11 geo
+    - rspec migration pg12
+    - rspec unit pg12
+    - rspec integration pg12
+    - rspec system pg12
+    - rspec-ee migration pg12
+    - rspec-ee unit pg12
+    - rspec-ee integration pg12
+    - rspec-ee system pg12
+    - rspec-ee unit pg12 geo
+    - rspec-ee integration pg12 geo
+    - rspec-ee system pg12 geo
     - memory-static
     - memory-on-boot
   script:
@@ -411,70 +411,70 @@ rspec:feature-flags:
 
 ##################################################
 # EE: default refs (MRs, master, schedules) jobs #
-rspec migration pg11-as-if-foss:
+rspec migration pg12-as-if-foss:
   extends:
-    - .rspec-base-pg11-as-if-foss
+    - .rspec-base-pg12-as-if-foss
     - .rspec-base-migration
     - .rails:rules:as-if-foss-migration
     - .rspec-migration-parallel
 
-rspec unit pg11-as-if-foss:
+rspec unit pg12-as-if-foss:
   extends:
-    - .rspec-base-pg11-as-if-foss
+    - .rspec-base-pg12-as-if-foss
     - .rails:rules:as-if-foss-unit
     - .rspec-unit-parallel
 
-rspec integration pg11-as-if-foss:
+rspec integration pg12-as-if-foss:
   extends:
-    - .rspec-base-pg11-as-if-foss
+    - .rspec-base-pg12-as-if-foss
     - .rails:rules:as-if-foss-integration
     - .rspec-integration-parallel
 
-rspec system pg11-as-if-foss:
+rspec system pg12-as-if-foss:
   extends:
-    - .rspec-base-pg11-as-if-foss
+    - .rspec-base-pg12-as-if-foss
     - .rails:rules:as-if-foss-system
     - .rspec-system-parallel
 
-rspec-ee migration pg11:
+rspec-ee migration pg12:
   extends:
-    - .rspec-ee-base-pg11
+    - .rspec-ee-base-pg12
     - .rspec-base-migration
     - .rails:rules:ee-only-migration
     - .rspec-ee-migration-parallel
 
-rspec-ee unit pg11:
+rspec-ee unit pg12:
   extends:
-    - .rspec-ee-base-pg11
+    - .rspec-ee-base-pg12
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-parallel
 
-rspec-ee integration pg11:
+rspec-ee integration pg12:
   extends:
-    - .rspec-ee-base-pg11
+    - .rspec-ee-base-pg12
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
 
-rspec-ee system pg11:
+rspec-ee system pg12:
   extends:
-    - .rspec-ee-base-pg11
+    - .rspec-ee-base-pg12
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
 
-rspec-ee unit pg11 geo:
+rspec-ee unit pg12 geo:
   extends:
-    - .rspec-ee-base-geo-pg11
+    - .rspec-ee-base-geo-pg12
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-geo-parallel
 
-rspec-ee integration pg11 geo:
+rspec-ee integration pg12 geo:
   extends:
-    - .rspec-ee-base-geo-pg11
+    - .rspec-ee-base-geo-pg12
     - .rails:rules:ee-only-integration
 
-rspec-ee system pg11 geo:
+rspec-ee system pg12 geo:
   extends:
-    - .rspec-ee-base-geo-pg11
+    - .rspec-ee-base-geo-pg12
     - .rails:rules:ee-only-system
 
 db:rollback geo:
@@ -489,28 +489,28 @@ db:rollback geo:
 
 ##########################################
 # EE/FOSS: master nightly scheduled jobs #
-rspec migration pg12:
+rspec migration pg11:
   extends:
-    - .rspec-base-pg12
+    - .rspec-base-pg11
     - .rspec-base-migration
     - .rails:rules:master-schedule-nightly--code-backstage
     - .rspec-migration-parallel
 
-rspec unit pg12:
+rspec unit pg11:
   extends:
-    - .rspec-base-pg12
+    - .rspec-base-pg11
     - .rails:rules:master-schedule-nightly--code-backstage
     - .rspec-unit-parallel
 
-rspec integration pg12:
+rspec integration pg11:
   extends:
-    - .rspec-base-pg12
+    - .rspec-base-pg11
     - .rails:rules:master-schedule-nightly--code-backstage
     - .rspec-integration-parallel
 
-rspec system pg12:
+rspec system pg11:
   extends:
-    - .rspec-base-pg12
+    - .rspec-base-pg11
     - .rails:rules:master-schedule-nightly--code-backstage
     - .rspec-system-parallel
 # EE/FOSS: master nightly scheduled jobs #
@@ -518,45 +518,45 @@ rspec system pg12:
 
 #####################################
 # EE: master nightly scheduled jobs #
-rspec-ee migration pg12:
+rspec-ee migration pg11:
   extends:
-    - .rspec-ee-base-pg12
+    - .rspec-ee-base-pg11
     - .rspec-base-migration
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-migration-parallel
 
-rspec-ee unit pg12:
+rspec-ee unit pg11:
   extends:
-    - .rspec-ee-base-pg12
+    - .rspec-ee-base-pg11
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-unit-parallel
 
-rspec-ee integration pg12:
+rspec-ee integration pg11:
   extends:
-    - .rspec-ee-base-pg12
+    - .rspec-ee-base-pg11
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-integration-parallel
 
-rspec-ee system pg12:
+rspec-ee system pg11:
   extends:
-    - .rspec-ee-base-pg12
+    - .rspec-ee-base-pg11
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-system-parallel
 
-rspec-ee unit pg12 geo:
+rspec-ee unit pg11 geo:
   extends:
-    - .rspec-ee-base-geo-pg12
+    - .rspec-ee-base-geo-pg11
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-unit-geo-parallel
 
-rspec-ee integration pg12 geo:
+rspec-ee integration pg11 geo:
   extends:
-    - .rspec-ee-base-geo-pg12
+    - .rspec-ee-base-geo-pg11
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
 
-rspec-ee system pg12 geo:
+rspec-ee system pg11 geo:
   extends:
-    - .rspec-ee-base-geo-pg12
+    - .rspec-ee-base-geo-pg11
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
 # EE: master nightly scheduled jobs #
 #####################################
@@ -565,7 +565,7 @@ rspec-ee system pg12 geo:
 # EE: Canonical MR pipelines
 rspec fail-fast:
   extends:
-    - .rspec-ee-base-pg11  # This job also runs EE spec which needs elasticsearch
+    - .rspec-ee-base-pg12  # This job also runs EE spec which needs elasticsearch
     - .rails:rules:rspec fail-fast
   stage: test
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
@@ -579,7 +579,7 @@ rspec fail-fast:
 
 rspec foss-impact:
   extends:
-    - .rspec-base-pg11-as-if-foss
+    - .rspec-base-pg12-as-if-foss
     - .rails:rules:rspec-foss-impact
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss", "detect-tests as-if-foss"]
   script:

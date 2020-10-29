@@ -84,7 +84,7 @@ graphql-reference-verify:
     - .rails-cache
     - .default-before_script
     - .docs:rules:graphql-reference-verify
-    - .use-pg11
+    - .use-pg12
   stage: test
   needs: ["setup-test-env"]
   script:

@@ -95,7 +95,7 @@ update-yarn-cache:
   extends:
     - .frontend-base
     - .rails-cache
-    - .use-pg11
+    - .use-pg12
   stage: fixtures
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
   variables:
