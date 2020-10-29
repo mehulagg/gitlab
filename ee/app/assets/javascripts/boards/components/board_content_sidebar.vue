@@ -7,6 +7,7 @@ import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees
 import IssuableTitle from '~/boards/components/issuable_title.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
+import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 
@@ -17,6 +18,7 @@ export default {
     GlDrawer,
     IssuableTitle,
     BoardSidebarEpicSelect,
+    BoardSidebarTimeTracker,
     BoardSidebarWeightInput,
     BoardSidebarLabelsSelect,
   },
@@ -48,6 +50,7 @@ export default {
     <template>
       <issuable-assignees :users="getActiveIssue.assignees" />
       <board-sidebar-epic-select />
+      <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
       <board-sidebar-labels-select />
     </template>

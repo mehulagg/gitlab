@@ -9,7 +9,6 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
 
   shared_context 'on-demand scans feature available' do
     before do
-      stub_feature_flags(security_on_demand_scans_feature_flag: true)
       stub_licensed_features(security_on_demand_scans: true)
     end
   end
@@ -54,23 +53,13 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
     end
 
     context 'feature not available' do
-      using RSpec::Parameterized::TableSyntax
-
       include_context 'user authorized'
 
-      where(:feature_flag_enabled, :license_support) do
-        false | true
-        true  | false
-      end
+      it 'sees a 404 error' do
+        stub_licensed_features(security_on_demand_scans: false)
+        get path
 
-      with_them do
-        it 'sees a 404 error' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: feature_flag_enabled)
-          stub_licensed_features(security_on_demand_scans: license_support)
-          get path
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

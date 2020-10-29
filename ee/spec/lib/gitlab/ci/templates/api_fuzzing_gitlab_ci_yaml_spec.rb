@@ -47,8 +47,8 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
         create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
       end
 
-      it 'includes no jobs' do
-        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+      it 'includes job to display error' do
+        expect(build_names).to match_array(%w[apifuzzer_fuzz_unlicensed])
       end
     end
 

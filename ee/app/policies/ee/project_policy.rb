@@ -101,7 +101,6 @@ module EE
 
       with_scope :subject
       condition(:on_demand_scans_enabled) do
-        ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true) &&
         @subject.feature_available?(:security_on_demand_scans)
       end
 

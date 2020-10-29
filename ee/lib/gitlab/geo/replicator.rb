@@ -134,18 +134,6 @@ module Gitlab
         replicator_class.new(model_record_id: replicable_id)
       end
 
-      def self.checksummed
-        model.available_replicables.checksummed
-      end
-
-      def self.checksummed_count
-        model.available_replicables.checksummed.count
-      end
-
-      def self.checksum_failed_count
-        model.available_replicables.checksum_failed.count
-      end
-
       def self.primary_total_count
         model.available_replicables.count
       end
@@ -265,17 +253,6 @@ module Gitlab
         registry_class.for_model_record_id(model_record_id)
       end
 
-      # Checksum value from the main database
-      #
-      # @abstract
-      def primary_checksum
-        model_record.verification_checksum
-      end
-
-      def secondary_checksum
-        registry.verification_checksum
-      end
-
       # Return exactly the data needed by `for_replicable_params` to
       # reinstantiate this Replicator elsewhere.
       #
@@ -298,10 +275,6 @@ module Gitlab
         publish(:updated, **updated_params)
       end
 
-      def schedule_checksum_calculation
-        raise NotImplementedError
-      end
-
       def created_params
         event_params
       end
@@ -316,12 +289,6 @@ module Gitlab
 
       def event_params
         { model_record_id: model_record.id }
-      end
-
-      def needs_checksum?
-        return true unless model_record.respond_to?(:needs_checksum?)
-
-        model_record.needs_checksum?
       end
 
       protected
