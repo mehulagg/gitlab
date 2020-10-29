@@ -56,7 +56,7 @@ module Gitlab
       end
 
       def string_malformed?(string)
-        string.match?(NULL_BYTE_REGEX)
+        Rack::Utils.unescape(string).match?(NULL_BYTE_REGEX)
       rescue ArgumentError
         # If we're here, we caught a malformed string. Return true
         true

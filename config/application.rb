@@ -257,7 +257,8 @@ module Gitlab
 
     config.middleware.insert_before ActionDispatch::RemoteIp, ::Gitlab::Middleware::HandleIpSpoofAttackError
 
-    config.middleware.insert_after ActionDispatch::ActionableExceptions, ::Gitlab::Middleware::HandleMalformedStrings
+    # This middleware should always be loaded as early as possible, as it catches a string handling exception.
+    config.middleware.insert 1, ::Gitlab::Middleware::HandleMalformedStrings
 
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do
