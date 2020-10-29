@@ -8,10 +8,15 @@ module Vulnerabilities
     condition(:merge_request) { @subject.for_merge_request? }
     condition(:dismissal) { @subject.for_dismissal? }
 
+    with_options scope: :user, score: 0
+    condition(:security_bot) { @user.security_bot? }
+
+
     rule { issue & ~can?(:create_issue) }.prevent :create_vulnerability_feedback
 
     rule do
       merge_request &
+        ~security_bot &
         (~can?(:create_merge_request_in) | ~can?(:create_merge_request_from))
     end.prevent :create_vulnerability_feedback
 
