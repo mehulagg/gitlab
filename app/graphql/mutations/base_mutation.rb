@@ -34,5 +34,9 @@ module Mutations
         true
       end
     end
+
+    def can?(ability, subject)
+      Ability.allowed?(current_user, ability, subject)
+    end
   end
 end

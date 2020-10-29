@@ -5,8 +5,9 @@ require 'spec_helper'
 RSpec.describe 'Update of an existing issue' do
   include GraphqlHelpers
 
+  let_it_be(:group) { create(:group) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:issue) { create(:issue, project: project) }
   let(:input) do
     {
@@ -17,7 +18,7 @@ RSpec.describe 'Update of an existing issue' do
   end
 
   let(:mutation) { graphql_mutation(:update_issue, input.merge(project_path: project.full_path)) }
-  let(:mutation_response) { graphql_mutation_response(:update_issue) }
+  let(:mutated_issue) { graphql_mutation_response(:update_issue)['issue'] }
 
   before do
     stub_licensed_features(issuable_health_status: true)
@@ -28,6 +29,76 @@ RSpec.describe 'Update of an existing issue' do
     post_graphql_mutation(mutation, current_user: current_user)
 
     expect(response).to have_gitlab_http_status(:success)
-    expect(mutation_response['issue']).to include(input)
+    expect(mutated_issue).to include(input)
+  end
+
+  context 'setting epic' do
+    let(:epic) { create(:epic, group: group) }
+
+    let(:input) do
+      { iid: issue.iid.to_s, epic_id: global_id_of(epic) }
+    end
+
+    before do
+      stub_licensed_features(epics: true)
+      group.add_developer(current_user)
+    end
+
+    it 'sets the epic' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(graphql_errors).to be_blank
+      expect(mutated_issue).to include(
+        'epic' => include('id' => global_id_of(epic))
+      )
+    end
+
+    context 'the epic is not readable to the current user' do
+      let(:epic) { create(:epic) }
+
+      it 'does not set the epic' do
+        post_graphql_mutation(mutation, current_user: current_user)
+
+        expect(response).to have_gitlab_http_status(:success)
+        expect(graphql_errors).not_to be_blank
+      end
+    end
+  end
+
+  context 'removing epic' do
+    let(:epic) { create(:epic, group: group) }
+
+    let(:input) do
+      { iid: issue.iid.to_s, epic_id: nil }
+    end
+
+    before do
+      stub_licensed_features(epics: true)
+      group.add_developer(current_user)
+      issue.update!(epic: epic)
+    end
+
+    it 'removes the epic' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(graphql_errors).to be_blank
+      expect(mutated_issue).to include('epic' => be_nil)
+    end
+
+    context 'the epic argument is not provided' do
+      let(:input) do
+        { iid: issue.iid.to_s, weight: 1 }
+      end
+
+      it 'does not remove the epic' do
+        post_graphql_mutation(mutation, current_user: current_user)
+
+        expect(response).to have_gitlab_http_status(:success)
+        expect(graphql_errors).to be_blank
+        expect(mutated_issue).to include('epic' => be_present)
+      end
+    end
   end
 end
