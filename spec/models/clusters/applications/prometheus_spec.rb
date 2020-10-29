@@ -236,7 +236,7 @@ RSpec.describe Clusters::Applications::Prometheus do
     let(:prometheus) { build(:clusters_applications_prometheus) }
     let(:values) { prometheus.values }
 
-    it { is_expected.to be_an_instance_of(::Gitlab::Kubernetes::Helm::V2::PatchCommand) }
+    it { is_expected.to be_an_instance_of(::Gitlab::Kubernetes::Helm::V3::PatchCommand) }
 
     it 'is initialized with 3 arguments' do
       expect(patch_command.name).to eq('prometheus')

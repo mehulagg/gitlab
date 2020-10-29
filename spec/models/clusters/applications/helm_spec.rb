@@ -67,7 +67,7 @@ RSpec.describe Clusters::Applications::Helm do
 
     subject { helm.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InitCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::InitCommand) }
 
     it 'is initialized with 1 arguments' do
       expect(subject.name).to eq('helm')
@@ -104,7 +104,7 @@ RSpec.describe Clusters::Applications::Helm do
 
     subject { helm.uninstall_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::ResetCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V2::ResetCommand) }
 
     it 'has name' do
       expect(subject.name).to eq('helm')

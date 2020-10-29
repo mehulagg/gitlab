@@ -12,7 +12,7 @@ RSpec.describe Gitlab::Kubernetes::Helm::V3::DeleteCommand do
   it_behaves_like 'helm command generator' do
     let(:commands) do
       <<~EOS
-      helm delete --purge app-name
+      helm delete app-name
       EOS
     end
   end
@@ -29,7 +29,7 @@ RSpec.describe Gitlab::Kubernetes::Helm::V3::DeleteCommand do
 
   describe '#delete_command' do
     it 'deletes the release' do
-      expect(subject.delete_command).to eq('helm delete --purge app-name')
+      expect(subject.delete_command).to eq('helm delete app-name')
     end
   end
 end
