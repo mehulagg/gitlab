@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import DevopsAdoptionApp from '~/admin/dev_ops_report/components/devops_adoption_app.vue';
-import DevopsAdoptionEmptyState from '~/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
+import DevopsAdoptionApp from 'ee/admin/dev_ops_report/components/devops_adoption_app.vue';
+import DevopsAdoptionEmptyState from 'ee/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
 
 describe('DevopsAdoptionApp', () => {
   let wrapper;
