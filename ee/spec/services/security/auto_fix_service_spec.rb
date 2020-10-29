@@ -6,7 +6,7 @@ RSpec.describe Security::AutoFixService do
   describe '#execute' do
     subject { described_class.new(project).execute(ids) }
 
-    let(:project) { create(:project,:custom_repo, files: { 'yarn.lock' => yarn_lock_content }) }
+    let(:project) { create(:project, :private, :custom_repo, files: { 'yarn.lock' => yarn_lock_content }) }
     let(:vulnerability_with_rem) { create(:vulnerabilities_finding_with_remediation, :yarn_remediation, report_type: :dependency_scanning, summary: "Test remediation") }
 
     let(:remediations_folder) { Rails.root.join('ee/spec/fixtures/security_reports/remediations') }

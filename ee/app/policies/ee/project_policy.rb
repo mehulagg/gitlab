@@ -211,6 +211,8 @@ module EE
 
       rule { security_bot }.policy do
         enable :developer_access
+        enable :create_merge_request_in
+        enable :create_merge_request_from
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do

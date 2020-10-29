@@ -17,6 +17,7 @@ class GlobalPolicy < BasePolicy
 
   condition(:project_bot, scope: :user) { @user&.project_bot? }
   condition(:migration_bot, scope: :user) { @user&.migration_bot? }
+  condition(:security_bot, scope: :user) { @user&.security_bot? }
 
   rule { anonymous }.policy do
     prevent :log_in
@@ -48,7 +49,7 @@ class GlobalPolicy < BasePolicy
     prevent :use_slash_commands
   end
 
-  rule { blocked | (internal & ~migration_bot) }.policy do
+  rule { blocked | (internal & ~migration_bot & ~security_bot) }.policy do
     prevent :access_git
   end
 
@@ -56,6 +57,7 @@ class GlobalPolicy < BasePolicy
     prevent :log_in
     prevent :receive_notifications
   end
+
 
   rule { deactivated }.policy do
     prevent :access_git
