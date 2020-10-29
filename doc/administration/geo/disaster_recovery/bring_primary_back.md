@@ -47,7 +47,9 @@ To bring the former **primary** node up to date:
 
 1. [Setup database replication](../setup/database.md). Note that in this
    case, **primary** node refers to the current **primary** node, and **secondary** node refers to the
-   former **primary** node.
+   former **primary** node. If [PgBouncer](../../postgresql/pgbouncer.md) was enabled on the former primary node,
+   disable it by editing `/etc/gitlab/gitlab.rb` and running `sudo gitlab-ctl reconfigure` before setting up database
+   replication.
 
 If you have lost your original **primary** node, follow the
 [setup instructions](../setup/index.md) to set up a new **secondary** node.
