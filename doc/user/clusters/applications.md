@@ -667,7 +667,7 @@ apply:
   image: "registry.gitlab.com/gitlab-org/cluster-integration/cluster-applications:v0.34.1"
 ```
 
-### Override environment or cluster scope
+### Use the template with a custom environment
 
 If you only want apps to be installed on a specific cluster, or if your cluster's
 scope does not match `production`, you can override the environment name in your `.gitlab-ci.yml`
@@ -678,9 +678,9 @@ include:
   - template: Managed-Cluster-Applications.gitlab-ci.yml
 
 apply:
-  only:
+  except:
     variables:
-      - $APP_ENVIRONMENT == "all"
+      - '$CI_JOB_NAME == "apply"'
 
 .managed-apps:
   extends: apply
