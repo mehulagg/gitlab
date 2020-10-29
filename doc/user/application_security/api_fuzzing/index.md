@@ -23,7 +23,7 @@ you can run fuzz tests as part your CI/CD workflow.
   - SOAP
   - GraphQL
   - Form bodies, JSON, or XML
-- One of the follow to provide APIs to test:
+- One of the following assets to provide APIs to test:
   - OpenAPI v2 API definition
   - HTTP Archive (HAR) of API requests to test
   - Postman Collection v2.0 or v2.1
@@ -51,7 +51,7 @@ changes, other pipelines, or other scanners) during a scan could cause inaccurat
 
 ## Configuration
 
-There are two ways to perform scans. See the configuration section for the one you wish to use:
+There are three ways to perform scans. See the configuration section for the one you wish to use:
 
 - [OpenAPI v2 specification](#openapi-specification)
 - [HTTP Archive (HAR)](#http-archive-har)
@@ -236,7 +236,7 @@ data. Only run fuzzing against a test server.
 
 ### Postman Collection
 
-The [Postman API Client](https://www.postman.com/product/api-client/) is a popular tool used by developers and testers to call various types of APIs. The API definitions can be exported as a Postman Collection file. When exporting, make sure to select a supported version of Postman Collection - v2.0 or v2.1.
+The [Postman API Client](https://www.postman.com/product/api-client/) is a popular tool used by developers and testers to call various types of APIs. The API definitions [can be exported as a Postman Collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-postman-data) for use with API Fuzzing. When exporting, make sure to select a supported version of Postman Collection - v2.0 or v2.1.
 
 When used with GitLab's API fuzzer, Postman Collections must contain definitions of the web API to test with valid data. API fuzzer extracts all the API definitions and uses them to perform testing.
 
