@@ -348,7 +348,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
         expect(page).to have_text custom_stage_name
       end
 
-      it_behaves_like 'can edit custom stages'
+      it_behaves_like 'can edit custom stages', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273045'
     end
   end
 

@@ -34,7 +34,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveUndefinedOccurrenceConfidenceL
   end
 
   def vuln_params(primary_identifier_id)
-    attrs = attributes_for(:vulnerabilities_occurrence)
+    attrs = attributes_for(:vulnerabilities_finding)
 
     {
       confidence: 0,

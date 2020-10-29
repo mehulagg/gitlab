@@ -2492,6 +2492,12 @@ msgstr ""
 msgid "AlertService|You must provide this URL and authorization key to authorize an external service to send alerts to GitLab. You can provide this URL and key to multiple services. After configuring an external service, alerts from your service will display on the GitLab %{linkStart}Alerts%{linkEnd} page."
 msgstr ""
 
+msgid "AlertSettings|1. Select integration type"
+msgstr ""
+
+msgid "AlertSettings|2. Name integration"
+msgstr ""
+
 msgid "AlertSettings|API URL"
 msgstr ""
 
@@ -2516,6 +2522,9 @@ msgstr ""
 msgid "AlertSettings|Copy"
 msgstr ""
 
+msgid "AlertSettings|Enter integration name"
+msgstr ""
+
 msgid "AlertSettings|Enter test alert JSON...."
 msgstr ""
 
@@ -2531,7 +2540,10 @@ msgstr ""
 msgid "AlertSettings|Integration"
 msgstr ""
 
-msgid "AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}"
+msgid "AlertSettings|Learn more about our our upcoming %{linkStart}integrations%{linkEnd}"
+msgstr ""
+
+msgid "AlertSettings|Learn more about our upcoming %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|Opsgenie"
@@ -2544,6 +2556,12 @@ msgid "AlertSettings|Resetting the authorization key for this project will requi
 msgstr ""
 
 msgid "AlertSettings|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgstr ""
+
+msgid "AlertSettings|Save integration"
+msgstr ""
+
+msgid "AlertSettings|Select integration type"
 msgstr ""
 
 msgid "AlertSettings|Test alert payload"
@@ -2739,6 +2757,9 @@ msgid "Allowed"
 msgstr ""
 
 msgid "Allowed Geo IP"
+msgstr ""
+
+msgid "Allowed domains for sign-ups"
 msgstr ""
 
 msgid "Allowed email domain restriction only permitted for top-level groups"
@@ -5147,6 +5168,9 @@ msgid "Child epic does not exist."
 msgstr ""
 
 msgid "Child epic doesn't exist."
+msgstr ""
+
+msgid "Chinese language support using"
 msgstr ""
 
 msgid "Choose %{strong_open}Create archive%{strong_close} and wait for archiving to complete."
@@ -7895,6 +7919,9 @@ msgstr ""
 msgid "Custom Git clone URL for HTTP(S)"
 msgstr ""
 
+msgid "Custom analyzers: language support"
+msgstr ""
+
 msgid "Custom hostname (for private commit emails)"
 msgstr ""
 
@@ -8686,10 +8713,16 @@ msgstr ""
 msgid "Denied authorization of chat nickname %{user_name}."
 msgstr ""
 
+msgid "Denied domains for sign-ups"
+msgstr ""
+
 msgid "Deny"
 msgstr ""
 
 msgid "Deny access request"
+msgstr ""
+
+msgid "Denylist file"
 msgstr ""
 
 msgid "Dependencies"
@@ -9229,6 +9262,15 @@ msgstr ""
 msgid "DevOps Score"
 msgstr ""
 
+msgid "DevopsAdoption|Add a segment to get started"
+msgstr ""
+
+msgid "DevopsAdoption|Add new segment"
+msgstr ""
+
+msgid "DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
+msgstr ""
+
 msgid "Diff content limits"
 msgstr ""
 
@@ -9439,6 +9481,9 @@ msgid "Domain"
 msgstr ""
 
 msgid "Domain cannot be deleted while associated to one or more clusters."
+msgstr ""
+
+msgid "Domain denylist"
 msgstr ""
 
 msgid "Domain verification is an essential security measure for public GitLab sites. Users are required to demonstrate they control a domain before it is enabled"
@@ -9891,6 +9936,12 @@ msgstr ""
 msgid "Enable integration"
 msgstr ""
 
+msgid "Enable kuromoji custom analyzer: Indexing"
+msgstr ""
+
+msgid "Enable kuromoji custom analyzer: Search"
+msgstr ""
+
 msgid "Enable maintenance mode"
 msgstr ""
 
@@ -9925,6 +9976,12 @@ msgid "Enable shared runners for all projects and subgroups in this group."
 msgstr ""
 
 msgid "Enable shared runners for this group"
+msgstr ""
+
+msgid "Enable smartcn custom analyzer: Indexing"
+msgstr ""
+
+msgid "Enable smartcn custom analyzer: Search"
 msgstr ""
 
 msgid "Enable snowplow tracking"
@@ -14859,6 +14916,9 @@ msgstr ""
 msgid "January"
 msgstr ""
 
+msgid "Japanese language support using"
+msgstr ""
+
 msgid "Jira Issues"
 msgstr ""
 
@@ -16391,6 +16451,12 @@ msgid "Members|Remove \"%{groupName}\""
 msgstr ""
 
 msgid "Members|Remove group"
+msgstr ""
+
+msgid "Members|Revert to LDAP group sync settings"
+msgstr ""
+
+msgid "Members|Reverted to LDAP group sync settings."
 msgstr ""
 
 msgid "Members|Role updated successfully."
@@ -19756,6 +19822,9 @@ msgstr ""
 msgid "Please note that this application is not provided by GitLab and you should verify its authenticity before allowing access."
 msgstr ""
 
+msgid "Please only enable search after installing the plugin, enabling indexing and recreating the index"
+msgstr ""
+
 msgid "Please provide a name"
 msgstr ""
 
@@ -23035,6 +23104,9 @@ msgid "Save Changes"
 msgstr ""
 
 msgid "Save Push Rules"
+msgstr ""
+
+msgid "Save and test payload"
 msgstr ""
 
 msgid "Save anyway"
@@ -29710,6 +29782,9 @@ msgstr ""
 msgid "Webhooks|Enable SSL verification"
 msgstr ""
 
+msgid "Webhooks|Feature Flag events"
+msgstr ""
+
 msgid "Webhooks|Issues events"
 msgstr ""
 
@@ -29735,6 +29810,9 @@ msgid "Webhooks|Tag push events"
 msgstr ""
 
 msgid "Webhooks|This URL is triggered when a deployment starts, finishes, fails, or is canceled"
+msgstr ""
+
+msgid "Webhooks|This URL is triggered when a feature flag is turned on or off"
 msgstr ""
 
 msgid "Webhooks|This URL will be triggered by a push to the repository"
@@ -31091,9 +31169,6 @@ msgstr ""
 msgid "ciReport|Coverage Fuzzing"
 msgstr ""
 
-msgid "ciReport|Coverage Fuzzing Title"
-msgstr ""
-
 msgid "ciReport|Coverage fuzzing"
 msgstr ""
 
@@ -31539,6 +31614,9 @@ msgid "it is too large"
 msgstr ""
 
 msgid "jigsaw is not defined"
+msgstr ""
+
+msgid "kuromoji custom analyzer"
 msgstr ""
 
 msgid "last commit:"
@@ -32166,6 +32244,9 @@ msgid "show less"
 msgstr ""
 
 msgid "sign in"
+msgstr ""
+
+msgid "smartcn custom analyzer"
 msgstr ""
 
 msgid "sort:"

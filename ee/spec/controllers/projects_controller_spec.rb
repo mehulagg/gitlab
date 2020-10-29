@@ -384,8 +384,8 @@ RSpec.describe ProjectsController do
     end
 
     context 'compliance framework settings' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:params) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
+      let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
 
       context 'when unlicensed' do
         before do
@@ -419,7 +419,7 @@ RSpec.describe ProjectsController do
               }
           project.reload
 
-          expect(project.compliance_framework_setting.framework).to eq(framework)
+          expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
         end
       end
     end

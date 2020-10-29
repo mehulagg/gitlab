@@ -14,7 +14,9 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
   it 'allows the requests' do
     requests = [
       '/users/sign_in',
-      '/namespace/subnamespace/design.gitlab.com'
+      '/namespace/subnamespace/design.gitlab.com',
+      '/users/foo/snippets',
+      '/users/foo/snippets/1'
     ]
 
     requests.each do |request|
@@ -27,6 +29,7 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
   it 'blocks the requests' do
     requests = [
       '/autocomplete/users',
+      '/autocomplete/projects',
       '/search',
       '/admin',
       '/profile',
@@ -36,6 +39,7 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
       '/help',
       '/s/',
       '/-/profile',
+      '/-/ide/project',
       '/foo/bar/new',
       '/foo/bar/edit',
       '/foo/bar/raw',
@@ -62,7 +66,20 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
       '/foo/bar/uploads/foo',
       '/foo/bar/project_members',
       '/foo/bar/settings',
-      '/namespace/subnamespace/design.gitlab.com/settings'
+      '/namespace/subnamespace/design.gitlab.com/settings',
+      '/foo/bar/-/import',
+      '/foo/bar/-/environments',
+      '/foo/bar/-/jobs',
+      '/foo/bar/-/requirements_management',
+      '/foo/bar/-/pipelines',
+      '/foo/bar/-/pipeline_schedules',
+      '/foo/bar/-/dependencies',
+      '/foo/bar/-/licenses',
+      '/foo/bar/-/metrics',
+      '/foo/bar/-/incidents',
+      '/foo/bar/-/value_stream_analytics',
+      '/foo/bar/-/analytics',
+      '/foo/bar/insights'
     ]
 
     requests.each do |request|

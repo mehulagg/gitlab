@@ -19,6 +19,7 @@ describe('ee/BoardContentSidebar', () => {
       store,
       stubs: {
         'board-sidebar-epic-select': '<div></div>',
+        'board-sidebar-time-tracker': '<div></div>',
         'board-sidebar-weight-input': '<div></div>',
         'board-sidebar-labels-select': '<div></div>',
       },

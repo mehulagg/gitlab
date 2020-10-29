@@ -9297,6 +9297,10 @@ CREATE TABLE application_settings (
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
     container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
+    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
@@ -14823,7 +14827,8 @@ CREATE TABLE project_ci_cd_settings (
     group_runners_enabled boolean DEFAULT true NOT NULL,
     merge_pipelines_enabled boolean,
     default_git_depth integer,
-    forward_deployment_enabled boolean
+    forward_deployment_enabled boolean,
+    merge_trains_enabled boolean DEFAULT false
 );
 
 CREATE SEQUENCE project_ci_cd_settings_id_seq
@@ -14837,7 +14842,7 @@ ALTER SEQUENCE project_ci_cd_settings_id_seq OWNED BY project_ci_cd_settings.id;
 
 CREATE TABLE project_compliance_framework_settings (
     project_id bigint NOT NULL,
-    framework smallint NOT NULL,
+    framework smallint,
     framework_id bigint,
     CONSTRAINT check_d348de9e2d CHECK ((framework_id IS NOT NULL))
 );
@@ -17295,7 +17300,8 @@ CREATE TABLE web_hooks (
     encrypted_token_iv character varying,
     encrypted_url character varying,
     encrypted_url_iv character varying,
-    deployment_events boolean DEFAULT false NOT NULL
+    deployment_events boolean DEFAULT false NOT NULL,
+    feature_flag_events boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE web_hooks_id_seq

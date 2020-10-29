@@ -88,7 +88,7 @@ export default {
     },
     coverageFuzzingPopover() {
       return {
-        title: s__('ciReport|Coverage Fuzzing Title'),
+        title: s__('ciReport|Coverage Fuzzing'),
         content: sprintf(
           s__('ciReport|%{linkStartTag}Learn more about Coverage Fuzzing %{linkEndTag}'),
           {
