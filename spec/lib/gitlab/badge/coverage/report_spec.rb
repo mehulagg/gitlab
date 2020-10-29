@@ -62,7 +62,7 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
       let(:job_name) { 'incorrect name' }
 
       it 'returns nil' do
-        expect(badge.status).to eq(nil)
+        expect(badge.status).to be_nil
       end
     end
 
