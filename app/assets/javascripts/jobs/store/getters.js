@@ -6,9 +6,6 @@ export const headerTime = state => (state.job.started ? state.job.started : stat
 export const hasUnmetPrerequisitesFailure = state =>
   state?.job?.failure_reason === 'unmet_prerequisites';
 
-export const hasForwardDeploymentFailure = state =>
-  state?.job?.failure_reason === 'forward_deployment_failure';
-
 export const shouldRenderCalloutMessage = state =>
   !isEmpty(state.job.status) && !isEmpty(state.job.callout_message);
 

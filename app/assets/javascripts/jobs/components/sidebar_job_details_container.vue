@@ -1,6 +1,5 @@
 <script>
 import { mapState } from 'vuex';
-import { isEmpty, pick } from 'lodash';
 import DetailRow from './sidebar_detail_row.vue';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
@@ -40,8 +39,13 @@ export default {
       return Boolean(this.job?.metadata?.timeout_human_readable);
     },
     hasAnyDetail() {
-      return !isEmpty(
-        pick(this.job, ['duration', 'finished_at', 'erased_at', 'queued', 'runner', 'coverage']),
+      return (
+        this.job.duration ||
+        this.job.finished_at ||
+        this.job.erased_at ||
+        this.job.queued ||
+        this.job.runner ||
+        this.job.coverage
       );
     },
     queued() {
