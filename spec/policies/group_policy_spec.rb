@@ -882,4 +882,15 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'Self-managed Core resource access tokens'
+
+  context 'support bot' do
+    let_it_be(:group) { create(:group, :private) }
+    let_it_be(:current_user) { User.support_bot }
+
+    context 'when group has a project with service desk enabled' do
+      let_it_be(:project) { create(:project, group: group, service_desk_enabled: true) }
+
+      it { expect_allowed(:read_label) }
+    end
+  end
 end

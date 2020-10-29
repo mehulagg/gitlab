@@ -59,6 +59,9 @@ class GroupPolicy < BasePolicy
   with_scope :subject
   condition(:resource_access_token_available) { resource_access_token_available? }
 
+  with_scope :subject
+  condition(:service_desk_enabled_for_project) { @subject.projects.any?(&:service_desk_enabled) }
+
   rule { design_management_enabled }.policy do
     enable :read_design_activity
   end
@@ -192,6 +195,10 @@ class GroupPolicy < BasePolicy
 
   rule { resource_access_token_available & can?(:admin_group) }.policy do
     enable :admin_resource_access_tokens
+  end
+
+  rule { support_bot & service_desk_enabled_for_project }.policy do
+    enable :read_label
   end
 
   def access_level
