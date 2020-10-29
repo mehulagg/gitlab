@@ -71,12 +71,6 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
   end
 
   describe "#parallelize" do
-    let(:parallelize) do
-      subject.send(:parallelize, git_env) do
-        Thread.current[:test_env] = Thread.current[:request_store][:gitlab_git_env]
-      end
-    end
-
     let(:git_env) do
       {
         "GIT_OBJECT_DIRECTORY_RELATIVE" => "foo",
@@ -84,15 +78,11 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
       }
     end
 
-    before do
+    it "makes the git env available to the child thread" do
       subject.instance_variable_set(:@threads, [])
-    end
 
-    it "returns the git env" do
-      parallelize.each do |thread|
-        thread.join
-
-        expect(thread[:test_env]).to eq({ project.repository.gl_repository => git_env })
+      subject.send(:parallelize, git_env) do
+        expect(::Gitlab::Git::HookEnv.all(project.repository.gl_repository)).to eq(git_env)
       end
     end
   end
