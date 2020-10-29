@@ -29,11 +29,11 @@ module QA
           end
         end
 
-        it 'allows an unrestricted push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/760' do
+        it 'allows an unrestricted push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/760', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
           expect_no_error_on_push(file: standard_file)
         end
 
-        it 'restricts files by name and size', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/653' do
+        it 'restricts files by name and size', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/653', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
           # Note: The file size limits in this test should be lower than the limits in
           # browser_ui/3_create/repository/push_over_http_file_size_spec to prevent
           # the limit set in that test from triggering in this test (which can happen
@@ -55,7 +55,7 @@ module QA
             error: Regexp.escape("File name #{@file_name_limitation} was blacklisted by the pattern #{@file_name_limitation}"))
         end
 
-        it 'restricts users by email format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/652' do
+        it 'restricts users by email format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/652', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
           gitlab_user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2)
           @project.add_member(gitlab_user, Resource::Members::AccessLevel::MAINTAINER)
 
@@ -68,7 +68,7 @@ module QA
             error: Regexp.escape("Branch name does not follow the pattern '#{@branch_name_limitation}'"))
         end
 
-        it 'restricts commit by message format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/648' do
+        it 'restricts commit by message format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/648', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
           expect_no_error_on_push(file: standard_file, commit_message: @needed_phrase_limitation)
           expect_error_on_push(file: standard_file, commit_message: 'forbidden message',
             error: Regexp.escape("Commit message does not follow the pattern '#{@needed_phrase_limitation}'"))
@@ -76,7 +76,7 @@ module QA
             error: Regexp.escape("Commit message contains the forbidden pattern '#{@deny_message_phrase_limitation}'"))
         end
 
-        it 'restricts committing files with secrets', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/647' do
+        it 'restricts committing files with secrets', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/647', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
           secret_file = [{
             name: 'id_rsa',
             content: SecureRandom.hex(100)
@@ -123,7 +123,7 @@ module QA
         end
       end
 
-      describe 'with commits restricted to verified emails' do
+      describe 'with commits restricted to verified emails', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
         before do
           prepare
 
@@ -142,7 +142,7 @@ module QA
         end
       end
 
-      describe 'using signed commits' do
+      describe 'using signed commits', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273007' } do
         before do
           prepare
 
