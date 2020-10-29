@@ -9,7 +9,7 @@ RSpec.describe Gitlab::UrlBlockers::UrlAllowlist do
 
   before do
     allow(ApplicationSetting).to receive(:current).and_return(ApplicationSetting.new)
-    stub_application_setting(outbound_local_requests_whitelist: allowlist)
+    stub_application_setting(outbound_local_requests_allowlist: allowlist)
   end
 
   describe '#domain_allowed?' do
@@ -100,7 +100,7 @@ RSpec.describe Gitlab::UrlBlockers::UrlAllowlist do
       end
 
       it 'does not allowlist ipv4 range when not in allowlist' do
-        stub_application_setting(outbound_local_requests_whitelist: [])
+        stub_application_setting(outbound_local_requests_allowlist: [])
 
         IPAddr.new(ipv4_range).to_range.to_a.each do |ip|
           expect(described_class).not_to be_ip_allowed(ip.to_s)
@@ -114,7 +114,7 @@ RSpec.describe Gitlab::UrlBlockers::UrlAllowlist do
       end
 
       it 'does not allowlist ipv6 range when not in allowlist' do
-        stub_application_setting(outbound_local_requests_whitelist: [])
+        stub_application_setting(outbound_local_requests_allowlist: [])
 
         IPAddr.new(ipv6_range).to_range.to_a.each do |ip|
           expect(described_class).not_to be_ip_allowed(ip.to_s)

@@ -78,8 +78,7 @@ CREATE TABLE audit_events_part_5fc467ac26 (
     target_id bigint,
     CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
     CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
-    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
-    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
+    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255))
 )
 PARTITION BY RANGE (created_at);
 
@@ -9046,7 +9045,6 @@ CREATE TABLE application_settings (
     max_attachment_size integer DEFAULT 10 NOT NULL,
     default_project_visibility integer DEFAULT 0 NOT NULL,
     default_snippet_visibility integer DEFAULT 0 NOT NULL,
-    domain_whitelist text,
     user_oauth_applications boolean DEFAULT true,
     after_sign_out_path character varying,
     session_expire_delay integer DEFAULT 10080 NOT NULL,
@@ -9082,8 +9080,6 @@ CREATE TABLE application_settings (
     elasticsearch_search boolean DEFAULT false NOT NULL,
     repository_storages character varying DEFAULT 'default'::character varying,
     enabled_git_access_protocol character varying,
-    domain_blacklist_enabled boolean DEFAULT false,
-    domain_blacklist text,
     usage_ping_enabled boolean DEFAULT true NOT NULL,
     sign_in_text_html text,
     help_page_text_html text,
@@ -9195,7 +9191,6 @@ CREATE TABLE application_settings (
     time_tracking_limit_to_hours boolean DEFAULT false NOT NULL,
     grafana_url character varying DEFAULT '/-/grafana'::character varying NOT NULL,
     login_recaptcha_protection_enabled boolean DEFAULT false NOT NULL,
-    outbound_local_requests_whitelist character varying(255)[] DEFAULT '{}'::character varying[] NOT NULL,
     raw_blob_request_limit integer DEFAULT 300 NOT NULL,
     allow_local_requests_from_web_hooks_and_services boolean DEFAULT false NOT NULL,
     allow_local_requests_from_system_hooks boolean DEFAULT true NOT NULL,
@@ -9297,17 +9292,22 @@ CREATE TABLE application_settings (
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
     container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
-    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
+    domain_denylist_enabled boolean DEFAULT false,
+    domain_denylist text,
+    domain_allowlist text,
+    outbound_local_requests_allowlist character varying(255) DEFAULT '{}'::character varying,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
+    CONSTRAINT check_56517289a2 CHECK ((outbound_local_requests_allowlist IS NOT NULL)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
     CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
     CONSTRAINT check_9a719834eb CHECK ((char_length(secret_detection_token_revocation_url) <= 255)),
@@ -14952,7 +14952,8 @@ CREATE TABLE project_features (
     repository_access_level integer DEFAULT 20 NOT NULL,
     pages_access_level integer NOT NULL,
     forking_access_level integer,
-    metrics_dashboard_access_level integer
+    metrics_dashboard_access_level integer,
+    requirements_access_level integer DEFAULT 20 NOT NULL
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -16713,9 +16714,9 @@ CREATE TABLE user_details (
     user_id bigint NOT NULL,
     job_title character varying(200) DEFAULT ''::character varying NOT NULL,
     bio character varying(255) DEFAULT ''::character varying NOT NULL,
+    webauthn_xid text,
     bio_html text,
     cached_markdown_version integer,
-    webauthn_xid text,
     CONSTRAINT check_245664af82 CHECK ((char_length(webauthn_xid) <= 100))
 );
 
@@ -19796,7 +19797,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
@@ -22105,8 +22106,6 @@ CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_and_note_id_index ON issue_u
 CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_index ON issue_user_mentions USING btree (issue_id) WHERE (note_id IS NULL);
 
 CREATE UNIQUE INDEX kubernetes_namespaces_cluster_and_namespace ON clusters_kubernetes_namespaces USING btree (cluster_id, namespace);
-
-CREATE INDEX merge_request_mentions_temp_index ON merge_requests USING btree (id) WHERE ((description ~~ '%@%'::text) OR ((title)::text ~~ '%@%'::text));
 
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_and_note_id_index ON merge_request_user_mentions USING btree (merge_request_id, note_id);
 

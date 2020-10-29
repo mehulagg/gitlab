@@ -60,7 +60,7 @@ module ApplicationSettingImplementation
         diff_max_patch_bytes: Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES,
         disabled_oauth_sign_in_sources: [],
         dns_rebinding_protection_enabled: true,
-        domain_whitelist: Settings.gitlab['domain_whitelist'],
+        domain_allowlist: Settings.gitlab['domain_allowlist'],
         dsa_key_restriction: 0,
         ecdsa_key_restriction: 0,
         ed25519_key_restriction: 0,
@@ -99,7 +99,7 @@ module ApplicationSettingImplementation
         minimum_password_length: DEFAULT_MINIMUM_PASSWORD_LENGTH,
         mirror_available: true,
         notify_on_unknown_sign_in: true,
-        outbound_local_requests_whitelist: [],
+        outbound_local_requests_allowlist: [],
         password_authentication_enabled_for_git: true,
         password_authentication_enabled_for_web: Settings.gitlab['signin_enabled'],
         performance_bar_allowed_group_id: nil,
@@ -203,19 +203,19 @@ module ApplicationSettingImplementation
   end
 
   def domain_allowlist_raw
-    array_to_string(self.domain_whitelist)
+    array_to_string(self.domain_allowlist)
   end
 
   def domain_denylist_raw
-    array_to_string(self.domain_blacklist)
+    array_to_string(self.domain_denylist)
   end
 
   def domain_allowlist_raw=(values)
-    self.domain_whitelist = strings_to_array(values)
+    self.domain_allowlist = strings_to_array(values)
   end
 
   def domain_denylist_raw=(values)
-    self.domain_blacklist = strings_to_array(values)
+    self.domain_denylist = strings_to_array(values)
   end
 
   def domain_denylist_file=(file)
@@ -223,22 +223,22 @@ module ApplicationSettingImplementation
   end
 
   def outbound_local_requests_allowlist_raw
-    array_to_string(self.outbound_local_requests_whitelist)
+    array_to_string(self.outbound_local_requests_allowlist)
   end
 
   def outbound_local_requests_allowlist_raw=(values)
     clear_memoization(:outbound_local_requests_allowlist_arrays)
 
-    self.outbound_local_requests_whitelist = strings_to_array(values)
+    self.outbound_local_requests_allowlist = strings_to_array(values)
   end
 
-  def add_to_outbound_local_requests_whitelist(values_array)
+  def add_to_outbound_local_requests_allowlist(values_array)
     clear_memoization(:outbound_local_requests_allowlist_arrays)
 
-    self.outbound_local_requests_whitelist ||= []
-    self.outbound_local_requests_whitelist += values_array
+    self.outbound_local_requests_allowlist ||= []
+    self.outbound_local_requests_allowlist += values_array
 
-    self.outbound_local_requests_whitelist.uniq!
+    self.outbound_local_requests_allowlist.uniq!
   end
 
   # This method separates out the strings stored in the
@@ -247,9 +247,9 @@ module ApplicationSettingImplementation
   # domain strings (`['www.example.com']`).
   def outbound_local_requests_allowlist_arrays
     strong_memoize(:outbound_local_requests_allowlist_arrays) do
-      next [[], []] unless self.outbound_local_requests_whitelist
+      next [[], []] unless self.outbound_local_requests_allowlist
 
-      ip_allowlist, domain_allowlist = separate_allowlists(self.outbound_local_requests_whitelist)
+      ip_allowlist, domain_allowlist = separate_allowlists(self.outbound_local_requests_allowlist)
 
       [ip_allowlist, domain_allowlist]
     end

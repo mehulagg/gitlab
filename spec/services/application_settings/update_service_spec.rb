@@ -62,30 +62,30 @@ RSpec.describe ApplicationSettings::UpdateService do
     end
   end
 
-  describe 'updating outbound_local_requests_whitelist' do
+  describe 'updating outbound_local_requests_allowlist' do
     context 'when params is blank' do
       let(:params) { {} }
 
-      it 'does not add to whitelist' do
+      it 'does not add to allowlist' do
         expect { subject.execute }.not_to change {
-          application_settings.outbound_local_requests_whitelist
+          application_settings.outbound_local_requests_allowlist
         }
       end
     end
 
-    context 'when param add_to_outbound_local_requests_whitelist contains values' do
+    context 'when param add_to_outbound_local_requests_allowlist contains values' do
       before do
-        application_settings.outbound_local_requests_whitelist = ['127.0.0.1']
+        application_settings.outbound_local_requests_allowlist = ['127.0.0.1']
       end
 
-      let(:params) { { add_to_outbound_local_requests_whitelist: ['example.com', ''] } }
+      let(:params) { { add_to_outbound_local_requests_allowlist: ['example.com', ''] } }
 
-      it 'adds to whitelist' do
+      it 'adds to allowlist' do
         expect { subject.execute }.to change {
-          application_settings.outbound_local_requests_whitelist
+          application_settings.outbound_local_requests_allowlist
         }
 
-        expect(application_settings.outbound_local_requests_whitelist).to contain_exactly(
+        expect(application_settings.outbound_local_requests_allowlist).to contain_exactly(
           '127.0.0.1', 'example.com'
         )
       end
@@ -93,17 +93,17 @@ RSpec.describe ApplicationSettings::UpdateService do
 
     context 'when param outbound_local_requests_allowlist_raw is passed' do
       before do
-        application_settings.outbound_local_requests_whitelist = ['127.0.0.1']
+        application_settings.outbound_local_requests_allowlist = ['127.0.0.1']
       end
 
       let(:params) { { outbound_local_requests_allowlist_raw: 'example.com;gitlab.com' } }
 
-      it 'overwrites the existing whitelist' do
+      it 'overwrites the existing allowlist' do
         expect { subject.execute }.to change {
-          application_settings.outbound_local_requests_whitelist
+          application_settings.outbound_local_requests_allowlist
         }
 
-        expect(application_settings.outbound_local_requests_whitelist).to contain_exactly(
+        expect(application_settings.outbound_local_requests_allowlist).to contain_exactly(
           'example.com', 'gitlab.com'
         )
       end

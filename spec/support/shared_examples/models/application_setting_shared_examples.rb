@@ -1,68 +1,68 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'string of domains' do |mapped_name, attribute|
+RSpec.shared_examples 'string of domains' do |attribute|
   it 'sets single domain' do
-    setting.method("#{mapped_name}_raw=").call('example.com')
+    setting.method("#{attribute}_raw=").call('example.com')
     expect(setting.method(attribute).call).to eq(['example.com'])
   end
 
   it 'sets multiple domains with spaces' do
-    setting.method("#{mapped_name}_raw=").call('example.com *.example.com')
+    setting.method("#{attribute}_raw=").call('example.com *.example.com')
     expect(setting.method(attribute).call).to eq(['example.com', '*.example.com'])
   end
 
   it 'sets multiple domains with newlines and a space' do
-    setting.method("#{mapped_name}_raw=").call("example.com\n *.example.com")
+    setting.method("#{attribute}_raw=").call("example.com\n *.example.com")
     expect(setting.method(attribute).call).to eq(['example.com', '*.example.com'])
   end
 
   it 'sets multiple domains with commas' do
-    setting.method("#{mapped_name}_raw=").call("example.com, *.example.com")
+    setting.method("#{attribute}_raw=").call("example.com, *.example.com")
     expect(setting.method(attribute).call).to eq(['example.com', '*.example.com'])
   end
 
   it 'sets multiple domains with semicolon' do
-    setting.method("#{mapped_name}_raw=").call("example.com; *.example.com")
+    setting.method("#{attribute}_raw=").call("example.com; *.example.com")
     expect(setting.method(attribute).call).to contain_exactly('example.com', '*.example.com')
   end
 
   it 'sets multiple domains with mixture of everything' do
-    setting.method("#{mapped_name}_raw=").call("example.com; *.example.com\n test.com\sblock.com   yes.com")
+    setting.method("#{attribute}_raw=").call("example.com; *.example.com\n test.com\sblock.com   yes.com")
     expect(setting.method(attribute).call).to contain_exactly('example.com', '*.example.com', 'test.com', 'block.com', 'yes.com')
   end
 
   it 'removes duplicates' do
-    setting.method("#{mapped_name}_raw=").call("example.com; example.com; 127.0.0.1; 127.0.0.1")
+    setting.method("#{attribute}_raw=").call("example.com; example.com; 127.0.0.1; 127.0.0.1")
     expect(setting.method(attribute).call).to contain_exactly('example.com', '127.0.0.1')
   end
 
   it 'does not fail with garbage values' do
-    setting.method("#{mapped_name}_raw=").call("example;34543:garbage:fdh5654;")
+    setting.method("#{attribute}_raw=").call("example;34543:garbage:fdh5654;")
     expect(setting.method(attribute).call).to contain_exactly('example', '34543:garbage:fdh5654')
   end
 
   it 'does not raise error with nil' do
-    setting.method("#{mapped_name}_raw=").call(nil)
+    setting.method("#{attribute}_raw=").call(nil)
     expect(setting.method(attribute).call).to eq([])
   end
 end
 
 RSpec.shared_examples 'application settings examples' do
   context 'restricted signup domains' do
-    it_behaves_like 'string of domains', :domain_allowlist, :domain_whitelist
+    it_behaves_like 'string of domains', :domain_allowlist
   end
 
-  context 'blacklisted signup domains' do
-    it_behaves_like 'string of domains', :domain_denylist, :domain_blacklist
+  context 'with denied signup domains' do
+    it_behaves_like 'string of domains', :domain_denylist
 
     it 'sets multiple domain with file' do
       setting.domain_denylist_file = File.open(Rails.root.join('spec/fixtures/', 'domain_denylist.txt'))
-      expect(setting.domain_blacklist).to contain_exactly('example.com', 'test.com', 'foo.bar')
+      expect(setting.domain_denylist).to contain_exactly('example.com', 'test.com', 'foo.bar')
     end
   end
 
-  context 'outbound_local_requests_whitelist' do
-    it_behaves_like 'string of domains', :outbound_local_requests_allowlist, :outbound_local_requests_whitelist
+  context 'outbound_local_requests_allowlist' do
+    it_behaves_like 'string of domains', :outbound_local_requests_allowlist
 
     it 'clears outbound_local_requests_allowlist_arrays memoization' do
       setting.outbound_local_requests_allowlist_raw = 'example.com'
@@ -80,7 +80,7 @@ RSpec.shared_examples 'application settings examples' do
 
   context 'outbound_local_requests_allowlist_arrays' do
     it 'separates the IPs and domains' do
-      setting.outbound_local_requests_whitelist = [
+      setting.outbound_local_requests_allowlist = [
         '192.168.1.1',
         '127.0.0.0/28',
         '::ffff:a00:2',
@@ -98,7 +98,7 @@ RSpec.shared_examples 'application settings examples' do
         'example.com:8080'
       ]
 
-      ip_whitelist = [
+      ip_allowlist = [
         an_object_having_attributes(ip: IPAddr.new('192.168.1.1')),
         an_object_having_attributes(ip: IPAddr.new('127.0.0.0/8')),
         an_object_having_attributes(ip: IPAddr.new('::ffff:a00:2')),
@@ -110,7 +110,7 @@ RSpec.shared_examples 'application settings examples' do
         an_object_having_attributes(ip: IPAddr.new('[1:2:3:4:5::7:8]')),
         an_object_having_attributes(ip: IPAddr.new('[2001:db8:85a3:8d3:1319:8a2e:370:7348]'), port: 443)
       ]
-      domain_whitelist = [
+      domain_allowlist = [
         an_object_having_attributes(domain: 'example.com'),
         an_object_having_attributes(domain: 'subdomain.example.com'),
         an_object_having_attributes(domain: 'www.example.com'),
@@ -118,21 +118,19 @@ RSpec.shared_examples 'application settings examples' do
         an_object_having_attributes(domain: 'example.com', port: 8080)
       ]
 
-      expect(setting.outbound_local_requests_allowlist_arrays).to contain_exactly(
-        ip_whitelist, domain_whitelist
-      )
+      expect(setting.outbound_local_requests_allowlist_arrays).to contain_exactly(ip_allowlist, domain_allowlist)
     end
   end
 
-  context 'add_to_outbound_local_requests_whitelist' do
-    it 'adds entry to outbound_local_requests_whitelist' do
-      setting.outbound_local_requests_whitelist = ['example.com']
+  context 'add_to_outbound_local_requests_allowlist' do
+    it 'adds entry to outbound_local_requests_allowlist' do
+      setting.outbound_local_requests_allowlist = ['example.com']
 
-      setting.add_to_outbound_local_requests_whitelist(
+      setting.add_to_outbound_local_requests_allowlist(
         ['example.com', '127.0.0.1', 'gitlab.com']
       )
 
-      expect(setting.outbound_local_requests_whitelist).to contain_exactly(
+      expect(setting.outbound_local_requests_allowlist).to contain_exactly(
         'example.com',
         '127.0.0.1',
         'gitlab.com'
@@ -140,14 +138,14 @@ RSpec.shared_examples 'application settings examples' do
     end
 
     it 'clears outbound_local_requests_allowlist_arrays memoization' do
-      setting.outbound_local_requests_whitelist = ['example.com']
+      setting.outbound_local_requests_allowlist = ['example.com']
 
       expect(setting.outbound_local_requests_allowlist_arrays).to contain_exactly(
         [],
         [an_object_having_attributes(domain: 'example.com')]
       )
 
-      setting.add_to_outbound_local_requests_whitelist(
+      setting.add_to_outbound_local_requests_allowlist(
         ['example.com', 'gitlab.com']
       )
 
@@ -158,18 +156,18 @@ RSpec.shared_examples 'application settings examples' do
     end
 
     it 'does not raise error with nil' do
-      setting.outbound_local_requests_whitelist = nil
+      setting.outbound_local_requests_allowlist = nil
 
-      setting.add_to_outbound_local_requests_whitelist(['gitlab.com'])
+      setting.add_to_outbound_local_requests_allowlist(['gitlab.com'])
 
-      expect(setting.outbound_local_requests_whitelist).to contain_exactly('gitlab.com')
+      expect(setting.outbound_local_requests_allowlist).to contain_exactly('gitlab.com')
       expect(setting.outbound_local_requests_allowlist_arrays).to contain_exactly(
         [], [an_object_having_attributes(domain: 'gitlab.com')]
       )
     end
 
     it 'does not raise error with nil' do
-      setting.outbound_local_requests_whitelist = nil
+      setting.outbound_local_requests_allowlist = nil
 
       expect(setting.outbound_local_requests_allowlist_arrays).to contain_exactly([], [])
     end

@@ -17,7 +17,7 @@ module ApplicationSettings
 
       update_terms(@params.delete(:terms))
 
-      add_to_outbound_local_requests_whitelist(@params.delete(:add_to_outbound_local_requests_whitelist))
+      add_to_outbound_local_requests_allowlist(@params.delete(:add_to_outbound_local_requests_allowlist))
 
       if params.key?(:performance_bar_allowed_group_path)
         group_id = process_performance_bar_allowed_group_id
@@ -46,11 +46,11 @@ module ApplicationSettings
       params.key?(:usage_ping_enabled) || params.key?(:version_check_enabled)
     end
 
-    def add_to_outbound_local_requests_whitelist(values)
+    def add_to_outbound_local_requests_allowlist(values)
       values_array = Array(values).reject(&:empty?)
       return if values_array.empty?
 
-      @application_setting.add_to_outbound_local_requests_whitelist(values_array)
+      @application_setting.add_to_outbound_local_requests_allowlist(values_array)
     end
 
     def invalidate_markdown_cache?

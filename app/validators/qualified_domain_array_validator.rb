@@ -9,7 +9,7 @@
 # Example:
 #
 #   class ApplicationSetting < ApplicationRecord
-#     validates :outbound_local_requests_whitelist, qualified_domain_array: true
+#     validates :outbound_local_requests_allowlist, qualified_domain_array: true
 #   end
 #
 class QualifiedDomainArrayValidator < ActiveModel::EachValidator
