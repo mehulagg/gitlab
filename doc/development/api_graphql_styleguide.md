@@ -126,6 +126,12 @@ Non-nullable fields should only be used when a field is required, very unlikely
 to become optional in the future, and very easy to calculate. An example would
 be `id` fields.
 
+Here's an example of a non-nullable `id` field in the `gitlab_schema.graphql` file:
+
+```graphql
+  id: ProjectID!
+```
+
 Further reading:
 
 - [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability)
