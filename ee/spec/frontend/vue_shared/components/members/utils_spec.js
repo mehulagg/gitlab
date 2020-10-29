@@ -1,5 +1,5 @@
 import { member as memberMock } from 'jest/vue_shared/components/members/mock_data';
-import { generateBadges } from 'ee/vue_shared/components/members/utils';
+import { generateBadges, canOverride } from 'ee/vue_shared/components/members/utils';
 
 describe('Members Utils', () => {
   describe('generateBadges', () => {
@@ -25,6 +25,16 @@ describe('Members Utils', () => {
       ${{ ...memberMock, canOverride: true }}         | ${{ show: true, text: 'LDAP', variant: 'info' }}
     `('returns expected output for "$expected.text" badge', ({ member, expected }) => {
       expect(generateBadges(member, true)).toContainEqual(expect.objectContaining(expected));
+    });
+  });
+
+  describe('canOverride', () => {
+    test.each`
+      member                                  | expected
+      ${{ ...memberMock, canOverride: true }} | ${true}
+      ${memberMock}                           | ${false}
+    `('returns $expected', ({ member, expected }) => {
+      expect(canOverride(member)).toBe(expected);
     });
   });
 });

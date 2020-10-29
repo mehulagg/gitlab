@@ -2,6 +2,7 @@
 import { mapState } from 'vuex';
 import { GlTable, GlBadge } from '@gitlab/ui';
 import MembersTableCell from 'ee_else_ce/vue_shared/components/members/table/members_table_cell.vue';
+import { canOverride } from 'ee_else_ce/vue_shared/components/members/utils';
 import { FIELDS } from '../constants';
 import initUserPopovers from '~/user_popovers';
 import MemberAvatar from './member_avatar.vue';
@@ -12,6 +13,7 @@ import MemberActionButtons from './member_action_buttons.vue';
 import RoleDropdown from './role_dropdown.vue';
 import RemoveGroupLinkModal from '../modals/remove_group_link_modal.vue';
 import ExpirationDatepicker from './expiration_datepicker.vue';
+import { canRemove, canResend, canUpdate } from '../utils';
 
 export default {
   name: 'MembersTable',
@@ -33,13 +35,39 @@ export default {
       ),
   },
   computed: {
-    ...mapState(['members', 'tableFields']),
+    ...mapState(['members', 'tableFields', 'currentUserId', 'sourceId']),
     filteredFields() {
-      return FIELDS.filter(field => this.tableFields.includes(field.key));
+      return FIELDS.filter(field => this.tableFields.includes(field.key) && this.showField(field));
+    },
+    userIsLoggedIn() {
+      return this.currentUserId !== null;
     },
   },
   mounted() {
     initUserPopovers(this.$el.querySelectorAll('.js-user-link'));
+  },
+  methods: {
+    showField(field) {
+      if (!Object.prototype.hasOwnProperty.call(field, 'showFunction')) {
+        return true;
+      }
+
+      return this[field.showFunction]();
+    },
+    showActionsField() {
+      if (!this.userIsLoggedIn) {
+        return false;
+      }
+
+      return this.members.some(member => {
+        return (
+          canRemove(member, this.sourceId) ||
+          canResend(member) ||
+          canUpdate(member, this.currentUserId, this.sourceId) ||
+          canOverride(member)
+        );
+      });
+    },
   },
 };
 </script>

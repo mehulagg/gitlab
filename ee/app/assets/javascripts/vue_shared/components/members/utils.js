@@ -24,3 +24,5 @@ export const generateBadges = (member, isCurrentUser) => [
     variant: 'info',
   },
 ];
+
+export const canOverride = member => member.canOverride;
