@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ResourceAccessTokens::CreateService do
+RSpec.describe ResourceAccessTokens::CreateService do #rubocop:disable RSpec/FilePath
   subject { described_class.new(user, resource).execute }
 
   describe '#execute' do
@@ -25,11 +25,11 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
 
       it 'does not add the project bot as a member' do
-        expect { subject }.not_to change{ Member.count }
+        expect { subject }.not_to change { Member.count }
       end
 
       it 'does not create a project bot user', :sidekiq_inline do
-        expect { subject }.not_to change{ User.count }
+        expect { subject }.not_to change { User.count }
       end
     end
   end

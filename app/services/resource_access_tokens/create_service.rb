@@ -14,14 +14,14 @@ module ResourceAccessTokens
 
       user = create_user
 
-      if !user.persisted?
+      unless user.persisted?
         delete_failed_user(user)
         return error(user.errors.full_messages.to_sentence)
       end
 
       member = create_membership(resource, user)
 
-      if !member.persisted?
+      unless member.persisted?
         delete_failed_user(user)
         return error("Failed to provide maintainer access")
       end
