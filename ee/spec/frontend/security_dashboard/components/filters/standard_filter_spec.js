@@ -7,26 +7,27 @@ const localVue = createLocalVue();
 localVue.use(VueRouter);
 const router = new VueRouter();
 
-const generateOption = index => ({
-  name: `Option ${index}`,
-  id: `option-${index}`,
-});
-
 const generateOptions = length => {
-  return Array.from({ length }).map((_, i) => generateOption(i));
+  return Array.from({ length }).map((_, i) => ({
+    name: `Option ${i}`,
+    id: `option-${i}`,
+    index: i,
+  }));
 };
 
-const filter = Object.freeze({ name: 'filter', options: generateOptions(12) });
-const optionAt = i => filter.options[i];
+const filter = Object.freeze({ id: 'filter', name: 'filter', options: generateOptions(12) });
+const optionAt = index => filter.options[index];
+const optionsAt = (...indexes) => filter.options.filter((_, i) => indexes.includes(i));
+const allOption = { id: 'allOptionId' };
 
 describe('Standard Filter component', () => {
   let wrapper;
 
-  const createWrapper = (filterInstance, showSearchBox) => {
+  const createWrapper = (filterOptions, showSearchBox) => {
     wrapper = shallowMount(StandardFilter, {
       localVue,
       router,
-      propsData: { filter: filterInstance, showSearchBox },
+      propsData: { filter: { ...filter, ...filterOptions }, showSearchBox },
     });
   };
 
@@ -35,70 +36,93 @@ describe('Standard Filter component', () => {
   const allOptionItem = () => wrapper.find('[data-testid="allOption"]');
   const isChecked = item => item.props('isChecked');
   const filterQuery = () => wrapper.vm.$route.query[filter.id];
+  const clickAllOptionItem = () => allOptionItem().vm.$emit('click');
+
+  const clickItemAt = async index => {
+    dropdownItemAt(index).vm.$emit('click');
+    await wrapper.vm.$nextTick();
+  };
+
+  const expectSelectedItems = indexes => {
+    const checkedIndexes = dropdownItems().wrappers.map(item => isChecked(item));
+    const expectedIndexes = Array.from({ length: checkedIndexes.length }).map((_, index) =>
+      indexes.includes(index),
+    );
+
+    expect(checkedIndexes).toEqual(expectedIndexes);
+  };
+
+  const expectAllOptionSelected = () => {
+    expect(isChecked(allOptionItem())).toBe(true);
+    const checkedIndexes = dropdownItems().wrappers.map(item => isChecked(item));
+    const expectedIndexes = new Array(checkedIndexes.length).fill(false);
+
+    expect(checkedIndexes).toEqual(expectedIndexes);
+  };
 
   afterEach(() => {
-    // If the test changed the querystring, clear it out. The querystring persists between tests.
-    if (Object.keys(wrapper.vm.$route.query).length) {
-      wrapper.vm.$router.push({ query: undefined });
+    // Clear out the querystring if one exists. It persists between tests.
+    if (filterQuery()?.length) {
+      wrapper.vm.$router.push('/');
     }
     wrapper.destroy();
   });
 
   describe('filter options', () => {
-    it('should show the filter options', () => {
-      createWrapper(filter);
+    it('shows the filter options', () => {
+      createWrapper();
 
       expect(dropdownItems()).toHaveLength(filter.options.length);
     });
 
     it.each`
-      phrase          | allOption
-      ${'should'}     | ${{}}
-      ${'should not'} | ${undefined}
-    `(`$phrase show the 'All' option if filter.allOption is $allOption`, ({ allOption }) => {
-      createWrapper({ ...filter, allOption });
+      phrase             | allItem
+      ${'shows'}         | ${allOption}
+      ${'does not show'} | ${undefined}
+    `(`$phrase the All option if filter.allOption is $allOption`, ({ allItem }) => {
+      createWrapper({ allOption: allItem });
 
-      expect(allOptionItem().exists()).toBe(Boolean(allOption));
+      expect(allOptionItem().exists()).toBe(Boolean(allItem));
     });
 
     it.each`
-      allOption    | defaultOptions
-      ${{}}        | ${[optionAt(5), optionAt(2)]}
-      ${{}}        | ${[]}
-      ${{}}        | ${undefined}
-      ${undefined} | ${[optionAt(2), optionAt(4)]}
+      allItem      | defaultOptions
+      ${allOption} | ${optionsAt(5, 2)}
+      ${allOption} | ${[]}
+      ${allOption} | ${undefined}
+      ${undefined} | ${optionsAt(2, 4)}
       ${undefined} | ${[]}
       ${undefined} | ${undefined}
     `(
       'should pre-select the correct option(s) when allOption is $allOption and defaultOptions is $defaultOptions',
-      ({ allOption, defaultOptions }) => {
-        createWrapper({ ...filter, allOption, defaultOptions });
+      ({ allItem, defaultOptions }) => {
+        createWrapper({ allItem, defaultOptions });
 
         if (allOptionItem().exists()) {
+          // Check that the All option is checked only if there aren't default options.
           expect(isChecked(allOptionItem())).toBe(!defaultOptions?.length);
         }
+
         // Check if the default options are checked.
-        dropdownItems().wrappers.forEach((item, i) => {
-          expect(isChecked(item)).toBe(Boolean(defaultOptions?.includes(optionAt(i))));
-        });
+        expectSelectedItems(defaultOptions?.map(x => x.index) || []);
       },
     );
   });
 
   describe('search box', () => {
     it.each`
-      phrase          | showSearchBox
-      ${'should'}     | ${true}
-      ${'should not'} | ${false}
-    `('$phrase show search box if showSearchBox is $showSearchBox', ({ showSearchBox }) => {
-      createWrapper(filter, showSearchBox);
+      phrase             | showSearchBox
+      ${'shows'}         | ${true}
+      ${'does not show'} | ${false}
+    `('$phrase search box if showSearchBox is $showSearchBox', ({ showSearchBox }) => {
+      createWrapper({}, showSearchBox);
 
       expect(wrapper.find(FilterBody).props('showSearchBox')).toBe(showSearchBox);
     });
 
-    it('typing something in the search box should filter options', async () => {
-      const expectedItems = filter.options.filter(x => x.name.includes('1')).map(x => x.name);
-      createWrapper(filter, true);
+    it('filters options when something is typed in the search box', async () => {
+      const expectedItems = filter.options.map(x => x.name).filter(x => x.includes('1'));
+      createWrapper({}, true);
       wrapper.find(FilterBody).vm.$emit('input', '1');
       await wrapper.vm.$nextTick();
 
@@ -109,20 +133,15 @@ describe('Standard Filter component', () => {
 
   describe('selecting options', () => {
     beforeEach(() => {
-      createWrapper({
-        ...filter,
-        allOption: {},
-        defaultOptions: [optionAt(1), optionAt(2), optionAt(3)],
-      });
+      createWrapper({ allOption: {}, defaultOptions: optionsAt(1, 2, 3) });
     });
 
-    it('should deselect all options and select the all option even when clicked repeatedly', async () => {
+    it('de-selects every option and selects the all option when all option is clicked', async () => {
       const clickAndCheck = async () => {
-        allOptionItem().vm.$emit('click');
+        clickAllOptionItem();
         await wrapper.vm.$nextTick();
 
-        expect(isChecked(allOptionItem())).toBe(true);
-        dropdownItems().wrappers.forEach(item => expect(isChecked(item)).toBe(false));
+        expectAllOptionSelected();
       };
 
       // Click the all option 3 times. We're checking that it doesn't toggle.
@@ -131,7 +150,7 @@ describe('Standard Filter component', () => {
       await clickAndCheck();
     });
 
-    it(`should toggle an option's selection when it it repeatedly clicked`, async () => {
+    it(`toggles an option's selection when it it repeatedly clicked`, async () => {
       const item = dropdownItemAt(5);
       let checkedState = isChecked(item);
 
@@ -150,52 +169,202 @@ describe('Standard Filter component', () => {
       await clickAndCheck();
     });
 
-    it('should multi-select options when multiple items are clicked', async () => {
-      const indexes = [5, 6, 7];
-
-      await indexes.forEach(async index => {
-        dropdownItemAt(index).vm.$emit('click');
+    it('multi-selects options when multiple items are clicked', async () => {
+      await [5, 6, 7].forEach(async index => {
+        clickItemAt(index);
         await wrapper.vm.$nextTick();
       });
 
-      indexes.forEach(index => {
-        expect(isChecked(dropdownItemAt(index))).toBe(true);
-      });
+      expectSelectedItems([1, 2, 3, 5, 6, 7]);
+    });
+
+    it('automatically selects the all option when last selected option is clicked to unselect it', async () => {
+      [1, 2, 3].forEach(clickItemAt);
+      await wrapper.vm.$nextTick();
+
+      expectAllOptionSelected();
+    });
+
+    it('emits filter-changed event when an option is clicked', async () => {
+      clickItemAt(4);
+      const expectedIds = optionsAt(1, 2, 3, 4).map(x => x.id);
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.emitted('filter-changed')).toHaveLength(1);
+      expect(wrapper.emitted('filter-changed')[0][0]).toEqual({ [filter.id]: expectedIds });
     });
   });
 
   describe('querystring stuff', () => {
+    const updateRouteQuery = (indexes = []) => {
+      // window.history.back() won't change the location nor fire the popstate event, so we need
+      // to fake it by doing it manually.
+      router.replace({ query: { [filter.id]: optionsAt(...indexes).map(x => x.id) } });
+      window.dispatchEvent(new Event('popstate'));
+    };
+
+    const updateRouteQueryRaw = ids => {
+      // window.history.back() won't change the location nor fire the popstate event, so we need
+      // to fake it by doing it manually.
+      router.replace({ query: { [filter.id]: ids } });
+      window.dispatchEvent(new Event('popstate'));
+    };
+
     it('should update the querystring when options are clicked', async () => {
-      createWrapper(filter);
+      createWrapper();
       const clickedIds = [];
 
-      [1, 3, 5].forEach(async index => {
-        dropdownItemAt(index).vm.$emit('click');
+      [1, 3, 5].forEach(index => {
+        clickItemAt(index);
         clickedIds.push(optionAt(index).id);
-        await wrapper.vm.$nextTick();
-
         expect(filterQuery()).toEqual(clickedIds);
       });
     });
 
-    it('clicking on the all option should update the querystring with all', async () => {
-      const allOption = { id: 'allOptionId' };
-      createWrapper({ ...filter, allOption });
-      [1, 2, 3, 4].forEach(index => dropdownItemAt(index).vm.$emit('click'));
+    it('should set the querystring properly when the All option is clicked', async () => {
+      createWrapper({ allOption });
+      [1, 2, 3, 4].forEach(clickItemAt);
       await wrapper.vm.$nextTick();
 
       expect(filterQuery()).toHaveLength(4);
 
-      allOptionItem().vm.$emit('click');
+      clickAllOptionItem();
       await wrapper.vm.$nextTick();
 
       expect(filterQuery()).toEqual([allOption.id]);
     });
 
-    it('clicking back/forward navigation should sync the selected options, but not update the querystring', () => {});
-    it('if querystring starts with query param, it should sync the selected options', () => {});
-    it('if querystring starts with query param but it has valid and invalid items, it should sync only the valid options', () => {});
-    it('if querystring starts with query param but it only has invalid items, it should not select anything and use the default options', () => {});
-    it('updating querystring for one filter does not touch querystring for another filter', () => {});
+    it('changing querystring to something existing should select those options', async () => {
+      createWrapper();
+      const indexes = [3, 5, 7];
+      updateRouteQuery(indexes);
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems(indexes);
+    });
+
+    it('changing querystring to blank should select default options', async () => {
+      createWrapper({ defaultOptions: optionsAt(2, 5, 8) });
+      clickItemAt(3);
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems([2, 3, 5, 8]);
+
+      updateRouteQuery();
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems([2, 5, 8]);
+    });
+
+    it('changing querystring to blank should select All option if no default options', async () => {
+      createWrapper({ allOption: {} });
+      clickItemAt(3);
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems([3]);
+
+      updateRouteQuery();
+      await wrapper.vm.$nextTick();
+
+      expectAllOptionSelected();
+    });
+
+    it('changing querystring to all option ID should select all option', async () => {
+      createWrapper({ allOption, defaultOptions: optionsAt(2, 4, 8) });
+
+      expectSelectedItems([2, 4, 8]);
+
+      updateRouteQueryRaw([allOption.id]);
+      await wrapper.vm.$nextTick();
+
+      expectAllOptionSelected();
+    });
+
+    it('changing querystring to something that has valid and invalid items should only select the valid items', async () => {
+      createWrapper();
+      const ids = optionsAt(3, 7, 9)
+        .map(x => x.id)
+        .concat(['some', 'invalid', 'ids']);
+      updateRouteQueryRaw(ids);
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems([3, 7, 9]);
+    });
+
+    it('changing querystring to something that only has invalid items should select the default options', async () => {
+      createWrapper({ defaultOptions: optionsAt(1, 3, 4) });
+      await clickItemAt(8);
+
+      expectSelectedItems([1, 3, 4, 8]);
+
+      updateRouteQueryRaw(['some', 'invalid', 'ids']);
+      await wrapper.vm.$nextTick();
+      expectSelectedItems([1, 3, 4]);
+    });
+
+    it('changing querystring to something that only has invalid items should select the All option', async () => {
+      createWrapper({ allOption: {} });
+      clickItemAt(8);
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems([8]);
+
+      updateRouteQueryRaw(['some', 'invalid', 'ids']);
+      await wrapper.vm.$nextTick();
+      expectAllOptionSelected();
+    });
+
+    it('changing querystring to something that has all and other options will only select the All option', async () => {
+      createWrapper({ allOption });
+      updateRouteQueryRaw([allOption.id, optionAt(1).id, optionAt(2).id]);
+      await wrapper.vm.$nextTick();
+
+      expectAllOptionSelected();
+    });
+
+    it('selects correct items from querystring on load', () => {
+      updateRouteQuery([1, 3, 5, 7]);
+      createWrapper();
+
+      expectSelectedItems([1, 3, 5, 7]);
+    });
+
+    it('selects correct items if querystring has valid and invalid items', async () => {
+      const ids = optionsAt(2, 4, 6)
+        .map(x => x.id)
+        .concat(['some', 'invalid', 'ids']);
+      updateRouteQueryRaw(ids);
+      createWrapper();
+
+      expectSelectedItems([2, 4, 6]);
+    });
+
+    it('selects default options if querystring only has invalid items', async () => {
+      updateRouteQueryRaw(['some', 'invalid', 'ids']);
+      createWrapper({ defaultOptions: optionsAt(4, 5, 8) });
+
+      expectSelectedItems([4, 5, 8]);
+    });
+
+    it('selects All option if querystring only has invalid items', async () => {
+      updateRouteQueryRaw(['some', 'invalid', 'ids']);
+      createWrapper({ allOption });
+
+      expectAllOptionSelected();
+    });
+
+    it('updating querystring for one filter does not touch querystring for another filter', async () => {
+      createWrapper();
+
+      const ids = optionsAt(1, 2, 3).map(x => x.id);
+      const other = ['6', '7', '8'];
+      const query = { [filter.id]: ids, other };
+      router.replace({ query });
+      window.dispatchEvent(new Event('popstate'));
+      await wrapper.vm.$nextTick();
+
+      expectSelectedItems([1, 2, 3]);
+      expect(wrapper.vm.$route.query.other).toEqual(other);
+    });
   });
 });

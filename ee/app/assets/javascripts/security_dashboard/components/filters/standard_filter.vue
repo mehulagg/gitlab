@@ -20,7 +20,6 @@ export default {
     return {
       searchTerm: '',
       selectedOptions: this.filter.defaultOptions || [],
-      shouldUpdateRouteQuery: true,
     };
   },
   computed: {
@@ -29,6 +28,7 @@ export default {
     },
     selectedOptionsOrAll() {
       const { selectedOptions, filter } = this;
+
       if (filter.allOption) {
         return selectedOptions.length ? selectedOptions : [filter.allOption];
       }
@@ -51,37 +51,38 @@ export default {
       return Array.isArray(keys) ? keys : [keys];
     },
     routeQueryOptions() {
-      return this.filter.options.filter(x => this.routeQuery.includes(x.id));
+      if (this.routeQuery.includes(this.filter.allOption?.id)) {
+        return [];
+      }
+
+      const options = this.filter.options.filter(x => this.routeQuery.includes(x.id));
+
+      return options.length ? options : this.filter.defaultOptions || [];
     },
   },
   watch: {
     selectedOptions() {
       this.$emit('filter-changed', this.filterObject);
-
-      if (this.shouldUpdateRouteQuery) {
-        this.updateRouteQuery();
-      }
     },
   },
   created() {
-    // Select the options based on the querystring.
-    if (this.routeQueryOptions.length) {
-      // SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
-      this.setOptionsFromQuery();
-    }
+    // SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
+    this.selectedOptions = this.routeQueryOptions;
 
     // WHEN USER CLICKS FORWARD/BACK BUTTON, SET SELECTED OPTIONS BUT DON'T UPDATE QUERYSTRING
     window.addEventListener('popstate', () => {
-      this.setOptionsFromQuery();
+      this.selectedOptions = this.routeQueryOptions;
     });
   },
   methods: {
     toggleOption(option) {
       // Toggle the option's existence in the array.
       this.selectedOptions = xor(this.selectedOptions, [option]);
+      this.updateRouteQuery();
     },
     deselectAllOptions() {
       this.selectedOptions = [];
+      this.updateRouteQuery();
     },
     updateRouteQuery() {
       const query = { query: { ...this.$route.query, ...this.queryObject } };
@@ -92,14 +93,6 @@ export default {
     },
     isSelected(option) {
       return this.selectedSet.has(option);
-    },
-    setOptionsFromQuery() {
-      this.shouldUpdateRouteQuery = false;
-      this.selectedOptions = this.routeQueryOptions;
-
-      this.$nextTick(() => {
-        this.shouldUpdateRouteQuery = true;
-      });
     },
   },
 };

@@ -12,14 +12,14 @@ export const mapProjects = projects =>
   projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
 
 const stateOptions = parseOptions(VULNERABILITY_STATES);
-const defaultStateOptionIds = ['DETECTED', 'CONFIRMED'];
+const defaultStateOptions = stateOptions.filter(x => ['DETECTED', 'CONFIRMED'].includes(x.id));
 
 export const stateFilter = {
   name: s__('SecurityReports|Status'),
   id: 'state',
   options: stateOptions,
   allOption: BASE_FILTERS.state,
-  defaultOptions: stateOptions.filter(x => defaultStateOptionIds.includes(x.id)),
+  defaultOptions: defaultStateOptions,
 };
 
 export const severityFilter = {
