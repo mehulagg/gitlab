@@ -163,6 +163,7 @@ it will use the cached result set as opposed to running the query against the da
 The query results are only cached for the duration of that single request, it does not persist across multiple requests.
 
 The cached queries help with reducing DB load, but they still:
+
 - Consume memory
 - Require as to re-instantiate each ActiveRecord object
 - Require as to re-instantiate each relation of the object
@@ -187,6 +188,7 @@ build.project == pipeline_project
 # CACHE Project Load (0.0ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
 # => true
 ```
+
 When we call `build.project`, it will not hit the database, it will use the cached result, but it will re-instantiate
 project object.
 
