@@ -4,12 +4,13 @@ require 'spec_helper'
 
 RSpec.describe DastSiteProfilePolicy do
   describe 'create_on_demand_dast_scan' do
-    let(:record) { create(:dast_site_profile, project: create(:project, group: group)) }
-    let(:group) { create(:group) }
-    let(:project) { record.project }
-    let(:user) { create(:user) }
+    let(:record) { create(:dast_site_profile, project: project) }
 
     shared_examples 'a dast on-demand scan policy' do
+      let(:group) { create(:group) }
+      let(:project) { create(:project, group: group) }
+      let(:user) { create(:user) }
+
       subject { described_class.new(user, record) }
 
       before do
