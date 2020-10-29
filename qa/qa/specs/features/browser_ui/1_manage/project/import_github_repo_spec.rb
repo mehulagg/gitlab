@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage', :github, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/issues/26952', type: :bug } do
+  RSpec.describe 'Manage', :github do
     describe 'Project import from GitHub' do
       let(:imported_project) do
         Resource::ProjectImportedFromGithub.fabricate! do |project|
