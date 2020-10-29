@@ -43,7 +43,7 @@ RSpec.describe AlertManagement::HttpIntegrations::DestroyService do
         stub_feature_flags(multiple_http_integrations: false)
       end
 
-      it_behaves_like 'error response', 'Multiple HTTP integrations are not supported for this project'
+      it_behaves_like 'error response', 'Removing integrations is not supported for this project'
     end
 
     context 'when an error occurs during removal' do

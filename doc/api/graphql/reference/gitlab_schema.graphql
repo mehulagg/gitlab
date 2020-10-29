@@ -9271,7 +9271,7 @@ type HttpIntegrationCreatePayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
@@ -9306,7 +9306,7 @@ type HttpIntegrationDestroyPayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
@@ -9341,7 +9341,7 @@ type HttpIntegrationResetTokenPayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
@@ -9386,7 +9386,7 @@ type HttpIntegrationUpdatePayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }

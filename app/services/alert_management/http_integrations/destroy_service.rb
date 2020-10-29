@@ -42,7 +42,7 @@ module AlertManagement
       end
 
       def error_multiple_integrations
-        error(_('Multiple HTTP integrations are not supported for this project'))
+        error(_('Removing integrations is not supported for this project'))
       end
     end
   end
