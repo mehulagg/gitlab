@@ -49,7 +49,10 @@ module Gitlab
             if @job.present?
               @project.builds.latest.success.for_ref(@ref).by_name(@job).order_id_desc.first
             else
-              @project.ci_pipelines.latest_successful_for_ref(@ref)
+              @project.daily_build_group_report_results
+                .with_default_branch
+                .with_coverage
+                .recent_results({}, limit: 1).first
             end
 
           latest&.coverage

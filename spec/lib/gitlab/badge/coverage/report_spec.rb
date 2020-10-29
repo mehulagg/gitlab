@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Badge::Coverage::Report do
   let_it_be(:project)  { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+  let_it_be(:daily_coverage_report) { create(:ci_daily_build_group_report_result, project: project, last_pipeline: pipeline) }
 
   let_it_be(:builds) do
     [
@@ -51,20 +52,20 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
     end
 
     context 'with no job specified' do
-      it 'returns the pipeline coverage value' do
-        expect(badge.status).to eq(50.00)
+      it 'returns the most recent daily build group report result coverage value' do
+        expect(badge.status).to eq(77.00)
       end
     end
 
     context 'with a blank job name' do
       let(:job_name) { ' ' }
 
-      it 'returns the pipeline coverage value' do
-        expect(badge.status).to eq(50.00)
+      it 'returns the most recent daily build group report result coverage value' do
+        expect(badge.status).to eq(77.00)
       end
     end
 
-    context 'with an unmatching job name specified' do
+    context 'with an unmatched job name specified' do
       let(:job_name) { 'incorrect name' }
 
       it 'returns nil' do
