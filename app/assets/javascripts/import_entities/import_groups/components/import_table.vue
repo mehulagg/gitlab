@@ -2,8 +2,23 @@
 import { ApolloMutation, ApolloQuery } from 'vue-apollo';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { n__, __, sprintf } from '~/locale';
-import bulkImportSourceGroupsQuery from '../graphql/queries/bulk_import_source_groups.graphql';
+import bulkImportSourceGroupsQuery from '../graphql/queries/bulk_import_source_groups.query.graphql';
+import setTargetNamespaceMutation from '../graphql/mutations/set_target_namespace.mutation.graphql';
+import setNewNameMutation from '../graphql/mutations/set_new_name.mutation.graphql';
 import ImportTableRow from './import_table_row.vue';
+
+const mapApolloMutations = mutations =>
+  Object.fromEntries(
+    Object.entries(mutations).map(([key, mutation]) => [
+      key,
+      function mutate(config) {
+        return this.$apollo.mutate({
+          mutation,
+          ...config,
+        });
+      },
+    ]),
+  );
 
 export default {
   components: {
@@ -16,21 +31,11 @@ export default {
     bulkImportSourceGroups: bulkImportSourceGroupsQuery,
   },
 
-  computed: {
-    // availableNamespaces() {
-    //   const serializedNamespaces = this.namespaces.map(({ fullPath }) => ({
-    //     id: fullPath,
-    //     text: fullPath,
-    //   }));
-    //   return [
-    //     { text: __('Groups'), children: serializedNamespaces },
-    //     {
-    //       text: __('Users'),
-    //       children: [{ id: this.defaultTargetNamespace, text: this.defaultTargetNamespace }],
-    //     },
-    //   ];
-    // },GitLab
-    // },
+  methods: {
+    ...mapApolloMutations({
+      setTargetNamespace: setTargetNamespaceMutation,
+      setNewName: setNewNameMutation,
+    }),
   },
 };
 </script>
@@ -63,6 +68,16 @@ export default {
                 :key="group.id"
                 :group="group"
                 :available-namespaces="groupsQuery.availableNamespaces"
+                @update-target-namespace="
+                  setTargetNamespace({
+                    variables: { sourceGroupId: group.id, targetNamespace: $event },
+                  })
+                "
+                @update-new-name="
+                  setNewName({
+                    variables: { sourceGroupId: group.id, newName: $event },
+                  })
+                "
               />
             </template>
           </tbody>
