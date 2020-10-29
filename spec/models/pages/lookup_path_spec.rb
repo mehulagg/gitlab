@@ -48,11 +48,8 @@ RSpec.describe Pages::LookupPath do
 
   describe '#source' do
     shared_examples 'uses disk storage' do
-      it 'sets the source type to "file"' do
+      it 'uses disk storage', :aggregate_failures do
         expect(lookup_path.source[:type]).to eq('file')
-      end
-
-      it 'sets the source path to the project full path suffixed with "public/' do
         expect(lookup_path.source[:path]).to eq(project.full_path + "/public/")
       end
     end
