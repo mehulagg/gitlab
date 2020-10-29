@@ -81,7 +81,7 @@ describe('Pipeline Schedule Callout', () => {
     });
 
     it('updates calloutDismissed when close button is clicked', done => {
-      calloutComponent.$el.querySelector('.gl-button').click();
+      getByRole(calloutComponent.$el, 'button', /dismiss/i).click();
 
       Vue.nextTick(() => {
         expect(calloutComponent.calloutDismissed).toBe(true);
@@ -99,7 +99,7 @@ describe('Pipeline Schedule Callout', () => {
     });
 
     it('is hidden when close button is clicked', done => {
-      calloutComponent.$el.querySelector('.gl-button').click();
+      getByRole(calloutComponent.$el, 'button', /dismiss/i).click();
 
       Vue.nextTick(() => {
         expect(calloutComponent.$el.childNodes.length).toBe(0);
