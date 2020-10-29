@@ -10617,6 +10617,9 @@ msgstr ""
 msgid "Error occurred. User was not unlocked"
 msgstr ""
 
+msgid "Error parsing CSV file. Please make sure it has the correct format: a delimited text file that uses a comma to separate values."
+msgstr ""
+
 msgid "Error rendering markdown preview"
 msgstr ""
 
@@ -30732,6 +30735,9 @@ msgstr ""
 msgid "Your CSV export of %{written_count} from project %{project_name} (%{project_url}) has been added to this email as an attachment."
 msgstr ""
 
+msgid "Your CSV import for project"
+msgstr ""
+
 msgid "Your Commit Email will be used for web based operations, such as edits and merges."
 msgstr ""
 
@@ -31486,6 +31492,9 @@ msgid "has already been linked to another vulnerability"
 msgstr ""
 
 msgid "has already been taken"
+msgstr ""
+
+msgid "has been completed."
 msgstr ""
 
 msgid "help"
