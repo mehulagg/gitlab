@@ -4,11 +4,13 @@
 .wiki-page-header.top-area.has-sidebar-toggle.flex-column.flex-lg-row
   = wiki_sidebar_toggle_button
 
-  .nav-text.flex-fill
-    %span.wiki-last-edit-by
+  .nav-text.gl-flex-fill-1
+    %span.gl-text-gray-900
       - if @page.last_version
-        = (_("Last edited by %{name}") % { name: "<strong>#{@page.last_version.author_name}</strong>" }).html_safe
-        = time_ago_with_tooltip(@page.last_version.authored_date)
+        Edited
+        = time_ago_with_tooltip(@page.last_version.authored_date, placement: 'bottom')
+        by
+        = link_to_member(@wiki.container, @wiki.commit.author, { size: 24, extra_class: 'gl-text-gray-900 gl-hover-text-gray-900 gl-font-weight-bold' })
 
   .nav-controls.pb-md-3.pb-lg-0
     = render 'shared/wikis/main_links'
