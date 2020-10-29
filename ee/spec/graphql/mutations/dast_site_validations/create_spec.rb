@@ -17,6 +17,8 @@ RSpec.describe Mutations::DastSiteValidations::Create do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+
   describe '#resolve' do
     subject do
       mutation.resolve(
@@ -39,22 +41,6 @@ RSpec.describe Mutations::DastSiteValidations::Create do
       context 'when the user is not associated with the project' do
         it 'raises an exception' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is an owner' do
-        it 'returns the dast_site_validation id' do
-          group.add_owner(user)
-
-          expect(subject[:id]).to eq(dast_site_validation.to_global_id)
-        end
-      end
-
-      context 'when the user is a maintainer' do
-        it 'returns the dast_site_validation id' do
-          project.add_maintainer(user)
-
-          expect(subject[:id]).to eq(dast_site_validation.to_global_id)
         end
       end
 
