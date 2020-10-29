@@ -2,6 +2,7 @@
 
 module PerformanceBarHelper
   def performance_bar_enabled?
-    Gitlab::PerformanceBar.enabled_for_request?
+    false
+    # Gitlab::PerformanceBar.enabled_for_request?
   end
 end
