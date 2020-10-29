@@ -195,7 +195,6 @@ For information on how to update your Geo nodes to the latest GitLab version, se
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35913) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
 
-
 CAUTION: **Caution:**
 Pausing and resuming of replication is currently only supported for Geo installations using an Omnibus-managed database. External databases are currently not supported.
 
