@@ -33,9 +33,13 @@ fragment Release on Release {
   }
   links {
     editUrl
-    issuesUrl
-    mergeRequestsUrl
     selfUrl
+    # TODO: switch open* to opened* once GraphQL endpoint has been updated
+    openIssuesUrl
+    closedIssuesUrl
+    openMergeRequestsUrl
+    mergedMergeRequestsUrl
+    closedMergeRequestsUrl
   }
   commit {
     sha

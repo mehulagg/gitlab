@@ -87,9 +87,14 @@ export default {
     <release-block-header :release="release" />
     <div class="card-body">
       <div v-if="shouldRenderMilestoneInfo">
+        <!-- TODO: Switch open* links to opened* once fields have been updated in GraphQL -->
         <release-block-milestone-info
           :milestones="milestones"
-          :open-issues-path="release._links.issuesUrl"
+          :open-issues-path="release._links.openIssuesUrl"
+          :closed-issues-path="release._links.closedIssuesUrl"
+          :open-merge-requests-path="release._links.openMergeRequestsUrl"
+          :merged-merge-requests-path="release._links.mergedMergeRequestsUrl"
+          :closed-merge-requests-path="release._links.closedMergeRequestsUrl"
         />
         <hr class="mb-3 mt-0" />
       </div>
