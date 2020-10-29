@@ -1,7 +1,7 @@
 \
 <script>
 import { isEmpty } from 'lodash';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlLink } from '@gitlab/ui';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import ArtifactsBlock from './artifacts_block.vue';
@@ -38,6 +38,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['hasForwardDeploymentFailure']),
     ...mapState(['job', 'stages', 'jobs', 'selectedStage']),
     retryButtonClass() {
       let className = 'js-retry-button btn btn-retry';
