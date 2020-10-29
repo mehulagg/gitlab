@@ -60,6 +60,8 @@ You can filter the data that is presented on the page based on the following par
 - Assignees
 - Labels
 - Milestones
+- Source branch
+- Target branch
 
 To filter results:
 
