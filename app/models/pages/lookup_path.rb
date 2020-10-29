@@ -22,7 +22,7 @@ module Pages
     end
 
     def source
-      if artifacts_archive && !artifacts_archive.file_storage?
+      if artifacts_archive
         zip_source
       else
         file_source
@@ -44,16 +44,19 @@ module Pages
     def artifacts_archive
       return unless Feature.enabled?(:pages_artifacts_archive, project)
 
-      # Using build artifacts is temporary solution for quick test
-      # in production environment, we'll replace this with proper
-      # `pages_deployments` later
-      project.pages_metadatum.artifacts_archive&.file
+      archive = project.pages_metadatum.artifacts_archive
+
+      return unless archive&.file
+
+      return if archive.file.file_storage?
+
+      archive
     end
 
     def zip_source
       {
         type: 'zip',
-        path: artifacts_archive.url(expire_at: 1.day.from_now)
+        path: artifacts_archive.file.url(expire_at: 1.day.from_now)
       }
     end
 
