@@ -145,6 +145,8 @@ export default {
       <edit-meta-modal
         ref="editMetaModal"
         :source-path="appData.sourcePath"
+        :namespace="appData.project.split('/')[0]"
+        :project="appData.project.split('/')[1]"
         @primary="onSubmit"
         @hide="onHideModal"
       />
