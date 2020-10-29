@@ -119,10 +119,10 @@ read this section on [how to prepare the merge request for a database review](da
 
 ## Query Counts
 
-**Summary:** a merge request **should not** increase the number of executed SQL
+**Summary:** a merge request **should not** increase the total number of executed SQL
 queries unless absolutely necessary.
 
-The number of queries executed by the code modified or added by a merge request
+The total number of queries executed by the code modified or added by a merge request
 must not increase unless absolutely necessary. When building features it's
 entirely possible you will need some extra queries, but you should try to keep
 this at a minimum.
@@ -169,15 +169,28 @@ The cached queries help with reducing DB load, but they still:
 - Require as to re-instantiate each relation of the object
 - Makes us spend additional CPU-cycles to look into a list of cached queries.
 
-We should treat the Cached queries the same as 
-[N+1 queries](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations).
 They are cheaper, but they are not cheap at all from `memory` perspective.
+ 
+Cached SQL queries, could mask [N+1 query problem](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations)
+If those N queries are executing the same query, it will not hit the database, it will return the cached results instead,
+which is still expensive since we need to re-initialize objects each time, and this is CPU/Memory expensive.
+Instead, you should use the same in-memory objects, if possible. 
 
-The code modified or added by a merge request should not execute duplicated cached queries.
+When building features, you could use [Performance bar](../administration/monitoring/performance/performance_bar.md)
+in order to list Database queries, which will include cached queries as well. If you see a lot of similar queries,
+this often indicates an N+1 query issue (or a similar kind of query batching problem).
+If you see same cached query executed multiple times, this often indicates a masked N+1 query problem.
 
-As an example, say we have a Ci pipeline. All pipeline builds belong to the same pipeline,
+The code introduced by a merge request, should not execute multiple duplicated cached queries.
+
+The total number of the queries (including cached ones) executed by the code modified or added by a merge request
+should not increase unless absolutely necessary. 
+The number of executed queries (including cached queries) should not depend on 
+collection size. 
+You can write a test by passing the `skip_cached` variable to [QueryRecorder](query_recorder.md) to detect this and prevent regressions.
+
+As an example, say you have a Ci pipeline. All pipeline builds belong to the same pipeline,
 thus they also belong to the same project (`pipeline.project`).
-But it turns out that associated objects do not point to the same in-memory objects.
 
 ```ruby
 pipeline_project = pipeline.project
@@ -190,7 +203,7 @@ build.project == pipeline_project
 ```
 
 When we call `build.project`, it will not hit the database, it will use the cached result, but it will re-instantiate
-project object.
+same pipeline project object. It turns out that associated objects do not point to the same in-memory object.
 
 If we try to serialize each build:
 
@@ -202,9 +215,6 @@ end
 
 It will re-instantiate project object for each build, instead of using the same in-memory object.
 
-When building features you could use [Performance bar](../administration/monitoring/performance/performance_bar.md) in order to detect duplicated cached queries.
-You can write a test with [QueryRecorder](query_recorder.md) to detect multiple cached queries and prevent regressions.
-
 In this particular case the workaround is fairly easy:
 
 ```ruby
@@ -215,7 +225,7 @@ pipeline.builds.each do |build|
 end
 ```
 
-We can assign `pipeline.project` to each `build.project`. 
+We can assign `pipeline.project` to each `build.project`, since we know it should point to the same project.
 This will allow us that each build point to the same in-memory project, 
 avoiding the cached SQL query and re-instantiation of the project object for each build.
 
