@@ -49,7 +49,7 @@ after sign out if value is not empty.
 
 If a "Sign in text" in Markdown format is provided, it will add this message on the Sign-in page between the description and the (optional) help message.
 
-![Sign-in page](img/custom_sign_in_page.png)
+![Sign-in page](img/custom_sign_in_page_v13_6.png)
 
 <!-- ## Troubleshooting
 
