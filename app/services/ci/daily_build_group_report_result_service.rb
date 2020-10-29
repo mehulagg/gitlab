@@ -3,6 +3,9 @@
 module Ci
   class DailyBuildGroupReportResultService
     def execute(pipeline)
+      # requeue worker if any child pipeline is still running
+      return if pipeline.dangling?
+
       DailyBuildGroupReportResult.upsert_reports(coverage_reports(pipeline))
     end
 
@@ -17,7 +20,7 @@ module Ci
         default_branch: pipeline.default_branch?
       }
 
-      aggregate(pipeline.builds.with_coverage).map do |group_name, group|
+      aggregate(pipeline.builds_in_hierarchy.with_coverage).map do |group_name, group|
         base_attrs.merge(
           group_name: group_name,
           data: {

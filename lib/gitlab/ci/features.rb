@@ -62,6 +62,10 @@ module Gitlab
       def self.manual_bridges_enabled?(project)
         ::Feature.enabled?(:ci_manual_bridges, project, default_enabled: true)
       end
+
+      def self.include_child_pipeline_jobs_in_reports?(project)
+        ::Feature.enabled?(:include_child_pipeline_jobs_in_reports, project, default_enabled: false)
+      end
     end
   end
 end

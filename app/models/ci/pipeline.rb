@@ -603,6 +603,14 @@ module Ci
         .last
     end
 
+    def job_artifacts_in_self_and_descendants
+      if Gitlab::Ci::Features.include_child_pipeline_jobs_in_reports?(project)
+        ::Ci::JobArtifacts.where(job: builds_in_self_and_descendants(while_dependent: true))
+      else
+        job_artifacts
+      end
+    end
+
     # This batch loads the latest reports for each CI job artifact
     # type (e.g. sast, dast, etc.) in a single SQL query to eliminate
     # the need to do N different `job_artifacts.where(file_type:
@@ -617,7 +625,7 @@ module Ci
         # affect query plan but included to ensure we don't leak the
         # wrong informaiton.
         ::Ci::JobArtifact.where(
-          id: job_artifacts.with_reports
+          id: job_artifacts_in_self_and_descendants.with_reports
             .select('max(ci_job_artifacts.id) as id')
             .where(project_id: self.read_attribute(:project_id))
             .group(:file_type)
@@ -841,15 +849,18 @@ module Ci
         .find_by_name(name)
     end
 
-    def builds_in_self_and_descendants
-      Ci::Build.latest.where(pipeline: self_and_descendants)
+    def builds_in_self_and_descendants(while_dependent: false)
+      Ci::Build.latest
+        .where(pipeline: self_and_descendants(while_dependent: while_dependent))
     end
 
     # Without using `unscoped`, caller scope is also included into the query.
     # Using `unscoped` here will be redundant after Rails 6.1
-    def self_and_descendants
+    def self_and_descendants(while_dependent: false)
       ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+        .new(
+          self.class.unscoped.where(id: id),
+          options: { same_project: true, while_dependent: while_dependent })
         .base_and_descendants
     end
 
@@ -891,7 +902,15 @@ module Ci
     end
 
     def latest_report_builds(reports_scope = ::Ci::JobArtifact.with_reports)
-      builds.latest.with_reports(reports_scope)
+      if Gitlab::Ci::Feature.include_child_pipeline_jobs_in_report?(project)
+        # list reports also from child pipelines using `strategy:depend`.
+        # we filter other child pipelines because we can't guarantee those
+        # finish before the parent pipeline as they run asynchronously.
+        builds_in_self_and_descendants(while_dependent: true)
+          .with_reports(reports_scope)
+      else
+        builds.latest.with_reports(reports_scope)
+      end
     end
 
     def builds_with_coverage
