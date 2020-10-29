@@ -51,9 +51,9 @@ You can **Delete** a user's SSH key by navigating to the credentials inventory's
 ## Revocation or deletion notification
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250354) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
 > - It's disabled on GitLab.com.
-> - It's not recommended for production use.
+> - It's recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-revocation-or-deletion-notification).
 
 CAUTION: **Warning:**
