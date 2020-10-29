@@ -98,23 +98,20 @@ export default {
       :label="__('Description template')"
       :label-for="getId('control', 'template')"
     >
-      <gl-dropdown ref="dropdown" :text="dropdownLabel">
-        <div class="dropdown-content dropdown-body">
-          <gl-dropdown-item key="none" ref="dropdownItemNone" @click="onChangeTemplate(null)">
-            {{ __('None') }}
-          </gl-dropdown-item>
+      <gl-dropdown :text="dropdownLabel">
+        <gl-dropdown-item key="none" @click="onChangeTemplate(null)">
+          {{ __('None') }}
+        </gl-dropdown-item>
 
-          <gl-dropdown-divider />
+        <gl-dropdown-divider />
 
-          <gl-dropdown-item
-            v-for="template in templates"
-            :key="template.key"
-            :ref="`dropdownItem${template.key}`"
-            @click="onChangeTemplate(template)"
-          >
-            {{ template.name }}
-          </gl-dropdown-item>
-        </div>
+        <gl-dropdown-item
+          v-for="template in templates"
+          :key="template.key"
+          @click="onChangeTemplate(template)"
+        >
+          {{ template.name }}
+        </gl-dropdown-item>
       </gl-dropdown>
     </gl-form-group>
 

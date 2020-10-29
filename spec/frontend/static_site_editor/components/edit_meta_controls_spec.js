@@ -35,7 +35,8 @@ describe('~/static_site_editor/components/edit_meta_controls.vue', () => {
   const findGlFormInputTitle = () => wrapper.find(GlFormInput);
   const findGlDropdownDescriptionTemplate = () => wrapper.find(GlDropdown);
   const findAllDropdownItems = () => wrapper.findAll(GlDropdownItem);
-  const findDropdownItemByIndex = index => wrapper.findAll(GlDropdownItem).at(index);
+  const findDropdownItemByIndex = index => findAllDropdownItems().at(index);
+
   const findGlFormTextAreaDescription = () => wrapper.find(GlFormTextarea);
 
   beforeEach(() => {
@@ -74,7 +75,8 @@ describe('~/static_site_editor/components/edit_meta_controls.vue', () => {
     expect(mockGlFormInputTitleInstance.$el.select).toHaveBeenCalled();
   });
 
-  it('renders a GlDropdownItem per template plus one (for the none option)', () => {
+  it('renders a GlDropdownItem per template plus one (for the starting none option)', () => {
+    expect(findDropdownItemByIndex(0).text()).toBe('None');
     expect(findAllDropdownItems().length).toBe(mergeRequestTemplates.length + 1);
   });
 
