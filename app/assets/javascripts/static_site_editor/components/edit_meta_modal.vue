@@ -1,6 +1,7 @@
 <script>
 import { GlModal } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
+import Api from '~/api';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 import EditMetaControls from './edit_meta_controls.vue';
@@ -15,6 +16,14 @@ export default {
   },
   props: {
     sourcePath: {
+      type: String,
+      required: true,
+    },
+    namespace: {
+      type: String,
+      required: true,
+    },
+    project: {
       type: String,
       required: true,
     },
@@ -49,9 +58,18 @@ export default {
       };
     },
   },
+  mounted() {
+    this.initTemplates();
+  },
   methods: {
     hide() {
       this.$refs.modal.hide();
+    },
+    initTemplates() {
+      Api.issueTemplates(this.namespace, this.project, 'merge_request', (err, templates) => {
+        if (err) return; // Error handled by global AJAX error handler
+        this.mergeRequestTemplates = templates;
+      });
     },
     show() {
       this.$refs.modal.show();
