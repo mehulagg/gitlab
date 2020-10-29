@@ -670,7 +670,7 @@ apply:
 ### Override environment or cluster scope
 
 If you only want apps to be installed on a specific cluster, or if your cluster's
-scope is not `production`, you can override the environment name in your `.gitlab-ci.yml`
+scope does not match `production`, you can override the environment name in your `.gitlab-ci.yml`
 file:
 
 ```yaml
