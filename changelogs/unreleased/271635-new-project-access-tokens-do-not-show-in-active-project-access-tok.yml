@@ -1,0 +1,5 @@
+---
+title: Skip GMA and SSO validation if project bot
+merge_request: 46280
+author:
+type: fixed
