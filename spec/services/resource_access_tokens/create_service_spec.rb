@@ -159,6 +159,10 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
               expect(response.error?).to be true
             end
+
+            it 'immediately destroys the bot user if one was created', :sidekiq_inline do
+              expect { subject }.not_to change { User.bots.count }
+            end
           end
         end
       end

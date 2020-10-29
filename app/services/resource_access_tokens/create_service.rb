@@ -14,10 +14,7 @@ module ResourceAccessTokens
 
       user = create_user
 
-      unless user.persisted?
-        delete_failed_user(user)
-        return error(user.errors.full_messages.to_sentence)
-      end
+      return error(user.errors.full_messages.to_sentence) unless user.persisted?
 
       member = create_membership(resource, user)
 
@@ -54,7 +51,7 @@ module ResourceAccessTokens
     end
 
     def delete_failed_user(user)
-      Users::DestroyService.new(current_user).execute(user, skip_authorization: true)
+      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true)
     end
 
     def default_user_params
