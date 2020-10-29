@@ -184,9 +184,9 @@ If you see same cached query executed multiple times, this often indicates a mas
 The code introduced by a merge request, should not execute multiple duplicated cached queries.
 
 The total number of the queries (including cached ones) executed by the code modified or added by a merge request
-should not increase unless absolutely necessary. 
+should not increase unless absolutely necessary.
 The number of executed queries (including cached queries) should not depend on 
-collection size. 
+collection size.
 You can write a test by passing the `skip_cached` variable to [QueryRecorder](query_recorder.md) to detect this and prevent regressions.
 
 As an example, say you have a Ci pipeline. All pipeline builds belong to the same pipeline,
@@ -218,7 +218,6 @@ It will re-instantiate project object for each build, instead of using the same 
 In this particular case the workaround is fairly easy:
 
 ```ruby
-
 pipeline.builds.each do |build|                               
   build.project = pipeline.project
   build.to_json(only: [:name], include: [project: { only: [:name]}])
@@ -226,7 +225,7 @@ end
 ```
 
 We can assign `pipeline.project` to each `build.project`, since we know it should point to the same project.
-This will allow us that each build point to the same in-memory project, 
+This will allow us that each build point to the same in-memory project,
 avoiding the cached SQL query and re-instantiation of the project object for each build.
 
 ## Executing Queries in Loops
