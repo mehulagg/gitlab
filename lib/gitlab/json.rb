@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'oj'
+
 # This is a GitLab-specific JSON interface. You should use this instead
 # of using `JSON` directly. This allows us to swap the adapter and handle
 # legacy issues.
