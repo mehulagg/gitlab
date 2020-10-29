@@ -25524,7 +25524,7 @@
             },
             {
               "name": "integration",
-              "description": "The updated HTTP integration",
+              "description": "The HTTP integration",
               "args": [
 
               ],

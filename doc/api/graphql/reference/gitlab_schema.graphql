@@ -9371,7 +9371,7 @@ type HttpIntegrationDestroyPayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
