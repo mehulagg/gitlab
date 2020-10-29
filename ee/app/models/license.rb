@@ -558,23 +558,22 @@ class License < ApplicationRecord
     end
   end
 
-  def real_restricted_user_count
-    if previous_user_count
-      restricted_user_count
-    else
-      percent = ALLOWED_PERCENTAGE_OF_USERS_OVERAGE / 100.0
+  def restricted_user_count_with_threshold
+    # overage should only be applied for new subscriptions not for renewals.
+    return restricted_user_count if previous_user_count
 
-      (restricted_user_count * (1 + percent)).to_i
-    end
+    percent = ALLOWED_PERCENTAGE_OF_USERS_OVERAGE / 100.0
+
+    (restricted_user_count * (1 + percent)).to_i
   end
 
   def check_users_limit
     return unless restricted_user_count
 
     if previous_user_count && (prior_historical_max <= previous_user_count)
-      return if real_restricted_user_count >= current_active_users_count
+      return if restricted_user_count >= current_active_users_count
     else
-      return if real_restricted_user_count >= prior_historical_max
+      return if restricted_user_count_with_threshold >= prior_historical_max
     end
 
     user_count = prior_historical_max == 0 ? current_active_users_count : prior_historical_max

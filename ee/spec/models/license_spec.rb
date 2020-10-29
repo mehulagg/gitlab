@@ -109,7 +109,7 @@ RSpec.describe License do
           context 'when current active users count is under the threshold' do
             let(:current_active_users_count) { 11 }
 
-            it 'accepts the license' do
+            it 'does not accept the license' do
               expect(new_license).not_to be_valid
             end
           end
