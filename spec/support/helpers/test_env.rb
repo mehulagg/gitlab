@@ -533,7 +533,7 @@ module TestEnv
     # The HEAD of the component_folder will be used as heuristic for the version
     # of the binaries, allowing to use Git to determine if HEAD is later than
     # the expected version. Note: Git considers HEAD to be an anchestor of HEAD.
-    out, exit_status = Gitlab::Popen.popen(%W[
+    _out, exit_status = Gitlab::Popen.popen(%W[
       #{Gitlab.config.git.bin_path}
       -C #{component_folder}
       merge-base --is-ancestor
