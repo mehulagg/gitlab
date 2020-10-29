@@ -88,7 +88,7 @@ describe('WebIDE', () => {
     });
   });
 
-  fit('user adds file that starts with +', async () => {
+  it('user adds file that starts with +', async () => {
     createComponent();
 
     await ideHelper.createFile('+test', 'Hello world!');
