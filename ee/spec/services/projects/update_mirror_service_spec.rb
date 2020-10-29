@@ -30,6 +30,19 @@ RSpec.describe Projects::UpdateMirrorService do
       service.execute
     end
 
+    it 'runs project housekeeping' do
+      stub_fetch_mirror(project)
+
+      expect_next_instance_of(Projects::HousekeepingService) do |svc|
+        expect(svc.project).to eq(project)
+        expect(svc).to receive(:increment!)
+        expect(svc).to receive(:needed?).and_return(true)
+        expect(svc).to receive(:execute)
+      end
+
+      service.execute
+    end
+
     it 'rescues exceptions from Repository#ff_merge' do
       stub_fetch_mirror(project)
 
