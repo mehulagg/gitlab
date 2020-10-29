@@ -165,6 +165,7 @@ NOTE: **Note:**
 The 'GitLab single sign-on URL' value appears in the GitLab set up screen after clicking **Save changes**.
 
 We recommend:
+
 - **NameID** value set to `OneLogin ID`.
 
 ### Additional providers and setup options
