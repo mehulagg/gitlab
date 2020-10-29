@@ -921,6 +921,25 @@
   }
 }
 
+/*
+ * Following overrides are done to prevent
+ * legacy dropdown styles from influencing
+ * GitLab UI components used within GlDropdown
+ */
+.issuable-move-dropdown {
+  .b-dropdown-form {
+    padding: 0;
+  }
+
+  .gl-search-box-by-type button.gl-clear-icon-button:hover {
+    background-color: initial;
+  }
+
+  .issuable-move-button:not(.disabled):hover {
+    color: $white;
+  }
+}
+
 .right-sidebar-collapsed {
   .sidebar-grouped-item {
     .sidebar-collapsed-icon {

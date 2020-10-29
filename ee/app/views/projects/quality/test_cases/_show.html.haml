@@ -7,10 +7,12 @@
 
 #js-issuable-app{ data: { initial: issuable_initial_data(@issue).to_json,
   can_edit_test_case: can?(current_user, :admin_issue, @project).to_s,
+  can_move_test_case: @issuable_sidebar.dig(:current_user, :can_move).to_s,
   description_preview_path: preview_markdown_path(@project),
   description_help_path: help_page_path('user/markdown'),
   project_full_path: @project.full_path,
   labels_manage_path: project_labels_path(@project),
   labels_fetch_path: project_labels_path(@project, format: :json),
   test_case_new_path: new_project_quality_test_case_path(@project),
+  sidebar_options: issuable_sidebar_options(@issuable_sidebar).to_json.html_safe,
   test_case_id: @issue.iid } }
