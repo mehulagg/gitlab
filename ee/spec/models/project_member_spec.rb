@@ -72,7 +72,6 @@ RSpec.describe ProjectMember do
       end
     end
 
-
     context 'enforced group managed account disabled' do
       it 'allows adding the group member' do
         member = entity.add_developer(create(:user))
