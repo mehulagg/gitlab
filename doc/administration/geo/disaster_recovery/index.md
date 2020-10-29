@@ -133,6 +133,9 @@ Note the following when promoting a secondary:
    ```
 
 1. Promote the **secondary** node to the **primary** node.
+   CAUTION: **Caution:**:
+   If the secondary node [has been paused](../../geo/#pausing-and-resuming-replication), this will perform a point in time recovery to the last known state.
+   Data that was created on the primary while the secondary is paused will be lost.
 
    To promote the secondary node to primary along with preflight checks:
 
