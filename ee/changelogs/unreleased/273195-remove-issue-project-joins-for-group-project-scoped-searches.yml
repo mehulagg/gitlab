@@ -1,0 +1,5 @@
+---
+title: Remove parent joins for group/project issue searches
+merge_request: 46461
+author:
+type: changed
