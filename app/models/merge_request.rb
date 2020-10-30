@@ -303,7 +303,15 @@ class MergeRequest < ApplicationRecord
   end
 
   scope :reviewer_assigned_to, ->(user) do
-    where("EXISTS (SELECT TRUE FROM merge_request_reviewers WHERE user_id = ? AND merge_request_id = merge_requests.id)", user.id)
+    mr_reviewers_table = MergeRequestReviewer.arel_table
+    mr_table = MergeRequest.arel_table
+    
+    inner_sql = mr_reviewers_table.project(Arel::Nodes::True.new)
+                  .where(mr_reviewers_table[:merge_request_id].eq(mr_table[:id])
+                           .and(mr_reviewers_table[:user_id].eq(user.id))
+                  ).exists
+
+    where(inner_sql)
   end
 
   after_save :keep_around_commit, unless: :importing?

@@ -89,12 +89,12 @@ module MergeRequests
 
     def group_users_mrs(items, field, values)
       filter_by_existence(items, values) do |value|
-        # rubocop:disable GitlabSecurity/SqlInjection`
-        # field is not user provided input
         ApprovalMergeRequestRule
           .joins(groups: :users)
-          .where("approval_merge_request_rules.merge_request_id = merge_requests.id AND users.#{field} = ?", value)
-        # rubocop:enable GitlabSecurity/SqlInjection`
+          .where(
+            ApprovalMergeRequestRule.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
+              .and(User.arel_table[field].eq(value))
+          )
       end
     end
 
