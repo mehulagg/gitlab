@@ -11,6 +11,9 @@ module EE
       condition(:security_bot) { @user.security_bot? }
 
       with_scope :subject
+      condition(:auto_fix_enabled) { @subject&.security_setting&.auto_fix_enabled&.any? }
+
+      with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
       with_scope :subject
@@ -209,7 +212,7 @@ module EE
         enable :admin_vulnerability_issue_link
       end
 
-      rule { security_bot }.policy do
+      rule { security_bot & auto_fix_enabled }.policy do
         enable :developer_access
         enable :create_merge_request_in
         enable :create_merge_request_from
