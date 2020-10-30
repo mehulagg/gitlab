@@ -24,12 +24,11 @@ export default {
 </script>
 <template>
   <gl-stacked-column-chart
-    :data="data"
+    :bars="data"
     :group-by="groupBy"
     x-axis-type="category"
     y-axis-type="value"
     :x-axis-title="__('Date')"
     :y-axis-title="s__('CycleAnalytics|Number of tasks')"
-    :series-names="seriesNames"
   />
 </template>

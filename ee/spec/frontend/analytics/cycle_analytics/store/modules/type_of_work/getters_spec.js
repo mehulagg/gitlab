@@ -11,6 +11,11 @@ describe('Type of work getters', () => {
     const rootState = { startDate, endDate };
     describe('with data', () => {
       it('correctly transforms the raw task by type data', () => {
+        console.log('rawTasksByTypeData', rawTasksByTypeData);
+        console.log(
+          'transformedTasksByTypeData',
+          tasksByTypeChartData(rawTasksByTypeData, null, rootState),
+        );
         expect(tasksByTypeChartData(rawTasksByTypeData, null, rootState)).toEqual(
           transformedTasksByTypeData,
         );

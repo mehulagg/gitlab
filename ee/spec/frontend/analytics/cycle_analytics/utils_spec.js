@@ -227,10 +227,15 @@ describe('Cycle analytics utils', () => {
 
   describe('getTasksByTypeData', () => {
     let transformed = {};
-
     const groupBy = getDatesInRange(startDate, endDate, toYmd);
     // only return the values, drop the date which is the first paramater
-    const extractSeriesValues = ({ series }) => series.map(kv => kv[1]);
+    const extractSeriesValues = ({ label: { title: name }, series }) => {
+      return {
+        name,
+        data: series.map(kv => kv[1]),
+      };
+    };
+
     const data = rawTasksByTypeData.map(extractSeriesValues);
 
     const labels = rawTasksByTypeData.map(d => {
@@ -241,7 +246,7 @@ describe('Cycle analytics utils', () => {
     it('will return blank arrays if given no data', () => {
       [{ data: [], startDate, endDate }, [], {}].forEach(chartData => {
         transformed = getTasksByTypeData(chartData);
-        ['seriesNames', 'data', 'groupBy'].forEach(key => {
+        ['data', 'groupBy'].forEach(key => {
           expect(transformed[key]).toEqual([]);
         });
       });
@@ -253,14 +258,8 @@ describe('Cycle analytics utils', () => {
       });
 
       it('will return an object with the properties needed for the chart', () => {
-        ['seriesNames', 'data', 'groupBy'].forEach(key => {
+        ['data', 'groupBy'].forEach(key => {
           expect(transformed).toHaveProperty(key);
-        });
-      });
-
-      describe('seriesNames', () => {
-        it('returns the names of all the labels in the dataset', () => {
-          expect(transformed.seriesNames).toEqual(labels);
         });
       });
 
@@ -289,7 +288,7 @@ describe('Cycle analytics utils', () => {
 
         it('contains a value for each day in the groupBy', () => {
           transformed.data.forEach(d => {
-            expect(d).toHaveLength(transformed.groupBy.length);
+            expect(d.data).toHaveLength(transformed.groupBy.length);
           });
         });
       });

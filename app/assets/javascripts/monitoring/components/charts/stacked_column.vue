@@ -145,7 +145,6 @@ export default {
       :group-by="groupBy"
       :width="width"
       :height="height"
-      :series-names="seriesNames"
       :legend-layout="legendLayout"
       :legend-average-text="legendAverageText"
       :legend-current-text="legendCurrentText"
