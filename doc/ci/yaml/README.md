@@ -4205,6 +4205,7 @@ There are three possible values: `clone`, `fetch`, and `none`.
 
 `clone` is the slowest option. It clones the repository from scratch for every
 job, ensuring that the local working copy is always pristine.
+If an existing worktree is found, it is removed before cloning.
 
 ```yaml
 variables:
@@ -4215,13 +4216,24 @@ variables:
 if it does not exist). `git clean` is used to undo any changes made by the last
 job, and `git fetch` is used to retrieve commits made since the last job ran.
 
+However, `fetch` does require access to the previous worktree. This works
+well when using the `shell` or `docker` executor because these
+try to preserve worktrees and try to re-use them by default.
+
+This has limitations when using `docker+machine`. Also, it does not currently work for
+[the `kubernetes` executor](https://docs.gitlab.com/runner/executors/kubernetes.html),
+but may be implemented in the future, see
+[support Git strategy with Kubernetes executor feature proposal](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3847).
+Currently, the `kubernetes` executor always clones into an ephemeral directory.
+
 ```yaml
 variables:
   GIT_STRATEGY: fetch
 ```
 
-`none` also re-uses the local working copy. However, it skips all Git operations,
-including GitLab Runner's pre-clone script, if present.
+`none` also re-uses the local working copy, but skips all Git operations normally done by GitLab.
+GitLab Runner's pre-clone script are also skipped, if present.
+This strategy requires you to add `fetch` and `checkout` commands to [your `.gitlab-ci.yml`](#script).
 
 It's useful for jobs that operate exclusively on artifacts, like a deployment job.
 Git repository data may be present, but it's likely out-of-date. You should only
@@ -4231,12 +4243,6 @@ rely on files brought into the local working copy from cache or artifacts.
 variables:
   GIT_STRATEGY: none
 ```
-
-NOTE: **Note:**
-`GIT_STRATEGY` is not supported for
-[Kubernetes executor](https://docs.gitlab.com/runner/executors/kubernetes.html),
-but may be in the future. See the [support Git strategy with Kubernetes executor feature proposal](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3847)
-for updates.
 
 ### Git submodule strategy
 
