@@ -213,6 +213,7 @@ module EE
         enable :developer_access
         enable :create_merge_request_in
         enable :create_merge_request_from
+        enable :read_project
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do
