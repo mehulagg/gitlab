@@ -5,6 +5,14 @@ require 'spec_helper'
 RSpec.describe Resolvers::TimelogResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(::Types::TimelogType.connection_type),
+      null: be_truthy,
+      extras: include(:lookahead)
+    )
+  end
+
   context "within a group" do
     let_it_be(:current_user) { create(:user) }
     let(:group)              { create(:group) }

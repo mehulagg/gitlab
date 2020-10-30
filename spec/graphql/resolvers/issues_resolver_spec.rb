@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::IssuesResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(Types::IssueType.connection_type),
+      null: be_truthy
+    )
+  end
+
   let(:current_user) { create(:user) }
 
   let_it_be(:group)         { create(:group) }

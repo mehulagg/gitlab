@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::AlertManagement::IntegrationsResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(Types::AlertManagement::IntegrationType.connection_type),
+      null: be_truthy
+    )
+  end
+
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:prometheus_integration) { create(:prometheus_service, project: project) }

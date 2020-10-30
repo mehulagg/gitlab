@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::Snippets::BlobsResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(Types::Snippets::BlobType.connection_type),
+      null: be_truthy
+    )
+  end
+
   describe '#resolve' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:snippet) { create(:personal_snippet, :private, :repository, author: current_user) }

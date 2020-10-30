@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::Projects::JiraImportsResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(Types::JiraImportType.connection_type),
+      null: be_truthy
+    )
+  end
+
   describe '#resolve' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project, reload: true) { create(:project, :public) }

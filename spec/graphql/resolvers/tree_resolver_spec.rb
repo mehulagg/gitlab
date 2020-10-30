@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::TreeResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(Types::Tree::TreeType),
+      null: be_truthy
+    )
+  end
+
   let(:repository) { create(:project, :repository).repository }
 
   describe '#resolve' do

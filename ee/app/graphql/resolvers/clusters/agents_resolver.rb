@@ -5,7 +5,7 @@ module Resolvers
     class AgentsResolver < BaseResolver
       include LooksAhead
 
-      type Types::Clusters::AgentType, null: true
+      type Types::Clusters::AgentType.connection_type, null: true
 
       alias_method :project, :object
 

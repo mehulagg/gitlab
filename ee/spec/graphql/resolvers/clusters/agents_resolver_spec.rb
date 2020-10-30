@@ -5,10 +5,12 @@ require 'spec_helper'
 RSpec.describe Resolvers::Clusters::AgentsResolver do
   include GraphqlHelpers
 
-  it { expect(described_class).to be < LooksAhead }
-
-  it { expect(described_class.type).to eq(Types::Clusters::AgentType) }
-  it { expect(described_class.null).to be_truthy }
+  specify do
+    expect(described_class.field_options).to include(
+       type: eq(Types::Clusters::AgentType.connection_type),
+       null: be_truthy
+    )
+  end
 
   describe '#resolve' do
     let_it_be(:user) { create(:user) }

@@ -6,6 +6,13 @@ RSpec.describe Resolvers::DesignManagement::DesignsResolver do
   include GraphqlHelpers
   include DesignManagementTestHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(::Types::DesignManagement::DesignType.connection_type),
+      null: be_truthy
+    )
+  end
+
   before do
     enable_design_management
   end

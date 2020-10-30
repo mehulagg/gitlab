@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::ErrorTracking::SentryErrorCollectionResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(Types::ErrorTracking::SentryErrorCollectionType),
+      null: be_truthy
+    )
+  end
+
   let_it_be(:project) { create(:project) }
   let_it_be(:current_user) { create(:user) }
 

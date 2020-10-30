@@ -5,6 +5,14 @@ require 'spec_helper'
 RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(::Types::RequirementsManagement::RequirementType.connection_type),
+      null: be_truthy,
+      extras: include(:lookahead)
+    )
+  end
+
   let_it_be(:current_user) { create(:user) }
   let_it_be(:other_user) { create(:user) }
   let_it_be(:third_user) { create(:user) }

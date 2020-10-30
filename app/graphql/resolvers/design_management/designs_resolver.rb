@@ -3,6 +3,8 @@
 module Resolvers
   module DesignManagement
     class DesignsResolver < BaseResolver
+      type ::Types::DesignManagement::DesignType.connection_type, null: true
+
       argument :ids,
                [GraphQL::ID_TYPE],
                required: false,

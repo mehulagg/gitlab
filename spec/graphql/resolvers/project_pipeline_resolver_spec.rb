@@ -5,6 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::ProjectPipelineResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class.field_options).to include(
+      type: eq(::Types::Ci::PipelineType),
+      null: be_truthy
+    )
+  end
+
   let_it_be(:project) { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project, iid: '1234') }
   let_it_be(:other_pipeline) { create(:ci_pipeline) }
