@@ -134,7 +134,7 @@ export default {
       v-if="loaded && isColumnChart"
       v-bind="$attrs"
       :height="$options.height"
-      :data="data.datasets"
+      :bars="[{ name: 'full', data: data.datasets }]"
       x-axis-type="category"
       :x-axis-title="data.xAxisTitle"
       :y-axis-title="data.yAxisTitle"
