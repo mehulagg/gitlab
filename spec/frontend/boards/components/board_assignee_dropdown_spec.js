@@ -3,6 +3,7 @@ import { GlDropdownItem, GlAvatarLink, GlAvatarLabeled } from '@gitlab/ui';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
+import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import store from '~/boards/stores';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import { participants } from '../mock_data';
@@ -185,6 +186,21 @@ describe('BoardCardAssigneeDropdown', () => {
 
     expect(wrapper.find('[data-testid="unassign-divider"]').exists()).toBe(true);
   });
+
+  it.each`
+    assignees                                                                 | expected
+    ${[{ id: 5, username: '', name: '' }]}                                    | ${'Assignee'}
+    ${[{ id: 6, username: '', name: '' }, { id: 7, username: '', name: '' }]} | ${'2 Assignees'}
+  `(
+    'when assignees have a length of $assignees.length, it renders $expected',
+    ({ assignees, expected }) => {
+      store.state.issues['1'].assignees = assignees;
+
+      createComponent();
+
+      expect(wrapper.find(BoardEditableItem).props('title')).toBe(expected);
+    },
+  );
 
   describe('Apollo Schema', () => {
     beforeEach(() => {

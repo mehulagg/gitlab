@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { GlDropdownItem, GlDropdownDivider, GlAvatarLabeled, GlAvatarLink } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
@@ -44,6 +44,9 @@ export default {
   },
   computed: {
     ...mapGetters(['getActiveIssue']),
+    assigneeText() {
+      return n__('Assignee', '%d Assignees', this.selected.length);
+    },
     unSelectedFiltered() {
       return this.participants.filter(({ username }) => {
         return !this.selectedUserNames.includes(username);
@@ -83,7 +86,7 @@ export default {
 </script>
 
 <template>
-  <board-editable-item :title="$options.i18n.assignee" @close="saveAssignees">
+  <board-editable-item :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
       <issuable-assignees :users="getActiveIssue.assignees" />
     </template>
