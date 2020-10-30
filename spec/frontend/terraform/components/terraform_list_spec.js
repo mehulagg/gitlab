@@ -45,6 +45,13 @@ describe('TerraformList', () => {
   const findStatesTable = () => wrapper.find(StatesTable);
   const findTab = () => wrapper.find(GlTab);
 
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
+  });
+
   describe('when the terraform query has succeeded', () => {
     describe('when there is a list of terraform states', () => {
       const states = [

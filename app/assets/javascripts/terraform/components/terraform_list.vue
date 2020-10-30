@@ -42,7 +42,7 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.queries.states?.loading;
+      return this.$apollo.queries.states.loading;
     },
     statesCount() {
       return this.states?.count;

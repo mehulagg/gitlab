@@ -15,8 +15,10 @@ describe('EmptyStateComponent', () => {
   });
 
   afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
   it('should render content', () => {
