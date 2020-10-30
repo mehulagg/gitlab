@@ -207,6 +207,13 @@ Examples of feature labels are `~wiki`, `~ldap`, `~api`, `~issues`, `~"merge req
 
 Feature labels are all-lowercase.
 
+### Facet labels
+
+Facet labels add more detail or context for one or more issues types. These labels may help with prioritization or measurements related to a collection of issues.
+
+Examples of facet labels are: `~"performance"`, `~"security"`, `~"database"`, `~"customer"`, etc.
+
+
 ### Department labels
 
 The current department labels are:
