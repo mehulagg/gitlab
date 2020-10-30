@@ -490,7 +490,21 @@ include:
 ```
 
 Keep in mind that this approach will eventually stop working when the stable repository is removed,
-so you must eventually fix your custom chart.
+so you must eventually fix your custom chart. 
+
+To fix your custom chart, you need to update the `requirements.yaml` file in your chart directory, from:
+
+```yaml
+repository: "https://kubernetes-charts.storage.googleapis.com/"
+```
+
+to:
+
+```yaml
+repository: "https://charts.helm.sh/stable"
+```
+
+And then you will need to run `helm dep update .` in your chart directory.
 
 You can find more information in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/263778).
 
