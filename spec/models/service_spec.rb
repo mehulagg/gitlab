@@ -891,4 +891,18 @@ RSpec.describe Service do
       end
     end
   end
+
+  describe '.available_services_names' do
+    before do
+      allow(described_class).to receive(:services_names).and_return(%w[prometheus pushover teamcity])
+      allow(described_class).to receive(:dev_services_names).and_return(%w[asana])
+      allow(described_class).to receive(:project_specific_services_names).and_return(%w[assembla])
+    end
+
+    it 'returns the available services names depending on the filters', :aggregate_failures do
+      expect(described_class.available_services_names).to eq(%w[asana prometheus pushover teamcity])
+      expect(described_class.available_services_names(include_project_specific: true, include_dev: false)).to eq(%w[assembla prometheus pushover teamcity])
+      expect(described_class.available_services_names(include_project_specific: true, include_dev: true)).to eq(%w[asana assembla prometheus pushover teamcity])
+    end
+  end
 end

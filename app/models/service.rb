@@ -18,7 +18,7 @@ class Service < ApplicationRecord
   ].freeze
 
   DEV_SERVICE_NAMES = %w[
-    mock_ci mock_deployment mock_monitoring
+    gitlab_slack_application mock_ci mock_deployment mock_monitoring
   ].freeze
 
   serialize :properties, JSON # rubocop:disable Cop/ActiveRecordSerialize
@@ -192,9 +192,10 @@ class Service < ApplicationRecord
   end
   private_class_method :list_nonexistent_services_for
 
-  def self.available_services_names
+  def self.available_services_names(include_project_specific: false, include_dev: true)
     service_names = services_names
-    service_names += dev_services_names
+    service_names += project_specific_services_names if include_project_specific
+    service_names += dev_services_names if include_dev
 
     service_names.sort_by(&:downcase)
   end
@@ -213,12 +214,10 @@ class Service < ApplicationRecord
     []
   end
 
-  def self.available_services_types
-    available_services_names.map { |service_name| "#{service_name}_service".camelize }
-  end
-
-  def self.services_types
-    services_names.map { |service_name| "#{service_name}_service".camelize }
+  def self.available_services_types(include_project_specific: false, include_dev: true)
+    available_services_names(include_project_specific: include_project_specific, include_dev: include_dev).map do |service_name|
+      "#{service_name}_service".camelize
+    end
   end
 
   def self.build_from_integration(integration, project_id: nil, group_id: nil)
