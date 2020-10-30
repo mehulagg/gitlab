@@ -39,6 +39,7 @@ The following quick actions are applicable to descriptions, discussions and thre
 | `/copy_metadata <!merge_request>`     | ✓     | ✓             |      | Copy labels and milestone from another merge request in the project.                                                             |
 | `/copy_metadata <#issue>`             | ✓     | ✓             |      | Copy labels and milestone from another issue in the project.                                                                     |
 | `/create_merge_request <branch name>` | ✓     |               |      | Create a new merge request starting from the current issue.                                                                      |
+| `/depends_on <!merge__request>`       |       | ✓             |      | Sets the current [merge request to depend](merge_requests/merge_request_dependencies.md) on the specified merge requests.        |
 | `/done`                               | ✓     | ✓             | ✓    | Mark to do as done.                                                                                                              |
 | `/due <date>`                         | ✓     |               |      | Set due date. Examples of valid `<date>` include `in 2 days`, `this Friday` and `December 31st`.                                 |
 | `/duplicate <#issue>`                 | ✓     |               |      | Close this issue and mark as a duplicate of another issue. **(CORE)** Also, mark both as related. **(STARTER)**                                          |

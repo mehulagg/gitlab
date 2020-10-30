@@ -957,6 +957,16 @@ RSpec.describe QuickActions::InterpretService do
         let(:issuable) { build(:merge_request, source_project: project) }
       end
     end
+
+    context 'depends_on command' do
+      it 'adds a blocking merge request' do
+        other_mr = create(:merge_request, source_project: project)
+
+        _, updates = service.execute("/depends_on #{other_mr.to_reference(project)}", merge_request)
+
+        expect(updates[:blocking_merge_request_references]).to match_array([other_mr.id])
+      end
+    end
   end
 
   describe '#explain' do
@@ -1227,6 +1237,18 @@ RSpec.describe QuickActions::InterpretService do
               .to eq("Parent epic is not present.")
           end
         end
+      end
+    end
+
+    describe 'depends_on command' do
+      let(:content) { '/depends_on' }
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+
+      it "includes all assignees' references" do
+        _, explanations = service.explain(content, issue)
+
+        expect(explanations).to eq(["Removes assignees @#{user.username} and @#{user2.username}."])
       end
     end
   end
