@@ -1,4 +1,4 @@
-t---
+---
 type: reference
 stage: Manage
 group: Access
