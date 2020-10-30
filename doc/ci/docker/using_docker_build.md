@@ -354,7 +354,61 @@ picked up by the `dind` service.
     volumes = ["/opt/docker/daemon.json:/etc/docker/daemon.json:ro"]
 ```
 
-### Use Docker socket binding
+##### Kubernetes executor inside GitLab Runner configuration
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3223) in GitLab Runner 13.6.
+
+If you are an administrator of GitLab Runner and you always want to use
+the mirror for every `dind` service update the
+[configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html)
+to specify a [Config Map volume
+mount](https://docs.gitlab.com/runner/executors/kubernetes.html#using-volumes).
+
+NOTE: **Note:**
+Please notice that to be able to use this solution we need to utilize the `SubPath` feature
+of Kubernetes volume mounts and for that GitLab Runner in version at least 13.6 must be used.
+
+Given we have a file `/tmp/daemon.json` with the following
+content:
+
+```json
+{
+  "registry-mirrors": [
+    "https://registry-mirror.example.com"
+  ]
+}
+```
+
+First you need to create Config Map with the content of this file. You can do this
+with a command like that:
+
+```shell
+kubectl create configmap docker-daemon --namespace gitlab-runner --from-file /tmp/daemon.json
+```
+
+Please make sure to use the namespace that the GitLab Runner's Kubernetes executor will use
+to create job pods in.
+
+Having the Config Map created you can next update the `config.toml`
+for GitLab Runner to mount the file to
+`/etc/docker/daemon.json`. This would mount the file for **every**
+container that is created by GitLab Runner. The configuration will be
+picked up by the `dind` service.
+
+```toml
+[[runners]]
+  ...
+  executor = "kubernetes"
+  [runners.kubernetes]
+    image = "alpine:3.12"
+    privileged = true
+    [[runners.kubernetes.volumes.config_map]]
+      name = "docker-daemon"
+      mount_path = "/etc/docker/daemon.json"
+      sub_path = "daemon.json"
+```
+
+#### Use Docker socket binding
 
 The third approach is to bind-mount `/var/run/docker.sock` into the
 container so that Docker is available in the context of that image.
