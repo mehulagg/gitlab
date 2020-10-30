@@ -908,12 +908,24 @@ class User < ApplicationRecord
 
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
-    Group.unscoped do
+    direct_groups = Group.unscoped do
       Group.from_union([
         groups,
         authorized_projects.joins(:namespace).select('namespaces.*')
       ])
     end
+
+    cte = Gitlab::SQL::CTE.new(:direct_groups, direct_groups)
+    cte_alias = cte.table.alias(Group.table_name)
+
+    Group
+      .unscoped
+      .with(cte.to_arel)
+      .from_union([
+        Group.from(cte_alias),
+        Group.joins(:shared_with_group_links)
+             .where(group_group_links: { shared_with_group_id: Group.from(cte_alias) })
+    ])
   end
 
   # Returns the groups a user is a member of, either directly or through a parent group

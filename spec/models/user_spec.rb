@@ -2894,6 +2894,10 @@ RSpec.describe User do
     let!(:user) { create(:user) }
     let!(:private_group) { create(:group) }
     let!(:child_group) { create(:group, parent: private_group) }
+    let!(:shared_group) { create(:group) }
+    let!(:shared_group_link) { create(:group_group_link,
+                                      shared_group: shared_group,
+                                      shared_with_group: private_group) }
 
     let!(:project_group) { create(:group) }
     let!(:project) { create(:project, group: project_group) }
@@ -2905,7 +2909,7 @@ RSpec.describe User do
 
     subject { user.authorized_groups }
 
-    it { is_expected.to contain_exactly private_group, project_group }
+    it { is_expected.to contain_exactly private_group, project_group, shared_group }
   end
 
   describe '#membership_groups' do
