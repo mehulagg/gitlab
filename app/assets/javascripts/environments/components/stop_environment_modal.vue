@@ -55,7 +55,11 @@ export default {
   >
     <template #modal-title>
       Stopping
-      <span v-gl-tooltip :title="environment.name" class="gl-text-truncate gl-ml-2 gl-mr-2 gl-flex-fill">
+      <span
+        v-gl-tooltip
+        :title="environment.name"
+        class="gl-text-truncate gl-ml-2 gl-mr-2 gl-flex-fill"
+      >
         {{ environment.name }}?
       </span>
     </template>
