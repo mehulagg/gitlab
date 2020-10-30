@@ -315,3 +315,7 @@
   category: issues_edit
   redis_slot: project_management
   aggregation: daily
+- name: i_ci_secrets_management_vault
+  category: ci_secrets_management
+  redis_slot: ci_secrets_management
+  aggregation: weekly

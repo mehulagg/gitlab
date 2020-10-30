@@ -31,6 +31,7 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan'
 
         after_save :stick_build_if_status_changed
+        after_commit :track_ci_secrets_management_usage, if: :ci_secrets_management_available?
         delegate :service_specification, to: :runner_session, allow_nil: true
 
         scope :license_scan, -> { joins(:job_artifacts).merge(::Ci::JobArtifact.license_scanning_reports) }
@@ -171,6 +172,13 @@ module EE
             method.call(self)
           end.keys
         end
+      end
+
+      def track_ci_secrets_management_usage
+        return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault, default_enabled: true)
+        return unless secrets?
+
+        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(user_id, 'i_ci_secrets_management_vault')
       end
     end
   end
