@@ -105,11 +105,10 @@ to a certain context. For example:
 - A snippet with a `docker-compose.yml` file and its associated `.env` file.
 - A `gulpfile.js` file coupled with a `package.json` file, which together can be used to bootstrap a project and manage its dependencies.
 
-
-
-
 Snippets support between 1 and 10 files. They can be managed via Git (since they're [versioned](#versioned-snippets)
-by a Git repository), through the [Snippets API](../api/snippets.md), or within the GitLab UI. If the snippet more than 10 files, please consider using [Wiki](https://docs.gitlab.com/ee/user/project/wiki/), which is now available at both [project level](https://docs.gitlab.com/ee/user/project/wiki/) and [group level](https://docs.gitlab.com/ee/user/group/index.html#group-wikis).
+by a Git repository), through the [Snippets API](../api/snippets.md), or within the GitLab UI.
+If you need more than 10 files for your snippet, please consider creating a [Wiki](project/wiki/index.md)
+instead. GitLab has Wikis for projects and recently introduced support for [groups](group/index.md#group-wikis).
 
 ![Multi-file Snippet](img/gitlab_snippet_v13_5.png)
 
