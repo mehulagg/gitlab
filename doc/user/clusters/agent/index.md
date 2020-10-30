@@ -122,13 +122,14 @@ repository layout looks like this:
 .gitlab/agents/<agent-name>/config.yaml
 ```
 
-The `config.yaml` file contents should look like this. There can be multiple manifest
-projects listed in the section `manifest_projects` section:
+The `config.yaml` file contents should look like this. Note that you may speficy multiple manifest
+projects in the section `manifest_projects`:
 
 ```yaml
 gitops:
   manifest_projects:
   - id: "path-to/your-manifest-project-number1"
+  ...
 ```
 
 ### Create an Agent record in GitLab
