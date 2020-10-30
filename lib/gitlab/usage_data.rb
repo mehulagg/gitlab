@@ -617,7 +617,9 @@ module Gitlab
           operations_dashboard_default_dashboard: count(::User.active.with_dashboard('operations').where(time_period),
                                                         start: user_minimum_id,
                                                         finish: user_maximum_id),
-          projects_with_tracing_enabled: distinct_count(::Project.with_tracing_enabled.where(time_period), :creator_id)
+          projects_with_tracing_enabled: distinct_count(::Project.with_tracing_enabled.where(time_period), :creator_id),
+          projects_with_incidents: distinct_count(::Issue.with_issue_type(:incident).where(time_period), :project_id),
+          projects_with_alert_incidents: distinct_count(::Issue.with_issue_type(:incident).with_alert_management_alerts.where(time_period), :project_id)
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
