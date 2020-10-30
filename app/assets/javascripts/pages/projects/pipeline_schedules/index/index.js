@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const { docsUrl, illustrationUrl } = el.dataset;
 
   // eslint-disable-next-line no-new
-  return new Vue({
+  new Vue({
     el,
     render(createElement) {
       return createElement(PipelineSchedulesCallout, {
