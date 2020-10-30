@@ -558,7 +558,8 @@ describe('moveIssue', () => {
 describe('setAssignees', () => {
   const node = { username: 'name' };
   const name = 'username';
-  const refPath = 'h/h#3';
+  const projectPath = 'h/h';
+  const refPath = `${projectPath}#3`;
   const iid = '1';
 
   beforeEach(() => {
@@ -575,7 +576,7 @@ describe('setAssignees', () => {
 
     expect(gqlClient.mutate).toHaveBeenCalledWith({
       mutation: updateAssignees,
-      variables: { iid, assigneeUsernames: [name], projectPath: refPath.split('#')[0] },
+      variables: { iid, assigneeUsernames: [name], projectPath },
     });
   });
 
