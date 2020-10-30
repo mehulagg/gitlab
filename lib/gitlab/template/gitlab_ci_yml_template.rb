@@ -3,7 +3,7 @@
 module Gitlab
   module Template
     class GitlabCiYmlTemplate < BaseTemplate
-      BASE_EXCLUDED_PATTERNS = [%r{\.latest\.}].freeze
+      BASE_EXCLUDED_PATTERNS = [%r{\.latest\.}, %r{^((?!AWS).)*Deploy-ECS}].freeze
 
       def content
         explanation = "# This file is a template, and might need editing before it works on your project."
@@ -22,7 +22,8 @@ module Gitlab
             'General' => '',
             'Pages' => 'Pages',
             'Verify' => 'Verify',
-            'Auto deploy' => 'autodeploy'
+            'Auto deploy' => 'autodeploy',
+            'AWS' => 'AWS'
           }
         end
 

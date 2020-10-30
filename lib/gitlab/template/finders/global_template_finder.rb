@@ -18,8 +18,6 @@ module Gitlab
         end
 
         def find(key)
-          return if excluded?(key)
-
           file_name = "#{key}#{@extension}"
 
           # The key is untrusted input, so ensure we can't be directed outside
@@ -27,7 +25,9 @@ module Gitlab
           Gitlab::Utils.check_path_traversal!(file_name)
 
           directory = select_directory(file_name)
-          directory ? File.join(category_directory(directory), file_name) : nil
+          return unless directory
+
+          File.join(category_directory(directory), file_name)
         end
 
         def list_files_for(dir)
@@ -48,7 +48,8 @@ module Gitlab
 
         def select_directory(file_name)
           @categories.keys.find do |category|
-            File.exist?(File.join(category_directory(category), file_name))
+            file = File.join(category_directory(category), file_name)
+            File.exist?(file) && !excluded?(file)
           end
         end
       end
