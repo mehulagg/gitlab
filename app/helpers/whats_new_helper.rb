@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module WhatsNewHelper
-  include Gitlab::WhatsNew
-
   def whats_new_most_recent_release_items_count
-    Gitlab::ProcessMemoryCache.cache_backend.fetch('whats_new:release_items_count', expires_in: CACHE_DURATION) do
-      whats_new_release_items&.count
+    Gitlab::ProcessMemoryCache.cache_backend.fetch('whats_new:release_items_count', expires_in: ReleaseHighlight::CACHE_DURATION) do
+      most_recent = ReleaseHighlight.paginated
+
+      most_recent&.[](:items)&.count
     end
   end
 
@@ -18,8 +18,10 @@ module WhatsNewHelper
   private
 
   def whats_new_most_recent_version
-    Gitlab::ProcessMemoryCache.cache_backend.fetch('whats_new:release_version', expires_in: CACHE_DURATION) do
-      whats_new_release_items&.first&.[]('release')
+    Gitlab::ProcessMemoryCache.cache_backend.fetch('whats_new:release_version', expires_in: ReleaseHighlight::CACHE_DURATION) do
+      most_recent = ReleaseHighlight.paginated
+
+      most_recent&.[](:items)&.first&.[]('release')
     end
   end
 end
