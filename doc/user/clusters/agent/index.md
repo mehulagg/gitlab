@@ -81,9 +81,9 @@ When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
 
 1. Edit `/etc/gitlab/gitlab.rb`:
 
-```plaintext
-gitlab_kas['enable'] = true
-```
+    ```plaintext
+    gitlab_kas['enable'] = true
+    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
 
@@ -102,6 +102,17 @@ helm upgrade --force --install gitlab gitlab/gitlab \
   --set global.kas.enabled=true
 ```
 
+If you need to specify other options related to kas sub-chart, they should be specified in
+`gitlab.kas` sub-section of your values.yaml file like this:
+
+```shell
+gitlab:
+  kas:
+    # put your kas custom options here
+```
+
+For details, see the doc [Using the GitLab-Kas chart](https://docs.gitlab.com/charts/charts/gitlab/kas/).
+
 ### Define a configuration repository
 
 Next, you need a GitLab repository to contain your Agent configuration. The minimal
@@ -116,7 +127,7 @@ The `config.yaml` file contents should look like this:
 ```yaml
 gitops:
   manifest_projects:
-  - id: "path-to/your-awesome-project"
+  - id: "path-to/your-manifest-project-number1"
 ```
 
 ### Create an Agent record in GitLab
@@ -128,7 +139,8 @@ the Agent in subsequent steps. You can create an Agent record either:
 - Through the Rails console, by running `rails c`:
 
   ```ruby
-  project = ::Project.find_by_full_path("path-to/your-awesome-project")
+  project = ::Project.find_by_full_path("path-to/your-configuration-project")
+  # agent-name should be the same as specified above in the config.yaml
   agent = ::Clusters::Agent.create(name: "<agent-name>", project: project)
   token = ::Clusters::AgentToken.create(agent: agent)
   token.token # this will print out the token you need to use on the next step
@@ -138,7 +150,8 @@ the Agent in subsequent steps. You can create an Agent record either:
 
   ```graphql
   mutation createAgent {
-    createClusterAgent(input: { projectPath: "path-to/your-awesome-project", name: "<agent-name>" }) {
+    # agent-name should be the same as specified above in the config.yaml
+    createClusterAgent(input: { projectPath: "path-to/your-configuration-project", name: "<agent-name>" }) {
       clusterAgent {
         id
         name
@@ -208,23 +221,16 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
 To apply this file, run the following command:
 
 ```shell
-kubectl apply -n gitlab-agent -f ./resources.yml
+kubectl apply -n <YOUR-DESIRED-NAMESPACE> -f ./resources.yml
 ```
 
 To review your configuration, run the following command:
 
 ```shell
-$ kubectl get pods --all-namespaces
+$ kubectl get pods -n <YOUR-DESIRED-NAMESPACE>
 
 NAMESPACE     NAME                               READY   STATUS    RESTARTS   AGE
 gitlab-agent  gitlab-agent-77689f7dcb-5skqk      1/1     Running   0          51s
-kube-system   coredns-f9fd979d6-n6wcw            1/1     Running   0          14m
-kube-system   etcd-minikube                      1/1     Running   0          14m
-kube-system   kube-apiserver-minikube            1/1     Running   0          14m
-kube-system   kube-controller-manager-minikube   1/1     Running   0          14m
-kube-system   kube-proxy-j6zdh                   1/1     Running   0          14m
-kube-system   kube-scheduler-minikube            1/1     Running   0          14m
-kube-system   storage-provisioner                1/1     Running   0          14m
 ```
 
 #### Example `resources.yml` file
@@ -256,7 +262,7 @@ spec:
         args:
         - --token-file=/config/token
         - --kas-address
-        - grpc://host.docker.internal:5005  # {"$openapi":"kas-address"}
+        - wss://gitlab.host.tld:443/-/kubernetes-agent
         volumeMounts:
         - name: token-volume
           mountPath: /config
