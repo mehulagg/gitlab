@@ -92,7 +92,8 @@ module MergeRequests
         ApprovalMergeRequestRule
           .joins(groups: :users)
           .where(
-            ApprovalMergeRequestRule.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
+            ApprovalMergeRequestRule
+              .arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
               .and(User.arel_table[field].eq(value))
           )
       end
