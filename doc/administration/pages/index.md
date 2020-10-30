@@ -465,7 +465,7 @@ are stored.
 Alternatively, if you have existing Pages deployed you can follow
 the below steps to do a no downtime transfer to a new storage location.
 
-1. Pause Pages deployments by setting following in `/etc/gitlab/gitlab.rb`:
+1. Pause Pages deployments by setting the following in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
    sidekiq['experimental_queue_selector'] = true
@@ -484,10 +484,10 @@ the below steps to do a no downtime transfer to a new storage location.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Verify Pages are still being served up as expected.
-1. Unpause Pages deployments by removing `sidekiq` setting set above from `/etc/gitlab/gitlab.rb`.
+1. Unpause Pages deployments by removing from `/etc/gitlab/gitlab.rb` the `sidekiq` setting set above.
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Trigger a new Pages deployment and verify working as expected.
-1. Remove old Pages storage location: `sudo rm -rf /var/opt/gitlab/gitlab-rails/shared/pages`
+1. Trigger a new Pages deployment and verify it's working as expected.
+1. Remove the old Pages storage location: `sudo rm -rf /var/opt/gitlab/gitlab-rails/shared/pages`
 1. Verify Pages are still being served up as expected.
 
 ## Configure listener for reverse proxy requests
