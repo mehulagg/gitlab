@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -581,6 +581,12 @@ This file lives in `/var/log/gitlab/gitaly/current` and is produced by [runit](h
 ### `grpc.log`
 
 This file lives in `/var/log/gitlab/gitlab-rails/grpc.log` for Omnibus GitLab packages. Native [gRPC](https://grpc.io/) logging used by Gitaly.
+
+### `gitaly_ruby_json.log`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/2678) in GitLab 13.6.
+
+This file lives in `/var/log/gitlab/gitaly/gitaly_ruby_json.log` and is produced by [`gitaly-ruby`](gitaly/reference.md#gitaly-ruby). It contains an access log of gRPC calls made by Gitaly to `gitaly-ruby`.
 
 ## Puma Logs
 

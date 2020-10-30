@@ -7,6 +7,7 @@ import CompareDropdownLayout from './compare_dropdown_layout.vue';
 import SettingsDropdown from './settings_dropdown.vue';
 import DiffStats from './diff_stats.vue';
 import { CENTERED_LIMITED_CONTAINER_CLASSES } from '../constants';
+import eventHub from '../event_hub';
 
 export default {
   components: {
@@ -38,7 +39,7 @@ export default {
   },
   computed: {
     ...mapGetters('diffs', [
-      'hasCollapsedFile',
+      'whichCollapsedTypes',
       'diffCompareDropdownTargetVersions',
       'diffCompareDropdownSourceVersions',
     ]),
@@ -67,9 +68,11 @@ export default {
     ...mapActions('diffs', [
       'setInlineDiffViewType',
       'setParallelDiffViewType',
-      'expandAllFiles',
       'toggleShowTreeList',
     ]),
+    expandAllFiles() {
+      eventHub.$emit('mr:diffs:expandAllFiles');
+    },
   },
 };
 </script>
@@ -129,7 +132,7 @@ export default {
           {{ __('Show latest version') }}
         </gl-button>
         <gl-button
-          v-show="hasCollapsedFile"
+          v-show="whichCollapsedTypes.any"
           variant="default"
           class="gl-mr-3"
           @click="expandAllFiles"

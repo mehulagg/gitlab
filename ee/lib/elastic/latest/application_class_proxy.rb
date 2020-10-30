@@ -55,6 +55,8 @@ module Elastic
       end
 
       def basic_query_hash(fields, query)
+        fields = CustomLanguageAnalyzers.add_custom_analyzers_fields(fields)
+
         query_hash =
           if query.present?
             {
@@ -136,13 +138,13 @@ module Elastic
 
       def apply_sort(query_hash, options)
         case options[:sort]
-        when 'oldest'
+        when 'created_asc'
           query_hash.merge(sort: {
             created_at: {
               order: 'asc'
             }
           })
-        when 'newest'
+        when 'created_desc'
           query_hash.merge(sort: {
             created_at: {
               order: 'desc'

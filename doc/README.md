@@ -3,7 +3,7 @@ comments: false
 description: 'Learn how to use and administer GitLab, the most scalable Git-based fully integrated platform for software development.'
 ---
 
-<div class="display-none">
+<div class="d-none">
   <em>Visit <a href="https://docs.gitlab.com/ee/">docs.gitlab.com</a> for optimized
   navigation, discoverability, and readability.</em>
 </div>
@@ -85,7 +85,7 @@ The following sections provide links to documentation for each DevOps stage:
 
 ### Manage
 
-GitLab provides statistics and insight into ways you can maximize the value of GitLab in your organization.
+GitLab provides statistics and insights into ways you can maximize the value of GitLab in your organization.
 
 The following documentation relates to the DevOps **Manage** stage:
 

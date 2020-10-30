@@ -1,5 +1,0 @@
----
-title: Allow created_at and updated_at to be set through Epics API
-merge_request: 43279
-author: stingrayza
-type: added

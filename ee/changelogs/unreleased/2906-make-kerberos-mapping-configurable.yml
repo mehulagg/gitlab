@@ -1,5 +1,0 @@
----
-title: Make mapping between LDAP and Kerberos configurable
-merge_request: 9962
-author: Christopher Schenk
-type: added

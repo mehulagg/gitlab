@@ -1,5 +1,0 @@
----
-title: Add description field to requirements model and expose it in GraphQL API
-merge_request: 43099
-author:
-type: added

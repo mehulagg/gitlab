@@ -43,6 +43,24 @@ RSpec.describe Resolvers::IssuesResolver do
             expect(resolve_issues(sort: :published_desc)).to eq [published, not_published]
           end
         end
+
+        context 'when sorting by sla due at' do
+          let_it_be(:sla_due_first) { create(:incident, project: project) }
+          let_it_be(:sla_due_last)  { create(:incident, project: project) }
+
+          before_all do
+            create(:issuable_sla, :exceeded, issue: sla_due_first)
+            create(:issuable_sla, issue: sla_due_last)
+          end
+
+          it 'sorts issues ascending' do
+            expect(resolve_issues(sort: :sla_due_at_asc)).to eq [sla_due_first, sla_due_last]
+          end
+
+          it 'sorts issues descending' do
+            expect(resolve_issues(sort: :sla_due_at_desc)).to eq [sla_due_last, sla_due_first]
+          end
+        end
       end
 
       describe 'filtering by iteration' do

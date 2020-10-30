@@ -8,6 +8,8 @@ module API
 
     before { authenticate_non_get! }
 
+    feature_category :issue_tracking
+
     helpers do
       params :negatable_issue_filter_params do
         optional :labels, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'

@@ -6,7 +6,7 @@ RSpec.describe VulnerabilitiesHelper do
   let_it_be(:user) { create(:user) }
   let(:project) { create(:project, :repository, :public) }
   let(:pipeline) { create(:ci_pipeline, :success, project: project) }
-  let(:finding) { create(:vulnerabilities_occurrence, pipelines: [pipeline], project: project, severity: :high) }
+  let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
   let(:vulnerability) { create(:vulnerability, title: "My vulnerability", project: project, findings: [finding]) }
 
   before do
@@ -161,7 +161,10 @@ RSpec.describe VulnerabilitiesHelper do
         evidence: kind_of(String),
         scanner: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         request: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
-        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder)
+        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
+        evidence_source: anything,
+        assets: kind_of(Array),
+        supporting_messages: kind_of(Array)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))

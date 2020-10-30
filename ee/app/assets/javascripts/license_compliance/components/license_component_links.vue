@@ -52,6 +52,11 @@ export default {
       return s__('Modal|Close');
     },
   },
+  methods: {
+    getComponentLabel({ name, version }) {
+      return version ? `${name} (${version})` : name;
+    },
+  },
 };
 </script>
 
@@ -64,9 +69,9 @@ export default {
         class="js-component-links-component-list-item"
       >
         <gl-link v-if="component.blob_path" :href="component.blob_path" target="_blank">{{
-          component.name
+          getComponentLabel(component)
         }}</gl-link>
-        <template v-else>{{ component.name }}</template>
+        <template v-else>{{ getComponentLabel(component) }}</template>
       </span>
       <gl-button
         v-if="hasComponentsInModal"

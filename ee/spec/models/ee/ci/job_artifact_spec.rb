@@ -115,6 +115,22 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '.api_fuzzing_reports' do
+    subject { Ci::JobArtifact.api_fuzzing }
+
+    context 'when there is a metrics report' do
+      let!(:artifact) { create(:ee_ci_job_artifact, :api_fuzzing) }
+
+      it { is_expected.to eq([artifact]) }
+    end
+
+    context 'when there is no coverage fuzzing reports' do
+      let!(:artifact) { create(:ee_ci_job_artifact, :trace) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
   describe '.associated_file_types_for' do
     using RSpec::Parameterized::TableSyntax
 
@@ -256,7 +272,9 @@ RSpec.describe Ci::JobArtifact do
       clear_security_report
       job_artifact.security_report
 
-      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).once
+      # This entity class receives the call twice
+      # because of the way MergeReportsService is implemented.
+      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).twice
     end
   end
 end

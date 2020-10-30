@@ -2,11 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Project do
+RSpec.describe Project, factory_default: :keep do
   include ProjectForksHelper
   include GitHelpers
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
+
+  let_it_be(:namespace) { create_default(:namespace) }
 
   it_behaves_like 'having unique enum values'
 
@@ -3003,14 +3005,23 @@ RSpec.describe Project do
   describe '#set_repository_read_only!' do
     let(:project) { create(:project) }
 
-    it 'returns true when there is no existing git transfer in progress' do
-      expect(project.set_repository_read_only!).to be_truthy
+    it 'makes the repository read-only' do
+      expect { project.set_repository_read_only! }
+        .to change(project, :repository_read_only?)
+        .from(false)
+        .to(true)
     end
 
-    it 'returns false when there is an existing git transfer in progress' do
+    it 'raises an error if the project is already read-only' do
+      project.set_repository_read_only!
+
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
+    end
+
+    it 'raises an error when there is an existing git transfer in progress' do
       allow(project).to receive(:git_transfer_in_progress?) { true }
 
-      expect(project.set_repository_read_only!).to be_falsey
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
     end
   end
 
@@ -3657,7 +3668,7 @@ RSpec.describe Project do
     let(:project) { create(:project) }
 
     before do
-      project.namespace_id = 7
+      project.namespace_id = project.namespace_id + 1
     end
 
     it { expect(project.parent_changed?).to be_truthy }
@@ -4207,6 +4218,27 @@ RSpec.describe Project do
       expect(project).to receive(:remove_pages).and_call_original
 
       expect { project.destroy }.not_to raise_error
+    end
+
+    context 'when there is an old pages deployment' do
+      let!(:old_deployment_from_another_project) { create(:pages_deployment) }
+      let!(:old_deployment) { create(:pages_deployment, project: project) }
+
+      it 'schedules a destruction of pages deployments' do
+        expect(DestroyPagesDeploymentsWorker).to(
+          receive(:perform_async).with(project.id)
+        )
+
+        project.remove_pages
+      end
+
+      it 'removes pages deployments', :sidekiq_inline do
+        expect do
+          project.remove_pages
+        end.to change { PagesDeployment.count }.by(-1)
+
+        expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
+      end
     end
   end
 

@@ -1,5 +1,0 @@
----
-title: Refactor vulnerabilities related issues component test createWrapper method to take an object instead of multiple arguments
-merge_request: 44035
-author: Kev @KevSlashNull
-type: other

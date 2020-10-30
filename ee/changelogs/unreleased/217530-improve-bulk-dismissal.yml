@@ -1,5 +1,0 @@
----
-title: Remove item when dismissed on security dashboard if it no longer matches filter
-merge_request: 43468
-author:
-type: changed

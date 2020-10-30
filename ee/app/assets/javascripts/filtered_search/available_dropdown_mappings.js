@@ -11,6 +11,7 @@ export default class AvailableDropdownMappings {
     milestonesEndpoint,
     epicsEndpoint,
     releasesEndpoint,
+    environmentsEndpoint,
     groupsOnly,
     includeAncestorGroups,
     includeDescendantGroups,
@@ -21,6 +22,7 @@ export default class AvailableDropdownMappings {
     this.milestonesEndpoint = milestonesEndpoint;
     this.epicsEndpoint = epicsEndpoint;
     this.releasesEndpoint = releasesEndpoint;
+    this.environmentsEndpoint = environmentsEndpoint;
     this.groupsOnly = groupsOnly;
     this.includeAncestorGroups = includeAncestorGroups;
     this.includeDescendantGroups = includeDescendantGroups;

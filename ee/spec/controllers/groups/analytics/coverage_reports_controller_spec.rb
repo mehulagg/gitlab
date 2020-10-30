@@ -59,15 +59,15 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
         stub_licensed_features(group_coverage_reports: true)
       end
 
-      it 'responds 200 with CSV coverage data' do
-        expect(Gitlab::Tracking).to receive(:event).with(
-          described_class.name,
-          'download_code_coverage_csv',
+      it 'responds 200 with CSV coverage data', :snowplow do
+        get :index, params: valid_request_params
+
+        expect_snowplow_event(
+          category: described_class.name,
+          action: 'download_code_coverage_csv',
           label: 'group_id',
           value: group.id
         )
-
-        get :index, params: valid_request_params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(csv_response).to eq([

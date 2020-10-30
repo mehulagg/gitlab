@@ -97,7 +97,15 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
+  :tags: []
+- :name: container_repository:container_expiration_policies_cleanup_container_repository
+  :feature_category: :container_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: container_repository:delete_container_repository
   :feature_category: :container_registry
@@ -1312,6 +1320,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: bulk_import
+  :feature_category: :importers
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: chat_notification
   :feature_category: :chatops
   :has_external_dependencies: true
@@ -1408,6 +1424,14 @@
   :resource_boundary: :memory
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: destroy_pages_deployments
+  :feature_category: :pages
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: detect_repository_languages
   :feature_category: :source_code_management
@@ -1832,6 +1856,14 @@
   :idempotent: true
   :tags: []
 - :name: propagate_integration_inherit
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: propagate_integration_inherit_descendant
   :feature_category: :integrations
   :has_external_dependencies:
   :urgency: :low

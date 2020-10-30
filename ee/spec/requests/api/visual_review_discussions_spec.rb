@@ -58,9 +58,10 @@ RSpec.describe API::VisualReviewDiscussions do
         stub_feature_flags(notes_create_service_tracking: false)
       end
 
-      it 'does not track any events' do
-        expect(Gitlab::Tracking).not_to receive(:event)
+      it 'does not track any events', :snowplow do
         request
+
+        expect_no_snowplow_event
       end
     end
 

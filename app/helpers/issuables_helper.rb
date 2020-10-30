@@ -49,12 +49,6 @@ module IssuablesHelper
     "#{due_date.to_s(:medium)} (#{remaining_days_in_words(due_date, start_date)})"
   end
 
-  def sidebar_label_filter_path(base_path, label_name)
-    query_params = { label_name: [label_name] }.to_query
-
-    "#{base_path}?#{query_params}"
-  end
-
   def multi_label_name(current_labels, default_label)
     return default_label if current_labels.blank?
 
@@ -82,7 +76,6 @@ module IssuablesHelper
                        when Issue
                          IssueSerializer
                        when MergeRequest
-                         opts[:experiment_enabled] = :suggest_pipeline if experiment_enabled?(:suggest_pipeline) && opts[:serializer] == 'widget'
                          MergeRequestSerializer
                        end
 
@@ -228,19 +221,6 @@ module IssuablesHelper
     nil
   end
 
-  def issuable_labels_tooltip(labels, limit: 5)
-    first, last = labels.partition.with_index { |_, i| i < limit }
-
-    if labels && labels.any?
-      label_names = first.collect { |label| label.fetch(:title) }
-      label_names << "and #{last.size} more" unless last.empty?
-
-      label_names.join(', ')
-    else
-      _("Labels")
-    end
-  end
-
   def issuables_state_counter_text(issuable_type, state, display_count)
     titles = {
       opened: "Open"
@@ -294,7 +274,6 @@ module IssuablesHelper
       canUpdate: can?(current_user, :"update_#{issuable.to_ability_name}", issuable),
       canDestroy: can?(current_user, :"destroy_#{issuable.to_ability_name}", issuable),
       issuableRef: issuable.to_reference,
-      issuableStatus: issuable.state,
       markdownPreviewPath: preview_markdown_path(parent),
       markdownDocsPath: help_page_path('user/markdown'),
       lockVersion: issuable.lock_version,
@@ -398,7 +377,12 @@ module IssuablesHelper
   end
 
   def issuable_display_type(issuable)
-    issuable.model_name.human.downcase
+    case issuable
+    when Issue
+      issuable.issue_type.downcase
+    when MergeRequest
+      issuable.model_name.human.downcase
+    end
   end
 
   def has_filter_bar_param?

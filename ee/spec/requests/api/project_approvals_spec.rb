@@ -144,7 +144,7 @@ RSpec.describe API::ProjectApprovals do
       context 'updates merge requests settings' do
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:permission) { :modify_approvers_rules }
+          let(:permission) { :modify_overriding_approvers_per_merge_request_setting }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
         end
 

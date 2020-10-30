@@ -181,9 +181,9 @@ sudo make install
 
 # Download and compile from source
 cd /tmp
-curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.28.0.tar.gz
-echo 'f914c60a874d466c1e18467c864a910dd4ea22281ba6d4d58077cb0c3f115170  git-2.28.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.28.0.tar.gz
-cd git-2.28.0/
+curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.29.0.tar.gz
+echo 'fa08dc8424ef80c0f9bf307877f9e2e49f1a6049e873530d6747c2be770742ff  git-2.29.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.29.0.tar.gz
+cd git-2.29.0/
 ./configure --with-libpcre
 make prefix=/usr/local all
 
@@ -243,9 +243,9 @@ Download Ruby and compile it:
 
 ```shell
 mkdir /tmp/ruby && cd /tmp/ruby
-curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz
-echo '2d78048e293817f38d4ede4ebc7873013e97bb0b  ruby-2.6.6.tar.gz' | shasum -c - && tar xzf ruby-2.6.6.tar.gz
-cd ruby-2.6.6
+curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz
+echo 'cb9731a17487e0ad84037490a6baf8bfa31a09e8  ruby-2.7.2.tar.gz' | shasum -c - && tar xzf ruby-2.7.2.tar.gz
+cd ruby-2.7.2
 
 ./configure --disable-install-rdoc
 make

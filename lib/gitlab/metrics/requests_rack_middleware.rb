@@ -22,8 +22,8 @@ module Gitlab
         @app = app
       end
 
-      def self.http_request_total
-        @http_request_total ||= ::Gitlab::Metrics.counter(:http_requests_total, 'Request count')
+      def self.http_requests_total
+        @http_requests_total ||= ::Gitlab::Metrics.counter(:http_requests_total, 'Request count')
       end
 
       def self.rack_uncaught_errors_count
@@ -39,10 +39,24 @@ module Gitlab
         @http_health_requests_total ||= ::Gitlab::Metrics.counter(:http_health_requests_total, 'Health endpoint request count')
       end
 
-      def self.initialize_http_request_duration_seconds
+      def self.initialize_metrics
+        # This initialization is done to avoid gaps in scraped metrics after
+        # restarts. It makes sure all counters/histograms are available at
+        # process start.
+        #
+        # For example `rate(http_requests_total{status="500"}[1m])` would return
+        # no data until the first 500 error would occur.
+
+        # The list of feature categories is currently not needed by the application
+        # anywhere else. So no need to keep these in memory forever.
+        # Doing it here, means we're only reading the file on boot.
+        feature_categories = YAML.load_file(Rails.root.join('config', 'feature_categories.yml')).map(&:strip).uniq << FEATURE_CATEGORY_DEFAULT
+
         HTTP_METHODS.each do |method, statuses|
-          statuses.each do |status|
-            http_request_duration_seconds.get({ method: method, status: status.to_s })
+          http_request_duration_seconds.get({ method: method })
+
+          statuses.product(feature_categories) do |status, feature_category|
+            http_requests_total.get({ method: method, status: status, feature_category: feature_category })
           end
         end
       end
@@ -62,7 +76,7 @@ module Gitlab
           feature_category = headers&.fetch(FEATURE_CATEGORY_HEADER, nil)
 
           unless health_endpoint
-            RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method, status: status.to_s }, elapsed)
+            RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method }, elapsed)
           end
 
           [status, headers, body]
@@ -71,9 +85,13 @@ module Gitlab
           raise
         ensure
           if health_endpoint
-            RequestsRackMiddleware.http_health_requests_total.increment(status: status, method: method)
+            RequestsRackMiddleware.http_health_requests_total.increment(status: status.to_s, method: method)
           else
-            RequestsRackMiddleware.http_request_total.increment(status: status, method: method, feature_category: feature_category || FEATURE_CATEGORY_DEFAULT)
+            RequestsRackMiddleware.http_requests_total.increment(
+              status: status.to_s,
+              method: method,
+              feature_category: feature_category.presence || FEATURE_CATEGORY_DEFAULT
+            )
           end
         end
       end

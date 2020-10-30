@@ -1,0 +1,11 @@
+- issue = local_assigns.fetch(:issue)
+
+- status_text = { 'at_risk' => _('At risk'), 'on_track' => _('On track'), 'needs_attention' => _('Needs attention') }
+- status_classes = { 'at_risk' => 'status-at-risk', 'on_track' => 'status-on-track', 'needs_attention' => 'status-needs-attention' }
+
+- if issue.health_status
+  .gl-ml-2.health-status.gl-display-inline-flex.gl-align-items-center
+    &nbsp;
+    %span.gl-label.gl-label-text-dark.gl-label-sm{ data: { testid: "health-status" }, class: status_classes[issue.health_status] }
+      %span.gl-label-text
+        = status_text[issue.health_status]

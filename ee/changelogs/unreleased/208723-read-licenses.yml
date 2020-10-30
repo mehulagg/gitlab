@@ -1,5 +1,0 @@
----
-title: Allow access to license scan report when `read_licenses` claim is satisfied.
-merge_request: 43222
-author:
-type: fixed

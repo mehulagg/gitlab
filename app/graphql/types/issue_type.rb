@@ -4,7 +4,7 @@ module Types
   class IssueType < BaseObject
     graphql_name 'Issue'
 
-    connection_type_class(Types::CountableConnectionType)
+    connection_type_class(Types::IssueConnectionType)
 
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
@@ -41,6 +41,9 @@ module Types
     field :assignees, Types::UserType.connection_type, null: true,
           description: 'Assignees of the issue'
 
+    field :updated_by, Types::UserType, null: true,
+          description: 'User that last updated the issue'
+
     field :labels, Types::LabelType.connection_type, null: true,
           description: 'Labels of the issue'
     field :milestone, Types::MilestoneType, null: true,
@@ -74,6 +77,10 @@ module Types
           description: 'Time estimate of the issue'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
           description: 'Total time reported as spent on the issue'
+    field :human_time_estimate, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable time estimate of the issue'
+    field :human_total_time_spent, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable total time reported as spent on the issue'
 
     field :closed_at, Types::TimeType, null: true,
           description: 'Timestamp of when the issue was closed'
@@ -108,6 +115,10 @@ module Types
 
     def author
       Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find
+    end
+
+    def updated_by
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.updated_by_id).find
     end
 
     def milestone

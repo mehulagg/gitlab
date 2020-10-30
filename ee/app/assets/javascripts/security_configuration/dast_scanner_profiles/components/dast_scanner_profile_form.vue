@@ -8,8 +8,6 @@ import {
   GlFormInput,
   GlFormInputGroup,
   GlModal,
-  GlIcon,
-  GlTooltipDirective,
   GlInputGroupText,
   GlFormCheckbox,
   GlFormRadioGroup,
@@ -20,6 +18,7 @@ import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
+import tooltipIcon from './tooltip_icon.vue';
 import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
 
 const initField = (value, isRequired = true) => ({
@@ -44,13 +43,10 @@ export default {
     GlFormInput,
     GlFormInputGroup,
     GlModal,
-    GlIcon,
     GlInputGroupText,
     GlFormCheckbox,
     GlFormRadioGroup,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
+    tooltipIcon,
   },
   props: {
     projectFullPath: {
@@ -265,12 +261,7 @@ export default {
     <gl-form-group>
       <template #label>
         {{ s__('DastProfiles|Scan mode') }}
-        <gl-icon
-          v-gl-tooltip.hover
-          name="information-o"
-          class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-          :title="i18n.tooltips.scanMode"
-        />
+        <tooltip-icon :title="i18n.tooltips.scanMode" />
       </template>
 
       <gl-form-radio-group
@@ -288,12 +279,7 @@ export default {
       >
         <template #label>
           {{ s__('DastProfiles|Spider timeout') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.spiderTimeout"
-          />
+          <tooltip-icon :title="i18n.tooltips.spiderTimeout" />
         </template>
         <gl-form-input-group
           v-model.number="form.spiderTimeout.value"
@@ -320,12 +306,7 @@ export default {
       >
         <template #label>
           {{ s__('DastProfiles|Target timeout') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.targetTimeout"
-          />
+          <tooltip-icon :title="i18n.tooltips.targetTimeout" />
         </template>
         <gl-form-input-group
           v-model.number="form.targetTimeout.value"
@@ -352,12 +333,7 @@ export default {
       <gl-form-group class="col-md-6 mb-0">
         <template #label>
           {{ s__('DastProfiles|AJAX spider') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.ajaxSpider"
-          />
+          <tooltip-icon :title="i18n.tooltips.ajaxSpider" />
         </template>
         <gl-form-checkbox v-model="form.useAjaxSpider.value">{{
           s__('DastProfiles|Turn on AJAX spider')
@@ -367,12 +343,7 @@ export default {
       <gl-form-group class="col-md-6 mb-0">
         <template #label>
           {{ s__('DastProfiles|Debug messages') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.debugMessage"
-          />
+          <tooltip-icon :title="i18n.tooltips.debugMessage" />
         </template>
         <gl-form-checkbox v-model="form.showDebugMessages.value">{{
           s__('DastProfiles|Show debug messages')

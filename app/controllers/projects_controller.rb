@@ -15,7 +15,7 @@ class ProjectsController < Projects::ApplicationController
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
   before_action :whitelist_query_limiting, only: [:create]
-  before_action :authenticate_user!, except: [:index, :show, :activity, :refs, :resolve]
+  before_action :authenticate_user!, except: [:index, :show, :activity, :refs, :resolve, :unfoldered_environment_names]
   before_action :redirect_git_extension, only: [:show]
   before_action :project, except: [:index, :new, :create, :resolve]
   before_action :repository, except: [:index, :new, :create, :resolve]
@@ -56,6 +56,7 @@ class ProjectsController < Projects::ApplicationController
   feature_category :issue_tracking, [:preview_markdown, :new_issuable_address]
   feature_category :importers, [:export, :remove_export, :generate_new_export, :download_export]
   feature_category :audit_events, [:activity]
+  feature_category :code_review, [:unfoldered_environment_names]
 
   def index
     redirect_to(current_user ? root_path : explore_root_path)
@@ -312,6 +313,16 @@ class ProjectsController < Projects::ApplicationController
       redirect_to @project
     else
       render_404
+    end
+  end
+
+  def unfoldered_environment_names
+    return render_404 unless Feature.enabled?(:deployment_filters)
+
+    respond_to do |format|
+      format.json do
+        render json: EnvironmentNamesFinder.new(@project, current_user).execute
+      end
     end
   end
 

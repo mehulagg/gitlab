@@ -167,7 +167,11 @@ export default {
           <vulnerability-count-list v-if="shouldShowCountList" />
           <filters>
             <template v-if="hasFuzzingArtifacts" #buttons>
-              <fuzzing-artifacts-download :jobs="fuzzingJobsWithArtifact" :project-id="projectId" />
+              <fuzzing-artifacts-download :jobs="fuzzingJobsWithArtifact" :project-id="projectId">
+                <template #label>
+                  <strong>{{ s__('SecurityReports|Download Report') }}</strong>
+                </template>
+              </fuzzing-artifacts-download>
             </template>
           </filters>
         </template>

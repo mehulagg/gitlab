@@ -76,26 +76,17 @@ module IconsHelper
     content_tag(:span, "", class: "gl-snippet-icon gl-snippet-icon-#{name}")
   end
 
-  def audit_icon(names, options = {})
-    case names
+  def audit_icon(name, css_class: nil)
+    case name
     when "standard"
-      names = "key"
+      name = "key"
     when "two-factor"
-      names = "key"
+      name = "key"
     when "google_oauth2"
-      names = "google"
+      name = "google"
     end
 
-    options.include?(:base) ? fa_stacked_icon(names, options) : fa_icon(names, options)
-  end
-
-  def spinner(text = nil, visible = false)
-    css_class = ['loading']
-    css_class << 'hide' unless visible
-
-    content_tag :div, class: css_class.join(' ') do
-      icon('spinner spin') + text
-    end
+    sprite_icon(name, css_class: css_class)
   end
 
   def boolean_to_icon(value)

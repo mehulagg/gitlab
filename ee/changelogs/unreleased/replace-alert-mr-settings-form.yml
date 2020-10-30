@@ -1,5 +1,0 @@
----
-title: Replace bootstrap alert in ee/app/views/projects/_merge_request_approvals_settings_form.html.haml
-merge_request: 44749
-author:
-type: changed

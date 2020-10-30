@@ -1,5 +1,0 @@
----
-title: Handle 500 error for GraphQL "configureSast" mutation
-merge_request: 43936
-author:
-type: fixed

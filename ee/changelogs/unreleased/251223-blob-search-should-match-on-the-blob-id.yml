@@ -1,5 +1,0 @@
----
-title: Add 'blob:' search filter to search for a specific Git object ID.
-merge_request: 42752
-author:
-type: added

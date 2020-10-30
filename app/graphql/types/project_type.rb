@@ -267,6 +267,12 @@ module Types
           description: 'Counts of alerts by status for the project',
           resolver: Resolvers::AlertManagement::AlertStatusCountsResolver
 
+    field :alert_management_integrations,
+          Types::AlertManagement::IntegrationType.connection_type,
+          null: true,
+          description: 'Integrations which can receive alerts for the project',
+          resolver: Resolvers::AlertManagement::IntegrationsResolver
+
     field :releases,
           Types::ReleaseType.connection_type,
           null: true,
@@ -284,6 +290,13 @@ module Types
           Types::ContainerExpirationPolicyType,
           null: true,
           description: 'The container expiration policy of the project'
+
+    field :container_repositories,
+          Types::ContainerRepositoryType.connection_type,
+          null: true,
+          description: 'Container repositories of the project',
+          resolver: Resolvers::ContainerRepositoriesResolver,
+          authorize: :read_container_image
 
     field :label,
           Types::LabelType,

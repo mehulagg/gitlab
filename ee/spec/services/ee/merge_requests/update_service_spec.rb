@@ -229,7 +229,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     context 'when reassigned' do
       it 'schedules for analytics metric update' do
         expect(Analytics::CodeReviewMetricsWorker)
-          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id, {})
+          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id)
 
         update_merge_request({ assignee_ids: [user2.id] })
       end

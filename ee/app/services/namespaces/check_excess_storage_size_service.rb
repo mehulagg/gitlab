@@ -15,11 +15,16 @@ module Namespaces
 
     def usage_message
       if root_namespace.contains_locked_projects?
+        params = { namespace_name: root_namespace.name,
+                  locked_project_count: root_namespace.repository_size_excess_project_count,
+                  free_size_limit: formatted(root_namespace.actual_size_limit) }
+
         if root_namespace.additional_purchased_storage_size == 0
-          params = { locked_project_count: root_namespace.repository_size_excess_project_count }
-          s_("NamespaceStorageSize|You have reached the free storage limit of 10GB on %{locked_project_count} projects. To unlock them, please purchase additional storage" % params)
+          ns_("NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on %{locked_project_count} project. To unlock it, please purchase additional storage",
+              "NamespaceStorageSize|You have reached the free storage limit of %{free_size_limit} on %{locked_project_count} projects. To unlock them, please purchase additional storage",
+              params[:locked_project_count]) % params
         else
-          s_("NamespaceStorageSize|%{namespace_name} contains a locked project" % { namespace_name: root_namespace.name })
+          ns_("NamespaceStorageSize|%{namespace_name} contains %{locked_project_count} locked project", "NamespaceStorageSize|%{namespace_name} contains %{locked_project_count} locked projects", params[:locked_project_count]) % params
         end
       else
         s_("NamespaceStorageSize|You have reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})" % current_usage_params)
@@ -28,10 +33,14 @@ module Namespaces
 
     def above_size_limit_message
       if root_namespace.additional_purchased_storage_size > 0
-        s_("NamespaceStorageSize|You have consumed all of your additional storage, please purchase more to unlock your projects over the free 10GB limit. You can't %{base_message}" % { base_message: base_message })
+        s_("NamespaceStorageSize|You have consumed all of your additional storage, please purchase more to unlock your projects over the free %{free_size_limit} limit. You can't %{base_message}" % { base_message: base_message, free_size_limit: formatted(root_namespace.actual_size_limit) })
       else
-        s_("NamespaceStorageSize|Please purchase additional storage to unlock your projects over the free 10GB project limit. You can't %{base_message}" % { base_message: base_message })
+        s_("NamespaceStorageSize|Please purchase additional storage to unlock your projects over the free %{free_size_limit} project limit. You can't %{base_message}" % { base_message: base_message, free_size_limit: formatted(root_namespace.actual_size_limit) })
       end
+    end
+
+    def formatted(number)
+      number_to_human_size(number, delimiter: ',', precision: 2)
     end
   end
 end

@@ -884,6 +884,7 @@ describe('Cycle analytics actions', () => {
 
   describe('createValueStream', () => {
     const payload = { name: 'cool value stream' };
+    const createResp = { id: 'new value stream', is_custom: true, ...payload };
 
     beforeEach(() => {
       state = { currentGroup };
@@ -891,7 +892,7 @@ describe('Cycle analytics actions', () => {
 
     describe('with no errors', () => {
       beforeEach(() => {
-        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, {});
+        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, createResp);
       });
 
       it(`commits the ${types.REQUEST_CREATE_VALUE_STREAM} and ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} actions`, () => {
@@ -904,7 +905,7 @@ describe('Cycle analytics actions', () => {
               type: types.REQUEST_CREATE_VALUE_STREAM,
             },
           ],
-          [{ type: 'receiveCreateValueStreamSuccess' }],
+          [{ type: 'receiveCreateValueStreamSuccess', payload: createResp }],
         );
       });
     });

@@ -43,6 +43,18 @@ RSpec.describe GroupMember do
           expect(group_member.errors[:user]).to include("email 'unverified@gitlab.com' is not a verified email.")
         end
 
+        context 'with project bot users' do
+          let_it_be(:project_bot) { create(:user, :project_bot, email: "bot@example.com") }
+
+          it 'bot user email does not match' do
+            expect(group.allowed_email_domains.include?(project_bot.email)).to be_falsey
+          end
+
+          it 'allows the project bot user' do
+            expect(build(:group_member, group: group, user: project_bot)).to be_valid
+          end
+        end
+
         context 'with group SAML users' do
           let(:saml_provider) { create(:saml_provider, group: group) }
 

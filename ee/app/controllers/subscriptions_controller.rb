@@ -60,10 +60,10 @@ class SubscriptionsController < ApplicationController
     ).execute
 
     if response[:success]
+      plan_id, quantity = subscription_params.values_at(:plan_id, :quantity)
       redirect_location = if params[:selected_group]
-                            group_path(group)
+                            group_path(group, plan_id: plan_id, purchased_quantity: quantity)
                           else
-                            plan_id, quantity = subscription_params.values_at(:plan_id, :quantity)
                             edit_subscriptions_group_path(group.path, plan_id: plan_id, quantity: quantity, new_user: params[:new_user])
                           end
 

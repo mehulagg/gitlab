@@ -8,7 +8,6 @@ module Projects
       before_action :authorize_admin_pipeline!
       before_action :define_variables
       before_action do
-        push_frontend_feature_flag(:new_variables_ui, @project, default_enabled: true)
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
       end
 
@@ -76,9 +75,9 @@ module Projects
         [
           :runners_token, :builds_enabled, :build_allow_git_fetch,
           :build_timeout_human_readable, :build_coverage_regex, :public_builds,
-          :auto_cancel_pending_pipelines, :forward_deployment_enabled, :ci_config_path,
+          :auto_cancel_pending_pipelines, :ci_config_path,
           auto_devops_attributes: [:id, :domain, :enabled, :deploy_strategy],
-          ci_cd_settings_attributes: [:default_git_depth]
+          ci_cd_settings_attributes: [:default_git_depth, :forward_deployment_enabled]
         ].tap do |list|
           list << :max_artifacts_size if can?(current_user, :update_max_artifacts_size, project)
         end

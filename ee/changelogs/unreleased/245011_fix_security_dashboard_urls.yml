@@ -1,5 +1,0 @@
----
-title: Change the instance security dashboard path as `/-/security/dashboard`
-merge_request: 43737
-author:
-type: fixed

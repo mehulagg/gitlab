@@ -2,6 +2,7 @@
 import Cookies from 'js-cookie';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AutoFixUserCallout from './auto_fix_user_callout.vue';
+import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
 import ReportsNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
@@ -14,6 +15,7 @@ export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 export default {
   components: {
     AutoFixUserCallout,
+    ProjectPipelineStatus,
     ProjectVulnerabilitiesApp,
     ReportsNotConfigured,
     SecurityDashboardLayout,
@@ -27,10 +29,10 @@ export default {
       type: String,
       required: true,
     },
-    projectFullPath: {
-      type: String,
+    pipeline: {
+      type: Object,
       required: false,
-      default: '',
+      default: () => ({}),
     },
     hasVulnerabilities: {
       type: Boolean,
@@ -78,14 +80,14 @@ export default {
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
-          <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
+          <project-pipeline-status :pipeline="pipeline" />
+          <vulnerabilities-count-list :filters="filters" />
         </template>
         <template #sticky>
           <filters @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"
-          :project-full-path="projectFullPath"
           :filters="filters"
         />
       </security-dashboard-layout>

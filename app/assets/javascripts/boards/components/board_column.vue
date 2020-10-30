@@ -2,7 +2,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import Sortable from 'sortablejs';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import Tooltip from '~/vue_shared/directives/tooltip';
 import EmptyComponent from '~/vue_shared/components/empty_component';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardList from './board_list.vue';
@@ -17,9 +16,6 @@ export default {
     BoardPromotionState: EmptyComponent,
     BoardListHeader,
     BoardList: gon.features?.graphqlBoardLists ? BoardListNew : BoardList,
-  },
-  directives: {
-    Tooltip,
   },
   mixins: [glFeatureFlagMixin()],
   props: {
@@ -102,11 +98,25 @@ export default {
 
         if (e.newIndex !== undefined && e.oldIndex !== e.newIndex) {
           const order = sortable.toArray();
-          const list = boardsStore.findList('id', parseInt(e.item.dataset.id, 10));
 
-          instance.$nextTick(() => {
-            boardsStore.moveList(list, order);
-          });
+          if (gon.features?.graphqlBoardLists) {
+            const { newIndex, oldIndex, to } = e;
+            const listId = instance.list.id;
+            const replacedListId = to.children[newIndex].dataset.id;
+
+            instance.moveList({
+              listId,
+              replacedListId,
+              newIndex,
+              adjustmentValue: newIndex < oldIndex ? 1 : -1,
+            });
+          } else {
+            const list = boardsStore.findList('id', parseInt(e.item.dataset.id, 10));
+
+            instance.$nextTick(() => {
+              boardsStore.moveList(list, order);
+            });
+          }
         }
       },
     });
@@ -114,7 +124,7 @@ export default {
     Sortable.create(this.$el.parentNode, sortableOptions);
   },
   methods: {
-    ...mapActions(['fetchIssuesForList']),
+    ...mapActions(['fetchIssuesForList', 'moveList']),
     showListNewIssueForm(listId) {
       eventHub.$emit('showForm', listId);
     },
@@ -131,7 +141,7 @@ export default {
       'board-type-assignee': list.type === 'assignee',
     }"
     :data-id="list.id"
-    class="board gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal"
+    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal"
     data-qa-selector="board_list"
   >
     <div

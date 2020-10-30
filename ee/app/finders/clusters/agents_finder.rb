@@ -14,7 +14,7 @@ module Clusters
       agents = project.cluster_agents
       agents = agents.with_name(params[:name]) if params[:name].present?
 
-      agents
+      agents.ordered_by_name
     end
 
     private

@@ -16,10 +16,9 @@ import {
   EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE,
   EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE,
 } from '~/design_management/utils/error_messages';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import createRouter from '~/design_management/router';
 import * as utils from '~/design_management/utils/design_management_utils';
-import { DESIGN_DETAIL_LAYOUT_CLASSLIST } from '~/design_management/constants';
 import {
   designListQueryResponse,
   designUploadMutationCreatedResponse,
@@ -444,10 +443,10 @@ describe('Design management index page', () => {
 
       return uploadDesign.then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Upload skipped. test.jpg did not change.',
-          'warning',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Upload skipped. test.jpg did not change.',
+          types: 'warning',
+        });
       });
     });
 
@@ -483,7 +482,7 @@ describe('Design management index page', () => {
         designDropzone.vm.$emit('change', eventPayload);
 
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(message);
+        expect(createFlash).toHaveBeenCalledWith({ message });
       });
     });
 
@@ -682,13 +681,6 @@ describe('Design management index page', () => {
   });
 
   describe('when navigating', () => {
-    it('ensures fullscreen layout is not applied', () => {
-      createComponent({ loading: true });
-
-      expect(mockPageEl.classList.remove).toHaveBeenCalledTimes(1);
-      expect(mockPageEl.classList.remove).toHaveBeenCalledWith(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
-    });
-
     it('should trigger a scrollIntoView method if designs route is detected', () => {
       router.replace({
         path: '/designs',
@@ -755,7 +747,7 @@ describe('Design management index page', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(createFlash).toHaveBeenCalledWith('Houston, we have a problem');
+      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
     });
 
     it('displays flash if mutation had a non-recoverable error', async () => {
@@ -769,9 +761,9 @@ describe('Design management index page', () => {
       await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
       await wrapper.vm.$nextTick(); // kick off the DOM update for flash
 
-      expect(createFlash).toHaveBeenCalledWith(
-        'Something went wrong when reordering designs. Please try again',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong when reordering designs. Please try again',
+      });
     });
   });
 });

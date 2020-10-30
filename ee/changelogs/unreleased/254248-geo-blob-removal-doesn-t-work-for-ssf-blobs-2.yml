@@ -1,5 +1,0 @@
----
-title: 'Fix: [Geo] Blob removal doesn''t work for SSF blobs'
-merge_request: 42891
-author:
-type: fixed

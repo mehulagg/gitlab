@@ -1,10 +1,9 @@
-import Cookies from 'js-cookie';
 import { pick } from 'lodash';
-import { __ } from '~/locale';
-import { parseBoolean } from '~/lib/utils/common_utils';
+
+import boardListsQuery from 'ee_else_ce/boards/queries/board_lists.query.graphql';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { BoardType, ListType, inactiveId } from '~/boards/constants';
+import { BoardType, ListType, inactiveId, DEFAULT_LABELS } from '~/boards/constants';
 import * as types from './mutation_types';
 import {
   formatBoardLists,
@@ -15,11 +14,12 @@ import {
 import boardStore from '~/boards/stores/boards_store';
 
 import listsIssuesQuery from '../queries/lists_issues.query.graphql';
-import boardListsQuery from '../queries/board_lists.query.graphql';
+import boardLabelsQuery from '../queries/board_labels.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
+import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -76,13 +76,13 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const { lists } = data[boardType]?.board;
+        const { lists, hideBacklogList } = data[boardType]?.board;
         commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
-        // Backlog list needs to be created if it doesn't exist
-        if (!lists.nodes.find(l => l.listType === ListType.backlog)) {
+        // Backlog list needs to be created if it doesn't exist and it's not hidden
+        if (!lists.nodes.find(l => l.listType === ListType.backlog) && !hideBacklogList) {
           dispatch('createList', { backlog: true });
         }
-        dispatch('showWelcomeList');
+        dispatch('generateDefaultLists');
       })
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
@@ -120,7 +120,32 @@ export default {
     );
   },
 
-  showWelcomeList: ({ state, dispatch }) => {
+  showPromotionList: () => {},
+
+  fetchLabels: ({ state, commit }, searchTerm) => {
+    const { endpoints, boardType } = state;
+    const { fullPath } = endpoints;
+
+    const variables = {
+      fullPath,
+      searchTerm,
+      isGroup: boardType === BoardType.group,
+      isProject: boardType === BoardType.project,
+    };
+
+    return gqlClient
+      .query({
+        query: boardLabelsQuery,
+        variables,
+      })
+      .then(({ data }) => {
+        const labels = data[boardType]?.labels;
+        return labels.nodes;
+      })
+      .catch(() => commit(types.RECEIVE_LABELS_FAILURE));
+  },
+
+  generateDefaultLists: async ({ state, commit, dispatch }) => {
     if (state.disabled) {
       return;
     }
@@ -131,22 +156,18 @@ export default {
     ) {
       return;
     }
-    if (parseBoolean(Cookies.get('issue_board_welcome_hidden'))) {
-      return;
-    }
 
-    dispatch('addList', {
-      id: 'blank',
-      listType: ListType.blank,
-      title: __('Welcome to your issue board!'),
-      position: 0,
-    });
-  },
+    const fetchLabelsAndCreateList = label => {
+      return dispatch('fetchLabels', label)
+        .then(res => {
+          if (res.length > 0) {
+            dispatch('createList', { labelId: res[0].id });
+          }
+        })
+        .catch(() => commit(types.GENERATE_DEFAULT_LISTS_FAILURE));
+    };
 
-  showPromotionList: () => {},
-
-  generateDefaultLists: () => {
-    notImplemented();
+    await Promise.all(DEFAULT_LABELS.map(fetchLabelsAndCreateList));
   },
 
   moveList: (
@@ -304,6 +325,30 @@ export default {
       issueId: activeIssue.id,
       prop: 'labels',
       value: data.updateIssue.issue.labels.nodes,
+    });
+  },
+
+  setActiveIssueDueDate: async ({ commit, getters }, input) => {
+    const activeIssue = getters.getActiveIssue;
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetDueDate,
+      variables: {
+        input: {
+          iid: String(activeIssue.iid),
+          projectPath: input.projectPath,
+          dueDate: input.dueDate,
+        },
+      },
+    });
+
+    if (data.updateIssue?.errors?.length > 0) {
+      throw new Error(data.updateIssue.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: activeIssue.id,
+      prop: 'dueDate',
+      value: data.updateIssue.issue.dueDate,
     });
   },
 

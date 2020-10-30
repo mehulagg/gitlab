@@ -44,7 +44,7 @@ are relative to the repository that was cloned during the build.
 
 By default, the artifacts upload when the job succeeds. You can also set artifacts to upload
 when the job fails, or always, by using [`artifacts:when`](../yaml/README.md#artifactswhen)
-parameter. GitLab keeps these uploaded artifacts for 1 week, as defined
+keyword. GitLab keeps these uploaded artifacts for 1 week, as defined
 by the `expire_in` definition. You can keep the artifacts from expiring
 via the [web interface](#browsing-artifacts). If the expiry time is not defined, it defaults
 to the [instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration).
@@ -114,7 +114,9 @@ There are a couple of exceptions to the [original dotenv rules](https://github.c
 
 - The variable key can contain only letters, digits, and underscores (`_`).
 - The maximum size of the `.env` file is 5 KB.
-- The maximum number of variables is 10.
+- In GitLab 13.5 and older, the maximum number of inherited variables is 10.
+- In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/247913),
+  the maximum number of inherited variables is 20.
 - Variable substitution in the `.env` file is not supported.
 - The `.env` file can't have empty lines or comments (starting with `#`).
 - Key values in the `env` file cannot have spaces or newline characters (`\n`), including when using single or double quotes.
@@ -414,7 +416,7 @@ information in the UI.
 
 ## Erasing artifacts
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 This is a destructive action that leads to data loss. Use with caution.
 
 You can erase a single job via the UI, which also removes the job's

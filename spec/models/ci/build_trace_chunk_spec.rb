@@ -135,11 +135,31 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     context 'when data_store is fog' do
       let(:data_store) { :fog }
 
-      before do
-        build_trace_chunk.send(:unsafe_set_data!, +'Sample data in fog')
+      context 'when legacy Fog is enabled' do
+        before do
+          stub_feature_flags(ci_trace_new_fog_store: false)
+          build_trace_chunk.send(:unsafe_set_data!, +'Sample data in fog')
+        end
+
+        it { is_expected.to eq('Sample data in fog') }
+
+        it 'returns a LegacyFog store' do
+          expect(described_class.get_store_class(data_store)).to be_a(Ci::BuildTraceChunks::LegacyFog)
+        end
       end
 
-      it { is_expected.to eq('Sample data in fog') }
+      context 'when new Fog is enabled' do
+        before do
+          stub_feature_flags(ci_trace_new_fog_store: true)
+          build_trace_chunk.send(:unsafe_set_data!, +'Sample data in fog')
+        end
+
+        it { is_expected.to eq('Sample data in fog') }
+
+        it 'returns a new Fog store' do
+          expect(described_class.get_store_class(data_store)).to be_a(Ci::BuildTraceChunks::Fog)
+        end
+      end
     end
   end
 
@@ -594,23 +614,19 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
           context 'when the chunk is being locked by a different worker' do
             let(:metrics) { spy('metrics') }
 
-            it 'does not raise an exception' do
-              lock_chunk do
-                expect { build_trace_chunk.persist_data! }.not_to raise_error
-              end
-            end
-
             it 'increments stalled chunk trace metric' do
               allow(build_trace_chunk)
                 .to receive(:metrics)
                 .and_return(metrics)
 
-              lock_chunk { build_trace_chunk.persist_data! }
+              expect do
+                subject
 
-              expect(metrics)
-                .to have_received(:increment_trace_operation)
-                .with(operation: :stalled)
-                .once
+                expect(metrics)
+                  .to have_received(:increment_trace_operation)
+                    .with(operation: :stalled)
+                    .once
+              end.to raise_error(described_class::FailedToPersistDataError)
             end
 
             def lock_chunk(&block)

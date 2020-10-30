@@ -1,5 +1,0 @@
----
-title: SAST mutation now supports analyzers section
-merge_request: 42542
-author:
-type: changed

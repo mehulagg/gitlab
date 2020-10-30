@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Run multiple Sidekiq processes **(CORE ONLY)**
 
 GitLab allows you to start multiple Sidekiq processes.
@@ -32,7 +38,7 @@ To start multiple processes:
    process, and values in each item determine the queues it works on.
 
    For example, the following setting creates three Sidekiq processes, one to run on
-   `elastic_indexer`, one to run on `mailers`, and one process running all on queues:
+   `elastic_indexer`, one to run on `mailers`, and one process running on all queues:
 
    ```ruby
    sidekiq['queue_groups'] = [
@@ -106,7 +112,8 @@ you list:
 
 ## Queue selector (experimental)
 
-> [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/45) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
+> - [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/45) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
+> - [Sidekiq cluster including queue selector moved](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/181) to GitLab [Core](https://about.gitlab.com/pricing/#self-managed) in GitLab 12.10.
 
 CAUTION: **Caution:**
 As this is marked as **experimental**, it is subject to change at any
@@ -123,6 +130,9 @@ in a more general way using the following components:
 
 - Attributes that can be selected.
 - Operators used to construct a query.
+
+When `experimental_queue_selector` is set, all `queue_groups` must be in
+the queue selector syntax.
 
 ### Available attributes
 
@@ -321,9 +331,9 @@ Running Sidekiq cluster is the default in GitLab 13.0 and later.
    ```
 
 `min_concurrency` and `max_concurrency` are independent; one can be set without
-the other. Setting `min_concurrency` to 0 will disable the limit.
+the other. Setting `min_concurrency` to `0` will disable the limit.
 
-For each queue group, let N be one more than the number of queues. The
+For each queue group, let `N` be one more than the number of queues. The
 concurrency factor will be set to:
 
 1. `N`, if it's between `min_concurrency` and `max_concurrency`.

@@ -101,7 +101,6 @@ module EE
 
       with_scope :subject
       condition(:on_demand_scans_enabled) do
-        ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true) &&
         @subject.feature_available?(:security_on_demand_scans)
       end
 
@@ -227,6 +226,7 @@ module EE
         enable :admin_path_locks
         enable :update_approvers
         enable :modify_approvers_rules
+        enable :modify_overriding_approvers_per_merge_request_setting
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
@@ -306,7 +306,7 @@ module EE
       end
 
       rule { regulated_merge_request_approval_settings }.policy do
-        prevent :modify_approvers_rules
+        prevent :modify_overriding_approvers_per_merge_request_setting
         prevent :modify_merge_request_author_setting
         prevent :modify_merge_request_committer_setting
       end
@@ -356,7 +356,10 @@ module EE
     def resource_access_token_available?
       return true unless ::Gitlab.com?
 
-      project.namespace.feature_available_non_trial?(:resource_access_token)
+      group = project.namespace
+
+      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
+        group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

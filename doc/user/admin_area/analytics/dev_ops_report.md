@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # DevOps Report
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30469) in GitLab 9.3.
@@ -9,6 +15,8 @@ Your GitLab instance's [usage ping](../settings/usage_statistics.md#usage-ping) 
 The DevOps Report gives you an overview of your entire instance's adoption of
 [Concurrent DevOps](https://about.gitlab.com/topics/concurrent-devops/)
 from planning to monitoring.
+
+To see DevOps Report, go to **Admin Area > Analytics > DevOps Report**.
 
 ## DevOps Score
 

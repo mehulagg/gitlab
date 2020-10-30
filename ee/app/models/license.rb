@@ -98,6 +98,7 @@ class License < ApplicationRecord
     admin_merge_request_approvers_rules
     merge_trains
     metrics_reports
+    multiple_alert_http_integrations
     multiple_approval_rules
     multiple_group_issue_boards
     object_storage
@@ -394,6 +395,10 @@ class License < ApplicationRecord
 
   def restricted_user_count
     restricted_attr(:active_user_count)
+  end
+
+  def restricted_user_count?
+    restricted_user_count.to_i > 0
   end
 
   def previous_user_count

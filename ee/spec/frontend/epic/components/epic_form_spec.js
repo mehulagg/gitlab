@@ -5,8 +5,11 @@ import EpicForm from 'ee/epic/components/epic_form.vue';
 import createEpic from 'ee/epic/queries/createEpic.mutation.graphql';
 import { TEST_HOST } from 'helpers/test_constants';
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
+import { visitUrl } from '~/lib/utils/url_utility';
 
-jest.mock('~/lib/utils/url_utility');
+jest.mock('~/lib/utils/url_utility', () => ({
+  visitUrl: jest.fn(),
+}));
 
 const TEST_GROUP_PATH = 'gitlab-org';
 const TEST_NEW_EPIC = { data: { createEpic: { epic: { webUrl: TEST_HOST } } } };
@@ -42,6 +45,7 @@ describe('ee/epic/components/epic_form.vue', () => {
     wrapper = null;
   });
 
+  const findForm = () => wrapper.find(GlForm);
   const findLabels = () => wrapper.find(LabelsSelectVue);
   const findTitle = () => wrapper.find('[data-testid="epic-title"]');
   const findDescription = () => wrapper.find('[data-testid="epic-description"]');
@@ -59,7 +63,7 @@ describe('ee/epic/components/epic_form.vue', () => {
     });
 
     it('should render the form', () => {
-      expect(wrapper.find(GlForm).exists()).toBe(true);
+      expect(findForm().exists()).toBe(true);
     });
 
     it('can be canceled', () => {
@@ -107,7 +111,7 @@ describe('ee/epic/components/epic_form.vue', () => {
       findStartDate().vm.$emit('input', startDateFixed);
       findDueDate().vm.$emit('input', dueDateFixed);
 
-      wrapper.vm.save();
+      findForm().vm.$emit('submit', { preventDefault: () => {} });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createEpic,
@@ -125,6 +129,10 @@ describe('ee/epic/components/epic_form.vue', () => {
           },
         },
       });
+
+      await wrapper.vm.$nextTick();
+
+      expect(visitUrl).toHaveBeenCalled();
     });
 
     it.each`

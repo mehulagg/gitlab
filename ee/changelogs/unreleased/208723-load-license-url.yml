@@ -1,5 +1,0 @@
----
-title: Load license scanning widget data when the `read_licenses` claim is satisfied
-merge_request: 44464
-author:
-type: fixed

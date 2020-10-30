@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Security::StoreReportService, '#execute' do
   let_it_be(:user) { create(:user) }
-  let(:artifact) { create(:ee_ci_job_artifact, report_type) }
+  let(:artifact) { create(:ee_ci_job_artifact, trait) }
+  let(:report_type) { artifact.file_type }
   let(:project) { artifact.project }
   let(:pipeline) { artifact.job.pipeline }
   let(:report) { pipeline.security_reports.get_report(report_type.to_s, artifact) }
@@ -23,10 +24,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :report_type, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines) do
-      'with SAST report'                | :sast                | 3 | 17 | 33 | 39 | 33
-      'with Dependency Scanning report' | :dependency_scanning | 2 | 7  | 4  | 7  | 4
-      'with Container Scanning report'  | :container_scanning  | 1 | 8  | 8  | 8  | 8
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines) do
+      'with SAST report'                | :sast                       | 3 | 17 | 33 | 39 | 33
+      'with exceeding identifiers'      | :with_exceeding_identifiers | 1 | 20 | 1  | 20 | 1
+      'with Dependency Scanning report' | :dependency_scanning        | 2 | 7  | 4  | 7  | 4
+      'with Container Scanning report'  | :container_scanning         | 1 | 8  | 8  | 8  | 8
     end
 
     with_them do
@@ -52,6 +54,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       it 'inserts all vulnerabilties' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
+      end
+
+      it 'calculates UUIDv5 for all findings' do
+        expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
       end
     end
 
@@ -85,7 +91,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
-    let(:report_type) { :sast }
+    let(:trait) { :sast }
 
     let!(:finding) do
       create(:vulnerabilities_finding,
@@ -116,6 +122,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'inserts only new findings and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
+    end
+
+    it 'calculates UUIDv5 for all findings' do
+      expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
     end
 
     it 'inserts all finding pipelines (join model) for this new pipeline' do
@@ -180,7 +190,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   context 'with existing data from same pipeline' do
     let!(:finding) { create(:vulnerabilities_finding, project: project, pipelines: [pipeline]) }
-    let(:report_type) { :sast }
+    let(:trait) { :sast }
 
     it 'skips report' do
       expect(subject).to eq({

@@ -635,15 +635,15 @@ RSpec.describe Project do
   end
 
   describe '#has_regulated_settings?' do
-    let(:framework) { ComplianceManagement::ComplianceFramework::FRAMEWORKS.first }
-    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, framework: framework.first.to_s) }
+    let(:gdpr_framework_definition) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:gdpr] }
+    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, :gdpr) }
     let(:project) { build(:project, compliance_framework_setting: compliance_framework_setting) }
 
     subject { project.has_regulated_settings? }
 
     context 'framework is regulated' do
       before do
-        stub_application_setting(compliance_frameworks: [framework.last])
+        stub_application_setting(compliance_frameworks: [gdpr_framework_definition.id])
       end
 
       it { is_expected.to be_truthy }
@@ -794,12 +794,6 @@ RSpec.describe Project do
     it "returns false" do
       project.namespace.update(share_with_group_lock: true)
       expect(project.allowed_to_share_with_group?).to be_falsey
-    end
-  end
-
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { create(:project) }
     end
   end
 
@@ -2242,22 +2236,6 @@ RSpec.describe Project do
         project.repository_size_limit = 200
 
         expect(checker.limit).to eq(200)
-      end
-    end
-
-    describe '#total_repository_size_excess' do
-      it 'returns the total repository size excess of the namespace' do
-        allow(project.namespace).to receive(:total_repository_size_excess).and_return(50)
-
-        expect(checker.total_repository_size_excess).to eq(50)
-      end
-    end
-
-    describe '#additional_purchased_storage' do
-      it 'returns the additional purchased storage size of the namespace' do
-        allow(project.namespace).to receive(:additional_purchased_storage_size).and_return(100)
-
-        expect(checker.additional_purchased_storage).to eq(100.megabytes)
       end
     end
 

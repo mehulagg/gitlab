@@ -85,6 +85,7 @@ export default {
 
       return {
         totalRepositorySize: this.namespace.totalRepositorySize,
+        actualRepositorySizeLimit: this.namespace.actualRepositorySizeLimit,
         totalRepositorySizeExcess: this.namespace.totalRepositorySizeExcess,
         additionalPurchasedStorageSize: this.namespace.additionalPurchasedStorageSize,
       };
@@ -109,7 +110,10 @@ export default {
       :actual-repository-size-limit="namespace.actualRepositorySizeLimit"
     />
     <div v-if="isAdditionalStorageFlagEnabled && storageStatistics">
-      <usage-statistics :root-storage-statistics="storageStatistics" />
+      <usage-statistics
+        :root-storage-statistics="storageStatistics"
+        :purchase-storage-url="purchaseStorageUrl"
+      />
     </div>
     <div v-else class="gl-py-4 gl-px-2 gl-m-0">
       <div class="gl-display-flex gl-align-items-center">
@@ -165,7 +169,10 @@ export default {
         />
       </div>
     </div>
-    <projects-table :projects="namespaceProjects" />
+    <projects-table
+      :projects="namespaceProjects"
+      :additional-purchased-storage-size="namespace.additionalPurchasedStorageSize || 0"
+    />
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
       :limit="formattedNamespaceLimit"

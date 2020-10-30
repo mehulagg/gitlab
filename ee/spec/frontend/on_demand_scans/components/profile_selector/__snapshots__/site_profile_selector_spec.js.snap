@@ -87,6 +87,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             </span>
              
             <svg
+              aria-hidden="true"
               class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
             >

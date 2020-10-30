@@ -12,6 +12,16 @@ FactoryBot.define do
       end
     end
 
+    trait :with_exceeding_identifiers do
+      file_type { :sast }
+      file_format { :raw }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report-with-exceeding-identifiers.json'), 'application/json')
+      end
+    end
+
     trait :secret_detection do
       file_type { :secret_detection }
       file_format { :raw }

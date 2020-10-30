@@ -27,7 +27,6 @@ import {
   scrollToLineIfNeededInline,
   scrollToLineIfNeededParallel,
   loadCollapsedDiff,
-  expandAllFiles,
   toggleFileDiscussions,
   saveDiffDiscussion,
   setHighlightedRow,
@@ -42,7 +41,7 @@ import {
   fetchFullDiff,
   toggleFullDiff,
   switchToFullDiffFromRenamedFile,
-  setFileCollapsed,
+  setFileCollapsedByUser,
   setExpandedDiffLines,
   setSuggestPopoverDismissed,
   changeCurrentCommit,
@@ -658,23 +657,6 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('expandAllFiles', () => {
-    it('should change the collapsed prop from the diffFiles', done => {
-      testAction(
-        expandAllFiles,
-        null,
-        {},
-        [
-          {
-            type: types.EXPAND_ALL_FILES,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
   describe('toggleFileDiscussions', () => {
     it('should dispatch collapseDiscussion when all discussions are expanded', () => {
       const getters = {
@@ -1216,13 +1198,18 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('setFileCollapsed', () => {
+  describe('setFileUserCollapsed', () => {
     it('commits SET_FILE_COLLAPSED', done => {
       testAction(
-        setFileCollapsed,
+        setFileCollapsedByUser,
         { filePath: 'test', collapsed: true },
         null,
-        [{ type: types.SET_FILE_COLLAPSED, payload: { filePath: 'test', collapsed: true } }],
+        [
+          {
+            type: types.SET_FILE_COLLAPSED,
+            payload: { filePath: 'test', collapsed: true, trigger: 'manual' },
+          },
+        ],
         [],
         done,
       );

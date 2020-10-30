@@ -1,5 +1,0 @@
----
-title: Allow 'allowed_to_push' to supersede code owner protected branch
-merge_request: 45323
-author:
-type: changed

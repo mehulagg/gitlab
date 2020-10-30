@@ -20,7 +20,7 @@ module AuditEvents
 
     def data
       events = AuditLogFinder.new(finder_params).execute
-      Gitlab::Audit::Events::Preloader.preload!(events)
+      Gitlab::Audit::Events::Preloader.new(events)
     end
 
     def finder_params

@@ -6,23 +6,109 @@ require 'benchmark/ips'
 RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
   let(:report) { described_class.new }
 
-  describe '#add_dependency' do
-    let(:dependency) do
-      {
-        name: 'gitlab',
-        packager: '',
-        package_manager: 'bundler',
-        location: { blob_path: '', path: 'Gemfile' },
-        version: '0.2.10',
-        vulnerabilities: [],
-        licenses: []
-      }
+  describe '#dependencies' do
+    subject(:dependencies) { report.dependencies }
+
+    context 'without dependency path information' do
+      let(:dependency) { build :dependency }
+
+      before do
+        report.add_dependency(dependency)
+      end
+
+      it 'returns array of hashes' do
+        expect(dependencies).to be_an(Array)
+        expect(dependencies.first).to be_a(Hash)
+      end
+
+      it 'does not contain dependency path' do
+        expect(dependencies.first[:location][:ancestors]).to be_nil
+      end
     end
 
-    subject { report.add_dependency(dependency) }
+    context 'with dependency path information' do
+      let(:indirect) { build :dependency, :with_vulnerabilities, iid: 32 }
+      let(:direct) { build :dependency, :direct, :with_vulnerabilities }
+
+      before do
+        indirect[:location][:top_level] = false
+        indirect[:location][:ancestors] = [{ iid: direct[:iid] }]
+
+        report.add_dependency(direct)
+        report.add_dependency(indirect)
+      end
+
+      it 'generates the dependency path' do
+        ancestors = dependencies.second[:location][:ancestors]
+
+        expect(ancestors.last).to eq({ name: direct[:name], version: direct[:version] })
+      end
+
+      context 'with multiple dependency files matching same package manager' do
+        let(:indirect_other) { build :dependency, :with_vulnerabilities, iid: 32 }
+        let(:direct_other) { build :dependency, :direct, :with_vulnerabilities }
+
+        before do
+          indirect_other[:location][:top_level] = false
+          indirect_other[:location][:ancestors] = [{ iid: direct[:iid] }]
+          indirect_other[:location][:path] = 'other_path.lock'
+          direct_other[:location][:path] = 'other_path.lock'
+
+          report.add_dependency(direct_other)
+          report.add_dependency(indirect_other)
+        end
+
+        it 'generates the dependency path' do
+          ancestors = dependencies.second[:location][:ancestors]
+          ancestors_other = dependencies.last[:location][:ancestors]
+
+          expect(ancestors.last).to eq({ name: direct[:name], version: direct[:version] })
+          expect(ancestors_other.last).to eq({ name: direct_other[:name], version: direct_other[:version] })
+        end
+      end
+
+      context 'when method is called more than once' do
+        it 'generates path only once' do
+          dependency_before = report.dependencies.last
+
+          expect(dependency_before[:name]).to eq(indirect[:name])
+          expect(dependency_before[:location][:ancestors].size).to eq(1)
+          expect(dependency_before[:location][:ancestors].last[:name]).to eq(direct[:name])
+
+          dependency_after = report.dependencies.last
+
+          expect(dependency_after[:name]).to eq(indirect[:name])
+          expect(dependency_after[:location][:ancestors].size).to eq(1)
+          expect(dependency_after[:location][:ancestors].last[:name]).to eq(direct[:name])
+        end
+      end
+
+      context 'with not vulnerable dependencies' do
+        let(:indirect_secure) { build :dependency, iid: 13 }
+
+        before do
+          indirect_secure[:location][:top_level] = false
+          indirect_secure[:location][:ancestors] = [{ iid: direct[:iid] }]
+
+          report.add_dependency(indirect_secure)
+        end
+
+        it 'augment dependency path only for vulnerable dependencies' do
+          vulnerable = dependencies.find { |dep| dep[:name] == indirect[:name] }
+          secure = dependencies.find { |dep| dep[:name] == indirect_secure[:name] }
+
+          expect(vulnerable[:location][:ancestors].last[:name]).to eq(direct[:name])
+          expect(secure[:location][:ancestors]).to be_nil
+        end
+      end
+    end
+  end
+
+  describe '#add_dependency' do
+    let(:dependency) { build :dependency }
 
     it 'stores given dependency params in the map' do
-      subject
+      report.add_dependency(dependency)
 
       expect(report.dependencies).to eq([dependency])
     end
@@ -44,7 +130,7 @@ RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
       expect(report.dependencies.first.dig(:vulnerabilities)).to eq(vulnerabilities)
     end
 
-    it 'updates dependency' do
+    it 'stores a dependency' do
       dependency[:packager] = 'Ruby (Bundler)'
       dependency[:vulnerabilities] = [{ name: 'abc', severity: 'high' }]
 

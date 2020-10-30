@@ -1,6 +1,7 @@
 <script>
 import { mapState } from 'vuex';
 import { GlTable, GlBadge } from '@gitlab/ui';
+import MembersTableCell from 'ee_else_ce/vue_shared/components/members/table/members_table_cell.vue';
 import { FIELDS } from '../constants';
 import initUserPopovers from '~/user_popovers';
 import MemberAvatar from './member_avatar.vue';
@@ -8,9 +9,9 @@ import MemberSource from './member_source.vue';
 import CreatedAt from './created_at.vue';
 import ExpiresAt from './expires_at.vue';
 import MemberActionButtons from './member_action_buttons.vue';
-import MembersTableCell from './members_table_cell.vue';
 import RoleDropdown from './role_dropdown.vue';
 import RemoveGroupLinkModal from '../modals/remove_group_link_modal.vue';
+import ExpirationDatepicker from './expiration_datepicker.vue';
 
 export default {
   name: 'MembersTable',
@@ -25,6 +26,11 @@ export default {
     MemberActionButtons,
     RoleDropdown,
     RemoveGroupLinkModal,
+    ExpirationDatepicker,
+    LdapOverrideConfirmationModal: () =>
+      import(
+        'ee_component/vue_shared/components/members/ldap/ldap_override_confirmation_modal.vue'
+      ),
   },
   computed: {
     ...mapState(['members', 'tableFields']),
@@ -85,8 +91,14 @@ export default {
 
       <template #cell(maxRole)="{ item: member }">
         <members-table-cell #default="{ permissions }" :member="member">
-          <role-dropdown v-if="permissions.canUpdate" :member="member" />
+          <role-dropdown v-if="permissions.canUpdate" :permissions="permissions" :member="member" />
           <gl-badge v-else>{{ member.accessLevel.stringValue }}</gl-badge>
+        </members-table-cell>
+      </template>
+
+      <template #cell(expiration)="{ item: member }">
+        <members-table-cell #default="{ permissions }" :member="member">
+          <expiration-datepicker :permissions="permissions" :member="member" />
         </members-table-cell>
       </template>
 
@@ -106,5 +118,6 @@ export default {
       </template>
     </gl-table>
     <remove-group-link-modal />
+    <ldap-override-confirmation-modal />
   </div>
 </template>

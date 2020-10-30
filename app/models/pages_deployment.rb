@@ -7,9 +7,13 @@ class PagesDeployment < ApplicationRecord
   belongs_to :project, optional: false
   belongs_to :ci_build, class_name: 'Ci::Build', optional: true
 
+  scope :older_than, -> (id) { where('id < ?', id) }
+
   validates :file, presence: true
   validates :file_store, presence: true, inclusion: { in: ObjectStorage::SUPPORTED_STORES }
   validates :size, presence: true, numericality: { greater_than: 0, only_integer: true }
+  validates :file_count, presence: true, numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validates :file_sha256, presence: true
 
   before_validation :set_size, if: :file_changed?
 

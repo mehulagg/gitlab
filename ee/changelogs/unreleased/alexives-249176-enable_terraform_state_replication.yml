@@ -1,5 +1,0 @@
----
-title: Enable geo replication of versioned terraform state
-merge_request: 43367
-author:
-type: added

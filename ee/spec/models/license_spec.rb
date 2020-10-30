@@ -1090,4 +1090,23 @@ RSpec.describe License do
       it { is_expected.to eq(result) }
     end
   end
+
+  describe '#restricted_user_count?' do
+    subject { license.restricted_user_count? }
+
+    where(:restricted_user_count, :result) do
+      nil | false
+      0   | false
+      1   | true
+      10  | true
+    end
+
+    with_them do
+      before do
+        allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
 end

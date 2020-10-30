@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import pipelineJobs from 'ee/security_dashboard/store/modules/pipeline_jobs';
 import configureMediator from './mediator';
 import * as actions from './actions';
 import * as getters from './getters';
@@ -14,6 +15,7 @@ export default () =>
   new Vuex.Store({
     modules: {
       sast,
+      pipelineJobs,
     },
     actions,
     getters,

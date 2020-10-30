@@ -18,7 +18,7 @@ RSpec.describe Projects::UpdatePagesService do
       file = fixture_file_upload('spec/fixtures/pages.zip')
       metafile = fixture_file_upload('spec/fixtures/pages.zip.meta')
 
-      create(:ci_job_artifact, :archive, file: file, job: build)
+      create(:ci_job_artifact, :archive, :correct_checksum, file: file, job: build)
       create(:ci_job_artifact, :metadata, file: metafile, job: build)
 
       allow(build).to receive(:artifacts_metadata_entry)
@@ -31,6 +31,7 @@ RSpec.describe Projects::UpdatePagesService do
 
     it 'uses closest setting for max_pages_size' do
       allow(metadata).to receive(:total_size).and_return(1.megabyte)
+      allow(metadata).to receive(:entries).and_return([])
 
       expect(project).to receive(:closest_setting).with(:max_pages_size).and_call_original
 

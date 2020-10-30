@@ -1,5 +1,0 @@
----
-title: Preload parent in GraphQL epics queries using Lookahead
-merge_request: 43323
-author:
-type: performance

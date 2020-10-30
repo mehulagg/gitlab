@@ -24,29 +24,29 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
     before do
       # takes 10 days
-      resource1 = Timecop.travel(Time.new(2019, 3, 5)) do
+      resource1 = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
-      Timecop.travel(Time.new(2019, 3, 15)) do
+      travel_to(Time.new(2019, 3, 15)) do
         create_data_for_end_event(resource1, self)
       end
 
       # takes 5 days
-      resource2 = Timecop.travel(Time.new(2019, 3, 5)) do
+      resource2 = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
-      Timecop.travel(Time.new(2019, 3, 10)) do
+      travel_to(Time.new(2019, 3, 10)) do
         create_data_for_end_event(resource2, self)
       end
 
       # takes 15 days
-      resource3 = Timecop.travel(Time.new(2019, 3, 5)) do
+      resource3 = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
-      Timecop.travel(Time.new(2019, 3, 20)) do
+      travel_to(Time.new(2019, 3, 20)) do
         create_data_for_end_event(resource3, self)
       end
     end
@@ -478,7 +478,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
       before do
         group.add_user(user, GroupMember::MAINTAINER)
 
-        Timecop.travel(Time.new(2019, 6, 1)) do
+        travel_to(Time.new(2019, 6, 1)) do
           mr = create(:merge_request, source_project: project1)
           mr.metrics.update!(merged_at: 1.hour.from_now)
 

@@ -115,12 +115,14 @@ class ApprovalWrappedRule
   end
 
   def overall_approver_ids
-    current_approvals = merge_request.approvals
+    strong_memoize(:overall_approver_ids) do
+      current_approvals = merge_request.approvals
 
-    if current_approvals.is_a?(ActiveRecord::Relation) && !current_approvals.loaded?
-      current_approvals.distinct.pluck(:user_id)
-    else
-      current_approvals.map(&:user_id).to_set
+      if current_approvals.is_a?(ActiveRecord::Relation) && !current_approvals.loaded?
+        current_approvals.distinct.pluck(:user_id)
+      else
+        current_approvals.map(&:user_id).to_set
+      end
     end
   end
 end

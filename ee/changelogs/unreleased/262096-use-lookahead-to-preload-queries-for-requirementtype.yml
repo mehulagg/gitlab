@@ -1,5 +1,0 @@
----
-title: Use Lookahead to preload tests reports when querying Requirements with GraphQL
-merge_request: 45195
-author:
-type: performance

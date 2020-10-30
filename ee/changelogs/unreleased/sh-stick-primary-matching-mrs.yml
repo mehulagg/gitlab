@@ -1,5 +1,0 @@
----
-title: Fix merge pre-receive errors when load balancing in use
-merge_request: 42435
-author:
-type: fixed

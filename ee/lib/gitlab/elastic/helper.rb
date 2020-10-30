@@ -3,6 +3,17 @@
 module Gitlab
   module Elastic
     class Helper
+      ES_ENABLED_CLASSES = [
+          Project,
+          Issue,
+          MergeRequest,
+          Snippet,
+          Note,
+          Milestone,
+          ProjectWiki,
+          Repository
+      ].freeze
+
       attr_reader :version, :client
       attr_accessor :target_name
 
@@ -28,6 +39,19 @@ module Gitlab
         end
       end
 
+      def default_settings
+        ES_ENABLED_CLASSES.inject({}) do |settings, klass|
+          settings.deep_merge(klass.__elasticsearch__.settings.to_hash)
+        end
+      end
+
+      def default_mappings
+        mappings = ES_ENABLED_CLASSES.inject({}) do |m, klass|
+          m.deep_merge(klass.__elasticsearch__.mappings.to_hash)
+        end
+        mappings.deep_merge(::Elastic::Latest::CustomLanguageAnalyzers.custom_analyzers_mappings)
+      end
+
       def create_empty_index(with_alias: true, options: {})
         new_index_name = options[:index_name] || "#{target_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 
@@ -35,24 +59,10 @@ module Gitlab
           raise "Index under '#{with_alias ? target_name : new_index_name}' already exists, use `recreate_index` to recreate it."
         end
 
-        settings = {}
-        mappings = {}
-
-        [
-          Project,
-          Issue,
-          MergeRequest,
-          Snippet,
-          Note,
-          Milestone,
-          ProjectWiki,
-          Repository
-        ].each do |klass|
-          settings.deep_merge!(klass.__elasticsearch__.settings.to_hash)
-          mappings.deep_merge!(klass.__elasticsearch__.mappings.to_hash)
-        end
-
+        settings = default_settings
         settings.merge!(options[:settings]) if options[:settings]
+
+        mappings = default_mappings
         mappings.merge!(options[:mappings]) if options[:mappings]
 
         create_index_options = {

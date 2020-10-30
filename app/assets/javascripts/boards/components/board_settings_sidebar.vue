@@ -34,14 +34,17 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['isSidebarOpen']),
+    ...mapGetters(['isSidebarOpen', 'shouldUseGraphQL']),
     ...mapState(['activeId', 'sidebarType', 'boardLists']),
+    isWipLimitsOn() {
+      return this.glFeatures.wipLimits;
+    },
     activeList() {
       /*
         Warning: Though a computed property it is not reactive because we are
         referencing a List Model class. Reactivity only applies to plain JS objects
       */
-      if (this.glFeatures.graphqlBoardLists) {
+      if (this.shouldUseGraphQL) {
         return this.boardLists[this.activeId];
       }
       return boardsStore.state.lists.find(({ id }) => id === this.activeId);
@@ -105,7 +108,10 @@ export default {
         :active-list="activeList"
         :board-list-type="boardListType"
       />
-      <board-settings-sidebar-wip-limit :max-issue-count="activeList.maxIssueCount" />
+      <board-settings-sidebar-wip-limit
+        v-if="isWipLimitsOn"
+        :max-issue-count="activeList.maxIssueCount"
+      />
       <div v-if="canAdminList && !activeList.preset && activeList.id" class="gl-m-4">
         <gl-button
           variant="danger"

@@ -22,6 +22,7 @@ describe('Members Utils', () => {
       ${{ ...memberMock, usingLicense: true }}        | ${{ show: true, text: 'Is using seat', variant: 'neutral' }}
       ${{ ...memberMock, groupSso: true }}            | ${{ show: true, text: 'SAML', variant: 'info' }}
       ${{ ...memberMock, groupManagedAccount: true }} | ${{ show: true, text: 'Managed Account', variant: 'info' }}
+      ${{ ...memberMock, canOverride: true }}         | ${{ show: true, text: 'LDAP', variant: 'info' }}
     `('returns expected output for "$expected.text" badge', ({ member, expected }) => {
       expect(generateBadges(member, true)).toContainEqual(expect.objectContaining(expected));
     });

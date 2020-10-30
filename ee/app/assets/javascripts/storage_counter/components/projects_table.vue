@@ -14,6 +14,10 @@ export default {
       type: Array,
       required: true,
     },
+    additionalPurchasedStorageSize: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     isAdditionalStorageFlagEnabled() {
@@ -61,6 +65,7 @@ export default {
       v-for="project in projects"
       :key="project.id"
       :project="project"
+      :additional-purchased-storage-size="additionalPurchasedStorageSize"
     />
   </div>
 </template>

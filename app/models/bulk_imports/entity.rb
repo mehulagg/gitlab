@@ -1,5 +1,22 @@
 # frozen_string_literal: true
 
+# The BulkImport::Entity represents a Group or Project to be imported during the
+# bulk import process. An entity is nested under the parent group when it is not
+# a top level group.
+#
+# A full bulk import entity structure might look like this, where the links are
+# parents:
+#
+#          **Before Import**              **After Import**
+#
+#             GroupEntity                      Group
+#              |      |                        |   |
+#     GroupEntity   ProjectEntity          Group   Project
+#          |                                 |
+#    ProjectEntity                        Project
+#
+# The tree structure of the entities results in the same structure for imported
+# Groups and Projects.
 class BulkImports::Entity < ApplicationRecord
   self.table_name = 'bulk_import_entities'
 
@@ -21,6 +38,21 @@ class BulkImports::Entity < ApplicationRecord
 
   state_machine :status, initial: :created do
     state :created, value: 0
+    state :started, value: 1
+    state :finished, value: 2
+    state :failed, value: -1
+
+    event :start do
+      transition created: :started
+    end
+
+    event :finish do
+      transition started: :finished
+    end
+
+    event :fail_op do
+      transition any => :failed
+    end
   end
 
   private
@@ -33,11 +65,17 @@ class BulkImports::Entity < ApplicationRecord
 
   def validate_imported_entity_type
     if group.present? && project_entity?
-      errors.add(:group, s_('BulkImport|expected an associated Project but has an associated Group'))
+      errors.add(
+        :group,
+        s_('BulkImport|expected an associated Project but has an associated Group')
+      )
     end
 
     if project.present? && group_entity?
-      errors.add(:project, s_('BulkImport|expected an associated Group but has an associated Project'))
+      errors.add(
+        :project,
+        s_('BulkImport|expected an associated Group but has an associated Project')
+      )
     end
   end
 end

@@ -4,6 +4,7 @@ import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
@@ -30,6 +31,7 @@ export default {
     GlLink,
     DastModal,
     GlButton,
+    FuzzingArtifactsDownload,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -171,6 +173,11 @@ export default {
       required: false,
       default: '',
     },
+    projectId: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     projectFullPath: {
       type: String,
       required: true,
@@ -210,6 +217,7 @@ export default {
       'canDismissVulnerability',
     ]),
     ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
     },
@@ -223,14 +231,8 @@ export default {
       return this.enabledReports.dast;
     },
     hasCoverageFuzzingReports() {
-      /*
-       * Fixes bug https://gitlab.com/gitlab-org/gitlab/-/issues/255183
-       * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343 change to:
-       * return this.enabledReports.coverageFuzzing;
-       */
-      return (
-        gl?.mrWidgetData?.coverage_fuzzing_comparison_path && this.enabledReports.coverageFuzzing
-      );
+      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
+      return this.enabledReports.coverageFuzzing && this.glFeatures.coverageFuzzingMrWidget;
     },
     hasSastReports() {
       return this.enabledReports.sast;
@@ -274,7 +276,9 @@ export default {
       this.createVulnerabilityFeedbackMergeRequestPath,
     );
     this.setCreateVulnerabilityFeedbackDismissalPath(this.createVulnerabilityFeedbackDismissalPath);
+    this.setProjectId(this.projectId);
     this.setPipelineId(this.pipelineId);
+    this.setPipelineJobsId(this.pipelineId);
 
     const sastDiffEndpoint = gl?.mrWidgetData?.sast_comparison_path;
 
@@ -315,6 +319,7 @@ export default {
     if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
       this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
       this.fetchCoverageFuzzingDiff();
+      this.fetchPipelineJobs();
     }
   },
   methods: {
@@ -355,6 +360,10 @@ export default {
     ...mapActions('sast', {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
+    }),
+    ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
+    ...mapActions('pipelineJobs', {
+      setPipelineJobsId: 'setPipelineId',
     }),
   },
   summarySlots: ['success', 'error', 'loading'],
@@ -555,6 +564,11 @@ export default {
             <template #summary>
               <security-summary :message="groupedCoverageFuzzingText" />
             </template>
+            <fuzzing-artifacts-download
+              v-if="hasFuzzingArtifacts"
+              :jobs="fuzzingJobsWithArtifact"
+              :project-id="projectId"
+            />
           </summary-row>
 
           <grouped-issues-list

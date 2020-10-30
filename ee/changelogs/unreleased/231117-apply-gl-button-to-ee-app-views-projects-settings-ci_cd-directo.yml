@@ -1,5 +1,0 @@
----
-title: Apply GitLab UI button styles in ee/app/views/projects/settings/ci_cd directory
-merge_request: 43335
-author: Justin Zeng @jzeng88
-type: other

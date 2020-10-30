@@ -206,14 +206,14 @@ module QA
 
       def wait_for_new_primary_node(node)
         QA::Runtime::Logger.info("Wait until #{node} is the primary node")
-        with_praefect_log do |log|
+        with_praefect_log(max_duration: 120) do |log|
           break true if log['msg'] == 'primary node changed' && log['newPrimary'] == node
         end
       end
 
       def wait_for_new_primary
         QA::Runtime::Logger.info("Wait until a new primary node is selected")
-        with_praefect_log do |log|
+        with_praefect_log(max_duration: 120) do |log|
           break true if log['msg'] == 'primary node changed'
         end
       end
@@ -387,7 +387,7 @@ module QA
       end
 
       def verify_storage_move_to_praefect(repo_path, virtual_storage)
-        wait_until_shell_command("docker exec #{@gitlab} bash -c 'tail -n 50 /var/log/gitlab/praefect/current'") do |line|
+        wait_until_shell_command("docker exec #{@praefect} bash -c 'tail -n 50 /var/log/gitlab/praefect/current'") do |line|
           log = JSON.parse(line)
 
           log['grpc.method'] == 'ReplicateRepository' && log['virtual_storage'] == virtual_storage && log['relative_path'] == repo_path
@@ -406,8 +406,8 @@ module QA
         end
       end
 
-      def with_praefect_log
-        wait_until_shell_command("docker exec #{@praefect} bash -c 'tail -n 1 /var/log/gitlab/praefect/current'") do |line|
+      def with_praefect_log(**kwargs)
+        wait_until_shell_command("docker exec #{@praefect} bash -c 'tail -n 1 /var/log/gitlab/praefect/current'", **kwargs) do |line|
           QA::Runtime::Logger.debug(line.chomp)
           yield JSON.parse(line)
         end

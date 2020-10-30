@@ -1,6 +1,0 @@
----
-title: This fixes an issue where the request parameters would be missing on the Value
-  Stream Analytics page, so the charts would not reflect the filters applied.
-merge_request: 42655
-author:
-type: fixed

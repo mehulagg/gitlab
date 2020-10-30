@@ -5,6 +5,8 @@ export default initialState => {
 
   return {
     ldapOverridePath,
+    memberToOverride: null,
+    ldapOverrideConfirmationModalVisible: false,
     ...createState(initialState),
   };
 };

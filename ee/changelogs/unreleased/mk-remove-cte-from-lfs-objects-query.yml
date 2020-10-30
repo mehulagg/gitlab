@@ -1,5 +1,0 @@
----
-title: 'Geo: Improve performance of LFS objects queries'
-merge_request: 42423
-author:
-type: performance
