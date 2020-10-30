@@ -122,7 +122,8 @@ repository layout looks like this:
 .gitlab/agents/<agent-name>/config.yaml
 ```
 
-The `config.yaml` file contents should look like this:
+The `config.yaml` file contents should look like this. There can be multiple manifest
+projects listed in the section `manifest_projects` section:
 
 ```yaml
 gitops:
@@ -335,7 +336,9 @@ subjects:
 In a previous step, you configured a `config.yaml` to point to the GitLab projects
 the Agent should synchronize. In each of those projects, you must create a `manifest.yaml`
 file for the Agent to monitor. You can auto-generate this `manifest.yaml` with a
-templating engine or other means.
+templating engine or other means. Note that currently only public projects are supported as
+manifest projects. The ability to use private projects will be added in scope of the issue
+[Agent authorization for private manifest projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
 
 Each time you commit and push a change to this file, the Agent logs the change:
 
