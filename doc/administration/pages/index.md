@@ -462,7 +462,7 @@ are stored.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-Alternative, if you have existing Pages deployed you can follow
+Alternatively, if you have existing Pages deployed you can follow
 the below steps to do a no downtime transfer to a new storage location.
 
 1. Pause new Pages deployments by setting following in `/etc/gitlab/gitlab.rb`:
