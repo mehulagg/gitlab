@@ -18,11 +18,6 @@ export default {
     validation: validation(),
   },
   props: {
-    authEnabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     fields: {
       type: Object,
       required: false,
@@ -54,7 +49,7 @@ export default {
           passwordFormField: initField(passwordFormField),
         },
       },
-      isAuthEnabled: this.authEnabled,
+      isAuthEnabled: this.fields.authEnabled,
     };
   },
   computed: {
@@ -84,7 +79,7 @@ export default {
 <template>
   <section>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-form-checkbox v-model="isAuthEnabled" data-testid="auth-checkbox">{{
+      <gl-form-checkbox v-model="isAuthEnabled" data-testid="auth-enabled-check">{{
         s__('DastProfiles|Enable Authentication')
       }}</gl-form-checkbox>
     </gl-form-group>

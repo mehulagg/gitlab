@@ -5,11 +5,10 @@ import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_fo
 describe('DastSiteAuthSection', () => {
   let wrapper;
 
-  const createComponent = ({ fields, authEnabled } = {}) => {
+  const createComponent = ({ fields } = {}) => {
     wrapper = mount(DastSiteAuthSection, {
       propsData: {
         fields,
-        authEnabled,
       },
     });
   };
@@ -23,8 +22,7 @@ describe('DastSiteAuthSection', () => {
   });
 
   const findByNameAttribute = name => wrapper.find(`[name="${name}"]`);
-  const findByTestId = testId => wrapper.find(`[data-testid=${testId}]`);
-  const findAuthForm = () => findByTestId('auth-form');
+  const findAuthForm = () => wrapper.find(`[data-testid="auth-form"]`);
   const findAuthCheckbox = () => wrapper.find(GlFormCheckbox);
 
   const setAuthentication = ({ enabled }) => {
@@ -38,18 +36,16 @@ describe('DastSiteAuthSection', () => {
   };
 
   describe('authentication toggle', () => {
-    it.each(
-      [true, false],
-      'is set correctly when the "auth-enabled" prop is set to "%s"',
+    it.each([true, false])(
+      'is set correctly when the "authEnabled" field is set to "%s"',
       authEnabled => {
-        createComponent({ authEnabled });
-
+        createComponent({ fields: { authEnabled } });
         expect(findAuthCheckbox().vm.$attrs.checked).toBe(authEnabled);
       },
     );
 
     it('controls the visibility of the authentication-fields form', async () => {
-      expect(findByTestId('auth-form').exists()).toBe(false);
+      expect(findAuthForm('auth-form').exists()).toBe(false);
       await setAuthentication({ enabled: true });
       expect(findAuthForm().exists()).toBe(true);
     });
