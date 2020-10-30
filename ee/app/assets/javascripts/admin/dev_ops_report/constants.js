@@ -1,6 +1,9 @@
 import { s__ } from '~/locale';
 
 export const DEVOPS_ADOPTION_STRINGS = {
+  app: {
+    groupsError: s__('DevopsAdoption|There was an error fetching Groups'),
+  },
   emptyState: {
     title: s__('DevopsAdoption|Add a segment to get started'),
     description: s__(
