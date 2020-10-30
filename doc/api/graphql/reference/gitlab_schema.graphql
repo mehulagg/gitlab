@@ -3063,6 +3063,56 @@ type ContainerRepositoryConnection {
 }
 
 """
+A container repository details
+"""
+type ContainerRepositoryDetails {
+  """
+  Can the current user delete the container repository.
+  """
+  canDelete: Boolean!
+
+  """
+  ID of the container repository.
+  """
+  id: ID!
+
+  """
+  Name of the container repository.
+  """
+  name: String!
+
+  """
+  Path of the container repository.
+  """
+  path: String!
+
+  """
+  Tags of the Container Repository
+  """
+  tags(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): ContainerRepositoryTagConnection
+}
+
+"""
 An edge in a connection.
 """
 type ContainerRepositoryEdge {
@@ -3078,6 +3128,11 @@ type ContainerRepositoryEdge {
 }
 
 """
+Identifier of ContainerRepository
+"""
+scalar ContainerRepositoryID
+
+"""
 Status of a container repository
 """
 enum ContainerRepositoryStatus {
@@ -3090,6 +3145,86 @@ enum ContainerRepositoryStatus {
   Delete Scheduled status.
   """
   DELETE_SCHEDULED
+}
+
+"""
+A tag from a container repository
+"""
+type ContainerRepositoryTag {
+  """
+  Timestamp when the container repository was created.
+  """
+  createdAt: Time!
+
+  """
+  Digest of the tag.
+  """
+  digest: String!
+
+  """
+  URL of the tag.
+  """
+  location: String!
+
+  """
+  Name of the tag.
+  """
+  name: String!
+
+  """
+  Path of the tag.
+  """
+  path: String!
+
+  """
+  Revision of the tag.
+  """
+  revision: String!
+
+  """
+  Short revision of the tag.
+  """
+  shortRevision: String!
+
+  """
+  The size of the tag.
+  """
+  totalSize: Int!
+}
+
+"""
+The connection type for ContainerRepositoryTag.
+"""
+type ContainerRepositoryTagConnection {
+  """
+  A list of edges.
+  """
+  edges: [ContainerRepositoryTagEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [ContainerRepositoryTag]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type ContainerRepositoryTagEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: ContainerRepositoryTag
 }
 
 """
@@ -15619,6 +15754,16 @@ type PrometheusAlert {
 }
 
 type Query {
+  """
+  Find a container repository
+  """
+  containerRepository(
+    """
+    The global ID of the container repository
+    """
+    id: ContainerRepositoryID!
+  ): ContainerRepositoryDetails
+
   """
   Get information about current user
   """
