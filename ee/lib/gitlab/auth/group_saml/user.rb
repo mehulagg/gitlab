@@ -38,7 +38,7 @@ module Gitlab
         def update_group_membership
           return unless user_from_identity
 
-          MembershipUpdater.new(user_from_identity, saml_provider).execute
+          MembershipUpdater.new(user_from_identity, saml_provider, auth_hash).execute
         end
       end
     end

@@ -9,4 +9,5 @@ class SamlGroupLink < ApplicationRecord
   validates :saml_group_name, presence: true, uniqueness: { scope: [:group_id] }, length: { maximum: 255 }
 
   scope :by_id_and_group_id, ->(id, group_id) { where(id: id, group_id: group_id) }
+  scope :by_saml_group_name_and_group_id, -> (name, group_id) { where(saml_group_name: name, group_id: group_id) }
 end
