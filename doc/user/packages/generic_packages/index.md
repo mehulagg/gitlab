@@ -49,7 +49,7 @@ Example request:
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
      --upload-file path/to/file.txt \
-     https://gitlab.example.com/api/v4/projects/24/generic/my_package/0.0.1/file.txt
+     https://gitlab.example.com/api/v4/projects/24/packages/generic/my_package/0.0.1/file.txt
 ```
 
 Example response:
@@ -85,7 +85,7 @@ Example request that uses a personal access token:
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
-     https://gitlab.example.com/api/v4/projects/24/generic/my_package/0.0.1/file.txt
+     https://gitlab.example.com/api/v4/projects/24/packages/generic/my_package/0.0.1/file.txt
 ```
 
 ## Publish a generic package by using CI/CD
@@ -137,3 +137,10 @@ Feature.disable(:generic_packages)
 # For a single project
 Feature.disable(:generic_packages, Project.find(<project id>))
 ```
+
+### Working Example
+The following repository contains a working example of creating, uploading and downloading Generic Packages in Gitlab CI.
+
+It also demonstrates how to manage a semantic version for the generic package - storing it in a CI/CD Variable, retrieving it, incrementing it and writing back to the CI/CD variable when tests for the download work correctly.
+
+[Write CI-CD Variables in Pipeline](https://gitlab.com/guided-explorations/cfg-data/write-ci-cd-variables-in-pipeline)
