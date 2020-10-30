@@ -4,9 +4,10 @@ module MergeCommits
   class ExportCsvService
     TARGET_FILESIZE = 15_000_000 # file size restricted to 15MB
 
-    def initialize(current_user, group)
+    def initialize(current_user, group, filter_params = {})
       @current_user = current_user
       @group = group
+      @filter_params = filter_params
     end
 
     def csv_data
@@ -15,7 +16,7 @@ module MergeCommits
 
     private
 
-    attr_reader :current_user, :group
+    attr_reader :current_user, :group, :filter_params
 
     def csv_builder
       @csv_builder ||= CsvBuilder.new(data, header_to_value_hash)
@@ -32,10 +33,14 @@ module MergeCommits
     end
 
     def finder_options
-      {
+      options = {
         group_id: group.id,
         state: 'merged'
       }
+
+      options[:merge_commit_sha] = filter_params[:commit_sha] if filter_params[:commit_sha].present?
+
+      options
     end
 
     def header_to_value_hash

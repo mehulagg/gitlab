@@ -62,6 +62,7 @@ class MergeRequestsFinder < IssuableFinder
     items = by_merged_at(items)
     items = by_approvals(items)
     items = by_deployments(items)
+    items = by_merge_commit_sha(items)
 
     by_source_project_id(items)
   end
@@ -77,6 +78,12 @@ class MergeRequestsFinder < IssuableFinder
     return items unless params[:commit_sha].presence
 
     items.by_commit_sha(params[:commit_sha])
+  end
+
+  def by_merge_commit_sha(items)
+    return items unless params[:merge_commit_sha].presence
+
+    items.by_merge_commit_sha(params[:merge_commit_sha])
   end
 
   def source_branch

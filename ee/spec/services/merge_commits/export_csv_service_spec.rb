@@ -57,10 +57,24 @@ RSpec.describe MergeCommits::ExportCsvService do
   end
 
   context 'with multiple merge requests' do
-    let_it_be(:merge_request_2) { create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged) }
+    let_it_be(:merge_request_2) { create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged, merge_commit_sha: 'rurebf') }
 
     it do
       expect(csv.count).to eq 2
+    end
+
+    context 'filters' do
+      context 'by commit_sha' do
+        subject { described_class.new(user, group, { commit_sha: merge_request_2.merge_commit_sha }) }
+
+        it do
+          expect(csv.count).to eq 1
+        end
+
+        it do
+          expect(csv[0]['Merge Commit']).to eq merge_request_2.merge_commit_sha
+        end
+      end
     end
   end
 
