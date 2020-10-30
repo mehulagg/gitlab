@@ -4,28 +4,27 @@ module EE
   module Service
     extend ActiveSupport::Concern
 
-    EE_SERVICE_NAMES = %w[
-      github
-      jenkins
+    EE_DEV_OR_COM_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
+      gitlab_slack_application
     ].freeze
 
     EE_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
-      gitlab_slack_application
+      github
+      jenkins
     ].freeze
 
     class_methods do
       extend ::Gitlab::Utils::Override
 
-      override :services_names
-      def services_names
-        super + EE_SERVICE_NAMES
-      end
-
       override :project_specific_services_names
       def project_specific_services_names
-        return super unless ::Gitlab.dev_env_or_com?
+        services = super + EE_PROJECT_SPECIFIC_SERVICE_NAMES
 
-        super + EE_PROJECT_SPECIFIC_SERVICE_NAMES
+        if ::Gitlab.dev_env_or_com?
+          services + EE_DEV_OR_COM_PROJECT_SPECIFIC_SERVICE_NAMES
+        else
+          services
+        end
       end
     end
   end
