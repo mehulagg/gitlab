@@ -19,7 +19,6 @@ import createBoardListMutation from '../queries/board_list_create.mutation.graph
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
-import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 
 const notImplemented = () => {
@@ -309,15 +308,6 @@ export default {
           value: data.issueSetAssignees.issue.assignees.nodes,
         });
       });
-  },
-
-  getIssueParticipants: (_, id) => {
-    return gqlClient.query({
-      query: getIssueParticipants,
-      variables: {
-        id,
-      },
-    });
   },
 
   createNewIssue: () => {

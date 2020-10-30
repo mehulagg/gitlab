@@ -57,7 +57,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['getIssueParticipants', 'setAssignees']),
+    ...mapActions(['setAssignees']),
     clearSelected() {
       this.selected = [];
     },

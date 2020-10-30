@@ -13,7 +13,6 @@ import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
 import { inactiveId } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
-import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
 
@@ -556,19 +555,6 @@ describe('moveIssue', () => {
   });
 });
 
-describe('getParticipants', () => {
-  it('calls query with the correct values', async () => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue({});
-
-    await actions.getIssueParticipants(null, '123');
-
-    expect(gqlClient.query).toHaveBeenCalledWith({
-      query: getIssueParticipants,
-      variables: { id: '123' },
-    });
-  });
-});
-
 describe('setAssignees', () => {
   const node = { username: 'name' };
   const name = 'username';
@@ -577,7 +563,7 @@ describe('setAssignees', () => {
 
   beforeEach(() => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-      data: { issueSetAssignees: { issue: { assignees: { edges: [{ node }] } } } },
+      data: { issueSetAssignees: { issue: { assignees: { nodes: [{ ...node }] } } } },
     });
   });
 
