@@ -98,11 +98,25 @@ export default {
 
         if (e.newIndex !== undefined && e.oldIndex !== e.newIndex) {
           const order = sortable.toArray();
-          const list = boardsStore.findList('id', parseInt(e.item.dataset.id, 10));
 
-          instance.$nextTick(() => {
-            boardsStore.moveList(list, order);
-          });
+          if (gon.features?.graphqlBoardLists) {
+            const { newIndex, oldIndex, to } = e;
+            const listId = instance.list.id;
+            const replacedListId = to.children[newIndex].dataset.id;
+
+            instance.moveList({
+              listId,
+              replacedListId,
+              newIndex,
+              adjustmentValue: newIndex < oldIndex ? 1 : -1,
+            });
+          } else {
+            const list = boardsStore.findList('id', parseInt(e.item.dataset.id, 10));
+
+            instance.$nextTick(() => {
+              boardsStore.moveList(list, order);
+            });
+          }
         }
       },
     });
@@ -110,7 +124,7 @@ export default {
     Sortable.create(this.$el.parentNode, sortableOptions);
   },
   methods: {
-    ...mapActions(['fetchIssuesForList']),
+    ...mapActions(['fetchIssuesForList', 'moveList']),
     showListNewIssueForm(listId) {
       eventHub.$emit('showForm', listId);
     },
