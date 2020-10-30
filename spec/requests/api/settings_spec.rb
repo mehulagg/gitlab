@@ -429,7 +429,7 @@ RSpec.describe API::Settings, 'Settings' do
         put api("/application/settings", admin), params: { secret_detection_token_revocation_enabled: true }
 
         expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['error']).to eq('secret_detection_token_revocation_url is missing')
+        expect(json_response['error']).to eq('secret_detection_token_revocation_url is missing, secret_detection_revocation_token_types_url is missing')
       end
     end
 
