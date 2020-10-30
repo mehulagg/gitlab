@@ -23566,6 +23566,12 @@ msgstr ""
 msgid "SecurityReports|Comment edited on '%{vulnerabilityName}'"
 msgstr ""
 
+msgid "SecurityReports|Could not load scanner types. Please try again later."
+msgstr ""
+
+msgid "SecurityReports|Could not retrieve custom scanners for scanner filter. Please try again later."
+msgstr ""
+
 msgid "SecurityReports|Create issue"
 msgstr ""
 
