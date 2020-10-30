@@ -22,9 +22,7 @@
 
         = render_if_exists 'personal_access_tokens/callout_max_personal_access_token_lifetime'
 
-        .js-access-tokens-expires-at
-          %expires-at-field
-            = f.text_field :expires_at, class: 'datepicker form-control gl-datepicker-input', placeholder: 'YYYY-MM-DD', autocomplete: 'off', inputmode: 'none', data: { qa_selector: 'expiry_date_field' }
+        .js-access-tokens-expires-at{ data: { options: { object_name: f.object_name, field_name: :expires_at }.to_json } }
 
   .form-group
     = f.label :scopes, _('Scopes'), class: 'label-bold'
