@@ -37,8 +37,16 @@ export const lineChartData = {
 
 export const stackedBarChartData = {
   labels: ['January', 'February'],
-  datasets: [[1, 2], [1, 2]],
-  seriesNames: ['Series 1', 'Series 2'],
+  datasets: [
+    {
+      name: 'Series 1',
+      data: [1, 2],
+    },
+    {
+      name: 'Series 2',
+      data: [1, 2],
+    },
+  ],
   xAxisTitle: 'Months',
   yAxisTitle: 'Issues',
 };
