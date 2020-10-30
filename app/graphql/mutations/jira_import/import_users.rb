@@ -22,7 +22,7 @@ module Mutations
       def resolve(project_path:, start_at: 0)
         project = authorized_find!(full_path: project_path)
 
-        service_response = ::JiraImport::UsersImporter.new(context[:current_user], project, start_at.to_i).execute
+        service_response = ::JiraImport::UsersImporter.new(current_user, project, start_at.to_i).execute
 
         {
           jira_users: service_response.payload,
@@ -37,7 +37,7 @@ module Mutations
       end
 
       def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :admin_project, project)
+        Ability.allowed?(current_user, :admin_project, project)
       end
     end
   end

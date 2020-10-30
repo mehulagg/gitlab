@@ -10,7 +10,7 @@ module Resolvers
                description: 'The name of the Geo node. Defaults to the current Geo node name.'
 
       def resolve(name: GeoNode.current_node_name)
-        GeoNodeFinder.new(context[:current_user], names: [name]).execute.first
+        GeoNodeFinder.new(current_user, names: [name]).execute.first
       end
     end
   end

@@ -31,7 +31,7 @@ module Mutations
         mapping = users_mapping.to_ary.map { |map| map.to_hash }
 
         service_response = ::JiraImport::StartImportService
-                             .new(context[:current_user], project, jira_project_key, mapping)
+                             .new(current_user, project, jira_project_key, mapping)
                              .execute
         jira_import = service_response.success? ? service_response.payload[:import_data] : nil
 
@@ -48,7 +48,7 @@ module Mutations
       end
 
       def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :admin_project, project)
+        Ability.allowed?(current_user, :admin_project, project)
       end
     end
   end

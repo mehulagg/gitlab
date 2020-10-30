@@ -62,7 +62,7 @@ module Mutations
           end
 
           def resolve(args)
-            annotation_response = ::Metrics::Dashboard::Annotations::CreateService.new(context[:current_user], annotation_create_params(args)).execute
+            annotation_response = ::Metrics::Dashboard::Annotations::CreateService.new(current_user, annotation_create_params(args)).execute
 
             annotation = annotation_response[:annotation]
 

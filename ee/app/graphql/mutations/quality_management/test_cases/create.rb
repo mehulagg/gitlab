@@ -37,7 +37,7 @@ module Mutations
 
           result = ::QualityManagement::TestCases::CreateService.new(
             project,
-            context[:current_user],
+            current_user,
             **args
           ).execute
 

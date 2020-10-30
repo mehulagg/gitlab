@@ -23,7 +23,7 @@ module Resolvers
           return registry_class.none unless geo_node_is_current?
 
           registry_finder_class.new(
-            context[:current_user],
+            current_user,
             ids: registry_ids(ids)
           ).execute
         end

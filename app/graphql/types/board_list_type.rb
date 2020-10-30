@@ -35,7 +35,7 @@ module Types
     def metadata
       strong_memoize(:metadata) do
         list = self.object
-        user = context[:current_user]
+        user = current_user
         params = (context[:issue_filters] || {}).merge(board_id: list.board_id, id: list.id)
 
         ::Boards::Issues::ListService

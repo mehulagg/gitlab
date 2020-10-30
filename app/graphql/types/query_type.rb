@@ -24,7 +24,7 @@ module Types
 
     field :current_user, Types::UserType,
           null: true,
-          resolve: -> (_obj, _args, context) { context[:current_user] },
+          resolve: -> (_obj, _args, context) { current_user },
           description: "Get information about current user"
 
     field :namespace, Types::NamespaceType,

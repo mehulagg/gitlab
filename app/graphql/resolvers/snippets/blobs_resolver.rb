@@ -26,7 +26,7 @@ module Resolvers
       end
 
       def authorized_resource?(snippet)
-        Ability.allowed?(context[:current_user], :read_snippet, snippet)
+        Ability.allowed?(current_user, :read_snippet, snippet)
       end
 
       private

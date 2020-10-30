@@ -28,7 +28,7 @@ module Resolvers
           end
 
           def admin?
-            context[:current_user].present? && context[:current_user].admin?
+            current_user.present? && current_user.admin?
           end
         end
       end

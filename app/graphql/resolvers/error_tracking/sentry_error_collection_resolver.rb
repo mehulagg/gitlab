@@ -8,7 +8,7 @@ module Resolvers
 
         service = ::ErrorTracking::ListIssuesService.new(
           project,
-          context[:current_user]
+          current_user
         )
 
         Gitlab::ErrorTracking::ErrorCollection.new(

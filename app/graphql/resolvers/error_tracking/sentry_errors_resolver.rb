@@ -9,7 +9,7 @@ module Resolvers
 
         result = ::ErrorTracking::ListIssuesService.new(
           project,
-          context[:current_user],
+          current_user,
           args
         ).execute
 

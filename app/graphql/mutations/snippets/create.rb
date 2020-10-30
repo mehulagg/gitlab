@@ -47,7 +47,7 @@ module Mutations
         end
 
         service_response = ::Snippets::CreateService.new(project,
-                                                         context[:current_user],
+                                                         current_user,
                                                          create_params(args)).execute
 
         snippet = service_response.payload[:snippet]
@@ -76,11 +76,11 @@ module Mutations
       end
 
       def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :create_snippet, project)
+        Ability.allowed?(current_user, :create_snippet, project)
       end
 
       def can_create_personal_snippet?
-        Ability.allowed?(context[:current_user], :create_snippet)
+        Ability.allowed?(current_user, :create_snippet)
       end
 
       def create_params(args)

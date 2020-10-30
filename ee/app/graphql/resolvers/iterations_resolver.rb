@@ -30,7 +30,7 @@ module Resolvers
 
       args[:include_ancestors] = true if args[:include_ancestors].nil? && args[:iid].nil?
 
-      iterations = IterationsFinder.new(context[:current_user], iterations_finder_params(args)).execute
+      iterations = IterationsFinder.new(current_user, iterations_finder_params(args)).execute
 
       # Necessary for scopedPath computation in IterationPresenter
       context[:parent_object] = parent
@@ -56,7 +56,7 @@ module Resolvers
     end
 
     def authorize!
-      Ability.allowed?(context[:current_user], :read_iteration, parent) || raise_resource_not_available_error!
+      Ability.allowed?(current_user, :read_iteration, parent) || raise_resource_not_available_error!
     end
   end
 end

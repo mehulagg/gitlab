@@ -15,7 +15,7 @@ module Resolvers
         return unless environment
 
         ::PerformanceMonitoring::PrometheusDashboard
-          .find_for(project: environment.project, user: context[:current_user], path: args[:path], options: { environment: environment })
+          .find_for(project: environment.project, user: current_user, path: args[:path], options: { environment: environment })
       end
     end
   end

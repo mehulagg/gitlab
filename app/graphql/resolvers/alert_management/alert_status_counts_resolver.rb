@@ -14,7 +14,7 @@ module Resolvers
                 description: 'Username of a user assigned to the issue'
 
       def resolve(**args)
-        ::Gitlab::AlertManagement::AlertStatusCounts.new(context[:current_user], object, args)
+        ::Gitlab::AlertManagement::AlertStatusCounts.new(current_user, object, args)
       end
     end
   end

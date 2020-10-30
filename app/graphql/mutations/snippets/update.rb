@@ -32,7 +32,7 @@ module Mutations
         snippet = authorized_find!(id: args.delete(:id))
 
         result = ::Snippets::UpdateService.new(snippet.project,
-                                               context[:current_user],
+                                               current_user,
                                                update_params(args)).execute(snippet)
         snippet = result.payload[:snippet]
 

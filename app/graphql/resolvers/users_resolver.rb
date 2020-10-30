@@ -21,7 +21,7 @@ module Resolvers
     def resolve(ids: nil, usernames: nil, sort: nil)
       authorize!
 
-      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort)).execute
+      ::UsersFinder.new(current_user, finder_params(ids, usernames, sort)).execute
     end
 
     def ready?(**args)
@@ -37,7 +37,7 @@ module Resolvers
     end
 
     def authorize!
-      Ability.allowed?(context[:current_user], :read_users_list) || raise_resource_not_available_error!
+      Ability.allowed?(current_user, :read_users_list) || raise_resource_not_available_error!
     end
 
     private

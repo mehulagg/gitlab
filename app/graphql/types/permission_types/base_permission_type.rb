@@ -14,7 +14,7 @@ module Types
       def self.ability_field(ability, **kword_args)
         unless resolving_keywords?(kword_args)
           kword_args[:resolve] ||= -> (object, args, context) do
-            can?(context[:current_user], ability, object, args.to_h)
+            can?(current_user, ability, object, args.to_h)
           end
         end
 

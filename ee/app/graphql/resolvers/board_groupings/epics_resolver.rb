@@ -39,7 +39,7 @@ module Resolvers
 
       def accessible_epics
         EpicsFinder.new(
-          context[:current_user],
+          current_user,
           group_id: group.id,
           state: :opened,
           include_ancestor_groups: true,

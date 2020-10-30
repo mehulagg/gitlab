@@ -14,7 +14,7 @@ module Resolvers
       end
 
       def authorized_resource?(project)
-        context[:current_user].present? && Ability.allowed?(context[:current_user], :read_project, project)
+        current_user.present? && Ability.allowed?(current_user, :read_project, project)
       end
     end
   end

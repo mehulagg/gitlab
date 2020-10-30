@@ -54,7 +54,7 @@ module Resolvers
       end
 
       def find_requirements(args)
-        ::RequirementsManagement::RequirementsFinder.new(context[:current_user], args).execute
+        ::RequirementsManagement::RequirementsFinder.new(current_user, args).execute
       end
     end
   end

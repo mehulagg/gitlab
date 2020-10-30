@@ -13,7 +13,7 @@ module Mutations
 
         requirement = ::RequirementsManagement::CreateRequirementService.new(
           project,
-          context[:current_user],
+          current_user,
           args
         ).execute
 

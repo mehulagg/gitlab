@@ -12,7 +12,7 @@ module Resolvers
       def resolve_with_lookahead(**args)
         apply_lookahead(
           ::Clusters::AgentsFinder
-            .new(project, context[:current_user], params: args)
+            .new(project, current_user, params: args)
             .execute
         )
       end

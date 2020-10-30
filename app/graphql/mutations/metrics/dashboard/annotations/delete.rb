@@ -17,7 +17,7 @@ module Mutations
           def resolve(id:)
             annotation = authorized_find!(id: id)
 
-            result = ::Metrics::Dashboard::Annotations::DeleteService.new(context[:current_user], annotation).execute
+            result = ::Metrics::Dashboard::Annotations::DeleteService.new(current_user, annotation).execute
 
             errors = Array.wrap(result[:message])
 

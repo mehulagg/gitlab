@@ -24,7 +24,7 @@ module Resolvers
       context.scoped_set!(:issue_filters, issue_filters(issue_filters))
 
       if load_preferences?(lookahead)
-        List.preload_preferences_for_user(lists, context[:current_user])
+        List.preload_preferences_for_user(lists, current_user)
       end
 
       Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(lists)
@@ -35,7 +35,7 @@ module Resolvers
     def board_lists(id)
       service = ::Boards::Lists::ListService.new(
         board.resource_parent,
-        context[:current_user],
+        current_user,
         list_id: extract_list_id(id)
       )
 
@@ -43,7 +43,7 @@ module Resolvers
     end
 
     def authorized_resource?(board)
-      Ability.allowed?(context[:current_user], :read_list, board)
+      Ability.allowed?(current_user, :read_list, board)
     end
 
     def load_preferences?(lookahead)

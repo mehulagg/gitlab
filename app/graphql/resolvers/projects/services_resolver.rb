@@ -23,7 +23,7 @@ module Resolvers
       end
 
       def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :admin_project, project)
+        Ability.allowed?(current_user, :admin_project, project)
       end
 
       private

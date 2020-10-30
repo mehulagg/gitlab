@@ -66,7 +66,7 @@ module Resolvers
     # MilestonesFinder does not check for current_user permissions,
     # so for now we need to keep it here.
     def authorize!
-      Ability.allowed?(context[:current_user], :read_milestone, parent) || raise_resource_not_available_error!
+      Ability.allowed?(current_user, :read_milestone, parent) || raise_resource_not_available_error!
     end
 
     def parse_gids(gids)

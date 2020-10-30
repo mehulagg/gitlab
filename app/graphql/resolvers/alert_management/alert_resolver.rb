@@ -32,7 +32,7 @@ module Resolvers
         parent = object.respond_to?(:sync) ? object.sync : object
         return ::AlertManagement::Alert.none if parent.nil?
 
-        apply_lookahead(::AlertManagement::AlertsFinder.new(context[:current_user], parent, args).execute)
+        apply_lookahead(::AlertManagement::AlertsFinder.new(current_user, parent, args).execute)
       end
 
       def preloads

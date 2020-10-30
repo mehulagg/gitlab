@@ -28,7 +28,7 @@ module Mutations
       end
 
       def authorized_resource?(snippet)
-        super && snippet.submittable_as_spam_by?(context[:current_user])
+        super && snippet.submittable_as_spam_by?(current_user)
       end
 
       def ability_name

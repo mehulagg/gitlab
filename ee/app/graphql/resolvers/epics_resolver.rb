@@ -74,7 +74,7 @@ module Resolvers
     end
 
     def find_epics(args)
-      apply_lookahead(EpicsFinder.new(context[:current_user], args).execute)
+      apply_lookahead(EpicsFinder.new(current_user, args).execute)
     end
 
     def epic_feature_enabled?

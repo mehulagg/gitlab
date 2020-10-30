@@ -20,7 +20,7 @@ module Types
       end
 
       permission_field :can_merge, calls_gitaly: true, resolve: -> (object, args, context) do
-        object.can_be_merged_by?(context[:current_user])
+        object.can_be_merged_by?(current_user)
       end
     end
   end
