@@ -830,7 +830,7 @@ module Ci
 
     def same_family_pipeline_ids
       ::Gitlab::Ci::PipelineObjectHierarchy.new(
-        base_and_ancestors(same_project: true), options: { same_project: true }
+        self.class.where(id: root_ancestor), options: { same_project: true }
       ).base_and_descendants.select(:id)
     end
 
@@ -851,6 +851,14 @@ module Ci
       ::Gitlab::Ci::PipelineObjectHierarchy
         .new(self.class.unscoped.where(id: id), options: { same_project: true })
         .base_and_descendants
+    end
+
+    def root_ancestor(same_project: true)
+      Gitlab::Ci::PipelineObjectHierarchy
+      .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
+      .base_and_ancestors
+      .load # calling .last directly reorders the results
+      .last
     end
 
     def bridge_triggered?
