@@ -103,7 +103,7 @@ helm upgrade --force --install gitlab gitlab/gitlab \
 ```
 
 If you need to specify other options related to kas sub-chart, they should be specified in
-`gitlab.kas` sub-section of your values.yaml file like this:
+`gitlab.kas` sub-section of your `values.yaml` file like this:
 
 ```shell
 gitlab:
@@ -138,7 +138,7 @@ Next, create an GitLab Rails Agent record so the Agent can associate itself with
 the configuration repository project. Creating this record also creates a Secret needed to configure
 the Agent in subsequent steps. You can create an Agent record either:
 
-- Through the Rails console, see [Starting a Rails console session](https://docs.gitlab.com/ee/administration/operations/rails_console.html#starting-a-rails-console-session) for details how to start it:
+- Through the Rails console, see [Starting a Rails console session](../../administration/operations/rails_console.md#starting-a-rails-console-session) for details how to start it:
 
   ```ruby
   project = ::Project.find_by_full_path("path-to/your-configuration-project")
@@ -208,7 +208,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
   or gRPC protocols to connect to the Agent Server. Depending on your cluster configuration and GitLab architecture, 
   you may need to use one or the other.
   - By default, `wss` scheme (an encrypted WebSockets connection) is used after you install `gitlab-kas` sub-chart or
-    enable `kas` for GitLab Omnibus. In this case, you will need to set `wss://GitLab.host.tld:443/-/kubernetes-agent` as 
+    enable `kas` for Omnibus GitLab. In this case, you will need to set `wss://GitLab.host.tld:443/-/kubernetes-agent` as 
     `kas-address` where `GitLab.host.tld` is your GitLab hostname.
   - Specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`) to use an unencrypted WebSockets connection.
   - `grpc` scheme can be used if both Agent and Server are installed in one cluster. In this case, you may specify `kas-address` value as
