@@ -4,6 +4,8 @@ module API
   class EpicLinks < ::API::Base
     include ::Gitlab::Utils::StrongMemoize
 
+    feature_category :issue_tracking
+
     before do
       authenticate!
     end

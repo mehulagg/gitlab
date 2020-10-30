@@ -2,6 +2,8 @@
 
 module API
   class EpicIssues < ::API::Base
+    feature_category :issue_tracking
+
     before do
       authenticate!
       authorize_epics_feature!
