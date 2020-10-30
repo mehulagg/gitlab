@@ -54,7 +54,7 @@ describe('DastSiteAuthSection', () => {
       'makes the component emit an "input" event when changed',
       async enabled => {
         await setAuthentication({ enabled });
-        expect(getLatestInputEventPayload().isAuthEnabled).toBe(enabled);
+        expect(getLatestInputEventPayload().fields.isAuthEnabled.value).toBe(enabled);
       },
     );
   });
@@ -85,13 +85,13 @@ describe('DastSiteAuthSection', () => {
 
         input.setValue(newValue);
 
-        expect(getLatestInputEventPayload().form.fields[inputFieldName].value).toBe(newValue);
+        expect(getLatestInputEventPayload().fields[inputFieldName].value).toBe(newValue);
       });
     });
 
     describe('validity', () => {
       it('is not valid per default', () => {
-        expect(getLatestInputEventPayload().form.state).toBe(false);
+        expect(getLatestInputEventPayload().state).toBe(false);
       });
 
       it('is valid when correct values are passed in via the "fields" prop', async () => {
@@ -99,7 +99,7 @@ describe('DastSiteAuthSection', () => {
 
         await setAuthentication({ enabled: true });
 
-        expect(getLatestInputEventPayload().form.state).toBe(true);
+        expect(getLatestInputEventPayload().state).toBe(true);
       });
 
       it('is valid once all fields have been entered correctly', () => {
@@ -109,7 +109,7 @@ describe('DastSiteAuthSection', () => {
           input.trigger('blur');
         });
 
-        expect(getLatestInputEventPayload().form.state).toBe(true);
+        expect(getLatestInputEventPayload().state).toBe(true);
       });
     });
   });

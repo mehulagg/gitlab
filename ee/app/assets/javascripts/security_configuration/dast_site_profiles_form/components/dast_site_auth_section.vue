@@ -2,9 +2,9 @@
 import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import validation from '~/vue_shared/directives/validation';
 
-const initField = value => ({
+const initField = (value, state = null) => ({
   value,
-  state: null,
+  state,
   feedback: null,
 });
 
@@ -31,6 +31,7 @@ export default {
   },
   data() {
     const {
+      authEnabled,
       authenticationUrl,
       userName,
       password,
@@ -42,6 +43,7 @@ export default {
       form: {
         state: false,
         fields: {
+          isAuthEnabled: initField(authEnabled, true),
           authenticationUrl: initField(authenticationUrl),
           userName: initField(userName),
           password: initField(password),
@@ -49,28 +51,19 @@ export default {
           passwordFormField: initField(passwordFormField),
         },
       },
-      isAuthEnabled: this.fields.authEnabled,
     };
   },
   computed: {
     showValidationOrInEditMode() {
       return this.showValidation || Object.keys(this.fields).length > 0;
     },
-    eventData() {
-      const { form, isAuthEnabled } = this;
-      return {
-        form,
-        isAuthEnabled,
-      };
-    },
   },
   watch: {
-    isAuthEnabled: 'emitUpdate',
     form: { handler: 'emitUpdate', immediate: true, deep: true },
   },
   methods: {
     emitUpdate() {
-      this.$emit('input', this.eventData);
+      this.$emit('input', this.form);
     },
   },
 };
@@ -79,11 +72,11 @@ export default {
 <template>
   <section>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-form-checkbox v-model="isAuthEnabled" data-testid="auth-enabled-check">{{
+      <gl-form-checkbox v-model="form.fields.isAuthEnabled.value">{{
         s__('DastProfiles|Enable Authentication')
       }}</gl-form-checkbox>
     </gl-form-group>
-    <div v-if="isAuthEnabled" data-testid="auth-form">
+    <div v-if="form.fields.isAuthEnabled.value" data-testid="auth-form">
       <div class="row">
         <gl-form-group
           :label="s__('DastProfiles|Authentication URL')"
