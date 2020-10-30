@@ -12,10 +12,18 @@ export default {
       default: '',
     },
   },
+  mounted() {
+    console.log('Mounting text editor....');
+  },
 };
 </script>
 <template>
   <div class="gl-border-solid gl-border-gray-100 gl-border-1">
-    <editor-lite v-model="value" file-name="*.yml" :editor-options="{ readOnly: true }" />
+    <editor-lite
+      v-model="value"
+      file-name="*.yml"
+      :editor-options="{ readOnly: true }"
+      @editor-ready="$emit('editor-ready')"
+    />
   </div>
 </template>

@@ -1,8 +1,9 @@
 <script>
-import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { GlLoadingIcon, GlAlert, GlTabs, GlTab } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 
 import TextEditor from './components/text_editor.vue';
+import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 
 import getBlobContent from './graphql/queries/blob_content.graphql';
 
@@ -10,7 +11,10 @@ export default {
   components: {
     GlLoadingIcon,
     GlAlert,
+    GlTabs,
+    GlTab,
     TextEditor,
+    PipelineGraph,
   },
   props: {
     projectPath: {
@@ -31,6 +35,7 @@ export default {
     return {
       error: null,
       content: '',
+      editorReady: false,
     };
   },
   apollo: {
@@ -69,10 +74,46 @@ export default {
 
       return sprintf(this.$options.i18n.errorMessageWithReason, { reason });
     },
+    pipelineData() {
+      return {
+        stages: [
+          {
+            name: 'test',
+            groups: [
+              {
+                id: '10',
+                name: 'jest',
+                size: 2,
+                jobs: [{ id: '100', name: 'jest 1/2' }, { id: '101', name: 'jest 2/2' }],
+              },
+              {
+                id: '11',
+                name: 'rspec',
+                size: 1,
+                jobs: [{ id: '110', name: 'rspec' }],
+              },
+            ],
+          },
+          {
+            name: 'post-test',
+            groups: [
+              {
+                id: '20',
+                name: 'jest-coverage',
+                size: 1,
+                jobs: [{ id: '200', name: 'jest-coverage', needs: ['jest'] }],
+              },
+            ],
+          },
+        ],
+      };
+    },
   },
   i18n: {
     unknownMessage: __('Unknown Error'),
     errorMessageWithReason: s__('Pipelines|CI file could not be loaded: %{reason}'),
+    tabEdit: s__('Pipelines|Write pipeline configuration'),
+    tabGraph: s__('Pipelines|Visualize'),
   },
 };
 </script>
@@ -82,7 +123,18 @@ export default {
     <gl-alert v-if="error" :dismissible="false" variant="danger">{{ errorMessage }}</gl-alert>
     <div class="gl-mt-4">
       <gl-loading-icon v-if="loading" size="lg" />
-      <text-editor v-else v-model="content" />
+      <div v-else class="file-editor">
+        <gl-tabs nav-class="nav-links">
+          <gl-tab :title="$options.i18n.tabEdit" :lazy="!editorReady">
+            <text-editor v-model="content" @editor-ready="editorReady = true" />
+          </gl-tab>
+          <gl-tab :title="$options.i18n.tabGraph">
+            <keep-alive>
+              <pipeline-graph :pipeline-data="pipelineData" />
+            </keep-alive>
+          </gl-tab>
+        </gl-tabs>
+      </div>
     </div>
   </div>
 </template>
