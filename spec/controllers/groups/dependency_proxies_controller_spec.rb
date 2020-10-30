@@ -60,7 +60,8 @@ RSpec.describe Groups::DependencyProxiesController do
   end
 
   def enable_dependency_proxy
-    allow(Gitlab.config.dependency_proxy)
-      .to receive(:enabled).and_return(true)
+    stub_config(dependency_proxy: { enabled: true })
+
+    group.create_dependency_proxy_setting!(enabled: true)
   end
 end

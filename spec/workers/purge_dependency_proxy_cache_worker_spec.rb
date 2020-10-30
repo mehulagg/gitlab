@@ -12,6 +12,7 @@ RSpec.describe PurgeDependencyProxyCacheWorker do
 
   before do
     stub_config(dependency_proxy: { enabled: true })
+    group.create_dependency_proxy_setting!(enabled: true)
   end
 
   describe '#perform' do

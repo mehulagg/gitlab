@@ -12,6 +12,7 @@ RSpec.describe API::DependencyProxy, api: true do
   before do
     group.add_owner(user)
     stub_config(dependency_proxy: { enabled: true })
+    group.create_dependency_proxy_setting!(enabled: true)
   end
 
   describe 'DELETE /groups/:id/dependency_proxy/cache' do
