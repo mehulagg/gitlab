@@ -19,6 +19,7 @@ export default {
           list: data?.project?.terraformStates?.nodes,
         };
       },
+      error() {},
     },
   },
   components: {
