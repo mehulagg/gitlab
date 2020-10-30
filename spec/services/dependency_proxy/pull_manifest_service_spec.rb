@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe DependencyProxy::PullManifestService do
-  include EE::DependencyProxyHelpers
+  include DependencyProxyHelpers
 
   let(:image) { 'alpine' }
   let(:tag) { '3.9' }

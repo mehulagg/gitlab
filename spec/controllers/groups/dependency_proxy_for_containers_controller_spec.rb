@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Groups::DependencyProxyForContainersController do
   include HttpBasicAuthHelpers
-  include EE::DependencyProxyHelpers
+  include DependencyProxyHelpers
 
   let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }

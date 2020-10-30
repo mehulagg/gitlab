@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Groups::DependencyProxyAuthController do
-  include EE::DependencyProxyHelpers
+  include DependencyProxyHelpers
 
   describe 'GET #pre_request' do
     subject { get :pre_request }

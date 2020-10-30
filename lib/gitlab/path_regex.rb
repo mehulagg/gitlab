@@ -253,6 +253,14 @@ module Gitlab
       %r{#{personal_snippet_path_regex}|#{project_snippet_path_regex}}
     end
 
+    def container_image_regex
+      @container_image_regex ||= %r{([\w\.-]+\/){0,1}[\w\.-]+}.freeze
+    end
+
+    def container_image_blob_sha_regex
+      @container_image_blob_sha_regex ||= %r{[\w+.-]+:?[\w]+}.freeze
+    end
+
     private
 
     def personal_snippet_path_regex
@@ -275,14 +283,6 @@ module Gitlab
       # Turns a multiline extended regexp into a single line one,
       # because `rake routes` breaks on multiline regexes.
       Regexp.new(regex.source.gsub(/\(\?#.+?\)/, '').gsub(/\s*/, ''), regex.options ^ Regexp::EXTENDED).freeze
-    end
-
-    def container_image_regex
-      @container_image_regex ||= %r{([\w\.-]+\/){0,1}[\w\.-]+}.freeze
-    end
-
-    def container_image_blob_sha_regex
-      @container_image_blob_sha_regex ||= %r{[\w+.-]+:?[\w]+}.freeze
     end
   end
 end
