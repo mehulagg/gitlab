@@ -245,7 +245,6 @@ quickly share your project with others.
 ### Enabling Live Preview
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/268288) in GitLab 12.9,
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/268288) in GitLab 12.9,
   third-party assets and libraries required for Live Preview are hosted at
   `https://sandbox-prod.gitlab-static.net` when it is enabled. However, some
   libraries are still served from other third-party services which may or may not be
