@@ -3,6 +3,9 @@ pre-push:
   commands:
     danger:
       run: bundle exec danger dry_run
+    docs:
+      tags: documentation style
+      run: yarn lint-docs
     eslint:
       tags: frontend style
       files: git diff --name-only $(git merge-base origin/master HEAD)..HEAD
