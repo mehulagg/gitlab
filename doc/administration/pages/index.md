@@ -475,8 +475,8 @@ the below steps to do a no downtime transfer to a new storage location.
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. `rsync` contents from current storage location to new storage location: `sudo rsync -avzh --progress /var/opt/gitlab/gitlab-rails/shared/pages/ /mnt/storage/pages`
-1. Set new storage location in `/etc/gitlab/gitlab.rb`:
+1. `rsync` contents from the current storage location to the new storage location: `sudo rsync -avzh --progress /var/opt/gitlab/gitlab-rails/shared/pages/ /mnt/storage/pages`
+1. Set the new storage location in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
    gitlab_rails['pages_path'] = "/mnt/storage/pages"
