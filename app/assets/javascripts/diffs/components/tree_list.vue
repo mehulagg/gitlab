@@ -2,6 +2,10 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
+
+import eventHub from '../event_hub';
+import { EVT_PERF_MARK_FILE_TREE_END, EVT_PERF_MARK_FILE_TREE_START } from '../constants';
+
 import FileTree from '~/vue_shared/components/file_tree.vue';
 import DiffFileRow from './diff_file_row.vue';
 
@@ -47,6 +51,14 @@ export default {
         return acc;
       }, []);
     },
+  },
+  beforeCreate() {
+    eventHub.$emit(EVT_PERF_MARK_FILE_TREE_START);
+  },
+  async mounted() {
+    await this.$nextTick();
+
+    eventHub.$emit(EVT_PERF_MARK_FILE_TREE_END);
   },
   methods: {
     ...mapActions('diffs', ['toggleTreeOpen', 'scrollToFile']),

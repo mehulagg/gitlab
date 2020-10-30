@@ -15,6 +15,9 @@ import {
   DIFF_FILE_AUTOMATIC_COLLAPSE,
   DIFF_FILE_MANUAL_COLLAPSE,
   EVT_EXPAND_ALL_FILES,
+  EVT_PERF_MARK_DIFF_FILES_END,
+  EVT_PERF_MARK_DIFF_FILES_START,
+  EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN,
 } from '../constants';
 import { DIFF_FILE, GENERIC_ERROR } from '../i18n';
 import eventHub from '../event_hub';
@@ -33,6 +36,14 @@ export default {
   props: {
     file: {
       type: Object,
+      required: true,
+    },
+    listPosition: {
+      type: Number,
+      required: true,
+    },
+    filesCount: {
+      type: Number,
       required: true,
     },
     canCurrentUserFork: {
@@ -159,6 +170,30 @@ export default {
   created() {
     notesEventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
     eventHub.$on(EVT_EXPAND_ALL_FILES, this.expandAllListener);
+  },
+  beforeMount() {
+    if (this.listPosition === 0) {
+      eventHub.$emit(EVT_PERF_MARK_DIFF_FILES_START);
+    }
+  },
+  async mounted() {
+    const events = [];
+
+    if (this.listPosition === 0) {
+      events.push(EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN);
+    }
+
+    if (this.listPosition === this.filesCount - 1) {
+      events.push(EVT_PERF_MARK_DIFF_FILES_END);
+    }
+
+    if (events.length) {
+      await this.$nextTick();
+
+      events.forEach(event => {
+        eventHub.$emit(event);
+      });
+    }
   },
   beforeDestroy() {
     eventHub.$off(EVT_EXPAND_ALL_FILES, this.expandAllListener);
