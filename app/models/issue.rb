@@ -177,6 +177,10 @@ class Issue < ApplicationRecord
       issue.closed_at = nil
       issue.closed_by = nil
     end
+
+    after_transition do |issue|
+      issue.refresh_blocking_and_blocked_issues_cache!
+    end
   end
 
   # Alias to state machine .with_state_id method
@@ -425,6 +429,10 @@ class Issue < ApplicationRecord
 
   def relocation_target
     moved_to || duplicated_to
+  end
+
+  def refresh_blocking_and_blocked_issues_cache!
+    # Overriden in EE
   end
 
   private

@@ -86,8 +86,12 @@ module EE
       blocking_issues_ids.any?
     end
 
+    def blocked_by_issues
+      self.class.where(id: blocking_issues_ids)
+    end
+
     # Used on EE::IssueEntity to expose blocking issues URLs
-    def blocked_by_issues(user)
+    def blocked_by_issues_for(user)
       return ::Issue.none unless blocked?
 
       issues =
@@ -208,6 +212,13 @@ module EE
       blocking_count = ::IssueLink.blocking_issues_count_for(self)
 
       update!(blocking_issues_count: blocking_count)
+    end
+
+    override :refresh_blocking_and_blocked_issues_cache!
+    def refresh_blocking_and_blocked_issues_cache!
+      update_blocking_issues_count!
+
+      blocked_by_issues.each(&:update_blocking_issues_count!)
     end
 
     override :relocation_target
