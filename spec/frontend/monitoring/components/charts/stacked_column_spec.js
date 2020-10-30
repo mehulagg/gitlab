@@ -44,11 +44,11 @@ describe('Stacked column chart component', () => {
     });
 
     it('data should match the graphData y value for each series', () => {
-      const data = findChart().props('data');
+      const data = findChart().props('bars');
 
       data.forEach((series, index) => {
         const { values } = stackedColumnMockedData.metrics[index].result[0];
-        expect(series).toEqual(values.map(value => value[1]));
+        expect(series.data).toEqual(values.map(value => value[1]));
       });
     });
 

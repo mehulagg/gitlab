@@ -61,7 +61,7 @@ export default {
   },
   computed: {
     chartData() {
-      return this.graphData.metrics.map(({ result }) => {
+      const mappedData = this.graphData.metrics.map(({ result }) => {
         // This needs a fix. Not only metrics[0] should be shown.
         // See https://gitlab.com/gitlab-org/gitlab/-/issues/220492
         if (!result || result.length === 0) {
@@ -69,6 +69,7 @@ export default {
         }
         return result[0].values.map(val => val[1]);
       });
+      return [{ name: 'full', data: mappedData[0] }];
     },
     xAxisTitle() {
       return this.graphData.x_label !== undefined ? this.graphData.x_label : '';
@@ -136,7 +137,7 @@ export default {
     <gl-stacked-column-chart
       ref="chart"
       v-bind="$attrs"
-      :data="chartData"
+      :bars="chartData"
       :option="chartOptions"
       :x-axis-title="xAxisTitle"
       :y-axis-title="yAxisTitle"
