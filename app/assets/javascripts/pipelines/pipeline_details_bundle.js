@@ -143,10 +143,10 @@ export default async function() {
 
   if (gon.features.graphqlPipelineDetails) {
     try {
-      const createPipelinesDetailApp = await import(
+      const { createPipelinesDetailApp } = await import(
         /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
       );
-      createPipelinesDetailApp.default();
+      createPipelinesDetailApp();
     } catch {
       Flash(__('An error occurred while loading the pipeline.'));
     }
