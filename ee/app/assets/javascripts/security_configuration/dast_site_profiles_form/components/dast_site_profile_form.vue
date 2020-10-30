@@ -18,7 +18,6 @@ import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import validation from '~/vue_shared/directives/validation';
 import DastSiteValidation from './dast_site_validation.vue';
-import DastSiteAuthSection from './dast_site_auth_section.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
@@ -44,7 +43,6 @@ export default {
     GlFormInput,
     GlModal,
     GlToggle,
-    DastSiteAuthSection,
     DastSiteValidation,
   },
   directives: {
@@ -81,7 +79,6 @@ export default {
     return {
       fetchValidationTimeout: null,
       form,
-      authSection: {},
       initialFormValues: serializeFormObject(form.fields),
       isFetchingValidationStatus: false,
       isValidatingSite: false,
@@ -281,7 +278,7 @@ export default {
     onSubmit() {
       this.form.showValidation = true;
 
-      if (!this.form.state || (this.authSection.isAuthEnabled && !this.authSection.form.state)) {
+      if (!this.form.state) {
         return;
       }
 
@@ -444,8 +441,6 @@ export default {
         />
       </gl-collapse>
     </template>
-
-    <dast-site-auth-section v-model="authSection" :show-validation="form.showValidation" />
 
     <hr />
 

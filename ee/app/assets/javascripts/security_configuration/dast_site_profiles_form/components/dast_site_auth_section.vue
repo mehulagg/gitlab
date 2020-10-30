@@ -43,7 +43,7 @@ export default {
       form: {
         state: false,
         fields: {
-          isAuthEnabled: initField(authEnabled, true),
+          authEnabled: initField(authEnabled, true),
           authenticationUrl: initField(authenticationUrl),
           userName: initField(userName),
           password: initField(password),
@@ -72,11 +72,11 @@ export default {
 <template>
   <section>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
-      <gl-form-checkbox v-model="form.fields.isAuthEnabled.value">{{
+      <gl-form-checkbox v-model="form.fields.authEnabled.value">{{
         s__('DastProfiles|Enable Authentication')
       }}</gl-form-checkbox>
     </gl-form-group>
-    <div v-if="form.fields.isAuthEnabled.value" data-testid="auth-form">
+    <div v-if="form.fields.authEnabled.value" data-testid="auth-form">
       <div class="row">
         <gl-form-group
           :label="s__('DastProfiles|Authentication URL')"

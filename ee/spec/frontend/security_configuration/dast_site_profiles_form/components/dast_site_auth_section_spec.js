@@ -54,7 +54,7 @@ describe('DastSiteAuthSection', () => {
       'makes the component emit an "input" event when changed',
       async enabled => {
         await setAuthentication({ enabled });
-        expect(getLatestInputEventPayload().fields.isAuthEnabled.value).toBe(enabled);
+        expect(getLatestInputEventPayload().fields.authEnabled.value).toBe(enabled);
       },
     );
   });
