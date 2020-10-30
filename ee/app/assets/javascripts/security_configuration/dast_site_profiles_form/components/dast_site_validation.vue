@@ -158,7 +158,7 @@ export default {
         } = await this.$apollo.mutate({
           mutation: dastSiteValidationCreateMutation,
           variables: {
-            projectFullPath: this.fullPath,
+            fullPath: this.fullPath,
             dastSiteTokenId: this.tokenId,
             validationPath: this.validationPath,
             strategy: this.validationMethod,
