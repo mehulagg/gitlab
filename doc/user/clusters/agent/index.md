@@ -201,22 +201,20 @@ Next, install the in-cluster component of the Agent. This example file contains 
 Kubernetes resources required for the Agent to be installed. You can modify this
 example [`resources.yml` file](#example-resourcesyml-file) in the following ways:
 
-- You can replace `gitlab-agent` with `<YOUR-DESIRED-NAMESPACE>`.
-- For the `kas-address` (Kubernetes Agent Server), the agent can use the WebSockets
-  or gRPC protocols to connect to the Agent Server. Depending on your cluster
-  configuration and GitLab architecture, you may need to use one or the other.
-  For the `gitlab-kas` Helm chart, an Ingress is created for the Agent Server using
-  the `/-/kubernetes-agent` endpoint. This can be used for the WebSockets protocol connection.
-  - Specify the `grpc` scheme (such as `grpc://gitlab-kas:5005`) to use gRPC directly.
-    Encrypted gRPC is not supported yet. Follow the
+- You will need to replace `namespace: gitlab-agent` with `namespace: <YOUR-DESIRED-NAMESPACE>`.
+- There are several ways how `kas-address` (Kubernetes Agent Server) can be configured. The agent can use the WebSockets
+  or gRPC protocols to connect to the Agent Server. Depending on your cluster configuration and GitLab architecture, 
+  you may need to use one or the other.
+  - By default, `wss` scheme (an encrypted WebSockets connection) is used after you install `gitlab-kas` sub-chart or
+    enable `kas` for GitLab Omnibus. In this case, you will need to set `wss://GitLab.host.tld:443/-/kubernetes-agent` as 
+    `kas-address` where `GitLab.host.tld` is your GitLab hostname.
+  - Specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`) to use an unencrypted WebSockets connection.
+  - `grpc` scheme can be used if both Agent and Server are installed in one cluster. In this case, you may specify `kas-address` value as
+    `grpc://gitlab-kas.<your-namespace>:5005`) to use gRPC directly. Here `gitlab-kas` is the name of the service created by `gitlab-kas` chart,
+    and `your-namespace` is the namespace where the chart was installed. Encrypted gRPC is not supported yet. Follow the
     [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7)
     for progress updates.
-  - Specify the `ws` scheme (such as `ws://gitlab-kas-ingress:80/-/kubernetes-agent`)
-    to use an unencrypted WebSockets connection.
-  - Specify the `wss` scheme (such as `wss://gitlab-kas-ingress:443/-/kubernetes-agent`)
-    to use an encrypted WebSockets connection. This is the recommended option if
-    installing the Agent into a separate cluster from your Agent Server.
-- If you defined your own secret name, replace `gitlab-agent-token` with your secret name.
+- If you defined your own secret name, replace `gitlab-agent-token` with your secret name in `secretName:` section.
 
 To apply this file, run the following command:
 
