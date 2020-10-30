@@ -91,20 +91,20 @@ module UsersHelper
     end
   end
 
-  def work_information(user)
+  def work_information(user, with_schema_markup: false)
     return unless user
 
     organization = user.organization
     job_title = user.job_title
 
     if organization.present? && job_title.present?
-      s_('Profile|%{job_title} at %{organization}') % { job_title: job_title, organization: organization }
+      render_job_title_and_organization(job_title, organization,with_schema_markup: with_schema_markup)
     elsif job_title.present?
-      job_title
+      render_job_title(job_title, with_schema_markup: with_schema_markup)
     elsif organization.present?
-      organization
+      render_organization(organization, with_schema_markup: with_schema_markup)
     end
-  end
+  end  
 
   def can_force_email_confirmation?(user)
     !user.confirmed?
@@ -150,6 +150,38 @@ module UsersHelper
     items << :start_trial if trials_allowed?(current_user)
 
     items
+  end
+
+  def render_job_title(job_title, with_schema_markup: false)
+    if with_schema_markup
+      content_tag :span, itemprop: 'jobTitle' do
+        job_title
+      end
+    else
+      job_title
+    end
+  end
+
+  def render_organization(organization, with_schema_markup: false)
+    if with_schema_markup
+      content_tag :span, itemprop: 'worksFor' do
+        organization
+      end
+    else
+      organization
+    end
+  end
+
+  def render_job_title_and_organization(job_title, organization, with_schema_markup: false)    
+    job_title_start, org_title_start, span_end = nil
+
+    if with_schema_markup
+      job_title_start = '<span itemprop="jobTitle">'.html_safe
+      org_title_start = '<span itemprop="worksFor">'.html_safe
+      span_end = '</span>'.html_safe
+    end
+
+    html_escape(s_('Profile|%{job_title_start}%{job_title}%{span_end} at %{org_title_start}%{organization}%{span_end}')) % { job_title: job_title, organization: organization, job_title_start: job_title_start, org_title_start: org_title_start, span_end: span_end }
   end
 end
 
