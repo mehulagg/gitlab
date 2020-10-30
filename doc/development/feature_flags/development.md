@@ -32,8 +32,16 @@ Choose a feature flag type that matches the expected usage.
 `development` feature flags are short-lived feature flags,
 used so that unfinished code can be deployed in production.
 
-A `development` feature flag should have a rollout issue,
-ideally created using the [Feature Flag Roll Out template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md).
+A `development` feature flag should correctly set a rollout issue URL.
+In typical development, you can set the original issue as the rollout issue.
+Once the original issue transitions to [`~workflow::verification` phase](https://about.gitlab.com/handbook/engineering/workflow/#updating-issues-throughout-development),
+rollout process can be began. While you perform rollout and measure the outcome,
+you should keep the original issue's description up-to-date to let anyone, including customers, users and stable counter-parts (e.g. PM/UX/EM),
+easily track the progress of the rollout.
+You can copy-and-paste [TODO list for rollout](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md)
+into the original issue's description for a quick setup.
+Alternatively, you can create [a new issue from a template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md)
+to isolate the rollout progress from the original issue.
 
 NOTE: **Note:**
 This is the default type used when calling `Feature.enabled?`.
