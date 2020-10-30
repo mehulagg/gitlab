@@ -137,7 +137,7 @@ Next, create an GitLab Rails Agent record so the Agent can associate itself with
 the configuration repository project. Creating this record also creates a Secret needed to configure
 the Agent in subsequent steps. You can create an Agent record either:
 
-- Through the Rails console, by running `rails c`:
+- Through the Rails console, see [Starting a Rails console session](https://docs.gitlab.com/ee/administration/operations/rails_console.html#starting-a-rails-console-session) for details how to start it:
 
   ```ruby
   project = ::Project.find_by_full_path("path-to/your-configuration-project")
