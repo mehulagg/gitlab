@@ -5,8 +5,8 @@
   self-managed: true
   gitlab-com: true
   packages: [Starter, Premium, Ultimate]
-  url: https://www.youtube.com/watch?v=31pNKjenlJY&feature=emb_title
-  image_url: http://i3.ytimg.com/vi/31pNKjenlJY/maxresdefault.jpg
+  url: https://www.youtube.com/watch?v=31pNKjenlJY
+  image_url: app/assets/images/whats_new/issues-to-iterations.jpg
   published_at: 2020-07-22
   release: 13.2
 - title: Container Host Monitoring and Blocking
@@ -15,8 +15,8 @@
   self-managed: true
   gitlab-com: true
   packages: [All]
-  url: https://www.youtube.com/watch?v=WxBzBz76FxU&feature=youtu.be
-  image_url: http://i3.ytimg.com/vi/WxBzBz76FxU/hqdefault.jpg
+  url: https://www.youtube.com/watch?v=WxBzBz76FxU
+  image_url: app/assets/images/whats_new/container-host-monitoring.jpg
   published_at: 2020-07-22
   release: 13.2
 - title: Official GitLab-Figma Plugin
