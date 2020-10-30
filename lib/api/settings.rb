@@ -131,6 +131,7 @@ module API
       optional :secret_detection_token_revocation_enabled, type: Boolean, desc: 'Enable Secret Detection Token Revocation'
       given secret_detection_token_revocation_enabled: ->(val) { val } do
         requires :secret_detection_token_revocation_url, type: String, desc: 'The configured Secret Detection Token Revocation instance URL'
+        requires :secret_detection_revocation_token_types_url, type: String, desc: 'The configured Secret Detection Revocation Token Types instance URL'
       end
       optional :send_user_confirmation_email, type: Boolean, desc: 'Send confirmation email on sign-up'
       optional :session_expire_delay, type: Integer, desc: 'Session duration in minutes. GitLab restart is required to apply changes.'

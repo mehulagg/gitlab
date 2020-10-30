@@ -61,6 +61,8 @@ module EE
         :secret_detection_token_revocation_enabled,
         :secret_detection_token_revocation_url,
         :secret_detection_token_revocation_token,
+        :secret_detection_revocation_token_types_url,
+        :secret_detection_revocation_token_types_token,
         :shared_runners_minutes,
         :slack_app_enabled,
         :slack_app_id,

@@ -146,6 +146,8 @@ module EE
           secret_detection_token_revocation_enabled: false,
           secret_detection_token_revocation_url: nil,
           secret_detection_token_revocation_token: nil,
+          secret_detection_revocation_token_types_url: nil,
+          secret_detection_revocation_token_types_token: nil,
           slack_app_enabled: false,
           slack_app_id: nil,
           slack_app_secret: nil,
