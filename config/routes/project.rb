@@ -318,6 +318,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         get 'issues/incident/:id' => 'incidents#show', as: :issues_incident
 
+        resources :on_call_schedule, only: [:index]
+
         namespace :error_tracking do
           resources :projects, only: :index
         end

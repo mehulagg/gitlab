@@ -459,6 +459,7 @@ module ProjectsHelper
       error_tracking:     :read_sentry_issue,
       alert_management:   :read_alert_management_alert,
       incidents:          :read_issue,
+      on_call_schedule:   :read_issue,
       labels:             :read_label,
       issues:             :read_issue,
       project_members:    :read_project_member,
@@ -470,7 +471,7 @@ module ProjectsHelper
   def can_view_operations_tab?(current_user, project)
     [
       :metrics_dashboard,
-      :read_alert_management_alert,
+      :read_on_call_schedule,
       :read_environment,
       :read_issue,
       :read_sentry_issue,
@@ -747,6 +748,7 @@ module ProjectsHelper
       alert_management
       incidents
       incident_management
+      on_call_schedule
       user
       gcp
       logs
