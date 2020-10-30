@@ -3414,7 +3414,7 @@ input CreateBoardInput {
   clientMutationId: String
 
   """
-  The group full path the board is associated with.
+  The group full path the resource is associated with
   """
   groupPath: ID
 
@@ -3434,7 +3434,7 @@ input CreateBoardInput {
   name: String
 
   """
-  The project full path the board is associated with.
+  The project full path the resource is associated with
   """
   projectPath: ID
 

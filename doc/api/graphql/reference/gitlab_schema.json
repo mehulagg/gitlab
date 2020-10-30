@@ -9226,7 +9226,7 @@
           "inputFields": [
             {
               "name": "projectPath",
-              "description": "The project full path the board is associated with.",
+              "description": "The project full path the resource is associated with",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -9236,7 +9236,7 @@
             },
             {
               "name": "groupPath",
-              "description": "The group full path the board is associated with.",
+              "description": "The group full path the resource is associated with",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
