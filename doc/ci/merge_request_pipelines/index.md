@@ -130,7 +130,7 @@ save resources.
 
 ### Using SAST, DAST, and other Secure Templates with Pipelines for Merge Requests 
 
-To use [Secure templates]() with pipelines for merge requests, a `rules: if: merge_request_event` may need to be applied for the Secure scans to be run in the same pipeline as the commit. 
+To use [Secure templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Security) with pipelines for merge requests, a `rules: if: merge_request_event` may need to be applied for the Secure scans to be run in the same pipeline as the commit. 
 
 
 #### Excluding certain branches
