@@ -158,7 +158,6 @@ RSpec.describe Groups::DependencyProxyForContainersController do
   end
 
   def enable_dependency_proxy
-    stub_licensed_features(dependency_proxy: true)
     group.create_dependency_proxy_setting!(enabled: true)
   end
 end

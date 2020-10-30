@@ -12,7 +12,6 @@ RSpec.describe API::DependencyProxy, api: true do
   before do
     group.add_owner(user)
     stub_config(dependency_proxy: { enabled: true })
-    stub_licensed_features(dependency_proxy: true)
   end
 
   describe 'DELETE /groups/:id/dependency_proxy/cache' do
@@ -63,15 +62,6 @@ RSpec.describe API::DependencyProxy, api: true do
     context 'depencency proxy is not enabled' do
       before do
         stub_config(dependency_proxy: { enabled: false })
-      end
-
-      it_behaves_like 'returning response status', :not_found
-    end
-
-    context 'dependency feature is not available' do
-      before do
-        stub_config(dependency_proxy: { enabled: true })
-        stub_licensed_features(dependency_proxy: false)
       end
 
       it_behaves_like 'returning response status', :not_found
