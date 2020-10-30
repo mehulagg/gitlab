@@ -1,0 +1,8 @@
+---
+name: ci_new_artifact_file_reader
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.6'
+type: development
+group: group::pipeline authoring
+default_enabled: false
