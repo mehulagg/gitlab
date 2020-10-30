@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlToggle } from '@gitlab/ui';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import Tracking from '~/tracking';
 import store from '~/boards/stores';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
@@ -30,7 +31,7 @@ export default () =>
       },
 
       onStorageUpdate(val) {
-        this.setShowLabels(JSON.parse(val));
+        this.setShowLabels(parseBoolean(val));
       },
     },
     template: `
