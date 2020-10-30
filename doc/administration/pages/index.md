@@ -475,7 +475,7 @@ transfer to a new storage location.
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. `rsync` contents from current folder to new storage location: `sudo rsync -avzh --progress /var/opt/gitlab/gitlab-rails/shared/pages/ /mnt/storage/pages`
+1. `rsync` contents from current storage location to new storage location: `sudo rsync -avzh --progress /var/opt/gitlab/gitlab-rails/shared/pages/ /mnt/storage/pages`
 1. Set new storage location in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
