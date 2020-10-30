@@ -45,8 +45,8 @@
   self-managed: true
   gitlab-com: true
   packages: [starter, premium, ultimate]
-  url: https://www.youtube.com/embed/1FBRaBQTQZk
-  image_url: http://i3.ytimg.com/vi/1FBRaBQTQZk/maxresdefault.jpg
+  url: https://www.youtube.com/watch?v=1FBRaBQTQZk
+  image_url: /app/assets/images/whats_new/feature-flags-core.jpg
   published_at: 2020-09-22
   release: 13.4
 - title: Quick navigation using the Search bar
