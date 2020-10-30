@@ -4,12 +4,21 @@ import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_fo
 describe('DastSiteAuthSection', () => {
   let wrapper;
 
-  const createComponent = () => {
-    wrapper = mount(DastSiteAuthSection);
+  const createComponent = ({ fields, authEnabled } = {}) => {
+    wrapper = mount(DastSiteAuthSection, {
+      propsData: {
+        fields,
+        authEnabled,
+      },
+    });
   };
 
   beforeEach(() => {
     createComponent();
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   const findByNameAttribute = name => wrapper.find(`[name="${name}"]`);
@@ -28,9 +37,15 @@ describe('DastSiteAuthSection', () => {
   };
 
   describe('authentication toggle', () => {
-    it('it is disabled per default', () => {
-      expect(findAuthToggle().props('value')).toBe(false);
-    });
+    it.each(
+      [true, false],
+      'is set correctly when the "auth-enabled" prop is set to "%s"',
+      authEnabled => {
+        createComponent({ authEnabled });
+
+        expect(findAuthToggle().props('value')).toBe(authEnabled);
+      },
+    );
 
     it('controls the visibility of the authentication-fields form', async () => {
       expect(findByTestId('auth-form').exists()).toBe(false);
@@ -80,6 +95,14 @@ describe('DastSiteAuthSection', () => {
     describe('validity', () => {
       it('is not valid per default', () => {
         expect(getLatestInputEventPayload().form.state).toBe(false);
+      });
+
+      it('is valid when correct values are passed in via the "fields" prop', async () => {
+        createComponent({ fields: inputFieldsWithValues });
+
+        await setAuthToggle({ enabled: true });
+
+        expect(getLatestInputEventPayload().form.state).toBe(true);
       });
 
       it('is valid once all fields have been entered correctly', () => {

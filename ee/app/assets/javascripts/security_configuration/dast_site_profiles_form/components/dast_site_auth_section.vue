@@ -18,6 +18,16 @@ export default {
     validation: validation(),
   },
   props: {
+    authEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    fields: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
     showValidation: {
       type: Boolean,
       required: false,
@@ -25,23 +35,32 @@ export default {
     },
   },
   data() {
-    const form = {
-      state: false,
-      fields: {
-        authenticationUrl: initField(),
-        userName: initField(),
-        password: initField(),
-        userNameFormField: initField(),
-        passwordFormField: initField(),
-      },
-    };
+    const {
+      authenticationUrl,
+      userName,
+      password,
+      userNameFormField,
+      passwordFormField,
+    } = this.fields;
 
     return {
-      form,
-      isAuthEnabled: false,
+      form: {
+        state: false,
+        fields: {
+          authenticationUrl: initField(authenticationUrl),
+          userName: initField(userName),
+          password: initField(password),
+          userNameFormField: initField(userNameFormField),
+          passwordFormField: initField(passwordFormField),
+        },
+      },
+      isAuthEnabled: this.authEnabled,
     };
   },
   computed: {
+    showValidationOrInEditMode() {
+      return this.showValidation || Object.keys(this.fields).length > 0;
+    },
     eventData() {
       const { form, isAuthEnabled } = this;
       return {
@@ -76,7 +95,7 @@ export default {
         >
           <gl-form-input
             v-model="form.fields.authenticationUrl.value"
-            v-validation:[showValidation]
+            v-validation:[showValidationOrInEditMode]
             name="authenticationUrl"
             type="url"
             required
@@ -92,7 +111,7 @@ export default {
         >
           <gl-form-input
             v-model="form.fields.userName.value"
-            v-validation:[showValidation]
+            v-validation:[showValidationOrInEditMode]
             autocomplete="off"
             name="userName"
             type="text"
@@ -107,7 +126,7 @@ export default {
         >
           <gl-form-input
             v-model="form.fields.password.value"
-            v-validation:[showValidation]
+            v-validation:[showValidationOrInEditMode]
             autocomplete="off"
             name="password"
             type="password"
@@ -124,7 +143,7 @@ export default {
         >
           <gl-form-input
             v-model="form.fields.userNameFormField.value"
-            v-validation:[showValidation]
+            v-validation:[showValidationOrInEditMode]
             name="userNameFormField"
             type="text"
             required
@@ -138,7 +157,7 @@ export default {
         >
           <gl-form-input
             v-model="form.fields.passwordFormField.value"
-            v-validation:[showValidation]
+            v-validation:[showValidationOrInEditMode]
             name="passwordFormField"
             type="password"
             required
