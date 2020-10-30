@@ -128,6 +128,11 @@ This helps you avoid having to add the `only:` rule to all of your jobs to make
 them always run. You can use this format to set up a Review App, helping to
 save resources.
 
+### Using SAST, DAST, and other Secure Templates with Pipelines for Merge Requests 
+
+To use [Secure templates]() with pipelines for merge requests, a `rules: if: merge_request_event` may need to be applied for the Secure scans to be run in the same pipeline as the commit. 
+
+
 #### Excluding certain branches
 
 Pipelines for merge requests require special treatment when
