@@ -56,12 +56,13 @@ test:
 
 > Introduced in GitLab Runner 8.9.
 
-By default, GitLab is configured to always prefer the [`fetch` strategy](../yaml/README.md#git-strategy),
-because it reduces the amount of data to transfer and
+By default, GitLab is configured to use the [`fetch` strategy](../yaml/README.md#git-strategy),
+which is particularly recommended for large repositories.
+This strategy reduces the amount of data to transfer and
 does not really impact the operations that you might do on a repository from CI.
 
 See [the `GIT_STRATEGY` variable documentation](../yaml/README.md#git-strategy)
-for other options and more details.
+for more details.
 
 ## Git clone path
 
