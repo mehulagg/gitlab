@@ -312,13 +312,6 @@ class Commit
     @raw.__send__(method, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
   end
 
-  def diff_stats
-    project.repository.diff_stats(
-      self.parent_id || Gitlab::Git::BLANK_SHA,
-      self.sha
-    )
-  end
-
   def respond_to_missing?(method, include_private = false)
     @raw.respond_to?(method, include_private) || super
   end

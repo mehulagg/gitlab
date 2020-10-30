@@ -216,6 +216,16 @@ module Gitlab
         response.flat_map(&:stats)
       end
 
+      def diff_tree_diff_stats(commits)
+        request = Gitaly::DiffTreeDiffStatsRequest.new(
+          repository: @gitaly_repo,
+          commits: commits
+        )
+
+        response = GitalyClient.call(@repository.storage, :diff_service, :diff_tree_diff_stats, request, timeout: GitalyClient.medium_timeout)
+        response.flat_map(&:stats)
+      end
+
       def find_all_commits(opts = {})
         request = Gitaly::FindAllCommitsRequest.new(
           repository: @gitaly_repo,

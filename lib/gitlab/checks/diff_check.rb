@@ -17,12 +17,22 @@ module Gitlab
 
         file_paths = []
 
-        process_commits do |commit|
-          validate_once(commit) do
-            commit.diff_stats.each do |diff_stat|
-              file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
+        if true
+          Gitlab::AppLogger.warn("Jimbo")
+          stats = project.repository.diff_tree_diff_stats(commits)
+          stats.each do |diff_stat|
+            file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
 
-              validate_diff(diff_stat)
+            validate_diff(diff_stat)
+          end
+        else
+          process_commits do |commit|
+            validate_once(commit) do
+              commit.diff_stats.each do |diff_stat|
+                file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
+
+                validate_diff(diff_stat)
+              end
             end
           end
         end

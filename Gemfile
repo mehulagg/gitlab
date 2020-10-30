@@ -471,6 +471,7 @@ end
 
 # Gitaly GRPC protocol definitions
 gem 'gitaly', '~> 13.5.0-rc2'
+# gem 'gitaly', git: 'https://gitlab.com/gitlab-org/gitaly.git', branch: 'add_new_diff_stat_rpc'
 
 gem 'grpc', '~> 1.30.2'
 
