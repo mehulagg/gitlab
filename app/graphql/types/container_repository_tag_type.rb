@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module Types
-  class ContainerRegistryTagType < BaseObject
-    graphql_name 'ContainerRegistryTag'
+  class ContainerRepositoryTagType < BaseObject
+    graphql_name 'ContainerRepositoryTag'
 
-    description 'A tag from a Container Repository'
+    description 'A tag from a container repository'
 
     authorize :read_container_image
 

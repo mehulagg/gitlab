@@ -56,7 +56,7 @@ module Types
     field :container_repository, Types::ContainerRepositoryDetailsType,
           null: true,
           description: 'Find a container repository' do
-            argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the Container Repository'
+            argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository'
           end
 
     field :user, Types::UserType,

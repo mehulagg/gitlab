@@ -13,9 +13,10 @@ module Types
     field :path, GraphQL::STRING_TYPE, null: false, description: 'Path of the container repository.'
     field :can_delete, GraphQL::BOOLEAN_TYPE, null: false, description: 'Can the current user delete the container repository.'
     field :tags,
-          Types::ContainerRegistryTagType.connection_type,
+          Types::ContainerRepositoryTagType.connection_type,
           null: true,
-          description: 'Tags of the Container Repository'
+          description: 'Tags of the Container Repository',
+          max_page_size: 20
 
     def can_delete
       Ability.allowed?(current_user, :update_container_image, object)
