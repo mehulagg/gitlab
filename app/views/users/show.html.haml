@@ -54,7 +54,7 @@
           = render "users/profile_basic_info"
           .cover-desc.cgray.mb-1.mb-sm-2
             - unless @user.location.blank?
-              .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mb-1.mb-sm-0{ itemprop: 'address', itemscope: '',  itemtype: 'https://schema.org/PostalAddress' }
+              .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mb-1.mb-sm-0{ itemprop: 'address', itemscope: '', itemtype: 'https://schema.org/PostalAddress' }
                 = sprite_icon('location', css_class: 'vertical-align-sub fgray')
                 %span.vertical-align-middle{ itemprop: 'addressLocality' }
                   = @user.location

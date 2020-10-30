@@ -20503,7 +20503,7 @@ msgstr ""
 msgid "Profiles|your account"
 msgstr ""
 
-msgid "Profile|%{job_title} at %{organization}"
+msgid "Profile|%{job_title_start}%{job_title}%{span_end} at %{org_title_start}%{organization}%{span_end}"
 msgstr ""
 
 msgid "Profiling - Performance bar"
