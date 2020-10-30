@@ -4,9 +4,9 @@ import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { MOCK_QUERY } from 'jest/search/mock_data';
 import * as urlUtils from '~/lib/utils/url_utility';
 import initStore from '~/search/store';
-import DropdownFilter from '~/search/dropdown_filter/components/dropdown_filter.vue';
-import stateFilterData from '~/search/dropdown_filter/constants/state_filter_data';
-import confidentialFilterData from '~/search/dropdown_filter/constants/confidential_filter_data';
+import RadioFilter from '~/search/sidebar/components/radio_filter.vue';
+import stateFilterData from '~/search/sidebar/constants/state_filter_data';
+import confidentialFilterData from '~/search/sidebar/constants/confidential_filter_data';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('DropdownFilter', () => {
+describe('RadioFilter', () => {
   let wrapper;
   let store;
 
@@ -25,7 +25,7 @@ describe('DropdownFilter', () => {
   };
 
   const createComponent = (props = { filterData: stateFilterData }) => {
-    wrapper = shallowMount(DropdownFilter, {
+    wrapper = shallowMount(RadioFilter, {
       localVue,
       store,
       propsData: {
