@@ -193,6 +193,10 @@ class Group < Namespace
     ::Gitlab.config.packages.enabled
   end
 
+  def dependency_proxy_feature_available?
+    ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
+  end
+
   def notification_email_for(user)
     # Finds the closest notification_setting with a `notification_email`
     notification_settings = notification_settings_for(user, hierarchy_order: :asc)

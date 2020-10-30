@@ -308,10 +308,6 @@ module EE
       end
     end
 
-    def dependency_proxy_feature_available?
-      ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
-    end
-
     override :supports_events?
     def supports_events?
       feature_available?(:epics)
