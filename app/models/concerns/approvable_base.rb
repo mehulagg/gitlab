@@ -16,7 +16,10 @@ module ApprovableBase
         items.where('EXISTS (?)',
           Approval
             .select(1)
-            .where('approvals.merge_request_id = merge_requests.id AND approvals.user_id = :user_id', user_id: user_id)
+            .where(
+              Approval.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
+                .and(Approval.arel_table[:user_id].eq(user_id))
+            )
         )
       end
     end
@@ -27,7 +30,10 @@ module ApprovableBase
           Approval
             .select(1)
             .joins(:user)
-            .where('approvals.merge_request_id = merge_requests.id AND users.username = :username', username: username)
+            .where(
+              Approval.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
+                .and(User.arel_table[:username].eq(username))
+            )
         )
       end
     end

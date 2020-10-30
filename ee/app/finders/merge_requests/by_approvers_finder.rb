@@ -68,32 +68,20 @@ module MergeRequests
     def with_users_filtered_by_criteria(items, field, values)
       items.select_from_union(
         [
-          users_mrs(items, field, values),
-          group_users_mrs(items, field, values),
-          project_users_mrs(mrs_without_overridden_rules(items), field, values),
-          project_group_users_mrs(mrs_without_overridden_rules(items), field, values)
+          users_mrs(items, field, values, :users),
+          users_mrs(items, field, values, { groups: :users }),
+          project_users_mrs(items, field, values, :users),
+          project_users_mrs(items, field, values, { groups: :users })
         ]
       )
     end
 
-    def users_mrs(items, field, values)
-      filter_by_existence(items, values) do |value|
-        # rubocop:disable GitlabSecurity/SqlInjection`
-        # field is not user provided input
-        ApprovalMergeRequestRule
-          .joins(:users)
-          .where("approval_merge_request_rules.merge_request_id = merge_requests.id AND users.#{field} = ?", value)
-        # rubocop:enable GitlabSecurity/SqlInjection`
-      end
-    end
-
-    def group_users_mrs(items, field, values)
+    def users_mrs(items, field, values, joins)
       filter_by_existence(items, values) do |value|
         ApprovalMergeRequestRule
-          .joins(groups: :users)
+          .joins(joins)
           .where(
-            ApprovalMergeRequestRule
-              .arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
+            ApprovalMergeRequestRule.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
               .and(User.arel_table[field].eq(value))
           )
       end
@@ -103,25 +91,15 @@ module MergeRequests
       items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
     end
 
-    def project_users_mrs(items, field, values)
+    def project_users_mrs(items, field, values, joins)
+      items = mrs_without_overridden_rules(items)
       filter_by_existence(items, values) do |value|
-        # rubocop:disable GitlabSecurity/SqlInjection`
-        # field is not user provided input
         Project
-          .joins(approval_rules: :users)
-          .where("projects.id = merge_requests.target_project_id AND users.#{field} = ?", value)
-        # rubocop:enable GitlabSecurity/SqlInjection`
-      end
-    end
-
-    def project_group_users_mrs(items, field, values)
-      filter_by_existence(items, values) do |value|
-        # rubocop:disable GitlabSecurity/SqlInjection`
-        # field is not user provided input
-        Project
-          .joins(approval_rules: { groups: :users })
-          .where("projects.id = merge_requests.target_project_id AND users.#{field} = ?", value)
-        # rubocop:enable GitlabSecurity/SqlInjection`
+          .joins(approval_rules: joins)
+          .where(
+            Project.arel_table[:id].eq(MergeRequest.arel_table[:target_project_id])
+              .and(User.arel_table[field].eq(value))
+          )
       end
     end
 

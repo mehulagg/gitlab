@@ -304,12 +304,11 @@ class MergeRequest < ApplicationRecord
 
   scope :reviewer_assigned_to, ->(user) do
     mr_reviewers_table = MergeRequestReviewer.arel_table
-    mr_table = MergeRequest.arel_table
 
     inner_sql = mr_reviewers_table
                   .project(Arel::Nodes::True.new)
                   .where(
-                    mr_reviewers_table[:merge_request_id].eq(mr_table[:id])
+                    mr_reviewers_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
                       .and(mr_reviewers_table[:user_id].eq(user.id))
                   ).exists
 
