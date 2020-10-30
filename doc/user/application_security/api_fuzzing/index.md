@@ -236,14 +236,23 @@ data. Only run fuzzing against a test server.
 
 ### Postman Collection
 
-The [Postman API Client](https://www.postman.com/product/api-client/) is a popular tool used by developers and testers to call various types of APIs. The API definitions [can be exported as a Postman Collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-postman-data) for use with API Fuzzing. When exporting, make sure to select a supported version of Postman Collection - v2.0 or v2.1.
+The [Postman API Client](https://www.postman.com/product/api-client/) is a popular tool that
+developers and testers use to call various types of APIs. The API definitions
+[can be exported as a Postman Collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-postman-data)
+for use with API Fuzzing. When exporting, make sure to select a supported version of Postman
+Collection: v2.0 or v2.1.
 
-When used with GitLab's API fuzzer, Postman Collections must contain definitions of the web API to test with valid data. API fuzzer extracts all the API definitions and uses them to perform testing.
+When used with GitLab's API fuzzer, Postman Collections must contain definitions of the web API to
+test with valid data. The API fuzzer extracts all the API definitions and uses them to perform
+testing.
 
 DANGER: **Warning:**
-Postman Collection files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the Postman Collection file contents before adding them to a repository.
+Postman Collection files may contain sensitive information such as authentication tokens, API keys,
+and session cookies. We recommend that you review the Postman Collection file contents before adding
+them to a repository.
 
-Follow these steps to configure API fuzzing to use a Postman Collection file that provides information about the target API to test:
+Follow these steps to configure API fuzzing to use a Postman Collection file that provides
+information about the target API to test:
 
 1. To use API fuzzing, you must [include](../../../ci/yaml/README.md#includetemplate)
    the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
@@ -255,7 +264,8 @@ Follow these steps to configure API fuzzing to use a Postman Collection file tha
      - template: API-Fuzzing.gitlab-ci.yml
    ```
 
-1. Add the configuration file [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml) to your repository's root as `.gitlab-api-fuzzing.yml`.
+1. Add the configuration file [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml)
+   to your repository's root as `.gitlab-api-fuzzing.yml`.
 
 1. The [configuration file](#configuration-files) has several testing profiles defined with varying
    amounts of fuzzing. We recommend that you start with the `Quick-10` profile. Testing with this
