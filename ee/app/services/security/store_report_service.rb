@@ -47,7 +47,7 @@ module Security
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan)
+      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
@@ -59,6 +59,8 @@ module Security
       finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
         create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       end
+
+      create_or_update_vulnerability_links(finding, vulnerability_finding)
 
       create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
@@ -122,6 +124,15 @@ module Security
       identifier_object = identifiers_objects[identifier.key]
       vulnerability_finding.finding_identifiers.find_or_create_by!(identifier: identifier_object)
       identifier_object.update!(identifier.to_hash)
+    rescue ActiveRecord::RecordNotUnique
+    end
+
+    def create_or_update_vulnerability_links(finding, vulnerability_finding)
+      return if finding.links.blank?
+
+      finding.links.each do |link|
+        vulnerability_finding.finding_links.find_or_create_by!(link.to_hash)
+      end
     rescue ActiveRecord::RecordNotUnique
     end
 

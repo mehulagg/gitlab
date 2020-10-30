@@ -78,5 +78,16 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         expect(empty_report.scan).to be(nil)
       end
     end
+
+    context 'parsing links' do
+      it 'returns links object for each finding', :aggregate_failures do
+        links = report.findings.flat_map(&:links)
+
+        expect(links.map(&:url)).to match_array(['https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1020', 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1030'])
+        expect(links.map(&:name)).to match_array([nil, 'CVE-1030'])
+        expect(links.size).to eq(2)
+        expect(links.first).to be_a(::Gitlab::Ci::Reports::Security::Link)
+      end
+    end
   end
 end

@@ -24,7 +24,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
 
   expose :metadata, merge: true, if: ->(occurrence, _) { occurrence.raw_metadata } do
     expose :description
-    expose :links
+    expose :links, using: Vulnerabilities::FindingLinkEntity
     expose :location
     expose :remediations
     expose :solution
