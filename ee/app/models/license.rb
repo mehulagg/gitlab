@@ -397,6 +397,10 @@ class License < ApplicationRecord
     restricted_attr(:active_user_count)
   end
 
+  def restricted_user_count?
+    restricted_user_count.to_i > 0
+  end
+
   def previous_user_count
     restricted_attr(:previous_user_count)
   end

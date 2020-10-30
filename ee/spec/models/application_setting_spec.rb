@@ -85,6 +85,12 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(-5).for(:max_personal_access_token_lifetime) }
     it { is_expected.not_to allow_value(366).for(:max_personal_access_token_lifetime) }
 
+    it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value(1).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value(10).for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value(-1).for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value(2.5).for(:new_user_signups_cap) }
+
     describe 'when additional email text is enabled' do
       before do
         stub_licensed_features(email_additional_text: true)
@@ -158,6 +164,18 @@ RSpec.describe ApplicationSetting do
           expect(setting.valid?).to eq(is_valid)
         end
       end
+    end
+
+    context 'when license presented' do
+      let_it_be(:max_active_user_count) { 20 }
+
+      before_all do
+        create_current_license({ restrictions: { active_user_count: max_active_user_count } })
+      end
+
+      it { is_expected.to allow_value(max_active_user_count - 1).for(:new_user_signups_cap) }
+      it { is_expected.to allow_value(max_active_user_count).for(:new_user_signups_cap) }
+      it { is_expected.not_to allow_value(max_active_user_count + 1).for(:new_user_signups_cap) }
     end
   end
 
