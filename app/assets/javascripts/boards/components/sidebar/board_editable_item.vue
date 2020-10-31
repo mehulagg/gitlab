@@ -14,12 +14,26 @@ export default {
       required: false,
       default: false,
     },
+    toggleHeader: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   inject: ['canUpdate'],
   data() {
     return {
       edit: false,
     };
+  },
+  computed: {
+    showHeader() {
+      if (!this.toggleHeader) {
+        return true;
+      }
+
+      return !this.edit;
+    },
   },
   destroyed() {
     window.removeEventListener('click', this.collapseWhenOffClick);
@@ -56,9 +70,14 @@ export default {
 
 <template>
   <div>
-    <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
+    <header
+      v-show="showHeader"
+      class="gl-display-flex gl-justify-content-space-between gl-align-items-flex-start gl-mb-3"
+    >
       <span class="gl-vertical-align-middle">
-        <span data-testid="title">{{ title }}</span>
+        <slot name="title">
+          <span data-testid="title">{{ title }}</span>
+        </slot>
         <gl-loading-icon v-if="loading" inline class="gl-ml-2" />
       </span>
       <gl-button
@@ -70,7 +89,7 @@ export default {
       >
         {{ __('Edit') }}
       </gl-button>
-    </div>
+    </header>
     <div v-show="!edit" class="gl-text-gray-400" data-testid="collapsed-content">
       <slot name="collapsed">{{ __('None') }}</slot>
     </div>
