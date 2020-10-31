@@ -94,7 +94,7 @@ describe('Cycle analytics actions', () => {
   describe('setSelectedValueStream', () => {
     const vs = { id: 'vs-1', name: 'Value stream 1' };
 
-    it('refetches the cycle analytics data', () => {
+    it('refetches the value stream analytics data', () => {
       return testAction(
         actions.setSelectedValueStream,
         vs,

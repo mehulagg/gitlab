@@ -18,7 +18,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
   # uses two methods for the data preparaton: `create_data_for_start_event` and
   # `create_data_for_end_event`. For each stage we create 3 records with a fixed
   # durations (10, 5, 15 days) in order to easily generalize the test cases.
-  shared_examples 'custom cycle analytics stage' do
+  shared_examples 'custom value stream analytics stage' do
     let(:params) { { from: Time.new(2019), to: Time.new(2020), current_user: user } }
     let(:data_collector) { described_class.new(stage: stage, params: params) }
 
@@ -85,7 +85,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           issue.metrics.update!(first_mentioned_in_commit_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between issue creation time and closing time' do
@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.close!
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between issue first mentioned in commit and first associated with milestone time' do
@@ -117,7 +117,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.metrics.update!(first_associated_with_milestone_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between issue creation time and first added to board time' do
@@ -132,7 +132,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.metrics.update!(first_added_to_board_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between issue creation time and last edit time' do
@@ -147,7 +147,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.update!(last_edited_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between issue label added time and label removed time' do
@@ -179,7 +179,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(resource)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between issue label added time and another issue label added time' do
@@ -211,7 +211,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(issue)
         end
 
-        it_behaves_like 'custom cycle analytics stage' do
+        it_behaves_like 'custom value stream analytics stage' do
           context 'when filtering for two labels' do
             let(:params) do
               {
@@ -251,7 +251,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(issue)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
     end
 
@@ -268,7 +268,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.metrics.update!(merged_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between merge request merrged time and first deployed to production at time' do
@@ -285,7 +285,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.metrics.update!(first_deployed_to_production_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between merge request build started time and build finished time' do
@@ -302,7 +302,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.metrics.update!(latest_build_finished_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between merge request creation time and close time' do
@@ -317,7 +317,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.metrics.update!(latest_closed_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between merge request creation time and last edit time' do
@@ -332,7 +332,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.update!(last_edited_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between merge request label added time and label removed time' do
@@ -364,7 +364,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(mr)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
 
       context 'between code stage start time and merge request created time with label filter' do
@@ -399,7 +399,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.update!(created_at: Time.zone.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom value stream analytics stage'
       end
     end
   end
