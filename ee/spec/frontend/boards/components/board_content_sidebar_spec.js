@@ -18,6 +18,7 @@ describe('ee/BoardContentSidebar', () => {
       },
       store,
       stubs: {
+        'board-sidebar-issue-title': '<div></div>',
         'board-sidebar-epic-select': '<div></div>',
         'board-sidebar-time-tracker': '<div></div>',
         'board-sidebar-weight-input': '<div></div>',
@@ -47,10 +48,6 @@ describe('ee/BoardContentSidebar', () => {
 
   it('applies an open attribute', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
-  });
-
-  it('finds IssuableTitle', () => {
-    expect(wrapper.find(IssuableTitle).text()).toContain('One');
   });
 
   it('renders IssuableAssignees', () => {
