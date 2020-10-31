@@ -9,7 +9,7 @@
 .base-script: &base-script
   # Only install knapsack after bundle install! Otherwise oddly some native
   # gems could not be found under some circumstance. No idea why, hours wasted.
-  - run_timed_command "gem install knapsack --no-document"
+  - run_timed_command "gem install bundler:1.17.3 knapsack --no-document"
   - run_timed_command "scripts/gitaly-test-build"
   - run_timed_command "scripts/gitaly-test-spawn"
   - source ./scripts/rspec_helpers.sh
@@ -183,7 +183,6 @@ update-coverage-cache:
     - .shared:rules:update-cache
   stage: prepare
   script:
-    - run_timed_command "gem install bundler -v 1.17.3"
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
@@ -363,7 +362,6 @@ rspec:coverage:
     - memory-static
     - memory-on-boot
   script:
-    - run_timed_command "gem install bundler -v 1.17.3"
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
     - run_timed_command "bundle exec scripts/merge-simplecov"
     - run_timed_command "bundle exec scripts/gather-test-memory-data"
@@ -401,7 +399,6 @@ rspec:feature-flags:
     - memory-static
     - memory-on-boot
   script:
-    - run_timed_command "gem install bundler -v 1.17.3"
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
     - run_timed_command "bundle exec scripts/used-feature-flags"
 # EE/FOSS: default refs (MRs, master, schedules) jobs #
