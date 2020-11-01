@@ -504,7 +504,10 @@ to:
 repository: "https://charts.helm.sh/stable"
 ```
 
-And then you will need to run `helm dep update .` in your chart directory.
+And then you will need to run `helm dep update .` in your chart directory and commit the changes
+to `requirements.lock`. If you did not previously have a `requirements.lock` file in your chart,
+you do not need to commit the new one. This file is optional, but when present, it is used to
+verify the integrity of the downloaded dependencies.
 
 You can find more information in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/263778).
 
