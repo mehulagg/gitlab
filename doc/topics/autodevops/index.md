@@ -504,7 +504,7 @@ to:
 repository: "https://charts.helm.sh/stable"
 ```
 
-And then you will need to run `helm dep update .` in your chart directory, using the same helm major version as Auto DevOps.
+And then you will need to run `helm dep update .` in your chart directory, using the same Helm major version as Auto DevOps.
 
 Then, commit the changes for the `requirements.yaml` and `requirements.lock` files.
 If you did not previously have a `requirements.lock` file in your chart,
