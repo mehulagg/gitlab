@@ -1,16 +1,19 @@
 import { mount } from '@vue/test-utils';
 import { GlFormCheckbox } from '@gitlab/ui';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_auth_section.vue';
 
 describe('DastSiteAuthSection', () => {
   let wrapper;
 
   const createComponent = ({ fields } = {}) => {
-    wrapper = mount(DastSiteAuthSection, {
-      propsData: {
-        fields,
-      },
-    });
+    wrapper = extendedWrapper(
+      mount(DastSiteAuthSection, {
+        propsData: {
+          fields,
+        },
+      }),
+    );
   };
 
   beforeEach(() => {
@@ -22,7 +25,7 @@ describe('DastSiteAuthSection', () => {
   });
 
   const findByNameAttribute = name => wrapper.find(`[name="${name}"]`);
-  const findAuthForm = () => wrapper.find(`[data-testid="auth-form"]`);
+  const findAuthForm = () => wrapper.findByTestId('auth-form');
   const findAuthCheckbox = () => wrapper.find(GlFormCheckbox);
 
   const setAuthentication = ({ enabled }) => {
@@ -45,7 +48,7 @@ describe('DastSiteAuthSection', () => {
     );
 
     it('controls the visibility of the authentication-fields form', async () => {
-      expect(findAuthForm('auth-form').exists()).toBe(false);
+      expect(findAuthForm().exists()).toBe(false);
       await setAuthentication({ enabled: true });
       expect(findAuthForm().exists()).toBe(true);
     });

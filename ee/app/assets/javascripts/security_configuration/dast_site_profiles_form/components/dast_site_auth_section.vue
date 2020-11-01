@@ -1,12 +1,7 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
+import { initFormField } from 'ee/security_configuration/utils';
 import validation from '~/vue_shared/directives/validation';
-
-const initField = (value, state = null) => ({
-  value,
-  state,
-  feedback: null,
-});
 
 export default {
   components: {
@@ -35,20 +30,21 @@ export default {
       authenticationUrl,
       userName,
       password,
-      userNameFormField,
-      passwordFormField,
+      // default to commonly used names for `userName` and `password` fields in authentcation forms
+      userNameFormField = 'username',
+      passwordFormField = 'password',
     } = this.fields;
 
     return {
       form: {
         state: false,
         fields: {
-          authEnabled: initField(authEnabled, true),
-          authenticationUrl: initField(authenticationUrl),
-          userName: initField(userName),
-          password: initField(password),
-          userNameFormField: initField(userNameFormField),
-          passwordFormField: initField(passwordFormField),
+          authEnabled: initFormField({ initialValue: authEnabled, skipValidation: true }),
+          authenticationUrl: initFormField({ initialValue: authenticationUrl }),
+          userName: initFormField({ initialValue: userName }),
+          password: initFormField({ initialValue: password }),
+          userNameFormField: initFormField({ initialValue: userNameFormField }),
+          passwordFormField: initFormField({ initialValue: passwordFormField }),
         },
       },
     };
@@ -95,7 +91,7 @@ export default {
       </div>
       <div class="row">
         <gl-form-group
-          :label="s__('DastProfiles|User Name')"
+          :label="s__('DastProfiles|Username')"
           :invalid-feedback="form.fields.userName.feedback"
           class="col-md-6"
         >
@@ -149,7 +145,7 @@ export default {
             v-model="form.fields.passwordFormField.value"
             v-validation:[showValidationOrInEditMode]
             name="passwordFormField"
-            type="password"
+            type="text"
             required
             :state="form.fields.passwordFormField.state"
           />

@@ -8436,7 +8436,7 @@ msgstr ""
 msgid "DastProfiles|Turn on AJAX spider"
 msgstr ""
 
-msgid "DastProfiles|User Name"
+msgid "DastProfiles|Username"
 msgstr ""
 
 msgid "DastProfiles|Username form field"
