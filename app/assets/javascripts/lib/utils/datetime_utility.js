@@ -792,3 +792,20 @@ export const dateAtFirstDayOfMonth = date => new Date(newDate(date).setDate(1));
  * @return {Boolean} true if the dates match
  */
 export const datesMatch = (date1, date2) => differenceInMilliseconds(date1, date2) === 0;
+
+/**
+ * Converts a numeric utc offset to +/- hours
+ * ie -32400 => -9 hours
+ *
+ * @param {Int} offset UTC offset as a integer
+ *
+ * @return {String} the + or - offset in hours
+ */
+export const formatUtcOffset = offset => {
+  const parsed = parseInt(offset, 10);
+  if (Number.isNaN(parsed) || parsed === 0) {
+    return `0`;
+  }
+  const prefix = offset > 0 ? '+' : '-';
+  return `${prefix}${Math.abs(offset / 3600)}`;
+};
