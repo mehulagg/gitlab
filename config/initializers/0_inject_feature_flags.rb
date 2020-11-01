@@ -18,7 +18,6 @@ if Gitlab.ee? && Gitlab.dev_or_test_env?
     feature_flags_related_issues
     group_coverage_reports
     group_wikis
-    incident_sla
     swimlanes
     minimal_access_role
   ].to_set
