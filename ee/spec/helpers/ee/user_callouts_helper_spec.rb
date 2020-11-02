@@ -368,4 +368,69 @@ RSpec.describe EE::UserCalloutsHelper do
       end
     end
   end
+
+  describe '.new_user_signups_cap_reached' do
+    subject { helper.render_new_user_signups_cap_reached }
+
+    context 'when user is anonymous' do
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when user is not an admin' do
+      let(:user) { create(:user) }
+
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'without a license' do
+      before do
+        allow(License).to receive(:current).and_return(nil)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with a license' do
+      let(:license) { create_current_license }
+      let(:user) { create(:user, admin: true) }
+
+      before do
+        allow(License).to receive(:current).and_return(license)
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      context 'when feature flag admin_new_user_signups_cap is disabled' do
+        before do
+          stub_feature_flags(admin_new_user_signups_cap: true)
+        end
+
+        it { is_expected.to eq(false) }
+      end
+
+      where(:new_user_signups_cap, :active_user_count, :result) do
+        nil | 10 | false
+        10  | 9  | true
+        0   | 10 | false
+        1   | 1  | true
+      end
+
+      with_them do
+        before do
+          allow(license).to receive(:current_active_users_count).and_return(active_user_count)
+          allow(Gitlab::CurrentSettings.current_application_settings)
+            .to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+        end
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
 end

@@ -91,10 +91,11 @@ module EE
     end
 
     def render_new_user_signups_cap_reached
-      return unless ::Feature.enabled?(:admin_new_user_signups_cap)
-      return unless current_user.admin?
+      return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
+      return false unless License.current
+      return false unless current_user&.admin?
 
-      return if user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED)
+      !user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED) && current_settings.new_user_signups_cap.to_i >= License.current.current_active_users_count
     end
 
     private
@@ -139,6 +140,10 @@ module EE
 
     def token_expiration_enforced?
       ::PersonalAccessToken.expiration_enforced?
+    end
+
+    def current_settings
+      Gitlab::CurrentSettings.current_application_settings
     end
   end
 end

@@ -108,43 +108,4 @@ RSpec.describe LicenseHelper do
       end
     end
   end
-
-  describe '#new_user_signups_cap_reached?' do
-    using RSpec::Parameterized::TableSyntax
-
-    subject { new_user_signups_cap_reached? }
-
-    context 'without a license' do
-      before do
-        allow(License).to receive(:current).and_return(nil)
-      end
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'with a license' do
-      let(:license) { double(:License) }
-
-      before do
-        allow(License).to receive(:current).and_return(license)
-      end
-
-      where(:new_user_signups_cap, :active_user_count, :result) do
-        nil | 10 | false
-        10  | 9  | true
-        0   | 10 | false
-        1   | 1  | true
-      end
-
-      with_them do
-        before do
-          allow(Gitlab::CurrentSettings.current_application_settings)
-            .to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
-          allow(helper).to receive(:active_user_count).and_return(active_user_count)
-        end
-
-        it { is_expected.to eq(result) }
-      end
-    end
-  end
 end

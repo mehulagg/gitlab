@@ -14,13 +14,6 @@ module LicenseHelper
     License.current&.maximum_user_count || 0
   end
 
-  def new_user_signups_cap_reached?
-    return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
-    return false unless License.current
-
-    current_settings.new_user_signups_cap.to_i >= active_user_count
-  end
-
   def seats_calculation_message(license)
     return unless license.present?
     return unless license.exclude_guests_from_active_count?
