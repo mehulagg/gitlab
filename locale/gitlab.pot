@@ -2280,6 +2280,15 @@ msgstr ""
 msgid "Administration"
 msgstr ""
 
+msgid "Admin|New user signups cap reached."
+msgstr ""
+
+msgid "Admin|View pending user approvals"
+msgstr ""
+
+msgid "Admin|Your Gitlab.com instance reached new user signups cap. All new users must be approved manually."
+msgstr ""
+
 msgid "Adoption"
 msgstr ""
 
