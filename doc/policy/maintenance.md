@@ -112,7 +112,6 @@ before upgrading to `12.10.x` to avoid [gitlab#215141](https://gitlab.com/gitlab
 To ensure these are successful:
 
 1. Increment to the first minor version (`x.0.x`) during the major version jump.
-
 1. Proceed with upgrading to a newer release.
 
 **For example: `11.5.x` -> `11.11.x` -> `12.0.x` -> `12.1.x` -> `12.10.x` -> `13.0.x`**
