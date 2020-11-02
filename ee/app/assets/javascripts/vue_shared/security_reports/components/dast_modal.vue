@@ -1,9 +1,16 @@
 <script>
 import { GlModal, GlIcon, GlSprintf, GlTruncate } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import download from '~/lib/utils/downloader';
 
 export default {
   components: { GlModal, GlIcon, GlSprintf, GlTruncate },
+  data() {
+    return {
+      downloadPending: false
+    }
+  },
   props: {
     scannedUrls: {
       required: true,
@@ -25,6 +32,23 @@ export default {
       attributes: { variant: 'success' },
     },
   },
+  methods: {
+    async downloadReport() {
+      const METHOD = 'GET';
+      const RESPONSETYPE = 'blob';
+      const URL = this.downloadLink;
+      const FILENAME = 'scanned_resources';
+
+      this.downloadPending = true;
+      try {
+        const CSVREPORT = await axios.request({url: URL, method: METHOD, responseType: RESPONSETYPE});
+        download({ fileName: FILENAME, fileData: btoa(CSVREPORT), fileType: 'text/csv'});
+        this.downloadPending = false;
+      } catch(e) {
+        this.downloadPending = false;
+      }
+    }
+  },
   computed: {
     title() {
       return n__('%d Scanned URL', '%d Scanned URLs', this.scannedResourcesCount);
@@ -38,8 +62,8 @@ export default {
         text: __('Download as CSV'),
         attributes: {
           variant: 'success',
+          loading: this.downloadPending,
           class: 'gl-button btn-success-secondary',
-          href: this.downloadLink,
           download: '',
           'data-testid': 'download-button',
         },
@@ -54,6 +78,7 @@ export default {
     :title="title"
     title-tag="h5"
     v-bind="$options.modal"
+    @secondary.prevent="downloadReport"
     :action-secondary="downloadButton"
   >
     <!-- heading -->

@@ -6,11 +6,11 @@
  *   download the file. In this case the `url` property will be ignored. Please
  *   note that `fileData` needs to be Base64 encoded.
  */
-export default ({ fileName, url, fileData }) => {
+export default ({ fileName, url, fileData, fileType = 'text/plain' }) => {
   let href = url;
 
   if (fileData) {
-    href = `data:text/plain;base64,${fileData}`;
+    href = `data:${fileType};base64,${fileData}`;
   }
 
   const anchor = document.createElement('a');

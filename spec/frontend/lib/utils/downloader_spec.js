@@ -15,12 +15,21 @@ describe('Downloader', () => {
   describe('when inline file content is provided', () => {
     const fileData = 'inline content';
     const fileName = 'test.csv';
+    const fileType = 'text/csv';
 
-    it('uses the data urls to download the file', () => {
+    it('uses the data urls to download the file with the default fileType', () => {
       downloader({ fileName, fileData });
       expect(document.createElement).toHaveBeenCalledWith('a');
       expect(a.download).toBe(fileName);
       expect(a.href).toBe(`data:text/plain;base64,${fileData}`);
+      expect(a.click).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the data urls to download the file with the given fileType', () => {
+      downloader({ fileName, fileData, fileType });
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      expect(a.download).toBe(fileName);
+      expect(a.href).toBe(`data:${fileType};base64,${fileData}`);
       expect(a.click).toHaveBeenCalledTimes(1);
     });
   });

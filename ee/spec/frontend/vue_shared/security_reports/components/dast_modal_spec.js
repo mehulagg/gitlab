@@ -1,9 +1,16 @@
 import { shallowMount } from '@vue/test-utils';
 import Component from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import { GlModal } from '@gitlab/ui';
+import MockAdapter from 'axios-mock-adapter';
+import httpStatus from '~/lib/utils/http_status';
+import axios from '~/lib/utils/axios_utils';
+import waitForPromises from 'helpers/wait_for_promises';
+import download from '~/lib/utils/downloader';
+jest.mock('~/lib/utils/downloader');
 
 describe('DAST Modal', () => {
   let wrapper;
+  let mock;
 
   const defaultProps = {
     scannedUrls: [{ requestMethod: 'POST', url: 'https://gitlab.com' }],
@@ -26,17 +33,37 @@ describe('DAST Modal', () => {
   };
   beforeEach(() => {
     createWrapper();
+    mock = new MockAdapter(axios);
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    mock.restore();
   });
 
   it('has the download button with required attrs', () => {
     expect(findDownloadButton().exists()).toBe(true);
-    expect(findDownloadButton().attributes('href')).toBe(defaultProps.downloadLink);
-    expect(findDownloadButton().attributes('download')).toBeDefined();
+    expect(findDownloadButton().text()).toBe('Download as CSV');
+  });
+
+  it('should make request to downloadLink on click', async () => {
+    const file = 'randomFileString';
+    mock.onGet(defaultProps.downloadLink).replyOnce(httpStatus.OK, file);
+    
+    findDownloadButton().vm.$emit('click',{
+      preventDefault: jest.fn(),
+      defaultPrevented: true
+    });
+
+    await waitForPromises();
+    expect(download).toHaveBeenCalledWith(
+      {
+        "fileData": "W29iamVjdCBPYmplY3Rd", 
+        "fileName": "scanned_resources", 
+        "fileType": "text/csv"
+      }
+    );
   });
 
   it('should contain the dynamic title', () => {
