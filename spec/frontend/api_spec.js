@@ -552,6 +552,28 @@ describe('Api', () => {
     });
   });
 
+  describe('issueTemplates', () => {
+    it('fetches all templates by type', done => {
+      const namespace = 'some namespace';
+      const project = 'some project';
+      const templateType = 'template type';
+      const expectedUrl = `${dummyUrlRoot}/${namespace}/${project}/templates/${templateType}`;
+      const expectedData = [
+        { key: 'Template1', name: 'Template 1', content: 'This is template 1!' },
+      ];
+      mock.onGet(expectedUrl).reply(httpStatus.OK, expectedData);
+
+      Api.issueTemplates(namespace, project, templateType, (error, response) => {
+        expect(response.length).toBe(1);
+        const { key, name, content } = response[0];
+        expect(key).toBe('Template1');
+        expect(name).toBe('Template 1');
+        expect(content).toBe('This is template 1!');
+        done();
+      });
+    });
+  });
+
   describe('projectTemplates', () => {
     it('fetches a list of templates', done => {
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/gitlab-org%2Fgitlab-ce/templates/licenses`;
