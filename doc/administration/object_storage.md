@@ -283,7 +283,7 @@ gitlab_rails['object_store']['connection'] = {
 
 ##### Google example with ADC (consolidated form)
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46648) in GitLab 13.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/275979) in GitLab 13.6.
 
 Google Cloud Application Default Credentials (ADC) are typically
 used with GitLab to use the default service account. This eliminates the
