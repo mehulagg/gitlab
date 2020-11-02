@@ -69,16 +69,10 @@ describe('AlertsSettingsFormNew', () => {
     });
   });
 
-  describe('when form is invalid', () => {
-    // TODO, implement specs for when form is invalid
-  });
-
-  describe('when form is valid', () => {
-    beforeEach(() => {
-      createComponent({});
-    });
-
+  describe('submitting integration form', () => {
     it('allows for on-create-new-integration with the correct form values for HTTP', async () => {
+      createComponent({});
+
       const options = findSelect().findAll('option');
       await options.at(1).setSelected();
 
@@ -103,6 +97,8 @@ describe('AlertsSettingsFormNew', () => {
     });
 
     it('allows for on-create-new-integration with the correct form values for PROMETHEUS', async () => {
+      createComponent({});
+
       const options = findSelect().findAll('option');
       await options.at(2).setSelected();
 
@@ -125,6 +121,71 @@ describe('AlertsSettingsFormNew', () => {
 
       expect(wrapper.emitted('on-create-new-integration')).toBeTruthy();
       expect(wrapper.emitted('on-create-new-integration')[0]).toEqual([
+        { type: 'PROMETHEUS', variables: { apiUrl: 'https://test.com', active: true } },
+      ]);
+    });
+
+    it('allows for on-update-integration with the correct form values for HTTP', async () => {
+      createComponent({
+        props: {
+          currentIntegration: { id: '1' },
+          loading: false,
+        },
+      });
+
+      const options = findSelect().findAll('option');
+      await options.at(1).setSelected();
+
+      await findFormFields()
+        .at(0)
+        .setValue('Test integration');
+      await findFormToggle().trigger('click');
+
+      await wrapper.vm.$nextTick();
+
+      expect(findSubmitButton().exists()).toBe(true);
+      expect(findSubmitButton().text()).toBe('Save integration');
+
+      findForm().trigger('submit');
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.emitted('on-update-integration')).toBeTruthy();
+      expect(wrapper.emitted('on-update-integration')[0]).toEqual([
+        { type: 'HTTP', variables: { name: 'Test integration', active: true } },
+      ]);
+    });
+
+    it('allows for on-update-integration with the correct form values for PROMETHEUS', async () => {
+      createComponent({
+        props: {
+          currentIntegration: { id: '1' },
+          loading: false,
+        },
+      });
+
+      const options = findSelect().findAll('option');
+      await options.at(2).setSelected();
+
+      await findFormFields()
+        .at(0)
+        .setValue('Test integration');
+      await findFormFields()
+        .at(1)
+        .setValue('https://test.com');
+      await findFormToggle().trigger('click');
+
+      await wrapper.vm.$nextTick();
+
+      expect(findSubmitButton().exists()).toBe(true);
+      expect(findSubmitButton().text()).toBe('Save integration');
+
+      findForm().trigger('submit');
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.emitted('on-update-integration')).toBeTruthy();
+      expect(wrapper.emitted('on-update-integration')[0]).toEqual([
         { type: 'PROMETHEUS', variables: { apiUrl: 'https://test.com', active: true } },
       ]);
     });
