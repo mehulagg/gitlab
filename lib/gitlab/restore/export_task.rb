@@ -104,7 +104,7 @@ module Gitlab
 
       # Ensure that the project exports will continue even if one of the "savers" fails.
       # "savers" - are the classes resposible for saving/exporting small portions of a project.
-      class ProjecstExportService < Projects::ImportExport::ExportService
+      class ProjectsExportService < Projects::ImportExport::ExportService
         # Remove repository.bundle if it fails to export
         class RepoSaver < Gitlab::ImportExport::RepoSaver
           # override
@@ -157,7 +157,7 @@ module Gitlab
         end
       end
 
-      def initialize(group_path:, username:, export_path:, logger:)
+      def initialize(group_path:, username:, export_path:, logger:, page_size: 30, page: 0)
         @group = Group.find_by_full_path(group_path)
         raise ActiveRecord::RecordNotFound, "Group #{group_path} not found" unless @group
 
@@ -166,6 +166,8 @@ module Gitlab
         @export_path = export_path
         @logger = logger
         $logger = logger
+        @page_size = page_size
+        @page = page
       end
 
       def execute
@@ -183,7 +185,7 @@ module Gitlab
 
       private
 
-      attr_reader :group, :user, :export_path, :logger
+      attr_reader :group, :user, :export_path, :logger, :page, :page_size
 
       def export_groups
         logger.info(">> Exporting #{group.name} and all its subgroups")
@@ -195,26 +197,30 @@ module Gitlab
 
       # rubocop: disable CodeReuse/ActiveRecord
       def export_all_projects
-        # Root group projects does not use the namespace folder, as the group may have a different
-        # path when importing
-        export_projects(group, bundle_path('projects'))
+        all_projects = Project.where(group: group_tree).order_by(:id)
 
-        group.descendants.find_each do |g|
-          export_projects(g, bundle_path('projects', g.full_path_components[1..-1].join('/')))
+        all_projects.slice(page * page_size, page_size).each do |project|
+          export_project(project)
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def export_projects(group, target_path)
-        CommandLine.mkdir_p(target_path)
-
-        Project.where(group: group).find_each do |project|
-          logger.info ">> Exporting project #{project.full_path}"
-
-          ProjecstExportService
-            .new(project, user)
-            .execute(File.join(target_path, "#{project.path}.tar.gz"))
+      def export_project(project)
+        target_path = if project.group.id == group.id
+          # Root group projects does not use the namespace folder, as the group may have a different
+          # path when importing
+          bundle_path('projects')
+        else
+          bundle_path('projects', project.group.full_path_components[1..-1].join('/'))
         end
+
+        CommandLine.mkdir_p(target_path) unless Dir.exist?(target_path)
+
+        logger.info ">> Exporting project #{project.full_path}"
+
+        ProjectsExportService
+          .new(project, user)
+          .execute(File.join(target_path, "#{project.path}.tar.gz"))
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -231,9 +237,9 @@ module Gitlab
       end
 
       def bundle_filename
-        filename = Gitlab::ImportExport.export_filename(exportable: group)
+        @filename ||= Gitlab::ImportExport.export_filename(exportable: group)
 
-        File.join(export_path, filename)
+        File.join(export_path, @filename)
       end
     end
   end
