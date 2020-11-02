@@ -317,6 +317,14 @@ As in other list types, click the trash icon to remove a list.
 
 ![Milestone lists](img/issue_board_milestone_lists.png)
 
+### Epics Swimlanes **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3352) in [GitLab Premium](https://about.gitlab.com/pricing/) in GitLab 13.6.
+
+Epics Swimlanes allow to visualize issues grouped by epic. This can be accessed by selecting `Epic` in the `Group by` dropdown. Beside the different visual organization of issues, it offers the same features as an issue board. This feature is available at the project-level, as well as the group-level.
+
+![Epics Swimlanes](img/epics_swimlanes_v13.6.png)
+
 ## Work In Progress limits **(STARTER)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11403) in GitLab 12.7
