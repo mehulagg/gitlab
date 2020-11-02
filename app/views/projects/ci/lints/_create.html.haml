@@ -2,10 +2,9 @@
   .bs-callout.bs-callout-success
     %p
       %b= _("Status:")
-      = _("syntax is correct")
-
+      = _("syntax is correct. CI configuration has been validated with all the includes.")
+      %b= link_to s_("Learn more"), help_page_path('ci/lint.md', anchor: 'validate-basic-logic-and-syntax'), target: '_blank'
   = render "projects/ci/lints/lint_warnings", warnings: @result.warnings
-
   .table-holder
     %table.table.table-bordered
       %thead
@@ -43,7 +42,9 @@
   .bs-callout.bs-callout-danger
     %p
       %b= _("Status:")
-      = _("syntax is incorrect")
+      = _("syntax is incorrect. CI configuration has been validated with all the includes.")
+      %b= link_to s_("Learn more"), help_page_path('ci/lint.md', anchor: 'validate-basic-logic-and-syntax'), target: '_blank'
+
   %pre
     - @result.errors.each do |message|
       %p= message

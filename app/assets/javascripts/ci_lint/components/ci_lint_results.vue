@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlTable } from '@gitlab/ui';
+import { GlAlert, GlLink, GlSprintf, GlTable } from '@gitlab/ui';
 import CiLintWarnings from './ci_lint_warnings.vue';
 import CiLintResultsValue from './ci_lint_results_value.vue';
 import CiLintResultsParam from './ci_lint_results_param.vue';
@@ -8,8 +8,15 @@ import { __ } from '~/locale';
 const thBorderColor = 'gl-border-gray-100!';
 
 export default {
-  correct: { variant: 'success', text: __('syntax is correct') },
-  incorrect: { variant: 'danger', text: __('syntax is incorrect') },
+  correct: {
+    variant: 'success',
+    text: __('syntax is correct.'),
+  },
+  incorrect: {
+    variant: 'danger',
+    text: __('syntax is incorrect.'),
+  },
+  includesText: __('CI configuration has been validated with all the includes. %{link}'),
   warningTitle: __('The form contains the following warning:'),
   fields: [
     {
@@ -25,6 +32,8 @@ export default {
   ],
   components: {
     GlAlert,
+    GlLink,
+    GlSprintf,
     GlTable,
     CiLintWarnings,
     CiLintResultsValue,
@@ -49,6 +58,10 @@ export default {
     },
     dryRun: {
       type: Boolean,
+      required: true,
+    },
+    lintHelpPagePath: {
+      type: String,
       required: true,
     },
   },
@@ -82,8 +95,16 @@ export default {
       :title="__('Status:')"
       :dismissible="false"
       data-testid="ci-lint-status"
-      >{{ status.text }}</gl-alert
     >
+      {{ status.text }}
+      <gl-sprintf :message="$options.includesText">
+        <template #link>
+          <gl-link :href="lintHelpPagePath" target="_blank">
+            {{ __('Read More') }}
+          </gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
 
     <pre
       v-if="shouldShowError"

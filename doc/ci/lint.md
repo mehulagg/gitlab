@@ -17,7 +17,8 @@ in your project and click **CI lint**.
 ## Validate basic logic and syntax
 
 By default, the CI lint checks the syntax of your CI YAML configuration and also runs
-some basic logical validations.
+some basic logical validations. In the case where your configuration uses [includes](./yaml/README#include),
+then each file included will also be validated.
 
 To use the CI lint, paste a complete CI configuration (`.gitlab-ci.yml` for example)
 into the text box and click **Validate**:
