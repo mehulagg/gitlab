@@ -111,7 +111,7 @@ addressed.
       end
       ```
 
-1. Track necessary events. See the [product analytics guide](../product_analytics/index.md) for details.
+1. Track necessary events. See the [product analytics guide](https://about.gitlab.com/handbook/product/product-analytics-guide/) for details.
 1. After the merge request is merged, use [`chatops`](../../ci/chatops/README.md) in the
 [appropriate channel](../feature_flags/controls.md#communicate-the-change) to start the experiment for 10% of the users.
 The feature flag should have the name of the experiment with the `_experiment_percentage` suffix appended.
