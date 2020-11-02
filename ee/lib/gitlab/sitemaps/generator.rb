@@ -8,21 +8,24 @@ module Gitlab
 
         GITLAB_ORG_NAMESPACE = 'gitlab-org'.freeze
 
-        def execute(save_to_disk: false)
+        def execute
           unless Gitlab.com?
-            return "The sitemap can only be generated for Gitlab.com"
+            return 'The sitemap can only be generated for Gitlab.com'
           end
 
           file = Sitemaps::SitemapFile.new
 
-          if gitlab_org_group
-            file.add_elements(generic_urls)
-            file.add_elements(gitlab_org_group)
-            file.add_elements(gitlab_org_subgroups)
-            file.add_elements(gitlab_org_projects)
-            save_to_disk ? file.save : file.render
+          return "The group '#{GITLAB_ORG_NAMESPACE}' was not found" unless gitlab_org_group
+
+          file.add_elements(generic_urls)
+          file.add_elements(gitlab_org_group)
+          file.add_elements(gitlab_org_subgroups)
+          file.add_elements(gitlab_org_projects)
+
+          if file.empty?
+            'No urls found to generate the sitemap'
           else
-            "The group '#{GITLAB_ORG_NAMESPACE}' was not found"
+            file
           end
         end
 

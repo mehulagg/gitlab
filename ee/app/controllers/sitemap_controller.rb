@@ -4,10 +4,26 @@ class SitemapController < ApplicationController
   feature_category :metrics
 
   def show
+    return render_404 unless Gitlab.com?
+
     respond_to do |format|
       format.xml do
-        render inline: Gitlab::Sitemaps::Generator.execute
+        response = Sitemap::CreateService.new.execute
+
+        if response.success?
+          render inline: response.payload[:sitemap]
+        else
+          render inline: xml_error(response.message)
+        end
       end
     end
+  end
+
+  private
+
+  def xml_error(message)
+    xml_builder = Builder::XmlMarkup.new(indent: 2)
+    xml_builder.instruct!
+    xml_builder.error message
   end
 end
