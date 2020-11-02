@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
 import { mockTags } from '../../mock_data';
 
@@ -68,12 +69,12 @@ describe('PackageTags', () => {
   });
 
   describe('tagBadgeStyle', () => {
-    const defaultStyle = ['badge', 'badge-info', 'gl-display-none'];
+    const defaultStyle = ['badge', 'badge-info', 'gl-display-flex'];
 
     it('shows tag badge when there is only one', () => {
       createComponent([mockTags[0]]);
 
-      const expectedStyle = [...defaultStyle, 'gl-display-flex', 'gl-ml-3'];
+      const expectedStyle = [...defaultStyle, 'gl-ml-3'];
 
       expect(
         tagBadges()
@@ -82,16 +83,34 @@ describe('PackageTags', () => {
       ).toEqual(expect.arrayContaining(expectedStyle));
     });
 
-    it('shows tag badge for medium or heigher resolutions', () => {
+    it('shows default style for medium or higher resolutions', () => {
       createComponent(mockTags);
-
-      const expectedStyle = [...defaultStyle, 'd-md-flex'];
 
       expect(
         tagBadges()
           .at(1)
           .classes(),
-      ).toEqual(expect.arrayContaining(expectedStyle));
+      ).toEqual(expect.arrayContaining(defaultStyle));
+    });
+
+    it('shows all the tags for mobile resolution', async () => {
+      jest.spyOn(GlBreakpointInstance, 'isDesktop').mockReturnValue(false);
+
+      createComponent(mockTags, {
+        tagDisplayLimit: 1,
+      });
+
+      const mobileStyle = [...defaultStyle, 'gl-mt-2'];
+
+      await wrapper.vm.$nextTick();
+
+      expect(
+        tagBadges()
+          .at(0)
+          .classes(),
+      ).toEqual(expect.arrayContaining(mobileStyle));
+
+      expect(tagBadges()).toHaveLength(mockTags.length);
     });
 
     it('correctly prepends left and appends right when there is more than one tag', () => {
@@ -99,8 +118,7 @@ describe('PackageTags', () => {
         tagDisplayLimit: 4,
       });
 
-      const expectedStyleWithoutAppend = [...defaultStyle, 'd-md-flex'];
-      const expectedStyleWithAppend = [...expectedStyleWithoutAppend, 'gl-mr-2'];
+      const expectedStyleWithAppend = [...defaultStyle, 'gl-mr-2'];
 
       const allBadges = tagBadges();
 
@@ -109,7 +127,7 @@ describe('PackageTags', () => {
       );
       expect(allBadges.at(1).classes()).toEqual(expect.arrayContaining(expectedStyleWithAppend));
       expect(allBadges.at(2).classes()).toEqual(expect.arrayContaining(expectedStyleWithAppend));
-      expect(allBadges.at(3).classes()).toEqual(expect.arrayContaining(expectedStyleWithoutAppend));
+      expect(allBadges.at(3).classes()).toEqual(expect.arrayContaining(defaultStyle));
     });
   });
 });
