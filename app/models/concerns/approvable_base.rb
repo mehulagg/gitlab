@@ -12,30 +12,19 @@ module ApprovableBase
     scope :with_approvals, -> { joins(:approvals) }
 
     scope :approved_by_users_with_ids, -> (*user_ids) do
-      user_ids.reduce(all) do |items, user_id|
-        items.where('EXISTS (?)',
-          Approval
-            .select(1)
-            .where(
-              Approval.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
-                .and(Approval.arel_table[:user_id].eq(user_id))
-            )
-        )
-      end
+      with_approvals
+        .merge(Approval.with_user)
+        .where(users: { id: user_ids })
+        .group(:id)
+        .having("COUNT(users.id) = ?", user_ids.size)
     end
 
     scope :approved_by_users_with_usernames, -> (*usernames) do
-      usernames.reduce(all) do |items, username|
-        items.where('EXISTS (?)',
-          Approval
-            .select(1)
-            .joins(:user)
-            .where(
-              Approval.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
-                .and(User.arel_table[:username].eq(username))
-            )
-        )
-      end
+      with_approvals
+        .merge(Approval.with_user)
+        .where(users: { username: usernames })
+        .group(:id)
+        .having("COUNT(users.id) = ?", usernames.size)
     end
   end
 

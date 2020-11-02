@@ -58,56 +58,35 @@ module MergeRequests
     end
 
     def find_approvers_by_names(items)
-      with_users_filtered_by_criteria(items, :username, usernames)
+      with_users_filtered_by_criteria(items) do |items_with_users|
+        find_approvers_by_query(items_with_users, :username, usernames)
+      end
     end
 
     def find_approvers_by_ids(items)
-      with_users_filtered_by_criteria(items, :id, ids)
-    end
-
-    def with_users_filtered_by_criteria(items, field, values)
-      items.select_from_union(
-        [
-          users_mrs(items, field, values, :users),
-          users_mrs(items, field, values, { groups: :users }),
-          project_users_mrs(items, field, values, :users),
-          project_users_mrs(items, field, values, { groups: :users })
-        ]
-      )
-    end
-
-    def users_mrs(items, field, values, joins)
-      filter_by_existence(items, values) do |value|
-        ApprovalMergeRequestRule
-          .joins(joins)
-          .where(
-            ApprovalMergeRequestRule.arel_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
-              .and(User.arel_table[field].eq(value))
-          )
+      with_users_filtered_by_criteria(items) do |items_with_users|
+        find_approvers_by_query(items_with_users, :id, ids)
       end
     end
 
-    def mrs_without_overridden_rules(items)
-      items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
+    def find_approvers_by_query(items, field, values)
+      items
+        .where(users: { field => values })
+        .group('merge_requests.id')
+        .having("COUNT(users.id) = ?", values.size)
     end
 
-    def project_users_mrs(items, field, values, joins)
-      items = mrs_without_overridden_rules(items)
-      filter_by_existence(items, values) do |value|
-        Project
-          .joins(approval_rules: joins)
-          .where(
-            Project.arel_table[:id].eq(MergeRequest.arel_table[:target_project_id])
-              .and(User.arel_table[field].eq(value))
-          )
-      end
+    def with_users_filtered_by_criteria(items)
+      users_mrs = yield(items.joins(approval_rules: :users))
+      group_users_mrs = yield(items.joins(approval_rules: { groups: :users }))
+
+      mrs_without_overridden_rules = items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
+      project_users_mrs = yield(mrs_without_overridden_rules.joins(target_project: { approval_rules: :users }))
+      project_group_users_mrs = yield(mrs_without_overridden_rules.joins(target_project: { approval_rules: { groups: :users } }))
+
+      items.select_from_union([users_mrs, group_users_mrs, project_users_mrs, project_group_users_mrs])
     end
 
-    def filter_by_existence(items, values)
-      values.reduce(items) do |items, value|
-        items.where('EXISTS (?)', yield(value))
-      end
-    end
     # rubocop: enable CodeReuse/ActiveRecord
   end
 end

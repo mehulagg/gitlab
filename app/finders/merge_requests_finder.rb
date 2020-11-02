@@ -177,9 +177,11 @@ class MergeRequestsFinder < IssuableFinder
   end
   # rubocop: enable CodeReuse/Finder
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def items_assigned_to(items, user)
-    MergeRequest.from_union([super, items.reviewer_assigned_to(user)])
+    items.where(id: MergeRequest.from_union([super, items.reviewer_assigned_to(user)]))
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def by_deployments(items)
     # Until this feature flag is enabled permanently, we retain the old
