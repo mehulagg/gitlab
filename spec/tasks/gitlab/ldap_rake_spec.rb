@@ -77,6 +77,13 @@ RSpec.describe 'gitlab:ldap:secret rake tasks' do
       FileUtils.rm_rf(Rails.root.join('tmp/tests/ldapenc'))
       expect { run_rake_task('gitlab:ldap:secret:edit') }.to output(/Directory .* does not exist./).to_stdout
     end
+
+    it 'shows a warning when content is invalid' do
+      Settings.encrypted(ldap_secret_file).write('somevalue')
+      expect { run_rake_task('gitlab:ldap:secret:edit') }.to output(/WARNING: Content was not a valid LDAP secret yml file/).to_stdout
+      value = Settings.encrypted(ldap_secret_file)
+      expect(value.read).to match(/somevalue/)
+    end
   end
 
   describe 'write' do
@@ -100,6 +107,13 @@ RSpec.describe 'gitlab:ldap:secret rake tasks' do
     it 'displays error when write directory does not exist' do
       FileUtils.rm_rf('tmp/tests/ldapenc/')
       expect { run_rake_task('gitlab:ldap:secret:write') }.to output(/Directory .* does not exist./).to_stdout
+    end
+
+    it 'shows a warning when content is invalid' do
+      Settings.encrypted(ldap_secret_file).write('somevalue')
+      expect { run_rake_task('gitlab:ldap:secret:edit') }.to output(/WARNING: Content was not a valid LDAP secret yml file/).to_stdout
+      value = Settings.encrypted(ldap_secret_file)
+      expect(value.read).to match(/somevalue/)
     end
   end
 end
