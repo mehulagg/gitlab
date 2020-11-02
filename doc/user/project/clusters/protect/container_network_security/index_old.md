@@ -4,7 +4,7 @@ group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Securing your deployed applications
+# Container Network Security
 
 GitLab makes it easy to secure applications deployed in [connected Kubernetes clusters](index.md).
 You can benefit from the protection of a [Web Application Firewall](../../../topics/web_application_firewall/quick_start_guide.md),

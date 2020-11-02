@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 ---
 
 
-# Web Application Firewall - ModSecurity
+# Web Application Firewall
 
 A web application firewall (or WAF) filters, monitors, and blocks HTTP traffic to
 and from a web application. By inspecting HTTP traffic, it can prevent attacks
