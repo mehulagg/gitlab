@@ -23,8 +23,20 @@ RSpec.describe DesignManagement::Design do
     it { is_expected.to belong_to(:issue) }
     it { is_expected.to have_many(:actions) }
     it { is_expected.to have_many(:versions) }
+    it { is_expected.to have_many(:authors) }
     it { is_expected.to have_many(:notes).dependent(:delete_all) }
     it { is_expected.to have_many(:user_mentions) }
+
+    describe '#authors' do
+      it 'returns unique version authors', :aggregate_failures do
+        author = create(:user)
+        create_list(:design_version, 2, designs: [design1], author: author)
+        version_authors = design1.versions.map(&:author)
+
+        expect(version_authors).to contain_exactly(issue.author, author, author)
+        expect(design1.authors).to contain_exactly(issue.author, author)
+      end
+    end
   end
 
   describe 'validations' do

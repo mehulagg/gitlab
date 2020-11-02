@@ -11,12 +11,14 @@ module DesignManagement
     include WhereComposite
     include RelativePositioning
     include Todoable
+    include Participable
 
     belongs_to :project, inverse_of: :designs
     belongs_to :issue
 
     has_many :actions
     has_many :versions, through: :actions, class_name: 'DesignManagement::Version', inverse_of: :designs
+    has_many :authors, -> { distinct }, through: :versions, class_name: 'User'
     # This is a polymorphic association, so we can't count on FK's to delete the
     # data
     has_many :notes, as: :noteable, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
@@ -30,6 +32,9 @@ module DesignManagement
     validate :validate_file_is_image
 
     alias_attribute :title, :filename
+
+    participant :authors
+    participant :notes_with_associations
 
     # Pre-fetching scope to include the data necessary to construct a
     # reference using `to_reference`.
