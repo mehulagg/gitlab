@@ -1,0 +1,11 @@
+- return unless render_new_user_signups_cap_reached
+
+.gl-alert.gl-alert-warning.mt-3{ role: 'alert', data: { feature_id: UserCalloutsHelper::NEW_USER_SIGNUPS_CAP_REACHED, dismiss_endpoint: user_callouts_path } }
+  = sprite_icon('warning', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+  %button.js-close.gl-alert-dismiss{ type: 'button', 'aria-label' => _('Dismiss') }
+    = sprite_icon('close', css_class: 'gl-icon')
+  .gl-alert-body
+    %h4.gl-alert-title= s_('Admin|New user signups cap reached.')
+    = s_('Admin|Your Gitlab.com instance reached new user signups cap. All new users must be approved manually.')
+  .gl-alert-actions
+    = link_to s_('Admin|View pending user approvals'), admin_users_path({ filter: 'blocked_pending_approval' }), class: 'btn gl-alert-action btn-info new-gl-button'
