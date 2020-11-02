@@ -13,5 +13,9 @@ FactoryBot.define do
         deployment.file_count = zip_archive.count
       end
     end
+
+    trait :remote_store do
+      file_store { ObjectStorage::Store::REMOTE}
+    end
   end
 end

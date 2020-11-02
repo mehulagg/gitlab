@@ -56,6 +56,15 @@ RSpec.describe Pages::LookupPath do
 
     include_examples 'uses disk storage'
 
+    context 'when there is pages deployment in object storage' do
+      let(:deployment) { create(:pages_deployment, :remote_store, project: project) }
+
+      before do
+        project.mark_pages_as_deployed
+        project.pages_metadatum
+      end
+    end
+
     context 'when artifact_id from build job is present in pages metadata' do
       let(:artifacts_archive) { create(:ci_job_artifact, :zip, :remote_store, project: project) }
 

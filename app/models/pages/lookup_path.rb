@@ -22,11 +22,11 @@ module Pages
     end
 
     def source
-      if artifacts_archive
-        zip_source
-      else
-        file_source
-      end
+      return zip_source(deployment) if deployment
+
+      return zip_source(artifacts_archive) if artifacts_archive
+
+      file_source
     end
 
     def prefix
@@ -53,10 +53,22 @@ module Pages
       archive
     end
 
-    def zip_source
+    def deployment
+      return unless Feature.enabled?(:serve_pages_from_deployments, project)
+
+      deployment = project.pages_metadatum.pages_deployment
+
+      return unless deployment&.file
+
+      return if deployment.file.file_storage? && !Feature.enabled?(:serve_pages_from_disk_zip, project)
+
+      deployment
+    end
+
+    def zip_source(source)
       {
         type: 'zip',
-        path: artifacts_archive.file.url(expire_at: 1.day.from_now)
+        path: source.file.url(expire_at: 1.day.from_now)
       }
     end
 
