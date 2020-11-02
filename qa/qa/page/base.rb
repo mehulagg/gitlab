@@ -34,8 +34,16 @@ module QA
         @retry_later_backoff = QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME
       end
 
-      def assert_no_element(name)
-        assert_no_selector(element_selector_css(name))
+      def assert_element(name, **kwargs)
+        wait_for_requests
+
+        assert_selector(element_selector_css(name, kwargs), only_capybara_query_keywords(kwargs))
+      end
+
+      def assert_no_element(name, **kwargs)
+        wait_for_requests
+
+        assert_no_selector(element_selector_css(name, kwargs), only_capybara_query_keywords(kwargs))
       end
 
       def refresh
@@ -99,15 +107,14 @@ module QA
       def find_element(name, **kwargs)
         wait_for_requests
 
-        element_selector = element_selector_css(name, reject_capybara_query_keywords(kwargs))
-        find(element_selector, only_capybara_query_keywords(kwargs))
+        find(element_selector_css(name, kwargs), only_capybara_query_keywords(kwargs))
       end
 
-      def only_capybara_query_keywords(kwargs)
+      def only_capybara_query_keywords(**kwargs)
         kwargs.select { |kwarg| Capybara::Queries::SelectorQuery::VALID_KEYS.include?(kwarg) }
       end
 
-      def reject_capybara_query_keywords(kwargs)
+      def reject_capybara_query_keywords(**kwargs)
         kwargs.reject { |kwarg| Capybara::Queries::SelectorQuery::VALID_KEYS.include?(kwarg) }
       end
 
@@ -286,7 +293,7 @@ module QA
       def element_selector_css(name, *attributes)
         return name.selector_css if name.is_a? Page::Element
 
-        Page::Element.new(name, *attributes).selector_css
+        Page::Element.new(name, reject_capybara_query_keywords(*attributes)).selector_css
       end
 
       def click_link_with_text(text)

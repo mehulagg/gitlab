@@ -4,8 +4,14 @@ module QA
   module Support
     module Page
       module Logging
-        def assert_no_element(name)
-          log("asserting no element :#{name}")
+        def assert_element(name, **kwargs)
+          log("asserting element :#{name} exists with args #{kwargs}")
+
+          super
+        end
+
+        def assert_no_element(name, **kwargs)
+          log("asserting no element :#{name} with args #{kwargs}")
 
           super
         end

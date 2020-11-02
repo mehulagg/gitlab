@@ -147,9 +147,7 @@ module QA
             find_element(:dismiss_comment_field).fill_in with: reason, fill_options: { automatic_label_click: true }
             click_element :add_and_dismiss_button
 
-            wait_until(reload: false) do
-              has_no_element?(:vulnerability_modal_content)
-            end
+            assert_no_element(:vulnerability_modal_content, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           end
 
           def resolve_vulnerability_with_mr(name)

@@ -373,3 +373,67 @@ end
 
 The problem is that if `"a_job"` is present and we're waiting for it to disappear, this statement
 will fail.
+
+## Prefer assertions over `wait_until` and predicate methods
+
+We sometimes want a page object to wait longer than ten seconds for a UI change. We might also want
+to raise an error if the expected change does not occur. For example, if a test is flaky because a
+button takes longer than ten seconds to appear.
+
+By using an assertion we can allow the test to wait long enough, and fail the test if the expected
+UI change doesn't occur. If it does fail the error will let us know what element was expected.
+
+For example:
+
+```ruby
+def click_merge_button
+  # We assume that the merge button we want to click sometimes doesn't appear until more than ten
+  # seconds have passed, for example if we're waiting for a pipeline to finish
+
+  # QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME is 60 (seconds)
+  assert_element(:merge_button, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
+
+  click_element(:merge_button)
+end
+```
+
+That method uses `assert_element` to raise an error if the button represented by `:merge_button`
+doesn't appear within one minute. It attempts to click the button only after confirming it appears.
+
+### Problematic alternatives
+
+Alternatively, we could use a predicate method to check for the element first. For example:
+
+```ruby
+# Bad
+def click_merge_button
+  has_element?(:merge_button)
+
+  click_element(:merge_button)
+end
+```
+
+The problem is that if the button doesn't appear, `has_element?` will return false after ten seconds
+but execution continues to the next line anyway. And then the test will fail after `click_element`
+waits another ten seconds.
+
+We might try to solve the problem using `wait_until`, which has a default max duration of 60 seconds
+and will raise an error if the condition is not met.
+
+```ruby
+# Slightly better, but not very efficient or informative
+def click_merge_button
+  wait_until(reload: false) do
+    has_element?(:merge_button)
+  end
+
+  click_element(:merge_button)
+end
+```
+
+There are two problems with the example above:
+
+1. The exception that `wait_until` raises does not include information about what it was waiting for.
+2. It will also wait ten seconds in `has_element?`, which means that block of code involves two wait loops.
+
+We can solve both problems by using an [appropriate `assert` method with an appropriate `wait` parameter](#prefer-assertions-over-wait_until-and-predicate-methods).
