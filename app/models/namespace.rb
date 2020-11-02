@@ -379,6 +379,10 @@ class Namespace < ApplicationRecord
       .try(name)
   end
 
+  def closest_ancestor_for_setting(name)
+    self_and_ancestors(hierarchy_order: :asc).find { |n| !n.read_attribute(name).nil? }
+  end
+
   def actual_plan
     Plan.default
   end

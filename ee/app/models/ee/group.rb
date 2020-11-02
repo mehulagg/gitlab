@@ -274,8 +274,13 @@ module EE
     def checked_file_template_project(*args, &blk)
       return unless feature_available?(:custom_file_templates_for_namespace)
 
-      project_id = closest_setting(:file_template_project_id)
-      project = ::Project.find(project_id) if project_id
+      # Find closest ancestor with given non nil setting or just use itself
+      self_or_ancestor = closest_ancestor_for_setting(:file_template_project_id) || self
+      project_id = file_template_project_id || self_or_ancestor&.file_template_project_id
+
+      # check that template project is part of the ancestor hierarchy || its shared projects
+      return unless project_id && project = (self_or_ancestor&.all_projects&.where(id: project_id)&.first ||
+        self_or_ancestor&.shared_projects&.where(id: project_id)&.first)
 
       project
     end

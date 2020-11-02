@@ -87,8 +87,8 @@ module IssuablesHelper
         data: issuable_templates(issuable),
         field_name: 'issuable_template',
         selected: selected_template(issuable),
-        project_path: ref_project&.group&.checked_file_template_project&.path || ref_project.path,
-        namespace_path: ref_project&.group&.checked_file_template_project&.namespace&.full_path || ref_project.namespace.full_path
+        project_path: issuable_templates_data(issuable)[:project_path],
+        namespace_path: issuable_templates_data(issuable)[:namespace_path]
       }
     }
 
@@ -370,13 +370,24 @@ module IssuablesHelper
   end
 
   def issuable_templates(issuable)
-    @issuable_templates ||=
+    @issuable_templates ||= issuable_templates_data(issuable)[:names] || []
+  end
+
+  def issuable_templates_data(issuable)
+    strong_memoize(:issuable_templates_data) do
       case issuable
       when Issue
-        ref_project&.group&.checked_file_template_project&.repository&.issue_template_names || ref_project.repository.issue_template_names
+        templates_project, template_names = ref_project.issue_templates_data
       when MergeRequest
-        ref_project&.group&.checked_file_template_project&.repository&.merge_request_template_names || ref_project.repository.merge_request_template_names
+        templates_project, template_names = ref_project.merge_request_templates_data
       end
+
+      {
+        names: template_names,
+        project_path: templates_project&.path,
+        namespace_path: templates_project&.namespace&.full_path
+      }
+    end
   end
 
   def issuable_templates_names(issuable)
@@ -384,7 +395,7 @@ module IssuablesHelper
   end
 
   def selected_template(issuable)
-    params[:issuable_template] if issuable_templates(issuable).any? { |template| template[:name] == params[:issuable_template] }
+    params[:issuable_template] if issuable_templates(issuable)&.any? { |template| template[:name] == params[:issuable_template] }
   end
 
   def issuable_todo_button_data(issuable, is_collapsed)

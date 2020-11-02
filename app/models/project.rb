@@ -2541,6 +2541,34 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
+  def merge_request_templates_data
+    # to keep backward compatibility we first need to check if ref_project project has any
+    # merge_request templates and use those first
+    templates_project = self
+    template_names = repository.merge_request_template_names
+
+    if template_names.blank?
+      templates_project = group&.checked_file_template_project
+      template_names = templates_project&.repository&.merge_request_template_names
+    end
+
+    [templates_project, template_names]
+  end
+
+  def issue_templates_data
+    # to keep backward compatibility we first need to check if ref_project project has any
+    # merge_request templates and use those first
+    templates_project = self
+    template_names = repository.issue_template_names
+
+    if template_names.blank?
+      templates_project = group&.checked_file_template_project
+      template_names = templates_project&.repository&.issue_template_names
+    end
+
+    [templates_project, template_names]
+  end
+
   private
 
   def find_service(services, name)
