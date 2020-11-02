@@ -297,9 +297,12 @@ export default {
             </template>
           </gl-form-input-group>
 
-          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
-            s__('AlertSettings|Reset Key')
-          }}</gl-button>
+          <gl-button
+            v-gl-modal.authKeyModal
+            :disabled="!integrationForm.active && currentIntegration"
+            class="gl-mt-3"
+            >{{ s__('AlertSettings|Reset Key') }}</gl-button
+          >
           <gl-modal
             modal-id="authKeyModal"
             :title="s__('AlertSettings|Reset Key')"

@@ -118,7 +118,7 @@ export default {
           this.isUpdating = false;
         });
     },
-    updateIntegrations(
+       updateIntegrations(
       store,
       {
         data: { httpIntegrationCreate, prometheusIntegrationCreate },
