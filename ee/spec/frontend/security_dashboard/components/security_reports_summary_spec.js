@@ -200,7 +200,7 @@ describe('Security reports summary component', () => {
       // gitlab-development-kit/gitlab/ee/app/assets/javascripts/vue_shared/security_reports/components/dast_modal.vue
       // is found.
 
-      //expect(modal.attributes('modalid')).toBe('dastUrl');
+      // expect(modal.attributes('modalid')).toBe('dastUrl');
     });
 
     it('should contain a link with Scanned URLs count', () => {

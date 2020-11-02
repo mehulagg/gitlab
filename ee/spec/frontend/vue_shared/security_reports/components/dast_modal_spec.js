@@ -2,10 +2,11 @@ import { shallowMount } from '@vue/test-utils';
 import Component from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import { GlModal } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
 import httpStatus from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
-import waitForPromises from 'helpers/wait_for_promises';
 import download from '~/lib/utils/downloader';
+
 jest.mock('~/lib/utils/downloader');
 
 describe('DAST Modal', () => {

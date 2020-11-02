@@ -8,11 +8,6 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 export default {
   components: { GlModal, GlIcon, GlSprintf, GlTruncate },
   mixins: [glFeatureFlagsMixin()],
-  data() {
-    return {
-      downloadPending: false
-    }
-  },
   props: {
     scannedUrls: {
       required: true,
@@ -27,29 +22,17 @@ export default {
       type: String,
     },
   },
+  data() {
+    return {
+      downloadPending: false
+    }
+  },
   modal: {
     modalId: 'dastUrl',
     actionPrimary: {
       text: __('Close'),
       attributes: { variant: 'success' },
     },
-  },
-  methods: {
-    async downloadReport() {
-      const METHOD = 'GET';
-      const RESPONSETYPE = 'blob';
-      const URL = this.downloadLink;
-      const FILENAME = 'scanned_resources';
-
-      this.downloadPending = true;
-      try {
-        const CSVREPORT = await axios.request({url: URL, method: METHOD, responseType: RESPONSETYPE});
-        download({ fileName: FILENAME, fileData: btoa(CSVREPORT), fileType: 'text/csv'});
-        this.downloadPending = false;
-      } catch(e) {
-        this.downloadPending = false;
-      }
-    }
   },
   computed: {
     title() {
@@ -73,19 +56,36 @@ export default {
       };
       return this.downloadLink ? buttonAttrs : null;
     },
+  },
+  methods: {
+    async downloadReport() {
+      const METHOD = 'GET';
+      const RESPONSETYPE = 'blob';
+      const URL = this.downloadLink;
+      const FILENAME = 'scanned_resources';
+
+      this.downloadPending = true;
+      try {
+        const CSVREPORT = await axios.request({url: URL, method: METHOD, responseType: RESPONSETYPE});
+        download({ fileName: FILENAME, fileData: btoa(CSVREPORT), fileType: 'text/csv'});
+        this.downloadPending = false;
+      } catch(e) {
+        this.downloadPending = false;
+      }
+    }
   }
 };
 </script>
 <template>
   <span>
   <gl-modal
+    v-if="glFeatures.dastModalLoadingIndicator"
     data-testid="dastModal"
     :title="title"
     title-tag="h5"
     v-bind="$options.modal"
-    v-if="this.glFeatures.dastModalLoadingIndicator"
-    @secondary.prevent="downloadReport"
     :action-secondary="downloadButton"
+    @secondary.prevent="downloadReport"
   >
     <!-- heading -->
     <div class="row gl-text-gray-400">
@@ -122,10 +122,10 @@ export default {
     </div>
   </gl-modal>
     <gl-modal
+    v-else
     :title="title"
     title-tag="h5"
     v-bind="$options.modal"
-    v-else
     :action-secondary="downloadButton"
   >
     <!-- heading -->
