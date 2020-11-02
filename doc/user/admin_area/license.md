@@ -28,6 +28,12 @@ The very first time you visit your GitLab EE installation signed in as an admin,
 you should see a note urging you to upload a license with a link that takes you
 to **Admin Area > License**.
 
+If you can't see the **License** page it's likely you are running GitLab Community Edition (CE).
+In that case you first need to upgrade your installation to GitLab Enterprise Edition (EE).
+For more details, see [Upgrading between editions](../..//update/README.md#upgrading-between-editions).
+If you have questions or need assistance upgrading from GitLab CE to EE
+please [contact GitLab Support](https://support.gitlab.com/hc/en-us).
+
 Otherwise, you can:
 
 1. Navigate manually to the **Admin Area** by clicking the wrench (**{admin}**) icon in the menu bar.
@@ -108,8 +114,9 @@ To remove a license from a self-managed instance:
 
 ## License history
 
-You can upload and view more than one license,
-but only the latest license is used as the active license.
+You can upload and view more than one license, but only the latest license in the current date
+range is used as the active license. When you upload a future-dated license, it
+doesn't take effect until its applicable date date.
 
 ## Troubleshooting
 
