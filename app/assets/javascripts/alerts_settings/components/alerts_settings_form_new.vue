@@ -108,20 +108,9 @@ export default {
   },
   data() {
     return {
-      selectedIntegration: integrationTypesNew[0].value,
+      selectedIntegration: this.currentIntegration?.type || integrationTypesNew[0].value,
       options: integrationTypesNew,
       formVisible: false,
-      integrationForm: {
-        name: '',
-        integrationTestPayload: {
-          json: null,
-          error: null,
-        },
-        active: false,
-        authKey: '',
-        url: '',
-        apiUrl: '',
-      },
     };
   },
   computed: {
@@ -137,6 +126,19 @@ export default {
         default:
           return {};
       }
+    },
+    integrationForm() {
+      return {
+        name: this.currentIntegration?.name || '',
+        integrationTestPayload: {
+          json: null,
+          error: null,
+        },
+        active: this.currentIntegration?.active || false,
+        token: this.currentIntegration?.token || '',
+        url: this.currentIntegration?.url || '',
+        apiUrl: this.currentIntegration?.apiUrl || '',
+      };
     },
   },
   methods: {
@@ -163,9 +165,9 @@ export default {
       return this.$emit('on-create-new-integration', integrationPayload);
     },
     onReset() {
-      this.integrationForm.name = '';
-      this.integrationForm.apiUrl = '';
-      this.integrationForm.active = false;
+      this.integrationForm.name = this.currentIntegration?.name || '';
+      this.integrationForm.apiUrl = this.currentIntegration?.apiUrl || '';
+      this.integrationForm.active = this.currentIntegration?.active || false;
       this.integrationForm.integrationTestPayload.error = null;
       this.integrationForm.integrationTestPayload.json = '';
     },
@@ -282,23 +284,20 @@ export default {
             id="authorization-key"
             class="gl-mb-2"
             readonly
-            :value="selectedIntegrationType.authKey"
+            :value="selectedIntegrationType.token"
           >
             <template #append>
               <clipboard-button
-                :text="selectedIntegrationType.authKey || ''"
+                :text="selectedIntegrationType.token || ''"
                 :title="__('Copy')"
                 class="gl-m-0!"
               />
             </template>
           </gl-form-input-group>
 
-          <gl-button
-            v-gl-modal.authKeyModal
-            :disabled="!integrationForm.active && currentIntegration"
-            class="gl-mt-3"
-            >{{ $options.i18n.integrationFormSteps.step3.reset }}</gl-button
-          >
+          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
+            $options.i18n.integrationFormSteps.step3.reset
+          }}</gl-button>
           <gl-modal
             modal-id="authKeyModal"
             :title="$options.i18n.integrationFormSteps.step3.reset"
