@@ -9,7 +9,7 @@ RSpec.describe Vulnerabilities::CreateService do
 
   let_it_be(:user) { create(:user) }
   let(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
-  let(:finding) { create(:vulnerabilities_occurrence, project: project) }
+  let(:finding) { create(:vulnerabilities_finding, project: project) }
   let(:finding_id) { finding.id }
   let(:expected_error_messages) { { base: ['finding is not found or is already attached to a vulnerability'] } }
 
@@ -39,7 +39,7 @@ RSpec.describe Vulnerabilities::CreateService do
     end
 
     context 'and finding is dismissed' do
-      let(:finding) { create(:vulnerabilities_occurrence, :with_dismissal_feedback, project: project) }
+      let(:finding) { create(:vulnerabilities_finding, :with_dismissal_feedback, project: project) }
       let(:vulnerability) { project.vulnerabilities.last }
 
       it 'creates a vulnerability in a dismissed state and sets dismissal information' do
@@ -67,7 +67,7 @@ RSpec.describe Vulnerabilities::CreateService do
     end
 
     context 'when finding does not belong to the vulnerability project' do
-      let(:finding) { create(:vulnerabilities_occurrence) }
+      let(:finding) { create(:vulnerabilities_finding) }
 
       it 'adds expected error to the response' do
         expect(subject.errors.messages).to eq(expected_error_messages)

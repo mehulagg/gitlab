@@ -2,6 +2,7 @@
 
 class GitlabSubscription < ApplicationRecord
   include EachBatch
+  include Gitlab::Utils::StrongMemoize
 
   default_value_for(:start_date) { Date.today }
   before_update :log_previous_state_for_update
@@ -90,7 +91,22 @@ class GitlabSubscription < ApplicationRecord
     self.hosted_plan = Plan.find_by(name: code)
   end
 
+  # We need to show seats in use for free or trial subscriptions
+  # in order to make it easy for customers to get this information.
+  def seats_in_use
+    return super unless Feature.enabled?(:seats_in_use_for_free_or_trial)
+    return super if has_a_paid_hosted_plan? || !hosted?
+
+    seats_in_use_now
+  end
+
   private
+
+  def seats_in_use_now
+    strong_memoize(:seats_in_use_now) do
+      calculate_seats_in_use
+    end
+  end
 
   def log_previous_state_for_update
     attrs = self.attributes.merge(self.attributes_in_database)

@@ -2,6 +2,8 @@
 
 module API
   class ProjectApprovals < ::API::Base
+    feature_category :code_review
+
     before { authenticate! }
     before { authorize! :update_approvers, user_project }
 

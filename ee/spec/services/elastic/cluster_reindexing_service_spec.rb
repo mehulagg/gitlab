@@ -71,6 +71,13 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
         expect { subject.execute }.to change { task.reload.state }.from('reindexing').to('failure')
         expect(task.reload.error_message).to match(/has failed with/)
       end
+
+      it 'errors if task is not found' do
+        allow(Gitlab::Elastic::Helper.default).to receive(:task_status).and_raise(Elasticsearch::Transport::Transport::Errors::NotFound)
+
+        expect { subject.execute }.to change { task.reload.state }.from('reindexing').to('failure')
+        expect(task.reload.error_message).to match(/couldn't load task status/i)
+      end
     end
 
     context 'task finishes correctly' do

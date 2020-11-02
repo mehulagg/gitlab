@@ -14,6 +14,7 @@ module EE
       'issue_removed_from_epic' => 'epic',
       'issue_changed_epic' => 'epic',
       'epic_date_changed' => 'calendar',
+      'iteration' => 'iteration',
       'weight' => 'weight',
       'relate_epic' => 'epic',
       'unrelate_epic' => 'epic',

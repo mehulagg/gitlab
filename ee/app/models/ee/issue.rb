@@ -23,6 +23,8 @@ module EE
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
       scope :order_status_page_published_first, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS LAST') }
       scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
+      scope :order_sla_due_at_asc, -> { includes(:issuable_sla).order('issuable_slas.due_at ASC NULLS LAST') }
+      scope :order_sla_due_at_desc, -> { includes(:issuable_sla).order('issuable_slas.due_at DESC NULLS LAST') }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
@@ -190,6 +192,8 @@ module EE
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
         when 'published_asc'        then order_status_page_published_last.with_order_id_desc
         when 'published_desc'       then order_status_page_published_first.with_order_id_desc
+        when 'sla_due_at_asc'       then with_feature(:sla).order_sla_due_at_asc.with_order_id_desc
+        when 'sla_due_at_desc'      then with_feature(:sla).order_sla_due_at_desc.with_order_id_desc
         else
           super
         end

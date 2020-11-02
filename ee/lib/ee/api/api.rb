@@ -8,7 +8,6 @@ module EE
       prepended do
         use ::Gitlab::Middleware::IpRestrictor
 
-        mount ::EE::API::Boards
         mount ::EE::API::GroupBoards
 
         mount ::API::AuditEvents
@@ -26,7 +25,6 @@ module EE
         mount ::API::Ldap
         mount ::API::LdapGroupLinks
         mount ::API::License
-        mount ::API::PersonalAccessTokens
         mount ::API::ProjectMirror
         mount ::API::ProjectPushRule
         mount ::API::GroupPushRule

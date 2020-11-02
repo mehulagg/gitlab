@@ -89,10 +89,10 @@ RSpec.describe HistoricalUserData::CsvService do
 
   context 'User Count Table' do
     let_it_be(:historical_datum) do
-      create(:historical_data, date: license_start_date, active_user_count: 1)
+      create(:historical_data, recorded_at: license_start_date, active_user_count: 1)
     end
     let_it_be(:historical_datum2) do
-      create(:historical_data, date: license_start_date + 1.day, active_user_count: 2)
+      create(:historical_data, recorded_at: license_start_date + 1.day, active_user_count: 2)
     end
 
     it 'shows the header for the user counts table' do
@@ -101,11 +101,11 @@ RSpec.describe HistoricalUserData::CsvService do
 
     it 'includes proper values for each column type', :aggregate_failures do
       expect(csv[8]).to contain_exactly(
-        historical_datum.date.to_s(:db),
+        historical_datum.recorded_at.to_s(:db),
         historical_datum.active_user_count.to_s
       )
       expect(csv[9]).to contain_exactly(
-        historical_datum2.date.to_s(:db),
+        historical_datum2.recorded_at.to_s(:db),
         historical_datum2.active_user_count.to_s
       )
     end

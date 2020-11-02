@@ -81,6 +81,10 @@ module EE
         @subject.saml_enabled?
       end
 
+      condition(:group_saml_group_sync_available, scope: :subject) do
+        @subject.feature_available?(:group_saml_group_sync)
+      end
+
       condition(:group_timelogs_available) do
         @subject.feature_available?(:group_timelogs)
       end
@@ -208,7 +212,9 @@ module EE
 
       rule { group_saml_config_enabled & group_saml_available & (admin | owner) }.enable :admin_group_saml
 
-      rule { group_saml_enabled & can?(:admin_group_saml) }.enable :admin_saml_group_links
+      rule { group_saml_group_sync_available & group_saml_enabled & can?(:admin_group_saml) }.policy do
+        enable :admin_saml_group_links
+      end
 
       rule { admin | (can_owners_manage_ldap & owner) }.policy do
         enable :admin_ldap_group_links
@@ -339,7 +345,8 @@ module EE
     def resource_access_token_available?
       return true unless ::Gitlab.com?
 
-      group.feature_available_non_trial?(:resource_access_token)
+      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
+        group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

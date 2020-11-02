@@ -96,7 +96,7 @@ exports[`MetricChart component template when isLoading is true matches the snaps
    
   <gl-loading-icon-stub
     class="my-4 py-4"
-    color="orange"
+    color="dark"
     label="Loading"
     size="md"
   />

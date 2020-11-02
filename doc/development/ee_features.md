@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Guidelines for implementing Enterprise Edition features
 
 - **Write the code and the tests.**: As with any code, EE features should have
@@ -419,6 +425,38 @@ module EE
           table_name   = next_table(table_name) if deleted_rows.zero?
 
           ::BackgroundMigrationWorker.perform_in(RESCHEDULE_DELAY, self.class.name.demodulize, table_name) if table_name
+        end
+      end
+    end
+  end
+end
+```
+
+### Code in `app/graphql/`
+
+EE-specific mutations, resolvers, and types should be added to
+`ee/app/graphql/{mutations,resolvers,types}`.
+
+To override a CE mutation, resolver, or type, create the file in
+`ee/app/graphql/ee/{mutations,resolvers,types}` and add new code to a
+`prepended` block.
+
+For example, if CE has a mutation called `Mutations::Tanukis::Create` and you
+wanted to add a new argument, place the EE override in
+`ee/app/graphql/ee/mutations/tanukis/create.rb`:
+
+```ruby
+module EE
+  module Mutations
+    module Tanukis
+      module Create
+        extend ActiveSupport::Concern
+
+        prepended do
+          argument :name,
+                   GraphQL::STRING_TYPE,
+                   required: false,
+                   description: 'Tanuki name'
         end
       end
     end

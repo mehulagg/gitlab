@@ -142,10 +142,12 @@ module Gitlab
         highlight_content = result.dig('highlight', 'blob.content')&.first || ''
 
         found_line_number = 0
+        highlight_found = false
 
         highlight_content.each_line.each_with_index do |line, index|
           if line.include?(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG)
             found_line_number = index
+            highlight_found = true
             break
           end
         end
@@ -163,12 +165,15 @@ module Gitlab
              end
 
         data = content.lines[from..to]
+        # only send highlighted line number if a highlight was returned by Elasticsearch
+        highlight_line = highlight_found ? found_line_number + 1 : nil
 
         ::Gitlab::Search::FoundBlob.new(
           path: path,
           basename: basename,
           ref: ref,
           startline: from + 1,
+          highlight_line: highlight_line,
           data: data.join,
           project: project,
           project_id: project_id

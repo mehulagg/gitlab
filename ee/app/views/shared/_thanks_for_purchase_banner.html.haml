@@ -1,0 +1,7 @@
+%section.gl-banner.gl-banner-introduction.gl-p-3.px-lg-6
+  .gl-banner-illustration.gl-display-flex
+    = image_tag('illustrations/illustration-congratulation-purchase.svg', class: 'mw-xs')
+  .gl-banner-content.gl-display-flex.gl-flex-direction-column.gl-justify-content-center
+    %h3= _('Thanks for your purchase!')
+    - number_of_users = n_('1 user', '%{num} users', quantity) % { num: quantity }
+    %p= _('You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email.') % { plan: plan_title, seats: number_of_users }

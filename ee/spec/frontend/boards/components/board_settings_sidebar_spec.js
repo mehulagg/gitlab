@@ -22,7 +22,7 @@ describe('ee/BoardSettingsSidebar', () => {
   const listId = 1;
   let mock;
 
-  const createComponent = (actions = {}) => {
+  const createComponent = (actions = {}, isWipLimitsOn = false) => {
     storeActions = actions;
 
     const store = new Vuex.Store({
@@ -34,6 +34,11 @@ describe('ee/BoardSettingsSidebar', () => {
     wrapper = shallowMount(BoardSettingsSidebar, {
       store,
       localVue,
+      provide: {
+        glFeatures: {
+          wipLimits: isWipLimitsOn,
+        },
+      },
       stubs: {
         'board-settings-sidebar-wip-limit': BoardSettingsWipLimit,
         'board-settings-list-types': BoardSettingsListTypes,
@@ -59,7 +64,7 @@ describe('ee/BoardSettingsSidebar', () => {
       list_type: 'label',
     });
 
-    createComponent();
+    createComponent({}, true);
 
     expect(wrapper.find(BoardSettingsWipLimit).exists()).toBe(true);
   });

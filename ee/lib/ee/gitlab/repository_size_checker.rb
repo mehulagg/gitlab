@@ -17,9 +17,10 @@ module EE
       override :exceeded_size
       # @param change_size [int] in bytes
       def exceeded_size(change_size = 0)
-        exceeded_size = super
-        exceeded_size -= remaining_additional_purchased_storage if additional_repo_storage_available?
-        exceeded_size
+        size = super
+        size -= remaining_additional_purchased_storage if additional_repo_storage_available?
+
+        [size, 0].max
       end
 
       private
@@ -38,8 +39,16 @@ module EE
         namespace&.additional_purchased_storage_size&.megabytes.to_i
       end
 
+      def current_project_excess
+        [current_size - limit, 0].max
+      end
+
+      def total_excess_without_current_project
+        total_repository_size_excess - current_project_excess
+      end
+
       def remaining_additional_purchased_storage
-        additional_purchased_storage - total_repository_size_excess
+        additional_purchased_storage - total_excess_without_current_project
       end
     end
   end

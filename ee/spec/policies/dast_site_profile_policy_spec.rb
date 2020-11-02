@@ -33,14 +33,6 @@ RSpec.describe DastSiteProfilePolicy do
 
       it { is_expected.to be_allowed(:create_on_demand_dast_scan) }
 
-      context 'when on demand scan feature flag is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
-      end
-
       context 'when on demand scan licensed feature is not available' do
         before do
           stub_licensed_features(security_on_demand_scans: false)

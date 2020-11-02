@@ -5,7 +5,7 @@ module Gitlab
     class Ingress
       include Gitlab::Utils::StrongMemoize
 
-      # Canry Ingress Annotations https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#canary
+      # Canary Ingress Annotations https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#canary
       ANNOTATION_KEY_CANARY = 'nginx.ingress.kubernetes.io/canary'
       ANNOTATION_KEY_CANARY_WEIGHT = 'nginx.ingress.kubernetes.io/canary-weight'
 

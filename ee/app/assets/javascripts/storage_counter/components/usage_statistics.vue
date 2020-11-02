@@ -15,6 +15,11 @@ export default {
       required: true,
       type: Object,
     },
+    purchaseStorageUrl: {
+      required: false,
+      type: String,
+      default: '',
+    },
   },
   computed: {
     formattedActualRepoSizeLimit() {
@@ -43,17 +48,19 @@ export default {
         totalRepositorySizeExcess,
         additionalPurchasedStorageSize,
       } = this.rootStorageStatistics;
-      return {
-        usage: this.formatSizeAndSplit(
-          Math.max(0, additionalPurchasedStorageSize - totalRepositorySizeExcess),
-        ),
-        usageTotal: this.formatSizeAndSplit(additionalPurchasedStorageSize),
-        description: s__('UsageQuota|Purchased storage available'),
-        link: {
-          text: s__('UsageQuota|Purchase more storage'),
-          url: '#',
-        },
-      };
+      return this.purchaseStorageUrl
+        ? {
+            usage: this.formatSizeAndSplit(
+              Math.max(0, additionalPurchasedStorageSize - totalRepositorySizeExcess),
+            ),
+            usageTotal: this.formatSizeAndSplit(additionalPurchasedStorageSize),
+            description: s__('UsageQuota|Purchased storage available'),
+            link: {
+              text: s__('UsageQuota|Purchase more storage'),
+              url: this.purchaseStorageUrl,
+            },
+          }
+        : null;
     },
   },
   methods: {
@@ -106,6 +113,7 @@ export default {
       </template>
     </usage-statistics-card>
     <usage-statistics-card
+      v-if="purchasedUsage"
       data-testid="purchasedUsage"
       :usage="purchasedUsage.usage"
       :usage-total="purchasedUsage.usageTotal"

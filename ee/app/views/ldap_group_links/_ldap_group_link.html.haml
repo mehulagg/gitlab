@@ -10,7 +10,7 @@
       As #{ldap_group_link.human_access} on #{ldap_group_link.provider_label} server
   - else
     .cred
-      %i.fa.fa-warning
+      = sprite_icon('warning-solid')
       Config for LDAP server
       %code= ldap_group_link.provider
       is not present in GitLab
