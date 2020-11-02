@@ -1,0 +1,6 @@
+---
+title: Add issue permission and target version document properties for Elasticsearch
+  migrations
+merge_request: 46719
+author:
+type: changed
