@@ -1,10 +1,19 @@
 <script>
 import $ from 'jquery';
-import { GlPopover, GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import {
+  GlPopover,
+  GlButton,
+  GlTooltipDirective,
+  GlIcon,
+  GlDropdown,
+  GlDropdownItem,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
 import { CopyAsGFM } from '../../../behaviors/markdown/copy_as_gfm';
 import ToolbarButton from './toolbar_button.vue';
+import savedRepliesQuery from './queries/saved_replies.query.graphql';
 
 export default {
   components: {
@@ -12,6 +21,9 @@ export default {
     GlIcon,
     GlPopover,
     GlButton,
+    GlDropdown,
+    GlDropdownItem,
+    GlSearchBoxByType,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -37,9 +49,17 @@ export default {
       default: false,
     },
   },
+  apollo: {
+    savedReplies: {
+      query: savedRepliesQuery,
+      update: data => data?.currentUser?.savedReplies?.nodes,
+    },
+  },
   data() {
     return {
       tag: '> ',
+      savedReplies: [],
+      savedRepliesSearch: '',
     };
   },
   computed: {
@@ -63,6 +83,9 @@ export default {
     },
     modifierKey() {
       return this.isMac ? '⌘' : s__('KeyboardKey|Ctrl+');
+    },
+    filteredSavedReplies() {
+      return this.savedReplies.filter(t => t.title.indexOf(this.savedRepliesSearch) >= 0);
     },
   },
   mounted() {
@@ -137,6 +160,29 @@ export default {
         </button>
       </li>
       <li :class="{ active: !previewMarkdown }" class="md-header-toolbar">
+        <div class="d-inline-block">
+          <gl-dropdown
+            toggle-class="py-0 px-1 toolbar-btn bg-transparent shadow-none"
+            :header-text="__('Saved replies')"
+          >
+            <template #button-content>
+              <gl-icon name="book" class="mr-0" />
+            </template>
+            <gl-search-box-by-type v-model.trim="savedRepliesSearch" />
+            <gl-dropdown-item
+              v-for="reply in filteredSavedReplies"
+              :key="reply.id"
+              :data-md-tag="reply.note"
+              data-md-prepend="true"
+              button-class="js-md"
+            >
+              {{ reply.title }}
+            </gl-dropdown-item>
+            <div v-if="filteredSavedReplies.length === 0" class="p-2">
+              {{ __('Nothing found') }}
+            </div>
+          </gl-dropdown>
+        </div>
         <div class="d-inline-block">
           <toolbar-button
             tag="**"

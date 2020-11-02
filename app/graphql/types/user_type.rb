@@ -41,6 +41,8 @@ module Types
           description: 'Projects starred by the user',
           resolver: Resolvers::UserStarredProjectsResolver
 
+    field :saved_replies, Types::SavedReplyType.connection_type, null: false
+
     # Merge request field: MRs can be either authored or assigned:
     field :authored_merge_requests, Types::MergeRequestType.connection_type, null: true,
           resolver: Resolvers::AuthoredMergeRequestsResolver,

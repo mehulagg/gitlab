@@ -339,9 +339,9 @@ export function addMarkdownListeners(form) {
       Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
     });
 
-  const $allToolbarBtns = $('.js-md', form)
-    .off('click')
-    .on('click', function() {
+  const $allToolbarBtns = $(document)
+    .off('click', '.js-md')
+    .on('click', '.js-md', function() {
       const $toolbarBtn = $(this);
 
       return updateTextForToolbarBtn($toolbarBtn);

@@ -1,15 +1,25 @@
 import $ from 'jquery';
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import store from '~/mr_notes/stores';
 import notesApp from '../notes/components/notes_app.vue';
 import discussionNavigator from '../notes/components/discussion_navigator.vue';
 import initWidget from '../vue_merge_request_widget';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import createDefaultClient from '~/lib/graphql';
+
+Vue.use(VueApollo);
 
 export default () => {
+  const defaultClient = createDefaultClient();
+  const apolloProvider = new VueApollo({
+    defaultClient,
+  });
+
   // eslint-disable-next-line no-new
   new Vue({
+    apolloProvider,
     el: '#js-vue-mr-discussions',
     name: 'MergeRequestDiscussions',
     components: {

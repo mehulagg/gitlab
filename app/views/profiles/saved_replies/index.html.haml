@@ -1,0 +1,29 @@
+- breadcrumb_title s_('Profiles|Saved Replies')
+- page_title s_('Profiles|Saved Replies')
+- @content_class = 'limit-container-width' unless fluid_layout
+
+.row.gl-mt-3
+  .col-lg-4.profile-settings-sidebar
+    %h4.gl-mt-0
+      = page_title
+
+  .col-lg-8
+    %h4.gl-mt-0
+      = _('Add saved reply')
+
+    = render "form", edit: false
+
+    %hr
+
+    - if @saved_replies.any?
+      %ul.content-list
+        - @saved_replies.each do |reply|
+          %li
+            = reply.title
+            .btn-group.gl-ml-3
+              = link_to edit_profile_saved_reply_path(reply), class: 'gl-button btn btn-default' do
+                %span.sr-only= _('Edit')
+                = sprite_icon('pencil')
+              = link_to profile_saved_reply_path(reply), data: { confirm: _('Are you sure?') }, method: :delete, class: 'gl-button btn btn-danger' do
+                %span.sr-only= _('Remove')
+                = sprite_icon('remove')

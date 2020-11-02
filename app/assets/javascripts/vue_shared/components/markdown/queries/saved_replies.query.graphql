@@ -1,0 +1,11 @@
+query getSavedReplies {
+  currentUser {
+    savedReplies {
+      nodes {
+        id
+        title
+        note
+      }
+    }
+  }
+}

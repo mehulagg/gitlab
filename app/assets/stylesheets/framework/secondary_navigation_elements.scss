@@ -8,7 +8,7 @@
   height: auto;
   border-bottom: 1px solid $border-color;
 
-  li:not(.md-header-toolbar) {
+  li:not(.md-header-toolbar):not(.gl-new-dropdown-item) {
     display: flex;
 
     a,

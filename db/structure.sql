@@ -13901,6 +13901,22 @@ CREATE SEQUENCE note_diff_files_id_seq
 
 ALTER SEQUENCE note_diff_files_id_seq OWNED BY note_diff_files.id;
 
+CREATE TABLE note_templates (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    title character varying,
+    note text
+);
+
+CREATE SEQUENCE note_templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE note_templates_id_seq OWNED BY note_templates.id;
+
 CREATE TABLE notes (
     id integer NOT NULL,
     note text,
@@ -14624,9 +14640,9 @@ CREATE TABLE plan_limits (
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
+    project_feature_flags integer DEFAULT 200 NOT NULL,
     golang_max_file_size bigint DEFAULT 104857600 NOT NULL,
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL
 );
 
@@ -15901,6 +15917,22 @@ CREATE SEQUENCE saml_providers_id_seq
     CACHE 1;
 
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
+
+CREATE TABLE saved_replies (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    title character varying,
+    note text
+);
+
+CREATE SEQUENCE saved_replies_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE saved_replies_id_seq OWNED BY saved_replies.id;
 
 CREATE TABLE schema_migrations (
     version character varying NOT NULL
@@ -17889,6 +17921,8 @@ ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_s
 
 ALTER TABLE ONLY note_diff_files ALTER COLUMN id SET DEFAULT nextval('note_diff_files_id_seq'::regclass);
 
+ALTER TABLE ONLY note_templates ALTER COLUMN id SET DEFAULT nextval('note_templates_id_seq'::regclass);
+
 ALTER TABLE ONLY notes ALTER COLUMN id SET DEFAULT nextval('notes_id_seq'::regclass);
 
 ALTER TABLE ONLY notification_settings ALTER COLUMN id SET DEFAULT nextval('notification_settings_id_seq'::regclass);
@@ -19128,6 +19162,9 @@ ALTER TABLE ONLY namespaces
 
 ALTER TABLE ONLY note_diff_files
     ADD CONSTRAINT note_diff_files_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY note_templates
+    ADD CONSTRAINT note_templates_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY notes
     ADD CONSTRAINT notes_pkey PRIMARY KEY (id);
@@ -21145,6 +21182,8 @@ CREATE INDEX index_namespaces_on_type_and_id_partial ON namespaces USING btree (
 CREATE INDEX index_non_requested_project_members_on_source_id_and_type ON members USING btree (source_id, source_type) WHERE ((requested_at IS NULL) AND ((type)::text = 'ProjectMember'::text));
 
 CREATE UNIQUE INDEX index_note_diff_files_on_diff_note_id ON note_diff_files USING btree (diff_note_id);
+
+CREATE INDEX index_note_templates_on_user_id ON note_templates USING btree (user_id);
 
 CREATE INDEX index_notes_on_author_id_and_created_at_and_id ON notes USING btree (author_id, created_at, id);
 
@@ -24100,6 +24139,9 @@ ALTER TABLE ONLY container_expiration_policies
 
 ALTER TABLE ONLY wiki_page_meta
     ADD CONSTRAINT fk_rails_c7a0c59cf1 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY note_templates
+    ADD CONSTRAINT fk_rails_c82e5a7cc9 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY scim_oauth_access_tokens
     ADD CONSTRAINT fk_rails_c84404fb6c FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;

@@ -1,0 +1,14 @@
+- breadcrumb_title s_('Profiles|Saved Replies')
+- page_title s_('Profiles|Saved Replies')
+- @content_class = 'limit-container-width' unless fluid_layout
+
+.row.gl-mt-3
+  .col-lg-4.profile-settings-sidebar
+    %h4.gl-mt-0
+      = page_title
+
+  .col-lg-8
+    %h4.gl-mt-0
+      = _('Edit saved reply')
+
+    = render "form", edit: true

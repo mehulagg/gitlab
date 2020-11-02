@@ -31,6 +31,7 @@ resource :profile, only: [:show, :update] do
       end
     end
     resource :preferences, only: [:show, :update]
+    resources :saved_replies, only: [:index, :edit, :update, :create, :destroy]
     resources :keys, only: [:index, :show, :create, :destroy]
     resources :gpg_keys, only: [:index, :create, :destroy] do
       member do
