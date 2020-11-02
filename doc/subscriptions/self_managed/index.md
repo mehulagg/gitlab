@@ -35,11 +35,10 @@ using [Seat Link](#seat-link).
 A _billable user_ counts against the number of subscription seats. Every user is considered a
 billable user, with the following exceptions:
 
-- [Deactivated](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) and
-  [blocked](../../user/admin_area/blocking_unblocking_users.md) users who are restricted prior to the
-  renewal of a subscription are not counted as billable users for the renewal of a subscription. They may
-  count as billable users in the subscription period in which they were originally added.
-- Users [pending approval](../../user/admin_area/approving_users.md).
+- [Deactivated users](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) and
+  [blocked users](../../user/admin_area/blocking_unblocking_users.md) don't count as billable users in the current subscription. When they are either deactivated or blocked they release a _billable user_ seat. However, they may
+  count toward overages in the subscribed seat count.
+- Users who are [pending approval](../../user/admin_area/approving_users.md).
 - Members with Guest permissions on an Ultimate subscription.
 - GitLab-created service accounts: `Ghost User` and bots (`Support Bot`, [`Project bot users`](../../user/project/settings/project_access_tokens.md#project-bot-users), and so on).
 
@@ -107,10 +106,10 @@ It's important to regularly review your user accounts, because:
 #### Users over License
 
 A GitLab subscription is valid for a specific number of users. For details, see
-[Billable users](#billable-users). If the active user
+[Billable users](#billable-users). If the billable user
 count exceeds the number included in the subscription, known as the number of
 _users over license_, you must pay for the excess number of users either before
-renewal, or at the time of renewal. This is also known the _true up_ process.
+renewal, or at the time of renewal. This is also known as the _true up_ process.
 
 Self-managed instances can add users to a subscription any time during the
 subscription period. The cost of additional users added during the subscription
