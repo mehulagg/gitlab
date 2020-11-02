@@ -110,7 +110,7 @@ export default {
       }
     },
     handleResize() {
-      this.isMobile = ['xs', 'sm'].includes(GlBreakpointInstance.getBreakpointSize());
+      this.isMobile = GlBreakpointInstance.getBreakpointSize() === 'xs';
     },
   },
 };
