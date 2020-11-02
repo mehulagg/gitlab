@@ -21,7 +21,7 @@ module EE
               description: 'Whether or not closed list is hidden.'
 
         field :labels, ::Types::LabelType.connection_type, null: true,
-              description: 'Labels of the board'
+              description: 'Labels of the board.'
 
         field :milestone, type: ::Types::MilestoneType, null: true,
               description: 'The board milestone.'

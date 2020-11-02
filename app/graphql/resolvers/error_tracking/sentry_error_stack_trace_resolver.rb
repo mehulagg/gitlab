@@ -5,7 +5,7 @@ module Resolvers
     class SentryErrorStackTraceResolver < BaseResolver
       argument :id, GraphQL::ID_TYPE,
                 required: true,
-                description: 'ID of the Sentry issue'
+                description: 'ID of the Sentry issue.'
 
       def resolve(**args)
         issue_id = GlobalID.parse(args[:id])&.model_id

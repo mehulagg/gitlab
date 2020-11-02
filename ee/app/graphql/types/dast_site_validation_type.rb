@@ -8,10 +8,10 @@ module Types
     authorize :create_on_demand_dast_scan
 
     field :id, ::Types::GlobalIDType[::DastSiteValidation], null: false,
-          description: 'ID of the site validation'
+          description: 'ID of the site validation.'
 
     field :status, Types::DastSiteProfileValidationStatusEnum, null: false,
-          description: 'The status of the validation',
+          description: 'The status of the validation.',
           resolve: -> (obj, _args, _ctx) { obj.state }
   end
 end

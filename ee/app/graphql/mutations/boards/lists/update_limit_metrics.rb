@@ -29,7 +29,7 @@ module Mutations
         field :list,
               ::Types::BoardListType,
               null: true,
-              description: 'The updated list'
+              description: 'The updated list.'
 
         def ready?(**args)
           if limit_metric_settings_of(args).blank?

@@ -8,7 +8,7 @@ module Resolvers
       argument :name,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'Project name or key'
+               description: 'Project name or key.'
 
       def resolve(name: nil, **args)
         authorize!(project)

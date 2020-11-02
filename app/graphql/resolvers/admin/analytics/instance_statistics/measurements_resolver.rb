@@ -11,7 +11,7 @@ module Resolvers
 
           argument :identifier, Types::Admin::Analytics::InstanceStatistics::MeasurementIdentifierEnum,
                     required: true,
-                    description: 'The type of measurement/statistics to retrieve'
+                    description: 'The type of measurement/statistics to retrieve.'
 
           def resolve(identifier:)
             authorize!

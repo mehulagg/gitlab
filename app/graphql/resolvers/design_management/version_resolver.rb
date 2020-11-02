@@ -11,7 +11,7 @@ module Resolvers
 
       argument :id, GraphQL::ID_TYPE,
                required: true,
-               description: 'The Global ID of the version'
+               description: 'The Global ID of the version.'
 
       def resolve(id:)
         authorized_find!(id: id)

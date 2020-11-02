@@ -9,7 +9,7 @@ module Resolvers
 
       argument :issue_filters, Types::Boards::BoardIssueInputType,
                required: false,
-               description: 'Filters applied when selecting issues on the board'
+               description: 'Filters applied when selecting issues on the board.'
 
       type Types::Boards::BoardEpicType, null: true
 

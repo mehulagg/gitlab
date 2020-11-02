@@ -13,36 +13,36 @@ module Mutations
       field :iteration,
             Types::IterationType,
             null: true,
-            description: 'The updated iteration'
+            description: 'The updated iteration.'
 
       argument :group_path, GraphQL::ID_TYPE,
                required: true,
-               description: "The group of the iteration"
+               description: "The group of the iteration."
 
       argument :id,
                GraphQL::ID_TYPE,
                required: true,
-               description: 'The id of the iteration'
+               description: 'The id of the iteration.'
 
       argument :title,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The title of the iteration'
+               description: 'The title of the iteration.'
 
       argument :description,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The description of the iteration'
+               description: 'The description of the iteration.'
 
       argument :start_date,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The start date of the iteration'
+               description: 'The start date of the iteration.'
 
       argument :due_date,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The end date of the iteration'
+               description: 'The end date of the iteration.'
 
       def resolve(args)
         validate_arguments!(args)

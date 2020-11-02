@@ -12,17 +12,17 @@ module Mutations
 
         argument :cluster_agent_id, ClusterAgentID,
                  required: true,
-                 description: 'Global ID of the cluster agent that will be associated with the new token'
+                 description: 'Global ID of the cluster agent that will be associated with the new token.'
 
         field :secret,
               GraphQL::STRING_TYPE,
               null: true,
-              description: "Token secret value. Make sure you save it - you won't be able to access it again"
+              description: "Token secret value. Make sure you save it - you won't be able to access it again."
 
         field :token,
               Types::Clusters::AgentTokenType,
               null: true,
-              description: 'Token created after mutation'
+              description: 'Token created after mutation.'
 
         def resolve(cluster_agent_id:)
           cluster_agent = authorized_find!(id: cluster_agent_id)

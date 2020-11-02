@@ -9,11 +9,11 @@ module EE
         prepended do
           argument :epic_id, ::Types::GlobalIDType[::Epic],
                    required: false,
-                   description: 'Filter by epic ID. Incompatible with epicWildcardId'
+                   description: 'Filter by epic ID. Incompatible with epicWildcardId.'
 
           argument :weight, GraphQL::STRING_TYPE,
                    required: false,
-                   description: 'Filter by weight'
+                   description: 'Filter by weight.'
         end
       end
     end

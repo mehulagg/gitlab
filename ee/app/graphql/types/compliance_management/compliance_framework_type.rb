@@ -9,7 +9,7 @@ module Types
 
       field :name, GraphQL::STRING_TYPE,
             null: false,
-            description: 'Name of the compliance framework'
+            description: 'Name of the compliance framework.'
 
       def name
         object.compliance_management_framework.name

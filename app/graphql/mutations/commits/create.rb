@@ -9,11 +9,11 @@ module Mutations
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,
-               description: 'Project full path the branch is associated with'
+               description: 'Project full path the branch is associated with.'
 
       argument :branch, GraphQL::STRING_TYPE,
                required: true,
-               description: 'Name of the branch'
+               description: 'Name of the branch.'
 
       argument :message,
                GraphQL::STRING_TYPE,
@@ -23,12 +23,12 @@ module Mutations
       argument :actions,
                [Types::CommitActionType],
                required: true,
-               description: 'Array of action hashes to commit as a batch'
+               description: 'Array of action hashes to commit as a batch.'
 
       field :commit,
             Types::CommitType,
             null: true,
-            description: 'The commit after mutation'
+            description: 'The commit after mutation.'
 
       authorize :push_code
 

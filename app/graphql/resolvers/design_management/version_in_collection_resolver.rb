@@ -13,10 +13,10 @@ module Resolvers
 
       argument :sha, GraphQL::STRING_TYPE,
                required: false,
-               description: "The SHA256 of a specific version"
+               description: "The SHA256 of a specific version."
       argument :id, GraphQL::ID_TYPE,
                required: false,
-               description: 'The Global ID of the version'
+               description: 'The Global ID of the version.'
 
       def resolve(id: nil, sha: nil)
         check_args(id, sha)

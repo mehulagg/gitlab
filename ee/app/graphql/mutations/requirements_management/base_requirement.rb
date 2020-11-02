@@ -7,19 +7,19 @@ module Mutations
 
       field :requirement, Types::RequirementsManagement::RequirementType,
             null: true,
-            description: 'Requirement after mutation'
+            description: 'Requirement after mutation.'
 
       argument :title, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Title of the requirement'
+               description: 'Title of the requirement.'
 
       argument :description, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Description of the requirement'
+               description: 'Description of the requirement.'
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,
-               description: 'Full project path the requirement is associated with'
+               description: 'Full project path the requirement is associated with.'
     end
   end
 end

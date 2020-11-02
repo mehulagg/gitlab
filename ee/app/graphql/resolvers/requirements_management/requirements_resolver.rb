@@ -7,27 +7,27 @@ module Resolvers
 
       argument :iid, GraphQL::ID_TYPE,
                required: false,
-               description: 'IID of the requirement, e.g., "1"'
+               description: 'IID of the requirement, e.g., "1".'
 
       argument :iids, [GraphQL::ID_TYPE],
                required: false,
-               description: 'List of IIDs of requirements, e.g., [1, 2]'
+               description: 'List of IIDs of requirements, e.g., [1, 2].'
 
       argument :sort, Types::SortEnum,
                required: false,
-               description: 'List requirements by sort order'
+               description: 'List requirements by sort order.'
 
       argument :state, Types::RequirementsManagement::RequirementStateEnum,
                required: false,
-               description: 'Filter requirements by state'
+               description: 'Filter requirements by state.'
 
       argument :search, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Search query for requirement title'
+               description: 'Search query for requirement title.'
 
       argument :author_username, [GraphQL::STRING_TYPE],
                required: false,
-               description: 'Filter requirements by author username'
+               description: 'Filter requirements by author username.'
 
       type Types::RequirementsManagement::RequirementType, null: true
 

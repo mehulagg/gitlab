@@ -7,19 +7,19 @@ module Resolvers
 
     argument :state, Types::IterationStateEnum,
              required: false,
-             description: 'Filter iterations by state'
+             description: 'Filter iterations by state.'
     argument :title, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Fuzzy search by title'
+             description: 'Fuzzy search by title.'
     argument :id, GraphQL::ID_TYPE,
              required: false,
-             description: 'The ID of the Iteration to look up'
+             description: 'The ID of the Iteration to look up.'
     argument :iid, GraphQL::ID_TYPE,
              required: false,
-             description: 'The internal ID of the Iteration to look up'
+             description: 'The internal ID of the Iteration to look up.'
     argument :include_ancestors, GraphQL::BOOLEAN_TYPE,
              required: false,
-             description: 'Whether to include ancestor iterations. Defaults to true'
+             description: 'Whether to include ancestor iterations. Defaults to true.'
 
     type Types::IterationType, null: true
 

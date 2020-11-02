@@ -5,7 +5,7 @@ module Resolvers
     class SentryDetailedErrorResolver < BaseResolver
       argument :id, GraphQL::ID_TYPE,
                 required: true,
-                description: 'ID of the Sentry issue'
+                description: 'ID of the Sentry issue.'
 
       def resolve(**args)
         current_user = context[:current_user]

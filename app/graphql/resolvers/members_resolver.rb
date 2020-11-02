@@ -7,7 +7,7 @@ module Resolvers
 
     argument :search, GraphQL::STRING_TYPE,
               required: false,
-              description: 'Search query'
+              description: 'Search query.'
 
     def resolve_with_lookahead(**args)
       authorize!(object)

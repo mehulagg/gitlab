@@ -8,7 +8,7 @@ module Mutations
       argument :id,
                GraphQL::ID_TYPE,
                required: true,
-               description: 'The global id of the snippet to update'
+               description: 'The global id of the snippet to update.'
 
       def resolve(id:)
         snippet = authorized_find!(id: id)

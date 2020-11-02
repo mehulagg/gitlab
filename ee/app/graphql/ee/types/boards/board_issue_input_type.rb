@@ -10,7 +10,7 @@ module EE
           # NONE/ANY epic filter can not be negated
           argument :epic_wildcard_id, ::Types::Boards::EpicWildcardIdEnum,
                    required: false,
-                   description: 'Filter by epic ID wildcard. Incompatible with epicId'
+                   description: 'Filter by epic ID wildcard. Incompatible with epicId.'
         end
       end
     end

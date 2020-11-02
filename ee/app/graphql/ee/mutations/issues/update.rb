@@ -11,7 +11,7 @@ module EE
 
           argument :epic_id, GraphQL::ID_TYPE,
                    required: false,
-                   description: 'The ID of the parent epic. NULL when removing the association'
+                   description: 'The ID of the parent epic. NULL when removing the association.'
         end
 
         def resolve(project_path:, iid:, **args)

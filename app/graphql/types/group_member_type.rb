@@ -11,7 +11,7 @@ module Types
     description 'Represents a Group Membership'
 
     field :group, Types::GroupType, null: true,
-          description: 'Group that a User is a member of',
+          description: 'Group that a User is a member of.',
           resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Group, obj.source_id).find }
   end
 end

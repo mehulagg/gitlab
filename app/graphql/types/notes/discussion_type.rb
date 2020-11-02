@@ -10,13 +10,13 @@ module Types
       implements(Types::ResolvableInterface)
 
       field :id, GraphQL::ID_TYPE, null: false,
-            description: "ID of this discussion"
+            description: "ID of this discussion."
       field :reply_id, GraphQL::ID_TYPE, null: false,
-            description: 'ID used to reply to this discussion'
+            description: 'ID used to reply to this discussion.'
       field :created_at, Types::TimeType, null: false,
-            description: "Timestamp of the discussion's creation"
+            description: "Timestamp of the discussion's creation."
       field :notes, Types::Notes::NoteType.connection_type, null: false,
-            description: 'All notes in the discussion'
+            description: 'All notes in the discussion.'
 
       # The gem we use to generate Global IDs is hard-coded to work with
       # `id` properties. To generate a GID for the `reply_id` property,

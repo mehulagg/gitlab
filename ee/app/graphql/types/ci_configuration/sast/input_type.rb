@@ -8,15 +8,15 @@ module Types
         description 'Represents a CI configuration of SAST'
 
         argument :global, [::Types::CiConfiguration::Sast::EntityInputType],
-          description: 'List of global entities related to SAST configuration',
+          description: 'List of global entities related to SAST configuration.',
           required: false
 
         argument :pipeline, [::Types::CiConfiguration::Sast::EntityInputType],
-          description: 'List of pipeline entities related to SAST configuration',
+          description: 'List of pipeline entities related to SAST configuration.',
           required: false
 
         argument :analyzers, [::Types::CiConfiguration::Sast::AnalyzersEntityInputType],
-          description: 'List of analyzers and related variables for the SAST configuration',
+          description: 'List of analyzers and related variables for the SAST configuration.',
           required: false
       end
     end

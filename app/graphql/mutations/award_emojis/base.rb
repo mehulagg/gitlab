@@ -8,7 +8,7 @@ module Mutations
       argument :awardable_id,
                ::Types::GlobalIDType[::Awardable],
                required: true,
-               description: 'The global id of the awardable resource'
+               description: 'The global id of the awardable resource.'
 
       argument :name,
                GraphQL::STRING_TYPE,
@@ -18,7 +18,7 @@ module Mutations
       field :award_emoji,
             Types::AwardEmojis::AwardEmojiType,
             null: true,
-            description: 'The award emoji after mutation'
+            description: 'The award emoji after mutation.'
 
       private
 

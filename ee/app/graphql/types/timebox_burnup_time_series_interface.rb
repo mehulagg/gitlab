@@ -6,7 +6,7 @@ module Types
 
     field :burnup_time_series, [::Types::BurnupChartDailyTotalsType], null: true,
           resolver: ::Resolvers::TimeboxBurnupTimeSeriesResolver,
-          description: 'Daily scope and completed totals for burnup charts',
+          description: 'Daily scope and completed totals for burnup charts.',
           complexity: 175
   end
 end

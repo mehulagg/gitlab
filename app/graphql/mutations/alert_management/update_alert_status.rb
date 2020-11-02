@@ -7,7 +7,7 @@ module Mutations
 
       argument :status, Types::AlertManagement::StatusEnum,
                required: true,
-               description: 'The status to set the alert'
+               description: 'The status to set the alert.'
 
       def resolve(args)
         alert = authorized_find!(project_path: args[:project_path], iid: args[:iid])

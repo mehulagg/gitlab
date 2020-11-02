@@ -9,7 +9,7 @@ module EE
       prepended do
         argument :iteration_id, ::GraphQL::ID_TYPE.to_list_type,
                  required: false,
-                 description: 'Iterations applied to the issue'
+                 description: 'Iterations applied to the issue.'
       end
 
       private

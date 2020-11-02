@@ -9,17 +9,17 @@ module Mutations
 
       field :vulnerability, Types::VulnerabilityType,
             null: true,
-            description: 'The vulnerability after dismissal'
+            description: 'The vulnerability after dismissal.'
 
       argument :id,
                ::Types::GlobalIDType[::Vulnerability],
                required: true,
-               description: 'ID of the vulnerability to be dismissed'
+               description: 'ID of the vulnerability to be dismissed.'
 
       argument :comment,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'Reason why vulnerability should be dismissed'
+               description: 'Reason why vulnerability should be dismissed.'
 
       def resolve(id:, comment: nil)
         vulnerability = authorized_find!(id: id)
