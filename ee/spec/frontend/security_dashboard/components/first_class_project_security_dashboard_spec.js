@@ -19,12 +19,12 @@ const props = {
     id: '214',
     path: '/mixed-vulnerabilities/dependency-list-test-01/-/pipelines/214',
   },
-  projectFullPath: '/group/project',
   securityDashboardHelpPath: '/security/dashboard/help-path',
   vulnerabilitiesExportEndpoint: '/vulnerabilities/exports',
 };
 
 const provide = {
+  projectFullPath: '/group/project',
   dashboardDocumentation: '/help/docs',
   autoFixDocumentation: '/auto/fix/documentation',
   emptyStateSvgPath: '/svgs/empty/svg',

@@ -71,14 +71,6 @@ RSpec.describe Mutations::DastSiteValidations::Create do
           expect(subject[:status]).to eq(dast_site_validation.state)
         end
 
-        context 'when on demand scan feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
-        end
-
         context 'when on demand scan site validations feature is not enabled' do
           it 'raises an exception' do
             stub_feature_flags(security_on_demand_scans_site_validation: false)

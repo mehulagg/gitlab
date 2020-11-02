@@ -7,7 +7,7 @@ export default {
   geoReplicationPath: '/api/:version/geo_replication/:replicable',
   ldapGroupsPath: '/api/:version/ldap/:provider/groups.json',
   subscriptionPath: '/api/:version/namespaces/:id/gitlab_subscription',
-  childEpicPath: '/api/:version/groups/:id/epics/:epic_iid/epics',
+  childEpicPath: '/api/:version/groups/:id/epics',
   groupEpicsPath: '/api/:version/groups/:id/epics',
   epicIssuePath: '/api/:version/groups/:id/epics/:epic_iid/issues/:issue_id',
   cycleAnalyticsTasksByTypePath: '/groups/:id/-/analytics/type_of_work/tasks_by_type',
@@ -41,6 +41,7 @@ export default {
   vulnerabilityActionPath: '/api/:version/vulnerabilities/:id/:action',
   vulnerabilityIssueLinksPath: '/api/:version/vulnerabilities/:id/issue_links',
   applicationSettingsPath: '/api/:version/application/settings',
+  descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -65,14 +66,23 @@ export default {
       });
   },
 
-  createChildEpic({ confidential, groupId, parentEpicIid, title }) {
-    const url = Api.buildUrl(this.childEpicPath)
-      .replace(':id', encodeURIComponent(groupId))
-      .replace(':epic_iid', parentEpicIid);
+  createChildEpic({ confidential, groupId, parentEpicId, title }) {
+    const url = Api.buildUrl(this.childEpicPath).replace(':id', encodeURIComponent(groupId));
 
     return axios.post(url, {
+      parent_id: parentEpicId,
       confidential,
       title,
+    });
+  },
+
+  descendantGroups({ groupId, search }) {
+    const url = Api.buildUrl(this.descendantGroupsPath).replace(':group_id', groupId);
+
+    return axios.get(url, {
+      params: {
+        search,
+      },
     });
   },
 

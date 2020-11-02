@@ -136,40 +136,68 @@ RSpec.describe Gitlab::RepositorySizeChecker do
         stub_feature_flags(namespace_storage_limit: false)
       end
 
-      context 'when current size + total repository size excess are below or equal to the limit + additional purchased storage' do
-        let(:current_size) { 50 }
+      context 'with additional purchased storage' do
         let(:total_repository_size_excess) { 10 }
         let(:additional_purchased_storage) { 10 }
 
-        it 'returns zero' do
-          expect(subject.exceeded_size).to eq(0)
+        context 'when no change size provided' do
+          context 'when current size + total repository size excess is below the limit (additional purchase storage not used)' do
+            let(:current_size) { limit - 1 }
+
+            it 'returns zero' do
+              expect(subject.exceeded_size).to eq(0)
+            end
+          end
+
+          context 'when current size + total repository size excess is equal to the limit (additional purchase storage not used)' do
+            let(:current_size) { limit }
+
+            it 'returns zero' do
+              expect(subject.exceeded_size).to eq(0)
+            end
+          end
+
+          context 'when there is remaining additional purchased storage (current size + other project excess use some additional purchased storage)' do
+            let(:current_size) { limit + 1 }
+
+            it 'returns zero' do
+              expect(subject.exceeded_size).to eq(0)
+            end
+          end
+
+          context 'when additional purchased storage is depleted (current size + other project excess exceed additional purchased storage)' do
+            let(:total_repository_size_excess) { 15 }
+            let(:current_size) { 61 }
+
+            it 'returns a positive number' do
+              expect(subject.exceeded_size).to eq(5.megabytes)
+            end
+          end
+        end
+
+        context 'when a change size is provided' do
+          let(:change_size) { 1.megabyte }
+
+          context 'when current size + total repository size excess is below the limit (additional purchase storage not used)' do
+            let(:current_size) { limit - 1 }
+
+            it 'returns zero' do
+              expect(subject.exceeded_size(change_size)).to eq(0)
+            end
+          end
+
+          context 'when current size + total repository size excess is equal to the limit (additional purchase storage depleted)' do
+            let(:current_size) { limit }
+
+            it 'returns a positive number' do
+              expect(subject.exceeded_size(change_size)).to eq(1.megabyte)
+            end
+          end
         end
       end
 
-      context 'when current size + total repository size excess are over the limit + additional purchased storage' do
-        let(:current_size) { 51 }
-        let(:total_repository_size_excess) { 10 }
-        let(:additional_purchased_storage) { 10 }
-
-        it 'returns 1' do
-          expect(subject.exceeded_size).to eq(1.megabytes)
-        end
-      end
-
-      context 'when change size will be over the limit' do
-        let(:current_size) { 50 }
-
-        it 'returns 1' do
-          expect(subject.exceeded_size(1.megabytes)).to eq(1.megabytes)
-        end
-      end
-
-      context 'when change size will not be over the limit' do
-        let(:current_size) { 49 }
-
-        it 'returns zero' do
-          expect(subject.exceeded_size(1.megabytes)).to eq(0)
-        end
+      context 'without additional purchased storage' do
+        include_examples 'checker size exceeded'
       end
     end
 

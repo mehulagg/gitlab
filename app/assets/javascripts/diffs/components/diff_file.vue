@@ -1,23 +1,29 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { hasDiff } from '~/helpers/diffs_helper';
-import eventHub from '../../notes/event_hub';
+import notesEventHub from '../../notes/event_hub';
 import DiffFileHeader from './diff_file_header.vue';
 import DiffContent from './diff_content.vue';
 import { diffViewerErrors } from '~/ide/constants';
 import { collapsedType, isCollapsed } from '../diff_file';
-import { DIFF_FILE_AUTOMATIC_COLLAPSE, DIFF_FILE_MANUAL_COLLAPSE } from '../constants';
+import {
+  DIFF_FILE_AUTOMATIC_COLLAPSE,
+  DIFF_FILE_MANUAL_COLLAPSE,
+  EVT_EXPAND_ALL_FILES,
+} from '../constants';
 import { DIFF_FILE, GENERIC_ERROR } from '../i18n';
+import eventHub from '../event_hub';
 
 export default {
   components: {
     DiffFileHeader,
     DiffContent,
+    GlButton,
     GlLoadingIcon,
   },
   directives: {
@@ -151,7 +157,11 @@ export default {
     },
   },
   created() {
-    eventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
+    notesEventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
+    eventHub.$on(EVT_EXPAND_ALL_FILES, this.expandAllListener);
+  },
+  beforeDestroy() {
+    eventHub.$off(EVT_EXPAND_ALL_FILES, this.expandAllListener);
   },
   methods: {
     ...mapActions('diffs', [
@@ -160,6 +170,11 @@ export default {
       'setRenderIt',
       'setFileCollapsedByUser',
     ]),
+    expandAllListener() {
+      if (this.isCollapsed) {
+        this.handleToggle();
+      }
+    },
     handleToggle() {
       const currentCollapsedFlag = this.isCollapsed;
 
@@ -257,16 +272,21 @@ export default {
           <div v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
-          <div v-show="showWarning" class="nothing-here-block diff-collapsed">
-            {{ $options.i18n.collapsed }}
-            <a
-              class="click-to-expand"
-              data-testid="toggle-link"
-              href="#"
+          <div
+            v-show="showWarning"
+            class="collapsed-file-warning gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
+          >
+            <p class="gl-mb-8">
+              {{ $options.i18n.autoCollapsed }}
+            </p>
+            <gl-button
+              data-testid="expand-button"
+              category="secondary"
+              variant="warning"
               @click.prevent="handleToggle"
             >
               {{ $options.i18n.expand }}
-            </a>
+            </gl-button>
           </div>
           <diff-content
             v-show="showContent"

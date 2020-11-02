@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: concepts
 ---
 
@@ -146,6 +149,15 @@ yum install gitlab-ee-12.0.12-ee.0.el7
 dnf install gitlab-ee-12.0.12-ee.0.el8
 # zypper (SUSE)
 zypper install gitlab-ee=12.0.12-ee.0
+```
+
+To identify the GitLab version number in your package manager, run the following commands:
+
+```shell
+# apt-cache (Ubuntu/Debian)
+sudo apt-cache madison gitlab-ee
+# yum (RHEL/CentOS 6 and 7)
+yum --showduplicates list gitlab-ee
 ```
 
 ## Patch releases

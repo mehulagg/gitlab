@@ -2,6 +2,8 @@
 
 module API
   class Dependencies < ::API::Base
+    feature_category :dependency_scanning
+
     helpers do
       def dependencies_by(params)
         pipeline = ::Security::ReportFetchService.new(user_project, ::Ci::JobArtifact.dependency_list_reports).pipeline

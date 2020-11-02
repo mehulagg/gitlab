@@ -34,11 +34,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    projectFullPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     hasVulnerabilities: {
       type: Boolean,
       required: false,
@@ -86,14 +81,13 @@ export default {
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
           <project-pipeline-status :pipeline="pipeline" />
-          <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
+          <vulnerabilities-count-list :filters="filters" />
         </template>
         <template #sticky>
           <filters @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"
-          :project-full-path="projectFullPath"
           :filters="filters"
         />
       </security-dashboard-layout>

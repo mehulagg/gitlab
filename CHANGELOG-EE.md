@@ -1,5 +1,15 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.5.2 (2020-11-02)
+
+### Security (4 changes)
+
+- Sync code owners rules on MR update. !1003
+- Fix potential regex backtracking attack in path parsing in search result. !1027
+- Transfer missing epics when a project is transferred.
+- Tighten the RBAC for GraphQL in SAST CiConfiguration.
+
+
 ## 13.5.1 (2020-10-22)
 
 - No changes.
@@ -218,6 +228,16 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Text wrap the license name in Dependency List. !45242
 - Convert bootstrap alert to gl for project size limit. !45312
 - Remove bootstrap class in licensed user count. !45443
+
+
+## 13.4.5 (2020-11-02)
+
+### Security (4 changes)
+
+- Sync code owners rules on MR update. !1003
+- Fix potential regex backtracking attack in path parsing in search result. !1023
+- Transfer missing epics when a project is transferred.
+- Tighten the RBAC for GraphQL in SAST CiConfiguration.
 
 
 ## 13.4.4 (2020-10-15)
@@ -491,6 +511,16 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Remove without_index_namespace_callback trait. !42082 (Andrei Cirnici @acirnici)
 - Adjust Color of Low Severity Symbol. !42153 (Kev @KevSlashNull)
 - Elasticsearch reindexing: add confirmation popup and change color scheme. !42209
+
+
+## 13.3.9 (2020-11-02)
+
+### Security (4 changes)
+
+- Sync code owners rules on MR update. !1003
+- Fix potential regex backtracking attack in path parsing in search result. !1024
+- Transfer missing epics when a project is transferred.
+- Tighten the RBAC for GraphQL in SAST CiConfiguration.
 
 
 ## 13.3.8 (2020-10-21)

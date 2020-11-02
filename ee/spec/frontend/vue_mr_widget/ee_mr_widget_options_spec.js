@@ -743,6 +743,14 @@ describe('ee merge request widget options', () => {
   describe('Coverage Fuzzing', () => {
     const COVERAGE_FUZZING_ENDPOINT = 'coverage_fuzzing_report';
 
+    const mountWithFeatureFlag = () =>
+      new Component({
+        propsData: { mrData: gl.mrWidgetData },
+        provide: {
+          glFeatures: { coverageFuzzingMrWidget: true },
+        },
+      }).$mount();
+
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
@@ -758,8 +766,7 @@ describe('ee merge request widget options', () => {
       it('should render loading indicator', () => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
 
         expect(
           findSecurityWidget()
@@ -773,8 +780,7 @@ describe('ee merge request widget options', () => {
       beforeEach(() => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
       });
 
       it('should render provided data', done => {
@@ -793,8 +799,7 @@ describe('ee merge request widget options', () => {
       beforeEach(() => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(500, {});
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, {});
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
       });
 
       it('should render error indicator', done => {

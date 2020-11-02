@@ -175,6 +175,7 @@ RSpec.describe MergeRequest do
       :license_scanning    | :with_license_management_reports  | :license_scanning
       :license_scanning    | :with_license_scanning_reports    | :license_scanning
       :coverage_fuzzing    | :with_coverage_fuzzing_reports    | :coverage_fuzzing
+      :api_fuzzing         | :with_api_fuzzing_reports         | :api_fuzzing
     end
 
     with_them do
@@ -392,6 +393,28 @@ RSpec.describe MergeRequest do
 
     context 'when head pipeline has coverage fuzzing reports' do
       let(:merge_request) { create(:ee_merge_request, :with_coverage_fuzzing_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have coverage fuzzing reports' do
+      let(:merge_request) { create(:ee_merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#has_api_fuzzing_reports?' do
+    subject { merge_request.has_api_fuzzing_reports? }
+
+    let_it_be(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(api_fuzzing: true)
+    end
+
+    context 'when head pipeline has coverage fuzzing reports' do
+      let(:merge_request) { create(:ee_merge_request, :with_api_fuzzing_reports, source_project: project) }
 
       it { is_expected.to be_truthy }
     end
@@ -847,6 +870,66 @@ RSpec.describe MergeRequest do
           end
 
           it 'raises and InvalidateReactiveCache error' do
+            expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
+          end
+        end
+      end
+    end
+  end
+
+  describe '#compare_api_fuzzing_reports' do
+    subject { merge_request.compare_api_fuzzing_reports(current_user) }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let(:current_user) { project.users.first }
+    let(:merge_request) { create(:merge_request, source_project: project) }
+
+    let!(:base_pipeline) do
+      create(:ee_ci_pipeline,
+             :with_api_fuzzing_report,
+             project: project,
+             ref: merge_request.target_branch,
+             sha: merge_request.diff_base_sha)
+    end
+
+    before do
+      merge_request.update!(head_pipeline_id: head_pipeline.id)
+    end
+
+    context 'when head pipeline has api fuzzing reports' do
+      let!(:head_pipeline) do
+        create(:ee_ci_pipeline,
+               :with_api_fuzzing_report,
+               project: project,
+               ref: merge_request.source_branch,
+               sha: merge_request.diff_head_sha)
+      end
+
+      context 'when reactive cache worker is parsing asynchronously' do
+        it 'returns status' do
+          expect(subject[:status]).to eq(:parsing)
+        end
+      end
+
+      context 'when reactive cache worker is inline' do
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        it 'returns status and data' do
+          expect_any_instance_of(Ci::CompareSecurityReportsService)
+            .to receive(:execute).with(base_pipeline, head_pipeline).and_call_original
+
+          subject
+        end
+
+        context 'when cached results is not latest' do
+          before do
+            allow_any_instance_of(Ci::CompareSecurityReportsService)
+                .to receive(:latest?).and_return(false)
+          end
+
+          it 'raises an InvalidateReactiveCache error' do
             expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
           end
         end

@@ -119,7 +119,7 @@ gem 'fog-aws', '~> 3.5'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'fog-google', '~> 1.10'
+gem 'fog-google', '~> 1.11'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -272,9 +272,6 @@ gem 'loofah', '~> 2.2'
 # Working with license
 gem 'licensee', '~> 8.9'
 
-# Ace editor
-gem 'ace-rails-ap', '~> 4.1.0'
-
 # Detect and convert string character encoding
 gem 'charlock_holmes', '~> 0.7.7'
 
@@ -386,6 +383,7 @@ group :development, :test do
   gem 'benchmark-ips', '~> 2.3.0', require: false
 
   gem 'knapsack', '~> 1.17'
+  gem 'crystalball', '~> 0.7.0', require: false
 
   gem 'simple_po_parser', '~> 1.1.2', require: false
 

@@ -63,7 +63,7 @@ describe('Grouped security reports app', () => {
 
   const glModalDirective = jest.fn();
 
-  const createWrapper = (propsData, options) => {
+  const createWrapper = (propsData, options, provide) => {
     wrapper = mount(GroupedSecurityReportsApp, {
       propsData,
       data() {
@@ -80,6 +80,10 @@ describe('Grouped security reports app', () => {
         },
       },
       store: appStore(),
+      provide: {
+        glFeatures: { coverageFuzzingMrWidget: true },
+        ...provide,
+      },
     });
   };
 
@@ -368,6 +372,37 @@ describe('Grouped security reports app', () => {
     });
   });
 
+  describe('coverage fuzzing reports', () => {
+    describe.each([true, false])(
+      'given coverage fuzzing comparison endpoint is /fuzzing and featureEnabled is %s',
+      shouldShowFuzzing => {
+        beforeEach(() => {
+          gl.mrWidgetData = gl.mrWidgetData || {};
+          gl.mrWidgetData.coverage_fuzzing_comparison_path = '/fuzzing';
+
+          createWrapper(
+            {
+              ...props,
+              enabledReports: {
+                coverageFuzzing: true,
+              },
+            },
+            {},
+            {
+              glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
+            },
+          );
+        });
+
+        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
+            shouldShowFuzzing,
+          );
+        });
+      },
+    );
+  });
+
   describe('container scanning reports', () => {
     beforeEach(() => {
       gl.mrWidgetData = gl.mrWidgetData || {};
@@ -578,40 +613,6 @@ describe('Grouped security reports app', () => {
         'SAST detected 1 critical severity vulnerability.',
       );
     });
-  });
-
-  describe('coverage fuzzing reports', () => {
-    /*
-     * Fixes bug https://gitlab.com/gitlab-org/gitlab/-/issues/255183
-     * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343
-     * replace with updated tests
-     */
-    describe.each`
-      endpoint      | shouldShowFuzzing
-      ${'/fuzzing'} | ${true}
-      ${undefined}  | ${false}
-    `(
-      'given coverage fuzzing comparision enpoint is $endpoint',
-      ({ endpoint, shouldShowFuzzing }) => {
-        beforeEach(() => {
-          gl.mrWidgetData = gl.mrWidgetData || {};
-          gl.mrWidgetData.coverage_fuzzing_comparison_path = endpoint;
-
-          createWrapper({
-            ...props,
-            enabledReports: {
-              coverageFuzzing: true,
-            },
-          });
-        });
-
-        it(`${shouldShowFuzzing ? 'renders' : 'does not render'} security row`, () => {
-          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
-            shouldShowFuzzing,
-          );
-        });
-      },
-    );
   });
 
   describe('Out of date report', () => {

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Updating GitLab
 
 Depending on the installation method and your GitLab version, there are multiple
@@ -222,6 +228,10 @@ possible.
 
 ## Version specific upgrading instructions
 
+### 13.6.0
+
+The required Git version is Git v2.29 or higher.
+
 ### 13.3.0
 
 The recommended Git version is Git v2.28. The minimum required version of Git
@@ -263,9 +273,9 @@ with the older Rails version - which could cause non-GET requests to
 fail for [multi-node GitLab installations](https://docs.gitlab.com/omnibus/update/#multi-node--ha-deployment).
 
 So, if you are using multiple Rails servers and specifically upgrading from 13.0,
-all servers must first be upgraded to 13.1.0 before upgrading to later versions:
+all servers must first be upgraded to 13.1.X before upgrading to 13.2.0 or later:
 
-1. Ensure all GitLab web nodes are on GitLab 13.1.0.
+1. Ensure all GitLab web nodes are on GitLab 13.1.X.
 1. Optionally, enable the `global_csrf_token` feature flag to enable new
    method of CSRF token generation:
 

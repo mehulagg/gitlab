@@ -28,38 +28,92 @@ RSpec.describe License do
     end
 
     describe '#check_users_limit' do
-      before do
-        create(:group_member, :guest)
-        create(:group_member, :reporter)
-        create(:license, plan: plan)
-      end
-
-      let(:users_count) { nil }
-      let(:new_license) do
-        gl_license = build(:gitlab_license, restrictions: { plan: plan, active_user_count: users_count, previous_user_count: 1 })
-        build(:license, data: gl_license.export)
-      end
-
-      where(:gl_plan, :valid) do
-        ::License::STARTER_PLAN  | false
-        ::License::PREMIUM_PLAN  | false
-        ::License::ULTIMATE_PLAN | true
-      end
-
-      with_them do
-        let(:plan) { gl_plan }
-
-        context 'when license has restricted users' do
-          let(:users_count) { 1 }
-
-          it { expect(new_license.valid?).to eq(valid) }
+      context 'for each plan' do
+        before do
+          create(:group_member, :guest)
+          create(:group_member, :reporter)
+          create(:license, plan: plan)
         end
 
-        context 'when license has unlimited users' do
-          let(:users_count) { nil }
+        let(:users_count) { nil }
+        let(:new_license) do
+          gl_license = build(:gitlab_license, restrictions: { plan: plan, active_user_count: users_count, previous_user_count: 1 })
+          build(:license, data: gl_license.export)
+        end
 
-          it 'is always valid' do
-            expect(new_license.valid?).to eq(true)
+        where(:gl_plan, :valid) do
+          ::License::STARTER_PLAN  | false
+          ::License::PREMIUM_PLAN  | false
+          ::License::ULTIMATE_PLAN | true
+        end
+
+        with_them do
+          let(:plan) { gl_plan }
+
+          context 'when license has restricted users' do
+            let(:users_count) { 1 }
+
+            it { expect(new_license.valid?).to eq(valid) }
+          end
+
+          context 'when license has unlimited users' do
+            let(:users_count) { nil }
+
+            it 'is always valid' do
+              expect(new_license.valid?).to eq(true)
+            end
+          end
+        end
+      end
+
+      context 'threshold for users overage' do
+        let(:current_active_users_count) { 0 }
+        let(:new_license) do
+          gl_license = build(
+            :gitlab_license,
+            starts_at: Date.today,
+            restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
+          )
+
+          build(:license, data: gl_license.export)
+        end
+
+        context 'when current active users count is above the limit set by the license' do
+          before do
+            create_list(:user, current_active_users_count)
+            HistoricalData.track!
+          end
+
+          context 'when license is from a fresh subscription' do
+            let(:previous_user_count) { nil }
+
+            context 'when current active users count is under the threshold' do
+              let(:current_active_users_count) { 11 }
+
+              it 'accepts the license' do
+                expect(new_license).to be_valid
+              end
+            end
+
+            context 'when current active users count is above the threshold' do
+              let(:current_active_users_count) { 12 }
+
+              it 'does not accept the license' do
+                expect(new_license).not_to be_valid
+              end
+            end
+          end
+
+          context 'when license is from a renewal' do
+            let(:previous_user_count) { 1 }
+
+            context 'when current active users count is under the threshold' do
+              let(:current_active_users_count) { 11 }
+
+              it 'does not accept the license' do
+                expect(new_license).not_to be_valid
+              end
+            end
           end
         end
       end
@@ -68,7 +122,7 @@ RSpec.describe License do
     describe "Historical active user count" do
       let(:active_user_count) { described_class.current_active_users.count + 10 }
       let(:date)              { described_class.current.starts_at }
-      let!(:historical_data)  { HistoricalData.create!(date: date, active_user_count: active_user_count) }
+      let!(:historical_data)  { HistoricalData.create!(recorded_at: date, active_user_count: active_user_count) }
 
       context "when there is no active user count restriction" do
         it "is valid" do
@@ -249,7 +303,7 @@ RSpec.describe License do
     describe 'downgrade' do
       context 'when more users were added in previous period' do
         before do
-          HistoricalData.create!(date: described_class.current.starts_at - 6.months, active_user_count: 15)
+          HistoricalData.create!(recorded_at: described_class.current.starts_at - 6.months, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 5, previous_user_count: 10)
         end
@@ -261,7 +315,7 @@ RSpec.describe License do
 
       context 'when no users were added in the previous period' do
         before do
-          HistoricalData.create!(date: 6.months.ago, active_user_count: 15)
+          HistoricalData.create!(recorded_at: 6.months.ago, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 10, previous_user_count: 15)
         end
@@ -1084,6 +1138,25 @@ RSpec.describe License do
     with_them do
       before do
         allow(license).to receive(:current_active_users_count).and_return(current_active_users_count)
+        allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#restricted_user_count?' do
+    subject { license.restricted_user_count? }
+
+    where(:restricted_user_count, :result) do
+      nil | false
+      0   | false
+      1   | true
+      10  | true
+    end
+
+    with_them do
+      before do
         allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
       end
 

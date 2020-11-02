@@ -9,7 +9,10 @@ import DiffFileComponent from '~/diffs/components/diff_file.vue';
 import DiffFileHeaderComponent from '~/diffs/components/diff_file_header.vue';
 import DiffContentComponent from '~/diffs/components/diff_content.vue';
 
+import eventHub from '~/diffs/event_hub';
+
 import { diffViewerModes, diffViewerErrors } from '~/ide/constants';
+import { EVT_EXPAND_ALL_FILES } from '~/diffs/constants';
 
 function changeViewer(store, index, { automaticallyCollapsed, manuallyCollapsed, name }) {
   const file = store.state.diffs.diffFiles[index];
@@ -88,7 +91,7 @@ function createComponent({ file }) {
 const findDiffHeader = wrapper => wrapper.find(DiffFileHeaderComponent);
 const findDiffContentArea = wrapper => wrapper.find('[data-testid="content-area"]');
 const findLoader = wrapper => wrapper.find('[data-testid="loader-icon"]');
-const findToggleLinks = wrapper => wrapper.findAll('[data-testid="toggle-link"]');
+const findToggleButton = wrapper => wrapper.find('[data-testid="expand-button"]');
 
 const toggleFile = wrapper => findDiffHeader(wrapper).vm.$emit('toggleFile');
 const isDisplayNone = element => element.style.display === 'none';
@@ -138,6 +141,30 @@ describe('DiffFile', () => {
   });
 
   describe('collapsing', () => {
+    describe(`\`${EVT_EXPAND_ALL_FILES}\` event`, () => {
+      beforeEach(() => {
+        jest.spyOn(wrapper.vm, 'handleToggle').mockImplementation(() => {});
+      });
+
+      it('performs the normal file toggle when the file is collapsed', async () => {
+        makeFileAutomaticallyCollapsed(store);
+
+        await wrapper.vm.$nextTick();
+
+        eventHub.$emit(EVT_EXPAND_ALL_FILES);
+
+        expect(wrapper.vm.handleToggle).toHaveBeenCalledTimes(1);
+      });
+
+      it('does nothing when the file is not collapsed', async () => {
+        eventHub.$emit(EVT_EXPAND_ALL_FILES);
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.handleToggle).not.toHaveBeenCalled();
+      });
+    });
+
     describe('user collapsed', () => {
       beforeEach(() => {
         makeFileManuallyCollapsed(store);
@@ -161,9 +188,11 @@ describe('DiffFile', () => {
         makeFileAutomaticallyCollapsed(store);
       });
 
-      it('should show the collapsed file warning with expansion link', () => {
-        expect(findDiffContentArea(wrapper).html()).toContain('This diff is collapsed');
-        expect(findToggleLinks(wrapper).length).toEqual(1);
+      it('should show the collapsed file warning with expansion button', () => {
+        expect(findDiffContentArea(wrapper).html()).toContain(
+          'Files with large changes are collapsed by default.',
+        );
+        expect(findToggleButton(wrapper).exists()).toBe(true);
       });
 
       it('should style the component so that it `.has-body` for layout purposes', () => {
@@ -266,8 +295,10 @@ describe('DiffFile', () => {
 
         await wrapper.vm.$nextTick();
 
-        expect(findDiffContentArea(wrapper).html()).toContain('This diff is collapsed');
-        expect(findToggleLinks(wrapper).length).toEqual(1);
+        expect(findDiffContentArea(wrapper).html()).toContain(
+          'Files with large changes are collapsed by default.',
+        );
+        expect(findToggleButton(wrapper).exists()).toBe(true);
       });
 
       it.each`

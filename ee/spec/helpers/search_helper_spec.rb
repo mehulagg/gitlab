@@ -92,21 +92,6 @@ RSpec.describe SearchHelper do
     end
   end
 
-  describe '#project_autocomplete' do
-    let(:user) { create(:user) }
-
-    before do
-      @project = create(:project, :repository)
-      allow(self).to receive(:current_user).and_return(user)
-    end
-
-    context 'with a licensed user' do
-      it "does include feature flags" do
-        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags' }).to be_present
-      end
-    end
-  end
-
   describe '#search_entries_info_template' do
     let(:com_value) { true }
     let(:elasticsearch_enabled) { true }

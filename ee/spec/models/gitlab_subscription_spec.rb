@@ -200,6 +200,79 @@ RSpec.describe GitlabSubscription do
     end
   end
 
+  describe '#seats_in_use' do
+    let(:group) { create(:group) }
+    let!(:group_member) { create(:group_member, :developer, user: create(:user), group: group) }
+    let(:hosted_plan) { nil }
+    let(:seats_in_use) { 5 }
+    let(:trial) { false }
+
+    let(:gitlab_subscription) do
+      create(:gitlab_subscription, namespace: group, trial: trial, hosted_plan: hosted_plan, seats_in_use: seats_in_use)
+    end
+
+    shared_examples 'a disabled feature' do
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(seats_in_use_for_free_or_trial: false)
+        end
+
+        it 'returns the previously calculated seats in use' do
+          expect(subject).to eq(5)
+        end
+      end
+    end
+
+    subject { gitlab_subscription.seats_in_use }
+
+    context 'with a paid hosted plan' do
+      let(:hosted_plan) { gold_plan }
+
+      it 'returns the previously calculated seats in use' do
+        expect(subject).to eq(5)
+      end
+
+      context 'when seats in use is 0' do
+        let(:seats_in_use) { 0 }
+
+        it 'returns 0 too' do
+          expect(subject).to eq(0)
+        end
+      end
+    end
+
+    context 'with a trial plan' do
+      let(:hosted_plan) { gold_plan }
+      let(:trial) { true }
+
+      it 'returns the current seats in use' do
+        expect(subject).to eq(1)
+      end
+
+      it_behaves_like 'a disabled feature'
+    end
+
+    context 'with a free plan' do
+      let(:hosted_plan) { free_plan }
+
+      it 'returns the current seats in use' do
+        expect(subject).to eq(1)
+      end
+
+      it_behaves_like 'a disabled feature'
+    end
+
+    context 'with a self hosted plan' do
+      before do
+        gitlab_subscription.update!(namespace: nil)
+      end
+
+      it 'returns the previously calculated seats in use' do
+        expect(subject).to eq(5)
+      end
+    end
+  end
+
   describe '#expired?' do
     let(:gitlab_subscription) { create(:gitlab_subscription, end_date: end_date) }
 

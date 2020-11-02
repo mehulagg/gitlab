@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     context 'Push Rules' do
       describe 'using non signed commits' do
         before(:context) do

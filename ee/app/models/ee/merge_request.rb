@@ -248,6 +248,10 @@ module EE
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'coverage_fuzzing')
     end
 
+    def has_api_fuzzing_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.api_fuzzing_reports)
+    end
+
     def compare_api_fuzzing_reports(current_user)
       return missing_report_error('api fuzzing') unless has_api_fuzzing_reports?
 

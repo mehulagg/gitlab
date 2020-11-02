@@ -2,7 +2,7 @@
 require 'securerandom'
 
 module QA
-  context 'Create', :requires_admin, :skip_live_env, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/195179', type: :flaky } do
+  RSpec.describe 'Create', :requires_admin, :skip_live_env, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/195179', type: :flaky } do
     describe 'Jenkins integration' do
       let(:project_name) { "project_with_jenkins_#{SecureRandom.hex(4)}" }
 
