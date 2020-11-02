@@ -39,7 +39,9 @@
     .row
       %section.col-md-12
         #js-tree{ data: { id: @epic.to_global_id,
+          numerical_id: @epic.id,
           iid: @epic.iid,
+          group_id: @group.id,
           full_path: @group.full_path,
           auto_complete_epics: 'true',
           auto_complete_issues: 'true',

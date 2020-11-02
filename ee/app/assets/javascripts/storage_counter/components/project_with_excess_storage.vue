@@ -116,7 +116,7 @@ export default {
     data-testid="projectTableRow"
   >
     <div
-      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-50 gl-text-truncate"
+      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-50 gl-text-truncate gl-pr-5"
       role="gridcell"
     >
       <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
@@ -146,7 +146,7 @@ export default {
       </div>
     </div>
     <div
-      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-25 gl-text-truncate"
+      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-15 gl-text-truncate"
       role="gridcell"
     >
       <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
@@ -155,7 +155,7 @@ export default {
       <div class="table-mobile-content gl-text-gray-900">{{ storageSize }}</div>
     </div>
     <div
-      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-25 gl-text-truncate"
+      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-15 gl-text-truncate"
       role="gridcell"
     >
       <div class="table-mobile-header gl-font-weight-bold" role="rowheader">

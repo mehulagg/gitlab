@@ -1,0 +1,5 @@
+---
+title: Resolve "SAST_DEFAULT_ANALYZERS is written with default value by SAST Config UI"
+merge_request: 46388
+author:
+type: fixed

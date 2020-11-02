@@ -53,6 +53,7 @@ export default {
       variables() {
         return {
           fullPath: this.namespacePath,
+          searchTerm: this.searchTerm,
           withExcessStorageData: this.isAdditionalStorageFlagEnabled,
         };
       },
@@ -62,6 +63,7 @@ export default {
   data() {
     return {
       namespace: {},
+      searchTerm: '',
     };
   },
   computed: {
@@ -92,6 +94,14 @@ export default {
     },
     shouldShowStorageInlineAlert() {
       return this.isAdditionalStorageFlagEnabled && !this.$apollo.queries.namespace.loading;
+    },
+  },
+  methods: {
+    handleSearch(input) {
+      // if length === 0 clear the search, if length > 2 update the search term
+      if (input.length === 0 || input.length > 2) {
+        this.searchTerm = input;
+      }
     },
   },
 
@@ -172,6 +182,7 @@ export default {
     <projects-table
       :projects="namespaceProjects"
       :additional-purchased-storage-size="namespace.additionalPurchasedStorageSize || 0"
+      @search="handleSearch"
     />
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
