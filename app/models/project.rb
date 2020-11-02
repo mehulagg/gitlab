@@ -1823,6 +1823,13 @@ class Project < ApplicationRecord
     ensure_pages_metadatum.update!(deployed: false, artifacts_archive: nil, pages_deployment: nil)
   end
 
+  def ensure_pages_metadatum
+    pages_metadatum || create_pages_metadatum!
+  rescue ActiveRecord::RecordNotUnique
+    reset
+    retry
+  end
+
   def write_repository_config(gl_full_path: full_path)
     # We'd need to keep track of project full path otherwise directory tree
     # created with hashed storage enabled cannot be usefully imported using
@@ -2702,13 +2709,6 @@ class Project < ApplicationRecord
         end
       end
     end
-  end
-
-  def ensure_pages_metadatum
-    pages_metadatum || create_pages_metadatum!
-  rescue ActiveRecord::RecordNotUnique
-    reset
-    retry
   end
 
   def oids(objects, oids: [])
