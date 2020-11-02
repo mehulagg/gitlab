@@ -52,6 +52,34 @@ module Gitlab
         mappings.deep_merge(::Elastic::Latest::CustomLanguageAnalyzers.custom_analyzers_mappings)
       end
 
+      def migrations_index_name
+        "#{target_name}-migrations"
+      end
+
+      def create_migrations_index(options: {})
+        settings = default_settings.merge(number_of_shards: 1)
+        settings.merge!(options[:settings]) if options[:settings]
+
+        mappings = {
+          properties: {
+            version: {
+              type: :keyword
+            }
+          }
+        }
+        mappings.merge!(options[:mappings]) if options[:mappings]
+
+        create_index_options = {
+          index: migrations_index_name,
+          body: {
+            settings: settings.to_hash,
+            mappings: mappings.to_hash
+          }
+        }
+
+        client.indices.create create_index_options
+      end
+
       def create_empty_index(with_alias: true, options: {})
         new_index_name = options[:index_name] || "#{target_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 

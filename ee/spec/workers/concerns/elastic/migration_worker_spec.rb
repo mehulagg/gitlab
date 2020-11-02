@@ -35,7 +35,7 @@ RSpec.describe Elastic::MigrationWorker do
     end.new
   end
 
-  describe '.perform' do
+  describe '#perform' do
     it 'fails if TIMESTAMP is not specified' do
       expect(issue).not_to receive(:touch)
       expect { incorrect_worker.perform(issue) }.to raise_error(StandardError, /TIMESTAMP is required/)

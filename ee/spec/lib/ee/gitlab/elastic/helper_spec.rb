@@ -53,6 +53,9 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
+  describe '#create_migrations_index' do
+  end
+
   describe '#create_empty_index' do
     context 'with an empty cluster' do
       context 'with alias and index' do
