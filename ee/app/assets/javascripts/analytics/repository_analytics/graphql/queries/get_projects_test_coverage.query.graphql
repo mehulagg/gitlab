@@ -1,8 +1,12 @@
 query getProjectsTestCoverage($projectIds: [ID!]) {
   projects(ids: $projectIds) {
     nodes {
+      fullPath
       id
       name
+      repository {
+        rootRef
+      }
       codeCoverageSummary {
         averageCoverage
         coverageCount
