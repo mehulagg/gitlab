@@ -4,15 +4,16 @@ module EE
   module UserCalloutsHelper
     extend ::Gitlab::Utils::Override
 
-    GEO_ENABLE_HASHED_STORAGE = 'geo_enable_hashed_storage'
-    GEO_MIGRATE_HASHED_STORAGE = 'geo_migrate_hashed_storage'
-    CANARY_DEPLOYMENT = 'canary_deployment'
-    GOLD_TRIAL = 'gold_trial'
-    GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
-    THREAT_MONITORING_INFO = 'threat_monitoring_info'
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
-    ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
-    PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
+    ACTIVE_USER_COUNT_THRESHOLD    = 'active_user_count_threshold'
+    CANARY_DEPLOYMENT              = 'canary_deployment'
+    GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
+    GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
+    GOLD_TRIAL                     = 'gold_trial'
+    GOLD_TRIAL_BILLINGS            = 'gold_trial_billings'
+    NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
+    PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
+    THREAT_MONITORING_INFO         = 'threat_monitoring_info'
 
     def show_canary_deployment_callout?(project)
       !user_dismissed?(CANARY_DEPLOYMENT) &&
@@ -87,6 +88,13 @@ module EE
       !token_expiration_enforced? &&
         current_user.active? &&
         !user_dismissed?(PERSONAL_ACCESS_TOKEN_EXPIRY, 1.week.ago)
+    end
+
+    def render_new_user_signups_cap_reached
+      return unless ::Feature.enabled?(:admin_new_user_signups_cap)
+      return unless current_user.admin?
+
+      return if user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED)
     end
 
     private

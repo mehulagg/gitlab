@@ -14,6 +14,13 @@ module LicenseHelper
     License.current&.maximum_user_count || 0
   end
 
+  def new_user_signups_cap_reached?
+    return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
+    return false unless License.current
+
+    current_settings.new_user_signups_cap.to_i >= active_user_count
+  end
+
   def seats_calculation_message(license)
     return unless license.present?
     return unless license.exclude_guests_from_active_count?
@@ -36,8 +43,7 @@ module LicenseHelper
   def show_promotions?(selected_user = current_user)
     return false unless selected_user
 
-    if Gitlab::CurrentSettings.current_application_settings
-      .should_check_namespace_plan?
+    if current_settings.should_check_namespace_plan?
       true
     else
       license = License.current
@@ -55,5 +61,9 @@ module LicenseHelper
 
   def active_user_count
     License.current_active_users.count
+  end
+
+  def current_settings
+    Gitlab::CurrentSettings.current_application_settings
   end
 end
