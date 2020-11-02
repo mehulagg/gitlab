@@ -7,24 +7,32 @@ type: howto
 
 # Activate GitLab EE with a license **(STARTER ONLY)**
 
-To activate all GitLab Enterprise Edition (EE) functionality, you need to upload
-a license. After you've received your license from GitLab Inc., you can upload it
-by **signing into your GitLab instance as an admin** or adding it at
-installation time.
+To activate all GitLab Enterprise Edition (EE) functionality, you require a license. You can obtain
+a license by:
 
-The license is a base64-encoded ASCII text file with a `.gitlab-license`
-extension. You can obtain the file by [purchasing a license](https://about.gitlab.com/pricing/)
-or by signing up for a [free trial](https://about.gitlab.com/free-trial/).
+- [Purchasing a license](https://about.gitlab.com/pricing/).
+- Signing up for a [free trial](https://about.gitlab.com/free-trial/).
 
-As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an
-uploaded license only has the Core features active. A trial license
-activates all Ultimate features, but after
-[the trial expires](#what-happens-when-your-license-expires), some functionality
-is locked.
+  As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an uploaded license only
+  has the Core features active. A trial license activates all Ultimate features, but after
+  [the trial expires](#what-happens-when-your-license-expires), some functionality is locked.
 
-## Uploading your license
+## GitLab license file
 
-The very first time you visit your GitLab EE installation signed in as an admin,
+The GitLab license file is a base64-encoded ASCII text file with a `.gitlab-license`
+extension.
+
+## Activate your GitLab license
+
+The choice of license activation process is the same whether you purchased a license, or requested a
+trial license:
+
+- If your GitLab license is already installed, [upload your license](#upload-your-license).
+- If you have not yet installed GitLab, [add your license at install time](#add-your-license-at-install-time).
+
+## Upload your license
+
+The first time you log in to your GitLab EE installation as an administrator,
 you should see a note urging you to upload a license with a link that takes you
 to **Admin Area > License**.
 
