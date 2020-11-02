@@ -26,6 +26,7 @@ type AppData {
   returnUrl: String
   sourcePath: String!
   username: String!
+  branch: String!
   mounts: [Mount]!
 }
 

@@ -9,6 +9,7 @@ const initStaticSiteEditor = el => {
     isSupportedContent,
     path: sourcePath,
     baseUrl,
+    branch,
     namespace,
     project,
     mergeRequestsIllustrationPath,
@@ -28,6 +29,7 @@ const initStaticSiteEditor = el => {
     hasSubmittedChanges: false,
     project: `${namespace}/${project}`,
     mounts: JSON.parse(mounts), // NOTE that the object in 'mounts' is a JSON string from the data attribute, so it must be parsed into an object.
+    branch,
     returnUrl,
     sourcePath,
     username,

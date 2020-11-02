@@ -38,6 +38,10 @@ export default {
       required: false,
       default: '',
     },
+    branch: {
+      type: String,
+      required: true,
+    },
     mounts: {
       type: Array,
       required: true,
@@ -78,7 +82,7 @@ export default {
       return this.editorMode === EDITOR_TYPES.wysiwyg;
     },
     customRenderers() {
-      const imageRenderer = renderImage.build(this.mounts, this.project);
+      const imageRenderer = renderImage.build(this.mounts, this.project, this.branch);
       return {
         image: [imageRenderer],
       };
