@@ -187,7 +187,7 @@ password = <your personal access token>
 
 You need the following:
 
-- A deploy token. You can generate a [deploy token](./../../project/deploy_tokens/index.md) with the `read_package_registry` and/or `write_package_registry` scopes for repository authentication.
+- A deploy token. You can generate a [deploy token](../../project/deploy_tokens/index.md) with the `read_package_registry` and/or `write_package_registry` scopes for repository authentication.
 - A suitable name for your source.
 - Your project ID which can be found on the home page of your project.
 
@@ -315,7 +315,7 @@ the three characters, such as `my-package`, `my_package`, and `my....package`.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202012) in GitLab 13.4.
 
-To work with PyPI commands within [GitLab CI/CD](./../../../ci/README.md), you can use
+To work with PyPI commands within [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
 
 For example:

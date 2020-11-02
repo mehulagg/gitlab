@@ -313,7 +313,7 @@ page.
 
 ## Publishing a package with CI/CD
 
-To work with NPM commands within [GitLab CI/CD](./../../../ci/README.md), you can use
+To work with NPM commands within [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
 
 A simple example `.gitlab-ci.yml` file for publishing NPM packages:
@@ -394,7 +394,7 @@ And the `.npmrc` file should look like:
 
 ### `npm install` returns `Error: Failed to replace env in config: ${NPM_TOKEN}`
 
-You do not need a token to run `npm install` unless your project is private (the token is only required to publish). If the `.npmrc` file was checked in with a reference to `$NPM_TOKEN`, you can remove it. If you prefer to leave the reference in, you need to set a value prior to running `npm install` or set the value using [GitLab environment variables](./../../../ci/variables/README.md):
+You do not need a token to run `npm install` unless your project is private (the token is only required to publish). If the `.npmrc` file was checked in with a reference to `$NPM_TOKEN`, you can remove it. If you prefer to leave the reference in, you need to set a value prior to running `npm install` or set the value using [GitLab environment variables](../../../ci/variables/README.md):
 
 ```shell
 NPM_TOKEN=<your_token> npm install

@@ -80,7 +80,7 @@ You need the following:
 - Your GitLab username.
 - A personal access token or deploy token. For repository authentication:
   - You can generate a [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
-  - You can generate a [deploy token](./../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
+  - You can generate a [deploy token](../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
 - A suitable name for your source.
 - Your project ID which can be found on the home page of your project.
 
