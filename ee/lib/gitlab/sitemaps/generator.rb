@@ -16,7 +16,6 @@ module Gitlab
           file = Sitemaps::SitemapFile.new
 
           if gitlab_org_group
-            file.add_elements(generic_urls)
             file.add_elements(gitlab_org_group)
             file.add_elements(gitlab_org_subgroups)
             file.add_elements(gitlab_org_projects)
@@ -27,14 +26,6 @@ module Gitlab
         end
 
         private
-
-        def generic_urls
-          [
-            explore_projects_url,
-            explore_snippets_url,
-            explore_groups_url
-          ]
-        end
 
         def gitlab_org_group
           @gitlab_org_group ||= GroupFinder.new(nil).execute(path: 'gitlab-org', parent_id: nil, visibility_level: Gitlab::VisibilityLevel::PUBLIC)

@@ -49,9 +49,6 @@ RSpec.describe Gitlab::Sitemaps::Generator do
 
           content = File.read(new_path)
 
-          expect(content).to include('/explore/projects')
-          expect(content).to include('/explore/groups')
-          expect(content).to include('/explore/snippets')
           expect(content).to include(gitlab_org_group.full_path)
           expect(content).to include(public_subgroup.full_path)
           expect(content).to include(public_gitlab_org_project.full_path)
