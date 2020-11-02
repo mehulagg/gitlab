@@ -2295,6 +2295,9 @@ msgstr ""
 msgid "After a successful password update, you will be redirected to the login page where you can log in with your new password."
 msgstr ""
 
+msgid "After sign-out path"
+msgstr ""
+
 msgid "After that, you will not be able to use merge approvals or code quality as well as many other features."
 msgstr ""
 
@@ -24608,6 +24611,9 @@ msgid "Sign up was successful! Please confirm your email to sign in."
 msgstr ""
 
 msgid "Sign-in restrictions"
+msgstr ""
+
+msgid "Sign-in text"
 msgstr ""
 
 msgid "Sign-up restrictions"
