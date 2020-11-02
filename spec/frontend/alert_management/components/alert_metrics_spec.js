@@ -28,7 +28,7 @@ describe('Alert Metrics', () => {
   }
 
   const findChart = () => wrapper.find(MetricEmbed);
-  const findEmptyState = () => wrapper.find({ ref: 'emptyState' });
+  const findUploadSection = () => wrapper.find({ ref: 'uploadSection' });
 
   afterEach(() => {
     if (wrapper) {
@@ -44,7 +44,7 @@ describe('Alert Metrics', () => {
     it('should display a message when metrics dashboard url is not provided ', () => {
       mountComponent();
       expect(findChart().exists()).toBe(false);
-      expect(findEmptyState().text()).toBe("Metrics weren't available in the alerts payload.");
+      expect(findUploadSection().text()).toBe("Metrics weren't available in the alerts payload.");
     });
   });
 
@@ -55,7 +55,7 @@ describe('Alert Metrics', () => {
       await waitForPromises();
       await wrapper.vm.$nextTick();
 
-      expect(findEmptyState().exists()).toBe(false);
+      expect(findUploadSection().exists()).toBe(false);
       expect(findChart().exists()).toBe(true);
     });
   });

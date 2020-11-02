@@ -49,7 +49,7 @@ export default {
         :namespace="namespace"
       />
     </div>
-    <div v-else ref="emptyState">
+    <div ref="uploadSection">
       {{ s__("AlertManagement|Metrics weren't available in the alerts payload.") }}
     </div>
   </div>
