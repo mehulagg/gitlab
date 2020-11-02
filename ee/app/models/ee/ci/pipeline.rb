@@ -8,7 +8,8 @@ module EE
 
       EE_FAILURE_REASONS = {
         activity_limit_exceeded: 20,
-        size_limit_exceeded: 21
+        size_limit_exceeded: 21,
+        deployments_limit_exceeded: 23,
       }.freeze
 
       prepended do

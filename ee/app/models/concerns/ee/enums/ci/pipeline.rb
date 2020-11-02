@@ -14,7 +14,8 @@ module EE
             super.merge(
               activity_limit_exceeded: 20,
               size_limit_exceeded: 21,
-              job_activity_limit_exceeded: 22
+              job_activity_limit_exceeded: 22,
+              deployments_limit_exceeded: 23
             )
           end
         end
