@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Performance Guidelines
 
 This document describes various guidelines to follow to ensure good and
@@ -334,10 +340,10 @@ These results can also be placed into a PostgreSQL database by setting the
 `RSPEC_PROFILING_POSTGRES_URL` variable. This is used to profile the test suite
 when running in the CI environment.
 
-We store these results also when running CI jobs on the default branch on
-`gitlab.com`. Statistics of these profiling data are [available
-online](https://gitlab-org.gitlab.io/rspec_profiling_stats/). For example,
-you can find which tests take longest to run or which execute the most
+We store these results also when running nightly scheduled CI jobs on the
+default branch on `gitlab.com`. Statistics of these profiling data are
+[available online](https://gitlab-org.gitlab.io/rspec_profiling_stats/). For
+example, you can find which tests take longest to run or which execute the most
 queries. This can be handy for optimizing our tests or identifying performance
 issues in our code.
 

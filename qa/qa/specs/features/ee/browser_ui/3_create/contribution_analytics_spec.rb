@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Contribution Analytics' do
       let(:group) do
         Resource::Group.fabricate_via_api! do |group|

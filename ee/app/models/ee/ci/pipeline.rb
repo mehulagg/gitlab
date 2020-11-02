@@ -107,7 +107,7 @@ module EE
         reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
 
         ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
-          builds.latest.with_reports(reports_scope).each do |build|
+          latest_report_builds(reports_scope).each do |build|
             build.collect_security_reports!(security_reports)
           end
         end
@@ -115,7 +115,7 @@ module EE
 
       def license_scanning_report
         ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_license_scanning_reports!(license_management_report)
           end
         end
@@ -123,10 +123,10 @@ module EE
 
       def dependency_list_report
         ::Gitlab::Ci::Reports::DependencyList::Report.new.tap do |dependency_list_report|
-          builds.latest.with_reports(::Ci::JobArtifact.dependency_list_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.dependency_list_reports).each do |build|
             build.collect_dependency_list_reports!(dependency_list_report)
           end
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_licenses_for_dependency_list!(dependency_list_report)
           end
         end
@@ -134,7 +134,7 @@ module EE
 
       def metrics_report
         ::Gitlab::Ci::Reports::Metrics::Report.new.tap do |metrics_report|
-          builds.latest.with_reports(::Ci::JobArtifact.metrics_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.metrics_reports).each do |build|
             build.collect_metrics_reports!(metrics_report)
           end
         end
@@ -168,7 +168,7 @@ module EE
       end
 
       def license_scan_completed?
-        builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).exists?
+        latest_report_builds(::Ci::JobArtifact.license_scanning_reports).exists?
       end
 
       def can_store_security_reports?

@@ -1,8 +1,8 @@
 <script>
-import { GlTable, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlTable, GlIcon, GlTooltipDirective, GlLoadingIcon } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import Tracking from '~/tracking';
-import { trackAlertIntergrationsViewsOptions } from '../constants';
+import { trackAlertIntegrationsViewsOptions } from '../constants';
 
 export const i18n = {
   title: s__('AlertsIntegrations|Current integrations'),
@@ -27,6 +27,7 @@ export default {
   components: {
     GlTable,
     GlIcon,
+    GlLoadingIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -37,10 +38,15 @@ export default {
       required: false,
       default: () => [],
     },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   fields: [
     {
-      key: 'activated',
+      key: 'active',
       label: __('Status'),
     },
     {
@@ -64,7 +70,7 @@ export default {
   },
   methods: {
     trackPageViews() {
-      const { category, action } = trackAlertIntergrationsViewsOptions;
+      const { category, action } = trackAlertIntegrationsViewsOptions;
       Tracking.event(category, action);
     },
   },
@@ -78,12 +84,13 @@ export default {
       :empty-text="$options.i18n.emptyState"
       :items="integrations"
       :fields="$options.fields"
+      :busy="loading"
       stacked="md"
       :tbody-tr-class="tbodyTrClass"
       show-empty
     >
-      <template #cell(activated)="{ item }">
-        <span v-if="item.activated" data-testid="integration-activated-status">
+      <template #cell(active)="{ item }">
+        <span v-if="item.active" data-testid="integration-activated-status">
           <gl-icon
             v-gl-tooltip
             name="check-circle-filled"
@@ -103,6 +110,10 @@ export default {
           />
           {{ $options.i18n.status.disabled.name }}
         </span>
+      </template>
+
+      <template #table-busy>
+        <gl-loading-icon size="lg" color="dark" class="mt-3" />
       </template>
     </gl-table>
   </div>

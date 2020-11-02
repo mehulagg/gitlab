@@ -24,6 +24,7 @@ RSpec.describe GitlabSchema.types['Mutation'] do
 
     where(:alias_name, :canonical_name) do
       'DismissVulnerability' | 'VulnerabilityDismiss'
+      'RevertVulnerabilityToDetected' | 'VulnerabilityRevertToDetected'
     end
 
     with_them do

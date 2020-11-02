@@ -1,22 +1,29 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { hasDiff } from '~/helpers/diffs_helper';
-import eventHub from '../../notes/event_hub';
+import notesEventHub from '../../notes/event_hub';
 import DiffFileHeader from './diff_file_header.vue';
 import DiffContent from './diff_content.vue';
 import { diffViewerErrors } from '~/ide/constants';
 import { collapsedType, isCollapsed } from '../diff_file';
-import { DIFF_FILE_AUTOMATIC_COLLAPSE, DIFF_FILE_MANUAL_COLLAPSE } from '../constants';
+import {
+  DIFF_FILE_AUTOMATIC_COLLAPSE,
+  DIFF_FILE_MANUAL_COLLAPSE,
+  EVT_EXPAND_ALL_FILES,
+} from '../constants';
+import { DIFF_FILE, GENERIC_ERROR } from '../i18n';
+import eventHub from '../event_hub';
 
 export default {
   components: {
     DiffFileHeader,
     DiffContent,
+    GlButton,
     GlLoadingIcon,
   },
   directives: {
@@ -49,13 +56,17 @@ export default {
       isCollapsed: isCollapsed(this.file),
     };
   },
+  i18n: {
+    ...DIFF_FILE,
+    genericError: GENERIC_ERROR,
+  },
   computed: {
     ...mapState('diffs', ['currentDiffFileId']),
     ...mapGetters(['isNotesFetched']),
     ...mapGetters('diffs', ['getDiffFileDiscussions']),
     viewBlobLink() {
       return sprintf(
-        __('You can %{linkStart}view the blob%{linkEnd} instead.'),
+        this.$options.i18n.blobView,
         {
           linkStart: `<a href="${escape(this.file.view_path)}">`,
           linkEnd: '</a>',
@@ -77,9 +88,7 @@ export default {
     },
     forkMessage() {
       return sprintf(
-        __(
-          "You're not allowed to %{tag_start}edit%{tag_end} files in this project directly. Please fork this project, make your changes there, and submit a merge request.",
-        ),
+        this.$options.i18n.editInFork,
         {
           tag_start: '<span class="js-file-fork-suggestion-section-action">',
           tag_end: '</span>',
@@ -148,7 +157,11 @@ export default {
     },
   },
   created() {
-    eventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
+    notesEventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
+    eventHub.$on(EVT_EXPAND_ALL_FILES, this.expandAllListener);
+  },
+  beforeDestroy() {
+    eventHub.$off(EVT_EXPAND_ALL_FILES, this.expandAllListener);
   },
   methods: {
     ...mapActions('diffs', [
@@ -157,6 +170,11 @@ export default {
       'setRenderIt',
       'setFileCollapsedByUser',
     ]),
+    expandAllListener() {
+      if (this.isCollapsed) {
+        this.handleToggle();
+      }
+    },
     handleToggle() {
       const currentCollapsedFlag = this.isCollapsed;
 
@@ -187,7 +205,7 @@ export default {
         })
         .catch(() => {
           this.isLoadingCollapsedDiff = false;
-          createFlash(__('Something went wrong on our end. Please try again!'));
+          createFlash(this.$options.i18n.genericError);
         });
     },
     showForkMessage() {
@@ -229,14 +247,14 @@ export default {
       <a
         :href="file.fork_path"
         class="js-fork-suggestion-button btn btn-grouped btn-inverted btn-success"
-        >{{ __('Fork') }}</a
+        >{{ $options.i18n.fork }}</a
       >
       <button
         class="js-cancel-fork-suggestion-button btn btn-grouped"
         type="button"
         @click="hideForkMessage"
       >
-        {{ __('Cancel') }}
+        {{ $options.i18n.cancel }}
       </button>
     </div>
     <template v-else>
@@ -254,16 +272,21 @@ export default {
           <div v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
-          <div v-show="showWarning" class="nothing-here-block diff-collapsed">
-            {{ __('This diff is collapsed.') }}
-            <a
-              class="click-to-expand"
-              data-testid="toggle-link"
-              href="#"
+          <div
+            v-show="showWarning"
+            class="collapsed-file-warning gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
+          >
+            <p class="gl-mb-8">
+              {{ $options.i18n.autoCollapsed }}
+            </p>
+            <gl-button
+              data-testid="expand-button"
+              category="secondary"
+              variant="warning"
               @click.prevent="handleToggle"
             >
-              {{ __('Click to expand it.') }}
-            </a>
+              {{ $options.i18n.expand }}
+            </gl-button>
           </div>
           <diff-content
             v-show="showContent"

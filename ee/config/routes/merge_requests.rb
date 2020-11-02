@@ -12,6 +12,7 @@ resources :merge_requests, only: [], constraints: { id: /\d+/ } do
     get :secret_detection_reports
     get :dast_reports
     get :coverage_fuzzing_reports
+    get :api_fuzzing_reports
 
     post :rebase
   end

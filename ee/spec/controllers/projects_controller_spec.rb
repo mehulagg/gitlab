@@ -3,36 +3,59 @@
 require 'spec_helper'
 
 RSpec.describe ProjectsController do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+
   let(:project) { create(:project) }
-  let(:user) { create(:user) }
+
+  let_it_be(:public_project) { create(:project, :public, :repository) }
 
   before do
     project.add_maintainer(user)
     sign_in(user)
   end
 
-  describe "GET show" do
-    let(:public_project) { create(:project, :public, :repository) }
-
+  describe 'GET show' do
     render_views
 
     subject { get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path } }
 
-    it 'shows the over size limit warning message if above_size_limit' do
-      allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
-        expect(checker).to receive(:above_size_limit?).and_return(true)
+    context 'with additional_repo_storage_by_namespace_enabled? enabled' do
+      before do
+        allow_any_instance_of(EE::Namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(true)
       end
-      allow(controller).to receive(:current_user).and_return(user)
 
-      subject
+      it 'does not show over size limit warning when above_size_limit' do
+        allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+          expect(checker).to receive(:above_size_limit?).and_return(true)
+        end
 
-      expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+        subject
+
+        expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      end
     end
 
-    it 'does not show an over size warning if not above_size_limit' do
-      subject
+    context 'with additional_repo_storage_by_namespace_enabled? disabled' do
+      before do
+        allow_any_instance_of(EE::Namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(false)
+      end
 
-      expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      it 'shows the over size limit warning message if above_size_limit' do
+        allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+          expect(checker).to receive(:above_size_limit?).and_return(true)
+        end
+
+        subject
+
+        expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+      end
+
+      it 'does not show an over size warning if not above_size_limit' do
+        subject
+
+        expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      end
     end
 
     context 'namespace storage limit' do
@@ -102,7 +125,6 @@ RSpec.describe ProjectsController do
     end
 
     context 'custom project templates' do
-      let(:group) { create(:group) }
       let(:project_template) { create(:project, :repository, :public, :metrics_dashboard_enabled, namespace: group) }
       let(:templates_params) do
         {
@@ -384,8 +406,8 @@ RSpec.describe ProjectsController do
     end
 
     context 'compliance framework settings' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:params) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
+      let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
 
       context 'when unlicensed' do
         before do
@@ -419,7 +441,7 @@ RSpec.describe ProjectsController do
               }
           project.reload
 
-          expect(project.compliance_framework_setting.framework).to eq(framework)
+          expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
         end
       end
     end
@@ -446,7 +468,6 @@ RSpec.describe ProjectsController do
   end
 
   context 'Archive & Unarchive actions' do
-    let(:group) { create(:group) }
     let(:project) { create(:project, group: group) }
     let(:archived_project) { create(:project, :archived, group: group) }
 
@@ -502,14 +523,12 @@ RSpec.describe ProjectsController do
   end
 
   describe 'DELETE #destroy' do
-    let(:owner) { create(:user) }
-    let(:group) { create(:group) }
-    let(:project) { create(:project, group: group)}
+    let(:project) { create(:project, group: group) }
 
     before do
-      group.add_user(owner, Gitlab::Access::OWNER)
+      group.add_user(user, Gitlab::Access::OWNER)
       controller.instance_variable_set(:@project, project)
-      sign_in(owner)
+      sign_in(user)
     end
 
     shared_examples 'deletes project right away' do
@@ -578,7 +597,7 @@ RSpec.describe ProjectsController do
       end
 
       context 'for projects in user namespace' do
-        let(:project) { create(:project, namespace: owner.namespace)}
+        let(:project) { create(:project, namespace: user.namespace) }
 
         it_behaves_like 'deletes project right away'
       end
@@ -594,12 +613,11 @@ RSpec.describe ProjectsController do
   end
 
   describe 'POST #restore' do
-    let(:owner) { create(:user) }
-    let(:project) { create(:project, namespace: owner.namespace)}
+    let(:project) { create(:project, namespace: user.namespace) }
 
     before do
       controller.instance_variable_set(:@project, project)
-      sign_in(owner)
+      sign_in(user)
     end
 
     it 'restores project deletion' do

@@ -33,15 +33,17 @@ class BulkCreateIntegrationService
     klass.insert_all(items_to_insert, returning: [:id])
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def run_callbacks(batch)
-    if integration.issue_tracker? && integration.active?
-      batch.update_all(has_external_issue_tracker: true)
+    if integration.external_issue_tracker?
+      Project.where(id: batch.select(:id)).update_all(has_external_issue_tracker: true)
     end
 
-    if integration.type == 'ExternalWikiService' && integration.active?
-      batch.update_all(has_external_wiki: true)
+    if integration.external_wiki?
+      Project.where(id: batch.select(:id)).update_all(has_external_wiki: true)
     end
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def service_hash
     if integration.template?

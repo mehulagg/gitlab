@@ -165,6 +165,16 @@ module EE
       scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
+      scope :order_by_total_repository_size_excess_desc, -> (limit) do
+        excess = ::ProjectStatistics.arel_table[:repository_size] +
+                   ::ProjectStatistics.arel_table[:lfs_objects_size] -
+                   ::Project.arel_table.coalesce(::Project.arel_table[:repository_size_limit], limit, 0)
+
+        joins(:statistics).order(
+          Arel.sql(Arel::Nodes::Descending.new(excess).to_sql)
+        )
+      end
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
@@ -235,10 +245,7 @@ module EE
 
     def has_regulated_settings?
       strong_memoize(:has_regulated_settings) do
-        next false unless compliance_framework_setting
-
-        compliance_framework_id = ::ComplianceManagement::ComplianceFramework::FRAMEWORKS[compliance_framework_setting.framework.to_sym]
-        ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(compliance_framework_id)
+        compliance_framework_setting&.compliance_management_framework&.merge_request_approval_rules_enforced?
       end
     end
 

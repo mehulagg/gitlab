@@ -234,4 +234,45 @@ RSpec.describe 'getting group information' do
       )
     end
   end
+
+  describe 'pagination' do
+    let_it_be(:current_user) { create(:user) }
+    let_it_be(:project_1) { create(:project) }
+    let_it_be(:project_2) { create(:project) }
+    let_it_be(:group) { create(:group, projects: [project_1, project_2]) }
+
+    let(:data_path) { [:group, :codeCoverageActivities] }
+
+    def pagination_query(params, page_info)
+      graphql_query_for(
+        'group',
+        { 'fullPath' => group.full_path },
+        <<~QUERY
+        codeCoverageActivities(startDate: "#{start_date}" #{params}) {
+          #{page_info} edges {
+            node {
+              averageCoverage
+            }
+          }
+        }
+        QUERY
+      )
+    end
+
+    def pagination_results_data(data)
+      data.map { |coverage| coverage.dig('node', 'averageCoverage') }
+    end
+
+    context 'when default sorting' do
+      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
+      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 88.8, date: 1.week.ago) }
+      let(:start_date) { 1.week.ago.to_date.to_s }
+
+      it_behaves_like 'sorted paginated query' do
+        let(:sort_param) { }
+        let(:first_param) { 2 }
+        let(:expected_results) { [88.8, 77.0] }
+      end
+    end
+  end
 end

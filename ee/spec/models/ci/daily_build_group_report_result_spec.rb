@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::DailyBuildGroupReportResult do
   let_it_be(:project) { create(:project) }
+  let_it_be(:group) { create(:group, projects: [project]) }
   let(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project) }
   let(:old_build_group_report_result) do
     create(:ci_daily_build_group_report_result, date: 1.week.ago, project: project)
@@ -66,5 +67,58 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
         end
       end
     end
+
+    describe '.activity_per_group' do
+      subject(:activity) { described_class.activity_per_group }
+
+      context 'when group has project with several coverage' do
+        let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project) }
+        let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project, group_name: 'karma', coverage: 88.8) }
+
+        it 'returns coverage activity for the group' do
+          expected_results = expected_activities(
+            average_coverage: 82.9,
+            coverage_count: 2,
+            date: Date.current,
+            project_count: 1
+          )
+
+          expect(activity).to contain_exactly(expected_results)
+        end
+      end
+
+      context 'when group has projects with several coverage' do
+        let!(:project_2) { create(:project) }
+        let!(:group) { create(:group, projects: [project, project_2]) }
+        let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project) }
+        let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2, group_name: 'karma') }
+
+        it 'returns coverage activity for the group' do
+          expected_results = expected_activities(
+            average_coverage: 77.0,
+            coverage_count: 2,
+            date: Date.current,
+            project_count: 2
+          )
+
+          expect(subject).to contain_exactly(expected_results)
+        end
+      end
+
+      context 'when group has projects without coverage' do
+        it 'returns an empty collection' do
+          expect(activity).to be_empty
+        end
+      end
+    end
+  end
+
+  def expected_activities(args = {})
+    {
+      average_coverage: args[:average_coverage],
+      coverage_count: args[:coverage_count],
+      date: args[:date].to_date,
+      project_count: args[:project_count]
+    }
   end
 end

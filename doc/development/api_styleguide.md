@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # API style guide
 
 This style guide recommends best practices for API development.
@@ -292,3 +298,8 @@ expect(response).to match_response_schema('merge_requests')
 ```
 
 Also see [verifying N+1 performance](#verifying-with-tests) in tests.
+
+## Include a changelog entry
+
+All client-facing changes **must** include a [changelog entry](changelog.md).
+This does not include internal APIs.

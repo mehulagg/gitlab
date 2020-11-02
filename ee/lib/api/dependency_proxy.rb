@@ -4,6 +4,8 @@ module API
   class DependencyProxy < ::API::Base
     helpers ::API::Helpers::PackagesHelpers
 
+    feature_category :dependency_proxy
+
     helpers do
       def obtain_new_purge_cache_lease
         Gitlab::ExclusiveLease

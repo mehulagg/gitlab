@@ -1,0 +1,5 @@
+---
+title: Update API Fuzzing template to support use of a Postman Collection
+merge_request: 46476
+author:
+type: added

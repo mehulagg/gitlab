@@ -42,15 +42,15 @@ RSpec.describe API::VisualReviewDiscussions do
       expect { request }.to change(merge_request.notes, :count).by(1)
     end
 
-    it 'tracks a visual review feedback event' do
-      expect(Gitlab::Tracking).to receive(:event) do |category, action, data|
-        expect(category).to eq('Notes::CreateService')
-        expect(action).to eq('execute')
-        expect(data[:label]).to eq('anonymous_visual_review_note')
-        expect(data[:value]).to be_an(Integer)
-      end
-
+    it 'tracks a visual review feedback event', :snowplow do
       request
+
+      expect_snowplow_event(
+        category: 'Notes::CreateService',
+        action: 'execute',
+        label: 'anonymous_visual_review_note',
+        value: merge_request.notes.last.id
+      )
     end
 
     context 'with notes_create_service_tracking feature flag disabled' do

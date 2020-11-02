@@ -1,0 +1,5 @@
+---
+title: Fix duplicate instances in deploy boards when multiple deployments have the same track
+merge_request: 46374
+author:
+type: fixed

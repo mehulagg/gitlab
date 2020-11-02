@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     context 'Push Rules' do
       describe 'using non signed commits' do
         before(:context) do
@@ -90,7 +90,7 @@ module QA
           tag = Resource::Tag.fabricate_via_api! do |tag|
             tag.project = @project
             tag.ref = 'master'
-            tag.name = 'test_tag'
+            tag.name = "test_tag_#{SecureRandom.hex(8)}"
           end
 
           expect_error_on_push(file: standard_file, tag: tag.name,

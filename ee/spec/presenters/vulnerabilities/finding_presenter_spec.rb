@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Vulnerabilities::FindingPresenter do
   let(:presenter) { described_class.new(occurrence) }
-  let(:occurrence) { build_stubbed(:vulnerabilities_occurrence) }
+  let(:occurrence) { build_stubbed(:vulnerabilities_finding) }
 
   describe '#blob_path' do
     subject { presenter.blob_path }
