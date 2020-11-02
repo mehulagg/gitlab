@@ -672,7 +672,6 @@ module EE
     def disable_overriding_approvers_per_merge_request
       strong_memoize(:disable_overriding_approvers_per_merge_request) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
         ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request?
       end
@@ -682,7 +681,6 @@ module EE
     def merge_requests_author_approval
       strong_memoize(:merge_requests_author_approval) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
         !::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
       end
@@ -692,7 +690,6 @@ module EE
     def merge_requests_disable_committers_approval
       strong_memoize(:merge_requests_disable_committers_approval) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
         ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval?
       end
