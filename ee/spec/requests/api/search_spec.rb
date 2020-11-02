@@ -37,6 +37,26 @@ RSpec.describe API::Search, factory_default: :keep do
     end
   end
 
+  shared_examples 'orderable by created_at' do |scope:, search: '*'|
+    it 'returns a different result for each page' do
+      get api(endpoint, user), params: { scope: scope, search: search, order_by: 'created_at', sort: 'asc' }
+
+      expect(json_response.count).to be > 1
+
+      created_ats = json_response.map { |r| r['created_at'] }
+
+      expect(created_ats).to eq(created_ats.sort)
+
+      get api(endpoint, user), params: { scope: scope, search: search, order_by: 'created_at', sort: 'desc' }
+
+      expect(json_response.count).to be > 1
+
+      created_ats = json_response.map { |r| r['created_at'] }
+
+      expect(created_ats).to eq(created_ats.sort.reverse)
+    end
+  end
+
   shared_examples 'elasticsearch disabled' do
     it 'returns 400 error for wiki_blobs, blobs and commits scope' do
       get api(endpoint, user), params: { scope: 'wiki_blobs', search: 'awesome' }
@@ -61,6 +81,7 @@ RSpec.describe API::Search, factory_default: :keep do
       end
 
       it_behaves_like 'pagination', scope: 'merge_requests'
+      it_behaves_like 'orderable by created_at', scope: 'merge_requests'
 
       it 'avoids N+1 queries' do
         control = ActiveRecord::QueryRecorder.new { get api(endpoint, user), params: { scope: 'merge_requests', search: '*' } }

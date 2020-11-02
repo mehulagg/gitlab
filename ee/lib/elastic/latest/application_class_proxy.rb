@@ -137,14 +137,16 @@ module Elastic
       end
 
       def apply_sort(query_hash, options)
-        case options[:sort]
-        when 'created_asc'
+        # Due to different uses of sort param we prefer order_by when
+        # present
+        case [options[:order_by], options[:sort]]
+        when ['created_at', 'asc'], [nil, 'created_asc']
           query_hash.merge(sort: {
             created_at: {
               order: 'asc'
             }
           })
-        when 'created_desc'
+        when ['created_at', 'desc'], [nil, 'created_desc']
           query_hash.merge(sort: {
             created_at: {
               order: 'desc'
