@@ -71,6 +71,7 @@ export default {
         return {
           fullPath: this.groupPath,
           title: search,
+          state: 'opened',
         };
       },
       update(data) {
