@@ -1,0 +1,5 @@
+---
+title: Adding check for pipeline subscription feature availability
+merge_request: 46712
+author:
+type: fixed

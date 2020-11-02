@@ -1,3 +1,5 @@
+- return unless @project.feature_available?(:ci_project_subscriptions)
+
 - expanded = expanded_by_default?
 
 %section.settings.no-animate#pipeline-subscriptions{ class: ('expanded' if expanded) }
