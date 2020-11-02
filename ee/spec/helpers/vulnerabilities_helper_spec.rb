@@ -150,7 +150,7 @@ RSpec.describe VulnerabilitiesHelper do
         description: finding.description,
         identifiers: kind_of(Array),
         issue_feedback: anything,
-        links: finding.links,
+        links: kind_of(Array),
         location: finding.location,
         name: finding.name,
         merge_request_feedback: anything,
