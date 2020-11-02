@@ -136,9 +136,7 @@ export default {
               v-if="commit.author"
               :href="commit.author.webPath"
               class="commit-author-link js-user-link"
-            >
-              {{ commit.author.name }}
-            </gl-link>
+            >{{ commit.author.name }}</gl-link>
             <template v-else>
               {{ commit.authorName }}
             </template>
