@@ -57,14 +57,6 @@ RSpec.describe AlertManagement::HttpIntegrations::DestroyService do
 
     it 'successfully returns the integration' do
       expect(response).to be_success
-
-      integration_result = response.payload[:integration]
-      expect(integration_result).to be_a(::AlertManagement::HttpIntegration)
-      expect(integration_result.name).to eq(integration.name)
-      expect(integration_result.active).to eq(integration.active)
-      expect(integration_result.token).to eq(integration.token)
-      expect(integration_result.endpoint_identifier).to eq(integration.endpoint_identifier)
-
       expect { integration.reload }.to raise_error ActiveRecord::RecordNotFound
     end
   end
