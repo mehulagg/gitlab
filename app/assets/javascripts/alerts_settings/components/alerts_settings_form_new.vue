@@ -62,6 +62,11 @@ export default {
         label: s__('AlertSettings|Prometheus API base URL'),
         help: s__('AlertSettings|URL cannot be blank and must start with http or https'),
       },
+      restKeyInfo: {
+        label: s__(
+          'AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in.',
+        ),
+      },
     },
   },
   components: {
@@ -94,6 +99,11 @@ export default {
     loading: {
       type: Boolean,
       required: true,
+    },
+    currentIntegration: {
+      type: Object,
+      required: false,
+      default: null,
     },
   },
   data() {
@@ -143,17 +153,27 @@ export default {
     },
     onSubmit() {
       const { name, apiUrl, active } = this.integrationForm;
-      const variables =
-        this.selectedIntegration === this.$options.typeSet.http
-          ? { name, active }
-          : { apiUrl, active };
-      this.$emit('on-create-new-integration', { type: this.selectedIntegration, variables });
+      const variables = this.selectedIntegration === this.$options.typeSet.http ? { name, active } : { apiUrl, active };
+      const integrationPayload = { type: this.selectedIntegration, variables };
+
+      if (this.currentIntegration) {
+        return this.$emit('on-update-integration', integrationPayload);
+      }
+
+      return this.$emit('on-create-new-integration', integrationPayload);
     },
     onReset() {
-      // TODO: Reset form values
+      this.integrationForm.name = '';
+      this.integrationForm.apiUrl = '';
+      this.integrationForm.active = false;
+      this.integrationForm.integrationTestPayload.error = null;
+      this.integrationForm.integrationTestPayload.json = '';
     },
     onResetAuthKey() {
-      // TODO: Handle reset auth key via GraphQL
+      this.$emit('on-reset-token', {
+        type: this.selectedIntegration,
+        variables: { id: this.currentIntegration.id },
+      });
     },
     validateJson() {
       this.integrationForm.integrationTestPayload.error = null;
@@ -273,17 +293,20 @@ export default {
             </template>
           </gl-form-input-group>
 
-          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
-            $options.i18n.integrationFormSteps.step3.reset
-          }}</gl-button>
+          <gl-button
+            v-gl-modal.authKeyModal
+            :disabled="!integrationForm.active && currentIntegration"
+            class="gl-mt-3"
+            >{{ $options.i18n.integrationFormSteps.step3.reset }}</gl-button
+          >
           <gl-modal
             modal-id="authKeyModal"
             :title="$options.i18n.integrationFormSteps.step3.reset"
             :ok-title="$options.i18n.integrationFormSteps.step3.reset"
             ok-variant="danger"
-            @ok="() => {}"
+            @ok="onResetAuthKey"
           >
-            {{ $options.i18n.integrationFormSteps.step3.reset }}
+            {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
           </gl-modal>
         </div>
       </gl-form-group>
