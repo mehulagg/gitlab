@@ -404,7 +404,7 @@ For supported database architecture, please see our documentation on
 ### Finding the requests that are being made to NFS
 
 ```shell
-perf trace -e 'nfs4:*' -p $(ps aux | grep [p]uma | awk '{print $2}' | paste -sd ',')
+sudo perf trace -e 'nfs4:*' -p $(pgrep -fd ',' puma)
 ```
 
 <!-- ## Troubleshooting
