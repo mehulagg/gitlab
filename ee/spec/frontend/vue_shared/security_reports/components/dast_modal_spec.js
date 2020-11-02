@@ -19,9 +19,13 @@ describe('DAST Modal', () => {
   };
 
   const findDownloadButton = () => wrapper.find('[data-testid="download-button"]');
+  const findModal = () => wrapper.find('[data-testid="dastModal"]')
 
   const createWrapper = propsData => {
     wrapper = shallowMount(Component, {
+      provide: {
+        glFeatures: { dastModalLoadingIndicator: true },
+      },
       propsData: {
         ...defaultProps,
         ...propsData,
@@ -68,7 +72,7 @@ describe('DAST Modal', () => {
 
   it('should contain the dynamic title', () => {
     createWrapper({ scannedResourcesCount: 20 });
-    expect(wrapper.attributes('title')).toBe('20 Scanned URLs');
+    expect(findModal().attributes('title')).toBe('20 Scanned URLs');
   });
 
   it('should not show download button when link is not present', () => {

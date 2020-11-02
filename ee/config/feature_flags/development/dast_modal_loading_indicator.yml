@@ -1,0 +1,7 @@
+---
+name: dast_modal_loading_indicator
+introduced_by_url:
+rollout_issue_url:
+type: development
+group: group::secure
+default_enabled: false

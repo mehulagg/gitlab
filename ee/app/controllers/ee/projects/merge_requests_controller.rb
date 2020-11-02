@@ -9,6 +9,7 @@ module EE
         include DescriptionDiffActions
 
         before_action only: [:show] do
+          push_frontend_feature_flag(:dast_modal_loading_indicator)
           push_frontend_feature_flag(:anonymous_visual_review_feedback)
           push_frontend_feature_flag(:missing_mr_security_scan_types, @project)
         end
