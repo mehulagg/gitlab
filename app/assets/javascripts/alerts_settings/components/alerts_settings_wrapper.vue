@@ -53,46 +53,7 @@ export default {
         const { alertManagementIntegrations: { nodes: list = [] } = {} } = data.project || {};
 
         return {
-          list: [
-            {
-              id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
-              type: 'HTTP',
-              active: true,
-              name: 'test',
-              url:
-                'http://192.168.1.152:3000/root/autodevops/alerts/notify/test/eddd36969b2d3d6a.json',
-              token: '7eb24af194116411ec8d66b58c6b0d2e',
-              apiUrl: null,
-            },
-            {
-              id: 'gid://gitlab/AlertManagement::HttpIntegration/6',
-              type: 'HTTP',
-              active: false,
-              name: 'test',
-              url: 'http://192.168.1.152:3000/root/autodevops/alerts/notify/test/abce123.json',
-              token: '8639e0ce06c731b00ee3e8dcdfd14fe0',
-              apiUrl: null,
-            },
-            {
-              id: 'gid://gitlab/AlertManagement::HttpIntegration/5',
-              type: 'HTTP',
-              active: false,
-              name: 'test',
-              url:
-                'http://192.168.1.152:3000/root/autodevops/alerts/notify/test/bcd64c85f918a2e2.json',
-              token: '5c8101533d970a55d5c105f8abff2192',
-              apiUrl: null,
-            },
-            {
-              id: 'gid://gitlab/PrometheusService/12',
-              type: 'PROMETHEUS',
-              active: true,
-              name: 'Prometheus',
-              url: 'http://192.168.1.152:3000/root/autodevops/prometheus/alerts/notify.json',
-              token: '0b18c37caa8fe980799b349916fe5ddf',
-              apiUrl: 'https://another-url-2.com',
-            },
-          ],
+          list,
         };
       },
       error(err) {
@@ -161,7 +122,7 @@ export default {
           this.isUpdating = false;
         });
     },
-       updateIntegrations(
+    updateIntegrations(
       store,
       {
         data: { httpIntegrationCreate, prometheusIntegrationCreate },
@@ -204,13 +165,18 @@ export default {
             type === 'HTTP' ? updateHttpIntegrationMutation : updatePrometheusIntegrationMutation,
           variables: {
             ...variables,
-            projectPath: this.projectPath,
+            id: this.currentIntegration.id,
           },
         })
         .then(({ data: { httpIntegrationUpdate, prometheusIntegrationUpdate } = {} } = {}) => {
-          // TODO: Handle ee or user recoverable errors via generic handler here
-          // eslint-disable-next-line no-console
-          console.debug(httpIntegrationUpdate, prometheusIntegrationUpdate);
+          const error = httpIntegrationUpdate?.errors[0] || prometheusIntegrationUpdate?.errors[0];
+          if (error) {
+            return createFlash({ message: error });
+          }
+          return createFlash({
+            message: this.$options.i18n.changesSaved,
+            type: FLASH_TYPES.SUCCESS,
+          });
         })
         .catch(err => {
           this.errored = true;
@@ -229,9 +195,15 @@ export default {
         })
         .then(
           ({ data: { httpIntegrationResetToken, prometheusIntegrationResetToken } = {} } = {}) => {
-            // TODO: Handle ee or user recoverable errors via generic handler here
-            // eslint-disable-next-line no-console
-            console.debug(httpIntegrationResetToken, prometheusIntegrationResetToken);
+            const error =
+              httpIntegrationResetToken?.errors[0] || prometheusIntegrationResetToken?.errors[0];
+            if (error) {
+              return createFlash({ message: error });
+            }
+            return createFlash({
+              message: this.$options.i18n.changesSaved,
+              type: FLASH_TYPES.SUCCESS,
+            });
           },
         )
         .catch(err => {
