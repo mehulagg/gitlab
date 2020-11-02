@@ -19,6 +19,7 @@ module BulkImports
         )
 
         BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
+        BulkImports::Groups::Pipelines::EpicsPipeline.new.run(context)
         BulkImports::Groups::Pipelines::SubgroupsPipeline.new.run(context)
 
         @entity.finish!
