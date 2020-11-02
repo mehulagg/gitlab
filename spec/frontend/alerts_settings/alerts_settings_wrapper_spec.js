@@ -6,6 +6,10 @@ import AlertsSettingsFormNew from '~/alerts_settings/components/alerts_settings_
 import IntegrationsList from '~/alerts_settings/components/alerts_integrations_list.vue';
 import createHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/create_http_integration.mutation.graphql';
 import createPrometheusIntegrationMutation from '~/alerts_settings/graphql/mutations/create_prometheus_integration.mutation.graphql';
+import updateHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/update_http_integration.mutation.graphql';
+import updatePrometheusIntegrationMutation from '~/alerts_settings/graphql/mutations/update_prometheus_integration.mutation.graphql';
+import resetHttpTokenMutation from '~/alerts_settings/graphql/mutations/reset_http_token.mutation.graphql';
+import resetPrometheusTokenMutation from '~/alerts_settings/graphql/mutations/reset_prometheus_token.mutation.graphql';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
 import mockIntegrations from './mocks/integrations.json';
@@ -123,6 +127,59 @@ describe('AlertsSettingsWrapper', () => {
       });
     });
 
+    it('calls `$apollo.mutate` with `updateHttpIntegrationMutation`', () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue({
+        data: { updateHttpIntegrationMutation: { integration: { id: '1' } } },
+      });
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-update-integration', {
+        type: 'HTTP',
+        variables: {
+          name: 'Test 1',
+          active: true,
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+        },
+      });
+
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: updateHttpIntegrationMutation,
+        variables: {
+          name: 'Test 1',
+          active: true,
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+          projectPath,
+        },
+      });
+    });
+
+    it('calls `$apollo.mutate` with `resetHttpTokenMutation`', () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue({
+        data: { resetHttpTokenMutation: { integration: { id: '1' } } },
+      });
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {
+        type: 'HTTP',
+        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/120040' },
+      });
+
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: resetHttpTokenMutation,
+        variables: {
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+        },
+      });
+    });
+
     it('calls `$apollo.mutate` with `createPrometheusIntegrationMutation`', () => {
       createComponent({
         data: { integrations: { list: mockIntegrations } },
@@ -148,6 +205,59 @@ describe('AlertsSettingsWrapper', () => {
       });
     });
 
+    it('calls `$apollo.mutate` with `updatePrometheusIntegrationMutation`', () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue({
+        data: { updatePrometheusIntegrationMutation: { integration: { id: '2' } } },
+      });
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-update-integration', {
+        type: 'PROMETHEUS',
+        variables: {
+          apiUrl: 'https://test.com',
+          active: true,
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+        },
+      });
+
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: updatePrometheusIntegrationMutation,
+        variables: {
+          apiUrl: 'https://test.com',
+          active: true,
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+          projectPath,
+        },
+      });
+    });
+
+    it('calls `$apollo.mutate` with `resetPrometheusTokenMutation`', () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue({
+        data: { resetPrometheusTokenMutation: { integration: { id: '1' } } },
+      });
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {
+        type: 'PROMETHEUS',
+        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/120040' },
+      });
+
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: resetPrometheusTokenMutation,
+        variables: {
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+        },
+      });
+    });
+
     it('shows error alert when integration creation fails ', async () => {
       const errorMsg = 'Something went wrong';
       createComponent({
@@ -159,6 +269,42 @@ describe('AlertsSettingsWrapper', () => {
       jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('on-create-new-integration', {});
+      await wrapper.vm.$nextTick();
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      });
+    });
+
+    it('shows error alert when integration token reset fails ', async () => {
+      const errorMsg = 'Something went wrong';
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {});
+      await wrapper.vm.$nextTick();
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      });
+    });
+
+    it('shows error alert when integration update fails ', async () => {
+      const errorMsg = 'Something went wrong';
+      createComponent({
+        data: { integrations: { list: mockIntegrations } },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-update-integration', {});
       await wrapper.vm.$nextTick();
 
       setImmediate(() => {
