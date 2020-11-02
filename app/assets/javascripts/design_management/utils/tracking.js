@@ -1,6 +1,7 @@
 import Tracking from '~/tracking';
+import api from '~/api';
 
-// Tracking Constants
+// Snowplow tracking constants
 const DESIGN_TRACKING_CONTEXT_SCHEMAS = {
   VIEW_DESIGN_SCHEMA: 'iglu:com.gitlab/design_management_context/jsonschema/1-0-0',
 };
@@ -9,6 +10,9 @@ const DESIGN_TRACKING_EVENTS = {
   CREATE_DESIGN: 'create_design',
   UPDATE_DESIGN: 'update_design',
 };
+
+// Usage ping tracking constants
+const DESIGN_ACTION = 'design_action';
 
 export const DESIGN_TRACKING_PAGE_NAME = 'projects:issues:design';
 
@@ -19,6 +23,8 @@ export function trackDesignDetailView(
   latestVersion = false,
 ) {
   const eventName = DESIGN_TRACKING_EVENTS.VIEW_DESIGN;
+
+  // Track event in snowplow
   Tracking.event(DESIGN_TRACKING_PAGE_NAME, eventName, {
     label: eventName,
     context: {
@@ -31,6 +37,9 @@ export function trackDesignDetailView(
       },
     },
   });
+
+  // Track usage ping event
+  api.trackRedisHllUserEvent(DESIGN_ACTION);
 }
 
 export function trackDesignCreate() {
