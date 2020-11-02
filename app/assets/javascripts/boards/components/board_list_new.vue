@@ -3,6 +3,7 @@ import { mapActions, mapState } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import BoardNewIssue from './board_new_issue.vue';
 import BoardCard from './board_card.vue';
+import BoardCardLoading from './board_card_loading.vue';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
@@ -12,6 +13,7 @@ export default {
   name: 'BoardList',
   components: {
     BoardCard,
+    BoardCardLoading,
     BoardNewIssue,
     GlLoadingIcon,
   },
@@ -132,11 +134,12 @@ export default {
   >
     <div
       v-if="loading"
-      class="gl-mt-4 gl-text-center"
+      class="gl-p-2"
       :aria-label="__('Loading issues')"
       data-testid="board_list_loading"
     >
-      <gl-loading-icon />
+      <board-card-loading />
+      <board-card-loading />
     </div>
     <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
     <ul

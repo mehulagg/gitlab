@@ -92,7 +92,7 @@ describe('Board list component', () => {
       expect(component.$el.classList.contains('board-list-component')).toBe(true);
     });
 
-    it('renders loading icon', () => {
+    it('renders loading skeleton', () => {
       component.list.loading = true;
 
       return Vue.nextTick().then(() => {

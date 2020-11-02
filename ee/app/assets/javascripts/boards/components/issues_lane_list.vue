@@ -6,11 +6,13 @@ import defaultSortableConfig from '~/sortable/sortable_config';
 import BoardCardLayout from '~/boards/components/board_card_layout.vue';
 import eventHub from '~/boards/eventhub';
 import BoardNewIssue from '~/boards/components/board_new_issue.vue';
+import BoardCardLoading from '~/boards/components/board_card_loading.vue';
 import { ISSUABLE } from '~/boards/constants';
 
 export default {
   components: {
     BoardCardLayout,
+    BoardCardLoading,
     BoardNewIssue,
     GlLoadingIcon,
   },
@@ -42,6 +44,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -165,6 +172,7 @@ export default {
         class="board-cell gl-p-2 gl-m-0 gl-h-full"
         @end="handleDragOnEnd"
       >
+        <board-card-loading v-if="isLoading && issues.length === 0" />
         <board-card-layout
           v-for="(issue, index) in issues"
           ref="issue"

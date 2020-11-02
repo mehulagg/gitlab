@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { DRAGGABLE_TAG } from '../constants';
@@ -16,6 +16,7 @@ export default {
     IssuesLaneList,
     GlButton,
     GlIcon,
+    GlLoadingIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -36,7 +37,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
+    ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'epicsSwimlanesFetchInProgress']),
     ...mapGetters(['getUnassignedIssues']),
     unassignedIssues() {
       return listId => this.getUnassignedIssues(listId);
@@ -104,6 +105,11 @@ export default {
     data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
   >
+    <gl-loading-icon
+      v-show="epicsSwimlanesFetchInProgress && lists.length === 0 && epics.length === 0"
+      label="Loading swimlanes"
+      class="gl-mt-3 gl-ml-3 gl-text-left"
+    />
     <component
       :is="treeRootWrapper"
       v-bind="treeRootOptions"

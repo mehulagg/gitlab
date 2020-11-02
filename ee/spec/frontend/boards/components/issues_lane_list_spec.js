@@ -1,11 +1,9 @@
 import Vue from 'vue';
-import AxiosMockAdapter from 'axios-mock-adapter';
 import { shallowMount } from '@vue/test-utils';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import { listObj } from 'jest/boards/mock_data';
-import { TEST_HOST } from 'helpers/test_constants';
 import BoardCard from '~/boards/components/board_card_layout.vue';
-import axios from '~/lib/utils/axios_utils';
+import BoardCardLoading from '~/boards/components/board_card_loading.vue';
 import { mockIssues } from '../mock_data';
 import List from '~/boards/models/list';
 import { createStore } from '~/boards/stores';
@@ -13,18 +11,14 @@ import { ListType } from '~/boards/constants';
 
 describe('IssuesLaneList', () => {
   let wrapper;
-  let axiosMock;
   let store;
-
-  beforeEach(() => {
-    axiosMock = new AxiosMockAdapter(axios);
-    axiosMock.onGet(`${TEST_HOST}/lists/1/issues`).reply(200, { issues: [] });
-  });
 
   const createComponent = ({
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
+    isLoading = false,
+    issues = mockIssues,
   } = {}) => {
     const boardId = '1';
 
@@ -40,7 +34,7 @@ describe('IssuesLaneList', () => {
     }
 
     // Making List reactive
-    const list = Vue.observable(new List(listMock));
+    const list = Vue.observable(new List({ ...listMock, doNotFetchIssues: true }));
 
     if (withLocalStorage) {
       localStorage.setItem(
@@ -53,14 +47,14 @@ describe('IssuesLaneList', () => {
       store,
       propsData: {
         list,
-        issues: mockIssues,
+        issues,
         disabled: false,
+        isLoading,
       },
     });
   };
 
   afterEach(() => {
-    axiosMock.restore();
     wrapper.destroy();
     localStorage.clear();
   });
@@ -79,6 +73,11 @@ describe('IssuesLaneList', () => {
     it('renders one BoardCard component per issue passed in props', () => {
       expect(wrapper.findAll(BoardCard)).toHaveLength(wrapper.props('issues').length);
     });
+
+    it('renders loading skeleton when issues are loading', () => {
+      createComponent({ issues: [], isLoading: true });
+      expect(wrapper.findAll(BoardCardLoading)).toHaveLength(1);
+    });
   });
 
   describe('if list is collapsed', () => {
@@ -94,6 +93,11 @@ describe('IssuesLaneList', () => {
 
     it('does not renders BoardCard components', () => {
       expect(wrapper.findAll(BoardCard)).toHaveLength(0);
+    });
+
+    it('does not render loading skeleton when issues are loading', () => {
+      createComponent({ issues: [], isLoading: true, collapsed: true });
+      expect(wrapper.findAll(BoardCardLoading)).toHaveLength(0);
     });
   });
 });

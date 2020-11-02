@@ -3,6 +3,7 @@ import { Sortable, MultiDrag } from 'sortablejs';
 import { GlLoadingIcon } from '@gitlab/ui';
 import boardNewIssue from './board_new_issue.vue';
 import boardCard from './board_card.vue';
+import BoardCardLoading from './board_card_loading.vue';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
@@ -25,6 +26,7 @@ export default {
   components: {
     boardCard,
     boardNewIssue,
+    BoardCardLoading,
     GlLoadingIcon,
   },
   mixins: [glFeatureFlagMixin()],
@@ -419,8 +421,9 @@ export default {
     class="board-list-component position-relative h-100"
     data-qa-selector="board_list_cards_area"
   >
-    <div v-if="loading" class="board-list-loading text-center" :aria-label="__('Loading issues')">
-      <gl-loading-icon />
+    <div v-if="loading" class="board-list-loading gl-p-2" :aria-label="__('Loading issues')">
+      <board-card-loading />
+      <board-card-loading />
     </div>
     <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
     <ul

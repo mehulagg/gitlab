@@ -7,6 +7,7 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import eventHub from '~/boards/eventhub';
 import BoardList from '~/boards/components/board_list_new.vue';
 import BoardCard from '~/boards/components/board_card.vue';
+import BoardCardLoading from '~/boards/components/board_card_loading.vue';
 import '~/boards/models/issue';
 import '~/boards/models/list';
 import { listObj, mockIssuesByListId, issues } from './mock_data';
@@ -100,12 +101,13 @@ describe('Board list component', () => {
       expect(wrapper.find('.board-list-component').exists()).toBe(true);
     });
 
-    it('renders loading icon', () => {
+    it('renders loading skeleton', () => {
       wrapper = createComponent({
         state: { listsFlags: { 'gid://gitlab/List/1': { isLoading: true } } },
       });
 
       expect(wrapper.find('[data-testid="board_list_loading"').exists()).toBe(true);
+      expect(wrapper.find(BoardCardLoading).exists()).toBe(true);
     });
 
     it('renders issues', () => {
