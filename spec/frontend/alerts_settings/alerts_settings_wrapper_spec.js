@@ -350,7 +350,7 @@ describe('AlertsSettingsWrapper', () => {
     it('shows error alert when integration token reset fails ', async () => {
       const errorMsg = 'Something went wrong';
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -368,7 +368,7 @@ describe('AlertsSettingsWrapper', () => {
     it('shows error alert when integration update fails ', async () => {
       const errorMsg = 'Something went wrong';
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
