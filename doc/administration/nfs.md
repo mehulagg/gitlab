@@ -399,6 +399,14 @@ Additionally, this configuration is specifically warned against in the
 For supported database architecture, please see our documentation on
 [Configuring a Database for GitLab HA](postgresql/replication_and_failover.md).
 
+## Troubleshooting
+
+### Finding the requests that are being made to NFS
+
+```shell
+perf trace -e 'nfs4:*' -p $(ps aux | grep [p]uma | awk '{print $2}' | paste -sd ',')
+```
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
