@@ -2,7 +2,7 @@
 
 module Gitlab
   module UsageDataCounters
-    module HLLRedisCounter
+    class HLLRedisCounter
       DEFAULT_WEEKLY_KEY_EXPIRY_LENGTH = 6.weeks
       DEFAULT_DAILY_KEY_EXPIRY_LENGTH = 29.days
       DEFAULT_REDIS_SLOT = ''.freeze
@@ -89,6 +89,12 @@ module Gitlab
           event_for(event_name).present?
         end
 
+        protected
+
+        def known_events
+          @known_events ||= YAML.load_file(Rails.root.join(KNOWN_EVENTS_PATH)).map(&:with_indifferent_access)
+        end
+
         private
 
         # Allow to add totals for events that are in the same redis slot, category and have the same aggregation level
@@ -106,10 +112,6 @@ module Gitlab
           else
             weekly_redis_keys(events: events, start_date: start_date, end_date: end_date)
           end
-        end
-
-        def known_events
-          @known_events ||= YAML.load_file(Rails.root.join(KNOWN_EVENTS_PATH)).map(&:with_indifferent_access)
         end
 
         def known_events_names
