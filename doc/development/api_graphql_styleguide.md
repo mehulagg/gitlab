@@ -295,7 +295,7 @@ class MergeRequestPermissionsType < BasePermissionType
   abilities :admin_merge_request, :update_merge_request, :create_note
 
   ability_field :resolve_note,
-                description: 'Indicates the user can resolve discussions on the merge request'
+                description: 'Indicates the user can resolve discussions on the merge request.'
   permission_field :push_to_source_branch, method: :can_push_to_source_branch?
 end
 ```
@@ -354,7 +354,7 @@ Example:
 ```ruby
 field :test_field, type: GraphQL::STRING_TYPE,
       null: true,
-      description: 'Some test field',
+      description: 'Some test field.',
       feature_flag: :my_feature_flag
 ```
 
@@ -379,7 +379,7 @@ Example:
 field :foo, GraphQL::STRING_TYPE,
       null: true,
       description: 'Some test field. Will always return `null`' \
-                   'if `my_feature_flag` feature flag is disabled'
+                   'if `my_feature_flag` feature flag is disabled.'
 
 def foo
   object.foo unless Feature.enabled?(:my_feature_flag, object)
@@ -405,7 +405,7 @@ Example:
 ```ruby
 field :token, GraphQL::STRING_TYPE, null: true,
       deprecated: { reason: 'Login via token has been removed', milestone: '10.0' },
-      description: 'Token for login'
+      description: 'Token for login.'
 ```
 
 The original `description` of the things being deprecated should be maintained,
@@ -426,7 +426,7 @@ Example:
 ```ruby
 field :designs, ::Types::DesignManagement::DesignCollectionType, null: true,
       deprecated: { reason: 'Use `designCollection`', milestone: '10.0' },
-      description: 'The designs associated with this issue',
+      description: 'The designs associated with this issue.',
 ```
 
 ```ruby
@@ -462,9 +462,9 @@ module Types
     graphql_name 'TrafficLightState'
     description 'State of a traffic light'
 
-    value 'RED', description: 'Drivers must stop'
-    value 'YELLOW', description: 'Drivers must stop when it is safe to'
-    value 'GREEN', description: 'Drivers can start or keep driving'
+    value 'RED', description: 'Drivers must stop.'
+    value 'YELLOW', description: 'Drivers must stop when it is safe to.'
+    value 'GREEN', description: 'Drivers can start or keep driving.'
   end
 end
 ```
@@ -483,8 +483,8 @@ module Types
     graphql_name 'EpicState'
     description 'State of a GitLab epic'
 
-    value 'OPENED', value: 'opened', description: 'An open Epic'
-    value 'CLOSED', value: 'closed', description: 'An closed Epic'
+    value 'OPENED', value: 'opened', description: 'An open Epic.'
+    value 'CLOSED', value: 'closed', description: 'An closed Epic.'
   end
 end
 ```
@@ -508,7 +508,7 @@ module Types
     description 'Incident severity'
 
     ::IssuableSeverity.severities.keys.each do |severity|
-      value severity.upcase, value: severity, description: "#{severity.titleize} severity"
+      value severity.upcase, value: severity, description: "#{severity.titleize} severity."
     end
   end
 end
@@ -547,15 +547,15 @@ We can use GraphQL types like this:
 ```ruby
 module Types
   class ChartType < BaseObject
-    field :title, GraphQL::STRING_TYPE, null: true, description: 'Title of the chart'
-    field :data, [Types::ChartDatumType], null: true, description: 'Data of the chart'
+    field :title, GraphQL::STRING_TYPE, null: true, description: 'Title of the chart.'
+    field :data, [Types::ChartDatumType], null: true, description: 'Data of the chart.'
   end
 end
 
 module Types
   class ChartDatumType < BaseObject
-    field :x, GraphQL::INT_TYPE, null: true, description: 'X-axis value of the chart datum'
-    field :y, GraphQL::INT_TYPE, null: true, description: 'Y-axis value of the chart datum'
+    field :x, GraphQL::INT_TYPE, null: true, description: 'X-axis value of the chart datum.'
+    field :y, GraphQL::INT_TYPE, null: true, description: 'Y-axis value of the chart datum.'
   end
 end
 ```
@@ -569,7 +569,7 @@ A description of a field or argument is given using the `description:`
 keyword. For example:
 
 ```ruby
-field :id, GraphQL::ID_TYPE, description: 'ID of the resource'
+field :id, GraphQL::ID_TYPE, description: 'ID of the resource.'
 ```
 
 Descriptions of fields and arguments are viewable to users through:
@@ -591,14 +591,14 @@ descriptions:
 - Always include the word `"timestamp"` when describing an argument or
   field of type `Types::TimeType`. This lets the reader know that the
   format of the property will be `Time`, rather than just `Date`.
-- No `.` at end of strings.
+- Must end with `.`.
 
 Example:
 
 ```ruby
-field :id, GraphQL::ID_TYPE, description: 'ID of the Issue'
-field :confidential, GraphQL::BOOLEAN_TYPE, description: 'Indicates the issue is confidential'
-field :closed_at, Types::TimeType, description: 'Timestamp of when the issue was closed'
+field :id, GraphQL::ID_TYPE, description: 'ID of the Issue.'
+field :confidential, GraphQL::BOOLEAN_TYPE, description: 'Indicates the issue is confidential.'
+field :closed_at, Types::TimeType, description: 'Timestamp of when the issue was closed.'
 ```
 
 ### `copy_field_description` helper
@@ -816,7 +816,7 @@ to advertise the need for lookahead:
   field :my_things, MyThingType.connection_type, null: true,
         extras: [:lookahead], # Necessary
         resolver: MyThingResolver,
-        description: 'My things'
+        description: 'My things.'
 ```
 
 For an example of real world use, please
@@ -863,7 +863,7 @@ To find the parent object in your `Presenter` class:
      field :computed_field, SomeType, null: true,
            method: :my_computing_method,
            extras: [:parent], # Necessary
-           description: 'My field description'
+           description: 'My field description.'
    ```
 
 1. Declare your field's method in your Presenter class and have it accept the `parent` keyword argument.
@@ -976,7 +976,7 @@ Example:
 ```ruby
 argument :my_arg, GraphQL::STRING_TYPE,
          required: true,
-         description: "A description of the argument"
+         description: "A description of the argument."
 ```
 
 Each GraphQL `argument` defined will be passed to the `#resolve` method
@@ -1001,11 +1001,11 @@ defines these arguments (some
 ```ruby
 argument :project_path, GraphQL::ID_TYPE,
          required: true,
-         description: "The project the merge request to mutate is in"
+         description: "The project the merge request to mutate is in."
 
 argument :iid, GraphQL::STRING_TYPE,
          required: true,
-         description: "The iid of the merge request to mutate"
+         description: "The iid of the merge request to mutate."
 
 argument :wip,
          GraphQL::BOOLEAN_TYPE,
@@ -1057,7 +1057,7 @@ field:
 field :merge_request,
       Types::MergeRequestType,
       null: true,
-      description: "The merge request after mutation"
+      description: "The merge request after mutation."
 ```
 
 This means that the hash returned from `resolve` in this mutation
@@ -1342,7 +1342,7 @@ and handles time inputs.
 Example:
 
 ```ruby
-field :created_at, Types::TimeType, null: true, description: 'Timestamp of when the issue was created'
+field :created_at, Types::TimeType, null: true, description: 'Timestamp of when the issue was created.'
 ```
 
 ## Testing

@@ -28,12 +28,35 @@ RSpec.describe RuboCop::Cop::Graphql::Descriptions, type: :rubocop do
       expect_no_offenses(<<~TYPE.strip)
         module Types
           class FakeType < BaseObject
-            graphql_name 'FakeTypeName'
-
-            argument :a_thing,
+            field :a_thing,
               GraphQL::STRING_TYPE,
               null: false,
-              description: 'A descriptive description'
+              description: 'A descriptive description.'
+          end
+        end
+      TYPE
+    end
+
+    it 'adds an offense for fields with a description that does not end in a period' do
+      expect_offense(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            field :a_thing,
+            ^^^^^^^^^^^^^^^ `description` strings must end with a `.`
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: 'Behold! A description'
+          end
+        end
+      TYPE
+
+      expect_correction(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            field :a_thing,
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: 'Behold! A description.'
           end
         end
       TYPE
@@ -59,12 +82,66 @@ RSpec.describe RuboCop::Cop::Graphql::Descriptions, type: :rubocop do
       expect_no_offenses(<<~TYPE.strip)
         module Types
           class FakeType < BaseObject
-            graphql_name 'FakeTypeName'
-
             argument :a_thing,
               GraphQL::STRING_TYPE,
               null: false,
+              description: 'Behold! A description.'
+          end
+        end
+      TYPE
+    end
+
+    it 'adds an offense for arguments with a description that does not end in a period' do
+      expect_offense(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            argument :a_thing,
+            ^^^^^^^^^^^^^^^^^^ `description` strings must end with a `.`
+              GraphQL::STRING_TYPE,
+              null: false,
               description: 'Behold! A description'
+          end
+        end
+      TYPE
+
+      expect_correction(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            argument :a_thing,
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: 'Behold! A description.'
+          end
+        end
+      TYPE
+    end
+  end
+
+  describe 'autocorrection' do
+    it 'works with heredoc descriptions' do
+      expect_offense(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            field :a_thing,
+            ^^^^^^^^^^^^^^^ `description` strings must end with a `.`
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: <<~DESC
+                Behold! A description
+              DESC
+          end
+        end
+      TYPE
+
+      expect_correction(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            field :a_thing,
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: <<~DESC
+                Behold! A description.
+              DESC
           end
         end
       TYPE
