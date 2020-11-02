@@ -64,11 +64,12 @@ RSpec.describe Groups::Registry::RepositoriesController do
       context 'html format' do
         let(:format) { :html }
 
-        it 'show index page', :snowplow do
+        it 'show index page' do
+          expect(Gitlab::Tracking).not_to receive(:event)
+
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect_no_snowplow_event
         end
       end
 

@@ -55,8 +55,6 @@ module Elastic
       end
 
       def basic_query_hash(fields, query)
-        fields = CustomLanguageAnalyzers.add_custom_analyzers_fields(fields)
-
         query_hash =
           if query.present?
             {

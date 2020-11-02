@@ -56,15 +56,13 @@ module QA
             title: title,
             description: description,
             visibility: visibility.downcase,
-            files: all_file_contents
+            files: [
+                {
+                    content: file_content,
+                    file_path: file_name
+                }
+            ]
         }
-      end
-
-      def all_file_contents
-        @files.insert(0, { name: @file_name, content: @file_content })
-        @files.each do |file|
-          file[:file_path] = file.delete(:name)
-        end
       end
     end
   end

@@ -8,8 +8,6 @@ module API
 
         before { authenticated_as_admin! }
 
-        feature_category :continuous_integration
-
         namespace 'admin' do
           namespace 'ci' do
             namespace 'variables' do

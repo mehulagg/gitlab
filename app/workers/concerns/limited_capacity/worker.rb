@@ -67,7 +67,6 @@ module LimitedCapacity
       return unless has_capacity?
 
       job_tracker.register(jid)
-      report_running_jobs_metrics
       perform_work(*args)
     rescue => exception
       raise
@@ -109,13 +108,9 @@ module LimitedCapacity
     end
 
     def report_prometheus_metrics(*args)
-      report_running_jobs_metrics
+      running_jobs_gauge.set(prometheus_labels, running_jobs_count)
       remaining_work_gauge.set(prometheus_labels, remaining_work_count(*args))
       max_running_jobs_gauge.set(prometheus_labels, max_running_jobs)
-    end
-
-    def report_running_jobs_metrics
-      running_jobs_gauge.set(prometheus_labels, running_jobs_count)
     end
 
     def required_jobs_count(*args)

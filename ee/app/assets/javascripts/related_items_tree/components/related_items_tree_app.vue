@@ -137,10 +137,9 @@ export default {
         this.addItem();
       }
     },
-    handleCreateEpicFormSubmit(newValue, groupFullPath) {
+    handleCreateEpicFormSubmit(newValue) {
       this.createItem({
         itemTitle: newValue,
-        groupFullPath,
       });
     },
     handleAddItemFormCancel() {

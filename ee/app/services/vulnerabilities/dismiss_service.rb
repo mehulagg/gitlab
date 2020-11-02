@@ -6,23 +6,20 @@ module Vulnerabilities
   class DismissService < BaseService
     FindingsDismissResult = Struct.new(:ok?, :finding, :message)
 
-    def initialize(current_user, vulnerability, comment = nil, dismiss_findings: true)
+    def initialize(current_user, vulnerability, comment = nil)
       super(current_user, vulnerability)
       @comment = comment
-      @dismiss_findings = dismiss_findings
     end
 
     def execute
       raise Gitlab::Access::AccessDeniedError unless authorized?
 
       @vulnerability.transaction do
-        if dismiss_findings
-          result = dismiss_vulnerability_findings
+        result = dismiss_findings
 
-          unless result.ok?
-            handle_finding_dismissal_error(result.finding, result.message)
-            raise ActiveRecord::Rollback
-          end
+        unless result.ok?
+          handle_finding_dismissal_error(result.finding, result.message)
+          raise ActiveRecord::Rollback
         end
 
         update_with_note(@vulnerability, state: Vulnerability.states[:dismissed], dismissed_by: @user, dismissed_at: Time.current)
@@ -32,8 +29,6 @@ module Vulnerabilities
     end
 
     private
-
-    attr_reader :dismiss_findings
 
     def feedback_service_for(finding)
       VulnerabilityFeedback::CreateService.new(@project, @user, feedback_params_for(finding))
@@ -45,12 +40,11 @@ module Vulnerabilities
         feedback_type: 'dismissal',
         project_fingerprint: finding.project_fingerprint,
         comment: @comment,
-        pipeline: @project.latest_pipeline_with_security_reports(only_successful: true),
-        dismiss_vulnerability: false
+        pipeline: @project.latest_pipeline_with_security_reports(only_successful: true)
       }
     end
 
-    def dismiss_vulnerability_findings
+    def dismiss_findings
       @vulnerability.findings.each do |finding|
         result = feedback_service_for(finding).execute
 

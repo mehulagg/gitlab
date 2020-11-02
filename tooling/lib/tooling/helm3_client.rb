@@ -3,6 +3,7 @@
 require 'time'
 require 'json'
 require_relative '../../../lib/gitlab/popen' unless defined?(Gitlab::Popen)
+require_relative '../../../lib/gitlab/json' unless defined?(Gitlab::Json)
 
 module Tooling
   class Helm3Client
@@ -66,7 +67,7 @@ module Tooling
         %(--output json),
         *args
       ]
-      releases = JSON.parse(run_command(command)) # rubocop:disable Gitlab/Json
+      releases = Gitlab::Json.parse(run_command(command))
 
       releases.map do |release|
         Release.new(*release.values_at(*RELEASE_JSON_ATTRIBUTES))

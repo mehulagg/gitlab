@@ -7,8 +7,6 @@ module API
     before { authenticate! }
     before { authorize_admin_project }
 
-    feature_category :integrations
-
     helpers do
       params :project_hook_properties do
         requires :url, type: String, desc: "The URL to send the request to"

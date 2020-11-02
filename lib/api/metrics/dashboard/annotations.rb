@@ -4,8 +4,6 @@ module API
   module Metrics
     module Dashboard
       class Annotations < ::API::Base
-        feature_category :metrics
-
         desc 'Create a new monitoring dashboard annotation' do
           success Entities::Metrics::Dashboard::Annotation
         end

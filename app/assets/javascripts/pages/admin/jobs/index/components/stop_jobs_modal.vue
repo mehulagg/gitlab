@@ -1,13 +1,13 @@
 <script>
-import { GlModal } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { __, s__ } from '~/locale';
+import { s__ } from '~/locale';
 
 export default {
   components: {
-    GlModal,
+    GlModal: DeprecatedModal2,
   },
   props: {
     url: {
@@ -36,24 +36,17 @@ export default {
         });
     },
   },
-  primaryAction: {
-    text: s__('AdminArea|Stop jobs'),
-    attributes: [{ variant: 'danger' }],
-  },
-  cancelAction: {
-    text: __('Cancel'),
-  },
 };
 </script>
 
 <template>
   <gl-modal
-    modal-id="stop-jobs-modal"
-    :action-primary="$options.primaryAction"
-    :action-cancel="$options.cancelAction"
-    @primary="onSubmit"
+    id="stop-jobs-modal"
+    :header-title-text="s__('AdminArea|Stop all jobs?')"
+    :footer-primary-button-text="s__('AdminArea|Stop jobs')"
+    footer-primary-button-variant="danger"
+    @submit="onSubmit"
   >
-    <template #modal-title>{{ s__('AdminArea|Stop all jobs?') }}</template>
     {{ text }}
   </gl-modal>
 </template>

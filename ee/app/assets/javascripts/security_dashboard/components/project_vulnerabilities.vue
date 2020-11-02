@@ -16,8 +16,11 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  inject: ['projectFullPath'],
   props: {
+    projectFullPath: {
+      type: String,
+      required: true,
+    },
     filters: {
       type: Object,
       required: false,

@@ -202,38 +202,38 @@ module ApplicationSettingImplementation
     super(sources)
   end
 
-  def domain_allowlist_raw
+  def domain_whitelist_raw
     array_to_string(self.domain_whitelist)
   end
 
-  def domain_denylist_raw
+  def domain_blacklist_raw
     array_to_string(self.domain_blacklist)
   end
 
-  def domain_allowlist_raw=(values)
+  def domain_whitelist_raw=(values)
     self.domain_whitelist = strings_to_array(values)
   end
 
-  def domain_denylist_raw=(values)
+  def domain_blacklist_raw=(values)
     self.domain_blacklist = strings_to_array(values)
   end
 
-  def domain_denylist_file=(file)
-    self.domain_denylist_raw = file.read
+  def domain_blacklist_file=(file)
+    self.domain_blacklist_raw = file.read
   end
 
-  def outbound_local_requests_allowlist_raw
+  def outbound_local_requests_whitelist_raw
     array_to_string(self.outbound_local_requests_whitelist)
   end
 
-  def outbound_local_requests_allowlist_raw=(values)
-    clear_memoization(:outbound_local_requests_allowlist_arrays)
+  def outbound_local_requests_whitelist_raw=(values)
+    clear_memoization(:outbound_local_requests_whitelist_arrays)
 
     self.outbound_local_requests_whitelist = strings_to_array(values)
   end
 
   def add_to_outbound_local_requests_whitelist(values_array)
-    clear_memoization(:outbound_local_requests_allowlist_arrays)
+    clear_memoization(:outbound_local_requests_whitelist_arrays)
 
     self.outbound_local_requests_whitelist ||= []
     self.outbound_local_requests_whitelist += values_array
@@ -242,16 +242,16 @@ module ApplicationSettingImplementation
   end
 
   # This method separates out the strings stored in the
-  # application_setting.outbound_local_requests_allowlist array into 2 arrays;
+  # application_setting.outbound_local_requests_whitelist array into 2 arrays;
   # an array of IPAddr objects (`[IPAddr.new('127.0.0.1')]`), and an array of
   # domain strings (`['www.example.com']`).
-  def outbound_local_requests_allowlist_arrays
-    strong_memoize(:outbound_local_requests_allowlist_arrays) do
+  def outbound_local_requests_whitelist_arrays
+    strong_memoize(:outbound_local_requests_whitelist_arrays) do
       next [[], []] unless self.outbound_local_requests_whitelist
 
-      ip_allowlist, domain_allowlist = separate_allowlists(self.outbound_local_requests_whitelist)
+      ip_whitelist, domain_whitelist = separate_whitelists(self.outbound_local_requests_whitelist)
 
-      [ip_allowlist, domain_allowlist]
+      [ip_whitelist, domain_whitelist]
     end
   end
 
@@ -396,19 +396,19 @@ module ApplicationSettingImplementation
 
   private
 
-  def separate_allowlists(string_array)
-    string_array.reduce([[], []]) do |(ip_allowlist, domain_allowlist), string|
+  def separate_whitelists(string_array)
+    string_array.reduce([[], []]) do |(ip_whitelist, domain_whitelist), string|
       address, port = parse_addr_and_port(string)
 
       ip_obj = Gitlab::Utils.string_to_ip_object(address)
 
       if ip_obj
-        ip_allowlist << Gitlab::UrlBlockers::IpAllowlistEntry.new(ip_obj, port: port)
+        ip_whitelist << Gitlab::UrlBlockers::IpWhitelistEntry.new(ip_obj, port: port)
       else
-        domain_allowlist << Gitlab::UrlBlockers::DomainAllowlistEntry.new(address, port: port)
+        domain_whitelist << Gitlab::UrlBlockers::DomainWhitelistEntry.new(address, port: port)
       end
 
-      [ip_allowlist, domain_allowlist]
+      [ip_whitelist, domain_whitelist]
     end
   end
 

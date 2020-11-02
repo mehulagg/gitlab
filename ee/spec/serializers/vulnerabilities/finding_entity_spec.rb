@@ -19,7 +19,7 @@ RSpec.describe Vulnerabilities::FindingEntity do
 
   let(:occurrence) do
     build(
-      :vulnerabilities_finding,
+      :vulnerabilities_occurrence,
       scanner: scanner,
       scan: scan,
       project: project,

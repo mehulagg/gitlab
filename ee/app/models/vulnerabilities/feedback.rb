@@ -90,13 +90,5 @@ module Vulnerabilities
     def touch_pipeline
       pipeline&.touch
     end
-
-    def finding
-      Finding.find_by(
-        project_id: project_id,
-        report_type: category,
-        project_fingerprint: project_fingerprint
-      )
-    end
   end
 end

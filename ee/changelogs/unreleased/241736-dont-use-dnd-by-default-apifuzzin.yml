@@ -1,5 +1,0 @@
----
-title: Don't use docker-in-docker by default for API Fuzzing
-merge_request: 45827
-author:
-type: changed

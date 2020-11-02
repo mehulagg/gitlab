@@ -5,5 +5,4 @@ export default {
   epics: 'epics-recent-searches',
   requirements: 'requirements-recent-searches',
   test_cases: 'test-cases-recent-searches',
-  jira_issues: 'jira-issues-recent-searches',
 };

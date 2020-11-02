@@ -30,8 +30,7 @@ RSpec.describe Backup::Artifacts do
 
     it 'excludes tmp from backup tar' do
       expect(backup).to receive(:tar).and_return('blabla-tar')
-      expect(backup).to receive(:run_pipeline!).with([%w(blabla-tar --exclude=lost+found --exclude=./tmp -C /var/gitlab-artifacts -cf - .), 'gzip -c -1'], any_args).and_return([[true, true], ''])
-      expect(backup).to receive(:pipeline_succeeded?).and_return(true)
+      expect(backup).to receive(:run_pipeline!).with([%w(blabla-tar --exclude=lost+found --exclude=./tmp -C /var/gitlab-artifacts -cf - .), 'gzip -c -1'], any_args)
       backup.dump
     end
   end

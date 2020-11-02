@@ -86,7 +86,10 @@ RSpec.describe 'User searches for issues', :js do
     context 'when on a project page' do
       it 'finds an issue' do
         find('.js-search-project-dropdown').click
-        find('[data-testid="project-filter"]').click_link(project.full_name)
+
+        page.within('.project-filter') do
+          click_link(project.full_name)
+        end
 
         search_for_issue(issue1.title)
 

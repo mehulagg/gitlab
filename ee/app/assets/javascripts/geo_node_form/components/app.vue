@@ -1,5 +1,5 @@
 <script>
-import { GlBadge } from '@gitlab/ui';
+import { GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
 import { __ } from '~/locale';
 import GeoNodeForm from './geo_node_form.vue';
 
@@ -33,7 +33,7 @@ export default {
     },
     pillDetails() {
       return {
-        variant: this.isNodePrimary ? 'info' : 'muted',
+        variant: this.isNodePrimary ? 'primary' : 'light',
         label: this.isNodePrimary ? __('Primary') : __('Secondary'),
       };
     },

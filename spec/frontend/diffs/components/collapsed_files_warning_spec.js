@@ -2,8 +2,7 @@ import Vuex from 'vuex';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import createStore from '~/diffs/store/modules';
 import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
-import { CENTERED_LIMITED_CONTAINER_CLASSES, EVT_EXPAND_ALL_FILES } from '~/diffs/constants';
-import eventHub from '~/diffs/event_hub';
+import { CENTERED_LIMITED_CONTAINER_CLASSES } from '~/diffs/constants';
 
 const propsData = {
   limited: true,
@@ -77,13 +76,13 @@ describe('CollapsedFilesWarning', () => {
     expect(wrapper.find('[data-testid="root"]').exists()).toBe(false);
   });
 
-  it(`emits the \`${EVT_EXPAND_ALL_FILES}\` event when the alert action button is clicked`, () => {
+  it('triggers the expandAllFiles action when the alert action button is clicked', () => {
     createComponent({}, { full: true });
 
-    jest.spyOn(eventHub, '$emit');
+    jest.spyOn(wrapper.vm.$store, 'dispatch').mockReturnValue(undefined);
 
     getAlertActionButton().vm.$emit('click');
 
-    expect(eventHub.$emit).toHaveBeenCalledWith(EVT_EXPAND_ALL_FILES);
+    expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('diffs/expandAllFiles', undefined);
   });
 });

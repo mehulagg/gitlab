@@ -101,6 +101,7 @@ module EE
 
       with_scope :subject
       condition(:on_demand_scans_enabled) do
+        ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true) &&
         @subject.feature_available?(:security_on_demand_scans)
       end
 
@@ -356,10 +357,7 @@ module EE
     def resource_access_token_available?
       return true unless ::Gitlab.com?
 
-      group = project.namespace
-
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      project.namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

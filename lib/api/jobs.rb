@@ -6,8 +6,6 @@ module API
 
     before { authenticate! }
 
-    feature_category :continuous_integration
-
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end

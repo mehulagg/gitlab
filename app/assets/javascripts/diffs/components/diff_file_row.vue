@@ -62,7 +62,6 @@ export default {
     v-bind="$attrs"
     :class="{ 'is-active': isActive }"
     class="diff-file-row"
-    truncate-middle
     :file-classes="fileClasses"
     v-on="$listeners"
   >

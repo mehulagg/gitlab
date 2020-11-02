@@ -3,29 +3,18 @@ import { GlBadge, GlIcon } from '@gitlab/ui';
 
 export default {
   components: { GlBadge, GlIcon },
-  props: {
-    pipeline: {
-      type: Object,
-      required: true,
-    },
-  },
-  computed: {
-    failedCount() {
-      return this.pipeline.securityBuildsFailedCount || 0;
-    },
-    failedPath() {
-      return this.pipeline.securityBuildsFailedPath || '';
-    },
-    shouldShow() {
-      return this.failedCount > 0;
-    },
+  inject: {
+    pipelineSecurityBuildsFailedCount: { default: 0 },
+    pipelineSecurityBuildsFailedPath: { default: '' },
   },
 };
 </script>
 
 <template>
-  <gl-badge v-if="shouldShow" variant="danger" :href="failedPath">
+  <gl-badge variant="danger" :href="pipelineSecurityBuildsFailedPath">
     <gl-icon name="status_failed" class="gl-mr-2" />
-    {{ n__('%d failed security job', '%d failed security jobs', failedCount) }}
+    {{
+      n__('%d failed security job', '%d failed security jobs', pipelineSecurityBuildsFailedCount)
+    }}
   </gl-badge>
 </template>

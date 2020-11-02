@@ -18,8 +18,7 @@ class ProjectHook < WebHook
     :job_hooks,
     :pipeline_hooks,
     :wiki_page_hooks,
-    :deployment_hooks,
-    :feature_flag_hooks
+    :deployment_hooks
   ]
 
   belongs_to :project

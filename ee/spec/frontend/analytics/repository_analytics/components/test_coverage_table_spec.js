@@ -1,18 +1,12 @@
-import VueApollo from 'vue-apollo';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { useFakeDate } from 'helpers/fake_date';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import waitForPromises from 'jest/helpers/wait_for_promises';
 import TestCoverageTable from 'ee/analytics/repository_analytics/components/test_coverage_table.vue';
-import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
-import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
 
 const localVue = createLocalVue();
 
 describe('Test coverage table component', () => {
   useFakeDate();
   let wrapper;
-  let fakeApollo;
 
   const findEmptyState = () => wrapper.find('[data-testid="test-coverage-table-empty-state"]');
   const findLoadingState = () => wrapper.find('[data-testid="test-coverage-loading-state"');
@@ -22,7 +16,7 @@ describe('Test coverage table component', () => {
   const findProjectCountById = id => wrapper.find(`[data-testid="${id}-count"`);
   const findProjectDateById = id => wrapper.find(`[data-testid="${id}-date"`);
 
-  const createComponent = ({ data = {}, mountFn = shallowMount } = {}) => {
+  const createComponent = (data = {}, mountFn = shallowMount) => {
     wrapper = mountFn(TestCoverageTable, {
       localVue,
       data() {
@@ -38,39 +32,12 @@ describe('Test coverage table component', () => {
       mocks: {
         $apollo: {
           queries: {
-            projects: {
+            coverageData: {
               query: jest.fn().mockResolvedValue(),
             },
           },
         },
       },
-    });
-  };
-
-  const createComponentWithApollo = ({
-    data = {},
-    mountFn = shallowMount,
-    queryData = {},
-  } = {}) => {
-    localVue.use(VueApollo);
-    fakeApollo = createMockApollo([
-      [getGroupProjects, jest.fn().mockResolvedValue()],
-      [getProjectsTestCoverage, jest.fn().mockResolvedValue(queryData)],
-    ]);
-
-    wrapper = mountFn(TestCoverageTable, {
-      localVue,
-      data() {
-        return {
-          allCoverageData: [],
-          allProjectsSelected: false,
-          hasError: false,
-          isLoading: false,
-          projectIds: {},
-          ...data,
-        };
-      },
-      apolloProvider: fakeApollo,
     });
   };
 
@@ -88,7 +55,7 @@ describe('Test coverage table component', () => {
 
   describe('when query is loading', () => {
     it('renders loading state', () => {
-      createComponent({ data: { isLoading: true } });
+      createComponent({ isLoading: true });
 
       expect(findLoadingState().exists()).toBe(true);
     });
@@ -98,20 +65,20 @@ describe('Test coverage table component', () => {
     it('renders coverage table', () => {
       const id = 'gid://gitlab/Project/1';
       const name = 'GitLab';
-      const averageCoverage = '74.35';
-      const coverageCount = '5';
+      const average = '74.35';
+      const count = '5';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
-      createComponent({
-        data: {
+      createComponent(
+        {
           allCoverageData: [
             {
               id,
               name,
-              codeCoverageSummary: {
-                averageCoverage,
-                coverageCount,
+              codeCoverage: {
+                average,
+                count,
                 lastUpdatedAt: yesterday.toISOString(),
               },
             },
@@ -120,48 +87,14 @@ describe('Test coverage table component', () => {
             [id]: true,
           },
         },
-        mountFn: mount,
-      });
+        mount,
+      );
 
       expect(findTable().exists()).toBe(true);
       expect(findProjectNameById(id).text()).toBe(name);
-      expect(findProjectAverageById(id).text()).toBe(`${averageCoverage}%`);
-      expect(findProjectCountById(id).text()).toBe(coverageCount);
+      expect(findProjectAverageById(id).text()).toBe(`${average}%`);
+      expect(findProjectCountById(id).text()).toBe(count);
       expect(findProjectDateById(id).text()).toBe('1 day ago');
-    });
-  });
-
-  describe('when selected project has no coverage', () => {
-    it('sets coverage to default values', async () => {
-      const name = 'test';
-      const id = 1;
-      createComponentWithApollo({
-        data: {
-          projectIds: { [id]: true },
-        },
-        queryData: {
-          data: {
-            projects: {
-              nodes: [
-                {
-                  name,
-                  id,
-                  codeCoverageSummary: null,
-                },
-              ],
-            },
-          },
-        },
-        mountFn: mount,
-      });
-      jest.runOnlyPendingTimers();
-      await waitForPromises();
-
-      expect(findTable().exists()).toBe(true);
-      expect(findProjectNameById(id).text()).toBe(name);
-      expect(findProjectAverageById(id).text()).toBe('0.00%');
-      expect(findProjectCountById(id).text()).toBe('0');
-      expect(findProjectDateById(id).text()).toBe('just now');
     });
   });
 });

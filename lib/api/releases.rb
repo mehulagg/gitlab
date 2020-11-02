@@ -9,8 +9,6 @@ module API
 
     before { authorize_read_releases! }
 
-    feature_category :release_orchestration
-
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end

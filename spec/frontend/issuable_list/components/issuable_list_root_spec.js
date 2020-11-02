@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { GlSkeletonLoading, GlPagination } from '@gitlab/ui';
+import { GlLoadingIcon, GlPagination } from '@gitlab/ui';
 
 import { TEST_HOST } from 'helpers/test_constants';
 
@@ -32,31 +32,6 @@ describe('IssuableListRoot', () => {
 
   afterEach(() => {
     wrapper.destroy();
-  });
-
-  describe('computed', () => {
-    describe('skeletonItemCount', () => {
-      it.each`
-        totalItems | defaultPageSize | currentPage | returnValue
-        ${100}     | ${20}           | ${1}        | ${20}
-        ${105}     | ${20}           | ${6}        | ${5}
-        ${7}       | ${20}           | ${1}        | ${7}
-        ${0}       | ${20}           | ${1}        | ${5}
-      `(
-        'returns $returnValue when totalItems is $totalItems, defaultPageSize is $defaultPageSize and currentPage is $currentPage',
-        async ({ totalItems, defaultPageSize, currentPage, returnValue }) => {
-          wrapper.setProps({
-            totalItems,
-            defaultPageSize,
-            currentPage,
-          });
-
-          await wrapper.vm.$nextTick();
-
-          expect(wrapper.vm.skeletonItemCount).toBe(returnValue);
-        },
-      );
-    });
   });
 
   describe('watch', () => {
@@ -136,7 +111,7 @@ describe('IssuableListRoot', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.findAll(GlSkeletonLoading)).toHaveLength(wrapper.vm.skeletonItemCount);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
 
     it('renders issuable-item component for each item within `issuables` array', () => {
@@ -164,7 +139,7 @@ describe('IssuableListRoot', () => {
     it('renders gl-pagination when `showPaginationControls` prop is true', async () => {
       wrapper.setProps({
         showPaginationControls: true,
-        totalItems: 10,
+        totalPages: 10,
       });
 
       await wrapper.vm.$nextTick();

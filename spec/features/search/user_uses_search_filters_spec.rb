@@ -18,17 +18,17 @@ RSpec.describe 'User uses search filters', :js do
     it 'shows group projects' do
       visit search_path
 
-      find('[data-testid="group-filter"]').click
+      find('.js-search-group-dropdown').click
 
       wait_for_requests
 
-      page.within('[data-testid="group-filter"]') do
-        click_on(group.name)
+      page.within('.search-page-form') do
+        click_link(group.name)
       end
 
-      expect(find('[data-testid="group-filter"]')).to have_content(group.name)
+      expect(find('.js-search-group-dropdown')).to have_content(group.name)
 
-      page.within('[data-testid="project-filter"]') do
+      page.within('.project-filter') do
         find('.js-search-project-dropdown').click
 
         wait_for_requests
@@ -44,11 +44,10 @@ RSpec.describe 'User uses search filters', :js do
 
       describe 'clear filter button' do
         it 'removes Group and Project filters' do
-          find('[data-testid="group-filter"] [data-testid="clear-icon"]').click
+          link = find('[data-testid="group-filter"] .js-search-clear')
+          params = CGI.parse(URI.parse(link[:href]).query)
 
-          wait_for_requests
-
-          expect(page).to have_current_path(search_path(search: "test"))
+          expect(params).not_to include(:group_id, :project_id)
         end
       end
     end
@@ -58,7 +57,7 @@ RSpec.describe 'User uses search filters', :js do
     it 'shows a project' do
       visit search_path
 
-      page.within('[data-testid="project-filter"]') do
+      page.within('.project-filter') do
         find('.js-search-project-dropdown').click
 
         wait_for_requests
@@ -78,7 +77,7 @@ RSpec.describe 'User uses search filters', :js do
 
       describe 'clear filter button' do
         it 'removes Project filters' do
-          link = find('[data-testid="project-filter"] .js-search-clear')
+          link = find('.project-filter .js-search-clear')
           params = CGI.parse(URI.parse(link[:href]).query)
 
           expect(params).not_to include(:project_id)

@@ -44,21 +44,6 @@ export default {
       default: false,
       required: false,
     },
-    /*
-      In issue list, "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
-      The actual hiding is controlled with css classes:
-        Hide "time-tracking-collapsed-state" 
-          if .right-sidebar .right-sidebar-collapsed .sidebar-collapsed-icon
-        Show "time-tracking-collapsed-state"
-          if .right-sidebar .right-sidebar-expanded .sidebar-collapsed-icon
-      
-      In Swimlanes sidebar, we do not use collapsed state at all.
-    */
-    showCollapsed: {
-      type: Boolean,
-      default: true,
-      required: false,
-    },
   },
   data() {
     return {
@@ -108,9 +93,8 @@ export default {
 </script>
 
 <template>
-  <div v-cloak class="time-tracker time-tracking-component-wrap" data-testid="time-tracker">
+  <div v-cloak class="time_tracker time-tracking-component-wrap">
     <time-tracking-collapsed-state
-      v-if="showCollapsed"
       :show-comparison-state="showComparisonState"
       :show-no-time-tracking-state="showNoTimeTrackingState"
       :show-help-state="showHelpState"
@@ -119,7 +103,7 @@ export default {
       :time-spent-human-readable="humanTimeSpent"
       :time-estimate-human-readable="humanTimeEstimate"
     />
-    <div class="title hide-collapsed gl-mb-3">
+    <div class="title hide-collapsed">
       {{ __('Time tracking') }}
       <div
         v-if="!showHelpState"

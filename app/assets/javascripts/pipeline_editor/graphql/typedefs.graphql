@@ -1,7 +1,0 @@
-type BlobContent {
-  rawData: String!
-}
-
-extend type Query {
-  blobContent: BlobContent
-}

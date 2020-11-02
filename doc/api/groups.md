@@ -1,9 +1,3 @@
----
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
----
-
 # Groups API
 
 ## List groups
@@ -1119,7 +1113,7 @@ DELETE /groups/:id/hooks/:hook_id
 
 Group audit events can be accessed via the [Group Audit Events API](audit_events.md#group-audit-events)
 
-## Sync group with LDAP **(STARTER ONLY)**
+## Sync group with LDAP **(STARTER)**
 
 Syncs the group with its linked LDAP group. Only available to group owners and administrators.
 
@@ -1139,7 +1133,7 @@ Please consult the [Group Members](members.md) documentation.
 
 List, add, and delete LDAP group links.
 
-### List LDAP group links **(STARTER ONLY)**
+### List LDAP group links **(STARTER)**
 
 Lists LDAP group links.
 
@@ -1151,7 +1145,7 @@ GET /groups/:id/ldap_group_links
 | --------- | -------------- | -------- | ----------- |
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 
-### Add LDAP group link with CN or filter **(STARTER ONLY)**
+### Add LDAP group link with CN or filter **(STARTER)**
 
 Adds an LDAP group link using a CN or filter. Adding a group link by filter is only supported in the Premium tier and above.
 
@@ -1170,7 +1164,7 @@ POST /groups/:id/ldap_group_links
 NOTE: **Note:**
 To define the LDAP group link, provide either a `cn` or a `filter`, but not both.
 
-### Delete LDAP group link **(STARTER ONLY)**
+### Delete LDAP group link **(STARTER)**
 
 Deletes an LDAP group link. Deprecated. Will be removed in a future release.
 
@@ -1195,7 +1189,7 @@ DELETE /groups/:id/ldap_group_links/:provider/:cn
 | `cn`      | string         | yes      | The CN of an LDAP group |
 | `provider` | string        | yes      | LDAP provider for the LDAP group link |
 
-### Delete LDAP group link with CN or filter **(STARTER ONLY)**
+### Delete LDAP group link with CN or filter **(STARTER)**
 
 Deletes an LDAP group link using a CN or filter. Deleting by filter is only supported in the Premium tier and above.
 

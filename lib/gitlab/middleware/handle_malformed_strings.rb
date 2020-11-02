@@ -26,18 +26,11 @@ module Gitlab
 
         request = Rack::Request.new(request)
 
-        return true if malformed_path?(request.path)
+        return true if string_malformed?(request.path)
 
         request.params.values.any? do |value|
           param_has_null_byte?(value)
         end
-      end
-
-      def malformed_path?(path)
-        string_malformed?(Rack::Utils.unescape(path))
-      rescue ArgumentError
-        # Rack::Utils.unescape raised this, path is malformed.
-        true
       end
 
       def param_has_null_byte?(value, depth = 0)

@@ -6,7 +6,7 @@
 
 - if issuable_mr > 0
   %li.issuable-mr.gl-display-none.gl-display-sm-block.has-tooltip{ title: _('Related merge requests') }
-    = sprite_icon('merge-request', css_class: "gl-vertical-align-middle")
+    = image_tag('icon-merge-request-unmerged.svg', class: 'icon-merge-request-unmerged')
     = issuable_mr
 
 - if upvotes > 0

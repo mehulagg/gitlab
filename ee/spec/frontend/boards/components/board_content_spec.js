@@ -11,9 +11,6 @@ describe('ee/BoardContent', () => {
   const createComponent = () => {
     wrapper = shallowMount(BoardContent, {
       store,
-      provide: {
-        timeTrackingLimitToHours: false,
-      },
       propsData: {
         lists: [],
         canAdminList: false,

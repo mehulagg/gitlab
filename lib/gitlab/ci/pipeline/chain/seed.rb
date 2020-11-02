@@ -19,12 +19,10 @@ module Gitlab
             # Build to prevent erroring out on ambiguous refs.
             pipeline.protected = @command.protected_ref?
 
-            unless ::Gitlab::Ci::Features.seed_block_run_before_workflow_rules_enabled?(project)
-              ##
-              # Populate pipeline with block argument of CreatePipelineService#execute.
-              #
-              @command.seeds_block&.call(pipeline)
-            end
+            ##
+            # Populate pipeline with block argument of CreatePipelineService#execute.
+            #
+            @command.seeds_block&.call(pipeline)
 
             ##
             # Gather all runtime build/stage errors

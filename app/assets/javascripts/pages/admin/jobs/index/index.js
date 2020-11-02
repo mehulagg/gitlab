@@ -5,24 +5,19 @@ import stopJobsModal from './components/stop_jobs_modal.vue';
 Vue.use(Translate);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const buttonId = 'js-stop-jobs-button';
-  const modalId = 'stop-jobs-modal';
-  const stopJobsButton = document.getElementById(buttonId);
+  const stopJobsButton = document.getElementById('stop-jobs-button');
   if (stopJobsButton) {
     // eslint-disable-next-line no-new
     new Vue({
-      el: `#js-${modalId}`,
+      el: '#stop-jobs-modal',
       components: {
         stopJobsModal,
       },
       mounted() {
         stopJobsButton.classList.remove('disabled');
-        stopJobsButton.addEventListener('click', () => {
-          this.$root.$emit('bv::show::modal', modalId, `#${buttonId}`);
-        });
       },
       render(createElement) {
-        return createElement(modalId, {
+        return createElement('stop-jobs-modal', {
           props: {
             url: stopJobsButton.dataset.url,
           },

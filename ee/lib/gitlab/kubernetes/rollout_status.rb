@@ -54,7 +54,13 @@ module Gitlab
       def initialize(deployments, pods: [], ingresses: [], status: :found)
         @status       = status
         @deployments  = deployments
-        @instances = RolloutInstances.new(deployments, pods).pod_instances
+
+        @instances = if ::Feature.enabled?(:deploy_boards_dedupe_instances)
+                       RolloutInstances.new(deployments, pods).pod_instances
+                     else
+                       deployments.flat_map(&:instances)
+                     end
+
         @canary_ingress = ingresses.find(&:canary?)
 
         @completion =

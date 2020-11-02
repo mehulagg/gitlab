@@ -37,7 +37,7 @@ RSpec.describe 'Query.vulnerabilities.primaryIdentifier' do
 
   let_it_be(:finding) do
     create(
-      :vulnerabilities_finding,
+      :vulnerabilities_occurrence,
       vulnerability: vulnerability,
       primary_identifier: primary_identifier
     )

@@ -9,8 +9,6 @@ module API
     include ::API::Helpers::Packages::BasicAuthHelpers::Constants
     include ::Gitlab::Utils::StrongMemoize
 
-    feature_category :package_registry
-
     content_type :json, 'application/json'
     default_format :json
 

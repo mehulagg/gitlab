@@ -75,12 +75,26 @@ RSpec.describe "Admin::Users" do
       end
 
       context '`Pending approval` tab' do
-        before do
-          visit admin_users_path
+        context 'feature is enabled' do
+          before do
+            stub_feature_flags(admin_approval_for_new_user_signups: true)
+            visit admin_users_path
+          end
+
+          it 'shows the `Pending approval` tab' do
+            expect(page).to have_link('Pending approval', href: admin_users_path(filter: 'blocked_pending_approval'))
+          end
         end
 
-        it 'shows the `Pending approval` tab' do
-          expect(page).to have_link('Pending approval', href: admin_users_path(filter: 'blocked_pending_approval'))
+        context 'feature is disabled' do
+          before do
+            stub_feature_flags(admin_approval_for_new_user_signups: false)
+            visit admin_users_path
+          end
+
+          it 'does not show the `Pending approval` tab' do
+            expect(page).not_to have_link('Pending approval', href: admin_users_path(filter: 'blocked_pending_approval'))
+          end
         end
       end
     end

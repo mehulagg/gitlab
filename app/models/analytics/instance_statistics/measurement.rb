@@ -38,7 +38,11 @@ module Analytics
       scope :with_identifier, -> (identifier) { where(identifier: identifier) }
 
       def self.measurement_identifier_values
-        identifiers.values
+        if Feature.enabled?(:store_ci_pipeline_counts_by_status, default_enabled: true)
+          identifiers.values
+        else
+          identifiers.values - EXPERIMENTAL_IDENTIFIERS.map { |identifier| identifiers[identifier] }
+        end
       end
     end
   end

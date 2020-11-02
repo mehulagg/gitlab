@@ -5,12 +5,10 @@ module API
     module NotesHelpers
       include ::RendersNotes
 
-      def self.feature_category_per_noteable_type
-        {
-          Issue => :issue_tracking,
-          MergeRequest => :code_review,
-          Snippet => :snippets
-        }
+      def self.noteable_types
+        # This is a method instead of a constant, allowing EE to more easily
+        # extend it.
+        [Issue, MergeRequest, Snippet]
       end
 
       def update_note(noteable, note_id)

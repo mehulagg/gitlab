@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create' do
+  context 'Create' do
     describe 'Codeowners' do
       context 'when the project is in a subgroup', :requires_admin do
         let(:approver) do

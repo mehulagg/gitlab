@@ -26,7 +26,6 @@ The following analytics features are available at the group level:
 - [Insights](../group/insights/index.md). **(ULTIMATE)**
 - [Issue](../group/issues_analytics/index.md). **(PREMIUM)**
 - [Productivity](productivity_analytics.md) **(PREMIUM)**
-- [Repositories](../group/repositories_analytics/index.md) **(PREMIUM)**
 - [Value Stream](value_stream_analytics.md). **(PREMIUM)**
 
 ## Project-level analytics

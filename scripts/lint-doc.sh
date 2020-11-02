@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd "$(dirname "$0")/.." || exit 1
+cd "$(dirname "$0")/.."
 echo "=> Linting documents at path $(pwd) as $(whoami)..."
 echo
 ERRORCODE=0

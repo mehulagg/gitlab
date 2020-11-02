@@ -33,10 +33,7 @@ export default {
 </script>
 
 <template>
-  <li
-    class="timeline-entry note note-wrapper discussion-filter-note js-discussion-filter-note"
-    data-qa-selector="discussion_filter_container"
-  >
+  <li class="timeline-entry note note-wrapper discussion-filter-note js-discussion-filter-note">
     <div class="timeline-icon d-none d-lg-flex">
       <gl-icon name="comment" />
     </div>

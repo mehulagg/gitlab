@@ -1,7 +1,8 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import { groupBy } from 'lodash';
-import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import tooltip from '~/vue_shared/directives/tooltip';
 import { glEmojiTag } from '../../emoji';
 import { __, sprintf } from '~/locale';
 
@@ -14,7 +15,7 @@ export default {
     GlLoadingIcon,
   },
   directives: {
-    GlTooltip: GlTooltipDirective,
+    tooltip,
   },
   props: {
     awards: {
@@ -153,9 +154,10 @@ export default {
     <button
       v-for="awardList in groupedAwards"
       :key="awardList.name"
-      v-gl-tooltip.viewport
+      v-tooltip
       :class="awardList.classes"
       :title="awardList.title"
+      data-boundary="viewport"
       data-testid="award-button"
       class="btn award-control"
       type="button"
@@ -166,11 +168,12 @@ export default {
     </button>
     <div v-if="canAwardEmoji" class="award-menu-holder">
       <button
-        v-gl-tooltip.viewport
+        v-tooltip
         :class="addButtonClass"
         class="award-control btn js-add-award"
         title="Add reaction"
         :aria-label="__('Add reaction')"
+        data-boundary="viewport"
         type="button"
       >
         <span class="award-control-icon award-control-icon-neutral">

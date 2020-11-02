@@ -926,7 +926,7 @@ module Ci
 
     def accessibility_reports
       Gitlab::Ci::Reports::AccessibilityReports.new.tap do |accessibility_reports|
-        latest_report_builds(Ci::JobArtifact.accessibility_reports).each do |build|
+        builds.latest.with_reports(Ci::JobArtifact.accessibility_reports).each do |build|
           build.collect_accessibility_reports!(accessibility_reports)
         end
       end

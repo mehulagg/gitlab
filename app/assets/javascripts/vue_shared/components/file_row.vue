@@ -1,5 +1,4 @@
 <script>
-import { GlTruncate } from '@gitlab/ui';
 import FileHeader from '~/vue_shared/components/file_row_header.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
@@ -9,7 +8,6 @@ export default {
   components: {
     FileHeader,
     FileIcon,
-    GlTruncate,
   },
   props: {
     file: {
@@ -29,11 +27,6 @@ export default {
       type: String,
       required: false,
       default: '',
-    },
-    truncateMiddle: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   computed: {
@@ -141,9 +134,9 @@ export default {
       <span
         ref="textOutput"
         :style="levelIndentation"
-        class="file-row-name"
+        class="file-row-name str-truncated"
         data-qa-selector="file_name_content"
-        :class="[fileClasses, { 'str-truncated': !truncateMiddle, 'gl-min-w-0': truncateMiddle }]"
+        :class="fileClasses"
       >
         <file-icon
           class="file-row-icon"
@@ -154,8 +147,7 @@ export default {
           :opened="file.opened"
           :size="16"
         />
-        <gl-truncate v-if="truncateMiddle" :text="file.name" position="middle" class="gl-pr-7" />
-        <template v-else>{{ file.name }}</template>
+        {{ file.name }}
       </span>
       <slot></slot>
     </div>

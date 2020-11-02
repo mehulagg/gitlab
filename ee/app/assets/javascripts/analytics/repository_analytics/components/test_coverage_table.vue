@@ -2,7 +2,6 @@
 import Vue from 'vue';
 import { GlCard, GlEmptyState, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
@@ -18,7 +17,7 @@ export default {
     TimeAgoTooltip,
   },
   apollo: {
-    projects: {
+    coverageData: {
       query: getProjectsTestCoverage,
       debounce: 500,
       variables() {
@@ -29,15 +28,7 @@ export default {
       result({ data }) {
         // Keep data from all queries so that we don't
         // fetch the same data more than once
-        this.allCoverageData = [
-          ...this.allCoverageData,
-          ...data.projects.nodes.map(project => ({
-            ...project,
-            // if a project has no code coverage, set to default values
-            codeCoverageSummary:
-              project.codeCoverageSummary || this.$options.noCoverageDefaultSummary,
-          })),
-        ];
+        this.allCoverageData = [...this.allCoverageData, ...data.projects.nodes];
       },
       error() {
         this.handleError();
@@ -108,29 +99,23 @@ export default {
       label: __('Project'),
     },
     {
-      key: 'averageCoverage',
+      key: 'coverage',
       label: s__('RepositoriesAnalytics|Coverage'),
     },
     {
-      key: 'coverageCount',
-      label: s__('RepositoriesAnalytics|Coverage Jobs'),
+      key: 'numberOfCoverages',
+      label: s__('RepositoriesAnalytics|Number of Coverages'),
     },
     {
-      key: 'lastUpdatedAt',
+      key: 'lastUpdate',
       label: s__('RepositoriesAnalytics|Last Update'),
     },
   ],
   text: {
-    header: s__('RepositoriesAnalytics|Latest test coverage results'),
     emptyStateTitle: s__('RepositoriesAnalytics|Please select projects to display.'),
     emptyStateDescription: s__(
       'RepositoriesAnalytics|Please select a project or multiple projects to display their most recent test coverage data.',
     ),
-  },
-  noCoverageDefaultSummary: {
-    averageCoverage: 0,
-    coverageCount: 0,
-    lastUpdatedAt: '', // empty string will default to "just now" in table
   },
   LOADING_STATE: {
     rows: 4,
@@ -141,21 +126,17 @@ export default {
     totalWidth: 430,
     totalHeight: 15,
   },
-  averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
 };
 </script>
 <template>
   <gl-card>
     <template #header>
-      <div class="gl-display-flex gl-justify-content-space-between">
-        <h5>{{ $options.text.header }}</h5>
-        <select-projects-dropdown
-          class="gl-w-quarter"
-          @projects-query-error="handleError"
-          @select-all-projects="selectAllProjects"
-          @select-project="toggleProject"
-        />
-      </div>
+      <select-projects-dropdown
+        class="gl-w-quarter"
+        @projects-query-error="handleError"
+        @select-all-projects="selectAllProjects"
+        @select-project="toggleProject"
+      />
     </template>
 
     <template v-if="isLoading">
@@ -188,30 +169,28 @@ export default {
       <template #head(project)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(averageCoverage)="data">
+      <template #head(coverage)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(coverageCount)="data">
+      <template #head(numberOfCoverages)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(lastUpdatedAt)="data">
+      <template #head(lastUpdate)="data">
         <div>{{ data.label }}</div>
       </template>
 
       <template #cell(project)="{ item }">
         <div :data-testid="`${item.id}-name`">{{ item.name }}</div>
       </template>
-      <template #cell(averageCoverage)="{ item }">
-        <div :data-testid="`${item.id}-average`">
-          {{ $options.averageCoverageFormatter(item.codeCoverageSummary.averageCoverage, 2) }}
-        </div>
+      <template #cell(coverage)="{ item }">
+        <div :data-testid="`${item.id}-average`">{{ item.codeCoverage.average }}%</div>
       </template>
-      <template #cell(coverageCount)="{ item }">
-        <div :data-testid="`${item.id}-count`">{{ item.codeCoverageSummary.coverageCount }}</div>
+      <template #cell(numberOfCoverages)="{ item }">
+        <div :data-testid="`${item.id}-count`">{{ item.codeCoverage.count }}</div>
       </template>
-      <template #cell(lastUpdatedAt)="{ item }">
+      <template #cell(lastUpdate)="{ item }">
         <time-ago-tooltip
-          :time="item.codeCoverageSummary.lastUpdatedAt"
+          :time="item.codeCoverage.lastUpdatedAt"
           :data-testid="`${item.id}-date`"
         />
       </template>

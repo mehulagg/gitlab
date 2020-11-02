@@ -7,8 +7,6 @@ module API
     before { authenticate! }
     before { authorize! :admin_build, user_group }
 
-    feature_category :continuous_integration
-
     params do
       requires :id, type: String, desc: 'The ID of a group'
     end

@@ -7,13 +7,10 @@ module Types
       graphql_name 'ComplianceFramework'
       description 'Represents a ComplianceFramework associated with a Project'
 
-      field :name, GraphQL::STRING_TYPE,
+      field :name, ComplianceManagement::ProjectSettingEnum,
             null: false,
-            description: 'Name of the compliance framework'
-
-      def name
-        object.compliance_management_framework.name
-      end
+            description: 'Name of the compliance framework',
+            method: :framework
     end
   end
 end

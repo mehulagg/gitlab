@@ -7,8 +7,6 @@ module API
 
     before { authenticate! }
 
-    feature_category :code_review
-
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end

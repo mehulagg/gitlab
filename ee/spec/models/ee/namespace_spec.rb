@@ -401,6 +401,7 @@ RSpec.describe Namespace do
 
       before do
         create(:gitlab_subscription, :active_trial, namespace: group, hosted_plan: hosted_plan)
+        stub_licensed_features(feature => true)
         stub_ee_application_setting(should_check_namespace_plan: true)
       end
 

@@ -478,8 +478,6 @@ module GraphqlHelpers
       use Gitlab::Graphql::Authorize
       use Gitlab::Graphql::Pagination::Connections
 
-      lazy_resolve ::Gitlab::Graphql::Lazy, :force
-
       query(query_type)
     end
 

@@ -20,7 +20,7 @@
   }
 }
 
-@mixin spinner($size: 16px, $border-width: 2px, $color: $orange-400) {
+.spinner {
   border-radius: 50%;
   position: relative;
   margin: 0 auto;
@@ -30,12 +30,8 @@
   animation-iteration-count: infinite;
   border-style: solid;
   display: inline-flex;
-  @include spinner-size($size, $border-width);
-  @include spinner-color($color);
-}
-
-.spinner {
-  @include spinner;
+  @include spinner-size(16px, 2px);
+  @include spinner-color($orange-400);
 
   &.spinner-md {
     @include spinner-size(32px, 3px);

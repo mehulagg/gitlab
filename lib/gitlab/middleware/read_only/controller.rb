@@ -9,20 +9,20 @@ module Gitlab
         APPLICATION_JSON_TYPES = %W{#{APPLICATION_JSON} application/vnd.git-lfs+json}.freeze
         ERROR_MESSAGE = 'You cannot perform write operations on a read-only instance'
 
-        ALLOWLISTED_GIT_ROUTES = {
+        WHITELISTED_GIT_ROUTES = {
           'repositories/git_http' => %w{git_upload_pack git_receive_pack}
         }.freeze
 
-        ALLOWLISTED_GIT_LFS_ROUTES = {
+        WHITELISTED_GIT_LFS_ROUTES = {
           'repositories/lfs_api' => %w{batch},
           'repositories/lfs_locks_api' => %w{verify create unlock}
         }.freeze
 
-        ALLOWLISTED_GIT_REVISION_ROUTES = {
+        WHITELISTED_GIT_REVISION_ROUTES = {
           'projects/compare' => %w{create}
         }.freeze
 
-        ALLOWLISTED_SESSION_ROUTES = {
+        WHITELISTED_SESSION_ROUTES = {
           'sessions' => %w{destroy},
           'admin/sessions' => %w{create destroy}
         }.freeze
@@ -55,7 +55,7 @@ module Gitlab
 
         def disallowed_request?
           DISALLOWED_METHODS.include?(@env['REQUEST_METHOD']) &&
-            !allowlisted_routes
+            !whitelisted_routes
         end
 
         def json_request?
@@ -87,7 +87,7 @@ module Gitlab
         end
 
         # Overridden in EE module
-        def allowlisted_routes
+        def whitelisted_routes
           workhorse_passthrough_route? || internal_route? || lfs_route? || compare_git_revisions_route? || sidekiq_route? || session_route? || graphql_query?
         end
 
@@ -98,7 +98,7 @@ module Gitlab
           return false unless request.post? &&
             request.path.end_with?('.git/git-upload-pack', '.git/git-receive-pack')
 
-          ALLOWLISTED_GIT_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          WHITELISTED_GIT_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
         def internal_route?
@@ -109,7 +109,7 @@ module Gitlab
           # Calling route_hash may be expensive. Only do it if we think there's a possible match
           return false unless request.post? && request.path.end_with?('compare')
 
-          ALLOWLISTED_GIT_REVISION_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          WHITELISTED_GIT_REVISION_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
         def lfs_route?
@@ -120,7 +120,7 @@ module Gitlab
             return false
           end
 
-          ALLOWLISTED_GIT_LFS_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          WHITELISTED_GIT_LFS_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
         def session_route?
@@ -128,7 +128,7 @@ module Gitlab
           return false unless request.post? && request.path.end_with?('/users/sign_out',
             '/admin/session', '/admin/session/destroy')
 
-          ALLOWLISTED_SESSION_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          WHITELISTED_SESSION_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
         def sidekiq_route?

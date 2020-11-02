@@ -65,9 +65,7 @@ module QA
 
           def has_assignee?(username)
             within_element(:assignee_block) do
-              wait_until(reload: false) do
-                has_text?(username)
-              end
+              has_text?(username)
             end
           end
 

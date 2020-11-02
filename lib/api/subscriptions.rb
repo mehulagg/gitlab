@@ -11,29 +11,25 @@ module API
         type: 'merge_requests',
         entity: Entities::MergeRequest,
         source: Project,
-        finder: ->(id) { find_merge_request_with_access(id, :update_merge_request) },
-        feature_category: :code_review
+        finder: ->(id) { find_merge_request_with_access(id, :update_merge_request) }
       },
       {
         type: 'issues',
         entity: Entities::Issue,
         source: Project,
-        finder: ->(id) { find_project_issue(id) },
-        feature_category: :issue_tracking
+        finder: ->(id) { find_project_issue(id) }
       },
       {
         type: 'labels',
         entity: Entities::ProjectLabel,
         source: Project,
-        finder: ->(id) { find_label(user_project, id) },
-        feature_category: :issue_tracking
+        finder: ->(id) { find_label(user_project, id) }
       },
       {
         type: 'labels',
         entity: Entities::GroupLabel,
         source: Group,
-        finder: ->(id) { find_label(user_group, id) },
-        feature_category: :issue_tracking
+        finder: ->(id) { find_label(user_group, id) }
       }
     ]
 
@@ -48,7 +44,7 @@ module API
         desc 'Subscribe to a resource' do
           success subscribable[:entity]
         end
-        post ":id/#{subscribable[:type]}/:subscribable_id/subscribe", subscribable.slice(:feature_category) do
+        post ":id/#{subscribable[:type]}/:subscribable_id/subscribe" do
           parent = parent_resource(source_type)
           resource = instance_exec(params[:subscribable_id], &subscribable[:finder])
 
@@ -63,7 +59,7 @@ module API
         desc 'Unsubscribe from a resource' do
           success subscribable[:entity]
         end
-        post ":id/#{subscribable[:type]}/:subscribable_id/unsubscribe", subscribable.slice(:feature_category) do
+        post ":id/#{subscribable[:type]}/:subscribable_id/unsubscribe" do
           parent = parent_resource(source_type)
           resource = instance_exec(params[:subscribable_id], &subscribable[:finder])
 

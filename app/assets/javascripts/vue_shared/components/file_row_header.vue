@@ -1,14 +1,18 @@
 <script>
-import { GlTruncate } from '@gitlab/ui';
+import { truncatePathMiddleToLength } from '~/lib/utils/text_utility';
+
+const MAX_PATH_LENGTH = 40;
 
 export default {
-  components: {
-    GlTruncate,
-  },
   props: {
     path: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    truncatedPath() {
+      return truncatePathMiddleToLength(this.path, MAX_PATH_LENGTH);
     },
   },
 };
@@ -16,6 +20,6 @@ export default {
 
 <template>
   <div class="file-row-header bg-white sticky-top p-2 js-file-row-header" :title="path">
-    <gl-truncate :text="path" position="middle" class="bold" />
+    <span class="bold">{{ truncatedPath }}</span>
   </div>
 </template>

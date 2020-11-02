@@ -56,11 +56,9 @@ RSpec.describe 'getting an issue list for a project' do
     let_it_be(:blocking_issue1) { create(:issue, project: project) }
     let_it_be(:blocked_issue2) { create(:issue, project: project) }
     let_it_be(:blocking_issue2) { create(:issue, :confidential, project: project) }
-    let_it_be(:blocking_issue3) { create(:issue, project: project) }
 
     let_it_be(:issue_link1) { create(:issue_link, source: blocked_issue1, target: blocking_issue1, link_type: 'is_blocked_by') }
     let_it_be(:issue_link2) { create(:issue_link, source: blocking_issue2, target: blocked_issue2, link_type: 'blocks') }
-    let_it_be(:issue_link3) { create(:issue_link, source: blocking_issue3, target: blocked_issue2, link_type: 'blocks') }
 
     let(:query) do
       graphql_query_for('project', { fullPath: project.full_path }, query_graphql_field('issues', {}, issue_links_aggregates_query))
@@ -75,7 +73,6 @@ RSpec.describe 'getting an issue list for a project' do
         nodes {
           id
           blocked
-          blockedByCount
         }
       QUERY
     end
@@ -98,21 +95,19 @@ RSpec.describe 'getting an issue list for a project' do
       post_graphql(single_issue_query, current_user: current_user)
     end
 
-    it 'returns the correct result', :aggregate_failures do
-      check_result(blocked_issue1, true, 1)
-      check_result(blocked_issue2, true, 2)
-      check_result(blocking_issue1, false, 0)
-      check_result(blocking_issue2, false, 0)
-    end
-
-    def check_result(issue, expected_blocked, expected_blocked_count)
+    it 'returns the correct results', :aggregate_failures do
       post_graphql(query, current_user: current_user)
 
-      nodes = graphql_data.dig('project', 'issues', 'nodes')
-      node = nodes.find { |r| r['id'] == issue.to_global_id.to_s }
+      result = graphql_data.dig('project', 'issues', 'nodes')
 
-      expect(node['blocked']).to eq expected_blocked
-      expect(node['blockedByCount']).to eq expected_blocked_count
+      expect(find_result(result, blocked_issue1)).to eq true
+      expect(find_result(result, blocked_issue2)).to eq true
+      expect(find_result(result, blocking_issue1)).to eq false
+      expect(find_result(result, blocking_issue2)).to eq false
     end
+  end
+
+  def find_result(result, issue)
+    result.find { |r| r['id'] == issue.to_global_id.to_s }['blocked']
   end
 end

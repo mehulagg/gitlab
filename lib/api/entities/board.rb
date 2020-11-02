@@ -4,7 +4,6 @@ module API
   module Entities
     class Board < Grape::Entity
       expose :id
-      expose :name
       expose :project, using: Entities::BasicProjectDetails
 
       expose :lists, using: Entities::List do |board|

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create' do
+  context 'Create' do
     describe 'Codeowners' do
       let(:files) do
         [

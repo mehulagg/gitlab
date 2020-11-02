@@ -30,7 +30,7 @@
       = sprite_icon('check', css_class: 'cgreen')
       #{ s_('HealthCheck|Healthy') }
     - else
-      = sprite_icon('warning-solid', css_class: 'cred')
+      = icon('warning', class: 'cred')
       #{ s_('HealthCheck|Unhealthy') }
   .card-body
     - if no_errors

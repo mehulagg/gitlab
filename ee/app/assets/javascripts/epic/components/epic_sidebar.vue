@@ -149,7 +149,6 @@ export default {
       <sidebar-todo
         v-show="sidebarCollapsed && isUserSignedIn"
         :sidebar-collapsed="sidebarCollapsed"
-        data-testid="todo"
       />
       <sidebar-date-picker
         v-show="!sidebarCollapsed"
@@ -168,7 +167,6 @@ export default {
         :date-from-milestones="startDateTimeFromMilestones"
         :selected-date="startDateTime"
         :is-date-invalid="isDateInvalid"
-        data-testid="start-date"
         block-class="start-date"
         @toggleCollapse="toggleSidebar({ sidebarCollapsed })"
         @toggleDateType="changeStartDateType"
@@ -190,7 +188,6 @@ export default {
         :date-from-milestones="dueDateTimeFromMilestones"
         :selected-date="dueDateTime"
         :is-date-invalid="isDateInvalid"
-        data-testid="due-date"
         block-class="due-date"
         @toggleDateType="changeDueDateType"
         @saveDate="saveDueDate"
@@ -202,13 +199,9 @@ export default {
         :max-date="dueDateForCollapsedSidebar"
         @toggleCollapse="toggleSidebar({ sidebarCollapsed })"
       />
-      <sidebar-labels
-        :can-update="canUpdate"
-        :sidebar-collapsed="sidebarCollapsed"
-        data-testid="labels-select"
-      />
+      <sidebar-labels :can-update="canUpdate" :sidebar-collapsed="sidebarCollapsed" />
       <div v-if="allowSubEpics" class="block ancestors">
-        <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
+        <ancestors-tree :ancestors="ancestors" :is-fetching="false" />
       </div>
 
       <confidential-issue-sidebar
@@ -223,7 +216,7 @@ export default {
           @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
         />
       </div>
-      <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" data-testid="subscribe" />
+      <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" />
     </div>
   </aside>
 </template>

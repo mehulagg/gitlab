@@ -11,8 +11,6 @@ module API
 
     before { authenticate_non_get! }
 
-    feature_category :projects, ['/projects/:id/custom_attributes', '/projects/:id/custom_attributes/:key']
-
     helpers do
       # EE::API::Projects would override this method
       def apply_filters(projects)
@@ -152,7 +150,7 @@ module API
         use :statistics_params
         use :with_custom_attributes
       end
-      get ":user_id/projects", feature_category: :projects do
+      get ":user_id/projects" do
         user = find_user(params[:user_id])
         not_found!('User') unless user
 
@@ -169,7 +167,7 @@ module API
         use :collection_params
         use :statistics_params
       end
-      get ":user_id/starred_projects", feature_category: :projects do
+      get ":user_id/starred_projects" do
         user = find_user(params[:user_id])
         not_found!('User') unless user
 
@@ -189,7 +187,7 @@ module API
         use :statistics_params
         use :with_custom_attributes
       end
-      get feature_category: :projects do
+      get do
         present_projects load_projects
       end
 
@@ -236,7 +234,7 @@ module API
         use :create_params
       end
       # rubocop: disable CodeReuse/ActiveRecord
-      post "user/:user_id", feature_category: :projects do
+      post "user/:user_id" do
         Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/21139')
         authenticated_as_admin!
         user = User.find_by(id: params.delete(:user_id))
@@ -272,7 +270,7 @@ module API
         optional :license, type: Boolean, default: false,
                            desc: 'Include project license data'
       end
-      get ":id", feature_category: :projects do
+      get ":id" do
         options = {
           with: current_user ? Entities::ProjectWithAccess : Entities::BasicProjectDetails,
           current_user: current_user,
@@ -296,7 +294,7 @@ module API
         optional :path, type: String, desc: 'The path that will be assigned to the fork'
         optional :name, type: String, desc: 'The name that will be assigned to the fork'
       end
-      post ':id/fork', feature_category: :source_code_management do
+      post ':id/fork' do
         Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42284')
 
         not_found! unless can?(current_user, :fork_project, user_project)
@@ -334,14 +332,14 @@ module API
         use :collection_params
         use :with_custom_attributes
       end
-      get ':id/forks', feature_category: :source_code_management do
+      get ':id/forks' do
         forks = ForkProjectsFinder.new(user_project, params: project_finder_params, current_user: current_user).execute
 
         present_projects forks, request_scope: user_project
       end
 
       desc 'Check pages access of this project'
-      get ':id/pages_access', feature_category: :pages do
+      get ':id/pages_access' do
         authorize! :read_pages_content, user_project unless user_project.public_pages?
         status 200
       end
@@ -359,7 +357,7 @@ module API
 
         at_least_one_of(*Helpers::ProjectsHelpers.update_params_at_least_one_of)
       end
-      put ':id', feature_category: :projects do
+      put ':id' do
         authorize_admin_project
         attrs = declared_params(include_missing: false)
         authorize! :rename_project, user_project if attrs[:name].present?
@@ -383,7 +381,7 @@ module API
       desc 'Archive a project' do
         success Entities::Project
       end
-      post ':id/archive', feature_category: :projects do
+      post ':id/archive' do
         authorize!(:archive_project, user_project)
 
         ::Projects::UpdateService.new(user_project, current_user, archived: true).execute
@@ -394,7 +392,7 @@ module API
       desc 'Unarchive a project' do
         success Entities::Project
       end
-      post ':id/unarchive', feature_category: :projects do
+      post ':id/unarchive' do
         authorize!(:archive_project, user_project)
 
         ::Projects::UpdateService.new(user_project, current_user, archived: false).execute
@@ -405,7 +403,7 @@ module API
       desc 'Star a project' do
         success Entities::Project
       end
-      post ':id/star', feature_category: :projects do
+      post ':id/star' do
         if current_user.starred?(user_project)
           not_modified!
         else
@@ -419,7 +417,7 @@ module API
       desc 'Unstar a project' do
         success Entities::Project
       end
-      post ':id/unstar', feature_category: :projects do
+      post ':id/unstar' do
         if current_user.starred?(user_project)
           current_user.toggle_star(user_project)
           user_project.reset
@@ -437,21 +435,21 @@ module API
         optional :search, type: String, desc: 'Return list of users matching the search criteria'
         use :pagination
       end
-      get ':id/starrers', feature_category: :projects do
+      get ':id/starrers' do
         starrers = UsersStarProjectsFinder.new(user_project, params, current_user: current_user).execute
 
         present paginate(starrers), with: Entities::UserStarsProject
       end
 
       desc 'Get languages in project repository'
-      get ':id/languages', feature_category: :source_code_management do
+      get ':id/languages' do
         ::Projects::RepositoryLanguagesService
           .new(user_project, current_user)
           .execute.map { |lang| [lang.name, lang.share] }.to_h
       end
 
       desc 'Delete a project'
-      delete ":id", feature_category: :projects do
+      delete ":id" do
         authorize! :remove_project, user_project
 
         delete_project(user_project)
@@ -461,7 +459,7 @@ module API
       params do
         requires :forked_from_id, type: String, desc: 'The ID of the project it was forked from'
       end
-      post ":id/fork/:forked_from_id", feature_category: :source_code_management do
+      post ":id/fork/:forked_from_id" do
         authorize! :admin_project, user_project
 
         fork_from_project = find_project!(params[:forked_from_id])
@@ -480,7 +478,7 @@ module API
       end
 
       desc 'Remove a forked_from relationship'
-      delete ":id/fork", feature_category: :source_code_management do
+      delete ":id/fork" do
         authorize! :remove_fork_project, user_project
 
         result = destroy_conditionally!(user_project) do
@@ -498,7 +496,7 @@ module API
         requires :group_access, type: Integer, values: Gitlab::Access.values, as: :link_group_access, desc: 'The group access level'
         optional :expires_at, type: Date, desc: 'Share expiration date'
       end
-      post ":id/share", feature_category: :authentication_and_authorization do
+      post ":id/share" do
         authorize! :admin_project, user_project
         group = Group.find_by_id(params[:group_id])
 
@@ -520,7 +518,7 @@ module API
         requires :group_id, type: Integer, desc: 'The ID of the group'
       end
       # rubocop: disable CodeReuse/ActiveRecord
-      delete ":id/share/:group_id", feature_category: :authentication_and_authorization do
+      delete ":id/share/:group_id" do
         authorize! :admin_project, user_project
 
         link = user_project.project_group_links.find_by(group_id: params[:group_id])
@@ -537,7 +535,7 @@ module API
         # TODO: remove rubocop disable - https://gitlab.com/gitlab-org/gitlab/issues/14960
         requires :file, type: File, desc: 'The file to be uploaded' # rubocop:disable Scalability/FileUploads
       end
-      post ":id/uploads", feature_category: :not_owned do
+      post ":id/uploads" do
         upload = UploadService.new(user_project, params[:file]).execute
 
         present upload, with: Entities::ProjectUpload
@@ -551,7 +549,7 @@ module API
         optional :skip_users, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Filter out users with the specified IDs'
         use :pagination
       end
-      get ':id/users', feature_category: :authentication_and_authorization do
+      get ':id/users' do
         users = DeclarativePolicy.subject_scope { user_project.team.users }
         users = users.search(params[:search]) if params[:search].present?
         users = users.where_not_in(params[:skip_users]) if params[:skip_users].present?
@@ -562,7 +560,7 @@ module API
       desc 'Start the housekeeping task for a project' do
         detail 'This feature was introduced in GitLab 9.0.'
       end
-      post ':id/housekeeping', feature_category: :source_code_management do
+      post ':id/housekeeping' do
         authorize_admin_project
 
         begin
@@ -576,7 +574,7 @@ module API
       params do
         requires :namespace, type: String, desc: 'The ID or path of the new namespace'
       end
-      put ":id/transfer", feature_category: :projects do
+      put ":id/transfer" do
         authorize! :change_namespace, user_project
 
         namespace = find_namespace!(params[:namespace])

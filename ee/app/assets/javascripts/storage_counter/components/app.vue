@@ -53,7 +53,6 @@ export default {
       variables() {
         return {
           fullPath: this.namespacePath,
-          searchTerm: this.searchTerm,
           withExcessStorageData: this.isAdditionalStorageFlagEnabled,
         };
       },
@@ -63,7 +62,6 @@ export default {
   data() {
     return {
       namespace: {},
-      searchTerm: '',
     };
   },
   computed: {
@@ -96,14 +94,6 @@ export default {
       return this.isAdditionalStorageFlagEnabled && !this.$apollo.queries.namespace.loading;
     },
   },
-  methods: {
-    handleSearch(input) {
-      // if length === 0 clear the search, if length > 2 update the search term
-      if (input.length === 0 || input.length > 2) {
-        this.searchTerm = input;
-      }
-    },
-  },
 
   modalId: 'temporary-increase-storage-modal',
 };
@@ -120,10 +110,7 @@ export default {
       :actual-repository-size-limit="namespace.actualRepositorySizeLimit"
     />
     <div v-if="isAdditionalStorageFlagEnabled && storageStatistics">
-      <usage-statistics
-        :root-storage-statistics="storageStatistics"
-        :purchase-storage-url="purchaseStorageUrl"
-      />
+      <usage-statistics :root-storage-statistics="storageStatistics" />
     </div>
     <div v-else class="gl-py-4 gl-px-2 gl-m-0">
       <div class="gl-display-flex gl-align-items-center">
@@ -179,11 +166,7 @@ export default {
         />
       </div>
     </div>
-    <projects-table
-      :projects="namespaceProjects"
-      :additional-purchased-storage-size="namespace.additionalPurchasedStorageSize || 0"
-      @search="handleSearch"
-    />
+    <projects-table :projects="namespaceProjects" />
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
       :limit="formattedNamespaceLimit"

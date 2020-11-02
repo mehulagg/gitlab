@@ -189,7 +189,6 @@ export default {
         <button
           v-if="isCollapsible"
           type="button"
-          data-testid="report-section-expand-button"
           class="js-collapse-btn btn float-right btn-sm align-self-center qa-expand-report-button"
           @click="toggleCollapsed"
         >

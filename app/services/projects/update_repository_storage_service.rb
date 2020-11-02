@@ -54,7 +54,7 @@ module Projects
     end
 
     def mirror_repositories
-      mirror_repository if project.repository_exists?
+      mirror_repository
 
       if project.wiki.repository_exists?
         mirror_repository(type: Gitlab::GlRepository::WIKI)
@@ -92,14 +92,12 @@ module Projects
     end
 
     def remove_old_paths
-      if project.repository_exists?
-        Gitlab::Git::Repository.new(
-          source_storage_name,
-          "#{project.disk_path}.git",
-          nil,
-          nil
-        ).remove
-      end
+      Gitlab::Git::Repository.new(
+        source_storage_name,
+        "#{project.disk_path}.git",
+        nil,
+        nil
+      ).remove
 
       if project.wiki.repository_exists?
         Gitlab::Git::Repository.new(

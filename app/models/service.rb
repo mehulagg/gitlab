@@ -422,12 +422,8 @@ class Service < ApplicationRecord
     ProjectServiceWorker.perform_async(id, data)
   end
 
-  def external_issue_tracker?
-    category == :issue_tracker && active?
-  end
-
-  def external_wiki?
-    type == 'ExternalWikiService' && active?
+  def issue_tracker?
+    self.category == :issue_tracker
   end
 
   # override if needed

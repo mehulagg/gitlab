@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
-  GlBadge,
+  GlDeprecatedBadge as GlBadge,
   GlLink,
   GlLoadingIcon,
   GlPagination,
@@ -294,7 +294,7 @@ export default {
       </template>
 
       <template #cell(cluster_type)="{value}">
-        <gl-badge variant="muted">
+        <gl-badge variant="light">
           {{ value }}
         </gl-badge>
       </template>

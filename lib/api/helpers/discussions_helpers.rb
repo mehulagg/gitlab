@@ -3,15 +3,10 @@
 module API
   module Helpers
     module DiscussionsHelpers
-      def self.feature_category_per_noteable_type
+      def self.noteable_types
         # This is a method instead of a constant, allowing EE to more easily
         # extend it.
-        {
-          Issue => :issue_tracking,
-          Snippet => :snippets,
-          MergeRequest => :code_review,
-          Commit => :code_review
-        }
+        [Issue, Snippet, MergeRequest, Commit]
       end
     end
   end

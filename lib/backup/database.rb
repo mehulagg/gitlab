@@ -140,14 +140,7 @@ module Backup
         'sslcrl'          => 'PGSSLCRL',
         'sslcompression'  => 'PGSSLCOMPRESSION'
       }
-      args.each do |opt, arg|
-        # This enables the use of different PostgreSQL settings in
-        # case PgBouncer is used. PgBouncer clears the search path,
-        # which wreaks havoc on Rails if connections are reused.
-        override = "GITLAB_BACKUP_#{arg}"
-        val = ENV[override].presence || config[opt].to_s.presence
-        ENV[arg] = val if val
-      end
+      args.each { |opt, arg| ENV[arg] = config[opt].to_s if config[opt] }
     end
 
     def report_success(success)

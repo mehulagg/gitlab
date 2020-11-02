@@ -2,8 +2,6 @@
 
 module API
   class ImportBitbucketServer < ::API::Base
-    feature_category :importers
-
     helpers do
       def client
         @client ||= BitbucketServer::Client.new(credentials)

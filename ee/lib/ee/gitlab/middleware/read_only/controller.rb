@@ -7,19 +7,19 @@ module EE
         module Controller
           extend ::Gitlab::Utils::Override
 
-          ALLOWLISTED_GEO_ROUTES = {
+          WHITELISTED_GEO_ROUTES = {
             'admin/geo/nodes' => %w{update}
           }.freeze
 
-          ALLOWLISTED_GEO_ROUTES_TRACKING_DB = {
+          WHITELISTED_GEO_ROUTES_TRACKING_DB = {
             'admin/geo/projects' => %w{destroy resync reverify force_redownload resync_all reverify_all},
             'admin/geo/uploads' => %w{destroy}
           }.freeze
 
           private
 
-          override :allowlisted_routes
-          def allowlisted_routes
+          override :whitelisted_routes
+          def whitelisted_routes
             super || geo_node_update_route? || geo_proxy_git_ssh_route? || geo_api_route?
           end
 
@@ -30,10 +30,10 @@ module EE
             controller = route_hash[:controller]
             action = route_hash[:action]
 
-            if ALLOWLISTED_GEO_ROUTES[controller]&.include?(action)
+            if WHITELISTED_GEO_ROUTES[controller]&.include?(action)
               ::Gitlab::Database.db_read_write?
             else
-              ALLOWLISTED_GEO_ROUTES_TRACKING_DB[controller]&.include?(action)
+              WHITELISTED_GEO_ROUTES_TRACKING_DB[controller]&.include?(action)
             end
           end
 

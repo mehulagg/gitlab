@@ -6,8 +6,6 @@ module API
 
     before { authenticate! }
 
-    feature_category :authentication_and_authorization
-
     helpers ::API::Helpers::MembersHelpers
 
     %w[group project].each do |source_type|
@@ -136,7 +134,7 @@ module API
           source = find_source(source_type, params.delete(:id))
           authorize_admin_source!(source_type, source)
 
-          member = source_members(source).find_by!(user_id: params[:user_id])
+          member = source.members.find_by!(user_id: params[:user_id])
           updated_member =
             ::Members::UpdateService
               .new(current_user, declared_params(include_missing: false))
@@ -159,7 +157,7 @@ module API
         # rubocop: disable CodeReuse/ActiveRecord
         delete ":id/members/:user_id" do
           source = find_source(source_type, params[:id])
-          member = source_members(source).find_by!(user_id: params[:user_id])
+          member = source.members.find_by!(user_id: params[:user_id])
 
           destroy_conditionally!(member) do
             ::Members::DestroyService.new(current_user).execute(member, unassign_issuables: params[:unassign_issuables])

@@ -11,9 +11,6 @@ module QA
           view 'app/views/projects/edit.html.haml' do
             element :project_path_field
             element :change_path_button
-          end
-
-          view 'app/views/projects/_transfer.html.haml' do
             element :transfer_button
           end
 

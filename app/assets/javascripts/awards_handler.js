@@ -5,11 +5,11 @@ import { uniq } from 'lodash';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
 import { __ } from './locale';
+import { updateTooltipTitle } from './lib/utils/common_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
 import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import * as Emoji from '~/emoji';
-import { dispose, fixTitle } from '~/tooltips';
 
 const animationEndEventString = 'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd';
 const transitionEndEventString = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
@@ -374,7 +374,7 @@ export class AwardsHandler {
       counter.text(counterNumber - 1);
       this.removeYouFromUserList($emojiButton);
     } else if (emoji === 'thumbsup' || emoji === 'thumbsdown') {
-      dispose($emojiButton);
+      $emojiButton.tooltip('dispose');
       counter.text('0');
       this.removeYouFromUserList($emojiButton);
       if ($emojiButton.parents('.note').length) {
@@ -387,8 +387,7 @@ export class AwardsHandler {
   }
 
   removeEmoji($emojiButton) {
-    dispose($emojiButton);
-
+    $emojiButton.tooltip('dispose');
     $emojiButton.remove();
     const $votesBlock = this.getVotesBlock();
     if ($votesBlock.find('.js-emoji-btn').length === 0) {
@@ -416,17 +415,13 @@ export class AwardsHandler {
     const originalTitle = this.getAwardTooltip(awardBlock);
     const authors = originalTitle.split(FROM_SENTENCE_REGEX);
     authors.splice(authors.indexOf('You'), 1);
-
-    awardBlock
+    return awardBlock
       .closest('.js-emoji-btn')
       .removeData('title')
       .removeAttr('data-title')
       .removeAttr('data-original-title')
-      .attr('title', this.toSentence(authors));
-
-    fixTitle(awardBlock);
-
-    return awardBlock;
+      .attr('title', this.toSentence(authors))
+      .tooltip('_fixTitle');
   }
 
   addYouToUserList(votesBlock, emoji) {
@@ -437,12 +432,7 @@ export class AwardsHandler {
       users = origTitle.trim().split(FROM_SENTENCE_REGEX);
     }
     users.unshift('You');
-
-    awardBlock.attr('title', this.toSentence(users));
-
-    fixTitle(awardBlock);
-
-    return awardBlock;
+    return awardBlock.attr('title', this.toSentence(users)).tooltip('_fixTitle');
   }
 
   createAwardButtonForVotesBlock(votesBlock, emojiName) {
@@ -458,7 +448,7 @@ export class AwardsHandler {
       .find('.emoji-icon')
       .data('name', emojiName);
     this.animateEmoji($emojiButton);
-
+    $('.award-control').tooltip();
     votesBlock.removeClass('current');
   }
 
@@ -495,6 +485,17 @@ export class AwardsHandler {
 
   findEmojiIcon(votesBlock, emoji) {
     return votesBlock.find(`.js-emoji-btn [data-name="${emoji}"]`);
+  }
+
+  userAuthored($emojiButton) {
+    const oldTitle = this.getAwardTooltip($emojiButton);
+    const newTitle = 'You cannot vote on your own issue, MR and note';
+    updateTooltipTitle($emojiButton, newTitle).tooltip('show');
+    // Restore tooltip back to award list
+    return setTimeout(() => {
+      $emojiButton.tooltip('hide');
+      updateTooltipTitle($emojiButton, oldTitle);
+    }, 2800);
   }
 
   scrollToAwards() {

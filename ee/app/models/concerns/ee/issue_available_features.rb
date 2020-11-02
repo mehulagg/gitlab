@@ -2,15 +2,13 @@
 
 module EE
   module IssueAvailableFeatures
-    extend ActiveSupport::Concern
+    include ::Gitlab::Utils::StrongMemoize
+    extend ::Gitlab::Utils::Override
 
-    class_methods do
-      include ::Gitlab::Utils::StrongMemoize
-
-      def available_features_for_issue_types
-        strong_memoize(:available_features_for_issue_types) do
-          super.merge(epics: %w(issue), sla: %w(incident))
-        end
+    override :available_features_for_issue_types
+    def available_features_for_issue_types
+      strong_memoize(:available_features_for_issue_types) do
+        super.merge(epics: %w(issue))
       end
     end
   end

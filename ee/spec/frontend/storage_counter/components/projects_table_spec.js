@@ -14,7 +14,6 @@ const createComponent = ({ additionalRepoStorageByNamespace = false } = {}) => {
   wrapper = shallowMount(ProjectsTable, {
     propsData: {
       projects,
-      additionalPurchasedStorageSize: 0,
     },
     stubs,
     provide: {

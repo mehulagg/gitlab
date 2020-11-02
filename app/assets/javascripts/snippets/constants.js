@@ -14,7 +14,7 @@ export const SNIPPET_VISIBILITY = {
   [SNIPPET_VISIBILITY_INTERNAL]: {
     label: __('Internal'),
     icon: 'shield',
-    description: __('The snippet is visible to any logged in user except external users.'),
+    description: __('The snippet is visible to any logged in user.'),
   },
   [SNIPPET_VISIBILITY_PUBLIC]: {
     label: __('Public'),

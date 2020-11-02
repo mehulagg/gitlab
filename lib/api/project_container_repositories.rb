@@ -10,8 +10,6 @@ module API
 
     before { authorize_read_container_images! }
 
-    feature_category :package_registry
-
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end

@@ -377,12 +377,7 @@ module IssuablesHelper
   end
 
   def issuable_display_type(issuable)
-    case issuable
-    when Issue
-      issuable.issue_type.downcase
-    when MergeRequest
-      issuable.model_name.human.downcase
-    end
+    issuable.model_name.human.downcase
   end
 
   def has_filter_bar_param?

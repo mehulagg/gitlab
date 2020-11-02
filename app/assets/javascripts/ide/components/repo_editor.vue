@@ -22,7 +22,6 @@ import Editor from '../lib/editor';
 import FileTemplatesBar from './file_templates/bar.vue';
 import { __ } from '~/locale';
 import { extractMarkdownImagesFromEntries } from '../stores/utils';
-import { getFileEditorOrDefault } from '../stores/modules/editor/utils';
 import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
@@ -50,7 +49,6 @@ export default {
     ...mapState('rightPane', {
       rightPaneIsOpen: 'isOpen',
     }),
-    ...mapState('editor', ['fileEditors']),
     ...mapState([
       'viewer',
       'panelResizing',
@@ -69,9 +67,6 @@ export default {
       'getJsonSchemaForPath',
     ]),
     ...mapGetters('fileTemplates', ['showFileTemplatesBar']),
-    fileEditor() {
-      return getFileEditorOrDefault(this.fileEditors, this.file.path);
-    },
     shouldHideEditor() {
       return this.file && !this.file.loading && !isTextFile(this.file);
     },
@@ -85,10 +80,10 @@ export default {
       return this.shouldHideEditor && this.file.mrChange && this.viewer === viewerTypes.mr;
     },
     isEditorViewMode() {
-      return this.fileEditor.viewMode === FILE_VIEW_MODE_EDITOR;
+      return this.file.viewMode === FILE_VIEW_MODE_EDITOR;
     },
     isPreviewViewMode() {
-      return this.fileEditor.viewMode === FILE_VIEW_MODE_PREVIEW;
+      return this.file.viewMode === FILE_VIEW_MODE_PREVIEW;
     },
     editTabCSS() {
       return {
@@ -130,7 +125,8 @@ export default {
         this.initEditor();
 
         if (this.currentActivityView !== leftSidebarViews.edit.name) {
-          this.updateEditor({
+          this.setFileViewMode({
+            file: this.file,
             viewMode: FILE_VIEW_MODE_EDITOR,
           });
         }
@@ -138,7 +134,8 @@ export default {
     },
     currentActivityView() {
       if (this.currentActivityView !== leftSidebarViews.edit.name) {
-        this.updateEditor({
+        this.setFileViewMode({
+          file: this.file,
           viewMode: FILE_VIEW_MODE_EDITOR,
         });
       }
@@ -198,11 +195,13 @@ export default {
       'getFileData',
       'getRawFileData',
       'changeFileContent',
+      'setFileLanguage',
+      'setEditorPosition',
+      'setFileViewMode',
       'removePendingTab',
       'triggerFilesChange',
       'addTempImage',
     ]),
-    ...mapActions('editor', ['updateFileEditor']),
     initEditor() {
       if (this.shouldHideEditor && (this.file.content || this.file.raw)) {
         return;
@@ -285,19 +284,19 @@ export default {
 
       // Handle Cursor Position
       this.editor.onPositionChange((instance, e) => {
-        this.updateEditor({
+        this.setEditorPosition({
           editorRow: e.position.lineNumber,
           editorColumn: e.position.column,
         });
       });
 
       this.editor.setPosition({
-        lineNumber: this.fileEditor.editorRow,
-        column: this.fileEditor.editorColumn,
+        lineNumber: this.file.editorRow,
+        column: this.file.editorColumn,
       });
 
       // Handle File Language
-      this.updateEditor({
+      this.setFileLanguage({
         fileLanguage: this.model.language,
       });
 
@@ -355,16 +354,6 @@ export default {
       const schema = this.getJsonSchemaForPath(this.file.path);
       registerSchema(schema);
     },
-    updateEditor(data) {
-      // Looks like our model wrapper `.dispose` causes the monaco editor to emit some position changes after
-      // when disposing. We want to ignore these by only capturing editor changes that happen to the currently active
-      // file.
-      if (!this.file.active) {
-        return;
-      }
-
-      this.updateFileEditor({ path: this.file.path, data });
-    },
   },
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
@@ -380,7 +369,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_EDITOR })"
+            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_EDITOR })"
           >
             {{ __('Edit') }}
           </a>
@@ -389,7 +378,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
+            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
             >{{ previewMode.previewTitle }}</a
           >
         </li>

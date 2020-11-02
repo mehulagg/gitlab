@@ -22,8 +22,6 @@ export default {
   data() {
     return {
       clearStorage: false,
-      currentTemplate: null,
-      mergeRequestTemplates: null,
       mergeRequestMeta: {
         title: sprintf(s__(`StaticSiteEditor|Update %{sourcePath} file`), {
           sourcePath: this.sourcePath,
@@ -63,13 +61,6 @@ export default {
     onSecondary() {
       this.hide();
     },
-    onChangeTemplate(template) {
-      this.currentTemplate = template;
-
-      const description = this.currentTemplate ? this.currentTemplate.content : '';
-      const mergeRequestMeta = { ...this.mergeRequestMeta, description };
-      this.onUpdateSettings(mergeRequestMeta);
-    },
     onUpdateSettings(mergeRequestMeta) {
       this.mergeRequestMeta = { ...mergeRequestMeta };
     },
@@ -100,10 +91,7 @@ export default {
       ref="editMetaControls"
       :title="mergeRequestMeta.title"
       :description="mergeRequestMeta.description"
-      :templates="mergeRequestTemplates"
-      :current-template="currentTemplate"
       @updateSettings="onUpdateSettings"
-      @changeTemplate="onChangeTemplate"
     />
   </gl-modal>
 </template>

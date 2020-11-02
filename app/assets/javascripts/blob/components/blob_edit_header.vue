@@ -50,7 +50,6 @@ export default {
         variant="danger"
         category="secondary"
         :disabled="!canDelete"
-        data-qa-selector="delete_file_button"
         @click="$emit('delete')"
         >{{ s__('Snippets|Delete file') }}</gl-button
       >

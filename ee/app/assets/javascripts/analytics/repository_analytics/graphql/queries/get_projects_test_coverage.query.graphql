@@ -3,9 +3,9 @@ query getProjectsTestCoverage($projectIds: [ID!]) {
     nodes {
       id
       name
-      codeCoverageSummary {
-        averageCoverage
-        coverageCount
+      codeCoverage @client {
+        average
+        count
         lastUpdatedAt
       }
     }

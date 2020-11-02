@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
 
 import EpicSidebar from 'ee/epic/components/epic_sidebar.vue';
@@ -6,32 +7,28 @@ import createStore from 'ee/epic/store';
 import epicUtils from 'ee/epic/utils/epic_utils';
 import { dateTypes } from 'ee/epic/constants';
 
-import { parsePikadayDate } from '~/lib/utils/datetime_utility';
-
+import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { mockEpicMeta, mockEpicData, mockAncestors } from '../mock_data';
-
-const createComponent = ({ methods } = {}) => {
-  const store = createStore();
-  store.dispatch('setEpicMeta', mockEpicMeta);
-  store.dispatch('setEpicData', mockEpicData);
-  store.state.ancestors = mockAncestors;
-
-  return shallowMount(EpicSidebar, {
-    store,
-    methods,
-  });
-};
 
 describe('EpicSidebarComponent', () => {
   const originalUserId = gon.current_user_id;
-  let wrapper;
+  let vm;
+  let store;
 
   beforeEach(() => {
-    wrapper = createComponent();
+    const Component = Vue.extend(EpicSidebar);
+    store = createStore();
+    store.dispatch('setEpicMeta', mockEpicMeta);
+    store.dispatch('setEpicData', mockEpicData);
+    store.state.ancestors = mockAncestors;
+
+    vm = mountComponentWithStore(Component, {
+      store,
+    });
   });
 
   afterEach(() => {
-    wrapper.destroy();
+    vm.$destroy();
   });
 
   describe('methods', () => {
@@ -39,7 +36,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `epicUtils.getDateFromMilestonesTooltip` with `dateType` param', () => {
         jest.spyOn(epicUtils, 'getDateFromMilestonesTooltip');
 
-        wrapper.vm.getDateFromMilestonesTooltip(dateTypes.start);
+        vm.getDateFromMilestonesTooltip(dateTypes.start);
 
         expect(epicUtils.getDateFromMilestonesTooltip).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -51,11 +48,11 @@ describe('EpicSidebarComponent', () => {
 
     describe('changeStartDateType', () => {
       it('calls `toggleStartDateType` on component with `dateTypeIsFixed` param', () => {
-        jest.spyOn(wrapper.vm, 'toggleStartDateType');
+        jest.spyOn(vm, 'toggleStartDateType');
 
-        wrapper.vm.changeStartDateType(true, true);
+        vm.changeStartDateType(true, true);
 
-        expect(wrapper.vm.toggleStartDateType).toHaveBeenCalledWith(
+        expect(vm.toggleStartDateType).toHaveBeenCalledWith(
           expect.objectContaining({
             dateTypeIsFixed: true,
           }),
@@ -63,11 +60,11 @@ describe('EpicSidebarComponent', () => {
       });
 
       it('calls `saveDate` on component when `typeChangeOnEdit` param false', () => {
-        jest.spyOn(wrapper.vm, 'saveDate');
+        jest.spyOn(vm, 'saveDate');
 
-        wrapper.vm.changeStartDateType(true, false);
+        vm.changeStartDateType(true, false);
 
-        expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
+        expect(vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
             dateTypeIsFixed: true,
             dateType: dateTypes.start,
@@ -79,11 +76,11 @@ describe('EpicSidebarComponent', () => {
 
     describe('saveStartDate', () => {
       it('calls `saveDate` on component with `date` param set to `newDate`', () => {
-        jest.spyOn(wrapper.vm, 'saveDate');
+        jest.spyOn(vm, 'saveDate');
 
-        wrapper.vm.saveStartDate('2018-1-1');
+        vm.saveStartDate('2018-1-1');
 
-        expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
+        expect(vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
             dateTypeIsFixed: true,
             dateType: dateTypes.start,
@@ -95,11 +92,11 @@ describe('EpicSidebarComponent', () => {
 
     describe('changeDueDateType', () => {
       it('calls `toggleDueDateType` on component with `dateTypeIsFixed` param', () => {
-        jest.spyOn(wrapper.vm, 'toggleDueDateType');
+        jest.spyOn(vm, 'toggleDueDateType');
 
-        wrapper.vm.changeDueDateType(true, true);
+        vm.changeDueDateType(true, true);
 
-        expect(wrapper.vm.toggleDueDateType).toHaveBeenCalledWith(
+        expect(vm.toggleDueDateType).toHaveBeenCalledWith(
           expect.objectContaining({
             dateTypeIsFixed: true,
           }),
@@ -107,11 +104,11 @@ describe('EpicSidebarComponent', () => {
       });
 
       it('calls `saveDate` on component when `typeChangeOnEdit` param false', () => {
-        jest.spyOn(wrapper.vm, 'saveDate');
+        jest.spyOn(vm, 'saveDate');
 
-        wrapper.vm.changeDueDateType(true, false);
+        vm.changeDueDateType(true, false);
 
-        expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
+        expect(vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
             dateTypeIsFixed: true,
             dateType: dateTypes.due,
@@ -123,11 +120,11 @@ describe('EpicSidebarComponent', () => {
 
     describe('saveDueDate', () => {
       it('calls `saveDate` on component with `date` param set to `newDate`', () => {
-        jest.spyOn(wrapper.vm, 'saveDate');
+        jest.spyOn(vm, 'saveDate');
 
-        wrapper.vm.saveDueDate('2018-1-1');
+        vm.saveDueDate('2018-1-1');
 
-        expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
+        expect(vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
             dateTypeIsFixed: true,
             dateType: dateTypes.due,
@@ -147,86 +144,117 @@ describe('EpicSidebarComponent', () => {
       gon.current_user_id = originalUserId;
     });
 
-    it('renders component container element with classes `right-sidebar-expanded`, `right-sidebar` & `epic-sidebar`', async () => {
-      wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
+    it('renders component container element with classes `right-sidebar-expanded`, `right-sidebar` & `epic-sidebar`', done => {
+      store.dispatch('toggleSidebarFlag', false);
 
-      await wrapper.vm.$nextTick();
-
-      expect(wrapper.classes()).toContain('right-sidebar-expanded');
-      expect(wrapper.classes()).toContain('right-sidebar');
-      expect(wrapper.classes()).toContain('epic-sidebar');
+      vm.$nextTick()
+        .then(() => {
+          expect(vm.$el.classList.contains('right-sidebar-expanded')).toBe(true);
+          expect(vm.$el.classList.contains('right-sidebar')).toBe(true);
+          expect(vm.$el.classList.contains('epic-sidebar')).toBe(true);
+        })
+        .then(done)
+        .catch(done.fail);
     });
 
     it('renders header container element with classes `issuable-sidebar` & `js-issuable-update`', () => {
-      expect(wrapper.find('.issuable-sidebar.js-issuable-update').exists()).toBe(true);
+      expect(vm.$el.querySelector('.issuable-sidebar.js-issuable-update')).not.toBeNull();
     });
 
-    it('renders Todo toggle button element when sidebar is collapsed and user is signed in', async () => {
-      wrapper.vm.$store.dispatch('toggleSidebarFlag', true);
+    it('renders Todo toggle button element when sidebar is collapsed and user is signed in', done => {
+      store.dispatch('toggleSidebarFlag', true);
 
-      await wrapper.vm.$nextTick();
+      vm.$nextTick()
+        .then(() => {
+          const todoBlockEl = vm.$el.querySelector('.block.todo');
 
-      expect(wrapper.find('[data-testid="todo"]').exists()).toBe(true);
+          expect(todoBlockEl).not.toBeNull();
+          expect(todoBlockEl.querySelector('button.btn-todo')).not.toBeNull();
+        })
+        .then(done)
+        .catch(done.fail);
     });
 
-    it('renders Start date & Due date elements when sidebar is expanded', async () => {
-      wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
+    it('renders Start date & Due date elements when sidebar is expanded', done => {
+      store.dispatch('toggleSidebarFlag', false);
 
-      await wrapper.vm.$nextTick();
+      vm.$nextTick()
+        .then(() => {
+          const startDateEl = vm.$el.querySelector('.block.date.start-date');
+          const dueDateEl = vm.$el.querySelector('.block.date.due-date');
 
-      const startDateEl = wrapper.find('[data-testid="start-date"]');
-      const dueDateEl = wrapper.find('[data-testid="due-date"]');
+          expect(startDateEl).not.toBeNull();
+          expect(startDateEl.querySelector('.title').innerText.trim()).toContain('Start date');
+          expect(
+            startDateEl.querySelector('.value .value-type-fixed .value-content').innerText.trim(),
+          ).toBe('Jun 1, 2018');
 
-      expect(startDateEl.exists()).toBe(true);
-      expect(startDateEl.props()).toMatchObject({
-        label: 'Start date',
-        dateFixed: parsePikadayDate(mockEpicMeta.startDateFixed),
-      });
-
-      expect(dueDateEl.exists()).toBe(true);
-      expect(dueDateEl.props()).toMatchObject({
-        label: 'Due date',
-        dateFixed: parsePikadayDate(mockEpicMeta.dueDateFixed),
-      });
+          expect(dueDateEl).not.toBeNull();
+          expect(dueDateEl.querySelector('.title').innerText.trim()).toContain('Due date');
+          expect(
+            dueDateEl.querySelector('.value .value-type-fixed .value-content').innerText.trim(),
+          ).toBe('Aug 1, 2018');
+        })
+        .then(done)
+        .catch(done.fail);
     });
 
     it('renders labels select element', () => {
-      expect(wrapper.find('[data-testid="labels-select"]').exists()).toBe(true);
+      expect(vm.$el.querySelector('.js-labels-block')).not.toBeNull();
     });
 
     describe('when sub-epics feature is available', () => {
-      it('renders ancestors list', async () => {
-        wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
-        wrapper.vm.$store.dispatch('setEpicMeta', {
+      it('renders ancestors list', done => {
+        store.dispatch('toggleSidebarFlag', false);
+        store.dispatch('setEpicMeta', {
           ...mockEpicMeta,
           allowSubEpics: false,
         });
 
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.find('.block.ancestors').exists()).toBe(false);
+        vm.$nextTick()
+          .then(() => {
+            expect(vm.$el.querySelector('.block.ancestors')).toBeNull();
+          })
+          .then(done)
+          .catch(done.fail);
       });
     });
 
     describe('when sub-epics feature is not available', () => {
-      it('does not render ancestors list', async () => {
-        wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
+      it('does not render ancestors list', done => {
+        store.dispatch('toggleSidebarFlag', false);
 
-        await wrapper.vm.$nextTick();
+        vm.$nextTick()
+          .then(() => {
+            const ancestorsEl = vm.$el.querySelector('.block.ancestors');
 
-        const ancestorsEl = wrapper.find('[data-testid="ancestors"]');
+            const reverseAncestors = [...mockAncestors].reverse();
 
-        expect(ancestorsEl.exists()).toBe(true);
-        expect(ancestorsEl.props('ancestors')).toEqual([...mockAncestors].reverse());
+            const getEls = selector => Array.from(ancestorsEl.querySelectorAll(selector));
+
+            expect(ancestorsEl).not.toBeNull();
+
+            expect(getEls('li.vertical-timeline-row')).toHaveLength(reverseAncestors.length);
+
+            expect(getEls('a').map(el => el.innerText.trim())).toEqual(
+              reverseAncestors.map(a => a.title),
+            );
+
+            expect(getEls('li.vertical-timeline-row a').map(a => a.getAttribute('href'))).toEqual(
+              reverseAncestors.map(a => a.url),
+            );
+          })
+          .then(done)
+          .catch(done.fail);
       });
     });
 
     it('renders participants list element', () => {
-      expect(wrapper.find('.block.participants').exists()).toBe(true);
+      expect(vm.$el.querySelector('.block.participants')).not.toBeNull();
     });
 
     it('renders subscription toggle element', () => {
-      expect(wrapper.find('[data-testid="subscribe"]').exists()).toBe(true);
+      expect(vm.$el.querySelector('.block.subscription')).not.toBeNull();
     });
   });
 
@@ -236,13 +264,12 @@ describe('EpicSidebarComponent', () => {
         fetchEpicDetails: jest.fn(),
       };
 
-      const wrapperWithMethod = createComponent({
+      shallowMount(EpicSidebar, {
+        store,
         methods: methodSpies,
       });
 
       expect(methodSpies.fetchEpicDetails).toHaveBeenCalled();
-
-      wrapperWithMethod.destroy();
     });
   });
 });

@@ -6,13 +6,7 @@ import { s__, sprintf } from '~/locale';
 
 export default {
   name: 'UserActionButtons',
-  components: {
-    ActionButtonGroup,
-    RemoveMemberButton,
-    LeaveButton,
-    LdapOverrideButton: () =>
-      import('ee_component/vue_shared/components/members/ldap/ldap_override_button.vue'),
-  },
+  components: { ActionButtonGroup, RemoveMemberButton, LeaveButton },
   props: {
     member: {
       type: Object,
@@ -62,9 +56,6 @@ export default {
         :message="message"
         :title="s__('Member|Remove member')"
       />
-    </div>
-    <div v-else-if="permissions.canOverride && !member.isOverridden" class="gl-px-1">
-      <ldap-override-button :member="member" />
     </div>
   </action-button-group>
 </template>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe Service::DockerRun::GitlabRunner do
+  describe Service::DockerRun::GitlabRunner do
     let(:runner_name) { 'test-runner' }
     let(:address) { 'gitlab.test' }
     let(:token) { 'abc123' }

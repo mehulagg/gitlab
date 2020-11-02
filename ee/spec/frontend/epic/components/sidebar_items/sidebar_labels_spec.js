@@ -22,7 +22,6 @@ describe('SidebarLabelsComponent', () => {
       propsData: { canUpdate: false, sidebarCollapsed: false },
       store,
       stubs: {
-        LabelsSelectVue: true,
         GlLabel: true,
       },
     });

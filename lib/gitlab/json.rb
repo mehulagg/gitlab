@@ -67,6 +67,15 @@ module Gitlab
         ::JSON.pretty_generate(object, opts)
       end
 
+      # Feature detection for using Oj instead of the `json` gem.
+      #
+      # @return [Boolean]
+      def enable_oj?
+        return false unless feature_table_exists?
+
+        Feature.enabled?(:oj_json, default_enabled: true)
+      end
+
       private
 
       # Convert JSON string into Ruby through toggleable adapters.
@@ -82,7 +91,11 @@ module Gitlab
       def adapter_load(string, *args, **opts)
         opts = standardize_opts(opts)
 
-        Oj.load(string, opts)
+        if enable_oj?
+          Oj.load(string, opts)
+        else
+          ::JSON.parse(string, opts)
+        end
       rescue Oj::ParseError, Encoding::UndefinedConversionError => ex
         raise parser_error.new(ex)
       end
@@ -107,7 +120,11 @@ module Gitlab
       #
       # @return [String]
       def adapter_dump(object, *args, **opts)
-        Oj.dump(object, opts)
+        if enable_oj?
+          Oj.dump(object, opts)
+        else
+          ::JSON.dump(object, *args)
+        end
       end
 
       # Generates JSON for an object but with fewer options, using toggleable adapters.
@@ -118,7 +135,11 @@ module Gitlab
       def adapter_generate(object, opts = {})
         opts = standardize_opts(opts)
 
-        Oj.generate(object, opts)
+        if enable_oj?
+          Oj.generate(object, opts)
+        else
+          ::JSON.generate(object, opts)
+        end
       end
 
       # Take a JSON standard options hash and standardize it to work across adapters
@@ -128,8 +149,11 @@ module Gitlab
       # @return [Hash]
       def standardize_opts(opts)
         opts ||= {}
-        opts[:mode] = :rails
-        opts[:symbol_keys] = opts[:symbolize_keys] || opts[:symbolize_names]
+
+        if enable_oj?
+          opts[:mode] = :rails
+          opts[:symbol_keys] = opts[:symbolize_keys] || opts[:symbolize_names]
+        end
 
         opts
       end
@@ -189,7 +213,7 @@ module Gitlab
       # @param object [Object]
       # @return [String]
       def self.call(object, env = nil)
-        if Feature.enabled?(:grape_gitlab_json, default_enabled: true)
+        if Gitlab::Json.enable_oj? && Feature.enabled?(:grape_gitlab_json, default_enabled: true)
           Gitlab::Json.dump(object)
         else
           Grape::Formatter::Json.call(object, env)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
+RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
   let(:app) { double('app') }
 
   subject { described_class.new(app) }
@@ -21,15 +21,20 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
         allow(app).to receive(:call).and_return([200, nil, nil])
       end
 
+      it 'increments requests count' do
+        expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get', status: 200, feature_category: 'unknown')
+
+        subject.call(env)
+      end
+
       RSpec::Matchers.define :a_positive_execution_time do
         match { |actual| actual > 0 }
       end
 
-      it 'tracks request count and duration' do
-        expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'unknown')
+      it 'measures execution time' do
         expect(described_class).to receive_message_chain(:http_request_duration_seconds, :observe).with({ method: 'get' }, a_positive_execution_time)
 
-        subject.call(env)
+        Timecop.scale(3600) { subject.call(env) }
       end
 
       context 'request is a health check endpoint' do
@@ -39,10 +44,15 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
               env['PATH_INFO'] = path
             end
 
-            it 'increments health endpoint counter rather than overall counter and does not record duration' do
+            it 'increments health endpoint counter rather than overall counter' do
+              expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: 200)
+              expect(described_class).not_to receive(:http_request_total)
+
+              subject.call(env)
+            end
+
+            it 'does not record the request duration' do
               expect(described_class).not_to receive(:http_request_duration_seconds)
-              expect(described_class).not_to receive(:http_requests_total)
-              expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: '200')
 
               subject.call(env)
             end
@@ -57,9 +67,14 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
               env['PATH_INFO'] = path
             end
 
-            it 'increments regular counters and tracks duration' do
-              expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'unknown')
+            it 'increments overall counter rather than health endpoint counter' do
+              expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get', status: 200, feature_category: 'unknown')
               expect(described_class).not_to receive(:http_health_requests_total)
+
+              subject.call(env)
+            end
+
+            it 'records the request duration' do
               expect(described_class)
                 .to receive_message_chain(:http_request_duration_seconds, :observe)
                       .with({ method: 'get' }, a_positive_execution_time)
@@ -73,18 +88,26 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
 
     context '@app.call throws exception' do
       let(:http_request_duration_seconds) { double('http_request_duration_seconds') }
-      let(:http_requests_total) { double('http_requests_total') }
 
       before do
         allow(app).to receive(:call).and_raise(StandardError)
         allow(described_class).to receive(:http_request_duration_seconds).and_return(http_request_duration_seconds)
-        allow(described_class).to receive(:http_requests_total).and_return(http_requests_total)
       end
 
-      it 'tracks the correct metrics' do
+      it 'increments exceptions count' do
         expect(described_class).to receive_message_chain(:rack_uncaught_errors_count, :increment)
-        expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: 'undefined', feature_category: 'unknown')
-        expect(described_class.http_request_duration_seconds).not_to receive(:observe)
+
+        expect { subject.call(env) }.to raise_error(StandardError)
+      end
+
+      it 'increments requests count' do
+        expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get', status: 'undefined', feature_category: 'unknown')
+
+        expect { subject.call(env) }.to raise_error(StandardError)
+      end
+
+      it "does't measure request execution time" do
+        expect(described_class.http_request_duration_seconds).not_to receive(:increment)
 
         expect { subject.call(env) }.to raise_error(StandardError)
       end
@@ -96,9 +119,8 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
           allow(app).to receive(:call).and_return([200, { described_class::FEATURE_CATEGORY_HEADER => 'issue_tracking' }, nil])
         end
 
-        it 'adds the feature category to the labels for http_requests_total' do
-          expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'issue_tracking')
-          expect(described_class).not_to receive(:http_health_requests_total)
+        it 'adds the feature category to the labels for http_request_total' do
+          expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get', status: 200, feature_category: 'issue_tracking')
 
           subject.call(env)
         end
@@ -106,8 +128,8 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
         it 'does not record a feature category for health check endpoints' do
           env['PATH_INFO'] = '/-/liveness'
 
-          expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: '200')
-          expect(described_class).not_to receive(:http_requests_total)
+          expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: 200)
+          expect(described_class).not_to receive(:http_request_total)
 
           subject.call(env)
         end
@@ -119,44 +141,22 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
         end
 
         it 'sets the feature category to unknown' do
-          expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'unknown')
-          expect(described_class).not_to receive(:http_health_requests_total)
+          expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get', status: 200, feature_category: 'unknown')
 
           subject.call(env)
         end
       end
     end
 
-    describe '.initialize_metrics', :prometheus do
-      it "sets labels for http_requests_total" do
+    describe '.initialize_http_request_duration_seconds' do
+      it "sets labels" do
         expected_labels = []
-
-        described_class::HTTP_METHODS.each do |method, statuses|
-          statuses.each do |status|
-            described_class::FEATURE_CATEGORIES_TO_INITIALIZE.each do |feature_category|
-              expected_labels << { method: method.to_s, status: status.to_s, feature_category: feature_category.to_s }
-            end
-          end
+        described_class::HTTP_METHODS.each do |method|
+          expected_labels << { method: method }
         end
 
-        described_class.initialize_metrics
-
-        expect(described_class.http_requests_total.values.keys).to contain_exactly(*expected_labels)
-      end
-
-      it 'sets labels for http_request_duration_seconds' do
-        expected_labels = described_class::HTTP_METHODS.keys.map { |method| { method: method } }
-
-        described_class.initialize_metrics
-
+        described_class.initialize_http_request_duration_seconds
         expect(described_class.http_request_duration_seconds.values.keys).to include(*expected_labels)
-      end
-
-      it 'has every label in config/feature_categories.yml' do
-        defaults = [described_class::FEATURE_CATEGORY_DEFAULT, 'not_owned']
-        feature_categories = YAML.load_file(Rails.root.join('config', 'feature_categories.yml')).map(&:strip) + defaults
-
-        expect(described_class::FEATURE_CATEGORIES_TO_INITIALIZE).to all(be_in(feature_categories))
       end
     end
   end

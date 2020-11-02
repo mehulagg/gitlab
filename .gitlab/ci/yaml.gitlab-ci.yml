@@ -1,9 +1,9 @@
-# Yamllint of CI-related yaml and changelogs.
+# Yamllint of *.yml for .gitlab-ci.yml.
 # This uses rules from project root `.yamllint`.
-lint-yaml:
+lint-ci-gitlab:
   extends:
     - .default-retry
-    - .yaml-lint:rules
+    - .yaml:rules
   image: pipelinecomponents/yamllint:latest
   stage: test
   needs: []

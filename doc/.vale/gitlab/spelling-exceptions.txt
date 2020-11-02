@@ -347,7 +347,6 @@ proxied
 proxies
 proxyable
 proxying
-pseudocode
 pseudonymized
 pseudonymizer
 Puma

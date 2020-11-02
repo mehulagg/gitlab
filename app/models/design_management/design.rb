@@ -10,7 +10,6 @@ module DesignManagement
     include Mentionable
     include WhereComposite
     include RelativePositioning
-    include Todoable
 
     belongs_to :project, inverse_of: :designs
     belongs_to :issue

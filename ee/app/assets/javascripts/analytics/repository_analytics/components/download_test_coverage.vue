@@ -110,10 +110,11 @@ export default {
     },
   },
   text: {
-    downloadTestCoverageHeader: s__('RepositoriesAnalytics|Download historic test coverage data'),
+    downloadTestCoverageHeader: s__('RepositoriesAnalytics|Download Historic Test Coverage Data'),
     downloadCSVButton: s__('RepositoriesAnalytics|Download historic test coverage data (.csv)'),
     dateRangeHeader: __('Date range'),
     downloadCSVModalButton: s__('RepositoriesAnalytics|Download test coverage data (.csv)'),
+    downloadCSVModalTitle: s__('RepositoriesAnalytics|Download Historic Test Coverage Data'),
     downloadCSVModalDescription: s__(
       'RepositoriesAnalytics|Historic Test Coverage Data is available in raw format (.csv) for further analysis.',
     ),
@@ -147,7 +148,7 @@ export default {
 
     <gl-modal
       modal-id="download-csv-modal"
-      :title="$options.text.downloadTestCoverageHeader"
+      :title="$options.text.downloadCSVModalTitle"
       no-fade
       :action-primary="downloadCSVModalButton"
       :action-cancel="cancelModalButton"

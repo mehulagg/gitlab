@@ -6,6 +6,8 @@ class EnvironmentPresenter < Gitlab::View::Presenter::Delegated
   presents :environment
 
   def path
-    project_environment_path(project, self)
+    if Feature.enabled?(:expose_environment_path_in_alert_details, project)
+      project_environment_path(project, self)
+    end
   end
 end

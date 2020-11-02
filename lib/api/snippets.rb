@@ -5,8 +5,6 @@ module API
   class Snippets < ::API::Base
     include PaginationParams
 
-    feature_category :snippets
-
     resource :snippets do
       helpers Helpers::SnippetsHelpers
       helpers do

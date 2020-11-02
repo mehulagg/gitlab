@@ -20,7 +20,11 @@ const environmentName = 'Production';
 const environmentPath = '/fake/path';
 
 describe('AlertDetails', () => {
-  let environmentData = { name: environmentName, path: environmentPath };
+  let environmentData = {
+    name: environmentName,
+    path: environmentPath,
+  };
+  let glFeatures = { exposeEnvironmentPathInAlertDetails: false };
   let mock;
   let wrapper;
   const projectPath = 'root/alerts';
@@ -36,6 +40,7 @@ describe('AlertDetails', () => {
           projectPath,
           projectIssuesPath,
           projectId,
+          glFeatures,
         },
         data() {
           return {
@@ -154,21 +159,33 @@ describe('AlertDetails', () => {
     });
 
     describe('environment fields', () => {
-      it('should show the environment name with a link to the path', () => {
-        mountComponent();
-        const path = findEnvironmentPath();
+      describe('when exposeEnvironmentPathInAlertDetails is disabled', () => {
+        beforeEach(mountComponent);
 
-        expect(findEnvironmentName().exists()).toBe(false);
-        expect(path.text()).toBe(environmentName);
-        expect(path.attributes('href')).toBe(environmentPath);
+        it('should not show the environment', () => {
+          expect(findEnvironmentName().exists()).toBe(false);
+          expect(findEnvironmentPath().exists()).toBe(false);
+        });
       });
 
-      it('should only show the environment name if the path is not provided', () => {
-        environmentData = { name: environmentName, path: null };
-        mountComponent();
+      describe('when exposeEnvironmentPathInAlertDetails is enabled', () => {
+        beforeEach(() => {
+          glFeatures = { exposeEnvironmentPathInAlertDetails: true };
+          mountComponent();
+        });
 
-        expect(findEnvironmentPath().exists()).toBe(false);
-        expect(findEnvironmentName().text()).toBe(environmentName);
+        it('should show the environment name with link to path', () => {
+          expect(findEnvironmentName().exists()).toBe(false);
+          expect(findEnvironmentPath().text()).toBe(environmentName);
+          expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
+        });
+
+        it('should only show the environment name if the path is not provided', () => {
+          environmentData = { name: environmentName, path: null };
+          mountComponent();
+          expect(findEnvironmentPath().exists()).toBe(false);
+          expect(findEnvironmentName().text()).toBe(environmentName);
+        });
       });
     });
 
@@ -178,7 +195,6 @@ describe('AlertDetails', () => {
         mountComponent({
           data: { alert: { ...mockAlert, issueIid }, sidebarStatus: false },
         });
-
         expect(findViewIncidentBtn().exists()).toBe(true);
         expect(findViewIncidentBtn().attributes('href')).toBe(
           joinPaths(projectIssuesPath, issueIid),
@@ -204,8 +220,8 @@ describe('AlertDetails', () => {
         jest
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { createAlertIssue: { issue: { iid: issueIid } } } });
-        findCreateIncidentBtn().trigger('click');
 
+        findCreateIncidentBtn().trigger('click');
         expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: createIssueMutation,
           variables: {
@@ -235,7 +251,6 @@ describe('AlertDetails', () => {
       beforeEach(() => {
         mountComponent({ data: { alert: mockAlert } });
       });
-
       it('should display a table of raw alert details data', () => {
         expect(findDetailsTable().exists()).toBe(true);
       });

@@ -10,7 +10,6 @@ import { DEFAULT_IMAGE_UPLOAD_PATH } from '../constants';
 import imageRepository from '../image_repository';
 import formatter from '../services/formatter';
 import templater from '../services/templater';
-import renderImage from '../services/renderers/render_image';
 
 export default {
   components: {
@@ -42,10 +41,6 @@ export default {
       type: Array,
       required: true,
     },
-    project: {
-      type: String,
-      required: true,
-    },
     imageRoot: {
       type: String,
       required: false,
@@ -55,12 +50,12 @@ export default {
   },
   data() {
     return {
+      saveable: false,
       parsedSource: parseSourceFile(this.preProcess(true, this.content)),
       editorMode: EDITOR_TYPES.wysiwyg,
+      isModified: false,
       hasMatter: false,
       isDrawerOpen: false,
-      isModified: false,
-      isSaveable: false,
     };
   },
   imageRepository: imageRepository(),
@@ -77,12 +72,6 @@ export default {
     isWysiwygMode() {
       return this.editorMode === EDITOR_TYPES.wysiwyg;
     },
-    customRenderers() {
-      const imageRenderer = renderImage.build(this.mounts, this.project);
-      return {
-        image: [imageRenderer],
-      };
-    },
   },
   created() {
     this.refreshEditHelpers();
@@ -96,11 +85,8 @@ export default {
       return templatedContent;
     },
     refreshEditHelpers() {
-      const { isModified, hasMatter, isMatterValid } = this.parsedSource;
-      this.isModified = isModified();
-      this.hasMatter = hasMatter();
-      const hasValidMatter = this.hasMatter ? isMatterValid() : true;
-      this.isSaveable = this.isModified && hasValidMatter;
+      this.isModified = this.parsedSource.isModified();
+      this.hasMatter = this.parsedSource.hasMatter();
     },
     onDrawerOpen() {
       this.isDrawerOpen = true;
@@ -151,18 +137,17 @@ export default {
       :content="editableContent"
       :initial-edit-type="editorMode"
       :image-root="imageRoot"
-      :options="{ customRenderers }"
       class="mb-9 pb-6 h-100"
       @modeChange="onModeChange"
       @input="onInputChange"
       @uploadImage="onUploadImage"
     />
-    <unsaved-changes-confirm-dialog :modified="isSaveable" />
+    <unsaved-changes-confirm-dialog :modified="isModified" />
     <publish-toolbar
       class="gl-fixed gl-left-0 gl-bottom-0 gl-w-full"
       :has-settings="hasSettings"
       :return-url="returnUrl"
-      :saveable="isSaveable"
+      :saveable="isModified"
       :saving-changes="savingChanges"
       @editSettings="onDrawerOpen"
       @submit="onSubmit"

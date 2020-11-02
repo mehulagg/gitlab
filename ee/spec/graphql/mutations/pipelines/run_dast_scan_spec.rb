@@ -34,6 +34,10 @@ RSpec.describe Mutations::Pipelines::RunDastScan do
     end
 
     context 'when on demand scan feature is enabled' do
+      before do
+        stub_feature_flags(security_on_demand_scans_feature_flag: true)
+      end
+
       context 'when the project does not exist' do
         let(:project_path) { SecureRandom.hex }
 

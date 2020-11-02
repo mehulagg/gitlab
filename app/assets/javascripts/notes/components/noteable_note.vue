@@ -353,8 +353,7 @@ export default {
     :class="classNameBindings"
     :data-award-url="note.toggle_award_path"
     :data-note-id="note.id"
-    class="note note-wrapper"
-    data-qa-selector="noteable_note_container"
+    class="note note-wrapper qa-noteable-note-item"
   >
     <div
       v-if="showMultiLineComment"

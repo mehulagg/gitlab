@@ -57,11 +57,9 @@ Data table displaying a maximum of the 100 most recent merge requests merged for
 You can filter the data that is presented on the page based on the following parameters:
 
 - Author
-- Assignee
-- Label
-- Milestone
-- Source branch
-- Target branch
+- Assignees
+- Labels
+- Milestones
 
 To filter results:
 

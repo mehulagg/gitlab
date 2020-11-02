@@ -7,8 +7,6 @@ module API
 
       before { authenticate_non_get! }
 
-      feature_category :continuous_integration
-
       params do
         requires :id, type: String, desc: 'The project ID'
       end

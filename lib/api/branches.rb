@@ -10,8 +10,6 @@ module API
 
     after_validation { content_type "application/json" }
 
-    feature_category :source_code_management
-
     before do
       require_repository_enabled!
       authorize! :download_code, user_project

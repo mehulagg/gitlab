@@ -1,7 +1,8 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlModal, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlModal, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
+import tooltip from '~/vue_shared/directives/tooltip';
 import ListItem from './list_item.vue';
 
 export default {
@@ -11,7 +12,7 @@ export default {
     GlModal,
   },
   directives: {
-    GlTooltip: GlTooltipDirective,
+    tooltip,
   },
   props: {
     fileList: {
@@ -72,7 +73,7 @@ export default {
         <div class="d-flex ml-auto">
           <button
             v-if="!stagedList"
-            v-gl-tooltip
+            v-tooltip
             :title="__('Discard all changes')"
             :aria-label="__('Discard all changes')"
             :disabled="!filesLength"

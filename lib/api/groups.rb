@@ -7,8 +7,6 @@ module API
 
     before { authenticate_non_get! }
 
-    feature_category :subgroups
-
     helpers Helpers::GroupsHelpers
 
     helpers do

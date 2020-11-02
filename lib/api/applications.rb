@@ -5,8 +5,6 @@ module API
   class Applications < ::API::Base
     before { authenticated_as_admin! }
 
-    feature_category :authentication_and_authorization
-
     resource :applications do
       helpers do
         def validate_redirect_uri(value)

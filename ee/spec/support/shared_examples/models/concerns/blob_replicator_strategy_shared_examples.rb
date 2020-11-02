@@ -19,7 +19,6 @@ RSpec.shared_examples 'a blob replicator' do
   end
 
   it_behaves_like 'a replicator'
-  it_behaves_like 'a verifiable replicator'
 
   # This could be included in each model's spec, but including it here is DRYer.
   include_examples 'a replicable model'
@@ -34,8 +33,9 @@ RSpec.shared_examples 'a blob replicator' do
         "replicable_name" => replicator.replicable_name, "event_name" => "created", "payload" => { "model_record_id" => replicator.model_record.id })
     end
 
-    it 'calls #after_verifiable_update' do
-      expect(replicator).to receive(:after_verifiable_update)
+    it 'schedules the checksum calculation if needed' do
+      expect(Geo::BlobVerificationPrimaryWorker).to receive(:perform_async)
+      expect(replicator).to receive(:needs_checksum?).and_return(true)
 
       replicator.handle_after_create_commit
     end
@@ -45,8 +45,8 @@ RSpec.shared_examples 'a blob replicator' do
         stub_feature_flags(replicator.replication_enabled_feature_key => false)
       end
 
-      it 'does not call #after_verifiable_update' do
-        expect(replicator).not_to receive(:after_verifiable_update)
+      it 'does not schedule the checksum calculation' do
+        expect(Geo::BlobVerificationPrimaryWorker).not_to receive(:perform_async)
 
         replicator.handle_after_create_commit
       end
@@ -79,6 +79,30 @@ RSpec.shared_examples 'a blob replicator' do
 
         replicator.handle_after_create_commit
       end
+    end
+  end
+
+  describe '#calculate_checksum!' do
+    it 'calculates the checksum' do
+      model_record.save!
+
+      replicator.calculate_checksum!
+
+      expect(model_record.reload.verification_checksum).not_to be_nil
+      expect(model_record.reload.verified_at).not_to be_nil
+    end
+
+    it 'saves the error message and increments retry counter' do
+      model_record.save!
+
+      allow(model_record).to receive(:calculate_checksum!) do
+        raise StandardError.new('Failure to calculate checksum')
+      end
+
+      replicator.calculate_checksum!
+
+      expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
+      expect(model_record.verification_retry_count).to be 1
     end
   end
 

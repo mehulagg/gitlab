@@ -22,8 +22,6 @@ module API
 
       include PaginationParams
 
-      feature_category :integrations
-
       before do
         authorize_jira_user_agent!(request)
         authenticate!

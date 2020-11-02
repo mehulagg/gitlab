@@ -3,13 +3,10 @@
 module API
   module Helpers
     module ResourceLabelEventsHelpers
-      def self.feature_category_per_eventable_type
+      def self.eventable_types
         # This is a method instead of a constant, allowing EE to more easily
         # extend it.
-        {
-          Issue => :issue_tracking,
-          MergeRequest => :code_review
-        }
+        [Issue, MergeRequest]
       end
     end
   end

@@ -21,9 +21,7 @@ export default () => {
   const {
     id,
     iid,
-    numericalId,
     fullPath,
-    groupId,
     autoCompleteEpics,
     autoCompleteIssues,
     userSignedIn,
@@ -42,10 +40,8 @@ export default () => {
     created() {
       this.setInitialParentItem({
         fullPath,
-        numericalId: parseInt(numericalId, 10),
-        groupId: parseInt(groupId, 10),
         id,
-        iid: parseInt(iid, 10),
+        iid: Number(iid),
         title: initialData.initialTitleText,
         confidential: initialData.confidential,
         reference: `${initialData.fullPath}${initialData.issuableRef}`,

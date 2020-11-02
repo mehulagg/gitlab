@@ -3,6 +3,7 @@ GEM
   specs:
     RedCloth (4.3.2)
     abstract_type (0.0.7)
+    ace-rails-ap (4.1.2)
     acme-client (2.0.6)
       faraday (>= 0.17, < 2.0.0)
     actioncable (6.0.3.3)
@@ -198,8 +199,6 @@ GEM
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
     creole (0.5.0)
-    crystalball (0.7.0)
-      git
     css_parser (1.7.0)
       addressable
     daemons (1.2.6)
@@ -369,12 +368,11 @@ GEM
       excon (~> 0.58)
       formatador (~> 0.2)
       mime-types
-    fog-google (1.11.0)
+    fog-google (1.10.0)
       fog-core (<= 2.1.0)
       fog-json (~> 1.2)
       fog-xml (~> 0.1.0)
       google-api-client (>= 0.32, < 0.34)
-      google-cloud-env (~> 1.2)
     fog-json (1.2.0)
       fog-core
       multi_json (~> 1.10)
@@ -476,8 +474,6 @@ GEM
       representable (~> 3.0)
       retriable (>= 2.0, < 4.0)
       signet (~> 0.12)
-    google-cloud-env (1.4.0)
-      faraday (>= 0.17.3, < 2.0)
     google-protobuf (3.12.4)
     googleapis-common-protos-types (1.0.5)
       google-protobuf (~> 3.11)
@@ -1255,6 +1251,7 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth (~> 4.3.2)
+  ace-rails-ap (~> 4.1.0)
   acme-client (~> 2.0, >= 2.0.6)
   activerecord-explain-analyze (~> 0.1)
   acts-as-taggable-on (~> 6.0)
@@ -1294,7 +1291,6 @@ DEPENDENCIES
   connection_pool (~> 2.0)
   countries (~> 3.0)
   creole (~> 0.5.0)
-  crystalball (~> 0.7.0)
   danger (~> 8.0.6)
   database_cleaner (~> 1.7.0)
   deckar01-task_list (= 2.3.1)
@@ -1328,7 +1324,7 @@ DEPENDENCIES
   fog-aliyun (~> 0.3)
   fog-aws (~> 3.5)
   fog-core (= 2.1.0)
-  fog-google (~> 1.11)
+  fog-google (~> 1.10)
   fog-local (~> 0.6)
   fog-openstack (~> 1.0)
   fog-rackspace (~> 0.1.1)
@@ -1524,4 +1520,4 @@ DEPENDENCIES
   yajl-ruby (~> 1.4.1)
 
 BUNDLED WITH
-   2.1.4
+   1.17.3

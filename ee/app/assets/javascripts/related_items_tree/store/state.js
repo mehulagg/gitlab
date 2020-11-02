@@ -52,7 +52,4 @@ export default () => ({
   },
 
   projects: [],
-
-  descendantGroups: [],
-  descendantGroupsFetchInProgress: false,
 });

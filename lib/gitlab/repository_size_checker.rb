@@ -37,9 +37,7 @@ module Gitlab
 
     # @param change_size [int] in bytes
     def exceeded_size(change_size = 0)
-      size = current_size + change_size - limit
-
-      [size, 0].max
+      current_size + change_size - limit
     end
 
     def error_message

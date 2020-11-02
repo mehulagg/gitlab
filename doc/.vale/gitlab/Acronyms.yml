@@ -95,7 +95,6 @@ exceptions:
   - URI
   - URL
   - USB
-  - UTC
   - UUID
   - VPC
   - WIP

@@ -385,13 +385,13 @@ export const receiveCreateItemFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
   flash(s__('Epics|Something went wrong while creating child epics.'));
 };
-export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) => {
+export const createItem = ({ state, dispatch }, { itemTitle }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
     confidential: state.parentItem.confidential,
-    groupId: groupFullPath || state.parentItem.fullPath,
-    parentEpicId: Number(state.parentItem.id.match(/\d.*/)),
+    groupId: state.parentItem.fullPath,
+    parentEpicIid: state.parentItem.iid,
     title: itemTitle,
   })
     .then(({ data }) => {
@@ -404,9 +404,6 @@ export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) =>
       });
 
       dispatch('receiveCreateItemSuccess', { rawItem: data });
-      dispatch('fetchItems', {
-        parentItem: state.parentItem,
-      });
     })
     .catch(() => {
       dispatch('receiveCreateItemFailure');
@@ -592,16 +589,4 @@ export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
       dispatch('receiveProjectsSuccess', data);
     })
     .catch(() => dispatch('receiveProjectsFailure'));
-};
-
-export const fetchDescendantGroups = ({ commit }, { groupId, search = '' }) => {
-  commit(types.REQUEST_DESCENDANT_GROUPS);
-
-  return Api.descendantGroups({ groupId, search })
-    .then(({ data }) => {
-      commit(types.RECEIVE_DESCENDANT_GROUPS_SUCCESS, data);
-    })
-    .catch(() => {
-      commit(types.RECEIVE_DESCENDANT_GROUPS_FAILURE);
-    });
 };

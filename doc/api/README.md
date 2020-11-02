@@ -1,9 +1,3 @@
----
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
----
-
 # API Docs
 
 Automate GitLab via a simple and powerful API.
@@ -173,7 +167,7 @@ to authenticate with the API:
   - [Conan Repository](../user/packages/conan_repository/index.md)
   - [Container Registry](../user/packages/container_registry/index.md) (`$CI_REGISTRY_PASSWORD` is actually `$CI_JOB_TOKEN`, but this may change in the future)
   - [Go Proxy](../user/packages/go_proxy/index.md)
-  - [Maven Repository](../user/packages/maven_repository/index.md#authenticate-with-a-ci-job-token-in-maven)
+  - [Maven Repository](../user/packages/maven_repository/index.md#authenticate-with-a-ci-job-token)
   - [NPM Repository](../user/packages/npm_registry/index.md#authenticating-with-a-ci-job-token)
   - [Nuget Repository](../user/packages/nuget_repository/index.md)
   - [PyPI Repository](../user/packages/pypi_repository/index.md#using-gitlab-ci-with-pypi-packages)

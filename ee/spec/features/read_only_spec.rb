@@ -13,11 +13,12 @@ RSpec.describe 'Geo read-only message', :geo do
     sign_in(user)
   end
 
-  context 'when on a Geo secondary' do
-    before do
-      stub_current_geo_node(secondary)
-    end
+  it 'shows read-only banner when on a Geo secondary' do
+    stub_current_geo_node(secondary)
 
-    it_behaves_like 'Read-only instance', /You are on a secondary, read\-only Geo node\. If you want to make changes, you must visit the primary site.*Go to the primary site/
+    visit root_dashboard_path
+
+    expect(page).to have_content('You are on a secondary, read-only Geo node. If you want to make changes, you must visit the primary site.')
+    expect(page).to have_content('Go to the primary site')
   end
 end

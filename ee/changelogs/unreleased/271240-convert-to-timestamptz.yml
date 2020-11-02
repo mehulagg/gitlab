@@ -1,5 +1,0 @@
----
-title: Change historical_data.date from date to timestamptz data type
-merge_request: 45893
-author:
-type: changed

@@ -42,7 +42,6 @@ FactoryBot.define do
     end
 
     trait :indirect do
-      iid { 42 }
       location do
         {
           blob_path: '/some_project/path/package_file.lock',
@@ -62,12 +61,12 @@ FactoryBot.define do
     end
 
     trait :direct do
-      iid { 24 }
       location do
         {
           blob_path: '/some_project/path/package_file.lock',
           path: 'package_file.lock',
-          ancestors: nil,
+          ancestors:
+            [],
           top_level: true
         }
       end

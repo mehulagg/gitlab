@@ -5,8 +5,6 @@ module API
     class CodeReviewAnalytics < ::API::Base
       include PaginationParams
 
-      feature_category :planning_analytics
-
       helpers do
         def project
           @project ||= find_project!(params[:project_id])

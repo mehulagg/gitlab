@@ -6,8 +6,6 @@ module API
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize
 
-    feature_category :geo_replication
-
     before do
       authenticate_admin_or_geo_node!
     end

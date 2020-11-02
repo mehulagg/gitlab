@@ -4,11 +4,13 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Members > Manage groups', :js do
   include Select2Helper
-  include Spec::Support::Helpers::Features::MembersHelpers
+  include Spec::Support::Helpers::Features::ListRowsHelpers
 
   let_it_be(:user) { create(:user) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(user)
   end
 
@@ -49,6 +51,7 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     end
 
     before do
+      travel_to Time.now.utc.beginning_of_day
       group_link.update!(additional_link_attrs)
 
       shared_group.add_owner(user)
@@ -60,12 +63,8 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
 
       expect(page).to have_content(shared_with_group.name)
 
-      page.within(first_row) do
-        click_button 'Remove group'
-      end
-
-      page.within('[role="dialog"]') do
-        click_button('Remove group')
+      accept_confirm do
+        find(:css, '#tab-groups li', text: shared_with_group.name).find(:css, 'a.btn-danger').click
       end
 
       expect(page).not_to have_content(shared_with_group.name)
@@ -76,7 +75,7 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
 
       page.within(first_row) do
         click_button('Developer')
-        click_button('Maintainer')
+        click_link('Maintainer')
 
         wait_for_requests
 
@@ -87,30 +86,33 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     it 'updates expiry date' do
       click_groups_tab
 
-      page.within first_row do
-        fill_in 'Expiration date', with: 5.days.from_now.to_date
-        find_field('Expiration date').native.send_keys :enter
+      expires_at_field = "member_expires_at_#{shared_with_group.id}"
+      fill_in "member_expires_at_#{shared_with_group.id}", with: 3.days.from_now.to_date
 
-        wait_for_requests
+      find_field(expires_at_field).native.send_keys :enter
+      wait_for_requests
 
-        expect(page).to have_content(/in \d days/)
+      page.within(find('li.group_member')) do
+        expect(page).to have_content('Expires in 3 days')
       end
     end
 
     context 'when expiry date is set' do
-      let(:additional_link_attrs) { { expires_at: 5.days.from_now.to_date } }
+      let(:additional_link_attrs) { { expires_at: 3.days.from_now.to_date } }
 
       it 'clears expiry date' do
         click_groups_tab
 
-        page.within first_row do
-          expect(page).to have_content(/in \d days/)
+        page.within(find('li.group_member')) do
+          expect(page).to have_content('Expires in 3 days')
 
-          find('[data-testid="clear-button"]').click
+          page.within(find('.js-edit-member-form')) do
+            find('.js-clear-input').click
+          end
 
           wait_for_requests
 
-          expect(page).to have_content('No expiration set')
+          expect(page).not_to have_content('Expires in')
         end
       end
     end
@@ -126,7 +128,6 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
   end
 
   def click_groups_tab
-    expect(page).to have_link 'Groups'
     click_link "Groups"
   end
 end

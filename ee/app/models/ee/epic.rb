@@ -18,7 +18,6 @@ module EE
       include EpicTreeSorting
       include Presentable
       include IdInOrdered
-      include Todoable
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],

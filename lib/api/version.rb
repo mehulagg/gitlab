@@ -9,8 +9,6 @@ module API
 
     before { authenticate! }
 
-    feature_category :not_owned
-
     METADATA_QUERY = <<~EOF
       {
         metadata {

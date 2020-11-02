@@ -19,7 +19,10 @@ RSpec.describe 'User searches for wiki pages', :js do
   shared_examples 'search wiki blobs' do
     it 'finds a page' do
       find('.js-search-project-dropdown').click
-      find('[data-testid="project-filter"]').click_link(project.full_name)
+
+      page.within('.project-filter') do
+        click_link(project.full_name)
+      end
 
       fill_in('dashboard_search', with: search_term)
       find('.btn-search').click

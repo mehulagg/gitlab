@@ -4,8 +4,6 @@ module API
   class Suggestions < ::API::Base
     before { authenticate! }
 
-    feature_category :code_review
-
     resource :suggestions do
       desc 'Apply suggestion patch in the Merge Request it was created' do
         success Entities::Suggestion

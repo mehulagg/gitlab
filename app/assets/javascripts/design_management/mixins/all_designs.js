@@ -1,5 +1,5 @@
 import { propertyOf } from 'lodash';
-import createFlash, { FLASH_TYPES } from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import getDesignListQuery from '../graphql/queries/get_design_list.query.graphql';
 import allVersionsMixin from './all_versions';
@@ -36,20 +36,20 @@ export default {
       },
       result() {
         if (this.$route.query.version && !this.hasValidVersion) {
-          createFlash({
-            message: s__(
+          createFlash(
+            s__(
               'DesignManagement|Requested design version does not exist. Showing latest version instead',
             ),
-          });
+          );
           this.$router.replace({ name: DESIGNS_ROUTE_NAME, query: { version: undefined } });
         }
         if (this.designCollection.copyState === 'ERROR') {
-          createFlash({
-            message: s__(
+          createFlash(
+            s__(
               'DesignManagement|There was an error moving your designs. Please upload your designs below.',
             ),
-            type: FLASH_TYPES.WARNING,
-          });
+            'warning',
+          );
         }
       },
     },

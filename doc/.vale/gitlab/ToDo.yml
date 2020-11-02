@@ -5,10 +5,9 @@
 #
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: substitution
-message: 'Use "to-do item" in most cases, or "Add a to do" if referring to the UI button.'
+message: 'Use "%s" instead of "%s" unless referring to the "Add a To Do" button in the UI.'
 link: https://docs.gitlab.com/ee/development/documentation/styleguide.html#feature-names
 level: warning
-ignorecase: false
+ignorecase: true
 swap:
-  '[Tt]o [Dd]o [Ii]tems?': to-do item
-  '\w* [Aa] [Tt]o [Dd]o': Add a to do
+  'to dos': to-do items

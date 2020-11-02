@@ -6,21 +6,17 @@ import TerminalSyncStatusSafe from '~/ide/components/terminal_sync/terminal_sync
 
 const TEST_FILE = {
   name: 'lorem.md',
+  editorRow: 3,
+  editorColumn: 23,
+  fileLanguage: 'markdown',
   content: 'abc\nndef',
   permalink: '/lorem.md',
 };
-const TEST_FILE_EDITOR = {
-  fileLanguage: 'markdown',
-  editorRow: 3,
-  editorColumn: 23,
-};
-const TEST_EDITOR_POSITION = `${TEST_FILE_EDITOR.editorRow}:${TEST_FILE_EDITOR.editorColumn}`;
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('ide/components/ide_status_list', () => {
-  let activeFileEditor;
   let activeFile;
   let store;
   let wrapper;
@@ -30,14 +26,6 @@ describe('ide/components/ide_status_list', () => {
     store = new Vuex.Store({
       getters: {
         activeFile: () => activeFile,
-      },
-      modules: {
-        editor: {
-          namespaced: true,
-          getters: {
-            activeFileEditor: () => activeFileEditor,
-          },
-        },
       },
     });
 
@@ -50,7 +38,6 @@ describe('ide/components/ide_status_list', () => {
 
   beforeEach(() => {
     activeFile = TEST_FILE;
-    activeFileEditor = TEST_FILE_EDITOR;
   });
 
   afterEach(() => {
@@ -59,6 +46,8 @@ describe('ide/components/ide_status_list', () => {
     store = null;
     wrapper = null;
   });
+
+  const getEditorPosition = file => `${file.editorRow}:${file.editorColumn}`;
 
   describe('with regular file', () => {
     beforeEach(() => {
@@ -76,11 +65,11 @@ describe('ide/components/ide_status_list', () => {
     });
 
     it('shows file editor position', () => {
-      expect(wrapper.text()).toContain(TEST_EDITOR_POSITION);
+      expect(wrapper.text()).toContain(getEditorPosition(TEST_FILE));
     });
 
     it('shows file language', () => {
-      expect(wrapper.text()).toContain(TEST_FILE_EDITOR.fileLanguage);
+      expect(wrapper.text()).toContain(TEST_FILE.fileLanguage);
     });
   });
 
@@ -92,7 +81,7 @@ describe('ide/components/ide_status_list', () => {
     });
 
     it('does not show file editor position', () => {
-      expect(wrapper.text()).not.toContain(TEST_EDITOR_POSITION);
+      expect(wrapper.text()).not.toContain(getEditorPosition(TEST_FILE));
     });
   });
 

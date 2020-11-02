@@ -1082,14 +1082,6 @@ describe('RelatedItemTree', () => {
                   rawItem: { ...mockEpic1, path: '', state: ChildState.Open, created_at: '' },
                 },
               },
-              {
-                type: 'fetchItems',
-                payload: {
-                  parentItem: {
-                    ...mockParentItem,
-                  },
-                },
-              },
             ],
           );
         });

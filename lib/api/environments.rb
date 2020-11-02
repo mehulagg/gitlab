@@ -7,8 +7,6 @@ module API
 
     before { authenticate! }
 
-    feature_category :continuous_delivery
-
     params do
       requires :id, type: String, desc: 'The project ID'
     end

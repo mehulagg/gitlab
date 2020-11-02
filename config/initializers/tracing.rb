@@ -2,8 +2,7 @@
 
 if Labkit::Tracing.enabled?
   Rails.application.configure do |config|
-    # Rack needs to parse multipart messages before ActionDispatch can filter parameters
-    config.middleware.insert_after Rack::MethodOverride, ::Labkit::Tracing::RackMiddleware
+    config.middleware.insert_after Labkit::Middleware::Rack, ::Labkit::Tracing::RackMiddleware
   end
 
   # Instrument Redis

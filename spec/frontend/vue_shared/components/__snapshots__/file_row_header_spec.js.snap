@@ -5,11 +5,11 @@ exports[`File row header component adds multiple ellipsises after 40 characters 
   class="file-row-header bg-white sticky-top p-2 js-file-row-header"
   title="app/assets/javascripts/merge_requests/widget/diffs/notes"
 >
-  <gl-truncate-stub
+  <span
     class="bold"
-    position="middle"
-    text="app/assets/javascripts/merge_requests/widget/diffs/notes"
-  />
+  >
+    app/assets/javascripts/…/…/diffs/notes
+  </span>
 </div>
 `;
 
@@ -18,11 +18,11 @@ exports[`File row header component renders file path 1`] = `
   class="file-row-header bg-white sticky-top p-2 js-file-row-header"
   title="app/assets"
 >
-  <gl-truncate-stub
+  <span
     class="bold"
-    position="middle"
-    text="app/assets"
-  />
+  >
+    app/assets
+  </span>
 </div>
 `;
 
@@ -31,10 +31,10 @@ exports[`File row header component trucates path after 40 characters 1`] = `
   class="file-row-header bg-white sticky-top p-2 js-file-row-header"
   title="app/assets/javascripts/merge_requests"
 >
-  <gl-truncate-stub
+  <span
     class="bold"
-    position="middle"
-    text="app/assets/javascripts/merge_requests"
-  />
+  >
+    app/assets/javascripts/merge_requests
+  </span>
 </div>
 `;

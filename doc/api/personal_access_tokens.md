@@ -1,17 +1,10 @@
----
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
----
-
-# Personal access tokens API
+# Personal access tokens API **(ULTIMATE)**
 
 You can read more about [personal access tokens](../user/profile/personal_access_tokens.md#personal-access-tokens).
 
 ## List personal access tokens
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227264) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.3.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/270200) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227264) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.3.
 
 Get a list of personal access tokens.
 

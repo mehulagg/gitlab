@@ -70,50 +70,34 @@ export default {
       </span>
       <span class="uploading-error-container hide">
         <span class="uploading-error-icon">
-          <gl-icon name="media" />
+          <template>
+            <gl-icon name="media" />
+          </template>
         </span>
         <span class="uploading-error-message"></span>
 
         <gl-sprintf
           :message="
             __(
-              '%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}.',
+              '%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}',
             )
           "
         >
           <template #retryButton="{content}">
-            <gl-button
-              variant="link"
-              category="primary"
-              class="retry-uploading-link gl-vertical-align-baseline"
-            >
-              {{ content }}
-            </gl-button>
+            <button class="retry-uploading-link" type="button">{{ content }}</button>
           </template>
           <template #newFileButton="{content}">
-            <gl-button
-              variant="link"
-              category="primary"
-              class="markdown-selector attach-new-file gl-vertical-align-baseline"
-            >
-              {{ content }}
-            </gl-button>
+            <button class="attach-new-file markdown-selector" type="button">{{ content }}</button>
           </template>
         </gl-sprintf>
       </span>
-      <gl-button
-        icon="media"
-        variant="link"
-        category="primary"
-        class="markdown-selector button-attach-file gl-vertical-align-text-bottom"
-      >
-        {{ __('Attach a file') }}
+      <gl-button class="markdown-selector button-attach-file" variant="link">
+        <template>
+          <gl-icon name="media" :size="16" />
+        </template>
+        <span class="text-attach-file">{{ __('Attach a file') }}</span>
       </gl-button>
-      <gl-button
-        variant="link"
-        category="primary"
-        class="button-cancel-uploading-files gl-vertical-align-baseline hide"
-      >
+      <gl-button class="btn btn-default btn-sm hide button-cancel-uploading-files" variant="link">
         {{ __('Cancel') }}
       </gl-button>
     </span>

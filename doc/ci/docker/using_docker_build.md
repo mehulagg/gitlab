@@ -90,7 +90,7 @@ GitLab Runner then executes job scripts as the `gitlab-runner` user.
 1. You can now use `docker` command (and **install** `docker-compose` if needed).
 
 By adding `gitlab-runner` to the `docker` group you are effectively granting `gitlab-runner` full root permissions.
-For more information please read [On Docker security: `docker` group considered harmful](https://blog.zopyx.com/on-docker-security-docker-group-considered-harmful/).
+For more information please read [On Docker security: `docker` group considered harmful](https://www.andreas-jung.com/contents/on-docker-security-docker-group-considered-harmful).
 
 ### Use Docker-in-Docker workflow with Docker executor
 
@@ -300,58 +300,6 @@ build:
   script:
     - docker build -t my-docker-image .
     - docker run my-docker-image /script/to/run/tests
-```
-
-#### Enable registry mirror for `docker:dind` service
-
-When the Docker daemon starts inside of the service container, it uses
-the default configuration. You may want to configure a [registry
-mirror](https://docs.docker.com/registry/recipes/mirror/) for
-performance improvements and ensuring you don't reach DockerHub rate limits.
-
-##### Inside `.gitlab-ci.yml`
-
-You can append extra CLI flags to the `dind` service to set the registry
-mirror:
-
-```yaml
-services:
-   - name: docker:19.03.13-dind
-     command: ["--registry-mirror", "https://registry-mirror.example.com"] # Specify the registry mirror to use.
-```
-
-##### Docker executor inside GitLab Runner configuration
-
-If you are an administrator of GitLab Runner and you always want to use
-the mirror for every `dind` service, update the
-[configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html)
-to specify a [volume
-mount](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#volumes-in-the-runnersdocker-section).
-
-Given we have a file `/opt/docker/daemon.json` with the following
-content:
-
-```json
-{
-  "registry-mirrors": [
-    "https://registry-mirror.example.com"
-  ]
-}
-```
-
-Update the `config.toml` for GitLab Runner to mount the file to
-`/etc/docker/daemon.json`. This would mount the file for **every**
-container that is created by GitLab Runner. The configuration will be
-picked up by the `dind` service.
-
-```toml
-[[runners]]
-  ...
-  executor = "docker"
-  [runners.docker]
-    image = "alpine:3.12"
-    privileged = true
-    volumes = ["/opt/docker/daemon.json:/etc/docker/daemon.json:ro"]
 ```
 
 ### Use Docker socket binding

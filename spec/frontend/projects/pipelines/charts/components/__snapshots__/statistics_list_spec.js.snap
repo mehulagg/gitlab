@@ -11,6 +11,7 @@ exports[`StatisticsList matches the snapshot 1`] = `
       4 pipelines
     </strong>
   </li>
+   
   <li>
     <span>
       Successful:
@@ -20,6 +21,7 @@ exports[`StatisticsList matches the snapshot 1`] = `
       2 pipelines
     </strong>
   </li>
+   
   <li>
     <span>
       Failed:
@@ -29,6 +31,7 @@ exports[`StatisticsList matches the snapshot 1`] = `
       2 pipelines
     </strong>
   </li>
+   
   <li>
     <span>
       Success ratio:
@@ -36,15 +39,6 @@ exports[`StatisticsList matches the snapshot 1`] = `
      
     <strong>
       50%
-    </strong>
-  </li>
-  <li>
-    <span>
-      Total duration:
-    </span>
-     
-    <strong>
-      00:01:56
     </strong>
   </li>
 </ul>

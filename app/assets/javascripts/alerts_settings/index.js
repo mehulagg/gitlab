@@ -1,10 +1,6 @@
 import Vue from 'vue';
-import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
-
-Vue.use(VueApollo);
+import AlertSettingsForm from './components/alerts_settings_form.vue';
 
 export default el => {
   if (!el) {
@@ -28,27 +24,18 @@ export default el => {
     opsgenieMvcFormPath,
     opsgenieMvcEnabled,
     opsgenieMvcTargetUrl,
-    projectPath,
   } = el.dataset;
 
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(
-      {},
-      {
-        cacheConfig: {},
-      },
-    ),
-  });
-
-  apolloProvider.clients.defaultClient.cache.writeData({
-    data: {},
-  });
+  const genericActivated = parseBoolean(activatedStr);
+  const prometheusIsActivated = parseBoolean(prometheusActivated);
+  const opsgenieMvcActivated = parseBoolean(opsgenieMvcEnabled);
+  const opsgenieMvcIsAvailable = parseBoolean(opsgenieMvcAvailable);
 
   return new Vue({
     el,
     provide: {
       prometheus: {
-        activated: parseBoolean(prometheusActivated),
+        activated: prometheusIsActivated,
         prometheusUrl,
         authorizationKey: prometheusAuthorizationKey,
         prometheusFormPath,
@@ -58,25 +45,23 @@ export default el => {
       generic: {
         alertsSetupUrl,
         alertsUsageUrl,
-        activated: parseBoolean(activatedStr),
+        activated: genericActivated,
         formPath,
         authorizationKey,
         url,
       },
       opsgenie: {
         formPath: opsgenieMvcFormPath,
-        activated: parseBoolean(opsgenieMvcEnabled),
+        activated: opsgenieMvcActivated,
         opsgenieMvcTargetUrl,
-        opsgenieMvcIsAvailable: parseBoolean(opsgenieMvcAvailable),
+        opsgenieMvcIsAvailable,
       },
-      projectPath,
     },
-    apolloProvider,
     components: {
-      AlertSettingsWrapper,
+      AlertSettingsForm,
     },
     render(createElement) {
-      return createElement('alert-settings-wrapper');
+      return createElement('alert-settings-form');
     },
   });
 };

@@ -7,8 +7,6 @@ module API
 
     before { authenticate! }
 
-    feature_category :issue_tracking
-
     params do
       requires :id, type: String, desc: 'The ID of a group'
     end

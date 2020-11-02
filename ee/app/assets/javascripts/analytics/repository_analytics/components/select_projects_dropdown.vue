@@ -40,13 +40,11 @@ export default {
         };
       },
       update(data) {
-        return (
-          data.group?.projects?.nodes?.map(project => ({
-            ...project,
-            parsedId: getIdFromGraphQLId(project.id),
-            isSelected: false,
-          })) || []
-        );
+        return data.group.projects.nodes.map(project => ({
+          ...project,
+          parsedId: getIdFromGraphQLId(project.id),
+          isSelected: false,
+        }));
       },
       result({ data }) {
         this.projectsPageInfo = data?.group?.projects?.pageInfo || {};

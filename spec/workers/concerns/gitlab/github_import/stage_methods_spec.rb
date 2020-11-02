@@ -9,8 +9,6 @@ RSpec.describe Gitlab::GithubImport::StageMethods do
   end
 
   describe '#perform' do
-    let(:project) { create(:project, import_url: 'https://t0ken@github.com/repo/repo.git') }
-
     it 'returns if no project could be found' do
       expect(worker).not_to receive(:try_import)
 

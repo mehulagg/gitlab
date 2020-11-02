@@ -36,15 +36,15 @@ RSpec.describe 'Global search' do
     end
   end
 
-  it 'closes the dropdown on blur', :js do
-    find('#search').click
+  it 'closes the dropdown on blur', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/201841' do
     fill_in 'search', with: "a"
+    dropdown = find('.js-dashboard-search-options')
 
-    expect(page).to have_selector("div[data-testid='dashboard-search-options'].show")
+    expect(dropdown[:class]).to include 'show'
 
     find('#search').send_keys(:backspace)
     find('body').click
 
-    expect(page).to have_no_selector("div[data-testid='dashboard-search-options'].show")
+    expect(dropdown[:class]).not_to include 'show'
   end
 end

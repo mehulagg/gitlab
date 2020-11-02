@@ -8,11 +8,11 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
   let(:project) { create(:project, :repository, :wiki_repo, namespace: group) }
 
   def choose_group(group)
-    find('[data-testid="group-filter"]').click
+    find('.js-search-group-dropdown').click
     wait_for_requests
 
-    page.within '[data-testid="group-filter"]' do
-      click_button group.name
+    page.within '.js-search-form' do
+      click_link group.name
     end
   end
 
@@ -25,9 +25,6 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
     sign_in(user)
 
     visit(search_path)
-
-    wait_for_requests
-
     choose_group(group)
   end
 

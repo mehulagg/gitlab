@@ -63,8 +63,6 @@ module EE
           attrs << :maintenance_mode_message
         end
 
-        attrs << :new_user_signups_cap if ::Feature.enabled?(:admin_new_user_signups_cap)
-
         attrs
       end
 

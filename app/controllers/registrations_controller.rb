@@ -60,7 +60,8 @@ class RegistrationsController < Devise::RegistrationsController
   def update_registration
     return redirect_to new_user_registration_path unless current_user
 
-    result = ::Users::SignupService.new(current_user, update_registration_params).execute
+    user_params = params.require(:user).permit(:role, :setup_for_company)
+    result = ::Users::SignupService.new(current_user, user_params).execute
 
     if result[:status] == :success
       if ::Gitlab.com? && show_onboarding_issues_experiment?
@@ -163,10 +164,6 @@ class RegistrationsController < Devise::RegistrationsController
     params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
   end
 
-  def update_registration_params
-    params.require(:user).permit(:role, :setup_for_company)
-  end
-
   def resource_name
     :user
   end
@@ -221,6 +218,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def set_user_state
+    return unless Feature.enabled?(:admin_approval_for_new_user_signups, default_enabled: true)
     return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
 
     resource.state = BLOCKED_PENDING_APPROVAL_STATE

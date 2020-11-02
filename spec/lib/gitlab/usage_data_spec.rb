@@ -546,13 +546,13 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       subject { described_class.data[:counts] }
 
       it 'gathers usage data' do
-        expect(subject[:projects_with_expiration_policy_enabled]).to eq 18
-        expect(subject[:projects_with_expiration_policy_disabled]).to eq 5
+        expect(subject[:projects_with_expiration_policy_enabled]).to eq 22
+        expect(subject[:projects_with_expiration_policy_disabled]).to eq 1
 
         expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_unset]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_set_to_1]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_set_to_5]).to eq 1
-        expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_set_to_10]).to eq 12
+        expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_set_to_10]).to eq 16
         expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_set_to_25]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_keep_n_set_to_50]).to eq 1
 
@@ -560,9 +560,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         expect(subject[:projects_with_expiration_policy_enabled_with_older_than_set_to_7d]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_older_than_set_to_14d]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_older_than_set_to_30d]).to eq 1
-        expect(subject[:projects_with_expiration_policy_enabled_with_older_than_set_to_90d]).to eq 14
+        expect(subject[:projects_with_expiration_policy_enabled_with_older_than_set_to_90d]).to eq 18
 
-        expect(subject[:projects_with_expiration_policy_enabled_with_cadence_set_to_1d]).to eq 14
+        expect(subject[:projects_with_expiration_policy_enabled_with_cadence_set_to_1d]).to eq 18
         expect(subject[:projects_with_expiration_policy_enabled_with_cadence_set_to_7d]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_cadence_set_to_14d]).to eq 1
         expect(subject[:projects_with_expiration_policy_enabled_with_cadence_set_to_1month]).to eq 1
@@ -591,21 +591,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
   describe '.system_usage_data_monthly' do
     let_it_be(:project) { create(:project) }
+    let!(:ud) { build(:usage_data) }
 
     before do
-      project = create(:project)
-      env = create(:environment)
-      create(:package, project: project, created_at: 3.days.ago)
-      create(:package, created_at: 2.months.ago, project: project)
-
-      [3, 31].each do |n|
-        deployment_options = { created_at: n.days.ago, project: env.project, environment: env }
-        create(:deployment, :failed, deployment_options)
-        create(:deployment, :success, deployment_options)
-        create(:project_snippet, project: project, created_at: n.days.ago)
-        create(:personal_snippet, created_at: n.days.ago)
-      end
-
       stub_application_setting(self_monitoring_project: project)
 
       for_defined_days_back do
@@ -621,10 +609,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(counts_monthly[:deployments]).to eq(2)
       expect(counts_monthly[:successful_deployments]).to eq(1)
       expect(counts_monthly[:failed_deployments]).to eq(1)
-      expect(counts_monthly[:snippets]).to eq(2)
+      expect(counts_monthly[:snippets]).to eq(3)
       expect(counts_monthly[:personal_snippets]).to eq(1)
-      expect(counts_monthly[:project_snippets]).to eq(1)
-      expect(counts_monthly[:packages]).to eq(1)
+      expect(counts_monthly[:project_snippets]).to eq(2)
+      expect(counts_monthly[:packages]).to eq(3)
       expect(counts_monthly[:promoted_issues]).to eq(1)
     end
   end

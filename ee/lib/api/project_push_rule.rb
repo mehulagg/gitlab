@@ -2,7 +2,6 @@
 
 module API
   class ProjectPushRule < ::API::Base
-    feature_category :source_code_management
     before { authenticate! }
     before { authorize_admin_project }
     before { check_project_feature_available!(:push_rules) }

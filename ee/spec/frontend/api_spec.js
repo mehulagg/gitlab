@@ -66,22 +66,22 @@ describe('Api', () => {
   describe('createChildEpic', () => {
     it('calls `axios.post` using params `groupId`, `parentEpicIid` and title', done => {
       const groupId = 'gitlab-org';
-      const parentEpicId = 1;
+      const parentEpicIid = 1;
       const title = 'Sample epic';
-      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics`;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics/${parentEpicIid}/epics`;
       const expectedRes = {
         title,
         id: 20,
-        parentId: 5,
+        iid: 5,
       };
 
       mock.onPost(expectedUrl).reply(httpStatus.OK, expectedRes);
 
-      Api.createChildEpic({ groupId, parentEpicId, title })
+      Api.createChildEpic({ groupId, parentEpicIid, title })
         .then(({ data }) => {
           expect(data.title).toBe(expectedRes.title);
           expect(data.id).toBe(expectedRes.id);
-          expect(data.parentId).toBe(expectedRes.parentId);
+          expect(data.iid).toBe(expectedRes.iid);
         })
         .then(done)
         .catch(done.fail);

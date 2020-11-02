@@ -8,8 +8,6 @@ module API
 
     before { authorize_admin_project }
 
-    feature_category :source_code_management
-
     helpers Helpers::ProtectedBranchesHelpers
 
     params do

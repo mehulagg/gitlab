@@ -591,178 +591,6 @@ type AlertManagementAlertStatusCountsType {
 }
 
 """
-An endpoint and credentials used to accept alerts for a project
-"""
-type AlertManagementHttpIntegration implements AlertManagementIntegration {
-  """
-  Whether the endpoint is currently accepting alerts
-  """
-  active: Boolean
-
-  """
-  URL at which Prometheus metrics can be queried to populate the metrics dashboard
-  """
-  apiUrl: String
-
-  """
-  ID of the integration
-  """
-  id: ID!
-
-  """
-  Name of the integration
-  """
-  name: String
-
-  """
-  Token used to authenticate alert notification requests
-  """
-  token: String
-
-  """
-  Type of integration
-  """
-  type: AlertManagementIntegrationType!
-
-  """
-  Endpoint which accepts alert notifications
-  """
-  url: String
-}
-
-"""
-Identifier of AlertManagement::HttpIntegration
-"""
-scalar AlertManagementHttpIntegrationID
-
-interface AlertManagementIntegration {
-  """
-  Whether the endpoint is currently accepting alerts
-  """
-  active: Boolean
-
-  """
-  URL at which Prometheus metrics can be queried to populate the metrics dashboard
-  """
-  apiUrl: String
-
-  """
-  ID of the integration
-  """
-  id: ID!
-
-  """
-  Name of the integration
-  """
-  name: String
-
-  """
-  Token used to authenticate alert notification requests
-  """
-  token: String
-
-  """
-  Type of integration
-  """
-  type: AlertManagementIntegrationType!
-
-  """
-  Endpoint which accepts alert notifications
-  """
-  url: String
-}
-
-"""
-The connection type for AlertManagementIntegration.
-"""
-type AlertManagementIntegrationConnection {
-  """
-  A list of edges.
-  """
-  edges: [AlertManagementIntegrationEdge]
-
-  """
-  A list of nodes.
-  """
-  nodes: [AlertManagementIntegration]
-
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-An edge in a connection.
-"""
-type AlertManagementIntegrationEdge {
-  """
-  A cursor for use in pagination.
-  """
-  cursor: String!
-
-  """
-  The item at the end of the edge.
-  """
-  node: AlertManagementIntegration
-}
-
-"""
-Values of types of integrations
-"""
-enum AlertManagementIntegrationType {
-  """
-  Integration with any monitoring tool
-  """
-  HTTP
-
-  """
-  Prometheus integration
-  """
-  PROMETHEUS
-}
-
-"""
-An endpoint and credentials used to accept Prometheus alerts for a project
-"""
-type AlertManagementPrometheusIntegration implements AlertManagementIntegration {
-  """
-  Whether the endpoint is currently accepting alerts
-  """
-  active: Boolean
-
-  """
-  URL at which Prometheus metrics can be queried to populate the metrics dashboard
-  """
-  apiUrl: String
-
-  """
-  ID of the integration
-  """
-  id: ID!
-
-  """
-  Name of the integration
-  """
-  name: String
-
-  """
-  Token used to authenticate alert notification requests
-  """
-  token: String
-
-  """
-  Type of integration
-  """
-  type: AlertManagementIntegrationType!
-
-  """
-  Endpoint which accepts alert notifications
-  """
-  url: String
-}
-
-"""
 Alert severity values
 """
 enum AlertManagementSeverity {
@@ -930,21 +758,6 @@ type AlertTodoCreatePayload {
   The todo after mutation
   """
   todo: Todo
-}
-
-"""
-User availability status
-"""
-enum AvailabilityEnum {
-  """
-  Busy
-  """
-  BUSY
-
-  """
-  Not Set
-  """
-  NOT_SET
 }
 
 """
@@ -2703,66 +2516,6 @@ Identifier of Clusters::Cluster
 scalar ClustersClusterID
 
 """
-Represents the code coverage activity for a group
-"""
-type CodeCoverageActivity {
-  """
-  Average percentage of the different code coverage results available for the group.
-  """
-  averageCoverage: Float
-
-  """
-  Number of different code coverage results available for the group.
-  """
-  coverageCount: Int
-
-  """
-  Date when the code coverage was created.
-  """
-  date: Date!
-
-  """
-  Number of projects with code coverage results for the group.
-  """
-  projectCount: Int
-}
-
-"""
-The connection type for CodeCoverageActivity.
-"""
-type CodeCoverageActivityConnection {
-  """
-  A list of edges.
-  """
-  edges: [CodeCoverageActivityEdge]
-
-  """
-  A list of nodes.
-  """
-  nodes: [CodeCoverageActivity]
-
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-An edge in a connection.
-"""
-type CodeCoverageActivityEdge {
-  """
-  A cursor for use in pagination.
-  """
-  cursor: String!
-
-  """
-  The item at the end of the edge.
-  """
-  node: CodeCoverageActivity
-}
-
-"""
 Represents the code coverage summary for a project
 """
 type CodeCoverageSummary {
@@ -3050,7 +2803,7 @@ type ComplianceFramework {
   """
   Name of the compliance framework
   """
-  name: String!
+  name: ProjectSettingEnum!
 }
 
 """
@@ -6478,9 +6231,10 @@ type Environment {
   name: String!
 
   """
-  The path to the environment.
+  The path to the environment. Will always return null if
+  `expose_environment_path_in_alert_details` feature flag is disabled
   """
-  path: String!
+  path: String
 
   """
   State of the environment, for example: available/stopped
@@ -7156,11 +6910,6 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   blocked: Boolean!
 
   """
-  Count of issues blocking this issue
-  """
-  blockedByCount: Int
-
-  """
   Timestamp of when the issue was closed
   """
   closedAt: Time
@@ -7464,11 +7213,6 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   Timestamp of when the issue was last updated
   """
   updatedAt: Time!
-
-  """
-  User that last updated the issue
-  """
-  updatedBy: User
 
   """
   Number of upvotes the issue has received
@@ -8044,37 +7788,6 @@ type Group {
     """
     last: Int
   ): BoardConnection
-
-  """
-  Represents the code coverage activity for this group. Available only when
-  feature flag `group_coverage_data_report` is enabled
-  """
-  codeCoverageActivities(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-
-    """
-    First day for which to fetch code coverage activity (maximum time window is set to 90 days)
-    """
-    startDate: Date!
-  ): CodeCoverageActivityConnection
 
   """
   Container repositories of the project
@@ -9232,131 +8945,6 @@ enum HealthStatus {
 }
 
 """
-Autogenerated input type of HttpIntegrationCreate
-"""
-input HttpIntegrationCreateInput {
-  """
-  Whether the integration is receiving alerts
-  """
-  active: Boolean!
-
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The name of the integration
-  """
-  name: String!
-
-  """
-  The project to create the integration in
-  """
-  projectPath: ID!
-}
-
-"""
-Autogenerated return type of HttpIntegrationCreate
-"""
-type HttpIntegrationCreatePayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The updated HTTP integration
-  """
-  integration: AlertManagementHttpIntegration
-}
-
-"""
-Autogenerated input type of HttpIntegrationResetToken
-"""
-input HttpIntegrationResetTokenInput {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The id of the integration to mutate
-  """
-  id: AlertManagementHttpIntegrationID!
-}
-
-"""
-Autogenerated return type of HttpIntegrationResetToken
-"""
-type HttpIntegrationResetTokenPayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The updated HTTP integration
-  """
-  integration: AlertManagementHttpIntegration
-}
-
-"""
-Autogenerated input type of HttpIntegrationUpdate
-"""
-input HttpIntegrationUpdateInput {
-  """
-  Whether the integration is receiving alerts
-  """
-  active: Boolean
-
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The id of the integration to mutate
-  """
-  id: AlertManagementHttpIntegrationID!
-
-  """
-  The name of the integration
-  """
-  name: String
-}
-
-"""
-Autogenerated return type of HttpIntegrationUpdate
-"""
-type HttpIntegrationUpdatePayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The updated HTTP integration
-  """
-  integration: AlertManagementHttpIntegration
-}
-
-"""
 An ISO 8601-encoded date
 """
 scalar ISO8601Date
@@ -9583,11 +9171,6 @@ type Issue implements CurrentUserTodos & Noteable {
   Indicates the issue is blocked
   """
   blocked: Boolean!
-
-  """
-  Count of issues blocking this issue
-  """
-  blockedByCount: Int
 
   """
   Timestamp of when the issue was closed
@@ -9883,11 +9466,6 @@ type Issue implements CurrentUserTodos & Noteable {
   Timestamp of when the issue was last updated
   """
   updatedAt: Time!
-
-  """
-  User that last updated the issue
-  """
-  updatedBy: User
 
   """
   Number of upvotes the issue has received
@@ -10618,16 +10196,6 @@ enum IssueSort {
   Severity from more critical to less critical
   """
   SEVERITY_DESC
-
-  """
-  Issues with earliest SLA due time shown first
-  """
-  SLA_DUE_AT_ASC
-
-  """
-  Issues with latest SLA due time shown first
-  """
-  SLA_DUE_AT_DESC
 
   """
   Updated at ascending order
@@ -12258,7 +11826,7 @@ input MergeRequestSetLabelsInput {
   """
   The Label IDs to set. Replaces existing labels by default.
   """
-  labelIds: [LabelID!]!
+  labelIds: [ID!]!
 
   """
   Changes the operation mode. Defaults to REPLACE.
@@ -12949,9 +12517,6 @@ type Mutation {
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
-  httpIntegrationCreate(input: HttpIntegrationCreateInput!): HttpIntegrationCreatePayload
-  httpIntegrationResetToken(input: HttpIntegrationResetTokenInput!): HttpIntegrationResetTokenPayload
-  httpIntegrationUpdate(input: HttpIntegrationUpdateInput!): HttpIntegrationUpdatePayload
   issueMove(input: IssueMoveInput!): IssueMovePayload
   issueMoveList(input: IssueMoveListInput!): IssueMoveListPayload
   issueSetAssignees(input: IssueSetAssigneesInput!): IssueSetAssigneesPayload
@@ -12982,9 +12547,6 @@ type Mutation {
   pipelineCancel(input: PipelineCancelInput!): PipelineCancelPayload
   pipelineDestroy(input: PipelineDestroyInput!): PipelineDestroyPayload
   pipelineRetry(input: PipelineRetryInput!): PipelineRetryPayload
-  prometheusIntegrationCreate(input: PrometheusIntegrationCreateInput!): PrometheusIntegrationCreatePayload
-  prometheusIntegrationResetToken(input: PrometheusIntegrationResetTokenInput!): PrometheusIntegrationResetTokenPayload
-  prometheusIntegrationUpdate(input: PrometheusIntegrationUpdateInput!): PrometheusIntegrationUpdatePayload
   removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2")
   removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
   revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5")
@@ -12992,7 +12554,6 @@ type Mutation {
   terraformStateDelete(input: TerraformStateDeleteInput!): TerraformStateDeletePayload
   terraformStateLock(input: TerraformStateLockInput!): TerraformStateLockPayload
   terraformStateUnlock(input: TerraformStateUnlockInput!): TerraformStateUnlockPayload
-  todoCreate(input: TodoCreateInput!): TodoCreatePayload
   todoMarkDone(input: TodoMarkDoneInput!): TodoMarkDonePayload
   todoRestore(input: TodoRestoreInput!): TodoRestorePayload
   todoRestoreMany(input: TodoRestoreManyInput!): TodoRestoreManyPayload
@@ -13277,11 +12838,6 @@ enum NamespaceProjectSort {
   Most similar to the search query
   """
   SIMILARITY
-
-  """
-  Sort by storage size
-  """
-  STORAGE
 }
 
 input NegatedBoardIssueInput {
@@ -13818,36 +13374,6 @@ type Pipeline {
   iid: String!
 
   """
-  Jobs belonging to the pipeline
-  """
-  jobs(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-
-    """
-    Filter jobs by the type of security report they produce
-    """
-    securityReportTypes: [SecurityReportTypeEnum!]
-  ): CiJobConnection
-
-  """
   Specifies if a pipeline can be retried
   """
   retryable: Boolean!
@@ -14191,31 +13717,6 @@ type Project {
     """
     statuses: [AlertManagementStatus!]
   ): AlertManagementAlertConnection
-
-  """
-  Integrations which can receive alerts for the project
-  """
-  alertManagementIntegrations(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-  ): AlertManagementIntegrationConnection
 
   """
   If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge
@@ -16191,6 +15692,17 @@ type ProjectPermissions {
   uploadFile: Boolean!
 }
 
+"""
+Names of compliance frameworks that can be assigned to a Project
+"""
+enum ProjectSettingEnum {
+  gdpr
+  hipaa
+  pci_dss
+  soc_2
+  sox
+}
+
 type ProjectStatistics {
   """
   Build artifacts size of the project
@@ -16247,136 +15759,6 @@ type PrometheusAlert {
   """
   id: ID!
 }
-
-"""
-Autogenerated input type of PrometheusIntegrationCreate
-"""
-input PrometheusIntegrationCreateInput {
-  """
-  Whether the integration is receiving alerts
-  """
-  active: Boolean!
-
-  """
-  Endpoint at which prometheus can be queried
-  """
-  apiUrl: String!
-
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The project to create the integration in
-  """
-  projectPath: ID!
-}
-
-"""
-Autogenerated return type of PrometheusIntegrationCreate
-"""
-type PrometheusIntegrationCreatePayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The newly created integration
-  """
-  integration: AlertManagementPrometheusIntegration
-}
-
-"""
-Autogenerated input type of PrometheusIntegrationResetToken
-"""
-input PrometheusIntegrationResetTokenInput {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The id of the integration to mutate
-  """
-  id: PrometheusServiceID!
-}
-
-"""
-Autogenerated return type of PrometheusIntegrationResetToken
-"""
-type PrometheusIntegrationResetTokenPayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The newly created integration
-  """
-  integration: AlertManagementPrometheusIntegration
-}
-
-"""
-Autogenerated input type of PrometheusIntegrationUpdate
-"""
-input PrometheusIntegrationUpdateInput {
-  """
-  Whether the integration is receiving alerts
-  """
-  active: Boolean
-
-  """
-  Endpoint at which prometheus can be queried
-  """
-  apiUrl: String
-
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The id of the integration to mutate
-  """
-  id: PrometheusServiceID!
-}
-
-"""
-Autogenerated return type of PrometheusIntegrationUpdate
-"""
-type PrometheusIntegrationUpdatePayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The newly created integration
-  """
-  integration: AlertManagementPrometheusIntegration
-}
-
-"""
-Identifier of PrometheusService
-"""
-scalar PrometheusServiceID
 
 type Query {
   """
@@ -17264,44 +16646,19 @@ type ReleaseEvidenceEdge {
 
 type ReleaseLinks {
   """
-  HTTP URL of the issues page, filtered by this release and `state=closed`
-  """
-  closedIssuesUrl: String
-
-  """
-  HTTP URL of the merge request page , filtered by this release and `state=closed`
-  """
-  closedMergeRequestsUrl: String
-
-  """
   HTTP URL of the release's edit page
   """
   editUrl: String
 
   """
-  HTTP URL of the issues page filtered by this release. Deprecated in 13.6: Use `openedIssuesUrl`
+  HTTP URL of the issues page filtered by this release
   """
-  issuesUrl: String @deprecated(reason: "Use `openedIssuesUrl`. Deprecated in 13.6")
+  issuesUrl: String
 
   """
-  HTTP URL of the merge request page filtered by this release. Deprecated in 13.6: Use `openedMergeRequestsUrl`
+  HTTP URL of the merge request page filtered by this release
   """
-  mergeRequestsUrl: String @deprecated(reason: "Use `openedMergeRequestsUrl`. Deprecated in 13.6")
-
-  """
-  HTTP URL of the merge request page , filtered by this release and `state=merged`
-  """
-  mergedMergeRequestsUrl: String
-
-  """
-  HTTP URL of the issues page, filtered by this release and `state=open`
-  """
-  openedIssuesUrl: String
-
-  """
-  HTTP URL of the merge request page, filtered by this release and `state=open`
-  """
-  openedMergeRequestsUrl: String
+  mergeRequestsUrl: String
 
   """
   HTTP URL of the release
@@ -18483,43 +17840,6 @@ type SecurityReportSummarySection {
   vulnerabilitiesCount: Int
 }
 
-enum SecurityReportTypeEnum {
-  """
-  API FUZZING scan report
-  """
-  API_FUZZING
-
-  """
-  CONTAINER SCANNING scan report
-  """
-  CONTAINER_SCANNING
-
-  """
-  COVERAGE FUZZING scan report
-  """
-  COVERAGE_FUZZING
-
-  """
-  DAST scan report
-  """
-  DAST
-
-  """
-  DEPENDENCY SCANNING scan report
-  """
-  DEPENDENCY_SCANNING
-
-  """
-  SAST scan report
-  """
-  SAST
-
-  """
-  SECRET DETECTION scan report
-  """
-  SECRET_DETECTION
-}
-
 """
 The type of the security scanner
 """
@@ -19674,11 +18994,6 @@ type TerraformState {
   id: ID!
 
   """
-  The latest version of the Terraform state
-  """
-  latestVersion: TerraformStateVersion
-
-  """
   Timestamp the Terraform state was locked
   """
   lockedAt: Time
@@ -19832,28 +19147,6 @@ type TerraformStateUnlockPayload {
   Errors encountered during execution of the mutation.
   """
   errors: [String!]!
-}
-
-type TerraformStateVersion {
-  """
-  Timestamp the version was created
-  """
-  createdAt: Time!
-
-  """
-  The user that created this version
-  """
-  createdByUser: User
-
-  """
-  ID of the Terraform state version
-  """
-  id: ID!
-
-  """
-  Timestamp the version was updated
-  """
-  updatedAt: Time!
 }
 
 """
@@ -20179,41 +19472,6 @@ type TodoConnection {
 }
 
 """
-Autogenerated input type of TodoCreate
-"""
-input TodoCreateInput {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  The global ID of the to-do item's parent. Issues, merge requests, designs and epics are supported
-  """
-  targetId: TodoableID!
-}
-
-"""
-Autogenerated return type of TodoCreate
-"""
-type TodoCreatePayload {
-  """
-  A unique identifier for the client performing the mutation.
-  """
-  clientMutationId: String
-
-  """
-  Errors encountered during execution of the mutation.
-  """
-  errors: [String!]!
-
-  """
-  The to-do created
-  """
-  todo: Todo
-}
-
-"""
 An edge in a connection.
 """
 type TodoEdge {
@@ -20379,11 +19637,6 @@ enum TodoTargetEnum {
   """
   MERGEREQUEST
 }
-
-"""
-Identifier of Todoable
-"""
-scalar TodoableID
 
 """
 Autogenerated input type of TodosMarkAllDone
@@ -21464,7 +20717,7 @@ type User {
     """
     The global ID of the project the authored merge requests should be in. Incompatible with projectPath.
     """
-    projectId: ProjectID
+    projectId: ID
 
     """
     The full-path of the project the authored merge requests should be in. Incompatible with projectId.
@@ -21549,7 +20802,7 @@ type User {
     """
     The global ID of the project the authored merge requests should be in. Incompatible with projectPath.
     """
-    projectId: ProjectID
+    projectId: ID
 
     """
     The full-path of the project the authored merge requests should be in. Incompatible with projectId.
@@ -21586,11 +20839,6 @@ type User {
   User email
   """
   email: String
-
-  """
-  Group count for the user. Available only when feature flag `user_group_counts` is enabled
-  """
-  groupCount: Int
 
   """
   Group memberships of the user
@@ -21876,11 +21124,6 @@ enum UserState {
 }
 
 type UserStatus {
-  """
-  User availability status
-  """
-  availability: AvailabilityEnum!
-
   """
   String representation of emoji
   """

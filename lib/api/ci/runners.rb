@@ -7,8 +7,6 @@ module API
 
       before { authenticate! }
 
-      feature_category :continuous_integration
-
       resource :runners do
         desc 'Get runners available for user' do
           success Entities::Runner

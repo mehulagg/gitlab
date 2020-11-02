@@ -12,7 +12,6 @@
 #     only_owned: boolean
 #     only_shared: boolean
 #     limit: integer
-#     include_subgroups: boolean
 #   params:
 #     sort: string
 #     visibility_level: int

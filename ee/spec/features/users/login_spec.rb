@@ -58,7 +58,13 @@ RSpec.describe 'Login' do
         it 'correctly renders tabs and panes' do
           subject
 
-          ensure_tab_pane_correctness(['Sign in', 'Register'])
+          ensure_tab_pane_correctness(false)
+        end
+
+        it 'does not show smartcard login form' do
+          subject
+
+          expect(page).not_to have_selector('.nav-tabs a[href="#smartcard"]')
         end
       end
 
@@ -70,7 +76,16 @@ RSpec.describe 'Login' do
         it 'correctly renders tabs and panes' do
           subject
 
-          ensure_tab_pane_correctness(%w(Smartcard Standard Register))
+          expect(page.all('.nav-tabs a[data-toggle="tab"]').length).to be(3)
+
+          ensure_one_active_tab
+          ensure_one_active_pane
+        end
+
+        it 'shows smartcard login form' do
+          subject
+
+          expect(page).to have_selector('.nav-tabs a[href="#smartcard"]')
         end
 
         describe 'with two-factor authentication required', :clean_gitlab_redis_shared_state do

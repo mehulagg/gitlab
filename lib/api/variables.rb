@@ -7,8 +7,6 @@ module API
     before { authenticate! }
     before { authorize! :admin_build, user_project }
 
-    feature_category :continuous_integration
-
     helpers do
       def filter_variable_parameters(params)
         # This method exists so that EE can more easily filter out certain

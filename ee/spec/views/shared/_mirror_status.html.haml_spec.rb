@@ -46,8 +46,7 @@ RSpec.describe 'shared/_mirror_status.html.haml' do
       render 'shared/mirror_status'
 
       expect(rendered).to have_content("Pull mirroring failed")
-
-      expect(rendered).to have_selector('[data-testid="warning-solid-icon"]')
+      expect(rendered).to have_css('i', class: 'fa-warning')
     end
 
     context 'with a previous successful update' do

@@ -4,9 +4,9 @@ module Epics
   class IssuePromoteService < ::Issuable::Clone::BaseService
     PromoteError = Class.new(StandardError)
 
-    def execute(issue, epic_group = nil)
+    def execute(issue)
       @issue = issue
-      @parent_group = epic_group || issue.project.group
+      @parent_group = issue.project.group
 
       validate_promotion!
 

@@ -17,10 +17,11 @@ export const i18n = {
   changesSaved: s__('AlertSettings|Your integration was successfully updated.'),
   prometheusInfo: s__('AlertSettings|Add URL and auth key to your Prometheus config file'),
   integrationsInfo: s__(
-    'AlertSettings|Learn more about our our upcoming %{linkStart}integrations%{linkEnd}',
+    'AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}',
   ),
   resetKey: s__('AlertSettings|Reset key'),
   copyToClipboard: s__('AlertSettings|Copy'),
+  integrationsLabel: s__('AlertSettings|Add new integrations'),
   apiBaseUrlLabel: s__('AlertSettings|API URL'),
   authKeyLabel: s__('AlertSettings|Authorization key'),
   urlLabel: s__('AlertSettings|Webhook URL'),
@@ -39,8 +40,7 @@ export const i18n = {
   integration: s__('AlertSettings|Integration'),
 };
 
-export const integrationTypes = [
-  { value: '', text: s__('AlertSettings|Select integration type') },
+export const serviceOptions = [
   { value: 'generic', text: s__('AlertSettings|HTTP Endpoint') },
   { value: 'prometheus', text: s__('AlertSettings|External Prometheus') },
   { value: 'opsgenie', text: s__('AlertSettings|Opsgenie') },
@@ -56,9 +56,9 @@ export const sectionHash = 'js-alert-management-settings';
 /* eslint-disable @gitlab/require-i18n-strings */
 
 /**
- * Tracks snowplow event when user views alerts integration list
+ * Tracks snowplow event when user views alerts intergration list
  */
-export const trackAlertIntegrationsViewsOptions = {
-  category: 'Alert Integrations',
+export const trackAlertIntergrationsViewsOptions = {
+  category: 'Alert Intergrations',
   action: 'view_alert_integrations_list',
 };

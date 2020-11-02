@@ -50,7 +50,11 @@
   .bordered-box.content-block {
     border: 1px solid var(--border-color, $border-color);
     background-color: transparent;
-    padding: $gl-spacing-scale-5;
+    padding: 16px;
+  }
+
+  #dismiss-callout-btn {
+    color: var(--gl-text-color, $gl-text-color);
   }
 }
 

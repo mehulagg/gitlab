@@ -10,8 +10,6 @@ module API
       authorize! :admin_group, user_group
     end
 
-    feature_category :importers
-
     params do
       requires :id, type: String, desc: 'The ID of a group'
     end

@@ -1,8 +1,4 @@
-query getStorageCounter(
-  $fullPath: ID!
-  $searchTerm: String = ""
-  $withExcessStorageData: Boolean = false
-) {
+query getStorageCounter($fullPath: ID!, $withExcessStorageData: Boolean = false) {
   namespace(fullPath: $fullPath) {
     id
     name
@@ -23,7 +19,7 @@ query getStorageCounter(
       wikiSize
       snippetsSize
     }
-    projects(includeSubgroups: true, sort: STORAGE, search: $searchTerm) {
+    projects(includeSubgroups: true) {
       edges {
         node {
           id

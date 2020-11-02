@@ -10,7 +10,6 @@ RSpec.describe WebHookService do
   let(:headers) do
     {
       'Content-Type' => 'application/json',
-      'User-Agent' => "GitLab/#{Gitlab::VERSION}",
       'X-Gitlab-Event' => 'Push Hook'
     }
   end

@@ -7,6 +7,7 @@ import {
   convertToSentenceCase,
   splitCamelCase,
 } from '~/lib/utils/text_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const thClass = 'gl-bg-transparent! gl-border-1! gl-border-b-solid! gl-border-gray-200!';
 const tdClass = 'gl-border-gray-100! gl-p-5!';
@@ -24,7 +25,6 @@ const allowedFields = [
   'endedAt',
   'details',
   'hosts',
-  'environment',
 ];
 
 export default {
@@ -32,6 +32,7 @@ export default {
     GlLoadingIcon,
     GlTable,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     alert: {
       type: Object,
@@ -59,6 +60,9 @@ export default {
     },
   ],
   computed: {
+    flaggedAllowedFields() {
+      return this.shouldDisplayEnvironment ? [...allowedFields, 'environment'] : allowedFields;
+    },
     items() {
       if (!this.alert) {
         return [];
@@ -80,10 +84,13 @@ export default {
         [],
       );
     },
+    shouldDisplayEnvironment() {
+      return this.glFeatures.exposeEnvironmentPathInAlertDetails;
+    },
   },
   methods: {
     isAllowed(fieldName) {
-      return allowedFields.includes(fieldName);
+      return this.flaggedAllowedFields.includes(fieldName);
     },
   },
 };

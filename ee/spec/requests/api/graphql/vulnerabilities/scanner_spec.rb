@@ -34,7 +34,7 @@ RSpec.describe 'Query.vulnerabilities.scanner' do
 
   let_it_be(:finding) do
     create(
-      :vulnerabilities_finding,
+      :vulnerabilities_occurrence,
       vulnerability: vulnerability,
       scanner: vulnerabilities_scanner
     )

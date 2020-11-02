@@ -14,10 +14,6 @@ class MergeRequestPolicy < IssuablePolicy
   rule { can?(:update_merge_request) }.policy do
     enable :approve_merge_request
   end
-
-  rule { ~anonymous & can?(:read_merge_request) }.policy do
-    enable :create_todo
-  end
 end
 
 MergeRequestPolicy.prepend_if_ee('EE::MergeRequestPolicy')

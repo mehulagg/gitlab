@@ -1,108 +1,167 @@
-import { shallowMount } from '@vue/test-utils';
-import Sidebar from '~/jobs/components/sidebar.vue';
-import StagesDropdown from '~/jobs/components/stages_dropdown.vue';
-import JobsContainer from '~/jobs/components/jobs_container.vue';
+import Vue from 'vue';
+import sidebarDetailsBlock from '~/jobs/components/sidebar.vue';
 import createStore from '~/jobs/store';
 import job, { jobsInStage } from '../mock_data';
-import { extendedWrapper } from '../../helpers/vue_test_utils_helper';
+import { mountComponentWithStore } from '../../helpers/vue_mount_component_helper';
+import { trimText } from '../../helpers/text_helper';
 
 describe('Sidebar details block', () => {
+  const SidebarComponent = Vue.extend(sidebarDetailsBlock);
+  let vm;
   let store;
-  let wrapper;
 
-  const createWrapper = ({ props = {} } = {}) => {
+  beforeEach(() => {
     store = createStore();
-    wrapper = extendedWrapper(
-      shallowMount(Sidebar, {
-        ...props,
-        store,
-      }),
-    );
-  };
+  });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
+    vm.$destroy();
   });
 
   describe('when there is no retry path retry', () => {
-    it('should not render a retry button', async () => {
-      createWrapper();
-      const copy = { ...job, retry_path: null };
-      await store.dispatch('receiveJobSuccess', copy);
+    it('should not render a retry button', () => {
+      const copy = { ...job };
+      delete copy.retry_path;
 
-      expect(wrapper.find('.js-retry-button').exists()).toBe(false);
+      store.dispatch('receiveJobSuccess', copy);
+      vm = mountComponentWithStore(SidebarComponent, {
+        store,
+      });
+
+      expect(vm.$el.querySelector('.js-retry-button')).toBeNull();
     });
   });
 
   describe('without terminal path', () => {
-    it('does not render terminal link', async () => {
-      createWrapper();
-      await store.dispatch('receiveJobSuccess', job);
+    it('does not render terminal link', () => {
+      store.dispatch('receiveJobSuccess', job);
+      vm = mountComponentWithStore(SidebarComponent, { store });
 
-      expect(wrapper.find('.js-terminal-link').exists()).toBe(false);
+      expect(vm.$el.querySelector('.js-terminal-link')).toBeNull();
     });
   });
 
   describe('with terminal path', () => {
-    it('renders terminal link', async () => {
-      createWrapper();
-      await store.dispatch('receiveJobSuccess', { ...job, terminal_path: 'job/43123/terminal' });
+    it('renders terminal link', () => {
+      store.dispatch('receiveJobSuccess', { ...job, terminal_path: 'job/43123/terminal' });
+      vm = mountComponentWithStore(SidebarComponent, {
+        store,
+      });
 
-      expect(wrapper.find('.js-terminal-link').exists()).toBe(true);
+      expect(vm.$el.querySelector('.js-terminal-link')).not.toBeNull();
     });
   });
 
-  describe('actions', () => {
-    beforeEach(() => {
-      createWrapper();
-      return store.dispatch('receiveJobSuccess', job);
-    });
+  beforeEach(() => {
+    store.dispatch('receiveJobSuccess', job);
+    vm = mountComponentWithStore(SidebarComponent, { store });
+  });
 
+  describe('actions', () => {
     it('should render link to new issue', () => {
-      expect(wrapper.findByTestId('job-new-issue').attributes('href')).toBe(job.new_issue_path);
-      expect(wrapper.find('[data-testid="job-new-issue"]').text()).toBe('New issue');
+      expect(vm.$el.querySelector('[data-testid="job-new-issue"]').getAttribute('href')).toEqual(
+        job.new_issue_path,
+      );
+
+      expect(vm.$el.querySelector('[data-testid="job-new-issue"]').textContent.trim()).toEqual(
+        'New issue',
+      );
     });
 
     it('should render link to retry job', () => {
-      expect(wrapper.find('.js-retry-button').attributes('href')).toBe(job.retry_path);
+      expect(vm.$el.querySelector('.js-retry-button').getAttribute('href')).toEqual(job.retry_path);
     });
 
     it('should render link to cancel job', () => {
-      expect(wrapper.find('.js-cancel-job').attributes('href')).toBe(job.cancel_path);
+      expect(vm.$el.querySelector('.js-cancel-job').getAttribute('href')).toEqual(job.cancel_path);
+    });
+  });
+
+  describe('information', () => {
+    it('should render job duration', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-duration').textContent)).toEqual(
+        'Duration: 6 seconds',
+      );
+    });
+
+    it('should render erased date', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-erased').textContent)).toEqual(
+        'Erased: 3 weeks ago',
+      );
+    });
+
+    it('should render finished date', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-finished').textContent)).toEqual(
+        'Finished: 3 weeks ago',
+      );
+    });
+
+    it('should render queued date', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-queued').textContent)).toEqual(
+        'Queued: 9 seconds',
+      );
+    });
+
+    it('should render runner ID', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-runner').textContent)).toEqual(
+        'Runner: local ci runner (#1)',
+      );
+    });
+
+    it('should render timeout information', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-timeout').textContent)).toEqual(
+        'Timeout: 1m 40s (from runner)',
+      );
+    });
+
+    it('should render coverage', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-coverage').textContent)).toEqual(
+        'Coverage: 20%',
+      );
+    });
+
+    it('should render tags', () => {
+      expect(trimText(vm.$el.querySelector('.js-job-tags').textContent)).toEqual('Tags: tag');
     });
   });
 
   describe('stages dropdown', () => {
     beforeEach(() => {
-      createWrapper();
-      return store.dispatch('receiveJobSuccess', { ...job, stage: 'aStage' });
+      store.dispatch('receiveJobSuccess', job);
     });
 
     describe('with stages', () => {
+      beforeEach(() => {
+        vm = mountComponentWithStore(SidebarComponent, { store });
+      });
+
       it('renders value provided as selectedStage as selected', () => {
-        expect(wrapper.find(StagesDropdown).props('selectedStage')).toBe('aStage');
+        expect(vm.$el.querySelector('.js-selected-stage').textContent.trim()).toEqual(
+          vm.selectedStage,
+        );
       });
     });
 
     describe('without jobs for stages', () => {
-      beforeEach(() => store.dispatch('receiveJobSuccess', job));
+      beforeEach(() => {
+        store.dispatch('receiveJobSuccess', job);
+        vm = mountComponentWithStore(SidebarComponent, { store });
+      });
 
       it('does not render job container', () => {
-        expect(wrapper.find('.js-jobs-container').exists()).toBe(false);
+        expect(vm.$el.querySelector('.js-jobs-container')).toBeNull();
       });
     });
 
     describe('with jobs for stages', () => {
-      beforeEach(async () => {
-        await store.dispatch('receiveJobSuccess', job);
-        await store.dispatch('receiveJobsForStageSuccess', jobsInStage.latest_statuses);
+      beforeEach(() => {
+        store.dispatch('receiveJobSuccess', job);
+        store.dispatch('receiveJobsForStageSuccess', jobsInStage.latest_statuses);
+        vm = mountComponentWithStore(SidebarComponent, { store });
       });
 
       it('renders list of jobs', () => {
-        expect(wrapper.find(JobsContainer).exists()).toBe(true);
+        expect(vm.$el.querySelector('.js-jobs-container')).not.toBeNull();
       });
     });
   });

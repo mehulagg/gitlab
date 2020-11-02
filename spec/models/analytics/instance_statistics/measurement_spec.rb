@@ -48,10 +48,26 @@ RSpec.describe Analytics::InstanceStatistics::Measurement, type: :model do
   end
 
   describe '#measurement_identifier_values' do
-    let(:expected_count) { Analytics::InstanceStatistics::Measurement.identifiers.size }
-
     subject { described_class.measurement_identifier_values.count }
 
-    it { is_expected.to eq(expected_count) }
+    context 'when the `store_ci_pipeline_counts_by_status` feature flag is off' do
+      let(:expected_count) { Analytics::InstanceStatistics::Measurement.identifiers.size - Analytics::InstanceStatistics::Measurement::EXPERIMENTAL_IDENTIFIERS.size }
+
+      before do
+        stub_feature_flags(store_ci_pipeline_counts_by_status: false)
+      end
+
+      it { is_expected.to eq(expected_count) }
+    end
+
+    context 'when the `store_ci_pipeline_counts_by_status` feature flag is on' do
+      let(:expected_count) { Analytics::InstanceStatistics::Measurement.identifiers.size }
+
+      before do
+        stub_feature_flags(store_ci_pipeline_counts_by_status: true)
+      end
+
+      it { is_expected.to eq(expected_count) }
+    end
   end
 end

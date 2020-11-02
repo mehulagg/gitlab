@@ -4,8 +4,6 @@ module API
   # Pages Internal API
   module Internal
     class Pages < ::API::Base
-      feature_category :pages
-
       before do
         authenticate_gitlab_pages_request!
       end

@@ -2,8 +2,6 @@
 
 module API
   class ProjectStatistics < ::API::Base
-    feature_category :source_code_management
-
     before do
       authenticate!
       authorize! :daily_statistics, user_project

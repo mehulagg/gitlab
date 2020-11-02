@@ -4,7 +4,7 @@ module Geo
   module RepositoryReplicatorStrategy
     extend ActiveSupport::Concern
 
-    include ::Geo::VerifiableReplicator
+    include Delay
     include Gitlab::Geo::LogHelpers
 
     included do
