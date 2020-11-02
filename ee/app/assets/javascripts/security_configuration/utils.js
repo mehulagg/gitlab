@@ -1,6 +1,6 @@
-export const initFormField = ({ initialValue, isRequired = true, skipValidation = false }) => ({
-  value: initialValue,
-  isRequired,
+export const initFormField = ({ value, required = true, skipValidation = false }) => ({
+  value,
+  required,
   state: skipValidation ? true : null,
   feedback: null,
 });

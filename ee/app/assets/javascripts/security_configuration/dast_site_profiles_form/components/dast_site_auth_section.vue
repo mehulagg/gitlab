@@ -39,12 +39,12 @@ export default {
       form: {
         state: false,
         fields: {
-          authEnabled: initFormField({ initialValue: authEnabled, skipValidation: true }),
-          authenticationUrl: initFormField({ initialValue: authenticationUrl }),
-          userName: initFormField({ initialValue: userName }),
-          password: initFormField({ initialValue: password }),
-          userNameFormField: initFormField({ initialValue: userNameFormField }),
-          passwordFormField: initFormField({ initialValue: passwordFormField }),
+          authEnabled: initFormField({ value: authEnabled, skipValidation: true }),
+          authenticationUrl: initFormField({ value: authenticationUrl }),
+          userName: initFormField({ value: userName }),
+          password: initFormField({ value: password }),
+          userNameFormField: initFormField({ value: userNameFormField }),
+          passwordFormField: initFormField({ value: passwordFormField }),
         },
       },
     };

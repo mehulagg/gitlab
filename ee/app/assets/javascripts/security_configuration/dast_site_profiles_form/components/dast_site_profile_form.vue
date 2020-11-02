@@ -10,6 +10,7 @@ import {
   GlModal,
   GlToggle,
 } from '@gitlab/ui';
+import { initFormField } from 'ee/security_configuration/utils';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -25,12 +26,6 @@ import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graph
 import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
 
 const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
-
-const initField = value => ({
-  value,
-  state: null,
-  feedback: null,
-});
 
 export default {
   name: 'DastSiteProfileForm',
@@ -71,8 +66,8 @@ export default {
       state: false,
       showValidation: false,
       fields: {
-        profileName: initField(name),
-        targetUrl: initField(targetUrl),
+        profileName: initFormField({ value: name }),
+        targetUrl: initFormField({ value: targetUrl }),
       },
     };
 
