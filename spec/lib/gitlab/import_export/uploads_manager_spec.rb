@@ -23,12 +23,12 @@ RSpec.describe Gitlab::ImportExport::UploadsManager do
   end
 
   describe '#save' do
+    before do
+      project.uploads << upload
+    end
+
     context 'when the project has uploads locally stored' do
       let(:upload) { create(:upload, :issuable_upload, :with_file, model: project) }
-
-      before do
-        project.uploads << upload
-      end
 
       it 'does not cause errors' do
         manager.save
@@ -72,6 +72,20 @@ RSpec.describe Gitlab::ImportExport::UploadsManager do
 
           expect(shared.errors).to be_empty
         end
+      end
+    end
+
+    context 'when upload is in object storage' do
+      before do
+        stub_uploads_object_storage(FileUploader)
+        allow(manager).to receive(:download_or_copy_upload).and_raise(Errno::ENAMETOOLONG)
+      end
+
+      it 'does not cause errors and ignores problematic upload' do
+        manager.save
+
+        expect(shared.errors).to be_empty
+        expect(File).not_to exist(exported_file_path)
       end
     end
   end
