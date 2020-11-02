@@ -24,8 +24,8 @@ export default {
   },
   data() {
     return {
-      downloadPending: false
-    }
+      downloadPending: false,
+    };
   },
   modal: {
     modalId: 'dastUrl',
@@ -66,101 +66,105 @@ export default {
 
       this.downloadPending = true;
       try {
-        const CSVREPORT = await axios.request({url: URL, method: METHOD, responseType: RESPONSETYPE});
-        download({ fileName: FILENAME, fileData: btoa(CSVREPORT), fileType: 'text/csv'});
+        const CSVREPORT = await axios.request({
+          url: URL,
+          method: METHOD,
+          responseType: RESPONSETYPE,
+        });
+        download({ fileName: FILENAME, fileData: btoa(CSVREPORT), fileType: 'text/csv' });
         this.downloadPending = false;
-      } catch(e) {
+      } catch (e) {
         this.downloadPending = false;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <template>
   <span>
-  <gl-modal
-    v-if="glFeatures.dastModalLoadingIndicator"
-    data-testid="dastModal"
-    :title="title"
-    title-tag="h5"
-    v-bind="$options.modal"
-    :action-secondary="downloadButton"
-    @secondary.prevent="downloadReport"
-  >
-    <!-- heading -->
-    <div class="row gl-text-gray-400">
-      <div class="col-1">{{ __('Method') }}</div>
-      <div class="col-11">{{ __('URL') }}</div>
-    </div>
-    <hr class="gl-my-3" />
-
-    <!-- rows -->
-    <div v-for="(url, index) in limitedScannedUrls" :key="index" class="row gl-my-2">
-      <div class="col-1">{{ url.requestMethod.toUpperCase() }}</div>
-      <div class="col-11" data-testid="dast-scanned-url">
-        <gl-truncate :text="url.url" position="middle" />
-      </div>
-    </div>
-
-    <!-- banner -->
-    <div
-      v-if="downloadLink"
-      class="gl-display-inline-block gl-bg-gray-50 gl-my-3 gl-pl-3 gl-pr-7 gl-py-5"
-    >
-      <gl-icon name="bulb" class="gl-vertical-align-middle gl-mr-5" />
-      <b class="gl-vertical-align-middle">
-        <gl-sprintf
-          :message="
-            __('To view all %{scannedResourcesCount} scanned URLs, please download the CSV file')
-          "
-        >
-          <template #scannedResourcesCount>
-            {{ scannedResourcesCount }}
-          </template>
-        </gl-sprintf>
-      </b>
-    </div>
-  </gl-modal>
     <gl-modal
-    v-else
-    :title="title"
-    title-tag="h5"
-    v-bind="$options.modal"
-    :action-secondary="downloadButton"
-  >
-    <!-- heading -->
-    <div class="row gl-text-gray-400">
-      <div class="col-1">{{ __('Method') }}</div>
-      <div class="col-11">{{ __('URL') }}</div>
-    </div>
-    <hr class="gl-my-3" />
-
-    <!-- rows -->
-    <div v-for="(url, index) in limitedScannedUrls" :key="index" class="row gl-my-2">
-      <div class="col-1">{{ url.requestMethod.toUpperCase() }}</div>
-      <div class="col-11" data-testid="dast-scanned-url">
-        <gl-truncate :text="url.url" position="middle" />
-      </div>
-    </div>
-
-    <!-- banner -->
-    <div
-      v-if="downloadLink"
-      class="gl-display-inline-block gl-bg-gray-50 gl-my-3 gl-pl-3 gl-pr-7 gl-py-5"
+      v-if="glFeatures.dastModalLoadingIndicator"
+      data-testid="dastModal"
+      :title="title"
+      title-tag="h5"
+      v-bind="$options.modal"
+      :action-secondary="downloadButton"
+      @secondary.prevent="downloadReport"
     >
-      <gl-icon name="bulb" class="gl-vertical-align-middle gl-mr-5" />
-      <b class="gl-vertical-align-middle">
-        <gl-sprintf
-          :message="
-            __('To view all %{scannedResourcesCount} scanned URLs, please download the CSV file')
-          "
-        >
-          <template #scannedResourcesCount>
-            {{ scannedResourcesCount }}
-          </template>
-        </gl-sprintf>
-      </b>
-    </div>
-  </gl-modal>
+      <!-- heading -->
+      <div class="row gl-text-gray-400">
+        <div class="col-1">{{ __('Method') }}</div>
+        <div class="col-11">{{ __('URL') }}</div>
+      </div>
+      <hr class="gl-my-3" />
+
+      <!-- rows -->
+      <div v-for="(url, index) in limitedScannedUrls" :key="index" class="row gl-my-2">
+        <div class="col-1">{{ url.requestMethod.toUpperCase() }}</div>
+        <div class="col-11" data-testid="dast-scanned-url">
+          <gl-truncate :text="url.url" position="middle" />
+        </div>
+      </div>
+
+      <!-- banner -->
+      <div
+        v-if="downloadLink"
+        class="gl-display-inline-block gl-bg-gray-50 gl-my-3 gl-pl-3 gl-pr-7 gl-py-5"
+      >
+        <gl-icon name="bulb" class="gl-vertical-align-middle gl-mr-5" />
+        <b class="gl-vertical-align-middle">
+          <gl-sprintf
+            :message="
+              __('To view all %{scannedResourcesCount} scanned URLs, please download the CSV file')
+            "
+          >
+            <template #scannedResourcesCount>
+              {{ scannedResourcesCount }}
+            </template>
+          </gl-sprintf>
+        </b>
+      </div>
+    </gl-modal>
+    <gl-modal
+      v-else
+      :title="title"
+      title-tag="h5"
+      v-bind="$options.modal"
+      :action-secondary="downloadButton"
+    >
+      <!-- heading -->
+      <div class="row gl-text-gray-400">
+        <div class="col-1">{{ __('Method') }}</div>
+        <div class="col-11">{{ __('URL') }}</div>
+      </div>
+      <hr class="gl-my-3" />
+
+      <!-- rows -->
+      <div v-for="(url, index) in limitedScannedUrls" :key="index" class="row gl-my-2">
+        <div class="col-1">{{ url.requestMethod.toUpperCase() }}</div>
+        <div class="col-11" data-testid="dast-scanned-url">
+          <gl-truncate :text="url.url" position="middle" />
+        </div>
+      </div>
+
+      <!-- banner -->
+      <div
+        v-if="downloadLink"
+        class="gl-display-inline-block gl-bg-gray-50 gl-my-3 gl-pl-3 gl-pr-7 gl-py-5"
+      >
+        <gl-icon name="bulb" class="gl-vertical-align-middle gl-mr-5" />
+        <b class="gl-vertical-align-middle">
+          <gl-sprintf
+            :message="
+              __('To view all %{scannedResourcesCount} scanned URLs, please download the CSV file')
+            "
+          >
+            <template #scannedResourcesCount>
+              {{ scannedResourcesCount }}
+            </template>
+          </gl-sprintf>
+        </b>
+      </div>
+    </gl-modal>
   </span>
 </template>

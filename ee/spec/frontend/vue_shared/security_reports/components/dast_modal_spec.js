@@ -20,7 +20,7 @@ describe('DAST Modal', () => {
   };
 
   const findDownloadButton = () => wrapper.find('[data-testid="download-button"]');
-  const findModal = () => wrapper.find('[data-testid="dastModal"]')
+  const findModal = () => wrapper.find('[data-testid="dastModal"]');
 
   const createWrapper = propsData => {
     wrapper = shallowMount(Component, {
@@ -55,20 +55,18 @@ describe('DAST Modal', () => {
   it('should make request to downloadLink on click', async () => {
     const file = 'randomFileString';
     mock.onGet(defaultProps.downloadLink).replyOnce(httpStatus.OK, file);
-    
-    findDownloadButton().vm.$emit('click',{
+
+    findDownloadButton().vm.$emit('click', {
       preventDefault: jest.fn(),
-      defaultPrevented: true
+      defaultPrevented: true,
     });
 
     await waitForPromises();
-    expect(download).toHaveBeenCalledWith(
-      {
-        "fileData": "W29iamVjdCBPYmplY3Rd", 
-        "fileName": "scanned_resources", 
-        "fileType": "text/csv"
-      }
-    );
+    expect(download).toHaveBeenCalledWith({
+      fileData: 'W29iamVjdCBPYmplY3Rd',
+      fileName: 'scanned_resources',
+      fileType: 'text/csv',
+    });
   });
 
   it('should contain the dynamic title', () => {

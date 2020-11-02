@@ -196,7 +196,7 @@ describe('Security reports summary component', () => {
       expect(modal.exists()).toBe(true);
       // TODO This test is currently failing and was temporarily deactivated
       // to make the pipeline green. This test needs to be reintroduced as soon as
-      // a better solution for the conditional rendering in 
+      // a better solution for the conditional rendering in
       // gitlab-development-kit/gitlab/ee/app/assets/javascripts/vue_shared/security_reports/components/dast_modal.vue
       // is found.
 
