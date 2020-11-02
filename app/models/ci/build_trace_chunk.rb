@@ -35,7 +35,7 @@ module Ci
 
     class << self
       def all_stores
-        @all_stores ||= self.data_stores.keys
+        @all_stores ||= self.data_stores.keys.map(&:to_sym)
       end
 
       def persistable_store
@@ -44,12 +44,13 @@ module Ci
       end
 
       def get_store_class(store)
-        @stores ||= {}
+        store = store.to_sym
 
         # Can't memoize this because the feature flag may alter this
-        return fog_store_class.new if store.to_sym == :fog
+        return fog_store_class.new if store == :fog
 
-        @stores[store] ||= "Ci::BuildTraceChunks::#{store.capitalize}".constantize.new
+        key = "build_trace_chunk_store_#{store}"
+        Gitlab::SafeRequestStore[key.to_sym] ||= "Ci::BuildTraceChunks::#{store.capitalize}".constantize.new
       end
 
       ##
