@@ -1,5 +1,12 @@
 <script>
-import { GlButtonGroup, GlTable, GlIcon, GlTooltipDirective, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlButtonGroup,
+  GlButton,
+  GlIcon,
+  GlLoadingIcon,
+  GlTable,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import Tracking from '~/tracking';
 import { trackAlertIntegrationsViewsOptions } from '../constants';
@@ -26,9 +33,10 @@ export default {
   i18n,
   components: {
     GlButtonGroup,
-    GlTable,
+    GlButton,
     GlIcon,
     GlLoadingIcon,
+    GlTable,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -57,6 +65,10 @@ export default {
     {
       key: 'type',
       label: __('Type'),
+    },
+    {
+      key: 'actions',
+      label: __('Actions'),
     },
   ],
   computed: {
@@ -115,7 +127,7 @@ export default {
       <template #cell(actions)="{ item }">
         <gl-button-group>
           <gl-button icon="pencil" @click="$emit('on-edit-integration', { id: item.id })" />
-          <gl-button icon="trash-can" @click="$emit('on-delete-integration', { id: item.id })" />
+          <gl-button icon="remove" @click="$emit('on-delete-integration', { id: item.id })" />
         </gl-button-group>
       </template>
 
