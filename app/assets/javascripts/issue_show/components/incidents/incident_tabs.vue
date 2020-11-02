@@ -17,8 +17,9 @@ export default {
     GlTab,
     GlTabs,
     HighlightBar,
+    MetricsTab: () => import('ee_component/issue_show/components/incidents/metrics_tab.vue'),
   },
-  inject: ['fullPath', 'iid'],
+  inject: ['fullPath', 'iid', 'uploadMetricsFeatureAvailable'],
   apollo: {
     alert: {
       query: getAlert,
@@ -66,6 +67,9 @@ export default {
       <gl-tab :title="s__('Incident|Summary')">
         <highlight-bar :alert="alert" />
         <description-component v-bind="$attrs" />
+      </gl-tab>
+      <gl-tab v-if="uploadMetricsFeatureAvailable" title="Metrics" data-testid="metrics-tab">
+        <metrics-tab />
       </gl-tab>
       <gl-tab v-if="alert" class="alert-management-details" :title="s__('Incident|Alert details')">
         <alert-details-table :alert="alert" :loading="loading" />

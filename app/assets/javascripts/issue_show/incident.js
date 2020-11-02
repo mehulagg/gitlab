@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import createStore from 'ee_else_ce/issue_show/components/incidents/store';
 import createDefaultClient from '~/lib/graphql';
 import issuableApp from './components/app.vue';
 import incidentTabs from './components/incidents/incident_tabs.vue';
@@ -12,18 +13,32 @@ export default function initIssuableApp(issuableData = {}) {
     defaultClient: createDefaultClient(),
   });
 
-  const { iid, projectNamespace, projectPath, slaFeatureAvailable } = issuableData;
+  const {
+    canUpdate,
+    iid,
+    projectNamespace,
+    projectPath,
+    projectId,
+    slaFeatureAvailable,
+    uploadMetricsFeatureAvailable,
+  } = issuableData;
+
+  const fullPath = `${projectNamespace}/${projectPath}`;
 
   return new Vue({
     el: document.getElementById('js-issuable-app'),
     apolloProvider,
+    // Only create store if createStore exists.
+    ...(createStore && { store: createStore({ projectId, issueIid: iid }) }),
     components: {
       issuableApp,
     },
     provide: {
-      fullPath: `${projectNamespace}/${projectPath}`,
+      canUpdate,
+      fullPath,
       iid,
       slaFeatureAvailable: parseBoolean(slaFeatureAvailable),
+      uploadMetricsFeatureAvailable: parseBoolean(uploadMetricsFeatureAvailable),
     },
     render(createElement) {
       return createElement('issuable-app', {

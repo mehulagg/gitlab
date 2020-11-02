@@ -35,7 +35,9 @@ module EE
 
       super.merge(
         publishedIncidentUrl: ::Gitlab::StatusPage::Storage.details_url(issuable),
-        slaFeatureAvailable: issuable.sla_available?.to_s
+        slaFeatureAvailable: issuable.sla_available?.to_s,
+        uploadMetricsFeatureAvailable: issuable.project.feature_available?(:incident_metric_upload),
+        projectId: issuable.project.id
       )
     end
 
