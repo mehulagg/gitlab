@@ -199,13 +199,6 @@ RSpec.describe Admin::ApplicationSettingsController do
       it_behaves_like 'settings for licensed features'
     end
 
-    context 'compliance frameworks' do
-      let(:settings) { { compliance_frameworks: [1, 2, 3, 4, 5] } }
-      let(:feature) { :admin_merge_request_approvers_rules }
-
-      it_behaves_like 'settings for licensed features'
-    end
-
     context 'required instance ci template' do
       let(:settings) { { required_instance_ci_template: 'Auto-DevOps' } }
       let(:feature) { :required_ci_templates }

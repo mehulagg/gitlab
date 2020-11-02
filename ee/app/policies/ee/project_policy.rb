@@ -33,10 +33,22 @@ module EE
         !PushRule.global&.commit_committer_check
       end
 
-      with_scope :subject
-      condition(:regulated_merge_request_approval_settings) do
+      with_scope :global
+      condition(:locked_approvers_rules) do
         License.feature_available?(:admin_merge_request_approvers_rules) &&
-          @subject.has_regulated_settings?
+          ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request
+      end
+
+      with_scope :global
+      condition(:locked_merge_request_author_setting) do
+        License.feature_available?(:admin_merge_request_approvers_rules) &&
+          ::Gitlab::CurrentSettings.prevent_merge_requests_author_approval
+      end
+
+      with_scope :global
+      condition(:locked_merge_request_committer_setting) do
+        License.feature_available?(:admin_merge_request_approvers_rules) &&
+          ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval
       end
 
       condition(:project_merge_request_analytics_available) do
@@ -305,9 +317,15 @@ module EE
         prevent :read_project
       end
 
-      rule { regulated_merge_request_approval_settings }.policy do
+      rule { locked_approvers_rules }.policy do
         prevent :modify_approvers_rules
+      end
+
+      rule { locked_merge_request_author_setting }.policy do
         prevent :modify_merge_request_author_setting
+      end
+
+      rule { locked_merge_request_committer_setting }.policy do
         prevent :modify_merge_request_committer_setting
       end
 

@@ -329,21 +329,17 @@ RSpec.describe ProjectsController do
       shared_examples 'merge request approvers rules' do
         using RSpec::Parameterized::TableSyntax
 
-        where(:license_value, :setting_value, :param_value, :final_value) do
-          false | false | false | false
-          false | true  | false | false
-          false | false | true  | true
-          false | true  | true  | true
-          true  | false | false | false
-          true  | true  | false | false
-          true  | false | true  | true
-          true  | true  | true  | true
+        where(:can_modify, :param_value, :final_value) do
+          true  | true  | true
+          true  | false | false
+          false | true  | nil
+          false | false | nil
         end
 
         with_them do
           before do
-            stub_licensed_features(admin_merge_request_approvers_rules: license_value)
-            stub_application_setting(app_setting => setting_value)
+            allow(controller).to receive(:can?).and_call_original
+            allow(controller).to receive(:can?).with(user, rule_name, project).and_return(can_modify)
           end
 
           it 'updates project if needed' do
@@ -363,21 +359,21 @@ RSpec.describe ProjectsController do
 
       describe ':disable_overriding_approvers_per_merge_request' do
         it_behaves_like 'merge request approvers rules' do
-          let(:app_setting) { :disable_overriding_approvers_per_merge_request }
+          let(:rule_name) { :modify_approvers_rules }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
         end
       end
 
       describe ':merge_requests_author_approval' do
         it_behaves_like 'merge request approvers rules' do
-          let(:app_setting) { :prevent_merge_requests_author_approval }
+          let(:rule_name) { :modify_merge_request_author_setting }
           let(:setting) { :merge_requests_author_approval }
         end
       end
 
       describe ':merge_requests_disable_committers_approval' do
         it_behaves_like 'merge request approvers rules' do
-          let(:app_setting) { :prevent_merge_requests_committers_approval }
+          let(:rule_name) { :modify_merge_request_committer_setting }
           let(:setting) { :merge_requests_disable_committers_approval }
         end
       end
