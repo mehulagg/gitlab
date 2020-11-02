@@ -134,7 +134,8 @@ Note the following when promoting a secondary:
 
 1. Promote the **secondary** node to the **primary** node.
    CAUTION: **Caution:**
-   If the secondary node [has been paused](../../geo/#pausing-and-resuming-replication), this will perform a point in time recovery to the last known state.
+   If the secondary node [has been paused](../../geo/#pausing-and-resuming-replication), this performs
+   a point-in-time recovery to the last known state.
    Data that was created on the primary while the secondary is paused will be lost.
 
    To promote the secondary node to primary along with preflight checks:
@@ -167,7 +168,8 @@ perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
 CAUTION: **Caution:**
-If the secondary node [has been paused](../../geo/#pausing-and-resuming-replication), this will perform a point in time recovery to the last known state.
+If the secondary node [has been paused](../../geo/#pausing-and-resuming-replication), this performs
+a point-in-time recovery to the last known state.
 Data that was created on the primary while the secondary is paused will be lost.
 
 1. SSH in to the database node in the **secondary** and trigger PostgreSQL to
