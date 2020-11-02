@@ -2644,6 +2644,9 @@ msgstr ""
 msgid "AlertsIntegrations|Prometheus"
 msgstr ""
 
+msgid "AlertsIntegrations|The integration has been successfully saved. Alerts from this new integration should now appear on your alerts list."
+msgstr ""
+
 msgid "Algorithm"
 msgstr ""
 

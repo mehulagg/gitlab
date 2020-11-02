@@ -115,6 +115,7 @@ describe('AlertsSettingsWrapper', () => {
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createHttpIntegrationMutation,
+        update: expect.anything(),
         variables: {
           name: 'Test 1',
           active: true,
@@ -140,6 +141,7 @@ describe('AlertsSettingsWrapper', () => {
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createPrometheusIntegrationMutation,
+        update: expect.anything(),
         variables: {
           apiUrl: 'https://test.com',
           active: true,
