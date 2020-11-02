@@ -98,7 +98,7 @@ export default {
   },
   data() {
     return {
-      selectedIntegration: this.currentIntegration?.type || integrationTypesNew[0].value,
+      selectedIntegration: integrationTypesNew[0].value,
       options: integrationTypesNew,
       formVisible: false,
     };
@@ -138,6 +138,10 @@ export default {
     'integrationForm.integrationTestPayload.json': debounce(function debouncedJsonValidate() {
       this.validateJson();
     }, JSON_VALIDATE_DELAY),
+    currentIntegration(val) {
+      this.selectedIntegration = val.type;
+      this.onIntegrationTypeSelect();
+    },
   },
   methods: {
     onIntegrationTypeSelect() {
@@ -163,11 +167,13 @@ export default {
       return this.$emit('on-create-new-integration', integrationPayload);
     },
     onReset() {
-      this.integrationForm.name = this.currentIntegration?.name || '';
-      this.integrationForm.apiUrl = this.currentIntegration?.apiUrl || '';
-      this.integrationForm.active = this.currentIntegration?.active || false;
+      this.integrationForm.name = '';
+      this.integrationForm.apiUrl = '';
+      this.integrationForm.active = false;
       this.integrationForm.integrationTestPayload.error = null;
       this.integrationForm.integrationTestPayload.json = '';
+      this.selectedIntegration = integrationTypesNew[0].value;
+      this.onIntegrationTypeSelect();
     },
     onResetAuthKey() {
       this.$emit('on-reset-token', {
