@@ -5,6 +5,8 @@ module ElasticMigrations
     include ApplicationWorker
     prepend Elastic::MigrationWorker
 
+    TIMESTAMP = 1604317360
+
     feature_category :global_search
     idempotent!
 
