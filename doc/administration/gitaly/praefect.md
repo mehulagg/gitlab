@@ -5,17 +5,12 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Gitaly Cluster
+# Gitaly Cluster **(PREMIUM ONLY)**
 
 [Gitaly](index.md), the service that provides storage for Git repositories, can
 be run in a clustered configuration to increase fault tolerance. In this
 configuration, every Git repository is stored on every Gitaly node in the
 cluster. Multiple clusters (or shards), can be configured.
-
-NOTE: **Note:**
-Gitaly Clusters can be created using [GitLab Core](https://about.gitlab.com/pricing/#self-managed)
-and higher tiers. However, technical support is limited to GitLab Premium and Ultimate customers
-only. Not available in GitLab.com.
 
 Praefect is a router and transaction manager for Gitaly, and a required
 component for running a Gitaly Cluster.
