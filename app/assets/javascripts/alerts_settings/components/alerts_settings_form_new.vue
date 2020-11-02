@@ -176,9 +176,9 @@ export default {
       return this.$emit('create-new-integration', integrationPayload);
     },
     onReset() {
-      this.integrationForm.name = '';
-      this.integrationForm.apiUrl = '';
-      this.integrationForm.active = false;
+      this.integrationForm.name = this.currentIntegration?.name || '';
+      this.integrationForm.apiUrl = this.currentIntegration?.apiUrl || '';
+      this.integrationForm.active = this.currentIntegration?.active || false;
       this.integrationForm.integrationTestPayload.error = null;
       this.integrationForm.integrationTestPayload.json = '';
       this.selectedIntegration = integrationTypesNew[0].value;
@@ -296,7 +296,7 @@ export default {
             :value="integrationForm.token"
           >
             <template #append>
-              <clipboard-button :text="integrationForm.token" :title="__('Copy')" class="gl-m-0!" />
+              <clipboard-button :text="integrationForm.token || ''" :title="__('Copy')" class="gl-m-0!" />
             </template>
           </gl-form-input-group>
 
