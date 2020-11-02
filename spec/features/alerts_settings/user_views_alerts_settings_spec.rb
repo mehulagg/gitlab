@@ -59,6 +59,6 @@ RSpec.describe 'Alert integrations settings form', :js do
     it 'shows the old alerts setting form' do
       expect(page).not_to have_selector('.incident-management-list')
       expect(page).not_to have_selector('#js-alert-management-settings')
-    end  
+    end
   end
 end
