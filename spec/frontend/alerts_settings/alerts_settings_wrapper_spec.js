@@ -84,7 +84,7 @@ describe('AlertsSettingsWrapper', () => {
 
     it('renders the IntegrationsList table using the API data', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -104,7 +104,7 @@ describe('AlertsSettingsWrapper', () => {
 
     it('calls `$apollo.mutate` with `createHttpIntegrationMutation`', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -131,7 +131,7 @@ describe('AlertsSettingsWrapper', () => {
 
     it('calls `$apollo.mutate` with `updateHttpIntegrationMutation`', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -144,7 +144,7 @@ describe('AlertsSettingsWrapper', () => {
         variables: {
           name: 'Test 1',
           active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
         },
       });
 
@@ -153,15 +153,14 @@ describe('AlertsSettingsWrapper', () => {
         variables: {
           name: 'Test 1',
           active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
-          projectPath,
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
         },
       });
     });
 
     it('calls `$apollo.mutate` with `resetHttpTokenMutation`', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -171,20 +170,20 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {
         type: 'HTTP',
-        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/120040' },
+        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/7' },
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: resetHttpTokenMutation,
         variables: {
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
         },
       });
     });
 
     it('calls `$apollo.mutate` with `createPrometheusIntegrationMutation`', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -211,7 +210,7 @@ describe('AlertsSettingsWrapper', () => {
 
     it('calls `$apollo.mutate` with `updatePrometheusIntegrationMutation`', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -224,7 +223,7 @@ describe('AlertsSettingsWrapper', () => {
         variables: {
           apiUrl: 'https://test.com',
           active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
         },
       });
 
@@ -233,15 +232,14 @@ describe('AlertsSettingsWrapper', () => {
         variables: {
           apiUrl: 'https://test.com',
           active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
-          projectPath,
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
         },
       });
     });
 
     it('calls `$apollo.mutate` with `resetPrometheusTokenMutation`', () => {
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -251,13 +249,13 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {
         type: 'PROMETHEUS',
-        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/120040' },
+        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/7' },
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: resetPrometheusTokenMutation,
         variables: {
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/120040',
+          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
         },
       });
     });
@@ -265,7 +263,7 @@ describe('AlertsSettingsWrapper', () => {
     it('shows error alert when integration creation fails ', async () => {
       const errorMsg = 'Something went wrong';
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -281,7 +279,7 @@ describe('AlertsSettingsWrapper', () => {
     it('shows error alert when integration token reset fails ', async () => {
       const errorMsg = 'Something went wrong';
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -299,7 +297,7 @@ describe('AlertsSettingsWrapper', () => {
     it('shows error alert when integration update fails ', async () => {
       const errorMsg = 'Something went wrong';
       createComponent({
-        data: { integrations: { list: mockIntegrations } },
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });

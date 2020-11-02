@@ -22777,9 +22777,6 @@ msgstr ""
 msgid "Resend it"
 msgstr ""
 
-msgid "Reset Key"
-msgstr ""
-
 msgid "Reset authorization key"
 msgstr ""
 
