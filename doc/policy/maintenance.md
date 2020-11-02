@@ -107,7 +107,7 @@ may occur during major release upgrades.
 
 NOTE: **Note:**
 If you are planning to upgrade from `12.0.x` to `12.10.x`, it is necessary to perform an intermediary upgrade to `12.1.x`
-before upgrading to `12.10.x` to avoid [gitlab#215141](https://gitlab.com/gitlab-org/gitlab/-/issues/215141).
+before upgrading to `12.10.x` to avoid [#215141](https://gitlab.com/gitlab-org/gitlab/-/issues/215141).
 
 To ensure these are successful:
 
