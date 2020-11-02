@@ -291,22 +291,26 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       for_defined_days_back do
         user    = create(:user, dashboard: 'operations')
         cluster = create(:cluster, user: user)
-        create(:project, creator: user)
+        project = create(:project, creator: user)
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
         create(:project_tracing_setting)
+        create_list(:alert_management_alert, 2, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         clusters: 2,
         clusters_applications_prometheus: 2,
         operations_dashboard_default_dashboard: 2,
-        projects_with_tracing_enabled: 2
+        projects_with_tracing_enabled: 2,
+        projects_with_alerts_created: 2
       )
+
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         clusters: 1,
         clusters_applications_prometheus: 1,
         operations_dashboard_default_dashboard: 1,
-        projects_with_tracing_enabled: 1
+        projects_with_tracing_enabled: 1,
+        projects_with_alerts_created: 1
       )
     end
   end
