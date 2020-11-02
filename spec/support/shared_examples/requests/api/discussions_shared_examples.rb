@@ -131,7 +131,7 @@ RSpec.shared_examples 'discussions API' do |parent_type, noteable_type, id_name,
       it 'does not track any events', :snowplow do
         post api("/#{parent_type}/#{parent.id}/#{noteable_type}/#{noteable[id_name]}/discussions"), params: { body: 'hi!' }
 
-        expect_no_sonwplow_event
+        expect_no_snowplow_event
       end
     end
 
