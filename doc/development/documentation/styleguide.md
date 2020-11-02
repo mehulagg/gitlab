@@ -1695,10 +1695,9 @@ Whenever possible, version text should have a link to the _completed_ issue,
 merge request, or epic that introduced the feature. An issue is preferred over
 a merge request, and a merge request is preferred over an epic. For example:
 
-<!-- vale gitlab.VersionText = NO -->
-
 ```markdown
 > [Introduced](<link-to-issue>) in GitLab 11.3.
+
 ```
 
 If the feature is only available in GitLab Enterprise Edition, mention
@@ -1707,6 +1706,7 @@ the feature is available in:
 
 ```markdown
 > [Introduced](<link-to-issue>) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.3.
+
 ```
 
 If listing information for multiple version as a feature evolves, add the
@@ -1715,6 +1715,7 @@ information to a block-quoted bullet list. For example:
 ```markdown
 > - [Introduced](<link-to-issue>) in GitLab 11.3.
 > - Enabled by default in GitLab 11.4.
+
 ```
 
 If a feature is moved to another tier:
@@ -1723,12 +1724,14 @@ If a feature is moved to another tier:
 > - [Introduced](<link-to-issue>) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.5.
 > - [Moved](<link-to-issue>) to [GitLab Starter](https://about.gitlab.com/pricing/) in 11.8.
 > - [Moved](<link-to-issue>) to GitLab Core in 12.0.
+
 ```
 
 If a feature is deprecated, include a link to a replacement (when available):
 
 ```markdown
 > - [Deprecated](<link-to-issue>) in GitLab 11.3. Replaced by [meaningful text](<link-to-appropriate-documentation>).
+
 ```
 
 It's also acceptable to describe the replacement in surrounding text, if available.
