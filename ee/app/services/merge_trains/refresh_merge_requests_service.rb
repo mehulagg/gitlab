@@ -43,11 +43,7 @@ module MergeTrains
     attr_reader :merge_request
 
     def get_first_in_train(items)
-      if Feature.enabled?(:ci_always_refresh_merge_requests_from_beginning, merge_request.target_project)
-        MergeTrain.first_in_train(merge_request.target_project, merge_request.target_branch)
-      else
-        MergeTrain.first_in_train_from(items)
-      end
+      MergeTrain.first_in_train(merge_request.target_project, merge_request.target_branch)
     end
 
     def unsafe_refresh(first_merge_request)
