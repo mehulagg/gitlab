@@ -99,7 +99,7 @@ browser's developer console while on any page within GitLab.
 
 - **`DOMContentLoaded` should not be used:**
   All of GitLab's JavaScript files are added with the `defer` attribute.
-  According to the [documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#attr-defer),
+  According to the [Mozilla documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#attr-defer),
   this implies that "the script is meant to be executed after the document has
   been parsed, but before firing `DOMContentLoaded`". Since the document is already
   parsed, `DOMContentLoaded` is not needed to bootstrap applications because all
