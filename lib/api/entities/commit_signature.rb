@@ -16,7 +16,7 @@ module API
 
       def commit_signature(commit)
         if commit.raw_commit_from_rugged?
-          Gitlab::Gpg::Commit.new(commit).signature
+          commit.gpg_commit.signature
         else
           commit.signature
         end
