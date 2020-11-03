@@ -62,7 +62,7 @@ To do this:
 Users can also be activated using the [GitLab API](../../api/users.md#activate-user).
 
 NOTE: **Note:**
-Activating a user changes the user's state to active and it consumes a
+Activating a user changes the user's state to active and consumes a
 [seat](../../subscriptions/self_managed/index.md#billable-users).
 
 TIP: **Tip:**

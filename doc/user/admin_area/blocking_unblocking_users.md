@@ -47,5 +47,5 @@ A blocked user can be unblocked from the Admin Area. To do this:
 Users can also be unblocked using the [GitLab API](../../api/users.md#unblock-user).
 
 NOTE: **Note:**
-Unblocking a user change the user's state to active and it consumes a
+Unblocking a user changes the user's state to active and consumes a
 [seat](../../subscriptions/self_managed/index.md#billable-users).
