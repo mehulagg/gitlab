@@ -53,6 +53,12 @@ module Ci
       :merge_train_pipeline?,
       to: :pipeline
 
+    state_machine :status do
+      event :actionize do
+        transition created: :manual
+      end
+    end
+
     def aggregated_needs_names
       read_attribute(:aggregated_needs_names)
     end

@@ -122,4 +122,24 @@ RSpec.describe Ci::Processable do
       it { is_expected.to be_empty }
     end
   end
+
+  describe '#actionize' do
+    context 'when processable status is created' do
+      let!(:processable) { create(:ci_build, :created, project: project, pipeline: pipeline) }
+
+      it 'makes processable a manual action' do
+        expect(processable.actionize).to be true
+        expect(processable).to be_manual
+      end
+    end
+
+    context 'when processable status is not created' do
+      let!(:processable) { create(:ci_build, :pending, project: project, pipeline: pipeline) }
+
+      it 'does not change processable status' do
+        expect(processable.actionize).to be false
+        expect(processable).to be_pending
+      end
+    end
+  end
 end

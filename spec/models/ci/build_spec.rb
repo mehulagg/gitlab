@@ -383,30 +383,6 @@ RSpec.describe Ci::Build do
     end
   end
 
-  describe '#actionize' do
-    context 'when build is a created' do
-      before do
-        build.update_column(:status, :created)
-      end
-
-      it 'makes build a manual action' do
-        expect(build.actionize).to be true
-        expect(build.reload).to be_manual
-      end
-    end
-
-    context 'when build is not created' do
-      before do
-        build.update_column(:status, :pending)
-      end
-
-      it 'does not change build status' do
-        expect(build.actionize).to be false
-        expect(build.reload).to be_pending
-      end
-    end
-  end
-
   describe '#schedulable?' do
     subject { build.schedulable? }
 

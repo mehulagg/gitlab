@@ -46,10 +46,6 @@ module Ci
       event :scheduled do
         transition all => :scheduled
       end
-
-      event :actionize do
-        transition created: :manual
-      end
     end
 
     def self.retry(bridge, current_user)

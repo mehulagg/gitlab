@@ -242,10 +242,6 @@ module Ci
         transition preparing: :pending
       end
 
-      event :actionize do
-        transition created: :manual
-      end
-
       event :schedule do
         transition created: :scheduled
       end
