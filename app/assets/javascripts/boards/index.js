@@ -340,7 +340,7 @@ export default () => {
   toggleFocusMode(ModalStore, boardsStore);
   toggleLabels();
 
-  if (gon.features?.swimlanes) {
+  if (gon.abilities?.swimlanes) {
     toggleEpicsSwimlanes();
   }
 

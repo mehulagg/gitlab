@@ -2,7 +2,7 @@
 
 module Gitlab
   module Abilities
-    class Swimlanes
+    class WipLimit
       class << self
         def enabled?(parent: nil)
           parent.feature_available?(:swimlanes)
