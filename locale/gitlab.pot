@@ -1725,6 +1725,9 @@ msgstr ""
 msgid "Add request manually"
 msgstr ""
 
+msgid "Add saved reply"
+msgstr ""
+
 msgid "Add strikethrough text"
 msgstr ""
 
@@ -9694,6 +9697,9 @@ msgid "Edit iteration"
 msgstr ""
 
 msgid "Edit public deploy key"
+msgstr ""
+
+msgid "Edit saved reply"
 msgstr ""
 
 msgid "Edit stage"
@@ -18302,6 +18308,9 @@ msgstr ""
 msgid "Note parameters are invalid: %{errors}"
 msgstr ""
 
+msgid "Note template was successfully deleted."
+msgstr ""
+
 msgid "Note that this invitation was sent to %{mail_to_invite_email}, but you are signed in as %{link_to_current_user} with email %{mail_to_current_user}."
 msgstr ""
 
@@ -18339,6 +18348,9 @@ msgid "Notes|Show history only"
 msgstr ""
 
 msgid "Notes|This comment has changed since you started editing, please review the %{open_link}updated comment%{close_link} to ensure information is not lost"
+msgstr ""
+
+msgid "Nothing found"
 msgstr ""
 
 msgid "Nothing found…"
@@ -20345,6 +20357,9 @@ msgid "Profiles|Public email"
 msgstr ""
 
 msgid "Profiles|Remove avatar"
+msgstr ""
+
+msgid "Profiles|Saved Replies"
 msgstr ""
 
 msgid "Profiles|Set new profile picture"
@@ -23128,6 +23143,12 @@ msgid "Save pipeline schedule"
 msgstr ""
 
 msgid "Save space and find tags in the Container Registry more easily. Enable the cleanup policy to remove stale tags and keep only the ones you need."
+msgstr ""
+
+msgid "Saved replies"
+msgstr ""
+
+msgid "Saved reply title"
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
@@ -30169,6 +30190,9 @@ msgid "Write access allowed"
 msgstr ""
 
 msgid "Write milestone description..."
+msgstr ""
+
+msgid "Write saved reply..."
 msgstr ""
 
 msgid "Write your release notes or drag your files here…"

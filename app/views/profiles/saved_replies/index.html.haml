@@ -20,7 +20,7 @@
         - @saved_replies.each do |reply|
           %li
             = reply.title
-            .btn-group.gl-ml-3
+            .btn-group.gl-ml-3.float-right
               = link_to edit_profile_saved_reply_path(reply), class: 'gl-button btn btn-default' do
                 %span.sr-only= _('Edit')
                 = sprite_icon('pencil')

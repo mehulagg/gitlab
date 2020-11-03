@@ -1,12 +1,13 @@
 - edit = local_assigns.fetch(:edit, false)
 - form_path = edit ? profile_saved_reply_path(@saved_reply) : profile_saved_replies_path
 
-= form_for @saved_reply, url: form_path do |f|
+= form_for @saved_reply, url: form_path, html: { class: 'common-note-form js-quick-submit js-requires-input' } do |f|
   .form-group
-    = f.label :title, 'Title'
-    = f.text_field :title, class: 'form-control', autofocus: true, required: true
+    = f.label :title, _('Title')
+    = f.text_field :title, class: 'form-control', autofocus: true, required: true, placeholder: _('Saved reply title')
   .form-group
-    = f.label :title, 'Note'
-    = f.text_area :note, class: 'form-control', required: true
+    = f.label :title, _('Note')
+    = render layout: 'shared/md_preview', locals: { url: '' } do
+      = render 'shared/zen', f: f, attr: :note, classes: 'note-textarea', placeholder: _('Write saved reply...'), supports_autocomplete: false, required: true
   .gl-mt-3
-    = f.submit 'Save', class: 'btn gl-button btn-success'
+    = f.submit _('Save'), class: 'btn gl-button btn-success'
