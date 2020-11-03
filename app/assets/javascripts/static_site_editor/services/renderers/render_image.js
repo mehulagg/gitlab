@@ -15,7 +15,7 @@ const generateSourceDirectory = ({ source, target }, basePath) => {
 };
 
 const getSrc = destination => {
-  const rePath = /^(.+)\/([^/]+)$/; // Extracts the base path anf fileName of the image
+  const rePath = /^(.+)\/([^/]+)$/; // Extracts the base path and fileName of the image
   const [, basePath, fileName] = rePath.exec(destination);
   let sourceDir = '';
 
@@ -34,6 +34,7 @@ const render = ({ destination, firstChild }, { skipChildren }) => {
     tagName: 'img',
     selfClose: true,
     attributes: {
+      'data-original-src': !isAbsolute(destination) ? destination : '',
       src: isAbsolute(destination) ? destination : getSrc(destination),
       alt: firstChild.literal,
     },
