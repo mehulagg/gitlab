@@ -109,8 +109,8 @@ export default {
   data() {
     return {
       selectedIntegration: integrationTypesNew[0].value,
-      active: false,
       options: integrationTypesNew,
+      active: false,
       formVisible: false,
     };
   },
@@ -136,17 +136,20 @@ export default {
           error: null,
         },
         active: this.currentIntegration?.active || false,
-        token: this.currentIntegration?.token || '',
-        url: this.currentIntegration?.url || '',
+        token: this.currentIntegration?.token || this.selectedIntegrationType.token,
+        url: this.currentIntegration?.url || this.selectedIntegrationType.url,
         apiUrl: this.currentIntegration?.apiUrl || '',
       };
     },
   },
   watch: {
     currentIntegration(val) {
+      if (val === null) {
+        return this.onReset();
+      }
       this.selectedIntegration = val.type;
       this.active = val.active;
-      this.onIntegrationTypeSelect();
+      return this.onIntegrationTypeSelect();
     },
   },
   methods: {
@@ -176,15 +179,27 @@ export default {
       return this.$emit('create-new-integration', integrationPayload);
     },
     onReset() {
-      this.integrationForm.name = '';
-      this.integrationForm.apiUrl = '';
-      this.integrationForm.active = false;
-      this.integrationForm.integrationTestPayload.error = null;
-      this.integrationForm.integrationTestPayload.json = '';
       this.selectedIntegration = integrationTypesNew[0].value;
       this.onIntegrationTypeSelect();
+
+      if (this.currentIntegration) {
+        return this.$emit('clear-current-integration');
+      }
+
+      return this.onResetFormValues();
+    },
+    onResetFormValues() {
+      this.integrationForm.name = '';
+      this.integrationForm.apiUrl = '';
+      this.active = false;
+      this.integrationForm.integrationTestPayload.error = null;
+      this.integrationForm.integrationTestPayload.json = '';
     },
     onResetAuthKey() {
+      if (!this.currentIntegration) {
+        return;
+      }
+
       this.$emit('reset-token', {
         type: this.selectedIntegration,
         variables: { id: this.currentIntegration.id },
@@ -217,6 +232,7 @@ export default {
     >
       <gl-form-select
         v-model="selectedIntegration"
+        :disabled="currentIntegration !== null"
         :options="options"
         @change="onIntegrationTypeSelect"
       />
@@ -279,7 +295,11 @@ export default {
 
           <gl-form-input-group id="url" readonly :value="integrationForm.url">
             <template #append>
-              <clipboard-button :text="integrationForm.url" :title="__('Copy')" class="gl-m-0!" />
+              <clipboard-button
+                :text="integrationForm.url || ''"
+                :title="__('Copy')"
+                class="gl-m-0!"
+              />
             </template>
           </gl-form-input-group>
         </div>
@@ -328,7 +348,7 @@ export default {
         <gl-form-textarea
           id="test-integration"
           v-model.trim="integrationForm.integrationTestPayload.json"
-          :disabled="!integrationForm.active"
+          :disabled="!active"
           :state="jsonIsValid"
           :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
           class="gl-my-4"
