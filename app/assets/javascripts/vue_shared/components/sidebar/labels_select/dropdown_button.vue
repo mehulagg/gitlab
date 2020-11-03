@@ -1,10 +1,11 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlDropdown } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 
 export default {
   components: {
     GlIcon,
+    GlDropdown,
   },
   props: {
     abilityName: {
@@ -73,7 +74,7 @@ export default {
     :data-scoped-labels="enableScopedLabels"
     type="button"
     class="dropdown-menu-toggle wide js-label-select js-multiselect js-context-config-modal"
-    data-toggle="dropdown"
+    data-toggle="gl-dropdown"
   >
     <span class="dropdown-toggle-text"> {{ dropdownToggleText }} </span>
     <gl-icon
