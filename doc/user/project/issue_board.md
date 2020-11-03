@@ -31,7 +31,7 @@ To let your team members organize their own workflows, use
 [multiple issue boards](#use-cases-for-multiple-issue-boards). This allows creating multiple issue
 boards in the same project.
 
-![GitLab issue board - Core](img/issue_boards_core.png)
+![GitLab issue board - Core](img/issue_boards_core_v13_6.png)
 
 Different issue board features are available in different [GitLab tiers](https://about.gitlab.com/pricing/),
 as shown in the following table:
@@ -45,7 +45,7 @@ as shown in the following table:
 
 To learn more, visit [GitLab Enterprise features for issue boards](#gitlab-enterprise-features-for-issue-boards) below.
 
-![GitLab issue board - Premium](img/issue_boards_premium.png)
+![GitLab issue board - Premium](img/issue_boards_premium_v13_6.png)
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 Watch a [video presentation](https://youtu.be/vjccjHI7aGI) of
@@ -69,8 +69,8 @@ For example, let's consider this simplified development workflow:
 1. When frontend is complete, the new feature is deployed to a **staging** environment to be tested.
 1. When successful, it's deployed to **production**.
 
-If you have the labels "**backend**", "**frontend**", "**staging**", and
-"**production**", and an issue board with a list for each, you can:
+If you have the labels **Backend**, **Frontend**, **Staging**, and
+**Production**, and an issue board with a list for each, you can:
 
 - Visualize the entire flow of implementations since the beginning of the development life cycle
   until deployed to production.
@@ -78,7 +78,7 @@ If you have the labels "**backend**", "**frontend**", "**staging**", and
 - Move issues between lists to organize them according to the labels you've set.
 - Add multiple issues to lists in the board by selecting one or more existing issues.
 
-![issue card moving](img/issue_board_move_issue_card_list.png)
+![issue card moving](img/issue_board_move_issue_card_list_v13_6.png)
 
 ### Use cases for multiple issue boards
 
@@ -199,7 +199,7 @@ Using the search box at the top of the menu, you can filter the listed boards.
 When you have ten or more boards available, a **Recent** section is also shown in the menu, with
 shortcuts to your last four visited boards.
 
-![Multiple issue boards](img/issue_boards_multiple.png)
+![Multiple issue boards](img/issue_boards_multiple_v13_6.png)
 
 When you're revisiting an issue board in a project or group with multiple boards,
 GitLab automatically loads the last board you visited.
@@ -229,19 +229,15 @@ An issue board can be associated with a GitLab [Milestone](milestones/index.md#m
 which automatically filter the board issues accordingly.
 This allows you to create unique boards according to your team's need.
 
-![Create scoped board](img/issue_board_creation.png)
+![Create scoped board](img/issue_board_creation_v13_6.png)
 
-You can define the scope of your board when creating it or by clicking the "Edit board" button.
+You can define the scope of your board when creating it or by clicking the **Edit board** button.
 After a milestone, assignee or weight is assigned to an issue board, you can no longer
 filter through these in the search bar. In order to do that, you need to remove the desired scope
 (for example, milestone, assignee, or weight) from the issue board.
 
-![Edit board configuration](img/issue_board_edit_button.png)
-
 If you don't have editing permission in a board, you're still able to see the configuration by
 clicking **View scope**.
-
-![Viewing board configuration](img/issue_board_view_scope.png)
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 Watch a [video presentation](https://youtu.be/m5UTNCSqaDk) of
@@ -253,12 +249,8 @@ the Configurable Issue Board feature.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28597) to the Free tier of GitLab.com in 12.10.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212331) to GitLab Core in 13.0.
 
-Click the button at the top right to toggle focus mode on and off. In focus mode, the navigation UI
-is hidden, allowing you to focus on issues in the board.
-
-![Board focus mode](img/issue_board_focus_mode.gif)
-
----
+To enable or disable focus mode, select the **Toggle focus mode** button (**{maximize}**) at the top
+right. In focus mode, the navigation UI is hidden, allowing you to focus on issues in the board.
 
 ### Sum of issue weights **(STARTER)**
 
