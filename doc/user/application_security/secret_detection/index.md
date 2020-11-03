@@ -51,7 +51,6 @@ Encrpytion Keys:
   - Stripe API
   - Generic API key strings starting with `api-`
 
-
 NOTE: **Note:**
 You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets)
 
