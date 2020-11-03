@@ -3,6 +3,8 @@
 module Elastic
   module Latest
     class IssueInstanceProxy < ApplicationInstanceProxy
+      GITLAB_MIGRATION_VERSION = '6b7304e6-c85e-44b4-b92c-fd5978c876cc'
+
       def as_indexed_json(options = {})
         data = {}
 
@@ -13,6 +15,8 @@ module Elastic
         end
 
         data['assignee_id'] = safely_read_attribute_for_elasticsearch(:assignee_ids)
+        data['issues_access_level'] = target.project.issues_access_level
+        data['gitlab_migration_version'] = GITLAB_MIGRATION_VERSION
 
         data.merge(generic_attributes)
       end

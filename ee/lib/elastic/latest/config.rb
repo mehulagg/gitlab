@@ -128,6 +128,9 @@ module Elastic
 
         indexes :iid, type: :integer
 
+        # Used to track data version for migrations
+        indexes :gitlab_migration_version, type: :keyword
+
         indexes :title, type: :text,
           index_options: 'positions'
         indexes :description, type: :text,

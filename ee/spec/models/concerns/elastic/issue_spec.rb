@@ -129,6 +129,8 @@ RSpec.describe Issue, :elastic do
     })
 
     expected_hash['assignee_id'] = [assignee.id]
+    expected_hash['issues_access_level'] = issue.project.issues_access_level
+    expected_hash['gitlab_migration_version'] = Elastic::Latest::IssueInstanceProxy::GITLAB_MIGRATION_VERSION
 
     expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
   end
