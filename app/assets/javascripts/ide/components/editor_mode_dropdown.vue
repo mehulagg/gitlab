@@ -35,7 +35,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-dropdown">
+  <div class="dropdown">
     <gl-button variant="link" data-toggle="gl-dropdown">{{ __('Edit') }}</gl-button>
     <div class="dropdown-menu dropdown-menu-selectable dropdown-open-left">
       <ul>
