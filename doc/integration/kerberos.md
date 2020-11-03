@@ -103,6 +103,10 @@ user associated with the email, which is built from the Kerberos username and
 realm. User accounts will be created automatically when authentication was
 successful.
 
+NOTE: **Note:**
+New users automatically created by Kerberos will be blocked by default for security reasons.
+Check the [Initial Omniauth Configuration](omniauth.md#initial-omniauth-configuration), specifically the `block_auto_created_users`.
+
 ## Linking Kerberos and LDAP accounts together
 
 If your users log in with Kerberos, but you also have [LDAP integration](../administration/auth/ldap/index.md)
