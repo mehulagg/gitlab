@@ -531,8 +531,7 @@ you when you're ready to manually deploy to production.
 You can use a [canary environment](../../user/project/canary_deployments.md) before
 deploying any changes to production.
 
-If you define `CANARY_ENABLED` in your project, such as setting `CANARY_ENABLED` to
-`1` (the actual value is irrelevant) as a CI/CD variable, then two manual jobs are created:
+If you define `CANARY_ENABLED` with a non-empty value, then two manual jobs are created:
 
 - `canary` - Deploys the application to the canary environment.
 - `production_manual` - Manually deploys the application to production.
