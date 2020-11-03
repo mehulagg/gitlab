@@ -7193,6 +7193,9 @@ msgstr ""
 msgid "ContainerRegistry|Something went wrong while fetching the cleanup policy."
 msgstr ""
 
+msgid "ContainerRegistry|Something went wrong while fetching the image details."
+msgstr ""
+
 msgid "ContainerRegistry|Something went wrong while fetching the repository list."
 msgstr ""
 
