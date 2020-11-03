@@ -127,6 +127,7 @@ export default {
       nextPageCursor: this.next,
       filterParams: this.initialFilterParams,
       sortedBy: this.initialSortBy,
+      showBulkEditSidebar: false,
       testCases: {
         list: [],
         pageInfo: {},
@@ -323,6 +324,12 @@ export default {
 
       this.updateUrl();
     },
+    handleEditTestCases() {
+      this.showBulkEditSidebar = true;
+    },
+    handleCancelEdit() {
+      this.showBulkEditSidebar = false;
+    },
   },
 };
 </script>
@@ -341,6 +348,7 @@ export default {
     :issuables="testCases.list"
     :issuables-loading="testCaseListLoading"
     :show-pagination-controls="showPaginationControls"
+    :show-bulk-edit-sidebar="showBulkEditSidebar"
     :default-page-size="$options.defaultPageSize"
     :current-page="currentPage"
     :previous-page="previousPage"
@@ -353,6 +361,9 @@ export default {
     @sort="handleSortTestCases"
   >
     <template v-if="canCreateTestCase" #nav-actions>
+      <gl-button :disabled="showBulkEditSidebar" class="gl-mr-2" @click="handleEditTestCases">{{
+        __('Edit test cases')
+      }}</gl-button>
       <gl-button :href="testCaseNewPath" category="primary" variant="success">{{
         s__('TestCases|New test case')
       }}</gl-button>
@@ -362,6 +373,12 @@ export default {
         :current-state="currentState"
         :test-cases-count="testCasesCount"
       />
+    </template>
+    <template #bulk-edit-actions="{ checkedIssuables }">
+      <gl-button variant="info" class="float-left" :disabled="!checkedIssuables.length">{{
+        __('Update all')
+      }}</gl-button>
+      <gl-button class="float-right" @click="handleCancelEdit">{{ __('Cancel') }}</gl-button>
     </template>
   </issuable-list>
 </template>
