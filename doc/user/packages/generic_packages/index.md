@@ -138,7 +138,8 @@ Feature.disable(:generic_packages)
 Feature.disable(:generic_packages, Project.find(<project id>))
 ```
 
-### Working Example
+### Generic package sample project
+
 The following repository contains a working example of creating, uploading and downloading Generic Packages in Gitlab CI.
 
 It also demonstrates how to manage a semantic version for the generic package - storing it in a CI/CD Variable, retrieving it, incrementing it and writing back to the CI/CD variable when tests for the download work correctly.
