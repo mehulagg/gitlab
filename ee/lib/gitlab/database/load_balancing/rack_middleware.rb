@@ -36,7 +36,9 @@ module Gitlab
 
           unstick_or_continue_sticking(env)
 
-          load_balancer.enable_query_cache!
+          if Feature.enabled?(:query_cache_for_load_balancing)
+            load_balancer.enable_query_cache!
+          end
 
           result = @app.call(env)
 

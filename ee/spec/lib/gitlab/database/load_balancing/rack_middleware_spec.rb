@@ -28,6 +28,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
   end
 
   describe '#call' do
+    let(:lb) { double(:lb) }
+
+    before do
+      allow(middleware).to receive(:load_balancer).and_return(lb)
+    end
+
     it 'handles a request' do
       env = {}
 
@@ -35,10 +41,31 @@ RSpec.describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
 
       expect(middleware).to receive(:unstick_or_continue_sticking).with(env)
       expect(middleware).to receive(:stick_if_necessary).with(env)
+      expect(lb).to receive(:enable_query_cache!)
 
       expect(app).to receive(:call).with(env).and_return(10)
 
       expect(middleware.call(env)).to eq(10)
+    end
+
+    context 'when :query_cache_for_load_balancing feature flag is disabled' do
+      before do
+        stub_feature_flags(query_cache_for_load_balancing: false)
+      end
+
+      it 'handles a request without enabling query cache' do
+        env = {}
+
+        expect(middleware).to receive(:clear).twice
+
+        expect(middleware).to receive(:unstick_or_continue_sticking).with(env)
+        expect(middleware).to receive(:stick_if_necessary).with(env)
+        expect(lb).not_to receive(:enable_query_cache!)
+
+        expect(app).to receive(:call).with(env).and_return(10)
+
+        expect(middleware.call(env)).to eq(10)
+      end
     end
   end
 
