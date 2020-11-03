@@ -190,7 +190,7 @@ collection size.
 You can write a test by passing the `skip_cached` variable to [QueryRecorder](query_recorder.md) to detect this and prevent regressions.
 
 As an example, say you have a Ci pipeline. All pipeline builds belong to the same pipeline,
-thus they also belong to the same project (`pipeline.project`).
+thus they also belong to the same project (`pipeline.project`):
 
 ```ruby
 pipeline_project = pipeline.project
