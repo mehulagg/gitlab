@@ -106,12 +106,12 @@ class RenameUsersUpdatedAtToUpdatedAtTimestamp < ActiveRecord::Migration[4.2]
 end
 ```
 
-This will take care of renaming the column, ensuring data stays in sync, copying
-over indexes and foreign keys, etc.
+This will take care of renaming the column, ensuring data stays in sync, and
+copying over indexes and foreign keys.
 
-If a column contains 1 or more indexes that do not contain the name of
-the original column, the above procedure will fail. In this case you will first
-need to rename these indexes.
+If a column contains one or more indexes that don't contain the name of the
+original column, the previously described procedure will fail. In that case,
+you'll first need to rename these indexes.
 
 ### Step 2: Add A Post-Deployment Migration
 
