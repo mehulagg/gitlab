@@ -6,7 +6,7 @@ import { viewerTypes } from '../constants';
 export default {
   components: {
     GlButton,
-    GlDropdown
+    GlDropdown,
   },
   props: {
     viewer: {
@@ -37,7 +37,7 @@ export default {
 <template>
   <div class="gl-dropdown">
     <gl-button variant="link" data-toggle="gl-dropdown">{{ __('Edit') }}</gl-button>
-    <div class="gl-dropdown-menu gl-dropdown-menu-selectable gl-dropdown-open-left">
+    <div class="dropdown-menu dropdown-menu-selectable dropdown-open-left">
       <ul>
         <li>
           <a
@@ -47,8 +47,8 @@ export default {
             href="#"
             @click.prevent="changeMode($options.viewerTypes.mr)"
           >
-            <strong class="gl-dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
-            <span class="gl-dropdown-menu-inner-content">
+            <strong class="dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
+            <span class="dropdown-menu-inner-content">
               {{ __('Compare changes with the merge request target branch') }}
             </span>
           </a>
@@ -61,8 +61,8 @@ export default {
             href="#"
             @click.prevent="changeMode($options.viewerTypes.diff)"
           >
-            <strong class="gl-dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
-            <span class="gl-dropdown-menu-inner-content">
+            <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
+            <span class="dropdown-menu-inner-content">
               {{ __('Compare changes with the last commit') }}
             </span>
           </a>
