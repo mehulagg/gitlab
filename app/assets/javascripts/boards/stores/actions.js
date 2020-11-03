@@ -18,6 +18,7 @@ import boardLabelsQuery from '../queries/board_labels.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
+import issueCreateMutation from '../queries/issue_create.mutation.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
 
@@ -291,16 +292,30 @@ export default {
       );
   },
 
-  createNewIssue: () => {
-    notImplemented();
+  createNewIssue: ({ commit }, input) => {
+    return gqlClient
+      .mutate({
+        mutation: issueCreateMutation,
+        variables: { input },
+      })
+      .then(({ data }) => {
+        if (data?.createIssue?.errors.length) {
+          commit(types.CREATE_ISSUE_FAILURE);
+        } else {
+          const issue = data.createIssue?.issue;
+          return issue;
+        }
+        return null;
+      })
+      .catch(() => commit(types.CREATE_ISSUE_FAILURE));
   },
 
   addListIssue: ({ commit }, { list, issue, position }) => {
     commit(types.ADD_ISSUE_TO_LIST, { list, issue, position });
   },
 
-  addListIssueFailure: ({ commit }, { list, issue }) => {
-    commit(types.ADD_ISSUE_TO_LIST_FAILURE, { list, issue });
+  addListIssueFailure: ({ commit }, { list, issueId }) => {
+    commit(types.ADD_ISSUE_TO_LIST_FAILURE, { list, issueId });
   },
 
   setActiveIssueLabels: async ({ commit, getters }, input) => {

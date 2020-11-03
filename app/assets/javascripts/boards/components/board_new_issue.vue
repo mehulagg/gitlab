@@ -7,6 +7,7 @@ import ListIssue from 'ee_else_ce/boards/models/issue';
 import eventHub from '../eventhub';
 import ProjectSelect from './project_select.vue';
 import boardsStore from '../stores/boards_store';
+import { formatIssue } from '../boards_util';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
@@ -31,15 +32,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['isSwimlanesOn']),
+    ...mapGetters(['shouldUseGraphQL']),
     disabled() {
       if (this.groupId) {
         return this.title === '' || !this.selectedProject.name;
       }
       return this.title === '';
-    },
-    shouldDisplaySwimlanes() {
-      return this.glFeatures.boardsWithSwimlanes && this.isSwimlanesOn;
     },
   },
   mounted() {
@@ -47,7 +45,7 @@ export default {
     eventHub.$on('setSelectedProject', this.setSelectedProject);
   },
   methods: {
-    ...mapActions(['addListIssue', 'addListIssueFailure']),
+    ...mapActions(['createNewIssue', 'addListIssue', 'addListIssueFailure']),
     submit(e) {
       e.preventDefault();
       if (this.title.trim() === '') return Promise.resolve();
@@ -61,8 +59,33 @@ export default {
       const { weightFeatureAvailable } = boardsStore;
       const { weight } = weightFeatureAvailable ? boardsStore.state.currentBoard : {};
 
+      const { title } = this;
+
+      eventHub.$emit(`scroll-board-list-${this.list.id}`);
+      this.cancel();
+
+      if (this.shouldUseGraphQL) {
+        let issueId;
+        return this.createNewIssue({
+          title,
+          labelIds: labels?.map(l => l.id),
+          assigneeIds: assignees?.map(a => a?.id),
+          milestoneId: milestone?.id,
+          projectPath: this.selectedProject.path,
+          weight,
+        })
+          .then(issue => {
+            // Need this because our jQuery very kindly disables buttons on ALL form submissions
+            $(this.$refs.submitButton).enable();
+
+            issueId = issue.id;
+            this.addListIssue({ list: this.list, issue: formatIssue(issue), position: 0 });
+          })
+          .catch(() => this.addListIssueFailure({ list: this.list, issueId }));
+      }
+
       const issue = new ListIssue({
-        title: this.title,
+        title,
         labels,
         subscribed: true,
         assignees,
@@ -71,34 +94,20 @@ export default {
         weight,
       });
 
-      eventHub.$emit(`scroll-board-list-${this.list.id}`);
-      this.cancel();
-
-      if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
-        this.addListIssue({ list: this.list, issue, position: 0 });
-      }
-
       return this.list
         .newIssue(issue)
         .then(() => {
           // Need this because our jQuery very kindly disables buttons on ALL form submissions
           $(this.$refs.submitButton).enable();
 
-          if (!this.shouldDisplaySwimlanes && !this.glFeatures.graphqlBoardLists) {
-            boardsStore.setIssueDetail(issue);
-            boardsStore.setListDetail(this.list);
-          }
+          boardsStore.setIssueDetail(issue);
+          boardsStore.setListDetail(this.list);
         })
         .catch(() => {
           // Need this because our jQuery very kindly disables buttons on ALL form submissions
           $(this.$refs.submitButton).enable();
 
-          // Remove the issue
-          if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
-            this.addListIssueFailure({ list: this.list, issue });
-          } else {
-            this.list.removeIssue(issue);
-          }
+          this.list.removeIssue(issue);
 
           // Show error message
           this.error = true;

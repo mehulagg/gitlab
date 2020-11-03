@@ -204,6 +204,10 @@ export default {
     notImplemented();
   },
 
+  [mutationTypes.CREATE_ISSUE_FAILURE]: state => {
+    state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
+  },
+
   [mutationTypes.ADD_ISSUE_TO_LIST]: (state, { list, issue, position }) => {
     const listIssues = state.issuesByListId[list.id];
     listIssues.splice(position, 0, issue.id);
@@ -211,9 +215,9 @@ export default {
     Vue.set(state.issues, issue.id, issue);
   },
 
-  [mutationTypes.ADD_ISSUE_TO_LIST_FAILURE]: (state, { list, issue }) => {
+  [mutationTypes.ADD_ISSUE_TO_LIST_FAILURE]: (state, { list, issueId }) => {
     state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
-    removeIssueFromList({ state, listId: list.id, issueId: issue.id });
+    removeIssueFromList({ state, listId: list.id, issueId });
   },
 
   [mutationTypes.SET_CURRENT_PAGE]: () => {
