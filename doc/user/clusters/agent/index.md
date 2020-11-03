@@ -206,7 +206,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
 - You will need to replace `namespace: gitlab-agent` with `namespace: <YOUR-DESIRED-NAMESPACE>`.
 - There are several ways how `kas-address` (Kubernetes Agent Server) can be configured. The agent can use the WebSockets
   or gRPC protocols to connect to the Agent Server. Depending on your cluster configuration and GitLab architecture, 
-  you may need to use one or the other.
+  you may need to use one or the other:
   - By default, `wss` scheme (an encrypted WebSockets connection) is used after you install `gitlab-kas` sub-chart or
     enable `kas` for Omnibus GitLab. In this case, you will need to set `wss://GitLab.host.tld:443/-/kubernetes-agent` as 
     `kas-address` where `GitLab.host.tld` is your GitLab hostname.
