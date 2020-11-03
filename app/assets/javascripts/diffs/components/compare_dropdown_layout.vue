@@ -28,7 +28,7 @@ export default {
       v-for="version in versions"
       :key="version.id"
       :is-check-item="true"
-      :is-checked="true"
+      :is-checked="version.selected"
       :class="{ 'is-active': version.selected }"
       :href="version.href"
     >
