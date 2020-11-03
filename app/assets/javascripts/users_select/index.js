@@ -770,13 +770,18 @@ UsersSelect.prototype.renderRow = function(issuableType, user, selected, usernam
 
   return `
     <li data-user-id=${user.id}>
-      <a href="#" class="dropdown-menu-user-link d-flex align-items-center ${linkClasses}" ${tooltipAttributes}>
+      <a href="#" class="dropdown-menu-user-link d-flex align-items-center samantha ${linkClasses}" ${tooltipAttributes}>
         ${this.renderRowAvatar(issuableType, user, img)}
         <span class="d-flex flex-column overflow-hidden">
-          <strong class="dropdown-menu-user-full-name">
+          <strong class="dropdown-menu-user-full-name gl-font-weight-bold">
             ${escape(user.name)}
           </strong>
-          ${username ? `<span class="dropdown-menu-user-username">${username}</span>` : ''}
+          ${
+            username
+              ? `<span class="dropdown-menu-user-username text gl-text-gray-400">${username}</span>`
+              : ''
+          }
+          <div>Security</div>
         </span>
       </a>
     </li>
