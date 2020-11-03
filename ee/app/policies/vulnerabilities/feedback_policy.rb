@@ -9,7 +9,7 @@ module Vulnerabilities
     condition(:dismissal) { @subject.for_dismissal? }
 
     with_options scope: :user, score: 0
-    condition(:security_bot) { @user.security_bot? }
+    condition(:security_bot) { @user&.security_bot? }
 
 
     rule { issue & ~can?(:create_issue) }.prevent :create_vulnerability_feedback
