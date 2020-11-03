@@ -1,10 +1,17 @@
 <script>
 import { GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import createFlash from '~/flash';
-import uploadDesignMutation from '../../graphql/mutations/upload_design.mutation.graphql';
-import { UPLOAD_DESIGN_INVALID_FILETYPE_ERROR } from '../../utils/error_messages';
-import { isValidDesignFile } from '../../utils/design_management_utils';
-import { VALID_DATA_TRANSFER_TYPE, VALID_DESIGN_FILE_MIMETYPE } from '../../constants';
+import { __ } from '~/locale';
+import { isValidImage } from './utils';
+import { VALID_DATA_TRANSFER_TYPE, VALID_IMAGE_FILE_MIMETYPE } from './constants';
+
+// TODO: Add props for:
+// - validators
+// - error message
+
+const UPLOAD_DESIGN_INVALID_FILETYPE_ERROR = __(
+  'Could not upload your designs as one or more files uploaded are not supported.',
+);
 
 export default {
   components: {
@@ -12,13 +19,17 @@ export default {
     GlLink,
     GlSprintf,
   },
-  props: {
-    hasDesigns: {
-      type: Boolean,
-      required: false,
-      default: false,
+  inject: {
+    uploadInvalidFileTypeError: {
+      default: __('Could not upload your image as one or more files uploaded are not supported'),
     },
-    isDraggingDesign: {
+  },
+  props: {
+    displayAsCard: {
+      type: Boolean,
+      required: true,
+    },
+    disableDragBehavior: {
       type: Boolean,
       required: false,
       default: false,
@@ -36,14 +47,14 @@ export default {
     },
     iconStyles() {
       return {
-        size: this.hasDesigns ? 24 : 16,
-        class: this.hasDesigns ? 'gl-mb-2' : 'gl-mr-3 gl-text-gray-500',
+        size: this.displayAsCard ? 24 : 16,
+        class: this.displayAsCard ? 'gl-mb-2' : 'gl-mr-3 gl-text-gray-500',
       };
     },
   },
   methods: {
     isValidUpload(files) {
-      return files.every(isValidDesignFile);
+      return files.every(isValidImage);
     },
     isValidDragDataType({ dataTransfer }) {
       return Boolean(dataTransfer && dataTransfer.types.some(t => t === VALID_DATA_TRANSFER_TYPE));
@@ -57,7 +68,7 @@ export default {
 
       const { files } = dataTransfer;
       if (!this.isValidUpload(Array.from(files))) {
-        createFlash({ message: UPLOAD_DESIGN_INVALID_FILETYPE_ERROR });
+        createFlash({ message: this.uploadInvalidFileTypeError });
         return;
       }
 
@@ -77,8 +88,7 @@ export default {
       this.$emit('change', e.target.files);
     },
   },
-  uploadDesignMutation,
-  VALID_DESIGN_FILE_MIMETYPE,
+  VALID_IMAGE_FILE_MIMETYPE,
 };
 </script>
 
@@ -98,7 +108,7 @@ export default {
         @click="openFileUpload"
       >
         <div
-          :class="{ 'gl-flex-direction-column': hasDesigns }"
+          :class="{ 'gl-flex-direction-column': displayAsCard }"
           class="gl-display-flex gl-align-items-center gl-justify-content-center gl-text-center"
           data-testid="dropzone-area"
         >
@@ -119,7 +129,7 @@ export default {
         ref="fileUpload"
         type="file"
         name="design_file"
-        :accept="$options.VALID_DESIGN_FILE_MIMETYPE.mimetype"
+        :accept="$options.VALID_IMAGE_FILE_MIMETYPE.mimetype"
         class="hide"
         multiple
         @change="onDesignInputChange"
@@ -127,11 +137,11 @@ export default {
     </slot>
     <transition name="design-dropzone-fade">
       <div
-        v-show="dragging && !isDraggingDesign"
+        v-show="dragging && !disableDragBehavior"
         class="card design-dropzone-border design-dropzone-overlay gl-w-full gl-h-full gl-absolute gl-display-flex gl-align-items-center gl-justify-content-center gl-p-3 gl-bg-white"
       >
         <div v-show="!isDragDataValid" class="mw-50 gl-text-center">
-          <h3 :class="{ 'gl-font-base gl-display-inline': !hasDesigns }">{{ __('Oh no!') }}</h3>
+          <h3 :class="{ 'gl-font-base gl-display-inline': !displayAsCard }">{{ __('Oh no!') }}</h3>
           <span>{{
             __(
               'You are trying to upload something other than an image. Please upload a .png, .jpg, .jpeg, .gif, .bmp, .tiff or .ico.',
@@ -139,7 +149,9 @@ export default {
           }}</span>
         </div>
         <div v-show="isDragDataValid" class="mw-50 gl-text-center">
-          <h3 :class="{ 'gl-font-base gl-display-inline': !hasDesigns }">{{ __('Incoming!') }}</h3>
+          <h3 :class="{ 'gl-font-base gl-display-inline': !displayAsCard }">
+            {{ __('Incoming!') }}
+          </h3>
           <span>{{ __('Drop your designs to start your upload.') }}</span>
         </div>
       </div>

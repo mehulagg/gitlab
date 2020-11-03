@@ -414,8 +414,8 @@ export default {
           class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
         >
           <design-dropzone
-            :has-designs="hasDesigns"
-            :is-dragging-design="isDraggingDesign"
+            :display-as-card="hasDesigns"
+            :disable-drag-behavior="isDraggingDesign"
             @change="onExistingDesignDropzoneChange($event, design.filename)"
           >
             <design
@@ -438,9 +438,9 @@ export default {
         <template #header>
           <li :class="designDropzoneWrapperClass" data-testid="design-dropzone-wrapper">
             <design-dropzone
-              :is-dragging-design="isDraggingDesign"
+              :disable-drag-behavior="isDraggingDesign"
               :class="{ 'design-list-item design-list-item-new': !isDesignListEmpty }"
-              :has-designs="hasDesigns"
+              :display-as-card="hasDesigns"
               data-qa-selector="design_dropzone_content"
               @change="onUploadDesign"
             />
