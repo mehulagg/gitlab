@@ -356,6 +356,10 @@ class Commit
     end
   end
 
+  def raw_commit_from_rugged?
+    @raw.raw_commit.is_a?(Rugged::Commit)
+  end
+
   def revert_branch_name
     "revert-#{short_id}"
   end
