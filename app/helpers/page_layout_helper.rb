@@ -147,4 +147,12 @@ module PageLayoutHelper
 
     css_class.join(' ')
   end
+
+  def page_itemtype(itemtype = nil)
+    if itemtype
+      @page_itemtype = { itemscope: true, itemtype: itemtype }
+    else
+      @page_itemtype
+    end
+  end
 end
