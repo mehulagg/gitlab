@@ -8,13 +8,21 @@ type: howto
 # Activate GitLab EE with a license **(STARTER ONLY)**
 
 To activate all GitLab Enterprise Edition (EE) functionality, you need to upload
-a license. After you've received your license from GitLab Inc., you can upload it
-by **signing into your GitLab instance as an admin** or adding it at
-installation time.
+a license. It's only possible to activate GitLab Enterprise Edition, so first, verify which edition
+you are running. Log in GitLab and go to `/help`. The GitLab edition and version are listed at the
+top of the **Help** page.
+
+If you are running GitLab Community Edition (CE) you first need to upgrade your installation to
+GitLab Enterprise Edition (EE). For more details, see [Upgrading between editions](../..//update/README.md#upgrading-between-editions).
+If you have questions or need assistance upgrading from GitLab CE to EE please [contact GitLab Support](https://support.gitlab.com/hc/en-us).
 
 The license is a base64-encoded ASCII text file with a `.gitlab-license`
 extension. You can obtain the file by [purchasing a license](https://about.gitlab.com/pricing/)
 or by signing up for a [free trial](https://about.gitlab.com/free-trial/).
+
+After you've received your license from GitLab Inc., you can upload it
+by **signing into your GitLab instance as an admin** or adding it at
+installation time.
 
 As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an
 uploaded license only has the Core features active. A trial license
@@ -27,12 +35,6 @@ is locked.
 The very first time you visit your GitLab EE installation signed in as an admin,
 you should see a note urging you to upload a license with a link that takes you
 to **Admin Area > License**.
-
-If you can't see the **License** page it's likely you are running GitLab Community Edition (CE).
-In that case you first need to upgrade your installation to GitLab Enterprise Edition (EE).
-For more details, see [Upgrading between editions](../..//update/README.md#upgrading-between-editions).
-If you have questions or need assistance upgrading from GitLab CE to EE
-please [contact GitLab Support](https://support.gitlab.com/hc/en-us).
 
 Otherwise, you can:
 
