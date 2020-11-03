@@ -8,7 +8,7 @@ module EE
     prepended do
       desc "User is support bot"
       with_options scope: :user, score: 0
-      condition(:security_bot) { @user&.security_bot? }
+      condition(:security_bot) { security_bot }
 
       with_scope :subject
       condition(:auto_fix_enabled) { @subject&.security_setting&.auto_fix_enabled&.any? }
@@ -371,6 +371,12 @@ module EE
       return true unless ::Gitlab.com?
 
       project.namespace.feature_available_non_trial?(:resource_access_token)
+    end
+
+    def security_bot
+      return false unless user_is_user?
+
+      @user.security_bot?
     end
   end
 end
