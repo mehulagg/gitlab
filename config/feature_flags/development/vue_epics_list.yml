@@ -1,0 +1,8 @@
+---
+name: vue_epics_list
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/276189
+milestone: '13.6'
+type: development
+group: group::product planning
+default_enabled: false

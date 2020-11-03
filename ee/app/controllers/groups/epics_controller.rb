@@ -19,6 +19,7 @@ class Groups::EpicsController < Groups::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
+    push_frontend_feature_flag(:vue_epics_list, @group, type: :development)
   end
 
   feature_category :epics
