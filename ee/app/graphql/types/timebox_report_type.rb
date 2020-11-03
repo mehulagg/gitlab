@@ -6,6 +6,8 @@ module Types
     graphql_name 'TimeboxReport'
     description 'Represents a fixed report about the timebox'
 
+    field :stats, ::Types::TimeReportStatsType, null: true,
+          description: ''
     field :burnup_time_series, [::Types::BurnupChartDailyTotalsType], null: true,
           description: 'Daily scope and completed totals for burnup charts'
   end
