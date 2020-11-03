@@ -61,7 +61,21 @@ module Gitlab
       end
 
       def replication_verification_complete?
-        replication_complete? && verification_complete?
+        [
+          current_node_status.repositories_synced_in_percentage,
+          current_node_status.repositories_checksummed_in_percentage,
+          current_node_status.repositories_verified_in_percentage,
+          current_node_status.repositories_checked_in_percentage,
+          current_node_status.wikis_synced_in_percentage,
+          current_node_status.wikis_checksummed_in_percentage,
+          current_node_status.wikis_verified_in_percentage,
+          current_node_status.lfs_objects_synced_in_percentage,
+          current_node_status.job_artifacts_synced_in_percentage,
+          current_node_status.attachments_synced_in_percentage,
+          current_node_status.replication_slots_used_in_percentage,
+          current_node_status.container_repositories_synced_in_percentage,
+          current_node_status.design_repositories_synced_in_percentage
+        ].all? { |success_percentage| success_percentage == 100 }
       end
 
       private
@@ -251,52 +265,6 @@ module Gitlab
           show_failed_value(replicator_class.checksum_failed_count)
           print "#{replicator_class.checksummed_count}/#{replicator_class.registry_count} "
           puts using_percentage(current_node_status.checksummed_in_percentage_for(replicator_class))
-        end
-      end
-
-      def replication_complete?
-        replicables.all? { |failed_count| failed_count == 0 }
-      end
-
-      def verification_complete?
-        verifiables.all? { |failed_count| failed_count == 0 }
-      end
-
-      def replicables
-        [
-          current_node_status.repositories_failed_count,
-          current_node_status.wikis_failed_count,
-          current_node_status.lfs_objects_failed_count,
-          current_node_status.attachments_failed_count,
-          current_node_status.job_artifacts_failed_count,
-          current_node_status.design_repositories_failed_count
-        ].tap do |r|
-          if ::Geo::ContainerRepositoryRegistry.replication_enabled?
-            r.push current_node_status.container_repositories_failed_count
-          end
-
-          Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
-            r.push replicator_class.failed_count
-          end
-        end
-      end
-
-      def verifiables
-        [].tap do |v|
-          if Gitlab::Geo.repository_verification_enabled?
-            v.push(
-              current_node_status.repositories_verification_failed_count,
-              current_node_status.wikis_verification_failed_count
-            )
-          end
-
-          if Gitlab::CurrentSettings.repository_checks_enabled
-            v.push current_node_status.repositories_checked_failed_count
-          end
-
-          Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
-            v.push replicator_class.checksum_failed_count
-          end
         end
       end
 
