@@ -1,34 +1,38 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Updating GitLab
+# Upgrading GitLab
+
+Upgrading GitLab is a relatively straightforward process, but the complexity
+can increase based on the installation method you have used, how old your
+GitLab version is, if you're upgrading to a major version, etc.
+
+Make sure to read the whole page as it contains information related to every upgrade method.
+
+## Upgrade based on installation method
 
 Depending on the installation method and your GitLab version, there are multiple
-update guides.
+official ways to update GitLab:
 
-There are currently 3 official ways to install GitLab:
+- [Omnibus packages](#linux-packages-omnibus-gitlab)
+- [Source installations](#installation-from-source)
+- [Docker installations](#installation-using-docker)
 
-- [Omnibus packages](#omnibus-packages)
-- [Source installation](#installation-from-source)
-- [Docker installation](#installation-using-docker)
-
-Based on your installation, choose a section below that fits your needs.
-
-## Omnibus Packages
+### Linux packages (Omnibus GitLab)
 
 - The [Omnibus update guide](https://docs.gitlab.com/omnibus/update/README.html)
   contains the steps needed to update an Omnibus GitLab package.
 
-## Installation from source
+### Installation from source
 
 - [Upgrading Community Edition and Enterprise Edition from
   source](upgrading_from_source.md) - The guidelines for upgrading Community
   Edition and Enterprise Edition from source.
 - [Patch versions](patch_versions.md) guide includes the steps needed for a
-  patch version, such as 6.2.0 to 6.2.1, and apply to both Community and Enterprise
+  patch version, such as 13.2.0 to 13.2.1, and apply to both Community and Enterprise
   Editions.
 
 In the past we used separate documents for the upgrading instructions, but we
@@ -38,11 +42,147 @@ can still be found in the Git repository:
 - [Old upgrading guidelines for Community Edition](https://gitlab.com/gitlab-org/gitlab-foss/tree/11-8-stable/doc/update)
 - [Old upgrading guidelines for Enterprise Edition](https://gitlab.com/gitlab-org/gitlab/tree/11-8-stable-ee/doc/update)
 
-## Installation using Docker
+### Installation using Docker
 
 GitLab provides official Docker images for both Community and Enterprise
 editions. They are based on the Omnibus package and instructions on how to
 update them are in [a separate document](https://docs.gitlab.com/omnibus/docker/README.html).
+
+## Checking for background migrations before upgrading
+
+Certain major/minor releases may require a set of background migrations to be
+finished. The number of remaining migrations jobs can be found by running the
+following command:
+
+**For Omnibus installations**
+
+If using GitLab 12.9 and newer, run:
+
+```shell
+sudo gitlab-rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
+```
+
+If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+puts Sidekiq::Queue.new("background_migration").size
+Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
+```
+
+---
+
+**For installations from source**
+
+If using GitLab 12.9 and newer, run:
+
+```shell
+cd /home/git/gitlab
+sudo -u git -H bundle exec rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
+```
+
+If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+puts Sidekiq::Queue.new("background_migration").size
+Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
+```
+
+### What do I do if my background migrations are stuck?
+
+CAUTION: **Warning:**
+The following operations can disrupt your GitLab performance.
+
+It is safe to re-execute these commands, especially if you have 1000+ pending jobs which would likely overflow your runtime memory.
+
+**For Omnibus installations**
+
+```shell
+# Start the rails console
+sudo gitlab-rails c
+
+# Execute the following in the rails console
+scheduled_queue = Sidekiq::ScheduledSet.new
+pending_job_classes = scheduled_queue.select { |job| job["class"] == "BackgroundMigrationWorker" }.map { |job| job["args"].first }.uniq
+pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
+```
+
+**For installations from source**
+
+```shell
+# Start the rails console
+sudo -u git -H bundle exec rails RAILS_ENV=production
+
+# Execute the following in the rails console
+scheduled_queue = Sidekiq::ScheduledSet.new
+pending_job_classes = scheduled_queue.select { |job| job["class"] == "BackgroundMigrationWorker" }.map { |job| job["args"].first }.uniq
+pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
+```
+
+## Upgrade paths
+
+The following table shows the recommended upgrade paths.
+
+| Target version | Your version | Recommended upgrade path | Note |
+| --------------------- | ------------ | ------------------------ | ---- |
+| `13.4.3`                | `12.9.2`      | `12.9.2` -> `12.10.14` -> `13.0.14` -> `13.4.3` | Two intermediate versions are required: the final `12.10` release, plus `13.0`. |
+| `13.2.10`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.2.10` | Five intermediate versions are required: the final `11.11`, `12.0`, `12.1` and `12.10` releases, plus `13.0`. |
+| `12.10.14`             | `11.3.4`       | `11.3.4` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14`             |  Three intermediate versions are required: the final `11.11` and `12.0` releases, plus `12.1` |
+| `12.9.5`             | `10.4.5`       | `10.4.5` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.9.5`   | Four intermediate versions are required: `10.8`, `11.11`, `12.0` and `12.1`, then `12.9.5` |
+| `12.2.5`              | `9.2.6`        | `9.2.6` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.2.5` | Five intermediate versions are required: `9.5`, `10.8`, `11.11`, `12.0`, `12.1`, then `12.2`. |
+| `11.3.4`              | `8.13.4`       | `8.13.4` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.3.4` | `8.17.7` is the last version in version 8, `9.5.10` is the last version in version 9, `10.8.7` is the last version in version 10. |
+
+### Multi-step upgrade paths with GitLab all-in-one Linux package repository
+
+Linux package managers default to installing the latest available version of a package for installation and upgrades.
+Upgrading directly to the latest major version can be problematic for older GitLab versions that require a multi-stage upgrade path.
+
+When following an upgrade path spanning multiple versions, for each upgrade, specify the intended GitLab version number in your package manager's install or upgrade command.
+
+Examples:
+
+```shell
+# apt-get (Ubuntu/Debian)
+sudo apt-get upgrade gitlab-ee=12.0.12-ee.0
+# yum (RHEL/CentOS 6 and 7)
+yum install gitlab-ee-12.0.12-ee.0.el7
+# dnf (RHEL/CentOS 8)
+dnf install gitlab-ee-12.0.12-ee.0.el8
+# zypper (SUSE)
+zypper install gitlab-ee=12.0.12-ee.0
+```
+
+To identify the GitLab version number in your package manager, run the following commands:
+
+```shell
+# apt-cache (Ubuntu/Debian)
+sudo apt-cache madison gitlab-ee
+# yum (RHEL/CentOS 6 and 7)
+yum --showduplicates list gitlab-ee
+```
+
+## Upgrading to a new major version
+
+Upgrading the *major* version requires more attention.
+Backward-incompatible changes and migrations are reserved for major versions.
+We cannot guarantee that upgrading between major versions will be seamless.
+It is suggested to upgrade to the latest available *minor* version within
+your major version before proceeding to the next major version.
+Doing this will address any backward-incompatible changes or deprecations
+to help ensure a successful upgrade to the next major release.
+Follow the upgrade recommendations to identify a [supported upgrade path](#upgrade-paths).
+
+More significant migrations may occur during major release upgrades. To ensure these are successful:
+
+1. Increment to the first minor version (`x.0.x`) during the major version jump.
+1. Proceed with upgrading to a newer release.
+
+It's also important to ensure that any background migrations have been fully completed
+before upgrading to a new major version. To see the current size of the `background_migration` queue,
+[Check for background migrations before upgrading](#checking-for-background-migrations-before-upgrading).
+
+If your GitLab instance has any runners associated with it, it is very
+important to upgrade GitLab Runner to match the GitLab minor version that was
+upgraded to. This is to ensure [compatibility with GitLab versions](https://docs.gitlab.com/runner/#compatibility-with-gitlab-versions).
 
 ## Upgrading without downtime
 
@@ -114,88 +254,6 @@ meet the other online upgrade requirements mentioned above.
 ### Steps
 
 Steps to [upgrade without downtime](https://docs.gitlab.com/omnibus/update/README.html#zero-downtime-updates).
-
-## Checking for background migrations before upgrading
-
-Certain major/minor releases may require a set of background migrations to be
-finished. The number of remaining migrations jobs can be found by running the
-following command:
-
-**For Omnibus installations**
-
-If using GitLab 12.9 and newer, run:
-
-```shell
-sudo gitlab-rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
-```
-
-If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
-
-```ruby
-puts Sidekiq::Queue.new("background_migration").size
-Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
-```
-
----
-
-**For installations from source**
-
-If using GitLab 12.9 and newer, run:
-
-```shell
-cd /home/git/gitlab
-sudo -u git -H bundle exec rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
-```
-
-If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
-
-```ruby
-puts Sidekiq::Queue.new("background_migration").size
-Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
-```
-
-### What do I do if my background migrations are stuck?
-
-CAUTION: **Warning:**
-The following operations can disrupt your GitLab performance.
-
-NOTE: **Note:**
-It is safe to re-execute these commands, especially if you have 1000+ pending jobs which would likely overflow your runtime memory.
-
-**For Omnibus installations**
-
-```shell
-# Start the rails console
-sudo gitlab-rails c
-
-# Execute the following in the rails console
-scheduled_queue = Sidekiq::ScheduledSet.new
-pending_job_classes = scheduled_queue.select { |job| job["class"] == "BackgroundMigrationWorker" }.map { |job| job["args"].first }.uniq
-pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
-```
-
-**For installations from source**
-
-```shell
-# Start the rails console
-sudo -u git -H bundle exec rails RAILS_ENV=production
-
-# Execute the following in the rails console
-scheduled_queue = Sidekiq::ScheduledSet.new
-pending_job_classes = scheduled_queue.select { |job| job["class"] == "BackgroundMigrationWorker" }.map { |job| job["args"].first }.uniq
-pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
-```
-
-## Upgrading to a new major version
-
-Major versions are reserved for backwards incompatible changes. We recommend that
-you first upgrade to the latest available minor version within your major version.
-Please follow the [Upgrade Recommendations](../policy/maintenance.md#upgrade-recommendations)
-to identify a supported upgrade path.
-
-Before upgrading to a new major version, you should ensure that any background
-migration jobs from previous releases have been completed. To see the current size
-of the `background_migration` queue, [check for background migrations before upgrading](#checking-for-background-migrations-before-upgrading).
 
 ## Upgrading between editions
 
@@ -312,6 +370,12 @@ Once upgraded to 11.11.8 you can safely upgrade to 12.0.x.
 
 See our [documentation on upgrade paths](../policy/maintenance.md#upgrade-recommendations)
 for more information.
+
+### Upgrades from versions earlier than 8.12
+
+- `8.11.x` and earlier: you might have to upgrade to `8.12.0` specifically before you can upgrade to `8.17.7`. This was [reported in an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/207259).
+- [CI changes prior to version 8.0](https://docs.gitlab.com/omnibus/update/README.html#updating-gitlab-ci-from-prior-540-to-version-714-via-omnibus-gitlab)
+  when it was merged into GitLab.
 
 ## Miscellaneous
 
