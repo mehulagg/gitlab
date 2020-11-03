@@ -375,7 +375,7 @@ In GitLab [8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) and 
 
 1. Go to your group's **Members** page.
 1. Select the pencil icon in the row for the user you are editing.
-1. Select the orange `Change permissions` button.
+1. Select the orange `Edit permissions` button in the modal.
 
 ![Setting manual permissions](img/manual_permissions_v13_1.png)
 
