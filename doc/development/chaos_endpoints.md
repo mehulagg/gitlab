@@ -144,7 +144,8 @@ curl http://localhost:3000/-/chaos/sleep?duration_s=60&token=secret
 
 This endpoint will simulate the unexpected death of a worker process using a `kill` signal.
 
-Since this endpoint uses the `KILL` signal, the worker is not given a chance to cleanup or shutdown.
+Because this endpoint uses the `KILL` signal, the worker isn't given an
+opportunity to cleanup or shutdown.
 
 ```plaintext
 GET /-/chaos/kill
