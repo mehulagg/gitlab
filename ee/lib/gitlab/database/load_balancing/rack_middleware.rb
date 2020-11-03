@@ -36,6 +36,8 @@ module Gitlab
 
           unstick_or_continue_sticking(env)
 
+          load_balancer.enable_query_cache!
+
           result = @app.call(env)
 
           stick_if_necessary(env)
