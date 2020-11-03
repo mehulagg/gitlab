@@ -351,7 +351,7 @@ setting is used:
 | `ci_max_artifact_size_license_management`   | 0             |
 | `ci_max_artifact_size_license_scanning`     | 0             |
 | `ci_max_artifact_size_load_performance`     | 0             |
-| `ci_max_artifact_size_lsif`                 | 20 MB ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3) |
+| `ci_max_artifact_size_lsif`                 | 0             |
 | `ci_max_artifact_size_metadata`             | 0             |
 | `ci_max_artifact_size_metrics_referee`      | 0             |
 | `ci_max_artifact_size_metrics`              | 0             |

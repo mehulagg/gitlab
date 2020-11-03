@@ -35,8 +35,6 @@ code_navigation:
       lsif: dump.lsif
 ```
 
-The generated LSIF file must be less than 170MiB.
-
 After the job succeeds, code intelligence data can be viewed while browsing the code:
 
 ![Code intelligence](img/code_intelligence_v13_4.png)
