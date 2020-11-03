@@ -1,9 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlBadge } from '@gitlab/ui';
 import component from '~/reports/codequality_report/components/codequality_issue_body.vue';
 import { STATUS_FAILED, STATUS_NEUTRAL, STATUS_SUCCESS } from '~/reports/constants';
 
 describe('code quality issue body issue body', () => {
   let wrapper;
+
+  const findBadge = () => wrapper.find(GlBadge);
 
   const codequalityIssue = {
     name:
@@ -14,10 +17,10 @@ describe('code quality issue body issue body', () => {
     urlPath: '/Gemfile.lock#L22',
   };
 
-  const mountWithStatus = initialStatus => {
+  const createComponent = (initialStatus, issue) => {
     wrapper = shallowMount(component, {
       propsData: {
-        issue: codequalityIssue,
+        issue: issue || codequalityIssue,
         status: initialStatus,
       },
     });
@@ -28,17 +31,39 @@ describe('code quality issue body issue body', () => {
     wrapper = null;
   });
 
+  describe('severity rating', () => {
+    it.each`
+      severity      | badgeVariant | badgeIcon
+      ${'info'}     | ${'info'}    | ${null}
+      ${'minor'}    | ${'neutral'} | ${null}
+      ${'major'}    | ${'warning'} | ${null}
+      ${'critical'} | ${'danger'}  | ${null}
+      ${'blocker'}  | ${'danger'}  | ${'cancel'}
+    `(
+      'renders correct badge and icon for "$severity" severity rating',
+      ({ severity, badgeVariant, badgeIcon }) => {
+        createComponent(STATUS_FAILED, {
+          ...codequalityIssue,
+          severity,
+        });
+
+        expect(findBadge().props('variant')).toBe(badgeVariant);
+        expect(findBadge().props('icon')).toBe(badgeIcon);
+      },
+    );
+  });
+
   describe('with success', () => {
     it('renders fixed label', () => {
-      mountWithStatus(STATUS_SUCCESS);
+      createComponent(STATUS_SUCCESS);
 
       expect(wrapper.text()).toContain('Fixed');
     });
   });
 
   describe('without success', () => {
-    it('renders fixed label', () => {
-      mountWithStatus(STATUS_FAILED);
+    it('does not render fixed label', () => {
+      createComponent(STATUS_FAILED);
 
       expect(wrapper.text()).not.toContain('Fixed');
     });
@@ -46,7 +71,7 @@ describe('code quality issue body issue body', () => {
 
   describe('name', () => {
     it('renders name', () => {
-      mountWithStatus(STATUS_NEUTRAL);
+      createComponent(STATUS_NEUTRAL);
 
       expect(wrapper.text()).toContain(codequalityIssue.name);
     });
@@ -54,7 +79,7 @@ describe('code quality issue body issue body', () => {
 
   describe('path', () => {
     it('renders the report-link path using the correct code quality issue', () => {
-      mountWithStatus(STATUS_NEUTRAL);
+      createComponent(STATUS_NEUTRAL);
 
       expect(wrapper.find('report-link-stub').props('issue')).toBe(codequalityIssue);
     });
