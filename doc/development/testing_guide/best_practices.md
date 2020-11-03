@@ -361,7 +361,7 @@ Finished in 34.51 seconds (files took 0.76702 seconds to load)
 1 example, 0 failures
 ```
 
-Note: `live_debug` only works on JavaScript enabled specs.
+`live_debug` only works on JavaScript enabled specs.
 
 #### Run `:js` spec in a visible browser
 
@@ -584,7 +584,6 @@ this trait should be either fixed to not rely on Sidekiq processing jobs, or the
 `:sidekiq_might_not_need_inline` trait should be updated to `:sidekiq_inline` if
 the processing of background jobs is needed/expected.
 
-NOTE: **Note:**
 The usage of `perform_enqueued_jobs` is only useful for testing delayed mail
 deliveries since our Sidekiq workers aren't inheriting from `ApplicationJob` / `ActiveJob::Base`.
 

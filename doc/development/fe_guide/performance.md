@@ -77,9 +77,8 @@ controller with the `index` action. If a corresponding file exists at
 `pages/projects/issues/index/index.js`, it will be compiled into a webpack
 bundle and included on the page.
 
-NOTE: **Note:**
-Previously we had encouraged the use of
-`content_for :page_specific_javascripts` within haml files, along with
+Previously, GitLab encouraged the use of
+`content_for :page_specific_javascripts` within HAML files, along with
 manually generated webpack bundles. However under this new system you should
 not ever need to manually add an entry point to the `webpack.config.js` file.
 
