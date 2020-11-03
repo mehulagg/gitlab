@@ -25809,6 +25809,9 @@ msgstr ""
 msgid "Succeeded"
 msgstr ""
 
+msgid "Successful purchase image"
+msgstr ""
+
 msgid "Successfully activated"
 msgstr ""
 
