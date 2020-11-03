@@ -16,8 +16,8 @@
 .broadcast-banner-message {
   text-align: center;
 
-  .broadcast-message-dismiss {
-    color: inherit;
+  .broadcast-message-dismiss-icon {
+    color: $white;
   }
 }
 
@@ -37,7 +37,7 @@
     position: static;
   }
 
-  .broadcast-message-dismiss {
+  .broadcast-message-dismiss-icon {
     color: $gray-700;
   }
 }
