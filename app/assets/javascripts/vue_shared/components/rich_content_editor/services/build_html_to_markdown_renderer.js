@@ -100,8 +100,8 @@ const buildHTMLToMarkdownRender = (baseRenderer, formattingPreferences = {}) => 
         : baseRenderer.convert(node, subContent);
     },
     IMG(node) {
-      const { originalSrc, src } = node.dataset;
-      return `![${node.alt}](${originalSrc || src})`;
+      const { originalSrc } = node.dataset;
+      return `![${node.alt}](${originalSrc || node.src})`;
     },
   };
 };

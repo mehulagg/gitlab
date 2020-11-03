@@ -14,9 +14,9 @@ const generateSourceDirectory = ({ source, target }, basePath) => {
   return joinPaths(source, basePath);
 };
 
-const getSrc = destination => {
-  const rePath = /^(.+)\/([^/]+)$/; // Extracts the base path and fileName of the image
-  const [, basePath, fileName] = rePath.exec(destination);
+const getSrc = originalSrc => {
+  const rePath = /^(.+)\/([^/]+)$/; // Extracts the base path and fileName from an image path
+  const [, basePath, fileName] = rePath.exec(originalSrc);
   let sourceDir = '';
 
   metadata.mounts.forEach(mount => {
@@ -26,7 +26,7 @@ const getSrc = destination => {
   return joinPaths(getBaseURL(), metadata.project, '/-/raw/', metadata.branch, sourceDir, fileName);
 };
 
-const render = ({ destination, firstChild }, { skipChildren }) => {
+const render = ({ destination: originalSrc, firstChild }, { skipChildren }) => {
   skipChildren();
 
   return {
@@ -34,8 +34,8 @@ const render = ({ destination, firstChild }, { skipChildren }) => {
     tagName: 'img',
     selfClose: true,
     attributes: {
-      'data-original-src': !isAbsolute(destination) ? destination : '',
-      src: isAbsolute(destination) ? destination : getSrc(destination),
+      'data-original-src': !isAbsolute(originalSrc) ? originalSrc : '',
+      src: isAbsolute(originalSrc) ? originalSrc : getSrc(originalSrc),
       alt: firstChild.literal,
     },
   };

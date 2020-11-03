@@ -24,6 +24,7 @@ import {
   trackingCategory,
   images,
   mounts,
+  branch,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -43,6 +44,7 @@ describe('static_site_editor/pages/home', () => {
     username,
     sourcePath,
     mounts,
+    branch,
   };
   const hasSubmittedChangesMutationPayload = {
     data: {

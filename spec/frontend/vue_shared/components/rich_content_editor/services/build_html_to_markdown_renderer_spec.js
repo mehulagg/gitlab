@@ -189,4 +189,20 @@ describe('rich_content_editor/services/html_to_markdown_renderer', () => {
       expect(htmlToMarkdownRenderer['PRE CODE'](node, subContent)).toBe(originalConverterResult);
     });
   });
+
+  describe('IMG', () => {
+    it('returns an image with its original src', () => {
+      const originalSrc = 'path/to/original/image.png';
+      const alt = 'alt text';
+      const node = document.createElement('img');
+
+      node.alt = alt;
+      node.dataset.originalSrc = originalSrc;
+      node.src = 'modified/path/to/image.png';
+
+      htmlToMarkdownRenderer = buildHTMLToMarkdownRenderer(baseRenderer);
+
+      expect(htmlToMarkdownRenderer.IMG(node)).toBe(`![${alt}](${originalSrc})`);
+    });
+  });
 });

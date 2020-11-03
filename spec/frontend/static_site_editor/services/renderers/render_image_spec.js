@@ -1,11 +1,11 @@
 import imageRenderer from '~/static_site_editor/services/renderers/render_image';
-import { mounts, project } from '../../mock_data';
+import { mounts, project, branch } from '../../mock_data';
 
 describe('rich_content_editor/renderers/render_image', () => {
   let renderer;
 
   beforeEach(() => {
-    renderer = imageRenderer.build(mounts, project);
+    renderer = imageRenderer.build(mounts, project, branch);
   });
 
   describe('build', () => {
@@ -48,13 +48,29 @@ describe('rich_content_editor/renderers/render_image', () => {
       expect(skipChildren).toHaveBeenCalled();
     });
 
-    it('returns an image', () => {
+    it.each`
+      destination                                      | isAbsolute | src
+      ${'http://test.host/absolute/path/to/image.png'} | ${true}    | ${'http://test.host/absolute/path/to/image.png'}
+      ${'/relative/path/to/image.png'}                 | ${false}   | ${'http://test.host/user1/project1/-/raw/master/some/source/relative/path/to/image.png'}
+      ${'relative/path/to/image.png'}                  | ${false}   | ${'http://test.host/user1/project1/-/raw/master/some/source/relative/path/to/image.png'}
+    `('returns an image with the correct attributes', ({ destination, isAbsolute, src }) => {
+      const node = {
+        destination,
+        firstChild: {
+          type: 'img',
+          literal: 'Some Image',
+        },
+      };
+
+      result = renderer.render(node, context);
+
       expect(result).toEqual({
         type: 'openTag',
         tagName: 'img',
         selfClose: true,
         attributes: {
-          src: '/some/path/image.png',
+          'data-original-src': !isAbsolute ? destination : '',
+          src,
           alt: 'Some Image',
         },
       });

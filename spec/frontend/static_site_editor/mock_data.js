@@ -75,3 +75,5 @@ export const mounts = [
     target: '',
   },
 ];
+
+export const branch = 'master';
