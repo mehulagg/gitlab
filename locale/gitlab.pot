@@ -4272,8 +4272,10 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
-msgid "Blocked issue"
-msgstr ""
+msgid "Blocked by %d issue"
+msgid_plural "Blocked by %d issues"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Blocking issues"
 msgstr ""
