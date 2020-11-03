@@ -15,4 +15,17 @@ describe('AssigneesDropdown Component', () => {
     });
     expect(getByText(wrapper.element, 'Test')).toBeDefined();
   });
+
+  it('renders search slot', () => {
+    const wrapper = shallowMount(AssigneesDropdown, {
+      propsData: {
+        text: '',
+        headerText: '',
+      },
+      slots: {
+        search: '<p>Search</p>',
+      },
+    });
+    expect(getByText(wrapper.element, 'Search')).toBeDefined();
+  });
 });

@@ -1,11 +1,12 @@
 import { mount } from '@vue/test-utils';
-import { GlDropdownItem, GlAvatarLink, GlAvatarLabeled } from '@gitlab/ui';
+import { GlDropdownItem, GlAvatarLink, GlAvatarLabeled, GlSearchBoxByType } from '@gitlab/ui';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import store from '~/boards/stores';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import searchUsers from '~/boards/queries/users_search.query.graphql';
 import { participants } from '../mock_data';
 
 describe('BoardCardAssigneeDropdown', () => {
@@ -14,10 +15,11 @@ describe('BoardCardAssigneeDropdown', () => {
   const activeIssueName = 'test';
   const anotherIssueName = 'hello';
 
-  const createComponent = () => {
+  const createComponent = (search = '') => {
     wrapper = mount(BoardAssigneeDropdown, {
       data() {
         return {
+          search,
           selected: store.getters.getActiveIssue.assignees,
           participants,
         };
@@ -43,7 +45,7 @@ describe('BoardCardAssigneeDropdown', () => {
   };
 
   const findByText = text => {
-    return wrapper.findAll(GlDropdownItem).wrappers.find(x => x.text().indexOf(text) === 0);
+    return wrapper.findAll(GlDropdownItem).wrappers.find(node => node.text().indexOf(text) === 0);
   };
 
   beforeEach(() => {
@@ -203,26 +205,50 @@ describe('BoardCardAssigneeDropdown', () => {
   );
 
   describe('Apollo Schema', () => {
-    beforeEach(() => {
-      createComponent();
+    // TODO: move .each to describe
+    it.each`
+      search      | expected
+      ${''}       | ${getIssueParticipants}
+      ${'search'} | ${searchUsers}
+    `('returns the correct query when search term is $search', ({ search, expected }) => {
+      createComponent(search);
+
+      const { query } = wrapper.vm.$options.apollo.participants;
+      const boundQuery = query.bind(wrapper.vm);
+
+      expect(boundQuery()).toEqual(expected);
     });
 
-    it('returns the correct query', () => {
-      expect(wrapper.vm.$options.apollo.participants.query).toEqual(getIssueParticipants);
-    });
+    it.each`
+      search      | expected
+      ${''}       | ${{ id: 'gid://gitlab/Issue/111' }}
+      ${'search'} | ${{ search: 'search' }}
+    `('contains the correct variables when search term is $search', ({ search, expected }) => {
+      createComponent(search);
 
-    it('contains the correct variables', () => {
       const { variables } = wrapper.vm.$options.apollo.participants;
       const boundVariable = variables.bind(wrapper.vm);
 
-      expect(boundVariable()).toEqual({ id: 'gid://gitlab/Issue/111' });
+      expect(boundVariable()).toEqual(expected);
     });
 
     it('returns the correct data from update', () => {
+      createComponent();
+
       const node = { test: 1 };
       const { update } = wrapper.vm.$options.apollo.participants;
 
-      expect(update({ issue: { participants: { nodes: [node] } } })).toEqual([node]);
+      const boundUpdate = update.bind(wrapper.vm);
+
+      expect(boundUpdate({ issue: { participants: { nodes: [node] } } })).toEqual([node]);
     });
+  });
+
+  it('finds GlSearchBoxByType', async () => {
+    createComponent();
+
+    await openDropdown();
+
+    expect(wrapper.find(GlSearchBoxByType).exists()).toBe(true);
   });
 });
