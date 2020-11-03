@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Geo', :orchestrated, :geo, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/262103', type: :bug } do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'Project snippet' do
       let(:snippet_title) { "Geo project snippet-#{SecureRandom.hex(8)}" }
       let(:snippet_description) { 'Geo snippet description' }
