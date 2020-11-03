@@ -7,6 +7,7 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
   FETCH_TAGS_LIST_ERROR_MESSAGE,
+  FETCH_IMAGE_DETAILS_ERROR_MESSAGE,
 } from '../constants/index';
 import { decodeAndParse } from '../utils';
 
@@ -62,11 +63,17 @@ export const requestTagsList = ({ commit, dispatch }, { pagination = {}, params 
     });
 };
 
-export const requestImageDetails = async ({ dispatch, commit }, id) => {
+export const requestImageDetails = ({ dispatch, commit }, id) => {
   commit(types.SET_MAIN_LOADING, true);
-  const { data } = await Api.containerRegistryDetails(id);
-  commit(types.SET_IMAGE_DETAILS, data);
-  dispatch('requestTagsList');
+  return Api.containerRegistryDetails(id)
+    .then(({ data }) => {
+      commit(types.SET_IMAGE_DETAILS, data);
+      dispatch('requestTagsList');
+    })
+    .catch(() => {
+      createFlash(FETCH_IMAGE_DETAILS_ERROR_MESSAGE);
+      commit(types.SET_MAIN_LOADING, false);
+    });
 };
 
 export const requestDeleteTag = ({ commit, dispatch, state }, { tag, params }) => {
