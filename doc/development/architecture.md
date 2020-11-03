@@ -687,7 +687,6 @@ Sidekiq is a Ruby background job processor that pulls jobs from the Redis queue 
 
 #### Puma
 
-NOTE: **Note:**
 Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
 disabled by default.
 
@@ -705,7 +704,6 @@ disabled by default.
 
 #### Unicorn
 
-NOTE: **Note:**
 Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
 disabled by default.
 
@@ -1039,7 +1037,7 @@ bundle exec rake gitlab:env:info RAILS_ENV=production
 bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
-Note: It is recommended to log into the `git` user using `sudo -i -u git` or `sudo su - git`. While
+It is recommended to log into the `git` user using `sudo -i -u git` or `sudo su - git`. While
 the `sudo` commands provided by GitLab work in Ubuntu they do not always work in RHEL.
 
 ## GitLab.com
