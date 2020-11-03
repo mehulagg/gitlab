@@ -44,10 +44,10 @@ To change the location where the job logs will be stored, follow the steps below
    changes to take effect.
 
 Alternatively, if you have existing job logs you can follow
-the below steps to do a no data loss transfer to a new storage location.
+these steps to move the logs to a new location without losing any data.
 
-1. Pause continuous integration data processing by setting the following in `/etc/gitlab/gitlab.rb`.
-   In progress jobs will also be safe due to how [data flow](#data-flow) works.
+1. Pause continuous integration data processing by updating this setting in `/etc/gitlab/gitlab.rb`.
+   Jobs in progress are not affected, based on how [data flow](#data-flow) works.
 
    ```ruby
    sidekiq['experimental_queue_selector'] = true
@@ -66,11 +66,21 @@ the below steps to do a no data loss transfer to a new storage location.
 
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
    changes to take effect.
-1. `rsync` job logs from the current storage location to the new storage location: `sudo rsync -avzh --remove-source-files --ignore-existing --progress /var/opt/gitlab/gitlab-ci/builds/ /mnt/to/gitlab-ci/builds`. We use `--ignore-existing` because we don't want to override any fresh job logs with older versions of the same log.
-1. Unpause continuous integration data processing by removing from `/etc/gitlab/gitlab.rb` the `sidekiq` setting set above.
+1. Use `rsync` to move job logs from the current location to the new location:
+
+   ```shell
+   sudo rsync -avzh --remove-source-files --ignore-existing --progress /var/opt/gitlab/gitlab-ci/builds/ /mnt/to/gitlab-ci/builds`
+   ```
+
+   Use `--ignore-existing` so you don't override new job logs with older versions of the same log.
+1. Unpause continuous integration data processing by editing `/etc/gitlab/gitlab.rb` and removing the `sidekiq` setting you updated earlier.
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
    changes to take effect.
-1. Remove the old job logs storage location: `sudo rm -rf /var/opt/gitlab/gitlab-ci/builds`
+1. Remove the old job logs storage location:
+
+   ```shell
+   sudo rm -rf /var/opt/gitlab/gitlab-ci/builds`
+   ```
 
 **In installations from source:**
 
