@@ -6,6 +6,8 @@ module EE
 
     prepended do
       belongs_to :push_rule
+
+      scope :has_vulnerabilities, -> { where('has_vulnerabilities IS TRUE') }
     end
   end
 end

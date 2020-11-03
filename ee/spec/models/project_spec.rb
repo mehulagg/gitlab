@@ -248,9 +248,11 @@ RSpec.describe Project do
     describe '.has_vulnerabilities' do
       let_it_be(:project_1) { create(:project) }
       let_it_be(:project_2) { create(:project) }
+      let_it_be(:project_3) { create(:project) }
 
       before do
-        create(:vulnerability, project: project_1)
+        project_1.project_setting.update!(has_vulnerabilities: true)
+        project_2.project_setting.update!(has_vulnerabilities: false)
       end
 
       subject { described_class.has_vulnerabilities }
