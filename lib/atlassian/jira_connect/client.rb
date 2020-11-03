@@ -20,6 +20,7 @@ module Atlassian
               commits: commits,
               branches: branches,
               merge_requests: merge_requests,
+              preloaded_user_notes_count: preload_user_notes_count(merge_requests),
               update_sequence_id: update_sequence_id
             )
           ]
@@ -36,6 +37,14 @@ module Atlassian
       end
 
       private
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_user_notes_count(merge_requests)
+        return unless merge_requests
+
+        Note.where(noteable_type: MergeRequest.to_s, noteable_id: merge_requests.map(&:id)).user.group(:noteable_id).count
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def jwt_token(http_method, uri)
         claims = Atlassian::Jwt.build_claims(
