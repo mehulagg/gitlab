@@ -7,32 +7,13 @@ export default {
   components: {
     SubscriptionTable,
   },
-  props: {
-    planUpgradeHref: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    namespaceId: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    customerPortalUrl: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    namespaceName: {
-      type: String,
-      required: true,
-    },
-    billableSeatsHref: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
+  inject: [
+    'planUpgradeHref',
+    'namespaceId',
+    'customerPortalUrl',
+    'namespaceName',
+    'billableSeatsHref',
+  ],
   created() {
     this.setNamespaceId(this.namespaceId);
   },

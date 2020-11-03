@@ -14,16 +14,7 @@ export default {
     GlPagination,
     GlLoadingIcon,
   },
-  props: {
-    namespaceName: {
-      type: String,
-      required: true,
-    },
-    namespaceId: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['namespaceName', 'namespaceId'],
   data() {
     return {
       fields: ['user'],

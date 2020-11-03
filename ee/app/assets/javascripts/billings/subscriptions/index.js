@@ -1,6 +1,9 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import SubscriptionApp from './components/app.vue';
 import store from '../stores/index_subscriptions';
+
+Vue.use(Vuex);
 
 export default (containerId = 'js-billing-plans') => {
   const containerEl = document.getElementById(containerId);
@@ -9,40 +12,20 @@ export default (containerId = 'js-billing-plans') => {
     return false;
   }
 
+  const {
+    namespaceId,
+    namespaceName,
+    planUpgradeHref,
+    customerPortalUrl,
+    billableSeatsHref,
+  } = containerEl.dataset;
+
   return new Vue({
     el: containerEl,
     store,
-    components: {
-      SubscriptionApp,
-    },
-    data() {
-      const { dataset } = this.$options.el;
-      const {
-        namespaceId,
-        namespaceName,
-        planUpgradeHref,
-        customerPortalUrl,
-        billableSeatsHref,
-      } = dataset;
-
-      return {
-        namespaceId,
-        namespaceName,
-        planUpgradeHref,
-        customerPortalUrl,
-        billableSeatsHref,
-      };
-    },
+    provide: { namespaceId, namespaceName, planUpgradeHref, customerPortalUrl, billableSeatsHref },
     render(createElement) {
-      return createElement('subscription-app', {
-        props: {
-          namespaceId: this.namespaceId,
-          namespaceName: this.namespaceName,
-          planUpgradeHref: this.planUpgradeHref,
-          customerPortalUrl: this.customerPortalUrl,
-          billableSeatsHref: this.billableSeatsHref,
-        },
-      });
+      return createElement(SubscriptionApp);
     },
   });
 };

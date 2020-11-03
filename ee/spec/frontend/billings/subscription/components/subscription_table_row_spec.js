@@ -1,9 +1,13 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { GlIcon } from '@gitlab/ui';
 import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscription_table_row.vue';
 import createStore from 'ee/billings/stores/index_subscriptions';
 import Popover from '~/vue_shared/components/help_popover.vue';
 import { dateInWords } from '~/lib/utils/datetime_utility';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('subscription table row', () => {
   let store;
@@ -48,6 +52,7 @@ describe('subscription table row', () => {
         glFeatures: { apiBillableMemberList: billableMembersFeatureFlagEnabled },
       },
       store,
+      localVue,
     });
   };
 
@@ -55,9 +60,23 @@ describe('subscription table row', () => {
     createComponent();
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   const findHeaderCell = () => wrapper.find('[data-testid="header-cell"]');
   const findContentCells = () => wrapper.findAll('[data-testid="content-cell"]');
   const findHeaderIcon = () => findHeaderCell().find(GlIcon);
+
+  const findColumnLabelAndTitle = columnWrapper => {
+    const label = columnWrapper.find('[data-testid="property-label"]');
+    const value = columnWrapper.find('[data-testid="property-value"]');
+
+    return expect.objectContaining({
+      label: label.text(),
+      value: Number(value.text()),
+    });
+  };
 
   it('dispatches correct actions when created', () => {
     expect(store.dispatch).toHaveBeenCalledWith(
@@ -67,8 +86,8 @@ describe('subscription table row', () => {
   });
 
   it(`should render one header cell and ${columns.length} visible columns in total`, () => {
-    expect(findHeaderCell().exists()).toBe(true);
-    expect(findContentCells().length).toBe(columns.length);
+    expect(findHeaderCell().isVisible()).toBe(true);
+    expect(findContentCells()).toHaveLength(columns.length);
   });
 
   it(`should not render a hidden column`, () => {
@@ -79,7 +98,7 @@ describe('subscription table row', () => {
   });
 
   it('should render a title in the header cell', () => {
-    expect(findHeaderCell().element.textContent).toMatch(header.title);
+    expect(findHeaderCell().text()).toMatch(header.title);
   });
 
   it(`should render a ${header.icon} icon in the header cell`, () => {
@@ -87,18 +106,10 @@ describe('subscription table row', () => {
     expect(findHeaderIcon().props('name')).toBe(header.icon);
   });
 
-  columns.forEach((col, idx) => {
-    it(`should render label and value in column ${col.label}`, () => {
-      const currentCol = findContentCells().at(idx);
+  it('renders correct column structure', () => {
+    const columnsStructure = findContentCells().wrappers.map(findColumnLabelAndTitle);
 
-      expect(currentCol.find('[data-testid="property-label"]').element.textContent).toMatch(
-        col.label,
-      );
-
-      expect(currentCol.find('[data-testid="property-value"]').element.textContent).toMatch(
-        String(col.value),
-      );
-    });
+    expect(columnsStructure).toEqual(expect.arrayContaining(columns));
   });
 
   it('should append the "number" css class to property value in "Column A"', () => {
@@ -133,13 +144,9 @@ describe('subscription table row', () => {
       const d = dateColumn.value.split('-');
       const outputDate = dateInWords(new Date(d[0], d[1] - 1, d[2]));
 
-      expect(currentCol.find('[data-testid="property-label"]').element.textContent).toMatch(
-        dateColumn.label,
-      );
+      expect(currentCol.find('[data-testid="property-label"]').text()).toMatch(dateColumn.label);
 
-      expect(currentCol.find('[data-testid="property-value"]').element.textContent).toMatch(
-        outputDate,
-      );
+      expect(currentCol.find('[data-testid="property-value"]').text()).toMatch(outputDate);
     });
   });
 

@@ -35,12 +35,12 @@ export default {
   },
   computed: {
     ...mapState('subscription', ['hasBillableGroupMembers']),
-    isFeatureFlagEnabled() {
+    apiBillableMemberListFeatureEnabled() {
       return this.glFeatures?.apiBillableMemberList;
     },
   },
   created() {
-    if (this.isFeatureFlagEnabled) {
+    if (this.apiBillableMemberListFeatureEnabled) {
       this.fetchHasBillableGroupMembers();
     }
   },
@@ -69,7 +69,7 @@ export default {
     },
     isSeatsUsageButtonShown(col) {
       return (
-        this.isFeatureFlagEnabled &&
+        this.apiBillableMemberListFeatureEnabled &&
         this.billableSeatsHref &&
         col.id === 'seatsInUse' &&
         this.hasBillableGroupMembers

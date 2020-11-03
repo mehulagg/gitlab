@@ -12,7 +12,7 @@ const actionSpies = {
   fetchBillableMembersList: jest.fn(),
 };
 
-const tableProps = {
+const providedFields = {
   namespaceName: 'Test Group Name',
   namespaceId: '1000',
 };
@@ -32,12 +32,13 @@ const fakeStore = ({ initialState }) =>
     },
   });
 
-const createComponent = ({ props = {}, options = {}, initialState = {} } = {}) => {
+const createComponent = (initialState = {}) => {
   return shallowMount(SubscriptionSeats, {
-    propsData: { ...tableProps, ...props },
     store: fakeStore({ initialState }),
+    provide: {
+      ...providedFields,
+    },
     localVue,
-    ...options,
     stubs: {
       GlTable: { template: '<div></div>', props: { items: Array, fields: Array, busy: Boolean } },
     },
@@ -53,27 +54,25 @@ describe('Subscription Seats', () => {
 
   beforeEach(() => {
     wrapper = createComponent({
-      initialState: {
-        namespaceId: null,
-        members: [...mockDataSeats.data],
-        total: 300,
-        page: 1,
-        perPage: 5,
-      },
+      namespaceId: null,
+      members: [...mockDataSeats.data],
+      total: 300,
+      page: 1,
+      perPage: 5,
     });
   });
 
   it('correct actions are called on create', () => {
     expect(actionSpies.setNamespaceId).toHaveBeenCalledWith(
       expect.any(Object),
-      tableProps.namespaceId,
+      providedFields.namespaceId,
     );
     expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledWith(expect.any(Object), 1);
   });
 
   describe('heading text', () => {
     it('contains the group name and total seats number', () => {
-      expect(findHeading().text()).toMatch(tableProps.namespaceName);
+      expect(findHeading().text()).toMatch(providedFields.namespaceName);
       expect(findHeading().text()).toMatch('300');
     });
   });
@@ -97,13 +96,11 @@ describe('Subscription Seats', () => {
       'will not render given %s for currentPage',
       value => {
         wrapper = createComponent({
-          initialState: {
-            namespaceId: null,
-            members: [...mockDataSeats.data],
-            total: 300,
-            page: value,
-            perPage: 5,
-          },
+          namespaceId: null,
+          members: [...mockDataSeats.data],
+          total: 300,
+          page: value,
+          perPage: 5,
         });
         expect(findPagination().exists()).toBe(false);
       },

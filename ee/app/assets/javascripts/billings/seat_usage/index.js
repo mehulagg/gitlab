@@ -1,6 +1,9 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import SubscriptionSeats from './components/subscription_seats.vue';
 import store from '../stores/index_seat_usage';
+
+Vue.use(Vuex);
 
 export default (containerId = 'js-seat-usage') => {
   const containerEl = document.getElementById(containerId);
@@ -9,28 +12,17 @@ export default (containerId = 'js-seat-usage') => {
     return false;
   }
 
+  const { namespaceId, namespaceName } = containerEl.dataset;
+
   return new Vue({
     el: containerEl,
     store,
-    components: {
-      SubscriptionSeats,
-    },
-    data() {
-      const { dataset } = this.$options.el;
-      const { namespaceId, namespaceName } = dataset;
-
-      return {
-        namespaceId,
-        namespaceName,
-      };
+    provide: {
+      namespaceId,
+      namespaceName,
     },
     render(createElement) {
-      return createElement('subscription-seats', {
-        props: {
-          namespaceId: this.namespaceId,
-          namespaceName: this.namespaceName,
-        },
-      });
+      return createElement(SubscriptionSeats);
     },
   });
 };

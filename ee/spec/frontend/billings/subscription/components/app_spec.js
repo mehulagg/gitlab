@@ -1,15 +1,19 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import createStore from 'ee/billings/stores/index_subscriptions';
 import SubscriptionApp from 'ee/billings/subscriptions/components/app.vue';
 import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import * as types from 'ee/billings/stores/modules/subscriptions/mutation_types';
 import { mockDataSeats } from '../../mock_data';
 
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
 describe('SubscriptionApp component', () => {
   let store;
   let wrapper;
 
-  const appProps = {
+  const providedFields = {
     namespaceId: '42',
     namespaceName: 'bronze',
     planUpgradeHref: '/url',
@@ -17,13 +21,16 @@ describe('SubscriptionApp component', () => {
     billableSeatsHref: 'https://billable/seats',
   };
 
-  const factory = (props = appProps) => {
+  const factory = () => {
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionApp, {
       store,
-      propsData: { ...props },
+      provide: {
+        ...providedFields,
+      },
+      localVue,
     });
   };
 
@@ -50,10 +57,10 @@ describe('SubscriptionApp component', () => {
 
     it('passes the correct props to the subscriptions table', () => {
       expectComponentWithProps(SubscriptionTable, {
-        namespaceName: appProps.namespaceName,
-        planUpgradeHref: appProps.planUpgradeHref,
-        customerPortalUrl: appProps.customerPortalUrl,
-        billableSeatsHref: appProps.billableSeatsHref,
+        namespaceName: providedFields.namespaceName,
+        planUpgradeHref: providedFields.planUpgradeHref,
+        customerPortalUrl: providedFields.customerPortalUrl,
+        billableSeatsHref: providedFields.billableSeatsHref,
       });
     });
   });

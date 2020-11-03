@@ -1,14 +1,18 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import createStore from 'ee/billings/stores/index_subscriptions';
 import * as types from 'ee/billings/stores/modules/subscriptions/mutation_types';
 import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscription_table_row.vue';
-import { mockDataSubscription } from '../../mock_data';
+import { mockDataSubscription } from 'ee_jest/billings/mock_data';
 
 const TEST_NAMESPACE_NAME = 'GitLab.com';
 const CUSTOMER_PORTAL_URL = 'https://customers.gitlab.com/subscriptions';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('SubscriptionTable component', () => {
   let store;
@@ -24,6 +28,7 @@ describe('SubscriptionTable component', () => {
     wrapper = shallowMount(SubscriptionTable, {
       ...options,
       store,
+      localVue,
     });
   };
 
