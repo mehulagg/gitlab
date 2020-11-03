@@ -22,9 +22,10 @@ RSpec.describe Vulnerabilities::ConfirmService do
     end
 
     it_behaves_like 'calls vulnerability statistics utility services in order'
+    it_behaves_like 'removes dismissal feedback from associated findings'
 
     it 'confirms a vulnerability' do
-      Timecop.freeze do
+      freeze_time do
         confirm_vulnerability
 
         expect(vulnerability.reload).to(

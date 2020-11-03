@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Updating GitLab
 
 Depending on the installation method and your GitLab version, there are multiple
@@ -221,6 +227,10 @@ Edition, you can follow [this guide](../downgrade_ee_to_ce/README.md) to make th
 possible.
 
 ## Version specific upgrading instructions
+
+### 13.6.0
+
+The required Git version is Git v2.29 or higher.
 
 ### 13.3.0
 

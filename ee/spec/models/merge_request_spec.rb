@@ -27,6 +27,72 @@ RSpec.describe MergeRequest do
     it { is_expected.to have_many(:approval_rules) }
     it { is_expected.to have_many(:approval_merge_request_rule_sources).through(:approval_rules) }
     it { is_expected.to have_many(:approval_project_rules).through(:approval_merge_request_rule_sources) }
+
+    describe 'approval_rules association' do
+      describe '#applicable_to_branch' do
+        let!(:rule) { create(:approval_merge_request_rule, merge_request: merge_request) }
+        let(:branch) { 'stable' }
+
+        subject { merge_request.approval_rules.applicable_to_branch(branch) }
+
+        shared_examples_for 'with applicable rules to specified branch' do
+          it { is_expected.to eq([rule]) }
+        end
+
+        context 'when there are no associated source rules' do
+          it_behaves_like 'with applicable rules to specified branch'
+        end
+
+        context 'when there are associated source rules' do
+          let(:source_rule) { create(:approval_project_rule, project: merge_request.target_project) }
+
+          before do
+            rule.update!(approval_project_rule: source_rule)
+          end
+
+          context 'and rule is not overridden' do
+            before do
+              rule.update!(
+                name: source_rule.name,
+                approvals_required: source_rule.approvals_required,
+                users: source_rule.users,
+                groups: source_rule.groups
+              )
+            end
+
+            context 'and there are no associated protected branches to source rule' do
+              it_behaves_like 'with applicable rules to specified branch'
+            end
+
+            context 'and there are associated protected branches to source rule' do
+              before do
+                source_rule.update!(protected_branches: protected_branches)
+              end
+
+              context 'and branch matches' do
+                let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+                it_behaves_like 'with applicable rules to specified branch'
+              end
+
+              context 'and branch does not match anything' do
+                let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+                it { is_expected.to be_empty }
+              end
+            end
+          end
+
+          context 'and rule is overridden' do
+            before do
+              rule.update!(name: 'Overridden Rule')
+            end
+
+            it_behaves_like 'with applicable rules to specified branch'
+          end
+        end
+      end
+    end
   end
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do

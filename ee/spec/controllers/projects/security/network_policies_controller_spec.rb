@@ -73,7 +73,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         end
 
         it 'returns network policies summary' do
-          Timecop.freeze do
+          freeze_time do
             expect(adapter).to(
               receive(:query)
                 .with(:packet_flow, kubernetes_namespace, "minute", 1.hour.ago.to_s, Time.current.to_s)
@@ -114,7 +114,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
           end
 
           it 'queries with default arguments' do
-            Timecop.freeze do
+            freeze_time do
               expect(adapter).to(
                 receive(:query)
                   .with(:packet_flow, kubernetes_namespace, "minute", 1.hour.ago.to_s, Time.current.to_s)

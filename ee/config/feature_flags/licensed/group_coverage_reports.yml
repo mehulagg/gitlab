@@ -1,7 +1,0 @@
----
-name: group_coverage_reports
-introduced_by_url: 
-rollout_issue_url: 
-type: licensed
-group: group::analytics
-default_enabled: true

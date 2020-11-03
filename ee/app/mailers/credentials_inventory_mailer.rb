@@ -15,12 +15,12 @@ class CredentialsInventoryMailer < ApplicationMailer
     )
   end
 
-  def ssh_key_deleted_email(key:, deleted_by:)
+  def ssh_key_deleted_email(params:, deleted_by:)
     @deleted_by = deleted_by
-    @key = key
+    @params = params
 
     mail(
-      to: key.user.notification_email,
+      to: params[:notification_email],
       subject: _('Your SSH key was deleted')
     )
   end

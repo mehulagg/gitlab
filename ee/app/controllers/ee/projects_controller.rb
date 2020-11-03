@@ -91,6 +91,10 @@ module EE
 
       attrs += compliance_framework_params
 
+      if ::Gitlab::Ci::Features.auto_rollback_available?(project)
+        attrs << :auto_rollback_enabled
+      end
+
       if allow_mirror_params?
         attrs + mirror_params
       else

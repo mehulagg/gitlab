@@ -617,7 +617,8 @@ module Gitlab
           operations_dashboard_default_dashboard: count(::User.active.with_dashboard('operations').where(time_period),
                                                         start: user_minimum_id,
                                                         finish: user_maximum_id),
-          projects_with_tracing_enabled: distinct_count(::Project.with_tracing_enabled.where(time_period), :creator_id)
+          projects_with_tracing_enabled: distinct_count(::Project.with_tracing_enabled.where(time_period), :creator_id),
+          projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id)
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -687,6 +688,14 @@ module Gitlab
 
       def redis_hll_counters
         { redis_hll_counters: ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events_data }
+      end
+
+      def aggregated_metrics
+        return {} unless Feature.enabled?(:product_analytics_aggregated_metrics)
+
+        {
+          aggregated_metrics: ::Gitlab::UsageDataCounters::HLLRedisCounter.aggregated_metrics_data
+        }
       end
 
       def analytics_unique_visits_data

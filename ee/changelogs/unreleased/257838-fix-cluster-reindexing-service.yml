@@ -1,0 +1,5 @@
+---
+title: Fix Global Search Reindexing when reindexing task is not found
+merge_request: 46224
+author:
+type: fixed

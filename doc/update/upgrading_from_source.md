@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 ---
 
@@ -132,7 +135,7 @@ To check you are running the minimum required Git version, see
 In Debian or Ubuntu:
 
 ```shell
-# Make sure Git is version 2.24.0 or higher
+# Make sure Git is version 2.29.0 or higher
 git --version
 
 # Remove packaged Git

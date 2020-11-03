@@ -14,6 +14,8 @@ RSpec.describe 'Issue Sidebar' do
   let_it_be(:issue_no_group) { create(:labeled_issue, project: project_without_group, labels: [label]) }
 
   before do
+    stub_feature_flags(vue_issue_header: false)
+
     sign_in(user)
   end
 

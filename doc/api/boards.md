@@ -171,7 +171,7 @@ Example response:
   }
 ```
 
-## Create an issue board **(STARTER)**
+## Create an issue board
 
 Creates a project issue board.
 
@@ -203,52 +203,16 @@ Example response:
       "web_url": "http://example.com/diaspora/diaspora-project-site"
     },
     "name": "newboard",
-    "milestone":   {
-      "id": 12
-      "title": "10.0"
-    },
-    "lists" : [
-      {
-        "id" : 1,
-        "label" : {
-          "name" : "Testing",
-          "color" : "#F0AD4E",
-          "description" : null
-        },
-        "position" : 1,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      },
-      {
-        "id" : 2,
-        "label" : {
-          "name" : "Ready",
-          "color" : "#FF0000",
-          "description" : null
-        },
-        "position" : 2,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      },
-      {
-        "id" : 3,
-        "label" : {
-          "name" : "Production",
-          "color" : "#FF5F00",
-          "description" : null
-        },
-        "position" : 3,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      }
-    ]
+    "lists" : [],
+    "group": null,
+    "milestone": null,
+    "assignee" : null,
+    "labels" : [],
+    "weight" : null
   }
 ```
 
-## Update an issue board **(STARTER)**
+## Update an issue board
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.1.
 
@@ -258,15 +222,15 @@ Updates a project issue board.
 PUT /projects/:id/boards/:board_id
 ```
 
-| Attribute           | Type           | Required | Description |
-| ------------------- | -------------- | -------- | ----------- |
-| `id`                | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `board_id`          | integer        | yes      | The ID of a board |
-| `name`              | string         | no       | The new name of the board |
-| `assignee_id`       | integer        | no       | The assignee the board should be scoped to |
-| `milestone_id`      | integer        | no       | The milestone the board should be scoped to |
-| `labels`            | string         | no       | Comma-separated list of label names which the board should be scoped to |
-| `weight`            | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
+| Attribute                    | Type           | Required | Description |
+| ---------------------------- | -------------- | -------- | ----------- |
+| `id`                         | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `board_id`                   | integer        | yes      | The ID of a board |
+| `name`                       | string         | no       | The new name of the board |
+| `assignee_id` **(STARTER)**  | integer        | no       | The assignee the board should be scoped to |
+| `milestone_id` **(STARTER)** | integer        | no       | The milestone the board should be scoped to |
+| `labels` **(STARTER)**       | string         | no       | Comma-separated list of label names which the board should be scoped to |
+| `weight` **(STARTER)**       | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1?name=new_name&milestone_id=43&assignee_id=1&labels=Doing&weight=4"
@@ -329,7 +293,7 @@ Example response:
   }
 ```
 
-## Delete an issue board **(STARTER)**
+## Delete an issue board
 
 Deletes a project issue board.
 

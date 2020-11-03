@@ -57,15 +57,16 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           end
         end
 
-        context 'when promoting issue' do
+        context 'when promoting issue', :snowplow do
           let!(:issue_mentionable_note) { create(:note, noteable: issue, author: user, project: project, note: "note with mention #{user.to_reference}") }
           let!(:issue_note) { create(:note, noteable: issue, author: user, project: project, note: "note without mention") }
 
           before do
-            allow(Gitlab::Tracking).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             allow(ProductAnalytics::Tracker).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
 
             subject.execute(issue)
+
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
           end
 
           it 'creates a new epic with correct attributes' do
@@ -188,9 +189,8 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           end
         end
 
-        context 'when issue has notes' do
+        context 'when issue has notes', :snowplow do
           before do
-            allow(Gitlab::Tracking).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             allow(ProductAnalytics::Tracker).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             issue.reload
           end
@@ -202,6 +202,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             expect(epic.notes.count).to eq(issue.notes.count)
             expect(epic.notes.where(discussion_id: discussion.discussion_id).count).to eq(0)
             expect(issue.notes.where(discussion_id: discussion.discussion_id).count).to eq(1)
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
           end
 
           it 'copies note attachments' do
@@ -210,6 +211,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             epic = subject.execute(issue)
 
             expect(epic.notes.user.first.attachment).to be_kind_of(AttachmentUploader)
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
           end
         end
 

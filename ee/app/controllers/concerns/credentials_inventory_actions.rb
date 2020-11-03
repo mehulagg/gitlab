@@ -58,7 +58,14 @@ module CredentialsInventoryActions
     return unless Feature.enabled?(:credentials_inventory_revocation_emails, credential.user)
 
     if credential.is_a?(Key)
-      CredentialsInventoryMailer.ssh_key_deleted_email(key: credential, deleted_by: current_user).deliver_later
+      CredentialsInventoryMailer.ssh_key_deleted_email(
+        params: {
+          notification_email: credential.user.notification_email,
+          title: credential.title,
+          last_used_at: credential.last_used_at,
+          created_at: credential.created_at
+        }, deleted_by: current_user
+      ).deliver_later
     elsif credential.is_a?(PersonalAccessToken)
       CredentialsInventoryMailer.personal_access_token_revoked_email(token: credential, revoked_by: current_user).deliver_later
     end

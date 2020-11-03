@@ -19,11 +19,10 @@ From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
 support for NFS for Git repositories is scheduled to be removed. Upgrade to
 [Gitaly Cluster](gitaly/praefect.md) as soon as possible.
 
-NOTE: **Note:**
-Filesystem performance has a big impact on overall GitLab
-performance, especially for actions that read or write to Git repositories. See
-[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md)
-for steps to test filesystem performance.
+Filesystem performance can impact overall GitLab performance, especially for
+actions that read or write to Git repositories. For steps you can use to test
+filesystem performance, see
+[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md).
 
 ## Known kernel version incompatibilities
 
@@ -307,8 +306,12 @@ by testing the following commands:
 ```shell
 sudo mkdir /gitlab-nfs/test-dir
 sudo chown git /gitlab-nfs/test-dir
-sudo chgrp gitlab-www /gitlab-nfs/test-dir
 sudo chgrp root /gitlab-nfs/test-dir
+sudo chmod 0700 /gitlab-nfs/test-dir
+sudo chgrp gitlab-www /gitlab-nfs/test-dir
+sudo chmod 0751 /gitlab-nfs/test-dir
+sudo chgrp git /gitlab-nfs/test-dir
+sudo chmod 2770 /gitlab-nfs/test-dir
 sudo chmod 2755 /gitlab-nfs/test-dir
 sudo -u git mkdir /gitlab-nfs/test-dir/test2
 sudo -u git chmod 2755 /gitlab-nfs/test-dir/test2

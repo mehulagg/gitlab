@@ -38,8 +38,8 @@ module Gitlab
 
     def default_max_count(date)
       HistoricalData.max_historical_user_count(
-        from: ::License.current.starts_at,
-        to: date
+        from: ::License.current.starts_at.beginning_of_day,
+        to: date.end_of_day
       )
     end
 

@@ -134,7 +134,6 @@ module EE
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
-      scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
@@ -165,6 +164,16 @@ module EE
       scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
+      scope :order_by_total_repository_size_excess_desc, -> (limit) do
+        excess = ::ProjectStatistics.arel_table[:repository_size] +
+                   ::ProjectStatistics.arel_table[:lfs_objects_size] -
+                   ::Project.arel_table.coalesce(::Project.arel_table[:repository_size_limit], limit, 0)
+
+        joins(:statistics).order(
+          Arel.sql(Arel::Nodes::Descending.new(excess).to_sql)
+        )
+      end
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
@@ -178,6 +187,7 @@ module EE
 
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
       delegate :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
 
       validates :repository_size_limit,

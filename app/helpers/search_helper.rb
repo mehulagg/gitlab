@@ -92,11 +92,27 @@ module SearchHelper
     end
   end
 
-  def search_entries_empty_message(scope, term)
-    (s_("SearchResults|We couldn't find any %{scope} matching %{term}") % {
+  def search_entries_empty_message(scope, term, group, project)
+    options = {
       scope: search_entries_scope_label(scope, 0),
-      term: "<code>#{h(term)}</code>"
-    }).html_safe
+      term: "<code>#{h(term)}</code>".html_safe
+    }
+
+    # We check project first because we have 3 possible combinations here:
+    # - group && project
+    # - group
+    # - group: nil, project: nil
+    if project
+      html_escape(_("We couldn't find any %{scope} matching %{term} in project %{project}")) % options.merge(
+        project: link_to(project.full_name, project_path(project), target: '_blank', rel: 'noopener noreferrer').html_safe
+      )
+    elsif group
+      html_escape(_("We couldn't find any %{scope} matching %{term} in group %{group}")) % options.merge(
+        group: link_to(group.full_name, group_path(group), target: '_blank', rel: 'noopener noreferrer').html_safe
+      )
+    else
+      html_escape(_("We couldn't find any %{scope} matching %{term}")) % options
+    end
   end
 
   def repository_ref(project)
@@ -150,7 +166,7 @@ module SearchHelper
     if @project && @project.repository.root_ref
       ref = @ref || @project.repository.root_ref
 
-      [
+      result = [
         { category: "In this project", label: _("Files"),          url: project_tree_path(@project, ref) },
         { category: "In this project", label: _("Commits"),        url: project_commits_path(@project, ref) },
         { category: "In this project", label: _("Network"),        url: project_network_path(@project, ref) },
@@ -162,6 +178,12 @@ module SearchHelper
         { category: "In this project", label: _("Members"),        url: project_project_members_path(@project) },
         { category: "In this project", label: _("Wiki"),           url: project_wikis_path(@project) }
       ]
+
+      if can?(current_user, :read_feature_flag, @project)
+        result << { category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }
+      end
+
+      result
     else
       []
     end

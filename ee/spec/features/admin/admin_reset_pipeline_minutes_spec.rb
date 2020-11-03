@@ -18,7 +18,7 @@ RSpec.describe 'Reset namespace pipeline minutes', :js do
       it 'resets pipeline minutes' do
         time = Time.now
 
-        Timecop.freeze(time) do
+        travel_to(time) do
           click_button 'Reset pipeline minutes'
         end
 

@@ -88,6 +88,8 @@ RSpec.describe ApplicationSetting do
     it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
     it { is_expected.to allow_value(1).for(:new_user_signups_cap) }
     it { is_expected.to allow_value(10).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value("").for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value("value").for(:new_user_signups_cap) }
     it { is_expected.not_to allow_value(-1).for(:new_user_signups_cap) }
     it { is_expected.not_to allow_value(2.5).for(:new_user_signups_cap) }
 
@@ -175,6 +177,7 @@ RSpec.describe ApplicationSetting do
 
       it { is_expected.to allow_value(max_active_user_count - 1).for(:new_user_signups_cap) }
       it { is_expected.to allow_value(max_active_user_count).for(:new_user_signups_cap) }
+      it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
       it { is_expected.not_to allow_value(max_active_user_count + 1).for(:new_user_signups_cap) }
     end
   end

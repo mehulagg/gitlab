@@ -14,7 +14,8 @@ RSpec.describe Vulnerabilities::DismissService do
   let!(:pipeline) { create(:ci_pipeline, :success, project: project) }
   let!(:build) { create(:ee_ci_build, :sast, pipeline: pipeline) }
   let(:vulnerability) { create(:vulnerability, :with_findings, project: project) }
-  let(:service) { described_class.new(user, vulnerability) }
+  let(:dismiss_findings) { true }
+  let(:service) { described_class.new(user, vulnerability, dismiss_findings: dismiss_findings) }
 
   subject(:dismiss_vulnerability) { service.execute }
 
@@ -25,13 +26,29 @@ RSpec.describe Vulnerabilities::DismissService do
 
     it_behaves_like 'calls vulnerability statistics utility services in order'
 
-    it 'dismisses a vulnerability and its associated findings' do
-      Timecop.freeze do
-        dismiss_vulnerability
+    context 'when the `dismiss_findings` argument is false' do
+      let(:dismiss_findings) { false }
 
-        expect(vulnerability.reload).to(
-          have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
-        expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
+      it 'dismisses only vulnerability' do
+        freeze_time do
+          dismiss_vulnerability
+
+          expect(vulnerability.reload).to(
+            have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
+          expect(vulnerability.findings).not_to include have_vulnerability_dismissal_feedback
+        end
+      end
+    end
+
+    context 'when the `dismiss_findings` argument is not false' do
+      it 'dismisses a vulnerability and its associated findings' do
+        freeze_time do
+          dismiss_vulnerability
+
+          expect(vulnerability.reload).to(
+            have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
+          expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
+        end
       end
     end
 
@@ -40,7 +57,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:service) { described_class.new(user, vulnerability, comment) }
 
       it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           aggregate_failures do
@@ -62,7 +79,7 @@ RSpec.describe Vulnerabilities::DismissService do
 
     context 'when there is a finding dismissal error' do
       before do
-        allow(service).to receive(:dismiss_findings).and_return(
+        allow(service).to receive(:dismiss_vulnerability_findings).and_return(
           described_class::FindingsDismissResult.new(false, broken_finding, 'something went wrong'))
       end
 

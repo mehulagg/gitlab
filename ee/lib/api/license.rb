@@ -4,6 +4,8 @@ module API
   class License < ::API::Base
     before { authenticated_as_admin! }
 
+    feature_category :provision
+
     resource :license do
       desc 'Get information on the currently active license' do
         success EE::API::Entities::GitlabLicenseWithActiveUsers

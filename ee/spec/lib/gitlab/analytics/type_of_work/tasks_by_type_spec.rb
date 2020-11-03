@@ -27,7 +27,7 @@ RSpec.describe Gitlab::Analytics::TypeOfWork::TasksByType do
   end
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before do

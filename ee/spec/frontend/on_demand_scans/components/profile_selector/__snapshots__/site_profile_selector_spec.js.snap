@@ -80,6 +80,8 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
           >
             <!---->
              
+            <!---->
+             
             <span
               class="gl-new-dropdown-button-text"
             >

@@ -11,6 +11,13 @@ module Types
     mount_mutation Mutations::AlertManagement::UpdateAlertStatus
     mount_mutation Mutations::AlertManagement::Alerts::SetAssignees
     mount_mutation Mutations::AlertManagement::Alerts::Todo::Create
+    mount_mutation Mutations::AlertManagement::HttpIntegration::Create
+    mount_mutation Mutations::AlertManagement::HttpIntegration::Update
+    mount_mutation Mutations::AlertManagement::HttpIntegration::ResetToken
+    mount_mutation Mutations::AlertManagement::HttpIntegration::Destroy
+    mount_mutation Mutations::AlertManagement::PrometheusIntegration::Create
+    mount_mutation Mutations::AlertManagement::PrometheusIntegration::Update
+    mount_mutation Mutations::AlertManagement::PrometheusIntegration::ResetToken
     mount_mutation Mutations::AwardEmojis::Add
     mount_mutation Mutations::AwardEmojis::Remove
     mount_mutation Mutations::AwardEmojis::Toggle
@@ -57,6 +64,7 @@ module Types
     mount_mutation Mutations::Terraform::State::Delete
     mount_mutation Mutations::Terraform::State::Lock
     mount_mutation Mutations::Terraform::State::Unlock
+    mount_mutation Mutations::Todos::Create
     mount_mutation Mutations::Todos::MarkDone
     mount_mutation Mutations::Todos::Restore
     mount_mutation Mutations::Todos::MarkAllDone

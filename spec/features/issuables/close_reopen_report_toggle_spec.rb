@@ -7,6 +7,10 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
 
   let(:user) { create(:user) }
 
+  before do
+    stub_feature_flags(vue_issue_header: false)
+  end
+
   shared_examples 'an issuable close/reopen/report toggle' do
     let(:container) { find('.issuable-close-dropdown') }
     let(:human_model_name) { issuable.model_name.human.downcase }
@@ -95,7 +99,7 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
         expect(page).to have_link('New issue')
         expect(page).not_to have_button('Close issue')
         expect(page).not_to have_button('Reopen issue')
-        expect(page).not_to have_link('Edit')
+        expect(page).not_to have_link(title: 'Edit title and description')
       end
     end
   end
@@ -121,7 +125,7 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
 
         it 'shows only the `Report abuse` and `Edit` button' do
           expect(page).to have_link('Report abuse')
-          expect(page).to have_link('Edit')
+          expect(page).to have_link(exact_text: 'Edit')
           expect(page).not_to have_button('Close merge request')
           expect(page).not_to have_button('Reopen merge request')
         end
@@ -130,8 +134,8 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
           let(:issuable) { create(:merge_request, :merged, source_project: project, author: user) }
 
           it 'shows only the `Edit` button' do
-            expect(page).to have_link('Edit')
             expect(page).to have_link('Report abuse')
+            expect(page).to have_link(exact_text: 'Edit')
             expect(page).not_to have_button('Close merge request')
             expect(page).not_to have_button('Reopen merge request')
           end
@@ -153,7 +157,7 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
         expect(page).to have_link('Report abuse')
         expect(page).not_to have_button('Close merge request')
         expect(page).not_to have_button('Reopen merge request')
-        expect(page).not_to have_link('Edit')
+        expect(page).not_to have_link(exact_text: 'Edit')
       end
     end
   end

@@ -48,7 +48,7 @@ module EE
       end
 
       def remaining_additional_purchased_storage
-        additional_purchased_storage - total_excess_without_current_project
+        [additional_purchased_storage - total_excess_without_current_project, 0].max
       end
     end
   end

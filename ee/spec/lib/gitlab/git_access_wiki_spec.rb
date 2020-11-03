@@ -130,7 +130,7 @@ RSpec.describe Gitlab::GitAccessWiki do
     let(:primary_repo_url) { geo_primary_http_url_to_repo(project.wiki) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project.wiki) }
 
-    it_behaves_like 'a read-only GitLab instance'
+    it_behaves_like 'git access for a read-only GitLab instance'
   end
 
   context 'when wiki is disabled' do

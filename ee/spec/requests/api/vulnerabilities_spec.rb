@@ -192,7 +192,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'dismisses a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           expect(response).to have_gitlab_http_status(:created)
@@ -279,7 +279,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'resolves a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           resolve_vulnerability
 
           expect(response).to have_gitlab_http_status(:created)
@@ -336,7 +336,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'confirms a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           confirm_vulnerability
 
           expect(response).to have_gitlab_http_status(:created)
@@ -394,7 +394,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'reverts a vulnerability and its associated findings to detected state' do
-        Timecop.freeze do
+        freeze_time do
           revert_vulnerability_to_detected
 
           expect(response).to have_gitlab_http_status(:created)

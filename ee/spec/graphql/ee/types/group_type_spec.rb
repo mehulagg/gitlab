@@ -93,7 +93,7 @@ RSpec.describe GitlabSchema.types['Group'] do
       subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
 
       it 'returns a graphQL error field does not exist' do
-        stub_feature_flags(group_coverage_data_report: false)
+        stub_feature_flags(group_coverage_data_report_graph: false)
 
         expected_message = "Field 'codeCoverageActivities' doesn't exist on type 'Group'"
 

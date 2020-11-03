@@ -9,32 +9,6 @@ RSpec.describe RegistrationsController do
     let(:base_user_params) { build_stubbed(:user).slice(:first_name, :last_name, :username, :email, :password) }
     let(:user_params) { { user: base_user_params } }
 
-    context 'when the user opted-in' do
-      let(:user_params) { { user: base_user_params.merge(email_opted_in: '1') } }
-
-      it 'sets the rest of the email_opted_in fields' do
-        post :create, params: user_params
-        user = User.find_by_username!(user_params[:user][:username])
-        expect(user.email_opted_in).to be_truthy
-        expect(user.email_opted_in_ip).to be_present
-        expect(user.email_opted_in_source).to eq('GitLab.com')
-        expect(user.email_opted_in_at).not_to be_nil
-      end
-    end
-
-    context 'when the user opted-out' do
-      let(:user_params) { { user: base_user_params.merge(email_opted_in: '0') } }
-
-      it 'does not set the rest of the email_opted_in fields' do
-        post :create, params: user_params
-        user = User.find_by_username!(user_params[:user][:username])
-        expect(user.email_opted_in).to be_falsey
-        expect(user.email_opted_in_ip).to be_blank
-        expect(user.email_opted_in_source).to be_blank
-        expect(user.email_opted_in_at).to be_nil
-      end
-    end
-
     context 'when reCAPTCHA experiment enabled' do
       it "logs a 'User Created' message including the experiment state" do
         allow_any_instance_of(EE::RecaptchaExperimentHelper).to receive(:show_recaptcha_sign_up?).and_return(true)
@@ -46,20 +20,19 @@ RSpec.describe RegistrationsController do
     end
   end
 
-  describe '#welcome' do
-    subject { get :welcome }
-
-    before do
-      sign_in(user)
-    end
-
-    it 'renders the checkout layout' do
-      expect(subject).to render_template(:checkout)
-    end
-  end
-
   describe '#update_registration' do
-    subject(:update_registration) { patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } } }
+    let(:setup_for_company) { 'false' }
+    let(:email_opted_in) { '0' }
+
+    subject(:update_registration) do
+      patch :update_registration, params: {
+        user: {
+          role: 'software_developer',
+          setup_for_company: setup_for_company,
+          email_opted_in: email_opted_in
+        }
+      }
+    end
 
     context 'without a signed in user' do
       it { is_expected.to redirect_to new_user_registration_path }
@@ -68,6 +41,49 @@ RSpec.describe RegistrationsController do
     context 'with a signed in user' do
       before do
         sign_in(user)
+      end
+
+      context 'email updates' do
+        context 'when setup for company is false' do
+          context 'when the user opted in' do
+            let(:email_opted_in) { '1' }
+
+            it 'sets the email_opted_in fields' do
+              subject
+
+              expect(controller.current_user.email_opted_in).to be_truthy
+              expect(controller.current_user.email_opted_in_ip).to be_present
+              expect(controller.current_user.email_opted_in_source).to eq('GitLab.com')
+              expect(controller.current_user.email_opted_in_at).not_to be_nil
+            end
+          end
+
+          context 'when user opted out' do
+            let(:email_opted_in) { '0' }
+
+            it 'does not set the rest of the email_opted_in fields' do
+              subject
+
+              expect(controller.current_user.email_opted_in).to be_falsey
+              expect(controller.current_user.email_opted_in_ip).to be_blank
+              expect(controller.current_user.email_opted_in_source).to be_blank
+              expect(controller.current_user.email_opted_in_at).to be_nil
+            end
+          end
+        end
+
+        context 'when setup for company is true' do
+          let(:setup_for_company) { 'true' }
+
+          it 'sets email_opted_in fields' do
+            subject
+
+            expect(controller.current_user.email_opted_in).to be_truthy
+            expect(controller.current_user.email_opted_in_ip).to be_present
+            expect(controller.current_user.email_opted_in_source).to eq('GitLab.com')
+            expect(controller.current_user.email_opted_in_at).not_to be_nil
+          end
+        end
       end
 
       describe 'redirection' do

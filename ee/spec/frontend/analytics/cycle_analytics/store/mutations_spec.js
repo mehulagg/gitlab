@@ -16,7 +16,7 @@ import {
 
 let state = null;
 
-describe('Cycle analytics mutations', () => {
+describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
     state = {};
   });
