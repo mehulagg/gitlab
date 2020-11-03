@@ -116,6 +116,7 @@ describe('Test coverage table component', () => {
               repository: {
                 rootRef,
               },
+              codeCoveragePath: '#',
               codeCoverageSummary: {
                 averageCoverage,
                 coverageCount,
@@ -147,6 +148,7 @@ describe('Test coverage table component', () => {
           id: 1,
           name: 'should be last',
           repository: { rootRef: 'master' },
+          codeCoveragePath: '#',
           codeCoverageSummary: {
             averageCoverage: '1.45',
             coverageCount: '1',
@@ -158,6 +160,7 @@ describe('Test coverage table component', () => {
           id: 2,
           name: 'should be first',
           repository: { rootRef: 'master' },
+          codeCoveragePath: '#',
           codeCoverageSummary: {
             averageCoverage: '1.45',
             coverageCount: '1',
@@ -187,6 +190,45 @@ describe('Test coverage table component', () => {
           .at(1)
           .text(),
       ).toContain('should be last');
+    });
+
+    it('renders the correct link', async () => {
+      const id = 1;
+      const fullPath = 'test/test';
+      const rootRef = 'master';
+      const expectedPath = `/${fullPath}/-/graphs/${rootRef}/charts`;
+      createComponentWithApollo({
+        data: {
+          projectIds: { [id]: true },
+        },
+        queryData: {
+          data: {
+            projects: {
+              nodes: [
+                {
+                  fullPath,
+                  name: 'test',
+                  id,
+                  repository: {
+                    rootRef,
+                  },
+                  codeCoverageSummary: {
+                    averageCoverage: '1.45',
+                    coverageCount: '1',
+                    lastUpdatedAt: new Date().toISOString(),
+                  },
+                },
+              ],
+            },
+          },
+        },
+        mountFn: mount,
+      });
+      jest.runOnlyPendingTimers();
+      await waitForPromises();
+
+      expect(findTable().exists()).toBe(true);
+      expect(findProjectNameById(id).attributes('href')).toBe(expectedPath);
     });
   });
 

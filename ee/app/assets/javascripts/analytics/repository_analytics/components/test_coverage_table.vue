@@ -2,6 +2,7 @@
 import Vue from 'vue';
 import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
+import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
@@ -33,7 +34,15 @@ export default {
         this.allCoverageData = [
           ...this.allCoverageData,
           // Remove the projects that don't have any code coverage
-          ...data.projects.nodes.filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary)),
+          ...data.projects.nodes
+            .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
+            .map(project => ({
+              ...project,
+              codeCoveragePath: joinPaths(
+                gon.relative_url_root || '',
+                `/${project.fullPath}/-/graphs/${project.repository.rootRef}/charts`,
+              ),
+            })),
         ];
       },
       error() {
@@ -202,11 +211,7 @@ export default {
       </template>
 
       <template #cell(project)="{ item }">
-        <gl-link
-          target="_blank"
-          :href="`/${item.fullPath}/-/graphs/${item.repository.rootRef}/charts`"
-          :data-testid="`${item.id}-name`"
-        >
+        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
           {{ item.name }}
         </gl-link>
       </template>
