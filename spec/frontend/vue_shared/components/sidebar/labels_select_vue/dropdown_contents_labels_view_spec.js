@@ -128,6 +128,16 @@ describe('DropdownContentsLabelsView', () => {
       });
     });
 
+    describe('handleComponentAppear', () => {
+      it('calls `focusInput` on searchInput field', async () => {
+        wrapper.vm.$refs.searchInput.focusInput = jest.fn();
+
+        await wrapper.vm.handleComponentAppear();
+
+        expect(wrapper.vm.$refs.searchInput.focusInput).toHaveBeenCalled();
+      });
+    });
+
     describe('handleComponentDisappear', () => {
       it('calls action `receiveLabelsSuccess` with empty array', () => {
         jest.spyOn(wrapper.vm, 'receiveLabelsSuccess');
