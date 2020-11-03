@@ -190,7 +190,7 @@ export default {
     <gl-dropdown
       v-show="editing"
       ref="newDropdown"
-      data-toggle="dropdown"
+      data-toggle="gl-dropdown"
       :text="$options.iterationText"
       class="dropdown gl-w-full"
       :class="{ show: editing }"
