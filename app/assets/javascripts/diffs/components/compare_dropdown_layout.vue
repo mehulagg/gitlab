@@ -23,7 +23,7 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="selectedVersionName" category="tertiary" variant="default" size="medium">
+  <gl-dropdown :text="selectedVersionName">
     <gl-dropdown-item
       v-for="version in versions"
       :key="version.id"
