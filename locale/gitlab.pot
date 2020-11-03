@@ -18136,9 +18136,6 @@ msgstr ""
 msgid "No containers available"
 msgstr ""
 
-msgid "No content to show"
-msgstr ""
-
 msgid "No contributions"
 msgstr ""
 
@@ -26445,6 +26442,9 @@ msgid "The commit does not exist"
 msgstr ""
 
 msgid "The comparison view may be inaccurate due to merge conflicts."
+msgstr ""
+
+msgid "The configuration visualization will appear in this tab."
 msgstr ""
 
 msgid "The connection will time out after %{timeout}. For repositories that take longer, use a clone/push combination."

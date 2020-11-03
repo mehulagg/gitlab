@@ -31,7 +31,7 @@ describe('pipeline graph component', () => {
     });
 
     it('renders an empty section', () => {
-      expect(wrapper.text()).toContain('No content to show');
+      expect(wrapper.text()).toContain('The configuration visualization will appear in this tab.');
       expect(findAllStagePills()).toHaveLength(0);
       expect(findAllJobPills()).toHaveLength(0);
     });

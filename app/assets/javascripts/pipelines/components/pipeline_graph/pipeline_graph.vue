@@ -162,7 +162,7 @@ export default {
       {{ failure.text }}
     </gl-alert>
     <gl-alert v-if="isPipelineDataEmpty" variant="tip" :dismissible="false">
-      {{ __('No content to show') }}
+      {{ __('The configuration visualization will appear in this tab.') }}
     </gl-alert>
     <div
       v-else
