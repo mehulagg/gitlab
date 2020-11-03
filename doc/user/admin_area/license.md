@@ -8,13 +8,13 @@ type: howto
 # Activate GitLab EE with a license **(STARTER ONLY)**
 
 To activate all GitLab Enterprise Edition (EE) functionality, you need to upload
-a license. It's only possible to activate GitLab Enterprise Edition, so first, verify which edition
-you are running. Log in GitLab and go to `/help`. The GitLab edition and version are listed at the
-top of the **Help** page.
+a license. It's only possible to activate GitLab Enterprise Edition, so first verify which edition
+you are running. To verify, sign in to GitLab and browse to `/help`. The GitLab edition and version
+are listed at the top of the **Help** page.
 
-If you are running GitLab Community Edition (CE) you first need to upgrade your installation to
+If you are running GitLab Community Edition (CE), upgrade your installation to
 GitLab Enterprise Edition (EE). For more details, see [Upgrading between editions](../..//update/README.md#upgrading-between-editions).
-If you have questions or need assistance upgrading from GitLab CE to EE please [contact GitLab Support](https://support.gitlab.com/hc/en-us).
+If you have questions or need assistance upgrading from GitLab CE to EE please [contact GitLab Support](https://about.gitlab.com/support/#contact-support).
 
 The license is a base64-encoded ASCII text file with a `.gitlab-license`
 extension. You can obtain the file by [purchasing a license](https://about.gitlab.com/pricing/)
