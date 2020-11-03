@@ -29,7 +29,6 @@ export default {
       :key="version.id"
       :is-check-item="true"
       :is-checked="version.selected"
-      :class="{ 'is-active': version.selected }"
       :href="version.href"
     >
       <div>
