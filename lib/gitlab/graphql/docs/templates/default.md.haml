@@ -30,11 +30,12 @@
 \
 
 - objects.each do |type|
-  - unless type[:fields].empty?
+  - all_fields = type[:fields] + type[:connections]
+  - unless all_fields.empty?
     = render_name_and_description(type)
     ~ "| Field | Type | Description |"
     ~ "| ----- | ---- | ----------- |"
-    - sorted_by_name(type[:fields]).each do |field|
+    - sorted_by_name(all_fields).each do |field|
       = render_field(field)
     \
 
