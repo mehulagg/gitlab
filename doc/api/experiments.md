@@ -14,7 +14,7 @@ The user must be a [GitLab team member](https://gitlab.com/groups/gitlab-com/-/g
 
 ## List all experiments
 
-Get a list of all experiments. Each experiment has an enabled status indicating whether the experiment is enabled in some contexts, not necessarily globally.
+Get a list of all experiments. Each experiment has an `enabled` status that indicates whether the experiment is enabled globally, or only in specific contexts.
 
 ```plaintext
 GET /experiments
