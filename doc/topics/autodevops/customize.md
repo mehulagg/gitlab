@@ -520,7 +520,7 @@ on the default branch. However, there are cases where you might want to use a
 staging environment, and deploy to production manually. For this scenario, the
 `STAGING_ENABLED` environment variable was introduced.
 
-If you define 'STAGING_ENABLED` with a non-empty value, then GitLab automatically deploys the application
+If you define `STAGING_ENABLED` with a non-empty value, then GitLab automatically deploys the application
 to a `staging` environment, and creates a `production_manual` job for
 you when you're ready to manually deploy to production.
 
