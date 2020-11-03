@@ -174,18 +174,9 @@ On Debian, use the following compilation instructions:
 
 ```shell
 # Install dependencies
-sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev build-essential
+sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential
 
-# Download and compile pcre2 from source
-curl --silent --show-error --location https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz --output pcre2.tar.gz
-tar -xzf pcre2.tar.gz
-cd pcre2-10.33
-chmod +x configure
-./configure --prefix=/usr --enable-jit
-make
-sudo make install
-
-# Download and compile from source
+# Download and compile Git from source
 cd /tmp
 curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.29.0.tar.gz
 echo 'fa08dc8424ef80c0f9bf307877f9e2e49f1a6049e873530d6747c2be770742ff  git-2.29.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.29.0.tar.gz
