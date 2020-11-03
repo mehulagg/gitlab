@@ -228,9 +228,9 @@ perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
 CAUTION: **Caution:**
-If the secondary node [has been paused](../../../geo/#pausing-and-resuming-replication), this performs
+   If the secondary node [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
 a point-in-time recovery to the last known state.
-Data that was created on the primary while the secondary is paused will be lost.
+Data that was created on the primary while the secondary was paused will be lost.
 
 1. SSH in to the PostgreSQL node in the **secondary** and promote PostgreSQL separately:
 
