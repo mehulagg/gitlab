@@ -14,7 +14,7 @@ class RemoveExpiredMembersWorker # rubocop:disable Scalability/IdempotentWorker
       expired_user = User.find(member.user_id)
 
       if expired_user.project_bot?
-        Users::DestroyService.new(expired_user).execute(expired_user, skip_authorization: true, hard_delete: true)
+        Users::DestroyService.new(nil).execute(expired_user, skip_authorization: true)
       end
     rescue => ex
       logger.error("Expired Member ID=#{member.id} cannot be removed - #{ex}")
