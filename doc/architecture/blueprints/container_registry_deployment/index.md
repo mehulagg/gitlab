@@ -189,7 +189,7 @@ For this reason, any features that require the use of the GitLab Container Regis
 
 #### Synchronizing Changes With GitLab Rails
 
-Currently, the GitLab Rails and GitLab Container Registry releases and deployments have been fully independent, as we have not introduced any new API features or breaking chances, apart from the described tag delete feature. 
+Currently, the GitLab Rails and GitLab Container Registry releases and deployments have been fully independent, as we have not introduced any new API features or breaking changes, apart from the described tag delete feature. 
 
 The registry will remain independent from GitLab Rails changes, but in the mid/long term, the implementation of new features or breaking changes will imply a corresponding change in GitLab Rails, so the latter will depend on a specific minimum version of the registry.
 
