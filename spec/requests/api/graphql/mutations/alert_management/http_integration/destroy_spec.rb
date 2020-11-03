@@ -40,7 +40,7 @@ RSpec.describe 'Removing an HTTP Integration' do
     post_graphql_mutation(mutation, current_user: user)
 
     expect(response).to have_gitlab_http_status(:success)
-    expect(mutation_response['integration']).to be_nil
+    expect(mutation_response['integration']['id']).to eq(GitlabSchema.id_from_object(integration).to_s)
     expect { integration.reload }.to raise_error ActiveRecord::RecordNotFound
   end
 end

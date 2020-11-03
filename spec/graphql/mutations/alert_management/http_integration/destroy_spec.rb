@@ -21,7 +21,7 @@ RSpec.describe Mutations::AlertManagement::HttpIntegration::Destroy do
       context 'when HttpIntegrations::DestroyService responds with success' do
         it 'returns the integration with no errors' do
           expect(resolve).to eq(
-            integration: nil,
+            integration: integration,
             errors: []
           )
         end
