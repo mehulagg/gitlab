@@ -13,7 +13,7 @@ GitLab offers a [continuous integration](https://about.gitlab.com/stages-devops-
 - Add a [`.gitlab-ci.yml` file](#creating-a-gitlab-ciyml-file) to your repository's root directory.
 - Ensure your project is configured to use a [runner](#configuring-a-runner).
 
-The `.gitlab-ci.yml` file defines the structure and order of the pipelines and determines:
+The `.gitlab-ci.yml` file defines the structure and order of the pipelines, and determines:
 
 - What to execute using [GitLab Runner](https://docs.gitlab.com/runner/).
 - What decisions to make when specific conditions are encountered. For example, when a process succeeds or fails.
