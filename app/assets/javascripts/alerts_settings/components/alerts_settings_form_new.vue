@@ -12,7 +12,6 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -338,7 +337,7 @@ export default {
             id="integration-apiUrl"
             v-model="integrationForm.apiUrl"
             type="text"
-            :placeholder="s__('AlertSettings|http://prometheus.example.com/')"
+            :placeholder="$options.targetPrometheusUrlPlaceholder"
           />
 
           <span class="gl-text-gray-400">
@@ -364,7 +363,7 @@ export default {
 
         <div class="gl-my-4">
           <span>
-            {{ s__('AlertSettings|Authorization key') }}
+            {{ $options.i18n.integrationFormSteps.step3.info }}
           </span>
 
           <gl-form-input-group
@@ -383,16 +382,16 @@ export default {
           </gl-form-input-group>
 
           <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
-            s__('AlertSettings|Reset Key')
+            $options.i18n.integrationFormSteps.step3.reset
           }}</gl-button>
           <gl-modal
             modal-id="authKeyModal"
-            :title="__('Reset Key')"
-            :ok-title="__('Reset Key')"
+            :title="$options.i18n.integrationFormSteps.step3.reset"
+            :ok-title="$options.i18n.integrationFormSteps.step3.reset"
             ok-variant="danger"
             @ok="() => {}"
           >
-            {{ s__('AlertSettings|Reset Key') }}
+            {{ $options.i18n.integrationFormSteps.step3.reset }}
           </gl-modal>
         </div>
       </gl-form-group>
@@ -414,8 +413,10 @@ export default {
           :state="jsonIsValid"
           :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
           class="gl-my-4"
+          :debounce="$options.JSON_VALIDATE_DELAY"
           rows="6"
           max-rows="10"
+          @input="validateJson"
         />
       </gl-form-group>
 
