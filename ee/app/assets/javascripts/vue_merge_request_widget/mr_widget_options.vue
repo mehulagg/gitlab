@@ -1,4 +1,5 @@
 <script>
+import { once } from 'lodash';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
@@ -6,6 +7,7 @@ import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
 import { GlSafeHtmlDirective } from '@gitlab/ui';
 import ReportSection from '~/reports/components/report_section.vue';
+import Tracking from '~/tracking';
 import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
 
 import { s__, __, sprintf } from '~/locale';
@@ -30,7 +32,7 @@ export default {
     SafeHtml: GlSafeHtmlDirective,
   },
   extends: CEWidgetOptions,
-  mixins: [reportsMixin],
+  mixins: [reportsMixin, Tracking.mixin()],
   componentNames,
   data() {
     return {
@@ -159,6 +161,13 @@ export default {
         this.loadingLoadPerformanceFailed,
       );
     },
+
+    handlePerformanceToggleEvent() {
+      return once(() => {
+        this.track(this.$options.performanceWidgetExpandEvent);
+      });
+    },
+
     licensesApiPath() {
       return gl?.mrWidgetData?.license_scanning_comparison_path || null;
     },
@@ -238,6 +247,7 @@ export default {
     'coverageFuzzing',
     'secretDetection',
   ],
+  performanceWidgetExpandEvent: 'expand_browser_performance_report_widget',
 };
 </script>
 <template>
@@ -286,7 +296,9 @@ export default {
         :neutral-issues="mr.browserPerformanceMetrics.same"
         :has-issues="hasBrowserPerformanceMetrics"
         :component="$options.componentNames.PerformanceIssueBody"
+        :should-emit-toggle-event="true"
         class="js-browser-performance-widget mr-widget-border-top mr-report"
+        @toggleEvent="handleBrowserPerformanceToggleEvent"
       />
       <report-section
         v-if="hasLoadPerformancePaths"

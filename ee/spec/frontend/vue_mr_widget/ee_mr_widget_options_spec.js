@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
+import { mockTracking } from 'helpers/tracking_helper';
 import mrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { TEST_HOST } from 'helpers/test_constants';
@@ -74,6 +75,8 @@ describe('ee merge request widget options', () => {
 
   const findBrowserPerformanceWidget = () => vm.$el.querySelector('.js-browser-performance-widget');
   const findLoadPerformanceWidget = () => vm.$el.querySelector('.js-load-performance-widget');
+  const findExpandButton = () =>
+    vm.$el.querySelector('.js-load-performance-widget .js-collapse-btn');
   const findSecurityWidget = () => vm.$el.querySelector('.js-security-widget');
 
   const setBrowserPerformance = (data = {}) => {
@@ -379,6 +382,32 @@ describe('ee merge request widget options', () => {
                 done();
               });
             });
+          });
+        });
+
+        describe('`Expand` button', () => {
+          let trackingSpy;
+
+          beforeEach(() => {
+            trackingSpy = mockTracking('_category_', vm.$el, jest.spyOn);
+          });
+
+          it('tracks an event on click', () => {
+            findExpandButton().trigger('click');
+
+            expect(trackingSpy).toHaveBeenCalledWith(undefined, 'expand_test_report_widget', {});
+          });
+
+          it('only tracks the first expansion', () => {
+            expect(trackingSpy).not.toHaveBeenCalled();
+
+            const button = findExpandButton();
+
+            button.trigger('click');
+            button.trigger('click');
+            button.trigger('click');
+
+            expect(trackingSpy).toHaveBeenCalledTimes(1);
           });
         });
       });
