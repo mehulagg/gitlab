@@ -1,6 +1,32 @@
-mutation dastSiteProfileCreate($fullPath: ID!, $profileName: String!, $targetUrl: String) {
+mutation dastSiteProfileCreate(
+  $fullPath: ID!
+  $profileName: String!
+  $targetUrl: String
+  $authEnabled: Boolean!
+  $authenticationUrl: String
+  $userNameFormField: String
+  $passwordFormField: String
+  $userName: String
+  $password: String
+  $excludedUrls: String
+  $requestHeaders: String
+) {
   dastSiteProfileCreate(
-    input: { fullPath: $fullPath, profileName: $profileName, targetUrl: $targetUrl }
+    input: {
+      fullPath: $fullPath
+      profileName: $profileName
+      targetUrl: $targetUrl
+      auth: {
+        enabled: $authEnabled
+        url: $authenticationUrl
+        usernameField: $userNameFormField
+        passwordField: $passwordFormField
+        username: $userName
+        password: $password
+      }
+      excludedUrls: $excludedUrls
+      requestHeaders: $requestHeaders
+    }
   ) {
     id
     errors

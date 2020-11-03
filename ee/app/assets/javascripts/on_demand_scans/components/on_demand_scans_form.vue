@@ -24,6 +24,7 @@ import {
   ERROR_MESSAGES,
   SCANNER_PROFILES_QUERY,
   SITE_PROFILES_QUERY,
+  SITE_PROFILES_EXTENDED_QUERY,
 } from '../settings';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
 import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
@@ -74,11 +75,15 @@ export default {
       'selectedScannerProfileId',
       SCANNER_PROFILES_QUERY,
     ),
-    siteProfiles: createProfilesApolloOptions(
-      'siteProfiles',
-      'selectedSiteProfileId',
-      SITE_PROFILES_QUERY,
-    ),
+    siteProfiles() {
+      return createProfilesApolloOptions(
+        'siteProfiles',
+        'selectedSiteProfileId',
+        this.glFeatures.securityDastSiteProfilesAdditionalFields
+          ? SITE_PROFILES_EXTENDED_QUERY
+          : SITE_PROFILES_QUERY,
+      );
+    },
   },
   props: {
     helpPagePath: {
@@ -310,6 +315,42 @@ export default {
               :value="selectedSiteProfile.targetUrl"
             />
           </div>
+          <template v-if="glFeatures.securityDastSiteProfilesAdditionalFields">
+            <template v-if="selectedSiteProfile.auth.enabled">
+              <div class="row">
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Authentication URL')"
+                  :value="selectedSiteProfile.auth.url"
+                />
+              </div>
+              <div class="row">
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Username')"
+                  :value="selectedSiteProfile.auth.username"
+                />
+              </div>
+              <div class="row">
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Username form field')"
+                  :value="selectedSiteProfile.auth.usernameField"
+                />
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Password form field')"
+                  :value="selectedSiteProfile.auth.usernameField"
+                />
+              </div>
+            </template>
+            <div class="row">
+              <profile-selector-summary-cell
+                :label="s__('DastProfiles|Excluded URLs')"
+                :value="selectedSiteProfile.excludedUrls"
+              />
+              <profile-selector-summary-cell
+                :label="s__('DastProfiles|Request headers')"
+                :value="selectedSiteProfile.requestHeaders"
+              />
+            </div>
+          </template>
         </template>
       </site-profile-selector>
 

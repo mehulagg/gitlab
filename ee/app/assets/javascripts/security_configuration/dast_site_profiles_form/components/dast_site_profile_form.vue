@@ -1,12 +1,22 @@
 <script>
 import { isEqual } from 'lodash';
-import { GlAlert, GlButton, GlForm, GlFormGroup, GlFormInput, GlModal } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlButton,
+  GlForm,
+  GlFormGroup,
+  GlFormInput,
+  GlModal,
+  GlFormTextarea,
+} from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject } from '~/lib/utils/forms';
 import validation from '~/vue_shared/directives/validation';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import DastSiteAuthSection from './dast_site_auth_section.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 
@@ -19,10 +29,13 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlModal,
+    GlFormTextarea,
+    DastSiteAuthSection,
   },
   directives: {
     validation: validation(),
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
       type: String,
@@ -39,7 +52,8 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '' } = this.siteProfile || {};
+    const { name = '', targetUrl = '', excludedURLs = '', requestHeaders = '' } =
+      this.siteProfile || {};
 
     const form = {
       state: false,
@@ -47,11 +61,18 @@ export default {
       fields: {
         profileName: initFormField({ value: name }),
         targetUrl: initFormField({ value: targetUrl }),
+        excludedURLs: initFormField({ value: excludedURLs, required: false, skipValidation: true }),
+        requestHeaders: initFormField({
+          value: requestHeaders,
+          required: false,
+          skipValidation: true,
+        }),
       },
     };
 
     return {
       form,
+      authSection: {},
       initialFormValues: serializeFormObject(form.fields),
       isLoading: false,
       hasAlert: false,
@@ -94,9 +115,11 @@ export default {
   },
   methods: {
     onSubmit() {
+      const isAuthEnabled = this.authSection.fields.authEnabled.value;
+
       this.form.showValidation = true;
 
-      if (!this.form.state) {
+      if (!this.form.state || (isAuthEnabled && !this.authSection.state)) {
         return;
       }
 
@@ -108,6 +131,7 @@ export default {
         fullPath: this.fullPath,
         ...(this.isEdit ? { id: this.siteProfile.id } : {}),
         ...serializeFormObject(this.form.fields),
+        ...(isAuthEnabled ? serializeFormObject(this.authSection.fields) : {}),
       };
 
       this.$apollo
@@ -216,6 +240,30 @@ export default {
         :state="form.fields.targetUrl.state"
       />
     </gl-form-group>
+
+    <dast-site-auth-section
+      v-if="glFeatures.securityDastSiteProfilesAdditionalFields"
+      v-model="authSection"
+      :show-validation="form.showValidation"
+    />
+
+    <div class="row" v-if="glFeatures.securityDastSiteProfilesAdditionalFields">
+      <gl-form-group
+        :label="s__('DastProfiles|Excluded URLs (Optional)')"
+        :invalid-feedback="form.fields.excludedURLs.feedback"
+        class="col-md-6 mb-0"
+      >
+        <gl-form-textarea v-model="form.fields.excludedURLs.value" />
+      </gl-form-group>
+
+      <gl-form-group
+        :label="s__('DastProfiles|Additional request headers (Optional)')"
+        :invalid-feedback="form.fields.requestHeaders.feedback"
+        class="col-md-6 mb-0"
+      >
+        <gl-form-textarea v-model="form.fields.requestHeaders.value" />
+      </gl-form-group>
+    </div>
 
     <hr />
 
