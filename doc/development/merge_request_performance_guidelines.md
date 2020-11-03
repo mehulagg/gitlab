@@ -164,9 +164,9 @@ The query results are only cached for the duration of that single request, it do
 
 The cached queries help with reducing DB load, but they still:
 
-- Consume memory
-- Require as to re-instantiate each ActiveRecord object
-- Require as to re-instantiate each relation of the object
+- Consume memory.
+- Require as to re-instantiate each `ActiveRecord` object.
+- Require as to re-instantiate each relation of the object.
 - Makes us spend additional CPU-cycles to look into a list of cached queries.
 
 They are cheaper, but they are not cheap at all from `memory` perspective.
