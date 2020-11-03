@@ -105,7 +105,7 @@ successful.
 
 NOTE: **Note:**
 New users automatically created by Kerberos will be blocked by default for security reasons.
-Check the [Initial Omniauth Configuration](omniauth.md#initial-omniauth-configuration), specifically the `block_auto_created_users`.
+Check the [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration), specifically the `block_auto_created_users`.
 
 ## Linking Kerberos and LDAP accounts together
 
