@@ -26,7 +26,9 @@ Many more features are planned. Please [review our roadmap](https://gitlab.com/g
 
 ## GitLab Agent GitOps workflow
 
-The GitLab Agent uses multiple GitLab projects to provide a flexible workflow that can suit various needs. The below diagram shows these repositories and the main actors involved in a deployment.
+The GitLab Agent uses multiple GitLab projects to provide a flexible workflow
+that can suit various needs. This diagram shows these repositories and the main
+actors involved in a deployment:
 
 ```mermaid
 sequenceDiagram
