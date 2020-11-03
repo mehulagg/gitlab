@@ -232,7 +232,7 @@ This allows you to create unique boards according to your team's need.
 ![Create scoped board](img/issue_board_creation.png)
 
 You can define the scope of your board when creating it or by clicking the "Edit board" button.
-Once a milestone, assignee or weight is assigned to an issue board, you can no longer
+After a milestone, assignee or weight is assigned to an issue board, you can no longer
 filter through these in the search bar. In order to do that, you need to remove the desired scope
 (for example, milestone, assignee, or weight) from the issue board.
 
@@ -385,9 +385,8 @@ Create a new list by clicking the **Add list** button in the upper right corner 
 
 ![creating a new list in an issue board](img/issue_board_add_list.png)
 
-Then, choose the label or user to create the list from. The new list is inserted
-at the end of the lists, before **Done**. Moving and reordering lists is as
-easy as dragging them around.
+Then, choose the label or user to base the new list on. The new list is inserted
+at the end of the lists, before **Done**. To move and reorder lists, drag them around.
 
 To create a list for a label that doesn't yet exist, create the label by
 choosing **Create new label**. This creates the label immediately and adds it to the dropdown.
@@ -424,8 +423,8 @@ respective label is removed.
 ### Filter issues
 
 You should be able to use the filters on top of your issue board to show only
-the results you want. It's similar to the filtering used in the issue tracker
-since the metadata from the issues and labels are re-used in the issue board.
+the results you want. It's similar to the filtering used in the issue tracker,
+as the metadata from the issues and labels is re-used in the issue board.
 
 You can filter by author, assignee, milestone, and label.
 
@@ -435,13 +434,13 @@ By reordering your lists, you can create workflows. As lists in issue boards are
 based on labels, it works out of the box with your existing issues.
 
 So if you've already labeled things with **Backend** and **Frontend**, the issue appears in
-the lists as you create them. In addition, this means you can easily move
-something between lists by changing a label.
+the lists as you create them. In addition, this means you can move something between lists by
+changing a label.
 
 A typical workflow of using an issue board would be:
 
 1. You have [created](labels.md#label-management) and [prioritized](labels.md#label-priority)
-   labels so that you can easily categorize your issues.
+   labels to categorize your issues.
 1. You have a bunch of issues (ideally labeled).
 1. You visit the issue board and start [creating lists](#create-a-new-list) to
    create a workflow.
@@ -457,9 +456,9 @@ For example, you can create a list based on the label of **Frontend** and one fo
 **Frontend** list. That way, everyone knows that this issue is now being
 worked on by the designers.
 
-Then, once they're done, all they have to do is
+Then, when they're done, all they have to do is
 drag it to the next list, **Backend**. Then, a backend developer can
-eventually pick it up. Once they’re done, they move it to **Done**, to close the
+eventually pick it up. When they’re done, they move it to **Done**, to close the
 issue.
 
 This process can be seen clearly when visiting an issue. With every move
@@ -482,7 +481,8 @@ When dragging issues between lists, different behavior occurs depending on the s
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18954) in GitLab 12.4.
 
-You can select multiple issue cards, then drag the group to another position within the list, or to another list. This makes it faster to reorder many issues at once.
+You can select multiple issue cards, then drag the group to another position within the list, or to
+another list. This makes it faster to reorder many issues at once.
 
 To select and move multiple cards:
 
