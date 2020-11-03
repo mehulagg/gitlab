@@ -49,6 +49,7 @@ function UsersSelect(currentUser, els, options = {}) {
     options.todoStateFilter = $dropdown.data('todoStateFilter');
     options.iid = $dropdown.data('iid');
     options.issuableType = $dropdown.data('issuableType');
+    options.targetBranch = $dropdown.data('targetBranch');
     const showNullUser = $dropdown.data('nullUser');
     const defaultNullUser = $dropdown.data('nullUserDefault');
     const showMenuAbove = $dropdown.data('showMenuAbove');
@@ -582,7 +583,14 @@ function UsersSelect(currentUser, els, options = {}) {
           img = `<img src='${avatar}' class='avatar avatar-inline m-0' width='32' />`;
         }
 
-        return userSelect.renderRow(options.issuableType, user, selected, username, img);
+        return userSelect.renderRow(
+          options.issuableType,
+          user,
+          selected,
+          username,
+          img,
+          elsClassName,
+        );
       },
     });
   });
@@ -746,8 +754,13 @@ UsersSelect.prototype.users = function(query, options, callback) {
     ...getAjaxUsersSelectParams(options, AJAX_USERS_SELECT_PARAMS_MAP),
   };
 
-  if (options.issuableType === 'merge_request') {
+  if (
+    options.issuableType === 'merge_request' ||
+    (!options.issuableType && (options.iid || options.targetBranch))
+  ) {
     params.merge_request_iid = options.iid || null;
+    params.target_branch = options.targetBranch || null;
+    params.approval_rules = true;
   }
 
   return axios.get(url, { params }).then(({ data }) => {
@@ -762,7 +775,14 @@ UsersSelect.prototype.buildUrl = function(url) {
   return url;
 };
 
-UsersSelect.prototype.renderRow = function(issuableType, user, selected, username, img) {
+UsersSelect.prototype.renderRow = function(
+  issuableType,
+  user,
+  selected,
+  username,
+  img,
+  elsClassName,
+) {
   const tooltip = issuableType === 'merge_request' && !user.can_merge ? __('Cannot merge') : '';
   const tooltipClass = tooltip ? `has-tooltip` : '';
   const selectedClass = selected === true ? 'is-active' : '';
@@ -776,10 +796,15 @@ UsersSelect.prototype.renderRow = function(issuableType, user, selected, usernam
       <a href="#" class="dropdown-menu-user-link d-flex align-items-center ${linkClasses}" ${tooltipAttributes}>
         ${this.renderRowAvatar(issuableType, user, img)}
         <span class="d-flex flex-column overflow-hidden">
-          <strong class="dropdown-menu-user-full-name">
+          <strong class="dropdown-menu-user-full-name gl-font-weight-bold">
             ${escape(user.name)}
           </strong>
-          ${username ? `<span class="dropdown-menu-user-username">${username}</span>` : ''}
+          ${
+            username
+              ? `<span class="dropdown-menu-user-username text gl-text-gray-400">${username}</span>`
+              : ''
+          }
+          ${this.renderApprovalRules(elsClassName, user.applicable_approval_rules)}
         </span>
       </a>
     </li>
@@ -800,6 +825,24 @@ UsersSelect.prototype.renderRowAvatar = function(issuableType, user, img) {
     ${img}
     ${mergeIcon}
   </span>`;
+};
+
+UsersSelect.prototype.renderApprovalRules = function(elsClassName, approvalRules = []) {
+  if (!elsClassName?.includes('reviewer')) {
+    return '';
+  }
+  const count = approvalRules.length;
+  const [rule] = approvalRules;
+
+  const renderApprovalRulesCount =
+    count > 1 ? `<span class="ml-1">(+${count}&nbsp;rules)</span>` : '';
+
+  return count
+    ? `<div class="gl-display-flex gl-font-sm">
+        <span class="gl-text-truncate" title="${rule.name}">${rule.name}</span>
+        ${renderApprovalRulesCount}
+      </div>`
+    : '';
 };
 
 export default UsersSelect;
