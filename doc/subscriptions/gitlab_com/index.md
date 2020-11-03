@@ -215,6 +215,11 @@ To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
 
 When the purchase has been processed, you receive confirmation of your new subscription tier.
 
+## See your billable users list
+
+To see a list of your billable users on your GitLab group page navigate to your group **settings** then click on **billing**; this page will provide information about your plan subscription and occupying seats for your group which is the list of billable users for your particular group.
+
+
 ## Subscription expiry
 
 When your subscription or trial expires, GitLab does not delete your data, but
