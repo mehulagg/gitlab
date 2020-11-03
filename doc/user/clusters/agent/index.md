@@ -213,7 +213,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
   - Specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`) to use an unencrypted WebSockets connection.
   - `grpc` scheme can be used if both Agent and Server are installed in one cluster. In this case, you may specify `kas-address` value as
     `grpc://gitlab-kas.<your-namespace>:5005`) to use gRPC directly. Here `gitlab-kas` is the name of the service created by `gitlab-kas` chart,
-    and `your-namespace` is the namespace where the chart was installed. Encrypted gRPC is not supported yet. Follow the
+    and `your-namespace` is the namespace where the chart was installed. Note that `grpc` is not enabled by default, and you will need to set Encrypted gRPC is not supported yet. Follow the
     [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7)
     for progress updates.
 - If you defined your own secret name, replace `gitlab-agent-token` with your secret name in `secretName:` section.
