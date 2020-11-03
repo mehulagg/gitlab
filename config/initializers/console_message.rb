@@ -20,4 +20,8 @@ if Gitlab::Runtime.console?
   end
 
   puts '-' * 80
+
+  if IRB.conf.any? && !IRB.conf[:HISTORY_FILE] && !File.exist?(IRB.rc_file("_history"))
+    IRB.conf[:SAVE_HISTORY] = false
+  end
 end
