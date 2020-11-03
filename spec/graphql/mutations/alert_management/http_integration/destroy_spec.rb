@@ -21,7 +21,7 @@ RSpec.describe Mutations::AlertManagement::HttpIntegration::Destroy do
       context 'when HttpIntegrations::DestroyService responds with success' do
         it 'returns the integration with no errors' do
           expect(resolve).to eq(
-            integration: nil,
+            integration: integration,
             errors: []
           )
         end
@@ -31,7 +31,7 @@ RSpec.describe Mutations::AlertManagement::HttpIntegration::Destroy do
         before do
           allow_any_instance_of(::AlertManagement::HttpIntegrations::DestroyService)
             .to receive(:execute)
-            .and_return(ServiceResponse.error(message: 'An error has occurred'))
+            .and_return(ServiceResponse.error(payload: { integration: nil }, message: 'An error has occurred'))
         end
 
         it 'returns errors' do

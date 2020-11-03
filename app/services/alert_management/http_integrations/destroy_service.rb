@@ -34,7 +34,7 @@ module AlertManagement
       end
 
       def success
-        ServiceResponse.success
+        ServiceResponse.success(payload: { integration: integration })
       end
 
       def error_no_permissions
