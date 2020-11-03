@@ -372,4 +372,4 @@ This basic GitOps example deploys NGINX:
 
 - [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
 - [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
-- [Install GitLab Runner](https://gitlab.com/gitlab-org/configure/examples/install-runner-via-k8s-agent)
+- [Install GitLab Runner](https://gitlab.com/gitlab-examples/install-runner-via-k8s-agent)
