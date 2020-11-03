@@ -386,7 +386,7 @@ module API
       get ':id/repository/commits/:sha/signature', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         commit = user_project.commit(params[:sha])
         not_found! 'Commit' unless commit
-        not_found! 'Signature' unless commit.has_signature?
+        not_found! 'Signature' if !commit.raw_commit_from_rugged? && !commit.has_signature?
 
         present commit, with: Entities::CommitSignature
       end
