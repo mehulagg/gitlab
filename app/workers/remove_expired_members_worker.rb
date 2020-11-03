@@ -8,10 +8,10 @@ class RemoveExpiredMembersWorker # rubocop:disable Scalability/IdempotentWorker
   worker_resource_boundary :cpu
 
   def perform
-    Member.expired.find_each do |member|
+    Member.expired.preload(:user).find_each do |member|
       Members::DestroyService.new.execute(member, skip_authorization: true)
 
-      expired_user = User.find(member.user_id)
+      expired_user = member.user
 
       if expired_user.project_bot?
         Users::DestroyService.new(nil).execute(expired_user, skip_authorization: true)
