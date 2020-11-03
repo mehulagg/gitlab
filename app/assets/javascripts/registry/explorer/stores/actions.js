@@ -1,5 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Api from '~/api';
 import * as types from './mutation_types';
 import {
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
@@ -59,6 +60,13 @@ export const requestTagsList = ({ commit, dispatch }, { pagination = {}, params 
     .finally(() => {
       commit(types.SET_MAIN_LOADING, false);
     });
+};
+
+export const requestImageDetails = async ({ dispatch, commit }, id) => {
+  commit(types.SET_MAIN_LOADING, true);
+  const { data } = await Api.containerRegistryDetails(id);
+  commit(types.SET_IMAGE_DETAILS, data);
+  dispatch('requestTagsList');
 };
 
 export const requestDeleteTag = ({ commit, dispatch, state }, { tag, params }) => {
