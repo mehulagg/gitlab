@@ -118,7 +118,7 @@ To remove a license from a self-managed instance:
 
 You can upload and view more than one license, but only the latest license in the current date
 range is used as the active license. When you upload a future-dated license, it
-doesn't take effect until its applicable date date.
+doesn't take effect until its applicable date.
 
 ## Troubleshooting
 
