@@ -13736,6 +13736,22 @@ CREATE SEQUENCE merge_trains_id_seq
 
 ALTER SEQUENCE merge_trains_id_seq OWNED BY merge_trains.id;
 
+CREATE TABLE metric_image_uploads (
+    id bigint NOT NULL,
+    issue_id bigint NOT NULL,
+    file character varying(255),
+    file_store smallint
+);
+
+CREATE SEQUENCE metric_image_uploads_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE metric_image_uploads_id_seq OWNED BY metric_image_uploads.id;
+
 CREATE TABLE metrics_dashboard_annotations (
     id bigint NOT NULL,
     starting_at timestamp with time zone NOT NULL,
@@ -17920,6 +17936,8 @@ ALTER TABLE ONLY merge_requests_closing_issues ALTER COLUMN id SET DEFAULT nextv
 
 ALTER TABLE ONLY merge_trains ALTER COLUMN id SET DEFAULT nextval('merge_trains_id_seq'::regclass);
 
+ALTER TABLE ONLY metric_image_uploads ALTER COLUMN id SET DEFAULT nextval('metric_image_uploads_id_seq'::regclass);
+
 ALTER TABLE ONLY metrics_dashboard_annotations ALTER COLUMN id SET DEFAULT nextval('metrics_dashboard_annotations_id_seq'::regclass);
 
 ALTER TABLE ONLY metrics_users_starred_dashboards ALTER COLUMN id SET DEFAULT nextval('metrics_users_starred_dashboards_id_seq'::regclass);
@@ -19144,6 +19162,9 @@ ALTER TABLE ONLY merge_requests
 
 ALTER TABLE ONLY merge_trains
     ADD CONSTRAINT merge_trains_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY metric_image_uploads
+    ADD CONSTRAINT metric_image_uploads_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY metrics_dashboard_annotations
     ADD CONSTRAINT metrics_dashboard_annotations_pkey PRIMARY KEY (id);
@@ -21124,6 +21145,8 @@ CREATE UNIQUE INDEX index_merge_trains_on_merge_request_id ON merge_trains USING
 CREATE INDEX index_merge_trains_on_pipeline_id ON merge_trains USING btree (pipeline_id);
 
 CREATE INDEX index_merge_trains_on_user_id ON merge_trains USING btree (user_id);
+
+CREATE INDEX index_metric_image_uploads_on_issue_id ON metric_image_uploads USING btree (issue_id);
 
 CREATE INDEX index_metrics_dashboard_annotations_on_cluster_id_and_3_columns ON metrics_dashboard_annotations USING btree (cluster_id, dashboard_path, starting_at, ending_at) WHERE (cluster_id IS NOT NULL);
 
@@ -24016,6 +24039,9 @@ ALTER TABLE ONLY ci_pipeline_artifacts
 
 ALTER TABLE ONLY merge_request_user_mentions
     ADD CONSTRAINT fk_rails_aa1b2961b1 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY metric_image_uploads
+    ADD CONSTRAINT fk_rails_aaa2f0ebca FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY x509_commit_signatures
     ADD CONSTRAINT fk_rails_ab07452314 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
