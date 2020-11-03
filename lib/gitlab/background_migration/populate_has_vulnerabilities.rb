@@ -34,7 +34,31 @@ module Gitlab
       end
 
       def perform(*project_ids)
-        Project.where(id: project_ids).each { |project| project.mark_as_vulnerable! }
+        Project.where(id: project_ids).includes(:project_setting).each do |project|
+          project.mark_as_vulnerable!
+        rescue StandardError => e
+          log_error(e, project)
+        end
+      ensure
+        log_info(project_ids)
+      end
+
+      private
+
+      def log_error(error, project)
+        ::Gitlab::BackgroundMigration::Logger.error(
+          migrator: self.class.name,
+          message: error.message,
+          project_id: project.id
+        )
+      end
+
+      def log_info(project_ids)
+        ::Gitlab::BackgroundMigration::Logger.info(
+          migrator: self.class.name,
+          message: '`has_vulnerabilities` information has been populated',
+          count: project_ids.length
+        )
       end
     end
   end
