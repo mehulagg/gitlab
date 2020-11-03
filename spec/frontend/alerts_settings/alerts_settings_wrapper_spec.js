@@ -113,6 +113,7 @@ describe('AlertsSettingsWrapper', () => {
         variables: { name: 'Test 1', active: true },
       });
 
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createHttpIntegrationMutation,
         update: expect.anything(),
@@ -139,6 +140,7 @@ describe('AlertsSettingsWrapper', () => {
         variables: { apiUrl: 'https://test.com', active: true },
       });
 
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createPrometheusIntegrationMutation,
         update: expect.anything(),
@@ -150,7 +152,7 @@ describe('AlertsSettingsWrapper', () => {
       });
     });
 
-    it('shows error alert when integration creation fails ', async () => {
+    it('shows error alert when integration creation fails ', () => {
       const errorMsg = 'Something went wrong';
       createComponent({
         data: { integrations: { list: mockIntegrations } },
@@ -159,9 +161,7 @@ describe('AlertsSettingsWrapper', () => {
       });
 
       jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
-
       wrapper.find(AlertsSettingsFormNew).vm.$emit('on-create-new-integration', {});
-      await wrapper.vm.$nextTick();
 
       setImmediate(() => {
         expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });

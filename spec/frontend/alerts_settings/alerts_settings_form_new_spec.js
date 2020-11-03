@@ -10,7 +10,7 @@ describe('AlertsSettingsFormNew', () => {
     data = {},
     props = { loading: false },
     multipleHttpIntegrationsCustomMapping = false,
-  }) => {
+  } = {}) => {
     wrapper = mount(AlertsSettingsForm, {
       data() {
         return { ...data };
@@ -42,7 +42,7 @@ describe('AlertsSettingsFormNew', () => {
 
   describe('with default values', () => {
     beforeEach(() => {
-      createComponent({});
+      createComponent();
     });
 
     it('renders the initial template', () => {
