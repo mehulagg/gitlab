@@ -156,7 +156,7 @@ query. This in turn makes it much harder for this code to overload a database.
 
 **Summary:** a merge request **should not** execute duplicated cached queries.
 
-Rails provides a [SQL query cache](https://guides.rubyonrails.org/caching_with_rails.html#sql-caching), 
+Rails provides an [SQL query cache](https://guides.rubyonrails.org/caching_with_rails.html#sql-caching), 
 used to cache the results of database queries for the duration of the request. 
 If Rails encounters the same query again for that request,
 it will use the cached result set as opposed to running the query against the database again.
