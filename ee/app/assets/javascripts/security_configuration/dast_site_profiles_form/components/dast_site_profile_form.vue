@@ -9,6 +9,7 @@ import {
   GlFormInput,
   GlModal,
   GlToggle,
+  GlFormTextarea,
 } from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
 import * as Sentry from '~/sentry/wrapper';
@@ -39,6 +40,7 @@ export default {
     GlFormInput,
     GlModal,
     GlToggle,
+    GlFormTextarea,
     DastSiteAuthSection,
     DastSiteValidation,
   },
@@ -62,7 +64,8 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '' } = this.siteProfile || {};
+    const { name = '', targetUrl = '', excludedURLs = '', additionalRequestHeaders = '' } =
+      this.siteProfile || {};
 
     const form = {
       state: false,
@@ -70,6 +73,12 @@ export default {
       fields: {
         profileName: initFormField({ value: name }),
         targetUrl: initFormField({ value: targetUrl }),
+        excludedURLs: initFormField({ value: excludedURLs, required: false, skipValidation: true }),
+        additionalRequestHeaders: initFormField({
+          value: additionalRequestHeaders,
+          required: false,
+          skipValidation: true,
+        }),
       },
     };
 
@@ -441,6 +450,24 @@ export default {
     </template>
 
     <dast-site-auth-section v-model="authSection" :show-validation="form.showValidation" />
+
+    <div class="row">
+      <gl-form-group
+        :label="s__('DastProfiles|Excluded URLs (Optional)')"
+        :invalid-feedback="form.fields.excludedURLs.feedback"
+        class="col-md-6 mb-0"
+      >
+        <gl-form-textarea v-model="form.fields.excludedURLs.value" />
+      </gl-form-group>
+
+      <gl-form-group
+        :label="s__('DastProfiles|Additional request headers (Optional)')"
+        :invalid-feedback="form.fields.additionalRequestHeaders.feedback"
+        class="col-md-6 mb-0"
+      >
+        <gl-form-textarea v-model="form.fields.additionalRequestHeaders.value" />
+      </gl-form-group>
+    </div>
 
     <hr />
 
