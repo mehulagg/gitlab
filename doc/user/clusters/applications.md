@@ -1559,7 +1559,7 @@ Logs produced by pods running **GitLab Managed Apps** can be browsed using [**Lo
 
 ## Enable HSTS
 
-You can add HTTP Strict Transport Security header using a [customized Helm chart value](../../topics/autodevops/customize.html#customize-values-for-helm-chart):
+You can modify the HTTP Strict Transport Security header from the ingress defaults by using a [customized Helm chart value](../../topics/autodevops/customize.html#customize-values-for-helm-chart):
 ```ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
