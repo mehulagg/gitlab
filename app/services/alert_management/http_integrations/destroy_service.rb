@@ -15,7 +15,7 @@ module AlertManagement
         return error_multiple_integrations unless Feature.enabled?(:multiple_http_integrations, integration.project)
 
         if integration.destroy
-          success(integration)
+          success
         else
           error(integration.errors.full_messages.to_sentence)
         end
