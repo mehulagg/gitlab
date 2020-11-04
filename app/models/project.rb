@@ -1345,6 +1345,8 @@ class Project < ApplicationRecord
     available_services_names =
       Service.available_services_names + Service.project_specific_services_names - disabled_services
 
+    available_services_names << 'datadog' if Feature.enabled?(:datadog_integration, self)
+
     available_services_names.map do |service_name|
       find_or_initialize_service(service_name)
     end.sort_by(&:title)
