@@ -24,10 +24,7 @@ import {
   createPrometheusVariables,
   updatePrometheusVariables,
   ID,
-<<<<<<< HEAD
   errorMsg,
-=======
->>>>>>> 8197313de2c (Add support for http destroy)
   getIntegrationsQueryResponse,
   destroyIntegrationResponse,
   integrationToDestroy,
@@ -37,10 +34,6 @@ import {
 jest.mock('~/flash');
 
 const localVue = createLocalVue();
-<<<<<<< HEAD
-=======
-localVue.use(VueApollo);
->>>>>>> 8197313de2c (Add support for http destroy)
 
 describe('AlertsSettingsWrapper', () => {
   let wrapper;
@@ -56,11 +49,7 @@ describe('AlertsSettingsWrapper', () => {
 
     localWrapper
       .find(IntegrationsList)
-<<<<<<< HEAD
       .vm.$emit('delete-integration', { id: integrationToDestroy.id });
-=======
-      .vm.$emit('on-delete-integration', { id: integrationToDestroy.id });
->>>>>>> 8197313de2c (Add support for http destroy)
   }
 
   const createComponent = ({ data = {}, provide = {}, loading = false } = {}) => {
@@ -89,11 +78,7 @@ describe('AlertsSettingsWrapper', () => {
 
   function createComponentWithApollo({
     destroyHandler = jest.fn().mockResolvedValue(destroyIntegrationResponse),
-<<<<<<< HEAD
   } = {}) {
-=======
-  }) {
->>>>>>> 8197313de2c (Add support for http destroy)
     localVue.use(VueApollo);
     destroyIntegrationHandler = destroyHandler;
 
@@ -103,10 +88,6 @@ describe('AlertsSettingsWrapper', () => {
     ];
 
     fakeApollo = createMockApollo(requestHandlers);
-<<<<<<< HEAD
-
-=======
->>>>>>> 8197313de2c (Add support for http destroy)
     wrapper = mount(AlertsSettingsWrapper, {
       localVue,
       apolloProvider: fakeApollo,
@@ -351,42 +332,6 @@ describe('AlertsSettingsWrapper', () => {
         expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
       });
     });
-
-    it('shows error alert when integration update fails ', async () => {
-      const errorMsg = 'Something went wrong';
-      createComponent({
-        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true } },
-        loading: false,
-      });
-
-      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
-
-      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-update-integration', {});
-      await wrapper.vm.$nextTick();
-
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
-      });
-    });
-
-    it('shows error alert when integration token reset fails ', async () => {
-      const errorMsg = 'Something went wrong';
-      createComponent({
-        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true } },
-        loading: false,
-      });
-
-      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
-
-      wrapper.find(AlertsSettingsFormNew).vm.$emit('on-reset-token', {});
-      await wrapper.vm.$nextTick();
-
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
-      });
-    });
   });
 
   describe('with mocked Apollo client', () => {
@@ -401,43 +346,6 @@ describe('AlertsSettingsWrapper', () => {
 
     it('calls a mutation with correct parameters and destroys a integration', async () => {
       createComponentWithApollo({});
-
-      await destroyHttpIntegration(wrapper);
-
-      expect(destroyIntegrationHandler).toHaveBeenCalled();
-
-      await wrapper.vm.$nextTick();
-
-      expect(findIntegrations()).toHaveLength(3);
-    });
-
-    it('displays flash if mutation had a recoverable error', async () => {
-      createComponentWithApollo({
-        destroyHandler: jest.fn().mockResolvedValue(destroyIntegrationResponseWithErrors),
-      });
-
-      await destroyHttpIntegration(wrapper);
-
-      await wrapper.vm.$nextTick(); // kick off the DOM update
-      await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-      await wrapper.vm.$nextTick(); // kick off the DOM update for flash
-
-      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
-    });
-  });
-
-  describe('with mocked Apollo client', () => {
-    it('has a selection of integrations loaded via the getIntegrationsQuery', async () => {
-      createComponentWithApollo();
-
-      await jest.runOnlyPendingTimers();
-      await wrapper.vm.$nextTick();
-
-      expect(findIntegrations()).toHaveLength(4);
-    });
-
-    it('calls a mutation with correct parameters and destroys a integration', async () => {
-      createComponentWithApollo();
 
       await destroyHttpIntegration(wrapper);
 
