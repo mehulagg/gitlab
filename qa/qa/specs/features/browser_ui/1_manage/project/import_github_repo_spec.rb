@@ -26,7 +26,6 @@ module QA
 
       after do
         user.remove_via_api!
-        Page::Main::Menu.perform(&:sign_out_if_signed_in)
       end
 
       it 'imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/385' do
