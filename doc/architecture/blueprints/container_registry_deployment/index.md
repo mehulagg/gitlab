@@ -243,7 +243,7 @@ Proposal:
 | Author                       |      João Pereira       |
 | Architecture Evolution Coach |                         |
 | Engineering Leader           |                         |
-| Domain Expert                |                         |
+| Domain Expert                |          Hayley Swimelar               |
 
 DRIs:
 
