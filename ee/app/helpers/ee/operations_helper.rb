@@ -73,6 +73,8 @@ module EE
     end
 
     def alert_management_multiple_integrations_data
+      return {} unless alerts_service.multi_integrations?
+
       {
         'multi_integrations' => @project.feature_available?(:multiple_alert_http_integrations).to_s
       }
