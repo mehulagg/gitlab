@@ -22,6 +22,10 @@ module IncidentManagement
 
     private
 
+    def filename
+      file&.filename
+    end
+
     def valid_file_extensions
       SAFE_IMAGE_EXT
     end
@@ -31,9 +35,8 @@ module IncidentManagement
         message = _('does not have a supported extension. Only %{extension_list} are supported') % {
           extension_list: valid_file_extensions.to_sentence
         }
-        errors.add(:filename, message)
+        errors.add(:file, message)
       end
     end
-
   end
 end
