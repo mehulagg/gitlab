@@ -9,7 +9,7 @@ RSpec.describe 'Projects > Show > Schema Markup' do
     end
   end
 
-  it 'shows SoftwareSourceCode structured markup' do
+  it 'shows SoftwareSourceCode structured markup', :js do
     visit project_path(project)
     wait_for_all_requests
 
