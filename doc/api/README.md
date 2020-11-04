@@ -165,7 +165,6 @@ When signing in to the main GitLab application, a `_gitlab_session` cookie is
 set. The API uses this cookie for authentication if it's present. Using the
 API to generate a new session cookie isn't supported.
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 The primary user of this authentication method is the web frontend of GitLab
 itself, which can, for example, use the API as the authenticated user to get a
 list of their projects without needing to explicitly pass an access token.
