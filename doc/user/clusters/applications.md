@@ -1559,17 +1559,17 @@ Logs produced by pods running **GitLab Managed Apps** can be browsed using [**Lo
 
 ## Customize HSTS
 
-You can modify the HTTP Strict Transport Security header from the ingress defaults by using a [customized Helm chart value](../../topics/autodevops/customize.html#customize-values-for-helm-chart):
+You can modify the HTTP Strict Transport Security header from the Ingress defaults by using a
+[customized Helm chart value](../../topics/autodevops/customize.md#customize-values-for-helm-chart).
+This example deploys an Ingress resource with the annotations needed to set up a host-specific
+HSTS header:
+
 ```ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: "nginx"
     nginx.org/hsts-max-age: 31536000
 ```
-
-This will deploy an Ingress resource that has the right annotations to setup a host specific hsts header.
-
-
 ## Upgrading applications
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24789) in GitLab 11.8.
