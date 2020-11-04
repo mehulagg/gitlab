@@ -21,6 +21,8 @@ describe('Grouped security reports app', () => {
     });
   };
 
+  const anyParams = expect.any(Object);
+
   const findPipelinesTabAnchor = () => wrapper.find('[data-testid="show-pipelines"]');
   const findHelpLink = () => wrapper.find('[data-testid="help"]');
   const setupMrTabsMock = () => {
@@ -38,15 +40,17 @@ describe('Grouped security reports app', () => {
     delete window.mrTabs;
   });
 
-  describe.each(SecurityReportsApp.reportTypes)('given a report type %p', reportType => {
+  describe.each([SecurityReportsApp.reportTypes[0]])('given a report type %p', reportType => {
     beforeEach(() => {
       window.mrTabs = { tabShown: jest.fn() };
       setupMockJobArtifact(reportType);
       createComponent();
+      return wrapper.vm.$nextTick();
     });
 
     it('calls the pipelineJobs API correctly', () => {
-      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId);
+      expect(Api.pipelineJobs).toHaveBeenCalledTimes(1);
+      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId, anyParams);
     });
 
     it('renders the expected message', () => {
@@ -75,14 +79,52 @@ describe('Grouped security reports app', () => {
     beforeEach(() => {
       setupMockJobArtifact('foo');
       createComponent();
+      return wrapper.vm.$nextTick();
     });
 
     it('calls the pipelineJobs API correctly', () => {
-      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId);
+      expect(Api.pipelineJobs).toHaveBeenCalledTimes(1);
+      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId, anyParams);
     });
 
     it('renders nothing', () => {
       expect(wrapper.html()).toBe('');
+    });
+  });
+
+  describe('security artifacts on last page of multi-page response', () => {
+    const numPages = 3;
+
+    beforeEach(() => {
+      jest
+        .spyOn(Api, 'pipelineJobs')
+        .mockImplementation(async (projectId, pipelineId, { page }) => {
+          const requestedPage = parseInt(page, 10);
+          if (requestedPage < numPages) {
+            return {
+              // Some jobs with no relevant artifacts
+              data: [{}, {}],
+              headers: { 'x-next-page': String(requestedPage + 1) },
+            };
+          } else if (requestedPage === numPages) {
+            return {
+              data: [{ artifacts: [{ file_type: SecurityReportsApp.reportTypes[0] }] }],
+            };
+          }
+
+          throw new Error('Test failed due to request of non-existent jobs page');
+        });
+
+      createComponent();
+      return wrapper.vm.$nextTick();
+    });
+
+    it('fetches all pages', () => {
+      expect(Api.pipelineJobs).toHaveBeenCalledTimes(numPages);
+    });
+
+    it('renders the expected message', () => {
+      expect(wrapper.text()).toMatchInterpolatedText(SecurityReportsApp.i18n.scansHaveRun);
     });
   });
 
@@ -93,10 +135,12 @@ describe('Grouped security reports app', () => {
       error = new Error('an error');
       jest.spyOn(Api, 'pipelineJobs').mockRejectedValue(error);
       createComponent();
+      return wrapper.vm.$nextTick();
     });
 
     it('calls the pipelineJobs API correctly', () => {
-      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId);
+      expect(Api.pipelineJobs).toHaveBeenCalledTimes(1);
+      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId, anyParams);
     });
 
     it('renders nothing', () => {
