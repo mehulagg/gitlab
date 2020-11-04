@@ -249,6 +249,6 @@ DRIs:
 
 | Role                         | Who
 |------------------------------|------------------------|
-| Product                      |    @trizzi                     |
+| Product                      |    Tim Rizzi                     |
 | Leadership                   |                        |
 | Engineering                  |              João Pereira           |
