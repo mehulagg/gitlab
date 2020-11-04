@@ -8427,6 +8427,11 @@ type Group {
     createdBefore: Time
 
     """
+    ID of an epic associated with the issues, "none" and "any" values supported
+    """
+    epicId: String
+
+    """
     Returns the first _n_ elements from the list.
     """
     first: Int
@@ -14720,6 +14725,11 @@ type Project {
     createdBefore: Time
 
     """
+    ID of an epic associated with the issues, "none" and "any" values supported
+    """
+    epicId: String
+
+    """
     IID of the issue. For example, "1"
     """
     iid: String
@@ -14913,6 +14923,11 @@ type Project {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values supported
+    """
+    epicId: String
 
     """
     Returns the first _n_ elements from the list.

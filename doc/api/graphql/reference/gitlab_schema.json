@@ -23208,6 +23208,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "epicId",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values supported",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "includeSubgroups",
                   "description": "Include issues belonging to subgroups",
                   "type": {
@@ -43288,6 +43298,16 @@
                     }
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "epicId",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values supported",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
                 }
               ],
               "type": {
@@ -43730,6 +43750,16 @@
                       "name": "ID",
                       "ofType": null
                     }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "epicId",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values supported",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
                   },
                   "defaultValue": null
                 },
