@@ -2,14 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Groups::SyncService, '#execute' do
+RSpec.describe Groups::SyncService do
   let(:user) { create(:user) }
 
   describe '#execute' do
-    subject(:sync) { described_class.new(nil, user, group_links: group_links).execute }
-
     let_it_be(:top_level_group) { create(:group) }
     let_it_be(:group1) { create(:group, parent: top_level_group) }
+    let_it_be(:group2) { create(:group, parent: top_level_group) }
 
     let_it_be(:group_links) do
       [
@@ -17,6 +16,15 @@ RSpec.describe Groups::SyncService, '#execute' do
         create(:saml_group_link, group: group1, access_level: 'Reporter'),
         create(:saml_group_link, group: group1, access_level: 'Developer')
       ]
+    end
+
+    let_it_be(:manage_group_ids) { [top_level_group.id, group1.id, group2.id] }
+
+    subject(:sync) do
+      described_class.new(
+        top_level_group, user,
+        group_links: group_links, manage_group_ids: manage_group_ids
+      ).execute
     end
 
     it 'adds two new group member records' do
@@ -37,6 +45,10 @@ RSpec.describe Groups::SyncService, '#execute' do
         .to eq(::Gitlab::Access::DEVELOPER)
     end
 
+    it 'returns a success response' do
+      expect(sync.success?).to eq(true)
+    end
+
     context 'when the user is already a member' do
       context 'with the correct access level' do
         before do
@@ -52,6 +64,12 @@ RSpec.describe Groups::SyncService, '#execute' do
 
           expect(group1.members.find_by(user_id: user.id).access_level)
             .to eq(::Gitlab::Access::DEVELOPER)
+        end
+
+        it 'does not call Group find_by_id' do
+          expect(Group).not_to receive(:find_by_id).with(group1.id)
+
+          sync
         end
       end
 
@@ -69,6 +87,41 @@ RSpec.describe Groups::SyncService, '#execute' do
 
           expect(top_level_group.members.find_by(user_id: user.id).access_level)
             .to eq(::Gitlab::Access::GUEST)
+        end
+      end
+
+      context 'but should no longer be a member' do
+        before do
+          group2.add_user(user, ::Gitlab::Access::DEVELOPER)
+        end
+
+        it 'reduces group member count by 1' do
+          expect { sync }.to change { group2.members.count }.by(-1)
+        end
+
+        it 'removes the matching user' do
+          sync
+
+          expect(group2.members.pluck(:user_id)).not_to include(user.id)
+        end
+      end
+
+      context 'in a group that should not be managed' do
+        let_it_be(:manage_group_ids) { [top_level_group.id, group1.id] }
+
+        before do
+          group2.add_user(user, ::Gitlab::Access::REPORTER)
+        end
+
+        it 'does not change the group member count' do
+          expect { sync }.not_to change { group2.members.count }
+        end
+
+        it 'retains the correct access level' do
+          sync
+
+          expect(group2.members.find_by(user_id: user.id).access_level)
+            .to eq(::Gitlab::Access::REPORTER)
         end
       end
     end

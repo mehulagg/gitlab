@@ -3,7 +3,7 @@
 #
 # Usage example:
 #
-# Groups::SyncService.new(nil, user, group_links: array_of_group_links).execute
+# Groups::SyncService.new(top_level_group, user, group_links: array_of_group_links).execute
 #
 # Given group links must respond to `group_id` and `access_level`.
 #
@@ -15,17 +15,61 @@
 #
 module Groups
   class SyncService < Groups::BaseService
+    include Gitlab::Utils::StrongMemoize
+
     def execute
-      group_links_by_group.each do |group_id, group_links|
-        access_level = max_access_level(group_links)
-        Group.find_by_id(group_id)&.add_user(current_user, access_level)
-      end
+      return unless group
+
+      remove_old_memberships
+      update_current_memberships
+
+      ServiceResponse.success
     end
 
     private
 
+    def remove_old_memberships
+      members_to_destroy.each do |member|
+        Members::DestroyService.new(current_user).execute(member, skip_authorization: true)
+      end
+    end
+
+    def update_current_memberships
+      group_links_by_group.each do |group_id, group_links|
+        access_level = max_access_level(group_links)
+
+        existing_member = existing_member_by_group(group_id)
+        next if existing_member && existing_member.access_level == access_level
+
+        Group.find_by_id(group_id)&.add_user(current_user, access_level)
+      end
+    end
+
+    def members_to_destroy
+      existing_members.select do |member|
+        !group_links_by_group.key?(member.source_id) &&
+          (manage_group_ids.blank? || manage_group_ids.include?(member.source_id))
+      end
+    end
+
+    def existing_member_by_group(group_id)
+      existing_members.find { |member| member.source_id == group_id }
+    end
+
+    def existing_members
+      strong_memoize(:existing_members) do
+        group.members_with_descendants.with_user(current_user).to_a
+      end
+    end
+
     def group_links_by_group
-      params[:group_links].group_by(&:group_id)
+      strong_memoize(:group_links_by_group) do
+        params[:group_links].group_by(&:group_id)
+      end
+    end
+
+    def manage_group_ids
+      params[:manage_group_ids]
     end
 
     def max_access_level(group_links)

@@ -68,7 +68,7 @@ RSpec.describe GroupSamlGroupSyncWorker do
     end
 
     def stub_sync_service_expectation(group_links)
-      expect(Groups::SyncService).to receive(:new).with(nil, user, group_links: group_links).and_call_original
+      expect(Groups::SyncService).to receive(:new).with(top_level_group, user, group_links: group_links).and_call_original
     end
 
     def perform(group_links)
