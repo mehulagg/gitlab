@@ -15,6 +15,10 @@ module Types
             resolve: -> (obj, _args, ctx) { obj.detailed_status(ctx[:current_user]) }
       field :scheduled_at, Types::TimeType, null: true,
         description: 'Schedule for the build'
+
+      field :artifacts, Types::Ci::JobArtifactType.connection_type, null: true,
+            description: 'Artifacts produced by the job',
+            method: :job_artifacts
     end
   end
 end
