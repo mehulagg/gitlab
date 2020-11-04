@@ -2,14 +2,15 @@
 import { GlLoadingIcon, GlButton, GlAlert } from '@gitlab/ui';
 import VueDraggable from 'vuedraggable';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import { s__, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import { getFilename } from '~/lib/utils/file_upload';
 import UploadButton from '../components/upload/button.vue';
 import DeleteButton from '../components/delete_button.vue';
 import Design from '../components/list/item.vue';
 import DesignDestroyer from '../components/design_destroyer.vue';
 import DesignVersionDropdown from '../components/upload/design_version_dropdown.vue';
-import DesignDropzone from '../components/upload/design_dropzone.vue';
+// import DesignDropzone from '../components/upload/design_dropzone.vue';
+import DesignDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import uploadDesignMutation from '../graphql/mutations/upload_design.mutation.graphql';
 import moveDesignMutation from '../graphql/mutations/move_design.mutation.graphql';
 import permissionsQuery from '../graphql/queries/design_permissions.query.graphql';
@@ -20,6 +21,7 @@ import {
   EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE,
   EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE,
   MOVE_DESIGN_ERROR,
+  UPLOAD_DESIGN_INVALID_FILETYPE_ERROR,
   designUploadSkippedWarning,
   designDeletionError,
 } from '../utils/error_messages';
@@ -49,6 +51,11 @@ export default {
     DeleteButton,
     DesignDropzone,
     VueDraggable,
+  },
+  i18n: {
+    dropDescriptionMessage: __('Drop or %{linkStart}upload%{linkEnd} designs to attach'),
+    dropInvalidFileTypeError: UPLOAD_DESIGN_INVALID_FILETYPE_ERROR,
+    dropToStartMessage: __('Drop your designs to start your upload.'),
   },
   mixins: [allDesignsMixin],
   apollo: {
@@ -416,6 +423,7 @@ export default {
           <design-dropzone
             :display-as-card="hasDesigns"
             :disable-drag-behavior="isDraggingDesign"
+            v-bind="$options.i18n"
             @change="onExistingDesignDropzoneChange($event, design.filename)"
           >
             <design
@@ -441,6 +449,7 @@ export default {
               :disable-drag-behavior="isDraggingDesign"
               :class="{ 'design-list-item design-list-item-new': !isDesignListEmpty }"
               :display-as-card="hasDesigns"
+              v-bind="$options.i18n"
               data-qa-selector="design_dropzone_content"
               @change="onUploadDesign"
             />

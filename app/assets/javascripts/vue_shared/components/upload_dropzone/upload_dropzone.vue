@@ -1,28 +1,19 @@
 <script>
 import { GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import createFlash from '~/flash';
+import uploadDesignMutation from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
 import { __ } from '~/locale';
 import { isValidImage } from './utils';
 import { VALID_DATA_TRANSFER_TYPE, VALID_IMAGE_FILE_MIMETYPE } from './constants';
 
 // TODO: Add props for:
 // - validators
-// - error message
-
-const UPLOAD_DESIGN_INVALID_FILETYPE_ERROR = __(
-  'Could not upload your designs as one or more files uploaded are not supported.',
-);
 
 export default {
   components: {
     GlIcon,
     GlLink,
     GlSprintf,
-  },
-  inject: {
-    uploadInvalidFileTypeError: {
-      default: __('Could not upload your image as one or more files uploaded are not supported'),
-    },
   },
   props: {
     displayAsCard: {
@@ -33,6 +24,21 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    dropDescriptionMessage: {
+      type: String,
+      required: false,
+      default: __('Drop or %{linkStart}upload%{linkEnd} images to attach'),
+    },
+    dropToStartMessage: {
+      type: String,
+      required: false,
+      default: __('Drop your images to start your upload'),
+    },
+    dropInvalidFileTypeError: {
+      type: String,
+      required: false,
+      default: __('Could not upload your image as one or more files uploaded are not supported'),
     },
   },
   data() {
@@ -68,7 +74,7 @@ export default {
 
       const { files } = dataTransfer;
       if (!this.isValidUpload(Array.from(files))) {
-        createFlash({ message: this.uploadInvalidFileTypeError });
+        createFlash({ message: this.dropInvalidFileTypeError });
         return;
       }
 
@@ -88,6 +94,7 @@ export default {
       this.$emit('change', e.target.files);
     },
   },
+  uploadDesignMutation,
   VALID_IMAGE_FILE_MIMETYPE,
 };
 </script>
@@ -114,7 +121,7 @@ export default {
         >
           <gl-icon name="upload" :size="iconStyles.size" :class="iconStyles.class" />
           <p class="gl-mb-0">
-            <gl-sprintf :message="__('Drop or %{linkStart}upload%{linkEnd} designs to attach')">
+            <gl-sprintf :message="dropDescriptionMessage">
               <template #link="{ content }">
                 <gl-link @click.stop="openFileUpload">
                   {{ content }}
@@ -152,7 +159,7 @@ export default {
           <h3 :class="{ 'gl-font-base gl-display-inline': !displayAsCard }">
             {{ __('Incoming!') }}
           </h3>
-          <span>{{ __('Drop your designs to start your upload.') }}</span>
+          <span>{{ dropToStartMessage }}</span>
         </div>
       </div>
     </transition>

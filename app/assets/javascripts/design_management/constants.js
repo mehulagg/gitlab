@@ -6,7 +6,7 @@ export const VALID_DESIGN_FILE_MIMETYPE = {
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/types
-export const VALID_DATA_TRANSFER_TYPE = 'Files';
+export const VALID_DATA_TRANSFER_TYPE = 'Files'; // TODO: can remove this once migrated
 
 export const ACTIVE_DISCUSSION_SOURCE_TYPES = {
   pin: 'pin',
