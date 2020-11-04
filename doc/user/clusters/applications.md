@@ -1557,6 +1557,19 @@ at least 2 people from the
 
 Logs produced by pods running **GitLab Managed Apps** can be browsed using [**Log Explorer**](../project/clusters/kubernetes_pod_logs.md).
 
+## Enable HSTS
+
+You can add HTTP Strict Transport Security header using a [customized Helm chart value](../../topics/autodevops/customize.html#customize-values-for-helm-chart):
+```ingress:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/hsts-max-age: 31536000
+```
+
+This will deploy an Ingress resource that has the right annotations to setup a host specific hsts header.
+
+
 ## Upgrading applications
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24789) in GitLab 11.8.
