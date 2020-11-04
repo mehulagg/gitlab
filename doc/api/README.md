@@ -623,7 +623,7 @@ regarding which field to use, see the documentation for the specific resource.
 ## Data validation and error reporting
 
 When working with the API you may encounter validation errors, in which case
-the API will return an HTTP `400` status.
+the API returns an HTTP `400` error.
 
 Such errors appear in the following cases:
 
