@@ -1570,6 +1570,7 @@ HSTS header:
     kubernetes.io/ingress.class: "nginx"
     nginx.org/hsts-max-age: 31536000
 ```
+
 ## Upgrading applications
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24789) in GitLab 11.8.
