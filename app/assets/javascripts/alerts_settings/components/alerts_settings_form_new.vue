@@ -145,26 +145,26 @@ export default {
   watch: {
     currentIntegration(val) {
       if (val === null) {
-        return this.onReset();
+        return this.reset();
       }
       this.selectedIntegration = val.type;
       this.active = val.active;
-      return this.onIntegrationTypeSelect();
+      return this.integrationTypeSelect();
     },
   },
   methods: {
-    onIntegrationTypeSelect() {
+    integrationTypeSelect() {
       if (this.selectedIntegration === integrationTypesNew[0].value) {
         this.formVisible = false;
       } else {
         this.formVisible = true;
       }
     },
-    onSubmitWithTestPayload() {
+    submitWithTestPayload() {
       // TODO: Test payload before saving via GraphQL
-      this.onSubmit();
+      this.submit();
     },
-    onSubmit() {
+    submit() {
       const { name, apiUrl } = this.integrationForm;
       const variables =
         this.selectedIntegration === this.$options.typeSet.http
@@ -178,24 +178,24 @@ export default {
 
       return this.$emit('create-new-integration', integrationPayload);
     },
-    onReset() {
+    reset() {
       this.selectedIntegration = integrationTypesNew[0].value;
-      this.onIntegrationTypeSelect();
+      this.integrationTypeSelect();
 
       if (this.currentIntegration) {
         return this.$emit('clear-current-integration');
       }
 
-      return this.onResetFormValues();
+      return this.resetFormValues();
     },
-    onResetFormValues() {
+    resetFormValues() {
       this.integrationForm.name = '';
       this.integrationForm.apiUrl = '';
       this.active = false;
       this.integrationForm.integrationTestPayload.error = null;
       this.integrationForm.integrationTestPayload.json = '';
     },
-    onResetAuthKey() {
+    resetAuthKey() {
       if (!this.currentIntegration) {
         return;
       }
@@ -222,7 +222,7 @@ export default {
 </script>
 
 <template>
-  <gl-form class="gl-mt-6" @submit.prevent="onSubmit" @reset.prevent="onReset">
+  <gl-form class="gl-mt-6" @submit.prevent="submit" @reset.prevent="reset">
     <h5 class="gl-font-lg gl-my-5">{{ s__('AlertSettings|Add new integrations') }}</h5>
 
     <gl-form-group
@@ -234,7 +234,7 @@ export default {
         v-model="selectedIntegration"
         :disabled="currentIntegration !== null"
         :options="options"
-        @change="onIntegrationTypeSelect"
+        @change="integrationTypeSelect"
       />
 
       <alert-settings-form-help-block
@@ -328,7 +328,7 @@ export default {
             :title="$options.i18n.integrationFormSteps.step3.reset"
             :ok-title="$options.i18n.integrationFormSteps.step3.reset"
             ok-variant="danger"
-            @ok="onResetAuthKey"
+            @ok="resetAuthKey"
           >
             {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
           </gl-modal>
@@ -374,7 +374,7 @@ export default {
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"
-          @click="onSubmitWithTestPayload"
+          @click="submitWithTestPayload"
           >{{ s__('AlertSettings|Save and test payload') }}</gl-button
         >
         <gl-button
