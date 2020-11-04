@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '/Users/gosia/gitlab-development-kit/gitlab/db/post_migrate/20201104124300_ensure_namespace_settings_creation.rb')
+require Rails.root.join('db', 'post_migrate', '20201104124300_ensure_namespace_settings_creation.rb')
 
 RSpec.describe EnsureNamespaceSettingsCreation do
   context 'when there are namespaces without namespace settings' do
