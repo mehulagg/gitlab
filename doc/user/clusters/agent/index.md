@@ -441,3 +441,11 @@ This error will be shown in KAS pod logs if the path to the configuration projec
 
 You may see similar errors if your manifest.yaml file is malformed, and kubernetes cannot create specified objects. Make sure that
 your yaml file is valid. You may try using it to create objects in Kubernetes directly to troubleshoot if.
+
+### Error while dialing failed to WebSocket dial: failed to send handshake request
+
+```plaintext
+{"level":"warn","time":"2020-10-30T09:50:51.173Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent\\\": net/http: HTTP/1.x transport connection broken: malformed HTTP response \\\"\\\\x00\\\\x00\\\\x06\\\\x04\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x05\\\\x00\\\\x00@\\\\x00\\\"\""}
+
+You may see such error if you configured `wss` as `kas-address` on the agent side but KAS on the server side is not available via `wss`.
+To fix it, you need to make sure that the same schemes are configured on both sides.
