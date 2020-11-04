@@ -37,7 +37,10 @@ export default {
 <template>
   <gl-table :items="states" :fields="fields" data-testid="terraform-states-table">
     <template #cell(name)="{ item }">
-      <p class="gl-font-weight-bold gl-m-0 gl-text-gray-900">
+      <p
+        class="gl-font-weight-bold gl-m-0 gl-text-gray-900"
+        data-testid="terraform-states-table-name"
+      >
         {{ item.name }}
 
         <gl-badge v-if="item.lockedAt">
@@ -48,11 +51,13 @@ export default {
     </template>
 
     <template #cell(updated)="{ item }">
-      <gl-sprintf :message="s__('Terraform|updated %{timeStart}time%{timeEnd}')">
-        <template #time>
-          <time-ago-tooltip :time="item.updatedAt" />
-        </template>
-      </gl-sprintf>
+      <p class="gl-m-0" data-testid="terraform-states-table-updated">
+        <gl-sprintf :message="s__('Terraform|updated %{timeStart}time%{timeEnd}')">
+          <template #time>
+            <time-ago-tooltip :time="item.updatedAt" />
+          </template>
+        </gl-sprintf>
+      </p>
     </template>
   </gl-table>
 </template>
