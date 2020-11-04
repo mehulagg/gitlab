@@ -282,6 +282,7 @@
 ####################
 .cache-repo:rules:
   rules:
+    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "276220-consider-making-the-ci_pre_clone_script-step-faster"'
     - <<: *if-cache-credentials-schedule
       allow_failure: true
 

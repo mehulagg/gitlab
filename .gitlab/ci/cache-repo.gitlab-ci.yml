@@ -27,10 +27,14 @@ cache-repo:
   script:
     - cd ..
     - rm -rf $CI_PROJECT_NAME
-    - git clone --progress $CI_REPOSITORY_URL $CI_PROJECT_NAME
+    - today=$(date +%Y-%m-%d)
+    - year=$(date +%Y)
+    - last_year=`expr $year - 1`
+    - one_year_ago=$(echo $today | sed "s/$year/$last_year/")
+    - git clone --progress --no-checkout --shallow-since=$one_year_ago $CI_REPOSITORY_URL $CI_PROJECT_NAME
     - cd $CI_PROJECT_NAME
     - gcloud auth activate-service-account --key-file=$CI_REPO_CACHE_CREDENTIALS
     - git remote rm origin
     - tar cf $TAR_FILENAME .
     - gzip $TAR_FILENAME
-    - gsutil cp $TAR_FILENAME.gz gs://gitlab-ci-git-repo-cache/project-$CI_PROJECT_ID/gitlab-master.tar.gz
+    - gsutil cp $TAR_FILENAME.gz gs://gitlab-ci-git-repo-cache/project-$CI_PROJECT_ID/gitlab-master-shallow.tar.gz
