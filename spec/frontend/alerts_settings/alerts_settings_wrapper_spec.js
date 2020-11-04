@@ -327,25 +327,11 @@ describe('AlertsSettingsWrapper', () => {
       await waitForPromises();
       expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
     });
-
-    it('shows an error alert when integration test payload fails ', async () => {
-      createComponent({
-        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true } },
-        loading: false,
-      });
-
-      wrapper.find(AlertsSettingsFormNew).vm.$emit('test-payload-failure');
-
-      await waitForPromises();
-      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
-      expect(createFlash).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('with mocked Apollo client', () => {
     it('has a selection of integrations loaded via the getIntegrationsQuery', async () => {
-      createComponentWithApollo();
+      createComponentWithApollo({});
 
       await jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
@@ -354,7 +340,7 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('calls a mutation with correct parameters and destroys a integration', async () => {
-      createComponentWithApollo();
+      createComponentWithApollo({});
 
       await destroyHttpIntegration(wrapper);
 
@@ -372,11 +358,9 @@ describe('AlertsSettingsWrapper', () => {
 
       await destroyHttpIntegration(wrapper);
 
-      await wrapper.vm.$nextTick(); // kick off the DOM update
-      await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-      await wrapper.vm.$nextTick(); // kick off the DOM update for flash
-
-      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
+      expect(createFlash).toHaveBeenCalledTimes(1);
     });
   });
 });
