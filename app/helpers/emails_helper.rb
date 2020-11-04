@@ -214,6 +214,26 @@ module EmailsHelper
     end
   end
 
+  def user_access_request_text(user, format: nil)
+    url = Gitlab.config.gitlab.url
+
+    case format
+    when :html
+      link_to = generate_link(url, url).html_safe
+      _('%{username} has asked for a GitLab account on your instance %{link_to}:').html_safe % { username: sanitize_name(user.name), link_to: link_to }
+    else
+      _('%{username} has asked for a GitLab account on your instance %{link_to}:') % { username: sanitize_name(user.name), link_to: url }
+    end
+  end
+
+  def user_access_request_link(format: nil)
+    url = Gitlab.config.gitlab.url
+
+    case format
+    when :html
+      link_to = generate_link(url, url).html_safe
+  end
+
   def contact_your_administrator_text
     _('Please contact your administrator with any questions.')
   end

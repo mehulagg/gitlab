@@ -1,0 +1,10 @@
+#content
+  = email_default_heading("Hello, #{@resource.name}!")
+  %p
+    = user_access_request_text(@resource, format: :html)
+  %p
+    Username: #{@resource.username}
+  %p
+    Email: #{@resource.email}
+  #cta
+    = link_to('Unlock account', unlock_url(@resource, unlock_token: @token))

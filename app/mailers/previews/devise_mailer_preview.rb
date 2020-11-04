@@ -24,6 +24,12 @@ class DeviseMailerPreview < ActionMailer::Preview
     DeviseMailer.password_change(unsaved_user, {})
   end
 
+  def user_access_request
+    admin = User.admins.first
+
+    DeviseMailer.user_access_request(admin, unsaved_user, {})
+  end
+
   private
 
   def unsaved_user

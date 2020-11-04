@@ -64,4 +64,31 @@ RSpec.describe DeviseMailer do
       is_expected.to have_body_text /#{Gitlab.config.gitlab.url}/
     end
   end
+
+  describe '#user_access_request' do
+    subject { described_class.user_access_request(admin, user) }
+
+    let_it_be(:admin) { create(:user, :admin) }
+    let_it_be(:user) { create(:user) }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
+
+    it 'is sent to the admin' do
+      is_expected.to deliver_to admin.email
+    end
+
+    it 'has the correct subject' do
+      is_expected.to have_subject /^GitLab Account Request$/i
+    end
+
+    it 'includes the correct content' do
+      is_expected.to have_body_text /#{user.name} has asked for a GitLab account on your instance/
+    end
+
+    it 'includes a link to GitLab' do
+      is_expected.to have_body_text /#{Gitlab.config.gitlab.url}/
+    end
+  end
 end

@@ -53,6 +53,10 @@ RSpec.describe RegistrationsController do
             .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator.')
         end
 
+        it 'emails the admin the access request' do
+          expect { subject }.to have_enqueued_mail(DeviseMailer, :user_access_request)
+        end
+
         context 'email confirmation' do
           context 'when `send_user_confirmation_email` is true' do
             before do
