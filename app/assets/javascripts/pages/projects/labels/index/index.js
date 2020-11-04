@@ -3,10 +3,11 @@ import Translate from '~/vue_shared/translate';
 import initLabels from '~/init_labels';
 import eventHub from '../event_hub';
 import PromoteLabelModal from '../components/promote_label_modal.vue';
+import DeleteLabelModal from '../components/delete_label_modal.vue';
 
 Vue.use(Translate);
 
-const initLabelIndex = () => {
+const initLabelPromotion = () => {
   initLabels();
 
   const onRequestFinished = ({ labelUrl, successful }) => {
@@ -78,4 +79,46 @@ const initLabelIndex = () => {
   });
 };
 
-document.addEventListener('DOMContentLoaded', initLabelIndex);
+const initLabelDeletionModal = () => {
+  const deleteLabelButtons = document.querySelectorAll('.js-delete-project-label-button');
+
+  return new Vue({
+    el: '#js-delete-label-modal',
+    data() {
+      return {
+        modalProps: {
+          deleteLabelPath: '',
+          labelName: '',
+          subjectName: '',
+        },
+      };
+    },
+    mounted() {
+      deleteLabelButtons.forEach(button => {
+        button.removeAttribute('disabled');
+        button.addEventListener('click', () => {
+          this.$root.$emit('bv::show::modal', 'delete-label-modal');
+
+          this.setModalProps({
+            labelName: button.dataset.labelName,
+            subjectName: button.dataset.subjectName,
+            deleteLabelPath: button.dataset.deleteLabelPath,
+          });
+        });
+      });
+    },
+    methods: {
+      setModalProps(modalProps) {
+        this.modalProps = modalProps;
+      },
+    },
+    render(createElement) {
+      return createElement(DeleteLabelModal, {
+        props: this.modalProps,
+      });
+    },
+  });
+};
+
+initLabelPromotion();
+initLabelDeletionModal();
