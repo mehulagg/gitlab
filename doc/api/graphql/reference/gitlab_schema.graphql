@@ -10067,7 +10067,7 @@ input IssueMoveListInput {
   """
   Global ID of the board that the issue is in
   """
-  boardId: ID!
+  boardId: BoardID!
 
   """
   A unique identifier for the client performing the mutation.

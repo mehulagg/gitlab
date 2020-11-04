@@ -1,0 +1,5 @@
+---
+title: Update GraphQL issueMoveList mutation board id to be more type-specific
+merge_request: 46881
+author:
+type: changed

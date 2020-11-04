@@ -6,7 +6,7 @@ module Mutations
       class IssueMoveList < Mutations::Issues::Base
         graphql_name 'IssueMoveList'
 
-        argument :board_id, GraphQL::ID_TYPE,
+        argument :board_id, Types::GlobalIDType[::Board],
                   required: true,
                   loads: Types::BoardType,
                   description: 'Global ID of the board that the issue is in'
@@ -19,19 +19,19 @@ module Mutations
                   required: true,
                   description: 'IID of the issue to mutate'
 
-        argument :from_list_id, GraphQL::ID_TYPE,
+        argument :from_list_id, GraphQL::ID_TYPE, # rubocop: disable Graphql/IDType
                   required: false,
                   description: 'ID of the board list that the issue will be moved from'
 
-        argument :to_list_id, GraphQL::ID_TYPE,
+        argument :to_list_id, GraphQL::ID_TYPE, # rubocop: disable Graphql/IDType
                   required: false,
                   description: 'ID of the board list that the issue will be moved to'
 
-        argument :move_before_id, GraphQL::ID_TYPE,
+        argument :move_before_id, GraphQL::ID_TYPE, # rubocop: disable Graphql/IDType
                   required: false,
                   description: 'ID of issue that should be placed before the current issue'
 
-        argument :move_after_id, GraphQL::ID_TYPE,
+        argument :move_after_id, GraphQL::ID_TYPE, # rubocop: disable Graphql/IDType
                   required: false,
                   description: 'ID of issue that should be placed after the current issue'
 

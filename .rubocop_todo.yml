@@ -1165,13 +1165,13 @@ RSpec/TimecopTravel:
     - 'spec/workers/concerns/reenqueuer_spec.rb'
     - 'spec/lib/gitlab/analytics/cycle_analytics/median_spec.rb'
 
-# Offense count: 21
+# Offense count: 20
 Graphql/IDType:
   Exclude:
     - 'ee/app/graphql/ee/mutations/issues/update.rb'
     - 'ee/app/graphql/mutations/iterations/update.rb'
     - 'ee/app/graphql/resolvers/iterations_resolver.rb'
-    - 'app/graphql/mutations/boards/issues/issue_move_list.rb'
+    - 'app/graphql/mutations/discussions/toggle_resolve.rb'
     - 'app/graphql/mutations/issues/update.rb'
     - 'app/graphql/mutations/metrics/dashboard/annotations/delete.rb'
     - 'app/graphql/mutations/snippets/destroy.rb'
