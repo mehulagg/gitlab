@@ -308,7 +308,7 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('shows error alert when integration creation fails ', async () => {
-      const errorMsg = 'Something went wrong';
+      const errorMsg = 'The integration could not be added. Please try again.';
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -324,7 +324,7 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('shows error alert when integration token reset fails ', () => {
-      const errorMsg = 'Something went wrong';
+      const errorMsg = 'The integration token could not be reset. Please try again.';
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
