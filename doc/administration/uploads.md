@@ -39,11 +39,8 @@ Feature.disable(:upload_middleware_jwt_params_handler)
 
 ## Using local storage
 
-NOTE: **Note:**
-This is the default configuration
-
-To change the location where the uploads are stored locally, follow the steps
-below.
+This is the default configuration. To change the location where the uploads are
+stored locally, follow the steps below.
 
 **In Omnibus installations:**
 
@@ -92,7 +89,6 @@ This configuration relies on valid AWS credentials to be configured already.
 
 [Read more about using object storage with GitLab](object_storage.md).
 
-NOTE: **Note:**
 We recommend using the [consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration). The following instructions apply to the original configuration format.
 
 ## Object Storage Settings
@@ -131,7 +127,6 @@ _The uploads are stored by default in
    }
    ```
 
-   NOTE: **Note:**
    If you are using AWS IAM profiles, be sure to omit the AWS access key and secret access key/value pairs.
 
    ```ruby
