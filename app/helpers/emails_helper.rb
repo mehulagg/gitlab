@@ -215,15 +215,9 @@ module EmailsHelper
   end
 
   def user_access_request_text(user, format: nil)
-    url = Gitlab.config.gitlab.url
+    gitlab_host = Gitlab.config.gitlab.host
 
-    case format
-    when :html
-      link_to = generate_link(url, url).html_safe
-      _('%{username} has asked for a GitLab account on your instance %{link_to}:').html_safe % { username: sanitize_name(user.name), link_to: link_to }
-    else
-      _('%{username} has asked for a GitLab account on your instance %{link_to}:') % { username: sanitize_name(user.name), link_to: url }
-    end
+    _('%{username} has asked for a GitLab account on your instance %{host}:') % { username: sanitize_name(user.name), host: gitlab_host }
   end
 
   def user_access_request_link(format: nil)
@@ -231,7 +225,7 @@ module EmailsHelper
 
     case format
     when :html
-      link_to = generate_link("", url).html_safe
+      link_to = generate_link("here", url).html_safe
       _('Click %{link_to} to approve or deny this request.').html_safe % { link_to: link_to }
     else
       _('Click %{link_to} to approve or deny this request.') % { link_to: url }
