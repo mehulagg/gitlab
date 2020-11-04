@@ -27,7 +27,7 @@ class Explore::ProjectsController < Explore::ApplicationController
       format.html
       format.json do
         render json: {
-          html: view_to_html_string("explore/projects/_projects", projects: @projects)
+          html: view_to_html_string("explore/projects/_projects", projects: @projects, explore_page: true)
         }
       end
     end
@@ -41,7 +41,7 @@ class Explore::ProjectsController < Explore::ApplicationController
       format.html
       format.json do
         render json: {
-          html: view_to_html_string("explore/projects/_projects", projects: @projects)
+          html: view_to_html_string("explore/projects/_projects", projects: @projects, explore_page: true)
         }
       end
     end
@@ -55,7 +55,7 @@ class Explore::ProjectsController < Explore::ApplicationController
       format.html
       format.json do
         render json: {
-          html: view_to_html_string("explore/projects/_projects", projects: @projects)
+          html: view_to_html_string("explore/projects/_projects", projects: @projects, explore_page: true)
         }
       end
     end
