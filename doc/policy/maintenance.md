@@ -149,19 +149,6 @@ This decision is made on a case-by-case basis.
 
 ## More information
 
-Check [our release posts](https://about.gitlab.com/releases/categories/releases/).
-
-Each month, we publish either a major or minor release of GitLab. At the end
-of those release posts, there are three sections to look for: Deprecations, Removals, and Important notes on upgrading. These will include:
-
-- Steps you need to perform as part of an upgrade.
-  For example [8.12](https://about.gitlab.com/releases/2016/09/22/gitlab-8-12-released/#upgrade-barometer)
-  required the Elasticsearch index to be recreated. Any older version of GitLab upgrading to 8.12 or higher would require this.
-- Changes to the versions of software we support such as
-  [ceasing support for IE11 in GitLab 13](https://about.gitlab.com/releases/2020/03/22/gitlab-12-9-released/#ending-support-for-internet-explorer-11).
-
-You should check all the major and minor versions you're passing over.
-
 More information about the release procedures can be found in our
 [release documentation](https://gitlab.com/gitlab-org/release/docs). You may also want to read our
 [Responsible Disclosure Policy](https://about.gitlab.com/security/disclosure/).

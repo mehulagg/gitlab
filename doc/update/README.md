@@ -12,6 +12,13 @@ GitLab version is, if you're upgrading to a major version, etc.
 
 Make sure to read the whole page as it contains information related to every upgrade method.
 
+Our [maintenance policy documentation](../policy/maintenance.md)
+has additional information about upgrading, including:
+- How to interpret GitLab product versioning.
+- Recommendations on the what release to run.
+- How we use patch and security patch releases.
+- When we backport code changes.
+
 ## Upgrade based on installation method
 
 Depending on the installation method and your GitLab version, there are multiple
@@ -120,9 +127,9 @@ pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_cla
 
 ## Upgrade paths
 
-The following table shows the recommended upgrade paths.
+The following table shows the supported upgrade paths.
 
-| Target version | Your version | Recommended upgrade path | Note |
+| Target version | Your version | Supported upgrade path | Note |
 | --------------------- | ------------ | ------------------------ | ---- |
 | `13.4.3`                | `12.9.2`      | `12.9.2` -> `12.10.14` -> `13.0.14` -> `13.4.3` | Two intermediate versions are required: the final `12.10` release, plus `13.0`. |
 | `13.2.10`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.2.10` | Five intermediate versions are required: the final `11.11`, `12.0`, `12.1` and `12.10` releases, plus `13.0`. |
@@ -169,7 +176,7 @@ It is suggested to upgrade to the latest available *minor* version within
 your major version before proceeding to the next major version.
 Doing this will address any backward-incompatible changes or deprecations
 to help ensure a successful upgrade to the next major release.
-Follow the upgrade recommendations to identify a [supported upgrade path](#upgrade-paths).
+Identify a [supported upgrade path](#upgrade-paths).
 
 More significant migrations may occur during major release upgrades. To ensure these are successful:
 
@@ -285,6 +292,19 @@ Edition, you can follow [this guide](../downgrade_ee_to_ce/README.md) to make th
 possible.
 
 ## Version specific upgrading instructions
+
+Check [our release posts](https://about.gitlab.com/releases/categories/releases/).
+
+Each month, we publish either a major or minor release of GitLab. At the end
+of those release posts, there are three sections to look for: Deprecations, Removals, and Important notes on upgrading. These will include:
+
+- Steps you need to perform as part of an upgrade.
+  For example [8.12](https://about.gitlab.com/releases/2016/09/22/gitlab-8-12-released/#upgrade-barometer)
+  required the Elasticsearch index to be recreated. Any older version of GitLab upgrading to 8.12 or higher would require this.
+- Changes to the versions of software we support such as
+  [ceasing support for IE11 in GitLab 13](https://about.gitlab.com/releases/2020/03/22/gitlab-12-9-released/#ending-support-for-internet-explorer-11).
+
+You should check all the major and minor versions you're passing over.
 
 ### 13.6.0
 
