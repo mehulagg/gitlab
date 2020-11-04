@@ -121,6 +121,7 @@ class License < ApplicationRecord
     unprotection_restrictions
     ci_project_subscriptions
     incident_timeline_view
+    multi_integrations
   ]
   EEP_FEATURES.freeze
 
