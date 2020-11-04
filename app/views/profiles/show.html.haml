@@ -7,6 +7,9 @@
   = form_errors(@user)
 
   .row
+    %pre
+      = @user.status.to_s
+  .row
     .col-lg-4.profile-settings-sidebar
       %h4.gl-mt-0
         = s_("Profiles|Public Avatar")
@@ -68,11 +71,8 @@
           prepend: emoji_button,
           append: reset_message_button,
           placeholder: s_("Profiles|What's your status?")
-
-      .checkbox-icon-inline-wrapper
-        - busy_label = capture do
-          = s_("Profiles|Busy")
-        = f.check_box :busy, label: busy_label, inline: true, wrapper_class: 'gl-mr-0'
+        .checkbox-icon-inline-wrapper
+          = status_form.check_box :availability, id: 'js-status-availability-field', label: s_("Profiles|Busy"), wrapper_class: 'gl-mr-0', checked: @user.status && @user.status.availability == 'busy' ? 'checked' : ""
   - if Feature.enabled?(:user_time_settings)
     %hr
     .row.user-time-preferences
