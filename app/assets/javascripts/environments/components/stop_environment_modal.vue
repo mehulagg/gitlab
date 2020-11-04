@@ -1,7 +1,6 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
-import { GlSprintf, GlTooltipDirective } from '@gitlab/ui';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import { GlSprintf, GlTooltipDirective, GlModal } from '@gitlab/ui';
 import eventHub from '../event_hub';
 
 export default {
@@ -9,7 +8,7 @@ export default {
   name: 'StopEnvironmentModal',
 
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
     GlSprintf,
   },
 
@@ -34,7 +33,7 @@ export default {
 
 <template>
   <gl-modal
-    :id="$options.id"
+    :modal-id="$options.id"
     :footer-primary-button-text="s__('Environments|Stop environment')"
     footer-primary-button-variant="danger"
     @submit="onSubmit"
