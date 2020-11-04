@@ -11,7 +11,7 @@ RSpec.describe 'Projects > Show > Schema Markup' do
 
   it 'shows SoftwareSourceCode structured markup' do
     visit project_path(project)
-    wait_for_requests
+    wait_for_all_requests
 
     aggregate_failures do
       expect(page).to have_selector('[itemscope][itemtype="http://schema.org/SoftwareSourceCode"]')
