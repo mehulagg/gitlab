@@ -412,7 +412,7 @@ w
 
 1. Track events using JavaScript/Vue API helper which calls the API above
 
-   Example usage for an existing event already defined in  [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml):
+   Example usage for an existing event already defined in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml):
 
    Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to be able to track events
 
@@ -444,6 +444,16 @@ Recommendations:
   metric's name and week of the year, `2020-33-{metric_name}`.
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
   adding new metrics.
+
+##### Disable Redis HLL tracking
+
+Events are tracked behind feature flags due to concerns for Redis performance and scalability. The coresponding feature for events are in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml)
+
+In order to disable tracking for specific event, we can [disable the corresponding feature](../feature_flags.md).
+
+```shell
+/chatops run feature set <feature_name> false
+```
 
 ##### Known events in usage data payload
 
