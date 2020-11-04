@@ -3,11 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects > Show > Schema Markup' do
-  let_it_be(:project) { create(:project, :repository, :public, description: 'foobar ') }
+  let_it_be(:project) do
+    create(:project, :repository, :public, :with_avatar, description: 'foobar', tag_list: 'tag1, tag2').tap do |p|
+      ::Projects::DetectRepositoryLanguagesService.new(p).execute
+    end
+  end
 
   it 'shows SoftwareSourceCode structured markup' do
-    allow(project).to receive(:tags).and_return(['v1.0.0', 'v2.0.0'])
     visit project_path(project)
+    wait_for_requests
 
     aggregate_failures do
       expect(page).to have_selector('[itemscope][itemtype="http://schema.org/SoftwareSourceCode"]')
