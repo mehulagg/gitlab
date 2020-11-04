@@ -53,7 +53,7 @@ export default {
     @primary="onSubmit"
   >
     <template #modal-title>
-      <gl-sprintf :message="s__('Environments|Stopping%{environment-name}')">
+      <gl-sprintf :message="s__('Environments|Stopping %{environment-name}')">
         <template #environment-name>
           <span
             v-gl-tooltip
