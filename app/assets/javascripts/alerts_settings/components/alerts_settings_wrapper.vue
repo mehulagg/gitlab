@@ -90,7 +90,7 @@ export default {
     },
   },
   methods: {
-    onCreateNewIntegration({ type, variables }) {
+    createNewIntegration({ type, variables }) {
       this.isUpdating = true;
       this.$apollo
         .mutate({
@@ -157,12 +157,14 @@ export default {
         data,
       });
     },
-    onUpdateIntegration({ type, variables }) {
+    updateIntegration({ type, variables }) {
       this.isUpdating = true;
       this.$apollo
         .mutate({
           mutation:
-            type === 'HTTP' ? updateHttpIntegrationMutation : updatePrometheusIntegrationMutation,
+            type === this.$options.typeSet.http
+              ? updateHttpIntegrationMutation
+              : updatePrometheusIntegrationMutation,
           variables: {
             ...variables,
             id: this.currentIntegration.id,
@@ -186,11 +188,14 @@ export default {
           this.isUpdating = false;
         });
     },
-    onResetToken({ type, variables }) {
+    resetToken({ type, variables }) {
       this.isUpdating = true;
       this.$apollo
         .mutate({
-          mutation: type === 'HTTP' ? resetHttpTokenMutation : resetPrometheusTokenMutation,
+          mutation:
+            type === this.$options.typeSet.http
+              ? resetHttpTokenMutation
+              : resetPrometheusTokenMutation,
           variables,
         })
         .then(
@@ -214,10 +219,10 @@ export default {
           this.isUpdating = false;
         });
     },
-    onEditIntegration({ id }) {
+    editIntegration({ id }) {
       this.currentIntegration = this.integrations.list.find(integration => integration.id === id);
     },
-    onDeleteIntegration() {
+    deleteIntegration() {
       // TODO, handle delete via GraphQL
     },
   },
@@ -229,16 +234,16 @@ export default {
     <integrations-list
       :integrations="glFeatures.httpIntegrationsList ? integrations.list : intergrationsOptionsOld"
       :loading="loading"
-      @on-edit-integration="onEditIntegration"
-      @on-delete-integration="onDeleteIntegration"
+      @edit-integration="editIntegration"
+      @delete-integration="deleteIntegration"
     />
     <settings-form-new
       v-if="glFeatures.httpIntegrationsList"
       :loading="isUpdating"
       :current-integration="currentIntegration"
-      @on-create-new-integration="onCreateNewIntegration"
-      @on-update-integration="onUpdateIntegration"
-      @on-reset-token="onResetToken"
+      @create-new-integration="createNewIntegration"
+      @update-integration="updateIntegration"
+      @reset-token="resetToken"
     />
     <settings-form-old v-else />
   </div>

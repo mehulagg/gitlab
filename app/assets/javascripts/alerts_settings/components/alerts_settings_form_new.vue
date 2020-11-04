@@ -170,10 +170,10 @@ export default {
       const integrationPayload = { type: this.selectedIntegration, variables };
 
       if (this.currentIntegration) {
-        return this.$emit('on-update-integration', integrationPayload);
+        return this.$emit('update-integration', integrationPayload);
       }
 
-      return this.$emit('on-create-new-integration', integrationPayload);
+      return this.$emit('create-new-integration', integrationPayload);
     },
     onReset() {
       this.integrationForm.name = '';
@@ -185,7 +185,7 @@ export default {
       this.onIntegrationTypeSelect();
     },
     onResetAuthKey() {
-      this.$emit('on-reset-token', {
+      this.$emit('reset-token', {
         type: this.selectedIntegration,
         variables: { id: this.currentIntegration.id },
       });
@@ -311,114 +311,6 @@ export default {
             @ok="onResetAuthKey"
           >
             {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
-          </gl-modal>
-        </div>
-      </gl-form-group>
-      <gl-form-group
-        id="test-integration"
-        :label="$options.i18n.integrationFormSteps.step4.label"
-        label-for="test-integration"
-        :invalid-feedback="integrationForm.integrationTestPayload.error"
-      >
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step4.help"
-          :link="generic.alertsUsageUrl"
-        />
-
-        <gl-form-textarea
-          id="test-integration"
-          v-model.trim="integrationForm.integrationTestPayload.json"
-          :disabled="!integrationForm.active"
-          :state="jsonIsValid"
-          :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
-          class="gl-my-4"
-          :debounce="$options.JSON_VALIDATE_DELAY"
-          rows="6"
-          max-rows="10"
-          @input="validateJson"
-        />
-      </gl-form-group>
-      <gl-form-group
-        id="integration-webhook"
-        :label="$options.i18n.integrationFormSteps.step3.label"
-        label-for="integration-webhook"
-      >
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step3.help"
-          link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
-        />
-
-        <gl-toggle
-          v-model="integrationForm.active"
-          :is-loading="loading"
-          :label="__('Active')"
-          class="gl-my-4 gl-font-weight-normal"
-        />
-
-        <div v-if="selectedIntegration === 'PROMETHEUS'" class="gl-my-4">
-          <span>
-            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
-          </span>
-
-          <gl-form-input
-            id="integration-apiUrl"
-            v-model="integrationForm.apiUrl"
-            type="text"
-            :placeholder="$options.targetPrometheusUrlPlaceholder"
-          />
-
-          <span class="gl-text-gray-400">
-            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
-          </span>
-        </div>
-
-        <div class="gl-my-4">
-          <span>
-            {{ s__('AlertSettings|Webhook URL') }}
-          </span>
-
-          <gl-form-input-group id="url" readonly :value="selectedIntegrationType.url">
-            <template #append>
-              <clipboard-button
-                :text="selectedIntegrationType.url || ''"
-                :title="__('Copy')"
-                class="gl-m-0!"
-              />
-            </template>
-          </gl-form-input-group>
-        </div>
-
-        <div class="gl-my-4">
-          <span>
-            {{ $options.i18n.integrationFormSteps.step3.info }}
-          </span>
-
-          <gl-form-input-group
-            id="authorization-key"
-            class="gl-mb-2"
-            readonly
-            :value="selectedIntegrationType.authKey"
-          >
-            <template #append>
-              <clipboard-button
-                :text="selectedIntegrationType.authKey || ''"
-                :title="__('Copy')"
-                class="gl-m-0!"
-              />
-            </template>
-          </gl-form-input-group>
-
-          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
-            $options.i18n.integrationFormSteps.step3.reset
-          }}</gl-button>
-          <gl-modal
-            modal-id="authKeyModal"
-            :title="$options.i18n.integrationFormSteps.step3.reset"
-            :ok-title="$options.i18n.integrationFormSteps.step3.reset"
-            ok-variant="danger"
-            @ok="() => {}"
-          >
-            {{ $options.i18n.integrationFormSteps.step3.reset }}
           </gl-modal>
         </div>
       </gl-form-group>
