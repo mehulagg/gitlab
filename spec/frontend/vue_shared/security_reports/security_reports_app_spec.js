@@ -5,7 +5,7 @@ import SecurityReportsApp from '~/vue_shared/security_reports/security_reports_a
 
 jest.mock('~/flash');
 
-describe('Grouped security reports app', () => {
+describe('Security reports app', () => {
   let wrapper;
   let mrTabsMock;
 
