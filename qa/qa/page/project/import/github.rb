@@ -69,7 +69,7 @@ module QA
           def wait_for_success
             # TODO: set reload:false and remove skip_finished_loading_check_on_refresh when
             # https://gitlab.com/gitlab-org/gitlab/-/issues/231542 is fixed
-            wait_until(max_duration: 60, sleep_interval: 5.0, reload: true, skip_finished_loading_check_on_refresh:true) do
+            wait_until(max_duration: 60, sleep_interval: 5.0, reload: true, skip_finished_loading_check_on_refresh: true) do
               page.has_content?('Done', wait: 1.0)
             end
           end
