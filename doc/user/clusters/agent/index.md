@@ -400,5 +400,44 @@ This basic GitOps example deploys NGINX:
 
 If you face any issues while using Kubernetes GitLab Agent, should be able to find any related errors in two places:
 
-- KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>
-- agent pod logs: you may tail them using `kubectl logs -f -l=app=gitlab-agent -n <YOUR-AGENT-NAMESPACE>
+- KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`
+- agent pod logs: you may tail them using `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>`
+
+### GitOps: failed to get project info
+
+You may see the error mentioned below in KAS pod logs:
+
+```plaintext
+{"level":"warn","time":"2020-10-30T08:37:26.123Z","msg":"GitOps: failed to get project info","agent_id":4,"project_id":"root/kas-manifest001","error":"error kind: 0; status: 404"}
+```
+
+It will be shown if the specified manifest project `root/kas-manifest001` does not exist or if a project is private. To fix it, make sure
+that the project exists and its visibility is set to public.
+
+### Transport: Error while dialing failed to WebSocket dial
+
+The error below may be found in the agent pod logs:
+
+```plaintext
+{"level":"warn","time":"2020-11-04T10:14:39.368Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://gitlab-kas:443/-/kubernetes-agent\\\": dial tcp: lookup gitlab-kas on 10.60.0.10:53: no such host\""}
+```
+
+It will be shown if there are some connectivity issues between the hostname/IP address specified as `kas-address` and your agent pod.
+To fix it, make sure that you specified the correct `kas-address` correctly. In most of the cases, it should be set to `wss://gitlab.host.tld:443/-/kubernetes-agent`.
+
+### configuration file not found
+
+```plaintext
+time="2020-10-29T04:44:14Z" level=warning msg="Config: failed to fetch" agent_id=2 error="configuration file not found: \".gitlab/agents/test-agent/config.yaml\
+```
+
+This error will be shown in KAS pod logs if the path to the configuration project was specified incorrectly of if the path to `config.yaml` is not valid.
+
+### ValidationError in agent pod logs
+
+```plaintext
+{"level":"info","time":"2020-10-30T08:56:54.329Z","msg":"Synced","project_id":"root/kas-manifest001","resource_key":"apps/Deployment/kas-test001/nginx-deployment","sync_result":"error validating data: [ValidationError(Deployment.metadata): unknown field \"replicas\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"selector\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"template\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]"}
+```
+
+You may see similar errors if your manifest.yaml file is malformed, and kubernetes cannot create specified objects. Make sure that
+your yaml file is valid. You may try using it to create objects in Kubernetes directly to troubleshoot if.
