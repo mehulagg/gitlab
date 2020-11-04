@@ -32,16 +32,15 @@ class RegistrationsController < Devise::RegistrationsController
       yield new_user if block_given?
     end
 
-    # Devise sets a flash message on both successful & failed signups,
-    # but we only want to show a message if the resource is blocked by a pending approval.
     if resource.blocked_pending_approval?
       User.admins.active.each do |admin|
         DeviseMailer.user_access_request(admin).deliver_later
       end
-    else
-      flash[:notice] = nil
     end
 
+    # Devise sets a flash message on both successful & failed signups,
+    # but we only want to show a message if the resource is blocked by a pending approval.
+    flash[:notice] = nil unless resource.blocked_pending_approval?
   rescue Gitlab::Access::AccessDeniedError
     redirect_to(new_user_session_path)
   end

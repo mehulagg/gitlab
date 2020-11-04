@@ -90,6 +90,10 @@ RSpec.describe RegistrationsController do
           expect(flash[:notice]).to be_nil
         end
 
+        it 'does not email the admin the access request' do
+          expect { subject }.not_to have_enqueued_mail(DeviseMailer, :user_access_request)
+        end
+
         context 'email confirmation' do
           context 'when `send_user_confirmation_email` is true' do
             before do
