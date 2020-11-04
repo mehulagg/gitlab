@@ -1,26 +1,24 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class Metric < ApplicationRecord
-    # include Gitlab::FileTypeDetection
+  class MetricImageUpload < ApplicationRecord
+    include Gitlab::FileTypeDetection
     include FileStoreMounter
 
-    # TODO tablename
-    self.table_name = 'metric_image_uploads'
-
-    # TODO external metrics?
     belongs_to :incident, class_name: 'Issue', foreign_key: 'issue_id', inverse_of: :metrics
 
-    # default_value_for(:file_store) { MetricImageUploader.default_store }
+    default_value_for(:file_store) { MetricImageUploader.default_store }
 
     mount_file_store_uploader MetricImageUploader
 
     validates :incident, presence: true
+    validates :file, presence: true
+    validate :validate_file_is_image
+    validates :url, length: { maximum: 255 }
 
-    def retrieve_upload
-      # TODO
-      # Upload.find_by(model: self, path: paths)
-    end
+    # def retrieve_upload(_identifier, paths)
+    #   Upload.find_by(model: self, path: paths)
+    # end
 
     private
 

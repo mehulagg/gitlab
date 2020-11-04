@@ -1,13 +1,25 @@
 # frozen_string_literal: true
 
 class AddIncidentMetricImages < ActiveRecord::Migration[6.0]
+  include Gitlab::Database::MigrationHelpers
+
   DOWNTIME = false
 
-  def change
+  disable_ddl_transaction!
+
+  def up
     create_table :metric_image_uploads do |t|
       t.references :issue, null: false, index: true, foreign_key: { on_delete: :cascade }
-      t.string :file, limit: 255
+      t.text :url, limit: 255
+      t.text :file, limit: 255
       t.integer :file_store, limit: 2
     end
+
+     add_text_limit(:metric_image_uploads, :url, 255)
+     add_text_limit(:metric_image_uploads, :file, 255)
+  end
+
+  def down
+    drop_table :metric_image_uploads
   end
 end

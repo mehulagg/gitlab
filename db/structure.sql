@@ -13739,6 +13739,7 @@ ALTER SEQUENCE merge_trains_id_seq OWNED BY merge_trains.id;
 CREATE TABLE metric_image_uploads (
     id bigint NOT NULL,
     issue_id bigint NOT NULL,
+    url character varying(255),
     file character varying(255),
     file_store smallint
 );

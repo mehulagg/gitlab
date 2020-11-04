@@ -18,6 +18,7 @@ class IssuablePolicy < BasePolicy
     enable :read_merge_request
     enable :update_merge_request
     enable :reopen_merge_request
+    enable :upload_metric
   end
 
   rule { locked & ~is_project_member }.policy do
