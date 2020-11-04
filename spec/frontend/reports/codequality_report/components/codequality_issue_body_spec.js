@@ -17,10 +17,10 @@ describe('code quality issue body issue body', () => {
     urlPath: '/Gemfile.lock#L22',
   };
 
-  const createComponent = (initialStatus, issue) => {
+  const createComponent = (initialStatus, issue = codequalityIssue) => {
     wrapper = shallowMount(component, {
       propsData: {
-        issue: issue || codequalityIssue,
+        issue,
         status: initialStatus,
       },
     });
@@ -47,8 +47,10 @@ describe('code quality issue body issue body', () => {
           severity,
         });
 
-        expect(findBadge().props('variant')).toBe(badgeVariant);
-        expect(findBadge().props('icon')).toBe(badgeIcon);
+        const badge = findBadge();
+
+        expect(badge.props('variant')).toBe(badgeVariant);
+        expect(badge.props('icon')).toBe(badgeIcon);
       },
     );
   });

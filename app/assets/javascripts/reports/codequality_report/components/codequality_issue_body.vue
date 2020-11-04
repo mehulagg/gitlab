@@ -42,7 +42,7 @@ export default {
     hasSeverity() {
       return Boolean(this.issue.severity) && Boolean(this.severityVariant);
     },
-    severity() {
+    severityLabel() {
       return capitalizeFirstCharacter(this.issue.severity);
     },
     severityBadgeClasses() {
@@ -67,7 +67,7 @@ export default {
         :class="severityBadgeClasses"
         :variant="severityVariant"
         :icon="severityIcon"
-        >{{ severity }}</gl-badge
+        >{{ severityLabel }}</gl-badge
       >
     </div>
     <div class="gl-flex-fill-1">
