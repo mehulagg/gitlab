@@ -9,9 +9,8 @@ import {
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-// Mocks will be removed when integrating with BE is ready
-// data format imost likely will differ but UI will not
-import gitlabFields from './mocks/gitlabFields.json';
+// currently all calls to BE are mocked but the format is pretty much defined (maybe some minor changes can happen)
+import gitlabFieldsMock from './mocks/gitlabFields.json';
 import parsedMapping from './mocks/parsedMapping.json';
 
 export const i18n = {
@@ -42,8 +41,13 @@ export default {
   },
   data() {
     return {
-      gitlabFields,
+      gitlabFields: this.gitlabAlertFields,
     };
+  },
+  inject: {
+    gitlabAlertFields: {
+      default: gitlabFieldsMock,
+    }
   },
   computed: {
     mappingData() {
@@ -63,12 +67,12 @@ export default {
   },
   methods: {
     setMapping(gitlabKey, mappingKey, valueKey) {
-      const fieldIndex = this.gitlabFields.findIndex(field => field.key === gitlabKey);
+      const fieldIndex = this.gitlabFields.findIndex(field => field.name === gitlabKey);
       const updatedField = { ...this.gitlabFields[fieldIndex], ...{ [valueKey]: mappingKey } };
       Vue.set(this.gitlabFields, fieldIndex, updatedField);
     },
     setSearchTerm(search = '', searchFieldKey, gitlabKey) {
-      const fieldIndex = this.gitlabFields.findIndex(field => field.key === gitlabKey);
+      const fieldIndex = this.gitlabFields.findIndex(field => field.name === gitlabKey);
       const updatedField = { ...this.gitlabFields[fieldIndex], ...{ [searchFieldKey]: search } };
       Vue.set(this.gitlabFields, fieldIndex, updatedField);
     },
@@ -80,9 +84,9 @@ export default {
     isSelected(fieldValue, mapping) {
       return fieldValue === mapping;
     },
-    selectedValue(key) {
+    selectedValue(name) {
       return (
-        parsedMapping.find(item => item.key === key)?.label || this.$options.i18n.makeSelection
+        parsedMapping.find(item => item.name === name)?.label || this.$options.i18n.makeSelection
       );
     },
   },
@@ -109,7 +113,7 @@ export default {
         />
       </h5>
     </div>
-    <div v-for="gitlabField in mappingData" :key="gitlabField.key" class="gl-display-table-row">
+    <div v-for="gitlabField in mappingData" :key="gitlabField.name" class="gl-display-table-row">
       <div class="gl-display-table-cell gl-py-3 gl-pr-3 w-30p">
         <gl-form-input
           disabled
@@ -130,13 +134,13 @@ export default {
           class="gl-w-full"
           :header-text="$options.i18n.selectMappingKey"
         >
-          <gl-search-box-by-type @input="setSearchTerm($event, 'searchTerm', gitlabField.key)" />
+          <gl-search-box-by-type @input="setSearchTerm($event, 'searchTerm', gitlabField.name)" />
           <gl-dropdown-item
             v-for="mappingField in filterFields(gitlabField.searchTerm, gitlabField.mappingFields)"
-            :key="`${mappingField.key}__mapping`"
-            :is-checked="isSelected(gitlabField.mapping, mappingField.key)"
+            :key="`${mappingField.name}__mapping`"
+            :is-checked="isSelected(gitlabField.mapping, mappingField.name)"
             is-check-item
-            @click="setMapping(gitlabField.key, mappingField.key, 'mapping')"
+            @click="setMapping(gitlabField.name, mappingField.name, 'mapping')"
           >
             {{ mappingField.label }}
           </gl-dropdown-item>
@@ -150,23 +154,23 @@ export default {
 
       <div class="gl-display-table-cell gl-py-3 w-30p">
         <gl-dropdown
-          v-if="gitlabField.hasFallback"
+          v-if="Boolean(gitlabField.numberOfFallbacks)"
           :text="selectedValue(gitlabField.fallback)"
           class="gl-w-full"
           :header-text="$options.i18n.selectMappingKey"
         >
           <gl-search-box-by-type
-            @input="setSearchTerm($event, 'fallbackSearchTerm', gitlabField.key)"
+            @input="setSearchTerm($event, 'fallbackSearchTerm', gitlabField.name)"
           />
           <gl-dropdown-item
             v-for="mappingField in filterFields(
               gitlabField.fallbackSearchTerm,
               gitlabField.mappingFields,
             )"
-            :key="`${mappingField.key}__fallback`"
-            :is-checked="isSelected(gitlabField.fallback, mappingField.key)"
+            :key="`${mappingField.name}__fallback`"
+            :is-checked="isSelected(gitlabField.fallback, mappingField.name)"
             is-check-item
-            @click="setMapping(gitlabField.key, mappingField.key, 'fallback')"
+            @click="setMapping(gitlabField.name, mappingField.name, 'fallback')"
           >
             {{ mappingField.label }}
           </gl-dropdown-item>

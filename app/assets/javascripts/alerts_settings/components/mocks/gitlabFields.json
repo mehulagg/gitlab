@@ -1,47 +1,47 @@
 [
   {
-    "key":"title",
+    "name":"title",
     "label":"Title",
     "type":"String",
-    "hasFallback": true
+    "numberOfFallbacks": 1
   },
   {
-    "key":"description",
+    "name":"description",
     "label":"Description",
     "type":"String"
   },
   {
-    "key":"startTime",
+    "name":"startTime",
     "label":"Start time",
     "type":"DateTime"
   },
   {
-    "key":"service",
+    "name":"service",
     "label":"Service",
     "type":"String"
   },
   {
-    "key":"monitoringTool",
+    "name":"monitoringTool",
     "label":"Monitoring tool",
     "type":"String"
   },
   {
-    "key":"hosts",
+    "name":"hosts",
     "label":"Hosts",
     "type":"String or Array"
   },
   {
-    "key":"severity",
+    "name":"severity",
     "label":"Severity",
     "type":"String"
   },
   {
-    "key":"fingerprint",
+    "name":"fingerprint",
     "label":"Fingerprint",
     "type":"String"
   },
   {
-    "key":"environment",
+    "name":"environment",
     "label":"Environment",
     "type":"String"
   }

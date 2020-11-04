@@ -29,6 +29,7 @@ export default el => {
     opsgenieMvcEnabled,
     opsgenieMvcTargetUrl,
     projectPath,
+    // gitlabAlertFields,
   } = el.dataset;
 
   const apolloProvider = new VueApollo({
@@ -70,6 +71,7 @@ export default el => {
         opsgenieMvcIsAvailable: parseBoolean(opsgenieMvcAvailable),
       },
       projectPath,
+      // gitlabAlertFields,
     },
     apolloProvider,
     components: {
