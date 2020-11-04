@@ -50,8 +50,8 @@ specification.
 
 The HTTP API is versioned using a single number, (currently _4_). This number
 symbolizes the major version number, as described by [SemVer](https://semver.org/).
-Because of this mean, backwards-incompatible changes require this version number
-to change. However, the minor version isn't explicit, allowing for a stable API
+Because of this, backwards-incompatible changes require this version number to
+change. However, the minor version isn't explicit, allowing for a stable API
 endpoint. This also means that new features can be added to the API in the same
 version number.
 
