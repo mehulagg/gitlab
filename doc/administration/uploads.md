@@ -40,12 +40,14 @@ Feature.disable(:upload_middleware_jwt_params_handler)
 ## Using local storage
 
 This is the default configuration. To change the location where the uploads are
-stored locally, follow the steps below.
+stored locally, use the steps in this section based on your installation method:
 
-**In Omnibus installations:**
+**In Omnibus GitLab installations:**
 
 NOTE: **Note:**
-For historical reasons, uploads are stored into a base directory, which by default is `uploads/-/system`. It is strongly discouraged to change this configuration option on an existing GitLab installation.
+For historical reasons, uploads are stored into a base directory, which by
+default is `uploads/-/system`. It's strongly discouraged to change this
+configuration option for an existing GitLab installation.
 
 _The uploads are stored by default in `/var/opt/gitlab/gitlab-rails/uploads`._
 
