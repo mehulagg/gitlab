@@ -395,3 +395,10 @@ This basic GitOps example deploys NGINX:
 - [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
 - [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
 - [Install GitLab Runner](https://gitlab.com/gitlab-examples/install-runner-via-k8s-agent)
+
+## Troubleshooting
+
+If you face any issues while using Kubernetes GitLab Agent, should be able to find any related errors in two places:
+
+- KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>
+- agent pod logs: you may tail them using `kubectl logs -f -l=app=gitlab-agent -n <YOUR-AGENT-NAMESPACE>
