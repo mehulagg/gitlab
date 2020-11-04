@@ -117,14 +117,14 @@ RSpec.describe OperationsHelper, :routing do
     end
 
     describe 'Multiple Integrations Support' do
+      before do
+        stub_licensed_features(multiple_alert_http_integrations: multi_integrations)
+      end
+
       context 'when available' do
         let(:multi_integrations) { true }
 
-        it do
-          is_expected.to include(
-            'multi_integrations' => 'true',
-          )
-        end
+        it { is_expected.to include('multi_integrations' => 'true') }
       end
 
       context 'when not available' do
@@ -134,7 +134,7 @@ RSpec.describe OperationsHelper, :routing do
 
         let(:multi_integrations) { false }
 
-        it { is_expected.not_to include(multi_integrations_key) }
+        it { is_expected.to include('multi_integrations' => 'false') }
       end
     end
   end

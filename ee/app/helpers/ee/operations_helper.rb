@@ -74,7 +74,7 @@ module EE
 
     def alert_management_multiple_integrations_data
       {
-        'multi_integrations' => 'true'
+        'multi_integrations' => @project.feature_available?(:multiple_alert_http_integrations).to_s
       }
     end
   end
