@@ -17,7 +17,6 @@ module IncidentManagement
         upload_metric
 
         success(metric: metric, issuable: issuable)
-
       rescue ::ActiveRecord::RecordInvalid => e
         error(e.message)
       end
@@ -27,7 +26,7 @@ module IncidentManagement
       private
 
       def upload_metric
-        @metric = IncidentManagement::MetricImageUpload.create(
+        @metric = IncidentManagement::MetricImageUpload.create!(
           incident: issuable,
           file: file,
           url: url
