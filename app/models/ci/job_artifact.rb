@@ -17,6 +17,7 @@ module Ci
     TEST_REPORT_FILE_TYPES = %w[junit].freeze
     COVERAGE_REPORT_FILE_TYPES = %w[cobertura].freeze
     ACCESSIBILITY_REPORT_FILE_TYPES = %w[accessibility].freeze
+    CODEQUALITY_REPORT_FILE_TYPES = %w[codequality].freeze
     NON_ERASABLE_FILE_TYPES = %w[trace].freeze
     TERRAFORM_REPORT_FILE_TYPES = %w[terraform].freeze
     UNSUPPORTED_FILE_TYPES = %i[license_management].freeze
@@ -151,6 +152,10 @@ module Ci
 
     scope :accessibility_reports, -> do
       with_file_types(ACCESSIBILITY_REPORT_FILE_TYPES)
+    end
+
+    scope :codequality_reports, -> do
+      with_file_types(CODEQUALITY_REPORT_FILE_TYPES)
     end
 
     scope :coverage_reports, -> do

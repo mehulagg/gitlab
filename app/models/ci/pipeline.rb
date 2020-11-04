@@ -932,6 +932,14 @@ module Ci
       end
     end
 
+    def codequality_reports
+      Gitlab::Ci::Reports::CodeQualityReports.new.tap do |codequality_reports|
+        latest_report_builds(Ci::JobArtifact.codequality_reports).each do |build|
+          build.collect_codequality_reports!(codequality_reports)
+        end
+      end
+    end
+
     def coverage_reports
       Gitlab::Ci::Reports::CoverageReports.new.tap do |coverage_reports|
         latest_report_builds(Ci::JobArtifact.coverage_reports).each do |build|

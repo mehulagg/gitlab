@@ -915,6 +915,14 @@ module Ci
       accessibility_report
     end
 
+    def collect_codequality_reports!(codequality_report)
+      each_report(Ci::JobArtifact::CODEQUALITY_REPORT_FILE_TYPES) do |file_type, blob|
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, codequality_report)
+      end
+
+      codequality_report
+    end
+
     def collect_coverage_reports!(coverage_report)
       each_report(Ci::JobArtifact::COVERAGE_REPORT_FILE_TYPES) do |file_type, blob|
         Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, coverage_report)
