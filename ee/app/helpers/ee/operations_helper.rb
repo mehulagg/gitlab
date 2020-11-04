@@ -73,8 +73,6 @@ module EE
     end
 
     def alert_management_multiple_integrations_data
-      return {} unless alerts_service.multi_integrations?
-
       {
         'multi_integrations' => 'true'
       }
