@@ -104,7 +104,7 @@ export default {
       this.integrationToDelete.id = id;
       this.integrationToDelete.name = name;
     },
-    onDeleteIntergration() {
+    deleteIntergration() {
       this.$emit('delete-integration', { id: this.integrationToDelete.id });
       this.integrationToDelete = { id: null, name: '' };
     },
@@ -174,7 +174,7 @@ export default {
       :title="__('Are you sure?')"
       :ok-title="s__('AlertSettings|Delete integration')"
       ok-variant="danger"
-      @ok="onDeleteIntergration"
+      @ok="deleteIntergration"
     >
       <gl-sprintf
         :message="
