@@ -40,7 +40,7 @@ describe('Grouped security reports app', () => {
     delete window.mrTabs;
   });
 
-  describe.each([SecurityReportsApp.reportTypes[0]])('given a report type %p', reportType => {
+  describe.each(SecurityReportsApp.reportTypes)('given a report type %p', reportType => {
     beforeEach(() => {
       window.mrTabs = { tabShown: jest.fn() };
       setupMockJobArtifact(reportType);
