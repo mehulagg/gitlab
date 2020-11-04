@@ -17,7 +17,6 @@ module Packages
     extend ActiveSupport::Concern
 
     included do
-      helpers ::API::Helpers::PackagesHelpers
       helpers ::API::Helpers::Packages::DependencyProxyHelpers
 
       before do
@@ -42,6 +41,8 @@ module Packages
 
           packages = ::Packages::Npm::PackageFinder.new(project, package_name)
                                                   .execute
+
+          not_found! if packages.empty?
 
           present ::Packages::Npm::PackagePresenter.new(package_name, packages),
                   with: ::API::Entities::NpmPackageTag
@@ -110,11 +111,15 @@ module Packages
       get '*package_name', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
         package_name = params[:package_name]
 
-        redirect_registry_request(project.blank?, :npm, package_name: package_name) do
+        packages = ::Packages::Npm::PackageFinder.new(project_or_nil, package_name)
+                                                 .execute
+
+        redirect_request = project_or_nil.blank? || packages.empty?
+
+        redirect_registry_request(redirect_request, :npm, package_name: package_name) do
           authorize_read_package!(project)
 
-          packages = ::Packages::Npm::PackageFinder
-            .new(project, package_name).execute
+          not_found!('Packages') if packages.empty?
 
           present ::Packages::Npm::PackagePresenter.new(package_name, packages),
             with: ::API::Entities::NpmPackage

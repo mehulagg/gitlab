@@ -25,6 +25,8 @@ module API
         package = project.packages.npm
           .by_name_and_file_name(params[:package_name], params[:file_name])
 
+        not_found!('Package') unless package
+
         package_file = ::Packages::PackageFileFinder
           .new(package, params[:file_name]).execute!
 
