@@ -231,6 +231,9 @@ danger-review:
   stage: test
   needs: []
   script:
+    - commits_count=$(git rev-list --count HEAD ^master)
+    # - '[[ $commits_count -le 20 ]] || (echo "Danger will not be able to perform its checks as the MR has more than 20 commits! Please squash your commits first." && exit 1)'
+    - '[[ $commits_count -le 20 ]] || echo "More than 20 commits!"'
     - source ./scripts/utils.sh
     - run_timed_command "retry yarn install --frozen-lockfile"
     - danger --fail-on-errors=true --verbose
