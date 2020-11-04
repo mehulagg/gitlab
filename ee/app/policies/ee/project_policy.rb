@@ -212,13 +212,6 @@ module EE
         enable :admin_vulnerability_issue_link
       end
 
-      rule { security_bot & auto_fix_enabled }.policy do
-        enable :developer_access
-        enable :create_merge_request_in
-        enable :create_merge_request_from
-        enable :read_project
-      end
-
       rule { issues_disabled & merge_requests_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:iteration))
       end
@@ -372,12 +365,6 @@ module EE
       return true unless ::Gitlab.com?
 
       project.namespace.feature_available_non_trial?(:resource_access_token)
-    end
-
-    def security_bot
-      return false unless user_is_user?
-
-      @user.security_bot?
     end
   end
 end
