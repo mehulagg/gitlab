@@ -9,7 +9,6 @@ import DeleteButton from '../components/delete_button.vue';
 import Design from '../components/list/item.vue';
 import DesignDestroyer from '../components/design_destroyer.vue';
 import DesignVersionDropdown from '../components/upload/design_version_dropdown.vue';
-// import DesignDropzone from '../components/upload/design_dropzone.vue';
 import DesignDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import uploadDesignMutation from '../graphql/mutations/upload_design.mutation.graphql';
 import moveDesignMutation from '../graphql/mutations/move_design.mutation.graphql';

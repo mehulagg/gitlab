@@ -5,9 +5,6 @@ import { __ } from '~/locale';
 import { isValidImage } from './utils';
 import { VALID_DATA_TRANSFER_TYPE, VALID_IMAGE_FILE_MIMETYPE } from './constants';
 
-// TODO: Add props for:
-// - validators
-
 export default {
   components: {
     GlIcon,
