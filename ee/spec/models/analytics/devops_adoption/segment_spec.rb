@@ -26,4 +26,15 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
       end
     end
   end
+
+  describe '.ordered_by_name' do
+    let(:segment_1) { create(:devops_adoption_segment, name: 'bbb') }
+    let(:segment_2) { create(:devops_adoption_segment, name: 'aaa') }
+
+    subject { described_class.ordered_by_name }
+
+    it 'orders segments by name' do
+      expect(subject).to eq([segment_2, segment_1])
+    end
+  end
 end
