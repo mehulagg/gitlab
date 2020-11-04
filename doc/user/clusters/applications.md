@@ -1557,7 +1557,7 @@ at least 2 people from the
 
 Logs produced by pods running **GitLab Managed Apps** can be browsed using [**Log Explorer**](../project/clusters/kubernetes_pod_logs.md).
 
-## Enable HSTS
+## Customize HSTS
 
 You can modify the HTTP Strict Transport Security header from the ingress defaults by using a [customized Helm chart value](../../topics/autodevops/customize.html#customize-values-for-helm-chart):
 ```ingress:
