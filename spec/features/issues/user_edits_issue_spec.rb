@@ -163,6 +163,7 @@ RSpec.describe "Issues > User edits issue", :js do
 
           expect(page).to have_text('removed verisimilitude label')
           expect(page).not_to have_text('removed syzygy verisimilitude labels')
+          expect(issue.reload.labels.map(&:title)).to contain_exactly('syzygy')
         end
       end
 
