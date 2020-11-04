@@ -19,7 +19,7 @@ class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWo
 
       (start_id..last_id).step(BATCH_SIZE) do |batch_start_id|
         batch_end_id = batch_start_id + BATCH_SIZE - 1
-        Ci::BatchResetMinutesWorker.perform_async(batch_start_id, batch_end_id)
+        Ci::BatchResetMinutesWorker.perform_in(delay, batch_start_id, batch_end_id)
       end
     else
       return unless try_obtain_lease
@@ -29,6 +29,10 @@ class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWo
   end
 
   private
+
+  def delay
+    (1..3).to_a.sample.hours
+  end
 
   def try_obtain_lease
     Gitlab::ExclusiveLease.new('gitlab_clear_shared_runners_minutes_worker',

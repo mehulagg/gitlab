@@ -147,11 +147,11 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
       end
 
       it 'runs a worker per batch' do
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(2, 4)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(5, 7)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(8, 10)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(11, 13)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(14, 16)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(instance_of(ActiveSupport::Duration), 2, 4)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(instance_of(ActiveSupport::Duration), 5, 7)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(instance_of(ActiveSupport::Duration), 8, 10)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(instance_of(ActiveSupport::Duration), 11, 13)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(instance_of(ActiveSupport::Duration), 14, 16)
 
         subject
       end
