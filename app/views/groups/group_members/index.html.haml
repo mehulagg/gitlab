@@ -69,6 +69,8 @@
               = label_tag :sort_by, _('Sort by'), class: form_item_label_css_class
               = render 'shared/members/sort_dropdown'
         - if vue_members_list_enabled
+          .js-group-members-list-loading.loading
+            .spinner.spinner-md
           .js-group-members-list{ data: group_members_list_data_attributes(@group, @members) }
         - else
           %ul.content-list.members-list{ data: { qa_selector: 'members_list' } }
@@ -85,6 +87,8 @@
             = render 'groups/group_members/tab_pane/title' do
               = html_escape(_('Groups with access to %{strong_start}%{group_name}%{strong_end}')) % { group_name: @group.name, strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe }
           - if vue_members_list_enabled
+            .js-group-linked-list-loading.loading
+              .spinner.spinner-md
             .js-group-linked-list{ data: linked_groups_list_data_attributes(@group) }
           - else
             %ul.content-list.members-list{ data: { qa_selector: 'groups_list' } }
@@ -99,6 +103,8 @@
             = form_tag group_group_members_path(@group), method: :get, class: 'user-search-form', data: { testid: 'user-search-form' } do
               = render 'shared/members/search_field', name: 'search_invited'
           - if vue_members_list_enabled
+            .js-group-invited-members-list-loading.loading
+              .spinner.spinner-md
             .js-group-invited-members-list{ data: group_members_list_data_attributes(@group, @invited_members) }
           - else
             %ul.content-list.members-list
@@ -115,6 +121,8 @@
             = render 'groups/group_members/tab_pane/title' do
               = html_escape(_('Users requesting access to %{strong_start}%{group_name}%{strong_end}')) % { group_name: @group.name, strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe }
           - if vue_members_list_enabled
+            .js-group-access-requests-list-loading.loading
+              .spinner.spinner-md
             .js-group-access-requests-list{ data: group_members_list_data_attributes(@group, @requesters) }
           - else
             %ul.content-list.members-list

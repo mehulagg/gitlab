@@ -3,10 +3,11 @@ import { initGroupMembersApp } from '~/groups/members';
 
 describe('initGroupMembersApp', () => {
   let el;
+  let loadingEl;
   let vm;
 
   const createVm = () => {
-    vm = initGroupMembersApp(el, ['account'], () => ({}));
+    vm = initGroupMembersApp(el, loadingEl, ['account'], () => ({}));
   };
 
   beforeEach(() => {
@@ -15,10 +16,14 @@ describe('initGroupMembersApp', () => {
     el.setAttribute('data-group-id', '234');
     el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
     el.setAttribute('data-ldap-override-path', '/groups/ldap-group/-/group_members/:id/override');
+
+    loadingEl = document.createElement('div');
+    document.body.appendChild(loadingEl);
   });
 
   afterEach(() => {
     el = null;
+    loadingEl = null;
   });
 
   it('sets `ldapOverridePath` in Vuex store', () => {

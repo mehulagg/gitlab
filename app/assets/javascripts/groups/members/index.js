@@ -5,7 +5,7 @@ import { parseDataAttributes } from 'ee_else_ce/groups/members/utils';
 import App from './components/app.vue';
 import membersModule from '~/vuex_shared/modules/members';
 
-export const initGroupMembersApp = (el, tableFields, requestFormatter) => {
+export const initGroupMembersApp = (el, loadingEl, tableFields, requestFormatter) => {
   if (!el) {
     return () => {};
   }
@@ -26,6 +26,6 @@ export const initGroupMembersApp = (el, tableFields, requestFormatter) => {
     el,
     components: { App },
     store,
-    render: createElement => createElement('app'),
+    render: createElement => createElement('app', { props: { loadingEl } }),
   });
 };

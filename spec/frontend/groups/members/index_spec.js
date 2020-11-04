@@ -5,13 +5,16 @@ import { membersJsonString, membersParsed } from './mock_data';
 
 describe('initGroupMembersApp', () => {
   let el;
+  let loadingEl;
   let vm;
   let wrapper;
 
   const setup = () => {
-    vm = initGroupMembersApp(el, ['account'], () => ({}));
+    vm = initGroupMembersApp(el, loadingEl, ['account'], () => ({}));
     wrapper = createWrapper(vm);
   };
+
+  const findGroupMembersApp = () => wrapper.find(GroupMembersApp);
 
   beforeEach(() => {
     el = document.createElement('div');
@@ -19,11 +22,15 @@ describe('initGroupMembersApp', () => {
     el.setAttribute('data-group-id', '234');
     el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
 
+    loadingEl = document.createElement('div');
+    document.body.appendChild(loadingEl);
+
     window.gon = { current_user_id: 123 };
   });
 
   afterEach(() => {
     el = null;
+    loadingEl = null;
 
     wrapper.destroy();
     wrapper = null;
@@ -32,7 +39,7 @@ describe('initGroupMembersApp', () => {
   it('renders `GroupMembersApp`', () => {
     setup();
 
-    expect(wrapper.find(GroupMembersApp).exists()).toBe(true);
+    expect(findGroupMembersApp().exists()).toBe(true);
   });
 
   it('sets `currentUserId` in Vuex store', () => {
@@ -78,5 +85,15 @@ describe('initGroupMembersApp', () => {
     setup();
 
     expect(vm.$store.state.memberPath).toBe('/groups/foo-bar/-/group_members/:id');
+  });
+
+  it('passes `loadingEl` as prop', () => {
+    setup();
+
+    expect(
+      findGroupMembersApp()
+        .props('loadingEl')
+        .isSameNode(loadingEl),
+    ).toBe(true);
   });
 });

@@ -28,24 +28,32 @@ document.addEventListener('DOMContentLoaded', () => {
   mountRemoveMemberModal();
 
   const SHARED_FIELDS = ['account', 'expires', 'maxRole', 'expiration', 'actions'];
+  const GROUP_MEMBERS_LIST_SELECTOR = '.js-group-members-list';
+  const GROUP_LINKED_LIST_SELECTOR = '.js-group-linked-list';
+  const GROUP_INVITED_MEMBERS_LIST_SELECTOR = '.js-group-invited-members-list';
+  const GROUP_ACCESS_REQUESTS_LIST_SELECTOR = '.js-group-access-requests-list';
 
   initGroupMembersApp(
-    document.querySelector('.js-group-members-list'),
+    document.querySelector(GROUP_MEMBERS_LIST_SELECTOR),
+    document.querySelector(`${GROUP_MEMBERS_LIST_SELECTOR}-loading`),
     SHARED_FIELDS.concat(['source', 'granted']),
     memberRequestFormatter,
   );
   initGroupMembersApp(
-    document.querySelector('.js-group-linked-list'),
+    document.querySelector(GROUP_LINKED_LIST_SELECTOR),
+    document.querySelector(`${GROUP_LINKED_LIST_SELECTOR}-loading`),
     SHARED_FIELDS.concat('granted'),
     groupLinkRequestFormatter,
   );
   initGroupMembersApp(
-    document.querySelector('.js-group-invited-members-list'),
+    document.querySelector(GROUP_INVITED_MEMBERS_LIST_SELECTOR),
+    document.querySelector(`${GROUP_INVITED_MEMBERS_LIST_SELECTOR}-loading`),
     SHARED_FIELDS.concat('invited'),
     memberRequestFormatter,
   );
   initGroupMembersApp(
-    document.querySelector('.js-group-access-requests-list'),
+    document.querySelector(GROUP_ACCESS_REQUESTS_LIST_SELECTOR),
+    document.querySelector(`${GROUP_ACCESS_REQUESTS_LIST_SELECTOR}-loading`),
     SHARED_FIELDS.concat('requested'),
     memberRequestFormatter,
   );

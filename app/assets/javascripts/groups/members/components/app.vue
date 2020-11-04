@@ -8,6 +8,13 @@ import { HIDE_ERROR } from '~/vuex_shared/modules/members/mutation_types';
 export default {
   name: 'GroupMembersApp',
   components: { MembersTable, GlAlert },
+  props: {
+    loadingEl: {
+      type: HTMLDivElement,
+      required: false,
+      default: null,
+    },
+  },
   computed: {
     ...mapState(['showError', 'errorMessage']),
   },
@@ -19,6 +26,13 @@ export default {
         });
       }
     },
+  },
+  mounted() {
+    if (!this.loadingEl) {
+      return;
+    }
+
+    this.loadingEl.parentNode.removeChild(this.loadingEl);
   },
   methods: {
     ...mapMutations({

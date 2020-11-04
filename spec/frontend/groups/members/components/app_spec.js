@@ -17,7 +17,7 @@ describe('GroupMembersApp', () => {
   let wrapper;
   let store;
 
-  const createComponent = (state = {}) => {
+  const createComponent = (state = {}, options = {}) => {
     store = new Vuex.Store({
       state: {
         showError: true,
@@ -30,6 +30,7 @@ describe('GroupMembersApp', () => {
     wrapper = shallowMount(App, {
       localVue,
       store,
+      ...options,
     });
   };
 
@@ -85,5 +86,15 @@ describe('GroupMembersApp', () => {
 
       expect(findAlert().exists()).toBe(false);
     });
+  });
+
+  it('removes loading icon when component is mounted', () => {
+    const loadingEl = document.createElement('div');
+    loadingEl.classList.add('js-group-members-list-loading');
+    document.body.appendChild(loadingEl);
+
+    createComponent({}, { propsData: { loadingEl } });
+
+    expect(document.querySelector('.js-group-members-list-loading')).toBeNull();
   });
 });
