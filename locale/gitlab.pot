@@ -10341,6 +10341,9 @@ msgstr ""
 msgid "Environments|Stopping"
 msgstr ""
 
+msgid "Environments|Stopping%{environment-name}"
+msgstr ""
+
 msgid "Environments|There was an error fetching the logs. Please try again."
 msgstr ""
 
