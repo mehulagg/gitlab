@@ -66,7 +66,7 @@ RSpec.describe DeviseMailer do
   end
 
   describe '#user_access_request' do
-    subject { described_class.user_access_request(admin, user) }
+    subject { described_class.user_access_request(admin) }
 
     let_it_be(:admin) { create(:user, :admin) }
     let_it_be(:user) { create(:user) }

@@ -889,6 +889,9 @@ msgstr ""
 msgid "%{user_name} profile page"
 msgstr ""
 
+msgid "%{username} has asked for a GitLab account on your instance %{host}:"
+msgstr ""
+
 msgid "%{username}'s avatar"
 msgstr ""
 
@@ -5482,6 +5485,9 @@ msgid "Cleared weight."
 msgstr ""
 
 msgid "Clears weight."
+msgstr ""
+
+msgid "Click %{link_to} to approve or deny this request."
 msgstr ""
 
 msgid "Click the %{strong_open}Download%{strong_close} button and wait for downloading to complete."
