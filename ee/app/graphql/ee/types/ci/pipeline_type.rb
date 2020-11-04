@@ -18,6 +18,7 @@ module EE
             ::Types::Ci::JobType.connection_type,
             null: true,
             description: 'Jobs belonging to the pipeline',
+            extras: [:lookahead],
             resolver: ::Resolvers::Ci::JobsResolver
         end
       end

@@ -60,7 +60,8 @@ module Types
             ::Types::Ci::JobType.connection_type,
             null: true,
             description: 'Jobs belonging to the pipeline',
-            method: :statuses
+            extras: [:lookahead],
+            resolver: Resolvers::Ci::JobsResolver
       field :source_job, Types::Ci::JobType, null: true,
             description: 'Job where pipeline was triggered from'
       field :downstream, Types::Ci::PipelineType.connection_type, null: true,
