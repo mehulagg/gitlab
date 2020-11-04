@@ -2551,6 +2551,9 @@ msgstr ""
 msgid "AlertSettings|HTTP endpoint"
 msgstr ""
 
+msgid "AlertSettings|In free versions of GitLab, only one integration for each type can be added. %{linkStart}Upgrade your subscription%{linkEnd} to add additional integrations."
+msgstr ""
+
 msgid "AlertSettings|Integration"
 msgstr ""
 
