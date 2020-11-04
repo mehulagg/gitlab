@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Automate GitLab by using a simple and powerful API.
 
-The main GitLab API is a [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)
+The main GitLab API is a [REST](http://spec.openapis.org/oas/v3.0.3)
 API. Because of this, the documentation in this section assumes that you're
 familiar with REST concepts.
 
