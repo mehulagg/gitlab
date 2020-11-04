@@ -10,7 +10,28 @@ The following installation steps are the recommended way of installing GitLab's 
 
 ## Overview of Installation Steps
 
-1. Connect a Kubernetes cluster
+1. Install and connect at least one runner to GitLab
+1. Create a group
+1. Connect a Kubernetes cluster to the group
+1. Create a cluster management project
+1. Associate the cluster management project with the Kubernetes cluster
+1. Install and configure an Ingress node
+1. Install and configure Cilium
+
+## Managing Network Policies
+
+1. Policy management
+1. Management through auto-devops
+1. Management through Policy management UI
+1. Monitoring throughput
+1. Forwarding logs to a SIEM
+
+## Troubleshooting
+
+1. Trouble connecting to the cluster
+1. Using GMAv1 with GMAv2
+1. 
+
 
 ### Configure OmniAuth (self-managed only)
 
