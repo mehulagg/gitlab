@@ -504,3 +504,40 @@ out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
 ```
 
 This outputs `1` followed by the content of `/etc/passwd`.
+
+## GitLab Internal Coding Guidelines
+
+### Introduction
+There're some cases where `users` passed in the code is actually referring to a `DeployToken`/`DeployKey` entity instead of a real `User`, because of the code below in **/lib/api/api_guard.rb**
+
+```ruby
+      def find_user_from_sources
+        strong_memoize(:find_user_from_sources) do
+          deploy_token_from_request ||
+            find_user_from_bearer_token ||
+            find_user_from_job_token ||
+            user_from_warden
+        end
+      end
+```
+
+### Past vulnerable code
+
+When this happens, in some scenarios this could cause security issues such as shown in this [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/237795). It was possible to impersonate User with the corresponding DeployToken ID. Since there was no check on the line `Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)`, and the id used in this line is actually the DeployToken id instead of the User's id. And this could lead to user impersonation by using a DeployToken id to impersonate the corresponding User id.
+
+```ruby
+def find_current_user!
+        user = find_user_from_sources
+        return unless user
+
+        # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
+        Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Feature.enabled?(:user_mode_in_session)
+
+        unless api_access_allowed?(user)
+          forbidden!(api_access_denied_message(user))
+        end
+
+```
+
+### Best Practices
+In order to prevent this from happening, it is recommended to use the method `user.is_a?(User)` to make sure it returns `true` when we are expecting to deal with an `User` object. This could prevent the id confusion from the method `find_user_from_sources` mentioned above.
