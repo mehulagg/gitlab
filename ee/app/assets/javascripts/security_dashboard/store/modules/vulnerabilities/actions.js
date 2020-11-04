@@ -27,42 +27,6 @@ export const setVulnerabilitiesEndpoint = ({ commit }, endpoint) => {
   commit(types.SET_VULNERABILITIES_ENDPOINT, endpoint);
 };
 
-export const setVulnerabilitiesCountEndpoint = ({ commit }, endpoint) => {
-  commit(types.SET_VULNERABILITIES_COUNT_ENDPOINT, endpoint);
-};
-
-export const fetchVulnerabilitiesCount = ({ state, dispatch }, params = {}) => {
-  if (!state.vulnerabilitiesCountEndpoint) {
-    return;
-  }
-  dispatch('requestVulnerabilitiesCount');
-
-  axios({
-    method: 'GET',
-    url: state.vulnerabilitiesCountEndpoint,
-    params,
-  })
-    .then(response => {
-      const { data } = response;
-      dispatch('receiveVulnerabilitiesCountSuccess', { data });
-    })
-    .catch(() => {
-      dispatch('receiveVulnerabilitiesCountError');
-    });
-};
-
-export const requestVulnerabilitiesCount = ({ commit }) => {
-  commit(types.REQUEST_VULNERABILITIES_COUNT);
-};
-
-export const receiveVulnerabilitiesCountSuccess = ({ commit }, { data }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS, data);
-};
-
-export const receiveVulnerabilitiesCountError = ({ commit }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_ERROR);
-};
-
 export const setVulnerabilitiesPage = ({ commit }, page) => {
   commit(types.SET_VULNERABILITIES_PAGE, page);
 };
