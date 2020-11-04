@@ -14,15 +14,12 @@ class RegistrationsController < Devise::RegistrationsController
   prepend_before_action :check_captcha, only: :create
   before_action :whitelist_query_limiting, :ensure_destroy_prerequisites_met, only: [:destroy]
   before_action :load_recaptcha, only: :new
+  before_action :set_invite_params, only: :new
 
   feature_category :authentication_and_authorization
 
   def new
-    if experiment_enabled?(:signup_flow)
-      @resource = build_resource
-    else
-      redirect_to new_user_session_path(anchor: 'register-pane')
-    end
+    @resource = build_resource
   end
 
   def create
@@ -60,8 +57,7 @@ class RegistrationsController < Devise::RegistrationsController
   def update_registration
     return redirect_to new_user_registration_path unless current_user
 
-    user_params = params.require(:user).permit(:role, :setup_for_company)
-    result = ::Users::SignupService.new(current_user, user_params).execute
+    result = ::Users::SignupService.new(current_user, update_registration_params).execute
 
     if result[:status] == :success
       if ::Gitlab.com? && show_onboarding_issues_experiment?
@@ -164,6 +160,10 @@ class RegistrationsController < Devise::RegistrationsController
     params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
   end
 
+  def update_registration_params
+    params.require(:user).permit(:role, :setup_for_company)
+  end
+
   def resource_name
     :user
   end
@@ -203,8 +203,8 @@ class RegistrationsController < Devise::RegistrationsController
   # Part of an experiment to build a new sign up flow. Will be resolved
   # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
   def choose_layout
-    if %w(welcome update_registration).include?(action_name) || experiment_enabled?(:signup_flow)
-      'devise_experimental_separate_sign_up_flow'
+    if %w(welcome update_registration).include?(action_name)
+      'welcome'
     else
       'devise'
     end
@@ -221,6 +221,10 @@ class RegistrationsController < Devise::RegistrationsController
     return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
 
     resource.state = BLOCKED_PENDING_APPROVAL_STATE
+  end
+
+  def set_invite_params
+    @invite_email = ActionController::Base.helpers.sanitize(params[:invite_email])
   end
 end
 

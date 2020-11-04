@@ -25,7 +25,7 @@ RSpec.describe Vulnerabilities::ResolveService do
     it_behaves_like 'removes dismissal feedback from associated findings'
 
     it 'resolves a vulnerability' do
-      Timecop.freeze do
+      freeze_time do
         resolve_vulnerability
 
         expect(vulnerability.reload).to(

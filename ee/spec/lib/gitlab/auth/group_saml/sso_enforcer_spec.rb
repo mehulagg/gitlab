@@ -24,7 +24,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::SsoEnforcer do
     end
 
     it 'stores the current time for later comparison' do
-      Timecop.freeze do
+      freeze_time do
         subject.update_session
 
         expect(session[:active_group_sso_sign_ins][saml_provider.id]).to eq DateTime.now
@@ -58,7 +58,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::SsoEnforcer do
         subject.update_session
 
         days_after_timeout = Gitlab::Auth::GroupSaml::SsoEnforcer::DEFAULT_SESSION_TIMEOUT + 2.days
-        Timecop.freeze(days_after_timeout) do
+        travel_to(days_after_timeout.from_now) do
           expect(subject).not_to be_active_session
         end
       end

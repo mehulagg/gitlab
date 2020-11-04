@@ -72,7 +72,7 @@ module EE
               null: true,
               description: 'Represents the code coverage activity for this group',
               resolver: ::Resolvers::Ci::CodeCoverageActivitiesResolver,
-              feature_flag: :group_coverage_data_report
+              feature_flag: :group_coverage_data_report_graph
       end
     end
   end

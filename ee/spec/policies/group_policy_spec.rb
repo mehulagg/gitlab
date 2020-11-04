@@ -327,48 +327,77 @@ RSpec.describe GroupPolicy do
         stub_licensed_features(group_saml: true)
       end
 
-      context 'without an enabled SAML provider' do
-        context 'maintainer' do
-          let(:current_user) { maintainer }
+      context 'when group_saml_group_sync is not licensed' do
+        context 'with an enabled SAML provider' do
+          let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
 
-          it { is_expected.to be_disallowed(:admin_group_saml) }
-          it { is_expected.to be_disallowed(:admin_saml_group_links) }
-        end
+          context 'owner' do
+            let(:current_user) { owner }
 
-        context 'owner' do
-          let(:current_user) { owner }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
 
-          it { is_expected.to be_allowed(:admin_group_saml) }
-          it { is_expected.to be_disallowed(:admin_saml_group_links) }
-        end
+          context 'admin' do
+            let(:current_user) { admin }
 
-        context 'admin' do
-          let(:current_user) { admin }
-
-          it { is_expected.to be_allowed(:admin_group_saml) }
-          it { is_expected.to be_disallowed(:admin_saml_group_links) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
         end
       end
 
-      context 'with an enabled SAML provider' do
-        let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
-
-        context 'maintainer' do
-          let(:current_user) { maintainer }
-
-          it { is_expected.to be_disallowed(:admin_saml_group_links) }
+      context 'when group_saml_group_sync is licensed' do
+        before do
+          stub_application_setting(check_namespace_plan: true)
         end
 
-        context 'owner' do
-          let(:current_user) { owner }
-
-          it { is_expected.to be_allowed(:admin_saml_group_links) }
+        before_all do
+          create(:license, plan: License::ULTIMATE_PLAN)
+          create(:gitlab_subscription, :gold, namespace: group)
         end
 
-        context 'admin' do
-          let(:current_user) { admin }
+        context 'without an enabled SAML provider' do
+          context 'maintainer' do
+            let(:current_user) { maintainer }
 
-          it { is_expected.to be_allowed(:admin_saml_group_links) }
+            it { is_expected.to be_disallowed(:admin_group_saml) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+
+          context 'owner' do
+            let(:current_user) { owner }
+
+            it { is_expected.to be_allowed(:admin_group_saml) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+
+          context 'admin' do
+            let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_group_saml) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+        end
+
+        context 'with an enabled SAML provider' do
+          let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
+
+          context 'maintainer' do
+            let(:current_user) { maintainer }
+
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+
+          context 'owner' do
+            let(:current_user) { owner }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+
+          context 'admin' do
+            let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
         end
       end
 

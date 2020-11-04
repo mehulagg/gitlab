@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 ---
 
@@ -11,7 +14,7 @@ comments: false
   - Type '`git`' in the Terminal application.
   - If it's not installed, it will prompt you to install it.
 
-- **Linux** - Enter `which git` in the Terminal application and press <kbd>Enter</kbd> to
+- **GNU/Linux** - Enter `which git` in the Terminal application and press <kbd>Enter</kbd> to
   determine if Git is installed on your system.
 
   - If the output of that command gives you the path to the Git executable, similar to
@@ -29,8 +32,8 @@ comments: false
   - **Debian/Ubuntu and their derivatives** - `sudo apt-get install git`
   - **Gentoo** - `sudo emerge --ask --verbose dev-vcs/git`
   - **openSUSE** - `sudo zypper install git`
-  - **FreeBSD** - `sudo pkg install git`
-  - **OpenBSD** - `doas pkg_add git`
+- **FreeBSD** - `sudo pkg install git`
+- **OpenBSD** - `doas pkg_add git`
 
 ## Configure Git
 

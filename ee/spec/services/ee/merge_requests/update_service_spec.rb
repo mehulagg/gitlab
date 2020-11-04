@@ -322,5 +322,13 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         it_behaves_like 'undeletable existing approval rules'
       end
     end
+
+    it 'updates code owner approval rules' do
+      expect_next_instance_of(::MergeRequests::SyncCodeOwnerApprovalRules) do |instance|
+        expect(instance).to receive(:execute)
+      end
+
+      update_merge_request(title: 'Title')
+    end
   end
 end

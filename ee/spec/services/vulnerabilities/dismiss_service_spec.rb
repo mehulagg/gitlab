@@ -30,7 +30,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:dismiss_findings) { false }
 
       it 'dismisses only vulnerability' do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           expect(vulnerability.reload).to(
@@ -42,7 +42,7 @@ RSpec.describe Vulnerabilities::DismissService do
 
     context 'when the `dismiss_findings` argument is not false' do
       it 'dismisses a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           expect(vulnerability.reload).to(
@@ -57,7 +57,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:service) { described_class.new(user, vulnerability, comment) }
 
       it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           aggregate_failures do

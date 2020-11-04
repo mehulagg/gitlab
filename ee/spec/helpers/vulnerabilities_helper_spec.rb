@@ -52,7 +52,7 @@ RSpec.describe VulnerabilitiesHelper do
     end
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'has expected vulnerability properties' do

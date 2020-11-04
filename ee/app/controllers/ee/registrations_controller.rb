@@ -14,8 +14,10 @@ module EE
       super(confirmed: confirmed) + ", experiments:#{experiments}"
     end
 
-    def sign_up_params
+    def update_registration_params
       clean_params = super.merge(params.require(:user).permit(:email_opted_in))
+
+      clean_params[:email_opted_in] = '1' if clean_params[:setup_for_company] == 'true'
 
       if clean_params[:email_opted_in] == '1'
         clean_params[:email_opted_in_ip] = request.remote_ip
@@ -24,16 +26,6 @@ module EE
       end
 
       clean_params
-    end
-
-    # Part of an experiment to build a new sign up flow. Will be resolved
-    # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
-    def choose_layout
-      if %w(welcome update_registration).include?(action_name)
-        'checkout'
-      else
-        super
-      end
     end
   end
 end

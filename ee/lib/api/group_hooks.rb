@@ -4,6 +4,8 @@ module API
   class GroupHooks < ::API::Base
     include ::API::PaginationParams
 
+    feature_category :integrations
+
     before { authenticate! }
     before { authorize! :admin_group, user_group }
 

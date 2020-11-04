@@ -95,11 +95,15 @@ module EE
       validate :allowed_frameworks, if: :compliance_frameworks_changed?
 
       validates :new_user_signups_cap,
-                numericality: { only_integer: true,
-                                allow_nil: true,
-                                greater_than: 0 }
+                allow_blank: true,
+                numericality: { only_integer: true, greater_than: 0 }
       validates :new_user_signups_cap,
-                numericality: { less_than_or_equal_to: proc { License.current&.restricted_user_count } },
+                allow_blank: true,
+                numericality: {
+                  only_integer: true,
+                  greater_than: 0,
+                  less_than_or_equal_to: proc { License.current&.restricted_user_count }
+                },
                 if: proc { License.current&.restricted_user_count? }
 
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?

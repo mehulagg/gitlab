@@ -436,20 +436,17 @@ RSpec.describe Gitlab::UsageData do
         project = create(:project, creator: user)
         create(:users_ops_dashboard_project, user: user)
         create(:prometheus_service, project: project)
-        create(:project_error_tracking_setting, project: project)
         create(:project_incident_management_setting, :sla_enabled, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
         projects_prometheus_active: 2,
-        projects_with_error_tracking_enabled: 2,
         projects_incident_sla_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_prometheus_active: 1,
-        projects_with_error_tracking_enabled: 1,
         projects_incident_sla_enabled: 2
       )
     end

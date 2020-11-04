@@ -262,4 +262,15 @@ export default {
   [types.RECIEVE_PROJECTS_FAILURE](state) {
     state.projectsFetchInProgress = false;
   },
+
+  [types.REQUEST_DESCENDANT_GROUPS](state) {
+    state.descendantGroupsFetchInProgress = true;
+  },
+  [types.RECEIVE_DESCENDANT_GROUPS_SUCCESS](state, descendantGroups) {
+    state.descendantGroups = descendantGroups;
+    state.descendantGroupsFetchInProgress = false;
+  },
+  [types.RECEIVE_DESCENDANT_GROUPS_FAILURE](state) {
+    state.descendantGroupsFetchInProgress = false;
+  },
 };

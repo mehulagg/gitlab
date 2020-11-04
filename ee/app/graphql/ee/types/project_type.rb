@@ -24,6 +24,8 @@ module EE
           calls_gitaly: true,
           description: 'SAST CI configuration for the project',
           resolve: -> (project, args, ctx) do
+            return unless Ability.allowed?(ctx[:current_user], :download_code, project)
+
             sast_ci_configuration(project)
           end
 

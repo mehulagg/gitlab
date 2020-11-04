@@ -18,29 +18,6 @@ RSpec.describe 'Every API endpoint' do
       api_endpoints.map do |(klass, path)|
         next if klass.try(:feature_category_for_action, path)
 
-        # We'll add the rest in https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/463
-        completed_classes = [
-          ::API::Users, ::API::Issues, ::API::AccessRequests, ::API::Admin::Ci::Variables,
-          ::API::Admin::InstanceClusters, ::API::Admin::Sidekiq, ::API::Appearance,
-          ::API::Applications, ::API::Avatar, ::API::AwardEmoji, API::Badges,
-          ::API::Boards, ::API::Branches, ::API::BroadcastMessages, ::API::Ci::Pipelines,
-          ::API::Ci::PipelineSchedules, ::API::Ci::Runners, ::API::Ci::Runner,
-          ::API::Commits, ::API::CommitStatuses, ::API::ContainerRegistryEvent,
-          ::API::DeployKeys, ::API::DeployTokens, ::API::Deployments, ::API::Environments,
-          ::API::ErrorTracking, ::API::Events, ::API::FeatureFlags, ::API::FeatureFlagScopes,
-          ::API::FeatureFlagsUserLists, ::API::Features, ::API::Files, ::API::FreezePeriods,
-          ::API::GroupBoards, ::API::GroupClusters, ::API::GroupExport, ::API::GroupImport,
-          ::API::GroupLabels, ::API::GroupMilestones, ::API::Groups,
-          ::API::GroupContainerRepositories, ::API::GroupVariables,
-          ::API::ImportBitbucketServer, ::API::ImportGithub, ::API::IssueLinks,
-          ::API::Issues, ::API::JobArtifacts, ::API::Jobs, ::API::Keys, ::API::Labels,
-          ::API::Lint, ::API::Markdown, ::API::Members, ::API::MergeRequestDiffs,
-          ::API::MergeRequests, ::API::MergeRequestApprovals, ::API::Metrics::Dashboard::Annotations,
-          ::API::Metrics::UserStarredDashboards, ::API::Namespaces, ::API::Notes,
-          ::API::Discussions
-        ]
-        next unless completed_classes.include?(klass)
-
         "#{klass}##{path}"
       end.compact.uniq
     end

@@ -8,7 +8,7 @@ RSpec.describe ProjectsController do
 
   let(:project) { create(:project) }
 
-  let_it_be(:public_project) { create(:project, :public, :repository) }
+  let_it_be(:public_project) { create(:project, :public, :repository, namespace: group) }
 
   before do
     project.add_maintainer(user)
@@ -19,6 +19,37 @@ RSpec.describe ProjectsController do
     render_views
 
     subject { get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path } }
+
+    context 'additional repo storage by namespace' do
+      using RSpec::Parameterized::TableSyntax
+      let(:namespace) { public_project.namespace }
+
+      where(:automatic_purchased_storage_allocation, :additional_repo_storage_by_namespace, :expected_to_render) do
+        true | true | true
+        true | false | false
+        false | true | false
+        false | false | false
+      end
+
+      with_them do
+        before do
+          allow_next_instance_of(EE::Namespace::RootExcessStorageSize) do |root_storage|
+            allow(root_storage).to receive(:usage_ratio).and_return(0.5)
+            allow(root_storage).to receive(:above_size_limit?).and_return(true)
+          end
+          stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
+          stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace, namespace_storage_limit: false)
+
+          namespace.add_owner(user)
+        end
+
+        it do
+          subject
+
+          expect(response.body.include?("Please purchase additional storage")).to eq(expected_to_render)
+        end
+      end
+    end
 
     context 'with additional_repo_storage_by_namespace_enabled? enabled' do
       before do

@@ -294,19 +294,22 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         create(:project, creator: user)
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
         create(:project_tracing_setting)
+        create(:project_error_tracking_setting)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         clusters: 2,
         clusters_applications_prometheus: 2,
         operations_dashboard_default_dashboard: 2,
-        projects_with_tracing_enabled: 2
+        projects_with_tracing_enabled: 2,
+        projects_with_error_tracking_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         clusters: 1,
         clusters_applications_prometheus: 1,
         operations_dashboard_default_dashboard: 1,
-        projects_with_tracing_enabled: 1
+        projects_with_tracing_enabled: 1,
+        projects_with_error_tracking_enabled: 1
       )
     end
   end
@@ -1230,6 +1233,32 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         end
 
         expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
+      end
+    end
+  end
+
+  describe 'aggregated_metrics' do
+    subject(:aggregated_metrics) { described_class.aggregated_metrics }
+
+    context 'with product_analytics_aggregated_metrics feature flag on' do
+      before do
+        stub_feature_flags(product_analytics_aggregated_metrics: true)
+      end
+
+      it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#aggregated_metrics_data', :aggregate_failures do
+        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:aggregated_metrics_data).and_return(global_search_gmau: 123)
+        expect(aggregated_metrics).to eq(aggregated_metrics: { global_search_gmau: 123 })
+      end
+    end
+
+    context 'with product_analytics_aggregated_metrics feature flag off' do
+      before do
+        stub_feature_flags(product_analytics_aggregated_metrics: false)
+      end
+
+      it 'returns empty hash', :aggregate_failures do
+        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:aggregated_metrics_data)
+        expect(aggregated_metrics).to be {}
       end
     end
   end

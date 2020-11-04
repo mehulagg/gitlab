@@ -98,17 +98,34 @@ RSpec.describe Vulnerabilities::ProjectsGrade do
   end
 
   describe '#projects' do
-    let(:projects_grade) { described_class.new(group, 1, [project_3.id, project_4.id]) }
-    let(:expected_projects) { [project_3, project_4] }
+    let(:projects_grade) { described_class.new(group, 1, [project_3.id, project_4.id, project_6.id], include_subgroups: include_subgroups) }
 
     subject(:projects) { projects_grade.projects }
 
-    it { is_expected.to match_array(expected_projects) }
+    context 'when include_subgroups is set to false' do
+      let(:include_subgroups) { false }
+      let(:expected_projects) { [project_3, project_4] }
 
-    it 'preloads vulnerability statistic once for whole collection' do
-      control_count = ActiveRecord::QueryRecorder.new { described_class.new(group, 1, [project_3.id]).projects.map(&:vulnerability_statistic) }.count
+      it { is_expected.to match_array(expected_projects) }
 
-      expect { described_class.new(group, 1, [project_3.id, project_4.id]).projects.map(&:vulnerability_statistic) }.not_to exceed_query_limit(control_count)
+      it 'preloads vulnerability statistic once for whole collection' do
+        control_count = ActiveRecord::QueryRecorder.new { described_class.new(group, 1, [project_3.id]).projects.map(&:vulnerability_statistic) }.count
+
+        expect { described_class.new(group, 1, [project_3.id, project_4.id]).projects.map(&:vulnerability_statistic) }.not_to exceed_query_limit(control_count)
+      end
+    end
+
+    context 'when include_subgroups is set to true' do
+      let(:include_subgroups) { true }
+      let(:expected_projects) { [project_3, project_4, project_6] }
+
+      it { is_expected.to match_array(expected_projects) }
+
+      it 'preloads vulnerability statistic once for whole collection' do
+        control_count = ActiveRecord::QueryRecorder.new { described_class.new(group, 1, [project_3.id]).projects.map(&:vulnerability_statistic) }.count
+
+        expect { described_class.new(group, 1, [project_3.id, project_4.id]).projects.map(&:vulnerability_statistic) }.not_to exceed_query_limit(control_count)
+      end
     end
   end
 

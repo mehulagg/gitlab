@@ -44,7 +44,7 @@ RSpec.describe ScheduleEpicIssuesAfterEpicsMove do
 
   it 'schedules background migrations at correct time', :aggregate_failures do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION).to(

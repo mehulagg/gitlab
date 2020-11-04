@@ -4,6 +4,8 @@ module API
   class Epics < ::API::Base
     include PaginationParams
 
+    feature_category :epics
+
     before do
       authenticate_non_get!
       authorize_epics_feature!
