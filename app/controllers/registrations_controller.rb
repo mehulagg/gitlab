@@ -33,9 +33,7 @@ class RegistrationsController < Devise::RegistrationsController
     end
 
     if resource.blocked_pending_approval?
-      User.admins.active.each do |admin|
-        DeviseMailer.user_access_request(admin).deliver_later
-      end
+      DeviseMailer.user_access_request(resource).deliver_later
     end
 
     # Devise sets a flash message on both successful & failed signups,

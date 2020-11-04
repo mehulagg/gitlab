@@ -14,7 +14,12 @@ class DeviseMailer < Devise::Mailer
   end
 
   def user_access_request(record, opts = {})
-    devise_mail(record, :user_access_request, opts)
+    User.admins.each do |admin|
+      @name = admin.name
+      opts[:to] = admin.email
+
+      devise_mail(record, :user_access_request, opts)
+    end
   end
 
   protected
