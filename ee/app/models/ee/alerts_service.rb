@@ -17,5 +17,11 @@ module EE
 
       project.feature_available?(:opsgenie_integration)
     end
+
+    def multi_integrations?
+      return false if instance? || template?
+
+      project.feature_available?(:multi_integrations)
+    end
   end
 end

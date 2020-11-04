@@ -117,12 +117,23 @@ RSpec.describe OperationsHelper, :routing do
     end
 
     describe 'Multiple Integrations Support' do
+      let_it_be(:alerts_service) do
+        create(:alerts_service,
+          project: project
+        )
+      end
+
+      before do
+        allow(helper).to receive(:alerts_service).and_return(alerts_service)
+        allow(alerts_service).to receive(:multi_integrations?).and_return(multi_integrations)
+      end
+
       context 'when available' do
         let(:multi_integrations) { true }
 
         it do
           is_expected.to include(
-            'multi_integrations' => 'true',
+            'multi_integrations' => 'true'
           )
         end
       end
