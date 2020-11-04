@@ -11,7 +11,6 @@ module Vulnerabilities
     with_options scope: :user, score: 0
     condition(:security_bot) { @user&.security_bot? }
 
-
     rule { issue & ~can?(:create_issue) }.prevent :create_vulnerability_feedback
 
     rule do
