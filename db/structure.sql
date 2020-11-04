@@ -21996,6 +21996,8 @@ CREATE INDEX index_users_on_group_view ON users USING btree (group_view);
 
 CREATE INDEX index_users_on_incoming_email_token ON users USING btree (incoming_email_token);
 
+CREATE INDEX index_users_on_lower_email ON users USING btree (lower((email)::text));
+
 CREATE INDEX index_users_on_managing_group_id ON users USING btree (managing_group_id);
 
 CREATE INDEX index_users_on_name ON users USING btree (name);

@@ -1,0 +1,5 @@
+---
+title: Add index to email field on users table if does not already exist
+merge_request: 46873
+author:
+type: performance
