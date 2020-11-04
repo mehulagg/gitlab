@@ -1,30 +1,36 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage', :github, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/issues/26952', type: :bug } do
-    describe 'Project import from GitHub' do
+  RSpec.describe 'Manage', :github, :requires_admin do
+    describe 'Project import' do
+      let!(:user) do
+        Resource::User.fabricate_via_api! do |resource|
+          resource.api_client = Runtime::API::Client.as_admin
+        end
+      end
+
+      let(:group) { Resource::Group.fabricate_via_api! }
+
       let(:imported_project) do
-        Resource::ProjectImportedFromGithub.fabricate! do |project|
+        Resource::ProjectImportedFromGithub.fabricate_via_browser_ui! do |project|
           project.name = 'imported-project'
-          project.personal_access_token = Runtime::Env.github_access_token
+          project.group = group
+          project.github_personal_access_token = Runtime::Env.github_access_token
           project.github_repository_path = 'gitlab-qa/test-project'
         end
       end
 
+      before do
+        group.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
+      end
+
       after do
-        # We need to delete the imported project because it's impossible to import
-        # the same GitHub project twice for a given user.
-        api_client = Runtime::API::Client.new(:gitlab)
-        delete_project_request = Runtime::API::Request.new(api_client, "/projects/#{CGI.escape("#{Runtime::Namespace.path}/#{imported_project.name}")}")
-        delete delete_project_request.url
-
-        expect_status(202)
-
+        user.remove_via_api!
         Page::Main::Menu.perform(&:sign_out_if_signed_in)
       end
 
-      it 'user imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/385' do
-        Flow::Login.sign_in
+      it 'imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/385' do
+        Flow::Login.sign_in(as: user)
 
         imported_project # import the project
 
