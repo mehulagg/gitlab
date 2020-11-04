@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable @gitlab/vue-require-i18n-strings */
 import { GlSprintf, GlTooltipDirective, GlModal } from '@gitlab/ui';
 import eventHub from '../event_hub';
 import { __, s__ } from '~/locale';
@@ -54,14 +53,17 @@ export default {
     @primary="onSubmit"
   >
     <template #modal-title>
-      Stopping
-      <span
-        v-gl-tooltip
-        :title="environment.name"
-        class="gl-text-truncate gl-ml-2 gl-mr-2 gl-flex-fill"
-      >
-        {{ environment.name }}?
-      </span>
+      <gl-sprintf :message="__(`Stopping%{environment-name}`)">
+        <template #environment-name>
+          <span
+            v-gl-tooltip
+            :title="environment.name"
+            class="gl-text-truncate gl-ml-2 gl-mr-2 gl-flex-fill"
+          >
+            {{ environment.name }}?
+          </span>
+        </template>
+      </gl-sprintf>
     </template>
 
     <p>{{ s__('Environments|Are you sure you want to stop this environment?') }}</p>
