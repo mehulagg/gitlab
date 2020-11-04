@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
-import { VALID_DESIGN_FILE_MIMETYPE } from '../../constants';
+import { VALID_IMAGE_FILE_MIMETYPE } from '~/vue_shared/components/upload_dropzone/constants';
 
 export default {
   components: {
@@ -24,7 +24,7 @@ export default {
       this.$emit('upload', e.target.files);
     },
   },
-  VALID_DESIGN_FILE_MIMETYPE,
+  VALID_IMAGE_FILE_MIMETYPE,
 };
 </script>
 
@@ -50,7 +50,7 @@ export default {
       ref="fileUpload"
       type="file"
       name="design_file"
-      :accept="$options.VALID_DESIGN_FILE_MIMETYPE.mimetype"
+      :accept="$options.VALID_IMAGE_FILE_MIMETYPE.mimetype"
       class="hide"
       multiple
       @change="onFileUploadChange"

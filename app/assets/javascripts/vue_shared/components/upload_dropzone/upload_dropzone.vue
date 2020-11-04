@@ -1,7 +1,6 @@
 <script>
 import { GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import createFlash from '~/flash';
-import uploadDesignMutation from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
 import { __ } from '~/locale';
 import { isValidImage } from './utils';
 import { VALID_DATA_TRANSFER_TYPE, VALID_IMAGE_FILE_MIMETYPE } from './constants';
@@ -18,7 +17,8 @@ export default {
   props: {
     displayAsCard: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     disableDragBehavior: {
       type: Boolean,
@@ -40,6 +40,16 @@ export default {
       required: false,
       default: __('Could not upload your image as one or more files uploaded are not supported'),
     },
+    isFileValid: {
+      type: Function,
+      required: false,
+      default: isValidImage,
+    },
+    validFileMimetypes: {
+      type: String,
+      required: false,
+      default: VALID_IMAGE_FILE_MIMETYPE.mimetype,
+    },
   },
   data() {
     return {
@@ -60,7 +70,7 @@ export default {
   },
   methods: {
     isValidUpload(files) {
-      return files.every(isValidImage);
+      return files.every(this.isFileValid);
     },
     isValidDragDataType({ dataTransfer }) {
       return Boolean(dataTransfer && dataTransfer.types.some(t => t === VALID_DATA_TRANSFER_TYPE));
@@ -90,12 +100,10 @@ export default {
     openFileUpload() {
       this.$refs.fileUpload.click();
     },
-    onDesignInputChange(e) {
+    onFileInputChange(e) {
       this.$emit('change', e.target.files);
     },
   },
-  uploadDesignMutation,
-  VALID_IMAGE_FILE_MIMETYPE,
 };
 </script>
 
@@ -111,7 +119,7 @@ export default {
   >
     <slot>
       <button
-        class="card design-dropzone-card design-dropzone-border gl-w-full gl-h-full gl-align-items-center gl-justify-content-center gl-p-3"
+        class="card upload-dropzone-card upload-dropzone-border gl-w-full gl-h-full gl-align-items-center gl-justify-content-center gl-p-3"
         @click="openFileUpload"
       >
         <div
@@ -135,17 +143,17 @@ export default {
       <input
         ref="fileUpload"
         type="file"
-        name="design_file"
-        :accept="$options.VALID_IMAGE_FILE_MIMETYPE.mimetype"
+        name="upload_file"
+        :accept="validFileMimetypes"
         class="hide"
         multiple
-        @change="onDesignInputChange"
+        @change="onFileInputChange"
       />
     </slot>
-    <transition name="design-dropzone-fade">
+    <transition name="upload-dropzone-fade">
       <div
         v-show="dragging && !disableDragBehavior"
-        class="card design-dropzone-border design-dropzone-overlay gl-w-full gl-h-full gl-absolute gl-display-flex gl-align-items-center gl-justify-content-center gl-p-3 gl-bg-white"
+        class="card upload-dropzone-border upload-dropzone-overlay gl-w-full gl-h-full gl-absolute gl-display-flex gl-align-items-center gl-justify-content-center gl-p-3 gl-bg-white"
       >
         <div v-show="!isDragDataValid" class="mw-50 gl-text-center">
           <h3 :class="{ 'gl-font-base gl-display-inline': !displayAsCard }">{{ __('Oh no!') }}</h3>

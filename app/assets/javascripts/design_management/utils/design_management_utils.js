@@ -1,8 +1,10 @@
 import { uniqueId } from 'lodash';
-import { VALID_DESIGN_FILE_MIMETYPE } from '../constants';
+import { VALID_IMAGE_FILE_MIMETYPE } from '~/vue_shared/components/upload_dropzone/constants';
 
+// WARNING: We may wish to restrict file types as per
+// https://gitlab.com/gitlab-org/gitlab/issues/118611
 export const isValidDesignFile = ({ type }) =>
-  (type.match(VALID_DESIGN_FILE_MIMETYPE.regex) || []).length > 0;
+  (type.match(VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
 
 /**
  * Returns formatted array of discussions

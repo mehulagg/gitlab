@@ -36,6 +36,7 @@ import {
 } from '../utils/design_management_utils';
 import { trackDesignCreate, trackDesignUpdate } from '../utils/tracking';
 import { DESIGNS_ROUTE_NAME } from '../router/constants';
+import { VALID_DESIGN_FILE_MIMETYPE } from '../constants';
 
 const MAXIMUM_FILE_UPLOAD_LIMIT = 10;
 
@@ -52,10 +53,12 @@ export default {
     DesignDropzone,
     VueDraggable,
   },
-  i18n: {
+  dropzoneProps: {
     dropDescriptionMessage: __('Drop or %{linkStart}upload%{linkEnd} designs to attach'),
     dropInvalidFileTypeError: UPLOAD_DESIGN_INVALID_FILETYPE_ERROR,
     dropToStartMessage: __('Drop your designs to start your upload.'),
+    isFileValid: isValidDesignFile,
+    validFileMimetypes: VALID_DESIGN_FILE_MIMETYPE.mimetype,
   },
   mixins: [allDesignsMixin],
   apollo: {
@@ -423,7 +426,7 @@ export default {
           <design-dropzone
             :display-as-card="hasDesigns"
             :disable-drag-behavior="isDraggingDesign"
-            v-bind="$options.i18n"
+            v-bind="$options.dropzoneProps"
             @change="onExistingDesignDropzoneChange($event, design.filename)"
           >
             <design
@@ -449,7 +452,7 @@ export default {
               :disable-drag-behavior="isDraggingDesign"
               :class="{ 'design-list-item design-list-item-new': !isDesignListEmpty }"
               :display-as-card="hasDesigns"
-              v-bind="$options.i18n"
+              v-bind="$options.dropzoneProps"
               data-qa-selector="design_dropzone_content"
               @change="onUploadDesign"
             />
