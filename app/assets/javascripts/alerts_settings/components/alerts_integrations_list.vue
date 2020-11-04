@@ -126,8 +126,8 @@ export default {
 
       <template #cell(actions)="{ item }">
         <gl-button-group>
-          <gl-button icon="pencil" @click="$emit('on-edit-integration', { id: item.id })" />
-          <gl-button icon="remove" @click="$emit('on-delete-integration', { id: item.id })" />
+          <gl-button icon="pencil" @click="$emit('edit-integration', { id: item.id })" />
+          <gl-button icon="remove" @click="$emit('delete-integration', { id: item.id })" />
         </gl-button-group>
       </template>
 

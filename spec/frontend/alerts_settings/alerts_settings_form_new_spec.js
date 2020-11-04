@@ -71,7 +71,7 @@ describe('AlertsSettingsFormNew', () => {
   });
 
   describe('submitting integration form', () => {
-    it('allows for on-create-new-integration with the correct form values for HTTP', async () => {
+    it('allows for create-new-integration with the correct form values for HTTP', async () => {
       createComponent({});
 
       const options = findSelect().findAll('option');
@@ -91,13 +91,13 @@ describe('AlertsSettingsFormNew', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.emitted('on-create-new-integration')).toBeTruthy();
-      expect(wrapper.emitted('on-create-new-integration')[0]).toEqual([
+      expect(wrapper.emitted('create-new-integration')).toBeTruthy();
+      expect(wrapper.emitted('create-new-integration')[0]).toEqual([
         { type: typeSet.http, variables: { name: 'Test integration', active: true } },
       ]);
     });
 
-    it('allows for on-create-new-integration with the correct form values for PROMETHEUS', async () => {
+    it('allows for create-new-integration with the correct form values for PROMETHEUS', async () => {
       createComponent({});
 
       const options = findSelect().findAll('option');
@@ -120,13 +120,13 @@ describe('AlertsSettingsFormNew', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.emitted('on-create-new-integration')).toBeTruthy();
-      expect(wrapper.emitted('on-create-new-integration')[0]).toEqual([
+      expect(wrapper.emitted('create-new-integration')).toBeTruthy();
+      expect(wrapper.emitted('create-new-integration')[0]).toEqual([
         { type: typeSet.prometheus, variables: { apiUrl: 'https://test.com', active: true } },
       ]);
     });
 
-    it('allows for on-update-integration with the correct form values for HTTP', async () => {
+    it('allows for update-integration with the correct form values for HTTP', async () => {
       createComponent({
         props: {
           currentIntegration: { id: '1' },
@@ -151,13 +151,13 @@ describe('AlertsSettingsFormNew', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.emitted('on-update-integration')).toBeTruthy();
-      expect(wrapper.emitted('on-update-integration')[0]).toEqual([
-        { type: 'HTTP', variables: { name: 'Test integration', active: true } },
+      expect(wrapper.emitted('update-integration')).toBeTruthy();
+      expect(wrapper.emitted('update-integration')[0]).toEqual([
+        { type: typeSet.http, variables: { name: 'Test integration', active: true } },
       ]);
     });
 
-    it('allows for on-update-integration with the correct form values for PROMETHEUS', async () => {
+    it('allows for update-integration with the correct form values for PROMETHEUS', async () => {
       createComponent({
         props: {
           currentIntegration: { id: '1' },
@@ -185,9 +185,9 @@ describe('AlertsSettingsFormNew', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.emitted('on-update-integration')).toBeTruthy();
-      expect(wrapper.emitted('on-update-integration')[0]).toEqual([
-        { type: 'PROMETHEUS', variables: { apiUrl: 'https://test.com', active: true } },
+      expect(wrapper.emitted('update-integration')).toBeTruthy();
+      expect(wrapper.emitted('update-integration')[0]).toEqual([
+        { type: typeSet.prometheus, variables: { apiUrl: 'https://test.com', active: true } },
       ]);
     });
   });
