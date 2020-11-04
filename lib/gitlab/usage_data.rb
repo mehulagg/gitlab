@@ -626,7 +626,8 @@ module Gitlab
       # rubocop: disable CodeReuse/ActiveRecord
       def usage_activity_by_stage_package(time_period)
         {
-          projects_with_packages: distinct_count(::Project.with_packages.where(time_period), :creator_id)
+          projects_with_packages: distinct_count(::Project.with_packages.where(time_period), :creator_id),
+          unique_events: ::Gitlab::UsageDataCounters::PackageUniqueCounter.unique_events_data
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
