@@ -90,5 +90,37 @@ RSpec.describe AlertsService do
         it { is_expected.to eq(false) }
       end
     end
+
+    describe '#multi_integrations?' do
+      subject { service.multi_integrations? }
+
+      before do
+        stub_licensed_features(multi_integrations: true)
+      end
+
+      context 'when license is available' do
+        it { is_expected.to eq(true) }
+      end
+
+      context 'when license is not available' do
+        before do
+          stub_licensed_features(multi_integrations: false)
+        end
+
+        it { is_expected.to eq(false) }
+      end
+
+      context 'when template service' do
+        let(:service) { build_stubbed(:alerts_service, :template) }
+
+        it { is_expected.to eq(false) }
+      end
+
+      context 'when instance service' do
+        let(:service) { build_stubbed(:alerts_service, :instance) }
+
+        it { is_expected.to eq(false) }
+      end
+    end
   end
 end
