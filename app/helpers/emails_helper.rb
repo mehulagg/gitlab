@@ -229,7 +229,6 @@ module EmailsHelper
       _('Click %{link_to} to approve or deny this request.').html_safe % { link_to: link_to }
     else
       _('Click %{link_to} to approve or deny this request.') % { link_to: url }
-
     end
   end
 
