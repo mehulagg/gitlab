@@ -65,6 +65,22 @@ RSpec.shared_examples 'group emails are disabled' do
   end
 end
 
+RSpec.shared_examples 'sends notification only to a maximum of ten, most recently active instance admins' do
+  let(:admins) { create_list(:user, :admin, 12, :with_sign_ins) }
+
+  before do
+    reset_delivered_emails!
+  end
+
+  context 'limit notification emails' do
+    it 'sends notification only to a maximum of ten, most recently active instance admins' do
+      ten_most_recently_active_instance_admins = User.admins.sort_by(&:last_sign_in_at).last(10)
+
+      should_only_email(*ten_most_recently_active_instance_admins)
+    end
+  end
+end
+
 RSpec.shared_examples 'sends notification only to a maximum of ten, most recently active group owners' do
   let(:owners) { create_list(:user, 12, :with_sign_ins) }
 

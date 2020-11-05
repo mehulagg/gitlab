@@ -2312,32 +2312,17 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
-  describe '#instance_access_request' do
-    subject { described_class.user_access_request(user) }
-
-    let_it_be(:admin) { create(:user, :admin, email: "admin@example.com") }
+  describe '#instance_access_request', :deliver_mails_inline do
     let_it_be(:user) { create(:user) }
 
-    it_behaves_like 'an email sent from GitLab'
-    it_behaves_like 'it should not have Gmail Actions links'
-    it_behaves_like 'a user cannot unsubscribe through footer link'
+    subject { notification.new_instance_access_request(user) }
 
-    it 'is sent to the admin' do
-      is_expected.to deliver_to admin.email
-      is_expected.to have_body_text /#{admin.name}/
+    before do
+      stub_application_setting(require_admin_approval_after_user_signup: true)
     end
 
-    it 'has the correct subject' do
-      is_expected.to have_subject /^GitLab Account Request$/i
-    end
+    it_behaves_like 'sends notification only to a maximum of ten, most recently active instance admins'
 
-    it 'includes the correct content' do
-      is_expected.to have_body_text /#{user.name} has asked for a GitLab account on your instance/
-    end
-
-    it 'includes a link to GitLab' do
-      is_expected.to have_body_text /#{Gitlab.config.gitlab.url}/
-    end
   end
 
   describe 'GroupMember', :deliver_mails_inline do
