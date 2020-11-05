@@ -23,6 +23,7 @@ import {
   DELETE_INTEGRATION_ERROR,
   ADD_INTEGRATION_ERROR,
   RESET_INTEGRATION_TOKEN_ERROR,
+  UPDATE_INTEGRATION_ERROR,
 } from '../utils/error_messages';
 
 export default {
@@ -162,8 +163,8 @@ export default {
             type: FLASH_TYPES.SUCCESS,
           });
         })
-        .catch(err => {
-          createFlash({ message: err });
+        .catch(() => {
+          createFlash({ message: UPDATE_INTEGRATION_ERROR });
         })
         .finally(() => {
           this.isUpdating = false;
@@ -234,7 +235,6 @@ export default {
           });
         })
         .catch(() => {
-          this.errored = true;
           createFlash({ message: DELETE_INTEGRATION_ERROR });
         })
         .finally(() => {
@@ -253,6 +253,7 @@ export default {
     <integrations-list
       :integrations="glFeatures.httpIntegrationsList ? integrations.list : intergrationsOptionsOld"
       :loading="loading"
+      :current-integration="currentIntegration"
       @edit-integration="editIntegration"
       @delete-integration="deleteIntegration"
     />
