@@ -56,6 +56,12 @@ describe('StackedProgressBarComponent', () => {
 
         expect(vm.getPercent(100)).toBe(0);
       });
+
+      it('returns 99.9% when numbers are vastly different', () => {
+        vm = createComponent({ totalCount: 100000 });
+
+        expect(vm.getPercent(99999)).toBe(99.9);
+      });
     });
 
     describe('barStyle', () => {
