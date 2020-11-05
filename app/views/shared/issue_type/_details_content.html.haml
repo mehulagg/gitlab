@@ -1,31 +1,47 @@
 - related_branches_path = related_branches_project_issue_path(@project, issuable)
 
 .issue-details.issuable-details
-  .detail-page-description.content-block
-    #js-issuable-app{ data: { initial: issuable_initial_data(issuable).to_json} }
-      .title-container
-        %h2.title= markdown_field(issuable, :title)
-      - if issuable.description.present?
-        .description
-          .md= markdown_field(issuable, :description)
+  -# TODO: this block is specific to issues, so should probably be moved there
+  -# possibly reconsider how we are splitting issues on frontend
+  - if Feature.enabled?(:issue_single_vue_app)
+    -# haml-lint:disable InlineJavaScript
+    %script#js-issuable-app-initial-data{ type: "application/json" }= issuable_initial_data(@issue).to_json
+    #js-issuable-app
+    - if @issue.sentry_issue.present?
+      #js-sentry-error-stack-trace{ data: error_details_data(@project, @issue.sentry_issue.sentry_issue_identifier) }
 
-      = edited_time_ago_with_tooltip(issuable, placement: 'bottom', html_class: 'issue-edited-ago js-issue-edited-ago')
-
-    = render 'shared/issue_type/sentry_stack_trace', issuable: issuable
-
-    = render 'projects/issues/design_management'
-
-    = render_if_exists 'projects/issues/related_issues'
-
-    #js-related-merge-requests{ data: { endpoint: expose_path(api_v4_projects_issues_related_merge_requests_path(id: @project.id, issue_iid: issuable.iid)), project_namespace: @project.namespace.path, project_path: @project.path } }
+    #js-related-merge-requests{ data: { endpoint: expose_path(api_v4_projects_issues_related_merge_requests_path(id: @project.id, issue_iid: @issue.iid)), project_namespace: @project.namespace.path, project_path: @project.path } }
 
     - if can?(current_user, :download_code, @project)
       - add_page_startup_api_call related_branches_path
       #related-branches{ data: { url: related_branches_path } }
         -# This element is filled in using JavaScript.
+  - else
+    .detail-page-description.content-block
+      #js-issuable-app{ data: { initial: issuable_initial_data(issuable).to_json} }
+        .title-container
+          %h2.title= markdown_field(issuable, :title)
+        - if issuable.description.present?
+          .description
+            .md= markdown_field(issuable, :description)
 
-  = render 'shared/issue_type/emoji_block', issuable: issuable
+        = edited_time_ago_with_tooltip(issuable, placement: 'bottom', html_class: 'issue-edited-ago js-issue-edited-ago')
 
-  = render 'projects/issues/discussion'
+      = render 'shared/issue_type/sentry_stack_trace', issuable: issuable
+
+      = render 'projects/issues/design_management'
+
+      = render_if_exists 'projects/issues/related_issues'
+
+      #js-related-merge-requests{ data: { endpoint: expose_path(api_v4_projects_issues_related_merge_requests_path(id: @project.id, issue_iid: issuable.iid)), project_namespace: @project.namespace.path, project_path: @project.path } }
+
+      - if can?(current_user, :download_code, @project)
+        - add_page_startup_api_call related_branches_path
+        #related-branches{ data: { url: related_branches_path } }
+          -# This element is filled in using JavaScript.
+
+    = render 'shared/issue_type/emoji_block', issuable: issuable
+
+    = render 'projects/issues/discussion'
 
 = render 'shared/issuable/sidebar', issuable_sidebar: @issuable_sidebar, assignees: @issue.assignees
