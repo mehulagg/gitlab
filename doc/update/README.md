@@ -128,7 +128,17 @@ pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_cla
 
 ## Upgrade paths
 
-The following table shows the supported upgrade paths.
+Although you can generally upgrade through multiple GitLab versions in one go,
+sometimes this can cause issues.
+
+Find where your version sits in the upgrade path below, and upgrade GitLab
+accordingly, while also consulting the
+[version-specific upgrade instructions](#version-specific-upgrading-instructions):
+
+`8.13.4` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11` - > `13.5.3`
+
+The following table, while not exhaustive, shows some examples of the supported
+upgrade paths.
 
 | Target version | Your version | Supported upgrade path | Note |
 | --------------------- | ------------ | ------------------------ | ---- |
@@ -292,12 +302,18 @@ If you need to downgrade your Enterprise Edition installation back to Community
 Edition, you can follow [this guide](../downgrade_ee_to_ce/README.md) to make the process as smooth as
 possible.
 
-## Version specific upgrading instructions
+## Version-specific upgrading instructions
 
-Check [our release posts](https://about.gitlab.com/releases/categories/releases/).
+Each month, a major or minor release of GitLab is published along with a
+[release post](https://about.gitlab.com/releases/categories/releases/).
+You should check all the major and minor versions you're passing over.
+At the end of those release posts, there are three sections to look for:
 
-Each month, we publish either a major or minor release of GitLab. At the end
-of those release posts, there are three sections to look for: Deprecations, Removals, and Important notes on upgrading. These will include:
+- Deprecations
+- Removals
+- Important notes on upgrading
+
+These will include:
 
 - Steps you need to perform as part of an upgrade.
   For example [8.12](https://about.gitlab.com/releases/2016/09/22/gitlab-8-12-released/#upgrade-barometer)
@@ -305,7 +321,11 @@ of those release posts, there are three sections to look for: Deprecations, Remo
 - Changes to the versions of software we support such as
   [ceasing support for IE11 in GitLab 13](https://about.gitlab.com/releases/2020/03/22/gitlab-12-9-released/#ending-support-for-internet-explorer-11).
 
-You should check all the major and minor versions you're passing over.
+Apart from the instructions in this section, you should also check the
+installation-specific upgrade instructions, based on how you installed GitLab:
+
+- [Linux packages (Omnibus GitLab)](https://docs.gitlab.com/omnibus/update/README.html#version-specific-changes)
+- [Helm charts](https://docs.gitlab.com/charts/installation/upgrade.html)
 
 ### 13.6.0
 
@@ -371,6 +391,12 @@ automatically upgraded.
 
 However, session cookie downgrades are not supported. So after upgrading to 12.2.0,
 any downgrades would result to all sessions being invalidated and users are logged out.
+
+### 12.1.0
+
+If you are planning to upgrade from `12.0.x` to `12.10.x`, it is necessary to
+perform an intermediary upgrade to `12.1.x` before upgrading to `12.10.x` to
+avoid issues like [#215141](https://gitlab.com/gitlab-org/gitlab/-/issues/215141).
 
 ### 12.0.0
 
