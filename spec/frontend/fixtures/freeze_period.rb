@@ -10,10 +10,20 @@ RSpec.describe 'Freeze Periods (JavaScript fixtures)' do
   let_it_be(:project) { create(:project, :repository, path: 'freeze-periods-project') }
 
   before(:all) do
+    # Allow Timecop freeze and travel without the block form
+    Timecop.safe_mode = false
+    Timecop.freeze
+
+    # Mock time to sept 19 (intl. talk like a pirate day)
+    Timecop.travel(2020, 9, 19)
+
     clean_frontend_fixtures('api/freeze-periods/')
   end
 
   after(:all) do
+    Timecop.return
+    Timecop.safe_mode = true
+
     remove_repository(project)
   end
 
