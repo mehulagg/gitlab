@@ -33,7 +33,7 @@ export default {
       return {
         text: s__('Cancel'),
       };
-    }, 
+    },
     confirmDeleteMessage() {
       return sprintf(
         s__(
@@ -59,7 +59,8 @@ export default {
   <gl-modal
     :modal-id="$options.id"
     :action-primary="primaryProps"
-+   :action-cancel="cancelProps"
+    +
+    :action-cancel="cancelProps"
     @primary="onSubmit"
   >
     <template #modal-title>
