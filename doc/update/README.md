@@ -60,6 +60,15 @@ GitLab provides official Docker images for both Community and Enterprise
 editions. They are based on the Omnibus package and instructions on how to
 update them are in [a separate document](https://docs.gitlab.com/omnibus/docker/README.html).
 
+### Installation using Helm
+
+GitLab can be deployed into a Kubernetes cluster using Helm.  Instructions on how
+to update a cloud-native deployment are in
+[a separate document](https://docs.gitlab.com/charts/installation/upgrade.html).
+
+Use the [version mapping](https://docs.gitlab.com/charts/installation/version_mappings.html)
+from the chart version to GitLab version to determine the [upgrade path](#upgrade-paths).
+
 ## Checking for background migrations before upgrading
 
 Certain major/minor releases may require a set of background migrations to be
