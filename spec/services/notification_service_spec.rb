@@ -2322,7 +2322,6 @@ RSpec.describe NotificationService, :mailer do
     end
 
     it_behaves_like 'sends notification only to a maximum of ten, most recently active instance admins'
-
   end
 
   describe 'GroupMember', :deliver_mails_inline do
