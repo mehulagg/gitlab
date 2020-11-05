@@ -17,7 +17,6 @@ class GlobalPolicy < BasePolicy
 
   condition(:project_bot, scope: :user) { @user&.project_bot? }
   condition(:migration_bot, scope: :user) { @user&.migration_bot? }
-  condition(:security_bot, scope: :user) { @user&.security_bot? }
 
   rule { anonymous }.policy do
     prevent :log_in
