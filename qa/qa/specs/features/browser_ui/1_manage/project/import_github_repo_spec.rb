@@ -16,7 +16,7 @@ module QA
           project.name = 'imported-project'
           project.group = group
           project.github_personal_access_token = Runtime::Env.github_access_token
-          project.github_repository_path = 'gitlab-qa/test-project'
+          project.github_repository_path = 'gitlab-qa-github/test-project'
         end
       end
 
@@ -60,14 +60,14 @@ module QA
 
           click_link 'This is a sample issue'
 
-          expect(page).to have_content('We should populate this project with issues, pull requests and wiki pages.')
+          expect(page).to have_content('This is a sample first comment')
 
           # Comments
-          comment_text = 'This is a comment from @rymai.'
+          comment_text = 'This is a comment from @sliaquat'
 
           Page::Project::Issue::Show.perform do |issue_page|
             expect(issue_page).to have_comment(comment_text)
-            expect(issue_page).to have_label('enhancement')
+            expect(issue_page).to have_label('custom new label')
             expect(issue_page).to have_label('help wanted')
             expect(issue_page).to have_label('good first issue')
           end
@@ -76,26 +76,22 @@ module QA
 
       def verify_merge_requests_import
         Page::Project::Menu.perform(&:click_merge_requests)
-        expect(page).to have_content('Improve README.md')
+        expect(page).to have_content('Improve readme')
 
-        click_link 'Improve README.md'
+        click_link 'Improve readme'
 
         expect(page).to have_content('This improves the README file a bit.')
 
-        # Review comment are not supported yet
-        expect(page).not_to have_content('Really nice change.')
-
         # Comments
-        expect(page).to have_content('Nice work! This is a comment from @rymai.')
+        expect(page).to have_content('[PR comment by @sliaquat] Nice work!')
 
         # Diff comments
-        expect(page).to have_content('[Review comment] I like that!')
-        expect(page).to have_content('[Review comment] Nice blank line.')
-        expect(page).to have_content('[Single diff comment] Much better without this line!')
+        expect(page).to have_content('[Single diff comment] Good riddance')
+        expect(page).to have_content('[Single diff comment] Nice addition')
 
         Page::MergeRequest::Show.perform do |merge_request|
           expect(merge_request).to have_label('bug')
-          expect(merge_request).to have_label('enhancement')
+          expect(merge_request).to have_label('documentation')
         end
       end
 
