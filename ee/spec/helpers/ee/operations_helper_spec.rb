@@ -128,10 +128,6 @@ RSpec.describe OperationsHelper, :routing do
       end
 
       context 'when not available' do
-        let(:multi_integrations_key) do
-          %w[multi_integrations]
-        end
-
         let(:multi_integrations) { false }
 
         it { is_expected.to include('multi_integrations' => 'false') }
