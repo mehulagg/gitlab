@@ -11,9 +11,9 @@ RSpec.describe 'DevOps Report page', :js do
     sign_in(create(:admin))
   end
 
-  context 'with devops_adoption feature flag disabled' do
+  context 'with devops_adoption_feature feature flag disabled' do
     before do
-      stub_feature_flags(devops_adoption: false)
+      stub_feature_flags(devops_adoption_feature: false)
     end
 
     it 'does not show the tabbed layout' do
@@ -23,7 +23,7 @@ RSpec.describe 'DevOps Report page', :js do
     end
   end
 
-  context 'with devops_adoption feature flag enabled' do
+  context 'with devops_adoption_feature feature flag enabled' do
     it 'shows the tabbed layout' do
       visit admin_dev_ops_report_path
 
