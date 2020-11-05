@@ -11,7 +11,7 @@ module API
         success EE::API::Entities::Experiment
       end
       get do
-        experiments = Gitlab::Experimentation::EXPERIMENTS.keys.map do |experiment_key|
+        experiments = Gitlab::Experimentation.registry.keys.map do |experiment_key|
           { key: experiment_key, enabled: Gitlab::Experimentation.enabled?(experiment_key) }
         end
 

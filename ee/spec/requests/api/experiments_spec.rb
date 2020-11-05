@@ -21,7 +21,7 @@ RSpec.describe API::Experiments do
       end
 
       before do
-        stub_const('Gitlab::Experimentation::EXPERIMENTS', experiments)
+        allow(Gitlab::Experimentation).to receive(:registry).and_return(experiments)
         Feature.enable_percentage_of_time('experiment_1_experiment_percentage', 10)
         Feature.disable('experiment_2_experiment_percentage')
         allow(Gitlab).to receive(:com?).and_return(true)
