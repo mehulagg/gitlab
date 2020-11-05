@@ -46,7 +46,6 @@ when you view the package details:
 
 ![Package CI/CD activity](img/package_activity_v12_10.png)
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 When using Maven and NPM, you can view which pipeline published the package, and
 the commit and user who triggered it.
 
