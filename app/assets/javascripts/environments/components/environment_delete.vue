@@ -4,16 +4,19 @@
  * Used in the environments table.
  */
 
-import { GlTooltipDirective, GlButton } from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
   components: {
     GlButton,
+    GlModal,
+    GlModal: GlModalDirective,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModalDirective,
   },
   props: {
     environment: {
@@ -54,6 +57,7 @@ export default {
 <template>
   <gl-button
     v-gl-tooltip="{ id: $options.deleteEnvironmentTooltipId }"
+    v-gl-modal-directive="'delete_environment_modal'"
     :loading="isLoading"
     :title="title"
     :aria-label="title"
@@ -61,8 +65,6 @@ export default {
     variant="danger"
     category="primary"
     icon="remove"
-    data-toggle="modal"
-    data-target="#delete-environment-modal"
     @click="onClick"
   />
 </template>
