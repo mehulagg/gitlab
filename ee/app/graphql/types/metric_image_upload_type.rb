@@ -14,7 +14,7 @@ module Types
           description: 'Internal ID of the metric upload'
 
     field :url, GraphQL::STRING_TYPE, null: false,
-          description: 'URL of the url to see more metric data'
+          description: 'URL of the metric source'
 
     field :file_name, GraphQL::STRING_TYPE, null: true,
           description: 'File name of the metric image',

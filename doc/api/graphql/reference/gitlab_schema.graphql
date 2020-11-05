@@ -12719,7 +12719,7 @@ type MetricImageUpload {
   iid: ID!
 
   """
-  URL of the url to see more metric data
+  URL of the metric source
   """
   url: String!
 }

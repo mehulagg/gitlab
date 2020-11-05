@@ -1863,7 +1863,7 @@ Represents a metric image upload.
 | `filePath` | String | File path of the metric image |
 | `id` | ID! | ID of the metric upload |
 | `iid` | ID! | Internal ID of the metric upload |
-| `url` | String! | URL of the url to see more metric data |
+| `url` | String! | URL of the metric source |
 
 ### MetricsDashboard
 

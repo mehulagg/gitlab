@@ -34899,7 +34899,7 @@
             },
             {
               "name": "url",
-              "description": "URL of the url to see more metric data",
+              "description": "URL of the metric source",
               "args": [
 
               ],
