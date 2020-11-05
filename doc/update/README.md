@@ -31,8 +31,12 @@ official ways to update GitLab:
 
 ### Linux packages (Omnibus GitLab)
 
-- The [Omnibus update guide](https://docs.gitlab.com/omnibus/update/README.html)
-  contains the steps needed to update an Omnibus GitLab package.
+The [Omnibus update guide](https://docs.gitlab.com/omnibus/update/)
+contains the steps needed to update a package installed by GitLab's official
+repositories.
+
+There are also instructions when you want to
+[update to a specific version](https://docs.gitlab.com/omnibus/update/#multi-step-upgrade-using-the-official-repositories).
 
 ### Installation from source
 
@@ -76,8 +80,6 @@ If using GitLab 12.8 and older, run the following using a [Rails console](../adm
 puts Sidekiq::Queue.new("background_migration").size
 Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
 ```
-
----
 
 **For installations from source**
 
@@ -148,35 +150,6 @@ upgrade paths.
 | `12.9.5`             | `10.4.5`       | `10.4.5` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.9.5`   | Four intermediate versions are required: `10.8`, `11.11`, `12.0` and `12.1`, then `12.9.5` |
 | `12.2.5`              | `9.2.6`        | `9.2.6` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.2.5` | Five intermediate versions are required: `9.5`, `10.8`, `11.11`, `12.0`, `12.1`, then `12.2`. |
 | `11.3.4`              | `8.13.4`       | `8.13.4` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.3.4` | `8.17.7` is the last version in version 8, `9.5.10` is the last version in version 9, `10.8.7` is the last version in version 10. |
-
-### Multi-step upgrade paths with GitLab all-in-one Linux package repository
-
-Linux package managers default to installing the latest available version of a package for installation and upgrades.
-Upgrading directly to the latest major version can be problematic for older GitLab versions that require a multi-stage upgrade path.
-
-When following an upgrade path spanning multiple versions, for each upgrade, specify the intended GitLab version number in your package manager's install or upgrade command.
-
-Examples:
-
-```shell
-# apt-get (Ubuntu/Debian)
-sudo apt-get upgrade gitlab-ee=12.0.12-ee.0
-# yum (RHEL/CentOS 6 and 7)
-yum install gitlab-ee-12.0.12-ee.0.el7
-# dnf (RHEL/CentOS 8)
-dnf install gitlab-ee-12.0.12-ee.0.el8
-# zypper (SUSE)
-zypper install gitlab-ee=12.0.12-ee.0
-```
-
-To identify the GitLab version number in your package manager, run the following commands:
-
-```shell
-# apt-cache (Ubuntu/Debian)
-sudo apt-cache madison gitlab-ee
-# yum (RHEL/CentOS 6 and 7)
-yum --showduplicates list gitlab-ee
-```
 
 ## Upgrading to a new major version
 
