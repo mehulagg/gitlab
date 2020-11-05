@@ -12,7 +12,7 @@ GitLab version is, if you're upgrading to a major version, etc.
 
 Make sure to read the whole page as it contains information related to every upgrade method.
 
-Our [maintenance policy documentation](../policy/maintenance.md)
+The [maintenance policy documentation](../policy/maintenance.md)
 has additional information about upgrading, including:
 
 - How to interpret GitLab product versioning.
@@ -25,7 +25,7 @@ has additional information about upgrading, including:
 Depending on the installation method and your GitLab version, there are multiple
 official ways to update GitLab:
 
-- [Omnibus packages](#linux-packages-omnibus-gitlab)
+- [Linux packages (Omnibus GitLab)](#linux-packages-omnibus-gitlab)
 - [Source installations](#installation-from-source)
 - [Docker installations](#installation-using-docker)
 
@@ -137,7 +137,7 @@ Find where your version sits in the upgrade path below, and upgrade GitLab
 accordingly, while also consulting the
 [version-specific upgrade instructions](#version-specific-upgrading-instructions):
 
-`8.13.4` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11` - > `13.5.3`
+`8.11.x` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11` - > `13.5.3`
 
 The following table, while not exhaustive, shows some examples of the supported
 upgrade paths.
