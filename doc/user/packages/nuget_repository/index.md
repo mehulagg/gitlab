@@ -163,7 +163,7 @@ nuget push <package_file> -Source <source_name>
 ```
 
 - `<package_file>` is your package filename, ending in `.nupkg`.
-- `<source_name>` is the [source name used during setup](#add---source-with-the-nuget-cli).
+- `<source_name>` is the [source name used during setup](#add-a-source-with-the-nuget-cli).
 
 ### Publish a package with the .NET CLI
 
@@ -176,7 +176,7 @@ dotnet nuget push <package_file> --source <source_name>
 ```
 
 - `<package_file>` is your package filename, ending in `.nupkg`.
-- `<source_name>` is the [source name used during setup](#add-the-source-with-the-net-cli).
+- `<source_name>` is the [source name used during setup](#add-a-source-with-the-net-cli).
 
 For example:
 
