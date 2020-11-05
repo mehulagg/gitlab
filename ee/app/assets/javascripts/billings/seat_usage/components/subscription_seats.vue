@@ -68,7 +68,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="gl-pt-4">
     <h4 data-testid="heading">{{ headingText }}</h4>
     <p>{{ subHeadingText }}</p>
     <gl-table
