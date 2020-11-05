@@ -32,6 +32,9 @@ To set up a project import/export:
 
 Note the following:
 
+- Before you can import a project, you need to export the data first.
+  See [Exporting a project and its data](#exporting-a-project-and-its-data)
+  for how you can export a project through the UI.
 - Imports from a newer version of GitLab are not supported.
   The Importing GitLab version must be greater than or equal to the Exporting GitLab version.
 - Imports will fail unless the import and export GitLab instances are
