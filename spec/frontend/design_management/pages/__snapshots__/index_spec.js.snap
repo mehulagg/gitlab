@@ -20,14 +20,32 @@ exports[`Design management index page designs does not render toolbar when there
         <design-dropzone-stub
           class="design-list-item design-list-item-new"
           data-qa-selector="design_dropzone_content"
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         />
       </li>
       <li
         class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
       >
         <design-dropzone-stub
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         >
           <design-stub
             class="gl-bg-white"
@@ -45,7 +63,16 @@ exports[`Design management index page designs does not render toolbar when there
         class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
       >
         <design-dropzone-stub
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         >
           <design-stub
             class="gl-bg-white"
@@ -63,7 +90,16 @@ exports[`Design management index page designs does not render toolbar when there
         class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
       >
         <design-dropzone-stub
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         >
           <design-stub
             class="gl-bg-white"
@@ -154,14 +190,32 @@ exports[`Design management index page designs renders designs list and header wi
         <design-dropzone-stub
           class="design-list-item design-list-item-new"
           data-qa-selector="design_dropzone_content"
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         />
       </li>
       <li
         class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
       >
         <design-dropzone-stub
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         >
           <design-stub
             class="gl-bg-white"
@@ -184,7 +238,16 @@ exports[`Design management index page designs renders designs list and header wi
         class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
       >
         <design-dropzone-stub
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         >
           <design-stub
             class="gl-bg-white"
@@ -207,7 +270,16 @@ exports[`Design management index page designs renders designs list and header wi
         class="col-md-6 col-lg-3 gl-mb-3 gl-bg-transparent gl-shadow-none js-design-tile"
       >
         <design-dropzone-stub
-          hasdesigns="true"
+          displayascard="true"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         >
           <design-stub
             class="gl-bg-white"
@@ -309,6 +381,15 @@ exports[`Design management index page when has no designs renders design dropzon
         <design-dropzone-stub
           class=""
           data-qa-selector="design_dropzone_content"
+          dropdescriptionmessage="Drop or %{linkStart}upload%{linkEnd} designs to attach"
+          dropinvalidfiletypeerror="Could not upload your designs as one or more files uploaded are not supported."
+          droptostartmessage="Drop your designs to start your upload."
+          isfilevalid="function ({
+  type
+}) {
+  return (type.match(_constants.VALID_IMAGE_FILE_MIMETYPE.regex) || []).length > 0;
+}"
+          validfilemimetypes="image/*"
         />
       </li>
     </ol>

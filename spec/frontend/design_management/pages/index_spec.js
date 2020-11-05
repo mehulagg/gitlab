@@ -8,7 +8,7 @@ import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import Index from '~/design_management/pages/index.vue';
 import uploadDesignQuery from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
 import DesignDestroyer from '~/design_management/components/design_destroyer.vue';
-import DesignDropzone from '~/design_management/components/upload/design_dropzone.vue';
+import DesignDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import DeleteButton from '~/design_management/components/delete_button.vue';
 import Design from '~/design_management/components/list/item.vue';
 import { DESIGNS_ROUTE_NAME } from '~/design_management/router/constants';
