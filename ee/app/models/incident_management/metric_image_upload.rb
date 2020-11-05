@@ -16,15 +16,19 @@ module IncidentManagement
     validate :validate_file_is_image
     validates :url, length: { maximum: 255 }
 
-    # def retrieve_upload(_identifier, paths)
-    #   Upload.find_by(model: self, path: paths)
-    # end
-
-    private
+    def retrieve_upload(_identifier, paths)
+      Upload.find_by(model: self, path: paths)
+    end
 
     def filename
       file&.filename
     end
+
+    def file_path
+      @file_path ||= file&.url
+    end
+
+    private
 
     def valid_file_extensions
       SAFE_IMAGE_EXT
