@@ -92,7 +92,7 @@ To enable the Packages feature:
      enabled: true
    ```
 
-1. [Restart GitLab](../restart_gitlab.html#helm-chart-installations "How to reconfigure Helm installations of GitLab") for the changes to take effect.
+1. [Restart GitLab](../restart_gitlab.md#helm-chart-installations "How to reconfigure Helm GitLab") for the changes to take effect.
 
 ## Changing the storage path
 
