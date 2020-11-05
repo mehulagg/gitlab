@@ -21,14 +21,12 @@ import {
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   typeSet,
-  defaultFormState,
 } from '../constants';
 
 export default {
   targetPrometheusUrlPlaceholder,
   JSON_VALIDATE_DELAY,
   typeSet,
-  defaultFormState,
   i18n: {
     integrationFormSteps: {
       step1: {
@@ -114,11 +112,15 @@ export default {
       options: integrationTypesNew,
       active: false,
       formVisible: false,
+      integrationTestPayload: {
+        json: null,
+        error: null,
+      },
     };
   },
   computed: {
     jsonIsValid() {
-      return this.integrationForm.integrationTestPayload.error === null;
+      return this.integrationTestPayload.error === null;
     },
     selectedIntegrationType() {
       switch (this.selectedIntegration) {
@@ -127,16 +129,12 @@ export default {
         case this.$options.typeSet.prometheus:
           return this.prometheus;
         default:
-          return this.$options.defaultFormState;
+          return {};
       }
     },
     integrationForm() {
       return {
         name: this.currentIntegration?.name || '',
-        integrationTestPayload: {
-          json: null,
-          error: null,
-        },
         active: this.currentIntegration?.active || false,
         token: this.currentIntegration?.token || this.selectedIntegrationType.token,
         url: this.currentIntegration?.url || this.selectedIntegrationType.url,
@@ -180,8 +178,7 @@ export default {
 
       return this.$emit('create-new-integration', integrationPayload);
     },
-    onReset() {
-      this.integrationForm = this.$options.defaultFormState;
+    reset() {
       this.selectedIntegration = integrationTypesNew[0].value;
       this.integrationTypeSelect();
 
@@ -191,8 +188,13 @@ export default {
 
       return this.resetFormValues();
     },
-    onResetFormValues() {
-      this.integrationForm = this.$options.defaultFormState;
+    resetFormValues() {
+      this.integrationForm.name = '';
+      this.integrationForm.apiUrl = '';
+      this.integrationTestPayload = {
+        json: null,
+        error: null,
+      };
       this.active = false;
     },
     resetAuthKey() {
@@ -206,15 +208,15 @@ export default {
       });
     },
     validateJson() {
-      this.integrationForm.integrationTestPayload.error = null;
-      if (this.integrationForm.integrationTestPayload.json === '') {
+      this.integrationTestPayload.error = null;
+      if (this.integrationTestPayload.json === '') {
         return;
       }
 
       try {
-        JSON.parse(this.integrationForm.integrationTestPayload.json);
+        JSON.parse(this.integrationTestPayload.json);
       } catch (e) {
-        this.integrationForm.integrationTestPayload.error = JSON.stringify(e.message);
+        this.integrationTestPayload.error = JSON.stringify(e.message);
       }
     },
   },
@@ -342,7 +344,7 @@ export default {
         id="test-integration"
         :label="$options.i18n.integrationFormSteps.step4.label"
         label-for="test-integration"
-        :invalid-feedback="integrationForm.integrationTestPayload.error"
+        :invalid-feedback="integrationTestPayload.error"
       >
         <alert-settings-form-help-block
           :message="$options.i18n.integrationFormSteps.step4.help"
@@ -351,7 +353,7 @@ export default {
 
         <gl-form-textarea
           id="test-integration"
-          v-model.trim="integrationForm.integrationTestPayload.json"
+          v-model.trim="integrationTestPayload.json"
           :disabled="!active"
           :state="jsonIsValid"
           :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"

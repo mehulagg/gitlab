@@ -176,10 +176,10 @@ export default {
               return createFlash({ message: error });
             }
 
-            const token =
-              httpIntegrationResetToken?.integration?.token ||
-              prometheusIntegrationResetToken?.integration?.token;
-            this.currentIntegration.token = token;
+            const integration =
+              httpIntegrationResetToken?.integration ||
+              prometheusIntegrationResetToken?.integration;
+            this.currentIntegration = integration;
 
             return createFlash({
               message: this.$options.i18n.changesSaved,
