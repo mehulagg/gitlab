@@ -14,12 +14,7 @@ class ProjectSecuritySetting < ApplicationRecord
   # Note: Even if we store settings for all types of security scanning
   # Currently, Auto-fix feature is available only for container_scanning and
   # dependency_scanning features.
-  def auto_fix_enabled
-    auto_fix = {
-      container_scanning: auto_fix_container_scanning,
-      dependency_scanning: auto_fix_dependency_scanning
-    }
-
-    auto_fix.select { |_, state| !!state }.keys
+  def auto_fix_enabled?
+    [ auto_fix_container_scanning, auto_fix_dependency_scanning ].any?
   end
 end
