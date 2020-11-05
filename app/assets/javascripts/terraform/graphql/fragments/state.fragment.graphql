@@ -3,4 +3,13 @@ fragment State on TerraformState {
   name
   lockedAt
   updatedAt
+
+  latestVersion {
+    updatedAt
+
+    createdByUser {
+      id
+      name
+    }
+  }
 }

@@ -52,9 +52,15 @@ export default {
 
     <template #cell(updated)="{ item }">
       <p class="gl-m-0" data-testid="terraform-states-table-updated">
-        <gl-sprintf :message="s__('Terraform|updated %{timeStart}time%{timeEnd}')">
+        <gl-sprintf
+          :message="s__('Terraform|%{nameStart}name%{nameEnd} updated %{timeStart}time%{timeEnd}')"
+        >
+          <template #name>
+            {{ item.latestVersion.createdByUser.name }}
+          </template>
+
           <template #time>
-            <time-ago-tooltip :time="item.updatedAt" />
+            <time-ago-tooltip :time="item.latestVersion.updatedAt" />
           </template>
         </gl-sprintf>
       </p>
