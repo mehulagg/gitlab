@@ -61,8 +61,8 @@ module EE
       end
     end
 
-    override :highlight_and_truncate_issue
-    def highlight_and_truncate_issue(issue, search_term, search_highlight)
+    override :highlight_and_truncate_issuable
+    def highlight_and_truncate_issuable(issue, search_term, search_highlight)
       return super unless search_service.use_elasticsearch? && search_highlight[issue.id]&.description.present?
 
       # We use Elasticsearch highlighting for results from Elasticsearch. Sanitize the description, replace the

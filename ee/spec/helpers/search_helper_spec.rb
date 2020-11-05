@@ -148,7 +148,7 @@ RSpec.describe SearchHelper do
     end
   end
 
-  describe '#highlight_and_truncate_issue' do
+  describe '#highlight_and_truncate_issuable' do
     let(:description) { 'hello world' }
     let(:issue) { create(:issue, description: description) }
     let(:user) { create(:user) }
@@ -160,7 +160,7 @@ RSpec.describe SearchHelper do
     end
 
     # Elasticsearch returns Elasticsearch::Model::HashWrapper class for the highlighting
-    subject { highlight_and_truncate_issue(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
+    subject { highlight_and_truncate_issuable(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
 
     context 'when description is not present' do
       let(:description) { nil }
