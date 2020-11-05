@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 require 'tempfile'
+# this file is an exact copy of source except for this line so we can know about the Cop class before it is monkey
+# patched and skirt around our superclass mismatch for class Cop
+# when running a rubocop specs for our locally defined cops
+require 'rubocop'
 
 # This module provides methods that make it easier to test Cops.
 module CopHelper
@@ -58,10 +62,7 @@ module RuboCop
   module Cop
     # Monkey-patch Cop for tests to provide easy access to messages and
     # highlights.
-    # this file is an exact copy of source except for this line
-    # where we change to the new Base class defined in rubocop and skirt around our superclass mismatch for class Cop
-    # when running a rubocop spec.
-    class Base
+    class Cop
       def messages
         offenses.sort.map(&:message)
       end

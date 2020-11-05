@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 # There is an issue between rubocop versions 0.86 and 0.87 (verified by testing locally)
-# where the monkey patching in cop_helper is referencing class Cop and should really be referencing class Base instead
+# where the monkey patching in cop_helper is referencing class Cop before rubocop is loaded locally and Cop is defined
 # the gem's version of the cop_helper causes this issue when testing a rubocop cop locally and in CI
 # The only difference in this file as compared to gem source file is that we include our own cop_helper instead
-# which is a direct copy with a fix for the monkey patching part.
+# which is a direct copy with a loading of rubocop
+# This is due to the change where before this fix, this cop_helper loaded first w/o an inheritance 'class Cop'
+# then when we require rubocop, it loads the gem version where it now has an inheritance of 'class Cop < Base'
+# So our order of loading needs to be rubocop first and then the monkey patch
 # Doing this, resolves the issue.
 # Ideally we should move away from using the cop_helper at all as is the direction of rubocop as seen
 # here - https://github.com/rubocop-hq/rubocop/issues/8003
