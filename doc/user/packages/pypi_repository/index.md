@@ -99,7 +99,7 @@ about this file, see [creating setup.py](https://packaging.python.org/tutorials/
 GitLab identifies packages based on
 [Python normalized names (PEP-503)](https://www.python.org/dev/peps/pep-0503/#normalized-names),
 so ensure your package name meets these requirements.
-See the [installation section](#install-packages) for more details.
+See the [installation section](#publish-a-pypi-package-by-using-cicd) for more details.
 
 For this guide, we don't need to extensively fill out this file, simply add the
 below to your `setup.py`:
@@ -257,7 +257,7 @@ python -m twine upload --repository <source_name> dist/<package_file>
 Where:
 
 - `<package_file>` is your package filename, ending in `.tar.gz` or `.whl`.
-- `<source_name>` is the [source name used during setup](#adding-the-gitlab-pypi-repository-as-a-source).
+- `<source_name>` is the [source name used during setup](#authenticate-with-the-package-registry).
 
 ### Publish a PyPI package by using CI/CD
 
