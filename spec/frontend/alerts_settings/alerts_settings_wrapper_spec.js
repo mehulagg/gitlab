@@ -15,6 +15,10 @@ import destroyHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/
 import resetHttpTokenMutation from '~/alerts_settings/graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '~/alerts_settings/graphql/mutations/reset_prometheus_token.mutation.graphql';
 import { typeSet } from '~/alerts_settings/constants';
+import {
+  ADD_INTEGRATION_ERROR,
+  RESET_INTEGRATION_TOKEN_ERROR,
+} from '~/alerts_settings/utils/error_messages';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
 import mockIntegrations from './mocks/integrations.json';
@@ -294,11 +298,11 @@ describe('AlertsSettingsWrapper', () => {
         loading: false,
       });
 
-      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(ADD_INTEGRATION_ERROR);
       wrapper.find(AlertsSettingsFormNew).vm.$emit('create-new-integration', {});
 
       setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+        expect(createFlash).toHaveBeenCalledWith({ message: ADD_INTEGRATION_ERROR });
       });
     });
 
@@ -309,12 +313,12 @@ describe('AlertsSettingsWrapper', () => {
         loading: false,
       });
 
-      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(RESET_INTEGRATION_TOKEN_ERROR);
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('reset-token', {});
 
       setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+        expect(createFlash).toHaveBeenCalledWith({ message: RESET_INTEGRATION_TOKEN_ERROR });
       });
     });
 
