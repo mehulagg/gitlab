@@ -81,7 +81,7 @@ describe('LdapOverrideConfirmationModal', () => {
     it('displays modal body', () => {
       expect(
         getByText(
-          `${member.user.name} is currently a LDAP user. Editing their permissions will override the settings from the LDAP group sync.`,
+          `${member.user.name} is currently an LDAP user. Editing their permissions will override the settings from the LDAP group sync.`,
         ).exists(),
       ).toBe(true);
     });

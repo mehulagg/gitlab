@@ -1,7 +1,12 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
 query getStorageCounter(
   $fullPath: ID!
-  $searchTerm: String = ""
   $withExcessStorageData: Boolean = false
+  $searchTerm: String = ""
+  $first: Int!
+  $after: String
+  $before: String
 ) {
   namespace(fullPath: $fullPath) {
     id
@@ -23,28 +28,36 @@ query getStorageCounter(
       wikiSize
       snippetsSize
     }
-    projects(includeSubgroups: true, sort: STORAGE, search: $searchTerm) {
-      edges {
-        node {
-          id
-          fullPath
-          nameWithNamespace
-          avatarUrl
-          webUrl
-          name
-          repositorySizeExcess @include(if: $withExcessStorageData)
-          actualRepositorySizeLimit @include(if: $withExcessStorageData)
-          statistics {
-            commitCount
-            storageSize
-            repositorySize
-            lfsObjectsSize
-            buildArtifactsSize
-            packagesSize
-            wikiSize
-            snippetsSize
-          }
+    projects(
+      includeSubgroups: true
+      search: $searchTerm
+      first: $first
+      after: $after
+      before: $before
+      sort: STORAGE
+    ) {
+      nodes {
+        id
+        fullPath
+        nameWithNamespace
+        avatarUrl
+        webUrl
+        name
+        repositorySizeExcess @include(if: $withExcessStorageData)
+        actualRepositorySizeLimit @include(if: $withExcessStorageData)
+        statistics {
+          commitCount
+          storageSize
+          repositorySize
+          lfsObjectsSize
+          buildArtifactsSize
+          packagesSize
+          wikiSize
+          snippetsSize
         }
+      }
+      pageInfo {
+        ...PageInfo
       }
     }
   }

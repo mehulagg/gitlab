@@ -13,70 +13,53 @@
 
 - true_up_url = 'https://about.gitlab.com/license-faq/'
 - true_up_link_start = '<a href="%{url}">'.html_safe % { url: true_up_url }
+- billable_users_url = help_page_path('subscriptions/self_managed/index', anchor: 'billable-users')
+- billable_users_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer nofollow">'.html_safe % { url: billable_users_url }
 - link_end = '</a>'.html_safe
 
-.license-panel.gl-mt-5
-  .gl-mb-5.info-well.dark-well
-    .gl-display-flex.gl-justify-content-space-between.gl-align-items-center.gl-p-5
-      %div
-        %h4.gl-mt-0
-          = _('License overview')
-        %p.gl-mb-0
-          = sprite_icon('license', css_class: 'gl-fill-gray-700')
-          %span.gl-ml-3
-            = _('Plan:')
-          %strong= @license.plan.capitalize
-          %span.gl-ml-5
-            = render 'admin/licenses/license_status'
-          %span.gl-ml-5
-            = _('Licensed to:')
-            %strong= @license.licensee['Name']
-            = "(#{@license.licensee['Email']})"
-      %div
-        = link_to 'View details', admin_license_path, class: "gl-button btn btn-secondary"
-  .d-flex.gl-mb-5
-    .col-sm-6.d-flex.pl-0
-      .info-well.dark-well.gl-mb-0
-        .well-segment.well-centered
-          %h3.center
-            = _('Users in License:')
-            = licensed_users
-          %hr
-          - if @license.will_expire?
-            = _('Your license is valid from')
-            %strong<>
-              = _(' %{start} to %{end}') % { start: @license.starts_at, end: @license.expires_at }
-            \.
-          = _('The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal.').html_safe % { link_start: true_up_link_start, link_end: link_end }
-          = seats_calculation_message(@license)
-    .col-sm-6.d-flex.pr-0
-      .info-well.dark-well.gl-mb-0
-        .well-segment.well-centered
-          %h3.center
-            = _('Billable Users:')
-            = number_with_delimiter current_active_user_count
-          %hr
-            %p
-            = _('This is the number of currently active users on your installation, and this is the minimum number you need to purchase when you renew your license.')
-  .d-flex.gl-pb-5
-    .col-sm-6.d-flex.pl-0
-      .info-well.dark-well.flex-fill.gl-mb-0
-        .well-segment.well-centered
-          %h3.center
-            = _('Maximum Users:')
-            = number_with_delimiter max_user_count
-          %hr
-            = _('This is the highest peak of users on your installation since the license started.')
-    .col-sm-6.d-flex.pr-0
-      .info-well.dark-well.gl-mb-0
-        .well-segment.well-centered
-          %h3.center
-            = _('Users over License:')
-            = number_with_delimiter users_over_license
-          %hr
-            - if license_is_over_capacity?
-              .gl-alert.gl-alert-info.gl-mb-3{ role: 'alert' }
-                = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-                .gl-alert-body
-                  = s_('Your instance has exceeded your subscription\'s licensed user count.')
-            = _('You\'ll be charged for %{true_up_link_start}users over license%{link_end} on a quartely or annual basis, depending on the terms of your agreement.').html_safe % { true_up_link_start: true_up_link_start, link_end: link_end }
+.d-flex.gl-mb-5
+  .col-sm-6.d-flex.pl-0
+    .info-well.dark-well.gl-mb-0
+      .well-segment.well-centered
+        %h3.center
+          = _('Users in License:')
+          = licensed_users
+        %hr
+        - if @license.will_expire?
+          = _('Your license is valid from')
+          %strong<>
+            = _(' %{start} to %{end}') % { start: @license.starts_at, end: @license.expires_at }
+          \.
+        = _('The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal.').html_safe % { link_start: true_up_link_start, link_end: link_end }
+        = seats_calculation_message(@license)
+  .col-sm-6.d-flex.pr-0
+    .info-well.dark-well.gl-mb-0
+      .well-segment.well-centered
+        %h3.center
+          = _('Billable Users:')
+          = number_with_delimiter current_active_user_count
+        %hr
+          %p
+          = _('This is the number of %{billable_users_link_start}billable users%{link_end} on your installation, and this is the minimum number you need to purchase when you renew your license.').html_safe % { billable_users_link_start: billable_users_link_start, link_end: link_end }
+.d-flex.gl-pb-5
+  .col-sm-6.d-flex.pl-0
+    .info-well.dark-well.flex-fill.gl-mb-0
+      .well-segment.well-centered
+        %h3.center
+          = _('Maximum Users:')
+          = number_with_delimiter max_user_count
+        %hr
+          = _('This is the highest peak of users on your installation since the license started.')
+  .col-sm-6.d-flex.pr-0
+    .info-well.dark-well.gl-mb-0
+      .well-segment.well-centered
+        %h3.center
+          = _('Users over License:')
+          = number_with_delimiter users_over_license
+        %hr
+          - if license_is_over_capacity?
+            .gl-alert.gl-alert-info.gl-mb-3{ role: 'alert' }
+              = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+              .gl-alert-body
+                = s_('Your instance has exceeded your subscription\'s licensed user count.')
+          = _('You\'ll be charged for %{true_up_link_start}users over license%{link_end} on a quartely or annual basis, depending on the terms of your agreement.').html_safe % { true_up_link_start: true_up_link_start, link_end: link_end }

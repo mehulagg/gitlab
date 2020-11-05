@@ -19,7 +19,7 @@ describe('Type of work getters', () => {
 
     describe('with no data', () => {
       it('returns all required properties', () => {
-        expect(tasksByTypeChartData()).toEqual({ groupBy: [], data: [], seriesNames: [] });
+        expect(tasksByTypeChartData()).toEqual({ groupBy: [], data: [] });
       });
     });
   });

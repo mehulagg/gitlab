@@ -197,6 +197,17 @@ RSpec.describe Gitlab::RepositorySizeChecker do
       end
 
       context 'without additional purchased storage' do
+        context 'when namespace has total_repository_size_excess but project is below limit' do
+          let(:total_repository_size_excess) { 50 }
+          let(:change_size) { 1.megabyte }
+          let(:limit) { 10 }
+          let(:current_size) { 5 }
+
+          it 'returns zero' do
+            expect(subject.exceeded_size(change_size)).to eq(0)
+          end
+        end
+
         include_examples 'checker size exceeded'
       end
     end

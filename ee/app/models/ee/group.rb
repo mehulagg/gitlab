@@ -229,6 +229,11 @@ module EE
       saml_provider.persisted? && saml_provider.enabled?
     end
 
+    def saml_group_sync_available?
+      ::Feature.enabled?(:saml_group_links, self) &&
+        feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
+    end
+
     override :multiple_issue_boards_available?
     def multiple_issue_boards_available?
       feature_available?(:multiple_group_issue_boards)

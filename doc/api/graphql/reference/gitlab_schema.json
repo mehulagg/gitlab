@@ -3868,6 +3868,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "includeDescendantGroups",
+                  "description": "Include epics from descendant groups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -7580,14 +7590,14 @@
               "deprecationReason": null
             },
             {
-              "name": "lastUpdatedAt",
+              "name": "lastUpdatedOn",
               "description": "Latest date when the code coverage was created for the project.",
               "args": [
 
               ],
               "type": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "Date",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -13948,7 +13958,7 @@
                   "description": "The Global ID of the most recent acceptable version",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementVersionID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -14397,7 +14407,7 @@
                   "description": "Find a design by its ID",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementDesignID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -14433,7 +14443,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ID",
+                      "name": "DesignManagementDesignAtVersionID",
                       "ofType": null
                     }
                   },
@@ -14463,7 +14473,7 @@
                       "name": null,
                       "ofType": {
                         "kind": "SCALAR",
-                        "name": "ID",
+                        "name": "DesignManagementDesignID",
                         "ofType": null
                       }
                     }
@@ -14493,7 +14503,7 @@
                   "description": "Filters designs to only those that existed at the version. If argument is omitted or nil then all designs will reflect the latest version",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementVersionID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -14606,7 +14616,7 @@
                   "description": "The Global ID of the version",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementVersionID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -14639,7 +14649,7 @@
                   "description": "The Global ID of the most recent acceptable version",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementVersionID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -15061,7 +15071,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ID",
+                      "name": "DesignManagementDesignAtVersionID",
                       "ofType": null
                     }
                   },
@@ -15088,7 +15098,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ID",
+                      "name": "DesignManagementVersionID",
                       "ofType": null
                     }
                   },
@@ -15246,6 +15256,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "DesignManagementDesignAtVersionID",
+          "description": "Identifier of DesignManagement::DesignAtVersion",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -15558,6 +15578,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "DesignManagementVersionID",
+          "description": "Identifier of DesignManagement::Version",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "DesignVersion",
           "description": "A specific version in which designs were added, modified or deleted",
@@ -15571,7 +15601,7 @@
                   "description": "The ID of the DesignAtVersion",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementDesignAtVersionID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -15581,7 +15611,7 @@
                   "description": "The ID of a specific design",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "DesignManagementDesignID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -15681,7 +15711,7 @@
                       "name": null,
                       "ofType": {
                         "kind": "SCALAR",
-                        "name": "ID",
+                        "name": "DesignManagementDesignID",
                         "ofType": null
                       }
                     }
@@ -18269,6 +18299,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "includeDescendantGroups",
+                  "description": "Include epics from descendant groups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -20643,6 +20683,24 @@
               "deprecationReason": null
             },
             {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the issue",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "userNotesCount",
               "description": "Number of user notes of the issue",
               "args": [
@@ -22555,6 +22613,16 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "includeDescendantGroups",
+                  "description": "Include epics from descendant groups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
                 }
               ],
               "type": {
@@ -22704,6 +22772,16 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "includeDescendantGroups",
+                  "description": "Include epics from descendant groups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
                 },
                 {
                   "name": "after",
@@ -23017,7 +23095,7 @@
                 },
                 {
                   "name": "assigneeId",
-                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values supported",
+                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values are supported",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -23144,6 +23222,16 @@
                       "name": "ID",
                       "ofType": null
                     }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "epicId",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
                   },
                   "defaultValue": null
                 },
@@ -25260,7 +25348,109 @@
             },
             {
               "name": "integration",
-              "description": "The updated HTTP integration",
+              "description": "The HTTP integration",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AlertManagementHttpIntegration",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "HttpIntegrationDestroyInput",
+          "description": "Autogenerated input type of HttpIntegrationDestroy",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "The id of the integration to remove",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "AlertManagementHttpIntegrationID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "HttpIntegrationDestroyPayload",
+          "description": "Autogenerated return type of HttpIntegrationDestroy",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "integration",
+              "description": "The HTTP integration",
               "args": [
 
               ],
@@ -25362,7 +25552,7 @@
             },
             {
               "name": "integration",
-              "description": "The updated HTTP integration",
+              "description": "The HTTP integration",
               "args": [
 
               ],
@@ -25484,7 +25674,7 @@
             },
             {
               "name": "integration",
-              "description": "The updated HTTP integration",
+              "description": "The HTTP integration",
               "args": [
 
               ],
@@ -26976,6 +27166,24 @@
             {
               "name": "upvotes",
               "description": "Number of upvotes the issue has received",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the issue",
               "args": [
 
               ],
@@ -32677,6 +32885,20 @@
               "deprecationReason": null
             },
             {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the merge request",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "userNotesCount",
               "description": "User notes count of the merge request",
               "args": [
@@ -36845,6 +37067,33 @@
               "deprecationReason": null
             },
             {
+              "name": "httpIntegrationDestroy",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "HttpIntegrationDestroyInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "HttpIntegrationDestroyPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "httpIntegrationResetToken",
               "description": null,
               "args": [
@@ -40698,6 +40947,59 @@
               "deprecationReason": null
             },
             {
+              "name": "downstream",
+              "description": "Pipelines this pipeline will trigger",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PipelineConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "duration",
               "description": "Duration of the pipeline in seconds",
               "args": [
@@ -40833,6 +41135,34 @@
               "deprecationReason": null
             },
             {
+              "name": "path",
+              "description": "Relative path to the pipeline's page",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "project",
+              "description": "Project the pipeline belongs to",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Project",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "retryable",
               "description": "Specifies if a pipeline can be retried",
               "args": [
@@ -40878,6 +41208,20 @@
                   "name": "String",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "sourceJob",
+              "description": "Job where pipeline was triggered from",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiJob",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -40981,6 +41325,20 @@
                   "name": "Time",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "upstream",
+              "description": "Pipeline that triggered the pipeline",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Pipeline",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -42861,7 +43219,7 @@
                 },
                 {
                   "name": "assigneeId",
-                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values supported",
+                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values are supported",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -42990,6 +43348,16 @@
                     }
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "epicId",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
                 }
               ],
               "type": {
@@ -43100,7 +43468,7 @@
                 },
                 {
                   "name": "assigneeId",
-                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values supported",
+                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values are supported",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -43305,7 +43673,7 @@
                 },
                 {
                   "name": "assigneeId",
-                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values supported",
+                  "description": "ID of a user assigned to the issues, \"none\" and \"any\" values are supported",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -43432,6 +43800,16 @@
                       "name": "ID",
                       "ofType": null
                     }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "epicId",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
                   },
                   "defaultValue": null
                 },
@@ -47742,6 +48120,26 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "recordedAfter",
+                  "description": "Measurement recorded after this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "recordedBefore",
+                  "description": "Measurement recorded before this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -48367,6 +48765,16 @@
                     "ofType": null
                   },
                   "defaultValue": "created_desc"
+                },
+                {
+                  "name": "search",
+                  "description": "Query to search users by name, username, or primary email.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
                 },
                 {
                   "name": "after",
@@ -49851,34 +50259,6 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "issuesUrl",
-              "description": "HTTP URL of the issues page filtered by this release. Deprecated in 13.6: Use `openedIssuesUrl`",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": true,
-              "deprecationReason": "Use `openedIssuesUrl`. Deprecated in 13.6"
-            },
-            {
-              "name": "mergeRequestsUrl",
-              "description": "HTTP URL of the merge request page filtered by this release. Deprecated in 13.6: Use `openedMergeRequestsUrl`",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": true,
-              "deprecationReason": "Use `openedMergeRequestsUrl`. Deprecated in 13.6"
             },
             {
               "name": "mergedMergeRequestsUrl",

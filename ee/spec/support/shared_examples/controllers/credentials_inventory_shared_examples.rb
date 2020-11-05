@@ -35,9 +35,9 @@ RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |
           end
 
           it 'notifies the key owner' do
-            expect(CredentialsInventoryMailer).to receive_message_chain(:ssh_key_deleted_email, :deliver_later)
-
-            subject
+            perform_enqueued_jobs do
+              expect { subject }.to change { ActionMailer::Base.deliveries.size }.by(1)
+            end
           end
 
           context 'when credentials_inventory_revocation_emails is disabled' do

@@ -187,7 +187,10 @@ module EE
 
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
       delegate :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
+
+      delegate :requirements_access_level, to: :project_feature, allow_nil: true
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -204,6 +207,17 @@ module EE
         validates :import_url, presence: true
         validates :mirror_user, presence: true
       end
+
+      # Because we use default_value_for we need to be sure
+      # requirements_enabled= method does exist even if we rollback migration.
+      # Otherwise many tests from spec/migrations will fail.
+      def requirements_enabled=(value)
+        if has_attribute?(:requirements_enabled)
+          write_attribute(:requirements_enabled, value)
+        end
+      end
+
+      default_value_for :requirements_enabled, true
 
       accepts_nested_attributes_for :status_page_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true

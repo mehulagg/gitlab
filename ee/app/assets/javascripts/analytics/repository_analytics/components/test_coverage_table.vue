@@ -1,7 +1,8 @@
 <script>
 import Vue from 'vue';
-import { GlCard, GlEmptyState, GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
+import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
@@ -12,6 +13,7 @@ export default {
   components: {
     GlCard,
     GlEmptyState,
+    GlLink,
     GlSkeletonLoader,
     GlTable,
     SelectProjectsDropdown,
@@ -31,12 +33,16 @@ export default {
         // fetch the same data more than once
         this.allCoverageData = [
           ...this.allCoverageData,
-          ...data.projects.nodes.map(project => ({
-            ...project,
-            // if a project has no code coverage, set to default values
-            codeCoverageSummary:
-              project.codeCoverageSummary || this.$options.noCoverageDefaultSummary,
-          })),
+          // Remove the projects that don't have any code coverage
+          ...data.projects.nodes
+            .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
+            .map(project => ({
+              ...project,
+              codeCoveragePath: joinPaths(
+                gon.relative_url_root || '',
+                `/${project.fullPath}/-/graphs/${project.repository.rootRef}/charts`,
+              ),
+            })),
         ];
       },
       error() {
@@ -75,6 +81,17 @@ export default {
     },
     selectedCoverageData() {
       return this.allCoverageData.filter(({ id }) => this.projectIds[id]);
+    },
+    sortedCoverageData() {
+      // Sort the table by most recently updated coverage report
+      return [...this.selectedCoverageData].sort((a, b) => {
+        if (a.codeCoverageSummary.lastUpdatedAt > b.codeCoverageSummary.lastUpdatedAt) {
+          return -1;
+        } else if (a.codeCoverageSummary.lastUpdatedAt < b.codeCoverageSummary.lastUpdatedAt) {
+          return 1;
+        }
+        return 0;
+      });
     },
   },
   methods: {
@@ -127,11 +144,6 @@ export default {
       'RepositoriesAnalytics|Please select a project or multiple projects to display their most recent test coverage data.',
     ),
   },
-  noCoverageDefaultSummary: {
-    averageCoverage: 0,
-    coverageCount: 0,
-    lastUpdatedAt: '', // empty string will default to "just now" in table
-  },
   LOADING_STATE: {
     rows: 4,
     height: 10,
@@ -183,7 +195,7 @@ export default {
       data-testid="test-coverage-data-table"
       thead-class="thead-white"
       :fields="$options.tableFields"
-      :items="selectedCoverageData"
+      :items="sortedCoverageData"
     >
       <template #head(project)="data">
         <div>{{ data.label }}</div>
@@ -199,7 +211,9 @@ export default {
       </template>
 
       <template #cell(project)="{ item }">
-        <div :data-testid="`${item.id}-name`">{{ item.name }}</div>
+        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
+          {{ item.name }}
+        </gl-link>
       </template>
       <template #cell(averageCoverage)="{ item }">
         <div :data-testid="`${item.id}-average`">

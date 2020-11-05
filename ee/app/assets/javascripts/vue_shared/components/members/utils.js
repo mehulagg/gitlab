@@ -1,6 +1,15 @@
 import { __ } from '~/locale';
 import { generateBadges as CEGenerateBadges } from '~/vue_shared/components/members/utils';
 
+export {
+  isGroup,
+  isDirectMember,
+  isCurrentUser,
+  canRemove,
+  canResend,
+  canUpdate,
+} from '~/vue_shared/components/members/utils';
+
 export const generateBadges = (member, isCurrentUser) => [
   ...CEGenerateBadges(member, isCurrentUser),
   {
@@ -24,3 +33,5 @@ export const generateBadges = (member, isCurrentUser) => [
     variant: 'info',
   },
 ];
+
+export const canOverride = member => member.canOverride;

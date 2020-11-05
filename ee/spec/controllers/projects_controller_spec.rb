@@ -298,7 +298,7 @@ RSpec.describe ProjectsController do
         end
       end
 
-      context 'when lisence is not sufficient' do
+      context 'when license is not sufficient' do
         before do
           stub_licensed_features(merge_pipelines: false)
         end
@@ -307,6 +307,48 @@ RSpec.describe ProjectsController do
           request
 
           expect(project.reload.merge_pipelines_enabled).to be_falsy
+        end
+      end
+    end
+
+    context 'when auto_rollback_enabled param is specified' do
+      let(:params) { { auto_rollback_enabled: true } }
+
+      let(:request) do
+        put :update, params: { namespace_id: project.namespace, id: project, project: params }
+      end
+
+      before do
+        stub_licensed_features(auto_rollback: true)
+      end
+
+      it 'updates the attribute' do
+        request
+
+        expect(project.reload.auto_rollback_enabled).to be_truthy
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(auto_rollback: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.reload.auto_rollback_enabled).to be_falsy
+        end
+      end
+
+      context 'when license is not sufficient' do
+        before do
+          stub_licensed_features(auto_rollback: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.reload.auto_rollback_enabled).to be_falsy
         end
       end
     end

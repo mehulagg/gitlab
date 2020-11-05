@@ -1,0 +1,5 @@
+---
+title: Migrate renamed Sidekiq queue
+merge_request: 45964
+author:
+type: changed

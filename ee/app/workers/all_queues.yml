@@ -323,14 +323,6 @@
   :weight: 1
   :idempotent:
   :tags: []
-- :name: geo:geo_blob_verification_primary
-  :feature_category: :geo_replication
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
-  :tags: []
 - :name: geo:geo_container_repository_sync
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -499,6 +491,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: geo:geo_verification
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: personal_access_tokens:personal_access_tokens_groups_policy
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -660,6 +660,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: group_saml_group_sync
+  :feature_category: :authentication_and_authorization
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: incident_management_apply_incident_sla_exceeded_label
   :feature_category: :incident_management

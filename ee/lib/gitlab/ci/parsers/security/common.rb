@@ -55,6 +55,7 @@ module Gitlab
 
           def create_vulnerability(report, data, version)
             identifiers = create_identifiers(report, data['identifiers'])
+            links = create_links(report, data['links'])
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
                 uuid: SecureRandom.uuid,
@@ -67,6 +68,7 @@ module Gitlab
                 scanner: create_scanner(report, data['scanner']),
                 scan: report&.scan,
                 identifiers: identifiers,
+                links: links,
                 raw_metadata: data.to_json,
                 metadata_version: version))
           end
@@ -104,6 +106,22 @@ module Gitlab
                 external_id: identifier['value'],
                 name: identifier['name'],
                 url: identifier['url']))
+          end
+
+          def create_links(report, links)
+            return [] unless links.is_a?(Array)
+
+            links
+              .map { |link| create_link(report, link) }
+              .compact
+          end
+
+          def create_link(report, link)
+            return unless link.is_a?(Hash)
+
+            ::Gitlab::Ci::Reports::Security::Link.new(
+              name: link['name'],
+              url: link['url'])
           end
 
           def parse_severity_level(input)

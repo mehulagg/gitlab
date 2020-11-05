@@ -200,7 +200,7 @@ describe('Api', () => {
     });
   });
 
-  describe('Cycle analytics', () => {
+  describe('Value Stream Analytics', () => {
     const createdBefore = '2019-11-18';
     const createdAfter = '2019-08-18';
     const groupId = 'counting-54321';

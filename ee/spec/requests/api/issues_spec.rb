@@ -12,23 +12,9 @@ RSpec.describe API::Issues, :mailer do
   let_it_be(:group_project) { create(:project, :public, creator_id: user.id, namespace: group) }
 
   let(:user2)             { create(:user) }
+
   let_it_be(:author)      { create(:author) }
   let_it_be(:assignee)    { create(:assignee) }
-  let(:issue_title)       { 'foo' }
-  let(:issue_description) { 'closed' }
-  let!(:issue) do
-    create :issue,
-           author: user,
-           assignees: [user],
-           project: project,
-           milestone: milestone,
-           created_at: generate(:past_time),
-           updated_at: 1.hour.ago,
-           title: issue_title,
-           description: issue_description
-  end
-
-  let_it_be(:milestone) { create(:milestone, title: '1.0.0', project: project) }
 
   before_all do
     project.add_reporter(user)
@@ -92,6 +78,36 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
+  shared_examples 'filtering by epic_id' do
+    let_it_be(:epic1) { create :epic, group: group_project.namespace }
+    let_it_be(:epic2) { create :epic, group: group_project.namespace }
+    let_it_be(:issue1) { create(:issue, { author: user, epic: epic1, project: group_project }) }
+    let_it_be(:issue2) { create(:issue, { author: user, epic: epic2, project: group_project }) }
+    let_it_be(:issue3) { create(:issue, { author: user, project: group_project }) }
+
+    before do
+      stub_licensed_features(epics: true)
+    end
+
+    it 'returns issues without epic when epic_id is "None"' do
+      get api(endpoint, user), params: { epic_id: 'None', scope: 'all' }
+
+      expect_response_contain_exactly(issue3.id)
+    end
+
+    it 'returns issues with any epic when epic_id is "Any"' do
+      get api(endpoint, user), params: { epic_id: 'Any', scope: 'all' }
+
+      expect_response_contain_exactly(issue1.id, issue2.id)
+    end
+
+    it 'returns issues with any epic when epic_id is specific' do
+      get api(endpoint, user), params: { epic_id: epic1.id, scope: 'all' }
+
+      expect_response_contain_exactly(issue1.id)
+    end
+  end
+
   describe "GET /issues" do
     context "when authenticated" do
       it 'matches V4 response schema' do
@@ -102,6 +118,8 @@ RSpec.describe API::Issues, :mailer do
       end
 
       context "blocking issues count" do
+        let!(:issue) { create :issue, author: user, project: project }
+
         it 'returns a blocking issues count of 0 if there are no blocking issues' do
           get api('/issues', user)
 
@@ -121,6 +139,7 @@ RSpec.describe API::Issues, :mailer do
       end
 
       context "filtering by weight" do
+        let!(:issue) { create(:issue, author: user2, project: project, weight: nil, created_at: 4.days.ago) }
         let!(:issue1) { create(:issue, author: user2, project: project, weight: 1, created_at: 3.days.ago) }
         let!(:issue2) { create(:issue, author: user2, project: project, weight: 5, created_at: 2.days.ago) }
         let!(:issue3) { create(:issue, author: user2, project: project, weight: 3, created_at: 1.day.ago) }
@@ -156,6 +175,10 @@ RSpec.describe API::Issues, :mailer do
           expect_paginated_array_response(issue3.id)
         end
       end
+
+      it_behaves_like 'filtering by epic_id' do
+        let(:endpoint) { '/issues' }
+      end
     end
   end
 
@@ -180,7 +203,11 @@ RSpec.describe API::Issues, :mailer do
       end
     end
 
-    include_examples 'exposes epic' do
+    it_behaves_like 'filtering by epic_id' do
+      let(:endpoint) { "/groups/#{group_project.group.id}/issues" }
+    end
+
+    it_behaves_like 'exposes epic' do
       let!(:issue_with_epic) { create(:issue, project: group_project, epic: epic) }
     end
   end
@@ -206,6 +233,10 @@ RSpec.describe API::Issues, :mailer do
       end
     end
 
+    it_behaves_like 'filtering by epic_id' do
+      let(:endpoint) { "/projects/#{group_project.id}/issues" }
+    end
+
     context 'on personal project' do
       let!(:issue_with_epic) { create(:issue, project: project, epic: epic) }
 
@@ -226,7 +257,7 @@ RSpec.describe API::Issues, :mailer do
 
       subject { get api("/projects/#{group_project.id}/issues", user) }
 
-      include_examples 'exposes epic'
+      it_behaves_like 'exposes epic'
     end
   end
 
@@ -253,7 +284,7 @@ RSpec.describe API::Issues, :mailer do
 
       subject { get api("/projects/#{group_project.id}/issues/#{issue_with_epic.iid}", user) }
 
-      include_examples 'exposes epic'
+      it_behaves_like 'exposes epic'
     end
   end
 
@@ -368,6 +399,8 @@ RSpec.describe API::Issues, :mailer do
   end
 
   describe 'PUT /projects/:id/issues/:issue_id to update weight' do
+    let!(:issue) { create :issue, author: user, project: project }
+
     it 'updates an issue with no weight' do
       put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 101 }
 

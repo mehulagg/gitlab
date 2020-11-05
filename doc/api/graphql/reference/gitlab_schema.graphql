@@ -1440,6 +1440,11 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     iids: [ID!]
 
     """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
+
+    """
     Filter epics by labels
     """
     labelName: [String!]
@@ -2779,7 +2784,7 @@ type CodeCoverageSummary {
   """
   Latest date when the code coverage was created for the project.
   """
-  lastUpdatedAt: Time
+  lastUpdatedOn: Date
 }
 
 type Commit {
@@ -5139,7 +5144,7 @@ type Design implements CurrentUserTodos & DesignFields & Noteable {
     """
     The Global ID of the most recent acceptable version
     """
-    earlierOrEqualToId: ID
+    earlierOrEqualToId: DesignManagementVersionID
 
     """
     The SHA256 of the most recent acceptable version
@@ -5279,7 +5284,7 @@ type DesignCollection {
     """
     Find a design by its ID
     """
-    id: ID
+    id: DesignManagementDesignID
   ): Design
 
   """
@@ -5289,7 +5294,7 @@ type DesignCollection {
     """
     The Global ID of the design at this version
     """
-    id: ID!
+    id: DesignManagementDesignAtVersionID!
   ): DesignAtVersion
 
   """
@@ -5305,7 +5310,7 @@ type DesignCollection {
     Filters designs to only those that existed at the version. If argument is
     omitted or nil then all designs will reflect the latest version
     """
-    atVersion: ID
+    atVersion: DesignManagementVersionID
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -5325,7 +5330,7 @@ type DesignCollection {
     """
     Filters designs by their ID
     """
-    ids: [ID!]
+    ids: [DesignManagementDesignID!]
 
     """
     Returns the last _n_ elements from the list.
@@ -5350,7 +5355,7 @@ type DesignCollection {
     """
     The Global ID of the version
     """
-    id: ID
+    id: DesignManagementVersionID
 
     """
     The SHA256 of a specific version
@@ -5375,7 +5380,7 @@ type DesignCollection {
     """
     The Global ID of the most recent acceptable version
     """
-    earlierOrEqualToId: ID
+    earlierOrEqualToId: DesignManagementVersionID
 
     """
     The SHA256 of the most recent acceptable version
@@ -5509,7 +5514,7 @@ type DesignManagement {
     """
     The Global ID of the design at this version
     """
-    id: ID!
+    id: DesignManagementDesignAtVersionID!
   ): DesignAtVersion
 
   """
@@ -5519,7 +5524,7 @@ type DesignManagement {
     """
     The Global ID of the version
     """
-    id: ID!
+    id: DesignManagementVersionID!
   ): DesignVersion
 }
 
@@ -5567,6 +5572,11 @@ type DesignManagementDeletePayload {
   """
   version: DesignVersion
 }
+
+"""
+Identifier of DesignManagement::DesignAtVersion
+"""
+scalar DesignManagementDesignAtVersionID
 
 """
 Identifier of DesignManagement::Design
@@ -5669,6 +5679,11 @@ type DesignManagementUploadPayload {
 }
 
 """
+Identifier of DesignManagement::Version
+"""
+scalar DesignManagementVersionID
+
+"""
 A specific version in which designs were added, modified or deleted
 """
 type DesignVersion {
@@ -5679,7 +5694,7 @@ type DesignVersion {
     """
     The ID of a specific design
     """
-    designId: ID
+    designId: DesignManagementDesignID
 
     """
     The filename of a specific design
@@ -5689,7 +5704,7 @@ type DesignVersion {
     """
     The ID of the DesignAtVersion
     """
-    id: ID
+    id: DesignManagementDesignAtVersionID
   ): DesignAtVersion!
 
   """
@@ -5744,7 +5759,7 @@ type DesignVersion {
     """
     Filters designs by their ID
     """
-    ids: [ID!]
+    ids: [DesignManagementDesignID!]
 
     """
     Returns the last _n_ elements from the list.
@@ -6581,6 +6596,11 @@ type Epic implements CurrentUserTodos & Noteable {
     List of IIDs of epics, e.g., [1, 2]
     """
     iids: [ID!]
+
+    """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
 
     """
     Filter epics by labels
@@ -7476,6 +7496,11 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   upvotes: Int!
 
   """
+  Number of user discussions in the issue
+  """
+  userDiscussionsCount: Int!
+
+  """
   Number of user notes of the issue
   """
   userNotesCount: Int!
@@ -8157,6 +8182,11 @@ type Group {
     iids: [ID!]
 
     """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
+
+    """
     Filter epics by labels
     """
     labelName: [String!]
@@ -8238,6 +8268,11 @@ type Group {
     List of IIDs of epics, e.g., [1, 2]
     """
     iids: [ID!]
+
+    """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
 
     """
     Filter epics by labels
@@ -8352,7 +8387,7 @@ type Group {
     after: String
 
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -8395,6 +8430,11 @@ type Group {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values are supported
+    """
+    epicId: String
 
     """
     Returns the first _n_ elements from the list.
@@ -9271,7 +9311,42 @@ type HttpIntegrationCreatePayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
+  """
+  integration: AlertManagementHttpIntegration
+}
+
+"""
+Autogenerated input type of HttpIntegrationDestroy
+"""
+input HttpIntegrationDestroyInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The id of the integration to remove
+  """
+  id: AlertManagementHttpIntegrationID!
+}
+
+"""
+Autogenerated return type of HttpIntegrationDestroy
+"""
+type HttpIntegrationDestroyPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
@@ -9306,7 +9381,7 @@ type HttpIntegrationResetTokenPayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
@@ -9351,7 +9426,7 @@ type HttpIntegrationUpdatePayload {
   errors: [String!]!
 
   """
-  The updated HTTP integration
+  The HTTP integration
   """
   integration: AlertManagementHttpIntegration
 }
@@ -9893,6 +9968,11 @@ type Issue implements CurrentUserTodos & Noteable {
   Number of upvotes the issue has received
   """
   upvotes: Int!
+
+  """
+  Number of user discussions in the issue
+  """
+  userDiscussionsCount: Int!
 
   """
   Number of user notes of the issue
@@ -11936,6 +12016,11 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   upvotes: Int!
 
   """
+  Number of user discussions in the merge request
+  """
+  userDiscussionsCount: Int
+
+  """
   User notes count of the merge request
   """
   userNotesCount: Int
@@ -12950,6 +13035,7 @@ type Mutation {
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
   httpIntegrationCreate(input: HttpIntegrationCreateInput!): HttpIntegrationCreatePayload
+  httpIntegrationDestroy(input: HttpIntegrationDestroyInput!): HttpIntegrationDestroyPayload
   httpIntegrationResetToken(input: HttpIntegrationResetTokenInput!): HttpIntegrationResetTokenPayload
   httpIntegrationUpdate(input: HttpIntegrationUpdateInput!): HttpIntegrationUpdatePayload
   issueMove(input: IssueMoveInput!): IssueMovePayload
@@ -13798,6 +13884,31 @@ type Pipeline {
   detailedStatus: DetailedStatus!
 
   """
+  Pipelines this pipeline will trigger
+  """
+  downstream(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PipelineConnection
+
+  """
   Duration of the pipeline in seconds
   """
   duration: Int
@@ -13848,6 +13959,16 @@ type Pipeline {
   ): CiJobConnection
 
   """
+  Relative path to the pipeline's page
+  """
+  path: String
+
+  """
+  Project the pipeline belongs to
+  """
+  project: Project
+
+  """
   Specifies if a pipeline can be retried
   """
   retryable: Boolean!
@@ -13861,6 +13982,11 @@ type Pipeline {
   SHA of the pipeline's commit
   """
   sha: String!
+
+  """
+  Job where pipeline was triggered from
+  """
+  sourceJob: CiJob
 
   """
   Stages of the pipeline
@@ -13902,6 +14028,11 @@ type Pipeline {
   Timestamp of the pipeline's last activity
   """
   updatedAt: Time!
+
+  """
+  Pipeline that triggered the pipeline
+  """
+  upstream: Pipeline
 
   """
   Pipeline user
@@ -14569,7 +14700,7 @@ type Project {
   """
   issue(
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -14607,6 +14738,11 @@ type Project {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values are supported
+    """
+    epicId: String
 
     """
     IID of the issue. For example, "1"
@@ -14669,7 +14805,7 @@ type Project {
   """
   issueStatusCounts(
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -14759,7 +14895,7 @@ type Project {
     after: String
 
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -14802,6 +14938,11 @@ type Project {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values are supported
+    """
+    epicId: String
 
     """
     Returns the first _n_ elements from the list.
@@ -16452,6 +16593,16 @@ type Query {
     Returns the last _n_ elements from the list.
     """
     last: Int
+
+    """
+    Measurement recorded after this date
+    """
+    recordedAfter: Time
+
+    """
+    Measurement recorded before this date
+    """
+    recordedBefore: Time
   ): InstanceStatisticsMeasurementConnection
 
   """
@@ -16707,6 +16858,11 @@ type Query {
     Returns the last _n_ elements from the list.
     """
     last: Int
+
+    """
+    Query to search users by name, username, or primary email.
+    """
+    search: String
 
     """
     Sort users by this criteria
@@ -17277,16 +17433,6 @@ type ReleaseLinks {
   HTTP URL of the release's edit page
   """
   editUrl: String
-
-  """
-  HTTP URL of the issues page filtered by this release. Deprecated in 13.6: Use `openedIssuesUrl`
-  """
-  issuesUrl: String @deprecated(reason: "Use `openedIssuesUrl`. Deprecated in 13.6")
-
-  """
-  HTTP URL of the merge request page filtered by this release. Deprecated in 13.6: Use `openedMergeRequestsUrl`
-  """
-  mergeRequestsUrl: String @deprecated(reason: "Use `openedMergeRequestsUrl`. Deprecated in 13.6")
 
   """
   HTTP URL of the merge request page , filtered by this release and `state=merged`

@@ -1,5 +1,6 @@
 <script>
 import CEMembersTableCell from '~/vue_shared/components/members/table/members_table_cell.vue';
+import { canOverride } from '../utils';
 
 export default {
   name: 'MembersTableCell',
@@ -11,7 +12,7 @@ export default {
   },
   computed: {
     canOverride() {
-      return this.member.canOverride;
+      return canOverride(this.member);
     },
   },
   render(createElement) {

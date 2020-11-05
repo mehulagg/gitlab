@@ -125,6 +125,7 @@ class License < ApplicationRecord
   EEP_FEATURES.freeze
 
   EEU_FEATURES = EEP_FEATURES + %i[
+    auto_rollback
     container_scanning
     coverage_fuzzing
     credentials_inventory

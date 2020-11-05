@@ -19,11 +19,10 @@ From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
 support for NFS for Git repositories is scheduled to be removed. Upgrade to
 [Gitaly Cluster](gitaly/praefect.md) as soon as possible.
 
-NOTE: **Note:**
-Filesystem performance has a big impact on overall GitLab
-performance, especially for actions that read or write to Git repositories. See
-[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md)
-for steps to test filesystem performance.
+Filesystem performance can impact overall GitLab performance, especially for
+actions that read or write to Git repositories. For steps you can use to test
+filesystem performance, see
+[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md).
 
 ## Known kernel version incompatibilities
 
@@ -119,7 +118,7 @@ To disable NFS server delegation, do the following:
 
 1. Restart the NFS server process. For example, on CentOS run `service nfs restart`.
 
-NOTE: **Important note:**
+NOTE: **Note:**
 The kernel bug may be fixed in
 [more recent kernels with this commit](https://github.com/torvalds/linux/commit/95da1b3a5aded124dd1bda1e3cdb876184813140).
 Red Hat Enterprise 7 [shipped a kernel update](https://access.redhat.com/errata/RHSA-2019:2029)
