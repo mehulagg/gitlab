@@ -5,7 +5,6 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from '../../constants';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'SubscriptionTable',
@@ -13,7 +12,6 @@ export default {
     SubscriptionTableRow,
     GlLoadingIcon,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     namespaceName: {
       type: String,
@@ -29,11 +27,6 @@ export default {
       required: false,
       default: '',
     },
-    billableSeatsHref: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
   computed: {
     ...mapState('subscription', [
@@ -42,7 +35,6 @@ export default {
       'plan',
       'tables',
       'endpoint',
-      'hasBillableGroupMembers',
     ]),
     ...mapGetters('subscription', ['isFreePlan']),
     subscriptionHeader() {
@@ -86,19 +78,12 @@ export default {
 
       return this.tables[tableKey].rows;
     },
-    isFeatureFlagEnabled() {
-      return this.glFeatures?.apiBillableMemberList;
-    },
   },
   mounted() {
     this.fetchSubscription();
-
-    if (this.isFeatureFlagEnabled) {
-      this.fetchHasBillableGroupMembers();
-    }
   },
   methods: {
-    ...mapActions('subscription', ['fetchSubscription', 'fetchHasBillableGroupMembers']),
+    ...mapActions('subscription', ['fetchSubscription']),
   },
 };
 </script>
@@ -131,8 +116,6 @@ export default {
           :header="row.header"
           :columns="row.columns"
           :is-free-plan="isFreePlan"
-          :subscription-has-billable-group-members="hasBillableGroupMembers"
-          :billable-seats-href="billableSeatsHref"
         />
       </div>
     </div>

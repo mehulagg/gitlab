@@ -2,7 +2,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlPagination } from '@gitlab/ui';
 import Vuex from 'vuex';
 import SubscriptionSeats from 'ee/billings/seat_usage/components/subscription_seats.vue';
-import { mockDataSeats, seatsTableItems } from '../../mock_data';
+import { mockDataSeats, seatsTableItems } from 'ee_jest/billings/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

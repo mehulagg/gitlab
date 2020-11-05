@@ -23,7 +23,14 @@ export default (containerId = 'js-billing-plans') => {
   return new Vue({
     el: containerEl,
     store,
-    provide: { namespaceId, namespaceName, planUpgradeHref, customerPortalUrl, billableSeatsHref },
+    provide: {
+      namespaceId,
+      namespaceName,
+      planUpgradeHref,
+      customerPortalUrl,
+      billableSeatsHref,
+      apiBillableMemberListFeatureEnabled: gon?.features?.apiBillableMemberList || false,
+    },
     render(createElement) {
       return createElement(SubscriptionApp);
     },

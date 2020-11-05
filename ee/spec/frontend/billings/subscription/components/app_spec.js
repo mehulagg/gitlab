@@ -4,7 +4,7 @@ import createStore from 'ee/billings/stores/index_subscriptions';
 import SubscriptionApp from 'ee/billings/subscriptions/components/app.vue';
 import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import * as types from 'ee/billings/stores/modules/subscriptions/mutation_types';
-import { mockDataSeats } from '../../mock_data';
+import { mockDataSeats } from 'ee_jest/billings/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -18,7 +18,6 @@ describe('SubscriptionApp component', () => {
     namespaceName: 'bronze',
     planUpgradeHref: '/url',
     customerPortalUrl: 'https://customers.gitlab.com/subscriptions',
-    billableSeatsHref: 'https://billable/seats',
   };
 
   const factory = () => {
@@ -60,7 +59,6 @@ describe('SubscriptionApp component', () => {
         namespaceName: providedFields.namespaceName,
         planUpgradeHref: providedFields.planUpgradeHref,
         customerPortalUrl: providedFields.customerPortalUrl,
-        billableSeatsHref: providedFields.billableSeatsHref,
       });
     });
   });

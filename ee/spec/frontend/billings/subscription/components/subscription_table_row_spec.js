@@ -13,12 +13,12 @@ describe('subscription table row', () => {
   let store;
   let wrapper;
 
-  const header = {
+  const HEADER = {
     icon: 'monitor',
     title: 'Test title',
   };
 
-  const columns = [
+  const COLUMNS = [
     {
       id: 'a',
       label: 'Column A',
@@ -35,12 +35,25 @@ describe('subscription table row', () => {
     },
   ];
 
-  const billableSeatsHref = 'http://billable/seats';
+  const BILLABLE_SEATS_URL = 'http://billable/seats';
 
-  const defaultProps = { header, columns, billableSeatsHref };
+  const defaultProps = { header: HEADER, columns: COLUMNS };
 
-  const createComponent = ({ props = {}, billableMembersFeatureFlagEnabled = true } = {}) => {
+  const createComponent = (
+    {
+      props = {},
+      apiBillableMemberListFeatureEnabled = true,
+      billableSeatsHref = BILLABLE_SEATS_URL,
+    } = {},
+    state,
+  ) => {
     store = createStore();
+    if (state) {
+      store.replaceState({
+        ...store.state,
+        ...state,
+      });
+    }
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionTableRow, {
@@ -49,7 +62,8 @@ describe('subscription table row', () => {
         ...props,
       },
       provide: {
-        glFeatures: { apiBillableMemberList: billableMembersFeatureFlagEnabled },
+        apiBillableMemberListFeatureEnabled,
+        billableSeatsHref,
       },
       store,
       localVue,
@@ -85,31 +99,31 @@ describe('subscription table row', () => {
     );
   });
 
-  it(`should render one header cell and ${columns.length} visible columns in total`, () => {
+  it(`should render one header cell and ${COLUMNS.length} visible columns in total`, () => {
     expect(findHeaderCell().isVisible()).toBe(true);
-    expect(findContentCells()).toHaveLength(columns.length);
+    expect(findContentCells()).toHaveLength(COLUMNS.length);
   });
 
   it(`should not render a hidden column`, () => {
-    const hiddenColIdx = columns.find(c => !c.display);
+    const hiddenColIdx = COLUMNS.find(c => !c.display);
     const hiddenCol = findContentCells().at(hiddenColIdx);
 
     expect(hiddenCol).toBe(undefined);
   });
 
   it('should render a title in the header cell', () => {
-    expect(findHeaderCell().text()).toMatch(header.title);
+    expect(findHeaderCell().text()).toMatch(HEADER.title);
   });
 
-  it(`should render a ${header.icon} icon in the header cell`, () => {
+  it(`should render a ${HEADER.icon} icon in the header cell`, () => {
     expect(findHeaderIcon().exists()).toBe(true);
-    expect(findHeaderIcon().props('name')).toBe(header.icon);
+    expect(findHeaderIcon().props('name')).toBe(HEADER.icon);
   });
 
   it('renders correct column structure', () => {
     const columnsStructure = findContentCells().wrappers.map(findColumnLabelAndTitle);
 
-    expect(columnsStructure).toEqual(expect.arrayContaining(columns));
+    expect(columnsStructure).toEqual(expect.arrayContaining(COLUMNS));
   });
 
   it('should append the "number" css class to property value in "Column A"', () => {
@@ -157,59 +171,51 @@ describe('subscription table row', () => {
         .find('[data-testid="seats-usage-button"]');
 
     it('is rendered when column id is correct and has href set', () => {
-      createComponent({ props: { columns: [{ id: 'seatsInUse' }] } });
+      createComponent(
+        { props: { columns: [{ id: 'seatsInUse' }] } },
+        { subscription: { hasBillableGroupMembers: true } },
+      );
 
-      Object.assign(store.state.subscription, { hasBillableGroupMembers: true });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findUsageButton().exists()).toBe(true);
-        expect(findUsageButton().attributes('href')).toBe(billableSeatsHref);
-      });
+      expect(findUsageButton().exists()).toBe(true);
+      expect(findUsageButton().attributes('href')).toBe(BILLABLE_SEATS_URL);
     });
 
     it('is not rendered if col id does not have correct value', () => {
-      createComponent({ props: { columns: [{ id: 'some_value' }] } });
+      createComponent(
+        { props: { columns: [{ id: 'some_value' }] } },
+        { subscription: { hasBillableGroupMembers: true } },
+      );
 
-      Object.assign(store.state.subscription, { hasBillableGroupMembers: true });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findUsageButton().exists()).toBe(false);
-      });
+      expect(findUsageButton().exists()).toBe(false);
     });
 
     it('is not rendered if feature flag is not set', () => {
-      createComponent({
-        props: { columns: [{ id: 'seatsInUse' }] },
-        billableMembersFeatureFlagEnabled: false,
-      });
+      createComponent(
+        { props: { columns: [{ id: 'seatsInUse' }] }, apiBillableMemberListFeatureEnabled: false },
+        { subscription: { hasBillableGroupMembers: true } },
+      );
 
-      Object.assign(store.state.subscription, { hasBillableGroupMembers: true });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findUsageButton().exists()).toBe(false);
-      });
+      expect(findUsageButton().exists()).toBe(false);
     });
 
     it('is not rendered if subscription has no billable members', () => {
-      createComponent({
-        props: { columns: [{ id: 'seatsInUse' }] },
-      });
+      createComponent(
+        {
+          props: { columns: [{ id: 'seatsInUse' }] },
+        },
+        { subscription: { hasBillableGroupMembers: false } },
+      );
 
-      Object.assign(store.state.subscription, { hasBillableGroupMembers: false });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findUsageButton().exists()).toBe(false);
-      });
+      expect(findUsageButton().exists()).toBe(false);
     });
 
     it('is not rendered if billable seats href is not provided', () => {
-      createComponent({ props: { columns: [{ id: 'seatsInUse' }], billableSeatsHref: '' } });
+      createComponent(
+        { props: { columns: [{ id: 'seatsInUse' }] }, billableSeatsHref: '' },
+        { subscription: { hasBillableGroupMembers: true } },
+      );
 
-      Object.assign(store.state.subscription, { hasBillableGroupMembers: true });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findUsageButton().exists()).toBe(false);
-      });
+      expect(findUsageButton().exists()).toBe(false);
     });
   });
 });

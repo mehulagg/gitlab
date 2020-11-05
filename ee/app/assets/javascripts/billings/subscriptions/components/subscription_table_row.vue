@@ -3,7 +3,6 @@ import { GlIcon, GlButton } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 import Popover from '~/vue_shared/components/help_popover.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'SubscriptionTableRow',
@@ -12,7 +11,6 @@ export default {
     GlIcon,
     Popover,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     header: {
       type: Object,
@@ -27,17 +25,11 @@ export default {
       required: false,
       default: false,
     },
-    billableSeatsHref: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
+  // inject: ['billableSeatsHref'],
+  inject: ['billableSeatsHref', 'apiBillableMemberListFeatureEnabled'],
   computed: {
     ...mapState('subscription', ['hasBillableGroupMembers']),
-    apiBillableMemberListFeatureEnabled() {
-      return this.glFeatures?.apiBillableMemberList;
-    },
   },
   created() {
     if (this.apiBillableMemberListFeatureEnabled) {
