@@ -4344,4 +4344,30 @@ RSpec.describe MergeRequest, factory_default: :keep do
         .from(nil).to(ref)
     end
   end
+
+  describe '#highlight_diff_conflicts?' do
+    let(:merge_request) { build_stubbed(:merge_request) }
+
+    it 'returns true' do
+      expect(merge_request.highlight_diff_conflicts?).to eq(true)
+    end
+
+    context 'when branch is missing' do
+      let(:merge_request) { build_stubbed(:merge_request, source_branch: nil) }
+
+      it 'returns false' do
+        expect(merge_request.highlight_diff_conflicts?).to eq(false)
+      end
+    end
+
+    context 'highlight_merge_conflicts_in_diff feature flag is disabled' do
+      before do
+        stub_feature_flags(highlight_merge_conflicts_in_diff: false)
+      end
+
+      it 'returns false' do
+        expect(merge_request.highlight_diff_conflicts?).to eq(false)
+      end
+    end
+  end
 end

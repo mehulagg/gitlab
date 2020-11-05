@@ -71,7 +71,7 @@ class DiffsEntity < Grape::Entity
     submodule_links = Gitlab::SubmoduleLinks.new(merge_request.project.repository)
 
     DiffFileEntity.represent(diffs.diff_files,
-      options.merge(submodule_links: submodule_links, code_navigation_path: code_navigation_path(diffs)))
+      options.merge(submodule_links: submodule_links, code_navigation_path: code_navigation_path(diffs), conflicts: conflicts))
   end
 
   expose :merge_request_diffs, using: MergeRequestDiffEntity, if: -> (_, options) { options[:merge_request_diffs]&.any? } do |diffs|
@@ -115,5 +115,11 @@ class DiffsEntity < Grape::Entity
       prev_commit_id: prev_commit_id,
       next_commit_id: next_commit_id
     )
+  end
+
+  def conflicts
+    return unless merge_request&.highlight_diff_conflicts?
+
+    MergeRequests::Conflicts::ListService.new(merge_request).conflicts # rubocop:disable CodeReuse/ServiceClass
   end
 end

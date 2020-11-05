@@ -54,7 +54,7 @@ class DiffFileEntity < DiffFileBaseEntity
 
   # Used for inline diffs
   expose :highlighted_diff_lines, using: DiffLineEntity, if: -> (diff_file, options) { inline_diff_view?(options, diff_file) && diff_file.text? } do |diff_file|
-    diff_file.diff_lines_for_serializer
+    diff_file.diff_lines_for_serializer(conflicts: options[:conflicts])
   end
 
   expose :is_fully_expanded do |diff_file|

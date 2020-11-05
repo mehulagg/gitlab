@@ -1700,6 +1700,10 @@ class MergeRequest < ApplicationRecord
     false
   end
 
+  def highlight_diff_conflicts?
+    !branch_missing? && Feature.enabled?(:highlight_merge_conflicts_in_diff, project)
+  end
+
   private
 
   def with_rebase_lock

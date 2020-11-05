@@ -31,4 +31,34 @@ RSpec.describe PaginatedDiffEntity do
       total_pages: 7
     )
   end
+
+  context 'when there are conflicts' do
+    let(:conflicts) { double(files: []) }
+
+    before do
+      allow_next_instance_of(MergeRequests::Conflicts::ListService) do |instance|
+        allow(instance).to receive(:conflicts).and_return(conflicts)
+      end
+    end
+
+    it 'lines are parsed with passed conflicts' do
+      expect(Gitlab::Git::Conflict::LineParser).to(
+        receive(:new).exactly(3).times.with(anything, conflicts).and_call_original
+      )
+
+      subject
+    end
+
+    context 'when diff lines should not be highlighted' do
+      before do
+        allow(merge_request).to receive(:highlight_diff_conflicts?).and_return(false)
+      end
+
+      it 'conflicts has no impact on line parsing' do
+        expect(Gitlab::Git::Conflict::LineParser).not_to receive(:new)
+
+        subject
+      end
+    end
+  end
 end

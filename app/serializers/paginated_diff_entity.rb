@@ -15,7 +15,8 @@ class PaginatedDiffEntity < Grape::Entity
       diffs.diff_files,
       options.merge(
         submodule_links: submodule_links,
-        code_navigation_path: code_navigation_path(diffs)
+        code_navigation_path: code_navigation_path(diffs),
+        conflicts: conflicts
       )
     )
   end
@@ -57,5 +58,11 @@ class PaginatedDiffEntity < Grape::Entity
 
   def merge_request
     options[:merge_request]
+  end
+
+  def conflicts
+    return unless merge_request&.highlight_diff_conflicts?
+
+    MergeRequests::Conflicts::ListService.new(merge_request).conflicts # rubocop:disable CodeReuse/ServiceClass
   end
 end
