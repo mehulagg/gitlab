@@ -230,7 +230,7 @@ The AutoDevOps templates leverage the `SECURE_ANALYZERS_PREFIX` variable to
 identify where the analyzer images are located. This variable was discussed
 [above](#using-the-secure-bundle-created). Ensure that you've set this variable
 to the correct value for where you've loaded the analyzer images. You could
-consider doing this with a pipeline variable or by [modifying](/topics/autodevops/customize.html#customizing-gitlab-ciyml)
+consider doing this with a pipeline variable or by [modifying](../../../topics/autodevops/customize.md#customizing-gitlab-ciyml)
 the `.gitlab-ci.yml` file directly.
 
 Once these two steps have been completed, GitLab will have local copies of the
