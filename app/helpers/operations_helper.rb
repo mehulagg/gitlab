@@ -31,7 +31,7 @@ module OperationsHelper
       'alerts_usage_url' => project_alert_management_index_path(@project),
       'disabled' => disabled.to_s,
       'project_path' => @project.full_path,
-      'multi_integrations' => @project.feature_available?(:multiple_alert_http_integrations).to_s
+      'multi_integrations' => 'false'
     }
   end
 
