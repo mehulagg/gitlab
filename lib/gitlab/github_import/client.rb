@@ -27,7 +27,7 @@ module Gitlab
       # token in parallel. This could result in all of them hitting the GitHub
       # rate limit at once. The threshold is put in place to not hit the limit
       # in most cases.
-      RATE_LIMIT_THRESHOLD = 50
+      RATE_LIMIT_THRESHOLD = 15
 
       # token - The GitHub API token to use.
       #

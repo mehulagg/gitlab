@@ -114,7 +114,7 @@ class Import::GithubController < Import::BaseController
 
   def client_repos
     @client_repos ||= if Feature.enabled?(:remove_legacy_github_client)
-                        filtered(concatenated_repos)
+                        concatenated_repos
                       else
                         filtered(client.repos)
                       end
@@ -122,8 +122,22 @@ class Import::GithubController < Import::BaseController
 
   def concatenated_repos
     return [] unless client.respond_to?(:each_page)
+    return client.each_page(:repos).flat_map(&:objects) unless sanitized_filter_param
 
-    client.each_page(:repos).flat_map(&:objects)
+    users = client
+      .each_page(:repos, nil, { affiliation: 'collaborator' })
+      .flat_map(&:objects)
+      .map { |repo| "user:#{repo.owner.login}" }
+      .join(' ')
+
+    orgs = client
+      .octokit
+      .organizations
+      .map { |org| "org:#{org.login}" }.join(' ')
+
+    search_query = "#{sanitized_filter_param} in:name is:public,private user:#{client.octokit.user.login} #{users} #{orgs}"
+
+    client.each_page(:search_repositories, search_query).flat_map(&:objects).flat_map(&:items)
   end
 
   def oauth_client
