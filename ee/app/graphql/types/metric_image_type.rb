@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module Types
-  class MetricImageUploadType < BaseObject
-    graphql_name 'MetricImageUpload'
+  class MetricImageType < BaseObject
+    graphql_name 'MetricImage'
     description 'Represents a metric image upload'
 
-    authorize :upload_metric ??
+    authorize :upload_metric
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the metric upload'

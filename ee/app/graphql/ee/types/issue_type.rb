@@ -43,7 +43,7 @@ module EE
         field :sla_due_at, ::Types::TimeType, null: true,
           description: 'Timestamp of when the issue SLA expires.'
 
-        field :metric_image_uploads, [::Types::MetricImageUploadType], null: true,
+        field :metric_images, [::Types::MetricImageType], null: true,
           description: 'Metric images associated to the issue.'
       end
     end

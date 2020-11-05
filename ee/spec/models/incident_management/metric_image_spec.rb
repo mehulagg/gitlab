@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe IncidentManagement::MetricImageUpload do
+RSpec.describe IncidentManagement::MetricImage do
   describe 'associations' do
-    subject { build(:metric_image_upload) }
+    subject { build(:metric_image) }
 
     it { is_expected.to belong_to(:incident) }
   end

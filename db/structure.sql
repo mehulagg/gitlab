@@ -8977,7 +8977,8 @@ CREATE TABLE analytics_devops_adoption_segments (
     name text NOT NULL,
     last_recorded_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_4be7a006fd CHECK ((char_length(name) <= 255))
 );
 
 CREATE SEQUENCE analytics_devops_adoption_segments_id_seq
@@ -9329,18 +9330,18 @@ CREATE TABLE application_settings (
     require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
     help_page_documentation_base_url text,
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
+    new_user_signups_cap integer,
+    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
-    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
-    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
-    new_user_signups_cap integer,
+    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
@@ -13736,22 +13737,24 @@ CREATE SEQUENCE merge_trains_id_seq
 
 ALTER SEQUENCE merge_trains_id_seq OWNED BY merge_trains.id;
 
-CREATE TABLE metric_image_uploads (
+CREATE TABLE metric_images (
     id bigint NOT NULL,
     issue_id bigint NOT NULL,
-    url character varying(255),
-    file character varying(255),
-    file_store smallint
+    url text,
+    file text,
+    file_store smallint,
+    CONSTRAINT check_1d5bf28f79 CHECK ((char_length(file) <= 255)),
+    CONSTRAINT check_bfa8eacfe4 CHECK ((char_length(url) <= 255))
 );
 
-CREATE SEQUENCE metric_image_uploads_id_seq
+CREATE SEQUENCE metric_images_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE metric_image_uploads_id_seq OWNED BY metric_image_uploads.id;
+ALTER SEQUENCE metric_images_id_seq OWNED BY metric_images.id;
 
 CREATE TABLE metrics_dashboard_annotations (
     id bigint NOT NULL,
@@ -14882,7 +14885,8 @@ CREATE TABLE project_ci_cd_settings (
     merge_pipelines_enabled boolean,
     default_git_depth integer,
     forward_deployment_enabled boolean,
-    merge_trains_enabled boolean DEFAULT false
+    merge_trains_enabled boolean DEFAULT false,
+    auto_rollback_enabled boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE project_ci_cd_settings_id_seq
@@ -15206,6 +15210,7 @@ CREATE TABLE project_settings (
     allow_merge_on_skipped_pipeline boolean,
     squash_option smallint DEFAULT 3,
     has_confluence boolean DEFAULT false NOT NULL,
+    has_vulnerabilities boolean DEFAULT false NOT NULL,
     CONSTRAINT check_bde223416c CHECK ((show_default_award_emojis IS NOT NULL))
 );
 
@@ -17937,7 +17942,7 @@ ALTER TABLE ONLY merge_requests_closing_issues ALTER COLUMN id SET DEFAULT nextv
 
 ALTER TABLE ONLY merge_trains ALTER COLUMN id SET DEFAULT nextval('merge_trains_id_seq'::regclass);
 
-ALTER TABLE ONLY metric_image_uploads ALTER COLUMN id SET DEFAULT nextval('metric_image_uploads_id_seq'::regclass);
+ALTER TABLE ONLY metric_images ALTER COLUMN id SET DEFAULT nextval('metric_images_id_seq'::regclass);
 
 ALTER TABLE ONLY metrics_dashboard_annotations ALTER COLUMN id SET DEFAULT nextval('metrics_dashboard_annotations_id_seq'::regclass);
 
@@ -19164,8 +19169,8 @@ ALTER TABLE ONLY merge_requests
 ALTER TABLE ONLY merge_trains
     ADD CONSTRAINT merge_trains_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY metric_image_uploads
-    ADD CONSTRAINT metric_image_uploads_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY metric_images
+    ADD CONSTRAINT metric_images_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY metrics_dashboard_annotations
     ADD CONSTRAINT metrics_dashboard_annotations_pkey PRIMARY KEY (id);
@@ -21147,7 +21152,7 @@ CREATE INDEX index_merge_trains_on_pipeline_id ON merge_trains USING btree (pipe
 
 CREATE INDEX index_merge_trains_on_user_id ON merge_trains USING btree (user_id);
 
-CREATE INDEX index_metric_image_uploads_on_issue_id ON metric_image_uploads USING btree (issue_id);
+CREATE INDEX index_metric_images_on_issue_id ON metric_images USING btree (issue_id);
 
 CREATE INDEX index_metrics_dashboard_annotations_on_cluster_id_and_3_columns ON metrics_dashboard_annotations USING btree (cluster_id, dashboard_path, starting_at, ending_at) WHERE (cluster_id IS NOT NULL);
 
@@ -21482,6 +21487,8 @@ CREATE INDEX index_project_repositories_on_shard_id ON project_repositories USIN
 CREATE UNIQUE INDEX index_project_repository_states_on_project_id ON project_repository_states USING btree (project_id);
 
 CREATE INDEX index_project_repository_storage_moves_on_project_id ON project_repository_storage_moves USING btree (project_id);
+
+CREATE INDEX index_project_settings_on_project_id_partially ON project_settings USING btree (project_id) WHERE (has_vulnerabilities IS TRUE);
 
 CREATE UNIQUE INDEX index_project_settings_on_push_rule_id ON project_settings USING btree (push_rule_id);
 
@@ -24041,9 +24048,6 @@ ALTER TABLE ONLY ci_pipeline_artifacts
 ALTER TABLE ONLY merge_request_user_mentions
     ADD CONSTRAINT fk_rails_aa1b2961b1 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY metric_image_uploads
-    ADD CONSTRAINT fk_rails_aaa2f0ebca FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY x509_commit_signatures
     ADD CONSTRAINT fk_rails_ab07452314 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -24289,6 +24293,9 @@ ALTER TABLE ONLY vulnerability_feedback
 
 ALTER TABLE ONLY analytics_cycle_analytics_group_stages
     ADD CONSTRAINT fk_rails_dfb37c880d FOREIGN KEY (end_event_label_id) REFERENCES labels(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY metric_images
+    ADD CONSTRAINT fk_rails_e0a7c6ab4f FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY label_priorities
     ADD CONSTRAINT fk_rails_e161058b0f FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;

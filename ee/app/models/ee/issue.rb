@@ -53,7 +53,7 @@ module EE
 
       has_one :status_page_published_incident, class_name: 'StatusPage::PublishedIncident', inverse_of: :issue
       has_one :issuable_sla
-      has_many :metric_image_uploads, class_name: 'IncidentManagement::MetricImageUpload'
+      has_many :metric_images, class_name: 'IncidentManagement::MetricImage'
 
       has_many :vulnerability_links, class_name: 'Vulnerabilities::IssueLink', inverse_of: :issue
       has_many :related_vulnerabilities, through: :vulnerability_links, source: :vulnerability

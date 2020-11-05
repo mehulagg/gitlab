@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class MetricImageUpload < ApplicationRecord
+  class MetricImage < ApplicationRecord
     include Gitlab::FileTypeDetection
     include FileStoreMounter
 

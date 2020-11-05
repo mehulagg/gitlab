@@ -26,7 +26,7 @@ module IncidentManagement
       private
 
       def upload_metric
-        @metric = IncidentManagement::MetricImageUpload.create!(
+        @metric = IncidentManagement::MetricImage.create!(
           incident: issuable,
           file: file,
           url: url

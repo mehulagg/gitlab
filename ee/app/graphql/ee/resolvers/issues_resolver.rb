@@ -19,7 +19,7 @@ module EE
         super.merge(
           {
             sla_due_at: [:issuable_sla],
-            metric_image_uploads: [:metric_image_uploads]
+            metric_images: [:metric_images]
           }
         )
       end
