@@ -1561,7 +1561,7 @@ Logs produced by pods running **GitLab Managed Apps** can be browsed using [**Lo
 
 You can modify the HTTP Strict Transport Security header from the Ingress defaults by using a
 [customized Helm chart value](../../topics/autodevops/customize.md#customize-values-for-helm-chart).
-This example deploys an Ingress resource with the annotations needed to set up a host-specific
+This example deploys an Ingress resource with the [annotations](https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/#auth-and-ssl-tls) needed to set up a host-specific
 HSTS header:
 
 ```ingress:
