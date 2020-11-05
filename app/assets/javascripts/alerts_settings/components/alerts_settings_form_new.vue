@@ -127,7 +127,7 @@ export default {
         case this.$options.typeSet.prometheus:
           return this.prometheus;
         default:
-          return this.defaultFormState;
+          return this.$options.defaultFormState;
       }
     },
     integrationForm() {
@@ -191,7 +191,7 @@ export default {
       return this.resetFormValues();
     },
     onResetFormValues() {
-      this.integrationForm = this.defaultFormState;
+      this.integrationForm = this.$options.defaultFormState;
       this.active = false;
     },
     resetAuthKey() {

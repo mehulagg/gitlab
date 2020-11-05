@@ -1,5 +1,6 @@
 const projectPath = '';
 export const ID = 'gid://gitlab/AlertManagement::HttpIntegration/7';
+export const errorMsg = 'Something went wrong';
 
 export const createHttpVariables = {
   name: 'Test Pre',
