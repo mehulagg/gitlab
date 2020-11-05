@@ -9,6 +9,10 @@ module QA
         Struct.new(:username, :password).new(admin_username, admin_password)
       end
 
+      def admin_tunnel
+        Struct.new(:username, :password).new(admin_username, admin_tunnel_password)
+      end
+
       def default_username
         'root'
       end
@@ -51,6 +55,10 @@ module QA
 
       def admin_password
         Runtime::Env.admin_password || default_password
+      end
+
+      def admin_tunnel_password
+        Runtime::Env.admin_tunnel_password || password
       end
     end
   end

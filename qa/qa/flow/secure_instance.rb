@@ -18,9 +18,14 @@ module QA
         end
       end
 
-      def change_root_password
+      def change_password_for_tunnel
         Flow::Login.sign_in_as_admin
+        Page::Main::Menu.perform(&:click_settings_link)
+        Page::Profile::Menu.perform(&:click_password)
 
+        Page::Profile::Password.perform do |password_page|
+          password_page.update_password(Runtime::User.admin_tunnel_password, Runtime::User.admin_password)
+        end
       end
     end
   end

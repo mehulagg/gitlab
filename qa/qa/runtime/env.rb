@@ -297,6 +297,10 @@ module QA
         @ldap_password ||= ENV['GITLAB_LDAP_PASSWORD']
       end
 
+      def admin_tunnel_password
+        @admin_tunnel_password ||= ENV['GITLAB_ADMIN_TUNNEL_PASSWORD']
+      end
+
       def sandbox_name
         ENV['GITLAB_SANDBOX_NAME']
       end
