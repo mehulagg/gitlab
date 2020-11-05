@@ -439,8 +439,8 @@ This error will be shown in KAS pod logs if the path to the configuration projec
 {"level":"info","time":"2020-10-30T08:56:54.329Z","msg":"Synced","project_id":"root/kas-manifest001","resource_key":"apps/Deployment/kas-test001/nginx-deployment","sync_result":"error validating data: [ValidationError(Deployment.metadata): unknown field \"replicas\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"selector\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"template\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]"}
 ```
 
-You may see similar errors if your `manifest.yaml` file is malformed, and kubernetes cannot create specified objects. Make sure that
-your `manifest.yaml` file is valid. You may try using it to create objects in Kubernetes directly to troubleshoot if.
+You may see similar errors if your `manifest.yaml` file is malformed, and Kubernetes cannot create specified objects. Make sure that
+your `manifest.yaml` file is valid. You may try using it to create objects in Kubernetes directly for further trobleshooting.
 
 ### Error while dialing failed to WebSocket dial: failed to send handshake request
 
