@@ -67,7 +67,7 @@ export default Vue.extend({
     handleItemClick(item) {
       if (
         this.vuexStore.getters.shouldUseGraphQL &&
-        !this.vuexStore.getters.getListByTitle(item.title)
+        !this.vuexStore.getters.listByTitle(item.title)
       ) {
         if (this.listType === 'milestones') {
           this.vuexStore.dispatch('createList', { milestoneId: fullMilestoneId(item.id) });

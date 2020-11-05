@@ -3,15 +3,15 @@ import gettersCE from '~/boards/stores/getters';
 export default {
   ...gettersCE,
 
-  getIssuesByEpic: (state, getters) => (listId, epicId) => {
-    return getters.getIssues(listId).filter(issue => issue.epic && issue.epic.id === epicId);
+  issuesByEpic: (state, getters) => (listId, epicId) => {
+    return getters.issues(listId).filter(issue => issue.epic && issue.epic.id === epicId);
   },
 
-  getUnassignedIssues: (state, getters) => listId => {
-    return getters.getIssues(listId).filter(i => Boolean(i.epic) === false);
+  unassignedIssues: (state, getters) => listId => {
+    return getters.issues(listId).filter(i => Boolean(i.epic) === false);
   },
 
-  getEpicById: state => epicId => {
+  epicById: state => epicId => {
     return state.epics.find(epic => epic.id === epicId);
   },
 

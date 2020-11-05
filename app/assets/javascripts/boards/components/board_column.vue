@@ -46,7 +46,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getIssues']),
+    ...mapGetters(['issues']),
     showBoardListAndBoardInfo() {
       return this.list.type !== ListType.promotion;
     },
@@ -58,7 +58,7 @@ export default {
       if (!this.glFeatures.graphqlBoardLists) {
         return this.list.issues;
       }
-      return this.getIssues(this.list.id);
+      return this.issues(this.list.id);
     },
     shouldFetchIssues() {
       return this.glFeatures.graphqlBoardLists && this.list.type !== ListType.blank;
@@ -71,7 +71,7 @@ export default {
           this.fetchIssuesForList({ listId: this.list.id });
         } else {
           this.list.page = 1;
-          this.list.getIssues(true).catch(() => {
+          this.list.issues(true).catch(() => {
             // TODO: handle request error
           });
         }

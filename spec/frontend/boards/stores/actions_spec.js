@@ -597,7 +597,7 @@ describe('addListIssueFailure', () => {
 
 describe('setActiveIssueLabels', () => {
   const state = { issues: { [mockIssue.id]: mockIssue } };
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const testLabelIds = labels.map(label => label.id);
   const input = {
     addLabelIds: testLabelIds,
@@ -611,7 +611,7 @@ describe('setActiveIssueLabels', () => {
       .mockResolvedValue({ data: { updateIssue: { issue: { labels: { nodes: labels } } } } });
 
     const payload = {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'labels',
       value: labels,
     };
@@ -642,7 +642,7 @@ describe('setActiveIssueLabels', () => {
 
 describe('setActiveIssueDueDate', () => {
   const state = { issues: { [mockIssue.id]: mockIssue } };
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const testDueDate = '2020-02-20';
   const input = {
     dueDate: testDueDate,
@@ -662,7 +662,7 @@ describe('setActiveIssueDueDate', () => {
     });
 
     const payload = {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'dueDate',
       value: testDueDate,
     };

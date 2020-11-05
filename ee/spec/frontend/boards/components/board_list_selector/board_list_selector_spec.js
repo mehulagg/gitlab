@@ -110,7 +110,7 @@ describe('BoardListSelector', () => {
         jest.spyOn(vm.vuexStore, 'dispatch').mockReturnValue({});
         const assignee = mockAssigneesList[0];
 
-        expect(vm.vuexStore.getters.getListByTitle(assignee.name)).not.toBeDefined();
+        expect(vm.vuexStore.getters.listByTitle(assignee.name)).not.toBeDefined();
         vm.handleItemClick(assignee);
 
         expect(vm.vuexStore.dispatch).toHaveBeenCalledWith('createList', {

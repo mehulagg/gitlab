@@ -26,7 +26,7 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
-    ...mapGetters(['isSidebarOpen', 'getActiveIssue']),
+    ...mapGetters(['isSidebarOpen', 'activeIssue']),
     ...mapState(['sidebarType']),
     showSidebar() {
       return this.sidebarType === ISSUABLE;
@@ -46,11 +46,11 @@ export default {
     @close="unsetActiveId"
   >
     <template #header>
-      <issuable-title :ref-path="getActiveIssue.referencePath" :title="getActiveIssue.title" />
+      <issuable-title :ref-path="activeIssue.referencePath" :title="activeIssue.title" />
     </template>
 
     <template>
-      <issuable-assignees :users="getActiveIssue.assignees" />
+      <issuable-assignees :users="activeIssue.assignees" />
       <board-sidebar-epic-select />
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <board-sidebar-weight-input v-if="glFeatures.issueWeights" />

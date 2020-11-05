@@ -15,7 +15,7 @@ export default () =>
     store,
     computed: {
       ...mapState(['isShowingLabels']),
-      ...mapGetters(['getLabelToggleState']),
+      ...mapGetters(['labelToggleState']),
     },
     methods: {
       ...mapActions(['setShowLabels']),
@@ -25,7 +25,7 @@ export default () =>
 
         Tracking.event(document.body.dataset.page, 'toggle', {
           label: 'show_labels',
-          property: this.getLabelToggleState,
+          property: this.labelToggleState,
         });
       },
 

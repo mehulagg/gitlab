@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     ...mapState(['epicsFlags', 'filterParams']),
-    ...mapGetters(['getIssuesByEpic']),
+    ...mapGetters(['issuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
     },
@@ -63,7 +63,7 @@ export default {
     },
     issuesCount() {
       return this.lists.reduce(
-        (total, list) => total + this.getIssuesByEpic(list.id, this.epic.id).length,
+        (total, list) => total + this.issuesByEpic(list.id, this.epic.id).length,
         0,
       );
     },
@@ -163,7 +163,7 @@ export default {
         v-for="list in lists"
         :key="`${list.id}-issues`"
         :list="list"
-        :issues="getIssuesByEpic(list.id, epic.id)"
+        :issues="issuesByEpic(list.id, epic.id)"
         :disabled="disabled"
         :epic-id="epic.id"
         :epic-is-confidential="epic.confidential"

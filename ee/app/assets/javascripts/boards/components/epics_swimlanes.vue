@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
-    ...mapGetters(['getUnassignedIssues']),
+    ...mapGetters({ getUnassignedIssues: 'unassignedIssues' }),
     unassignedIssues() {
       return listId => this.getUnassignedIssues(listId);
     },
