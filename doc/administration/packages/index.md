@@ -83,6 +83,7 @@ To enable the Packages feature:
 1. [Restart GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure "How to reconfigure Omnibus GitLab") for the changes to take effect.
 
 **Helm Chart installations**
+
 1. After the installation is complete, you will have to configure the `packages`
    section in `global.appConfig.packages`. Set to `true` to enable it:
 
@@ -91,7 +92,7 @@ To enable the Packages feature:
      enabled: true
    ```
 
-1. [Restart GitLab](../restart_gitlab.html#helm-chart-installations) for the changes to take effect.
+1. [Restart GitLab](../restart_gitlab.html#helm-chart-installations "How to reconfigure Helm installations of GitLab") for the changes to take effect.
 
 ## Changing the storage path
 
