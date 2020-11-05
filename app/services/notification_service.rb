@@ -370,6 +370,14 @@ class NotificationService
     end
   end
 
+  def new_instance_access_request(member)
+    recipients = User.admins.order_recent_sign_in.limit(10)
+
+    recipients.each do |recipient|
+      mailer.instance_access_request_email(member, recipient).deliver_later
+    end
+  end
+
   # Members
   def new_access_request(member)
     return true unless member.notifiable?(:subscription)

@@ -22,6 +22,15 @@ module Emails
         subject: subject("Request to join the #{member_source.human_name} #{member_source.model_name.singular}"))
     end
 
+    def instance_access_request_email(member, recipient)
+      @member = member
+      @recipient = recipient
+
+      member_email_with_layout(
+        to: recipient.email,
+        subject: subject("GitLab Account Request"))
+    end
+
     def member_access_granted_email(member_source_type, member_id)
       @member_source_type = member_source_type
       @member_id = member_id

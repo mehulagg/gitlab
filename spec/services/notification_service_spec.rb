@@ -2312,6 +2312,47 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
+  describe 'InstanceMember', :deliver_mails_inline do
+    let(:added_user) { create(:user) }
+
+    describe '#new_access_request' do
+      context 'recipients' do
+        let(:maintainer) { create(:user) }
+        let(:owner) { create(:user) }
+        let(:developer) { create(:user) }
+
+        let!(:group) do
+          create(:group, :public) do |group|
+            group.add_owner(owner)
+            group.add_maintainer(maintainer)
+            group.add_developer(developer)
+          end
+        end
+
+        before do
+          reset_delivered_emails!
+        end
+
+        it 'sends notification only to group owners' do
+          group.request_access(added_user)
+
+          should_email(owner)
+          should_not_email(maintainer)
+          should_not_email(developer)
+        end
+
+        it_behaves_like 'group emails are disabled' do
+          let(:notification_target)  { group }
+          let(:notification_trigger) { group.request_access(added_user) }
+        end
+      end
+
+      it_behaves_like 'sends notification only to a maximum of ten, most recently active group owners' do
+        let(:group) { create(:group, :public) }
+        let(:notification_trigger) { group.request_access(added_user) }
+      end
+    end
+
   describe 'GroupMember', :deliver_mails_inline do
     let(:added_user) { create(:user) }
 
