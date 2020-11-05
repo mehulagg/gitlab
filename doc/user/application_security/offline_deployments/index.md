@@ -224,7 +224,7 @@ images.
 
 GitLab Secure leverages analyzer container images to do the various scans. These
 images must be available as part of running AutoDevOps. Follow the steps
-[above](#using-the-official-gitLab-template) to load those container images into
+[above](#using-the-official-gitlab-template) to load those container images into
 the local container registry before running AutoDevOps.
 
 The AutoDevOps templates leverage the `SECURE_ANALYZERS_PREFIX` variable to
