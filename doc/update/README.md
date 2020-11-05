@@ -28,6 +28,7 @@ official ways to update GitLab:
 - [Linux packages (Omnibus GitLab)](#linux-packages-omnibus-gitlab)
 - [Source installations](#installation-from-source)
 - [Docker installations](#installation-using-docker)
+- [Kubernetes (Helm) installations](#installation-using-helm)
 
 ### Linux packages (Omnibus GitLab)
 
