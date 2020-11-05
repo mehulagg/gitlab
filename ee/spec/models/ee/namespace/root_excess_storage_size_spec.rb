@@ -16,40 +16,26 @@ RSpec.describe EE::Namespace::RootExcessStorageSize do
     subject { model.above_size_limit? }
 
     before do
-      allow(Gitlab::CurrentSettings).to receive(:automatic_purchased_storage_allocation?) { storage_allocation_enabled }
+      allow(model).to receive(:enforce_limit?) { enforce_limit }
     end
 
     context 'when limit enforcement is off' do
-      let(:storage_allocation_enabled) { false }
+      let(:enforce_limit) { false }
 
       it { is_expected.to eq(false) }
     end
 
     context 'when limit enforcement is on' do
-      let(:storage_allocation_enabled) { true }
+      let(:enforce_limit) { true }
 
-      context 'with feature flag :namespace_storage_limit disabled' do
-        before do
-          stub_feature_flags(namespace_storage_limit: false)
-        end
-
-        context 'when below limit' do
-          it { is_expected.to eq(false) }
-        end
-
-        context 'when above limit' do
-          let(:total_repository_size_excess) { 101.megabytes }
-
-          it { is_expected.to eq(true) }
-        end
+      context 'when below limit' do
+        it { is_expected.to eq(false) }
       end
 
-      context 'with feature flag :additional_repo_storage_by_namespace disabled' do
-        before do
-          stub_feature_flags(additional_repo_storage_by_namespace: false)
-        end
+      context 'when above limit' do
+        let(:total_repository_size_excess) { 101.megabytes }
 
-        it { is_expected.to eq(false) }
+        it { is_expected.to eq(true) }
       end
     end
   end
@@ -99,36 +85,21 @@ RSpec.describe EE::Namespace::RootExcessStorageSize do
   describe '#enforce_limit?' do
     subject { model.enforce_limit? }
 
-    let(:storage_allocation_enabled) { true }
-
     before do
-      allow(Gitlab::CurrentSettings).to receive(:automatic_purchased_storage_allocation?) { storage_allocation_enabled }
+      allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+        .and_return(additional_repo_storage_by_namespace_enabled)
     end
 
-    context 'with application setting is disabled' do
-      let(:storage_allocation_enabled) { false }
+    context 'when additional_repo_storage_by_namespace_enabled is false' do
+      let(:additional_repo_storage_by_namespace_enabled) { false }
 
-      it { is_expected.to eq(false) }
-    end
-
-    context 'with feature flags (:namespace_storage_limit & :additional_repo_storage_by_namespace) enabled' do
       it { is_expected.to eq(false) }
     end
 
     context 'with feature flag :namespace_storage_limit disabled' do
-      before do
-        stub_feature_flags(namespace_storage_limit: false)
-      end
+      let(:additional_repo_storage_by_namespace_enabled) { true }
 
       it { is_expected.to eq(true) }
-    end
-
-    context 'with feature flag :additional_repo_storage_by_namespace disabled' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: false)
-      end
-
-      it { is_expected.to eq(false) }
     end
   end
 end

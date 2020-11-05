@@ -373,7 +373,9 @@ module EE
     end
 
     def additional_repo_storage_by_namespace_enabled?
-      !::Feature.enabled?(:namespace_storage_limit, self) && ::Feature.enabled?(:additional_repo_storage_by_namespace, self)
+      !::Feature.enabled?(:namespace_storage_limit, self) &&
+        ::Feature.enabled?(:additional_repo_storage_by_namespace, self) &&
+        ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
     end
 
     def root_storage_size
