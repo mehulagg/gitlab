@@ -4,42 +4,27 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# GitLab PyPI Repository
+# PyPI packages in the Package Registry
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208747) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
 
-With the GitLab PyPI Repository, every project can have its own space to store PyPI packages.
+Publish PyPI packages in your project’s Package Registry. Then install the packages whenever you need to use them as a dependency.
 
 The GitLab PyPI Repository works with:
 
 - [pip](https://pypi.org/project/pip/)
 - [twine](https://pypi.org/project/twine/)
 
-## Setting up your development environment
-
-You need a recent version of [pip](https://pypi.org/project/pip/) and [twine](https://pypi.org/project/twine/).
-
-## Enabling the PyPI Repository
-
-NOTE: **Note:**
-This option is available only if your GitLab administrator has
-[enabled support for the Package Registry](../../../administration/packages/index.md).
-
-After the PyPI Repository is enabled, it is available for all new projects
-by default. To enable it for existing projects, or if you want to disable it:
-
-1. Navigate to your project's **Settings > General > Visibility, project features, permissions**.
-1. Find the Packages feature and enable or disable it.
-1. Click on **Save changes** for the changes to take effect.
-
-You should then be able to see the **Packages & Registries** section on the left sidebar.
-
-## Getting started
+## Build a PyPI package
 
 This section covers creating a new example PyPI package to upload. This is a
 quickstart to test out the **GitLab PyPI Registry**. If you already understand how
 to build and publish your own packages, move on to the [next section](#adding-the-gitlab-pypi-repository-as-a-source).
+
+### Install pip and twine
+
+You need a recent version of [pip](https://pypi.org/project/pip/) and [twine](https://pypi.org/project/twine/).
 
 ### Create a project
 
@@ -160,9 +145,9 @@ mypypipackage-0.0.1-py3-none-any.whl mypypipackage-0.0.1.tar.gz
 Our package is now all set up and ready to be uploaded to the **GitLab PyPI
 Package Registry**. Before we do so, we next need to set up authentication.
 
-## Adding the GitLab PyPI Repository as a source
+## Authenticate with the Package Registry
 
-### Authenticating with a personal access token
+### Authenticate with a personal access token
 
 You need the following:
 
@@ -183,7 +168,7 @@ username = __token__
 password = <your personal access token>
 ```
 
-### Authenticating with a deploy token
+### Authenticate with a deploy token
 
 You need the following:
 
@@ -204,9 +189,9 @@ username = <deploy token username>
 password = <deploy token>
 ```
 
-## Uploading packages
+## Publish a PyPI package
 
-When uploading packages, note that:
+When publishing packages, note that:
 
 - The maximum allowed size is 50 Megabytes.
 - You cannot upload the same version of a package multiple times. If you try, you receive the error `Validation failed: File name has already been taken`.
@@ -231,7 +216,7 @@ You can play around with the regex and try your version strings on [this regular
 
 For more details about the regex used, please check the [documentation here](https://www.python.org/dev/peps/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions))
 
-### Upload packages with Twine
+### Publish a PyPI package by using twine
 
 If you were following the guide above, then the `MyPyPiPackage` package should
 be ready to be uploaded. Run the following command:
@@ -274,7 +259,39 @@ Where:
 - `<package_file>` is your package filename, ending in `.tar.gz` or `.whl`.
 - `<source_name>` is the [source name used during setup](#adding-the-gitlab-pypi-repository-as-a-source).
 
-## Install packages
+### Publish a PyPI package by using CI/CD
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202012) in GitLab 13.4.
+
+To work with PyPI commands within [GitLab CI/CD](./../../../ci/README.md), you can use
+`CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
+
+For example:
+
+```yaml
+image: python:latest
+
+run:
+  script:
+    - pip install twine
+    - python setup.py sdist bdist_wheel
+    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+```
+
+You can also use `CI_JOB_TOKEN` in a `~/.pypirc` file that you check into GitLab:
+
+```ini
+[distutils]
+index-servers =
+    gitlab
+
+[gitlab]
+repository = https://gitlab.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/pypi
+username = gitlab-ci-token
+password = ${env.CI_JOB_TOKEN}
+```
+
+## Install a PyPI package
 
 Install the latest version of a package using the following command:
 
@@ -310,35 +327,3 @@ GitLab looks for packages using
 so the characters `-`, `_`, and `.` are all treated the same and repeated characters are removed.
 A `pip install` request for `my.package` looks for packages that match any of
 the three characters, such as `my-package`, `my_package`, and `my....package`.
-
-## Using GitLab CI with PyPI packages
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202012) in GitLab 13.4.
-
-To work with PyPI commands within [GitLab CI/CD](./../../../ci/README.md), you can use
-`CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
-
-For example:
-
-```yaml
-image: python:latest
-
-run:
-  script:
-    - pip install twine
-    - python setup.py sdist bdist_wheel
-    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi dist/*
-```
-
-You can also use `CI_JOB_TOKEN` in a `~/.pypirc` file that you check into GitLab:
-
-```ini
-[distutils]
-index-servers =
-    gitlab
-
-[gitlab]
-repository = https://gitlab.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/pypi
-username = gitlab-ci-token
-password = ${env.CI_JOB_TOKEN}
-```
