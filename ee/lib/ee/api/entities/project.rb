@@ -28,8 +28,11 @@ module EE
           expose :marked_for_deletion_on, if: ->(project, _) { project.feature_available?(:adjourned_deletion_for_projects_and_groups) } do |project, _|
             project.marked_for_deletion_at
           end
+          expose :requirements_enabled do |project, options|
+            project.feature_available?(:requirements, options[:current_user])
+          end
           expose :compliance_frameworks do |project, _|
-            [project.compliance_framework_setting&.framework].compact
+            [project.compliance_framework_setting&.compliance_management_framework&.name].compact
           end
         end
       end

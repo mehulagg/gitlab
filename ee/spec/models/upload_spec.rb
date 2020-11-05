@@ -6,7 +6,7 @@ RSpec.describe Upload do
   include EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax
 
-  describe '.replicables_for_geo_node' do
+  describe '.replicables_for_current_secondary' do
     # Selective sync is configured relative to the upload's model. Take care not
     # to specify a model_factory that contradicts factory.
     #
@@ -37,7 +37,7 @@ RSpec.describe Upload do
     end
 
     with_them do
-      subject(:upload_included) { described_class.replicables_for_geo_node.include?(upload) }
+      subject(:upload_included) { described_class.replicables_for_current_secondary(upload).exists? }
 
       let(:model) { create(*model_factory) }
       let(:node) do

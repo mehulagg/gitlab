@@ -29,7 +29,7 @@ module LatestPipelineInformation
   end
 
   def latest_default_branch_pipeline
-    strong_memoize(:pipeline) { latest_pipeline_for_ref }
+    strong_memoize(:pipeline) { latest_pipeline }
   end
 
   def auto_devops_source?

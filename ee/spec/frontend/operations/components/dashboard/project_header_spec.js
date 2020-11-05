@@ -39,7 +39,7 @@ describe('project header component', () => {
 
   describe('remove button', () => {
     it('renders removal button icon', () => {
-      expect(wrapper.contains('.js-remove-button')).toBe(true);
+      expect(wrapper.find('.js-remove-button').exists()).toBe(true);
     });
 
     it('renders correct title for removal icon', () => {

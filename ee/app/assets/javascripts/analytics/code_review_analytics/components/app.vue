@@ -33,14 +33,6 @@ export default {
       type: String,
       required: true,
     },
-    milestonePath: {
-      type: String,
-      required: true,
-    },
-    labelsPath: {
-      type: String,
-      required: true,
-    },
   },
   computed: {
     ...mapState('mergeRequests', {
@@ -66,16 +58,12 @@ export default {
     if (!this.codeReviewAnalyticsHasNewSearch) {
       this.filterManager = new FilteredSearchCodeReviewAnalytics();
       this.filterManager.setup();
-    } else {
-      this.setMilestonesEndpoint(this.milestonePath);
-      this.setLabelsEndpoint(this.labelsPath);
     }
 
     this.setProjectId(this.projectId);
     this.fetchMergeRequests();
   },
   methods: {
-    ...mapActions('filters', ['setMilestonesEndpoint', 'setLabelsEndpoint']),
     ...mapActions('mergeRequests', ['setProjectId', 'fetchMergeRequests', 'setPage']),
   },
 };

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Test Import Project
 
 For testing, we can import our own [GitLab CE](https://gitlab.com/gitlab-org/gitlab-foss/) project (named `gitlabhq` in this case) under a group named `qa-perf-testing`. Project tarballs that can be used for testing can be found over on the [performance-data](https://gitlab.com/gitlab-org/quality/performance-data) project. A different project could be used if required.
@@ -17,7 +23,6 @@ The first option is to simply [import the Project tarball file via the GitLab UI
 
 It should take up to 15 minutes for the project to fully import. You can head to the project's main page for the current status.
 
-NOTE: **Note:**
 This method ignores all the errors silently (including the ones related to `GITALY_DISABLE_REQUEST_LIMITS`) and is used by GitLab's users. For development and testing, check the other methods below.
 
 ### Importing via the `import-project` script
@@ -95,6 +100,13 @@ If you want to import it to a new group or subgroup then create it first.
 ##### `Exception: No such file or directory @ rb_sysopen - (filename)`
 
 The specified project export file in `archive_path` is missing.
+
+##### `Exception: Permission denied @ rb_sysopen - (filename)`
+
+The specified project export file can not be accessed by the `git` user.
+
+Setting the file owner to `git:git`, changing the file permissions to `0400`, and moving it to a
+public folder (for example `/tmp/`) fixes the issue.
 
 ##### `Name can contain only letters, digits, emojis ...`
 

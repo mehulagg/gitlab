@@ -1,0 +1,7 @@
+---
+name: admin_new_user_signups_cap
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45643
+rollout_issue_url:
+type: development
+group: group::purchase
+default_enabled: false

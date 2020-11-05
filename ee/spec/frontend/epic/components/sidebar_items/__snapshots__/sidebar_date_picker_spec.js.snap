@@ -31,6 +31,7 @@ exports[`SidebarDatePicker renders expected template 1`] = `
       />
        
       <gl-button-stub
+        buttontextclasses=""
         category="primary"
         class="btn-sidebar-action"
         icon=""
@@ -76,10 +77,7 @@ exports[`SidebarDatePicker renders expected template 1`] = `
      
     <abbr
       class="value-type-dynamic text-secondary d-flex gl-mt-3"
-      data-html="true"
-      data-original-title="Select an issue with milestone to set date"
-      data-placement="bottom"
-      title=""
+      title="Select an issue with milestone to set date"
     >
       <input
         name="datetype_test"

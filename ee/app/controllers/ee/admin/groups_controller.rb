@@ -4,6 +4,8 @@
 module EE
   module Admin
     module GroupsController
+      extend ::Gitlab::Utils::Override
+
       def reset_runners_minutes
         group
 
@@ -23,6 +25,13 @@ module EE
           :shared_runners_minutes_limit,
           gitlab_subscription_attributes: [:hosted_plan_id]
         ]
+      end
+
+      override :group_members
+      def group_members
+        return @group.all_group_members if @group.minimal_access_role_allowed?
+
+        @group.members
       end
 
       def groups

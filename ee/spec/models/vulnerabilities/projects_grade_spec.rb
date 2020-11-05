@@ -4,38 +4,64 @@ require 'spec_helper'
 
 RSpec.describe Vulnerabilities::ProjectsGrade do
   let_it_be(:group) { create(:group) }
+  let_it_be(:subgroup) { create(:group, parent: group) }
   let_it_be(:project_1) { create(:project, group: group) }
   let_it_be(:project_2) { create(:project, group: group) }
   let_it_be(:project_3) { create(:project, group: group) }
   let_it_be(:project_4) { create(:project, group: group) }
   let_it_be(:project_5) { create(:project, group: group) }
+  let_it_be(:project_6) { create(:project, group: subgroup) }
 
   let_it_be(:vulnerability_statistic_1) { create(:vulnerability_statistic, :grade_a, project: project_1) }
   let_it_be(:vulnerability_statistic_2) { create(:vulnerability_statistic, :grade_b, project: project_2) }
   let_it_be(:vulnerability_statistic_3) { create(:vulnerability_statistic, :grade_b, project: project_3) }
   let_it_be(:vulnerability_statistic_4) { create(:vulnerability_statistic, :grade_c, project: project_4) }
   let_it_be(:vulnerability_statistic_5) { create(:vulnerability_statistic, :grade_f, project: project_5) }
+  let_it_be(:vulnerability_statistic_6) { create(:vulnerability_statistic, :grade_d, project: project_6) }
 
   describe '.grades_for' do
     let(:compare_key) { ->(projects_grade) { [projects_grade.grade, projects_grade.project_ids.sort] } }
+    let(:include_subgroups) { false }
 
-    subject(:projects_grades) { described_class.grades_for([vulnerable]) }
+    subject(:projects_grades) { described_class.grades_for([vulnerable], include_subgroups: include_subgroups) }
 
     context 'when the given vulnerable is a Group' do
       let(:vulnerable) { group }
-      let(:expected_projects_grades) do
-        {
-          vulnerable => [
-            described_class.new(vulnerable, 'a', [project_1.id]),
-            described_class.new(vulnerable, 'b', [project_2.id, project_3.id]),
-            described_class.new(vulnerable, 'c', [project_4.id]),
-            described_class.new(vulnerable, 'f', [project_5.id])
-          ]
-        }
+
+      context 'when subgroups are not included' do
+        let(:expected_projects_grades) do
+          {
+            vulnerable => [
+              described_class.new(vulnerable, 'a', [project_1.id]),
+              described_class.new(vulnerable, 'b', [project_2.id, project_3.id]),
+              described_class.new(vulnerable, 'c', [project_4.id]),
+              described_class.new(vulnerable, 'f', [project_5.id])
+            ]
+          }
+        end
+
+        it 'returns the letter grades for given vulnerable' do
+          expect(projects_grades[vulnerable].map(&compare_key)).to match_array(expected_projects_grades[vulnerable].map(&compare_key))
+        end
       end
 
-      it 'returns the letter grades for given vulnerable' do
-        expect(projects_grades[vulnerable].map(&compare_key)).to match_array(expected_projects_grades[vulnerable].map(&compare_key))
+      context 'when subgroups are included' do
+        let(:include_subgroups) { true }
+        let(:expected_projects_grades) do
+          {
+            vulnerable => [
+              described_class.new(vulnerable, 'a', [project_1.id]),
+              described_class.new(vulnerable, 'b', [project_2.id, project_3.id]),
+              described_class.new(vulnerable, 'c', [project_4.id]),
+              described_class.new(vulnerable, 'd', [project_6.id]),
+              described_class.new(vulnerable, 'f', [project_5.id])
+            ]
+          }
+        end
+
+        it 'returns the letter grades for given vulnerable' do
+          expect(projects_grades[vulnerable].map(&compare_key)).to match_array(expected_projects_grades[vulnerable].map(&compare_key))
+        end
       end
     end
 
@@ -72,17 +98,34 @@ RSpec.describe Vulnerabilities::ProjectsGrade do
   end
 
   describe '#projects' do
-    let(:projects_grade) { described_class.new(group, 1, [project_3.id, project_4.id]) }
-    let(:expected_projects) { [project_3, project_4] }
+    let(:projects_grade) { described_class.new(group, 1, [project_3.id, project_4.id, project_6.id], include_subgroups: include_subgroups) }
 
     subject(:projects) { projects_grade.projects }
 
-    it { is_expected.to match_array(expected_projects) }
+    context 'when include_subgroups is set to false' do
+      let(:include_subgroups) { false }
+      let(:expected_projects) { [project_3, project_4] }
 
-    it 'preloads vulnerability statistic once for whole collection' do
-      control_count = ActiveRecord::QueryRecorder.new { described_class.new(group, 1, [project_3.id]).projects.map(&:vulnerability_statistic) }.count
+      it { is_expected.to match_array(expected_projects) }
 
-      expect { described_class.new(group, 1, [project_3.id, project_4.id]).projects.map(&:vulnerability_statistic) }.not_to exceed_query_limit(control_count)
+      it 'preloads vulnerability statistic once for whole collection' do
+        control_count = ActiveRecord::QueryRecorder.new { described_class.new(group, 1, [project_3.id]).projects.map(&:vulnerability_statistic) }.count
+
+        expect { described_class.new(group, 1, [project_3.id, project_4.id]).projects.map(&:vulnerability_statistic) }.not_to exceed_query_limit(control_count)
+      end
+    end
+
+    context 'when include_subgroups is set to true' do
+      let(:include_subgroups) { true }
+      let(:expected_projects) { [project_3, project_4, project_6] }
+
+      it { is_expected.to match_array(expected_projects) }
+
+      it 'preloads vulnerability statistic once for whole collection' do
+        control_count = ActiveRecord::QueryRecorder.new { described_class.new(group, 1, [project_3.id]).projects.map(&:vulnerability_statistic) }.count
+
+        expect { described_class.new(group, 1, [project_3.id, project_4.id]).projects.map(&:vulnerability_statistic) }.not_to exceed_query_limit(control_count)
+      end
     end
   end
 

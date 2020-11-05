@@ -4,6 +4,8 @@ class Groups::Security::MergeCommitReportsController < Groups::ApplicationContro
 
   before_action :authorize_compliance_dashboard!
 
+  feature_category :compliance_management
+
   def index
     csv_data = MergeCommits::ExportCsvService.new(current_user, group).csv_data
 

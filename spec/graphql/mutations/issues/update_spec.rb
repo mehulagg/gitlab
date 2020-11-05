@@ -35,11 +35,7 @@ RSpec.describe Mutations::Issues::Update do
 
     subject { mutation.resolve(mutation_params) }
 
-    context 'when the user cannot access the issue' do
-      it 'raises an error' do
-        expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-      end
-    end
+    it_behaves_like 'permission level for issue mutation is correctly verified'
 
     context 'when the user can update the issue' do
       before do
@@ -67,6 +63,23 @@ RSpec.describe Mutations::Issues::Update do
           issue.update_column(:milestone_id, milestone.id)
 
           expect { subject }.to change { issue.reload.milestone }.from(milestone).to(nil)
+        end
+      end
+
+      context 'when changing state' do
+        let_it_be_with_refind(:issue) { create(:issue, project: project, state: :opened) }
+
+        it 'closes issue' do
+          mutation_params[:state_event] = 'close'
+
+          expect { subject }.to change { issue.reload.state }.from('opened').to('closed')
+        end
+
+        it 'reopens issue' do
+          issue.close
+          mutation_params[:state_event] = 'reopen'
+
+          expect { subject }.to change { issue.reload.state }.from('closed').to('opened')
         end
       end
 

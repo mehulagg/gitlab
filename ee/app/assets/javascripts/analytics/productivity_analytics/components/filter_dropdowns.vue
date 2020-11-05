@@ -4,7 +4,6 @@ import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { accessLevelReporter, projectsPerPage } from '../constants';
-import { SIMILARITY_ORDER, LAST_ACTIVITY_AT } from '../../shared/constants';
 
 export default {
   components: {
@@ -44,10 +43,8 @@ export default {
     },
     projectsQueryParams() {
       return {
-        per_page: projectsPerPage,
-        with_shared: false, // exclude forks
-        order_by: this.glFeatures.analyticsSimilaritySearch ? SIMILARITY_ORDER : LAST_ACTIVITY_AT,
-        include_subgroups: true,
+        first: projectsPerPage,
+        includeSubgroups: true,
       };
     },
   },
@@ -59,13 +56,8 @@ export default {
       this.$emit('groupSelected', { groupId: id, groupNamespace: full_path });
     },
     onProjectsSelected(selectedProjects) {
-      let projectNamespace = null;
-      let projectId = null;
-
-      if (selectedProjects.length) {
-        projectNamespace = selectedProjects[0].path_with_namespace;
-        projectId = selectedProjects[0].id;
-      }
+      const projectNamespace = selectedProjects[0]?.fullPath || null;
+      const projectId = selectedProjects[0]?.id || null;
 
       this.setProjectPath(projectNamespace);
       this.$emit('projectSelected', {
@@ -98,6 +90,8 @@ export default {
       :default-projects="projects"
       :query-params="projectsQueryParams"
       :group-id="groupId"
+      :group-namespace="groupNamespace"
+      :use-graphql="true"
       @selected="onProjectsSelected"
     />
   </div>

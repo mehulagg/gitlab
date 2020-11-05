@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Insights::Finders::IssuableFinder do
   using RSpec::Parameterized::TableSyntax
 
   around do |example|
-    Timecop.freeze(Time.utc(2019, 3, 5)) { example.run }
+    travel_to(Time.utc(2019, 3, 5)) { example.run }
   end
 
   let(:base_query) do

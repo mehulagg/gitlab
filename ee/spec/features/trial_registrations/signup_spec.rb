@@ -37,12 +37,14 @@ RSpec.describe 'Trial Sign Up', :js do
           fill_in 'new_user_email',      with: user_attrs[:email]
           fill_in 'new_user_password',   with: user_attrs[:password]
 
-          check 'terms_opt_in'
-
           click_button 'Continue'
         end
 
         wait_for_requests
+
+        select 'Software Developer', from: 'user_role'
+        choose 'user_setup_for_company_true'
+        click_button 'Continue'
 
         expect(current_path).to eq(new_trial_path)
         expect(page).to have_content('Start your Free Gold Trial')

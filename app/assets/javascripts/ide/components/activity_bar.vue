@@ -1,8 +1,6 @@
 <script>
-import $ from 'jquery';
 import { mapActions, mapState } from 'vuex';
-import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { leftSidebarViews } from '../constants';
 
 export default {
@@ -10,7 +8,7 @@ export default {
     GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   computed: {
     ...mapState(['currentActivityView']),
@@ -22,9 +20,7 @@ export default {
 
       this.updateActivityBarView(view);
 
-      // TODO: We must use JQuery here to interact with the Bootstrap tooltip API
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/217577
-      $(e.currentTarget).tooltip('hide');
+      this.$root.$emit('bv::hide::tooltip');
     },
   },
   leftSidebarViews,
@@ -32,11 +28,11 @@ export default {
 </script>
 
 <template>
-  <nav class="ide-activity-bar">
+  <nav class="ide-activity-bar" data-testid="left-sidebar">
     <ul class="list-unstyled">
       <li>
         <button
-          v-tooltip
+          v-gl-tooltip.right.viewport
           :class="{
             active: currentActivityView === $options.leftSidebarViews.edit.name,
           }"
@@ -44,6 +40,7 @@ export default {
           :aria-label="s__('IDE|Edit')"
           data-container="body"
           data-placement="right"
+          data-qa-selector="edit_mode_tab"
           type="button"
           class="ide-sidebar-link js-ide-edit-mode"
           @click.prevent="changedActivityView($event, $options.leftSidebarViews.edit.name)"
@@ -53,7 +50,7 @@ export default {
       </li>
       <li>
         <button
-          v-tooltip
+          v-gl-tooltip.right.viewport
           :class="{
             active: currentActivityView === $options.leftSidebarViews.review.name,
           }"
@@ -70,7 +67,7 @@ export default {
       </li>
       <li>
         <button
-          v-tooltip
+          v-gl-tooltip.right.viewport
           :class="{
             active: currentActivityView === $options.leftSidebarViews.commit.name,
           }"
@@ -78,8 +75,9 @@ export default {
           :aria-label="s__('IDE|Commit')"
           data-container="body"
           data-placement="right"
+          data-qa-selector="commit_mode_tab"
           type="button"
-          class="ide-sidebar-link js-ide-commit-mode qa-commit-mode-tab"
+          class="ide-sidebar-link js-ide-commit-mode"
           @click.prevent="changedActivityView($event, $options.leftSidebarViews.commit.name)"
         >
           <gl-icon name="commit" />

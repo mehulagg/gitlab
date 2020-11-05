@@ -46,11 +46,11 @@ RSpec.describe UpdateBuildMinutesService do
         end
       end
 
-      context 'when namespace is subgroup' do
+      context 'when group is subgroup' do
         let(:root_ancestor) { create(:group, shared_runners_minutes_limit: 100) }
-        let(:namespace) { create(:namespace, parent: root_ancestor) }
+        let(:namespace) { create(:group, parent: root_ancestor) }
 
-        it 'creates a statistics in root namespace' do
+        it 'creates a statistics in root group' do
           subject
 
           expect(root_ancestor.namespace_statistics.reload.shared_runners_seconds)

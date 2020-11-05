@@ -16,6 +16,7 @@ import {
   RECEIVE_NAMESPACES_SUCCESS,
   RECEIVE_NAMESPACES_ERROR,
   SET_PAGE,
+  SET_FILTER,
 } from '~/import_projects/store/mutation_types';
 import actionsFactory from '~/import_projects/store/actions';
 import { getImportTarget } from '~/import_projects/store/getters';
@@ -40,7 +41,7 @@ const {
   fetchImport,
   fetchJobs,
   fetchNamespaces,
-  setPage,
+  setFilter,
 } = actionsFactory({
   endpoints,
 });
@@ -83,7 +84,7 @@ describe('import_projects store actions', () => {
 
     afterEach(() => mock.restore());
 
-    it('dispatches stopJobsPolling actions and commits REQUEST_REPOS, RECEIVE_REPOS_SUCCESS mutations on a successful request', () => {
+    it('commits SET_PAGE, REQUEST_REPOS, RECEIVE_REPOS_SUCCESS mutations on a successful request', () => {
       mock.onGet(MOCK_ENDPOINT).reply(200, payload);
 
       return testAction(
@@ -91,54 +92,65 @@ describe('import_projects store actions', () => {
         null,
         localState,
         [
+          { type: SET_PAGE, payload: 1 },
           { type: REQUEST_REPOS },
           {
             type: RECEIVE_REPOS_SUCCESS,
             payload: convertObjectPropsToCamelCase(payload, { deep: true }),
           },
         ],
-        [{ type: 'stopJobsPolling' }, { type: 'fetchJobs' }],
+        [],
       );
     });
 
-    it('dispatches stopJobsPolling action and commits REQUEST_REPOS, RECEIVE_REPOS_ERROR mutations on an unsuccessful request', () => {
+    it('commits SET_PAGE, REQUEST_REPOS, RECEIVE_REPOS_ERROR and SET_PAGE again mutations on an unsuccessful request', () => {
       mock.onGet(MOCK_ENDPOINT).reply(500);
 
       return testAction(
         fetchRepos,
         null,
         localState,
-        [{ type: REQUEST_REPOS }, { type: RECEIVE_REPOS_ERROR }],
-        [{ type: 'stopJobsPolling' }],
+        [
+          { type: SET_PAGE, payload: 1 },
+          { type: REQUEST_REPOS },
+          { type: SET_PAGE, payload: 0 },
+          { type: RECEIVE_REPOS_ERROR },
+        ],
+        [],
       );
     });
 
-    describe('when pagination is enabled', () => {
-      it('includes page in url query params', async () => {
-        const { fetchRepos: fetchReposWithPagination } = actionsFactory({
-          endpoints,
-          hasPagination: true,
-        });
-
-        let requestedUrl;
-        mock.onGet().reply(config => {
-          requestedUrl = config.url;
-          return [200, payload];
-        });
-
-        await testAction(
-          fetchReposWithPagination,
-          null,
-          localState,
-          expect.any(Array),
-          expect.any(Array),
-        );
-
-        expect(requestedUrl).toBe(`${MOCK_ENDPOINT}?page=${localState.pageInfo.page}`);
+    it('includes page in url query params', async () => {
+      let requestedUrl;
+      mock.onGet().reply(config => {
+        requestedUrl = config.url;
+        return [200, payload];
       });
+
+      const localStateWithPage = { ...localState, pageInfo: { page: 2 } };
+
+      await testAction(fetchRepos, null, localStateWithPage, expect.any(Array), expect.any(Array));
+
+      expect(requestedUrl).toBe(`${MOCK_ENDPOINT}?page=${localStateWithPage.pageInfo.page + 1}`);
     });
 
-    describe('when filtered', () => {
+    it('correctly updates current page on an unsuccessful request', () => {
+      mock.onGet(MOCK_ENDPOINT).reply(500);
+      const CURRENT_PAGE = 5;
+
+      return testAction(
+        fetchRepos,
+        null,
+        { ...localState, pageInfo: { page: CURRENT_PAGE } },
+        expect.arrayContaining([
+          { type: SET_PAGE, payload: CURRENT_PAGE + 1 },
+          { type: SET_PAGE, payload: CURRENT_PAGE },
+        ]),
+        [],
+      );
+    });
+
+    describe('when /home/xanf/projects/gdk/gitlab/spec/frontend/import_projects/store/actions_spec.jsfiltered', () => {
       it('fetches repos with filter applied', () => {
         mock.onGet(`${TEST_HOST}/endpoint.json?filter=filter`).reply(200, payload);
 
@@ -147,13 +159,14 @@ describe('import_projects store actions', () => {
           null,
           { ...localState, filter: 'filter' },
           [
+            { type: SET_PAGE, payload: 1 },
             { type: REQUEST_REPOS },
             {
               type: RECEIVE_REPOS_SUCCESS,
               payload: convertObjectPropsToCamelCase(payload, { deep: true }),
             },
           ],
-          [{ type: 'stopJobsPolling' }, { type: 'fetchJobs' }],
+          [],
         );
       });
     });
@@ -347,21 +360,17 @@ describe('import_projects store actions', () => {
         ],
       );
     });
+  });
 
-    describe('setPage', () => {
-      it('dispatches fetchRepos and commits setPage when page number differs from current one', async () => {
-        await testAction(
-          setPage,
-          2,
-          { ...localState, pageInfo: { page: 1 } },
-          [{ type: SET_PAGE, payload: 2 }],
-          [{ type: 'fetchRepos' }],
-        );
-      });
-
-      it('does not perform any action if page equals to current one', async () => {
-        await testAction(setPage, 2, { ...localState, pageInfo: { page: 2 } }, [], []);
-      });
+  describe('setFilter', () => {
+    it('dispatches sets the filter value and dispatches fetchRepos', async () => {
+      await testAction(
+        setFilter,
+        'filteredRepo',
+        localState,
+        [{ type: SET_FILTER, payload: 'filteredRepo' }],
+        [{ type: 'fetchRepos' }],
+      );
     });
   });
 });

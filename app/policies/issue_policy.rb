@@ -15,9 +15,6 @@ class IssuePolicy < IssuablePolicy
   desc "Issue is confidential"
   condition(:confidential, scope: :subject) { @subject.confidential? }
 
-  desc "Issue has moved"
-  condition(:moved) { @subject.moved? }
-
   rule { confidential & ~can_read_confidential }.policy do
     prevent(*create_read_update_admin_destroy(:issue))
     prevent :read_issue_iid
@@ -39,10 +36,8 @@ class IssuePolicy < IssuablePolicy
     prevent :move_design
   end
 
-  rule { locked | moved }.policy do
-    prevent :create_design
-    prevent :move_design
-    prevent :destroy_design
+  rule { ~anonymous & can?(:read_issue) }.policy do
+    enable :create_todo
   end
 end
 

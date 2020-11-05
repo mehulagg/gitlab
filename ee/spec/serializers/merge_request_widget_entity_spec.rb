@@ -161,12 +161,7 @@ RSpec.describe MergeRequestWidgetEntity do
 
   describe '#license_scanning', :request_store do
     before do
-      allow(merge_request).to receive_messages(head_pipeline: pipeline, target_project: project)
       stub_licensed_features(license_scanning: true)
-    end
-
-    it 'is not included, if missing artifacts' do
-      expect(subject.as_json).not_to include(:license_scanning)
     end
 
     context 'when report artifact is defined' do
@@ -175,6 +170,8 @@ RSpec.describe MergeRequestWidgetEntity do
       end
 
       it 'is included' do
+        allow(merge_request).to receive_messages(head_pipeline: pipeline, target_project: project)
+
         expect(subject.as_json[:license_scanning]).to include(:can_manage_licenses)
         expect(subject.as_json[:license_scanning]).to include(:full_report_path)
       end
@@ -201,6 +198,14 @@ RSpec.describe MergeRequestWidgetEntity do
         it '#settings_path should be included for maintainers' do
           expect(subject.as_json[:license_scanning]).to include(:settings_path)
         end
+      end
+
+      context "when a report artifact is produced from a forked project" do
+        let(:source_project) { fork_project(project, user, repository: true) }
+        let(:fork_merge_request) { create(:merge_request, source_project: source_project, target_project: project) }
+        let(:subject_json) { described_class.new(fork_merge_request, current_user: user, request: request).as_json }
+
+        specify { expect(subject_json).to include(:license_scanning) }
       end
     end
 

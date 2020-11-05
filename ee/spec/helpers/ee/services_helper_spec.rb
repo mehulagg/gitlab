@@ -20,19 +20,31 @@ RSpec.describe EE::ServicesHelper do
   describe '#integration_form_data' do
     subject { helper.integration_form_data(integration) }
 
+    before do
+      assign(:project, project)
+    end
+
     context 'Slack service' do
       let(:integration) { build(:slack_service) }
 
       it 'does not include Jira specific fields' do
-        is_expected.not_to include(:show_jira_issues_integration, :enable_jira_issues, :project_key, :edit_project_path)
+        is_expected.not_to include(:show_jira_issues_integration, :enable_jira_issues, :project_key, :gitlab_issues_enabled, :edit_project_path)
       end
     end
 
     context 'Jira service' do
-      let(:integration) { build(:jira_service) }
+      let(:integration) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE') }
 
       it 'includes Jira specific fields' do
-        is_expected.to include(:show_jira_issues_integration, :enable_jira_issues, :project_key, :edit_project_path)
+        stub_licensed_features(jira_issues_integration: true)
+
+        is_expected.to include(
+          show_jira_issues_integration: 'true',
+          enable_jira_issues: 'true',
+          project_key: 'FE',
+          gitlab_issues_enabled: 'true',
+          edit_project_path: edit_project_path(project, anchor: 'js-shared-permissions')
+        )
       end
     end
   end

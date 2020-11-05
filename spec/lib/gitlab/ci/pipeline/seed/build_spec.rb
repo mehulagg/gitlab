@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
-  let(:project) { create(:project, :repository) }
-  let(:head_sha) { project.repository.head_commit.id }
-  let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: head_sha) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:head_sha) { project.repository.head_commit.id }
+  let(:pipeline) { build(:ci_empty_pipeline, project: project, sha: head_sha) }
   let(:attributes) { { name: 'rspec', ref: 'master', scheduling_type: :stage } }
   let(:previous_stages) { [] }
 
@@ -503,7 +503,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       using RSpec::Parameterized
 
       let(:pipeline) do
-        build(:ci_empty_pipeline, ref: 'deploy', tag: false, source: source)
+        build(:ci_empty_pipeline, ref: 'deploy', tag: false, source: source, project: project)
       end
 
       context 'matches' do
@@ -766,7 +766,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
 
       context 'with a matching changes: rule' do
         let(:pipeline) do
-          create(:ci_pipeline, project: project).tap do |pipeline|
+          build(:ci_pipeline, project: project).tap do |pipeline|
             stub_pipeline_modified_paths(pipeline, %w[app/models/ci/pipeline.rb spec/models/ci/pipeline_spec.rb .gitlab-ci.yml])
           end
         end
@@ -931,47 +931,30 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
     context 'when using 101 needs' do
       let(:needs_count) { 101 }
 
-      context 'when ci_plan_needs_size_limit is disabled' do
+      it "returns an error" do
+        expect(subject.errors).to contain_exactly(
+          "rspec: one job can only need 50 others, but you have listed 101. See needs keyword documentation for more details")
+      end
+
+      context 'when ci_needs_size_limit is set to 100' do
         before do
-          stub_feature_flags(ci_plan_needs_size_limit: false)
+          project.actual_limits.update!(ci_needs_size_limit: 100)
         end
 
         it "returns an error" do
           expect(subject.errors).to contain_exactly(
-            "rspec: one job can only need 10 others, but you have listed 101. See needs keyword documentation for more details")
+            "rspec: one job can only need 100 others, but you have listed 101. See needs keyword documentation for more details")
         end
       end
 
-      context 'when ci_plan_needs_size_limit is enabled' do
+      context 'when ci_needs_size_limit is set to 0' do
         before do
-          stub_feature_flags(ci_plan_needs_size_limit: true)
+          project.actual_limits.update!(ci_needs_size_limit: 0)
         end
 
         it "returns an error" do
           expect(subject.errors).to contain_exactly(
-            "rspec: one job can only need 50 others, but you have listed 101. See needs keyword documentation for more details")
-        end
-
-        context 'when ci_needs_size_limit is set to 100' do
-          before do
-            project.actual_limits.update!(ci_needs_size_limit: 100)
-          end
-
-          it "returns an error" do
-            expect(subject.errors).to contain_exactly(
-              "rspec: one job can only need 100 others, but you have listed 101. See needs keyword documentation for more details")
-          end
-        end
-
-        context 'when ci_needs_size_limit is set to 0' do
-          before do
-            project.actual_limits.update!(ci_needs_size_limit: 0)
-          end
-
-          it "returns an error" do
-            expect(subject.errors).to contain_exactly(
-              "rspec: one job can only need 0 others, but you have listed 101. See needs keyword documentation for more details")
-          end
+            "rspec: one job can only need 0 others, but you have listed 101. See needs keyword documentation for more details")
         end
       end
     end

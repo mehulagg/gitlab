@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto
 ---
 
@@ -18,14 +21,14 @@ For an overview of application security with GitLab, see
 ## Quick start
 
 Get started quickly with Dependency Scanning, License Scanning, Static Application Security
-Testing (SAST), and Secret Detection by adding the following to your `.gitlab-ci.yml`:
+Testing (SAST), and Secret Detection by adding the following to your [`.gitlab-ci.yml`](../../ci/yaml/README.md):
 
 ```yaml
 include:
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
-  - template: SAST.gitlab-ci.yml
-  - template: Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 ```
 
 To add Dynamic Application Security Testing (DAST) scanning, add the following to your
@@ -33,7 +36,7 @@ To add Dynamic Application Security Testing (DAST) scanning, add the following t
 
 ```yaml
 include:
-  - template: DAST.gitlab-ci.yml
+  - template: Security/DAST.gitlab-ci.yml
 
 variables:
   DAST_WEBSITE: https://staging.example.com
@@ -67,21 +70,36 @@ GitLab uses the following tools to scan and report known vulnerabilities found i
 | [Dependency List](dependency_list/index.md) **(ULTIMATE)**                   | View your project's dependencies and their known vulnerabilities.      |
 | [Dependency Scanning](dependency_scanning/index.md) **(ULTIMATE)**           | Analyze your dependencies for known vulnerabilities.                   |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) **(ULTIMATE)**  | Analyze running web applications for known vulnerabilities.            |
+| [API fuzzing](api_fuzzing/index.md) **(ULTIMATE)**                           | Find unknown bugs and vulnerabilities in web APIs with fuzzing.        |
 | [Secret Detection](secret_detection/index.md) **(ULTIMATE)**                 | Analyze Git history for leaked secrets.                                |
 | [Security Dashboard](security_dashboard/index.md) **(ULTIMATE)**             | View vulnerabilities in all your projects and groups.                  |
 | [Static Application Security Testing (SAST)](sast/index.md)                  | Analyze source code for known vulnerabilities.                         |
 | [Coverage fuzzing](coverage_fuzzing/index.md) **(ULTIMATE)**                 | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
 
+### Use security scanning tools with Pipelines for Merge Requests
+
+The security scanning tools can all be added to pipelines with [templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Security).
+See each tool for details on how to use include each template in your CI/CD configuration.
+
+By default, the application security jobs are configured to run for branch pipelines only.
+To use them with [pipelines for merge requests](../../ci/merge_request_pipelines/index.md),
+you may need to override the default `rules:` configuration to add:
+
+```yaml
+rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+```
+
 ## Security Scanning with Auto DevOps
 
 When [Auto DevOps](../../topics/autodevops/) is enabled, all GitLab Security scanning tools will be configured using default settings.
 
-- [Auto SAST](../../topics/autodevops/stages.md#auto-sast-ultimate)
-- [Auto Secret Detection](../../topics/autodevops/stages.md#auto-secret-detection-ultimate)
-- [Auto DAST](../../topics/autodevops/stages.md#auto-dast-ultimate)
-- [Auto Dependency Scanning](../../topics/autodevops/stages.md#auto-dependency-scanning-ultimate)
-- [Auto License Compliance](../../topics/autodevops/stages.md#auto-license-compliance-ultimate)
-- [Auto Container Scanning](../../topics/autodevops/stages.md#auto-container-scanning-ultimate)
+- [Auto SAST](../../topics/autodevops/stages.md#auto-sast)
+- [Auto Secret Detection](../../topics/autodevops/stages.md#auto-secret-detection)
+- [Auto DAST](../../topics/autodevops/stages.md#auto-dast)
+- [Auto Dependency Scanning](../../topics/autodevops/stages.md#auto-dependency-scanning)
+- [Auto License Compliance](../../topics/autodevops/stages.md#auto-license-compliance)
+- [Auto Container Scanning](../../topics/autodevops/stages.md#auto-container-scanning)
 
 While you cannot directly customize Auto DevOps, you can [include the Auto DevOps template in your project's `.gitlab-ci.yml` file](../../topics/autodevops/customize.md#customizing-gitlab-ciyml).
 
@@ -118,7 +136,7 @@ information with several options:
 - [Create issue](#creating-an-issue-for-a-vulnerability): Create a new issue with the title and
   description pre-populated with information from the vulnerability report. By default, such issues
   are [confidential](../project/issues/confidential_issues.md).
-- [Solution](#solutions-for-vulnerabilities-auto-remediation): For some vulnerabilities,
+- [Automatic Remediation](#automatic-remediation-for-vulnerabilities): For some vulnerabilities,
   a solution is provided for how to fix the vulnerability.
 
 ![Interacting with security reports](img/interacting_with_vulnerability_v13_3.png)
@@ -140,21 +158,21 @@ To view details of DAST vulnerabilities:
 
 1. Click on the vulnerability's description. The following details are provided:
 
-   | Field            | Description                                                                                                                                                                   |
-|:-----------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Description      | Description of the vulnerability.                                                                                                                                             |
-| Project          | Namespace and project in which the vulnerability was detected.                                                                                                                |
-| Method           | HTTP method used to detect the vulnerability.                                                                                                                                 |
-| URL              | URL at which the vulnerability was detected.                                                                                                                                  |
-| Request Headers  | Headers of the request.                                                                                                                                                       |
-| Response Status  | Response status received from the application.                                                                                                                                |
-| Response Headers | Headers of the response received from the application.                                                                                                                        |
+| Field            | Description                                                        |
+|:-----------------|:------------------------------------------------------------------ |
+| Description      | Description of the vulnerability.                                  |
+| Project          | Namespace and project in which the vulnerability was detected.     |
+| Method           | HTTP method used to detect the vulnerability.                      |
+| URL              | URL at which the vulnerability was detected.                       |
+| Request Headers  | Headers of the request.                                            |
+| Response Status  | Response status received from the application.                     |
+| Response Headers | Headers of the response received from the application.             |
 | Evidence         | Evidence of the data found that verified the vulnerability. Often a snippet of the request or response, this can be used to help verify that the finding is a vulnerability. |
-| Identifiers      | Identifiers of the vulnerability.                                                                                                                                             |
-| Severity         | Severity of the vulnerability.                                                                                                                                                |
-| Scanner Type     | Type of vulnerability report.                                                                                                                                                 |
-| Links            | Links to further details of the detected vulnerability.                                                                                                                       |
-| Solution         | Details of a recommended solution to the vulnerability (optional).                                                                                                            |
+| Identifiers      | Identifiers of the vulnerability.                                  |
+| Severity         | Severity of the vulnerability.                                     |
+| Scanner Type     | Type of vulnerability report.                                      |
+| Links            | Links to further details of the detected vulnerability.            |
+| Solution         | Details of a recommended solution to the vulnerability (optional). |
 
 #### Hide sensitive information in headers
 
@@ -165,7 +183,8 @@ reports. You can specify the list of all headers to be masked. For details, see
 
 ### Dismissing a vulnerability
 
-To dismiss a vulnerability, you must set its status to Dismissed. Follow these steps to do so:
+To dismiss a vulnerability, you must set its status to Dismissed. This dismisses the vulnerability
+for the entire project. Follow these steps to do so:
 
 1. Select the vulnerability in the Security Dashboard.
 1. Select **Dismissed** from the **Status** selector menu at the top-right.
@@ -181,7 +200,7 @@ vulnerability's status to Dismissed, a text box appears for you to add a comment
 dismissal. Once added, you can edit or delete it. This allows you to add and update context for a
 vulnerability as you learn more over time.
 
-![Dismissed vulnerability comment](img/adding_a_dismissal_reason_v13_0.png)
+![Dismissed vulnerability comment](img/adding_a_dismissal_reason_v13_4.png)
 
 #### Dismissing multiple vulnerabilities
 
@@ -213,7 +232,7 @@ to the name.
 
 ![Linked issue in the group security dashboard](img/issue.png)
 
-### Solutions for vulnerabilities (auto-remediation)
+### Automatic remediation for vulnerabilities
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5656) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.7.
 
@@ -225,18 +244,23 @@ automatically generates. The following scanners are supported:
   `yarn`.
 - [Container Scanning](container_scanning/index.md)
 
+When an automatic solution is available, the button in the header shows **Resolve with merge request**:
+
+![Resolve with Merge Request button](img/vulnerability_page_merge_request_button_v13_1.png)
+
+Selecting the button creates a merge request with the solution.
+
 #### Manually applying the suggested patch
 
-Some vulnerabilities can be fixed by applying a patch that is automatically
-generated by GitLab. To apply the fix:
+To manually apply the patch that GitLab generated for a vulnerability:
 
-1. Click the vulnerability.
-1. Download and review the patch file `remediation.patch`.
+1. Select the **Resolve with merge request** dropdown, then select **Download patch to resolve**:
+
+   ![Resolve with Merge Request button dropdown](img/vulnerability_page_merge_request_button_dropdown_v13_1.png)
+
 1. Ensure your local project has the same commit checked out that was used to generate the patch.
 1. Run `git apply remediation.patch`.
 1. Verify and commit the changes to your branch.
-
-![Apply patch for dependency scanning](img/vulnerability_solution.png)
 
 #### Creating a merge request from a vulnerability
 
@@ -244,13 +268,13 @@ generated by GitLab. To apply the fix:
 
 In certain cases, GitLab allows you to create a merge request that automatically remediates the
 vulnerability. Any vulnerability that has a
-[solution](#solutions-for-vulnerabilities-auto-remediation) can have a merge
+[solution](#automatic-remediation-for-vulnerabilities) can have a merge
 request created to automatically solve the issue.
 
-If this action is available, the vulnerability modal contains a **Create merge request** button.
+If this action is available, the vulnerability page or modal contains a **Create merge request** button.
 Click this button to create a merge request to apply the solution onto the source branch.
 
-![Create merge request from vulnerability](img/create_issue_with_list_hover.png)
+![Create merge request from vulnerability](img/create_mr_from_vulnerability_v13_4.png)
 
 ### Managing related issues for a vulnerability
 
@@ -308,15 +332,29 @@ rating.
 
 ### Enabling Security Approvals within a project
 
-To enable Security Approvals, a [project approval rule](../project/merge_requests/merge_request_approvals.md#adding--editing-a-default-approval-rule)
-must be created with the case-sensitive name `Vulnerability-Check`. This approval group must be set
-with the number of approvals required greater than zero. You must have Maintainer or Owner [permissions](../permissions.md#project-members-permissions) to manage approval rules.
+To enable the `Vulnerability-Check` or `License-Check` Security Approvals, a [project approval rule](../project/merge_requests/merge_request_approvals.md#adding--editing-a-default-approval-rule)
+must be created. A [security scanner job](#security-scanning-tools) must be enabled for
+`Vulnerability-Check`, and a [license scanning](../compliance/license_compliance/index.md#configuration)
+job must be enabled for `License-Check`. When the proper jobs aren't configured, the following
+appears:
+
+![Unconfigured Approval Rules](img/unconfigured_security_approval_rules_and_jobs_v13_4.png)
+
+If at least one security scanner is enabled, you can enable the `Vulnerability-Check` approval rule. If a license scanning job is enabled, you can enable the `License-Check` rule.
+
+![Unconfigured Approval Rules with valid pipeline jobs](img/unconfigured_security_approval_rules_and_enabled_jobs_v13_4.png)
+
+For this approval group, you must set the number of approvals required to greater than zero. You
+must have Maintainer or Owner [permissions](../permissions.md#project-members-permissions)
+to manage approval rules.
+
+Follow these steps to enable `Vulnerability-Check`:
 
 1. Navigate to your project's **Settings > General** and expand **Merge request approvals**.
-1. Click **Add approval rule**, or **Edit**.
-   - Add or change the **Rule name** to `Vulnerability-Check` (case sensitive).
+1. Click **Enable**, or **Edit**.
+1. Add or change the **Rule name** to `Vulnerability-Check` (case sensitive).
 
-![Vulnerability Check Approver Rule](img/vulnerability-check_v13_0.png)
+![Vulnerability Check Approver Rule](img/vulnerability-check_v13_4.png)
 
 Once this group is added to your project, the approval rule is enabled for all merge requests.
 
@@ -333,32 +371,14 @@ An approval is optional when the security report:
 - Contains no new vulnerabilities when compared to the target branch.
 - Contains only new vulnerabilities of `low` or `medium` severity.
 
-## Enabling License Approvals within a project
+### Enabling License Approvals within a project
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13067) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.3.
 
-`License-Check` is an approval rule you can enable to allow an individual or group to approve a
-merge request that contains a `denied` license.
-
-You can enable `License-Check` one of two ways:
-
-- Create a [project approval rule](../project/merge_requests/merge_request_approvals.md#multiple-approval-rules-premium)
-  with the case-sensitive name `License-Check`.
-- Create an approval group in the [project policies section for License Compliance](../compliance/license_compliance/index.md#policies).
-  You must set this approval group's number of approvals required to greater than zero. Once you
-  enable this group in your project, the approval rule is enabled for all merge requests.
-
-Any code changes cause the approvals required to reset.
-
-An approval is required when a license report:
-
-- Contains a dependency that includes a software license that is `denied`.
-- Is not generated during pipeline execution.
-
-An approval is optional when a license report:
-
-- Contains no software license violations.
-- Contains only new licenses that are `allowed` or unknown.
+`License-Check` is a [security approval rule](#enabling-security-approvals-within-a-project)
+you can enable to allow an individual or group to approve a merge request that contains a `denied`
+license. For instructions on enabling this rule, see
+[Enabling license approvals within a project](../compliance/license_compliance/index.md#enabling-license-approvals-within-a-project).
 
 ## Working in an offline environment
 
@@ -449,7 +469,7 @@ To fix this issue, you can either:
 
   ```yaml
   include:
-    template: SAST.gitlab-ci.yml
+    template: Security/SAST.gitlab-ci.yml
 
   spotbugs-sast:
     stage: unit-tests
@@ -457,6 +477,15 @@ To fix this issue, you can either:
 
 [Learn more on overriding SAST jobs](sast/index.md#overriding-sast-jobs).
 All the security scanning tools define their stage, so this error can occur with all of them.
+
+### Getting warning messages `… report.json: no matching files`
+
+This is often followed by the [error `No files to upload`](../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload),
+and preceded by other errors or warnings that indicate why the JSON report wasn't generated. Please
+check the entire job log for such messages. If you don't find these messages, retry the failed job
+after setting `SECURE_LOG_LEVEL: "debug"` as a
+[custom environment variable](../../ci/variables/README.md#custom-environment-variables).
+This provides useful information to investigate further.
 
 ### Getting error message `sast job: config key may not be used with 'rules': only/except`
 
@@ -490,7 +519,7 @@ would look similar to:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is only executed on master or merge requests
 spotbugs-sast:
@@ -505,7 +534,7 @@ would be written as follows:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is only executed on master or merge requests
 spotbugs-sast:
@@ -519,7 +548,7 @@ it would look similar to:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is not executed on tags
 spotbugs-sast:
@@ -531,7 +560,7 @@ To transition to the new `rules` syntax, the override would be rewritten as:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is not executed on tags
 spotbugs-sast:
@@ -557,3 +586,11 @@ Additionally, we provide a dedicated project containing the versioned legacy tem
 This can be useful for offline setups or anyone wishing to use [Auto DevOps](../../topics/autodevops/index.md).
 
 Instructions are available in the [legacy template project](https://gitlab.com/gitlab-org/auto-devops-v12-10).
+
+#### Vulnerabilities are found, but the job succeeds. How can I have a pipeline fail instead?
+
+This is the current default behavior, because the job's status indicates success or failure of the analyzer itself.
+Analyzer results are displayed in the [job logs](../../ci/pipelines/#expand-and-collapse-job-log-sections),
+[Merge Request widget](sast/index.md#overview)
+or [Security Dashboard](security_dashboard/index.md).
+There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.

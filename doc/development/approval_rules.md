@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Approval Rules **(STARTER)**
 
 This document explains the backend design and flow of all related functionality
@@ -14,7 +20,7 @@ feature to work.
 
 NOTE: **Note:**
 This is a living document and should be updated accordingly when parts
-of the codebase touched in this document changed/removed or when new components
+of the codebase touched in this document are changed or removed, or when new components
 are added.
 
 ## Data Model
@@ -81,7 +87,7 @@ The `ApprovalState` model get these records when approval rules are not
 overwritten.
 
 The `protected_branches` attribute is set and used when a rule is scoped to
-protected branches. See [Scoped to Protected Branch doc](../user/project/merge_requests/merge_request_approvals.md#scoped-to-protected-branch-premium)
+protected branches. See [Scoped to Protected Branch doc](../user/project/merge_requests/merge_request_approvals.md#scoped-to-protected-branch)
 for more information about the feature.
 
 ### `ApprovalMergeRequestRule`

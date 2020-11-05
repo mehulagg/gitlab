@@ -2,23 +2,34 @@
 
 module Security
   class StoreScansService
-    def initialize(build)
-      @build = build
+    def self.execute(pipeline)
+      new(pipeline).execute
+    end
+
+    def initialize(pipeline)
+      @pipeline = pipeline
     end
 
     def execute
-      return if @build.canceled? || @build.skipped?
+      grouped_report_artifacts.each { |artifacts| StoreGroupedScansService.execute(artifacts) }
+    end
 
-      security_reports = @build.job_artifacts.security_reports
+    private
 
-      ActiveRecord::Base.transaction do
-        security_reports.each do |report|
-          Security::Scan.safe_find_or_create_by!(
-            build: @build,
-            scan_type: report.file_type
-          )
-        end
-      end
+    attr_reader :pipeline
+
+    delegate :project, to: :pipeline, private: true
+
+    def grouped_report_artifacts
+      pipeline.job_artifacts
+              .security_reports
+              .group_by(&:file_type)
+              .select { |file_type, _| parse_report_file?(file_type) }
+              .values
+    end
+
+    def parse_report_file?(file_type)
+      project.feature_available?(Ci::Build::LICENSED_PARSER_FEATURES.fetch(file_type))
     end
   end
 end

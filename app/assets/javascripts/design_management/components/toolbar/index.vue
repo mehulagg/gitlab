@@ -1,10 +1,10 @@
 <script>
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import DesignNavigation from './design_navigation.vue';
 import DeleteButton from '../delete_button.vue';
-import permissionsQuery from '../../graphql/queries/design_permissions.query.graphql';
 import { DESIGNS_ROUTE_NAME } from '../../router/constants';
 
 export default {
@@ -13,6 +13,9 @@ export default {
     GlIcon,
     DesignNavigation,
     DeleteButton,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [timeagoMixin],
   props: {
@@ -106,20 +109,27 @@ export default {
       >
         <gl-icon name="close" />
       </router-link>
-      <div class="overflow-hidden d-flex align-items-center">
-        <h2 class="m-0 str-truncated-100 gl-font-base">{{ filename }}</h2>
-        <small v-if="updatedAt" class="text-secondary">{{ updatedText }}</small>
+      <div class="gl-overflow-hidden gl-display-flex gl-align-items-center">
+        <h2 class="gl-m-0 str-truncated-100 gl-font-base">{{ filename }}</h2>
+        <small v-if="updatedAt" class="gl-text-gray-500">{{ updatedText }}</small>
       </div>
     </div>
-    <design-navigation :id="id" class="ml-auto flex-shrink-0" />
-    <gl-button :href="image" icon="download" />
+    <design-navigation :id="id" class="gl-ml-auto gl-flex-shrink-0" />
+    <gl-button
+      v-gl-tooltip.bottom
+      :href="image"
+      icon="download"
+      :title="s__('DesignManagement|Download design')"
+    />
     <delete-button
       v-if="isLatestVersion && canDeleteDesign"
+      v-gl-tooltip.bottom
       class="gl-ml-3"
       :is-deleting="isDeleting"
       button-variant="warning"
       button-icon="archive"
       button-category="secondary"
+      :title="s__('DesignManagement|Archive design')"
       @deleteSelectedDesigns="$emit('delete')"
     />
   </header>

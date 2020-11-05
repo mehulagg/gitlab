@@ -28,6 +28,10 @@ export default (el, dashboardType) => {
   }
 
   const props = {};
+  const provide = {
+    dashboardDocumentation: el.dataset.dashboardDocumentation,
+    emptyStateSvgPath: el.dataset.emptyStateSvgPath,
+  };
 
   let component;
 
@@ -36,6 +40,7 @@ export default (el, dashboardType) => {
     props.groupFullPath = el.dataset.groupFullPath;
   } else if (dashboardType === DASHBOARD_TYPES.INSTANCE) {
     component = InstanceSecurityCharts;
+    provide.instanceDashboardSettingsPath = el.dataset.instanceDashboardSettingsPath;
   }
 
   const router = createRouter();
@@ -46,6 +51,7 @@ export default (el, dashboardType) => {
     store,
     router,
     apolloProvider,
+    provide: () => provide,
     render(createElement) {
       return createElement(component, { props });
     },

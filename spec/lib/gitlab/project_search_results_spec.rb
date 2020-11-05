@@ -5,12 +5,13 @@ require 'spec_helper'
 RSpec.describe Gitlab::ProjectSearchResults do
   include SearchHelpers
 
-  let(:user) { create(:user) }
-  let(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project) }
   let(:query) { 'hello world' }
   let(:repository_ref) { nil }
+  let(:filters) { {} }
 
-  subject(:results) { described_class.new(user, query, project: project, repository_ref: repository_ref) }
+  subject(:results) { described_class.new(user, query, project: project, repository_ref: repository_ref, filters: filters) }
 
   context 'with a repository_ref' do
     context 'when empty' do
@@ -248,8 +249,9 @@ RSpec.describe Gitlab::ProjectSearchResults do
   describe 'issues search' do
     let(:issue) { create(:issue, project: project) }
     let(:query) { issue.title }
+    let(:scope) { 'issues' }
 
-    subject(:objects) { results.objects('issues') }
+    subject(:objects) { results.objects(scope) }
 
     it 'does not list issues on private projects' do
       expect(objects).not_to include issue
@@ -257,6 +259,35 @@ RSpec.describe Gitlab::ProjectSearchResults do
 
     describe "confidential issues" do
       include_examples "access restricted confidential issues"
+    end
+
+    context 'filtering' do
+      let_it_be(:project) { create(:project, :public) }
+      let_it_be(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
+      let_it_be(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
+      let_it_be(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
+      let(:query) { 'foo' }
+
+      before do
+        project.add_developer(user)
+      end
+
+      include_examples 'search results filtered by state'
+      include_examples 'search results filtered by confidential'
+    end
+  end
+
+  describe 'merge requests search' do
+    let(:scope) { 'merge_requests' }
+    let(:project) { create(:project, :public) }
+
+    context 'filtering' do
+      let!(:project) { create(:project, :public) }
+      let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
+      let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
+      let(:query) { 'foo' }
+
+      include_examples 'search results filtered by state'
     end
   end
 

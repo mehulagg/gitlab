@@ -1,17 +1,17 @@
 <script>
 import {
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownDivider,
-  GlDeprecatedDropdownHeader,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
   GlIcon,
 } from '@gitlab/ui';
+import permissionsQuery from 'shared_queries/repository/permissions.query.graphql';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '../../locale';
 import getRefMixin from '../mixins/get_ref';
 import projectShortPathQuery from '../queries/project_short_path.query.graphql';
 import projectPathQuery from '../queries/project_path.query.graphql';
-import permissionsQuery from '../queries/permissions.query.graphql';
 
 const ROW_TYPES = {
   header: 'header',
@@ -20,10 +20,10 @@ const ROW_TYPES = {
 
 export default {
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownDivider,
-    GlDeprecatedDropdownHeader,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownSectionHeader,
+    GlDropdownItem,
     GlIcon,
   },
   apollo: {
@@ -226,11 +226,11 @@ export default {
     getComponent(type) {
       switch (type) {
         case ROW_TYPES.divider:
-          return 'gl-deprecated-dropdown-divider';
+          return 'gl-dropdown-divider';
         case ROW_TYPES.header:
-          return 'gl-deprecated-dropdown-header';
+          return 'gl-dropdown-section-header';
         default:
-          return 'gl-deprecated-dropdown-item';
+          return 'gl-dropdown-item';
       }
     },
   },
@@ -246,7 +246,7 @@ export default {
         </router-link>
       </li>
       <li v-if="renderAddToTreeDropdown" class="breadcrumb-item">
-        <gl-deprecated-dropdown toggle-class="add-to-tree qa-add-to-tree ml-1">
+        <gl-dropdown toggle-class="add-to-tree qa-add-to-tree gl-ml-2">
           <template #button-content>
             <span class="sr-only">{{ __('Add to tree') }}</span>
             <gl-icon name="plus" :size="16" class="float-left" />
@@ -257,7 +257,7 @@ export default {
               {{ item.text }}
             </component>
           </template>
-        </gl-deprecated-dropdown>
+        </gl-dropdown>
       </li>
     </ol>
   </nav>

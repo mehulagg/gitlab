@@ -3,7 +3,7 @@
 
 - if message.present? && subscribable.present?
   .container-fluid.container-limited.pt-3
-    .alert.alert-dismissible.gitlab-ee-license-banner.hidden.js-gitlab-ee-license-banner.pb-5.border-width-1px.border-style-solid.border-color-default.border-radius-default{ role: 'alert', data: { license_expiry: subscribable.expires_at } }
+    .gl-alert.alert-dismissible.gitlab-ee-license-banner.hidden.js-gitlab-ee-license-banner.gl-pb-7.gl-border-1.gl-border-solid.gl-border-gray-100.gl-rounded-base{ role: 'alert', data: { license_expiry: subscribable.expires_at } }
       %button.close.p-2{ type: 'button', 'aria-label' => 'Dismiss banner', data: { dismiss: 'alert', track_event: 'click_button', track_label: 'dismiss_subscribable_banner' } }
         %span{ 'aria-hidden' => 'true' }
           = sprite_icon('merge-request-close-m', size: 24)

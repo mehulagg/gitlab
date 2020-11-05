@@ -1,11 +1,13 @@
 <script>
 import { GlButton, GlLink, GlSprintf } from '@gitlab/ui';
+import RuleName from 'ee/approvals/components/rule_name.vue';
 
 export default {
   components: {
     GlButton,
     GlLink,
     GlSprintf,
+    RuleName,
   },
   props: {
     rule: {
@@ -21,7 +23,8 @@ export default {
     <!-- Suggested approval rule creation row -->
     <template v-if="rule.hasConfiguredJob">
       <td class="js-name" colspan="4">
-        <div>{{ rule.name }}</div>
+        <rule-name :name="rule.name" />
+
         <div class="gl-text-gray-500">
           <gl-sprintf :message="rule.enableDescription">
             <template #link="{ content }">
@@ -39,7 +42,8 @@ export default {
 
     <!-- Approval rule suggestion when lacking appropriate CI job for the rule -->
     <td v-else class="js-name" colspan="5">
-      <div>{{ rule.name }}</div>
+      <rule-name :name="rule.name" />
+
       <div class="gl-text-gray-500">
         <gl-sprintf :message="rule.description">
           <template #link="{ content }">

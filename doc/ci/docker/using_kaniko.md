@@ -17,13 +17,13 @@ kaniko solves two problems with using the
 build](using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) method:
 
 - Docker-in-Docker requires [privileged mode](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
-  in order to function, which is a significant security concern.
+  to function, which is a significant security concern.
 - Docker-in-Docker generally incurs a performance penalty and can be quite slow.
 
 ## Requirements
 
-In order to utilize kaniko with GitLab, [a runner](https://docs.gitlab.com/runner/)
-with one of the following executors is required:
+To use kaniko with GitLab, [a runner](https://docs.gitlab.com/runner/) with one
+of the following executors is required:
 
 - [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html).
 - [Docker](https://docs.gitlab.com/runner/executors/docker.html).
@@ -85,13 +85,13 @@ This can be solved by adding your CA's certificate to the kaniko certificate
 store:
 
 ```yaml
-  before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - |
-      echo "-----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----" >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
+before_script:
+  - mkdir -p /kaniko/.docker
+  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  - |
+    echo "-----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----" >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
 ```
 
 ## Video walkthrough of a working example

@@ -10,7 +10,7 @@ export default {
     EditorModeDropdown,
   },
   computed: {
-    ...mapGetters(['currentMergeRequest', 'activeFile']),
+    ...mapGetters(['currentMergeRequest', 'activeFile', 'getUrlForPath']),
     ...mapState(['viewer', 'currentMergeRequestId']),
     showLatestChangesText() {
       return !this.currentMergeRequestId || this.viewer === viewerTypes.diff;
@@ -23,26 +23,32 @@ export default {
     },
   },
   mounted() {
-    if (this.activeFile && this.activeFile.pending && !this.activeFile.deleted) {
-      this.$router.push(`/project${this.activeFile.url}`, () => {
-        this.updateViewer('editor');
-      });
-    } else if (this.activeFile && this.activeFile.deleted) {
-      this.resetOpenFiles();
-    }
-
-    this.$nextTick(() => {
-      this.updateViewer(this.currentMergeRequestId ? viewerTypes.mr : viewerTypes.diff);
-    });
+    this.initialize();
+  },
+  activated() {
+    this.initialize();
   },
   methods: {
     ...mapActions(['updateViewer', 'resetOpenFiles']),
+    initialize() {
+      if (this.activeFile && this.activeFile.pending && !this.activeFile.deleted) {
+        this.$router.push(this.getUrlForPath(this.activeFile.path), () => {
+          this.updateViewer(viewerTypes.edit);
+        });
+      } else if (this.activeFile && this.activeFile.deleted) {
+        this.resetOpenFiles();
+      }
+
+      this.$nextTick(() => {
+        this.updateViewer(this.currentMergeRequestId ? viewerTypes.mr : viewerTypes.diff);
+      });
+    },
   },
 };
 </script>
 
 <template>
-  <ide-tree-list :viewer-type="viewer" header-class="ide-review-header">
+  <ide-tree-list header-class="ide-review-header">
     <template #header>
       <div class="ide-review-button-holder">
         {{ __('Review') }}

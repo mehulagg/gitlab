@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Database Reviewer Guidelines
 
 This page includes introductory material for new database reviewers.
@@ -23,9 +29,9 @@ For more information on the database review process, check the [database review 
 Team members are encouraged to self-identify as database domain experts and add it to their [team profile](https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/data/team.yml)
 
 ```yaml
-  projects:
-    gitlab:
-      - reviewer database
+projects:
+  gitlab:
+    - reviewer database
 ```
 
 Assign the MR which adds your expertise to the `team.yml` file to a database maintainer
@@ -70,9 +76,9 @@ they can update their [team profile](https://gitlab.com/gitlab-com/www-gitlab-co
 to a `trainee_maintainer database`:
 
 ```yaml
-  projects:
-    gitlab:
-      - trainee_maintainer database
+projects:
+  gitlab:
+    - trainee_maintainer database
 ```
 
 The first step is to a create a [Trainee Database Maintainer Issue](https://gitlab.com/gitlab-com/www-gitlab-com/-/issues/new?issuable_template=trainee-database-maintainer).

@@ -19,19 +19,20 @@ export default {
     }
   },
   [types.TOGGLE_FILE_OPEN](state, path) {
-    Object.assign(state.entries[path], {
-      opened: !state.entries[path].opened,
-    });
+    const entry = state.entries[path];
 
-    if (state.entries[path].opened) {
+    entry.opened = !entry.opened;
+    if (entry.opened && !entry.tempFile) {
+      entry.loading = true;
+    }
+
+    if (entry.opened) {
       Object.assign(state, {
         openFiles: state.openFiles.filter(f => f.path !== path).concat(state.entries[path]),
       });
     } else {
-      const file = state.entries[path];
-
       Object.assign(state, {
-        openFiles: state.openFiles.filter(f => f.key !== file.key),
+        openFiles: state.openFiles.filter(f => f.key !== entry.key),
       });
     }
   },
@@ -94,17 +95,6 @@ export default {
       changed,
     });
   },
-  [types.SET_FILE_LANGUAGE](state, { file, fileLanguage }) {
-    Object.assign(state.entries[file.path], {
-      fileLanguage,
-    });
-  },
-  [types.SET_FILE_POSITION](state, { file, editorRow, editorColumn }) {
-    Object.assign(state.entries[file.path], {
-      editorRow,
-      editorColumn,
-    });
-  },
   [types.SET_FILE_MERGE_REQUEST_CHANGE](state, { file, mrChange }) {
     let diffMode = diffModes.replaced;
     if (mrChange.new_file) {
@@ -119,11 +109,6 @@ export default {
         ...mrChange,
         diffMode,
       },
-    });
-  },
-  [types.SET_FILE_VIEWMODE](state, { file, viewMode }) {
-    Object.assign(state.entries[file.path], {
-      viewMode,
     });
   },
   [types.DISCARD_FILE_CHANGES](state, path) {

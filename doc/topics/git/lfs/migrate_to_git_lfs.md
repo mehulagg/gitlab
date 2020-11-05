@@ -1,7 +1,8 @@
 ---
-type: tutorial, concepts
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: "How to migrate an existing Git repository to Git LFS with BFG."
-last_updated: 2019-07-11
 ---
 
 # Migrate a Git repo into Git LFS with BFG

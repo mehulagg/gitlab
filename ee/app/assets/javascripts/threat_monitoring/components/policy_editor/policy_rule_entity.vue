@@ -1,5 +1,5 @@
 <script>
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import { EntityTypes } from './constants';
 

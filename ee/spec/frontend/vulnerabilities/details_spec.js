@@ -36,7 +36,7 @@ describe('Vulnerability Details', () => {
     expect(getText('title')).toBe(vulnerability.title);
     expect(getText('description')).toBe(vulnerability.description);
     expect(wrapper.find(SeverityBadge).props('severity')).toBe(vulnerability.severity);
-    expect(getText('reportType')).toBe(`Report Type: ${vulnerability.report_type}`);
+    expect(getText('reportType')).toBe(`Scan Type: ${vulnerability.report_type}`);
 
     expect(getById('image').exists()).toBe(false);
     expect(getById('os').exists()).toBe(false);
@@ -199,6 +199,7 @@ describe('Vulnerability Details', () => {
 
     it.each`
       request                                                    | expectedData
+      ${null}                                                    | ${null}
       ${{}}                                                      | ${null}
       ${{ headers: TEST_HEADERS }}                               | ${[EXPECT_HEADERS]}
       ${{ headers: TEST_HEADERS, method: 'GET' }}                | ${[{ label: 'Method:', content: 'GET' }, EXPECT_HEADERS]}
@@ -212,6 +213,7 @@ describe('Vulnerability Details', () => {
 
     it.each`
       response                                                            | expectedData
+      ${null}                                                             | ${null}
       ${{}}                                                               | ${null}
       ${{ headers: TEST_HEADERS }}                                        | ${[EXPECT_HEADERS]}
       ${{ headers: TEST_HEADERS, status_code: 200 }}                      | ${[EXPECT_HEADERS]}

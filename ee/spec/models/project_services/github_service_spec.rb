@@ -22,7 +22,7 @@ RSpec.describe GithubService do
     }
   end
 
-  subject { described_class.create(service_params) }
+  subject { described_class.create!(service_params) }
 
   before do
     stub_licensed_features(github_project_service_integration: true)
@@ -38,7 +38,7 @@ RSpec.describe GithubService do
 
       describe '#valid?' do
         it 'is not valid' do
-          expect(subject).not_to be_valid
+          expect(described_class.new(service_params)).not_to be_valid
         end
       end
     end
@@ -80,7 +80,7 @@ RSpec.describe GithubService do
     let(:properties) { subject.reload.properties.symbolize_keys }
 
     it 'does not overwrite existing integrations' do
-      subject.update(service_params.slice(:properties))
+      subject.update!(service_params.slice(:properties))
 
       expect(properties).to match(service_params[:properties])
       expect(subject.static_context).to be_nil

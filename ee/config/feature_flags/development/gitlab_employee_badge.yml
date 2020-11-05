@@ -1,0 +1,7 @@
+---
+name: gitlab_employee_badge
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/issues/212259
+rollout_issue_url: 
+group: group::access
+type: development
+default_enabled: false

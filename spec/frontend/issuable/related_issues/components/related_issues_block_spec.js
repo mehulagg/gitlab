@@ -18,7 +18,10 @@ describe('RelatedIssuesBlock', () => {
   const findIssueCountBadgeAddButton = () => wrapper.find(GlButton);
 
   afterEach(() => {
-    wrapper.destroy();
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
   describe('with defaults', () => {
@@ -40,7 +43,7 @@ describe('RelatedIssuesBlock', () => {
     });
 
     it('add related issues form is hidden', () => {
-      expect(wrapper.contains('.js-add-related-issues-form-area')).toBe(false);
+      expect(wrapper.find('.js-add-related-issues-form-area').exists()).toBe(false);
     });
   });
 
@@ -120,7 +123,7 @@ describe('RelatedIssuesBlock', () => {
     });
 
     it('shows add related issues form', () => {
-      expect(wrapper.contains('.js-add-related-issues-form-area')).toBe(true);
+      expect(wrapper.find('.js-add-related-issues-form-area').exists()).toBe(true);
     });
   });
 

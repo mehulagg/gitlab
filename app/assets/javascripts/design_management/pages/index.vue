@@ -1,8 +1,11 @@
 <script>
 import { GlLoadingIcon, GlButton, GlAlert } from '@gitlab/ui';
 import VueDraggable from 'vuedraggable';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import getDesignListQuery from 'shared_queries/design_management/get_design_list.query.graphql';
+import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import { s__, sprintf } from '~/locale';
+import { getFilename } from '~/lib/utils/file_upload';
 import UploadButton from '../components/upload/button.vue';
 import DeleteButton from '../components/delete_button.vue';
 import Design from '../components/list/item.vue';
@@ -11,8 +14,6 @@ import DesignVersionDropdown from '../components/upload/design_version_dropdown.
 import DesignDropzone from '../components/upload/design_dropzone.vue';
 import uploadDesignMutation from '../graphql/mutations/upload_design.mutation.graphql';
 import moveDesignMutation from '../graphql/mutations/move_design.mutation.graphql';
-import permissionsQuery from '../graphql/queries/design_permissions.query.graphql';
-import getDesignListQuery from '../graphql/queries/get_design_list.query.graphql';
 import allDesignsMixin from '../mixins/all_designs';
 import {
   UPLOAD_DESIGN_ERROR,
@@ -31,7 +32,7 @@ import {
   isValidDesignFile,
   moveDesignOptimisticResponse,
 } from '../utils/design_management_utils';
-import { getFilename } from '~/lib/utils/file_upload';
+import { trackDesignCreate, trackDesignUpdate } from '../utils/tracking';
 import { DESIGNS_ROUTE_NAME } from '../router/constants';
 
 const MAXIMUM_FILE_UPLOAD_LIMIT = 10;
@@ -71,11 +72,14 @@ export default {
       selectedDesigns: [],
       isDraggingDesign: false,
       reorderedDesigns: null,
+      isReorderingInProgress: false,
     };
   },
   computed: {
     isLoading() {
-      return this.$apollo.queries.designs.loading || this.$apollo.queries.permissions.loading;
+      return (
+        this.$apollo.queries.designCollection.loading || this.$apollo.queries.permissions.loading
+      );
     },
     isSaving() {
       return this.filesToBeSaved.length > 0;
@@ -109,6 +113,9 @@ export default {
     isDesignListEmpty() {
       return !this.isSaving && !this.hasDesigns;
     },
+    isDesignCollectionCopying() {
+      return this.designCollection && this.designCollection.copyState === 'IN_PROGRESS';
+    },
     designDropzoneWrapperClass() {
       return this.isDesignListEmpty
         ? 'col-12'
@@ -132,8 +139,8 @@ export default {
       if (!this.canCreateDesign) return false;
 
       if (files.length > MAXIMUM_FILE_UPLOAD_LIMIT) {
-        createFlash(
-          sprintf(
+        createFlash({
+          message: sprintf(
             s__(
               'DesignManagement|The maximum number of designs allowed to be uploaded is %{upload_limit}. Please try again.',
             ),
@@ -141,7 +148,7 @@ export default {
               upload_limit: MAXIMUM_FILE_UPLOAD_LIMIT,
             },
           ),
-        );
+        });
 
         return false;
       }
@@ -180,21 +187,34 @@ export default {
       updateStoreAfterUploadDesign(store, designManagementUpload, this.projectQueryBody);
     },
     onUploadDesignDone(res) {
+      // display any warnings, if necessary
       const skippedFiles = res?.data?.designManagementUpload?.skippedDesigns || [];
       const skippedWarningMessage = designUploadSkippedWarning(this.filesToBeSaved, skippedFiles);
       if (skippedWarningMessage) {
-        createFlash(skippedWarningMessage, 'warning');
+        createFlash({ message: skippedWarningMessage, types: FLASH_TYPES.WARNING });
       }
 
       // if this upload resulted in a new version being created, redirect user to the latest version
       if (!this.isLatestVersion) {
         this.$router.push({ name: DESIGNS_ROUTE_NAME });
       }
+
+      // reset state
       this.resetFilesToBeSaved();
+      this.trackUploadDesign(res);
+    },
+    trackUploadDesign(res) {
+      (res?.data?.designManagementUpload?.designs || []).forEach(design => {
+        if (design.event === 'CREATION') {
+          trackDesignCreate();
+        } else if (design.event === 'MODIFICATION') {
+          trackDesignUpdate();
+        }
+      });
     },
     onUploadDesignError() {
       this.resetFilesToBeSaved();
-      createFlash(UPLOAD_DESIGN_ERROR);
+      createFlash({ message: UPLOAD_DESIGN_ERROR });
     },
     changeSelectedDesigns(filename) {
       if (this.isDesignSelected(filename)) {
@@ -225,18 +245,18 @@ export default {
     },
     onDesignDeleteError() {
       const errorMessage = designDeletionError({ singular: this.selectedDesigns.length === 1 });
-      createFlash(errorMessage);
+      createFlash({ message: errorMessage });
     },
     onExistingDesignDropzoneChange(files, existingDesignFilename) {
       const filesArr = Array.from(files);
 
       if (filesArr.length > 1) {
-        createFlash(EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE);
+        createFlash({ message: EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE });
         return;
       }
 
       if (!filesArr.some(({ name }) => existingDesignFilename === name)) {
-        createFlash(EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE);
+        createFlash({ message: EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE });
         return;
       }
 
@@ -277,6 +297,7 @@ export default {
       return variables;
     },
     reorderDesigns({ moved: { newIndex, element } }) {
+      this.isReorderingInProgress = true;
       this.$apollo
         .mutate({
           mutation: moveDesignMutation,
@@ -286,7 +307,10 @@ export default {
           optimisticResponse: moveDesignOptimisticResponse(this.reorderedDesigns),
         })
         .catch(() => {
-          createFlash(MOVE_DESIGN_ERROR);
+          createFlash({ message: MOVE_DESIGN_ERROR });
+        })
+        .finally(() => {
+          this.isReorderingInProgress = false;
         });
     },
     onDesignMove(designs) {
@@ -311,7 +335,7 @@ export default {
     @mouseenter="toggleOnPasteListener"
     @mouseleave="toggleOffPasteListener"
   >
-    <header v-if="showToolbar" class="row-content-block border-top-0 p-2 d-flex">
+    <header v-if="showToolbar" class="row-content-block gl-border-t-0 gl-p-3 gl-display-flex">
       <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-w-full">
         <div>
           <span class="gl-font-weight-bold gl-mr-3">{{ s__('DesignManagement|Designs') }}</span>
@@ -339,6 +363,7 @@ export default {
               button-category="secondary"
               button-class="gl-mr-3"
               button-size="small"
+              data-qa-selector="archive_button"
               :loading="loading"
               :has-selected-designs="hasSelectedDesigns"
               @deleteSelectedDesigns="mutate()"
@@ -350,15 +375,30 @@ export default {
         </div>
       </div>
     </header>
-    <div class="mt-4">
+    <div class="gl-mt-6">
       <gl-loading-icon v-if="isLoading" size="md" />
       <gl-alert v-else-if="error" variant="danger" :dismissible="false">
         {{ __('An error occurred while loading designs. Please try again.') }}
       </gl-alert>
+      <header
+        v-else-if="isDesignCollectionCopying"
+        class="card"
+        data-testid="design-collection-is-copying"
+      >
+        <div class="card-header design-card-header gl-border-b-0">
+          <div class="card-title gl-display-flex gl-align-items-center gl-my-0 gl-h-7">
+            {{
+              s__(
+                'DesignManagement|Your designs are being copied and are on their way… Please refresh to update.',
+              )
+            }}
+          </div>
+        </div>
+      </header>
       <vue-draggable
         v-else
         :value="designs"
-        :disabled="!isLatestVersion"
+        :disabled="!isLatestVersion || isReorderingInProgress"
         v-bind="$options.dragOptions"
         tag="ol"
         draggable=".js-design-tile"
@@ -390,6 +430,8 @@ export default {
             :checked="isDesignSelected(design.filename)"
             type="checkbox"
             class="design-checkbox"
+            data-qa-selector="design_checkbox"
+            :data-qa-design="design.filename"
             @change="changeSelectedDesigns(design.filename)"
           />
         </li>
@@ -399,6 +441,7 @@ export default {
               :is-dragging-design="isDraggingDesign"
               :class="{ 'design-list-item design-list-item-new': !isDesignListEmpty }"
               :has-designs="hasDesigns"
+              data-qa-selector="design_dropzone_content"
               @change="onUploadDesign"
             />
           </li>

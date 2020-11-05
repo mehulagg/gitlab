@@ -4,6 +4,7 @@ module Ci
   class BatchResetMinutesWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 10
     feature_category :continuous_integration
     idempotent!
 

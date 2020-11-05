@@ -42,7 +42,7 @@ describe('Environments', () => {
     beforeAll(() => {
       wrapper = mount(Environments, {
         propsData: { ...propsData, environments },
-        stubs: { deploymentInstance: '<div class="js-deployment-instance"></div>' },
+        stubs: { deploymentInstance: { template: '<div class="js-deployment-instance"></div>' } },
       });
 
       table = wrapper.find(GlTable);

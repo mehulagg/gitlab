@@ -11,6 +11,7 @@ module EE
           params.delete(:milestone_id)
           params.delete(:assignee_id)
           params.delete(:label_ids)
+          params.delete(:labels)
           params.delete(:weight)
           params.delete(:hide_backlog_list)
           params.delete(:hide_closed_list)

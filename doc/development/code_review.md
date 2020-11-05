@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Code Review Guidelines
 
 This guide contains advice and best practices for performing code review, and
@@ -67,6 +73,10 @@ page, with these behaviors:
    contains the string 'OOO', or the emoji is `:palm_tree:` or `:beach:`.
 1. [Trainee maintainers](https://about.gitlab.com/handbook/engineering/workflow/code-review/#trainee-maintainer)
    are three times as likely to be picked as other reviewers.
+1. People whose [GitLab status](../user/profile/index.md#current-status) emoji
+   is `:large_blue_circle:` are more likely to be picked. This applies to both reviewers and trainee maintainers.
+   - Reviewers with `:large_blue_circle:` are two times as likely to be picked as other reviewers.
+   - Trainee maintainers with `:large_blue_circle:` are four times as likely to be picked as other reviewers.
 1. It always picks the same reviewers and maintainers for the same
    branch name (unless their OOO status changes, as in point 1). It
    removes leading `ce-` and `ee-`, and trailing `-ce` and `-ee`, so
@@ -87,8 +97,14 @@ with [domain expertise](#domain-experts).
    **approved by a [frontend maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_frontend)**.
 1. If your merge request includes UX changes (*1*), it must be
    **approved by a [UX team member](https://about.gitlab.com/company/team/)**.
-1. If your merge request includes adding a new JavaScript library (*1*), it must be
-   **approved by a [frontend lead](https://about.gitlab.com/company/team/)**.
+1. If your merge request includes adding a new JavaScript library (*1*)...
+   - If the library significantly increases the
+     [bundle size](https://gitlab.com/gitlab-org/frontend/playground/webpack-memory-metrics/-/blob/master/doc/report.md), it must
+     be **approved by a [frontend foundations member](https://about.gitlab.com/direction/create/ecosystem/frontend-ux-foundations/)**.
+   - If the license used by the new library hasn't been approved for use in
+     GitLab, the license must be **approved by a [legal department member](https://about.gitlab.com/handbook/legal/)**.
+     More information about license compatiblity can be found in our
+     [GitLab Licensing and Compatibility documentation](./licensing.md).
 1. If your merge request includes adding a new UI/UX paradigm (*1*), it must be
    **approved by a [UX lead](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes a new dependency or a filesystem change, it must be
@@ -99,6 +115,8 @@ with [domain expertise](#domain-experts).
 1. If your merge request includes end-to-end **and** non-end-to-end changes (*3*), it must be **approved
    by a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors)**.
 1. If your merge request only includes end-to-end changes (*3*) **or** if the MR author is a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa)**
+1. If your merge request includes a new or updated [application limit](https://about.gitlab.com/handbook/product/product-processes/#introducing-application-limits), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**.
+1. If your merge request includes Product Analytics (telemetry) changes, it should be reviewed and approved by a [Product analytics engineer](https://gitlab.com/gitlab-org/growth/product-analytics/engineers).
 
 - (*1*): Please note that specs other than JavaScript specs are considered backend code.
 - (*2*): We encourage you to seek guidance from a database maintainer if your merge
@@ -358,10 +376,10 @@ When ready to merge:
   messy commit history that is intended to be squashed.
 - **Start a new merge request pipeline with the `Run Pipeline` button in the merge
   request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).** Note that:
-  - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results-premium)** finished less than 2 hours ago, you
+  - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results)** finished less than 2 hours ago, you
     might merge without starting a new pipeline as the merge request is close
     enough to `master`.
-  - If the **merge request is from a fork**, we can use [Pipelines for Merged Results from a forked project](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project-starter) with caution.
+  - If the **merge request is from a fork**, we can use [Pipelines for Merged Results from a forked project](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project) with caution.
     Before triggering the pipeline, review all changes for **malicious code**.
     If you cannot trigger the pipeline, review the status of the fork relative to `master`.
     If it's more than 100 commits behind, ask the author to rebase it before merging.
@@ -372,8 +390,7 @@ When ready to merge:
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
 
-NOTE: **Note:**
-Thanks to "Pipeline for Merged Results", authors won't have to rebase their
+Thanks to **Pipeline for Merged Results**, authors won't have to rebase their
 branch as frequently anymore (only when there are conflicts) since the Merge
 Results Pipeline will already incorporate the latest changes from `master`.
 This results in faster review/merge cycles since maintainers don't have to ask

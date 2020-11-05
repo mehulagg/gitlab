@@ -11,6 +11,8 @@ module QA
 
       attribute :id
       attribute :name
+      attribute :first_name
+      attribute :last_name
       attribute :email
 
       def initialize
@@ -32,6 +34,14 @@ module QA
 
       def name
         @name ||= api_resource&.dig(:name) || "QA User #{unique_id}"
+      end
+
+      def first_name
+        name.split(' ').first
+      end
+
+      def last_name
+        name.split(' ').drop(1).join(' ')
       end
 
       def email
@@ -65,7 +75,7 @@ module QA
           end
         else
           Page::Main::Login.perform do |login|
-            login.switch_to_register_tab
+            login.switch_to_register_page
           end
           Page::Main::SignUp.perform do |signup|
             signup.sign_up!(self)
@@ -148,7 +158,7 @@ module QA
       end
 
       def fetching_own_data?
-        user&.username == username || Runtime::User.username == username
+        api_user&.username == username || Runtime::User.username == username
       end
     end
   end

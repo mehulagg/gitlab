@@ -6,7 +6,7 @@ RSpec.describe 'Project' do
   describe 'Custom instance-level projects templates' do
     let(:user) { create(:user) }
     let(:group) { create(:group) }
-    let!(:projects) { create_list(:project, 3, :public, namespace: group) }
+    let!(:projects) { create_list(:project, 3, :public, :metrics_dashboard_enabled, namespace: group) }
 
     before do
       stub_ee_application_setting(custom_project_templates_group_id: group.id)

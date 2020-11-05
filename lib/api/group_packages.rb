@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class GroupPackages < Grape::API::Instance
+  class GroupPackages < ::API::Base
     include PaginationParams
 
     before do
       authorize_packages_access!(user_group)
     end
+
+    feature_category :package_registry
 
     helpers ::API::Helpers::PackagesHelpers
 

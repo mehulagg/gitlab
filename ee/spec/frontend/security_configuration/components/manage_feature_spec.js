@@ -17,7 +17,6 @@ describe('ManageFeature component', () => {
         {
           propsData: {
             createSastMergeRequestPath,
-            gitlabCiPresent: false,
             autoDevopsEnabled: false,
           },
         },
@@ -28,7 +27,6 @@ describe('ManageFeature component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findCreateMergeRequestButton = () => wrapper.find(CreateMergeRequestButton);
@@ -44,17 +42,17 @@ describe('ManageFeature component', () => {
     };
 
     describe.each`
-      autoDevopsEnabled | expectedTestId
-      ${true}           | ${'configureButton'}
-      ${false}          | ${'enableButton'}
-    `('given autoDevopsEnabled is $autoDevopsEnabled', ({ autoDevopsEnabled, expectedTestId }) => {
-      describe('given no CI file and feature with a configuration path', () => {
+      configured | expectedTestId
+      ${true}    | ${'configureButton'}
+      ${false}   | ${'enableButton'}
+    `('given feature.configured is $configured', ({ configured, expectedTestId }) => {
+      describe('given a configuration path', () => {
         beforeEach(() => {
-          [feature] = generateFeatures(1, { configuration_path: 'foo' });
+          [feature] = generateFeatures(1, { configured, configuration_path: 'foo' });
 
           createComponent({
             ...featureFlagEnabled,
-            propsData: { feature, gitlabCiPresent: false, autoDevopsEnabled },
+            propsData: { feature },
           });
         });
 
@@ -67,14 +65,14 @@ describe('ManageFeature component', () => {
     });
   });
 
-  describe('given a feature with type "sast" and no CI file', () => {
+  describe('given a feature with type "sast"', () => {
     const autoDevopsEnabled = true;
 
     beforeEach(() => {
       [feature] = generateFeatures(1, { type: 'sast' });
 
       createComponent({
-        propsData: { feature, gitlabCiPresent: false, autoDevopsEnabled },
+        propsData: { feature, autoDevopsEnabled },
       });
     });
 
@@ -88,27 +86,19 @@ describe('ManageFeature component', () => {
     });
   });
 
-  describe.each`
-    featureProps        | gitlabCiPresent
-    ${{ type: 'sast' }} | ${true}
-    ${{}}               | ${false}
-  `(
-    'given a featureProps with $featureProps and gitlabCiPresent is $gitlabCiPresent',
-    ({ featureProps, gitlabCiPresent }) => {
-      beforeEach(() => {
-        [feature] = generateFeatures(1, featureProps);
+  describe('given a feature with type "dast-profiles"', () => {
+    beforeEach(() => {
+      [feature] = generateFeatures(1, { type: 'dast_profiles', configuration_path: 'foo' });
 
-        createComponent({
-          propsData: { feature, gitlabCiPresent },
-        });
+      createComponent({
+        propsData: { feature, autoDevopsEnabled: true },
       });
+    });
 
-      it('shows docs link for feature', () => {
-        const link = findTestId('docsLink');
-        expect(link.exists()).toBe(true);
-        expect(link.attributes('aria-label')).toContain(feature.name);
-        expect(link.attributes('href')).toBe(feature.link);
-      });
-    },
-  );
+    it('shows the DAST Profiles manage button', () => {
+      const button = findTestId('manageButton');
+      expect(button.exists()).toBe(true);
+      expect(button.attributes('href')).toBe(feature.configuration_path);
+    });
+  });
 });

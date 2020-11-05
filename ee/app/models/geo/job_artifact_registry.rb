@@ -6,20 +6,6 @@ class Geo::JobArtifactRegistry < Geo::BaseRegistry
   MODEL_CLASS = ::Ci::JobArtifact
   MODEL_FOREIGN_KEY = :artifact_id
 
-  scope :never, -> { where(success: false, retry_count: nil) }
-
-  def self.failed
-    where(success: false).where.not(retry_count: nil)
-  end
-
-  def self.finder_class
-    ::Geo::JobArtifactRegistryFinder
-  end
-
-  def self.find_registry_differences(range)
-    finder_class.new(current_node_id: Gitlab::Geo.current_node.id).find_registry_differences(range)
-  end
-
   # When false, RegistryConsistencyService will frequently check the end of the
   # table to quickly handle new replicables.
   def self.has_create_events?

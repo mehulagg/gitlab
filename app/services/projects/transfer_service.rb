@@ -79,14 +79,14 @@ module Projects
         # Directories on disk
         move_project_folders(project)
 
-        # Move missing group labels to project
-        Labels::TransferService.new(current_user, @old_group, project).execute
-
-        # Move missing group milestones
-        Milestones::TransferService.new(current_user, @old_group, project).execute
+        transfer_missing_group_resources(@old_group)
 
         # Move uploads
         move_project_uploads(project)
+
+        # If a project is being transferred to another group it means it can already
+        # have shared runners enabled but we need to check whether the new group allows that.
+        project.shared_runners_enabled = false if project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
 
         project.old_path_with_namespace = @old_path
 
@@ -101,6 +101,12 @@ module Projects
       raise
     ensure
       refresh_permissions
+    end
+
+    def transfer_missing_group_resources(group)
+      Labels::TransferService.new(current_user, group, project).execute
+
+      Milestones::TransferService.new(current_user, group, project).execute
     end
 
     def allowed_transfer?(current_user, project)
@@ -181,15 +187,9 @@ module Projects
     end
 
     def move_pages(project)
-      transfer = Gitlab::PagesTransfer.new
+      return unless project.pages_deployed?
 
-      if Feature.enabled?(:async_pages_move_project_transfer, project)
-        # Avoid scheduling moves for directories that don't exist.
-        return unless project.pages_deployed?
-
-        transfer = transfer.async
-      end
-
+      transfer = Gitlab::PagesTransfer.new.async
       transfer.move_project(project.path, @old_namespace.full_path, @new_namespace.full_path)
     end
 

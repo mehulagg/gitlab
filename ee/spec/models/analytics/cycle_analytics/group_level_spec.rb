@@ -13,7 +13,7 @@ RSpec.describe Analytics::CycleAnalytics::GroupLevel do
   let(:pipeline) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr.source_branch, sha: mr.source_branch_sha, head_pipeline_of: mr) }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   subject { described_class.new(group: group, options: { from: from_date, current_user: user }) }

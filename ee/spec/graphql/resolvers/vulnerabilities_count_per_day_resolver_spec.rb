@@ -18,7 +18,7 @@ RSpec.describe Resolvers::VulnerabilitiesCountPerDayResolver do
     let(:args) { { start_date: start_date, end_date: end_date } }
 
     it 'fetches historical vulnerability data from the start date to the end date' do
-      Timecop.freeze(Date.new(2019, 10, 31)) do
+      travel_to(Date.new(2019, 10, 31)) do
         create(:vulnerability_historical_statistic, date: start_date + 1.day, total: 2, critical: 1, high: 1, project: project)
         create(:vulnerability_historical_statistic, date: start_date + 2.days, total: 3, critical: 2, high: 1, project: project)
         create(:vulnerability_historical_statistic, date: start_date + 4.days, total: 1, critical: 1, high: 0, project: project_2)

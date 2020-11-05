@@ -51,7 +51,7 @@ describe('First Class Instance Dashboard Component', () => {
     });
 
     it('renders the alert component', () => {
-      expect(findAlert().text()).toBe('Something went wrong, unable to get projects');
+      expect(findAlert().text()).toBe('An error occurred while retrieving projects.');
     });
   });
 });

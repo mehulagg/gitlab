@@ -6,37 +6,23 @@ import {
   RuleDirectionInbound,
   PortMatchModeAny,
 } from '../constants';
+import { portSelectors, labelSelector, splitItems } from './utils';
 
 /*
  Return kubernetes specification object that is shared by all rule types.
 */
-function commonSpec({ portMatchMode, ports }) {
-  if (portMatchMode === PortMatchModeAny) return {};
-
-  const portSelectors = ports.split(/\s/).reduce((acc, item) => {
-    const [port, protocol = 'tcp'] = item.split('/');
-    const portNumber = parseInt(port, 10);
-    if (Number.isNaN(portNumber)) return acc;
-
-    acc.push({ port, protocol: protocol.trim().toUpperCase() });
-    return acc;
-  }, []);
-
-  return { toPorts: [{ ports: portSelectors }] };
+function commonSpec(rule) {
+  const spec = {};
+  const ports = portSelectors(rule);
+  if (Object.keys(ports).length > 0) spec.toPorts = [{ ports }];
+  return spec;
 }
 
 /*
  Return kubernetes specification object for an endpoint rule.
 */
 function ruleEndpointSpec({ direction, matchLabels }) {
-  const matchSelector = matchLabels.split(/\s/).reduce((acc, item) => {
-    const [key, value = ''] = item.split(':');
-    if (key.length === 0) return acc;
-
-    acc[key] = value.trim();
-    return acc;
-  }, {});
-
+  const matchSelector = labelSelector(matchLabels);
   if (Object.keys(matchSelector).length === 0) return {};
 
   return {
@@ -63,7 +49,7 @@ function ruleEntitySpec({ direction, entities }) {
   Return kubernetes specification object for a cidr rule.
 */
 function ruleCIDRSpec({ direction, cidr }) {
-  const cidrList = cidr.length === 0 ? [] : cidr.split(/\s/);
+  const cidrList = splitItems(cidr);
   if (cidrList.length === 0) return {};
 
   return {
@@ -77,7 +63,7 @@ function ruleCIDRSpec({ direction, cidr }) {
 function ruleFQDNSpec({ direction, fqdn }) {
   if (direction === RuleDirectionInbound) return {};
 
-  const fqdnList = fqdn.length === 0 ? [] : fqdn.split(/\s/);
+  const fqdnList = splitItems(fqdn);
   if (fqdnList.length === 0) return {};
 
   return {

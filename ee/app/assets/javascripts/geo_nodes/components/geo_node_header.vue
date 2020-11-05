@@ -1,6 +1,5 @@
 <script>
-import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   components: {
@@ -8,7 +7,7 @@ export default {
     GlLoadingIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     node: {
@@ -43,7 +42,7 @@ export default {
           />
           <gl-icon
             v-if="showNodeWarningIcon"
-            v-tooltip
+            v-gl-tooltip
             class="ml-2 text-warning-500"
             name="warning"
             :size="18"

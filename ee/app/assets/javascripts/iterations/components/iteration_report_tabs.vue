@@ -193,12 +193,17 @@ export default {
         :show-empty="true"
         fixed
         stacked="sm"
+        data-qa-selector="iteration_issues_container"
       >
         <template #cell(title)="{ item: { iid, title, webUrl } }">
           <div class="gl-text-truncate">
-            <gl-link class="gl-text-gray-900 gl-font-weight-bold" :href="webUrl">{{
-              title
-            }}</gl-link>
+            <gl-link
+              class="gl-text-gray-900 gl-font-weight-bold"
+              :href="webUrl"
+              data-qa-selector="iteration_issue_link"
+              :data-qa-issue-title="title"
+              >{{ title }}</gl-link
+            >
             <!-- TODO: add references.relative (project name) -->
             <!-- Depends on https://gitlab.com/gitlab-org/gitlab/-/issues/222763 -->
             <div class="gl-text-secondary">#{{ iid }}</div>

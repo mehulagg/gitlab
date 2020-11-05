@@ -1,6 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import {
+  GlTooltipDirective,
+  GlDropdown,
+  GlDropdownItem,
+  GlLoadingIcon,
+  GlIcon,
+  GlButton,
+} from '@gitlab/ui';
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
@@ -14,12 +21,17 @@ const invisibleClass = 'invisible';
 export default {
   name: 'AdminLicenseManagementRow',
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
+    GlButton,
     GlLoadingIcon,
     GlIcon,
     IssueStatusIcon,
   },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
+
   props: {
     license: {
       type: Object,
@@ -70,31 +82,33 @@ export default {
     <div class="float-right">
       <div class="d-flex">
         <gl-loading-icon v-if="loading" class="js-loading-icon d-flex align-items-center mr-2" />
-        <gl-deprecated-dropdown
+        <gl-dropdown
           :text="dropdownText"
           :disabled="loading"
           toggle-class="d-flex justify-content-between align-items-center"
           right
         >
-          <gl-deprecated-dropdown-item @click="allowLicense(license)">
+          <gl-dropdown-item @click="allowLicense(license)">
             <gl-icon :class="approveIconClass" name="mobile-issue-close" />
             {{ $options[$options.LICENSE_APPROVAL_ACTION.ALLOW] }}
-          </gl-deprecated-dropdown-item>
-          <gl-deprecated-dropdown-item @click="denyLicense(license)">
+          </gl-dropdown-item>
+          <gl-dropdown-item @click="denyLicense(license)">
             <gl-icon :class="blacklistIconClass" name="mobile-issue-close" />
             {{ $options[$options.LICENSE_APPROVAL_ACTION.DENY] }}
-          </gl-deprecated-dropdown-item>
-        </gl-deprecated-dropdown>
-        <button
+          </gl-dropdown-item>
+        </gl-dropdown>
+        <gl-button
+          v-gl-tooltip
+          :title="__('Remove license')"
+          :aria-label="__('Remove license')"
           :disabled="loading"
-          class="btn btn-blank js-remove-button"
-          type="button"
+          icon="remove"
+          class="js-remove-button gl-ml-3"
+          category="tertiary"
           data-toggle="modal"
           data-target="#modal-license-delete-confirmation"
           @click="setLicenseInModal(license)"
-        >
-          <gl-icon name="remove" />
-        </button>
+        />
       </div>
     </div>
   </div>

@@ -119,6 +119,13 @@ describe('issue_comment_form component', () => {
         const primaryButton = warning.find('.gl-alert-actions .gl-button');
         expect(primaryButton.text()).toEqual('Yes, close issue');
         primaryButton.trigger('click');
+
+        wrapper.vm.$nextTick(() => {
+          expect(warning.exists()).toBe(false);
+
+          done();
+        });
+
         setTimeout(() => {
           expect(wrapper.vm.closeIssue).toHaveBeenCalled();
 

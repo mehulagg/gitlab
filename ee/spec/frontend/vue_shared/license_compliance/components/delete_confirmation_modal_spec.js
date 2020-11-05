@@ -98,7 +98,6 @@ describe('DeleteConfirmationModal', () => {
         expect(actions.deleteLicense).toHaveBeenCalledWith(
           expect.any(Object),
           store.state.licenseManagement.currentLicenseInModal,
-          undefined,
         );
       });
     });

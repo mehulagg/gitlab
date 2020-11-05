@@ -21,46 +21,64 @@ module Mutations
                required: true,
                description: 'ID of the site profile to be used for the scan.'
 
+      argument :dast_scanner_profile_id, ::Types::GlobalIDType[::DastScannerProfile],
+               required: false,
+               description: 'ID of the scanner profile to be used for the scan.'
+
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, dast_site_profile_id:)
+      def resolve(full_path:, dast_site_profile_id:, **args)
         project = authorized_find_project!(full_path: full_path)
 
-        dast_site_profile = find_dast_site_profile(project: project, dast_site_profile_id: dast_site_profile_id)
-        dast_site = dast_site_profile.dast_site
+        dast_site_profile = find_dast_site_profile(project, dast_site_profile_id)
+        dast_scanner_profile = find_dast_scanner_profile(project, args[:dast_scanner_profile_id])
 
-        service = ::Ci::RunDastScanService.new(project, current_user)
-        result = service.execute(branch: project.default_branch, target_url: dast_site.url)
+        response = create_on_demand_dast_scan(project, dast_site_profile, dast_scanner_profile)
 
-        if result.success?
-          success_response(project: project, pipeline: result.payload)
-        else
-          error_response(result)
-        end
+        return { errors: response.errors } if response.error?
+
+        { errors: [], pipeline_url: response.payload.fetch(:pipeline_url) }
       end
 
       private
 
-      def find_dast_site_profile(project:, dast_site_profile_id:)
-        project
-          .dast_site_profiles
-          .with_dast_site
-          .find(dast_site_profile_id.model_id)
-      end
+      # rubocop: disable CodeReuse/ActiveRecord
+      def find_dast_site_profile(project, dast_site_profile_id)
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        dast_site_profile_id = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(dast_site_profile_id)
 
-      def success_response(project:, pipeline:)
-        pipeline_url = Rails.application.routes.url_helpers.project_pipeline_url(
-          project,
-          pipeline
-        )
-        {
-          errors: [],
-          pipeline_url: pipeline_url
-        }
+        DastSiteProfilesFinder.new(project_id: project.id, id: dast_site_profile_id.model_id)
+          .execute
+          .first!
       end
+      # rubocop: enable CodeReuse/ActiveRecord
 
-      def error_response(result)
-        { errors: result.errors }
+      # rubocop: disable CodeReuse/ActiveRecord
+      def find_dast_scanner_profile(project, dast_scanner_profile_id)
+        return unless dast_scanner_profile_id
+
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        dast_scanner_profile_id = ::Types::GlobalIDType[::DastScannerProfile]
+                                    .coerce_isolated_input(dast_scanner_profile_id)
+
+        DastScannerProfilesFinder.new(
+          project_ids: [project.id],
+          ids: [dast_scanner_profile_id.model_id]
+        ).execute.first!
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      def create_on_demand_dast_scan(project, dast_site_profile, dast_scanner_profile)
+        ::DastOnDemandScans::CreateService.new(
+          container: project,
+          current_user: current_user,
+          params: {
+            dast_site_profile: dast_site_profile,
+            dast_scanner_profile: dast_scanner_profile
+          }
+        ).execute
       end
     end
   end

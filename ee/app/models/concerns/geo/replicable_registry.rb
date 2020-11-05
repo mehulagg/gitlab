@@ -35,12 +35,13 @@ module Geo::ReplicableRegistry
   included do
     include ::Delay
 
-    scope :never, -> { where(last_synced_at: nil) }
     scope :failed, -> { with_state(:failed) }
-    scope :synced, -> { with_state(:synced) }
+    scope :needs_sync_again, -> { failed.retry_due }
+    scope :never_attempted_sync, -> { pending.where(last_synced_at: nil) }
+    scope :ordered, -> { order(:id) }
     scope :pending, -> { with_state(:pending) }
     scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
-    scope :ordered, -> { order(:id) }
+    scope :synced, -> { with_state(:synced) }
 
     state_machine :state, initial: :pending do
       state :pending, value: STATE_VALUES[:pending]

@@ -18,15 +18,6 @@ module EE
       super.merge(read_epic: %i[epic? epic_note?])
     end
 
-    override :action_name
-    def action_name
-      if approved_action?
-        'approved'
-      else
-        super
-      end
-    end
-
     def epic_note?
       note? && note_target.is_a?(::Epic)
     end

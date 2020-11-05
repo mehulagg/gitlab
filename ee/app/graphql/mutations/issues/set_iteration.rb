@@ -6,7 +6,7 @@ module Mutations
       graphql_name 'IssueSetIteration'
 
       argument :iteration_id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Iteration],
                required: false,
                loads: Types::IterationType,
                description: <<~DESC

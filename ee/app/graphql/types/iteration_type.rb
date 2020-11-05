@@ -3,11 +3,13 @@
 module Types
   class IterationType < BaseObject
     graphql_name 'Iteration'
-    description 'Represents an iteration object.'
+    description 'Represents an iteration object'
 
     present_using IterationPresenter
 
     authorize :read_iteration
+
+    implements ::Types::TimeboxReportInterface
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the iteration'

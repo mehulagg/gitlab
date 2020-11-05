@@ -16,8 +16,9 @@ RSpec.describe GitlabSchema.types['Project'] do
   it 'includes the ee specific fields' do
     expected_fields = %w[
       vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
-      vulnerability_severities_count packages compliance_frameworks
-      security_dashboard_path iterations
+      vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
+      security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
+      code_coverage_summary
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -25,9 +26,8 @@ RSpec.describe GitlabSchema.types['Project'] do
 
   describe 'sast_ci_configuration' do
     include_context 'read ci configuration for sast enabled project'
-    let(:error_message) { "This is an error for YamlProcessor." }
 
-    let_it_be(:query) do
+    let(:query) do
       %(
         query {
             project(fullPath: "#{project.full_path}") {
@@ -90,7 +90,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(secure_analyzers_prefix['label']).to eq('Image prefix')
       expect(secure_analyzers_prefix['defaultValue']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
       expect(secure_analyzers_prefix['value']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['size']).to eq('MEDIUM')
+      expect(secure_analyzers_prefix['size']).to eq('LARGE')
       expect(secure_analyzers_prefix['options']).to be_nil
     end
 
@@ -111,12 +111,70 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(analyzer['enabled']).to eq(true)
     end
 
-    it 'returns an error if there is an exception in YamlProcessor' do
-      allow_next_instance_of(::Security::CiConfiguration::SastParserService) do |service|
-        allow(service).to receive(:configuration).and_raise(::Gitlab::Ci::YamlProcessor::ValidationError.new(error_message))
+    context "with guest user" do
+      before do
+        project.add_guest(user)
       end
 
-      expect(subject["errors"].first["message"]).to eql(error_message)
+      context 'when project is private' do
+        let(:project) { create(:project, :private, :repository) }
+
+        it "returns no configuration" do
+          secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
+          expect(secure_analyzers_prefix).to be_nil
+        end
+      end
+
+      context 'when project is public' do
+        let(:project) { create(:project, :public, :repository) }
+
+        context 'when repository is accessible by everyone' do
+          it "returns the project's sast configuration for global variables" do
+            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
+
+            expect(secure_analyzers_prefix['type']).to eq('string')
+            expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
+          end
+        end
+      end
+    end
+
+    context "with non-member user" do
+      before do
+        project.team.truncate
+      end
+
+      context 'when project is private' do
+        let(:project) { create(:project, :private, :repository) }
+
+        it "returns no configuration" do
+          secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
+          expect(secure_analyzers_prefix).to be_nil
+        end
+      end
+
+      context 'when project is public' do
+        let(:project) { create(:project, :public, :repository) }
+
+        context 'when repository is accessible by everyone' do
+          it "returns the project's sast configuration for global variables" do
+            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
+            expect(secure_analyzers_prefix['type']).to eq('string')
+            expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
+          end
+        end
+
+        context 'when repository is accessible only by team members' do
+          it "returns no configuration" do
+            project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED,
+                                                   builds_access_level: ProjectFeature::DISABLED,
+                                                   repository_access_level: ProjectFeature::PRIVATE)
+
+            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
+            expect(secure_analyzers_prefix).to be_nil
+          end
+        end
+      end
     end
   end
 
@@ -193,5 +251,109 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(vulnerabilities.first['state']).to eq('DETECTED')
       expect(vulnerabilities.first['severity']).to eq('CRITICAL')
     end
+  end
+
+  describe 'cluster_agents' do
+    let_it_be(:cluster_agent) { create(:cluster_agent, project: project, name: 'agent-name') }
+    let_it_be(:query) do
+      %(
+        query {
+          project(fullPath: "#{project.full_path}") {
+            clusterAgents {
+              count
+              nodes {
+                id
+                name
+                createdAt
+                updatedAt
+
+                project {
+                  id
+                }
+              }
+            }
+          }
+        }
+      )
+    end
+
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+
+      project.add_maintainer(user)
+    end
+
+    it 'returns associated cluster agents' do
+      agents = subject.dig('data', 'project', 'clusterAgents', 'nodes')
+
+      expect(agents.count).to be(1)
+      expect(agents.first['id']).to eq(cluster_agent.to_global_id.to_s)
+      expect(agents.first['name']).to eq('agent-name')
+      expect(agents.first['createdAt']).to be_present
+      expect(agents.first['updatedAt']).to be_present
+      expect(agents.first['project']['id']).to eq(project.to_global_id.to_s)
+    end
+
+    it 'returns count of cluster agents' do
+      count = subject.dig('data', 'project', 'clusterAgents', 'count')
+
+      expect(count).to be(project.cluster_agents.size)
+    end
+  end
+
+  describe 'cluster_agent' do
+    let_it_be(:cluster_agent) { create(:cluster_agent, project: project, name: 'agent-name') }
+    let_it_be(:agent_token) { create(:cluster_agent_token, agent: cluster_agent) }
+    let_it_be(:query) do
+      %(
+        query {
+          project(fullPath: "#{project.full_path}") {
+            clusterAgent(name: "#{cluster_agent.name}") {
+              id
+
+              tokens {
+                count
+                nodes {
+                  id
+                }
+              }
+            }
+          }
+        }
+      )
+    end
+
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+
+      project.add_maintainer(user)
+    end
+
+    it 'returns associated cluster agents' do
+      agent = subject.dig('data', 'project', 'clusterAgent')
+      tokens = agent.dig('tokens', 'nodes')
+
+      expect(agent['id']).to eq(cluster_agent.to_global_id.to_s)
+
+      expect(tokens.count).to be(1)
+      expect(tokens.first['id']).to eq(agent_token.to_global_id.to_s)
+    end
+
+    it 'returns count of agent tokens' do
+      agent = subject.dig('data', 'project', 'clusterAgent')
+      count = agent.dig('tokens', 'count')
+
+      expect(cluster_agent.agent_tokens.size).to be(count)
+    end
+  end
+
+  describe 'code coverage summary field' do
+    subject { described_class.fields['codeCoverageSummary'] }
+
+    it { is_expected.to have_graphql_type(Types::Ci::CodeCoverageSummaryType) }
   end
 end

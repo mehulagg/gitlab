@@ -31,8 +31,8 @@ describe('GeoSettingsApp', () => {
   });
 
   const findGeoSettingsContainer = () => wrapper.find('[data-testid="geoSettingsContainer"]');
-  const containsGeoSettingsForm = () => wrapper.contains(GeoSettingsForm);
-  const containsGlLoadingIcon = () => wrapper.contains(GlLoadingIcon);
+  const containsGeoSettingsForm = () => wrapper.find(GeoSettingsForm).exists();
+  const containsGlLoadingIcon = () => wrapper.find(GlLoadingIcon).exists();
 
   describe('renders', () => {
     beforeEach(() => {

@@ -7,7 +7,7 @@ module Mutations
         graphql_name 'BoardListUpdateLimitMetrics'
 
         argument :list_id,
-                 GraphQL::ID_TYPE,
+                 ::Types::GlobalIDType[::List],
                  required: true,
                  description: 'The global ID of the list.'
 

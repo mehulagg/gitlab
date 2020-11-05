@@ -5,7 +5,7 @@ import App from './components/app.vue';
 import Breadcrumbs from './components/breadcrumbs.vue';
 import LastCommit from './components/last_commit.vue';
 import TreeActionLink from './components/tree_action_link.vue';
-import WebIdeLink from './components/web_ide_link.vue';
+import initWebIdeLink from '~/pages/projects/shared/web_ide_link';
 import DirectoryDownloadLinks from './components/directory_download_links.vue';
 import apolloProvider from './graphql';
 import { setTitle } from './utils/title';
@@ -16,15 +16,7 @@ import { __ } from '../locale';
 export default function setupVueRepositoryList() {
   const el = document.getElementById('js-tree-list');
   const { dataset } = el;
-  const {
-    canPushCode,
-    projectPath,
-    projectShortPath,
-    forkPath,
-    ref,
-    escapedRef,
-    fullName,
-  } = dataset;
+  const { projectPath, projectShortPath, ref, escapedRef, fullName } = dataset;
   const router = createRouter(projectPath, escapedRef);
 
   apolloProvider.clients.defaultClient.cache.writeData({
@@ -36,6 +28,22 @@ export default function setupVueRepositoryList() {
       commits: [],
     },
   });
+
+  const initLastCommitApp = () =>
+    new Vue({
+      el: document.getElementById('js-last-commit'),
+      router,
+      apolloProvider,
+      render(h) {
+        return h(LastCommit, {
+          props: {
+            currentPath: this.$route.params.path,
+          },
+        });
+      },
+    });
+
+  initLastCommitApp();
 
   router.afterEach(({ params: { path } }) => {
     setTitle(path, ref, fullName);
@@ -85,20 +93,6 @@ export default function setupVueRepositoryList() {
     });
   }
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: document.getElementById('js-last-commit'),
-    router,
-    apolloProvider,
-    render(h) {
-      return h(LastCommit, {
-        props: {
-          currentPath: this.$route.params.path,
-        },
-      });
-    },
-  });
-
   const treeHistoryLinkEl = document.getElementById('js-tree-history-link');
   const { historyLink } = treeHistoryLinkEl.dataset;
 
@@ -118,25 +112,7 @@ export default function setupVueRepositoryList() {
     },
   });
 
-  const webIdeLinkEl = document.getElementById('js-tree-web-ide-link');
-
-  if (webIdeLinkEl) {
-    // eslint-disable-next-line no-new
-    new Vue({
-      el: webIdeLinkEl,
-      router,
-      render(h) {
-        return h(WebIdeLink, {
-          props: {
-            projectPath,
-            refSha: ref,
-            forkPath,
-            canPushCode: parseBoolean(canPushCode),
-          },
-        });
-      },
-    });
-  }
+  initWebIdeLink({ el: document.getElementById('js-tree-web-ide-link'), router });
 
   const directoryDownloadLinks = document.getElementById('js-directory-downloads');
 

@@ -69,6 +69,35 @@ RSpec.describe ProjectCiCdSetting do
     end
   end
 
+  describe '#auto_rollback_enabled?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:project) { create(:project) }
+
+    where(:license_feature, :feature_flag, :actual_setting) do
+      true  | true  | true
+      false | true  | true
+      true  | false | true
+      false | false | true
+      true  | true  | false
+      false | true  | false
+      true  | false | false
+      false | false | false
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(auto_rollback: license_feature)
+        stub_feature_flags(cd_auto_rollback: feature_flag)
+        project.auto_rollback_enabled = actual_setting
+      end
+
+      it 'is only enabled if set and both the license and the feature flag allows' do
+        expect(project.auto_rollback_enabled?).to be(actual_setting && license_feature && feature_flag)
+      end
+    end
+  end
+
   describe '#merge_pipelines_were_disabled?' do
     subject { project.merge_pipelines_were_disabled? }
 

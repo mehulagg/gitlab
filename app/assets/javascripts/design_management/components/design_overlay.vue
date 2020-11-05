@@ -237,7 +237,12 @@ export default {
       });
     },
     isNoteInactive(note) {
-      return this.activeDiscussion.id && this.activeDiscussion.id !== note.id;
+      const discussionNotes = note.discussion.notes.nodes || [];
+
+      return (
+        this.activeDiscussion.id &&
+        !discussionNotes.some(({ id }) => id === this.activeDiscussion.id)
+      );
     },
     designPinClass(note) {
       return { inactive: this.isNoteInactive(note), resolved: note.resolved };
@@ -261,7 +266,7 @@ export default {
       type="button"
       role="button"
       :aria-label="$options.i18n.newCommentButtonLabel"
-      class="gl-absolute gl-w-full gl-h-full gl-p-0 gl-top-0 gl-left-0 gl-outline-0! btn-transparent design-detail-overlay-add-comment"
+      class="gl-absolute gl-w-full gl-h-full gl-p-0 gl-top-0 gl-left-0 gl-outline-0! btn-transparent gl-hover-cursor-crosshair"
       data-qa-selector="design_image_button"
       @mouseup="onAddCommentMouseup"
     ></button>
@@ -271,7 +276,6 @@ export default {
       v-if="resolvedDiscussionsExpanded || !note.resolved"
       :key="note.id"
       :label="note.index"
-      :repositioning="isMovingNote(note.id)"
       :position="
         isMovingNote(note.id) && movingNoteNewPosition
           ? getNotePositionStyle(movingNoteNewPosition)
@@ -285,7 +289,6 @@ export default {
     <design-note-pin
       v-if="currentCommentForm"
       :position="currentCommentPositionStyle"
-      :repositioning="isMovingCurrentComment"
       @mousedown.stop="onNoteMousedown"
       @mouseup.stop="onNoteMouseup"
     />

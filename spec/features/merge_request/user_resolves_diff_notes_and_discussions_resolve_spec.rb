@@ -16,7 +16,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
   end
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
+    stub_feature_flags(remove_resolve_note: false)
   end
 
   context 'no threads' do

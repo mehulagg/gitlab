@@ -16,6 +16,7 @@ module EE
 
           params :optional_issues_params_ee do
             optional :weight, types: [Integer, String], integer_none_any: true, desc: 'The weight of the issue'
+            optional :epic_id, types: [Integer, String], integer_none_any: true, desc: 'The ID of an epic associated with the issues'
           end
         end
 

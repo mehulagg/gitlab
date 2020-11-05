@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Vue
 
 To get started with Vue, read through [their documentation](https://vuejs.org/v2/guide/).
@@ -56,7 +62,7 @@ Be sure to read about [page-specific JavaScript](./performance.md#page-specific-
 While mounting a Vue application, you might need to provide data from Rails to JavaScript.
 To do that, you can use the `data` attributes in the HTML element and query them while mounting the application.
 
-_Note:_ You should only do this while initializing the application, because the mounted element will be replaced with Vue-generated DOM.
+You should only do this while initializing the application, because the mounted element will be replaced with Vue-generated DOM.
 
 The advantage of providing data from the DOM to the Vue instance through `props` in the `render` function
 instead of querying the DOM inside the main Vue component is avoiding the need to create a fixture or an HTML element in the unit test,
@@ -182,9 +188,12 @@ Check this [page](vuex.md) for more details.
 ## Style guide
 
 Please refer to the Vue section of our [style guide](style/vue.md)
-for best practices while writing your Vue components and templates.
+for best practices while writing and testing your Vue components and templates.
 
 ## Testing Vue Components
+
+Please refer to the [Vue testing style guide](style/vue.md#vue-testing)
+for guidelines and best practices for testing your Vue components.
 
 Each Vue component has a unique output. This output is always present in the render function.
 
@@ -226,7 +235,7 @@ describe('~/todos/app.vue', () => {
     mock.restore();
   });
 
-  // NOTE: It is very helpful to separate setting up the component from
+  // It is very helpful to separate setting up the component from
   // its collaborators (i.e. Vuex, axios, etc.)
   const createWrapper = (props = {}) => {
     wrapper = shallowMount(App, {
@@ -236,7 +245,7 @@ describe('~/todos/app.vue', () => {
       },
     });
   };
-  // NOTE: Helper methods greatly help test maintainability and readability.
+  // Helper methods greatly help test maintainability and readability.
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findAddButton = () => wrapper.find('[data-testid="add-button"]');
   const findTextInput = () => wrapper.find('[data-testid="text-input"]');

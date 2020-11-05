@@ -177,5 +177,21 @@
       "url": "https://github.com/ffi/ffi/releases/tag/1.9.24",
       "tool": "bundler_audit"
     }
-  ]
+  ],
+  "scan": {
+    "scanner": {
+      "id": "gemnasium-maven",
+      "name": "gemnasium-maven",
+      "url": "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-maven",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.18.0"
+    },
+    "type": "dependency_scanning",
+    "start_time": "placeholder-value",
+    "end_time": "placeholder-value",
+    "status": "success"
+  }
+
 }

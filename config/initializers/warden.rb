@@ -19,7 +19,7 @@ Rails.application.configure do |config|
 
   Warden::Manager.after_authentication(scope: :user) do |user, auth, opts|
     ActiveSession.cleanup(user)
-    Gitlab::AnonymousSession.new(auth.request.remote_ip, session_id: auth.request.session.id).cleanup_session_per_ip_entries
+    Gitlab::AnonymousSession.new(auth.request.remote_ip).cleanup_session_per_ip_count
   end
 
   Warden::Manager.after_set_user(scope: :user, only: :fetch) do |user, auth, opts|
@@ -40,7 +40,8 @@ Rails.application.configure do |config|
     activity = Gitlab::Auth::Activity.new(opts)
     tracker = Gitlab::Auth::BlockedUserTracker.new(user, auth)
 
-    ActiveSession.destroy(user, auth.request.session.id)
+    # TODO: switch to `auth.request.session.id.private_id` in 13.7
+    ActiveSession.destroy_with_rack_session_id(user, auth.request.session.id)
     activity.user_session_destroyed!
 
     ##

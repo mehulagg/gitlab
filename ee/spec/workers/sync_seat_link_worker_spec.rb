@@ -11,18 +11,18 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
         # Setting the date as 12th March 2020 12:00 UTC for tests and creating new license
         create_current_license(starts_at: '2020-02-12'.to_date)
 
-        HistoricalData.create!(date: '2020-02-11'.to_date, active_user_count: 100)
-        HistoricalData.create!(date: '2020-02-12'.to_date, active_user_count: 10)
-        HistoricalData.create!(date: '2020-02-13'.to_date, active_user_count: 15)
+        HistoricalData.create!(recorded_at: '2020-02-11'.to_date, active_user_count: 100)
+        HistoricalData.create!(recorded_at: '2020-02-12'.to_date, active_user_count: 10)
+        HistoricalData.create!(recorded_at: '2020-02-13'.to_date, active_user_count: 15)
 
-        HistoricalData.create!(date: '2020-03-11'.to_date, active_user_count: 10)
-        HistoricalData.create!(date: '2020-03-12'.to_date, active_user_count: 20)
-        HistoricalData.create!(date: '2020-03-15'.to_date, active_user_count: 25)
+        HistoricalData.create!(recorded_at: '2020-03-11'.to_date, active_user_count: 10)
+        HistoricalData.create!(recorded_at: '2020-03-12'.to_date, active_user_count: 20)
+        HistoricalData.create!(recorded_at: '2020-03-15'.to_date, active_user_count: 25)
         allow(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
       end
 
       it 'executes the SyncSeatLinkRequestWorker with expected params' do
-        Timecop.travel(utc_time) do
+        travel_to(utc_time) do
           subject.perform
 
           expect(SyncSeatLinkRequestWorker).to have_received(:perform_async)
@@ -41,7 +41,7 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
         end
 
         it 'executes the SyncSeatLinkRequestWorker with expected params' do
-          Timecop.travel(utc_time) do
+          travel_to(utc_time) do
             expect(Date.current.to_s).to eql('2020-03-13')
 
             subject.perform
@@ -62,7 +62,7 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
           end
 
           it 'executes the SyncSeatLinkRequestWorker with expected params' do
-            Timecop.travel(utc_time.beginning_of_day) do
+            travel_to(utc_time.beginning_of_day) do
               expect(Date.current.to_s).to eql('2020-03-11')
 
               subject.perform

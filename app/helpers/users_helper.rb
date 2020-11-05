@@ -84,29 +84,40 @@ module UsersHelper
 
   def user_badges_in_admin_section(user)
     [].tap do |badges|
-      badges << { text: s_('AdminUsers|Blocked'), variant: 'danger' } if user.blocked?
+      badges << blocked_user_badge(user) if user.blocked?
       badges << { text: s_('AdminUsers|Admin'), variant: 'success' } if user.admin?
       badges << { text: s_('AdminUsers|External'), variant: 'secondary' } if user.external?
       badges << { text: s_("AdminUsers|It's you!"), variant: nil } if current_user == user
     end
   end
 
-  def work_information(user)
+  def work_information(user, with_schema_markup: false)
     return unless user
 
     organization = user.organization
     job_title = user.job_title
 
     if organization.present? && job_title.present?
-      s_('Profile|%{job_title} at %{organization}') % { job_title: job_title, organization: organization }
+      render_job_title_and_organization(job_title, organization, with_schema_markup: with_schema_markup)
     elsif job_title.present?
-      job_title
+      render_job_title(job_title, with_schema_markup: with_schema_markup)
     elsif organization.present?
-      organization
+      render_organization(organization, with_schema_markup: with_schema_markup)
     end
   end
 
+  def can_force_email_confirmation?(user)
+    !user.confirmed?
+  end
+
   private
+
+  def blocked_user_badge(user)
+    pending_approval_badge = { text: s_('AdminUsers|Pending approval'), variant: 'info' }
+    return pending_approval_badge if user.blocked_pending_approval?
+
+    { text: s_('AdminUsers|Blocked'), variant: 'danger' }
+  end
 
   def get_profile_tabs
     tabs = []
@@ -139,6 +150,35 @@ module UsersHelper
     items << :start_trial if trials_allowed?(current_user)
 
     items
+  end
+
+  def render_job_title(job_title, with_schema_markup: false)
+    if with_schema_markup
+      content_tag :span, itemprop: 'jobTitle' do
+        job_title
+      end
+    else
+      job_title
+    end
+  end
+
+  def render_organization(organization, with_schema_markup: false)
+    if with_schema_markup
+      content_tag :span, itemprop: 'worksFor' do
+        organization
+      end
+    else
+      organization
+    end
+  end
+
+  def render_job_title_and_organization(job_title, organization, with_schema_markup: false)
+    if with_schema_markup
+      job_title = '<span itemprop="jobTitle">'.html_safe + job_title + "</span>".html_safe
+      organization = '<span itemprop="worksFor">'.html_safe + organization + "</span>".html_safe
+    end
+
+    html_escape(s_('Profile|%{job_title} at %{organization}')) % { job_title: job_title, organization: organization }
   end
 end
 

@@ -161,7 +161,13 @@ export default {
     </header>
 
     <gl-tabs>
-      <gl-tab :title="s__('ThreatMonitoring|Overview')">
+      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
+        <network-policy-list
+          :documentation-path="documentationPath"
+          :new-policy-path="newPolicyPath"
+        />
+      </gl-tab>
+      <gl-tab :title="s__('ThreatMonitoring|Statistics')">
         <threat-monitoring-filters />
 
         <threat-monitoring-section
@@ -194,12 +200,6 @@ export default {
           :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
           :documentation-path="documentationPath"
           documentation-anchor="container-network-policy"
-        />
-      </gl-tab>
-      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
-        <network-policy-list
-          :documentation-path="documentationPath"
-          :new-policy-path="newPolicyPath"
         />
       </gl-tab>
     </gl-tabs>

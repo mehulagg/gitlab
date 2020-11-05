@@ -1,12 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
-import {
-  GlLoadingIcon,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlAlert,
-  GlIcon,
-} from '@gitlab/ui';
+import { GlLoadingIcon, GlDropdown, GlDropdownItem, GlAlert, GlIcon } from '@gitlab/ui';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 describe('MetricChart component', () => {
@@ -44,8 +38,8 @@ describe('MetricChart component', () => {
 
   const findLoadingIndicator = () => wrapper.find(GlLoadingIcon);
   const findInfoMessage = () => wrapper.find(GlAlert);
-  const findMetricDropdown = () => wrapper.find(GlDeprecatedDropdown);
-  const findMetricDropdownItems = () => findMetricDropdown().findAll(GlDeprecatedDropdownItem);
+  const findMetricDropdown = () => wrapper.find(GlDropdown);
+  const findMetricDropdownItems = () => findMetricDropdown().findAll(GlDropdownItem);
   const findChartSlot = () => wrapper.find({ ref: 'chart' });
 
   describe('template', () => {

@@ -13,6 +13,7 @@ RSpec.describe CreateMissingVulnerabilitiesIssueLinks, :migration do
   let(:issues) { table(:issues) }
   let(:issue1) { issues.create!(id: 123, project_id: project.id) }
   let(:issue2) { issues.create!(id: 124, project_id: project.id) }
+  let(:issue3) { issues.create!(id: 125, project_id: project.id) }
   let(:vulnerabilities) { table(:vulnerabilities) }
   let(:vulnerabilities_findings) { table(:vulnerability_occurrences) }
   let(:vulnerability_feedback) { table(:vulnerability_feedback) }
@@ -72,6 +73,20 @@ RSpec.describe CreateMissingVulnerabilitiesIssueLinks, :migration do
   context 'when an Vulnerabilities::IssueLink already exists' do
     before do
       vulnerability_issue_links.create!(vulnerability_id: vulnerability.id, issue_id: issue1.id)
+    end
+
+    it 'creates no duplicates' do
+      expect(vulnerability_issue_links.count).to eq(1)
+
+      migrate!
+
+      expect(vulnerability_issue_links.count).to eq(1)
+    end
+  end
+
+  context 'when an Vulnerabilities::IssueLink of type created already exists' do
+    before do
+      vulnerability_issue_links.create!(vulnerability_id: vulnerability.id, issue_id: issue3.id, link_type: 2)
     end
 
     it 'creates no duplicates' do

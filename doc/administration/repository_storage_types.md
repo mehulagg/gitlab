@@ -83,7 +83,7 @@ The "Gitaly relative path" is shown there, for example:
 This is the path under `/var/opt/gitlab/git-data/repositories/` on a
 default Omnibus installation.
 
-In a [Rails console](troubleshooting/debug.md#starting-a-rails-console-session),
+In a [Rails console](operations/rails_console.md#starting-a-rails-console-session),
 get this information using either the numeric project ID or the full path:
 
 ```ruby
@@ -95,7 +95,7 @@ Project.find_by_full_path('group/project').disk_path
 
 To translate from a hashed storage path to a project name:
 
-1. Start a [Rails console](troubleshooting/debug.md#starting-a-rails-console-session).
+1. Start a [Rails console](operations/rails_console.md#starting-a-rails-console-session).
 1. Run the following:
 
 ```ruby
@@ -117,7 +117,7 @@ The output includes the project ID and the project name:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/1606) in GitLab 12.1.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Do not run `git prune` or `git gc` in pool repositories! This can
 cause data loss in "real" repositories that depend on the pool in
 question.

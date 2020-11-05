@@ -15,16 +15,12 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    groupId: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
     list: {
       type: Object,
       required: true,
     },
   },
+  inject: ['groupId'],
   data() {
     return {
       loading: true,

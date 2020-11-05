@@ -177,16 +177,30 @@ module Issuable
       assignees.count > 1
     end
 
-    def supports_weight?
+    def allows_reviewers?
       false
     end
 
     def supports_time_tracking?
-      is_a?(TimeTrackable) && !incident?
+      is_a?(TimeTrackable)
+    end
+
+    def supports_severity?
+      incident?
     end
 
     def incident?
       is_a?(Issue) && super
+    end
+
+    def supports_issue_type?
+      is_a?(Issue)
+    end
+
+    def severity
+      return IssuableSeverity::DEFAULT unless incident?
+
+      issuable_severity&.severity || IssuableSeverity::DEFAULT
     end
 
     private
@@ -385,8 +399,12 @@ module Issuable
     Date.today == created_at.to_date
   end
 
+  def created_hours_ago
+    (Time.now.utc.to_i - created_at.utc.to_i) / 3600
+  end
+
   def new?
-    today? && created_at == updated_at
+    created_hours_ago < 24
   end
 
   def open?

@@ -21,7 +21,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::ContainerScanning do
     it "parses all identifiers and findings for unapproved vulnerabilities" do
       expect(report.findings.length).to eq(8)
       expect(report.identifiers.length).to eq(8)
-      expect(report.scanners.length).to eq(1)
+      expect(report.scanners.length).to eq(2)
     end
 
     it 'generates expected location' do

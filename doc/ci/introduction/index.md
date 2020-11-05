@@ -12,10 +12,18 @@ In this document, we'll present an overview of the concepts of Continuous Integr
 Continuous Delivery, and Continuous Deployment, as well as an introduction to
 GitLab CI/CD.
 
-NOTE: **Note:**
+TIP: **Tip:**
 Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
 Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
+
+> For some additional information about GitLab CI/CD:
+>
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch the [CI/CD Ease of configuration](https://www.youtube.com/embed/opdLqwz6tcE) video.
+> - Watch the [Making the case for CI/CD in your organization](https://about.gitlab.com/compare/github-actions-alternative/)
+>   webcast to learn the benefits of CI/CD and how to measure the results of CI/CD automation.
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Learn how [Verizon reduced rebuilds](https://about.gitlab.com/blog/2019/02/14/verizon-customer-story/)
+>   from 30 days to under 8 hours with GitLab.
 
 ## Introduction to CI/CD methodologies
 
@@ -154,7 +162,7 @@ commits to a feature branch in a remote repository in GitLab,
 the CI/CD pipeline set for your project is triggered. By doing
 so, GitLab CI/CD:
 
-- Runs automated scripts (sequential or parallel) to:
+- Runs automated scripts (sequentially or in parallel) to:
   - Build and test your app.
   - Preview the changes per merge request with Review Apps, as you
     would see in your `localhost`.
@@ -237,3 +245,6 @@ existing one) for any application.
 
 For a deep view of GitLab's CI/CD configuration options, check the
 [`.gitlab-ci.yml` full reference](../yaml/README.md).
+
+For help making your pipelines faster and more efficient, see the
+[pipeline efficiency documentation](../pipelines/pipeline_efficiency.md).

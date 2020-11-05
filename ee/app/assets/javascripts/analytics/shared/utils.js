@@ -1,6 +1,6 @@
 import dateFormat from 'dateformat';
-import { dateFormats } from './constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { dateFormats } from './constants';
 
 export const toYmd = date => dateFormat(date, dateFormats.isoDate);
 
@@ -9,6 +9,17 @@ export default {
 };
 
 export const formattedDate = d => dateFormat(d, dateFormats.defaultDate);
+
+/**
+ * Creates a value stream object from a dataset. Returns null if no valueStreamId is present.
+ *
+ * @param {Object} dataset - The raw value stream object
+ * @returns {Object} - A value stream object
+ */
+export const buildValueStreamFromJson = valueStream => {
+  const { id, name, is_custom: isCustom } = valueStream ? JSON.parse(valueStream) : {};
+  return id ? { id, name, isCustom } : null;
+};
 
 /**
  * Creates a group object from a dataset. Returns null if no groupId is present.
@@ -39,11 +50,11 @@ export const buildGroupFromDataset = dataset => {
  * @returns {Object} - A project object
  */
 export const buildProjectFromDataset = dataset => {
-  const { projectId, projectName, projectPathWithNamespace, projectAvatarUrl } = dataset;
+  const { projectGid, projectName, projectPathWithNamespace, projectAvatarUrl } = dataset;
 
-  if (projectId) {
+  if (projectGid) {
     return {
-      id: Number(projectId),
+      id: projectGid,
       name: projectName,
       path_with_namespace: projectPathWithNamespace,
       avatar_url: projectAvatarUrl,
@@ -71,6 +82,7 @@ const buildProjectsFromJSON = (projects = []) => {
  * @returns {Object} - The initial data to load the app with
  */
 export const buildCycleAnalyticsInitialData = ({
+  valueStream = null,
   groupId = null,
   createdBefore = null,
   createdAfter = null,
@@ -79,13 +91,10 @@ export const buildCycleAnalyticsInitialData = ({
   groupFullPath = null,
   groupParentId = null,
   groupAvatarUrl = null,
-  author = null,
-  milestone = null,
-  labels = null,
-  assignees = null,
   labelsPath = '',
   milestonesPath = '',
 } = {}) => ({
+  selectedValueStream: buildValueStreamFromJson(valueStream),
   group: groupId
     ? convertObjectPropsToCamelCase(
         buildGroupFromDataset({
@@ -102,10 +111,6 @@ export const buildCycleAnalyticsInitialData = ({
   selectedProjects: projects
     ? buildProjectsFromJSON(projects).map(convertObjectPropsToCamelCase)
     : [],
-  selectedAuthor: author,
-  selectedMilestone: milestone,
-  selectedLabels: labels ? JSON.parse(labels) : [],
-  selectedAssignees: assignees ? JSON.parse(assignees) : [],
   labelsPath,
   milestonesPath,
 });

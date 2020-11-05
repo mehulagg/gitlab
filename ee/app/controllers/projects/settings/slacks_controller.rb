@@ -11,6 +11,8 @@ module Projects
 
       layout 'project_settings'
 
+      feature_category :integrations
+
       def slack_auth
         result = Projects::SlackApplicationInstallService.new(project, current_user, params).execute
 

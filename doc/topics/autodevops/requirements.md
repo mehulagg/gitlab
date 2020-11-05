@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Requirements for Auto DevOps
 
 You can set up Auto DevOps for [Kubernetes](#auto-devops-requirements-for-kubernetes)
@@ -48,21 +54,21 @@ To make full use of Auto DevOps with Kubernetes, you need:
 
 - **GitLab Runner** (for all stages)
 
-  Your Runner must be configured to run Docker, usually with either the
+  Your runner must be configured to run Docker, usually with either the
   [Docker](https://docs.gitlab.com/runner/executors/docker.html)
   or [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html) executors, with
   [privileged mode enabled](https://docs.gitlab.com/runner/executors/docker.html#use-docker-in-docker-with-privileged-mode).
-  The Runners don't need to be installed in the Kubernetes cluster, but the
+  The runners don't need to be installed in the Kubernetes cluster, but the
   Kubernetes executor is easy to use and automatically autoscales.
-  You can configure Docker-based Runners to autoscale as well, using
+  You can configure Docker-based runners to autoscale as well, using
   [Docker Machine](https://docs.gitlab.com/runner/install/autoscaling.html).
 
   If you've configured GitLab's Kubernetes integration in the first step, you
   can deploy it to your cluster by installing the
   [GitLab-managed app for GitLab Runner](../../user/clusters/applications.md#gitlab-runner).
 
-  Runners should be registered as [shared Runners](../../ci/runners/README.md#shared-runners)
-  for the entire GitLab instance, or [specific Runners](../../ci/runners/README.md#specific-runners)
+  Runners should be registered as [shared runners](../../ci/runners/README.md#shared-runners)
+  for the entire GitLab instance, or [specific runners](../../ci/runners/README.md#specific-runners)
   that are assigned to specific projects (the default if you've installed the
   GitLab Runner managed application).
 
@@ -120,11 +126,9 @@ When you trigger a pipeline, if you have Auto DevOps enabled and if you have cor
 [entered AWS credentials as environment variables](../../ci/cloud_deployment/index.md#deploy-your-application-to-the-aws-elastic-container-service-ecs),
 your application will be deployed to AWS ECS.
 
-NOTE: **Note:**
 [GitLab Managed Apps](../../user/clusters/applications.md) are not available when deploying to AWS ECS.
 You must manually configure your application (such as Ingress or Help) on AWS ECS.
 
-NOTE: **Note:**
 If you have both a valid `AUTO_DEVOPS_PLATFORM_TARGET` variable and a Kubernetes cluster tied to your project,
 only the deployment to Kubernetes will run.
 

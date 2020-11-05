@@ -14,16 +14,6 @@ RSpec.describe SystemNoteService do
   let_it_be(:issue)    { noteable }
   let_it_be(:epic)     { create(:epic, group: group) }
 
-  describe '.change_weight_note' do
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_weight_note)
-      end
-
-      described_class.change_weight_note(noteable, project, author)
-    end
-  end
-
   describe '.change_health_status_note' do
     it 'calls IssuableService' do
       expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
@@ -169,16 +159,6 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.publish_issue_to_status_page(noteable, project, author)
-    end
-  end
-
-  describe '.change_iteration' do
-    it 'calls IssuablesService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_iteration)
-      end
-
-      described_class.change_iteration(noteable, author, nil)
     end
   end
 end

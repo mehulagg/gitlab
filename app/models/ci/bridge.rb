@@ -27,12 +27,16 @@ module Ci
     # rubocop:enable Cop/ActiveRecordSerialize
 
     state_machine :status do
-      after_transition created: :pending do |bridge|
+      after_transition [:created, :manual] => :pending do |bridge|
         next unless bridge.downstream_project
 
         bridge.run_after_commit do
           bridge.schedule_downstream_pipeline!
         end
+      end
+
+      event :pending do
+        transition all => :pending
       end
 
       event :manual do
@@ -42,10 +46,22 @@ module Ci
       event :scheduled do
         transition all => :scheduled
       end
+
+      event :actionize do
+        transition created: :manual
+      end
     end
 
     def self.retry(bridge, current_user)
       raise NotImplementedError
+    end
+
+    def self.with_preloads
+      preload(
+        :metadata,
+        downstream_pipeline: [project: [:route, { namespace: :route }]],
+        project: [:namespace]
+      )
     end
 
     def schedule_downstream_pipeline!
@@ -114,9 +130,27 @@ module Ci
       false
     end
 
-    def action?
-      false
+    def playable?
+      return false unless ::Gitlab::Ci::Features.manual_bridges_enabled?(project)
+
+      action? && !archived? && manual?
     end
+
+    def action?
+      return false unless ::Gitlab::Ci::Features.manual_bridges_enabled?(project)
+
+      %w[manual].include?(self.when)
+    end
+
+    # rubocop: disable CodeReuse/ServiceClass
+    # We don't need it but we are taking `job_variables_attributes` parameter
+    # to make it consistent with `Ci::Build#play` method.
+    def play(current_user, job_variables_attributes = nil)
+      Ci::PlayBridgeService
+        .new(project, current_user)
+        .execute(self)
+    end
+    # rubocop: enable CodeReuse/ServiceClass
 
     def artifacts?
       false
@@ -171,6 +205,10 @@ module Ci
 
     def dependency_variables
       []
+    end
+
+    def target_revision_ref
+      downstream_pipeline_params.dig(:target_revision, :ref)
     end
 
     private

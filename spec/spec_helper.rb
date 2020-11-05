@@ -1,7 +1,18 @@
 # frozen_string_literal: true
 
+#  $" is $LOADED_FEATURES, but RuboCop didn't like it
+if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
+  warn 'Detected fast_spec_helper is loaded first than spec_helper.'
+  warn 'If running test files using both spec_helper and fast_spec_helper,'
+  warn 'make sure test file with spec_helper is loaded first.'
+  abort 'Aborting...'
+end
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
+
+require './spec/crystalball_env'
+CrystalballEnv.start!
 
 ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
@@ -47,10 +58,10 @@ require_relative('../ee/spec/spec_helper') if Gitlab.ee?
 require Rails.root.join("spec/support/helpers/git_helpers.rb")
 
 # Then the rest
-Dir[Rails.root.join("spec/support/helpers/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/shared_examples/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+Dir[Rails.root.join("spec/support/helpers/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
 quality_level = Quality::TestLevel.new
 
@@ -66,7 +77,11 @@ RSpec.configure do |config|
   config.display_try_failure_messages = true
 
   config.infer_spec_type_from_file_location!
-  config.full_backtrace = !!ENV['CI']
+
+  # Add :full_backtrace tag to an example if full_backtrace output is desired
+  config.before(:each, full_backtrace: true) do |example|
+    config.full_backtrace = true
+  end
 
   unless ENV['CI']
     # Re-run failures locally with `--only-failures`
@@ -100,6 +115,10 @@ RSpec.configure do |config|
     metadata[:enable_admin_mode] = true if location =~ %r{(ee)?/spec/controllers/admin/}
   end
 
+  config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_docs\.rb\z}) do |metadata|
+    metadata[:type] = :feature
+  end
+
   config.include LicenseHelpers
   config.include ActiveJob::TestHelper
   config.include ActiveSupport::Testing::TimeHelpers
@@ -111,6 +130,8 @@ RSpec.configure do |config|
   config.include StubExperiments
   config.include StubGitlabCalls
   config.include StubGitlabData
+  config.include SnowplowHelpers
+  config.include NextFoundInstanceOf
   config.include NextInstanceOf
   config.include TestEnv
   config.include Devise::Test::ControllerHelpers, type: :controller
@@ -118,6 +139,7 @@ RSpec.configure do |config|
   config.include LoginHelpers, type: :feature
   config.include SearchHelpers, type: :feature
   config.include WaitHelpers, type: :feature
+  config.include WaitForRequests, type: :feature
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
   config.include Gitlab::Routing, type: :routing
@@ -127,7 +149,6 @@ RSpec.configure do |config|
   config.include InputHelper, :js
   config.include SelectionHelper, :js
   config.include InspectRequests, :js
-  config.include WaitForRequests, :js
   config.include LiveDebugger, :js
   config.include MigrationsHelpers, :migration
   config.include RedisHelpers
@@ -198,6 +219,14 @@ RSpec.configure do |config|
       # unified diff lines works as expected
       stub_feature_flags(unified_diff_lines: false)
 
+      # Merge request widget GraphQL requests are disabled in the tests
+      # for now whilst we migrate as much as we can over the GraphQL
+      stub_feature_flags(merge_request_widget_graphql: false)
+
+      # Using FortiAuthenticator as OTP provider is disabled by default in
+      # tests, until we introduce it in user settings
+      stub_feature_flags(forti_authenticator: false)
+
       enable_rugged = example.metadata[:enable_rugged].present?
 
       # Disable Rugged features by default
@@ -215,13 +244,19 @@ RSpec.configure do |config|
     end
 
     # Enable Marginalia feature for all specs in the test suite.
-    allow(Gitlab::Marginalia).to receive(:cached_feature_enabled?).and_return(true)
+    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:
     #
     # expect(Gitlab::Git::KeepAround).to receive(:execute).and_call_original
     allow(Gitlab::Git::KeepAround).to receive(:execute)
+
+    # Stub these calls due to being expensive operations
+    # It can be reenabled for specific tests via:
+    #
+    # expect(Gitlab::JobWaiter).to receive(:wait).and_call_original
+    allow_any_instance_of(Gitlab::JobWaiter).to receive(:wait)
 
     Gitlab::ProcessMemoryCache.cache_backend.clear
 

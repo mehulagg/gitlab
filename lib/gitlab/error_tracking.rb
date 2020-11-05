@@ -26,6 +26,8 @@ module Gitlab
           # Sanitize fields based on those sanitized from Rails.
           config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
           config.processors << ::Gitlab::ErrorTracking::Processor::SidekiqProcessor
+          config.processors << ::Gitlab::ErrorTracking::Processor::GrpcErrorProcessor
+
           # Sanitize authentication headers
           config.sanitize_http_headers = %w[Authorization Private-Token]
           config.tags = extra_tags_from_env.merge(program: Gitlab.process_name)
@@ -121,6 +123,7 @@ module Gitlab
         end
 
         extra = sanitize_request_parameters(extra)
+        inject_sql_query_into_extra(exception, extra)
 
         if sentry && Raven.configuration.server
           Raven.capture_exception(exception, tags: default_tags, extra: extra)
@@ -145,6 +148,12 @@ module Gitlab
       def sanitize_request_parameters(parameters)
         filter = ActiveSupport::ParameterFilter.new(::Rails.application.config.filter_parameters)
         filter.filter(parameters)
+      end
+
+      def inject_sql_query_into_extra(exception, extra)
+        return unless exception.is_a?(ActiveRecord::StatementInvalid)
+
+        extra[:sql] = PgQuery.normalize(exception.sql.to_s)
       end
 
       def sentry_dsn

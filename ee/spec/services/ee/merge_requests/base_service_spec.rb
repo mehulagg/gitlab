@@ -18,58 +18,6 @@ RSpec.describe MergeRequests::BaseService do
 
   subject { MergeRequests::CreateService.new(project, project.owner, params) }
 
-  describe '#execute_hooks' do
-    shared_examples 'enqueues Jira sync worker' do
-      it do
-        Sidekiq::Testing.fake! do
-          expect { subject.execute }.to change(JiraConnect::SyncMergeRequestWorker.jobs, :size).by(1)
-        end
-      end
-    end
-
-    shared_examples 'does not enqueue Jira sync worker' do
-      it do
-        Sidekiq::Testing.fake! do
-          expect { subject.execute }.not_to change(JiraConnect::SyncMergeRequestWorker.jobs, :size)
-        end
-      end
-    end
-
-    context 'has Jira dev panel integration license' do
-      before do
-        stub_licensed_features(jira_dev_panel_integration: true)
-      end
-
-      context 'with a Jira subscription' do
-        before do
-          create(:jira_connect_subscription, namespace: project.namespace)
-        end
-
-        context 'MR contains Jira issue key' do
-          let(:title) { 'Awesome merge_request with issue JIRA-123' }
-
-          it_behaves_like 'enqueues Jira sync worker'
-        end
-
-        context 'MR does not contain Jira issue key' do
-          it_behaves_like 'does not enqueue Jira sync worker'
-        end
-      end
-
-      context 'without a Jira subscription' do
-        it_behaves_like 'does not enqueue Jira sync worker'
-      end
-    end
-
-    context 'does not have Jira dev panel integration license' do
-      before do
-        stub_licensed_features(jira_dev_panel_integration: false)
-      end
-
-      it_behaves_like 'does not enqueue Jira sync worker'
-    end
-  end
-
   describe '#filter_params' do
     let(:params_filtering_service) { double(:params_filtering_service) }
 

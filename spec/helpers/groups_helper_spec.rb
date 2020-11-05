@@ -369,4 +369,68 @@ RSpec.describe GroupsHelper do
       it { is_expected.to be_falsey }
     end
   end
+
+  describe '#show_thanks_for_purchase_banner?' do
+    subject { helper.show_thanks_for_purchase_banner? }
+
+    it 'returns true with purchased_quantity present in params' do
+      allow(controller).to receive(:params) { { purchased_quantity: '1' } }
+
+      is_expected.to be_truthy
+    end
+
+    it 'returns false with purchased_quantity not present in params' do
+      is_expected.to be_falsey
+    end
+
+    it 'returns false with purchased_quantity is empty in params' do
+      allow(controller).to receive(:params) { { purchased_quantity: '' } }
+
+      is_expected.to be_falsey
+    end
+  end
+
+  describe '#show_invite_banner?' do
+    let_it_be(:current_user) { create(:user) }
+    let_it_be_with_refind(:group) { create(:group) }
+    let_it_be(:users) { [current_user, create(:user)] }
+
+    subject { helper.show_invite_banner?(group) }
+
+    before do
+      allow(helper).to receive(:current_user) { current_user }
+      allow(helper).to receive(:can?).with(current_user, :admin_group, group).and_return(can_admin_group)
+      stub_feature_flags(invite_your_teammates_banner_a: feature_enabled_flag)
+      users.take(group_members_count).each { |user| group.add_guest(user) }
+    end
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:feature_enabled_flag, :can_admin_group, :group_members_count, :expected_result) do
+      true  | true  | 1 | true
+      true  | false | 1 | false
+      false | true  | 1 | false
+      false | false | 1 | false
+      true  | true  | 2 | false
+      true  | false | 2 | false
+      false | true  | 2 | false
+      false | false | 2 | false
+    end
+
+    with_them do
+      context 'when the group was just created' do
+        before do
+          flash[:notice] = "Group #{group.name} was successfully created"
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when no flash message' do
+        it 'returns the expected result' do
+          expect(subject).to eq(expected_result)
+        end
+      end
+    end
+  end
 end

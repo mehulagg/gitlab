@@ -13,7 +13,7 @@ RSpec.describe Projects::FeatureFlagIssuesController do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
+    stub_licensed_features(feature_flags_related_issues: true)
   end
 
   describe 'GET #index' do
@@ -162,29 +162,9 @@ RSpec.describe Projects::FeatureFlagIssuesController do
       expect(json_response.map { |issue| issue['id'] }).to eq([issue_b.id])
     end
 
-    it 'returns not found when the feature is off' do
-      stub_feature_flags(feature_flags_issue_links: false)
-      feature_flag, _, _ = setup
-      sign_in(developer)
-
-      get_request(project, feature_flag)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
-    it 'returns not found when related issues feature is unavailable' do
-      stub_licensed_features(blocked_issues: false)
-      feature_flag, _issue = setup
-      sign_in(developer)
-
-      get_request(project, feature_flag)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
-    context 'when feature flags are unlicensed' do
+    context 'when feature flag related issues feature is unlicensed' do
       before do
-        stub_licensed_features(feature_flags: false)
+        stub_licensed_features(feature_flags_related_issues: false)
       end
 
       it 'does not return linked issues' do
@@ -332,23 +312,12 @@ RSpec.describe Projects::FeatureFlagIssuesController do
       expect(::FeatureFlagIssue.count).to eq(0)
     end
 
-    it 'does not create a link when the related issues feature is unavailable' do
-      stub_licensed_features(blocked_issues: false)
-      feature_flag, issue = setup
-      sign_in(developer)
-
-      post_request(project, feature_flag, issue)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-      expect(::FeatureFlagIssue.count).to eq(0)
-    end
-
-    context 'when feature flags are unlicensed' do
+    context 'when feature flag related issues feature is unlicensed' do
       before do
-        stub_licensed_features(feature_flags: false)
+        stub_licensed_features(feature_flags_related_issues: false)
       end
 
-      it 'does not create a link between the feature flag and the issue when feature flags are unlicensed' do
+      it 'does not create a link between the feature flag and the issue' do
         feature_flag, issue = setup
         sign_in(developer)
 
@@ -400,15 +369,20 @@ RSpec.describe Projects::FeatureFlagIssuesController do
       expect(feature_flag.reload.issues).to eq([issue])
     end
 
-    it 'does not unlink the issue when the related issues feature is unavailable' do
-      stub_licensed_features(blocked_issues: false)
-      feature_flag, issue, link = setup
-      sign_in(developer)
+    context 'when feature flag related issues feature is unlicensed' do
+      before do
+        stub_licensed_features(feature_flags_related_issues: false)
+      end
 
-      delete_request(project, feature_flag, link)
+      it 'does not unlink the issue' do
+        feature_flag, issue, link = setup
+        sign_in(developer)
 
-      expect(response).to have_gitlab_http_status(:not_found)
-      expect(feature_flag.reload.issues).to eq([issue])
+        delete_request(project, feature_flag, link)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(feature_flag.reload.issues).to eq([issue])
+      end
     end
   end
 end

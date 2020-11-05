@@ -5,6 +5,7 @@ import DateRangeField from 'ee/audit_events/components/date_range_field.vue';
 import SortingField from 'ee/audit_events/components/sorting_field.vue';
 import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
 import AuditEventsFilter from 'ee/audit_events/components/audit_events_filter.vue';
+import AuditEventsExportButton from 'ee/audit_events/components/audit_events_export_button.vue';
 import { AVAILABLE_TOKEN_TYPES } from 'ee/audit_events/constants';
 import createStore from 'ee/audit_events/store';
 
@@ -19,18 +20,16 @@ describe('AuditEventsApp', () => {
 
   const events = [{ foo: 'bar' }];
   const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map(type => ({ type }));
-  const filterQaSelector = 'filter_qa_selector';
-  const tableQaSelector = 'table_qa_selector';
+  const exportUrl = 'http://example.com/audit_log_reports.csv';
 
   const initComponent = (props = {}) => {
     wrapper = shallowMount(AuditEventsApp, {
       store,
       propsData: {
         isLastPage: true,
-        filterQaSelector,
-        tableQaSelector,
         filterTokenOptions,
         events,
+        exportUrl,
         ...props,
       },
       stubs: {
@@ -67,7 +66,6 @@ describe('AuditEventsApp', () => {
     it('renders audit events table', () => {
       expect(wrapper.find(AuditEventsTable).props()).toEqual({
         events,
-        qaSelector: tableQaSelector,
         isLastPage: true,
       });
     });
@@ -75,7 +73,6 @@ describe('AuditEventsApp', () => {
     it('renders audit events filter', () => {
       expect(wrapper.find(AuditEventsFilter).props()).toEqual({
         filterTokenOptions,
-        qaSelector: filterQaSelector,
         value: TEST_FILTER_VALUE,
       });
     });
@@ -89,6 +86,13 @@ describe('AuditEventsApp', () => {
 
     it('renders sorting field', () => {
       expect(wrapper.find(SortingField).props()).toEqual({ sortBy: TEST_SORT_BY });
+    });
+
+    it('renders the audit events export button', () => {
+      expect(wrapper.find(AuditEventsExportButton).props()).toEqual({
+        exportHref:
+          'http://example.com/audit_log_reports.csv?created_after=2020-01-01&created_before=2020-02-02',
+      });
     });
   });
 
@@ -109,6 +113,16 @@ describe('AuditEventsApp', () => {
       wrapper.find(field).vm.$emit('selected', payload);
 
       expect(store.dispatch).toHaveBeenCalledWith(action, payload);
+    });
+  });
+
+  describe('when the audit events export link is not present', () => {
+    beforeEach(() => {
+      initComponent({ exportUrl: '' });
+    });
+
+    it('does not render the audit events export button', () => {
+      expect(wrapper.find(AuditEventsExportButton).exists()).toBe(false);
     });
   });
 });

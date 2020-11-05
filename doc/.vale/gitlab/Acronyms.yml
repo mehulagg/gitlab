@@ -29,8 +29,11 @@ exceptions:
   - DNS
   - EKS
   - FAQ
+  - FOSS
+  - GCP
   - GDK
   - GET
+  - GKE
   - GNU
   - GPG
   - GPL
@@ -41,6 +44,7 @@ exceptions:
   - IBM
   - IDE
   - IID
+  - IMAP
   - IRC
   - ISO
   - JSON
@@ -49,6 +53,8 @@ exceptions:
   - LESS
   - LFS
   - LRU
+  - MIME
+  - MVC
   - NFS
   - NGINX
   - NOTE
@@ -60,15 +66,20 @@ exceptions:
   - POST
   - PUT
   - RAM
+  - REST
   - RPC
   - RSA
   - RSS
+  - RVM
   - SAML
   - SAST
   - SCIM
   - SCP
   - SCSS
+  - SDK
   - SHA
+  - SLA
+  - SMTP
   - SQL
   - SSH
   - SSL
@@ -84,8 +95,10 @@ exceptions:
   - URI
   - URL
   - USB
+  - UTC
   - UUID
   - VPC
   - WIP
+  - WSL
   - XML
   - YAML

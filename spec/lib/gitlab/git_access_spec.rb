@@ -420,6 +420,13 @@ RSpec.describe Gitlab::GitAccess do
       expect { pull_access_check }.to raise_forbidden('Your account has been blocked.')
     end
 
+    it 'disallows users that are blocked pending approval to pull' do
+      project.add_maintainer(user)
+      user.block_pending_approval
+
+      expect { pull_access_check }.to raise_forbidden('Your account is pending approval from your administrator and hence blocked.')
+    end
+
     it 'disallows deactivated users to pull' do
       project.add_maintainer(user)
       user.deactivate!
@@ -428,14 +435,12 @@ RSpec.describe Gitlab::GitAccess do
     end
 
     context 'when the project repository does not exist' do
-      it 'returns not found' do
+      before do
         project.add_guest(user)
-        repo = project.repository
-        Gitlab::GitalyClient::StorageSettings.allow_disk_access { FileUtils.rm_rf(repo.path) }
+        allow(project.repository).to receive(:exists?).and_return(false)
+      end
 
-        # Sanity check for rm_rf
-        expect(repo.exists?).to eq(false)
-
+      it 'returns not found' do
         expect { pull_access_check }.to raise_error(Gitlab::GitAccess::NotFoundError, 'A repository for this project does not exist yet.')
       end
     end
@@ -472,31 +477,135 @@ RSpec.describe Gitlab::GitAccess do
       let(:actor) { key }
 
       context 'pull code' do
-        context 'when project is authorized' do
-          before do
-            key.projects << project
+        context 'when project is public' do
+          let(:project) { create(:project, :public, :repository, *options) }
+
+          context 'when deploy key exists in the project' do
+            before do
+              key.projects << project
+            end
+
+            context 'when the repository is public' do
+              let(:options) { %i[repository_enabled] }
+
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+
+            context 'when the repository is private' do
+              let(:options) { %i[repository_private] }
+
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+
+            context 'when the repository is disabled' do
+              let(:options) { %i[repository_disabled] }
+
+              it { expect { pull_access_check }.to raise_error('You are not allowed to download code from this project.') }
+            end
           end
 
-          it { expect { pull_access_check }.not_to raise_error }
+          context 'when deploy key does not exist in the project' do
+            context 'when the repository is public' do
+              let(:options) { %i[repository_enabled] }
+
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+
+            context 'when the repository is private' do
+              let(:options) { %i[repository_private] }
+
+              it { expect { pull_access_check }.to raise_error('You are not allowed to download code from this project.') }
+            end
+
+            context 'when the repository is disabled' do
+              let(:options) { %i[repository_disabled] }
+
+              it { expect { pull_access_check }.to raise_error('You are not allowed to download code from this project.') }
+            end
+          end
         end
 
-        context 'when unauthorized' do
-          context 'from public project' do
-            let(:project) { create(:project, :public, :repository) }
+        context 'when project is internal' do
+          let(:project) { create(:project, :internal, :repository, *options) }
 
-            it { expect { pull_access_check }.not_to raise_error }
+          context 'when deploy key exists in the project' do
+            before do
+              key.projects << project
+            end
+
+            context 'when the repository is public' do
+              let(:options) { %i[repository_enabled] }
+
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+
+            context 'when the repository is private' do
+              let(:options) { %i[repository_private] }
+
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+
+            context 'when the repository is disabled' do
+              let(:options) { %i[repository_disabled] }
+
+              it { expect { pull_access_check }.to raise_error('You are not allowed to download code from this project.') }
+            end
           end
 
-          context 'from internal project' do
-            let(:project) { create(:project, :internal, :repository) }
+          context 'when deploy key does not exist in the project' do
+            context 'when the repository is public' do
+              let(:options) { %i[repository_enabled] }
 
-            it { expect { pull_access_check }.to raise_not_found }
+              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+            end
+
+            context 'when the repository is private' do
+              let(:options) { %i[repository_private] }
+
+              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+            end
+
+            context 'when the repository is disabled' do
+              let(:options) { %i[repository_disabled] }
+
+              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+            end
+          end
+        end
+
+        context 'when project is private' do
+          let(:project) { create(:project, :private, :repository, *options) }
+
+          context 'when deploy key exists in the project' do
+            before do
+              key.projects << project
+            end
+
+            context 'when the repository is private' do
+              let(:options) { %i[repository_private] }
+
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+
+            context 'when the repository is disabled' do
+              let(:options) { %i[repository_disabled] }
+
+              it { expect { pull_access_check }.to raise_error('You are not allowed to download code from this project.') }
+            end
           end
 
-          context 'from private project' do
-            let(:project) { create(:project, :private, :repository) }
+          context 'when deploy key does not exist in the project' do
+            context 'when the repository is private' do
+              let(:options) { %i[repository_private] }
 
-            it { expect { pull_access_check }.to raise_not_found }
+              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+            end
+
+            context 'when the repository is disabled' do
+              let(:options) { %i[repository_disabled] }
+
+              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+            end
           end
         end
       end
@@ -811,6 +920,12 @@ RSpec.describe Gitlab::GitAccess do
 
       before do
         project.add_developer(user)
+      end
+
+      it 'disallows users that are blocked pending approval to push' do
+        user.block_pending_approval
+
+        expect { push_access_check }.to raise_forbidden('Your account is pending approval from your administrator and hence blocked.')
       end
 
       it 'does not allow deactivated users to push' do

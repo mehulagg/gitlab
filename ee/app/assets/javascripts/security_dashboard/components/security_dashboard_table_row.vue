@@ -3,7 +3,7 @@ import { mapActions, mapState } from 'vuex';
 import {
   GlDeprecatedButton,
   GlFormCheckbox,
-  GlSkeletonLoading,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
   GlIcon,
 } from '@gitlab/ui';

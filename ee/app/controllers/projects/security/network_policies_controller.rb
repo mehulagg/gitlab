@@ -8,6 +8,8 @@ module Projects
       before_action :authorize_read_threat_monitoring!
       before_action :set_polling_interval, only: [:summary]
 
+      feature_category :container_network_security
+
       def summary
         return not_found unless environment.has_metrics?
 
@@ -34,14 +36,13 @@ module Projects
       end
 
       def index
-        response = NetworkPolicies::ResourcesService.new(environment: environment).execute
+        response = NetworkPolicies::ResourcesService.new(project: project, environment_id: params[:environment_id]).execute
         respond_with_service_response(response)
       end
 
       def create
-        policy = Gitlab::Kubernetes::NetworkPolicy.from_yaml(params[:manifest])
         response = NetworkPolicies::DeployResourceService.new(
-          policy: policy,
+          manifest: params[:manifest],
           environment: environment
         ).execute
 
@@ -49,15 +50,11 @@ module Projects
       end
 
       def update
-        policy = Gitlab::Kubernetes::NetworkPolicy.from_yaml(params[:manifest])
-        unless params[:enabled].nil?
-          params[:enabled] ? policy.enable : policy.disable
-        end
-
         response = NetworkPolicies::DeployResourceService.new(
           resource_name: params[:id],
-          policy: policy,
-          environment: environment
+          manifest: params[:manifest],
+          environment: environment,
+          enabled: params[:enabled]
         ).execute
 
         respond_with_service_response(response)
@@ -66,6 +63,7 @@ module Projects
       def destroy
         response = NetworkPolicies::DeleteResourceService.new(
           resource_name: params[:id],
+          manifest: params[:manifest],
           environment: environment
         ).execute
 
@@ -93,7 +91,7 @@ module Projects
       end
 
       def respond_with_service_response(response)
-        payload = response.success? ? response.payload : { error: response.message }
+        payload = response.success? ? response.payload : { payload: response.payload, error: response.message }
         respond_to do |format|
           format.json do
             render status: response.http_status, json: payload

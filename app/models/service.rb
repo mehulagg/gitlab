@@ -7,13 +7,12 @@ class Service < ApplicationRecord
   include Importable
   include ProjectServicesLoggable
   include DataFields
-  include IgnorableColumns
-
-  ignore_columns %i[default], remove_with: '13.5', remove_after: '2020-10-22'
+  include FromUnion
+  include EachBatch
 
   SERVICE_NAMES = %w[
     alerts asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker discord
-    drone_ci emails_on_push external_wiki flowdock hangouts_chat hipchat irker jira
+    drone_ci emails_on_push ewm external_wiki flowdock hangouts_chat hipchat irker jira
     mattermost mattermost_slash_commands microsoft_teams packagist pipelines_email
     pivotaltracker prometheus pushover redmine slack slack_slash_commands teamcity unify_circuit webex_teams youtrack
   ].freeze
@@ -46,6 +45,7 @@ class Service < ApplicationRecord
   after_commit :cache_project_has_external_wiki
 
   belongs_to :project, inverse_of: :services
+  belongs_to :group, inverse_of: :services
   has_one :service_hook
 
   validates :project_id, presence: true, unless: -> { template? || instance? || group_id }
@@ -64,6 +64,7 @@ class Service < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :by_type, -> (type) { where(type: type) }
   scope :by_active_flag, -> (flag) { where(active: flag) }
+  scope :inherit_from_id, -> (id) { where(inherit_from_id: id) }
   scope :for_group, -> (group) { where(group_id: group, type: available_services_types) }
   scope :for_template, -> { where(template: true, type: available_services_types) }
   scope :for_instance, -> { where(instance: true, type: available_services_types) }
@@ -208,6 +209,10 @@ class Service < ApplicationRecord
     DEV_SERVICE_NAMES
   end
 
+  def self.project_specific_services_names
+    []
+  end
+
   def self.available_services_types
     available_services_names.map { |service_name| "#{service_name}_service".camelize }
   end
@@ -216,7 +221,7 @@ class Service < ApplicationRecord
     services_names.map { |service_name| "#{service_name}_service".camelize }
   end
 
-  def self.build_from_integration(project_id, integration)
+  def self.build_from_integration(integration, project_id: nil, group_id: nil)
     service = integration.dup
 
     if integration.supports_data_fields?
@@ -226,8 +231,9 @@ class Service < ApplicationRecord
 
     service.template = false
     service.instance = false
-    service.inherit_from_id = integration.id if integration.instance?
     service.project_id = project_id
+    service.group_id = group_id
+    service.inherit_from_id = integration.id if integration.instance? || integration.group
     service.active = false if service.invalid?
     service
   end
@@ -236,8 +242,47 @@ class Service < ApplicationRecord
     exists?(instance: true, type: type)
   end
 
-  def self.instance_for(type)
-    find_by(instance: true, type: type)
+  def self.default_integration(type, scope)
+    closest_group_integration(type, scope) || instance_level_integration(type)
+  end
+
+  def self.closest_group_integration(type, scope)
+    group_ids = scope.ancestors.select(:id)
+    array = group_ids.to_sql.present? ? "array(#{group_ids.to_sql})" : 'ARRAY[]'
+
+    where(type: type, group_id: group_ids, inherit_from_id: nil)
+      .order(Arel.sql("array_position(#{array}::bigint[], services.group_id)"))
+      .first
+  end
+  private_class_method :closest_group_integration
+
+  def self.instance_level_integration(type)
+    find_by(type: type, instance: true)
+  end
+  private_class_method :instance_level_integration
+
+  def self.create_from_active_default_integrations(scope, association, with_templates: false)
+    group_ids = scope.ancestors.select(:id)
+    array = group_ids.to_sql.present? ? "array(#{group_ids.to_sql})" : 'ARRAY[]'
+
+    from_union([
+      with_templates ? active.where(template: true) : none,
+      active.where(instance: true),
+      active.where(group_id: group_ids, inherit_from_id: nil)
+    ]).order(Arel.sql("type ASC, array_position(#{array}::bigint[], services.group_id), instance DESC")).group_by(&:type).each do |type, records|
+      build_from_integration(records.first, association => scope.id).save!
+    end
+  end
+
+  def self.inherited_descendants_from_self_or_ancestors_from(integration)
+    inherit_from_ids =
+      where(type: integration.type, group: integration.group.self_and_ancestors)
+        .or(where(type: integration.type, instance: true)).select(:id)
+
+    from_union([
+      where(type: integration.type, inherit_from_id: inherit_from_ids, group: integration.group.descendants),
+      where(type: integration.type, inherit_from_id: inherit_from_ids, project: Project.in_namespace(integration.group.self_and_descendants))
+    ])
   end
 
   def activated?
@@ -261,7 +306,7 @@ class Service < ApplicationRecord
   end
 
   def initialize_properties
-    self.properties = {} if properties.nil?
+    self.properties = {} if has_attribute?(:properties) && properties.nil?
   end
 
   def title
@@ -294,7 +339,7 @@ class Service < ApplicationRecord
   end
 
   def to_service_hash
-    as_json(methods: :type, except: %w[id template instance project_id])
+    as_json(methods: :type, except: %w[id template instance project_id group_id])
   end
 
   def to_data_fields_hash
@@ -351,10 +396,10 @@ class Service < ApplicationRecord
     { success: result.present?, result: result }
   end
 
-  # Disable test for instance-level services.
+  # Disable test for instance-level and group-level services.
   # https://gitlab.com/gitlab-org/gitlab/-/issues/213138
   def can_test?
-    !instance?
+    !instance? && !group_id
   end
 
   # Returns a hash of the properties that have been assigned a new value since last save,
@@ -377,8 +422,12 @@ class Service < ApplicationRecord
     ProjectServiceWorker.perform_async(id, data)
   end
 
-  def issue_tracker?
-    self.category == :issue_tracker
+  def external_issue_tracker?
+    category == :issue_tracker && active?
+  end
+
+  def external_wiki?
+    type == 'ExternalWikiService' && active?
   end
 
   # override if needed

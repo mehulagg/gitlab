@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import UnconfiguredSecurityRules from 'ee/approvals/components/security_configuration/unconfigured_security_rules.vue';
 import UnconfiguredSecurityRule from 'ee/approvals/components/security_configuration/unconfigured_security_rule.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
@@ -74,7 +74,7 @@ describe('UnconfiguredSecurityRules component', () => {
       });
 
       it(`should ${shouldRender ? '' : 'not'} render the loading skeleton`, () => {
-        expect(wrapper.contains(GlSkeletonLoading)).toBe(shouldRender);
+        expect(wrapper.find(GlSkeletonLoading).exists()).toBe(shouldRender);
       });
     },
   );

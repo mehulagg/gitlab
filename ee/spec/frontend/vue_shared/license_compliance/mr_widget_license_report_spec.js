@@ -308,7 +308,7 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, fullReportPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
   });
 
@@ -329,7 +329,7 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, licenseManagementSettingsPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
   });
 
@@ -347,26 +347,17 @@ describe('License Report MR Widget', () => {
     };
     mountComponent({ actions });
 
-    expect(actions.setAPISettings).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        apiUrlManageLicenses: apiUrl,
-        licensesApiPath: defaultProps.licensesApiPath,
-        approvalsApiPath: defaultProps.approvalsApiPath,
-        canManageLicenses: true,
-      },
-      undefined,
-    );
+    expect(actions.setAPISettings).toHaveBeenCalledWith(expect.any(Object), {
+      apiUrlManageLicenses: apiUrl,
+      licensesApiPath: defaultProps.licensesApiPath,
+      approvalsApiPath: defaultProps.approvalsApiPath,
+      canManageLicenses: true,
+    });
 
-    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(
-      expect.any(Object),
-      undefined,
-      undefined,
-    );
+    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(expect.any(Object), undefined);
 
     expect(actions.fetchLicenseCheckApprovalRule).toHaveBeenCalledWith(
       expect.any(Object),
-      undefined,
       undefined,
     );
   });

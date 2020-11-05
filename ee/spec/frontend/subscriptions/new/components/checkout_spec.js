@@ -51,21 +51,6 @@ describe('Checkout', () => {
       ]);
     });
 
-    describe('when part of the onboarding issues experiment', () => {
-      beforeEach(() => {
-        store.state.isOnboardingIssuesExperimentEnabled = true;
-      });
-
-      it('passes the steps', () => {
-        expect(findProgressBar().props('steps')).toEqual([
-          'Your profile',
-          'Checkout',
-          'Your GitLab group',
-          'Your first project',
-        ]);
-      });
-    });
-
     it('passes the current step', () => {
       expect(findProgressBar().props('currentStep')).toEqual('Checkout');
     });

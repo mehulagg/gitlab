@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Migration Style Guide
 
 When writing migrations for GitLab, you have to take into account that
@@ -295,13 +301,16 @@ end
 
 Adding foreign key to `projects`:
 
+We can use the `add_concurrenct_foreign_key` method in this case, as this helper method
+has the lock retries built into it.
+
 ```ruby
 include Gitlab::Database::MigrationHelpers
 
+disable_ddl_transaction!
+
 def up
-  with_lock_retries do
-    add_foreign_key :imports, :projects, column: :project_id, on_delete: :cascade
-  end
+  add_concurrent_foreign_key :imports, :projects, column: :project_id, on_delete: :cascade
 end
 
 def down
@@ -316,10 +325,10 @@ Adding foreign key to `users`:
 ```ruby
 include Gitlab::Database::MigrationHelpers
 
+disable_ddl_transaction!
+
 def up
-  with_lock_retries do
-    add_foreign_key :imports, :users, column: :user_id, on_delete: :cascade
-  end
+  add_concurrent_foreign_key :imports, :users, column: :user_id, on_delete: :cascade
 end
 
 def down
@@ -331,7 +340,7 @@ end
 
 **Usage with `disable_ddl_transaction!`**
 
-Generally the `with_lock_retries` helper should work with `disabled_ddl_transaction!`. A custom RuboCop rule ensures that only allowed methods can be placed within the lock retries block.
+Generally the `with_lock_retries` helper should work with `disable_ddl_transaction!`. A custom RuboCop rule ensures that only allowed methods can be placed within the lock retries block.
 
 ```ruby
 disable_ddl_transaction!
@@ -348,7 +357,7 @@ end
 The RuboCop rule generally allows standard Rails migration methods, listed below. This example will cause a Rubocop offense:
 
 ```ruby
-disabled_ddl_transaction!
+disable_ddl_transaction!
 
 def up
   with_lock_retries do
@@ -364,16 +373,7 @@ standard Rails migration helper methods. Calling more than one migration
 helper is not a problem if they're executed on the same table.
 
 Using the `with_lock_retries` helper method is advised when a database
-migration involves one of the high-traffic tables:
-
-- `users`
-- `projects`
-- `namespaces`
-- `issues`
-- `merge_requests`
-- `ci_pipelines`
-- `ci_builds`
-- `notes`
+migration involves one of the [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3).
 
 Example changes:
 
@@ -382,8 +382,7 @@ Example changes:
 - `change_column_default`
 - `create_table` / `drop_table`
 
-NOTE: **Note:**
-`with_lock_retries` method **cannot** be used within the `change` method, you must manually define the `up` and `down` methods to make the migration reversible.
+The `with_lock_retries` method **cannot** be used within the `change` method, you must manually define the `up` and `down` methods to make the migration reversible.
 
 ### How the helper method works
 
@@ -443,7 +442,6 @@ the `with_multiple_threads` block, instead of re-using the global connection
 pool. This ensures each thread has its own connection object, and won't time
 out when trying to obtain one.
 
-NOTE: **Note:**
 PostgreSQL has a maximum amount of connections that it allows. This
 limit can vary from installation to installation. As a result, it's recommended
 you do not use more than 32 threads in a single migration. Usually, 4-8 threads
@@ -464,13 +462,17 @@ class MyMigration < ActiveRecord::Migration[6.0]
   disable_ddl_transaction!
 
   def up
-    remove_concurrent_index :table_name, :column_name
+    remove_concurrent_index :table_name, :column_name, name: :index_name
   end
 end
 ```
 
 Note that it is not necessary to check if the index exists prior to
-removing it.
+removing it, however it is required to specify the name of the
+index that is being removed. This can be done either by passing the name
+as an option to the appropriate form of `remove_index` or `remove_concurrent_index`,
+or more simply by using the `remove_concurrent_index_by_name` method. Explicitly
+specifying the name is important to ensure the correct index is removed.
 
 For a small table (such as an empty one or one with less than `1,000` records),
 it is recommended to use `remove_index` in a single-transaction migration,
@@ -511,10 +513,15 @@ class MyMigration < ActiveRecord::Migration[6.0]
   end
 
   def down
-    remove_concurrent_index :table, :column
+    remove_concurrent_index :table, :column, name: index_name
   end
 end
 ```
+
+You must explicitly name indexes that are created with more complex
+definitions beyond table name, column name(s) and uniqueness constraint.
+Consult the [Adding Database Indexes](adding_database_indexes.md#requirements-for-naming-indexes)
+guide for more details.
 
 If you need to add a unique index, please keep in mind there is the possibility
 of existing duplicates being present in the database. This means that should
@@ -524,6 +531,42 @@ unique index.
 For a small table (such as an empty one or one with less than `1,000` records),
 it is recommended to use `add_index` in a single-transaction migration, combining it with other
 operations that don't require `disable_ddl_transaction!`.
+
+## Testing for existence of indexes
+
+If a migration requires conditional logic based on the absence or
+presence of an index, you must test for existence of that index using
+its name. This helps avoids problems with how Rails compares index definitions,
+which can lead to unexpected results. For more details, review the
+[Adding Database Indexes](adding_database_indexes.md#why-explicit-names-are-required)
+guide.
+
+The easiest way to test for existence of an index by name is to use the
+`index_name_exists?` method, but the `index_exists?` method can also
+be used with a name option. For example:
+
+```ruby
+class MyMigration < ActiveRecord::Migration[6.0]
+  include Gitlab::Database::MigrationHelpers
+
+  INDEX_NAME = 'index_name'
+
+  def up
+    # an index must be conditionally created due to schema inconsistency
+    unless index_exists?(:table_name, :column_name, name: INDEX_NAME)
+      add_index :table_name, :column_name, name: INDEX_NAME
+    end
+  end
+
+  def down
+    # no op
+  end
+end
+```
+
+Keep in mind that concurrent index helpers like `add_concurrent_index`,
+`remove_concurrent_index`, and `remove_concurrent_index_by_name` already
+perform existence checks internally.
 
 ## Adding foreign-key constraints
 
@@ -566,14 +609,13 @@ See the style guide on [`NOT NULL` constraints](database/not_null_constraints.md
 
 ## Adding Columns With Default Values
 
-With PostgreSQL 11 being the minimum version since GitLab 13.0, adding columns with default values has become much easier and
+With PostgreSQL 11 being the minimum version in GitLab 13.0 and later, adding columns with default values has become much easier and
 the standard `add_column` helper should be used in all cases.
 
 Before PostgreSQL 11, adding a column with a default was problematic as it would
 have caused a full table rewrite. The corresponding helper `add_column_with_default`
 has been deprecated and will be removed in a later release.
 
-NOTE: **Note:**
 If a backport adding a column with a default value is needed for %12.9 or earlier versions,
 it should use `add_column_with_default` helper. If a [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3)
 is involved, backporting to %12.9 is contraindicated.
@@ -601,7 +643,7 @@ tables: `namespaces`. This can be translated to:
 ```sql
 ALTER TABLE namespaces
 ALTER COLUMN request_access_enabled
-DEFAULT false
+SET DEFAULT false
 ```
 
 In this particular case, the default value exists and we're just changing the metadata for
@@ -919,7 +961,6 @@ in a previous migration.
 
 ### Example: Add a column `my_column` to the users table
 
-NOTE: **Note:**
 It is important not to leave out the `User.reset_column_information` command, in order to ensure that the old schema is dropped from the cache and ActiveRecord loads the updated schema information.
 
 ```ruby

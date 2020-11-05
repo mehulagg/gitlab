@@ -26,6 +26,6 @@ RSpec.describe Plan do
   describe '::PLANS_ELIGIBLE_FOR_TRIAL' do
     subject { ::Plan::PLANS_ELIGIBLE_FOR_TRIAL }
 
-    it { is_expected.to eq(%w[default free early_adopter]) }
+    it { is_expected.to eq(%w[default free]) }
   end
 end

@@ -1,10 +1,10 @@
 <script>
-import { GlNewDropdown, GlNewDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 export default {
   components: {
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
   },
   props: {
     visibilityLevelOptions: {
@@ -34,15 +34,15 @@ export default {
 <template>
   <div>
     <input type="hidden" name="group[visibility_level]" :value="selectedOption.level" />
-    <gl-new-dropdown :text="selectedOption.label" class="gl-w-full" menu-class="gl-w-full! gl-mb-0">
-      <gl-new-dropdown-item
+    <gl-dropdown :text="selectedOption.label" class="gl-w-full" menu-class="gl-w-full! gl-mb-0">
+      <gl-dropdown-item
         v-for="option in visibilityLevelOptions"
         :key="option.level"
         :secondary-text="option.description"
         @click="onClick(option)"
       >
         <div class="gl-font-weight-bold gl-mb-1">{{ option.label }}</div>
-      </gl-new-dropdown-item>
-    </gl-new-dropdown>
+      </gl-dropdown-item>
+    </gl-dropdown>
   </div>
 </template>

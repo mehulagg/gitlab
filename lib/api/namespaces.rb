@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Namespaces < Grape::API::Instance
+  class Namespaces < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :subgroups
 
     helpers do
       params :optional_list_params_ee do
@@ -32,7 +34,9 @@ module API
       get do
         namespaces = current_user.admin ? Namespace.all : current_user.namespaces
 
-        namespaces = namespaces.include_gitlab_subscription if Gitlab.ee?
+        namespaces = namespaces.include_route
+
+        namespaces = namespaces.include_gitlab_subscription_with_hosted_plan if Gitlab.ee?
 
         namespaces = namespaces.search(params[:search]) if params[:search].present?
 

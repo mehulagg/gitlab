@@ -22,7 +22,23 @@ RSpec.describe 'Creating a DAST Scanner Profile' do
     it 'returns the dast_scanner_profile id' do
       post_graphql_mutation(mutation, current_user: current_user)
 
-      expect(mutation_response["id"]).to eq(dast_scanner_profile.to_global_id.to_s)
+      expect(mutation_response['id']).to eq(dast_scanner_profile.to_global_id.to_s)
+    end
+
+    it 'returns the dast_scanner_profile global_id' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(mutation_response['globalId']).to eq(dast_scanner_profile.to_global_id.to_s)
+    end
+
+    it 'sets default values of omitted properties' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      aggregate_failures do
+        expect(dast_scanner_profile.scan_type).to eq('passive')
+        expect(dast_scanner_profile.use_ajax_spider).to eq(false)
+        expect(dast_scanner_profile.show_debug_messages).to eq(false)
+      end
     end
 
     context 'when dast_scanner_profile exists' do
@@ -33,7 +49,7 @@ RSpec.describe 'Creating a DAST Scanner Profile' do
       it 'returns errors' do
         post_graphql_mutation(mutation, current_user: current_user)
 
-        expect(mutation_response["errors"]).to include('Name has already been taken')
+        expect(mutation_response['errors']).to include('Name has already been taken')
       end
     end
   end

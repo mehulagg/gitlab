@@ -83,11 +83,7 @@ describe('Rule Input', () => {
     jest.runAllTimers();
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(action).toHaveBeenCalledWith(
-        expect.anything(),
-        { approvalsRequired: 10, id: 5 },
-        undefined,
-      );
+      expect(action).toHaveBeenCalledWith(expect.anything(), { approvalsRequired: 10, id: 5 });
     });
   });
 });

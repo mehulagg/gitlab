@@ -1,4 +1,19 @@
-import { releaseToApiJson, apiJsonToRelease } from '~/releases/util';
+import { cloneDeep } from 'lodash';
+import { getJSONFixture } from 'helpers/fixtures';
+import {
+  releaseToApiJson,
+  apiJsonToRelease,
+  convertGraphQLRelease,
+  convertAllReleasesGraphQLResponse,
+  convertOneReleaseGraphQLResponse,
+} from '~/releases/util';
+
+const originalAllReleasesQueryResponse = getJSONFixture(
+  'graphql/releases/queries/all_releases.query.graphql.json',
+);
+const originalOneReleaseQueryResponse = getJSONFixture(
+  'graphql/releases/queries/one_release.query.graphql.json',
+);
 
 describe('releases/util.js', () => {
   describe('releaseToApiJson', () => {
@@ -7,7 +22,7 @@ describe('releases/util.js', () => {
         tagName: 'tag-name',
         name: 'Release name',
         description: 'Release description',
-        milestones: [{ id: 1, title: '13.2' }, { id: 2, title: '13.3' }],
+        milestones: ['13.2', '13.3'],
         assets: {
           links: [{ url: 'https://gitlab.example.com/link', linkType: 'other' }],
         },
@@ -58,18 +73,6 @@ describe('releases/util.js', () => {
         expect(releaseToApiJson(release)).toMatchObject(expectedJson);
       });
     });
-
-    describe('when release.milestones is falsy', () => {
-      it('includes a "milestone" property in the returned result as an empty array', () => {
-        const release = {};
-
-        const expectedJson = {
-          milestones: [],
-        };
-
-        expect(releaseToApiJson(release)).toMatchObject(expectedJson);
-      });
-    });
   });
 
   describe('apiJsonToRelease', () => {
@@ -98,6 +101,64 @@ describe('releases/util.js', () => {
       };
 
       expect(apiJsonToRelease(json)).toEqual(expectedRelease);
+    });
+  });
+
+  describe('convertGraphQLRelease', () => {
+    let releaseFromResponse;
+    let convertedRelease;
+
+    beforeEach(() => {
+      releaseFromResponse = cloneDeep(originalOneReleaseQueryResponse).data.project.release;
+      convertedRelease = convertGraphQLRelease(releaseFromResponse);
+    });
+
+    describe('assets', () => {
+      it("handles asset links that don't have a linkType", () => {
+        expect(convertedRelease.assets.links[0].linkType).not.toBeUndefined();
+
+        delete releaseFromResponse.assets.links.nodes[0].linkType;
+
+        convertedRelease = convertGraphQLRelease(releaseFromResponse);
+
+        expect(convertedRelease.assets.links[0].linkType).toBeUndefined();
+      });
+    });
+
+    describe('_links', () => {
+      it("handles releases that don't have any links", () => {
+        expect(convertedRelease._links.selfUrl).not.toBeUndefined();
+
+        delete releaseFromResponse.links;
+
+        convertedRelease = convertGraphQLRelease(releaseFromResponse);
+
+        expect(convertedRelease._links.selfUrl).toBeUndefined();
+      });
+    });
+
+    describe('commit', () => {
+      it("handles releases that don't have any commit info", () => {
+        expect(convertedRelease.commit).not.toBeUndefined();
+
+        delete releaseFromResponse.commit;
+
+        convertedRelease = convertGraphQLRelease(releaseFromResponse);
+
+        expect(convertedRelease.commit).toBeUndefined();
+      });
+    });
+  });
+
+  describe('convertAllReleasesGraphQLResponse', () => {
+    it('matches snapshot', () => {
+      expect(convertAllReleasesGraphQLResponse(originalAllReleasesQueryResponse)).toMatchSnapshot();
+    });
+  });
+
+  describe('convertOneReleaseGraphQLResponse', () => {
+    it('matches snapshot', () => {
+      expect(convertOneReleaseGraphQLResponse(originalOneReleaseQueryResponse)).toMatchSnapshot();
     });
   });
 });

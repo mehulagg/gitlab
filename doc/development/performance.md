@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Performance Guidelines
 
 This document describes various guidelines to follow to ensure good and
@@ -247,8 +253,12 @@ The following configuration options can be configured:
 
 - `STACKPROF_ENABLED`: Enables stackprof signal handler on SIGUSR2 signal.
   Defaults to `false`.
-- `STACKPROF_INTERVAL_US`: Sampling interval in microseconds. Defaults to
-  `10000` μs (100hz).
+- `STACKPROF_MODE`: See [sampling modes](https://github.com/tmm1/stackprof#sampling).
+  Defaults to `cpu`.
+- `STACKPROF_INTERVAL`: Sampling interval. Unit semantics depend on `STACKPROF_MODE`.
+  For `object` mode this is a per-event interval (every `n`th event will be sampled)
+  and defaults to `1000`.
+  For other modes such as `cpu` this is a frequency and defaults to `10000` μs (100hz).
 - `STACKPROF_FILE_PREFIX`: File path prefix where profiles are stored. Defaults
   to `$TMPDIR` (often corresponds to `/tmp`).
 - `STACKPROF_TIMEOUT_S`: Profiling timeout in seconds. Profiling will
@@ -330,10 +340,10 @@ These results can also be placed into a PostgreSQL database by setting the
 `RSPEC_PROFILING_POSTGRES_URL` variable. This is used to profile the test suite
 when running in the CI environment.
 
-We store these results also when running CI jobs on the default branch on
-`gitlab.com`. Statistics of these profiling data are [available
-online](https://gitlab-org.gitlab.io/rspec_profiling_stats/). For example,
-you can find which tests take longest to run or which execute the most
+We store these results also when running nightly scheduled CI jobs on the
+default branch on `gitlab.com`. Statistics of these profiling data are
+[available online](https://gitlab-org.gitlab.io/rspec_profiling_stats/). For
+example, you can find which tests take longest to run or which execute the most
 queries. This can be handy for optimizing our tests or identifying performance
 issues in our code.
 

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class UserCounts < Grape::API::Instance
+  class UserCounts < ::API::Base
+    feature_category :navigation
+
     resource :user_counts do
       desc 'Return the user specific counts' do
         detail 'Open MR Count'

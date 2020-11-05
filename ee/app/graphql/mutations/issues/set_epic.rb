@@ -6,7 +6,7 @@ module Mutations
       graphql_name 'IssueSetEpic'
 
       argument :epic_id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Epic],
                required: false,
                loads: Types::EpicType,
                description: 'Global ID of the epic to be assigned to the issue, ' \

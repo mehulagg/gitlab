@@ -1,6 +1,8 @@
 - commit = @repository.commit(tag.dereferenced_target)
 - release = @releases.find { |release| release.tag == tag.name }
-%li.flex-row.allow-wrap
+- commit_status = @tag_pipeline_statuses[tag.name] unless @tag_pipeline_statuses.nil?
+
+%li.flex-row.allow-wrap.js-tag-list
   .row-main-content
     = sprite_icon('tag')
     = link_to tag.name, project_tag_path(@project, tag.name), class: 'item-title ref-name'
@@ -24,7 +26,7 @@
       .text-secondary
         = sprite_icon("rocket", size: 12)
         = _("Release")
-        = link_to release.name, project_releases_path(@project, anchor: release.tag), class: 'tag-release-link'
+        = link_to release.name, project_releases_path(@project, anchor: release.tag), class: 'gl-text-blue-600!'
       - if release.description.present?
         .md.gl-mt-3
           = markdown_field(release, :description)
@@ -33,10 +35,15 @@
     - if tag.has_signature?
       = render partial: 'projects/commit/signature', object: tag.signature
 
+    - if commit_status
+      = render 'ci/status/icon', size: 24, status: commit_status, option_css_classes: 'gl-display-inline-flex gl-vertical-align-middle gl-mr-5'
+    - elsif @tag_pipeline_statuses && @tag_pipeline_statuses.any?
+      .gl-display-inline-flex.gl-vertical-align-middle.gl-mr-5
+        %svg.s24
+
     = render 'projects/buttons/download', project: @project, ref: tag.name, pipeline: @tags_pipelines[tag.name]
 
     - if can?(current_user, :admin_tag, @project)
       = link_to edit_project_tag_release_path(@project, tag.name), class: 'btn btn-edit has-tooltip', title: s_('TagsPage|Edit release notes'), data: { container: "body" } do
         = sprite_icon("pencil")
-      = link_to project_tag_path(@project, tag.name), class: "btn btn-remove remove-row has-tooltip gl-ml-3 #{protected_tag?(@project, tag) ? 'disabled' : ''}", title: s_('TagsPage|Delete tag'), method: :delete, data: { confirm: s_('TagsPage|Deleting the %{tag_name} tag cannot be undone. Are you sure?') % { tag_name: tag.name }, container: 'body' }, remote: true do
-        = sprite_icon("remove")
+      = render 'projects/buttons/remove_tag', project: @project, tag: tag

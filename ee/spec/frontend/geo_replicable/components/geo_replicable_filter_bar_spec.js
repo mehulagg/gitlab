@@ -1,13 +1,8 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import {
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlSearchBoxByType,
-  GlButton,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlButton } from '@gitlab/ui';
 import GeoReplicableFilterBar from 'ee/geo_replicable/components/geo_replicable_filter_bar.vue';
-import createStore from 'ee/geo_replicable/store';
+import { getStoreConfig } from 'ee/geo_replicable/store';
 import { DEFAULT_SEARCH_DELAY } from 'ee/geo_replicable/constants';
 import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 
@@ -25,12 +20,13 @@ describe('GeoReplicableFilterBar', () => {
   };
 
   const createComponent = () => {
+    const fakeStore = new Vuex.Store({
+      ...getStoreConfig({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
+      actions: actionSpies,
+    });
     wrapper = shallowMount(GeoReplicableFilterBar, {
       localVue,
-      store: createStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
-      methods: {
-        ...actionSpies,
-      },
+      store: fakeStore,
     });
   };
 
@@ -39,8 +35,8 @@ describe('GeoReplicableFilterBar', () => {
   });
 
   const findNavContainer = () => wrapper.find('nav');
-  const findGlDropdown = () => findNavContainer().find(GlDeprecatedDropdown);
-  const findGlDropdownItems = () => findNavContainer().findAll(GlDeprecatedDropdownItem);
+  const findGlDropdown = () => findNavContainer().find(GlDropdown);
+  const findGlDropdownItems = () => findNavContainer().findAll(GlDropdownItem);
   const findDropdownItemsText = () => findGlDropdownItems().wrappers.map(w => w.text());
   const findGlSearchBox = () => findNavContainer().find(GlSearchBoxByType);
   const findGlButton = () => findNavContainer().find(GlButton);
@@ -77,7 +73,7 @@ describe('GeoReplicableFilterBar', () => {
           .at(index)
           .vm.$emit('click');
 
-        expect(actionSpies.setFilter).toHaveBeenCalledWith(index);
+        expect(actionSpies.setFilter).toHaveBeenCalledWith(expect.any(Object), index);
       });
     });
 
@@ -98,7 +94,7 @@ describe('GeoReplicableFilterBar', () => {
         });
 
         it('calls fetchSyncNamespaces when input event is fired from GlSearchBoxByType', () => {
-          expect(actionSpies.setSearch).toHaveBeenCalledWith(testSearch);
+          expect(actionSpies.setSearch).toHaveBeenCalledWith(expect.any(Object), testSearch);
           expect(actionSpies.fetchReplicableItems).toHaveBeenCalled();
         });
       });
@@ -125,7 +121,7 @@ describe('GeoReplicableFilterBar', () => {
     });
 
     it('should call setFilter with the filterIndex', () => {
-      expect(actionSpies.setFilter).toHaveBeenCalledWith(testValue);
+      expect(actionSpies.setFilter).toHaveBeenCalledWith(expect.any(Object), testValue);
     });
 
     it('should call fetchReplicableItems', () => {

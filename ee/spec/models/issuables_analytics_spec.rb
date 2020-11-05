@@ -13,7 +13,7 @@ RSpec.describe IssuablesAnalytics do
     end
 
     before do
-      Timecop.freeze(Time.current) do
+      travel_to(Time.current) do
         seed.each_pair do |months_back, issues_count|
           create_list(:issue, issues_count, project: project, created_at: months_back.months.ago)
         end

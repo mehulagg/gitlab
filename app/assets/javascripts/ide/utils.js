@@ -1,6 +1,7 @@
 import { languages } from 'monaco-editor';
-import { flatten } from 'lodash';
+import { flatten, isString } from 'lodash';
 import { SIDE_LEFT, SIDE_RIGHT } from './constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 
 const toLowerCase = x => x.toLowerCase();
 
@@ -42,15 +43,17 @@ const KNOWN_TYPES = [
   },
 ];
 
-export function isTextFile(content, mimeType, fileName) {
-  const knownType = KNOWN_TYPES.find(type => type.isMatch(mimeType, fileName));
-
+export function isTextFile({ name, raw, content, mimeType = '' }) {
+  const knownType = KNOWN_TYPES.find(type => type.isMatch(mimeType, name));
   if (knownType) return knownType.isText;
 
   // does the string contain ascii characters only (ranges from space to tilde, tabs and new lines)
   const asciiRegex = /^[ -~\t\n\r]+$/;
+
+  const fileContents = raw || content;
+
   // for unknown types, determine the type by evaluating the file contents
-  return asciiRegex.test(content);
+  return isString(fileContents) && (fileContents === '' || asciiRegex.test(fileContents));
 }
 
 export const createPathWithExt = p => {
@@ -75,17 +78,17 @@ export function registerLanguages(def, ...defs) {
   languages.setLanguageConfiguration(languageId, def.conf);
 }
 
-export function registerSchemas({ language, options }, ...schemas) {
-  schemas.forEach(schema => registerSchemas(schema));
-
-  const defaults = {
-    json: languages.json.jsonDefaults,
-    yaml: languages.yaml.yamlDefaults,
-  };
-
-  if (defaults[language]) {
-    defaults[language].setDiagnosticsOptions(options);
-  }
+export function registerSchema(schema) {
+  const defaults = [languages.json.jsonDefaults, languages.yaml.yamlDefaults];
+  defaults.forEach(d =>
+    d.setDiagnosticsOptions({
+      validate: true,
+      enableSchemaRequest: true,
+      hover: true,
+      completion: true,
+      schemas: [schema],
+    }),
+  );
 }
 
 export const otherSide = side => (side === SIDE_RIGHT ? SIDE_LEFT : SIDE_RIGHT);
@@ -136,3 +139,49 @@ export function readFileAsDataURL(file) {
 export function getFileEOL(content = '') {
   return content.includes('\r\n') ? 'CRLF' : 'LF';
 }
+
+/**
+ * Adds or increments the numeric suffix to a filename/branch name.
+ * Retains underscore or dash before the numeric suffix if it already exists.
+ *
+ * Examples:
+ *  hello -> hello-1
+ *  hello-2425 -> hello-2425
+ *  hello.md -> hello-1.md
+ *  hello_2.md -> hello_3.md
+ *  hello_ -> hello_1
+ *  master-patch-22432 -> master-patch-22433
+ *  patch_332 -> patch_333
+ *
+ * @param {string} filename File name or branch name
+ * @param {number} [randomize] Should randomize the numeric suffix instead of auto-incrementing?
+ */
+export function addNumericSuffix(filename, randomize = false) {
+  return filename.replace(/([ _-]?)(\d*)(\..+?$|$)/, (_, before, number, after) => {
+    const n = randomize
+      ? Math.random()
+          .toString()
+          .substring(2, 7)
+          .slice(-5)
+      : Number(number) + 1;
+    return `${before || '-'}${n}${after}`;
+  });
+}
+
+export const measurePerformance = (
+  mark,
+  measureName,
+  measureStart = undefined,
+  measureEnd = mark,
+) => {
+  performanceMarkAndMeasure({
+    mark,
+    measures: [
+      {
+        name: measureName,
+        start: measureStart,
+        end: measureEnd,
+      },
+    ],
+  });
+};

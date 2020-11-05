@@ -36,7 +36,7 @@ describe('ListFilter', () => {
     it('clears input field and emits `onSearchInput` event with empty value', () => {
       expect(input.element.value).toBe('foobar');
 
-      wrapper.find('.dropdown-input-clear').trigger('click');
+      wrapper.find('.dropdown-input-clear').vm.$emit('click');
 
       return Vue.nextTick().then(() => {
         expect(input.element.value).toBe('');
@@ -74,8 +74,8 @@ describe('ListFilter', () => {
     });
 
     it('renders search input icons', () => {
-      expect(wrapper.find('i.fa.fa-search.dropdown-input-search').exists()).toBe(true);
-      expect(wrapper.find('i.fa.fa-times.dropdown-input-clear').exists()).toBe(true);
+      expect(wrapper.find('.dropdown-input-search').exists()).toBe(true);
+      expect(wrapper.find('.dropdown-input-clear').exists()).toBe(true);
     });
   });
 });

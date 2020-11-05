@@ -79,6 +79,14 @@ $subscriptions-full-width-lg: 541px;
     @media(min-width: map-get($grid-breakpoints, lg)) {
       width: $subscriptions-full-width-lg;
     }
+
+    &.payment-method {
+      // Use literals here to avoid dark theme from changing the color
+      // scss-lint:disable ColorVariable
+      background-color: #fff;
+      color: #303030;
+      // scss-lint:enable ColorVariable
+    }
   }
 
   .gl-form-group,
@@ -144,7 +152,10 @@ $subscriptions-full-width-lg: 541px;
     }
 
     iframe {
-      background-color: $white;
+      // Use literal to avoid dark theme from changing the color
+      // scss-lint:disable ColorVariable
+      background-color: #fff;
+      // scss-lint:enable ColorVariable
       margin: -4px;
       width: 100% !important;
     }

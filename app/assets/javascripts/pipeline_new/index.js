@@ -6,11 +6,13 @@ export default () => {
   const {
     projectId,
     pipelinesPath,
+    configVariablesPath,
     refParam,
     varParam,
     fileParam,
     refNames,
     settingsLink,
+    maxWarnings,
   } = el?.dataset;
 
   const variableParams = JSON.parse(varParam);
@@ -24,11 +26,13 @@ export default () => {
         props: {
           projectId,
           pipelinesPath,
+          configVariablesPath,
           refParam,
           variableParams,
           fileParams,
           refs,
           settingsLink,
+          maxWarnings: Number(maxWarnings),
         },
       });
     },

@@ -5,7 +5,7 @@ module QA
     module Project
       module Issue
         class Index < Page::Base
-          view 'app/assets/javascripts/issuables_list/components/issuable.vue' do
+          view 'app/assets/javascripts/issues_list/components/issuable.vue' do
             element :issue_container
             element :issue_link
           end
@@ -15,13 +15,13 @@ module QA
             element :avatar_counter_content
           end
 
-          view 'app/views/projects/issues/export_csv/_button.html.haml' do
+          view 'app/views/shared/issuable/csv_export/_button.html.haml' do
             element :export_as_csv_button
           end
 
-          view 'app/views/projects/issues/export_csv/_modal.html.haml' do
+          view 'app/views/shared/issuable/csv_export/_modal.html.haml' do
             element :export_issues_button
-            element :export_issues_modal
+            element :export_issuable_modal
           end
 
           view 'app/views/projects/issues/import_csv/_button.html.haml' do
@@ -64,7 +64,7 @@ module QA
           end
 
           def export_issues_modal
-            find_element(:export_issues_modal)
+            find_element(:export_issuable_modal)
           end
 
           def go_to_jira_import_form

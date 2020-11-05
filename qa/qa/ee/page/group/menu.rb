@@ -13,6 +13,24 @@ module QA
             base.class_eval do
               prepend QA::Page::Group::SubMenus::Common
 
+              view 'app/views/layouts/nav/sidebar/_group.html.haml' do
+                element :group_issue_boards_link
+                element :group_issues_item
+                element :group_sidebar
+                element :group_sidebar_submenu
+                element :group_settings_item
+              end
+
+              view 'app/views/layouts/nav/sidebar/_wiki_link.html.haml' do
+                element :wiki_link
+              end
+
+              view 'ee/app/views/groups/ee/_administration_nav.html.haml' do
+                element :group_administration_link
+                element :group_sidebar_submenu_content
+                element :group_saml_sso_link
+              end
+
               view 'ee/app/views/groups/ee/_settings_nav.html.haml' do
                 element :ldap_synchronization_link
                 element :audit_events_settings_link
@@ -32,22 +50,8 @@ module QA
                 element :group_insights_link
               end
 
-              view 'app/views/layouts/nav/sidebar/_group.html.haml' do
-                element :group_issue_boards_link
-                element :group_issues_item
-                element :group_sidebar
-                element :group_sidebar_submenu
-                element :group_settings_item
-              end
-
-              view 'ee/app/views/groups/ee/_administration_nav.html.haml' do
-                element :group_administration_link
-                element :group_sidebar_submenu_content
-                element :group_saml_sso_link
-              end
-
-              view 'app/views/layouts/nav/sidebar/_wiki_link.html.haml' do
-                element :wiki_link
+              view 'ee/app/views/layouts/nav/sidebar/_group_iterations_link.html.haml' do
+                element :group_iterations_link
               end
             end
           end
@@ -64,6 +68,14 @@ module QA
             hover_element(:group_issues_item) do
               within_submenu(:group_issues_sidebar_submenu) do
                 click_element(:group_issue_boards_link)
+              end
+            end
+          end
+
+          def go_to_group_iterations
+            hover_element(:group_issues_item) do
+              within_submenu(:group_issues_sidebar_submenu) do
+                click_element(:group_iterations_link)
               end
             end
           end

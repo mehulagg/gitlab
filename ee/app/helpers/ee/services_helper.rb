@@ -18,6 +18,7 @@ module EE
           show_jira_issues_integration: @project&.feature_available?(:jira_issues_integration).to_s,
           enable_jira_issues: integration.issues_enabled.to_s,
           project_key: integration.project_key,
+          gitlab_issues_enabled: @project&.issues_enabled?.to_s,
           upgrade_plan_path: @project && ::Gitlab::CurrentSettings.should_check_namespace_plan? ? upgrade_plan_path(@project.group) : nil,
           edit_project_path: @project ? edit_project_path(@project, anchor: 'js-shared-permissions') : nil
         )

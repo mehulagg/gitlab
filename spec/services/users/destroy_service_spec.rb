@@ -108,7 +108,7 @@ RSpec.describe Users::DestroyService do
     context 'projects in pending_delete' do
       before do
         project.pending_delete = true
-        project.save
+        project.save!
       end
 
       it 'destroys a project in pending_delete' do
@@ -234,6 +234,14 @@ RSpec.describe Users::DestroyService do
 
         expect(User.exists?(user.id)).to be(false)
       end
+
+      it 'allows user to be deleted if skip_authorization: true' do
+        other_user = create(:user)
+
+        described_class.new(user).execute(other_user, skip_authorization: true)
+
+        expect(User.exists?(other_user.id)).to be(false)
+      end
     end
 
     context "migrating associated records" do
@@ -302,7 +310,7 @@ RSpec.describe Users::DestroyService do
 
       it 'of group_members' do
         group_member = create(:group_member)
-        group_member.group.group_members.create(user: user, access_level: 40)
+        group_member.group.group_members.create!(user: user, access_level: 40)
 
         expect_any_instance_of(GroupMember).to receive(:run_callbacks).with(:find).once
         expect_any_instance_of(GroupMember).to receive(:run_callbacks).with(:initialize).once

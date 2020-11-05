@@ -11,7 +11,7 @@ module QA
             super
 
             base.class_eval do
-              view 'ee/app/assets/javascripts/security_dashboard/components/filter.vue' do
+              view 'ee/app/assets/javascripts/security_dashboard/components/filters/standard_filter.vue' do
                 element :filter_dropdown, ':data-qa-selector="qaSelector"' # rubocop:disable QA/ElementWithPattern
                 element :filter_dropdown_content
               end
@@ -33,7 +33,9 @@ module QA
           end
 
           def has_vulnerability?(name)
-            has_element?(:vulnerability, text: name)
+            retry_until(reload: true, sleep_interval: 0.5) do
+              has_element?(:vulnerability, text: name)
+            end
           end
 
           def has_vulnerability_info_content?(name)

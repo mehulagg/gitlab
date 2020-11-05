@@ -2,11 +2,13 @@
 
 module EE
   module API
-    class GroupBoards < ::Grape::API::Instance
+    class GroupBoards < ::API::Base
       include ::API::PaginationParams
       include ::API::BoardsResponses
 
       prepend EE::API::BoardsResponses # rubocop: disable Cop/InjectEnterpriseEditionModule
+
+      feature_category :boards
 
       before do
         authenticate!

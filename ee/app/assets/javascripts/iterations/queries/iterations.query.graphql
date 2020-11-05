@@ -13,7 +13,6 @@ query Iterations(
   group(fullPath: $fullPath) @include(if: $isGroup) {
     iterations(
       state: $state
-      includeAncestors: false
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize

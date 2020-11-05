@@ -20,12 +20,12 @@ describe('system note component', () => {
     mock.onDelete('/path/to/diff/1').replyOnce(statusCode);
   }
 
-  const findBlankBtn = () => wrapper.find('.note-headline-light .btn-blank');
+  const findBlankBtn = () => wrapper.find('[data-testid="compare-btn"]');
 
   const findDescriptionVersion = () => wrapper.find('.description-version');
 
   const findDeleteDescriptionVersionButton = () =>
-    wrapper.find({ ref: 'deleteDescriptionVersionButton' });
+    wrapper.find('[data-testid="delete-description-version-button"]');
 
   beforeEach(() => {
     props = {

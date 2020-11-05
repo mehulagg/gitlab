@@ -13,7 +13,7 @@ RSpec.describe FeatureFlagIssues::DestroyService do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
+    stub_licensed_features(feature_flags_related_issues: true)
   end
 
   def setup

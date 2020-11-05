@@ -23,9 +23,6 @@ describe('BoardContent', () => {
     return new Vuex.Store({
       getters,
       state,
-      actions: {
-        fetchIssuesForAllLists: () => {},
-      },
     });
   };
 
@@ -39,11 +36,7 @@ describe('BoardContent', () => {
       propsData: {
         lists: mockListsWithModel,
         canAdminList: true,
-        groupId: 1,
         disabled: false,
-        issueLinkBase: '/',
-        rootPath: '/',
-        boardId: '1',
       },
       store,
     });
@@ -62,7 +55,7 @@ describe('BoardContent', () => {
   });
 
   it('does not display EpicsSwimlanes component', () => {
-    expect(wrapper.contains(EpicsSwimlanes)).toBe(false);
-    expect(wrapper.contains(GlAlert)).toBe(false);
+    expect(wrapper.find(EpicsSwimlanes).exists()).toBe(false);
+    expect(wrapper.find(GlAlert).exists()).toBe(false);
   });
 });

@@ -3,18 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe Groups::WikisController do
+  include WikiHelpers
+
+  before do
+    stub_group_wikis(true)
+  end
+
   it_behaves_like 'wiki controller actions' do
     let(:container) { create(:group, :public) }
     let(:routing_params) { { group_id: container } }
 
     before do
       container.add_owner(user)
-      stub_feature_flags(group_wiki: container)
     end
 
-    context 'when the feature flag is disabled' do
+    context 'when the feature is not available' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       using RSpec::Parameterized::TableSyntax

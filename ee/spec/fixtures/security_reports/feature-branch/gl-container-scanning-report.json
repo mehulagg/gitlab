@@ -39,5 +39,18 @@
       ]
     }
   ],
-  "remediations": []
+  "remediations": [],
+  "scan": {
+    "scanner": {
+      "id": "clair",
+      "name": "Clair",
+      "url": "https://github.com/coreos/clair",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.1.4"
+    },
+    "type": "container_scanning",
+    "status": "success"
+  }
 }

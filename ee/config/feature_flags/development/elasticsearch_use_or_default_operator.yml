@@ -1,0 +1,7 @@
+---
+name: elasticsearch_use_or_default_operator
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41664
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/246500
+group: group::global search
+type: development
+default_enabled: false

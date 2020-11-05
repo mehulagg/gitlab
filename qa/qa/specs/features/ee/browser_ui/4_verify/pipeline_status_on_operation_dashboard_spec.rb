@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker do
+  RSpec.describe 'Verify' do
     describe 'Operations Dashboard' do
       let(:group) { Resource::Group.fabricate_via_api! }
       let!(:runner) do
@@ -54,7 +54,7 @@ module QA
         remove_projects
       end
 
-      it 'has many pipelines with appropriate statuses', status_issue: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/900' do
+      it 'has many pipelines with appropriate statuses', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/900' do
         add_projects_to_board
 
         EE::Page::OperationsDashboard.perform do |operation|

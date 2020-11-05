@@ -36,13 +36,9 @@ RSpec.describe API::Commits do
       end
 
       it 'include correct pagination headers' do
-        commit_count = project.repository.count_commits(ref: 'master').to_s
-
         get api(route, current_user)
 
-        expect(response).to include_pagination_headers
-        expect(response.headers['X-Total']).to eq(commit_count)
-        expect(response.headers['X-Page']).to eql('1')
+        expect(response).to include_limited_pagination_headers
       end
     end
 
@@ -79,12 +75,10 @@ RSpec.describe API::Commits do
         it 'include correct pagination headers' do
           commits = project.repository.commits("master", limit: 2)
           after = commits.second.created_at
-          commit_count = project.repository.count_commits(ref: 'master', after: after).to_s
 
           get api("/projects/#{project_id}/repository/commits?since=#{after.utc.iso8601}", user)
 
-          expect(response).to include_pagination_headers
-          expect(response.headers['X-Total']).to eq(commit_count)
+          expect(response).to include_limited_pagination_headers
           expect(response.headers['X-Page']).to eql('1')
         end
       end
@@ -109,12 +103,10 @@ RSpec.describe API::Commits do
         it 'include correct pagination headers' do
           commits = project.repository.commits("master", limit: 2)
           before = commits.second.created_at
-          commit_count = project.repository.count_commits(ref: 'master', before: before).to_s
 
           get api("/projects/#{project_id}/repository/commits?until=#{before.utc.iso8601}", user)
 
-          expect(response).to include_pagination_headers
-          expect(response.headers['X-Total']).to eq(commit_count)
+          expect(response).to include_limited_pagination_headers
           expect(response.headers['X-Page']).to eql('1')
         end
       end
@@ -137,49 +129,49 @@ RSpec.describe API::Commits do
       context "path optional parameter" do
         it "returns project commits matching provided path parameter" do
           path = 'files/ruby/popen.rb'
-          commit_count = project.repository.count_commits(ref: 'master', path: path).to_s
 
           get api("/projects/#{project_id}/repository/commits?path=#{path}", user)
 
           expect(json_response.size).to eq(3)
           expect(json_response.first["id"]).to eq("570e7b2abdd848b95f2f578043fc23bd6f6fd24d")
-          expect(response).to include_pagination_headers
-          expect(response.headers['X-Total']).to eq(commit_count)
+          expect(response).to include_limited_pagination_headers
         end
 
         it 'include correct pagination headers' do
           path = 'files/ruby/popen.rb'
-          commit_count = project.repository.count_commits(ref: 'master', path: path).to_s
 
           get api("/projects/#{project_id}/repository/commits?path=#{path}", user)
 
-          expect(response).to include_pagination_headers
-          expect(response.headers['X-Total']).to eq(commit_count)
+          expect(response).to include_limited_pagination_headers
           expect(response.headers['X-Page']).to eql('1')
         end
       end
 
       context 'all optional parameter' do
         it 'returns all project commits' do
-          commit_count = project.repository.count_commits(all: true)
+          expected_commit_ids = project.repository.commits(nil, all: true, limit: 50).map(&:id)
 
-          get api("/projects/#{project_id}/repository/commits?all=true", user)
+          get api("/projects/#{project_id}/repository/commits?all=true&per_page=50", user)
 
-          expect(response).to include_pagination_headers
-          expect(response.headers['X-Total']).to eq(commit_count.to_s)
+          commit_ids = json_response.map { |c| c['id'] }
+
+          expect(response).to include_limited_pagination_headers
+          expect(commit_ids).to eq(expected_commit_ids)
           expect(response.headers['X-Page']).to eql('1')
         end
       end
 
       context 'first_parent optional parameter' do
         it 'returns all first_parent commits' do
-          commit_count = project.repository.count_commits(ref: SeedRepo::Commit::ID, first_parent: true)
+          expected_commit_ids = project.repository.commits(SeedRepo::Commit::ID, limit: 50, first_parent: true).map(&:id)
 
-          get api("/projects/#{project_id}/repository/commits", user), params: { ref_name: SeedRepo::Commit::ID, first_parent: 'true' }
+          get api("/projects/#{project_id}/repository/commits?per_page=50", user), params: { ref_name: SeedRepo::Commit::ID, first_parent: 'true' }
 
-          expect(response).to include_pagination_headers
-          expect(commit_count).to eq(12)
-          expect(response.headers['X-Total']).to eq(commit_count.to_s)
+          commit_ids = json_response.map { |c| c['id'] }
+
+          expect(response).to include_limited_pagination_headers
+          expect(expected_commit_ids.size).to eq(12)
+          expect(commit_ids).to eq(expected_commit_ids)
         end
       end
 
@@ -209,11 +201,7 @@ RSpec.describe API::Commits do
         end
 
         it 'returns correct headers' do
-          commit_count = project.repository.count_commits(ref: ref_name).to_s
-
-          expect(response).to include_pagination_headers
-          expect(response.headers['X-Total']).to eq(commit_count)
-          expect(response.headers['X-Page']).to eq('1')
+          expect(response).to include_limited_pagination_headers
           expect(response.headers['Link']).to match(/page=1&per_page=5/)
           expect(response.headers['Link']).to match(/page=2&per_page=5/)
         end
@@ -367,10 +355,31 @@ RSpec.describe API::Commits do
         end
       end
 
-      it 'does not increment the usage counters using access token authentication' do
-        expect(::Gitlab::UsageDataCounters::WebIdeCounter).not_to receive(:increment_commits_count)
+      context 'when using access token authentication' do
+        it 'does not increment the usage counters' do
+          expect(::Gitlab::UsageDataCounters::WebIdeCounter).not_to receive(:increment_commits_count)
+          expect(::Gitlab::UsageDataCounters::EditorUniqueCounter).not_to receive(:track_web_ide_edit_action)
 
-        post api(url, user), params: valid_c_params
+          post api(url, user), params: valid_c_params
+        end
+      end
+
+      context 'when using warden' do
+        it 'increments usage counters', :clean_gitlab_redis_shared_state do
+          session_id = Rack::Session::SessionId.new('6919a6f1bb119dd7396fadc38fd18d0d')
+          session_hash = { 'warden.user.user.key' => [[user.id], user.encrypted_password[0, 29]] }
+
+          Gitlab::Redis::SharedState.with do |redis|
+            redis.set("session:gitlab:#{session_id.private_id}", Marshal.dump(session_hash))
+          end
+
+          cookies[Gitlab::Application.config.session_options[:key]] = session_id.public_id
+
+          expect(::Gitlab::UsageDataCounters::WebIdeCounter).to receive(:increment_commits_count)
+          expect(::Gitlab::UsageDataCounters::EditorUniqueCounter).to receive(:track_web_ide_edit_action)
+
+          post api(url), params: valid_c_params
+        end
       end
 
       context 'a new file in project repo' do
@@ -951,7 +960,7 @@ RSpec.describe API::Commits do
         refs.concat(project.repository.tag_names_contains(commit_id).map {|name| ['tag', name]})
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
+        expect(response).to include_limited_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.map { |r| [r['type'], r['name']] }.compact).to eq(refs)
       end
@@ -1241,7 +1250,7 @@ RSpec.describe API::Commits do
         get api(route, current_user)
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
+        expect(response).to include_limited_pagination_headers
         expect(json_response.size).to be >= 1
         expect(json_response.first.keys).to include 'diff'
       end
@@ -1255,7 +1264,7 @@ RSpec.describe API::Commits do
           get api(route, current_user)
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to include_pagination_headers
+          expect(response).to include_limited_pagination_headers
           expect(json_response.size).to be <= 1
         end
       end
@@ -1893,7 +1902,7 @@ RSpec.describe API::Commits do
       get api("/projects/#{project.id}/repository/commits/#{commit.id}/merge_requests", user)
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(response).to include_pagination_headers
+      expect(response).to include_limited_pagination_headers
       expect(json_response.length).to eq(1)
       expect(json_response[0]['id']).to eq(merged_mr.id)
     end

@@ -22,7 +22,6 @@ RSpec.describe Projects::AfterRenameService do
         # call. This makes testing a bit easier.
         allow(project).to receive(:gitlab_shell).and_return(gitlab_shell)
 
-        stub_feature_flags(skip_hashed_storage_upgrade: false)
         stub_application_setting(hashed_storage_enabled: false)
       end
 
@@ -63,16 +62,6 @@ RSpec.describe Projects::AfterRenameService do
       context 'gitlab pages' do
         before do
           allow(project_storage).to receive(:rename_repo) { true }
-        end
-
-        context 'when async_pages_move_project_rename is disabled' do
-          it 'moves pages folder to new location' do
-            stub_feature_flags(async_pages_move_project_rename: false)
-
-            expect_any_instance_of(Gitlab::PagesTransfer).to receive(:rename_project)
-
-            service_execute
-          end
         end
 
         context 'when the project has pages deployed' do
@@ -151,7 +140,6 @@ RSpec.describe Projects::AfterRenameService do
         # call. This makes testing a bit easier.
         allow(project).to receive(:gitlab_shell).and_return(gitlab_shell)
 
-        stub_feature_flags(skip_hashed_storage_upgrade: false)
         stub_application_setting(hashed_storage_enabled: true)
       end
 
@@ -185,16 +173,6 @@ RSpec.describe Projects::AfterRenameService do
       end
 
       context 'gitlab pages' do
-        context 'when async_pages_move_project_rename is disabled' do
-          it 'moves pages folder to new location' do
-            stub_feature_flags(async_pages_move_project_rename: false)
-
-            expect_any_instance_of(Gitlab::PagesTransfer).to receive(:rename_project)
-
-            service_execute
-          end
-        end
-
         context 'when the project has pages deployed' do
           it 'schedules a move of the pages directory' do
             allow(project).to receive(:pages_deployed?).and_return(true)
@@ -265,7 +243,7 @@ RSpec.describe Projects::AfterRenameService do
   def service_execute
     # AfterRenameService is called by UpdateService after a successful model.update
     # the initialization will include before and after paths values
-    project.update(path: path_after_rename)
+    project.update!(path: path_after_rename)
 
     described_class.new(project, path_before: path_before_rename, full_path_before: full_path_before_rename).execute
   end

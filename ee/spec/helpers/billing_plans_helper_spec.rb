@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe BillingPlansHelper do
   describe '#subscription_plan_data_attributes' do
-    let(:customer_portal_url) { "https://customers.gitlab.com/subscriptions" }
+    let(:customer_portal_url) { "#{EE::SUBSCRIPTIONS_URL}/subscriptions" }
 
     let(:group) { build(:group) }
     let(:plan) do
@@ -46,8 +46,7 @@ RSpec.describe BillingPlansHelper do
   end
 
   describe '#use_new_purchase_flow?' do
-    where free_group_new_purchase: [true, false],
-          type: ['Group', nil],
+    where type: ['Group', nil],
           plan: Plan.all_plans
 
     with_them do
@@ -59,13 +58,12 @@ RSpec.describe BillingPlansHelper do
 
       before do
         allow(helper).to receive(:current_user).and_return(user)
-        stub_feature_flags free_group_new_purchase_flow: free_group_new_purchase
       end
 
       subject { helper.use_new_purchase_flow?(namespace) }
 
       it do
-        result = free_group_new_purchase && type == 'Group' && plan == Plan::FREE
+        result = type == 'Group' && plan == Plan::FREE
 
         is_expected.to be(result)
       end
@@ -124,6 +122,28 @@ RSpec.describe BillingPlansHelper do
             property: 'Category:control_group'
           }
         })
+      end
+    end
+  end
+
+  describe '#seats_data_last_update_info' do
+    before do
+      allow(UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker).to receive(:last_enqueue_time).and_return(enqueue_time)
+    end
+
+    context 'when last_enqueue_time from the worker is known' do
+      let(:enqueue_time) { Time.current }
+
+      it 'shows the last enqueue time' do
+        expect(helper.seats_data_last_update_info).to match("as of #{enqueue_time}")
+      end
+    end
+
+    context 'when last_enqueue_time from the worker is unknown' do
+      let(:enqueue_time) { nil }
+
+      it 'shows default message' do
+        expect(helper.seats_data_last_update_info).to match('is updated every day at 12:00pm UTC')
       end
     end
   end

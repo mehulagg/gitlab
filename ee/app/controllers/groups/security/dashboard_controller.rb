@@ -2,6 +2,8 @@
 class Groups::Security::DashboardController < Groups::ApplicationController
   layout 'group'
 
+  feature_category :vulnerability_management
+
   def show
     render :unavailable unless dashboard_available?
   end

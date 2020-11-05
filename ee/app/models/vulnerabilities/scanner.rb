@@ -5,6 +5,7 @@ module Vulnerabilities
     self.table_name = "vulnerability_scanners"
 
     has_many :findings, class_name: 'Vulnerabilities::Finding', inverse_of: :scanner
+    has_many :security_findings, class_name: 'Security::Finding', inverse_of: :scanner
 
     belongs_to :project
 

@@ -24,10 +24,10 @@
     %p= s_("BillingPlans|This group uses the plan associated with its parent group.")
     - parent_billing_page_link = link_to parent_group.full_name, group_billings_path(parent_group)
     %p= s_("BillingPlans|To manage the plan for this group, visit the billing section of %{parent_billing_page_link}.").html_safe % { parent_billing_page_link: parent_billing_page_link }
-    = link_to s_("BillingPlans|Manage plan"), group_billings_path(parent_group), class: 'btn btn-success'
+    = link_to s_("BillingPlans|Manage plan"), group_billings_path(parent_group), class: 'btn btn-success gl-button'
   - else
     = render 'shared/billings/trial_status', namespace: namespace
 
   - if namespace.eligible_for_trial?
     - glm_content = namespace_for_user ? 'user-billing' : 'group-billing'
-    %p= link_to 'Start your free trial', new_trial_registration_path(glm_source: 'gitlab.com', glm_content: glm_content), class: 'btn btn-primary'
+    %p= link_to 'Start your free trial', new_trial_registration_path(glm_source: 'gitlab.com', glm_content: glm_content), class: 'btn btn-primary gl-button'

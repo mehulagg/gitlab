@@ -30,35 +30,35 @@ RSpec.describe Vulnerabilities::HistoricalStatistics::DeletionService do
       create(:vulnerability_historical_statistic, project: other_project, date: 25.days.ago)
     end
 
-    context 'when there is no historical statistics older than 100 days' do
+    context 'when there is no historical statistics older than 365 days' do
       it 'does not delete historical statistics' do
         expect { delete_historical_statistics }.not_to change { Vulnerabilities::HistoricalStatistic.count }
       end
     end
 
-    context 'when there is a historical statistic entry that was created 99 days ago' do
+    context 'when there is a historical statistic entry that was created 364 days ago' do
       before do
-        create(:vulnerability_historical_statistic, project: project, date: 99.days.ago)
-        create(:vulnerability_historical_statistic, project: other_project, date: 99.days.ago)
+        create(:vulnerability_historical_statistic, project: project, date: 364.days.ago)
+        create(:vulnerability_historical_statistic, project: other_project, date: 364.days.ago)
       end
 
       it 'does not delete historical statistics' do
         expect { delete_historical_statistics }.not_to change { Vulnerabilities::HistoricalStatistic.count }
       end
 
-      context 'and there are more than one entries that are older than 100 days' do
+      context 'and there are more than one entries that are older than 365 days' do
         before do
-          create(:vulnerability_historical_statistic, project: project, date: 101.days.ago)
-          create(:vulnerability_historical_statistic, project: project, date: 102.days.ago)
-          create(:vulnerability_historical_statistic, project: project, date: 103.days.ago)
-          create(:vulnerability_historical_statistic, project: other_project, date: 101.days.ago)
-          create(:vulnerability_historical_statistic, project: other_project, date: 102.days.ago)
-          create(:vulnerability_historical_statistic, project: other_project, date: 103.days.ago)
+          create(:vulnerability_historical_statistic, project: project, date: 366.days.ago)
+          create(:vulnerability_historical_statistic, project: project, date: 367.days.ago)
+          create(:vulnerability_historical_statistic, project: project, date: 368.days.ago)
+          create(:vulnerability_historical_statistic, project: other_project, date: 366.days.ago)
+          create(:vulnerability_historical_statistic, project: other_project, date: 367.days.ago)
+          create(:vulnerability_historical_statistic, project: other_project, date: 368.days.ago)
         end
 
-        it 'deletes historical statistics older than 90 days', :aggregate_failures do
+        it 'deletes historical statistics older than 365 days', :aggregate_failures do
           expect { delete_historical_statistics }.to change { Vulnerabilities::HistoricalStatistic.count }.by(-6)
-          expect(Vulnerabilities::HistoricalStatistic.pluck(:date)).to all(be >= 100.days.ago.to_date)
+          expect(Vulnerabilities::HistoricalStatistic.pluck(:date)).to all(be >= 365.days.ago.to_date)
         end
       end
     end

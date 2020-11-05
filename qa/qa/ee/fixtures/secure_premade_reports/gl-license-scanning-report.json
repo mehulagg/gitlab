@@ -1,39 +1,31 @@
 {
-    "version": "2.0",
-    "licenses": [{
-      "id": "WTFPL",
-      "name": "WTFPL",
-      "url": "http://www.wtfpl.net/",
-      "count": 1
+  "version": "2.1",
+  "licenses": [
+    {
+      "id": "Apache-2.0",
+      "name": "Apache License 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-      {
-        "id": "MIT",
-        "name": "MIT License",
-        "url": "https://opensource.org/licenses/MIT",
-        "count": 1
-      }
-    ],
-    "dependencies": [{
-      "name": "wtfpl_init",
-      "licenses": [
-        "WTFPL"
-      ],
-      "url": "https://rubygems.org/gems/wtfpl_init",
-      "description": "Download WTFPL license file and rename to LICENSE.md or something",
-      "paths": [
-        "."
-      ]
+    {
+      "id": "MIT",
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "actioncable",
+      "version": "6.0.3.3",
+      "package_manager": "bundler",
+      "path": "Gemfile.lock",
+      "licenses": ["MIT"]
     },
-      {
-        "name": "actioncable",
-        "licenses": [
-          "MIT"
-        ],
-        "url": "http://rubyonrails.org",
-        "description": "WebSocket framework for Rails.",
-        "paths": [
-          "."
-        ]
-      }
-    ]
-  }
+    {
+      "name": "test_package",
+      "version": "0.1.0",
+      "package_manager": "bundler",
+      "path": "Gemfile.lock",
+      "licenses": ["Apache-2.0"]
+    }
+  ]
+}

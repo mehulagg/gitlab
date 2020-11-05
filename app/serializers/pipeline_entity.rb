@@ -82,11 +82,9 @@ class PipelineEntity < Grape::Entity
   end
 
   expose :failed_builds, if: -> (*) { can_retry? }, using: JobEntity do |pipeline|
-    pipeline.failed_builds
-  end
-
-  expose :tests_total_count do |pipeline|
-    pipeline.test_report_summary.total[:count]
+    pipeline.failed_builds.each do |build|
+      build.project = pipeline.project
+    end
   end
 
   private

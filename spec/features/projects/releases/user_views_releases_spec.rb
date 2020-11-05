@@ -13,20 +13,20 @@ RSpec.describe 'User views releases', :js do
     project.add_guest(guest)
   end
 
-  context('when the user is a maintainer') do
-    before do
-      gitlab_sign_in(maintainer)
-    end
+  shared_examples 'releases page' do
+    context('when the user is a maintainer') do
+      before do
+        sign_in(maintainer)
+      end
 
-    it 'sees the release' do
-      visit project_releases_path(project)
+      it 'sees the release' do
+        visit project_releases_path(project)
 
-      expect(page).to have_content(release.name)
-      expect(page).to have_content(release.tag)
-      expect(page).not_to have_content('Upcoming Release')
-    end
+        expect(page).to have_content(release.name)
+        expect(page).to have_content(release.tag)
+        expect(page).not_to have_content('Upcoming Release')
+      end
 
-    shared_examples 'asset link tests' do
       context 'when there is a link as an asset' do
         let!(:release_link) { create(:release_link, release: release, url: url ) }
         let(:url) { "#{project.web_url}/-/jobs/1/artifacts/download" }
@@ -67,63 +67,59 @@ RSpec.describe 'User views releases', :js do
           end
         end
       end
-    end
 
-    context 'when the release_asset_link_type feature flag is enabled' do
-      before do
-        stub_feature_flags(release_asset_link_type: true)
+      context 'with an upcoming release' do
+        let(:tomorrow) { Time.zone.now + 1.day }
+        let!(:release) { create(:release, project: project, released_at: tomorrow ) }
+
+        it 'sees the upcoming tag' do
+          visit project_releases_path(project)
+
+          expect(page).to have_content('Upcoming Release')
+        end
       end
 
-      it_behaves_like 'asset link tests'
+      context 'with a tag containing a slash' do
+        it 'sees the release' do
+          release = create :release, project: project, tag: 'debian/2.4.0-1'
+          visit project_releases_path(project)
+
+          expect(page).to have_content(release.name)
+          expect(page).to have_content(release.tag)
+        end
+      end
     end
 
-    context 'when the release_asset_link_type feature flag is disabled' do
+    context('when the user is a guest') do
       before do
-        stub_feature_flags(release_asset_link_type: false)
+        sign_in(guest)
       end
 
-      it_behaves_like 'asset link tests'
-    end
-
-    context 'with an upcoming release' do
-      let(:tomorrow) { Time.zone.now + 1.day }
-      let!(:release) { create(:release, project: project, released_at: tomorrow ) }
-
-      it 'sees the upcoming tag' do
+      it 'renders release info except for Git-related data' do
         visit project_releases_path(project)
 
-        expect(page).to have_content('Upcoming Release')
-      end
-    end
+        within('.release-block') do
+          expect(page).to have_content(release.description)
 
-    context 'with a tag containing a slash' do
-      it 'sees the release' do
-        release = create :release, project: project, tag: 'debian/2.4.0-1'
-        visit project_releases_path(project)
-
-        expect(page).to have_content(release.name)
-        expect(page).to have_content(release.tag)
+          # The following properties (sometimes) include Git info,
+          # so they are not rendered for Guest users
+          expect(page).not_to have_content(release.name)
+          expect(page).not_to have_content(release.tag)
+          expect(page).not_to have_content(release.commit.short_id)
+        end
       end
     end
   end
 
-  context('when the user is a guest') do
+  context 'when the graphql_releases_page feature flag is enabled' do
+    it_behaves_like 'releases page'
+  end
+
+  context 'when the graphql_releases_page feature flag is disabled' do
     before do
-      gitlab_sign_in(guest)
+      stub_feature_flags(graphql_releases_page: false)
     end
 
-    it 'renders release info except for Git-related data' do
-      visit project_releases_path(project)
-
-      within('.release-block') do
-        expect(page).to have_content(release.description)
-
-        # The following properties (sometimes) include Git info,
-        # so they are not rendered for Guest users
-        expect(page).not_to have_content(release.name)
-        expect(page).not_to have_content(release.tag)
-        expect(page).not_to have_content(release.commit.short_id)
-      end
-    end
+    it_behaves_like 'releases page'
   end
 end

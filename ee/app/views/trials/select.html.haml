@@ -1,23 +1,22 @@
 - page_title _('Start a Free Gold Trial')
-- glm_params = { glm_source: params[:glm_source], glm_content: params[:glm_content] }
-- should_ask_company_question = glm_params[:glm_source] != 'about.gitlab.com'
 
 %h3.center.pt-6
   = _('Almost there')
 
 %p.center
-  = _('You can apply your Trial to your Personal account or create a New Group.')
+  = trial_selection_intro_text
 
 = render 'errors'
 
 = form_tag apply_trials_path(glm_params), method: :post do
-  .form-group.gl-select2-html5-required-fix
-    = label_tag :namespace_id, _('This subscription is for'), for: :namespace_id, class: 'col-form-label'
-    = select_tag :namespace_id, namespace_options_for_select(params[:namespace_id]), class: 'select2', required: true
-  #group_name.form-group.hidden
+  - if show_trial_namespace_select?
+    .form-group.gl-select2-html5-required-fix
+      = label_tag :namespace_id, _('This subscription is for'), for: :namespace_id, class: 'col-form-label'
+      = select_tag :namespace_id, namespace_options_for_select(params[:namespace_id]), class: 'select2', required: true
+  #group_name.form-group{ class: ("hidden" if show_trial_namespace_select?) }
     = label_tag :new_group_name, _('New Group Name'), for: :new_group_name, class: 'col-form-label'
-    = text_field_tag :new_group_name, nil, class: 'form-control'
-  - if should_ask_company_question
+    = text_field_tag :new_group_name, nil, class: 'form-control', required: !show_trial_namespace_select?
+  - if should_ask_company_question?
     .form-group
       = label_tag :trial_entity, _('Is this GitLab trial for your company?')
       .gl-form-checkbox-group

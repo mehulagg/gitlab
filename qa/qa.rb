@@ -18,6 +18,8 @@ module QA
     autoload :Project, 'qa/flow/project'
     autoload :Saml, 'qa/flow/saml'
     autoload :User, 'qa/flow/user'
+    autoload :MergeRequest, 'qa/flow/merge_request'
+    autoload :Pipeline, 'qa/flow/pipeline'
   end
 
   ##
@@ -91,6 +93,7 @@ module QA
     autoload :UserGPG, 'qa/resource/user_gpg'
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
+    autoload :Design, 'qa/resource/design'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -190,6 +193,7 @@ module QA
       autoload :Projects, 'qa/page/dashboard/projects'
       autoload :Groups, 'qa/page/dashboard/groups'
       autoload :Welcome, 'qa/page/dashboard/welcome'
+      autoload :Todos, 'qa/page/dashboard/todos'
 
       module Snippet
         autoload :New, 'qa/page/dashboard/snippet/new'
@@ -260,6 +264,7 @@ module QA
       module Pipeline
         autoload :Index, 'qa/page/project/pipeline/index'
         autoload :Show, 'qa/page/project/pipeline/show'
+        autoload :New, 'qa/page/project/pipeline/new'
       end
 
       module Tag
@@ -371,6 +376,7 @@ module QA
       module Snippet
         autoload :New, 'qa/page/project/snippet/new'
         autoload :Show, 'qa/page/project/snippet/show'
+        autoload :Index, 'qa/page/project/snippet/index'
       end
     end
 
@@ -397,6 +403,7 @@ module QA
 
     module Layout
       autoload :Banner, 'qa/page/layout/banner'
+      autoload :Flash, 'qa/page/layout/flash'
       autoload :PerformanceBar, 'qa/page/layout/performance_bar'
     end
 
@@ -590,10 +597,12 @@ module QA
     autoload :Api, 'qa/support/api'
     autoload :Dates, 'qa/support/dates'
     autoload :Repeater, 'qa/support/repeater'
+    autoload :Run, 'qa/support/run'
     autoload :Retrier, 'qa/support/retrier'
     autoload :Waiter, 'qa/support/waiter'
     autoload :WaitForRequests, 'qa/support/wait_for_requests'
     autoload :OTP, 'qa/support/otp'
+    autoload :SSH, 'qa/support/ssh'
   end
 end
 

@@ -142,4 +142,14 @@ RSpec.describe EE::GitlabRoutingHelper do
       end
     end
   end
+
+  describe '#vulnerability_url' do
+    let_it_be(:vulnerability) { create(:vulnerability) }
+
+    subject { vulnerability_url(vulnerability) }
+
+    it 'returns the full url of the vulnerability' do
+      expect(subject).to eq "http://localhost/#{vulnerability.project.namespace.path}/#{vulnerability.project.name}/-/security/vulnerabilities/#{vulnerability.id}"
+    end
+  end
 end

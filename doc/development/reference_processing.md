@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: 'An introduction to reference parsers and reference filters, and a guide to their implementation.'
 ---
 
@@ -10,7 +13,6 @@ abstractions in the `Banzai` pipeline: `ReferenceFilter` and `ReferenceParser`.
 This page explains what these are, how they are used, and how you would
 implement a new filter/parser pair.
 
-NOTE: **Note:**
 Each `ReferenceFilter` must have a corresponding `ReferenceParser`.
 
 It is possible to share reference parsers between filters - if two filters find
@@ -76,6 +78,22 @@ a minimum implementation of `AbstractReferenceFilter` should define:
 - `#find_object(parent_object, id)`: given the parent (usually a [`Project`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/models/project.rb))
  and an identifier, find the object. For example, this in a reference filter for
  merge requests, this might be `project.merge_requests.where(iid: iid)`.
+
+### Add a new reference prefix and filter
+
+For reference filters for new objects, use a prefix format following the pattern
+`^<object_type>#`, because:
+
+1. Varied single-character prefixes are hard for users to track. Especially for
+   lower-use object types, this can diminish value for the feature.
+1. Suitable single-character prefixes are limited.
+1. Following a consistent pattern allows users to infer the existence of new features.
+
+To add a reference prefix for a new object `apple`,which has both a name and ID,
+format the reference as:
+
+- `^apple#123` for identification by ID.
+- `^apple#"Granny Smith"` for identification by name.
 
 ### Performance
 
@@ -180,6 +198,5 @@ In practice, all reference parsers inherit from [`BaseParser`](https://gitlab.co
   - `#references_relation` an active record relation for objects by ID.
   - `#nodes_user_can_reference(user, nodes)` to filter nodes directly.
 
-NOTE: **Note:**
 A failure to implement this class for each reference type means that the
 application will raise exceptions during Markdown processing.

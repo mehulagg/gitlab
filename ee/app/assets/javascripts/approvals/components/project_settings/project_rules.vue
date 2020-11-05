@@ -1,5 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
+import RuleName from 'ee/approvals/components/rule_name.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { n__, sprintf } from '~/locale';
 import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR } from '../../constants';
@@ -20,6 +21,7 @@ export default {
     EmptyRule,
     RuleInput,
     RuleBranches,
+    RuleName,
     UnconfiguredSecurityRules,
   },
   // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
@@ -102,7 +104,7 @@ export default {
     <rules :rules="rules">
       <template #thead="{ name, members, approvalsRequired, branches }">
         <tr class="d-none d-sm-table-row">
-          <th class="w-25">{{ hasNamedRule ? name : members }}</th>
+          <th class="w-50">{{ hasNamedRule ? name : members }}</th>
           <th :class="settings.allowMultiRule ? 'w-50 d-none d-sm-table-cell' : 'w-75'">
             <span v-if="hasNamedRule">{{ members }}</span>
           </th>
@@ -123,7 +125,9 @@ export default {
             :can-edit="canEdit(rule)"
           />
           <tr v-else :key="index">
-            <td class="js-name">{{ rule.name }}</td>
+            <td class="js-name">
+              <rule-name :name="rule.name" />
+            </td>
             <td
               class="js-members"
               :class="settings.allowMultiRule ? 'd-none d-sm-table-cell' : null"

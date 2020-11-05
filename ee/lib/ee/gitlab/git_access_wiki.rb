@@ -12,9 +12,9 @@ module EE
         no_group_repo: 'A repository for this group wiki does not exist yet.'
       }.freeze
 
-      override :project?
-      def project?
-        !group?
+      override :group
+      def group
+        container.group if container.is_a?(GroupWiki)
       end
 
       override :check_container!
@@ -53,14 +53,10 @@ module EE
 
       def can_read_group?
         if user
-          user.can?(:read_group, container)
+          user.can?(:read_group, group)
         else
-          Guest.can?(:read_group, container)
+          Guest.can?(:read_group, group)
         end
-      end
-
-      def project_or_wiki
-        container.wiki
       end
     end
   end

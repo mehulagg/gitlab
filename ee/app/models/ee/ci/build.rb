@@ -16,11 +16,12 @@ module EE
         dependency_scanning: :dependency_scanning,
         container_scanning: :container_scanning,
         dast: :dast,
-        coverage_fuzzing: :coverage_fuzzing
+        coverage_fuzzing: :coverage_fuzzing,
+        api_fuzzing: :api_fuzzing
       }.with_indifferent_access.freeze
 
       EE_RUNNER_FEATURES = {
-        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets?}
+        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets? }
       }.freeze
 
       prepended do
@@ -30,6 +31,7 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan'
 
         after_save :stick_build_if_status_changed
+        after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
 
         scope :license_scan, -> { joins(:job_artifacts).merge(::Ci::JobArtifact.license_scanning_reports) }
@@ -76,11 +78,9 @@ module EE
       end
 
       def collect_license_scanning_reports!(license_scanning_report)
+        return license_scanning_report unless project.feature_available?(:license_scanning)
+
         each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |file_type, blob|
-          next if ::Feature.disabled?(:parse_license_management_reports, default_enabled: true)
-
-          next unless project.feature_available?(:license_scanning)
-
           ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, license_scanning_report)
         end
 
@@ -136,7 +136,9 @@ module EE
       end
 
       def ci_secrets_management_available?
-        project.beta_feature_available?(:ci_secrets_management)
+        return false unless project
+
+        project.feature_available?(:ci_secrets_management)
       end
 
       override :runner_required_feature_names
@@ -172,6 +174,13 @@ module EE
             method.call(self)
           end.keys
         end
+      end
+
+      def track_ci_secrets_management_usage
+        return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
+        return unless ci_secrets_management_available? && secrets?
+
+        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(user_id, 'i_ci_secrets_management_vault_build_created')
       end
     end
   end

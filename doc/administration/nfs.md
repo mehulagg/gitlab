@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -16,11 +19,10 @@ From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
 support for NFS for Git repositories is scheduled to be removed. Upgrade to
 [Gitaly Cluster](gitaly/praefect.md) as soon as possible.
 
-NOTE: **Note:**
-Filesystem performance has a big impact on overall GitLab
-performance, especially for actions that read or write to Git repositories. See
-[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md)
-for steps to test filesystem performance.
+Filesystem performance can impact overall GitLab performance, especially for
+actions that read or write to Git repositories. For steps you can use to test
+filesystem performance, see
+[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md).
 
 ## Known kernel version incompatibilities
 
@@ -31,10 +33,10 @@ bug](https://bugzilla.redhat.com/show_bug.cgi?id=1783554) that causes
 following GitLab versions include a fix to work properly with that
 kernel version:
 
-1. [12.10.12](https://about.gitlab.com/releases/2020/06/25/gitlab-12-10-12-released/)
-1. [13.0.7](https://about.gitlab.com/releases/2020/06/25/gitlab-13-0-7-released/)
-1. [13.1.1](https://about.gitlab.com/releases/2020/06/24/gitlab-13-1-1-released/)
-1. 13.2 and up
+- [12.10.12](https://about.gitlab.com/releases/2020/06/25/gitlab-12-10-12-released/)
+- [13.0.7](https://about.gitlab.com/releases/2020/06/25/gitlab-13-0-7-released/)
+- [13.1.1](https://about.gitlab.com/releases/2020/06/24/gitlab-13-1-1-released/)
+- 13.2 and up
 
 If you are using that kernel version, be sure to upgrade GitLab to avoid
 errors.
@@ -116,7 +118,7 @@ To disable NFS server delegation, do the following:
 
 1. Restart the NFS server process. For example, on CentOS run `service nfs restart`.
 
-NOTE: **Important note:**
+NOTE: **Note:**
 The kernel bug may be fixed in
 [more recent kernels with this commit](https://github.com/torvalds/linux/commit/95da1b3a5aded124dd1bda1e3cdb876184813140).
 Red Hat Enterprise 7 [shipped a kernel update](https://access.redhat.com/errata/RHSA-2019:2029)
@@ -127,7 +129,9 @@ administrators to keep NFS server delegation disabled.
 
 ### Improving NFS performance with GitLab
 
-#### Improving NFS performance with Unicorn
+NFS performance with GitLab can in some cases be improved with
+[direct Git access](gitaly/index.md#direct-access-to-git-in-gitlab) using
+[Rugged](https://github.com/libgit2/rugged).
 
 NOTE: **Note:**
 From GitLab 12.1, it will automatically be detected if Rugged can and should be used per storage.
@@ -138,18 +142,16 @@ If you previously enabled Rugged using the feature flag, you will need to unset 
 sudo gitlab-rake gitlab:features:unset_rugged
 ```
 
-If the Rugged feature flag is explicitly set to either true or false, GitLab will use the value explicitly set.
+If the Rugged feature flag is explicitly set to either `true` or `false`, GitLab will use the value explicitly set.
 
 #### Improving NFS performance with Puma
 
 NOTE: **Note:**
-From GitLab 12.7, Rugged auto-detection is disabled if Puma thread count is greater than 1.
+From GitLab 12.7, Rugged is not automatically enabled if Puma thread count is greater than `1`.
 
-If you want to use Rugged with Puma, it is recommended to [set Puma thread count to 1](https://docs.gitlab.com/omnibus/settings/puma.html#puma-settings).
+If you want to use Rugged with Puma, [set Puma thread count to `1`](https://docs.gitlab.com/omnibus/settings/puma.html#puma-settings).
 
-If you want to use Rugged with Puma thread count more than 1, Rugged can be enabled using the [feature flag](../development/gitaly.md#legacy-rugged-code)
-
-If the Rugged feature flag is explicitly set to either true or false, GitLab will use the value explicitly set.
+If you want to use Rugged with Puma thread count more than `1`, Rugged can be enabled using the [feature flag](../development/gitaly.md#legacy-rugged-code).
 
 ## NFS client
 
@@ -172,6 +174,9 @@ Here is an example snippet to add to `/etc/fstab`:
 10.1.0.1:/var/opt/gitlab/gitlab-ci/builds /var/opt/gitlab/gitlab-ci/builds nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
 10.1.0.1:/var/opt/gitlab/git-data /var/opt/gitlab/git-data nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
 ```
+
+You can view information and options set for each of the mounted NFS file
+systems by running `nfsstat -m` and `cat /etc/fstab`.
 
 Note there are several options that you should consider using:
 
@@ -271,9 +276,6 @@ Using bind mounts will require manually making sure the data directories
 are empty before attempting a restore. Read more about the
 [restore prerequisites](../raketasks/backup_restore.md).
 
-You can view information and options set for each of the mounted NFS file
-systems by running `nfsstat -m` and `cat /etc/fstab`.
-
 ### Multiple NFS mounts
 
 When using default Omnibus configuration you will need to share 4 data locations
@@ -296,12 +298,35 @@ Having multiple NFS mounts will require manually making sure the data directorie
 are empty before attempting a restore. Read more about the
 [restore prerequisites](../raketasks/backup_restore.md).
 
+## Testing NFS
+
+Once you've set up the NFS server and client, you can verify NFS is configured correctly
+by testing the following commands:
+
+```shell
+sudo mkdir /gitlab-nfs/test-dir
+sudo chown git /gitlab-nfs/test-dir
+sudo chgrp root /gitlab-nfs/test-dir
+sudo chmod 0700 /gitlab-nfs/test-dir
+sudo chgrp gitlab-www /gitlab-nfs/test-dir
+sudo chmod 0751 /gitlab-nfs/test-dir
+sudo chgrp git /gitlab-nfs/test-dir
+sudo chmod 2770 /gitlab-nfs/test-dir
+sudo chmod 2755 /gitlab-nfs/test-dir
+sudo -u git mkdir /gitlab-nfs/test-dir/test2
+sudo -u git chmod 2755 /gitlab-nfs/test-dir/test2
+sudo ls -lah /gitlab-nfs/test-dir/test2
+sudo -u git rm -r /gitlab-nfs/test-dir
+```
+
+Any `Operation not permitted` errors means you should investigate your NFS server export options.
+
 ## NFS in a Firewalled Environment
 
 If the traffic between your NFS server and NFS client(s) is subject to port filtering
 by a firewall, then you will need to reconfigure that firewall to allow NFS communication.
 
-[This guide from TDLP](http://tldp.org/HOWTO/NFS-HOWTO/security.html#FIREWALLS)
+[This guide from TDLP](https://tldp.org/HOWTO/NFS-HOWTO/security.html#FIREWALLS)
 covers the basics of using NFS in a firewalled environment. Additionally, we encourage you to
 search for and review the specific documentation for your operating system or distribution and your firewall software.
 
@@ -316,6 +341,28 @@ sudo ufw allow from <client_ip_address> to any port nfs
 ```
 
 ## Known issues
+
+### Upgrade to Gitaly Cluster or disable caching if experiencing data loss
+
+CAUTION: **Caution:**
+From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
+support for NFS for Git repositories is scheduled to be removed. Upgrade to
+[Gitaly Cluster](gitaly/praefect.md) as soon as possible.
+
+Customers and users have reported data loss on high-traffic repositories when using NFS for Git repositories.
+For example, we have seen [inconsistent updates after a push](https://gitlab.com/gitlab-org/gitaly/-/issues/2589). The problem may be partially mitigated by adjusting caching using the following NFS client mount options:
+
+| Setting | Description |
+| ------- | ----------- |
+| `lookupcache=positive` | Tells the NFS client to honor `positive` cache results but invalidates any `negative` cache results. Negative cache results cause problems with Git. Specifically, a `git push` can fail to register uniformly across all NFS clients. The negative cache causes the clients to 'remember' that the files did not exist previously.
+| `actimeo=0` | Sets the time to zero that the NFS client caches files and directories before requesting fresh information from a server. |
+| `noac` | Tells the NFS client not to cache file attributes and forces application writes to become synchronous so that local changes to a file become visible on the server immediately. |
+
+CAUTION: **Caution:**
+The `actimeo=0` and `noac` options both result in a significant reduction in performance, possibly leading to timeouts.
+You may be able to avoid timeouts and data loss using `actimeo=0` and `lookupcache=positive` _without_ `noac`, however
+we expect the performance reduction will still be significant. As noted above, we strongly recommend upgrading to
+[Gitaly Cluster](gitaly/praefect.md) as soon as possible.
 
 ### Avoid using AWS's Elastic File System (EFS)
 

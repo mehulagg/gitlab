@@ -37,6 +37,10 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       expect(subject[:create_sast_merge_request_path]).to eq(project_security_configuration_sast_path(project))
     end
 
+    it 'includes the path to gitlab_ci history' do
+      expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
+    end
+
     context "when the latest default branch pipeline's source is auto devops" do
       before do
         pipeline = create(
@@ -61,13 +65,15 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
       it 'reports that all scanners are configured for which latest pipeline has builds' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
-          security_scan(:dast, configured: true),
-          security_scan(:sast, configured: true),
-          security_scan(:container_scanning, configured: false),
-          security_scan(:dependency_scanning, configured: false),
-          security_scan(:license_scanning, configured: false),
-          security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:dast, configured: true, auto_dev_ops_enabled: true),
+          security_scan(:dast_profiles, configured: true, auto_dev_ops_enabled: true),
+          security_scan(:sast, configured: true, auto_dev_ops_enabled: true),
+          security_scan(:container_scanning, configured: false, auto_dev_ops_enabled: true),
+          security_scan(:dependency_scanning, configured: false, auto_dev_ops_enabled: true),
+          security_scan(:license_scanning, configured: false, auto_dev_ops_enabled: true),
+          security_scan(:secret_detection, configured: true, auto_dev_ops_enabled: true),
+          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true),
+          security_scan(:api_fuzzing, configured: false, auto_dev_ops_enabled: true)
         )
       end
     end
@@ -84,12 +90,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       it 'reports all security jobs as unconfigured' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: false),
+          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: false),
           security_scan(:container_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
     end
@@ -113,12 +121,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       it 'uses the latest default branch pipeline to determine whether a security job is configured' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: true),
+          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -129,12 +139,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: false),
+          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -151,12 +163,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: false),
+          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -165,12 +179,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: true),
+          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: true),
           security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -184,7 +200,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
         end
 
         it 'expects the gitlab_ci_presence to be false if the file is absent' do
-          allow_any_instance_of(described_class).to receive(:latest_pipeline_for_ref).and_return(nil)
+          allow_any_instance_of(described_class).to receive(:latest_pipeline).and_return(nil)
           expect(subject[:gitlab_ci_present]).to eq(false)
         end
       end
@@ -222,16 +238,41 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
     end
   end
 
-  def security_scan(type, configured:)
-    configuration_path = project_security_configuration_sast_path(project) if type == :sast
+  def security_scan(type, configured:, auto_dev_ops_enabled: false)
+    configuration_path = configuration_path(type)
+
+    status_str = scan_status(type, configured, auto_dev_ops_enabled)
 
     {
       "type" => type.to_s,
       "configured" => configured,
+      "status" => status_str,
       "description" => described_class.localized_scan_descriptions[type],
       "link" => help_page_path(described_class::SCAN_DOCS[type]),
       "configuration_path" => configuration_path,
       "name" => described_class.localized_scan_names[type]
     }
+  end
+
+  def configuration_path(type)
+    if type === :dast_profiles
+      project_security_configuration_dast_profiles_path(project)
+    elsif type === :sast
+      project_security_configuration_sast_path(project)
+    else
+      nil
+    end
+  end
+
+  def scan_status(type, configured, auto_dev_ops_enabled)
+    if type == :dast_profiles
+      "Available for on-demand DAST"
+    elsif configured && auto_dev_ops_enabled
+      "Enabled with Auto DevOps"
+    elsif configured
+      "Enabled"
+    else
+      "Not enabled"
+    end
   end
 end

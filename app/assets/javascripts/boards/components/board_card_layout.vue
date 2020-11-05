@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/require-default-prop */
 import IssueCardInner from './issue_card_inner.vue';
 import boardsStore from '../stores/boards_store';
 
@@ -19,11 +18,6 @@ export default {
       default: () => ({}),
       required: false,
     },
-    issueLinkBase: {
-      type: String,
-      default: '',
-      required: false,
-    },
     disabled: {
       type: Boolean,
       default: false,
@@ -32,15 +26,6 @@ export default {
     index: {
       type: Number,
       default: 0,
-      required: false,
-    },
-    rootPath: {
-      type: String,
-      default: '',
-      required: false,
-    },
-    groupId: {
-      type: Number,
       required: false,
     },
     isActive: {
@@ -59,9 +44,6 @@ export default {
     multiSelectVisible() {
       return this.multiSelect.list.findIndex(issue => issue.id === this.issue.id) > -1;
     },
-    canMultiSelect() {
-      return gon.features && gon.features.multiSelectBoard;
-    },
   },
   methods: {
     mouseDown() {
@@ -74,7 +56,7 @@ export default {
       // Don't do anything if this happened on a no trigger element
       if (e.target.classList.contains('js-no-trigger')) return;
 
-      const isMultiSelect = this.canMultiSelect && (e.ctrlKey || e.metaKey);
+      const isMultiSelect = e.ctrlKey || e.metaKey;
 
       if (this.showDetail || isMultiSelect) {
         this.showDetail = false;
@@ -95,19 +77,14 @@ export default {
     }"
     :index="index"
     :data-issue-id="issue.id"
+    :data-issue-iid="issue.iid"
+    :data-issue-path="issue.referencePath"
     data-testid="board_card"
     class="board-card p-3 rounded"
     @mousedown="mouseDown"
     @mousemove="mouseMove"
     @mouseup="showIssue($event)"
   >
-    <issue-card-inner
-      :list="list"
-      :issue="issue"
-      :issue-link-base="issueLinkBase"
-      :group-id="groupId"
-      :root-path="rootPath"
-      :update-filters="true"
-    />
+    <issue-card-inner :list="list" :issue="issue" :update-filters="true" />
   </li>
 </template>

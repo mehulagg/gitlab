@@ -23,18 +23,6 @@ FactoryBot.modify do
       last_repository_updated_at { rand(1.year).seconds.ago }
     end
 
-    trait :jira_dvcs_cloud do
-      before(:create) do |project|
-        create(:project_feature_usage, :dvcs_cloud, project: project)
-      end
-    end
-
-    trait :jira_dvcs_server do
-      before(:create) do |project|
-        create(:project_feature_usage, :dvcs_server, project: project)
-      end
-    end
-
     trait :github_imported do
       import_type { 'github' }
     end
@@ -56,7 +44,7 @@ FactoryBot.modify do
     end
 
     trait :with_sox_compliance_framework do
-      association :compliance_framework_setting, factory: :compliance_framework_project_setting, framework: 'sox'
+      association :compliance_framework_setting, :sox, factory: :compliance_framework_project_setting
     end
   end
 end

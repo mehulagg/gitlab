@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Clean up **(CORE ONLY)**
 
 GitLab provides Rake tasks for cleaning up GitLab instances.
@@ -6,7 +12,7 @@ GitLab provides Rake tasks for cleaning up GitLab instances.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36628) in GitLab 12.10.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Do not run this within 12 hours of a GitLab upgrade. This is to ensure that all background migrations
 have finished, which otherwise may lead to data loss.
 
@@ -146,7 +152,7 @@ NOTE: **Note:**
 These commands will not work for artifacts stored on
 [object storage](../administration/object_storage.md).
 
-When you notice there are more job artifacts files on disk than there
+When you notice there are more job artifacts files and/or directories on disk than there
 should be, you can run:
 
 ```shell
@@ -157,7 +163,7 @@ This command:
 
 - Scans through the entire artifacts folder.
 - Checks which files still have a record in the database.
-- If no database record is found, the file is deleted from disk.
+- If no database record is found, the file and directory is deleted from disk.
 
 By default, this task does not delete anything but shows what it can
 delete. Run the command with `DRY_RUN=false` if you actually want to
@@ -200,6 +206,10 @@ sudo gitlab-rake gitlab:cleanup:sessions:active_sessions_lookup_keys
 # installation from source
 bundle exec rake gitlab:cleanup:sessions:active_sessions_lookup_keys RAILS_ENV=production
 ```
+
+## Cleaning up stale Redis sessions
+
+[Clean up stale sessions](../administration/operations/cleaning_up_redis_sessions.md) to compact the Redis database after you upgrade to GitLab 7.3.
 
 ## Container Registry garbage collection
 

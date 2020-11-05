@@ -15,6 +15,7 @@ module ReleasesHelper
   def data_for_releases_page
     {
       project_id: @project.id,
+      project_path: @project.full_path,
       illustration_path: illustration,
       documentation_path: help_page
     }.tap do |data|
@@ -26,6 +27,14 @@ module ReleasesHelper
                                   end
       end
     end
+  end
+
+  def data_for_show_page
+    {
+      project_id: @project.id,
+      project_path: @project.full_path,
+      tag_name: @release.tag
+    }
   end
 
   def data_for_edit_release_page
@@ -47,6 +56,7 @@ module ReleasesHelper
   def new_edit_pages_shared_data
     {
       project_id: @project.id,
+      project_path: @project.full_path,
       markdown_preview_path: preview_markdown_path(@project),
       markdown_docs_path: help_page_path('user/markdown'),
       update_release_api_docs_path: help_page_path('api/releases/index.md', anchor: 'update-a-release'),

@@ -24,7 +24,7 @@
       %div
         = ci_minutes_report(minutes_quota.monthly_minutes_report)
         minutes
-        = link_to icon('question-circle'), help_page_path('user/admin_area/settings/continuous_integration', anchor: 'shared-runners-pipeline-minutes-quota-starter-only'), target: '_blank', 'aria-label': _('Shared runners help link')
+        = link_to sprite_icon('question-o'), help_page_path('user/admin_area/settings/continuous_integration', anchor: 'shared-runners-pipeline-minutes-quota'), target: '_blank', 'aria-label': _('Shared runners help link')
 
     .col-sm-6.right
       - if namespace.shared_runners_minutes_limit_enabled?

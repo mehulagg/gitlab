@@ -18,7 +18,7 @@ module QA
 
       attr_reader :api_resource, :api_response
       attr_writer :api_client
-      attr_accessor :user
+      attr_accessor :api_user
 
       def api_support?
         respond_to?(:api_get_path) &&
@@ -96,15 +96,38 @@ module QA
       end
 
       def api_post
-        response = post(
-          Runtime::API::Request.new(api_client, api_post_path).url,
-          api_post_body)
+        if api_post_path == "/graphql"
+          graphql_response = post(
+            Runtime::API::Request.new(api_client, api_post_path).url,
+            query: api_post_body)
 
-        unless response.code == HTTP_STATUS_CREATED
-          raise ResourceFabricationFailedError, "Fabrication of #{self.class.name} using the API failed (#{response.code}) with `#{response}`."
+          flattened_response = flatten_hash(parse_body(graphql_response))
+
+          unless graphql_response.code == HTTP_STATUS_OK && flattened_response[:errors].empty?
+            raise ResourceFabricationFailedError, "Fabrication of #{self.class.name} using the API failed (#{graphql_response.code}) with `#{graphql_response}`."
+          end
+
+          flattened_response[:web_url] = flattened_response.delete(:webUrl)
+          flattened_response[:id] = flattened_response.fetch(:id).split('/')[-1]
+
+          process_api_response(flattened_response)
+        else
+          response = post(
+            Runtime::API::Request.new(api_client, api_post_path).url,
+            api_post_body)
+
+          unless response.code == HTTP_STATUS_CREATED
+            raise ResourceFabricationFailedError, "Fabrication of #{self.class.name} using the API failed (#{response.code}) with `#{response}`."
+          end
+
+          process_api_response(parse_body(response))
         end
+      end
 
-        process_api_response(parse_body(response))
+      def flatten_hash(param)
+        param.each_pair.reduce({}) do |a, (k, v)|
+          v.is_a?(Hash) ? a.merge(flatten_hash(v)) : a.merge(k.to_sym => v)
+        end
       end
 
       def api_delete
@@ -120,7 +143,7 @@ module QA
 
       def api_client
         @api_client ||= begin
-          Runtime::API::Client.new(:gitlab, is_new_session: !current_url.start_with?('http'), user: user)
+          Runtime::API::Client.new(:gitlab, is_new_session: !current_url.start_with?('http'), user: api_user)
         end
       end
 

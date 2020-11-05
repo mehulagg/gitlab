@@ -15,7 +15,6 @@ describe('BoardList Component', () => {
 
     const componentProps = {
       groupId: undefined,
-      issueLinkBase: '/test/:project_path/issues',
     };
 
     ({ mock, component } = createComponent({

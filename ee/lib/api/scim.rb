@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Scim < Grape::API::Instance
+  class Scim < ::API::Base
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :authentication_and_authorization
 
     prefix 'api/scim'
     version 'v2'
@@ -97,23 +99,12 @@ module API
 
         def find_user_identity(group, extern_uid)
           return unless group.saml_provider
-          return group.scim_identities.with_extern_uid(extern_uid).first if scim_identities_enabled?
 
-          GroupSamlIdentityFinder.find_by_group_and_uid(group: group, uid: extern_uid)
-        end
-
-        def scim_identities_enabled?
-          strong_memoize(:scim_identities_enabled) do
-            ::EE::Gitlab::Scim::Feature.scim_identities_enabled?(@group)
-          end
+          group.scim_identities.with_extern_uid(extern_uid).first
         end
 
         def deprovision(identity)
-          if scim_identities_enabled?
-            ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
-          else
-            GroupSaml::Identity::DestroyService.new(identity).execute(transactional: true)
-          end
+          ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
           true
         rescue => e

@@ -9,8 +9,7 @@ const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-sca
 const projectPath = 'group/project';
 const defaultBranch = 'master';
 const emptyStateSvgPath = `${TEST_HOST}/assets/illustrations/alert-management-empty-state.svg`;
-const profilesLibraryPath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
-const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
+const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_profiles`;
 
 describe('OnDemandScansApp', () => {
   let wrapper;
@@ -19,13 +18,13 @@ describe('OnDemandScansApp', () => {
   const findOnDemandScansForm = () => wrapper.find(OnDemandScansForm);
 
   const expectEmptyState = () => {
-    expect(wrapper.contains(OnDemandScansForm)).toBe(false);
-    expect(wrapper.contains(OnDemandScansEmptyState)).toBe(true);
+    expect(wrapper.find(OnDemandScansForm).exists()).toBe(false);
+    expect(wrapper.find(OnDemandScansEmptyState).exists()).toBe(true);
   };
 
   const expectForm = () => {
-    expect(wrapper.contains(OnDemandScansForm)).toBe(true);
-    expect(wrapper.contains(OnDemandScansEmptyState)).toBe(false);
+    expect(wrapper.find(OnDemandScansForm).exists()).toBe(true);
+    expect(wrapper.find(OnDemandScansEmptyState).exists()).toBe(false);
   };
 
   const createComponent = options => {
@@ -39,7 +38,6 @@ describe('OnDemandScansApp', () => {
             projectPath,
             defaultBranch,
             emptyStateSvgPath,
-            profilesLibraryPath,
             newSiteProfilePath,
           },
         },
@@ -85,8 +83,6 @@ describe('OnDemandScansApp', () => {
         helpPagePath,
         projectPath,
         defaultBranch,
-        profilesLibraryPath,
-        newSiteProfilePath,
       });
     });
 

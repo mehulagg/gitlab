@@ -44,6 +44,7 @@ export const checkPageAndAction = (page, action) => {
   return pagePath === page && actionPath === action;
 };
 
+export const isInIncidentPage = () => checkPageAndAction('incidents', 'show');
 export const isInIssuePage = () => checkPageAndAction('issues', 'show');
 export const isInMRPage = () => checkPageAndAction('merge_requests', 'show');
 export const isInEpicPage = () => checkPageAndAction('epics', 'show');
@@ -59,9 +60,6 @@ export const rstrip = val => {
   }
   return val;
 };
-
-export const updateTooltipTitle = ($tooltipEl, newTitle) =>
-  $tooltipEl.attr('title', newTitle).tooltip('_fixTitle');
 
 export const disableButtonIfEmptyField = (fieldSelector, buttonSelector, eventName = 'input') => {
   const field = $(fieldSelector);

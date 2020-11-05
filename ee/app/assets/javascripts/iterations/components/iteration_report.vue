@@ -6,10 +6,12 @@ import {
   GlLoadingIcon,
   GlEmptyState,
   GlIcon,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
 } from '@gitlab/ui';
+import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
 import IterationReportSummary from './iteration_report_summary.vue';
 import IterationForm from './iteration_form.vue';
@@ -23,15 +25,21 @@ const iterationStates = {
   expired: 'expired',
 };
 
+const page = {
+  view: 'viewIteration',
+  edit: 'editIteration',
+};
+
 export default {
   components: {
+    BurnCharts,
     GlAlert,
     GlBadge,
     GlLoadingIcon,
     GlEmptyState,
     GlIcon,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     IterationForm,
     IterationReportSummary,
     IterationReportTabs,
@@ -56,6 +64,7 @@ export default {
       },
     },
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
       type: String,
@@ -76,6 +85,11 @@ export default {
       required: false,
       default: false,
     },
+    initiallyEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     namespaceType: {
       type: String,
       required: false,
@@ -90,7 +104,7 @@ export default {
   },
   data() {
     return {
-      isEditing: false,
+      isEditing: this.initiallyEditing,
       error: '',
       iteration: {},
     };
@@ -118,9 +132,35 @@ export default {
       }
     },
   },
+  mounted() {
+    this.boundOnPopState = this.onPopState.bind(this);
+    window.addEventListener('popstate', this.boundOnPopState);
+  },
+  beforeDestroy() {
+    window.removeEventListener('popstate', this.boundOnPopState);
+  },
   methods: {
+    onPopState(e) {
+      if (e.state?.prev === page.view) {
+        this.isEditing = true;
+      } else if (e.state?.prev === page.edit) {
+        this.isEditing = false;
+      } else {
+        this.isEditing = this.initiallyEditing;
+      }
+    },
     formatDate(date) {
       return formatDate(date, 'mmm d, yyyy', true);
+    },
+    loadEditPage() {
+      this.isEditing = true;
+      const newUrl = window.location.pathname.replace(/(\/edit)?\/?$/, '/edit');
+      window.history.pushState({ prev: page.view }, null, newUrl);
+    },
+    loadReportPage() {
+      this.isEditing = false;
+      const newUrl = window.location.pathname.replace(/\/edit$/, '');
+      window.history.pushState({ prev: page.edit }, null, newUrl);
     },
   },
 };
@@ -140,11 +180,11 @@ export default {
     <iteration-form
       v-else-if="isEditing"
       :group-path="fullPath"
+      :preview-markdown-path="previewMarkdownPath"
       :is-editing="true"
       :iteration="iteration"
-      :preview-markdown-path="previewMarkdownPath"
-      @updated="isEditing = false"
-      @cancel="isEditing = false"
+      @updated="loadReportPage"
+      @cancel="loadReportPage"
     />
     <template v-else>
       <div
@@ -157,8 +197,9 @@ export default {
         <span class="gl-ml-4"
           >{{ formatDate(iteration.startDate) }} – {{ formatDate(iteration.dueDate) }}</span
         >
-        <gl-new-dropdown
+        <gl-dropdown
           v-if="canEditIteration"
+          data-testid="actions-dropdown"
           variant="default"
           toggle-class="gl-text-decoration-none gl-border-0! gl-shadow-none!"
           class="gl-ml-auto gl-text-secondary"
@@ -168,10 +209,8 @@ export default {
           <template #button-content>
             <gl-icon name="ellipsis_v" /><span class="gl-sr-only">{{ __('Actions') }}</span>
           </template>
-          <gl-new-dropdown-item @click="isEditing = true">{{
-            __('Edit iteration')
-          }}</gl-new-dropdown-item>
-        </gl-new-dropdown>
+          <gl-dropdown-item @click="loadEditPage">{{ __('Edit iteration') }}</gl-dropdown-item>
+        </gl-dropdown>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
@@ -179,6 +218,12 @@ export default {
         :full-path="fullPath"
         :iteration-id="iteration.id"
         :namespace-type="namespaceType"
+      />
+      <burn-charts
+        v-if="glFeatures.iterationCharts && glFeatures.burnupCharts"
+        :start-date="iteration.startDate"
+        :due-date="iteration.dueDate"
+        :iteration-id="iteration.id"
       />
       <iteration-report-tabs
         :full-path="fullPath"

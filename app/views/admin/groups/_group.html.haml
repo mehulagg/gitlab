@@ -27,11 +27,11 @@
 
     %span.gl-ml-5
       = sprite_icon('users', css_class: 'gl-vertical-align-text-bottom')
-      = number_with_delimiter(group.users.count)
+      = number_with_delimiter(group.users_count)
 
     %span.gl-ml-5.visibility-icon.has-tooltip{ data: { container: 'body', placement: 'left' }, title: visibility_icon_description(group) }
       = visibility_level_icon(group.visibility_level)
 
   .controls.gl-flex-shrink-0.gl-ml-5
     = link_to _('Edit'), admin_group_edit_path(group), id: "edit_#{dom_id(group)}", class: 'btn'
-    = link_to _('Delete'), [:admin, group], data: { confirm: _("Are you sure you want to remove %{group_name}?") % { group_name: group.name } }, method: :delete, class: 'btn btn-remove'
+    = link_to _('Delete'), [:admin, group], data: { confirm: _("Are you sure you want to remove %{group_name}?") % { group_name: group.name } }, method: :delete, class: 'gl-button btn btn-danger'

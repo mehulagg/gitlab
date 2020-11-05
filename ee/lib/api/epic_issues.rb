@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class EpicIssues < Grape::API::Instance
+  class EpicIssues < ::API::Base
+    feature_category :epics
+
     before do
       authenticate!
       authorize_epics_feature!

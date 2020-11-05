@@ -56,21 +56,21 @@ module Gitlab
           @updates[:merge] = params[:merge_request_diff_head_sha]
         end
 
-        desc 'Toggle the Work In Progress status'
+        desc 'Toggle the Draft status'
         explanation do
           noun = quick_action_target.to_ability_name.humanize(capitalize: false)
           if quick_action_target.work_in_progress?
-            _("Unmarks this %{noun} as Work In Progress.")
+            _("Unmarks this %{noun} as a draft.")
           else
-            _("Marks this %{noun} as Work In Progress.")
+            _("Marks this %{noun} as a draft.")
           end % { noun: noun }
         end
         execution_message do
           noun = quick_action_target.to_ability_name.humanize(capitalize: false)
           if quick_action_target.work_in_progress?
-            _("Unmarked this %{noun} as Work In Progress.")
+            _("Unmarked this %{noun} as a draft.")
           else
-            _("Marked this %{noun} as Work In Progress.")
+            _("Marked this %{noun} as a draft.")
           end % { noun: noun }
         end
 
@@ -80,7 +80,7 @@ module Gitlab
             # Allow it to mark as WIP on MR creation page _or_ through MR notes.
             (quick_action_target.new_record? || current_user.can?(:"update_#{quick_action_target.to_ability_name}", quick_action_target))
         end
-        command :wip do
+        command :draft, :wip do
           @updates[:wip_event] = quick_action_target.work_in_progress? ? 'unwip' : 'wip'
         end
 
@@ -120,6 +120,20 @@ module Gitlab
                                                else
                                                  result[:message]
                                                end
+        end
+
+        desc _('Approve a merge request')
+        explanation _('Approve the current merge request.')
+        types MergeRequest
+        condition do
+          quick_action_target.persisted? && quick_action_target.can_be_approved_by?(current_user)
+        end
+        command :approve do
+          success = MergeRequests::ApprovalService.new(quick_action_target.project, current_user).execute(quick_action_target)
+
+          next unless success
+
+          @execution_message[:approve] = _('Approved the current merge request.')
         end
       end
 

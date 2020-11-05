@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class GroupPushRule < Grape::API::Instance
+  class GroupPushRule < ::API::Base
+    feature_category :source_code_management
+
     before { authenticate! }
-    before { authorize_admin_group }
-    before { check_feature_availability! }
+    before { check_group_push_rule_access! }
     before { authorize_change_param(user_group, :commit_committer_check, :reject_unsigned_commits) }
 
     params do
@@ -13,8 +14,8 @@ module API
 
     resource :groups do
       helpers do
-        def check_feature_availability!
-          not_found! unless user_group.feature_available?(:push_rules)
+        def check_group_push_rule_access!
+          not_found! unless can?(current_user, :change_push_rules, user_group)
         end
 
         params :push_rule_params do
@@ -63,6 +64,34 @@ module API
         allowed_params = declared_params(include_missing: false)
         user_group.update!(push_rule: PushRule.create!(allowed_params))
         present user_group.push_rule, with: EE::API::Entities::GroupPushRule, user: current_user
+      end
+
+      desc 'Edit push rule of a group' do
+        detail 'This feature was introduced in GitLab 13.4.'
+        success EE::API::Entities::GroupPushRule
+      end
+      params do
+        use :push_rule_params
+      end
+      put ":id/push_rule" do
+        push_rule = user_group.push_rule
+        not_found! unless push_rule
+
+        if push_rule.update(declared_params(include_missing: false))
+          present push_rule, with: EE::API::Entities::GroupPushRule, user: current_user
+        else
+          render_validation_error!(push_rule)
+        end
+      end
+
+      desc 'Deletes group push rule' do
+        detail 'This feature was introduced in GitLab 13.4.'
+      end
+      delete ":id/push_rule" do
+        push_rule = user_group.push_rule
+        not_found! unless push_rule
+
+        destroy_conditionally!(push_rule)
       end
     end
   end

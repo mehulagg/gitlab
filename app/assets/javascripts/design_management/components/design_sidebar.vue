@@ -8,6 +8,8 @@ import { extractDiscussions, extractParticipants } from '../utils/design_managem
 import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../constants';
 import DesignDiscussion from './design_notes/design_discussion.vue';
 import Participants from '~/sidebar/components/participants/participants.vue';
+import DesignTodoButton from './design_todo_button.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -16,7 +18,9 @@ export default {
     GlCollapse,
     GlButton,
     GlPopover,
+    DesignTodoButton,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     design: {
       type: Object,
@@ -36,6 +40,14 @@ export default {
       isResolvedCommentsPopoverHidden: parseBoolean(Cookies.get(this.$options.cookieKey)),
       discussionWithOpenForm: '',
     };
+  },
+  inject: {
+    projectPath: {
+      default: '',
+    },
+    issueIid: {
+      default: '',
+    },
   },
   computed: {
     discussions() {
@@ -101,7 +113,13 @@ export default {
 </script>
 
 <template>
-  <div class="image-notes" @click="handleSidebarClick">
+  <div class="image-notes gl-pt-0" @click="handleSidebarClick">
+    <div
+      class="gl-py-4 gl-mb-4 gl-display-flex gl-justify-content-space-between gl-align-items-center gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
+    >
+      <span>{{ __('To Do') }}</span>
+      <design-todo-button :design="design" @error="$emit('todoError', $event)" />
+    </div>
     <h2 class="gl-font-weight-bold gl-mt-0">
       {{ issue.title }}
     </h2>
@@ -132,11 +150,11 @@ export default {
       :resolved-discussions-expanded="resolvedDiscussionsExpanded"
       :discussion-with-open-form="discussionWithOpenForm"
       data-testid="unresolved-discussion"
-      @createNoteError="$emit('onDesignDiscussionError', $event)"
-      @updateNoteError="$emit('updateNoteError', $event)"
-      @resolveDiscussionError="$emit('resolveDiscussionError', $event)"
+      @create-note-error="$emit('onDesignDiscussionError', $event)"
+      @update-note-error="$emit('updateNoteError', $event)"
+      @resolve-discussion-error="$emit('resolveDiscussionError', $event)"
       @click.native.stop="updateActiveDiscussion(discussion.notes[0].id)"
-      @openForm="updateDiscussionWithOpenForm"
+      @open-form="updateDiscussionWithOpenForm"
     />
     <template v-if="resolvedDiscussions.length > 0">
       <gl-button

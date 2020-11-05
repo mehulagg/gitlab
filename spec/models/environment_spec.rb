@@ -312,18 +312,25 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
   describe '#update_merge_request_metrics?' do
     {
+      'gprd' => false,
+      'prod' => true,
+      'prod-test' => false,
+      'PROD' => true,
       'production' => true,
+      'production-test' => false,
+      'PRODUCTION' => true,
       'production/eu' => true,
+      'PRODUCTION/EU' => true,
       'production/www.gitlab.com' => true,
       'productioneu' => false,
-      'Production' => false,
-      'Production/eu' => false,
+      'Production' => true,
+      'Production/eu' => true,
       'test-production' => false
     }.each do |name, expected_value|
       it "returns #{expected_value} for #{name}" do
         env = create(:environment, name: name)
 
-        expect(env.update_merge_request_metrics?).to eq(expected_value)
+        expect(env.update_merge_request_metrics?).to eq(expected_value), "Expected the name '#{name}' to result in #{expected_value}, but it didn't."
       end
     end
   end
@@ -854,8 +861,8 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
 
     it 'overrides reactive_cache_limit_enabled? with a FF' do
-      environment_with_enabled_ff = FactoryBot.build(:environment)
-      environment_with_disabled_ff = FactoryBot.build(:environment)
+      environment_with_enabled_ff = build(:environment, project: create(:project))
+      environment_with_disabled_ff = build(:environment, project: create(:project))
 
       stub_feature_flags(reactive_caching_limit_environment: environment_with_enabled_ff.project)
 
@@ -1222,7 +1229,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
       let(:environment) { build(:environment, :will_auto_stop) }
 
       it 'returns when it will expire' do
-        Timecop.freeze { is_expected.to eq(1.day.to_i) }
+        freeze_time { is_expected.to eq(1.day.to_i) }
       end
     end
 
@@ -1248,7 +1255,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
     with_them do
       it 'sets correct auto_stop_in' do
-        Timecop.freeze do
+        freeze_time do
           if expected_result.is_a?(Integer) || expected_result.nil?
             subject
 

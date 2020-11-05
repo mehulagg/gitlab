@@ -1,20 +1,17 @@
 /* eslint-disable @gitlab/require-i18n-strings */
 
-import { groupBy } from 'lodash';
+import { differenceBy } from 'lodash';
 import produce from 'immer';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { extractCurrentDiscussion, extractDesign, extractDesigns } from './design_management_utils';
 import {
   ADD_IMAGE_DIFF_NOTE_ERROR,
   UPDATE_IMAGE_DIFF_NOTE_ERROR,
-  ADD_DISCUSSION_COMMENT_ERROR,
+  DELETE_DESIGN_TODO_ERROR,
   designDeletionError,
 } from './error_messages';
 
 const designsOf = data => data.project.issue.designCollection.designs;
-
-const isParticipating = (design, username) =>
-  design.issue.participants.nodes.some(participant => participant.username === username);
 
 const deleteDesignsFromStore = (store, query, selectedDesigns) => {
   const sourceData = store.readQuery(query);
@@ -53,36 +50,6 @@ const addNewVersionToStore = (store, query, version) => {
 
   store.writeQuery({
     ...query,
-    data,
-  });
-};
-
-const addDiscussionCommentToStore = (store, createNote, query, queryVariables, discussionId) => {
-  const sourceData = store.readQuery({
-    query,
-    variables: queryVariables,
-  });
-
-  const newParticipant = {
-    __typename: 'User',
-    ...createNote.note.author,
-  };
-
-  const data = produce(sourceData, draftData => {
-    const design = extractDesign(draftData);
-    const currentDiscussion = extractCurrentDiscussion(design.discussions, discussionId);
-    currentDiscussion.notes.nodes = [...currentDiscussion.notes.nodes, createNote.note];
-
-    if (!isParticipating(design, createNote.note.author.username)) {
-      design.issue.participants.nodes = [...design.issue.participants.nodes, newParticipant];
-    }
-
-    design.notesCount += 1;
-  });
-
-  store.writeQuery({
-    query,
-    variables: queryVariables,
     data,
   });
 };
@@ -165,10 +132,13 @@ const addNewDesignToStore = (store, designManagementUpload, query) => {
 
   const data = produce(sourceData, draftData => {
     const currentDesigns = extractDesigns(draftData);
-    const existingDesigns = groupBy(currentDesigns, 'filename');
-    const newDesigns = currentDesigns.concat(
-      designManagementUpload.designs.filter(d => !existingDesigns[d.filename]),
-    );
+    const difference = differenceBy(designManagementUpload.designs, currentDesigns, 'filename');
+
+    const newDesigns = currentDesigns
+      .map(design => {
+        return designManagementUpload.designs.find(d => d.filename === design.filename) || design;
+      })
+      .concat(difference);
 
     let newVersionNode;
     const findNewVersions = designManagementUpload.designs.find(design => design.versions);
@@ -188,6 +158,7 @@ const addNewDesignToStore = (store, designManagementUpload, query) => {
 
     const updatedDesigns = {
       __typename: 'DesignCollection',
+      copyState: 'READY',
       designs: {
         __typename: 'DesignConnection',
         nodes: newDesigns,
@@ -222,8 +193,51 @@ const moveDesignInStore = (store, designManagementMove, query) => {
   });
 };
 
+export const addPendingTodoToStore = (store, pendingTodo, query, queryVariables) => {
+  const sourceData = store.readQuery({
+    query,
+    variables: queryVariables,
+  });
+
+  const data = produce(sourceData, draftData => {
+    const design = extractDesign(draftData);
+    const existingTodos = design.currentUserTodos?.nodes || [];
+    const newTodoNodes = [...existingTodos, { ...pendingTodo, __typename: 'Todo' }];
+
+    if (!design.currentUserTodos) {
+      design.currentUserTodos = {
+        __typename: 'TodoConnection',
+        nodes: newTodoNodes,
+      };
+    } else {
+      design.currentUserTodos.nodes = newTodoNodes;
+    }
+  });
+
+  store.writeQuery({ query, variables: queryVariables, data });
+};
+
+export const deletePendingTodoFromStore = (store, todoMarkDone, query, queryVariables) => {
+  const sourceData = store.readQuery({
+    query,
+    variables: queryVariables,
+  });
+
+  const {
+    todo: { id: todoId },
+  } = todoMarkDone;
+  const data = produce(sourceData, draftData => {
+    const design = extractDesign(draftData);
+    const existingTodos = design.currentUserTodos?.nodes || [];
+
+    design.currentUserTodos.nodes = existingTodos.filter(({ id }) => id !== todoId);
+  });
+
+  store.writeQuery({ query, variables: queryVariables, data });
+};
+
 const onError = (data, message) => {
-  createFlash(message);
+  createFlash({ message });
   throw new Error(data.errors);
 };
 
@@ -243,20 +257,6 @@ export const updateStoreAfterDesignsDelete = (store, data, query, designs) => {
   } else {
     deleteDesignsFromStore(store, query, designs);
     addNewVersionToStore(store, query, data.version);
-  }
-};
-
-export const updateStoreAfterAddDiscussionComment = (
-  store,
-  data,
-  query,
-  queryVariables,
-  discussionId,
-) => {
-  if (hasErrors(data)) {
-    onError(data, ADD_DISCUSSION_COMMENT_ERROR);
-  } else {
-    addDiscussionCommentToStore(store, data, query, queryVariables, discussionId);
   }
 };
 
@@ -286,8 +286,16 @@ export const updateStoreAfterUploadDesign = (store, data, query) => {
 
 export const updateDesignsOnStoreAfterReorder = (store, data, query) => {
   if (hasErrors(data)) {
-    createFlash(data.errors[0]);
+    createFlash({ message: data.errors[0] });
   } else {
     moveDesignInStore(store, data, query);
+  }
+};
+
+export const updateStoreAfterDeleteDesignTodo = (store, data, query, queryVariables) => {
+  if (hasErrors(data)) {
+    onError(data, DELETE_DESIGN_TODO_ERROR);
+  } else {
+    deletePendingTodoFromStore(store, data, query, queryVariables);
   }
 };

@@ -11,7 +11,6 @@ import {
   OLD_LINE_TYPE,
   MATCH_LINE_TYPE,
   LINES_TO_BE_RENDERED_DIRECTLY,
-  MAX_LINES_TO_BE_RENDERED,
   TREE_TYPE,
   INLINE_DIFF_VIEW_TYPE,
   PARALLEL_DIFF_VIEW_TYPE,
@@ -351,15 +350,8 @@ function mergeTwoFiles(target, source) {
 }
 
 function ensureBasicDiffFileLines(file) {
-  if (window.gon?.features?.unifiedDiffLines) {
-    return Object.assign(file, {
-      highlighted_diff_lines: [],
-      parallel_diff_lines: parallelizeDiffLines(file.highlighted_diff_lines || []),
-    });
-  }
-
   const missingInline = !file.highlighted_diff_lines;
-  const missingParallel = !file.parallel_diff_lines;
+  const missingParallel = !file.parallel_diff_lines || window.gon?.features?.unifiedDiffLines;
 
   Object.assign(file, {
     highlighted_diff_lines: missingInline ? [] : file.highlighted_diff_lines,
@@ -457,12 +449,10 @@ function getVisibleDiffLines(file) {
 }
 
 function finalizeDiffFile(file) {
-  const name = (file.viewer && file.viewer.name) || diffViewerModes.text;
   const lines = getVisibleDiffLines(file);
 
   Object.assign(file, {
     renderIt: lines < LINES_TO_BE_RENDERED_DIRECTLY,
-    collapsed: name === diffViewerModes.text && lines > MAX_LINES_TO_BE_RENDERED,
     isShowingFullFile: false,
     isLoadingFullFile: false,
     discussions: [],
@@ -495,11 +485,11 @@ export function prepareDiffData(diff, priorFiles = []) {
   return deduplicateFilesList([...priorFiles, ...cleanedFiles]);
 }
 
-export function getDiffPositionByLineCode(diffFiles, useSingleDiffStyle) {
+export function getDiffPositionByLineCode(diffFiles) {
   let lines = [];
   const hasInlineDiffs = diffFiles.some(file => file.highlighted_diff_lines.length > 0);
 
-  if (!useSingleDiffStyle || hasInlineDiffs) {
+  if (hasInlineDiffs) {
     // In either of these cases, we can use `highlighted_diff_lines` because
     // that will include all of the parallel diff lines, too
 
@@ -674,6 +664,7 @@ export const generateTreeList = files => {
               addedLines: file.added_lines,
               removedLines: file.removed_lines,
               parentPath: parent ? `${parent.path}/` : '/',
+              submodule: file.submodule,
             });
           } else {
             Object.assign(entry, {

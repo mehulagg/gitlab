@@ -8,11 +8,11 @@ RSpec.shared_examples 'creates an alert management alert' do
   end
 
   it 'executes the alert service hooks' do
-    slack_service = create(:service, type: 'SlackService', project: project, alert_events: true, active: true)
+    expect_next_instance_of(AlertManagement::Alert) do |alert|
+      expect(alert).to receive(:execute_services)
+    end
 
     subject
-
-    expect(ProjectServiceWorker).to have_received(:perform_async).with(slack_service.id, an_instance_of(Hash))
   end
 end
 
@@ -37,5 +37,43 @@ RSpec.shared_examples 'adds an alert management alert event' do
     expect(alert).not_to receive(:execute_services)
 
     subject
+  end
+end
+
+RSpec.shared_examples 'processes incident issues' do
+  let(:create_incident_service) { spy }
+
+  before do
+    allow_any_instance_of(AlertManagement::Alert).to receive(:execute_services)
+  end
+
+  it 'processes issues' do
+    expect(IncidentManagement::ProcessAlertWorker)
+      .to receive(:perform_async)
+      .with(nil, nil, kind_of(Integer))
+      .once
+
+    Sidekiq::Testing.inline! do
+      expect(subject).to be_success
+    end
+  end
+end
+
+RSpec.shared_examples 'does not process incident issues' do
+  it 'does not process issues' do
+    expect(IncidentManagement::ProcessAlertWorker)
+      .not_to receive(:perform_async)
+
+    expect(subject).to be_success
+  end
+end
+
+RSpec.shared_examples 'does not process incident issues due to error' do |http_status:|
+  it 'does not process issues' do
+    expect(IncidentManagement::ProcessAlertWorker)
+      .not_to receive(:perform_async)
+
+    expect(subject).to be_error
+    expect(subject.http_status).to eq(http_status)
   end
 end

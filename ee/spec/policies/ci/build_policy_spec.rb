@@ -14,6 +14,6 @@ RSpec.describe Ci::BuildPolicy do
 
     subject { user.can?(:update_build, build) }
 
-    it_behaves_like 'protected environments access'
+    it_behaves_like 'protected environments access', direct_access: true
   end
 end

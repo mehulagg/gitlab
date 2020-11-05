@@ -10,28 +10,6 @@ RSpec.describe DashboardHelper, type: :helper do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    describe 'analytics' do
-      context 'and the user has no access to instance statistics features' do
-        before do
-          stub_user_permissions_for(:analytics, false)
-        end
-
-        it 'does not include analytics' do
-          expect(helper.dashboard_nav_links).not_to include(:analytics)
-        end
-      end
-
-      context 'and the user has access to instance statistics features' do
-        before do
-          stub_user_permissions_for(:analytics, true)
-        end
-
-        it 'does include analytics' do
-          expect(helper.dashboard_nav_links).to include(:analytics)
-        end
-      end
-    end
-
     describe 'operations dashboard link' do
       context 'when the feature is available on the license' do
         context 'and the user is authenticated' do
@@ -160,11 +138,9 @@ RSpec.describe DashboardHelper, type: :helper do
     def stub_user_permissions_for(feature, enabled)
       allow(helper).to receive(:can?).with(user, :read_cross_project).and_return(false)
 
-      can_read_instance_statistics = enabled && feature == :analytics
       can_read_operations_dashboard = enabled && feature == :operations
       can_read_instance_security_dashboard = enabled && feature == :security
 
-      allow(helper).to receive(:can?).with(user, :read_instance_statistics).and_return(can_read_instance_statistics)
       allow(helper).to receive(:can?).with(user, :read_operations_dashboard).and_return(can_read_operations_dashboard)
       allow_next_instance_of(InstanceSecurityDashboard) do |dashboard|
         allow(helper).to(

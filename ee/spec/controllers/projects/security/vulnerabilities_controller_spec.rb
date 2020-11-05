@@ -24,7 +24,7 @@ RSpec.describe Projects::Security::VulnerabilitiesController do
     end
 
     context "when there's an attached pipeline" do
-      let_it_be(:finding) { create(:vulnerabilities_occurrence, vulnerability: vulnerability, pipelines: [pipeline]) }
+      let_it_be(:finding) { create(:vulnerabilities_finding, vulnerability: vulnerability, pipelines: [pipeline]) }
 
       it 'renders the vulnerability page' do
         show_vulnerability
@@ -34,15 +34,15 @@ RSpec.describe Projects::Security::VulnerabilitiesController do
         expect(response.body).to have_text(vulnerability.title)
       end
 
-      it 'renders the solution card' do
+      it 'renders the vulnerability component' do
         show_vulnerability
 
-        expect(response.body).to have_css("#js-vulnerability-footer")
+        expect(response.body).to have_css("#js-vulnerability-main")
       end
     end
 
     context "when there's no attached pipeline" do
-      let_it_be(:finding) { create(:vulnerabilities_occurrence, vulnerability: vulnerability) }
+      let_it_be(:finding) { create(:vulnerabilities_finding, vulnerability: vulnerability) }
 
       it 'renders the vulnerability page' do
         show_vulnerability

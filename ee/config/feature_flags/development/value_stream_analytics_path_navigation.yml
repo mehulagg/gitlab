@@ -1,0 +1,7 @@
+---
+name: value_stream_analytics_path_navigation
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31069
+rollout_issue_url:
+group: group::analytics
+type: development
+default_enabled: false

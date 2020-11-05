@@ -1,8 +1,7 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import tooltip from '~/vue_shared/directives/tooltip';
 import { s__, __ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import MrWidgetAuthorTime from '../mr_widget_author_time.vue';
@@ -12,13 +11,14 @@ import eventHub from '../../event_hub';
 export default {
   name: 'MRWidgetMerged',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     MrWidgetAuthorTime,
     statusIcon,
     ClipboardButton,
     GlLoadingIcon,
+    GlButton,
   },
   props: {
     mr: {
@@ -112,48 +112,52 @@ export default {
           :date-title="mr.metrics.mergedAt"
           :date-readable="mr.metrics.readableMergedAt"
         />
-        <a
+        <gl-button
           v-if="mr.canRevertInCurrentMR"
-          v-tooltip
+          v-gl-tooltip.hover
           :title="revertTitle"
-          class="btn btn-close btn-sm"
+          size="small"
+          category="secondary"
+          variant="warning"
           href="#modal-revert-commit"
           data-toggle="modal"
           data-container="body"
         >
           {{ revertLabel }}
-        </a>
-        <a
+        </gl-button>
+        <gl-button
           v-else-if="mr.revertInForkPath"
-          v-tooltip
+          v-gl-tooltip.hover
           :href="mr.revertInForkPath"
           :title="revertTitle"
-          class="btn btn-close btn-sm"
+          size="small"
+          category="secondary"
+          variant="warning"
           data-method="post"
         >
           {{ revertLabel }}
-        </a>
-        <a
+        </gl-button>
+        <gl-button
           v-if="mr.canCherryPickInCurrentMR"
-          v-tooltip
+          v-gl-tooltip.hover
           :title="cherryPickTitle"
-          class="btn btn-default btn-sm"
+          size="small"
           href="#modal-cherry-pick-commit"
           data-toggle="modal"
           data-container="body"
         >
           {{ cherryPickLabel }}
-        </a>
-        <a
+        </gl-button>
+        <gl-button
           v-else-if="mr.cherryPickInForkPath"
-          v-tooltip
+          v-gl-tooltip.hover
           :href="mr.cherryPickInForkPath"
           :title="cherryPickTitle"
-          class="btn btn-default btn-sm"
+          size="small"
           data-method="post"
         >
           {{ cherryPickLabel }}
-        </a>
+        </gl-button>
       </div>
       <section class="mr-info-list" data-qa-selector="merged_status_content">
         <p>
@@ -172,7 +176,9 @@ export default {
             <clipboard-button
               :title="__('Copy commit SHA')"
               :text="mr.mergeCommitSha"
-              css-class="btn-default btn-transparent btn-clipboard js-mr-merged-copy-sha"
+              css-class="js-mr-merged-copy-sha"
+              category="tertiary"
+              size="small"
             />
           </template>
         </p>
@@ -181,14 +187,14 @@ export default {
         </p>
         <p v-if="shouldShowRemoveSourceBranch" class="space-children">
           <span>{{ s__('mrWidget|You can delete the source branch now') }}</span>
-          <button
+          <gl-button
             :disabled="isMakingRequest"
-            type="button"
-            class="btn btn-sm btn-default js-remove-branch-button"
+            size="small"
+            class="js-remove-branch-button"
             @click="removeSourceBranch"
           >
             {{ s__('mrWidget|Delete source branch') }}
-          </button>
+          </gl-button>
         </p>
         <p v-if="shouldShowSourceBranchRemoving">
           <gl-loading-icon :inline="true" />

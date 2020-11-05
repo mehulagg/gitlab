@@ -67,18 +67,17 @@ export default {
         <slot name="rules"></slot>
       </div>
       <div v-if="settings.canEdit && settings.allowMultiRule" class="border-bottom py-3 px-2">
-        <div class="d-flex">
+        <div class="gl-display-flex">
           <gl-button
             v-if="targetBranch"
             :disabled="isLoading"
-            class="gl-ml-auto"
             data-testid="reset-to-defaults"
             @click="resetToProjectDefaults"
           >
             {{ __('Reset to project defaults') }}
           </gl-button>
           <gl-button
-            :class="{ 'gl-ml-3': targetBranch, 'gl-ml-auto': !targetBranch }"
+            :class="{ 'gl-ml-3': targetBranch, 'gl-ml-0': !targetBranch }"
             :disabled="isLoading"
             category="secondary"
             variant="info"

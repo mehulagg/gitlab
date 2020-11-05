@@ -49,7 +49,7 @@ export function initIterationForm() {
   });
 }
 
-export function initIterationReport(namespaceType) {
+export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const el = document.querySelector('.js-iteration');
 
   const {
@@ -74,6 +74,7 @@ export function initIterationReport(namespaceType) {
           editIterationPath,
           namespaceType,
           previewMarkdownPath,
+          initiallyEditing,
         },
       });
     },

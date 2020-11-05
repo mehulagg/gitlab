@@ -336,7 +336,7 @@ RSpec.shared_examples 'pages settings editing' do
 
         expect(page).not_to have_field(:project_pages_https_only)
         expect(page).not_to have_content('Force HTTPS (requires valid certificates)')
-        expect(page).not_to have_button('Save')
+        expect(page).to have_button('Save')
       end
     end
   end
@@ -365,7 +365,7 @@ RSpec.shared_examples 'pages settings editing' do
       end
 
       let!(:artifact) do
-        create(:ci_job_artifact, :archive,
+        create(:ci_job_artifact, :archive, :correct_checksum,
                file: fixture_file_upload(File.join('spec/fixtures/pages.zip')), job: ci_build)
       end
 

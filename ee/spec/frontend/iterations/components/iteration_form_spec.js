@@ -37,7 +37,7 @@ describe('Iteration Form', () => {
       propsData: props,
       stubs: {
         ApolloMutation,
-        MarkdownField: '<div><slot name="textarea"></slot></div>',
+        MarkdownField: { template: '<div><slot name="textarea"></slot></div>' },
       },
       mocks: {
         $apollo: {

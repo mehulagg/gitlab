@@ -25,24 +25,19 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'relates and unrelates one issue to/from another', status_issue: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/541' do
+      it 'relates and unrelates one issue to/from another', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/541' do
         issue_1.visit!
 
         Page::Project::Issue::Show.perform do |show|
           max_wait = 60
-          wait_interval = 1
 
           show.relate_issue(issue_2)
 
-          show.wait_until(reload: false, max_duration: max_wait, sleep_interval: wait_interval) do
-            expect(show.related_issuable_item).to have_content(issue_2.title)
-          end
+          expect(show.related_issuable_item).to have_text(issue_2.title, wait: max_wait)
 
           show.click_remove_related_issue_button
 
-          show.wait_until(reload: false, max_duration: max_wait, sleep_interval: wait_interval) do
-            expect(show).not_to have_content(issue_2.title)
-          end
+          expect(show).to have_no_text(issue_2.title, wait: max_wait)
         end
       end
     end

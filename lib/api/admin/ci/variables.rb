@@ -3,10 +3,12 @@
 module API
   module Admin
     module Ci
-      class Variables < Grape::API::Instance
+      class Variables < ::API::Base
         include PaginationParams
 
         before { authenticated_as_admin! }
+
+        feature_category :continuous_integration
 
         namespace 'admin' do
           namespace 'ci' do

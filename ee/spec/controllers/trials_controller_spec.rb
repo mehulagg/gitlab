@@ -120,13 +120,43 @@ RSpec.describe TrialsController do
   end
 
   describe '#select' do
-    subject do
+    def get_select
       get :select
+    end
+
+    subject do
+      get_select
       response
     end
 
     it_behaves_like 'an authenticated endpoint'
     it_behaves_like 'a dot-com only feature'
+
+    context 'when the group-only trials experiment is active' do
+      before do
+        stub_experiment(group_only_trials: true)
+        stub_experiment_for_user(group_only_trials: user_is_in_experiment?)
+      end
+
+      def expected_group_type
+        user_is_in_experiment? ? 'experimental' : 'control'
+      end
+
+      where(user_is_in_experiment?: [true, false])
+
+      with_them do
+        it 'records the user as being part of the experiment' do
+          expect { get_select }.to change { ExperimentUser.count }.by(1)
+          expect(ExperimentUser.last.group_type).to eq(expected_group_type)
+        end
+      end
+    end
+
+    context 'when the group-only trials experiment is not active' do
+      it 'does not record the user as being part of the experiment' do
+        expect { get_select }.not_to change { ExperimentUser.count }
+      end
+    end
   end
 
   describe '#apply' do
@@ -197,6 +227,34 @@ RSpec.describe TrialsController do
       end
 
       post :apply, params: post_params
+    end
+  end
+
+  describe 'confirm email warning' do
+    before do
+      get :new
+    end
+
+    RSpec::Matchers.define :set_confirm_warning_for do |email|
+      match do |response|
+        expect(response).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
+      end
+    end
+
+    context 'with an unconfirmed email address present' do
+      let(:user) { create(:user, confirmed_at: nil, unconfirmed_email: 'unconfirmed@gitlab.com') }
+
+      before do
+        sign_in(user)
+      end
+
+      it { is_expected.not_to set_confirm_warning_for(user.unconfirmed_email) }
+    end
+
+    context 'without an unconfirmed email address present' do
+      let(:user) { create(:user, confirmed_at: nil) }
+
+      it { is_expected.not_to set_confirm_warning_for(user.email) }
     end
   end
 end

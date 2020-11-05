@@ -5,6 +5,7 @@ import {
   groupedDastText,
   groupedDependencyText,
   groupedSecretScanningText,
+  groupedCoverageFuzzingText,
   groupedSummaryText,
   allReportsHaveError,
   noBaseInAllReports,
@@ -44,6 +45,7 @@ describe('Security reports getters', () => {
     ${'Dependency scanning'} | ${'dependencyScanning'} | ${groupedDependencyText}
     ${'Container scanning'}  | ${'containerScanning'}  | ${groupedContainerScanningText}
     ${'DAST'}                | ${'dast'}               | ${groupedDastText}
+    ${'Coverage fuzzing'}    | ${'coverageFuzzing'}    | ${groupedCoverageFuzzingText}
   `('grouped text for $name', ({ name, scanner, getter }) => {
     describe('with no issues', () => {
       it('returns no issues text', () => {
@@ -79,9 +81,10 @@ describe('Security reports getters', () => {
         state.containerScanning.newIssues = [generateVuln(CRITICAL)];
         state.dast.newIssues = [generateVuln(CRITICAL)];
         state.dependencyScanning.newIssues = [generateVuln(CRITICAL)];
+        state.coverageFuzzing.newIssues = [generateVuln(CRITICAL)];
 
         expect(summaryCounts(state)).toEqual({
-          critical: 3,
+          critical: 4,
           high: 0,
           other: 0,
         });
@@ -91,10 +94,11 @@ describe('Security reports getters', () => {
         state.containerScanning.newIssues = [generateVuln(CRITICAL)];
         state.dast.newIssues = [generateVuln(CRITICAL), generateVuln(HIGH)];
         state.dependencyScanning.newIssues = [generateVuln(LOW)];
+        state.coverageFuzzing.newIssues = [generateVuln(HIGH)];
 
         expect(summaryCounts(state)).toEqual({
           critical: 2,
-          high: 1,
+          high: 2,
           other: 1,
         });
       });
@@ -221,6 +225,7 @@ describe('Security reports getters', () => {
       state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
       state.secretScanning.hasError = true;
+      state.coverageFuzzing.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(true);
     });

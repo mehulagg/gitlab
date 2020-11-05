@@ -24,7 +24,9 @@ RSpec.describe GitlabSchema.types['User'] do
       authoredMergeRequests
       assignedMergeRequests
       groupMemberships
+      groupCount
       projectMemberships
+      starredProjects
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

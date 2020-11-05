@@ -264,7 +264,7 @@ describe('CustomStageForm', () => {
             wrapper
               .find(sel.startEventLabel)
               .findAll('.dropdown-item')
-              .at(1) // item at index 0 is 'select a label'
+              .at(0)
               .trigger('click');
             return wrapper.vm.$nextTick();
           })
@@ -454,7 +454,7 @@ describe('CustomStageForm', () => {
             wrapper
               .find(sel.endEventLabel)
               .findAll('.dropdown-item')
-              .at(2) // item at index 0 is 'select a label'
+              .at(1)
               .trigger('click');
 
             return wrapper.vm.$nextTick();

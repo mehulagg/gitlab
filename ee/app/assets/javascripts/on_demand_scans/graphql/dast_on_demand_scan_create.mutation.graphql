@@ -1,5 +1,15 @@
-mutation dastOnDemandScanCreate($fullPath: ID!, $dastSiteProfileId: DastSiteProfileID!) {
-  dastOnDemandScanCreate(input: { fullPath: $fullPath, dastSiteProfileId: $dastSiteProfileId }) {
+mutation dastOnDemandScanCreate(
+  $fullPath: ID!
+  $dastScannerProfileId: DastScannerProfileID
+  $dastSiteProfileId: DastSiteProfileID!
+) {
+  dastOnDemandScanCreate(
+    input: {
+      fullPath: $fullPath
+      dastScannerProfileId: $dastScannerProfileId
+      dastSiteProfileId: $dastSiteProfileId
+    }
+  ) {
     pipelineUrl
     errors
   }

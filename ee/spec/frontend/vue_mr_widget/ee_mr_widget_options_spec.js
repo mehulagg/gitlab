@@ -110,6 +110,7 @@ describe('ee merge request widget options', () => {
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm.loading = false;
 
         expect(
           findSecurityWidget()
@@ -742,6 +743,14 @@ describe('ee merge request widget options', () => {
   describe('Coverage Fuzzing', () => {
     const COVERAGE_FUZZING_ENDPOINT = 'coverage_fuzzing_report';
 
+    const mountWithFeatureFlag = () =>
+      new Component({
+        propsData: { mrData: gl.mrWidgetData },
+        provide: {
+          glFeatures: { coverageFuzzingMrWidget: true },
+        },
+      }).$mount();
+
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
@@ -757,8 +766,7 @@ describe('ee merge request widget options', () => {
       it('should render loading indicator', () => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
 
         expect(
           findSecurityWidget()
@@ -772,8 +780,7 @@ describe('ee merge request widget options', () => {
       beforeEach(() => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
       });
 
       it('should render provided data', done => {
@@ -792,8 +799,7 @@ describe('ee merge request widget options', () => {
       beforeEach(() => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(500, {});
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, {});
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
       });
 
       it('should render error indicator', done => {
@@ -810,13 +816,13 @@ describe('ee merge request widget options', () => {
   });
 
   describe('Secret Scanning', () => {
-    const SECRET_SCANNING_ENDPOINT = 'secret_scanning';
+    const SECRET_SCANNING_ENDPOINT = 'secret_detection_report';
 
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
         enabled_reports: {
-          secret_scanning: true,
+          secret_detection: true,
           // The below property needs to exist until
           // secret scanning is implemented in backend
           // Or for some other reason I'm yet to find
@@ -958,10 +964,10 @@ describe('ee merge request widget options', () => {
       vm.mr.state = 'readyToMerge';
 
       vm.$nextTick(() => {
-        const tooltip = vm.$el.querySelector('.fa-question-circle');
+        const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
-        expect(tooltip.getAttribute('data-original-title')).toBe(
+        expect(tooltip.getAttribute('title')).toBe(
           'A user with write access to the source branch selected this option',
         );
 
@@ -1070,7 +1076,7 @@ describe('ee merge request widget options', () => {
         sast: false,
         container_scanning: false,
         dependency_scanning: false,
-        secret_scanning: false,
+        secret_detection: false,
       },
     ];
 

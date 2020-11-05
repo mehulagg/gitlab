@@ -2,12 +2,37 @@
 
 require "spec_helper"
 
-RSpec.describe "Admin uploads license" do
+RSpec.describe "Admin uploads license", :js do
   let_it_be(:admin) { create(:admin) }
 
   before do
-    stub_feature_flags(licenses_app: false)
     sign_in(admin)
+  end
+
+  context 'default state' do
+    before do
+      visit(new_admin_license_path)
+    end
+
+    it 'has unselected EULA checkbox by default' do
+      expect(page).to have_unchecked_field('accept_eula')
+    end
+
+    it 'has disabled button "Upload license" by default' do
+      expect(page).to have_button('Upload License', disabled: true)
+    end
+
+    it 'redirects to current Subscription terms' do
+      expect(page).to have_link('Terms of Service', href: 'https://about.gitlab.com/terms/#subscription')
+    end
+
+    it 'enables button "Upload license" when EULA checkbox is selected' do
+      expect(page).to have_button('Upload License', disabled: true)
+
+      check('accept_eula')
+
+      expect(page).to have_button('Upload License', disabled: false)
+    end
   end
 
   context "when license key is provided in the query string" do
@@ -119,6 +144,7 @@ RSpec.describe "Admin uploads license" do
 
   def attach_and_upload(path)
     attach_file("license_data_file", path)
-    click_button("Upload license")
+    check("accept_eula")
+    click_button("Upload License")
   end
 end

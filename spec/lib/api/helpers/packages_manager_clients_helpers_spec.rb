@@ -50,7 +50,7 @@ RSpec.describe API::Helpers::PackagesManagerClientsHelpers do
 
   describe '#find_job_from_http_basic_auth' do
     let_it_be(:user) { personal_access_token.user }
-    let(:job) { create(:ci_build, user: user) }
+    let(:job) { create(:ci_build, user: user, status: :running) }
     let(:password) { job.token }
 
     subject { helper.find_job_from_http_basic_auth }
@@ -60,6 +60,16 @@ RSpec.describe API::Helpers::PackagesManagerClientsHelpers do
     end
 
     it_behaves_like 'invalid auth header'
+
+    context 'when the job is not running' do
+      before do
+        job.update!(status: :failed)
+      end
+
+      it_behaves_like 'valid auth header' do
+        let(:expected_result) { nil }
+      end
+    end
   end
 
   describe '#find_deploy_token_from_http_basic_auth' do
@@ -75,37 +85,5 @@ RSpec.describe API::Helpers::PackagesManagerClientsHelpers do
     end
 
     it_behaves_like 'invalid auth header'
-  end
-
-  describe '#uploaded_package_file' do
-    let_it_be(:params) { {} }
-
-    subject { helper.uploaded_package_file }
-
-    before do
-      allow(helper).to receive(:params).and_return(params)
-    end
-
-    context 'with valid uploaded package file' do
-      let_it_be(:uploaded_file) { Object.new }
-
-      before do
-        allow(UploadedFile).to receive(:from_params).and_return(uploaded_file)
-      end
-
-      it { is_expected.to be uploaded_file }
-    end
-
-    context 'with invalid uploaded package file' do
-      before do
-        allow(UploadedFile).to receive(:from_params).and_return(nil)
-      end
-
-      it 'fails with bad_request!' do
-        expect(helper).to receive(:bad_request!)
-
-        expect(subject).to be nil
-      end
-    end
   end
 end

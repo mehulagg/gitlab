@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 module API
-  class NpmPackages < Grape::API::Instance
+  class NpmPackages < ::API::Base
     helpers ::API::Helpers::PackagesHelpers
     helpers ::API::Helpers::Packages::DependencyProxyHelpers
+
+    feature_category :package_registry
 
     NPM_ENDPOINT_REQUIREMENTS = {
       package_name: API::NO_SLASH_URL_PART_REGEX
@@ -141,7 +143,7 @@ module API
         package_file = ::Packages::PackageFileFinder
           .new(package, params[:file_name]).execute!
 
-        track_event('pull_package')
+        track_package_event('pull_package', package)
 
         present_carrierwave_file!(package_file.file)
       end
@@ -157,7 +159,7 @@ module API
       put ':id/packages/npm/:package_name', requirements: NPM_ENDPOINT_REQUIREMENTS do
         authorize_create_package!(user_project)
 
-        track_event('push_package')
+        track_package_event('push_package', :npm)
 
         created_package = ::Packages::Npm::CreatePackageService
           .new(user_project, current_user, params.merge(build: current_authenticated_job)).execute

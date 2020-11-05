@@ -8,9 +8,9 @@ RSpec.describe 'Running a DAST Scan' do
   let(:project) { create(:project, :repository, creator: current_user) }
   let(:current_user) { create(:user) }
   let(:project_path) { project.full_path }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:branch) { project.default_branch }
-  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
+  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive].upcase }
 
   let(:mutation) do
     graphql_mutation(
@@ -37,10 +37,6 @@ RSpec.describe 'Running a DAST Scan' do
   end
 
   context 'when on demand scan feature is enabled' do
-    before do
-      stub_feature_flags(security_on_demand_scans_feature_flag: true)
-    end
-
     context 'when the user does not have permission to run a dast scan' do
       it_behaves_like 'a mutation that returns top-level errors',
                       errors: ['The resource that you are attempting to access does not ' \

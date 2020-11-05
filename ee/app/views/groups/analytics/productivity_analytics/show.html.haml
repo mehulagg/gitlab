@@ -1,5 +1,5 @@
 - page_title _('Productivity Analytics')
-
+- add_page_specific_style 'page_bundles/productivity_analytics'
 - data_attributes = @request_params.valid? ? @request_params.to_data_attributes : @request_params.to_default_data_attributes
 
 #js-productivity-analytics{ data: data_attributes.merge(hide_group_drop_down: 'true') }

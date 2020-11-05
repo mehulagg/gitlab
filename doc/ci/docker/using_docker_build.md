@@ -48,7 +48,6 @@ The simplest approach is to install GitLab Runner in `shell` execution mode.
 GitLab Runner then executes job scripts as the `gitlab-runner` user.
 
 1. Install [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/#installation).
-
 1. During GitLab Runner installation select `shell` as method of executing job scripts or use command:
 
    ```shell
@@ -90,9 +89,8 @@ GitLab Runner then executes job scripts as the `gitlab-runner` user.
 
 1. You can now use `docker` command (and **install** `docker-compose` if needed).
 
-NOTE: **Note:**
 By adding `gitlab-runner` to the `docker` group you are effectively granting `gitlab-runner` full root permissions.
-For more information please read [On Docker security: `docker` group considered harmful](https://www.andreas-jung.com/contents/on-docker-security-docker-group-considered-harmful).
+For more information please read [On Docker security: `docker` group considered harmful](https://blog.zopyx.com/on-docker-security-docker-group-considered-harmful/).
 
 ### Use Docker-in-Docker workflow with Docker executor
 
@@ -101,12 +99,11 @@ The second approach is to use the special Docker-in-Docker (dind)
 (`docker`) and run the job script in context of that
 image in privileged mode.
 
-NOTE: **Note:**
 `docker-compose` is not part of Docker-in-Docker (dind). To use `docker-compose` in your
 CI builds, follow the `docker-compose`
 [installation instructions](https://docs.docker.com/compose/install/).
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 By enabling `--docker-privileged`, you are effectively disabling all of
 the security mechanisms of containers and exposing your host to privilege
 escalation which can lead to container breakout. For more information, check
@@ -149,22 +146,17 @@ released.
 
 #### TLS enabled
 
-NOTE: **Note:**
-Requires GitLab Runner 11.11 or later, but is not supported if GitLab
-Runner is installed using the [Helm
-chart](https://docs.gitlab.com/runner/install/kubernetes.html). See the
-[related
-issue](https://gitlab.com/gitlab-org/charts/gitlab-runner/-/issues/83) for
-details.
-
 The Docker daemon supports connection over TLS and it's done by default
 for Docker 19.03.12 or higher. This is the **suggested** way to use the
 Docker-in-Docker service and
 [GitLab.com shared runners](../../user/gitlab_com/index.md#shared-runners)
 support this.
 
-1. Install [GitLab Runner](https://docs.gitlab.com/runner/install/).
+GitLab Runner 11.11 or later is required, but it is not supported if GitLab
+Runner is installed using the [Helm chart](https://docs.gitlab.com/runner/install/kubernetes.html).
+See the [related issue](https://gitlab.com/gitlab-org/charts/gitlab-runner/-/issues/83) for details.
 
+1. Install [GitLab Runner](https://docs.gitlab.com/runner/install/).
 1. Register GitLab Runner from the command line to use `docker` and `privileged`
    mode:
 
@@ -225,7 +217,7 @@ support this.
      # The 'docker' hostname is the alias of the service container as described at
      # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services.
      #
-     # Note that if you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
+     # If you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
      # the variable must be set to tcp://localhost:2376 because of how the
      # Kubernetes executor connects services to the job container
      # DOCKER_HOST: tcp://localhost:2376
@@ -287,7 +279,7 @@ variables:
   # The 'docker' hostname is the alias of the service container as described at
   # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
   #
-  # Note that if you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
+  # If you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
   # the variable must be set to tcp://localhost:2375 because of how the
   # Kubernetes executor connects services to the job container
   # DOCKER_HOST: tcp://localhost:2375
@@ -310,6 +302,98 @@ build:
     - docker run my-docker-image /script/to/run/tests
 ```
 
+#### Enable registry mirror for `docker:dind` service
+
+When the Docker daemon starts inside of the service container, it uses
+the default configuration. You may want to configure a [registry
+mirror](https://docs.docker.com/registry/recipes/mirror/) for
+performance improvements and ensuring you don't reach DockerHub rate limits.
+
+##### Inside `.gitlab-ci.yml`
+
+You can append extra CLI flags to the `dind` service to set the registry
+mirror:
+
+```yaml
+services:
+   - name: docker:19.03.13-dind
+     command: ["--registry-mirror", "https://registry-mirror.example.com"] # Specify the registry mirror to use.
+```
+
+#### DinD service defined inside of GitLab Runner configuration
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/27173) in GitLab Runner 13.6.
+
+If you are an administrator of GitLab Runner and you have the `dind`
+service defined for the [Docker
+executor](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersdockerservices-section),
+or the [Kubernetes
+executor](https://docs.gitlab.com/runner/executors/kubernetes.html#using-services)
+you can specify the `command` to configure the registry mirror for the
+Docker daemon.
+
+Docker:
+
+```toml
+[[runners]]
+  ...
+  executor = "docker"
+  [runners.docker]
+    ...
+    privileged = true
+    [[runners.docker.services]]
+      name = "docker:19.03.13-dind"
+      command = ["--registry-mirror", "https://registry-mirror.example.com"]
+```
+
+Kubernetes:
+
+```toml
+[[runners]]
+  ...
+  name = "kubernetes"
+  [runners.kubernetes]
+    ...
+    privileged = true
+    [[runners.kubernetes.services]]
+      name = "docker:19.03.13-dind"
+      command = ["--registry-mirror", "https://registry-mirror.example.com"]
+```
+
+##### Docker executor inside GitLab Runner configuration
+
+If you are an administrator of GitLab Runner and you always want to use
+the mirror for every `dind` service, update the
+[configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html)
+to specify a [volume
+mount](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#volumes-in-the-runnersdocker-section).
+
+Given we have a file `/opt/docker/daemon.json` with the following
+content:
+
+```json
+{
+  "registry-mirrors": [
+    "https://registry-mirror.example.com"
+  ]
+}
+```
+
+Update the `config.toml` for GitLab Runner to mount the file to
+`/etc/docker/daemon.json`. This would mount the file for **every**
+container that is created by GitLab Runner. The configuration will be
+picked up by the `dind` service.
+
+```toml
+[[runners]]
+  ...
+  executor = "docker"
+  [runners.docker]
+    image = "alpine:3.12"
+    privileged = true
+    volumes = ["/opt/docker/daemon.json:/etc/docker/daemon.json:ro"]
+```
+
 ### Use Docker socket binding
 
 The third approach is to bind-mount `/var/run/docker.sock` into the
@@ -324,7 +408,6 @@ are done to the services as well, making these incompatible.
 In order to do that, follow the steps:
 
 1. Install [GitLab Runner](https://docs.gitlab.com/runner/install/).
-
 1. Register GitLab Runner from the command line to use `docker` and share `/var/run/docker.sock`:
 
    ```shell
@@ -506,14 +589,13 @@ environment = ["DOCKER_DRIVER=overlay2"]
 
 If you're running multiple runners, you have to modify all configuration files.
 
-NOTE: **Note:**
 Read more about the [runner configuration](https://docs.gitlab.com/runner/configuration/)
 and [using the OverlayFS storage driver](https://docs.docker.com/engine/userguide/storagedriver/overlayfs-driver/).
 
 ## Using the GitLab Container Registry
 
 Once you've built a Docker image, you can push it up to the built-in
-[GitLab Container Registry](../../user/packages/container_registry/index.md#build-and-push-images-using-gitlab-cicd).
+[GitLab Container Registry](../../user/packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd).
 
 ## Troubleshooting
 

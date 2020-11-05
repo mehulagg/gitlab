@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Manage', :requires_admin, :skip_live_env do
+  RSpec.describe 'Manage', :requires_admin, :skip_live_env do
     describe '2FA' do
       let(:owner_user) do
         Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_2fa_owner_username_1, Runtime::Env.gitlab_qa_2fa_owner_password_1)
@@ -32,7 +32,7 @@ module QA
         group.add_member(developer_user, Resource::Members::AccessLevel::DEVELOPER)
       end
 
-      it 'allows using 2FA recovery code once only', status_issue: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/972' do
+      it 'allows using 2FA recovery code once only', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/972' do
         recovery_code = enable_2fa_for_user_and_fetch_recovery_code(developer_user)
 
         Flow::Login.sign_in(as: developer_user, skip_page_validation: true)

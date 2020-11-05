@@ -3,12 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :public, :repository) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :public, :repository) }
   let(:query) { 'hello world' }
   let(:repository_ref) { nil }
+  let(:filters) { {} }
 
-  subject(:results) { described_class.new(user, query, project: project, repository_ref: repository_ref) }
+  subject(:results) { described_class.new(user, query, project: project, repository_ref: repository_ref, filters: filters) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
@@ -30,9 +31,9 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
     it { expect(results.query).to eq('hello world') }
   end
 
-  describe "search", :sidekiq_might_not_need_inline do
-    let(:project) { create(:project, :public, :repository, :wiki_repo) }
-    let(:private_project) { create(:project, :repository, :wiki_repo) }
+  describe "search", :sidekiq_inline do
+    let_it_be(:project) { create(:project, :public, :repository, :wiki_repo) }
+    let_it_be(:private_project) { create(:project, :repository, :wiki_repo) }
 
     before do
       [project, private_project].each do |project|
@@ -56,7 +57,7 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
     end
 
     context 'visibility checks' do
-      let(:project) { create(:project, :public, :wiki_repo) }
+      let_it_be(:project) { create(:project, :public, :wiki_repo) }
       let(:query) { 'term' }
 
       before do
@@ -65,6 +66,39 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
 
       it 'shows wiki for guests' do
         expect(results.wiki_blobs_count).to eq(1)
+      end
+    end
+
+    context 'filtering' do
+      let!(:project) { create(:project, :public) }
+      let(:query) { 'foo' }
+
+      context 'issues' do
+        let!(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
+        let!(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
+        let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
+        let(:scope) { 'issues' }
+
+        before do
+          project.add_developer(user)
+
+          ensure_elasticsearch_index!
+        end
+
+        include_examples 'search results filtered by state'
+        include_examples 'search results filtered by confidential'
+      end
+
+      context 'merge_requests' do
+        let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
+        let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
+        let(:scope) { 'merge_requests' }
+
+        before do
+          ensure_elasticsearch_index!
+        end
+
+        include_examples 'search results filtered by state'
       end
     end
   end
@@ -132,32 +166,6 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
     include_examples 'access restricted confidential issues' do
       before do
         ensure_elasticsearch_index!
-      end
-    end
-  end
-
-  context 'user search' do
-    let(:query) { project.owner.username }
-
-    before do
-      expect(Gitlab::ProjectSearchResults).to receive(:new).and_call_original
-    end
-
-    it { expect(results.objects('users')).to eq([project.owner]) }
-    it { expect(results.limited_users_count).to eq(1) }
-
-    describe 'pagination' do
-      let(:query) {}
-
-      let!(:user2) { create(:user).tap { |u| project.add_user(u, Gitlab::Access::REPORTER) } }
-
-      it 'returns the correct page of results' do
-        expect(results.objects('users', page: 1, per_page: 1)).to eq([project.owner])
-        expect(results.objects('users', page: 2, per_page: 1)).to eq([user2])
-      end
-
-      it 'returns the correct number of results for one page' do
-        expect(results.objects('users', page: 1, per_page: 2).count).to eq(2)
       end
     end
   end

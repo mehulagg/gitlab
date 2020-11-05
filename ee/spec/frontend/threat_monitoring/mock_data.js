@@ -38,28 +38,6 @@ spec:
           project: myproject`,
     creation_timestamp: '2020-04-14T00:08:30Z',
     is_enabled: true,
-    is_standard: true,
-  },
-  {
-    name: 'cilium_policy',
-    namespace: 'production',
-    manifest: `---
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: cilium_policy
-  namespace: production
-spec:
-  endpointSelector:
-    matchLabels:
-      role: db
-  ingress:
-  - fromEndpoints:
-    - matchLabels:
-        project: myproject`,
-    created_timestamp: '2020-04-15T00:08:30Z',
-    is_enabled: true,
-    is_standard: false,
   },
 ];
 

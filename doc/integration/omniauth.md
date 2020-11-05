@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # OmniAuth
 
 GitLab leverages OmniAuth to allow users to sign in using Twitter, GitHub, and
@@ -50,7 +56,7 @@ earlier version, you'll need to explicitly enable it.
 - `allow_single_sign_on` allows you to specify the providers you want to allow to
   automatically create an account. It defaults to `false`. If `false` users must
   be created manually or they will not be able to sign in via OmniAuth.
-- `auto_link_ldap_user` can be used if you have [LDAP / ActiveDirectory](ldap.md)
+- `auto_link_ldap_user` can be used if you have [LDAP / ActiveDirectory](../administration/auth/ldap/index.md)
   integration enabled. It defaults to `false`. When enabled, users automatically
   created through an OmniAuth provider will have their LDAP identity created in GitLab as well.
 - `block_auto_created_users` defaults to `true`. If `true` auto created users will
@@ -104,21 +110,21 @@ To change these settings:
 
   ```yaml
   ## OmniAuth settings
-   omniauth:
-     # Allow login via Twitter, Google, etc. using OmniAuth providers
-     # Versions prior to 11.4 require this to be set to true
-     # enabled: true
+  omniauth:
+    # Allow login via Twitter, Google, etc. using OmniAuth providers
+    # Versions prior to 11.4 require this to be set to true
+    # enabled: true
 
-     # CAUTION!
-     # This allows users to login without having a user account first. Define the allowed providers
-     # using an array, e.g. ["saml", "twitter"], or as true/false to allow all providers or none.
-     # User accounts will be created automatically when authentication was successful.
-     allow_single_sign_on: ["saml", "twitter"]
+    # CAUTION!
+    # This allows users to login without having a user account first. Define the allowed providers
+    # using an array, e.g. ["saml", "twitter"], or as true/false to allow all providers or none.
+    # User accounts will be created automatically when authentication was successful.
+    allow_single_sign_on: ["saml", "twitter"]
 
-     auto_link_ldap_user: true
+    auto_link_ldap_user: true
 
-     # Locks down those users until they have been cleared by the admin (default: true).
-     block_auto_created_users: true
+    # Locks down those users until they have been cleared by the admin (default: true).
+    block_auto_created_users: true
   ```
 
 Now we can choose one or more of the [Supported Providers](#supported-providers)
@@ -142,19 +148,22 @@ The chosen OmniAuth provider is now active and can be used to sign in to GitLab 
 
 ## Automatically Link Existing Users to OmniAuth Users
 
-You can automatically link OmniAuth users with existing GitLab users if their email addresses match by adding the following setting:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36664) in GitLab 13.4.
+
+You can automatically link OmniAuth users with existing GitLab users if their email addresses match.
+For example, the following setting is used to enable the auto link feature for both a SAML provider and the Twitter OAuth provider:
 
 **For Omnibus installations**
 
 ```ruby
-gitlab_rails['omniauth_auto_link_user'] = true
+gitlab_rails['omniauth_auto_link_user'] = ["saml", "twitter"]
 ```
 
 **For installations from source**
 
 ```yaml
 omniauth:
-  auto_link_user: true
+  auto_link_user: ["saml", "twitter"]
 ```
 
 ## Configure OmniAuth Providers as External

@@ -30,11 +30,24 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, :cl
         allow(Gitlab::ShardHealthCache).to receive(:healthy_shard?).with('default').and_return(true)
       end
 
-      context "when the container repository's project is not excluded by selective sync" do
+      context 'when the design repository is not excluded by selective sync' do
         it_behaves_like 'event should trigger a sync'
+
+        context 'when the project is included in selective sync but there is no design' do
+          before do
+            node = create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: [project.repository_storage])
+            stub_current_geo_node(node)
+          end
+
+          context 'when a registry does not yet exist' do
+            it_behaves_like 'event does not create a registry'
+            it_behaves_like 'event does not schedule a sync worker'
+            it_behaves_like 'logs event source info'
+          end
+        end
       end
 
-      context "when the container repository's project is excluded by selective sync" do
+      context "when the design repository is excluded by selective sync" do
         before do
           stub_current_geo_node(secondary_excludes_all_projects)
         end

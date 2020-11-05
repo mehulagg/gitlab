@@ -17,6 +17,7 @@ RSpec.describe 'Labels Hierarchy', :js do
   let!(:project_label_1) { create(:label, project: project_1, title: 'Label_4') }
 
   before do
+    stub_feature_flags(graphql_board_lists: false)
     grandparent.add_owner(user)
 
     sign_in(user)
@@ -42,12 +43,12 @@ RSpec.describe 'Labels Hierarchy', :js do
 
     it 'does not find child group labels on dropdown' do
       page.within('.block.labels') do
-        find('.edit-link').click
+        click_on 'Edit'
+
+        wait_for_requests
+
+        expect(page).not_to have_text(child_group_label.title)
       end
-
-      wait_for_requests
-
-      expect(page).not_to have_selector('.badge', text: child_group_label.title)
     end
   end
 

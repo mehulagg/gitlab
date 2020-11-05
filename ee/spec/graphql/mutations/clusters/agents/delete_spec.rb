@@ -24,7 +24,7 @@ RSpec.describe Mutations::Clusters::Agents::Delete do
     context 'without user permissions' do
       it 'fails to delete the cluster agent', :aggregate_failures do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        expect { cluster_agent.reload }.not_to raise_error(ActiveRecord::RecordNotFound)
+        expect { cluster_agent.reload }.not_to raise_error
       end
     end
 
@@ -43,8 +43,8 @@ RSpec.describe Mutations::Clusters::Agents::Delete do
       subject { mutation.resolve(id: cluster_agent.id) }
 
       it 'raises an error if the cluster agent id is invalid', :aggregate_failures do
-        expect { subject }.to raise_error(NoMethodError)
-        expect { cluster_agent.reload }.not_to raise_error(ActiveRecord::RecordNotFound)
+        expect { subject }.to raise_error(::GraphQL::CoercionError)
+        expect { cluster_agent.reload }.not_to raise_error
       end
     end
   end

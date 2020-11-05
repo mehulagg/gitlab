@@ -53,7 +53,7 @@ RSpec.describe Geo::EventLog, type: :model do
     end
 
     it 'returns repository_created_event when set' do
-      repository_created_event = build(:geo_repository_created_event)
+      repository_created_event = build_stubbed(:geo_repository_created_event)
       subject.repository_created_event = repository_created_event
 
       expect(subject.event).to eq repository_created_event

@@ -20,7 +20,8 @@
             %div
               - if github_import_enabled?
                 = link_to new_import_github_path(ci_cd_only: true), class: 'btn js-import-github', data: { track_label: "#{track_label}", track_property: 'github', track_event: "click_button", track_value: "" } do
-                  = icon('github', text: 'GitHub')
+                  = sprite_icon('github')
+                  GitHub
             %div
               - if git_import_enabled?
                 %button.btn.btn-svg.js-toggle-button.js-import-git-toggle-button{ type: "button", data: { toggle_open_class: 'active', track_label: "#{track_label}", track_property: 'repo_url', track_event: "click_button", track_value: "" } }

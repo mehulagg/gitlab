@@ -10,7 +10,7 @@ RSpec.describe 'User views iteration' do
   let_it_be(:sub_project) { create(:project, group: sub_group) }
   let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group).user }
   let_it_be(:guest_user) { create(:group_member, :guest, user: create(:user), group: group).user }
-  let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, iid: 1, id: 2, group: group, title: 'Correct Iteration', start_date: now - 1.day, due_date: now) }
+  let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, iid: 1, id: 2, group: group, title: 'Correct Iteration', description: 'iteration description', start_date: now - 1.day, due_date: now) }
   let_it_be(:other_iteration) { create(:iteration, :skip_future_date_validation, iid: 2, id: 1, group: group, title: 'Wrong Iteration', start_date: now - 4.days, due_date: now - 3.days) }
   let_it_be(:sub_group_iteration) { create(:iteration, id: 3, group: sub_group) }
   let_it_be(:issue) { create(:issue, project: project, iteration: iteration) }
@@ -20,60 +20,64 @@ RSpec.describe 'User views iteration' do
   let_it_be(:other_issue) { create(:issue, project: project, iteration: other_iteration) }
 
   context 'with license', :js do
-    context 'view an iteration' do
+    before do
+      stub_licensed_features(iterations: true)
+    end
+
+    shared_examples 'shows iteration info' do
       before do
-        stub_licensed_features(iterations: true)
-        sign_in(user)
+        sign_in(current_user)
 
         visit group_iteration_path(iteration.group, iteration.iid)
       end
 
-      it 'shows iteration info and dates' do
-        expect(page).to have_content(iteration.title)
-        expect(page).to have_content(iteration.description)
-        expect(page).to have_content(iteration.start_date.strftime('%b %-d, %Y'))
-        expect(page).to have_content(iteration.due_date.strftime('%b %-d, %Y'))
-      end
+      it 'shows iteration info' do
+        aggregate_failures 'expect title, description, and dates' do
+          expect(page).to have_content(iteration.title)
+          expect(page).to have_content(iteration.description)
+          expect(page).to have_content(iteration.start_date.strftime('%b %-d, %Y'))
+          expect(page).to have_content(iteration.due_date.strftime('%b %-d, %Y'))
+        end
 
-      it 'shows correct summary information' do
-        expect(page).to have_content("Complete 25%")
-        expect(page).to have_content("Open 2")
-        expect(page).to have_content("In progress 1")
-        expect(page).to have_content("Completed 1")
-      end
+        aggregate_failures 'expect summary information' do
+          expect(page).to have_content("Complete 25%")
+          expect(page).to have_content("Open 2")
+          expect(page).to have_content("In progress 1")
+          expect(page).to have_content("Completed 1")
+        end
 
-      it 'shows all issues within the group' do
-        expect(page).to have_content(issue.title)
-        expect(page).to have_content(assigned_issue.title)
-        expect(page).to have_content(closed_issue.title)
-        expect(page).to have_content(sub_group_issue.title)
-        expect(page).not_to have_content(other_issue.title)
+        aggregate_failures 'expect burnup and burndown charts' do
+          expect(page).to have_content('Burndown chart')
+          expect(page).to have_content('Burnup chart')
+        end
+
+        aggregate_failures 'expect list of assigned issues' do
+          expect(page).to have_content(issue.title)
+          expect(page).to have_content(assigned_issue.title)
+          expect(page).to have_content(closed_issue.title)
+          expect(page).to have_content(sub_group_issue.title)
+          expect(page).not_to have_content(other_issue.title)
+        end
+
+        if shows_actions
+          expect(page).to have_button('Actions')
+        else
+          expect(page).not_to have_button('Actions')
+        end
       end
     end
 
     context 'when user has edit permissions' do
-      before do
-        stub_licensed_features(iterations: true)
-        sign_in(user)
-
-        visit group_iteration_path(iteration.group, iteration.iid)
-      end
-
-      it 'shows action dropdown for editing the iteration' do
-        expect(page).to have_button('Actions')
+      it_behaves_like 'shows iteration info' do
+        let(:current_user) { user }
+        let(:shows_actions) { true }
       end
     end
 
     context 'when user does not have edit permissions' do
-      before do
-        stub_licensed_features(iterations: true)
-        sign_in(guest_user)
-
-        visit group_iteration_path(iteration.group, iteration.iid)
-      end
-
-      it 'hides action dropdown for editing the iteration' do
-        expect(page).not_to have_button('Actions')
+      it_behaves_like 'shows iteration info' do
+        let(:current_user) { guest_user }
+        let(:shows_actions) { false }
       end
     end
   end

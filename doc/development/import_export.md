@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Import/Export development documentation
 
 Troubleshooting and general development guidelines and tips for the [Import/Export feature](../user/project/settings/import_export.md).
@@ -244,7 +250,7 @@ project_tree:
       - :push_event_payload
   - issues:
     - events:
-    - ...
+    # ...
 ```
 
 Only include the following attributes for the models specified:
@@ -254,8 +260,7 @@ included_attributes:
   user:
     - :id
     - :email
-  ...
-
+  # ...
 ```
 
 Do not include the following attributes for the models specified:

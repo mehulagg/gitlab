@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class GroupContainerRepositories < Grape::API::Instance
+  class GroupContainerRepositories < ::API::Base
     include PaginationParams
 
+    helpers ::API::Helpers::PackagesHelpers
+
     before { authorize_read_group_container_images! }
+
+    feature_category :package_registry
 
     REPOSITORY_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(
       tag_name: API::NO_SLASH_URL_PART_REGEX)
@@ -27,7 +31,7 @@ module API
           user: current_user, subject: user_group
         ).execute
 
-        track_event('list_repositories')
+        track_package_event('list_repositories', :container)
 
         present paginate(repositories), with: Entities::ContainerRegistry::Repository, tags: params[:tags], tags_count: params[:tags_count]
       end

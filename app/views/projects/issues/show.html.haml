@@ -1,10 +1,9 @@
 - @content_class = "limit-container-width" unless fluid_layout
 - add_to_breadcrumbs _("Issues"), project_issues_path(@project)
 - breadcrumb_title @issue.to_reference
-- page_title           "#{@issue.title} (#{@issue.to_reference})", _("Issues")
-- page_description     @issue.description
-- page_card_attributes @issue.card_attributes
+- page_title "#{@issue.title} (#{@issue.to_reference})", _("Issues")
 
+<<<<<<< HEAD
 - can_update_issue = can?(current_user, :update_issue, @issue)
 - can_reopen_issue = can?(current_user, :reopen_issue, @issue)
 - can_report_spam = @issue.submittable_as_spam_by?(current_user)
@@ -115,3 +114,6 @@
     = render 'projects/issues/tabs'
 
 = render 'shared/issuable/sidebar', issuable_sidebar: @issuable_sidebar, assignees: @issue.assignees
+=======
+= render 'projects/issuable/show', issuable: @issue
+>>>>>>> 3dece4681a6ee94df0ee88adec6405a6b3ca5a2e

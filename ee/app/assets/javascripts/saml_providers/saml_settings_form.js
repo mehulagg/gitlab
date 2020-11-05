@@ -3,6 +3,7 @@ import { __ } from '~/locale';
 import DirtyFormChecker from './dirty_form_checker';
 import setupToggleButtons from '~/toggle_buttons';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import { fixTitle } from '~/tooltips';
 
 const CALLOUT_SELECTOR = '.js-callout';
 const HELPER_SELECTOR = '.js-helper-text';
@@ -139,6 +140,7 @@ export default class SamlSettingsForm {
 
     // Update tooltip using wrapper so it works when input disabled
     this.testButtonTooltipWrapper.setAttribute('title', this.testButtonTooltip());
-    $(this.testButtonTooltipWrapper).tooltip('_fixTitle');
+
+    fixTitle($(this.testButtonTooltipWrapper));
   }
 }

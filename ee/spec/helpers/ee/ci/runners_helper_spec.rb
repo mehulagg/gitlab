@@ -91,16 +91,6 @@ RSpec.describe EE::Ci::RunnersHelper do
         it_behaves_like 'minutes notification' do
           before do
             allow(helper).to receive(:experiment_enabled?).with(:ci_notification_dot).and_return(experiment_status)
-            allow(helper).to receive(:experiment_enabled?).with(:buy_ci_minutes_version_a).and_return(false)
-          end
-        end
-      end
-
-      context 'when experiment is "ci_minutes_version_a"' do
-        it_behaves_like 'minutes notification' do
-          before do
-            allow(helper).to receive(:experiment_enabled?).with(:ci_notification_dot).and_return(false)
-            allow(helper).to receive(:experiment_enabled?).with(:buy_ci_minutes_version_a).and_return(experiment_status)
           end
         end
       end

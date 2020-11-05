@@ -1,14 +1,22 @@
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import eventHub from '~/environments/event_hub';
 import EnvironmentActions from '~/environments/components/environment_actions.vue';
 
 describe('EnvironmentActions Component', () => {
   let vm;
 
+  const findEnvironmentActionsButton = () => vm.find('[data-testid="environment-actions-button"]');
+
   beforeEach(() => {
-    vm = shallowMount(EnvironmentActions, { propsData: { actions: [] } });
+    vm = shallowMount(EnvironmentActions, {
+      propsData: { actions: [] },
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
+    });
   });
 
   afterEach(() => {
@@ -21,6 +29,11 @@ describe('EnvironmentActions Component', () => {
 
   it('should render a dropdown button with aria-label description', () => {
     expect(vm.find('.dropdown-new').attributes('aria-label')).toEqual('Deploy to...');
+  });
+
+  it('should render a tooltip', () => {
+    const tooltip = getBinding(findEnvironmentActionsButton().element, 'gl-tooltip');
+    expect(tooltip).toBeDefined();
   });
 
   describe('is loading', () => {
@@ -59,11 +72,7 @@ describe('EnvironmentActions Component', () => {
     });
 
     it("should render a disabled action when it's not playable", () => {
-      expect(vm.find('.dropdown-menu li:last-child button').attributes('disabled')).toEqual(
-        'disabled',
-      );
-
-      expect(vm.find('.dropdown-menu li:last-child button').classes('disabled')).toBe(true);
+      expect(vm.find('.dropdown-menu li:last-child gl-button-stub').props('disabled')).toBe(true);
     });
   });
 
@@ -81,7 +90,7 @@ describe('EnvironmentActions Component', () => {
       scheduledAt: '2018-10-05T08:23:00Z',
     };
     const findDropdownItem = action => {
-      const buttons = vm.findAll('.dropdown-menu li button');
+      const buttons = vm.findAll('.dropdown-menu li gl-button-stub');
       return buttons.filter(button => button.text().startsWith(action.name)).at(0);
     };
 
@@ -95,7 +104,7 @@ describe('EnvironmentActions Component', () => {
       eventHub.$on('postAction', emitSpy);
       jest.spyOn(window, 'confirm').mockImplementation(() => true);
 
-      findDropdownItem(scheduledJobAction).trigger('click');
+      findDropdownItem(scheduledJobAction).vm.$emit('click');
 
       expect(window.confirm).toHaveBeenCalled();
       expect(emitSpy).toHaveBeenCalledWith({ endpoint: scheduledJobAction.playPath });
@@ -106,7 +115,7 @@ describe('EnvironmentActions Component', () => {
       eventHub.$on('postAction', emitSpy);
       jest.spyOn(window, 'confirm').mockImplementation(() => false);
 
-      findDropdownItem(scheduledJobAction).trigger('click');
+      findDropdownItem(scheduledJobAction).vm.$emit('click');
 
       expect(window.confirm).toHaveBeenCalled();
       expect(emitSpy).not.toHaveBeenCalled();

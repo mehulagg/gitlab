@@ -13,6 +13,19 @@ query sastCiConfiguration($fullPath: ID!) {
           ...SastCiConfigurationEntityFragment
         }
       }
+      analyzers {
+        nodes {
+          description
+          enabled
+          label
+          name
+          variables {
+            nodes {
+              ...SastCiConfigurationEntityFragment
+            }
+          }
+        }
+      }
     }
   }
 }

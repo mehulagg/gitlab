@@ -22,5 +22,9 @@ module EE
     def merge_pipelines_were_disabled?
       saved_change_to_attribute?(:merge_pipelines_enabled, from: true, to: false)
     end
+
+    def auto_rollback_enabled?
+      super && ::Gitlab::Ci::Features.auto_rollback_available?(project)
+    end
   end
 end

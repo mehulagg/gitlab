@@ -1,6 +1,6 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { sprintf, s__ } from '~/locale';
+import { GlLoadingIcon, GlSprintf, GlLink } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import statusCodes from '~/lib/utils/http_status';
 import { bytesToMiB } from '~/lib/utils/number_utils';
 import { backOff } from '~/lib/utils/common_utils';
@@ -11,6 +11,9 @@ export default {
   name: 'MemoryUsage',
   components: {
     MemoryGraph,
+    GlLoadingIcon,
+    GlSprintf,
+    GlLink,
   },
   props: {
     metricsUrl: {
@@ -48,45 +51,22 @@ export default {
       return !this.loadingMetrics && !this.hasMetrics && !this.loadFailed;
     },
     memoryChangeMessage() {
-      const messageProps = {
-        memoryFrom: this.memoryFrom,
-        memoryTo: this.memoryTo,
-        metricsLinkStart: `<a href="${this.metricsMonitoringUrl}">`,
-        metricsLinkEnd: '</a>',
-        emphasisStart: '<b>',
-        emphasisEnd: '</b>',
-      };
       const memoryTo = Number(this.memoryTo);
       const memoryFrom = Number(this.memoryFrom);
-      let memoryUsageMsg = '';
 
       if (memoryTo > memoryFrom) {
-        memoryUsageMsg = sprintf(
-          s__(
-            'mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage %{emphasisStart} increased %{emphasisEnd} from %{memoryFrom}MB to %{memoryTo}MB',
-          ),
-          messageProps,
-          false,
+        return s__(
+          'mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage %{emphasisStart} increased %{emphasisEnd} from %{memoryFrom}MB to %{memoryTo}MB',
         );
       } else if (memoryTo < memoryFrom) {
-        memoryUsageMsg = sprintf(
-          s__(
-            'mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage %{emphasisStart} decreased %{emphasisEnd} from %{memoryFrom}MB to %{memoryTo}MB',
-          ),
-          messageProps,
-          false,
-        );
-      } else {
-        memoryUsageMsg = sprintf(
-          s__(
-            'mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage is %{emphasisStart} unchanged %{emphasisEnd} at %{memoryFrom}MB',
-          ),
-          messageProps,
-          false,
+        return s__(
+          'mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage %{emphasisStart} decreased %{emphasisEnd} from %{memoryFrom}MB to %{memoryTo}MB',
         );
       }
 
-      return memoryUsageMsg;
+      return s__(
+        'mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage is %{emphasisStart} unchanged %{emphasisEnd} at %{memoryFrom}MB',
+      );
     },
   },
   mounted() {
@@ -156,14 +136,23 @@ export default {
 <template>
   <div class="mr-info-list clearfix mr-memory-usage js-mr-memory-usage">
     <p v-if="shouldShowLoading" class="usage-info js-usage-info usage-info-loading">
-      <i class="fa fa-spinner fa-spin usage-info-load-spinner" aria-hidden="true"> </i
-      >{{ s__('mrWidget|Loading deployment statistics') }}
+      <gl-loading-icon class="usage-info-load-spinner" />{{
+        s__('mrWidget|Loading deployment statistics')
+      }}
     </p>
-    <p
-      v-if="shouldShowMemoryGraph"
-      class="usage-info js-usage-info"
-      v-html="memoryChangeMessage"
-    ></p>
+    <p v-if="shouldShowMemoryGraph" class="usage-info js-usage-info">
+      <gl-sprintf :message="memoryChangeMessage">
+        <template #metricsLink="{ content }">
+          <gl-link :href="metricsMonitoringUrl">{{ content }}</gl-link>
+        </template>
+        <template #emphasis="{content}">
+          <strong>{{ content }}</strong>
+        </template>
+        <template #memoryFrom>{{ memoryFrom }}</template>
+        <template #memoryTo>{{ memoryTo }}</template>
+      </gl-sprintf>
+    </p>
+
     <p v-if="shouldShowLoadFailure" class="usage-info js-usage-info usage-info-failed">
       {{ s__('mrWidget|Failed to load deployment statistics') }}
     </p>

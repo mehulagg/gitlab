@@ -47,7 +47,7 @@ RSpec.describe 'admin/dashboard/index.html.haml' do
       render
 
       expect(rendered).to have_content "Users in License:"
-      expect(rendered).to have_content "Active Users"
+      expect(rendered).to have_content "Billable Users"
       expect(rendered).to have_content "Maximum Users"
       expect(rendered).to have_content "Users over License"
     end

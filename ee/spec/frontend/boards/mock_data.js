@@ -1,5 +1,9 @@
+/* global ListIssue */
+/* global List */
+
 import Vue from 'vue';
-import List from '~/boards/models/list';
+import '~/boards/models/list';
+import '~/boards/models/issue';
 
 export const mockLists = [
   {
@@ -12,6 +16,7 @@ export const mockLists = [
     maxIssueCount: 0,
     assignee: null,
     milestone: null,
+    preset: true,
   },
   {
     id: 'gid://gitlab/List/2',
@@ -29,6 +34,7 @@ export const mockLists = [
     maxIssueCount: 0,
     assignee: null,
     milestone: null,
+    preset: false,
   },
 ];
 
@@ -60,6 +66,34 @@ const labels = [
   },
 ];
 
+export const rawIssue = {
+  title: 'Issue 1',
+  id: 'gid://gitlab/Issue/436',
+  iid: 27,
+  dueDate: null,
+  timeEstimate: 0,
+  weight: null,
+  confidential: false,
+  referencePath: 'gitlab-org/test-subgroup/gitlab-test#27',
+  path: '/gitlab-org/test-subgroup/gitlab-test/-/issues/27',
+  labels: {
+    nodes: [
+      {
+        id: 1,
+        title: 'test',
+        color: 'red',
+        description: 'testing',
+      },
+    ],
+  },
+  assignees: {
+    nodes: assignees,
+  },
+  epic: {
+    id: 'gid://gitlab/Epic/41',
+  },
+};
+
 export const mockIssue = {
   id: 'gid://gitlab/Issue/436',
   iid: 27,
@@ -77,6 +111,8 @@ export const mockIssue = {
   },
 };
 
+export const mockIssueWithModel = new ListIssue({ ...mockIssue, id: '436' });
+
 export const mockIssue2 = {
   id: 'gid://gitlab/Issue/437',
   iid: 28,
@@ -93,6 +129,8 @@ export const mockIssue2 = {
     id: 'gid://gitlab/Epic/40',
   },
 };
+
+export const mockIssue2WithModel = new ListIssue({ ...mockIssue2, id: '437' });
 
 export const mockIssue3 = {
   id: 'gid://gitlab/Issue/438',
@@ -216,6 +254,13 @@ export const mockEpics = [
 ];
 
 export const mockIssuesByListId = {
-  'gid://gitlab/List/1': [mockIssue, mockIssue3, mockIssue4],
-  'gid://gitlab/List/2': mockIssues,
+  'gid://gitlab/List/1': [mockIssue.id, mockIssue3.id, mockIssue4.id],
+  'gid://gitlab/List/2': mockIssues.map(({ id }) => id),
+};
+
+export const issues = {
+  [mockIssue.id]: mockIssue,
+  [mockIssue2.id]: mockIssue2,
+  [mockIssue3.id]: mockIssue3,
+  [mockIssue4.id]: mockIssue4,
 };

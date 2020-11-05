@@ -15,7 +15,10 @@ module Search
         current_user,
         params[:search],
         projects,
-        group: group
+        group: group,
+        order_by: params[:order_by],
+        sort: params[:sort],
+        filters: { state: params[:state], confidential: params[:confidential] }
       )
     end
 

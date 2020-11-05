@@ -63,8 +63,8 @@ RSpec.describe Boards::UpdateService, services: true do
     end
 
     describe '#set_labels' do
-      def expect_label_assigned(user, board, input_labels, expected_labels)
-        service = described_class.new(board.resource_parent, user, labels: input_labels.join(','))
+      def expect_label_assigned(user, board, params, expected_labels)
+        service = described_class.new(board.resource_parent, user, params)
         service.execute(board)
 
         expect(board.reload.labels.map(&:title)).to contain_exactly(*expected_labels)
@@ -72,9 +72,11 @@ RSpec.describe Boards::UpdateService, services: true do
 
       let(:user) { create(:user) }
       let(:role) { :guest }
+      let(:input_labels) { %w{group_label new_label} }
+      let(:labels_param) { { labels: input_labels.join(',') } }
+      let(:label_ids_param) { { label_ids: [group_label.id] } }
 
       context 'group board labels' do
-        let!(:board) { create(:board, group: group, name: 'Backend') }
         let!(:group_label) { create(:group_label, title: 'group_label', group: group) }
 
         before do
@@ -83,23 +85,34 @@ RSpec.describe Boards::UpdateService, services: true do
         end
 
         it 'updates using only existing label' do
-          expect_label_assigned(user, board, %w{group_label new_label}, %w{group_label})
+          expect_label_assigned(user, board, labels_param, %w{group_label})
         end
 
         context 'user with admin_label ability' do
           let(:role) { :reporter }
 
           it 'finds and creates labels' do
-            expect_label_assigned(user, board, %w{group_label new_label}, %w{group_label new_label})
+            expect_label_assigned(user, board, labels_param, input_labels)
           end
-        end
 
-        context 'nested group' do
-          let!(:child_group) { create(:group, parent: group)}
-          let(:project) { create(:project, group: child_group) }
+          context 'when scoped_issue_board disabled' do
+            before do
+              stub_licensed_features(scoped_issue_board: false)
+            end
 
-          it "allows using ancestor group's label" do
-            expect_label_assigned(user, board, %w{group_label}, %w{group_label})
+            it 'does not create labels' do
+              expect_label_assigned(user, board, labels_param, [])
+              expect_label_assigned(user, board, label_ids_param, [])
+            end
+          end
+
+          context 'nested group' do
+            let!(:child_group) { create(:group, parent: group)}
+            let!(:board) { create(:board, group: child_group, name: 'Child Backend') }
+
+            it "allows using ancestor group's label" do
+              expect_label_assigned(user, board, labels_param, input_labels)
+            end
           end
         end
       end
@@ -110,6 +123,10 @@ RSpec.describe Boards::UpdateService, services: true do
         let!(:group_label) { create(:group_label, title: 'group_label', group: group) }
         let!(:label) { create(:label, title: 'project_label', project: project) }
 
+        let(:input_labels) { %w{group_label project_label new_label} }
+        let(:labels_param) { { labels: input_labels.join(',') } }
+        let(:label_ids_param) { { label_ids: [group_label.id, label.id] } }
+
         before do
           project.add_user(user, role)
           stub_licensed_features(scoped_issue_board: true)
@@ -119,12 +136,23 @@ RSpec.describe Boards::UpdateService, services: true do
           let(:role) { :reporter }
 
           it 'finds and creates labels' do
-            expect_label_assigned(user, board, %w{group_label project_label new_label}, %w{group_label project_label new_label})
+            expect_label_assigned(user, board, labels_param, input_labels)
+          end
+
+          context 'when scoped_issue_board disabled' do
+            before do
+              stub_licensed_features(scoped_issue_board: false)
+            end
+
+            it 'does not create labels' do
+              expect_label_assigned(user, board, labels_param, [])
+              expect_label_assigned(user, board, label_ids_param, [])
+            end
           end
         end
 
         it 'updates using only existing label' do
-          expect_label_assigned(user, board, %w{group_label project_label new_label}, %w{group_label project_label})
+          expect_label_assigned(user, board, labels_param, %w{group_label project_label})
         end
 
         context 'nested group' do
@@ -132,7 +160,7 @@ RSpec.describe Boards::UpdateService, services: true do
           let(:project) { create(:project, group: child_group) }
 
           it "allows using ancestor group's label" do
-            expect_label_assigned(user, board, %w{group_label project_label new_label}, %w{group_label project_label})
+            expect_label_assigned(user, board, labels_param, %w{group_label project_label})
           end
         end
 

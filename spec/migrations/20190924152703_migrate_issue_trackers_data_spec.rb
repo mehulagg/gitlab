@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20190924152703_migrate_issue_trackers_data.rb')
+require_migration!('migrate_issue_trackers_data')
 
 RSpec.describe MigrateIssueTrackersData do
   let(:services) { table(:services) }
@@ -52,7 +52,7 @@ RSpec.describe MigrateIssueTrackersData do
 
   it 'schedules background migrations at correct time' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(migration_name).to be_scheduled_delayed_migration(3.minutes, jira_service.id, bugzilla_service.id)

@@ -21,7 +21,7 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-ci-status-icon-success')).toBe(true);
+      expect(wrapper.find('.js-ci-status-icon-success').exists()).toBe(true);
     });
 
     it('should render failed badge', () => {
@@ -30,7 +30,7 @@ describe('project pipeline component', () => {
         hasPipelineFailed: true,
       });
 
-      expect(wrapper.contains('.js-ci-status-icon-failed')).toBe(true);
+      expect(wrapper.find('.js-ci-status-icon-failed').exists()).toBe(true);
     });
 
     it('should render running badge', () => {
@@ -39,7 +39,7 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-ci-status-icon-running')).toBe(true);
+      expect(wrapper.find('.js-ci-status-icon-running').exists()).toBe(true);
     });
   });
 
@@ -52,7 +52,9 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-upstream-pipeline-status.js-ci-status-icon-success')).toBe(true);
+      expect(wrapper.find('.js-upstream-pipeline-status.js-ci-status-icon-success').exists()).toBe(
+        true,
+      );
     });
   });
 
@@ -65,9 +67,9 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-downstream-pipeline-status.js-ci-status-icon-success')).toBe(
-        true,
-      );
+      expect(
+        wrapper.find('.js-downstream-pipeline-status.js-ci-status-icon-success').exists(),
+      ).toBe(true);
     });
 
     it('should render downstream failed badge', () => {
@@ -78,7 +80,7 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-downstream-pipeline-status.js-ci-status-icon-failed')).toBe(
+      expect(wrapper.find('.js-downstream-pipeline-status.js-ci-status-icon-failed').exists()).toBe(
         true,
       );
     });
@@ -91,9 +93,9 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-downstream-pipeline-status.js-ci-status-icon-running')).toBe(
-        true,
-      );
+      expect(
+        wrapper.find('.js-downstream-pipeline-status.js-ci-status-icon-running').exists(),
+      ).toBe(true);
     });
 
     it('should render extra downstream icon', () => {
@@ -107,7 +109,7 @@ describe('project pipeline component', () => {
         hasPipelineFailed: false,
       });
 
-      expect(wrapper.contains('.js-downstream-extra-icon')).toBe(true);
+      expect(wrapper.find('.js-downstream-extra-icon').exists()).toBe(true);
     });
   });
 });

@@ -2,5 +2,5 @@
 
 %p
   %span.gl-text-gray-500= _('Projects will be permanently deleted after a 7-day waiting period.')
-  = link_to(_('Customizable by an administrator.'), help_page_path('user/admin_area/settings/visibility_and_access_controls', anchor: 'default-deletion-delay-premium-only'))
+  = link_to(_('Customizable by an administrator.'), help_page_path('user/admin_area/settings/visibility_and_access_controls', anchor: 'default-deletion-delay'))
 %p= marked_for_removal_message(@project)

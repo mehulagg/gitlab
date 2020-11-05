@@ -28,7 +28,7 @@ RSpec.describe 'Query' do
     end
 
     it "fetches historical vulnerability data from the start date to the end date for projects on the current user's instance security dashboard" do
-      Timecop.freeze(Time.zone.parse('2019-10-31')) do
+      travel_to(Time.zone.parse('2019-10-31')) do
         project = create(:project)
         current_user = create(:user)
         current_user.security_dashboard_projects << project

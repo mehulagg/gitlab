@@ -1,11 +1,17 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab development style guides
 
-See below the relevant style guides, guidelines, linting, and other information for developing GitLab.
+See below for the relevant style guides, guidelines, linting, and other information for developing GitLab.
 
 ## JavaScript style guide
 
 We use `eslint` to enforce our [JavaScript style guides](javascript.md). Our guide is based on
-the excellent [AirBnB](https://github.com/airbnb/javascript) style guide with a few small
+the excellent [Airbnb](https://github.com/airbnb/javascript) style guide with a few small
 changes.
 
 ## SCSS style guide

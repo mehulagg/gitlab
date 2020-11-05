@@ -19,7 +19,7 @@ module EE
         return if collection.empty?
 
         collection.in_groups_of(BATCH_SIZE, false) do |services|
-          ::Gitlab::Database.bulk_insert(::AuditEvent.table_name, services.map(&:attributes))
+          ::Gitlab::Database.bulk_insert(::AuditEvent.table_name, services.map(&:attributes)) # rubocop:disable Gitlab/BulkInsert
 
           services.each(&:log_security_event_to_file)
         end

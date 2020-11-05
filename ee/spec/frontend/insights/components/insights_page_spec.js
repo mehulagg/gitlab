@@ -71,7 +71,7 @@ describe('Insights page component', () => {
     });
 
     it('shows an empty state', () => {
-      expect(wrapper.contains(GlEmptyState)).toBe(true);
+      expect(wrapper.find(GlEmptyState).exists()).toBe(true);
     });
   });
 
@@ -88,7 +88,7 @@ describe('Insights page component', () => {
     });
 
     it('does not show empty state', () => {
-      expect(wrapper.contains(GlEmptyState)).toBe(false);
+      expect(wrapper.find(GlEmptyState).exists()).toBe(false);
     });
 
     describe('pageConfig changes', () => {
@@ -97,7 +97,7 @@ describe('Insights page component', () => {
 
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.contains(GlEmptyState)).toBe(true);
+        expect(wrapper.find(GlEmptyState).exists()).toBe(true);
       });
     });
 
@@ -113,7 +113,7 @@ describe('Insights page component', () => {
       });
 
       it('does not display chart', () => {
-        expect(wrapper.contains(GlColumnChart)).toBe(false);
+        expect(wrapper.find(GlColumnChart).exists()).toBe(false);
       });
     });
 

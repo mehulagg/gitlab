@@ -107,7 +107,7 @@
 
     &-needs-attention {
       color: $orange-700;
-      background-color: $orange-100;
+      background-color: $orange-50;
     }
 
     &-on-track {
@@ -118,6 +118,7 @@
 
   .gl-label-text {
     font-weight: $gl-font-weight-bold;
+    font-size: 0.75rem;
   }
 }
 

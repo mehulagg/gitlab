@@ -60,9 +60,18 @@ describe('StageTableNav', () => {
     });
   });
 
-  it('will render the add a stage button', () => {
-    wrapper = createComponent();
-    expect(wrapper.find(AddStageButton).exists()).toBe(true);
+  describe('Add stage button', () => {
+    it('will render', () => {
+      wrapper = createComponent();
+      expect(wrapper.find(AddStageButton).exists()).toBe(true);
+    });
+
+    it('will emit showAddStageForm action when clicked', () => {
+      wrapper = createComponent({ mountFn: mount });
+      wrapper.find(AddStageButton).trigger('click');
+
+      expect(wrapper.emitted('showAddStageForm')).toHaveLength(1);
+    });
   });
 
   describe.each`

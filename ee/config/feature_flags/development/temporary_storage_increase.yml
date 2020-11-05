@@ -1,0 +1,7 @@
+---
+name: temporary_storage_increase
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36605
+rollout_issue_url:
+group: group::fulfillment
+type: development
+default_enabled: false

@@ -141,6 +141,7 @@ RSpec.describe Clusters::Kubernetes::CreateOrUpdateServiceAccountService do
       before do
         cluster.platform_kubernetes.rbac!
 
+        stub_kubeclient_delete_role_binding(api_url, role_binding_name, namespace: namespace)
         stub_kubeclient_put_role_binding(api_url, role_binding_name, namespace: namespace)
         stub_kubeclient_put_role(api_url, Clusters::Kubernetes::GITLAB_KNATIVE_SERVING_ROLE_NAME, namespace: namespace)
         stub_kubeclient_put_role_binding(api_url, Clusters::Kubernetes::GITLAB_KNATIVE_SERVING_ROLE_BINDING_NAME, namespace: namespace)
@@ -160,7 +161,7 @@ RSpec.describe Clusters::Kubernetes::CreateOrUpdateServiceAccountService do
 
       it_behaves_like 'creates service account and token'
 
-      it 'creates a namespaced role binding with edit access' do
+      it 'creates a namespaced role binding with admin access' do
         subject
 
         expect(WebMock).to have_requested(:put, api_url + "/apis/rbac.authorization.k8s.io/v1/namespaces/#{namespace}/rolebindings/#{role_binding_name}").with(
@@ -169,7 +170,7 @@ RSpec.describe Clusters::Kubernetes::CreateOrUpdateServiceAccountService do
             roleRef: {
               apiGroup: 'rbac.authorization.k8s.io',
               kind: 'ClusterRole',
-              name: 'edit'
+              name: 'admin'
             },
             subjects: [
               {

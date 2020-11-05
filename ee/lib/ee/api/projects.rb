@@ -10,7 +10,7 @@ module EE
           desc 'Restore a project' do
             success Entities::Project
           end
-          post ':id/restore' do
+          post ':id/restore', feature_category: :authentication_and_authorization do
             authorize!(:remove_project, user_project)
             break not_found! unless user_project.feature_available?(:adjourned_deletion_for_projects_and_groups)
 
@@ -21,10 +21,11 @@ module EE
               render_api_error!(result[:message], 400)
             end
           end
-          segment ':id/audit_events' do
+          segment ':id/audit_events', feature_category: :audit_events do
             before do
               authorize! :admin_project, user_project
               check_audit_events_available!(user_project)
+              increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end
 
             desc 'Get a list of audit events in this project.' do
@@ -36,7 +37,7 @@ module EE
 
               use :pagination
             end
-            get '/' do
+            get '/', feature_category: :audit_events do
               level = ::Gitlab::Audit::Levels::Project.new(project: user_project)
               audit_events = AuditLogFinder.new(
                 level: level,
@@ -52,7 +53,7 @@ module EE
             params do
               requires :audit_event_id, type: Integer, desc: 'The ID of the audit event'
             end
-            get '/:audit_event_id' do
+            get '/:audit_event_id', feature_category: :audit_events do
               level = ::Gitlab::Audit::Levels::Project.new(project: user_project)
               # rubocop: disable CodeReuse/ActiveRecord
               # This is not `find_by!` from ActiveRecord

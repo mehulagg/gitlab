@@ -94,13 +94,13 @@ describe('Subscriptions', () => {
 
     it('sets the correct display text', () => {
       expect(wrapper.find('.issuable-header-text').text()).toContain(subscribeDisabledDescription);
-      expect(wrapper.find({ ref: 'tooltip' }).attributes('data-original-title')).toBe(
+      expect(wrapper.find({ ref: 'tooltip' }).attributes('title')).toBe(
         subscribeDisabledDescription,
       );
     });
 
     it('does not render the toggle button', () => {
-      expect(wrapper.contains('.js-issuable-subscribe-button')).toBe(false);
+      expect(wrapper.find('.js-issuable-subscribe-button').exists()).toBe(false);
     });
   });
 });

@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -58,7 +61,7 @@ sequenceDiagram
 
 ## Usage Ping **(CORE ONLY)**
 
-See [Usage Ping guide](../../../development/telemetry/usage_ping.md).
+See [Usage Ping guide](../../../development/product_analytics/usage_ping.md).
 
 ## Instance-level statistics **(CORE ONLY)**
 

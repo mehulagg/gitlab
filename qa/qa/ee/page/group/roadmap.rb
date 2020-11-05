@@ -18,9 +18,9 @@ module QA
           end
 
           def epic_present?(epic)
-            uri = URI(epic.group.web_url)
-            group_relative_url = uri.path
-            epic_href_selector = "a[href*='#{group_relative_url}/-/epics/#{epic.iid}']"
+            epic_href_selector = "a[href*='#{epic.web_url}']"
+
+            wait_for_requests
 
             within_element(:roadmap_shell) do
               find("[data-qa-selector='epic_details_cell'] #{epic_href_selector}") &&

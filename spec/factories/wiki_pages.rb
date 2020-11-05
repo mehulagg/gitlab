@@ -9,7 +9,7 @@ FactoryBot.define do
       content { 'Content for wiki page' }
       format { :markdown }
       message { nil }
-      project { association(:project, :wiki_repo) }
+      project { association(:project) }
       container { project }
       wiki { association(:wiki, container: container) }
       page { OpenStruct.new(url_path: title) }
@@ -18,6 +18,7 @@ FactoryBot.define do
     initialize_with do
       new(wiki, page).tap do |page|
         page.attributes = {
+          slug: title&.tr(' ', '-'),
           title: title,
           content: content,
           format: format
@@ -38,14 +39,14 @@ FactoryBot.define do
 
   factory :wiki_page_meta, class: 'WikiPage::Meta' do
     title { generate(:wiki_page_title) }
-    project { create(:project) }
+    project { association(:project) }
 
     trait :for_wiki_page do
       transient do
-        wiki_page { create(:wiki_page, container: project) }
+        wiki_page { association(:wiki_page, container: project) }
       end
 
-      project { @overrides[:wiki_page]&.container || create(:project) }
+      project { @overrides[:wiki_page]&.container || association(:project) }
       title { wiki_page.title }
 
       initialize_with do
@@ -57,7 +58,7 @@ FactoryBot.define do
   end
 
   factory :wiki_page_slug, class: 'WikiPage::Slug' do
-    wiki_page_meta { create(:wiki_page_meta) }
+    wiki_page_meta { association(:wiki_page_meta) }
     slug { generate(:sluggified_title) }
     canonical { false }
 

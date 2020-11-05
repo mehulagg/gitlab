@@ -2,6 +2,7 @@
 
 class GitlabSubscription < ApplicationRecord
   include EachBatch
+  include Gitlab::Utils::StrongMemoize
 
   default_value_for(:start_date) { Date.today }
   before_update :log_previous_state_for_update
@@ -24,6 +25,8 @@ class GitlabSubscription < ApplicationRecord
     with_hosted_plan(Plan::PAID_HOSTED_PLANS)
   end
 
+  scope :preload_for_refresh_seat, -> { preload([{ namespace: :route }, :hosted_plan]) }
+
   DAYS_AFTER_EXPIRATION_BEFORE_REMOVING_FROM_INDEX = 7
 
   # We set a 7 days as the threshold for expiration before removing them from
@@ -42,7 +45,7 @@ class GitlabSubscription < ApplicationRecord
     end
   end
 
-  def seats_in_use
+  def calculate_seats_in_use
     namespace.billable_members_count
   end
 
@@ -50,10 +53,17 @@ class GitlabSubscription < ApplicationRecord
   # with the historical max. We want to know how many extra users the customer
   # has added to their group (users above the number purchased on their subscription).
   # Then, on the next month we're going to automatically charge the customers for those extra users.
-  def seats_owed
+  def calculate_seats_owed
     return 0 unless has_a_paid_hosted_plan?
 
     [0, max_seats_used - seats].max
+  end
+
+  # Refresh seat related attribute (without persisting them)
+  def refresh_seat_attributes!
+    self.seats_in_use = calculate_seats_in_use
+    self.max_seats_used = [max_seats_used, seats_in_use].max
+    self.seats_owed = calculate_seats_owed
   end
 
   def has_a_paid_hosted_plan?(include_trials: false)
@@ -81,7 +91,22 @@ class GitlabSubscription < ApplicationRecord
     self.hosted_plan = Plan.find_by(name: code)
   end
 
+  # We need to show seats in use for free or trial subscriptions
+  # in order to make it easy for customers to get this information.
+  def seats_in_use
+    return super unless Feature.enabled?(:seats_in_use_for_free_or_trial)
+    return super if has_a_paid_hosted_plan? || !hosted?
+
+    seats_in_use_now
+  end
+
   private
+
+  def seats_in_use_now
+    strong_memoize(:seats_in_use_now) do
+      calculate_seats_in_use
+    end
+  end
 
   def log_previous_state_for_update
     attrs = self.attributes.merge(self.attributes_in_database)
@@ -99,7 +124,7 @@ class GitlabSubscription < ApplicationRecord
     attrs['gitlab_subscription_id'] = self.id
     attrs['change_type'] = change_type
 
-    omitted_attrs = %w(id created_at updated_at)
+    omitted_attrs = %w(id created_at updated_at seats_in_use seats_owed)
 
     GitlabSubscriptionHistory.create(attrs.except(*omitted_attrs))
   end

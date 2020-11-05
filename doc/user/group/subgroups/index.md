@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto, concepts
 ---
 
@@ -80,7 +83,10 @@ By default, groups created in:
 - GitLab 12.2 or later allow both Owners and Maintainers to create subgroups.
 - GitLab 12.1 or earlier only allow Owners to create subgroups.
 
-This setting can be for any group by an Owner or Administrator.
+The setting can be changed for any group by:
+
+- A group owner. Select the group, and navigate to **Settings > General > Permissions, LFS, 2FA**.
+- An administrator. Navigate to **Admin Area > Overview > Groups**, select the group, and choose **Edit**.
 
 For more information check the
 [permissions table](../../permissions.md#group-members-permissions). For a list
@@ -115,10 +121,10 @@ When you add a member to a subgroup, they inherit the membership and permission
 level from the parent group(s). This model allows access to nested groups if you
 have membership in one of its parents.
 
-Jobs for pipelines in subgroups can use [Runners](../../../ci/runners/README.md) registered to the parent group(s).
+Jobs for pipelines in subgroups can use [runners](../../../ci/runners/README.md) registered to the parent group(s).
 This means secrets configured for the parent group are available to subgroup jobs.
 
-In addition, maintainers of projects that belong to subgroups can see the details of Runners registered to parent group(s).
+In addition, maintainers of projects that belong to subgroups can see the details of runners registered to parent group(s).
 
 The group permissions for a member can be changed only by Owners, and only on
 the **Members** page of the group the member was added.

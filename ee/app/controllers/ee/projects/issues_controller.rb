@@ -11,9 +11,7 @@ module EE
 
         before_action :whitelist_query_limiting_ee, only: [:update]
 
-        before_action do
-          push_frontend_feature_flag(:save_issuable_health_status, project.group, default_enabled: true)
-        end
+        feature_category :issue_tracking, [:delete_description_version, :description_diff]
       end
 
       private

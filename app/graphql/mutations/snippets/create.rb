@@ -3,6 +3,7 @@
 module Mutations
   module Snippets
     class Create < BaseMutation
+      include SpammableMutationFields
       include ResolvesProject
 
       graphql_name 'CreateSnippet'
@@ -15,14 +16,6 @@ module Mutations
       argument :title, GraphQL::STRING_TYPE,
                required: true,
                description: 'Title of the snippet'
-
-      argument :file_name, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'File name of the snippet'
-
-      argument :content, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Content of the snippet'
 
       argument :description, GraphQL::STRING_TYPE,
                required: false,
@@ -59,10 +52,17 @@ module Mutations
 
         snippet = service_response.payload[:snippet]
 
-        {
-          snippet: service_response.success? ? snippet : nil,
-          errors: errors_on_object(snippet)
-        }
+        # Only when the user is not an api user and the operation was successful
+        if !api_user? && service_response.success?
+          ::Gitlab::UsageDataCounters::EditorUniqueCounter.track_snippet_editor_edit_action(author: current_user)
+        end
+
+        with_spam_fields(snippet) do
+          {
+            snippet: service_response.success? ? snippet : nil,
+            errors: errors_on_object(snippet)
+          }
+        end
       end
 
       private
@@ -84,14 +84,16 @@ module Mutations
       end
 
       def create_params(args)
-        args.tap do |create_args|
-          # We need to rename `blob_actions` into `snippet_actions` because
-          # it's the expected key param
-          create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
+        with_spam_params do
+          args.tap do |create_args|
+            # We need to rename `blob_actions` into `snippet_actions` because
+            # it's the expected key param
+            create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
 
-          # We need to rename `uploaded_files` into `files` because
-          # it's the expected key param
-          create_args[:files] = create_args.delete(:uploaded_files)
+            # We need to rename `uploaded_files` into `files` because
+            # it's the expected key param
+            create_args[:files] = create_args.delete(:uploaded_files)
+          end
         end
       end
     end

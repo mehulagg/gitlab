@@ -115,6 +115,22 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '.api_fuzzing_reports' do
+    subject { Ci::JobArtifact.api_fuzzing }
+
+    context 'when there is a metrics report' do
+      let!(:artifact) { create(:ee_ci_job_artifact, :api_fuzzing) }
+
+      it { is_expected.to eq([artifact]) }
+    end
+
+    context 'when there is no coverage fuzzing reports' do
+      let!(:artifact) { create(:ee_ci_job_artifact, :trace) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
   describe '.associated_file_types_for' do
     using RSpec::Parameterized::TableSyntax
 
@@ -133,7 +149,7 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
-  describe '#replicables_for_geo_node' do
+  describe '#replicables_for_current_secondary' do
     # Selective sync is configured relative to the job artifact's project.
     #
     # Permutations of sync_object_storage combined with object-stored-artifacts
@@ -162,7 +178,7 @@ RSpec.describe Ci::JobArtifact do
     end
 
     with_them do
-      subject(:job_artifact_included) { described_class.replicables_for_geo_node.include?(ci_job_artifact) }
+      subject(:job_artifact_included) { described_class.replicables_for_current_secondary(ci_job_artifact).exists? }
 
       let(:project) { create(*project_factory) }
       let(:ci_build) { create(:ci_build, project: project) }
@@ -210,6 +226,55 @@ RSpec.describe Ci::JobArtifact do
           it { is_expected.to be_falsey }
         end
       end
+    end
+  end
+
+  describe '#security_report' do
+    let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
+    let(:security_report) { job_artifact.security_report }
+
+    subject(:findings_count) { security_report.findings.length }
+
+    it { is_expected.to be(33) }
+
+    context 'for different types' do
+      where(:file_type, :security_report?) do
+        :performance         | false
+        :sast                | true
+        :secret_detection    | true
+        :dependency_scanning | true
+        :container_scanning  | true
+        :dast                | true
+        :coverage_fuzzing    | true
+      end
+
+      with_them do
+        let(:job_artifact) { create(:ee_ci_job_artifact, file_type) }
+
+        subject { security_report.is_a?(::Gitlab::Ci::Reports::Security::Report) }
+
+        it { is_expected.to be(security_report?) }
+      end
+    end
+  end
+
+  describe '#clear_security_report' do
+    let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
+
+    subject(:clear_security_report) { job_artifact.clear_security_report }
+
+    before do
+      job_artifact.security_report # Memoize first
+      allow(::Gitlab::Ci::Reports::Security::Report).to receive(:new).and_call_original
+    end
+
+    it 'clears the security_report' do
+      clear_security_report
+      job_artifact.security_report
+
+      # This entity class receives the call twice
+      # because of the way MergeReportsService is implemented.
+      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).twice
     end
   end
 end

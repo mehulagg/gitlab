@@ -5,9 +5,7 @@ module EE
     def execute(blocking: true, priority: ::UserProjectAccessChangedService::HIGH_PRIORITY)
       result = super
 
-      @user_ids.each do |id| # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        ::Gitlab::Database::LoadBalancing::Sticking.stick(:user, id)
-      end
+      ::Gitlab::Database::LoadBalancing::Sticking.bulk_stick(:user, @user_ids) # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
       result
     end

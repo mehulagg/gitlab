@@ -68,6 +68,7 @@ RSpec.describe 'Admin updates EE-only settings' do
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
         fill_in 'Bulk request concurrency', with: '23'
+        fill_in 'Client request timeout', with: '30'
 
         click_button 'Save changes'
       end
@@ -81,6 +82,7 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)
         expect(current_settings.elasticsearch_max_bulk_concurrency).to eq(23)
+        expect(current_settings.elasticsearch_client_request_timeout).to eq(30)
         expect(page).to have_content 'Application settings saved successfully'
       end
     end
@@ -159,6 +161,17 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedNamespace.count).to eq(0)
       expect(ElasticsearchIndexedProject.count).to eq(0)
       expect(page).to have_content 'Application settings saved successfully'
+    end
+
+    it 'zero-downtime reindexing shows popup', :js do
+      page.within('.as-elasticsearch') do
+        expect(page).to have_content 'Trigger cluster reindexing'
+        click_link 'Trigger cluster reindexing'
+      end
+
+      text = page.driver.browser.switch_to.alert.text
+      expect(text).to eq 'Are you sure you want to reindex?'
+      page.driver.browser.switch_to.alert.accept
     end
   end
 
@@ -255,6 +268,75 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(page).to have_selector '.js-seat-link-payload'
         expect(page).to have_button 'Hide payload'
         expect(page).to have_content expected_payload_content
+      end
+    end
+  end
+
+  context 'sign up settings' do
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
+      it 'does not render user cap form group' do
+        visit general_admin_application_settings_path
+
+        expect(page).not_to have_field('User cap')
+      end
+    end
+
+    context 'when feature flag is enabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: true)
+      end
+
+      context 'when license has active user count' do
+        let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
+
+        before do
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'disallows entering user cap greater then license allows', :js do
+          visit general_admin_application_settings_path
+
+          page.within('#js-signup-settings') do
+            fill_in 'User cap', with: 5
+
+            click_button 'Save changes'
+
+            message =
+              page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
+
+            expect(message).to eq('Value must be less than or equal to 1.')
+          end
+        end
+      end
+
+      it 'changes the user cap from unlimited to 5' do
+        visit general_admin_application_settings_path
+
+        expect(current_settings.new_user_signups_cap).to be_nil
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: 5
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to eq(5)
+        end
+      end
+
+      it 'changes the user cap to unlimited' do
+        visit general_admin_application_settings_path
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: nil
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to be_nil
+        end
       end
     end
   end

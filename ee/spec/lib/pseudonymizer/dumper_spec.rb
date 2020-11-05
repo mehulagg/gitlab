@@ -95,7 +95,7 @@ RSpec.describe Pseudonymizer::Dumper do
           }
         }
 
-        expect(Rails.logger).to receive(:warn).with(/extraneous/)
+        expect(Gitlab::AppLogger).to receive(:warn).with(/extraneous/)
 
         pseudo.tables_to_csv
       end

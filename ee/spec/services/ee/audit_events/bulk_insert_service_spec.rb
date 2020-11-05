@@ -36,7 +36,7 @@ RSpec.describe EE::AuditEvents::BulkInsertService do
 
   describe '#execute' do
     it 'persists audit events' do
-      Timecop.freeze(timestamp) { service.execute }
+      travel_to(timestamp) { service.execute }
 
       events_attributes = AuditEvent.all.map { |event| event.attributes.deep_symbolize_keys }
 

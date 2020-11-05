@@ -10,7 +10,7 @@ RSpec.describe Projects::Alerting::NotifyService do
     let(:token) { alerts_service.token }
     let(:payload) do
       {
-        title: 'Test alert title'
+        'title' => 'Test alert title'
       }
     end
 
@@ -19,14 +19,11 @@ RSpec.describe Projects::Alerting::NotifyService do
     subject { service.execute(token) }
 
     context 'existing alert with same payload fingerprint' do
-      let(:existing_alert) do
-        service.execute(token)
-        AlertManagement::Alert.last!
-      end
+      let(:existing_alert) { create(:alert_management_alert, :from_payload, project: project, payload: payload) }
 
       before do
         stub_licensed_features(generic_alert_fingerprinting: fingerprinting_enabled)
-        existing_alert # create existing alert
+        existing_alert # create existing alert after enabling flag
       end
 
       context 'generic fingerprinting license not enabled' do
@@ -50,6 +47,20 @@ RSpec.describe Projects::Alerting::NotifyService do
 
         it 'increments the existing alert count' do
           expect { subject }.to change { existing_alert.reload.events }.from(1).to(2)
+        end
+
+        context 'end_time provided for subsequent alert' do
+          let(:existing_alert) { create(:alert_management_alert, :from_payload, project: project, payload: payload.except('end_time')) }
+          let(:payload) { { 'title' => 'title', 'end_time' => Time.current.change(usec: 0).iso8601 } }
+
+          it 'does not create AlertManagement::Alert' do
+            expect { subject }.not_to change(AlertManagement::Alert, :count)
+          end
+
+          it 'resolves the existing alert', :aggregate_failures do
+            expect { subject }.to change { existing_alert.reload.resolved? }.from(false).to(true)
+            expect(existing_alert.ended_at).to eq(payload['end_time'])
+          end
         end
       end
     end

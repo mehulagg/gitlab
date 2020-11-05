@@ -11,6 +11,17 @@ RSpec.describe ::TodosHelper do
     end
   end
 
+  describe '#todo_target_path' do
+    context 'when target is vulnerability' do
+      let(:vulnerability) { create(:vulnerability) }
+      let(:todo) { create(:todo, target: vulnerability, project: vulnerability.project) }
+
+      subject(:todo_target_path) { helper.todo_target_path(todo) }
+
+      it { is_expected.to eq("/#{todo.project.full_path}/-/security/vulnerabilities/#{todo.target.id}") }
+    end
+  end
+
   describe '#todo_author_display?' do
     using RSpec::Parameterized::TableSyntax
 

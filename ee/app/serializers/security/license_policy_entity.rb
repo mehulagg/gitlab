@@ -3,7 +3,7 @@
 module Security
   class LicensePolicyEntity < Grape::Entity
     expose :name
-    expose :dependencies, using: LicenseScanningReportDependencyEntity
+    expose :dependencies, using: ::LicenseEntity::ComponentEntity
     expose :url
 
     expose :classification do |entity|

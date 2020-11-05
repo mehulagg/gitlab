@@ -1,6 +1,10 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import AlertSettingsForm from './components/alerts_settings_form.vue';
+import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
+
+Vue.use(VueApollo);
 
 export default el => {
   if (!el) {
@@ -24,20 +28,29 @@ export default el => {
     opsgenieMvcFormPath,
     opsgenieMvcEnabled,
     opsgenieMvcTargetUrl,
+    projectPath,
   } = el.dataset;
 
-  const genericActivated = parseBoolean(activatedStr);
-  const prometheusIsActivated = parseBoolean(prometheusActivated);
-  const opsgenieMvcActivated = parseBoolean(opsgenieMvcEnabled);
-  const opsgenieMvcIsAvailable = parseBoolean(opsgenieMvcAvailable);
+  const apolloProvider = new VueApollo({
+    defaultClient: createDefaultClient(
+      {},
+      {
+        cacheConfig: {},
+      },
+    ),
+  });
+
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {},
+  });
 
   return new Vue({
     el,
     provide: {
       prometheus: {
-        activated: prometheusIsActivated,
-        prometheusUrl,
-        authorizationKey: prometheusAuthorizationKey,
+        active: parseBoolean(prometheusActivated),
+        url: prometheusUrl,
+        token: prometheusAuthorizationKey,
         prometheusFormPath,
         prometheusResetKeyPath,
         prometheusApiUrl,
@@ -45,23 +58,25 @@ export default el => {
       generic: {
         alertsSetupUrl,
         alertsUsageUrl,
-        activated: genericActivated,
+        active: parseBoolean(activatedStr),
         formPath,
-        authorizationKey,
+        token: authorizationKey,
         url,
       },
       opsgenie: {
         formPath: opsgenieMvcFormPath,
-        activated: opsgenieMvcActivated,
+        active: parseBoolean(opsgenieMvcEnabled),
         opsgenieMvcTargetUrl,
-        opsgenieMvcIsAvailable,
+        opsgenieMvcIsAvailable: parseBoolean(opsgenieMvcAvailable),
       },
+      projectPath,
     },
+    apolloProvider,
     components: {
-      AlertSettingsForm,
+      AlertSettingsWrapper,
     },
     render(createElement) {
-      return createElement('alert-settings-form');
+      return createElement('alert-settings-wrapper');
     },
   });
 };

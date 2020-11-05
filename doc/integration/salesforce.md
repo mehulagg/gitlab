@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Salesforce OmniAuth Provider
 
 You can integrate your GitLab instance with [Salesforce](https://www.salesforce.com/) to enable users to log in to your GitLab instance with their Salesforce account.
@@ -64,7 +70,7 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
    - { name: 'salesforce',
        app_id: 'SALESFORCE_CLIENT_ID',
        app_secret: 'SALESFORCE_CLIENT_SECRET'
-     }
+   }
    ```
 
 1. Change `SALESFORCE_CLIENT_ID` to the Consumer Key from the Salesforce connected application page.

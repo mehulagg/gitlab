@@ -4,7 +4,6 @@ import {
   STEPS,
   SUBSCRIPTON_FLOW_STEPS,
   ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS,
-  ONBOARDING_ISSUES_EXPERIMENT_AND_SUBSCRIPTION_FLOW_STEPS,
 } from '../constants';
 import ProgressBar from '../components/progress_bar.vue';
 
@@ -20,9 +19,7 @@ export default () => {
 
   let steps;
 
-  if (isInSubscriptionFlow && isOnboardingIssuesExperimentEnabled) {
-    steps = ONBOARDING_ISSUES_EXPERIMENT_AND_SUBSCRIPTION_FLOW_STEPS;
-  } else if (isInSubscriptionFlow) {
+  if (isInSubscriptionFlow) {
     steps = SUBSCRIPTON_FLOW_STEPS;
   } else if (isOnboardingIssuesExperimentEnabled) {
     steps = ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS;

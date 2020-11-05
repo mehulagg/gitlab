@@ -13,11 +13,10 @@ module Gitlab
         # @param [Upload] upload
         def initialize(file_type, upload)
           if upload.local?
-            super(local_file_attributes(file_type, upload))
+            super(**local_file_attributes(file_type, upload))
           else
-            super(remote_file_attributes(file_type, upload))
+            super(**remote_file_attributes(file_type, upload))
           end
-
         rescue ObjectStorage::RemoteStoreError
           ::Gitlab::Geo::Logger.warn "Error trying to transfer a remote object as a local object."
         end

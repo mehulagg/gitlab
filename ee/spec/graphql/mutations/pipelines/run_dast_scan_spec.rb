@@ -7,7 +7,7 @@ RSpec.describe Mutations::Pipelines::RunDastScan do
   let(:project) { create(:project, :repository, group: group) }
   let(:user) { create(:user) }
   let(:project_path) { project.full_path }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:branch) { project.default_branch }
   let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
 
@@ -34,10 +34,6 @@ RSpec.describe Mutations::Pipelines::RunDastScan do
     end
 
     context 'when on demand scan feature is enabled' do
-      before do
-        stub_feature_flags(security_on_demand_scans_feature_flag: true)
-      end
-
       context 'when the project does not exist' do
         let(:project_path) { SecureRandom.hex }
 

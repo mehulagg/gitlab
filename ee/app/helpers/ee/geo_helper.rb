@@ -216,7 +216,7 @@ module EE
       ]
 
       # Adds all the SSF Data Types automatically
-      replicator_classes.each do |replicator_class|
+      enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
           {
             title: replicator_class.replicable_title,
@@ -231,8 +231,8 @@ module EE
       replicable_types
     end
 
-    def replicator_classes
-      ::Gitlab::Geo.replicator_classes
+    def enabled_replicator_classes
+      ::Gitlab::Geo.enabled_replicator_classes
     end
   end
 end

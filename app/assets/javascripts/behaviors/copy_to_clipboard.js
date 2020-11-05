@@ -1,19 +1,24 @@
 import $ from 'jquery';
 import Clipboard from 'clipboard';
 import { sprintf, __ } from '~/locale';
+import { fixTitle, show } from '~/tooltips';
 
 function showTooltip(target, title) {
-  const $target = $(target);
-  const originalTitle = $target.data('originalTitle');
+  const { originalTitle } = target.dataset;
+  const hideTooltip = () => {
+    target.removeEventListener('mouseout', hideTooltip);
+    setTimeout(() => {
+      target.setAttribute('title', originalTitle);
+      fixTitle(target);
+    }, 100);
+  };
 
-  if (!$target.data('hideTooltip')) {
-    $target
-      .attr('title', title)
-      .tooltip('_fixTitle')
-      .tooltip('show')
-      .attr('title', originalTitle)
-      .tooltip('_fixTitle');
-  }
+  target.setAttribute('title', title);
+
+  fixTitle(target);
+  show(target);
+
+  target.addEventListener('mouseout', hideTooltip);
 }
 
 function genericSuccess(e) {
@@ -73,4 +78,34 @@ export default function initCopyToClipboard() {
     clipboardData.setData('text/plain', json.text);
     clipboardData.setData('text/x-gfm', json.gfm);
   });
+}
+
+/**
+ * Programmatically triggers a click event on a
+ * "copy to clipboard" button, causing its
+ * contents to be copied. Handles some of the messiniess
+ * around managing the button's tooltip.
+ * @param {HTMLElement} btnElement
+ */
+export function clickCopyToClipboardButton(btnElement) {
+  const $btnElement = $(btnElement);
+
+  // Ensure the button has already been tooltip'd.
+  // If the use hasn't yet interacted (i.e. hovered or clicked)
+  // with the button, Bootstrap hasn't yet initialized
+  // the tooltip, and its `data-original-title` will be `undefined`.
+  // This value is used in the functions above.
+  $btnElement.tooltip();
+  btnElement.dispatchEvent(new MouseEvent('mouseover'));
+
+  btnElement.click();
+
+  // Manually trigger the necessary events to hide the
+  // button's tooltip and allow the button to perform its
+  // tooltip cleanup (updating the title from "Copied" back
+  // to its original title, "Copy branch name").
+  setTimeout(() => {
+    btnElement.dispatchEvent(new MouseEvent('mouseout'));
+    $btnElement.tooltip('hide');
+  }, 2000);
 }

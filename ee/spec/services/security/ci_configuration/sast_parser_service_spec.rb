@@ -12,6 +12,8 @@ RSpec.describe Security::CiConfiguration::SastParserService do
     let(:sast_analyzer_image_tag) { configuration['global'][2] }
     let(:sast_pipeline_stage) { configuration['pipeline'][0] }
     let(:sast_search_max_depth) { configuration['pipeline'][1] }
+    let(:brakeman) { configuration['analyzers'][0] }
+    let(:sast_brakeman_level) { brakeman['variables'][0] }
 
     it 'parses the configuration for SAST' do
       expect(secure_analyzers_prefix['default_value']).to eql('registry.gitlab.com/gitlab-org/security-products/analyzers')
@@ -19,6 +21,8 @@ RSpec.describe Security::CiConfiguration::SastParserService do
       expect(sast_analyzer_image_tag['default_value']).to eql('2')
       expect(sast_pipeline_stage['default_value']).to eql('test')
       expect(sast_search_max_depth['default_value']).to eql('4')
+      expect(brakeman['enabled']).to be(true)
+      expect(sast_brakeman_level['default_value']).to eql('1')
     end
 
     context 'while populating current values of the entities' do
@@ -30,6 +34,8 @@ RSpec.describe Security::CiConfiguration::SastParserService do
           expect(sast_analyzer_image_tag['value']).to eql('2')
           expect(sast_pipeline_stage['value']).to eql('our_custom_security_stage')
           expect(sast_search_max_depth['value']).to eql('8')
+          expect(brakeman['enabled']).to be(false)
+          expect(sast_brakeman_level['value']).to eql('2')
         end
       end
 
@@ -41,6 +47,8 @@ RSpec.describe Security::CiConfiguration::SastParserService do
           expect(sast_analyzer_image_tag['value']).to eql('2')
           expect(sast_pipeline_stage['value']).to eql('test')
           expect(sast_search_max_depth['value']).to eql('4')
+          expect(brakeman['enabled']).to be(true)
+          expect(sast_brakeman_level['value']).to eql('1')
         end
       end
     end

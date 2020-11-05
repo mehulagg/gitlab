@@ -20,8 +20,10 @@ module Gitlab
     # solutions can be found at
     # https://gitlab.com/gitlab-org/gitlab/-/issues/227693
     REPLICATOR_CLASSES = [
-        ::Geo::PackageFileReplicator,
-        ::Geo::TerraformStateReplicator
+      ::Geo::MergeRequestDiffReplicator,
+      ::Geo::PackageFileReplicator,
+      ::Geo::TerraformStateVersionReplicator,
+      ::Geo::SnippetRepositoryReplicator
     ].freeze
 
     def self.current_node
@@ -166,7 +168,7 @@ module Gitlab
       _(template) % { url: url }
     end
 
-    def self.replicator_classes
+    def self.enabled_replicator_classes
       REPLICATOR_CLASSES.select(&:enabled?)
     end
   end

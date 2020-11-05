@@ -6,7 +6,7 @@ import * as types from '../mutation_types';
 import { setPageTitleForFile } from '../utils';
 import { viewerTypes, stageKeys } from '../../constants';
 
-export const closeFile = ({ commit, state, dispatch }, file) => {
+export const closeFile = ({ commit, state, dispatch, getters }, file) => {
   const { path } = file;
   const indexOfClosedFile = state.openFiles.findIndex(f => f.key === file.key);
   const fileWasActive = file.active;
@@ -29,10 +29,12 @@ export const closeFile = ({ commit, state, dispatch }, file) => {
         keyPrefix: nextFileToOpen.staged ? 'staged' : 'unstaged',
       });
     } else {
-      dispatch('router/push', `/project${nextFileToOpen.url}`, { root: true });
+      dispatch('router/push', getters.getUrlForPath(nextFileToOpen.path), { root: true });
     }
   } else if (!state.openFiles.length) {
-    dispatch('router/push', `/project/${file.projectId}/tree/${file.branchId}/`, { root: true });
+    dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
+      root: true,
+    });
   }
 
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
@@ -57,7 +59,7 @@ export const setFileActive = ({ commit, state, getters, dispatch }, path) => {
 
 export const getFileData = (
   { state, commit, dispatch, getters },
-  { path, makeFileActive = true, openFile = makeFileActive },
+  { path, makeFileActive = true, openFile = makeFileActive, toggleLoading = true },
 ) => {
   const file = state.entries[path];
   const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
@@ -97,7 +99,7 @@ export const getFileData = (
       });
     })
     .finally(() => {
-      commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
+      if (toggleLoading) commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
     });
 };
 
@@ -121,7 +123,7 @@ export const getRawFileData = ({ state, commit, dispatch, getters }, { path }) =
         const baseSha =
           (getters.currentMergeRequest && getters.currentMergeRequest.baseCommitSha) || '';
 
-        return service.getBaseRawFileData(file, baseSha).then(baseRaw => {
+        return service.getBaseRawFileData(file, state.currentProjectId, baseSha).then(baseRaw => {
           commit(types.SET_FILE_BASE_RAW_DATA, {
             file,
             baseRaw,
@@ -162,26 +164,6 @@ export const changeFileContent = ({ commit, state, getters }, { path, content })
   }
 };
 
-export const setFileLanguage = ({ getters, commit }, { fileLanguage }) => {
-  if (getters.activeFile) {
-    commit(types.SET_FILE_LANGUAGE, { file: getters.activeFile, fileLanguage });
-  }
-};
-
-export const setEditorPosition = ({ getters, commit }, { editorRow, editorColumn }) => {
-  if (getters.activeFile) {
-    commit(types.SET_FILE_POSITION, {
-      file: getters.activeFile,
-      editorRow,
-      editorColumn,
-    });
-  }
-};
-
-export const setFileViewMode = ({ commit }, { file, viewMode }) => {
-  commit(types.SET_FILE_VIEWMODE, { file, viewMode });
-};
-
 export const restoreOriginalFile = ({ dispatch, state, commit }, path) => {
   const file = state.entries[path];
   const isDestructiveDiscard = file.tempFile || file.prevPath;
@@ -218,7 +200,7 @@ export const discardFileChanges = ({ dispatch, state, commit, getters }, path) =
   if (!isDestructiveDiscard && file.path === getters.activeFile?.path) {
     dispatch('updateDelayViewerUpdated', true)
       .then(() => {
-        dispatch('router/push', `/project${file.url}`, { root: true });
+        dispatch('router/push', getters.getUrlForPath(file.path), { root: true });
       })
       .catch(e => {
         throw e;
@@ -274,7 +256,7 @@ export const openPendingTab = ({ commit, dispatch, getters, state }, { file, key
 
   commit(types.ADD_PENDING_TAB, { file, keyPrefix });
 
-  dispatch('router/push', `/project/${file.projectId}/tree/${state.currentBranchId}/`, {
+  dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
     root: true,
   });
 
@@ -287,7 +269,7 @@ export const removePendingTab = ({ commit }, file) => {
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
 };
 
-export const triggerFilesChange = () => {
+export const triggerFilesChange = (ctx, payload = {}) => {
   // Used in EE for file mirroring
-  eventHub.$emit('ide.files.change');
+  eventHub.$emit('ide.files.change', payload);
 };

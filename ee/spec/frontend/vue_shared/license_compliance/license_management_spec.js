@@ -121,11 +121,7 @@ describe('License Management', () => {
           isAdmin,
         });
 
-        expect(fetchManagedLicensesMock).toHaveBeenCalledWith(
-          expect.any(Object),
-          undefined,
-          undefined,
-        );
+        expect(fetchManagedLicensesMock).toHaveBeenCalledWith(expect.any(Object), undefined);
       });
     });
   });

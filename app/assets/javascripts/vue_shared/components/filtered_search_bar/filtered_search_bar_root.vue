@@ -3,8 +3,9 @@ import {
   GlFilteredSearch,
   GlButtonGroup,
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
+  GlFormCheckbox,
   GlTooltipDirective,
 } from '@gitlab/ui';
 
@@ -15,7 +16,7 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
 import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
 
-import { stripQuotes } from './filtered_search_utils';
+import { stripQuotes, uniqueTokens } from './filtered_search_utils';
 import { SortDirection } from './constants';
 
 export default {
@@ -25,6 +26,7 @@ export default {
     GlButton,
     GlDropdown,
     GlDropdownItem,
+    GlFormCheckbox,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -58,6 +60,16 @@ export default {
       required: false,
       default: '',
       validator: value => value === '' || /(_desc)|(_asc)/g.test(value),
+    },
+    showCheckbox: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    checkboxChecked: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     searchInputPlaceholder: {
       type: String,
@@ -120,10 +132,31 @@ export default {
         ? __('Sort direction: Ascending')
         : __('Sort direction: Descending');
     },
+    /**
+     * This prop fixes a behaviour affecting GlFilteredSearch
+     * where selecting duplicate token values leads to history
+     * dropdown also showing that selection.
+     */
     filteredRecentSearches() {
-      return this.recentSearchesStorageKey
-        ? this.recentSearches.filter(item => typeof item !== 'string')
-        : undefined;
+      if (this.recentSearchesStorageKey) {
+        const knownItems = [];
+        return this.recentSearches.reduce((historyItems, item) => {
+          // Only include non-string history items (discard items from legacy search)
+          if (typeof item !== 'string') {
+            const sanitizedItem = uniqueTokens(item);
+            const itemString = JSON.stringify(sanitizedItem);
+            // Only include items which aren't already part of history
+            if (!knownItems.includes(itemString)) {
+              historyItems.push(sanitizedItem);
+              // We're storing string for comparision as doing direct object compare
+              // won't work due to object reference not being the same.
+              knownItems.push(itemString);
+            }
+          }
+          return historyItems;
+        }, []);
+      }
+      return undefined;
     },
   },
   watch: {
@@ -245,12 +278,14 @@ export default {
       this.recentSearchesService.save(resultantSearches);
       this.recentSearches = [];
     },
-    handleFilterSubmit(filters) {
+    handleFilterSubmit() {
+      const filterTokens = uniqueTokens(this.filterValue);
+      this.filterValue = filterTokens;
       if (this.recentSearchesStorageKey) {
         this.recentSearchesPromise
           .then(() => {
-            if (filters.length) {
-              const resultantSearches = this.recentSearchesStore.addRecentSearch(filters);
+            if (filterTokens.length) {
+              const resultantSearches = this.recentSearchesStore.addRecentSearch(filterTokens);
               this.recentSearchesService.save(resultantSearches);
               this.recentSearches = resultantSearches;
             }
@@ -260,7 +295,7 @@ export default {
           });
       }
       this.blurSearchInput();
-      this.$emit('onFilter', this.removeQuotesEnclosure(filters));
+      this.$emit('onFilter', this.removeQuotesEnclosure(filterTokens));
     },
   },
 };
@@ -268,6 +303,12 @@ export default {
 
 <template>
   <div class="vue-filtered-search-bar-container d-md-flex">
+    <gl-form-checkbox
+      v-if="showCheckbox"
+      class="gl-align-self-center"
+      :checked="checkboxChecked"
+      @input="$emit('checked-input', $event)"
+    />
     <gl-filtered-search
       ref="filteredSearchInput"
       v-model="filterValue"

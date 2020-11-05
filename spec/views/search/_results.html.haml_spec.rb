@@ -54,6 +54,18 @@ RSpec.describe 'search/_results' do
           expect(rendered).to have_selector('[data-track-event=click_text]')
           expect(rendered).to have_selector('[data-track-property=search_result]')
         end
+
+        it 'renders the state filter drop down' do
+          render
+
+          expect(rendered).to have_selector('#js-search-filter-by-state')
+        end
+
+        it 'renders the confidential drop down' do
+          render
+
+          expect(rendered).to have_selector('#js-search-filter-by-confidential')
+        end
       end
     end
   end

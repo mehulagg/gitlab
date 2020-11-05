@@ -52,7 +52,7 @@ export default {
   [types.REQUEST_PROJECTS](state) {
     state.isLoadingProjects = true;
   },
-  [types.RECEIVE_PROJECTS_SUCCESS](state, projects) {
+  [types.RECEIVE_PROJECTS_SUCCESS](state, { projects, headers }) {
     let projectIds = [];
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
       projectIds = (localStorage.getItem(state.projectEndpoints.list) || '').split(',');
@@ -65,6 +65,9 @@ export default {
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
       localStorage.setItem(state.projectEndpoints.list, state.projects.map(p => p.id));
     }
+
+    const pageInfo = parseIntPagination(normalizeHeaders(headers));
+    state.projectsPage.pageInfo = pageInfo;
   },
   [types.RECEIVE_PROJECTS_ERROR](state) {
     state.projects = null;

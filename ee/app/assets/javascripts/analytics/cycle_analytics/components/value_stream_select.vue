@@ -1,9 +1,10 @@
 <script>
 import {
+  GlAlert,
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-  GlNewDropdownDivider as GlDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlForm,
   GlFormInput,
   GlFormGroup,
@@ -33,6 +34,7 @@ const validate = ({ name }) => {
 
 export default {
   components: {
+    GlAlert,
     GlButton,
     GlDropdown,
     GlDropdownItem,
@@ -53,11 +55,16 @@ export default {
   },
   computed: {
     ...mapState({
-      isLoading: 'isCreatingValueStream',
+      isDeleting: 'isDeletingValueStream',
+      isCreating: 'isCreatingValueStream',
+      deleteValueStreamError: 'deleteValueStreamError',
       initialFormErrors: 'createValueStreamErrors',
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
     }),
+    isLoading() {
+      return this.isDeleting || this.isCreating;
+    },
     isValid() {
       return !this.errors.name?.length;
     },
@@ -73,9 +80,20 @@ export default {
     selectedValueStreamId() {
       return this.selectedValueStream?.id || null;
     },
+    canDeleteSelectedStage() {
+      return this.selectedValueStream?.isCustom || false;
+    },
     hasFormErrors() {
       const { initialFormErrors } = this;
       return Boolean(Object.keys(initialFormErrors).length);
+    },
+    deleteSelectedText() {
+      return sprintf(__('Delete %{name}'), { name: this.selectedValueStreamName });
+    },
+    deleteConfirmationText() {
+      return sprintf(__('Are you sure you want to delete "%{name}" Value Stream?'), {
+        name: this.selectedValueStreamName,
+      });
     },
   },
   watch: {
@@ -92,7 +110,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['createValueStream', 'setSelectedValueStream']),
+    ...mapActions(['createValueStream', 'setSelectedValueStream', 'deleteValueStream']),
     onSubmit() {
       const { name } = this;
       return this.createValueStream({ name }).then(() => {
@@ -111,8 +129,18 @@ export default {
     isSelected(id) {
       return Boolean(this.selectedValueStreamId && this.selectedValueStreamId === id);
     },
-    onSelect(id) {
-      this.setSelectedValueStream(id);
+    onSelect(selectedId) {
+      this.setSelectedValueStream(this.data.find(({ id }) => id === selectedId));
+    },
+    onDelete() {
+      const name = this.selectedValueStreamName;
+      return this.deleteValueStream(this.selectedValueStreamId).then(() => {
+        if (!this.deleteValueStreamError) {
+          this.$toast.show(sprintf(__("'%{name}' Value Stream deleted"), { name }), {
+            position: 'top-center',
+          });
+        }
+      });
     },
   },
 };
@@ -137,12 +165,19 @@ export default {
       <gl-dropdown-item v-gl-modal-directive="'create-value-stream-modal'" @click="onHandleInput">{{
         __('Create new Value Stream')
       }}</gl-dropdown-item>
+      <gl-dropdown-item
+        v-if="canDeleteSelectedStage"
+        v-gl-modal-directive="'delete-value-stream-modal'"
+        variant="danger"
+        data-testid="delete-value-stream"
+        >{{ deleteSelectedText }}</gl-dropdown-item
+      >
     </gl-dropdown>
     <gl-button v-else v-gl-modal-directive="'create-value-stream-modal'" @click="onHandleInput">{{
       __('Create new Value Stream')
     }}</gl-button>
     <gl-modal
-      ref="modal"
+      data-testid="create-value-stream-modal"
       modal-id="create-value-stream-modal"
       :title="__('Value Stream Name')"
       :action-primary="{
@@ -174,6 +209,22 @@ export default {
           @input="onHandleInput"
         />
       </gl-form-group>
+    </gl-modal>
+    <gl-modal
+      data-testid="delete-value-stream-modal"
+      modal-id="delete-value-stream-modal"
+      :title="__('Delete Value Stream')"
+      :action-primary="{
+        text: __('Delete'),
+        attributes: [{ variant: 'danger' }, { loading: isLoading }],
+      }"
+      :action-cancel="{ text: __('Cancel') }"
+      @primary.prevent="onDelete"
+    >
+      <gl-alert v-if="deleteValueStreamError" variant="danger">{{
+        deleteValueStreamError
+      }}</gl-alert>
+      <p>{{ deleteConfirmationText }}</p>
     </gl-modal>
   </gl-form>
 </template>

@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import '~/lib/utils/jquery_at_who';
 import GfmAutoComplete from '~/gfm_auto_complete';
 
 /**

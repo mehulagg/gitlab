@@ -10,6 +10,8 @@ class Groups::PushRulesController < Groups::ApplicationController
 
   respond_to :html
 
+  feature_category :source_code_management
+
   def edit
   end
 

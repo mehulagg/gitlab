@@ -19,7 +19,7 @@ import {
 } from '~/ide/stores/actions';
 import axios from '~/lib/utils/axios_utils';
 import * as types from '~/ide/stores/mutation_types';
-import { file } from '../helpers';
+import { file, createTriggerRenameAction, createTriggerChangeAction } from '../helpers';
 import testAction from '../../helpers/vuex_action_helper';
 import eventHub from '~/ide/eventhub';
 
@@ -123,7 +123,6 @@ describe('Multi-file store actions', () => {
       it('creates temp tree', done => {
         store
           .dispatch('createTempEntry', {
-            branchId: store.state.currentBranchId,
             name: 'test',
             type: 'tree',
           })
@@ -150,7 +149,6 @@ describe('Multi-file store actions', () => {
 
         store
           .dispatch('createTempEntry', {
-            branchId: store.state.currentBranchId,
             name: 'testing/test',
             type: 'tree',
           })
@@ -176,7 +174,6 @@ describe('Multi-file store actions', () => {
 
         store
           .dispatch('createTempEntry', {
-            branchId: store.state.currentBranchId,
             name: 'testing',
             type: 'tree',
           })
@@ -197,7 +194,6 @@ describe('Multi-file store actions', () => {
         store
           .dispatch('createTempEntry', {
             name,
-            branchId: 'mybranch',
             type: 'blob',
           })
           .then(() => {
@@ -217,7 +213,6 @@ describe('Multi-file store actions', () => {
         store
           .dispatch('createTempEntry', {
             name,
-            branchId: 'mybranch',
             type: 'blob',
           })
           .then(() => {
@@ -237,7 +232,6 @@ describe('Multi-file store actions', () => {
         store
           .dispatch('createTempEntry', {
             name,
-            branchId: 'mybranch',
             type: 'blob',
           })
           .then(() => {
@@ -249,7 +243,7 @@ describe('Multi-file store actions', () => {
       });
 
       it('sets tmp file as active', () => {
-        createTempEntry(store, { name: 'test', branchId: 'mybranch', type: 'blob' });
+        createTempEntry(store, { name: 'test', type: 'blob' });
 
         expect(store.dispatch).toHaveBeenCalledWith('setFileActive', 'test');
       });
@@ -262,7 +256,6 @@ describe('Multi-file store actions', () => {
         store
           .dispatch('createTempEntry', {
             name: 'test',
-            branchId: 'mybranch',
             type: 'blob',
           })
           .then(() => {
@@ -529,7 +522,7 @@ describe('Multi-file store actions', () => {
         'path',
         store.state,
         [{ type: types.DELETE_ENTRY, payload: 'path' }],
-        [{ type: 'stageChange', payload: 'path' }, { type: 'triggerFilesChange' }],
+        [{ type: 'stageChange', payload: 'path' }, createTriggerChangeAction()],
         done,
       );
     });
@@ -558,7 +551,7 @@ describe('Multi-file store actions', () => {
         [{ type: types.DELETE_ENTRY, payload: 'testFolder/entry-to-delete' }],
         [
           { type: 'stageChange', payload: 'testFolder/entry-to-delete' },
-          { type: 'triggerFilesChange' },
+          createTriggerChangeAction(),
         ],
         done,
       );
@@ -621,7 +614,7 @@ describe('Multi-file store actions', () => {
             testEntry.path,
             store.state,
             [{ type: types.DELETE_ENTRY, payload: testEntry.path }],
-            [{ type: 'stageChange', payload: testEntry.path }, { type: 'triggerFilesChange' }],
+            [{ type: 'stageChange', payload: testEntry.path }, createTriggerChangeAction()],
             done,
           );
         });
@@ -761,7 +754,7 @@ describe('Multi-file store actions', () => {
               payload: origEntry,
             },
           ],
-          [{ type: 'triggerFilesChange' }],
+          [createTriggerRenameAction('renamed', 'orig')],
           done,
         );
       });
@@ -774,15 +767,17 @@ describe('Multi-file store actions', () => {
           { path: 'orig', name: 'renamed' },
           store.state,
           [expect.objectContaining({ type: types.RENAME_ENTRY })],
-          [{ type: 'triggerFilesChange' }],
+          [createTriggerRenameAction('orig', 'renamed')],
           done,
         );
       });
 
       it('routes to the renamed file if the original file has been opened', done => {
+        store.state.currentProjectId = 'test/test';
+        store.state.currentBranchId = 'master';
+
         Object.assign(store.state.entries.orig, {
           opened: true,
-          url: '/foo-bar.md',
         });
 
         store
@@ -792,7 +787,7 @@ describe('Multi-file store actions', () => {
           })
           .then(() => {
             expect(router.push.mock.calls).toHaveLength(1);
-            expect(router.push).toHaveBeenCalledWith(`/project/foo-bar.md`);
+            expect(router.push).toHaveBeenCalledWith(`/project/test/test/tree/master/-/renamed/`);
           })
           .then(done)
           .catch(done.fail);

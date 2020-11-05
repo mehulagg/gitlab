@@ -1,6 +1,6 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { __, sprintf } from '~/locale';
 import ServiceDeskSetting from './service_desk_setting.vue';
 import ServiceDeskService from '../services/service_desk_service';
 import eventHub from '../event_hub';
@@ -118,12 +118,17 @@ export default {
       this.isTemplateSaving = true;
       this.service
         .updateTemplate({ selectedTemplate, outgoingName, projectKey }, this.isEnabled)
-        .then(() => this.showAlert(__('Template was successfully saved.'), 'success'))
-        .catch(() =>
+        .then(({ data }) => {
+          this.incomingEmail = data?.service_desk_address;
+          this.showAlert(__('Changes were successfully made.'), 'success');
+        })
+        .catch(err => {
           this.showAlert(
-            __('An error occurred while saving the template. Please check if the template exists.'),
-          ),
-        )
+            sprintf(__('An error occured while making the changes: %{error}'), {
+              error: err?.response?.data?.message,
+            }),
+          );
+        })
         .finally(() => {
           this.isTemplateSaving = false;
         });

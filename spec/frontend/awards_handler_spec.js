@@ -169,29 +169,6 @@ describe('AwardsHandler', () => {
     });
   });
 
-  describe('::userAuthored', () => {
-    it('should update tooltip to user authored title', () => {
-      const $votesBlock = $('.js-awards-block').eq(0);
-      const $thumbsUpEmoji = $votesBlock.find('[data-name=thumbsup]').parent();
-      $thumbsUpEmoji.attr('data-title', 'sam');
-      awardsHandler.userAuthored($thumbsUpEmoji);
-
-      expect($thumbsUpEmoji.data('originalTitle')).toBe(
-        'You cannot vote on your own issue, MR and note',
-      );
-    });
-
-    it('should restore tooltip back to initial vote list', () => {
-      const $votesBlock = $('.js-awards-block').eq(0);
-      const $thumbsUpEmoji = $votesBlock.find('[data-name=thumbsup]').parent();
-      $thumbsUpEmoji.attr('data-title', 'sam');
-      awardsHandler.userAuthored($thumbsUpEmoji);
-      jest.advanceTimersByTime(2801);
-
-      expect($thumbsUpEmoji.data('originalTitle')).toBe('sam');
-    });
-  });
-
   describe('::getAwardUrl', () => {
     it('returns the url for request', () => {
       expect(awardsHandler.getAwardUrl()).toBe('http://test.host/-/snippets/1/toggle_award_emoji');
@@ -308,6 +285,30 @@ describe('AwardsHandler', () => {
       expect($('[data-name=anger]').is(':visible')).toBe(true);
       expect($('[data-name=alien]').is(':visible')).toBe(true);
       expect($('.js-emoji-menu-search').val()).toBe('');
+    });
+
+    it('should fuzzy filter the emoji', async () => {
+      await openAndWaitForEmojiMenu();
+
+      awardsHandler.searchEmojis('sgls');
+
+      expect($('[data-name=angel]').is(':visible')).toBe(false);
+      expect($('[data-name=anger]').is(':visible')).toBe(false);
+      expect($('[data-name=sunglasses]').is(':visible')).toBe(true);
+    });
+
+    it('should filter by emoji description', async () => {
+      await openAndWaitForEmojiMenu();
+
+      awardsHandler.searchEmojis('baby');
+      expect($('[data-name=angel]').is(':visible')).toBe(true);
+    });
+
+    it('should filter by emoji unicode value', async () => {
+      await openAndWaitForEmojiMenu();
+
+      awardsHandler.searchEmojis('👼');
+      expect($('[data-name=angel]').is(':visible')).toBe(true);
     });
   });
 

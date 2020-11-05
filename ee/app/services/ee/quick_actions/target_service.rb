@@ -14,6 +14,9 @@ module EE
       # rubocop: disable CodeReuse/ActiveRecord
       def epic(type_id)
         group = params[:group]
+
+        return group.epics.build if type_id.nil?
+
         EpicsFinder.new(current_user, group_id: group.id).find_by(iid: type_id) || group.epics.build
       end
       # rubocop: enable CodeReuse/ActiveRecord

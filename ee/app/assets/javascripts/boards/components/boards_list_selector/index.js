@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import boardsStore from '~/boards/stores/boards_store';
+import vuexStore from '~/boards/stores';
 import ListContainer from './list_container.vue';
+import { fullMilestoneId, fullUserId } from '../../boards_util';
 
 export default Vue.extend({
   components: {
@@ -20,6 +22,7 @@ export default Vue.extend({
     return {
       loading: true,
       store: boardsStore,
+      vuexStore,
     };
   },
   mounted() {
@@ -46,19 +49,33 @@ export default Vue.extend({
         return foundName || username.indexOf(query) > -1;
       });
     },
-    handleItemClick(item) {
-      if (!this.store.findList('title', item.name)) {
-        const list = {
-          title: item.name,
-          position: this.store.state.lists.length - 2,
-          list_type: this.listType,
-        };
+    prepareListObject(item) {
+      const list = {
+        title: item.name,
+        position: this.store.state.lists.length - 2,
+        list_type: this.listType,
+      };
 
+      if (this.listType === 'milestones') {
+        list.milestone = item;
+      } else if (this.listType === 'assignees') {
+        list.user = item;
+      }
+
+      return list;
+    },
+    handleItemClick(item) {
+      if (
+        this.vuexStore.getters.shouldUseGraphQL &&
+        !this.vuexStore.getters.getListByTitle(item.title)
+      ) {
         if (this.listType === 'milestones') {
-          list.milestone = item;
+          this.vuexStore.dispatch('createList', { milestoneId: fullMilestoneId(item.id) });
         } else if (this.listType === 'assignees') {
-          list.user = item;
+          this.vuexStore.dispatch('createList', { assigneeId: fullUserId(item.id) });
         }
+      } else if (!this.store.findList('title', item.title)) {
+        const list = this.prepareListObject(item);
 
         this.store.new(list);
       }

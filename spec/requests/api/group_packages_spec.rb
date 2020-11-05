@@ -77,7 +77,7 @@ RSpec.describe API::GroupPackages do
         it_behaves_like 'returns packages', :group, :owner
         it_behaves_like 'returns packages', :group, :maintainer
         it_behaves_like 'returns packages', :group, :developer
-        it_behaves_like 'rejects packages access', :group, :reporter, :forbidden
+        it_behaves_like 'returns packages', :group, :reporter
         it_behaves_like 'rejects packages access', :group, :guest, :forbidden
 
         context 'with subgroup' do
@@ -88,7 +88,7 @@ RSpec.describe API::GroupPackages do
           it_behaves_like 'returns packages with subgroups', :group, :owner
           it_behaves_like 'returns packages with subgroups', :group, :maintainer
           it_behaves_like 'returns packages with subgroups', :group, :developer
-          it_behaves_like 'rejects packages access', :group, :reporter, :forbidden
+          it_behaves_like 'returns packages with subgroups', :group, :reporter
           it_behaves_like 'rejects packages access', :group, :guest, :forbidden
 
           context 'excluding subgroup' do
@@ -97,7 +97,7 @@ RSpec.describe API::GroupPackages do
             it_behaves_like 'returns packages', :group, :owner
             it_behaves_like 'returns packages', :group, :maintainer
             it_behaves_like 'returns packages', :group, :developer
-            it_behaves_like 'rejects packages access', :group, :reporter, :forbidden
+            it_behaves_like 'returns packages', :group, :reporter
             it_behaves_like 'rejects packages access', :group, :guest, :forbidden
           end
         end
@@ -141,5 +141,7 @@ RSpec.describe API::GroupPackages do
 
       it_behaves_like 'returning response status', :bad_request
     end
+
+    it_behaves_like 'does not cause n^2 queries'
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Codeowners' do
       # Create one user to be the assigned approver and another user who will not be an approver
       let(:approver) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
@@ -25,7 +25,7 @@ module QA
         project.visit!
       end
 
-      it 'merge request assigns code owners as approvers', status_issue: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/605' do
+      it 'merge request assigns code owners as approvers', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/605' do
         # Commit CODEOWNERS to master
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project

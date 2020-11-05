@@ -53,6 +53,15 @@ RSpec.describe Ci::JobsFinder, '#execute' do
         it { expect(subject).to match_array([jobs[index]]) }
       end
     end
+
+    context 'scope is an array' do
+      let(:jobs) { [job_1, job_2, job_3] }
+      let(:params) {{ scope: ['running'] }}
+
+      it 'filters by the job statuses in the scope' do
+        expect(subject).to match_array([job_2])
+      end
+    end
   end
 
   context 'a project is present' do

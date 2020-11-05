@@ -16,6 +16,42 @@ RSpec.describe EnvironmentEntity do
   describe '#as_json' do
     subject { entity.as_json }
 
+    context 'with alert' do
+      let!(:environment) { create(:environment, project: project) }
+      let!(:prometheus_alert) { create(:prometheus_alert, project: project, environment: environment) }
+      let!(:alert) { create(:alert_management_alert, :triggered, :prometheus, project: project, environment: environment, prometheus_alert: prometheus_alert) }
+
+      before do
+        stub_licensed_features(environment_alerts: true)
+      end
+
+      it 'exposes active alert flag' do
+        project.add_maintainer(user)
+
+        expect(subject[:has_opened_alert]).to eq(true)
+      end
+
+      context 'when user does not have permission to read alert' do
+        it 'does not expose active alert flag' do
+          project.add_reporter(user)
+
+          expect(subject[:has_opened_alert]).to be_nil
+        end
+      end
+
+      context 'when license is insufficient' do
+        before do
+          stub_licensed_features(environment_alerts: false)
+        end
+
+        it 'does not expose active alert flag' do
+          project.add_maintainer(user)
+
+          expect(subject[:has_opened_alert]).to be_nil
+        end
+      end
+    end
+
     context 'when deploy_boards are available' do
       before do
         stub_licensed_features(deploy_board: true)
@@ -66,7 +102,7 @@ RSpec.describe EnvironmentEntity do
 
         subject { entity.as_json.include?(:terminal_path) }
 
-        it_behaves_like 'protected environments access', false
+        it_behaves_like 'protected environments access', developer_access: false
       end
     end
   end

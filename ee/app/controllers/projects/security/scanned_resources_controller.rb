@@ -6,6 +6,8 @@ module Projects
       before_action :authorize_read_vulnerability!
       before_action :scanned_resources
 
+      feature_category :dynamic_application_security_testing
+
       def index
         respond_to do |format|
           format.csv do
@@ -20,7 +22,7 @@ module Projects
       private
 
       def scanned_resources
-        pipeline = project.ci_pipelines.find(pipeline_id)
+        pipeline = project.all_pipelines.find(pipeline_id)
         @scanned_resources = pipeline&.security_reports&.reports&.fetch('dast', nil)&.scanned_resources
 
         return if @scanned_resources

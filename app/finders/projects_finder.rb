@@ -24,6 +24,7 @@
 #     last_activity_after: datetime
 #     last_activity_before: datetime
 #     repository_storage: string
+#     without_deleted: boolean
 #
 class ProjectsFinder < UnionFinder
   include CustomAttributesFilter
@@ -49,7 +50,12 @@ class ProjectsFinder < UnionFinder
     use_cte = params.delete(:use_cte)
     collection = Project.wrap_with_cte(collection) if use_cte
     collection = filter_projects(collection)
-    sort(collection)
+
+    if params[:sort] == 'similarity' && params[:search] && Feature.enabled?(:project_finder_similarity_sort)
+      collection.sorted_by_similarity_desc(params[:search])
+    else
+      sort(collection)
+    end
   end
 
   private
@@ -208,7 +214,11 @@ class ProjectsFinder < UnionFinder
   end
 
   def sort(items)
-    params[:sort].present? ? items.sort_by_attribute(params[:sort]) : items.projects_order_id_desc
+    if params[:sort].present?
+      items.sort_by_attribute(params[:sort])
+    else
+      items.projects_order_id_desc
+    end
   end
 
   def by_archived(projects)

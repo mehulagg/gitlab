@@ -25,14 +25,6 @@ export default {
       type: String,
       required: true,
     },
-    profilesLibraryPath: {
-      type: String,
-      required: true,
-    },
-    newSiteProfilePath: {
-      type: String,
-      required: true,
-    },
   },
   data() {
     return {
@@ -49,8 +41,6 @@ export default {
         :help-page-path="helpPagePath"
         :project-path="projectPath"
         :default-branch="defaultBranch"
-        :profiles-library-path="profilesLibraryPath"
-        :new-site-profile-path="newSiteProfilePath"
         @cancel="showForm = false"
       />
     </template>

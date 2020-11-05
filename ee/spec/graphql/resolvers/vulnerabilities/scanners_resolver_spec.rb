@@ -15,10 +15,10 @@ RSpec.describe Resolvers::Vulnerabilities::ScannersResolver do
     let_it_be(:user) { create(:user, security_dashboard_projects: [project_with_no_group]) }
 
     let_it_be(:vulnerability_scanner_1) { create(:vulnerabilities_scanner, project: project) }
-    let_it_be(:finding_1) { create(:vulnerabilities_occurrence, project: project, scanner: vulnerability_scanner_1) }
+    let_it_be(:finding_1) { create(:vulnerabilities_finding, project: project, scanner: vulnerability_scanner_1) }
 
     let_it_be(:vulnerability_scanner_2) { create(:vulnerabilities_scanner, project: project_with_no_group) }
-    let_it_be(:finding_2) { create(:vulnerabilities_occurrence, project: project_with_no_group, scanner: vulnerability_scanner_2) }
+    let_it_be(:finding_2) { create(:vulnerabilities_finding, project: project_with_no_group, scanner: vulnerability_scanner_2) }
 
     let(:current_user) { user }
 

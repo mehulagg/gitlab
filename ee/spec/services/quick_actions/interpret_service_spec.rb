@@ -232,6 +232,19 @@ RSpec.describe QuickActions::InterpretService do
               expect(updates).to eq(iteration: iteration)
               expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
             end
+
+            context 'when iteration is started' do
+              before do
+                iteration.start!
+              end
+
+              it 'assigns an iteration to an issue' do
+                _, updates, message = service.execute(content, issue)
+
+                expect(updates).to eq(iteration: iteration)
+                expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
+              end
+            end
           end
 
           context 'when the user does not have enough permissions' do
@@ -268,6 +281,16 @@ RSpec.describe QuickActions::InterpretService do
 
         it 'does not recognize /iteration' do
           _, updates = service.execute(content, issue)
+
+          expect(updates).to be_empty
+        end
+      end
+
+      context 'when issuable does not support iterations' do
+        it 'does not assign an iteration to an incident' do
+          incident = create(:incident, project: project)
+
+          _, updates = service.execute(content, incident)
 
           expect(updates).to be_empty
         end
@@ -318,6 +341,16 @@ RSpec.describe QuickActions::InterpretService do
           expect(updates).to be_empty
         end
       end
+
+      context 'when issuable does not support iterations' do
+        it 'does not assign an iteration to an incident' do
+          incident = create(:incident, project: project)
+
+          _, updates = service.execute(content, incident)
+
+          expect(updates).to be_empty
+        end
+      end
     end
 
     context 'epic command' do
@@ -360,6 +393,16 @@ RSpec.describe QuickActions::InterpretService do
 
               expect(updates).to be_empty
               expect(message).to eq("Issue #{issue.to_reference} has already been added to epic #{epic.to_reference}.")
+            end
+          end
+
+          context 'when issuable does not support epics' do
+            it 'does not assign an incident to an epic' do
+              incident = create(:incident, project: project)
+
+              _, updates = service.execute(content, incident)
+
+              expect(updates).to be_empty
             end
           end
         end
@@ -720,13 +763,18 @@ RSpec.describe QuickActions::InterpretService do
 
     context 'remove_epic command' do
       let(:epic) { create(:epic, group: group) }
-      let(:content) { "/remove_epic #{epic.to_reference(project)}" }
+      let(:content) { "/remove_epic" }
 
       before do
+        stub_licensed_features(epics: true)
         issue.update!(epic: epic)
       end
 
       context 'when epics are disabled' do
+        before do
+          stub_licensed_features(epics: false)
+        end
+
         it 'does not recognize /remove_epic' do
           _, updates = service.execute(content, issue)
 
@@ -743,6 +791,16 @@ RSpec.describe QuickActions::InterpretService do
           _, updates = service.execute(content, issue)
 
           expect(updates).to eq(epic: nil)
+        end
+      end
+
+      context 'when issuable does not support epics' do
+        it 'does not recognize /remove_epic' do
+          incident = create(:incident, project: project, epic: epic)
+
+          _, updates = service.execute(content, incident)
+
+          expect(updates).to be_empty
         end
       end
     end
@@ -837,6 +895,26 @@ RSpec.describe QuickActions::InterpretService do
 
       it 'does not recognise /clear_weight' do
         _, updates = service.execute('/clear_weight', issue)
+
+        expect(updates).to be_empty
+      end
+    end
+
+    context 'issuable weights not supported by type' do
+      let_it_be(:incident) { create(:incident, project: project) }
+
+      before do
+        stub_licensed_features(issue_weights: true)
+      end
+
+      it 'does not recognise /weight X' do
+        _, updates = service.execute('/weight 5', incident)
+
+        expect(updates).to be_empty
+      end
+
+      it 'does not recognise /clear_weight' do
+        _, updates = service.execute('/clear_weight', incident)
 
         expect(updates).to be_empty
       end

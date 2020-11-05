@@ -108,7 +108,7 @@ class Import::GithubController < Import::BaseController
     @client ||= if Feature.enabled?(:remove_legacy_github_client)
                   Gitlab::GithubImport::Client.new(session[access_token_key])
                 else
-                  Gitlab::LegacyGithubImport::Client.new(session[access_token_key], client_options)
+                  Gitlab::LegacyGithubImport::Client.new(session[access_token_key], **client_options)
                 end
   end
 
@@ -244,14 +244,6 @@ class Import::GithubController < Import::BaseController
 
   def extra_import_params
     {}
-  end
-
-  def sanitized_filter_param
-    @filter ||= sanitize(params[:filter])
-  end
-
-  def filter_attribute
-    :name
   end
 end
 

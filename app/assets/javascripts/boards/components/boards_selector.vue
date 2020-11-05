@@ -61,6 +61,10 @@ export default {
       type: String,
       required: true,
     },
+    labelsWebUrl: {
+      type: String,
+      required: true,
+    },
     projectId: {
       type: Number,
       required: true,
@@ -257,7 +261,7 @@ export default {
         >
           <gl-deprecated-dropdown-item
             v-show="filteredBoards.length === 0"
-            class="no-pointer-events text-secondary"
+            class="gl-pointer-events-none text-secondary"
           >
             {{ s__('IssueBoards|No matching boards found') }}
           </gl-deprecated-dropdown-item>
@@ -332,6 +336,7 @@ export default {
       <board-form
         v-if="currentPage"
         :labels-path="labelsPath"
+        :labels-web-url="labelsWebUrl"
         :project-id="projectId"
         :group-id="groupId"
         :can-admin-board="canAdminBoard"

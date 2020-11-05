@@ -1,5 +1,10 @@
 <script>
+import { GlButton } from '@gitlab/ui';
+
 export default {
+  components: {
+    GlButton,
+  },
   props: {
     item: {
       type: Object,
@@ -15,11 +20,9 @@ export default {
 </script>
 
 <template>
-  <li class="filter-dropdown-item" @click="handleItemClick">
-    <button class="btn btn-link dropdown-user" type="button">
-      <div class="dropdown-user-details">
-        <div :title="item.title">{{ item.title }}</div>
-      </div>
-    </button>
+  <li>
+    <gl-button category="tertiary" class="gl-rounded-0!" @click="handleItemClick">
+      <span class="gl-white-space-normal">{{ item.title }}</span>
+    </gl-button>
   </li>
 </template>

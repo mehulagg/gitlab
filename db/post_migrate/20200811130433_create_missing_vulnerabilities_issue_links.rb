@@ -38,8 +38,7 @@ class CreateMissingVulnerabilitiesIssueLinks < ActiveRecord::Migration[6.0]
 
       VulnerabilitiesIssueLink.insert_all(
         issue_links,
-        returning: false,
-        unique_by: %i[vulnerability_id issue_id]
+        returning: false
       )
     end
   end

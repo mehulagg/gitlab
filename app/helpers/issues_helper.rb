@@ -4,7 +4,7 @@ module IssuesHelper
   def issue_css_classes(issue)
     classes = ["issue"]
     classes << "closed" if issue.closed?
-    classes << "today" if issue.today?
+    classes << "today" if issue.new?
     classes << "user-can-drag" if @sort == 'relative_position'
     classes.join(' ')
   end
@@ -136,6 +136,36 @@ module IssuesHelper
     return false unless issue.from_service_desk?
 
     issue.moved_from.project.service_desk_enabled? && !issue.project.service_desk_enabled?
+  end
+
+  def use_startup_call?
+    request.query_parameters.empty? && @sort == 'created_date'
+  end
+
+  def startup_call_params
+    {
+      state: 'opened',
+      with_labels_details: 'true',
+      page: 1,
+      per_page: 20,
+      order_by: 'created_at',
+      sort: 'desc'
+    }
+  end
+
+  def issue_header_actions_data(project, issue, current_user)
+    {
+      can_create_issue: show_new_issue_link?(project).to_s,
+      can_reopen_issue: can?(current_user, :reopen_issue, issue).to_s,
+      can_report_spam: issue.submittable_as_spam_by?(current_user).to_s,
+      can_update_issue: can?(current_user, :update_issue, issue).to_s,
+      iid: issue.iid,
+      is_issue_author: (issue.author == current_user).to_s,
+      new_issue_path: new_project_issue_path(project),
+      project_path: project.full_path,
+      report_abuse_path: new_abuse_report_path(user_id: issue.author.id, ref_url: issue_url(issue)),
+      submit_as_spam_path: mark_as_spam_project_issue_path(project, issue)
+    }
   end
 end
 

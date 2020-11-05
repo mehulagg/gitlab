@@ -6,7 +6,7 @@ import { apiTasksByTypeData, rawTasksByTypeData } from '../../../mock_data';
 
 let state = null;
 
-describe('Cycle analytics mutations', () => {
+describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
     state = {};
   });
@@ -26,6 +26,19 @@ describe('Cycle analytics mutations', () => {
 
     expect(state[stateKey]).toEqual(value);
   });
+
+  it.each`
+    mutation             | payload | expectedState
+    ${types.SET_LOADING} | ${true} | ${{ isLoadingTasksByTypeChart: true, isLoadingTasksByTypeChartTopLabels: true }}
+  `(
+    '$mutation with payload $payload will update state with $expectedState',
+    ({ mutation, payload, expectedState }) => {
+      state = {};
+      mutations[mutation](state, payload);
+
+      expect(state).toMatchObject(expectedState);
+    },
+  );
 
   describe(`${types.RECEIVE_TASKS_BY_TYPE_DATA_SUCCESS}`, () => {
     it('sets isLoadingTasksByTypeChart to false', () => {

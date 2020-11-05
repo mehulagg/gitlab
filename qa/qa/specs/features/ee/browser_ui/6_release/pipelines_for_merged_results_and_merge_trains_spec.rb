@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  RSpec.describe 'Release', :docker, :runner do
+  RSpec.describe 'Release', :runner do
     describe 'Pipelines for merged results and merge trains' do
       let(:group) { Resource::Group.fabricate_via_api! }
 
@@ -59,7 +59,7 @@ module QA
         runner.remove_via_api! if runner
       end
 
-      it 'creates a pipeline with merged results', status_issue: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/562' do
+      it 'creates a pipeline with merged results', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/562' do
         branch_name = "merged-results-#{SecureRandom.hex(8)}"
 
         # Create a branch that will be merged into master
@@ -94,7 +94,7 @@ module QA
         expect(merged).to be_truthy, "Expected content 'The changes were merged' but it did not appear."
       end
 
-      it 'merges via a merge train', status_issue: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/561' do
+      it 'merges via a merge train', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/561' do
         branch_name = "merge-train-#{SecureRandom.hex(8)}"
 
         # Create a branch that will be merged into master

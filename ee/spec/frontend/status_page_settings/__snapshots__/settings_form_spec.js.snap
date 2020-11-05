@@ -17,9 +17,12 @@ exports[`Status Page settings form default state should match the default snapsh
     </h4>
      
     <gl-button-stub
+      buttontextclasses=""
+      category="primary"
       class="js-settings-toggle"
-      size="md"
-      variant="secondary"
+      icon=""
+      size="medium"
+      variant="default"
     >
       Expand
     </gl-button-stub>
@@ -142,20 +145,19 @@ exports[`Status Page settings form default state should match the default snapsh
         />
       </gl-form-group-stub>
        
-      <div
-        class="gl-display-flex gl-justify-content-end"
+      <gl-button-stub
+        buttontextclasses=""
+        category="primary"
+        class="js-no-auto-disable"
+        icon=""
+        size="medium"
+        type="submit"
+        variant="success"
       >
-        <gl-button-stub
-          class="js-no-auto-disable"
-          size="md"
-          type="submit"
-          variant="success"
-        >
-          
-          Save changes
         
-        </gl-button-stub>
-      </div>
+        Save changes
+      
+      </gl-button-stub>
     </form>
   </div>
 </section>

@@ -17,6 +17,7 @@ export default function init() {
     dependencyScanningHelpPath,
     toggleAutofixSettingEndpoint,
     createSastMergeRequestPath,
+    gitlabCiHistoryPath,
   } = el.dataset;
 
   return new Vue({
@@ -38,6 +39,7 @@ export default function init() {
             'canEnableAutoDevops',
             'gitlabCiPresent',
           ]),
+          gitlabCiHistoryPath,
           autoFixSettingsProps: {
             autoFixEnabled: JSON.parse(autoFixEnabled),
             autoFixHelpPath,

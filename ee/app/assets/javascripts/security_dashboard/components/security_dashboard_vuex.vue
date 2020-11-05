@@ -38,10 +38,6 @@ export default {
       required: false,
       default: '',
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: true,
-    },
     vulnerableProjectsEndpoint: {
       type: String,
       required: false,
@@ -171,7 +167,11 @@ export default {
           <vulnerability-count-list v-if="shouldShowCountList" />
           <filters>
             <template v-if="hasFuzzingArtifacts" #buttons>
-              <fuzzing-artifacts-download :jobs="fuzzingJobsWithArtifact" :project-id="projectId" />
+              <fuzzing-artifacts-download :jobs="fuzzingJobsWithArtifact" :project-id="projectId">
+                <template #label>
+                  <strong>{{ s__('SecurityReports|Download Report') }}</strong>
+                </template>
+              </fuzzing-artifacts-download>
             </template>
           </filters>
         </template>
@@ -193,7 +193,6 @@ export default {
 
       <issue-modal
         :modal="modal"
-        :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
         :can-create-issue="canCreateIssue"
         :can-create-merge-request="canCreateMergeRequest"
         :can-dismiss-vulnerability="canDismissVulnerability"

@@ -22,9 +22,10 @@ RSpec.describe Vulnerabilities::ResolveService do
     end
 
     it_behaves_like 'calls vulnerability statistics utility services in order'
+    it_behaves_like 'removes dismissal feedback from associated findings'
 
     it 'resolves a vulnerability' do
-      Timecop.freeze do
+      freeze_time do
         resolve_vulnerability
 
         expect(vulnerability.reload).to(

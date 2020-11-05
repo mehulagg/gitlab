@@ -2,9 +2,9 @@
 
 module Projects
   class OnDemandScansController < Projects::ApplicationController
-    before_action do
-      authorize_read_on_demand_scans!
-    end
+    before_action :authorize_read_on_demand_scans!
+
+    feature_category :dynamic_application_security_testing
 
     def index
     end

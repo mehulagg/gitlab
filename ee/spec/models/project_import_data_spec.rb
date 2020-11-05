@@ -5,9 +5,11 @@ require 'spec_helper'
 RSpec.describe ProjectImportData do
   using RSpec::Parameterized::TableSyntax
 
+  let_it_be(:user) { create(:user) }
+
   let(:import_url) { 'ssh://example.com' }
   let(:import_data_attrs) { { auth_method: 'ssh_public_key' } }
-  let(:project) { build(:project, :mirror, import_url: import_url, import_data_attributes: import_data_attrs) }
+  let(:project) { build(:project, :mirror, creator: user, import_url: import_url, import_data_attributes: import_data_attrs) }
 
   subject(:import_data) { project.import_data }
 
@@ -33,8 +35,6 @@ RSpec.describe ProjectImportData do
   end
 
   describe '#ssh_known_hosts_verified_by' do
-    let(:user) { project.owner }
-
     subject { import_data.ssh_known_hosts_verified_by }
 
     it 'is a user when ssh_known_hosts_verified_by_id is a valid id' do

@@ -1,6 +1,6 @@
 $header-item-height: 60px;
 $item-height: 50px;
-$details-cell-width: 320px;
+$details-cell-width: px-to-rem(320px);
 $timeline-cell-height: 32px;
 $timeline-cell-width: 180px;
 $border-style: 1px solid $border-gray-normal;

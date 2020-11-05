@@ -34,5 +34,10 @@ module Types
           null: true,
           resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Issue, obj.issue_id).find },
           description: 'The issue that logged time was added to'
+
+    field :note,
+          Types::Notes::NoteType,
+          null: true,
+          description: 'The note where the quick action to add the logged time was executed'
   end
 end

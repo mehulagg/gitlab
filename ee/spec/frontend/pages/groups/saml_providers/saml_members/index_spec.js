@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlTable, GlSkeletonLoading } from '@gitlab/ui';
+import { GlTable, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import MembersApp from 'ee/pages/groups/saml_providers/saml_members/index.vue';
 import createInitialState from 'ee/pages/groups/saml_providers/saml_members/store/state';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
@@ -71,7 +71,7 @@ describe('SAML providers members app', () => {
       const changeFn = wrapper.find(TablePagination).props('change');
       changeFn(2);
       return wrapper.vm.$nextTick(() => {
-        expect(fetchPageMock).toHaveBeenCalledWith(expect.anything(), 2, undefined);
+        expect(fetchPageMock).toHaveBeenCalledWith(expect.anything(), 2);
       });
     });
   });

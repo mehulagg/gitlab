@@ -16,10 +16,10 @@ RSpec.shared_examples 'issue with epic_id parameter' do
   context 'when epic_id is 0' do
     let(:params) { { title: 'issue1', epic_id: 0 } }
 
-    it 'ignores epic_id' do
+    it 'does not assign any epic' do
       issue = execute
 
-      expect(issue).to be_persisted
+      expect(issue.reload).to be_persisted
       expect(issue.epic).to be_nil
     end
   end
@@ -32,6 +32,12 @@ RSpec.shared_examples 'issue with epic_id parameter' do
     let(:params) { { title: 'issue1', epic_id: epic.id } }
 
     it 'raises an exception' do
+      expect { execute }.to raise_error(Gitlab::Access::AccessDeniedError)
+    end
+
+    it 'does not send usage data for added epic action', :aggregate_failures do
+      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_added_epic_action)
+
       expect { execute }.to raise_error(Gitlab::Access::AccessDeniedError)
     end
   end
@@ -48,8 +54,47 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       it 'creates epic issue link' do
         issue = execute
 
-        expect(issue).to be_persisted
+        expect(issue.reload).to be_persisted
         expect(issue.epic).to eq(epic)
+      end
+
+      it 'calls EpicIssues::CreateService' do
+        link_sevice = double
+        expect(EpicIssues::CreateService).to receive(:new).and_return(link_sevice)
+        expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+        execute
+      end
+
+      it 'tracks usage data for added to epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
+
+        execute
+      end
+    end
+
+    context 'when epic param is also present' do
+      context 'when epic_id belongs to another valid epic' do
+        let(:other_epic) { create(:epic, group: group) }
+        let(:params) { { title: 'issue1', epic: epic, epic_id: other_epic.id } }
+
+        it 'creates epic issue link based on the epic param' do
+          issue = execute
+
+          expect(issue.reload).to be_persisted
+          expect(issue.epic).to eq(epic)
+        end
+      end
+
+      context 'when epic_id is empty' do
+        let(:params) { { title: 'issue1', epic: epic, epic_id: '' } }
+
+        it 'creates epic issue link based on the epic param' do
+          issue = execute
+
+          expect(issue.reload).to be_persisted
+          expect(issue.epic).to eq(epic)
+        end
       end
     end
 
@@ -63,8 +108,14 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       it 'creates epic issue link' do
         issue = execute
 
-        expect(issue).to be_persisted
+        expect(issue.reload).to be_persisted
         expect(issue.epic).to eq(epic)
+      end
+
+      it 'tracks usage data for added to epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
+
+        execute
       end
     end
   end

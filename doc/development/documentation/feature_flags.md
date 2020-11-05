@@ -30,7 +30,6 @@ See how to document them below, according to the state of the flag:
 - [Features that can be enabled or disabled for a single project](#features-enabled-by-project).
 - [Features with the feature flag removed](#features-with-flag-removed).
 
-NOTE: **Note:**
 The [`**(CORE ONLY)**`](styleguide.md#product-badges) badge or equivalent for
 the feature's tier should be added to the line and heading that refers to
 enabling/disabling feature flags as Admin access is required to do so,
@@ -52,7 +51,7 @@ For feature flags disabled by default, if they can be used by end users:
   do not say anything about it.
 - Say whether it's recommended for production use.
 - Document how to enable and disable it.
-- Add a warning to the user saying that the feature is disabled.
+- Add a warning to the user saying that the feature might be disabled.
 
 For example, for a feature disabled by default, disabled on GitLab.com, cannot
 be enabled for a single project, and is not ready for production use:
@@ -66,7 +65,7 @@ be enabled for a single project, and is not ready for production use:
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
 
-CAUTION: **Caution:**
+CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
 (...Regular content goes here...)
@@ -119,13 +118,13 @@ use:
 # Feature Name
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
-> - It was deployed [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
+> - It was [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
 > - [Became enabled by default](link-to-issue) on GitLab 12.1.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
 
-CAUTION: **Caution:**
+CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
 (...Regular content goes here...)
@@ -181,7 +180,7 @@ cannot be enabled for a single project, and is ready for production use:
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
 
-CAUTION: **Caution:**
+CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
 (...Regular content goes here...)
@@ -250,11 +249,11 @@ be enabled by project, and is ready for production use:
 > - [Introduced](link-to-issue) in GitLab 12.0.
 > - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
-> - It can be enabled or disable for a single project.
+> - It can be enabled or disabled for a single project.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
 
-CAUTION: **Caution:**
+CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
 (...Regular content goes here...)

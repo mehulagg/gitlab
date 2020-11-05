@@ -35,7 +35,7 @@ module Ci
 
     def upstream_pipeline
       strong_memoize(:upstream_pipeline) do
-        upstream_project.pipeline_for(upstream_project.default_branch)
+        upstream_project.latest_pipeline(upstream_project.default_branch)
       end
     end
   end

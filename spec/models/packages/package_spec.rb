@@ -6,6 +6,7 @@ RSpec.describe Packages::Package, type: :model do
 
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:creator) }
     it { is_expected.to have_many(:package_files).dependent(:destroy) }
     it { is_expected.to have_many(:dependency_links).inverse_of(:package) }
     it { is_expected.to have_many(:tags).inverse_of(:package) }
@@ -107,6 +108,35 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('.foobar').for(:name) }
         it { is_expected.not_to allow_value('%foo%bar').for(:name) }
       end
+
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to allow_value('123').for(:name) }
+        it { is_expected.to allow_value('foo').for(:name) }
+        it { is_expected.to allow_value('foo.bar.baz-2.0-20190901.47283-1').for(:name) }
+        it { is_expected.not_to allow_value('../../foo').for(:name) }
+        it { is_expected.not_to allow_value('..\..\foo').for(:name) }
+        it { is_expected.not_to allow_value('%2f%2e%2e%2f%2essh%2fauthorized_keys').for(:name) }
+        it { is_expected.not_to allow_value('$foo/bar').for(:name) }
+        it { is_expected.not_to allow_value('my file name').for(:name) }
+        it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
+      end
+
+      context 'nuget package' do
+        subject { build_stubbed(:nuget_package) }
+
+        it { is_expected.to allow_value('My.Package').for(:name) }
+        it { is_expected.to allow_value('My.Package.Mvc').for(:name) }
+        it { is_expected.to allow_value('MyPackage').for(:name) }
+        it { is_expected.to allow_value('My.23.Package').for(:name) }
+        it { is_expected.to allow_value('My23Package').for(:name) }
+        it { is_expected.to allow_value('runtime.my-test64.runtime.package.Mvc').for(:name) }
+        it { is_expected.to allow_value('my_package').for(:name) }
+        it { is_expected.not_to allow_value('My/package').for(:name) }
+        it { is_expected.not_to allow_value('../../../my_package').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
     end
 
     describe '#version' do
@@ -139,6 +169,13 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('.1.2.3').for(:version) }
         it { is_expected.not_to allow_value('+1.2.3').for(:version) }
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'composer package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :composer_package
+
+        it { is_expected.to allow_value('dev-master').for(:version) }
+        it { is_expected.to allow_value('2.x-dev').for(:version) }
       end
 
       context 'maven package' do
@@ -236,8 +273,32 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
       end
 
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to validate_presence_of(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.3.350').for(:version) }
+        it { is_expected.not_to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('  1.2.3').for(:version) }
+        it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
+        it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
+        it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('').for(:version) }
+        it { is_expected.not_to allow_value(nil).for(:version) }
+      end
+
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
-      it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
+
+      context 'nuget package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
+
+        it { is_expected.to allow_value('1.2.3.4').for(:version) }
+      end
     end
 
     describe '#package_already_taken' do
@@ -245,7 +306,7 @@ RSpec.describe Packages::Package, type: :model do
         let!(:package) { create(:npm_package) }
 
         it 'will not allow a package of the same name' do
-          new_package = build(:npm_package, name: package.name)
+          new_package = build(:npm_package, project: create(:project), name: package.name)
 
           expect(new_package).not_to be_valid
         end
@@ -477,6 +538,14 @@ RSpec.describe Packages::Package, type: :model do
 
       it { is_expected.to match_array([package1, package2]) }
     end
+
+    describe '.with_normalized_pypi_name' do
+      let_it_be(:pypi_package) { create(:pypi_package, name: 'Foo.bAr---BAZ_buz') }
+
+      subject { described_class.with_normalized_pypi_name('foo-bar-baz-buz') }
+
+      it { is_expected.to match_array([pypi_package]) }
+    end
   end
 
   describe '.select_distinct_name' do
@@ -552,11 +621,17 @@ RSpec.describe Packages::Package, type: :model do
 
   describe 'plan_limits' do
     Packages::Package.package_types.keys.without('composer').each do |pt|
+      plan_limit_name = if pt == 'generic'
+                          "#{pt}_packages_max_file_size"
+                        else
+                          "#{pt}_max_file_size"
+                        end
+
       context "File size limits for #{pt}" do
         let(:package) { create("#{pt}_package") }
 
-        it "plan_limits includes column #{pt}_max_file_size" do
-          expect { package.project.actual_limits.send("#{pt}_max_file_size") }
+        it "plan_limits includes column #{plan_limit_name}" do
+          expect { package.project.actual_limits.send(plan_limit_name) }
             .not_to raise_error(NoMethodError)
         end
       end

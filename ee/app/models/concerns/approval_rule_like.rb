@@ -5,10 +5,10 @@ module ApprovalRuleLike
 
   DEFAULT_NAME = 'Default'
   DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check'
-  DEFAULT_NAME_FOR_SECURITY_REPORT = 'Vulnerability-Check'
+  DEFAULT_NAME_FOR_VULNERABILITY_REPORT = 'Vulnerability-Check'
   REPORT_TYPES_BY_DEFAULT_NAME = {
     DEFAULT_NAME_FOR_LICENSE_REPORT => :license_scanning,
-    DEFAULT_NAME_FOR_SECURITY_REPORT => :security
+    DEFAULT_NAME_FOR_VULNERABILITY_REPORT => :vulnerability
   }.freeze
   APPROVALS_REQUIRED_MAX = 100
   ALL_MEMBERS = 'All Members'
@@ -26,6 +26,7 @@ module ApprovalRuleLike
 
     scope :with_users, -> { preload(:users, :group_users) }
     scope :regular_or_any_approver, -> { where(rule_type: [:regular, :any_approver]) }
+    scope :for_groups, -> (groups) { joins(:groups).where(approval_project_rules_groups: { group_id: groups }) }
   end
 
   def audit_add

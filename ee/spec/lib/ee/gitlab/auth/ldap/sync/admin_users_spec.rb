@@ -61,7 +61,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Sync::AdminUsers do
       end
 
       it 'logs a debug message' do
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn)
                 .with("Error syncing admin users for provider 'ldapmain'. LDAP connection Error")
                 .at_least(:once)

@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner, :requires_admin do
+  RSpec.describe 'Verify', :runner, :requires_admin do
     describe 'Artifacts' do
       context 'when locked' do
-        let(:ff_keep_latest) { 'keep_latest_artifacts_for_ref' }
-        let(:ff_destroy_unlocked) { 'destroy_only_unlocked_expired_artifacts' }
         let(:file_name) { 'artifact.txt' }
         let(:directory_name) { 'my_artifacts' }
         let(:executor) { "qa-runner-#{Time.now.to_i}" }
@@ -25,12 +23,10 @@ module QA
         end
 
         before do
-          [ff_keep_latest, ff_destroy_unlocked].each { |flag| Runtime::Feature.enable_and_verify(flag) }
           Flow::Login.sign_in
         end
 
         after do
-          [ff_keep_latest, ff_destroy_unlocked].each { |flag| Runtime::Feature.disable_and_verify(flag) }
           runner.remove_via_api!
         end
 
@@ -60,11 +56,7 @@ module QA
             )
           end.project.visit!
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-          Page::Project::Pipeline::Index.perform do |index|
-            index.wait_for_latest_pipeline_completion
-            index.click_on_latest_pipeline
-          end
+          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completion')
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             pipeline.click_job('test-artifacts')

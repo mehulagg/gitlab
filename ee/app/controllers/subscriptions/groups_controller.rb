@@ -8,6 +8,8 @@ module Subscriptions
 
     before_action :find_group
 
+    feature_category :purchase
+
     def edit
     end
 

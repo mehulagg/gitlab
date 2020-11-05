@@ -4,9 +4,6 @@ module RequirementsManagement
   class TestReport < ApplicationRecord
     include Sortable
     include BulkInsertSafe
-    include IgnorableColumns
-
-    ignore_column :pipeline_id, remove_with: '13.4', remove_after: '2020-08-22'
 
     belongs_to :requirement, inverse_of: :test_reports
     belongs_to :author, inverse_of: :test_reports, class_name: 'User'
@@ -29,6 +26,16 @@ module RequirementsManagement
                   end
 
         bulk_insert!(reports)
+      end
+
+      def build_report(author: nil, state:, requirement:, build: nil, timestamp: Time.current)
+        new(
+          requirement_id: requirement.id,
+          build_id: build&.id,
+          author_id: build&.user_id || author&.id,
+          created_at: timestamp,
+          state: state
+        )
       end
 
       private
@@ -54,16 +61,6 @@ module RequirementsManagement
             reports << build_report(state: new_state, requirement: requirement, build: build, timestamp: timestamp)
           end
         end
-      end
-
-      def build_report(state:, requirement:, build:, timestamp:)
-        new(
-          requirement_id: requirement.id,
-          build_id: build.id,
-          author_id: build.user_id,
-          created_at: timestamp,
-          state: state
-        )
       end
     end
   end
