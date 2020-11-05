@@ -103,7 +103,11 @@ export default {
     showIssue(issue) {
       this.setActiveId({ id: issue.id, sidebarType: ISSUABLE });
     },
+    handleDragOnStart() {
+      document.body.classList.add('is-dragging');
+    },
     handleDragOnEnd(params) {
+      document.body.classList.remove('is-dragging');
       const { newIndex, oldIndex, from, to, item } = params;
       const { issueId, issueIid, issuePath } = item.dataset;
       const { children } = to;
@@ -163,6 +167,7 @@ export default {
         v-if="list.isExpanded"
         v-bind="treeRootOptions"
         class="board-cell gl-p-2 gl-m-0 gl-h-full"
+        @start="handleDragOnStart"
         @end="handleDragOnEnd"
       >
         <board-card-layout
