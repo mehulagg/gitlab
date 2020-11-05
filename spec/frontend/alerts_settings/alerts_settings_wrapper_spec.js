@@ -331,7 +331,7 @@ describe('AlertsSettingsWrapper', () => {
 
   describe('with mocked Apollo client', () => {
     it('has a selection of integrations loaded via the getIntegrationsQuery', async () => {
-      createComponentWithApollo({});
+      createComponentWithApollo();
 
       await jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
@@ -340,7 +340,7 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('calls a mutation with correct parameters and destroys a integration', async () => {
-      createComponentWithApollo({});
+      createComponentWithApollo();
 
       await destroyHttpIntegration(wrapper);
 
