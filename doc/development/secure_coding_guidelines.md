@@ -505,7 +505,7 @@ out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
 
 This outputs `1` followed by the content of `/etc/passwd`.
 
-## GitLab Internal Coding Guidelines
+## GitLab Internal Authorization
 
 ### Introduction
 There're some cases where `users` passed in the code is actually referring to a `DeployToken`/`DeployKey` entity instead of a real `User`, because of the code below in **/lib/api/api_guard.rb**
