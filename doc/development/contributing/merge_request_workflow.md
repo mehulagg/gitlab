@@ -142,6 +142,10 @@ CAUTION: **Caution:**
 If the guidelines are not met, the MR may not pass the
 [Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
 
+NOTE: **Note:**
+The prefixes in the form of `[prefix]` and `prefix:` are allowed (they can be all lowercase, as long as the message itself is capitalized).
+For instance, `danger: Improve Danger behavior` and `[API] Improve the labels endpoint` are valid commit messages.
+
 TIP: **Tip:**
 Consider enabling [Squash and merge](../../user/project/merge_requests/squash_and_merge.md#squash-and-merge) if your merge
 request includes "Applied suggestion to X files" commits, so that Danger can ignore those.
