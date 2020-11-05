@@ -9,8 +9,6 @@ export default class IssuableTemplateSelector extends TemplateSelector {
   constructor(...args) {
     super(...args);
 
-    this.projectPath = this.dropdown.data('projectPath');
-    this.namespacePath = this.dropdown.data('namespacePath');
     this.issuableType = this.$dropdownContainer.data('issuableType');
     this.titleInput = $(`#${this.issuableType}_title`);
     this.templateWarningEl = $('.js-issuable-template-warning');
@@ -84,8 +82,8 @@ export default class IssuableTemplateSelector extends TemplateSelector {
     this.startLoadingSpinner();
 
     Api.issueTemplate(
-      this.namespacePath,
-      this.projectPath,
+      query.namespace_path,
+      query.project_path,
       query.name,
       this.issuableType,
       (err, currentTemplate) => {

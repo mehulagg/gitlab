@@ -379,8 +379,10 @@ class Namespace < ApplicationRecord
       .try(name)
   end
 
-  def closest_ancestor_for_setting(name)
-    self_and_ancestors(hierarchy_order: :asc).find { |n| !n.read_attribute(name).nil? }
+  def closest_ancestor_for_setting(name, rollup_to_instance: false)
+    ancestor = self_and_ancestors(hierarchy_order: :asc).find { |n| !n.read_attribute(name).nil? }
+    ancestor = ApplicationSetting.current if ancestor.blank? && rollup_to_instance
+    ancestor
   end
 
   def actual_plan

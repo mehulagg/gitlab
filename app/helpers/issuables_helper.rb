@@ -86,9 +86,7 @@ module IssuablesHelper
       data: {
         data: issuable_templates(issuable),
         field_name: 'issuable_template',
-        selected: selected_template(issuable),
-        project_path: issuable_templates_data(issuable)[:project_path],
-        namespace_path: issuable_templates_data(issuable)[:namespace_path]
+        selected: selected_template(issuable)
       }
     }
 
@@ -370,23 +368,20 @@ module IssuablesHelper
   end
 
   def issuable_templates(issuable)
-    @issuable_templates ||= issuable_templates_data(issuable)[:names] || []
-  end
+    strong_memoize(:issuable_templates) do
+      issuable_templates = {}
+      supported_issuable_types = %w[issue merge_request]
+      issuable_type = issuable.class.name.underscore
 
-  def issuable_templates_data(issuable)
-    strong_memoize(:issuable_templates_data) do
-      case issuable
-      when Issue
-        templates_project, template_names = ref_project.issue_templates_data
-      when MergeRequest
-        templates_project, template_names = ref_project.merge_request_templates_data
-      end
+      return {} if issuable.blank? || !supported_issuable_types.include?(issuable_type)
 
-      {
-        names: template_names,
-        project_path: templates_project&.path,
-        namespace_path: templates_project&.namespace&.full_path
-      }
+      project_own_issuable_templates = ref_project.own_issuable_templates(issuable_type)
+      project_inherited_issuable_templates = ref_project.inherited_issuable_templates(issuable_type)
+
+      issuable_templates[_('Project Templates')] = project_own_issuable_templates unless project_own_issuable_templates.blank?
+      issuable_templates[_('Inherited Templates')] = project_inherited_issuable_templates unless project_inherited_issuable_templates.blank?
+
+      issuable_templates
     end
   end
 
@@ -395,7 +390,7 @@ module IssuablesHelper
   end
 
   def selected_template(issuable)
-    params[:issuable_template] if issuable_templates(issuable)&.any? { |template| template[:name] == params[:issuable_template] }
+    params[:issuable_template] if issuable_templates(issuable).values.flatten.any? { |template| template[:name] == params[:issuable_template] }
   end
 
   def issuable_todo_button_data(issuable, is_collapsed)

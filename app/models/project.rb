@@ -2541,32 +2541,20 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
-  def merge_request_templates_data
-    # to keep backward compatibility we first need to check if ref_project project has any
-    # merge_request templates and use those first
-    templates_project = self
-    template_names = repository.merge_request_template_names
-
-    if template_names.blank?
-      templates_project = group&.checked_file_template_project
-      template_names = templates_project&.repository&.merge_request_template_names
-    end
-
-    [templates_project, template_names]
+  def own_issuable_templates(issuable_type)
+    repository.send("#{issuable_type}_template_names").map do |template_names_hash| # rubocop:disable GitlabSecurity/PublicSend
+      template_names_hash.merge(project_path: self.path, namespace_path: self.group&.full_path)
+    end.flatten.compact
   end
 
-  def issue_templates_data
-    # to keep backward compatibility we first need to check if ref_project project has any
-    # merge_request templates and use those first
-    templates_project = self
-    template_names = repository.issue_template_names
+  def inherited_issuable_templates(issuable_type)
+    templates_project = group&.checked_file_template_project
 
-    if template_names.blank?
-      templates_project = group&.checked_file_template_project
-      template_names = templates_project&.repository&.issue_template_names
-    end
+    return [] if templates_project&.id == self.id
 
-    [templates_project, template_names]
+    templates_project&.repository&.send("#{issuable_type}_template_names")&.map do |template_names_hash| # rubocop:disable GitlabSecurity/PublicSend
+      template_names_hash.merge(project_path: templates_project.path, namespace_path: templates_project.group&.full_path)
+    end&.flatten&.compact
   end
 
   private
