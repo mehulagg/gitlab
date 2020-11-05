@@ -17,7 +17,7 @@ module API
           release = object.release
           project = release.project
 
-          Gitlab::Routing.url_helpers.project_release_url(project, release) << object.filepath
+          Gitlab::Routing.url_helpers.project_release_url(project, release) << "/downloads#{object.filepath}"
         end
       end
     end
