@@ -100,9 +100,7 @@ export default {
       ];
     },
     canAddIntegration() {
-      return (
-        this.multiIntegrations || (!this.multiIntegrations && this.integrations?.list?.length < 2)
-      );
+      return this.multiIntegrations || this.integrations?.list?.length < 2;
     },
   },
   methods: {
