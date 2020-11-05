@@ -162,7 +162,7 @@ export default {
       {{ failure.text }}
     </gl-alert>
     <gl-alert v-if="isPipelineDataEmpty" variant="tip" :dismissible="false">
-      {{ __('The configuration visualization will appear in this tab.') }}
+      {{ __('The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax.') }}
     </gl-alert>
     <div
       v-else

@@ -26444,9 +26444,6 @@ msgstr ""
 msgid "The comparison view may be inaccurate due to merge conflicts."
 msgstr ""
 
-msgid "The configuration visualization will appear in this tab."
-msgstr ""
-
 msgid "The connection will time out after %{timeout}. For repositories that take longer, use a clone/push combination."
 msgstr ""
 
@@ -26771,6 +26768,9 @@ msgid "The value lying at the midpoint of a series of observed values. E.g., bet
 msgstr ""
 
 msgid "The value of the provided variable exceeds the %{count} character limit"
+msgstr ""
+
+msgid "The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax."
 msgstr ""
 
 msgid "The vulnerability is no longer detected. Verify the vulnerability has been fixed or removed before changing its status."
