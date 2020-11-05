@@ -1,0 +1,35 @@
+- if @page
+  - wiki_page_title @page
+
+- add_page_specific_style 'page_bundles/wiki'
+
+- git_access_url = wiki_path(@wiki, action: :git_access)
+
+.wiki-page-header.top-area.flex-column.flex-lg-row
+  - if @page
+    .nav-text.flex-fill
+      %span.wiki-last-edit-by
+        - if @page.last_version
+          = (_("Last edited by %{name}") % { name: "<strong>#{@page.last_version.author_name}</strong>" }).html_safe
+          = time_ago_with_tooltip(@page.last_version.authored_date)
+
+    .nav-controls.pb-md-3.pb-lg-0
+      = render 'shared/wikis/main_links'
+
+    - if @page.historical?
+      .warning_message
+        = s_("WikiHistoricalPage|This is an old version of this page.")
+        - most_recent_link = link_to s_("WikiHistoricalPage|most recent version"), wiki_page_path(@wiki, @page)
+        - history_link = link_to s_("WikiHistoricalPage|history"), wiki_page_path(@wiki, @page, action: :history)
+        = (s_("WikiHistoricalPage|You can view the %{most_recent_link} or browse the %{history_link}.") % { most_recent_link: most_recent_link, history_link: history_link }).html_safe
+
+  .gl-mt-5.gl-mb-3
+    .gl-display-flex.gl-justify-content-space-between
+      %h2.gl-mt-0.gl-mb-5{ data: { qa_selector: 'wiki_page_title', testid: 'wiki_page_title' } }= @page ? @page.human_title : _('Failed to retrieve page')
+      %div
+    .js-wiki-page-content.md.gl-pt-2{ data: { qa_selector: 'wiki_page_content', testid: 'wiki_page_content' } }
+      = _('The page could not be displayed because it timed out.')
+      = _('You can view the source or')
+      = link_to git_access_url do
+        = sprite_icon('download', css_class: 'gl-mr-2')
+        %span= _("clone the repository")

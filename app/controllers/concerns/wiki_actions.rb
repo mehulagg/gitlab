@@ -38,6 +38,15 @@ module WikiActions
       feature: :track_unique_wiki_page_views, feature_default_enabled: true
 
     helper_method :view_file_button, :diff_file_html_data
+
+    rescue_from ::Gitlab::Git::CommandError do |exception|
+      # Log all non-timeout errors
+      if exception.message.include?('Deadline Exceeded')
+        render 'shared/wikis/git_error'
+      else
+        raise exception
+      end
+    end
   end
 
   def new
