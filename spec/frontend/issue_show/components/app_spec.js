@@ -36,6 +36,10 @@ describe('Issuable output', () => {
 
   const findStickyHeader = () => wrapper.find('[data-testid="issue-sticky-header"]');
 
+  const findLockedBadge = () => wrapper.find('[data-testid="locked"]');
+
+  const findConfidentialBadge = () => wrapper.find('[data-testid="confidential"]');
+
   const mountComponent = (props = {}, options = {}) => {
     wrapper = mount(IssuableApp, {
       propsData: { ...appProps, ...props },
@@ -532,7 +536,7 @@ describe('Issuable output', () => {
   describe('sticky header', () => {
     describe('when title is in view', () => {
       it('is not shown', () => {
-        expect(wrapper.find('.issue-sticky-header').exists()).toBe(false);
+        expect(findStickyHeader().exists()).toBe(false);
       });
     });
 
@@ -542,24 +546,56 @@ describe('Issuable output', () => {
         wrapper.find(GlIntersectionObserver).vm.$emit('disappear');
       });
 
-      it('is shown with title', () => {
+      it('shows with title', () => {
         expect(findStickyHeader().text()).toContain('Sticky header title');
       });
 
-      it('is shown with Open when status is opened', () => {
+      it('shows with Open when status is opened', async () => {
         wrapper.setProps({ issuableStatus: 'opened' });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(findStickyHeader().text()).toContain('Open');
-        });
+        await wrapper.vm.$nextTick();
+
+        expect(findStickyHeader().text()).toContain('Open');
       });
 
-      it('is shown with Closed when status is closed', () => {
+      it('shows with Closed when status is closed', async () => {
         wrapper.setProps({ issuableStatus: 'closed' });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(findStickyHeader().text()).toContain('Closed');
-        });
+        await wrapper.vm.$nextTick();
+
+        expect(findStickyHeader().text()).toContain('Closed');
+      });
+
+      it('does not show confidential badge when issue is not confidential', async () => {
+        wrapper.setProps({ isConfidential: false });
+
+        await wrapper.vm.$nextTick();
+
+        expect(findConfidentialBadge().exists()).toBe(false);
+      });
+
+      it('shows confidential badge when issue is confidential', async () => {
+        wrapper.setProps({ isConfidential: true });
+
+        await wrapper.vm.$nextTick();
+
+        expect(findConfidentialBadge().exists()).toBe(true);
+      });
+
+      it('does not show locked badge when issue is not locked', async () => {
+        wrapper.setProps({ isLocked: false });
+
+        await wrapper.vm.$nextTick();
+
+        expect(findLockedBadge().exists()).toBe(false);
+      });
+
+      it('shows locked badge when issue is locked', async () => {
+        wrapper.setProps({ isLocked: true });
+
+        await wrapper.vm.$nextTick();
+
+        expect(findLockedBadge().exists()).toBe(true);
       });
     });
   });
