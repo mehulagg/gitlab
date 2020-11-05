@@ -1,0 +1,32 @@
+stages:
+  - code_quality_check
+  - test
+
+variables:
+  LC_ALL: "en_US.UTF-8"
+  LANG: "en_US.UTF-8"
+
+code_quality:
+  image: "cirrusci/flutter:dev"
+  stage: code_quality_check
+  before_script:
+    - pub global activate dart_code_metrics
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
+  script:
+    - metrics lib -r codeclimate  > gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+  needs: []
+
+flutter_test:
+  stage: test
+  image: "cirrusci/flutter:dev"
+  before_script:
+    - pub global activate junitreport
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
+    - rm -rf test/test/
+  script:
+    - flutter test --machine --coverage | tojunit -o report.xml
+    - lcov --summary coverage/lcov.info
+    - genhtml coverage/lcov.info --output=coverage
