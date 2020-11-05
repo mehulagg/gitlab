@@ -17,13 +17,10 @@ process.on('unhandledRejection', global.promiseRejectionHandler);
 
 setupManualMocks();
 
-afterEach(() =>
-  // give Promises a bit more time so they fail the right test
-  new Promise(setImmediate).then(() => {
-    // wait for pending setTimeout()s
-    jest.runOnlyPendingTimers();
-  }),
-);
+afterEach(() => {
+  // wait for pending setTimeout()s
+  jest.runOnlyPendingTimers();
+});
 
 initializeTestTimeout(process.env.CI ? 6000 : 500);
 
