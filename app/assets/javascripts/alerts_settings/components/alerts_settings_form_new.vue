@@ -21,12 +21,14 @@ import {
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   typeSet,
+  defaultFormState,
 } from '../constants';
 
 export default {
   targetPrometheusUrlPlaceholder,
   JSON_VALIDATE_DELAY,
   typeSet,
+  defaultFormState,
   i18n: {
     integrationFormSteps: {
       step1: {
@@ -125,7 +127,7 @@ export default {
         case this.$options.typeSet.prometheus:
           return this.prometheus;
         default:
-          return {};
+          return this.defaultFormState;
       }
     },
     integrationForm() {
@@ -176,11 +178,7 @@ export default {
       return this.$emit('create-new-integration', integrationPayload);
     },
     onReset() {
-      this.integrationForm.name = '';
-      this.integrationForm.apiUrl = '';
-      this.integrationForm.active = false;
-      this.integrationForm.integrationTestPayload.error = null;
-      this.integrationForm.integrationTestPayload.json = '';
+      this.integrationForm = this.defaultFormState;
       this.selectedIntegration = integrationTypesNew[0].value;
       this.onIntegrationTypeSelect();
     },

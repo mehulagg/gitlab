@@ -57,14 +57,12 @@ export default {
         };
       },
       error(err) {
-        this.errored = true;
         createFlash({ message: err });
       },
     },
   },
   data() {
     return {
-      errored: false,
       isUpdating: false,
       integrations: {},
       currentIntegration: null,
@@ -115,7 +113,6 @@ export default {
           });
         })
         .catch(err => {
-          this.errored = true;
           createFlash({ message: err });
         })
         .finally(() => {
@@ -181,7 +178,6 @@ export default {
           });
         })
         .catch(err => {
-          this.errored = true;
           createFlash({ message: err });
         })
         .finally(() => {
@@ -212,7 +208,6 @@ export default {
           },
         )
         .catch(err => {
-          this.errored = true;
           createFlash({ message: err });
         })
         .finally(() => {

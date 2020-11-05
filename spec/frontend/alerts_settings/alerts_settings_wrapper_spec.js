@@ -14,10 +14,15 @@ import { typeSet } from '~/alerts_settings/constants';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
 import mockIntegrations from './mocks/integrations.json';
+import {
+  createHttpVariables,
+  updateHttpVariables,
+  createPrometheusVariables,
+  updatePrometheusVariables,
+  ID,
+} from './mocks/apollo_mock';
 
 jest.mock('~/flash');
-
-const projectPath = '';
 
 describe('AlertsSettingsWrapper', () => {
   let wrapper;
@@ -115,18 +120,14 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('create-new-integration', {
         type: typeSet.http,
-        variables: { name: 'Test 1', active: true },
+        variables: createHttpVariables,
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createHttpIntegrationMutation,
         update: expect.anything(),
-        variables: {
-          name: 'Test 1',
-          active: true,
-          projectPath,
-        },
+        variables: createHttpVariables,
       });
     });
 
@@ -142,20 +143,12 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('update-integration', {
         type: typeSet.http,
-        variables: {
-          name: 'Test 1',
-          active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
-        },
+        variables: updateHttpVariables,
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: updateHttpIntegrationMutation,
-        variables: {
-          name: 'Test 1',
-          active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
-        },
+        variables: updateHttpVariables,
       });
     });
 
@@ -171,13 +164,13 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('reset-token', {
         type: typeSet.http,
-        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/7' },
+        variables: { id: ID },
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: resetHttpTokenMutation,
         variables: {
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
+          id: ID,
         },
       });
     });
@@ -194,18 +187,14 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('create-new-integration', {
         type: typeSet.prometheus,
-        variables: { apiUrl: 'https://test.com', active: true },
+        variables: createPrometheusVariables,
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: createPrometheusIntegrationMutation,
         update: expect.anything(),
-        variables: {
-          apiUrl: 'https://test.com',
-          active: true,
-          projectPath,
-        },
+        variables: createPrometheusVariables,
       });
     });
 
@@ -221,20 +210,12 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('update-integration', {
         type: typeSet.prometheus,
-        variables: {
-          apiUrl: 'https://test.com',
-          active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
-        },
+        variables: updatePrometheusVariables,
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: updatePrometheusIntegrationMutation,
-        variables: {
-          apiUrl: 'https://test.com',
-          active: true,
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
-        },
+        variables: updatePrometheusVariables,
       });
     });
 
@@ -250,13 +231,13 @@ describe('AlertsSettingsWrapper', () => {
       });
       wrapper.find(AlertsSettingsFormNew).vm.$emit('reset-token', {
         type: typeSet.prometheus,
-        variables: { id: 'gid://gitlab/AlertManagement::HttpIntegration/7' },
+        variables: { id: ID },
       });
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
         mutation: resetPrometheusTokenMutation,
         variables: {
-          id: 'gid://gitlab/AlertManagement::HttpIntegration/7',
+          id: ID,
         },
       });
     });
