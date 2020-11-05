@@ -544,7 +544,7 @@ end
 ```
 
 Please refer to [the `PrometheusClient` definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/prometheus_client.rb)
-for how to use its API to query for data.
+for how to use its API to query for data. 
 
 ## Developing and testing Usage Ping
 
@@ -680,6 +680,46 @@ but with the following limitations:
 with any of the other services that are running. That is not how node metrics are reported in a production setup, where `node_exporter`
 always runs as a process alongside other GitLab components on any given node. From Usage Ping's perspective none of the node data would therefore
 appear to be associated to any of the services running, since they all appear to be running on different hosts. To alleviate this problem, the `node_exporter` in GCK was arbitrarily "assigned" to the `web` service, meaning only for this service `node_*` metrics will appear in Usage Ping.
+
+
+## Aggregated metrics
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45979) in GitLab 13.06 behind a disabled feature flag.
+
+In order to add data for aggregated metrics into Usage Ping payload you should add corresponding definition into  [`aggregated_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics.yml) file. Each aggregate definition includes following parts:
+
+* name: unique name under which aggregate metric will be added to Usage Ping payload
+* operator: operator that defines how aggregated metric data will be counted. Available operators are:
+  * `ANY`: removes duplicates and counts all entries that triggered any of listed events
+* events: list of events names (from [`known_events.yml`](#known-events-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
+
+Example aggregated metric entry:
+
+```yaml
+- name: example_aggregated_metric
+  operator: ANY
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+```
+
+Aggregated metrics will be added under `aggregated_metrics` key in both `counts_weekly` and `counts_monthly` top level keys in Usage Ping payload.
+
+```ruby
+{
+  :counts_monthly => {
+    :deployments => 1003,
+    :successful_deployments => 78,
+    :failed_deployments => 275,
+    :packages => 155,
+    :personal_snippets => 2106,
+    :project_snippets => 407,
+    :promoted_issues => 719,
+    :aggregated_metrics => {
+      :example_aggregated_metric => 7
+    },
+    :snippets => 2513
+  }
+}
+```
 
 ## Example Usage Ping payload
 
