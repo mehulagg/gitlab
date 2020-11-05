@@ -48,7 +48,7 @@ docs lint:
   script:
     - apk add python3
     - echo $PATH
-    - python -v
+    - python3 -V
     - scripts/lint-doc.sh
     # Prepare docs for build
     # The path must be 'ee/' because we have hardcoded links relying on it
