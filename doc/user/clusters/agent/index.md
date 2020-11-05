@@ -439,13 +439,22 @@ This error will be shown in KAS pod logs if the path to the configuration projec
 {"level":"info","time":"2020-10-30T08:56:54.329Z","msg":"Synced","project_id":"root/kas-manifest001","resource_key":"apps/Deployment/kas-test001/nginx-deployment","sync_result":"error validating data: [ValidationError(Deployment.metadata): unknown field \"replicas\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"selector\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"template\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]"}
 ```
 
-You may see similar errors if your manifest.yaml file is malformed, and kubernetes cannot create specified objects. Make sure that
-your yaml file is valid. You may try using it to create objects in Kubernetes directly to troubleshoot if.
+You may see similar errors if your `manifest.yaml` file is malformed, and kubernetes cannot create specified objects. Make sure that
+your `manifest.yaml` file is valid. You may try using it to create objects in Kubernetes directly to troubleshoot if.
 
 ### Error while dialing failed to WebSocket dial: failed to send handshake request
 
 ```plaintext
 {"level":"warn","time":"2020-10-30T09:50:51.173Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent\\\": net/http: HTTP/1.x transport connection broken: malformed HTTP response \\\"\\\\x00\\\\x00\\\\x06\\\\x04\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x05\\\\x00\\\\x00@\\\\x00\\\"\""}
+```
 
 You may see such error if you configured `wss` as `kas-address` on the agent side but KAS on the server side is not available via `wss`.
 To fix it, you need to make sure that the same schemes are configured on both sides.
+
+#### Decompressor is not installed for grpc-encoding
+
+```plaintext
+{"level":"warn","time":"2020-11-05T05:25:46.916Z","msg":"GetConfiguration.Recv failed","error":"rpc error: code = Unimplemented desc = grpc: Decompressor is not installed for grpc-encoding \"gzip\""}
+```
+
+You may see such error if the version of the agent is newer that the version of KAS. Make sure that both agentk and kas have the same versions to fix it.
