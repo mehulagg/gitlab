@@ -14,6 +14,7 @@ module Gitlab
       SlotMismatch = Class.new(EventError)
       CategoryMismatch = Class.new(EventError)
       UnknownAggregationOperator = Class.new(EventError)
+      InvalidContext = Class.new(EventError)
 
       KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events.yml'
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
@@ -50,11 +51,23 @@ module Gitlab
           Gitlab::Redis::HLL.add(key: redis_key(event, time), value: entity_id, expiry: expiry(event))
         end
 
-        def unique_events(event_names:, start_date:, end_date:)
-          count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date) do |events|
+        def track_event_in_context(entity_id, event_name, context, time = Time.zone.now)
+          return unless Gitlab::CurrentSettings.usage_ping_enabled?
+          return if context.blank? || (context.present? && !context.in?(valid_context_list))
+
+          event = event_for(event_name)
+
+          raise UnknownEvent, "Unknown event #{event_name}" unless event.present?
+
+          Gitlab::Redis::HLL.add(key: redis_key(event, time, context), value: entity_id, expiry: expiry(event))
+        end
+
+        def unique_events(event_names:, start_date:, end_date:, context: '')
+          count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date, context: context) do |events|
             raise SlotMismatch, events unless events_in_same_slot?(events)
             raise CategoryMismatch, events unless events_in_same_category?(events)
             raise AggregationMismatch, events unless events_same_aggregation?(events)
+            raise InvalidContext if context.present? && !context.in?(valid_context_list)
           end
         end
 
@@ -104,6 +117,11 @@ module Gitlab
 
         private
 
+        # The aray of valid context on which we allow tracking
+        def valid_context_list
+          Plan.all_plans
+        end
+
         def calculate_count_for_aggregation(aggregation, start_date:, end_date:)
           validate_aggregation_operator!(aggregation[:operator])
 
@@ -113,14 +131,14 @@ module Gitlab
           end
         end
 
-        def count_unique_events(event_names:, start_date:, end_date:)
+        def count_unique_events(event_names:, start_date:, end_date:, context: '')
           events = events_for(Array(event_names).map(&:to_s))
 
           yield events if block_given?
 
           aggregation = events.first[:aggregation]
 
-          keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date)
+          keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date, context: context)
           redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
         end
 
@@ -133,11 +151,11 @@ module Gitlab
           events_in_same_slot?(events) && events_in_same_category?(events) && events_same_aggregation?(events)
         end
 
-        def keys_for_aggregation(aggregation, events:, start_date:, end_date:)
+        def keys_for_aggregation(aggregation, events:, start_date:, end_date:, context: '')
           if aggregation.to_sym == :daily
-            daily_redis_keys(events: events, start_date: start_date, end_date: end_date)
+            daily_redis_keys(events: events, start_date: start_date, end_date: end_date, context: context)
           else
-            weekly_redis_keys(events: events, start_date: start_date, end_date: end_date)
+            weekly_redis_keys(events: events, start_date: start_date, end_date: end_date, context: context)
           end
         end
 
@@ -194,17 +212,41 @@ module Gitlab
         end
 
         # Compose the key in order to store events daily or weekly
-        def redis_key(event, time)
+        def redis_key(event, time, context = '')
           raise UnknownEvent.new("Unknown event #{event[:name]}") unless known_events_names.include?(event[:name].to_s)
           raise UnknownAggregation.new("Use :daily or :weekly aggregation") unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
 
-          slot = redis_slot(event)
-          key = if slot.present?
-                  event[:name].to_s.gsub(slot, "{#{slot}}")
-                else
-                  "{#{event[:name]}}"
-                end
+          key = apply_slot(event)
+          key = apply_time_aggregation(key, time, event)
+          key = "#{context}_#{key}" if context.present?
+          key
 
+          # slot = redis_slot(event)
+          # key = if slot.present?
+          #         event[:name].to_s.gsub(slot, "{#{slot}}")
+          #       else
+          #         "{#{event[:name]}}"
+          #       end
+
+          # if event[:aggregation].to_sym == :daily
+          #   year_day = time.strftime('%G-%j')
+          #   "#{year_day}-#{key}"
+          # else
+          #   year_week = time.strftime('%G-%V')
+          #   "#{key}-#{year_week}"
+          # end
+        end
+
+        def apply_slot(event)
+          slot = redis_slot(event)
+          if slot.present?
+            event[:name].to_s.gsub(slot, "{#{slot}}")
+          else
+            "{#{event[:name]}}"
+          end
+        end
+
+        def apply_time_aggregation(key, time, event)
           if event[:aggregation].to_sym == :daily
             year_day = time.strftime('%G-%j')
             "#{year_day}-#{key}"
@@ -214,9 +256,9 @@ module Gitlab
           end
         end
 
-        def daily_redis_keys(events:, start_date:, end_date:)
+        def daily_redis_keys(events:, start_date:, end_date:, context: '')
           (start_date.to_date..end_date.to_date).map do |date|
-            events.map { |event| redis_key(event, date) }
+            events.map { |event| redis_key(event, date, context) }
           end.flatten
         end
 
@@ -226,15 +268,17 @@ module Gitlab
           raise UnknownAggregationOperator.new("Events should be aggregated with one of operators #{ALLOWED_METRICS_AGGREGATIONS}")
         end
 
-        def weekly_redis_keys(events:, start_date:, end_date:)
+        def weekly_redis_keys(events:, start_date:, end_date:, context: '')
           weeks = end_date.to_date.cweek - start_date.to_date.cweek
           weeks = 1 if weeks == 0
 
           (0..(weeks - 1)).map do |week_increment|
-            events.map { |event| redis_key(event, start_date + week_increment * 7.days) }
+            events.map { |event| redis_key(event, start_date + week_increment * 7.days, context) }
           end.flatten
         end
       end
     end
   end
 end
+
+Gitlab::UsageDataCounters::HLLRedisCounter.prepend_if_ee('EE::Gitlab::UsageDataCounters::HLLRedisCounter')
