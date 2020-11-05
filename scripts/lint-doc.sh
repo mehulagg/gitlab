@@ -99,7 +99,7 @@ echo
 run_locally_or_in_docker 'markdownlint' "--config .markdownlint.json ${MD_DOC_PATH}"
 
 echo '=> Linting prose...'
-run_locally_or_in_docker 'vale' "--minAlertLevel error ${MD_DOC_PATH}"
+run_locally_or_in_docker 'vale' "--minAlertLevel error --output=JSON ${MD_DOC_PATH} | python .vale.py"
 
 if [ $ERRORCODE -ne 0 ]
 then
