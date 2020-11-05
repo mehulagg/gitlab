@@ -92,9 +92,9 @@ module ProjectsHelper
         link_to(simple_sanitize(owner.name), user_path(owner))
       end
 
-    project_link = link_to project_path(project) do
+    project_link = link_to project_url(project) do
       icon = project_icon(project, alt: project.name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
-      [icon, content_tag("span", simple_sanitize(project.name), class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
+      [icon, content_tag("span", simple_sanitize(project.name), class: "breadcrumb-item-text js-breadcrumb-item-text", itemprop: 'name')].join.html_safe
     end
 
     namespace_link = breadcrumb_list_item(namespace_link) unless project.group
