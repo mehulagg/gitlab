@@ -349,6 +349,10 @@ module EE
       feature_available?(:jira_issues_integration)
     end
 
+    def jira_vulnerabilities_integration_available?
+      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
+    end
+
     def multiple_approval_rules_available?
       feature_available?(:multiple_approval_rules)
     end

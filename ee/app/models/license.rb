@@ -93,6 +93,7 @@ class License < ApplicationRecord
     ide_schema_config
     issues_analytics
     jira_issues_integration
+    jira_vulnerabilities_integration
     ldap_group_sync_filter
     merge_pipelines
     merge_request_performance_metrics
