@@ -4,14 +4,13 @@
  * Used in the environments table.
  */
 
-import { GlTooltipDirective, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlModalDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
   components: {
     GlButton,
-    GlModal,
     GlModal: GlModalDirective,
   },
   directives: {

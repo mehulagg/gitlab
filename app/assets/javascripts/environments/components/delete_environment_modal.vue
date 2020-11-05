@@ -31,7 +31,7 @@ export default {
     },
     cancelProps() {
       return {
-        text: __('Cancel'),
+        text: s__('Cancel'),
       };
     }, 
     confirmDeleteMessage() {
