@@ -7,7 +7,7 @@ module EE
 
     prepended do
       with_scope :subject
-      condition(:auto_fix_enabled) { @subject.security_setting&.auto_fix_enabled&.any? }
+      condition(:auto_fix_enabled) { @subject.security_setting&.auto_fix_enabled? }
 
       with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }

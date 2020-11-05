@@ -7,7 +7,7 @@ module Vulnerabilities
     condition(:issue) { @subject.for_issue? }
     condition(:merge_request) { @subject.for_merge_request? }
     condition(:dismissal) { @subject.for_dismissal? }
-    condition(:auto_fix_enabled) { @subject.project.security_setting&.auto_fix_enabled&.any? }
+    condition(:auto_fix_enabled) { @subject.project.security_setting&.auto_fix_enabled? }
 
     rule { issue & ~can?(:create_issue) }.prevent :create_vulnerability_feedback
 

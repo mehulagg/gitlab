@@ -31,7 +31,7 @@ module Security
       return @auto_fix_enabled_types if @auto_fix_enabled_types
 
       setting ||= ProjectSecuritySetting.safe_find_or_create_for(project)
-      @auto_fix_enabled_types = setting.auto_fix_enabled
+      @auto_fix_enabled_types = [ setting.auto_fix_container_scanning, setting.auto_fix_dependency_scanning ]
     end
 
     def service_params(vulnerability)
