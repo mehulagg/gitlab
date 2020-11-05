@@ -7,15 +7,43 @@ module Geo
     include Delay
 
     class_methods do
+      # If replication is disabled, then so is verification.
+      def verification_enabled?
+        # Default off during development. This is overridden by
+        # PackageFileReplicator to allow toggling with a feature flag.
+        false
+
+        # After package file verification is released, then remove `false` above
+        # and allow feature flagged testing of verification for all replicators:
+        #
+        # enabled? && Feature.enabled?(:ssf_verify_all)
+
+        # After testing is successful, enable by default for all:
+        #
+        # enabled? && Feature.enabled?(:ssf_verify_all, default_enabled: true)
+
+        # After default on for all, remove FF:
+        #
+        # enabled?
+      end
+
       def checksummed
         model.available_replicables.checksummed
       end
 
       def checksummed_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
         model.available_replicables.checksummed.count
       end
 
       def checksum_failed_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
         model.available_replicables.checksum_failed.count
       end
     end
@@ -41,6 +69,7 @@ module Geo
     end
 
     def needs_checksum?
+      return false unless self.class.verification_enabled?
       return true unless model_record.respond_to?(:needs_checksum?)
 
       model_record.needs_checksum?
