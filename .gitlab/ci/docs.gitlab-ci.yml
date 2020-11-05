@@ -46,6 +46,9 @@ docs lint:
   stage: test
   needs: []
   script:
+    - apk add python3
+    - echo $PATH
+    - python -v
     - scripts/lint-doc.sh
     # Prepare docs for build
     # The path must be 'ee/' because we have hardcoded links relying on it
