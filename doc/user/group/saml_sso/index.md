@@ -134,7 +134,7 @@ For a demo of the Okta SAML setup including SCIM, see [Demo: Okta Group SAML & S
 
 Under Okta's **Single sign-on URL** field, check the option **Use this for Recipient URL and Destination URL**.
 
-We recommend:
+For the NameID settings, we recommend and for SCIM, we require:
 
 - **Application username** (NameID) set to **Custom** `user.getInternalProperty("id")`.
 - **Name ID Format** set to **Persistent**.

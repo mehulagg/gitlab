@@ -122,6 +122,7 @@ Once synchronized, changing the field mapped to `id` and `externalId` may cause 
 ### Okta configuration steps
 
 The SAML application that was created during [Single sign-on](index.md#okta-setup-notes) setup for [Okta](https://developer.okta.com/docs/guides/build-sso-integration/saml2/overview/) now needs to be set up for SCIM.
+Note that the Okta setup has to match our documentation exactly, especially the NameID configuration, for the Okta SCIM app to work properly.
 Before proceeding, be sure to complete the [GitLab configuration](#gitlab-configuration) process.
 
 1. Sign in to Okta.
