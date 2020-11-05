@@ -32,4 +32,26 @@ RSpec.describe Elastic::ProjectsSearch do
       subject.maintain_elasticsearch_destroy
     end
   end
+
+  describe '#maintain_elasticsearch_update' do
+    before do
+      stub_ee_application_setting(elasticsearch_indexing: true)
+    end
+    let!(:project) { create(:project) }
+    let!(:issues) { create_list(:issue, 3, project: project) }
+
+    it 'indexes issues if visibility_level is updated', :aggregate_failures do
+      expect(::Elastic::ProcessBookkeepingService).to receive(:track!)
+      expect(::Elastic::ProcessBookkeepingService).to receive(:track!).with(issues)
+
+      project.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+    end
+
+    it 'indexes issues if issues_access_level is updated', :aggregate_failures do
+      expect(::Elastic::ProcessBookkeepingService).to receive(:track!)
+      expect(::Elastic::ProcessBookkeepingService).to receive(:track!).with(issues)
+
+      project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
+    end
+  end
 end
