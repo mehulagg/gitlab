@@ -7,11 +7,9 @@ module Ci
 
     BATCH_SIZE = 100
     LOOP_TIMEOUT = 5.minutes
-    LEGACY_LOOP_TIMEOUT = 45.minutes
     LOOP_LIMIT = 1000
     EXCLUSIVE_LOCK_KEY = 'expired_job_artifacts:destroy:lock'
     LOCK_TIMEOUT = 10.minutes
-    LEGACY_LOCK_TIMEOUT = 50.minutes
 
     ##
     # Destroy expired job artifacts on GitLab instance
@@ -20,8 +18,8 @@ module Ci
     # preventing multiple `ExpireBuildArtifactsWorker` CRON jobs run concurrently,
     # which is scheduled at every hour.
     def execute
-      in_lock(EXCLUSIVE_LOCK_KEY, ttl: lock_timeout, retries: 1) do
-        loop_until(timeout: loop_timeout, limit: LOOP_LIMIT) do
+      in_lock(EXCLUSIVE_LOCK_KEY, ttl: LOCK_TIMEOUT, retries: 1) do
+        loop_until(timeout: LOOP_TIMEOUT, limit: LOOP_LIMIT) do
           destroy_artifacts_batch
         end
       end
@@ -42,13 +40,7 @@ module Ci
 
       return false if artifacts.empty?
 
-      if parallel_destroy?
-        parallel_destroy_batch(artifacts)
-      else
-        legacy_destroy_batch(artifacts)
-        destroy_related_records_for(artifacts)
-      end
-
+      parallel_destroy_batch(artifacts)
       true
     end
 
@@ -56,16 +48,8 @@ module Ci
       artifacts = Ci::PipelineArtifact.expired(BATCH_SIZE).to_a
       return false if artifacts.empty?
 
-      legacy_destroy_batch(artifacts)
-      true
-    end
-
-    def parallel_destroy?
-      ::Feature.enabled?(:ci_delete_objects)
-    end
-
-    def legacy_destroy_batch(artifacts)
       artifacts.each(&:destroy!)
+      true
     end
 
     def parallel_destroy_batch(job_artifacts)
@@ -88,22 +72,6 @@ module Ci
         delta = -artifacts.sum { |artifact| artifact.size.to_i }
         ProjectStatistics.increment_statistic(
           project, Ci::JobArtifact.project_statistics_name, delta)
-      end
-    end
-
-    def loop_timeout
-      if parallel_destroy?
-        LOOP_TIMEOUT
-      else
-        LEGACY_LOOP_TIMEOUT
-      end
-    end
-
-    def lock_timeout
-      if parallel_destroy?
-        LOCK_TIMEOUT
-      else
-        LEGACY_LOCK_TIMEOUT
       end
     end
   end

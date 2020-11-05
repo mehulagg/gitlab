@@ -61,35 +61,17 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
     end
 
     context 'when failed to destroy artifact' do
-      context 'with ci_delete_objects disabled' do
-        before do
-          stub_feature_flags(ci_delete_objects: false)
-          stub_const('Ci::DestroyExpiredJobArtifactsService::LOOP_LIMIT', 10)
-
-          allow_next_found_instance_of(Ci::JobArtifact) do |artifact|
-            allow(artifact).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-          end
-        end
-
-        it 'raises an exception and stop destroying' do
-          expect { subject }.to raise_error(ActiveRecord::RecordNotDestroyed)
-                            .and not_change { Security::Finding.count }.from(1)
-        end
+      before do
+        stub_const('Ci::DestroyExpiredJobArtifactsService::LOOP_LIMIT', 10)
+        expect(Ci::DeletedObject)
+          .to receive(:bulk_import)
+          .once
+          .and_raise(ActiveRecord::RecordNotDestroyed)
       end
 
-      context 'with ci_delete_objects enabled' do
-        before do
-          stub_const('Ci::DestroyExpiredJobArtifactsService::LOOP_LIMIT', 10)
-          expect(Ci::DeletedObject)
-            .to receive(:bulk_import)
-            .once
-            .and_raise(ActiveRecord::RecordNotDestroyed)
-        end
-
-        it 'raises an exception and stop destroying' do
-          expect { subject }.to raise_error(ActiveRecord::RecordNotDestroyed)
-                            .and not_change { Security::Finding.count }.from(1)
-        end
+      it 'raises an exception and stop destroying' do
+        expect { subject }.to raise_error(ActiveRecord::RecordNotDestroyed)
+                          .and not_change { Security::Finding.count }.from(1)
       end
     end
 
