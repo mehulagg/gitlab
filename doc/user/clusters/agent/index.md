@@ -449,7 +449,9 @@ your `manifest.yaml` file is valid. You may try using it to create objects in Ku
 ```
 
 You may see such error if you configured `wss` as `kas-address` on the agent side but KAS on the server side is not available via `wss`.
-To fix it, you need to make sure that the same schemes are configured on both sides.
+To fix it, you need to make sure that the same schemes are configured on both sides. Note that it is currently not possible to set `grpc` scheme
+due to the issue [It is not possible to configure gitlab-kas to work with grpc without directly editing gitlab-kas deployment](https://gitlab.com/gitlab-org/gitlab/-/issues/276888). While the issue is in progress, to use `grpc` you may directly edit the deployment via `kubectl edit deployment gitlab-kas` 
+and change `--listen-websocket=true` to `--listen-websocket=false`. After that you should be able to use `grpc://gitlab-kas.<YOUR-NAMESPACE>:5005`.
 
 #### Decompressor is not installed for grpc-encoding
 
