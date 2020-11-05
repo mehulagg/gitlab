@@ -12,6 +12,9 @@ module Quality
         lib/gitlab/background_migration
         lib/ee/gitlab/background_migration
       ],
+      frontend_fixtures: %w[
+        frontend/fixtures
+      ],
       unit: %w[
         bin
         channels
@@ -76,6 +79,9 @@ module Quality
       # spec/lib/gitlab/background_migration and tests under spec/lib are unit by default
       when regexp(:migration), regexp(:background_migration)
         :migration
+      # Detect fixtures before other frontend unit tests
+      when regexp(:frontend_fixtures)
+        :frontend_fixtures
       when regexp(:unit)
         :unit
       when regexp(:integration)
