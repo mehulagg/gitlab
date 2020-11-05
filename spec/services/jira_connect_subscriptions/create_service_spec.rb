@@ -42,8 +42,10 @@ RSpec.describe JiraConnectSubscriptions::CreateService do
       end
 
       it 'starts workers to sync projects in batches with delay' do
-        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(1.minute, [[project_1.id]])
-        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(2.minutes, [[project_2.id]])
+        allow(Atlassian::JiraConnect::Client).to receive(:generate_update_sequence_id).and_return(123)
+
+        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(1.minute, [[project_1.id, 123]])
+        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(2.minutes, [[project_2.id, 123]])
 
         subject
       end

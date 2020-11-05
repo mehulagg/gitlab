@@ -11,12 +11,12 @@ module JiraConnect
 
     MERGE_REQUEST_LIMIT = 400
 
-    def perform(project_id)
+    def perform(project_id, update_sequence_id)
       project = Project.find_by_id(project_id)
 
       return if project.nil?
 
-      JiraConnect::SyncService.new(project).execute(merge_requests: merge_requests_to_sync(project))
+      JiraConnect::SyncService.new(project).execute(merge_requests: merge_requests_to_sync(project), update_sequence_id: update_sequence_id)
     end
 
     private

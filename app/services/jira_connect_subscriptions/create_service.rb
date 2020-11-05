@@ -41,7 +41,7 @@ module JiraConnectSubscriptions
         JiraConnect::SyncProjectWorker.bulk_perform_in_with_contexts(
           index * MERGE_REQUEST_SYNC_BATCH_delay,
           projects,
-          arguments_proc: -> (project) { project.id },
+          arguments_proc: -> (project) { [project.id, Atlassian::JiraConnect::Client.generate_update_sequence_id] },
           context_proc: -> (project) { { project: project } }
         )
       end
