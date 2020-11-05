@@ -6,12 +6,8 @@ module EE
     extend ::Gitlab::Utils::Override
 
     prepended do
-      desc "User is support bot"
-      with_options scope: :user, score: 0
-      condition(:security_bot) { security_bot }
-
       with_scope :subject
-      condition(:auto_fix_enabled) { @subject&.security_setting&.auto_fix_enabled&.any? }
+      condition(:auto_fix_enabled) { @subject.security_setting&.auto_fix_enabled&.any? }
 
       with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
