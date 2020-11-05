@@ -154,11 +154,18 @@ module Ci
     # acquired
     #
     def persist_data!
-      in_lock(*lock_params) do         # exclusive Redis lock is acquired first
+      in_lock(*lock_params) do # We acquire exclusive Redis lock first
         raise FailedToPersistDataError, 'Modifed build trace chunk detected' if has_changes_to_save?
 
-        self.reset.then do |chunk|     # we ensure having latest lock_version
-          chunk.unsafe_persist_data!   # we migrate the data and update data store
+        ##
+        # We use primary data source (in EE it is a primary database) and
+        # reload `lock_version` before we migrate the data to persistent
+        # storage and update data store location of the chunk.
+        #
+        # TODO we also need to stick the chunk to primary
+        #
+        ::Gitlab::Ci::Trace::Metadata.using_primary_source do
+          self.reset.then { |chunk| chunk.unsafe_persist_data! }
         end
       end
     rescue FailedToObtainLockError
