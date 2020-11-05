@@ -2312,46 +2312,33 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
-  describe 'InstanceMember', :deliver_mails_inline do
-    let(:added_user) { create(:user) }
+  describe '#instance_access_request' do
+    subject { described_class.user_access_request(user) }
 
-    describe '#new_access_request' do
-      context 'recipients' do
-        let(:maintainer) { create(:user) }
-        let(:owner) { create(:user) }
-        let(:developer) { create(:user) }
+    let_it_be(:admin) { create(:user, :admin, email: "admin@example.com") }
+    let_it_be(:user) { create(:user) }
 
-        let!(:group) do
-          create(:group, :public) do |group|
-            group.add_owner(owner)
-            group.add_maintainer(maintainer)
-            group.add_developer(developer)
-          end
-        end
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
 
-        before do
-          reset_delivered_emails!
-        end
-
-        it 'sends notification only to group owners' do
-          group.request_access(added_user)
-
-          should_email(owner)
-          should_not_email(maintainer)
-          should_not_email(developer)
-        end
-
-        it_behaves_like 'group emails are disabled' do
-          let(:notification_target)  { group }
-          let(:notification_trigger) { group.request_access(added_user) }
-        end
-      end
-
-      it_behaves_like 'sends notification only to a maximum of ten, most recently active group owners' do
-        let(:group) { create(:group, :public) }
-        let(:notification_trigger) { group.request_access(added_user) }
-      end
+    it 'is sent to the admin' do
+      is_expected.to deliver_to admin.email
+      is_expected.to have_body_text /#{admin.name}/
     end
+
+    it 'has the correct subject' do
+      is_expected.to have_subject /^GitLab Account Request$/i
+    end
+
+    it 'includes the correct content' do
+      is_expected.to have_body_text /#{user.name} has asked for a GitLab account on your instance/
+    end
+
+    it 'includes a link to GitLab' do
+      is_expected.to have_body_text /#{Gitlab.config.gitlab.url}/
+    end
+  end
 
   describe 'GroupMember', :deliver_mails_inline do
     let(:added_user) { create(:user) }

@@ -13,16 +13,6 @@ class DeviseMailer < Devise::Mailer
     devise_mail(record, :password_change_by_admin, opts)
   end
 
-  def user_access_request(record, opts = {})
-    User.admins.active.each do |admin|
-      @name = admin.name
-      @email = admin.email
-      opts[:to] = @email
-
-      devise_mail(record, :user_access_request, opts)
-    end
-  end
-
   protected
 
   def subject_for(key)
