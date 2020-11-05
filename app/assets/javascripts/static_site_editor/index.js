@@ -31,6 +31,7 @@ const initStaticSiteEditor = el => {
     returnUrl,
     sourcePath,
     username,
+    imageUploadPath,
   });
 
   return new Vue({

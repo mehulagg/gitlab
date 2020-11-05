@@ -43,9 +43,7 @@ export default {
     },
     imageRoot: {
       type: String,
-      required: false,
-      default: DEFAULT_IMAGE_UPLOAD_PATH,
-      validator: prop => prop.endsWith('/'),
+      required: true,
     },
   },
   data() {
