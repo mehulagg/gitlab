@@ -35,7 +35,7 @@ module API
       params do
         optional :dry_run, type: Boolean, default: false, desc: 'Run pipeline creation simulation, or only do static check.'
       end
-      get ':id/ci/lint' do
+      post ':id/ci/lint' do
         authorize! :download_code, user_project
 
         content = user_project.repository.gitlab_ci_yml_for(user_project.commit.id, user_project.ci_config_path_or_default)
@@ -43,6 +43,7 @@ module API
           .new(project: user_project, current_user: current_user)
           .validate(content, dry_run: params[:dry_run])
 
+        status 200
         present result, with: Entities::Ci::Lint::Result, current_user: current_user
       end
     end

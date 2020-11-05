@@ -76,8 +76,8 @@ RSpec.describe API::Lint do
     end
   end
 
-  describe 'GET /projects/:id/ci/lint' do
-    subject(:ci_lint) { get api("/projects/#{project.id}/ci/lint", api_user), params: { dry_run: dry_run } }
+  describe 'POST /projects/:id/ci/lint' do
+    subject(:ci_lint) { post api("/projects/#{project.id}/ci/lint", api_user), params: { dry_run: dry_run } }
 
     let(:project) { create(:project, :repository) }
     let(:dry_run) { nil }
