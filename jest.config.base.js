@@ -90,7 +90,7 @@ module.exports = path => {
     transformIgnorePatterns: [
       'node_modules/(?!(@gitlab/ui|bootstrap-vue|three|monaco-editor|monaco-yaml)/)',
     ],
-    timers: 'fake',
+    timers: 'modern',
     testEnvironment: '<rootDir>/spec/frontend/environment.js',
     testEnvironmentOptions: {
       IS_EE,
