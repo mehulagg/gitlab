@@ -21,10 +21,7 @@ module Security
 
         next unless remediation
 
-        result = VulnerabilityFeedback::CreateService.new(project, User.security_bot, service_params(vulnerability)).execute
-        if result[:status] == :error
-          pp result[:message][:merge_request]
-        end
+        VulnerabilityFeedback::CreateService.new(project, User.security_bot, service_params(vulnerability)).execute
       end
     end
 
