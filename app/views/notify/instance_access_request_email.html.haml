@@ -1,10 +1,10 @@
 #content
   = email_default_heading("Hello, #{@recipient.name}!")
   %p
-    = user_access_request_text(@member, format: :html)
+    = instance_access_request_text(@member, format: :html)
   %p
     Username: #{@member.username}
   %p
     Email: #{@member.email}
   %p
-    = user_access_request_link(format: :html)
+    = instance_access_request_link(format: :html)

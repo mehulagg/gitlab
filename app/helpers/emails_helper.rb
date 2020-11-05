@@ -214,13 +214,13 @@ module EmailsHelper
     end
   end
 
-  def user_access_request_text(user, format: nil)
+  def instance_access_request_text(user, format: nil)
     gitlab_host = Gitlab.config.gitlab.host
 
     _('%{username} has asked for a GitLab account on your instance %{host}:') % { username: sanitize_name(user.name), host: gitlab_host }
   end
 
-  def user_access_request_link(format: nil)
+  def instance_access_request_link(format: nil)
     url = Gitlab.config.gitlab.url + "/admin/users?filter=blocked_pending_approval"
 
     case format
