@@ -14,6 +14,7 @@ Make sure to read the whole page as it contains information related to every upg
 
 Our [maintenance policy documentation](../policy/maintenance.md)
 has additional information about upgrading, including:
+
 - How to interpret GitLab product versioning.
 - Recommendations on the what release to run.
 - How we use patch and security patch releases.
