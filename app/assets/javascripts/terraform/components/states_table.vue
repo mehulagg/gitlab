@@ -1,6 +1,7 @@
 <script>
 import { GlBadge, GlIcon, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 export default {
   components: {
@@ -11,6 +12,7 @@ export default {
     GlTooltip,
     TimeAgoTooltip,
   },
+  mixins: [timeagoMixin],
   props: {
     states: {
       required: true,
@@ -49,8 +51,24 @@ export default {
             {{ s__('Terraform|Locked') }}
           </gl-badge>
 
-          <gl-tooltip container="terraformLockedBadgeContainer.right" target="terraformLockedBadge">
-            {{ item.lockedByUser.name }}
+          <gl-tooltip
+            container="terraformLockedBadgeContainer"
+            placement="right"
+            target="terraformLockedBadge"
+          >
+            <gl-sprintf
+              :message="
+                s__('Terraform|Locked by %{nameStart}name%{nameEnd} %{timeStart}time%{timeEnd}')
+              "
+            >
+              <template #name>
+                {{ item.lockedByUser.name }}
+              </template>
+
+              <template #time>
+                {{ timeFormatted(item.lockedAt) }}
+              </template>
+            </gl-sprintf>
           </gl-tooltip>
         </div>
       </div>
