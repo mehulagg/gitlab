@@ -215,6 +215,7 @@ done
 ```
 
 ### Using GitLab Secure with AutoDevOps in an offline environment
+
 GitLab AutoDevOps can be used for Secure scans in an offline environment. There
 are a few steps to take beforehand before using it. At a high-level, these
 are to load the container images into the local registry and then set the
