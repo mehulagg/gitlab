@@ -69,8 +69,8 @@ Prerequisites:
 - A personal access token or deploy token. For repository authentication:
   - You can generate a [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
   - You can generate a [deploy token](./../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
-- A suitable name for your source.
-- Your project ID, which can be found on the home page of your project.
+- A name for your source.
+- Your project ID, which can be found on your project's home page.
 
 You can now add a new source to NuGet with:
 
@@ -95,6 +95,8 @@ nuget source Add -Name "GitLab" -Source "https://gitlab.example.com/api/v4/proje
 ```
 
 ### Add a source with Visual Studio
+
+To add the Package Registry as a source with Visual Studio:
 
 1. Open [Visual Studio](https://visualstudio.microsoft.com/vs/).
 1. On Windows, select **FILE > OPTIONS**. On macOS, select **Visual Studio > Preferences**.
@@ -154,7 +156,9 @@ When publishing packages:
 
 ### Publish a package with the NuGet CLI
 
-This section assumes that your project is properly built and you already [created a NuGet package with NuGet CLI](https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package).
+Prerequisite:
+
+- [A NuGet package created with NuGet CLI](https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package).
 
 Publish a package by running this command:
 
@@ -167,7 +171,9 @@ nuget push <package_file> -Source <source_name>
 
 ### Publish a package with the .NET CLI
 
-This section assumes that your project is properly built and you already [created a NuGet package with .NET CLI](https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package-dotnet-cli).
+Prerequisite:
+
+[A NuGet package created with .NET CLI](https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package-dotnet-cli).
 
 Publish a package by running this command:
 
@@ -225,7 +231,7 @@ By default, `nuget` checks the official source at `nuget.org` first. If you have
 Package Registry with the same name as a package at `nuget.org`, you must specify the source
 name to install the correct package.
 
-Install the latest version of a package using this command:
+Install the latest version of a package running this command:
 
 ```shell
 nuget install <package_id> -OutputDirectory <output_directory> \
@@ -245,7 +251,7 @@ If you have a package in the Package Registry with the same name as a package at
 verify the order in which `dotnet` checks sources during install. This is defined in the
 `nuget.config` file.
 
-Install the latest version of a package by using this command:
+Install the latest version of a package by running this command:
 
 ```shell
 dotnet add package <package_id> \
