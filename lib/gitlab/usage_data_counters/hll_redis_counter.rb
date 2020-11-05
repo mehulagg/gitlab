@@ -15,9 +15,9 @@ module Gitlab
       CategoryMismatch = Class.new(EventError)
       UnknownAggregationOperator = Class.new(EventError)
 
-      KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events.yml'
+      KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events*.yml'
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
-      AGGREGATED_METRICS_PATH = 'lib/gitlab/usage_data_counters/aggregated_metrics.yml'
+      AGGREGATED_METRICS_PATH = 'lib/gitlab/usage_data_counters/aggregated_metrics*.yml'
       ALLOWED_METRICS_AGGREGATIONS = %w[ANY].freeze
 
       # Track event on entity_id
@@ -142,11 +142,17 @@ module Gitlab
         end
 
         def known_events
-          @known_events ||= load_yaml_from_path(KNOWN_EVENTS_PATH)
+          @known_events ||= load_events(KNOWN_EVENTS_PATH)
         end
 
         def aggregated_metrics
-          @aggregated_metrics ||= (load_yaml_from_path(AGGREGATED_METRICS_PATH) || [])
+          @aggregated_metrics ||= load_events(AGGREGATED_METRICS_PATH)
+        end
+
+        def load_events(wildcard)
+          Dir[wildcard].each_with_object({}) do |path, events|
+            events += load_yaml_from_path(path)
+          end
         end
 
         def load_yaml_from_path(path)
