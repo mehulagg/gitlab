@@ -1,5 +1,5 @@
 <script>
-import { GlBadge, GlIcon, GlSprintf, GlTable } from '@gitlab/ui';
+import { GlBadge, GlIcon, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
@@ -8,6 +8,7 @@ export default {
     GlIcon,
     GlSprintf,
     GlTable,
+    GlTooltip,
     TimeAgoTooltip,
   },
   props: {
@@ -37,17 +38,22 @@ export default {
 <template>
   <gl-table :items="states" :fields="fields" data-testid="terraform-states-table">
     <template #cell(name)="{ item }">
-      <p
-        class="gl-font-weight-bold gl-m-0 gl-text-gray-900"
-        data-testid="terraform-states-table-name"
-      >
-        {{ item.name }}
+      <div class="gl-display-flex align-items-center" data-testid="terraform-states-table-name">
+        <p class="gl-font-weight-bold gl-m-0 gl-text-gray-900">
+          {{ item.name }}
+        </p>
 
-        <gl-badge v-if="item.lockedAt">
-          <gl-icon name="lock" />
-          {{ s__('Terraform|Locked') }}
-        </gl-badge>
-      </p>
+        <div v-if="item.lockedAt" id="terraformLockedBadgeContainer" class="gl-m-2">
+          <gl-badge id="terraformLockedBadge">
+            <gl-icon name="lock" />
+            {{ s__('Terraform|Locked') }}
+          </gl-badge>
+
+          <gl-tooltip container="terraformLockedBadgeContainer.right" target="terraformLockedBadge">
+            {{ item.lockedByUser.name }}
+          </gl-tooltip>
+        </div>
+      </div>
     </template>
 
     <template #cell(updated)="{ item }">
