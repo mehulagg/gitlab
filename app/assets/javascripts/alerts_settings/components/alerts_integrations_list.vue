@@ -12,7 +12,7 @@ import {
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import Tracking from '~/tracking';
-import { trackAlertIntegrationsViewsOptions } from '../constants';
+import { trackAlertIntegrationsViewsOptions, integrationToDeleteDefault } from '../constants';
 
 export const i18n = {
   title: s__('AlertsIntegrations|Current integrations'),
@@ -45,7 +45,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
-    'gl-modal': GlModalDirective,
+    GlModal: GlModalDirective,
   },
   props: {
     integrations: {
@@ -79,10 +79,7 @@ export default {
   ],
   data() {
     return {
-      integrationToDelete: {
-        id: null,
-        name: '',
-      },
+      integrationToDelete: integrationToDeleteDefault,
     };
   },
   computed: {
@@ -106,7 +103,7 @@ export default {
     },
     deleteIntergration() {
       this.$emit('delete-integration', { id: this.integrationToDelete.id });
-      this.integrationToDelete = { id: null, name: '' };
+      this.integrationToDelete = { ...integrationToDeleteDefault };
     },
   },
 };
@@ -179,7 +176,7 @@ export default {
       <gl-sprintf
         :message="
           s__(
-            'AlertsIntegrations|You have optd to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer recieve alerts from this endpoint in your alert list, and this action cannot be undone.',
+            'AlertsIntegrations|You have opted to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer receive alerts from this endpoint in your alert list, and this action cannot be undone.',
           )
         "
       >

@@ -24,6 +24,7 @@ import {
   createPrometheusVariables,
   updatePrometheusVariables,
   ID,
+  errorMsg,
   getIntegrationsQueryResponse,
   destroyIntegrationResponse,
   integrationToDestroy,
@@ -78,7 +79,7 @@ describe('AlertsSettingsWrapper', () => {
 
   function createComponentWithApollo({
     destroyHandler = jest.fn().mockResolvedValue(destroyIntegrationResponse),
-  }) {
+  } = {}) {
     localVue.use(VueApollo);
     destroyIntegrationHandler = destroyHandler;
 
@@ -287,7 +288,6 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('shows error alert when integration creation fails ', async () => {
-      const errorMsg = 'Something went wrong';
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -303,7 +303,6 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('shows error alert when integration token reset fails ', () => {
-      const errorMsg = 'Something went wrong';
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -320,7 +319,6 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('shows error alert when integration update fails ', () => {
-      const errorMsg = 'Something went wrong';
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -339,7 +337,7 @@ describe('AlertsSettingsWrapper', () => {
 
   describe('with mocked Apollo client', () => {
     it('has a selection of integrations loaded via the getIntegrationsQuery', async () => {
-      createComponentWithApollo({});
+      createComponentWithApollo();
 
       await jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
@@ -348,7 +346,7 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('calls a mutation with correct parameters and destroys a integration', async () => {
-      createComponentWithApollo({});
+      createComponentWithApollo();
 
       await destroyHttpIntegration(wrapper);
 
