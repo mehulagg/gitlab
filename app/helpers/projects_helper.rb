@@ -89,7 +89,11 @@ module ProjectsHelper
         group_title(project.group, nil, nil)
       else
         owner = project.namespace.owner
-        link_to(simple_sanitize(owner.name), user_path(owner))
+        link_to(user_url(owner), itemprop: 'item') do
+          content_tag :span, itemprop: 'name' do
+            simple_sanitize(owner.name)
+          end
+        end
       end
 
     project_link = link_to project_url(project) do
