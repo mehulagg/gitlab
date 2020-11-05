@@ -49,6 +49,34 @@ RSpec.describe DiffFileEntity do
 
       expect(subject).to include(:load_collapsed_diff_url)
     end
+
+    context 'when there are conflicts' do
+      let(:conflicts) { double(files: []) }
+
+      before do
+        allow_next_instance_of(MergeRequests::Conflicts::ListService) do |instance|
+          allow(instance).to receive(:conflicts).and_return(conflicts)
+        end
+      end
+
+      it 'lines are parsed with passed conflicts' do
+        expect(Gitlab::Git::Conflict::LineParser).to receive(:new).with(anything, conflicts).and_call_original
+
+        subject
+      end
+
+      context 'highlight_merge_conflicts_in_diff feature flag is disabled' do
+        before do
+          stub_feature_flags(highlight_merge_conflicts_in_diff: false)
+        end
+
+        it 'conflicts has no impact on line parsing' do
+          expect(Gitlab::Git::Conflict::LineParser).to receive(:new).with(anything, nil).and_call_original
+
+          subject
+        end
+      end
+    end
   end
 
   describe '#parallel_diff_lines' do

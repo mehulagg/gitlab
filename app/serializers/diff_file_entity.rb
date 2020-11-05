@@ -54,7 +54,7 @@ class DiffFileEntity < DiffFileBaseEntity
 
   # Used for inline diffs
   expose :highlighted_diff_lines, using: DiffLineEntity, if: -> (diff_file, options) { inline_diff_view?(options, diff_file) && diff_file.text? } do |diff_file|
-    diff_file.diff_lines_for_serializer
+    diff_file.diff_lines_for_serializer(conflicts: conflicts(options[:merge_request]))
   end
 
   expose :is_fully_expanded do |diff_file|
@@ -78,5 +78,11 @@ class DiffFileEntity < DiffFileBaseEntity
   def inline_diff_view?(options, diff_file)
     # If nothing is present, inline will be the default.
     options.fetch(:diff_view, :inline).to_sym == :inline
+  end
+
+  def conflicts(merge_request)
+    return unless merge_request && Feature.enabled?(:highlight_merge_conflicts_in_diff, merge_request.project)
+
+    MergeRequests::Conflicts::ListService.new(merge_request).conflicts # rubocop:disable CodeReuse/ServiceClass
   end
 end

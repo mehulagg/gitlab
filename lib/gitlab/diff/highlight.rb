@@ -3,12 +3,13 @@
 module Gitlab
   module Diff
     class Highlight
-      attr_reader :diff_file, :diff_lines, :raw_lines, :repository
+      attr_reader :diff_file, :diff_lines, :raw_lines, :repository, :conflicts
 
       delegate :old_path, :new_path, :old_sha, :new_sha, to: :diff_file, prefix: :diff
 
-      def initialize(diff_lines, repository: nil)
+      def initialize(diff_lines, repository: nil, conflicts: nil)
         @repository = repository
+        @conflicts = conflicts
 
         if diff_lines.is_a?(Gitlab::Diff::File)
           @diff_file = diff_lines
@@ -21,6 +22,8 @@ module Gitlab
       end
 
       def highlight
+        conflicts_parser = Gitlab::Git::Conflict::LineParser.new(diff_new_path, conflicts)
+
         @diff_lines.map.with_index do |diff_line, i|
           diff_line = diff_line.dup
           # ignore highlighting for "match" lines
@@ -40,6 +43,8 @@ module Gitlab
           end
 
           diff_line.rich_text = rich_line
+
+          conflicts_parser.assign_type!(diff_line)
 
           diff_line
         end
