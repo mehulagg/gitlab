@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import { GlToast } from '@gitlab/ui';
 import { parseDataAttributes } from 'ee_else_ce/groups/members/utils';
 import App from './components/app.vue';
-import membersModule from '~/vuex_shared/modules/members';
+import membersStore from '~/members/store';
 
 export const initGroupMembersApp = (el, tableFields, requestFormatter) => {
   if (!el) {
@@ -13,14 +13,14 @@ export const initGroupMembersApp = (el, tableFields, requestFormatter) => {
   Vue.use(Vuex);
   Vue.use(GlToast);
 
-  const store = new Vuex.Store({
-    ...membersModule({
+  const store = new Vuex.Store(
+    membersStore({
       ...parseDataAttributes(el),
       currentUserId: gon.current_user_id || null,
       tableFields,
       requestFormatter,
     }),
-  });
+  );
 
   return new Vue({
     el,
