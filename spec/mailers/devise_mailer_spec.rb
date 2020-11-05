@@ -66,9 +66,9 @@ RSpec.describe DeviseMailer do
   end
 
   describe '#user_access_request' do
-    subject { described_class.user_access_request(admin) }
+    subject { described_class.user_access_request(user) }
 
-    let_it_be(:admin) { create(:user, :admin) }
+    let_it_be(:admin) { create(:user, :admin, email: "admin@example.com") }
     let_it_be(:user) { create(:user) }
 
     it_behaves_like 'an email sent from GitLab'
@@ -77,6 +77,7 @@ RSpec.describe DeviseMailer do
 
     it 'is sent to the admin' do
       is_expected.to deliver_to admin.email
+      is_expected.to have_body_text /#{admin.name}/
     end
 
     it 'has the correct subject' do
