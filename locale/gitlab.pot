@@ -2671,6 +2671,9 @@ msgstr ""
 msgid "AlertsIntegrations|Prometheus"
 msgstr ""
 
+msgid "AlertsIntegrations|The current integration could not be updated. Please try again."
+msgstr ""
+
 msgid "AlertsIntegrations|The integration could not be added. Please try again."
 msgstr ""
 
