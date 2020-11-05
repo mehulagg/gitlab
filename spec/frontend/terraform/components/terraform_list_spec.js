@@ -28,7 +28,12 @@ describe('TerraformList', () => {
     };
 
     const apolloProvider = createMockApollo([
-      [getStatesQuery, jest.fn().mockResolvedValue(apolloQueryResponse)],
+      [
+        getStatesQuery,
+        !terraformStates
+          ? jest.fn().mockRejectedValue()
+          : jest.fn().mockResolvedValue(apolloQueryResponse),
+      ],
     ]);
 
     wrapper = shallowMount(TerraformList, {
@@ -36,8 +41,6 @@ describe('TerraformList', () => {
       apolloProvider,
       propsData,
     });
-
-    return wrapper.vm.$nextTick();
   };
 
   const findBadge = () => wrapper.find(GlBadge);
@@ -46,10 +49,8 @@ describe('TerraformList', () => {
   const findTab = () => wrapper.find(GlTab);
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
+    wrapper.destroy();
+    wrapper = null;
   });
 
   describe('when the terraform query has succeeded', () => {
@@ -70,12 +71,14 @@ describe('TerraformList', () => {
       ];
 
       beforeEach(() => {
-        return createWrapper({
+        createWrapper({
           terraformStates: {
             nodes: states,
             count: states.length,
           },
         });
+
+        return wrapper.vm.$nextTick();
       });
 
       it('displays a states tab and count', () => {
@@ -90,12 +93,14 @@ describe('TerraformList', () => {
 
     describe('when the list of terraform states is empty', () => {
       beforeEach(() => {
-        return createWrapper({
+        createWrapper({
           terraformStates: {
             nodes: [],
             count: 0,
           },
         });
+
+        return wrapper.vm.$nextTick();
       });
 
       it('displays a states tab with no count', () => {
@@ -111,7 +116,9 @@ describe('TerraformList', () => {
 
   describe('when the terraform query has errored', () => {
     beforeEach(() => {
-      return createWrapper({ terraformStates: null });
+      createWrapper({ terraformStates: null });
+
+      return wrapper.vm.$nextTick();
     });
 
     it('displays an alert message', () => {
@@ -120,20 +127,8 @@ describe('TerraformList', () => {
   });
 
   describe('when the terraform query is loading', () => {
-    const mocks = {
-      $apollo: {
-        queries: {
-          states: {
-            loading: true,
-          },
-        },
-      },
-    };
-
     beforeEach(() => {
-      wrapper = shallowMount(TerraformList, { mocks, propsData });
-
-      return wrapper.vm.$nextTick();
+      createWrapper({ terraformStates: null });
     });
 
     it('displays a loading icon', () => {
