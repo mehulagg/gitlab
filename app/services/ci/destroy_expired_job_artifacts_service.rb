@@ -9,14 +9,14 @@ module Ci
     LOOP_TIMEOUT = 5.minutes
     LOOP_LIMIT = 1000
     EXCLUSIVE_LOCK_KEY = 'expired_job_artifacts:destroy:lock'
-    LOCK_TIMEOUT = 10.minutes
+    LOCK_TIMEOUT = 6.minutes
 
     ##
     # Destroy expired job artifacts on GitLab instance
     #
-    # This destroy process cannot run for more than 10 minutes. This is for
+    # This destroy process cannot run for more than 6 minutes. This is for
     # preventing multiple `ExpireBuildArtifactsWorker` CRON jobs run concurrently,
-    # which is scheduled at every hour.
+    # which is scheduled every 7 minutes.
     def execute
       in_lock(EXCLUSIVE_LOCK_KEY, ttl: LOCK_TIMEOUT, retries: 1) do
         loop_until(timeout: LOOP_TIMEOUT, limit: LOOP_LIMIT) do
