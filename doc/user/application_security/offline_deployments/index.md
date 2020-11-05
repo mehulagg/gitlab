@@ -241,4 +241,4 @@ environment!
 
 Note: These steps are specific to GitLab Secure with AutoDevOps. Using other
 stages with AutoDevOps may require other steps that will be covered in the other
-[relevant documentation pages](/topics/autodevops/).
+[relevant documentation pages](../../../topics/autodevops/).
