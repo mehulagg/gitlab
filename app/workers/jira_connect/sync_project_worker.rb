@@ -23,9 +23,7 @@ module JiraConnect
 
     # rubocop: disable CodeReuse/ActiveRecord
     def merge_requests_to_sync(project)
-      project.merge_requests.preload(:author, :notes).limit(MERGE_REQUEST_LIMIT).order(id: :desc).reject do |merge_request|
-        Atlassian::JiraIssueKeyExtractor.new(merge_request.title, merge_request.description).issue_keys.empty?
-      end
+      project.merge_requests.with_jira_issue_keys.preload(:author).limit(MERGE_REQUEST_LIMIT).order(id: :desc)
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end
