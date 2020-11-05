@@ -106,6 +106,10 @@ When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
 
+NOTE: **Note:** if you want to configure any additional options related to KAS
+please refer to the [gitlab.rb template](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-config-template/gitlab.rb.template#L1586).
+The options will be described in the documentation in scope of the issue [Describe KAS options available for Omnibus GitLab
+](https://gitlab.com/gitlab-org/gitlab/-/issues/276899.
 #### Install with the Helm chart
 
 When installing or upgrading the GitLab Helm chart, consider the following Helm v3 example.
