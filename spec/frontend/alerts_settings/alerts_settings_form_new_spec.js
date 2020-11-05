@@ -79,6 +79,37 @@ describe('AlertsSettingsFormNew', () => {
       expect(findSelect().attributes('disabled')).toBe('disabled');
       expect(findMultiSupportText().exists()).toBe(true);
     });
+
+    it('shows the form with pre-filled values if currentIntegration is set', async () => {
+      createComponent({
+        props: {
+          currentIntegration: {
+            id: '1',
+            name: 'Test integration to show',
+            type: typeSet.http,
+            active: false,
+          },
+          loading: false,
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findSelect().attributes('disabled')).toBe('disabled');
+      expect(findFormFields().at(0).element.value).toBe('Test integration to show');
+      expect(findFormToggle().props('value')).toBe(false);
+    });
+
+    it('does not show the form with pre-filled values if currentIntegration is not set', async () => {
+      createComponent({
+        props: {
+          currentIntegration: null,
+          loading: false,
+        },
+      });
+
+      expect(findSelect().attributes('disabled')).toBe(undefined);
+    });
   });
 
   describe('submitting integration form', () => {
