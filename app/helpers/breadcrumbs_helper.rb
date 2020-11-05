@@ -34,28 +34,29 @@ module BreadcrumbsHelper
   end
 
   def push_to_schema_breadcrumb(text, link)
-    @push_schema_breadcrumb ||= []
-    @push_schema_breadcrumb.push(schema_list_item(text, link, @push_schema_breadcrumb.size + 1))
+    schema_breadcrumb_list.push(schema_list_item(text, link, schema_breadcrumb_list.size + 1))
   end
 
   def schema_breadcrumb_json
     {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      'itemListElement': @push_schema_breadcrumb
+      'itemListElement': schema_breadcrumb_list
     }.to_json
   end
 
   private
 
+  def schema_breadcrumb_list
+    @schema_breadcrumb_list ||= []
+  end
+
   def schema_list_item(text, link, position)
     {
       '@type' => 'ListItem',
       'position' => position,
-      'item' => {
-        '@id' => link,
-        'name' => text
-      }
+      'name' => text,
+      'item' => link
     }
   end
 end
