@@ -20673,6 +20673,8 @@ CREATE INDEX index_epics_on_group_id ON epics USING btree (group_id);
 
 CREATE UNIQUE INDEX index_epics_on_group_id_and_external_key ON epics USING btree (group_id, external_key) WHERE (external_key IS NOT NULL);
 
+CREATE UNIQUE INDEX index_epics_on_group_id_and_iid ON epics USING btree (group_id, iid);
+
 CREATE INDEX index_epics_on_group_id_and_iid_varchar_pattern ON epics USING btree (group_id, ((iid)::character varying) varchar_pattern_ops);
 
 CREATE INDEX index_epics_on_iid ON epics USING btree (iid);
