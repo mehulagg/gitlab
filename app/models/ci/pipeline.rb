@@ -934,7 +934,7 @@ module Ci
 
     def coverage_reports
       Gitlab::Ci::Reports::CoverageReports.new.tap do |coverage_reports|
-        latest_report_builds(Ci::JobArtifact.coverage_reports).each do |build|
+        latest_report_builds(Ci::JobArtifact.coverage_reports).includes(:project).each do |build|
           build.collect_coverage_reports!(coverage_reports)
         end
       end

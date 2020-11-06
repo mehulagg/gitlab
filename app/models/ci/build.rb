@@ -916,8 +916,17 @@ module Ci
     end
 
     def collect_coverage_reports!(coverage_report)
+      # NOTE: Ensure we're not causing N+1 queries here when a pipeline has multiple builds
+      project_path = project.full_path
+      worktree_paths = pipeline.all_worktree_paths
+
       each_report(Ci::JobArtifact::COVERAGE_REPORT_FILE_TYPES) do |file_type, blob|
-        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, coverage_report)
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+          blob,
+          coverage_report,
+          project_path: project_path,
+          worktree_paths: worktree_paths
+        )
       end
 
       coverage_report
