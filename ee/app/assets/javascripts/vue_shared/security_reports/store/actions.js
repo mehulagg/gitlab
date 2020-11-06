@@ -6,6 +6,7 @@ import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import toast from '~/vue_shared/plugins/global_toast';
 import * as types from './mutation_types';
+export {fetchDiffData} from '~/vue_shared/security_reports/store/modules/sast/actions.js'
 
 /**
  * A lot of this file has duplicate actions to
@@ -43,19 +44,6 @@ export const setCreateVulnerabilityFeedbackDismissalPath = ({ commit }, path) =>
   commit(types.SET_CREATE_VULNERABILITY_FEEDBACK_DISMISSAL_PATH, path);
 
 export const setPipelineId = ({ commit }, id) => commit(types.SET_PIPELINE_ID, id);
-
-export const fetchDiffData = (state, endpoint, category) => {
-  const requests = [pollUntilComplete(endpoint)];
-
-  if (state.canReadVulnerabilityFeedback) {
-    requests.push(axios.get(state.vulnerabilityFeedbackPath, { params: { category } }));
-  }
-
-  return Promise.all(requests).then(([diffResponse, enrichResponse]) => ({
-    diff: diffResponse.data,
-    enrichData: enrichResponse?.data ?? [],
-  }));
-};
 
 /**
  * CONTAINER SCANNING
