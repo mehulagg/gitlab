@@ -328,6 +328,20 @@ describe('AlertsSettingsWrapper', () => {
       await waitForPromises();
       expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
     });
+
+    it('shows an error alert when integration test payload fails ', () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
+      });
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('test-payload-failure');
+
+      setImmediate(() => {
+        expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
+      });
+    });
   });
 
   describe('with mocked Apollo client', () => {
