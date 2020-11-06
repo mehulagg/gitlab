@@ -88,6 +88,7 @@ describe('AlertsSettingsWrapper', () => {
     ];
 
     fakeApollo = createMockApollo(requestHandlers);
+
     wrapper = mount(AlertsSettingsWrapper, {
       localVue,
       apolloProvider: fakeApollo,
