@@ -18,6 +18,15 @@
   @include gl-font-weight-bold;
 }
 
+.whats-new-item-title-link {
+  h5 {
+    @include gl-font-lg;
+  }
+  &:hover {
+    color: $gray-900;
+  }
+}
+
 .whats-new-item-image {
   border-color: $gray-50;
 }
