@@ -18,12 +18,12 @@ needs.
 
 ## APIs
 
-- [Audit events](https://docs.gitlab.com/ee/api/audit_events.html)
-- [GraphQL - User](https://docs.gitlab.com/ee/api/graphql/reference/#user)
-- [GraphQL - GroupMember](https://docs.gitlab.com/ee/api/graphql/reference/#groupmember)
-- [GraphQL - ProjectMember](https://docs.gitlab.com/ee/api/graphql/reference/#projectmember)
+- [Audit events](../api/audit_events.md)
+- [GraphQL - User](../api/graphql/reference/index.md#user)
+- [GraphQL - GroupMember](../api/graphql/reference/index.md#groupmember)
+- [GraphQL - ProjectMember](../api/graphql/reference/index.md#projectmember)
 
 ## Features
 
-- [Audit events](https://docs.gitlab.com/ee/administration/audit_events.html)
-- [Log system](https://docs.gitlab.com/ee/administration/logs.html)
+- [Audit events](audit_events.md)
+- [Log system](logs.md)
