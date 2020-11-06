@@ -221,7 +221,7 @@ module EmailsHelper
   end
 
   def instance_access_request_link(user, format: nil)
-    user_path =  "/admin/users/%{username}" % { username: user.username }
+    user_path = "/admin/users/%{username}" % { username: user.username }
     url = Gitlab.config.gitlab.url + user_path
 
     case format
