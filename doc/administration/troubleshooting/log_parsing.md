@@ -156,3 +156,14 @@ CT: 635 PROJECT: groupA/project1     DURS: 4292.269,  4228.853,  2885.548
 CT: 462 PROJECT: groupB/project5     DURS: 4368.981,  3623.553,  361.399
 CT: 455 PROJECT: groupC/project7     DURS: 387.295,  381.874,  373.988
 ```
+
+#### Find projects that fail to sync to a Geo secondary
+
+In your of [`Synchronization failed - Error syncing repository` messages](../geo/replication/troubleshooting.md#message-synchronization-failed---error-syncing-repository)
+you can find all affected projects with
+
+```bash
+grep "fatal: 'geo' does not appear to be a git repository" var/log/gitlab/gitaly/current | \
+    jq '."grpc.request.glProjectPath" | \
+    sort | uniq
+```

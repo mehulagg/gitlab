@@ -438,6 +438,7 @@ end
 
 1. Verify that each of those IDs corresponds to a project
    with a known Geo replication failure
+   (for example [using `grep` and `jq`](../../troubleshooting/log_parsing.md#find-projects-that-fail-to-sync-to-a-geo-secondary)).
 
 1. If that's the case, run the following commands to
    reset each project's geo-related attributes and execute a new sync:
