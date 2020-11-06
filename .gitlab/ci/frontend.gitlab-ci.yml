@@ -245,15 +245,15 @@ frontend-fixtures-as-if-foss:
 #     - *yarn-install
 #     - run_timed_command "retry yarn run webpack-prod"
 
-qa-frontend-node:10:
-  extends: .qa-frontend-node
-  image: node:dubnium
+# qa-frontend-node:10:
+#   extends: .qa-frontend-node
+#   image: node:dubnium
 
-qa-frontend-node:latest:
-  extends:
-    - .qa-frontend-node
-    - .frontend:rules:qa-frontend-node-latest
-  image: node:latest
+# qa-frontend-node:latest:
+#   extends:
+#     - .qa-frontend-node
+#     - .frontend:rules:qa-frontend-node-latest
+#   image: node:latest
 
 # webpack-dev-server:
 #   extends:
