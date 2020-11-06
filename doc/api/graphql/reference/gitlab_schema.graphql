@@ -3674,7 +3674,7 @@ type CreateDevopsAdoptionSegmentPayload {
   errors: [String!]!
 
   """
-  Information about the status of the deletion request
+  The segment after mutation
   """
   segment: DevopsAdoptionSegment
 }
@@ -21561,7 +21561,7 @@ type UpdateDevopsAdoptionSegmentPayload {
   errors: [String!]!
 
   """
-  Information about the status of the deletion request
+  The segment after mutation
   """
   segment: DevopsAdoptionSegment
 }

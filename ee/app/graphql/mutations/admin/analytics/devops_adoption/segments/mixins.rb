@@ -9,8 +9,13 @@ module Mutations
             # This module ensures that the mutations are admin only
             module CommonMethods
               ADMIN_MESSAGE = 'You must be an admin to use this mutation'
+              FEATURE_UNAVAILABLE_MESSAGE = 'Feature is not available'
 
               def ready?(**args)
+                unless License.feature_available?(:instance_level_devops_adoption)
+                  raise ::Gitlab::Graphql::Errors::ResourceNotAvailable, FEATURE_UNAVAILABLE_MESSAGE
+                end
+
                 unless current_user&.admin?
                   raise Gitlab::Graphql::Errors::ResourceNotAvailable, ADMIN_MESSAGE
                 end
@@ -25,10 +30,6 @@ module Mutations
                   segment: segment.valid? ? segment : nil,
                   errors: errors_on_object(segment)
                 }
-              end
-
-              def to_numeric_ids(ids)
-                Array(ids).map(&:model_id)
               end
             end
 
@@ -47,7 +48,7 @@ module Mutations
                 field :segment,
                   Types::Admin::Analytics::DevopsAdoption::SegmentType,
                   null: true,
-                  description: 'Information about the status of the deletion request'
+                  description: 'The segment after mutation'
               end
             end
           end

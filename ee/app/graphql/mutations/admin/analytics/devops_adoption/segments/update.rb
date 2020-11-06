@@ -16,8 +16,10 @@ module Mutations
               description: "ID of the segment"
 
             def resolve(id:, name:, group_ids: nil, **)
+              groups = GlobalID::Locator.locate_many(group_ids) if group_ids
+
               segment = ::Analytics::DevopsAdoption::Segments::UpdateService
-                .new(segment: id.find, params: { name: name, group_ids: to_numeric_ids(group_ids) })
+                .new(segment: id.find, params: { name: name, groups: groups })
                 .execute
 
               resolve_segment(segment)

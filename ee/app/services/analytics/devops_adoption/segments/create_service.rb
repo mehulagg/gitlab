@@ -27,13 +27,7 @@ module Analytics
         end
 
         def groups
-          @groups ||= begin
-                        group_ids = Array(params[:group_ids])
-                          .uniq
-                          .first(::Analytics::DevopsAdoption::SegmentSelection::ALLOWED_SELECTIONS_PER_SEGMENT)
-
-                        ::Group.by_id(group_ids).to_a
-                      end
+          @groups ||= Array(params[:groups]).uniq
         end
       end
     end

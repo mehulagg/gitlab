@@ -10,7 +10,7 @@ module Analytics
 
         override :segment_selections_attributes
         def segment_selections_attributes
-          return if params[:group_ids].nil?
+          return if params[:groups].nil?
 
           existing_selections_by_group_id = segment.segment_selections.index_by(&:group_id)
           groups_by_id = groups.index_by(&:id)

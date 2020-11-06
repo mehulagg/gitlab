@@ -34,11 +34,11 @@ RSpec.describe Mutations::Admin::Analytics::DevopsAdoption::Segments::Create do
     graphql_mutation_response(:create_devops_adoption_segment)
   end
 
-  context 'when the user is not an admin' do
-    let(:current_user) { create(:user) }
-
-    it_behaves_like 'a mutation that returns top-level errors', errors: ['You must be an admin to use this mutation']
+  before do
+    stub_licensed_features(instance_level_devops_adoption: true)
   end
+
+  it_behaves_like 'DevOps Adoption top level errors'
 
   it 'creates the segment with the groups' do
     post_graphql_mutation(mutation, current_user: admin)

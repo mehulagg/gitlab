@@ -12,8 +12,10 @@ module Mutations
             graphql_name 'CreateDevopsAdoptionSegment'
 
             def resolve(name:, group_ids: [], **)
+              groups = GlobalID::Locator.locate_many(group_ids)
+
               segment = ::Analytics::DevopsAdoption::Segments::CreateService
-                .new(params: { name: name, group_ids: to_numeric_ids(group_ids) }.compact)
+                .new(params: { name: name, groups: groups })
                 .execute
 
               resolve_segment(segment)

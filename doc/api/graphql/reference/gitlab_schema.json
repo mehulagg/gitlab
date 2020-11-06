@@ -9968,7 +9968,7 @@
             },
             {
               "name": "segment",
-              "description": "Information about the status of the deletion request",
+              "description": "The segment after mutation",
               "args": [
 
               ],
@@ -62764,7 +62764,7 @@
             },
             {
               "name": "segment",
-              "description": "Information about the status of the deletion request",
+              "description": "The segment after mutation",
               "args": [
 
               ],

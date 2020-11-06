@@ -7,7 +7,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::UpdateService do
   let_it_be(:other_group) { create(:group) }
   let_it_be_with_refind(:segment) { create(:devops_adoption_segment, name: 'segment', segment_selections: [build(:devops_adoption_segment_selection, :group, group: group)]) }
 
-  let(:params) { { name: 'new name', group_ids: [group.id, other_group.id] } }
+  let(:params) { { name: 'new name', groups: [group, other_group] } }
 
   subject { described_class.new(segment: segment, params: params).execute }
 
@@ -28,9 +28,9 @@ RSpec.describe Analytics::DevopsAdoption::Segments::UpdateService do
     end
   end
 
-  context 'when group_ids is not given' do
+  context 'when groups are not given' do
     before do
-      params.delete(:group_ids)
+      params.delete(:groups)
     end
 
     it 'does not change the groups' do

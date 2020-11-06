@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
   let_it_be(:group) { create(:group) }
 
-  let(:params) { { name: 'my service', group_ids: [group.id] } }
+  let(:params) { { name: 'my service', groups: [group] } }
 
   subject { described_class.new(params: params).execute }
 
@@ -26,22 +26,23 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
     end
   end
 
-  context 'when group_ids is not given' do
+  context 'when groups are not given' do
     before do
-      params.delete(:group_ids)
+      params.delete(:groups)
     end
 
-    it 'persists the segment without group_ids' do
+    it 'persists the segment without groups' do
       expect(subject).to be_persisted
+      expect(subject.segment_selections).to be_empty
     end
   end
 
-  context 'when duplicated group_ids are given' do
+  context 'when duplicated groups are given' do
     before do
-      params[:group_ids] = [group.id] * 5
+      params[:groups] = [group] * 5
     end
 
-    it 'persists the segments with unique group_ids' do
+    it 'persists the segments with unique groups' do
       expect(subject).to be_persisted
       expect(subject.groups).to eq([group])
     end
