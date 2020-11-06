@@ -43,6 +43,9 @@ module EE
         mount_mutation ::Mutations::Security::CiConfiguration::ConfigureSast
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Update
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
 
         prepend(Types::DeprecatedMutations)
       end
