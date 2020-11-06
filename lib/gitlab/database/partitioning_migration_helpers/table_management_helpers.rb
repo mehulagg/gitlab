@@ -240,14 +240,6 @@ module Gitlab
           "#{table}_archived"
         end
 
-        def make_sync_function_name(table)
-          object_name(table, 'table_sync_function')
-        end
-
-        def make_sync_trigger_name(table)
-          object_name(table, 'table_sync_trigger')
-        end
-
         def find_column_definition(table, column)
           connection.columns(table).find { |c| c.name == column.to_s }
         end
@@ -317,64 +309,15 @@ module Gitlab
         end
 
         def create_trigger_to_sync_tables(source_table_name, partitioned_table_name, unique_key)
-          function_name = make_sync_function_name(source_table_name)
-          trigger_name = make_sync_trigger_name(source_table_name)
-
-          create_sync_function(function_name, partitioned_table_name, unique_key)
-          create_comment('FUNCTION', function_name, "Partitioning migration: table sync for #{source_table_name} table")
-
-          create_sync_trigger(source_table_name, trigger_name, function_name)
+          make_sync_trigger(source_table_name).create_or_replace(partitioned_table_name, unique_key)
         end
 
         def drop_sync_trigger(source_table_name)
-          trigger_name = make_sync_trigger_name(source_table_name)
-          drop_trigger(source_table_name, trigger_name)
-
-          function_name = make_sync_function_name(source_table_name)
-          drop_function(function_name)
+          make_sync_trigger(source_table_name).drop
         end
 
-        def create_sync_function(name, partitioned_table_name, unique_key)
-          if function_exists?(name)
-            Gitlab::AppLogger.warn "Partitioning sync function not created because it already exists" \
-              " (this may be due to an aborted migration or similar): function name: #{name}"
-            return
-          end
-
-          delimiter = ",\n    "
-          column_names = connection.columns(partitioned_table_name).map(&:name)
-          set_statements = build_set_statements(column_names, unique_key)
-          insert_values = column_names.map { |name| "NEW.#{name}" }
-
-          create_trigger_function(name, replace: false) do
-            <<~SQL
-              IF (TG_OP = 'DELETE') THEN
-                DELETE FROM #{partitioned_table_name} where #{unique_key} = OLD.#{unique_key};
-              ELSIF (TG_OP = 'UPDATE') THEN
-                UPDATE #{partitioned_table_name}
-                SET #{set_statements.join(delimiter)}
-                WHERE #{partitioned_table_name}.#{unique_key} = NEW.#{unique_key};
-              ELSIF (TG_OP = 'INSERT') THEN
-                INSERT INTO #{partitioned_table_name} (#{column_names.join(delimiter)})
-                VALUES (#{insert_values.join(delimiter)});
-              END IF;
-              RETURN NULL;
-            SQL
-          end
-        end
-
-        def build_set_statements(column_names, unique_key)
-          column_names.reject { |name| name == unique_key }.map { |name| "#{name} = NEW.#{name}" }
-        end
-
-        def create_sync_trigger(table_name, trigger_name, function_name)
-          if trigger_exists?(table_name, trigger_name)
-            Gitlab::AppLogger.warn "Partitioning sync trigger not created because it already exists" \
-              " (this may be due to an aborted migration or similar): trigger name: #{trigger_name}"
-            return
-          end
-
-          create_trigger(table_name, trigger_name, function_name, fires: 'AFTER INSERT OR UPDATE OR DELETE')
+        def make_sync_trigger(source_table_name)
+          Gitlab::Database::SyncTrigger.new(source_table_name, message_context: 'Partitioning Migration')
         end
 
         def enqueue_background_migration(source_table_name, partitioned_table_name, source_column)

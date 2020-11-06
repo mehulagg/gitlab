@@ -19,14 +19,18 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
   let(:partition_column) { 'created_at' }
   let(:min_date) { Date.new(2019, 12) }
   let(:max_date) { Date.new(2020, 3) }
+  let(:sync_trigger) { Gitlab::Database::SyncTrigger.new(source_table, message_context: 'Test') }
 
   before do
     allow(migration).to receive(:puts)
-    allow(migration).to receive(:transaction_open?).and_return(false)
     allow(migration).to receive(:make_partitioned_table_name).and_return(partitioned_table)
-    allow(migration).to receive(:make_sync_function_name).and_return(function_name)
-    allow(migration).to receive(:make_sync_trigger_name).and_return(trigger_name)
+    allow(migration).to receive(:make_sync_trigger).and_return(sync_trigger)
     allow(migration).to receive(:assert_table_is_allowed)
+
+    allow(connection).to receive(:transaction_open?).and_return(false)
+
+    allow(sync_trigger).to receive(:function_name).and_return(function_name)
+    allow(sync_trigger).to receive(:trigger_name).and_return(trigger_name)
   end
 
   describe '#partition_table_by_date' do
@@ -52,7 +56,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
 
     context 'when run inside a transaction block' do
       it 'raises an error' do
-        expect(migration).to receive(:transaction_open?).and_return(true)
+        expect(connection).to receive(:transaction_open?).and_return(true)
 
         expect do
           migration.partition_table_by_date source_table, partition_column, min_date: min_date, max_date: max_date
@@ -379,7 +383,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
 
     context 'when run inside a transaction block' do
       it 'raises an error' do
-        expect(migration).to receive(:transaction_open?).and_return(true)
+        expect(connection).to receive(:transaction_open?).and_return(true)
 
         expect do
           migration.enqueue_partitioning_data_migration source_table

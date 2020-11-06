@@ -18,13 +18,11 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::ForeignKeyHelpers
     allow(model).to receive(:puts)
     allow(model).to receive(:fk_function_name).and_return(function_name)
     allow(model).to receive(:fk_trigger_name).and_return(trigger_name)
+
+    allow(connection).to receive(:transaction_open?).and_return(false)
   end
 
   describe 'adding a foreign key' do
-    before do
-      allow(model).to receive(:transaction_open?).and_return(false)
-    end
-
     context 'when the table has no foreign keys' do
       it 'creates a trigger function to handle the single cascade' do
         model.add_partitioned_foreign_key :issue_assignees, referenced_table
@@ -116,7 +114,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::ForeignKeyHelpers
 
     context 'when run inside a transaction' do
       it 'raises an error' do
-        expect(model).to receive(:transaction_open?).and_return(true)
+        expect(connection).to receive(:transaction_open?).and_return(true)
 
         expect do
           model.add_partitioned_foreign_key :issue_assignees, referenced_table
@@ -126,10 +124,6 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::ForeignKeyHelpers
   end
 
   context 'removing a foreign key' do
-    before do
-      allow(model).to receive(:transaction_open?).and_return(false)
-    end
-
     context 'when the table has multiple foreign keys' do
       before do
         model.add_partitioned_foreign_key :issue_assignees, referenced_table
@@ -183,7 +177,7 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::ForeignKeyHelpers
 
     context 'when run outside a transaction' do
       it 'raises an error' do
-        expect(model).to receive(:transaction_open?).and_return(true)
+        expect(connection).to receive(:transaction_open?).and_return(true)
 
         expect do
           model.remove_partitioned_foreign_key :issue_assignees, referenced_table
