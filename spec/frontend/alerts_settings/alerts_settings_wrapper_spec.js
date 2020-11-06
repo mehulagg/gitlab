@@ -1,6 +1,7 @@
 import VueApollo from 'vue-apollo';
 import { mount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import { GlLoadingIcon } from '@gitlab/ui';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import AlertsSettingsFormOld from '~/alerts_settings/components/alerts_settings_form_old.vue';
@@ -301,12 +302,12 @@ describe('AlertsSettingsWrapper', () => {
       jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(ADD_INTEGRATION_ERROR);
       wrapper.find(AlertsSettingsFormNew).vm.$emit('create-new-integration', {});
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: ADD_INTEGRATION_ERROR });
-      });
+      await waitForPromises();
+
+      expect(createFlash).toHaveBeenCalledWith({ message: ADD_INTEGRATION_ERROR });
     });
 
-    it('shows error alert when integration token reset fails ', () => {
+    it('shows error alert when integration token reset fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -317,12 +318,11 @@ describe('AlertsSettingsWrapper', () => {
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('reset-token', {});
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: RESET_INTEGRATION_TOKEN_ERROR });
-      });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: RESET_INTEGRATION_TOKEN_ERROR });
     });
 
-    it('shows error alert when integration update fails ', () => {
+    it('shows error alert when integration update fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -333,9 +333,8 @@ describe('AlertsSettingsWrapper', () => {
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('update-integration', {});
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
-      });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
     });
   });
 
