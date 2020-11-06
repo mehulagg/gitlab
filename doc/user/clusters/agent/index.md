@@ -106,9 +106,9 @@ When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-If you want to configure any additional options related to KAS please refer to the section **Enable GitLab KAS** of
-[GitLab.rb template](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-config-template/gitlab.rb.template).
-These options will be described in the documentation in scope of the issue [Describe KAS options available for Omnibus GitLab](https://gitlab.com/gitlab-org/gitlab/-/issues/276899).
+To configure any additional options related to GitLab Kubernetes Agent Server,
+refer to the **Enable GitLab KAS** section of the
+[`gitlab.rb.template`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-config-template/gitlab.rb.template).
 
 #### Install with the Helm chart
 
