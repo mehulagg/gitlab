@@ -9,6 +9,7 @@
 
 .yarn-install: &yarn-install
   - source scripts/utils.sh
+  - yarn cache clean
   - run_timed_command "retry yarn install --frozen-lockfile --verbose"
 
 .compile-assets-base:
