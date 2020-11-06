@@ -249,6 +249,16 @@
   - ".dockerignore"
   - "qa/**/*"
 
+.workhorse-code-patterns: &workhorse-code-patterns
+  - ".gitlab/ci/**/*"
+  - "components/workhorse/**/*"
+  # Backstage changes
+  - "Dangerfile"
+  - "danger/**/*"
+  # QA changes
+  - ".dockerignore"
+  - "qa/**/*"
+
 ################
 # Shared rules #
 ################
@@ -301,6 +311,15 @@
   rules:
     - <<: *if-security-pipeline-merge-result
       when: on_failure
+
+###################
+# Workhorse rules #
+###################
+.workhorse:rules:
+  rules:
+    - <<: *if-default-refs
+      changes: *workhorse-code-patterns
+      when: on_success
 
 ######################
 # Dev fixtures rules #
