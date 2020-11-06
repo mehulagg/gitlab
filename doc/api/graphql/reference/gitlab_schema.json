@@ -20236,7 +20236,7 @@
               "deprecationReason": null
             },
             {
-              "name": "metricImageUploads",
+              "name": "metricImages",
               "description": "Metric images associated to the issue.",
               "args": [
 
@@ -20249,7 +20249,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "MetricImageUpload",
+                    "name": "MetricImage",
                     "ofType": null
                   }
                 }
@@ -26621,7 +26621,7 @@
               "deprecationReason": null
             },
             {
-              "name": "metricImageUploads",
+              "name": "metricImages",
               "description": "Metric images associated to the issue.",
               "args": [
 
@@ -26634,7 +26634,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "MetricImageUpload",
+                    "name": "MetricImage",
                     "ofType": null
                   }
                 }
@@ -34830,7 +34830,7 @@
         },
         {
           "kind": "OBJECT",
-          "name": "MetricImageUpload",
+          "name": "MetricImage",
           "description": "Represents a metric image upload",
           "fields": [
             {

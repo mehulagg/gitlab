@@ -7333,7 +7333,7 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   """
   Metric images associated to the issue.
   """
-  metricImageUploads: [MetricImageUpload!]
+  metricImages: [MetricImage!]
 
   """
   Milestone of the issue
@@ -9762,7 +9762,7 @@ type Issue implements CurrentUserTodos & Noteable {
   """
   Metric images associated to the issue.
   """
-  metricImageUploads: [MetricImageUpload!]
+  metricImages: [MetricImage!]
 
   """
   Milestone of the issue
@@ -12697,7 +12697,7 @@ type Metadata {
 """
 Represents a metric image upload
 """
-type MetricImageUpload {
+type MetricImage {
   """
   File name of the metric image
   """
