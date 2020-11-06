@@ -19,10 +19,7 @@ The table below describes the convention that should be used to named custom Pos
 | **Check Constraint**     | `check_<table name>_<column(s) name>_<optional suffix>`   | The optional suffix should  denote the type of validation, such as `length` and `enum`. It can also be used to desambiguate multiple `CHECK` constraints on the same column. | `check_projects_name_length`<br />`check_projects_type_enum`<br />`check_projects_admin1_id_and_admin2_id_differ` |
 | **Exclusion Constraint** | `excl_<table name>_<column(s) name>_<suffix>`             | The suffix should denote the type of exclusion being performed.                                                                                                              | `excl_reservations_start_at_end_at_no_overlap`                                                                    |
 
-
-
 ## Observations
 
 - The prefix used for each type of constraint matches the suffix used internally by PostgreSQL for that same type. Prefixes are preferred over suffices because they make it easier to identify the type of a given constraint quickly, as well as group them alphabetically;
 - When targetting multiple columns with a constraint, their names should be joined with `_and_`.
-
