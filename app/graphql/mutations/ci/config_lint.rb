@@ -5,7 +5,7 @@ module Mutations
     class ConfigLint < BaseMutation
       graphql_name 'ConfigLint'
 
-      argument :content, ApolloUploadServer::Upload,
+      argument :content, GraphQL::STRING_TYPE,
                required: false,
                description: 'Contents of .gitlab-ci.yml'
 
@@ -13,30 +13,59 @@ module Mutations
                 required: false,
                 description: 'Whether or not to include merged CI yaml in the response'
 
-      field :yaml_processor_result, Types::Ci::YamlProcessorResultType,
+      field :stages, Types::Ci::StageType.connection_type,
             null: true,
             description: 'Result for the YAML processor'
 
+      field :status, GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Status of linting, can be either valid or invalid'
+
       def resolve(content:, include_merged_yaml: false)
-        result = Gitlab::Ci::YamlProcessor.new(File.read(content)).execute
+        result = Gitlab::Ci::YamlProcessor.new(content).execute
 
-        error = result.errors.first
+        if result.errors.empty?
+          stages = stages(result.stages)
+          jobs = jobs(result.jobs)
+          groups = groups(jobs)
+          stage_groups(stages, groups)
 
-        response = if error.blank?
-                     { status: 'valid', errors: [] }
-                   else
-                     { status: 'invalid', errors: [error] }
-                   end
+          response = {
+                        status: 'valid',
+                        errors: [],
+                        stages: stages
+                      }
+        else
+          response = { status: 'invalid', errors: [result.errors.first] }
+        end
 
         response.tap do |response|
           response[:merged_yaml] = result.merged_yaml if include_merged_yaml
         end
+      end
 
-        {
-          yaml_processor_result: result,
-          errors: []
-        }
+      private
 
+      def stages(config_stages)
+        config_stages.map { |stage| OpenStruct.new(name: stage, groups: []) }
+      end
+
+      def jobs(config_jobs)
+        config_jobs.map { |job_name, job| CommitStatus.new(name: job_name, stage: job[:stage] ) }
+      end
+
+      def groups(jobs)
+        group_names = jobs.map(&:group_name).uniq
+        groups = group_names.map do |group|
+          group_jobs = jobs.select { |job| job.group_name == group }
+          ::Ci::Group.new(nil, group_jobs.first.stage, name: group, jobs: group_jobs)
+        end
+      end
+
+      def stage_groups(stage_data, groups)
+        stage_data.map do |stage|
+          stage.groups = groups.select { |group| group.stage == stage.name }
+        end
       end
     end
   end
