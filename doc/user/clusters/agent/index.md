@@ -63,7 +63,7 @@ For more details, please refer to our [full architecture documentation](https://
 The setup process involves a few steps to enable GitOps deployments:
 
 1. [Install the Agent server](#install-the-kubernetes-agent-server).
-1. [Define a configuration directory](#define-a-configuration-repository).
+1. [Define a configuration repository](#define-a-configuration-repository).
 1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
 1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
 1. [Install the Agent into the cluster](#install-the-agent-into-the-cluster).
