@@ -4,11 +4,11 @@ group: Database
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Constraint Naming Conventions
+# Constraint Naming Convention
 
 The most common option is to let Rails pick the name for database constraints and indexes or let PostgreSQL use the defaults (when applicable). However, when needing to define custom names in Rails or working in Go applications where no ORM is used, it is important to follow strict naming conventions to improve consistency and discoverability.
 
-The table below describes the conventions that should be used for custom PostgreSQL constraint names.
+The table below describes the convention that should be used to named custom PostgreSQL constraint.
 
 | Type                     | Syntax                                                    | Notes                                                                                                                                                                        | Examples                                                                                                          |
 |--------------------------|-----------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
