@@ -398,7 +398,8 @@ This basic GitOps example deploys NGINX:
 
 ## Troubleshooting
 
-If you face any issues while using Kubernetes GitLab Agent, you should be able to find any related errors in two places:
+If you face any issues while using GitLab Kubernetes Agent, you can read the
+service logs with the following commands:
 
 - KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`. In case of Omnibus GitLab the logs
 will reside in `/var/log/gitlab/gitlab-kas/`.
