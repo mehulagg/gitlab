@@ -3,6 +3,7 @@ import { GlLoadingIcon, GlAlert, GlTabs, GlTab } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 
 import TextEditor from './components/text_editor.vue';
+import CommitForm from './components/commit/commit_form.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 
 import getBlobContent from './graphql/queries/blob_content.graphql';
@@ -14,6 +15,7 @@ export default {
     GlTabs,
     GlTab,
     TextEditor,
+    CommitForm,
     PipelineGraph,
   },
   props: {
@@ -60,6 +62,9 @@ export default {
     loading() {
       return this.$apollo.queries.content.loading;
     },
+    defaultCommitMessage() {
+      return sprintf(this.$options.i18n.defaultCommitMessage, { sourcePath: this.ciConfigPath });
+    },
     errorMessage() {
       const { message: generalReason, networkError } = this.error ?? {};
 
@@ -78,9 +83,30 @@ export default {
   },
   i18n: {
     unknownError: __('Unknown Error'),
+    defaultCommitMessage: __('Update %{sourcePath} file'),
     errorMessageWithReason: s__('Pipelines|CI file could not be loaded: %{reason}'),
     tabEdit: s__('Pipelines|Write pipeline configuration'),
     tabGraph: s__('Pipelines|Visualize'),
+  },
+  methods: {
+    onCommitSubmit(event) {
+      const { message, branch, newMr } = event;
+      // TODO Add mutation
+      console.log('Lets mutate here', {
+        newMr,
+        actions: [
+          {
+            action: 'update',
+            content: this.content,
+            encoding: 'text',
+            file_path: this.ciConfigPath,
+          },
+        ],
+        branch,
+        commit_message: message,
+        start_sha: '???',
+      });
+    },
   },
 };
 </script>
@@ -90,7 +116,7 @@ export default {
     <gl-alert v-if="error" :dismissible="false" variant="danger">{{ errorMessage }}</gl-alert>
     <div class="gl-mt-4">
       <gl-loading-icon v-if="loading" size="lg" />
-      <div v-else class="file-editor">
+      <div v-else class="file-editor gl-mb-3">
         <gl-tabs>
           <!-- editor should be mounted when its tab is visible, so the container has a size -->
           <gl-tab :title="$options.i18n.tabEdit" :lazy="!editorIsReady">
@@ -103,6 +129,11 @@ export default {
           </gl-tab>
         </gl-tabs>
       </div>
+      <commit-form
+        :default-branch="defaultBranch"
+        :default-message="defaultCommitMessage"
+        @submit="onCommitSubmit"
+      />
     </div>
   </div>
 </template>
