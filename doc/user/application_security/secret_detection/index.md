@@ -32,25 +32,28 @@ GitLab displays identified secrets visibly in a few places:
 
 ## Supported secrets
 
-Out of the box, Secret Detection detects a variety of common secrets. The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types: 
+Secret Detection detects a variety of common secrets by default. You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets).
 
-- Cloud Services:
+The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types: 
+
+- Cloud services:
   - Amazon Web Services (AWS)
-  - AGoogle Cloud Provider (GCP) 
-Encrpytion Keys:  
+  - Google Cloud Platform (GCP) 
+Encryption keys:  
   - PKCS8
   - RSA
   - SSH
   - PGP
-- Social Platforms:
+- Social media platforms:
   - Facebook API
   - Twitter API
-- Cloud SaaS Vendors: 
+- Cloud SaaS vendors: 
   - GitHub API
   - Slack Token
   - Stripe API
   - Generic API key strings starting with `api-`
 
+NOTE: **Note:**
 NOTE: **Note:**
 You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets)
 
