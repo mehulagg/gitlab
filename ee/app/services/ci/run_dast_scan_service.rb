@@ -50,9 +50,13 @@ module Ci
         hash
       end
 
-      self.class.ci_template.deep_merge(
+      hash = self.class.ci_template.deep_merge(
         'variables' => variables
-      ).to_yaml
+      )
+
+      hash['dast']['environment'] = { 'name' => args[:environment_scope] }
+
+      hash.to_yaml
     end
   end
 end
