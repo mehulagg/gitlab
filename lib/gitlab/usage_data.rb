@@ -318,7 +318,8 @@ module Gitlab
             version: alt_usage_data { Gitaly::Server.all.first.server_version },
             servers: alt_usage_data { Gitaly::Server.count },
             clusters: alt_usage_data { Gitaly::Server.gitaly_clusters },
-            filesystems: alt_usage_data(fallback: ["-1"]) { Gitaly::Server.filesystems }
+            filesystems: alt_usage_data(fallback: ["-1"]) { Gitaly::Server.filesystems },
+            apdex: gitaly_apdex
           },
           gitlab_pages: {
             enabled: alt_usage_data(fallback: nil) { Gitlab.config.pages.enabled },
@@ -759,6 +760,19 @@ module Gitlab
       end
 
       private
+
+      def gitaly_apdex
+        with_prometheus_client(verify: false) do |client|
+          query = <<-PROMQL
+            (
+              sum(rate(grpc_server_handling_seconds_bucket{le="0.005s"}[1w]))
+              +
+              sum(rate(grpc_server_handling_seconds_bucket{le="0.025s"}[1w]))
+            ) / 2 / (sum(rate(grpc_server_handling_seconds_count[1w])))
+          PROMQL
+          client.query(query)
+        end
+      end
 
       def event_monthly_active_users(date_range)
         data = {

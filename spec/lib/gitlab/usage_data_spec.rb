@@ -752,8 +752,11 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     describe '.components_usage_data' do
       subject { described_class.components_usage_data }
 
+      let(:prometheus_client) { Gitlab::PrometheusClient.new('http://localhost:9090') }
+
       it 'gathers basic components usage data' do
         stub_application_setting(container_registry_vendor: 'gitlab', container_registry_version: 'x.y.z')
+        expect(described_class).to receive(:with_prometheus_client).and_yield(prometheus_client)
 
         expect(subject[:gitlab_pages][:enabled]).to eq(Gitlab.config.pages.enabled)
         expect(subject[:gitlab_pages][:version]).to eq(Gitlab::Pages::VERSION)
@@ -767,6 +770,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         expect(subject[:gitaly][:clusters]).to be >= 0
         expect(subject[:gitaly][:filesystems]).to be_an(Array)
         expect(subject[:gitaly][:filesystems].first).to be_a(String)
+        expect(subject[:gitaly][:apdex]).to be >= 0
         expect(subject[:container_registry_server][:vendor]).to eq('gitlab')
         expect(subject[:container_registry_server][:version]).to eq('x.y.z')
       end
