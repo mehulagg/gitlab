@@ -325,39 +325,70 @@ In general, we use an `expect` statement to check that something _is_ as we expe
 
 ```ruby
 Page::Project::Pipeline::Show.perform do |pipeline|
-  expect(pipeline).to have_job("a_job")
+  expect(pipeline).to have_job('a_job')
 end
 ```
 
-### Ensure `expect` checks for negation efficiently
+### Create negatable matchers so `expect` checks for negation efficiently
 
 However, sometimes we want to check that something is _not_ as we _don't_ want it to be. In other
-words, we want to make sure something is absent. In such a case we should use an appropriate
-predicate method that returns quickly, rather than waiting for a state that won't appear.
-
-It's most efficient to use a predicate method that returns immediately when there is no job, or waits
-until it disappears:
+words, we want to make sure something is absent. In such a case it's common to use `not_to`
+because RSpec's built-in matchers are negatable, which means the following two statements are
+equivalent.
 
 ```ruby
-# Good
-Page::Project::Pipeline::Show.perform do |pipeline|
-  expect(pipeline).to have_no_job("a_job")
+except(page).not_to have_text('hidden')
+except(page).to have_no_text('hidden')
+```
+
+Unfortunately, that's not automatically the case for the predicate methods that we add to our
+[page objects](page_objects.md). We need to [create our own negatable matchers](https://relishapp.com/rspec/rspec-expectations/v/3-9/docs/custom-matchers/define-a-custom-matcher#matcher-with-separate-logic-for-expect().to-and-expect().not-to).
+
+The initial example uses the `have_job` matcher which is derived from the `has_job?` predicate
+method of the `Page::Project::Pipeline::Show` page object. To create a negatable matcher, we
+use `has_no_job?` for the negative case:
+
+```ruby
+RSpec::Matchers.define :have_job do |job_name|
+  match do |page_object|
+    page_object.has_job?(job_name)
+  end
+
+  match_when_negated do |page_object|
+    page_object.has_no_job?(job_name)
+  end
 end
 ```
 
-### Problematic alternatives
+And then the two `expect` statements in the following example are equivalent:
 
-Alternatively, if we want to check that a job doesn't exist it might be tempting to use `not_to`:
+```ruby
+Page::Project::Pipeline::Show.perform do |pipeline|
+  expect(pipeline).not_to have_job('a_job')
+  expect(pipeline).to have_no_job('a_job')
+end
+```
+
+[See this merge request for a real example of adding a custom matcher](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46302).
+
+NOTE: **Note:**
+We need to create custom negatable matchers only for the predicate methods we've added to the test framework.
+RSpec's built-in matchers are all negatable. We tend not to use them in QA end-to-end tests, but we
+do use them in unit tests and feature specs.
+
+### Explanation of why we need negatable matchers
+
+Consider the following code, but assume that we _don't_ have a custom negatable matcher for `have_job`.
 
 ```ruby
 # Bad
 Page::Project::Pipeline::Show.perform do |pipeline|
-  expect(pipeline).not_to have_job("a_job")
+  expect(pipeline).not_to have_job('a_job')
 end
 ```
 
-For this statement to pass, `have_job("a_job")` has to return `false` so that `not_to` can negate it.
-The problem is that `have_job("a_job")` waits up to ten seconds for `"a job"` to appear before
+For this statement to pass, `have_job('a_job')` has to return `false` so that `not_to` can negate it.
+The problem is that `have_job('a_job')` waits up to ten seconds for `'a job'` to appear before
 returning `false`. Under the expected condition this test will take ten seconds longer than it needs to.
 
 Instead, we could force no wait:
@@ -365,9 +396,11 @@ Instead, we could force no wait:
 ```ruby
 # Not as bad but potentially flaky
 Page::Project::Pipeline::Show.perform do |pipeline|
-  expect(pipeline).not_to have_job("a_job", wait: 0)
+  expect(pipeline).not_to have_job('a_job', wait: 0)
 end
 ```
 
-The problem is that if `"a_job"` is present and we're waiting for it to disappear, this statement
-will fail.
+The problem is that if `'a_job'` is present and we're waiting for it to disappear, this statement will fail.
+
+Neither problem is present if we create a custom negatable matcher because the `has_no_job?` predicate method
+would be used, which would wait only as long as necessary for the job to disappear.
