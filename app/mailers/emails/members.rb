@@ -27,7 +27,7 @@ module Emails
       @recipient = recipient
 
       member_email_with_layout(
-        to: recipient.email,
+        to: recipient.notification_email,
         subject: subject("GitLab Account Request"))
     end
 
