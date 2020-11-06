@@ -972,6 +972,9 @@ When [troubleshooting](troubleshooting/index.md) issues that aren't localized to
 previously listed components, it's helpful to simultaneously gather multiple logs and statistics
 from a GitLab instance.
 
+NOTE: **Note:**
+GitLab Support will often ask for one of these, and maintains the required tools.
+
 ### Briefly tail the main logs
 
 If the bug or error is readily reproducible, save the main GitLab logs
@@ -990,9 +993,6 @@ If performance degradations or cascading errors occur that can't readily be attr
 of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
 can provide a broader perspective of the GitLab instance. For more details and instructions
 to run it, read [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
-
-NOTE: **Note:**
-GitLab Support likes to use this custom-made tool.
 
 ### Fast-stats
 
