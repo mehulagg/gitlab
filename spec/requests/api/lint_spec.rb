@@ -26,6 +26,19 @@ RSpec.describe API::Lint do
       end
     end
 
+    context 'with valid .gitlab-ci.yaml but with warnings' do
+      let(:yaml_content) { { job: { script: 'ls',  rules: [{ when: 'always' }] } }.to_yaml }
+
+      it 'passes validation but raises a warning' do
+        post api('/ci/lint'), params: { content: yaml_content }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['warnings']).not_to be_empty
+        expect(json_response['status']).to eq('valid')
+        expect(json_response['errors']).to eq([])
+      end
+    end
+
     context 'with an invalid .gitlab_ci.yml' do
       context 'with invalid syntax' do
         let(:yaml_content) { 'invalid content' }

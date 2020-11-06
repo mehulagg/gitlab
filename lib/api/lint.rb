@@ -13,14 +13,16 @@ module API
       post '/lint' do
         result = Gitlab::Ci::YamlProcessor.new(params[:content], user: current_user).execute
         error = result.errors.first
+        warning = result.warnings.first
 
         status 200
 
         response = if error.blank?
-                     { status: 'valid', errors: [] }
+                     { status: 'valid', errors: [], warnings: [warning] }
                    else
-                     { status: 'invalid', errors: [error] }
+                     { status: 'invalid', errors: [error], warnings: [] }
                    end
+
 
         response.tap do |response|
           response[:merged_yaml] = result.merged_yaml if params[:include_merged_yaml]
