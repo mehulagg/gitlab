@@ -1,0 +1,5 @@
+---
+title: Support container scanning from FIPS enabled hosts
+merge_request: 46507
+author:
+type: added
