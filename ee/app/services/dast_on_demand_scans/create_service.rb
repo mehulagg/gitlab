@@ -29,8 +29,12 @@ module DastOnDemandScans
       dast_site_validation.present?
     end
 
+    def dast_site_profile
+      @dast_site ||= params.fetch(:dast_site_profile)
+    end
+
     def dast_site
-      @dast_site ||= params.fetch(:dast_site_profile).dast_site
+      @dast_site ||= dast_site_profile.dast_site
     end
 
     def dast_scanner_profile
@@ -44,7 +48,8 @@ module DastOnDemandScans
     def default_config
       {
         branch: container.default_branch,
-        target_url: dast_site.url
+        target_url: dast_site.url,
+        dast_site_profile_id: dast_site_profile.id
       }
     end
 
