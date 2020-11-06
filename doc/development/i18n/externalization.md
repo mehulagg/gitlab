@@ -480,6 +480,22 @@ This makes use of [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/do
 
 ## Best practices
 
+### Avoid un-necessary translation updates
+
+Our translations are identified by the value supplied to the translations methods, so when we update this it can result
+in the loss of the translations for this string and decreased the overall translation complete
+
+For example:
+
+```ruby
+# bad
+- _('This string has a %{count}') % { count: 10 }
++ n_('This string has a %d', 10)
+```
+
+This change does not result in any change to the string that will be shown to the user, but it does result in the loss
+of the translations for this string in Crowdin, which results in extra work for our translators.
+
 ### Keep translations dynamic
 
 There are cases when it makes sense to keep translations together within an array or a hash.
