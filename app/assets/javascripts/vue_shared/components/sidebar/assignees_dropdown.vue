@@ -1,6 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownForm } from '@gitlab/ui';
-// multiselect_dropdown rename
+
 export default {
   components: {
     GlDropdownForm,
