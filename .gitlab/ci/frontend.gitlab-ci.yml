@@ -3,13 +3,13 @@
     - .default-retry
     - .default-before_script
   variables:
-    SETUP_DB: "false"
+    SETUP_DB: 'false'
     # we override the max_old_space_size to prevent OOM errors
     NODE_OPTIONS: --max_old_space_size=3584
 
 .yarn-install: &yarn-install
   - source scripts/utils.sh
-  - run_timed_command "retry yarn install --frozen-lockfile"
+  - run_timed_command "retry yarn install --frozen-lockfile --verbose"
 
 .compile-assets-base:
   extends:
@@ -17,7 +17,7 @@
     - .assets-compile-cache
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-git-2.29-lfs-2.9-node-12.18-yarn-1.22-graphicsmagick-1.3.34
   variables:
-    WEBPACK_VENDOR_DLL: "true"
+    WEBPACK_VENDOR_DLL: 'true'
   stage: prepare
   script:
     - *yarn-install
@@ -29,9 +29,9 @@ compile-production-assets:
     - .compile-assets-base
     - .frontend:rules:compile-production-assets
   variables:
-    NODE_ENV: "production"
-    RAILS_ENV: "production"
-    WEBPACK_REPORT: "true"
+    NODE_ENV: 'production'
+    RAILS_ENV: 'production'
+    WEBPACK_REPORT: 'true'
   artifacts:
     name: webpack-report
     expire_in: 31d
@@ -43,7 +43,7 @@ compile-production-assets:
       - webpack-report/
     when: always
   after_script:
-    - rm -f /etc/apt/sources.list.d/google*.list  # We don't need to update Chrome here
+    - rm -f /etc/apt/sources.list.d/google*.list # We don't need to update Chrome here
 
 compile-test-assets:
   extends:
@@ -53,7 +53,7 @@ compile-test-assets:
     expire_in: 7d
     paths:
       - public/assets/
-      - node_modules/@gitlab/svgs/dist/icons.json  # app/helpers/icons_helper.rb uses this file
+      - node_modules/@gitlab/svgs/dist/icons.json # app/helpers/icons_helper.rb uses this file
     when: always
 
 compile-test-assets as-if-foss:
@@ -67,18 +67,18 @@ update-assets-compile-production-cache:
     - compile-production-assets
     - .shared:rules:update-cache
   stage: prepare
-  artifacts: {}  # This job's purpose is only to update the cache.
+  artifacts: {} # This job's purpose is only to update the cache.
   cache:
-    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
+    policy: push # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
 update-assets-compile-test-cache:
   extends:
     - compile-test-assets
     - .shared:rules:update-cache
   stage: prepare
-  artifacts: {}  # This job's purpose is only to update the cache.
+  artifacts: {} # This job's purpose is only to update the cache.
   cache:
-    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
+    policy: push # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
 update-yarn-cache:
   extends:
@@ -97,10 +97,10 @@ update-yarn-cache:
     - .rails-cache
     - .use-pg11
   stage: fixtures
-  needs: ["setup-test-env", "compile-test-assets"]
+  needs: ['setup-test-env', 'compile-test-assets']
   variables:
-    SETUP_DB: "true"
-    WEBPACK_VENDOR_DLL: "true"
+    SETUP_DB: 'true'
+    WEBPACK_VENDOR_DLL: 'true'
   script:
     - run_timed_command "scripts/gitaly-test-build"
     - run_timed_command "scripts/gitaly-test-spawn"
@@ -128,7 +128,7 @@ frontend-fixtures-as-if-foss:
     - .frontend-base
     - .yarn-cache
   variables:
-    USE_BUNDLE_INSTALL: "false"
+    USE_BUNDLE_INSTALL: 'false'
   stage: test
 
 eslint-as-if-foss:
@@ -152,7 +152,7 @@ karma:
   extends:
     - .karma-base
     - .frontend:rules:default-frontend-jobs
-  needs: ["frontend-fixtures"]
+  needs: ['frontend-fixtures']
   coverage: '/^Statements *: (\d+\.\d+%)/'
   artifacts:
     name: coverage-javascript
@@ -171,7 +171,7 @@ karma-as-if-foss:
     - .karma-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
-  needs: ["frontend-fixtures-as-if-foss"]
+  needs: ['frontend-fixtures-as-if-foss']
 
 .jest-base:
   extends: .frontend-test-base
@@ -183,7 +183,7 @@ jest:
   extends:
     - .jest-base
     - .frontend:rules:default-frontend-jobs
-  needs: ["frontend-fixtures"]
+  needs: ['frontend-fixtures']
   artifacts:
     name: coverage-frontend
     expire_in: 31d
@@ -203,14 +203,14 @@ jest-integration:
   script:
     - *yarn-install
     - run_timed_command "yarn jest:integration --ci"
-  needs: ["frontend-fixtures"]
+  needs: ['frontend-fixtures']
 
 jest-as-if-foss:
   extends:
     - .jest-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
-  needs: ["frontend-fixtures-as-if-foss"]
+  needs: ['frontend-fixtures-as-if-foss']
   parallel: 2
 
 coverage-frontend:
@@ -218,7 +218,7 @@ coverage-frontend:
     - .default-retry
     - .yarn-cache
     - .frontend:rules:ee-mr-and-master-only
-  needs: ["jest"]
+  needs: ['jest']
   stage: post-test
   before_script:
     - *yarn-install
@@ -262,8 +262,8 @@ webpack-dev-server:
   stage: test
   needs: []
   variables:
-    WEBPACK_MEMORY_TEST: "true"
-    WEBPACK_VENDOR_DLL: "true"
+    WEBPACK_MEMORY_TEST: 'true'
+    WEBPACK_VENDOR_DLL: 'true'
   script:
     - *yarn-install
     - run_timed_command "retry yarn webpack-vendor"
@@ -280,7 +280,7 @@ bundle-size-review:
     - .frontend:rules:bundle-size-review
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:danger
   stage: test
-  needs: ["compile-production-assets"]
+  needs: ['compile-production-assets']
   script:
     - mkdir -p bundle-size-review
     - cp webpack-report/index.html bundle-size-review/bundle-report.html
