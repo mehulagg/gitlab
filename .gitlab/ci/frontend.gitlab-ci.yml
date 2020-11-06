@@ -49,6 +49,7 @@ compile-production-assets:
 compile-test-assets:
   extends:
     - .frontend:rules:compile-test-assets
+  stage: prepare
   script:
     - echo "noop"
   artifacts:
