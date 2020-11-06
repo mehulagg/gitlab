@@ -134,7 +134,7 @@ For more details on the specific data persisted in a project export, see the
 
 Full project export functionality is limited to project maintainers and owners.
 Export functionality for the full project includes Issues and Merge Requests.
-You can configure such functionality can through [project settings](index.md):
+You can configure such functionality through [project settings](index.md):
 
 To export a project and its data, follow these steps:
 
