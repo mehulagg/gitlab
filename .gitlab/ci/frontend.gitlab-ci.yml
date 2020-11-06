@@ -92,45 +92,45 @@ compile-production-assets:
 #   cache:
 #     policy: push
 
-.frontend-fixtures-base:
-  extends:
-    - .frontend-base
-    - .rails-cache
-    - .use-pg11
-  stage: fixtures
-  needs: ["setup-test-env", "compile-test-assets"]
-  variables:
-    SETUP_DB: "true"
-    WEBPACK_VENDOR_DLL: "true"
-  script:
-    - run_timed_command "scripts/gitaly-test-build"
-    - run_timed_command "scripts/gitaly-test-spawn"
-    - run_timed_command "bin/rake frontend:fixtures"
-  artifacts:
-    name: frontend-fixtures
-    expire_in: 31d
-    when: always
-    paths:
-      - tmp/tests/frontend/
+# .frontend-fixtures-base:
+#   extends:
+#     - .frontend-base
+#     - .rails-cache
+#     - .use-pg11
+#   stage: fixtures
+#   needs: ["setup-test-env", "compile-test-assets"]
+#   variables:
+#     SETUP_DB: "true"
+#     WEBPACK_VENDOR_DLL: "true"
+#   script:
+#     - run_timed_command "scripts/gitaly-test-build"
+#     - run_timed_command "scripts/gitaly-test-spawn"
+#     - run_timed_command "bin/rake frontend:fixtures"
+#   artifacts:
+#     name: frontend-fixtures
+#     expire_in: 31d
+#     when: always
+#     paths:
+#       - tmp/tests/frontend/
 
-frontend-fixtures:
-  extends:
-    - .frontend-fixtures-base
-    - .frontend:rules:default-frontend-jobs
+# frontend-fixtures:
+#   extends:
+#     - .frontend-fixtures-base
+#     - .frontend:rules:default-frontend-jobs
 
-frontend-fixtures-as-if-foss:
-  extends:
-    - .frontend-fixtures-base
-    - .frontend:rules:default-frontend-jobs-as-if-foss
-    - .as-if-foss
+# frontend-fixtures-as-if-foss:
+#   extends:
+#     - .frontend-fixtures-base
+#     - .frontend:rules:default-frontend-jobs-as-if-foss
+#     - .as-if-foss
 
-.frontend-test-base:
-  extends:
-    - .frontend-base
-    - .yarn-cache
-  variables:
-    USE_BUNDLE_INSTALL: "false"
-  stage: test
+# .frontend-test-base:
+#   extends:
+#     - .frontend-base
+#     - .yarn-cache
+#   variables:
+#     USE_BUNDLE_INSTALL: "false"
+#   stage: test
 
 # eslint-as-if-foss:
 #   extends:
@@ -275,21 +275,21 @@ frontend-fixtures-as-if-foss:
 #     paths:
 #       - webpack-dev-server.json
 
-bundle-size-review:
-  extends:
-    - .default-retry
-    - .frontend:rules:bundle-size-review
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:danger
-  stage: test
-  needs: ["compile-production-assets"]
-  script:
-    - mkdir -p bundle-size-review
-    - cp webpack-report/index.html bundle-size-review/bundle-report.html
-    - yarn global add https://gitlab.com/gitlab-org/frontend/playground/webpack-memory-metrics.git
-    - danger --dangerfile=danger/bundle_size/Dangerfile --fail-on-errors=true --verbose --danger_id=bundle-size-review
-  artifacts:
-    when: always
-    name: bundle-size-review
-    expire_in: 31d
-    paths:
-      - bundle-size-review
+# bundle-size-review:
+#   extends:
+#     - .default-retry
+#     - .frontend:rules:bundle-size-review
+#   image: registry.gitlab.com/gitlab-org/gitlab-build-images:danger
+#   stage: test
+#   needs: ["compile-production-assets"]
+#   script:
+#     - mkdir -p bundle-size-review
+#     - cp webpack-report/index.html bundle-size-review/bundle-report.html
+#     - yarn global add https://gitlab.com/gitlab-org/frontend/playground/webpack-memory-metrics.git
+#     - danger --dangerfile=danger/bundle_size/Dangerfile --fail-on-errors=true --verbose --danger_id=bundle-size-review
+#   artifacts:
+#     when: always
+#     name: bundle-size-review
+#     expire_in: 31d
+#     paths:
+#       - bundle-size-review
