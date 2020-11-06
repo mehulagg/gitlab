@@ -21,18 +21,20 @@ The Package Registry works with:
 
 This section explains how to create a PyPI package.
 
-If you already use PyPI and know how to build your own packages, go to the [next section](#authenticate-with-the-package-registry).
+If you already use PyPI and know how to build your own packages, go to the
+[next section](#authenticate-with-the-package-registry).
 
 ### Install pip and twine
 
-Install a recent version of [pip](https://pypi.org/project/pip/) and [twine](https://pypi.org/project/twine/).
+Install a recent version of [pip](https://pypi.org/project/pip/) and
+[twine](https://pypi.org/project/twine/).
 
 ### Create a project
 
 Create a test project.
 
 1. Open your terminal.
-1. Create a directory called `MyPyPiPackage` and go to that directory:
+1. Create a directory called `MyPyPiPackage`, and then go to that directory:
 
    ```shell
    mkdir MyPyPiPackage && cd MyPyPiPackage
@@ -44,14 +46,14 @@ Create a test project.
    mkdir mypypipackage && cd mypypipackage
    ```
 
-1. Create two files in this directory:
+1. Create the required files in this directory:
 
    ```shell
    touch __init__.py
    touch greet.py
    ```
 
-1. Open the `greet.py` file and add:
+1. Open the `greet.py` file, and then add:
 
    ```python
    def SayHello():
@@ -59,7 +61,7 @@ Create a test project.
        return
    ```
 
-1. Open the `__init__.py` file and add:
+1. Open the `__init__.py` file, and then add:
 
    ```python
    from .greet import SayHello
@@ -107,7 +109,7 @@ After you create a project, you can create a package.
    ensure your package name meets these requirements. See the [installation section](#publish-a-pypi-package-by-using-cicd)
    for details.
 
-1. Open the `setup.py` file and add basic information:
+1. Open the `setup.py` file, and then add basic information:
 
    ```python
    import setuptools
@@ -141,7 +143,7 @@ The output should be visible in a newly-created `dist` folder:
 ls dist
 ```
 
-The output should look like this:
+The output should appear similar to the following:
 
 ```plaintext
 mypypipackage-0.0.1-py3-none-any.whl mypypipackage-0.0.1.tar.gz
@@ -153,10 +155,12 @@ The package is now ready to be published to the Package Registry.
 
 Before you can publish to the Package Registry, you must authenticate.
 
-You can use:
+To do this, you can use:
 
-- A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
-- A [deploy token](./../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
+- A [personal access token](../../../user/profile/personal_access_tokens.md)
+  with the scope set to `api`.
+- A [deploy token](./../../project/deploy_tokens/index.md) with the scope set to
+  `read_package_registry`, `write_package_registry`, or both.
 - A [CI job token](#authenticate-with-a-ci-job-token).
 
 ### Authenticate with a personal access token
@@ -192,7 +196,7 @@ username = <deploy token username>
 password = <deploy token>
 ```
 
-- Your project ID is on your project's home page.
+Your project ID is on your project's home page.
 
 ### Authenticate with a CI job token
 
@@ -213,7 +217,8 @@ run:
     - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url https://gitlab.example.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi dist/*
 ```
 
-You can also use `CI_JOB_TOKEN` in a `~/.pypirc` file that you check into GitLab:
+You can also use `CI_JOB_TOKEN` in a `~/.pypirc` file that you check in to
+GitLab:
 
 ```ini
 [distutils]
@@ -230,13 +235,13 @@ password = ${env.CI_JOB_TOKEN}
 
 When publishing packages, note that:
 
-- The maximum allowed size is 50 Megabytes.
+- The maximum allowed size is 50 MB.
 - You can't upload the same version of a package multiple times. If you try,
-  you receive the error `Validation failed: File name has already been taken`.
+  you'll receive the error `Validation failed: File name has already been taken`.
 
 ### Ensure your version string is valid
 
-If your version string (for example, `0.0.1`) is not valid, it is rejected.
+If your version string (for example, `0.0.1`) isn't valid, it will be rejected.
 GitLab uses the following regex to validate the version string.
 
 ```ruby
@@ -274,17 +279,18 @@ Uploading mypypipackage-0.0.1.tar.gz
 100%|███████████████████████████████████████████████████████████████████████████████████████████| 4.24k/4.24k [00:00<00:00, 11.0kB/s]
 ```
 
-To view the published package, go to your project's **Packages & Registries** page.
+To view the published package, go to your project's **Packages & Registries**
+page.
 
-If you did not use a `.pypirc` file to define your repository source,
-you can publish to the repository with the authentication inline:
+If you didn't use a `.pypirc` file to define your repository source, you can
+publish to the repository with the authentication inline:
 
 ```shell
 TWINE_PASSWORD=<personal_access_token or deploy_token> TWINE_USERNAME=<username or deploy_token_username> python3 -m twine upload --repository-url https://gitlab.example.com/api/v4/projects/<project_id>/packages/pypi dist/*
 ```
 
-If you did not follow the steps on this page, ensure your package was
-properly built, and that you [created a PyPI package with `setuptools`](https://packaging.python.org/tutorials/packaging-projects/).
+If you didn't follow the steps on this page, ensure your package was properly
+built, and that you [created a PyPI package with `setuptools`](https://packaging.python.org/tutorials/packaging-projects/).
 
 You can then upload your package by using the following command:
 
@@ -328,7 +334,8 @@ Successfully installed mypypipackage-0.0.1
 
 GitLab looks for packages that use
 [Python normalized names (PEP-503)](https://www.python.org/dev/peps/pep-0503/#normalized-names). 
-The characters `-`, `_`, and `.` are all treated the same and repeated characters are removed.
+The characters `-`, `_`, and `.` are all treated the same, and repeated
+characters are removed.
 
 A `pip install` request for `my.package` looks for packages that match any of
 the three characters, such as `my-package`, `my_package`, and `my....package`.
