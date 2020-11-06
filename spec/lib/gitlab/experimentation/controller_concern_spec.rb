@@ -391,10 +391,8 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
 
     context 'do not track' do
       before do
+        stub_experiment(test_experiment: true)
         allow(controller).to receive(:current_user).and_return(user)
-        allow_next_instance_of(described_class) do |instance|
-          allow(instance).to receive(:experiment_enabled?).with(:test_experiment).and_return(false)
-        end
       end
 
       context 'is disabled' do
