@@ -15,6 +15,7 @@ import RequirementsLoading from './requirements_loading.vue';
 import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementItem from './requirement_item.vue';
 import RequirementForm from './requirement_form.vue';
+import ImportRequirementsModal from './import_requirements_modal.vue';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
@@ -40,6 +41,7 @@ export default {
     RequirementItem,
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
+    ImportRequirementsModal,
   },
   props: {
     projectPath: {
@@ -558,6 +560,9 @@ export default {
 
       this.updateUrl();
     },
+    handleImportRequirementsClick() {
+      this.$refs.modal.show();
+    },
   },
 };
 </script>
@@ -571,6 +576,7 @@ export default {
       :can-create-requirement="canCreateRequirement"
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
+      @click-import-requirements="handleImportRequirementsClick"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -607,6 +613,7 @@ export default {
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
       @click-new-requirement="handleNewRequirementClick"
+      @click-import-requirements="handleImportRequirementsClick"
     />
     <requirements-loading
       v-show="requirementsListLoading"
@@ -640,5 +647,6 @@ export default {
       class="gl-pagination gl-mt-3"
       @input="handlePageChange"
     />
+    <import-requirements-modal ref="modal" />
   </div>
 </template>

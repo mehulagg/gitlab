@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
+import { GlLink, GlIcon, GlBadge, GlButton } from '@gitlab/ui';
 
 import { FilterState } from '../constants';
 
@@ -9,6 +9,7 @@ export default {
     GlLink,
     GlBadge,
     GlButton,
+    GlIcon,
   },
   props: {
     filterBy: {
@@ -80,6 +81,13 @@ export default {
       </li>
     </ul>
     <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
+      <gl-button
+        category="secondary"
+        variant="default"
+        class="js-import-requirements qa-import-requirements-button"
+        @click="$emit('click-import-requirements')"
+        ><gl-icon name="import" />
+      </gl-button>
       <gl-button
         category="primary"
         variant="success"
