@@ -6,9 +6,9 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        field :approved, GraphQL::BOOLEAN_TYPE, method: :approved?, null: false,
+        field :approved, GraphQL::BOOLEAN_TYPE, method: :approved?, null: false, calls_gitaly: true,
               description: 'Indicates if the merge request has all the required approvals. Returns true if no required approvals are configured.'
-        field :approvals_left, GraphQL::INT_TYPE, null: true,
+        field :approvals_left, GraphQL::INT_TYPE, null: true, calls_gitaly: true,
               description: 'Number of approvals left'
         field :approvals_required, GraphQL::INT_TYPE, null: true,
               description: 'Number of approvals required'
