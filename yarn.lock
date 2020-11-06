@@ -840,6 +840,11 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@gitlab-com/twilio-npm@^1.0.2":
+  version "1.0.2"
+  resolved "https://gitlab.com/api/v4/projects/19722470/packages/npm/@gitlab-com/twilio-npm/-/@gitlab-com/twilio-npm-1.0.2.tgz#81728169178adfaf836b723ab258d589a6ec6cc8"
+  integrity sha1-gXKBaReK36+Da3I6sljViabsbMg=
+
 "@gitlab/at.js@1.5.5":
   version "1.5.5"
   resolved "https://registry.yarnpkg.com/@gitlab/at.js/-/at.js-1.5.5.tgz#5f6bfe6baaef360daa9b038fa78798d7a6a916b4"
