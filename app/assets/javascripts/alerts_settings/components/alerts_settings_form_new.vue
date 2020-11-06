@@ -17,6 +17,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
+import service from '../services';
 import {
   integrationTypesNew,
   JSON_VALIDATE_DELAY,
@@ -89,7 +90,7 @@ export default {
     MappingBuilder,
   },
   directives: {
-    'gl-modal': GlModalDirective,
+    GlModal: GlModalDirective,
   },
   inject: {
     generic: {
@@ -170,8 +171,19 @@ export default {
       }
     },
     submitWithTestPayload() {
-      // TODO: Test payload before saving via GraphQL
-      this.submit();
+      const variables = {
+        data: this.integrationTestPayload.json,
+        endpoint: this.integrationForm.url,
+        token: this.integrationForm.token,
+      };
+      return service
+        .updateTestAlert(variables)
+        .then(() => {
+          this.submit();
+        })
+        .catch(() => {
+          this.$emit('test-payload-failure');
+        });
     },
     submit() {
       const { name, apiUrl } = this.integrationForm;
@@ -359,7 +371,6 @@ export default {
         </div>
       </gl-form-group>
       <gl-form-group
-        id="test-integration"
         :label="$options.i18n.integrationFormSteps.step4.label"
         label-for="test-integration"
         :invalid-feedback="integrationTestPayload.error"
@@ -395,6 +406,8 @@ export default {
       <div class="gl-display-flex gl-justify-content-end">
         <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
         <gl-button
+          data-testid="integration-test-and-submit"
+          :disabled="integrationTestPayload.error !== null"
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"
