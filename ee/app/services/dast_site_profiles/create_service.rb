@@ -10,6 +10,30 @@ module DastSiteProfiles
         dast_site = service.execute!(url: target_url)
 
         dast_site_profile = DastSiteProfile.create!(project: project, dast_site: dast_site, name: name)
+
+        environment_scope = "dast_site_profile/#{dast_site_profile.id}"
+
+        Environment.create!(
+          project: project,
+          name: environment_scope
+        )
+
+        Ci::Variable.create!(
+          project_id: 22,
+          key: 'DAST_USERNAME_BASE64',
+          value: SecureRandom.base64,
+          masked: true,
+          environment_scope: environment_scope
+        )
+
+        Ci::Variable.create!(
+          project_id: 22,
+          key: 'DAST_PASSWORD_BASE64',
+          value: SecureRandom.base64,
+          masked: true,
+          environment_scope: environment_scope
+        )
+
         ServiceResponse.success(payload: dast_site_profile)
       end
 
