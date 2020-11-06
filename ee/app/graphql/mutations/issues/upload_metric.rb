@@ -14,10 +14,14 @@ module Mutations
                required: false,
                description: 'The URL of the metric data source'
 
+      authorize :upload_metric
+
+      MAX_FILE_SIZE = 1.megabyte
 
       def resolve(project_path:, iid:, file:, url: nil)
-        issue = authorized_find!(project_path: project_path, iid: iid)
-        project = issue.project
+        return response('File size too large!') if file.size > MAX_FILE_SIZE
+
+        @issue = authorized_find!(project_path: project_path, iid: iid)
 
         upload = ::IncidentManagement::Incidents::UploadMetricService.new(
           issue,
@@ -25,13 +29,19 @@ module Mutations
           { file: file, url: url }
         ).execute
 
-        {
-          issue: issue,
-          errors: Array(error_message(upload))
-        }
+        response(error_message(upload))
       end
 
       private
+
+      attr_reader :issue
+
+      def response(errors)
+        {
+          issue: issue,
+          errors: Array(errors)
+        }
+      end
 
       def error_message(upload)
         return unless upload[:status] == :error

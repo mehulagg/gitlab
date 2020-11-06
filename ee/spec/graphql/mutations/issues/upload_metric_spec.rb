@@ -11,7 +11,7 @@ RSpec.describe Mutations::Issues::UploadMetric do
   let(:file) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
 
   subject(:mutation) do
-    described_class.new(object: nil, context: { current_user:  current_user }, field: nil)
+    described_class.new(object: nil, context: { current_user: current_user }, field: nil)
   end
 
   describe '#resolve' do
@@ -31,11 +31,24 @@ RSpec.describe Mutations::Issues::UploadMetric do
       end
 
       it 'creates the metric image' do
-        expect { subject }.
-          to change(issue.metric_images, :count)
+        expect { subject }
+          .to change(issue.metric_images, :count)
 
         expect(subject[:issue]).to eq(issue)
         expect(subject[:errors]).to be_empty
+      end
+
+      context 'file size is too large' do
+        before do
+          allow(file).to receive(:size).and_return(2.megabytes)
+        end
+
+        it 'returns an error' do
+        expect { subject }
+          .not_to change(issue.metric_images, :count)
+
+        expect(subject[:errors]).to include('File size too large!')
+      end
       end
     end
   end

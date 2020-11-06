@@ -159,6 +159,10 @@ module EE
 
       rule { ~group_timelogs_available }.prevent :read_group_timelogs
 
+      rule { can?(:guest_access) }.policy do
+        enable :read_metric
+      end
+
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
@@ -166,6 +170,7 @@ module EE
         enable :read_deploy_board
         enable :admin_epic_issue
         enable :read_group_timelogs
+        enable :upload_metric
       end
 
       rule { can?(:developer_access) }.policy do

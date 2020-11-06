@@ -5,7 +5,7 @@ module Types
     graphql_name 'MetricImage'
     description 'Represents a metric image upload'
 
-    authorize :upload_metric
+    authorize :read_metric
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the metric upload'

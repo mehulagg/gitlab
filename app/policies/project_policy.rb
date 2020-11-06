@@ -226,7 +226,6 @@ class ProjectPolicy < BasePolicy
     enable :create_snippet
     enable :update_issue
     enable :reopen_issue
-    enable :upload_metric
     enable :admin_issue
     enable :admin_label
     enable :admin_list

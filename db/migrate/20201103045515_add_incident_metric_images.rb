@@ -15,8 +15,8 @@ class AddIncidentMetricImages < ActiveRecord::Migration[6.0]
       t.integer :file_store, limit: 2
     end
 
-     add_text_limit(:metric_images, :url, 255)
-     add_text_limit(:metric_images, :file, 255)
+    add_text_limit(:metric_images, :url, 255)
+    add_text_limit(:metric_images, :file, 255)
   end
 
   def down
