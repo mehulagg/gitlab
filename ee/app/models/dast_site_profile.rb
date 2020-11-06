@@ -14,6 +14,12 @@ class DastSiteProfile < ApplicationRecord
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
+  def environment_scope
+    return unless persisted?
+
+    "dast_site_profile/#{id}"
+  end
+
   def status
     return DastSiteValidation::INITIAL_STATE unless dast_site_validation
 
