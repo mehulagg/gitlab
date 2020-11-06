@@ -220,15 +220,16 @@ module EmailsHelper
     _('%{username} has asked for a GitLab account on your instance %{host}:') % { username: sanitize_name(user.name), host: gitlab_host }
   end
 
-  def instance_access_request_link(format: nil)
-    url = Gitlab.config.gitlab.url + "/admin/users?filter=blocked_pending_approval"
+  def instance_access_request_link(user, format: nil)
+    user_path =  "/admin/users/%{username}" % { username: user.username }
+    url = Gitlab.config.gitlab.url + user_path
 
     case format
     when :html
       link_to = generate_link("here", url).html_safe
-      _('Click %{link_to} to approve or deny this request.').html_safe % { link_to: link_to }
+      _('Click %{link_to} to view the request.').html_safe % { link_to: link_to }
     else
-      _('Click %{link_to} to approve or deny this request.') % { link_to: url }
+      _('Click %{link_to} to view the request.') % { link_to: url }
     end
   end
 
