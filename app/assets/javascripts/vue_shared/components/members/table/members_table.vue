@@ -89,6 +89,9 @@ export default {
       thead-class="border-bottom"
       :empty-text="__('No members found')"
       show-empty
+      :tbody-tr-attr="{
+        'data-qa-selector': 'member_row',
+      }"
     >
       <template #cell(account)="{ item: member }">
         <members-table-cell #default="{ memberType, isCurrentUser }" :member="member">

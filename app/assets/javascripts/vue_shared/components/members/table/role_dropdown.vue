@@ -2,6 +2,7 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { mapActions } from 'vuex';
+import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__ } from '~/locale';
 
 export default {
@@ -35,6 +36,12 @@ export default {
   },
   mounted() {
     this.isDesktop = bp.isDesktop();
+
+    const dropdownToggle = this.$refs.glDropdown.$el.querySelector('.dropdown-toggle');
+
+    if (dropdownToggle) {
+      dropdownToggle.setAttribute('data-qa-selector', 'access_level_dropdown');
+    }
   },
   methods: {
     ...mapActions(['updateMemberRole']),
@@ -57,12 +64,14 @@ export default {
           this.busy = false;
         });
     },
+    convertToSnakeCase,
   },
 };
 </script>
 
 <template>
   <gl-dropdown
+    ref="glDropdown"
     :right="!isDesktop"
     :text="member.accessLevel.stringValue"
     :header-text="__('Change permissions')"
@@ -73,6 +82,7 @@ export default {
       :key="value"
       is-check-item
       :is-checked="value === member.accessLevel.integerValue"
+      :data-qa-selector="`${convertToSnakeCase(name)}_access_level_link`"
       @click="handleSelect(value, name)"
     >
       {{ name }}
