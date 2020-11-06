@@ -7,3 +7,4 @@
   = f.select :deletion_adjourned_period, options_for_select(0..90, @application_setting.deletion_adjourned_period), {}, class: 'form-control'
   = f.label :deletion_adjourned_period, class: 'form-check-label' do
     = _('How many days need to pass between marking entity for deletion and actual removing it.')
+    = _('Please note this setting is not applicable to user namespaced projects. User namespaced projects are deleted immediately on request.')

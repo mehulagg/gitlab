@@ -20034,6 +20034,9 @@ msgstr ""
 msgid "Please note that this application is not provided by GitLab and you should verify its authenticity before allowing access."
 msgstr ""
 
+msgid "Please note this setting is not applicable to user namespaced projects. User namespaced projects are deleted immediately on request."
+msgstr ""
+
 msgid "Please only enable search after installing the plugin, enabling indexing and recreating the index"
 msgstr ""
 
