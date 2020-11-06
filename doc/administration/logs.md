@@ -988,7 +988,7 @@ Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
 
 If performance degradations or cascading errors occur that can't readily be attributed to one
 of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
-can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
+can provide a broader perspective of the GitLab instance. For more details and instructions
 to run it, read [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
 
 NOTE: **Note:**
