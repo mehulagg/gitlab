@@ -8,17 +8,9 @@ module Environments
 
         return result unless result[:status] == :success
 
-        canary_ingress = environment.ingresses&.find(&:canary?)
+        Environments::CanaryIngress::PatchWorker.perform_async(environment.id, params)
 
-        unless canary_ingress.present?
-          return error(_('Canary Ingress does not exist in the environment.'))
-        end
-
-        if environment.patch_ingress(canary_ingress, patch_data)
-          success
-        else
-          error(_('Failed to update the Canary Ingress.'), :bad_request)
-        end
+        success
       end
 
       private
@@ -49,16 +41,6 @@ module Environments
         end
 
         success
-      end
-
-      def patch_data
-        {
-          metadata: {
-            annotations: {
-              Gitlab::Kubernetes::Ingress::ANNOTATION_KEY_CANARY_WEIGHT => params[:weight].to_s
-            }
-          }
-        }
       end
     end
   end
