@@ -6,6 +6,7 @@ import { unescape } from 'lodash';
 import { GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import { stripHtml } from '~/lib/utils/text_utility';
+import { spriteIcon } from '~/lib/utils/common_utils';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import GLForm from '~/gl_form';
 import MarkdownHeader from './header.vue';
@@ -144,7 +145,7 @@ export default {
           '%{icon}You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
         ),
         {
-          icon: '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>',
+          icon: spriteIcon('warning-solid', 's16'),
           usersTag: `<strong><span class="js-referenced-users-count">${this.referencedUsers.length}</span></strong>`,
         },
         false,
