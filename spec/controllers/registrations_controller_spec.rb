@@ -54,7 +54,14 @@ RSpec.describe RegistrationsController do
         end
 
         it 'emails the admin the access request' do
-          expect { subject }.to have_enqueued_mail(DeviseMailer, :user_access_request)
+          created_user = User.find_by(email: 'new@user.com')
+
+          expect_next_instance_of(NotificationService) do |notification|
+            allow(notification).to receive(:new_instance_access_request).with(created_user)
+          end
+
+
+          subject
         end
 
         context 'email confirmation' do
