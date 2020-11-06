@@ -93,7 +93,7 @@ to authenticate with Kerberos tokens.
 
 **Enable single sign-on**
 
-See [Initial OmniAuth Configuration](../../integration/omniauth.md#initial-omniauth-configuration)
+See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration)
 for initial settings to enable single sign-on and add Kerberos servers
 as an identity provider.
 
