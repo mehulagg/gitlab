@@ -370,6 +370,7 @@ class NotificationService
     end
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def new_instance_access_request(member)
     recipients = User.admins.order_recent_sign_in.limit(10) # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
 
@@ -379,6 +380,7 @@ class NotificationService
       mailer.instance_access_request_email(member, recipient).deliver_later
     end
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   # Members
   def new_access_request(member)
