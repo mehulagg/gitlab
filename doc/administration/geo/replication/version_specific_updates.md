@@ -25,7 +25,7 @@ DROP EXTENSION IF EXISTS postgres_fdw;
 ```
 
 DANGER: **Warning:**
-In GitLab 13.3, promoting a secondary node to a primary while the secondary is paused fails. Do not pause replication before promoting a secondary. If the node is paused, please resume before promoting. To avoid this issue, upgrade to GitLab 13.4 or later.
+In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the secondary is paused fails. Do not pause replication before promoting a secondary. If the node is paused, please resume before promoting. This issue has been fixed in GitLab 13.4 or later.
 
 ## Updating to GitLab 13.2
 
