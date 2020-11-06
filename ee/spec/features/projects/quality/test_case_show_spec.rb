@@ -89,7 +89,7 @@ RSpec.describe 'Test Cases', :js do
         page.within('.test-case-container .issuable-details') do
           expect(page.find('.title')).to have_content(title)
           expect(page.find('.description')).to have_content(description)
-          expect(page.find('.edited-text')).to have_content('')
+          expect(page.find('.edited-text')).to have_content("Edited just now by #{user.name}")
         end
       end
     end

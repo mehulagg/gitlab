@@ -2,13 +2,12 @@
 
 exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] = `
 <div
-  class="card"
+  class="gl-card"
   data-foo="bar"
   value="gid://gitlab/DastScannerProfile/1"
 >
-  <!---->
   <div
-    class="card-header"
+    class="gl-card-header"
   >
     <div
       class="row"
@@ -46,12 +45,11 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
       </div>
     </div>
   </div>
+   
   <div
-    class="card-body"
+    class="gl-card-body"
   >
-    <!---->
-    <!---->
-      
+     
     <fieldset
       class="form-group gl-form-group"
     >
@@ -318,21 +316,19 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
         <!---->
       </div>
     </fieldset>
-     
   </div>
-  <!---->
+   
   <!---->
 </div>
 `;
 
 exports[`OnDemandScansScannerProfileSelector renders properly without profiles 1`] = `
 <div
-  class="card"
+  class="gl-card"
   data-foo="bar"
 >
-  <!---->
   <div
-    class="card-header"
+    class="gl-card-header"
   >
     <div
       class="row"
@@ -371,12 +367,11 @@ exports[`OnDemandScansScannerProfileSelector renders properly without profiles 1
       </div>
     </div>
   </div>
+   
   <div
-    class="card-body"
+    class="gl-card-body"
   >
-    <!---->
-    <!---->
-      
+     
     <p
       class="gl-text-gray-700"
     >
@@ -398,9 +393,8 @@ exports[`OnDemandScansScannerProfileSelector renders properly without profiles 1
         Create a new scanner profile
       </span>
     </a>
-     
   </div>
-  <!---->
+   
   <!---->
 </div>
 `;

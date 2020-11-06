@@ -17,6 +17,7 @@ describe('Test coverage table component', () => {
   const findEmptyState = () => wrapper.find('[data-testid="test-coverage-table-empty-state"]');
   const findLoadingState = () => wrapper.find('[data-testid="test-coverage-loading-state"');
   const findTable = () => wrapper.find('[data-testid="test-coverage-data-table"');
+  const findTableRows = () => findTable().findAll('tbody tr');
   const findProjectNameById = id => wrapper.find(`[data-testid="${id}-name"`);
   const findProjectAverageById = id => wrapper.find(`[data-testid="${id}-average"`);
   const findProjectCountById = id => wrapper.find(`[data-testid="${id}-count"`);
@@ -96,8 +97,10 @@ describe('Test coverage table component', () => {
 
   describe('when code coverage is available', () => {
     it('renders coverage table', () => {
+      const fullPath = 'gitlab-org/gitlab';
       const id = 'gid://gitlab/Project/1';
       const name = 'GitLab';
+      const rootRef = 'master';
       const averageCoverage = '74.35';
       const coverageCount = '5';
       const yesterday = new Date();
@@ -107,8 +110,13 @@ describe('Test coverage table component', () => {
         data: {
           allCoverageData: [
             {
+              fullPath,
               id,
               name,
+              repository: {
+                rootRef,
+              },
+              codeCoveragePath: '#',
               codeCoverageSummary: {
                 averageCoverage,
                 coverageCount,
@@ -129,12 +137,66 @@ describe('Test coverage table component', () => {
       expect(findProjectCountById(id).text()).toBe(coverageCount);
       expect(findProjectDateById(id).text()).toBe('1 day ago');
     });
-  });
 
-  describe('when selected project has no coverage', () => {
-    it('sets coverage to default values', async () => {
-      const name = 'test';
+    it('sorts the table by the most recently updated report', () => {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const allCoverageData = [
+        {
+          fullPath: '-',
+          id: 1,
+          name: 'should be last',
+          repository: { rootRef: 'master' },
+          codeCoveragePath: '#',
+          codeCoverageSummary: {
+            averageCoverage: '1.45',
+            coverageCount: '1',
+            lastUpdatedAt: yesterday.toISOString(),
+          },
+        },
+        {
+          fullPath: '-',
+          id: 2,
+          name: 'should be first',
+          repository: { rootRef: 'master' },
+          codeCoveragePath: '#',
+          codeCoverageSummary: {
+            averageCoverage: '1.45',
+            coverageCount: '1',
+            lastUpdatedAt: today.toISOString(),
+          },
+        },
+      ];
+      createComponent({
+        data: {
+          allCoverageData,
+          projectIds: {
+            1: true,
+            2: true,
+          },
+        },
+        mountFn: mount,
+      });
+
+      expect(findTable().exists()).toBe(true);
+      expect(
+        findTableRows()
+          .at(0)
+          .text(),
+      ).toContain('should be first');
+      expect(
+        findTableRows()
+          .at(1)
+          .text(),
+      ).toContain('should be last');
+    });
+
+    it('renders the correct link', async () => {
       const id = 1;
+      const fullPath = 'test/test';
+      const rootRef = 'master';
+      const expectedPath = `/${fullPath}/-/graphs/${rootRef}/charts`;
       createComponentWithApollo({
         data: {
           projectIds: { [id]: true },
@@ -144,9 +206,17 @@ describe('Test coverage table component', () => {
             projects: {
               nodes: [
                 {
-                  name,
+                  fullPath,
+                  name: 'test',
                   id,
-                  codeCoverageSummary: null,
+                  repository: {
+                    rootRef,
+                  },
+                  codeCoverageSummary: {
+                    averageCoverage: '1.45',
+                    coverageCount: '1',
+                    lastUpdatedAt: new Date().toISOString(),
+                  },
                 },
               ],
             },
@@ -158,10 +228,40 @@ describe('Test coverage table component', () => {
       await waitForPromises();
 
       expect(findTable().exists()).toBe(true);
-      expect(findProjectNameById(id).text()).toBe(name);
-      expect(findProjectAverageById(id).text()).toBe('0.00%');
-      expect(findProjectCountById(id).text()).toBe('0');
-      expect(findProjectDateById(id).text()).toBe('just now');
+      expect(findProjectNameById(id).attributes('href')).toBe(expectedPath);
+    });
+  });
+
+  describe('when selected project has no coverage', () => {
+    it('does not render the table', async () => {
+      const id = 1;
+      createComponentWithApollo({
+        data: {
+          projectIds: { [id]: true },
+        },
+        queryData: {
+          data: {
+            projects: {
+              nodes: [
+                {
+                  fullPath: 'test/test',
+                  name: 'test',
+                  id,
+                  repository: {
+                    rootRef: 'master',
+                  },
+                  codeCoverageSummary: null,
+                },
+              ],
+            },
+          },
+        },
+        mountFn: mount,
+      });
+      jest.runOnlyPendingTimers();
+      await waitForPromises();
+
+      expect(findTable().exists()).toBe(false);
     });
   });
 });

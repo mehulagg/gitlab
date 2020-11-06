@@ -111,6 +111,7 @@ describe('BoardCardAssigneeDropdown', () => {
       createComponent();
 
       expect(wrapper.find(IssuableAssignees).isVisible()).toBe(true);
+      expect(wrapper.find(AssigneesDropdown).isVisible()).toBe(false);
     });
   });
 
@@ -177,7 +178,7 @@ describe('BoardCardAssigneeDropdown', () => {
         expect(store.dispatch).toHaveBeenCalledWith('setAssignees', []);
       });
 
-      it('closed the dropdown', async () => {
+      it('closes the dropdown', async () => {
         expect(wrapper.find(IssuableAssignees).isVisible()).toBe(true);
       });
     });
@@ -241,6 +242,17 @@ describe('BoardCardAssigneeDropdown', () => {
       const boundUpdate = update.bind(wrapper.vm);
 
       expect(boundUpdate({ issue: { participants: { nodes: [node] } } })).toEqual([node]);
+    });
+
+    it('returns the correct query', () => {
+      expect(wrapper.vm.$options.apollo.participants.query).toEqual(getIssueParticipants);
+    });
+
+    it('contains the correct variables', () => {
+      const { variables } = wrapper.vm.$options.apollo.participants;
+      const boundVariable = variables.bind(wrapper.vm);
+
+      expect(boundVariable()).toEqual({ id: 'gid://gitlab/Issue/111' });
     });
   });
 

@@ -1440,6 +1440,11 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     iids: [ID!]
 
     """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
+
+    """
     Filter epics by labels
     """
     labelName: [String!]
@@ -3494,7 +3499,7 @@ input CreateBoardInput {
   clientMutationId: String
 
   """
-  The group full path the board is associated with.
+  The group full path the resource is associated with
   """
   groupPath: ID
 
@@ -3514,7 +3519,7 @@ input CreateBoardInput {
   name: String
 
   """
-  The project full path the board is associated with.
+  The project full path the resource is associated with
   """
   projectPath: ID
 
@@ -6020,6 +6025,81 @@ type DetailedStatus {
   tooltip: String
 }
 
+"""
+Segment
+"""
+type DevopsAdoptionSegment {
+  """
+  Assigned groups
+  """
+  groups(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): GroupConnection
+
+  """
+  ID of the segment
+  """
+  id: ID!
+
+  """
+  Name of the segment
+  """
+  name: String!
+}
+
+"""
+The connection type for DevopsAdoptionSegment.
+"""
+type DevopsAdoptionSegmentConnection {
+  """
+  A list of edges.
+  """
+  edges: [DevopsAdoptionSegmentEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [DevopsAdoptionSegment]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type DevopsAdoptionSegmentEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: DevopsAdoptionSegment
+}
+
 input DiffImagePositionInput {
   """
   Merge base of the branch the comment was made on
@@ -6591,6 +6671,11 @@ type Epic implements CurrentUserTodos & Noteable {
     List of IIDs of epics, e.g., [1, 2]
     """
     iids: [ID!]
+
+    """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
 
     """
     Filter epics by labels
@@ -7486,6 +7571,11 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   upvotes: Int!
 
   """
+  Number of user discussions in the issue
+  """
+  userDiscussionsCount: Int!
+
+  """
   Number of user notes of the issue
   """
   userNotesCount: Int!
@@ -8167,6 +8257,11 @@ type Group {
     iids: [ID!]
 
     """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
+
+    """
     Filter epics by labels
     """
     labelName: [String!]
@@ -8248,6 +8343,11 @@ type Group {
     List of IIDs of epics, e.g., [1, 2]
     """
     iids: [ID!]
+
+    """
+    Include epics from descendant groups
+    """
+    includeDescendantGroups: Boolean = true
 
     """
     Filter epics by labels
@@ -8362,7 +8462,7 @@ type Group {
     after: String
 
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -8405,6 +8505,11 @@ type Group {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values are supported
+    """
+    epicId: String
 
     """
     Returns the first _n_ elements from the list.
@@ -9133,6 +9238,41 @@ type Group {
   Web URL of the group
   """
   webUrl: String!
+}
+
+"""
+The connection type for Group.
+"""
+type GroupConnection {
+  """
+  A list of edges.
+  """
+  edges: [GroupEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [Group]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type GroupEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: Group
 }
 
 """
@@ -9938,6 +10078,11 @@ type Issue implements CurrentUserTodos & Noteable {
   Number of upvotes the issue has received
   """
   upvotes: Int!
+
+  """
+  Number of user discussions in the issue
+  """
+  userDiscussionsCount: Int!
 
   """
   Number of user notes of the issue
@@ -10783,7 +10928,7 @@ enum IssueType {
 """
 Represents an iteration object
 """
-type Iteration implements TimeboxBurnupTimeSeriesInterface {
+type Iteration implements TimeboxReportInterface {
   """
   Daily scope and completed totals for burnup charts
   """
@@ -10818,6 +10963,11 @@ type Iteration implements TimeboxBurnupTimeSeriesInterface {
   Internal ID of the iteration
   """
   iid: ID!
+
+  """
+  Historically accurate report about the timebox
+  """
+  report: TimeboxReport
 
   """
   Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts
@@ -11271,6 +11421,63 @@ type LabelConnection {
   Information to aid in pagination.
   """
   pageInfo: PageInfo!
+}
+
+"""
+Autogenerated input type of LabelCreate
+"""
+input LabelCreateInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The color of the label given in 6-digit hex notation with leading '#' sign
+  (e.g. #FFAABB) or one of the CSS color names in
+  https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords
+  """
+  color: String = "#428BCA"
+
+  """
+  Description of the label
+  """
+  description: String
+
+  """
+  The group full path the resource is associated with
+  """
+  groupPath: ID
+
+  """
+  The project full path the resource is associated with
+  """
+  projectPath: ID
+
+  """
+  Title of the label
+  """
+  title: String!
+}
+
+"""
+Autogenerated return type of LabelCreate
+"""
+type LabelCreatePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The label after mutation
+  """
+  label: Label
 }
 
 """
@@ -11979,6 +12186,11 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   Number of upvotes for the merge request
   """
   upvotes: Int!
+
+  """
+  Number of user discussions in the merge request
+  """
+  userDiscussionsCount: Int
 
   """
   User notes count of the merge request
@@ -12791,7 +13003,7 @@ type MetricsDashboardAnnotationEdge {
 """
 Represents a milestone
 """
-type Milestone implements TimeboxBurnupTimeSeriesInterface {
+type Milestone implements TimeboxReportInterface {
   """
   Daily scope and completed totals for burnup charts
   """
@@ -12826,6 +13038,11 @@ type Milestone implements TimeboxBurnupTimeSeriesInterface {
   Indicates if milestone is at project level
   """
   projectMilestone: Boolean!
+
+  """
+  Historically accurate report about the timebox
+  """
+  report: TimeboxReport
 
   """
   Timestamp of the milestone start date
@@ -13011,6 +13228,7 @@ type Mutation {
   issueSetWeight(input: IssueSetWeightInput!): IssueSetWeightPayload
   jiraImportStart(input: JiraImportStartInput!): JiraImportStartPayload
   jiraImportUsers(input: JiraImportUsersInput!): JiraImportUsersPayload
+  labelCreate(input: LabelCreateInput!): LabelCreatePayload
   markAsSpamSnippet(input: MarkAsSpamSnippetInput!): MarkAsSpamSnippetPayload
   mergeRequestCreate(input: MergeRequestCreateInput!): MergeRequestCreatePayload
   mergeRequestSetAssignees(input: MergeRequestSetAssigneesInput!): MergeRequestSetAssigneesPayload
@@ -14660,7 +14878,7 @@ type Project {
   """
   issue(
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -14698,6 +14916,11 @@ type Project {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values are supported
+    """
+    epicId: String
 
     """
     IID of the issue. For example, "1"
@@ -14760,7 +14983,7 @@ type Project {
   """
   issueStatusCounts(
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -14850,7 +15073,7 @@ type Project {
     after: String
 
     """
-    ID of a user assigned to the issues, "none" and "any" values supported
+    ID of a user assigned to the issues, "none" and "any" values are supported
     """
     assigneeId: String
 
@@ -14893,6 +15116,11 @@ type Project {
     Issues created before this date
     """
     createdBefore: Time
+
+    """
+    ID of an epic associated with the issues, "none" and "any" values are supported
+    """
+    epicId: String
 
     """
     Returns the first _n_ elements from the list.
@@ -16481,6 +16709,31 @@ type Query {
   designManagement: DesignManagement!
 
   """
+  Get configured DevOps adoption segments on the instance
+  """
+  devopsAdoptionSegments(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): DevopsAdoptionSegmentConnection
+
+  """
   Text to echo back
   """
   echo(
@@ -17383,16 +17636,6 @@ type ReleaseLinks {
   HTTP URL of the release's edit page
   """
   editUrl: String
-
-  """
-  HTTP URL of the issues page filtered by this release. Deprecated in 13.6: Use `openedIssuesUrl`
-  """
-  issuesUrl: String @deprecated(reason: "Use `openedIssuesUrl`. Deprecated in 13.6")
-
-  """
-  HTTP URL of the merge request page filtered by this release. Deprecated in 13.6: Use `openedMergeRequestsUrl`
-  """
-  mergeRequestsUrl: String @deprecated(reason: "Use `openedMergeRequestsUrl`. Deprecated in 13.6")
 
   """
   HTTP URL of the merge request page , filtered by this release and `state=merged`
@@ -20115,11 +20358,26 @@ Time represented in ISO 8601
 """
 scalar Time
 
-interface TimeboxBurnupTimeSeriesInterface {
+"""
+Represents a historically accurate report about the timebox
+"""
+type TimeboxReport {
   """
   Daily scope and completed totals for burnup charts
   """
   burnupTimeSeries: [BurnupChartDailyTotals!]
+}
+
+interface TimeboxReportInterface {
+  """
+  Daily scope and completed totals for burnup charts
+  """
+  burnupTimeSeries: [BurnupChartDailyTotals!]
+
+  """
+  Historically accurate report about the timebox
+  """
+  report: TimeboxReport
 }
 
 """

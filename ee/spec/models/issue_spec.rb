@@ -209,6 +209,18 @@ RSpec.describe Issue do
           expect(described_class.in_iterations([iteration1])).to eq [iteration1_issue]
         end
       end
+
+      describe '.with_iteration_title' do
+        it 'returns only issues with iterations that match the title' do
+          expect(described_class.with_iteration_title(iteration1.title)).to eq [iteration1_issue]
+        end
+      end
+
+      describe '.without_iteration_title' do
+        it 'returns only issues without iterations or have iterations that do not match the title' do
+          expect(described_class.without_iteration_title(iteration1.title)).to contain_exactly(issue_no_iteration, iteration2_issue)
+        end
+      end
     end
 
     context 'status page published' do

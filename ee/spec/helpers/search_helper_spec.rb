@@ -49,6 +49,67 @@ RSpec.describe SearchHelper do
         expect(options[:data][:'multiple-assignees']).to eq('true')
       end
     end
+
+    describe 'iterations-endpoint' do
+      let_it_be(:group, refind: true) { create(:group) }
+      let_it_be(:project_under_group, refind: true) { create(:project, group: group) }
+
+      context 'when iterations are available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'includes iteration endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_projects_iterations_path(id: @project.id)))
+        end
+
+        it 'includes iteration endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_groups_iterations_path(id: @group.id)))
+        end
+
+        it 'does not include iterations endpoint for projects under a namespace' do
+          @project = create(:project, namespace: create(:namespace))
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in dashboard context' do
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(filter_bar_iterations: false)
+          end
+
+          it 'does not include iterations endpoint' do
+            expect(options[:data]['iterations-endpoint']).to be(nil)
+          end
+        end
+      end
+
+      context 'when iterations are not available' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'does not include iterations endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+    end
   end
 
   describe 'search_autocomplete_opts' do

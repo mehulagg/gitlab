@@ -7,91 +7,15 @@ type: reference
 
 # GitLab CI/CD pipeline configuration reference
 
-GitLab CI/CD [pipelines](../pipelines/index.md) are configured using a YAML file called `.gitlab-ci.yml` within each project.
+This document lists the configuration options for your GitLab `.gitlab-ci.yml` file.
 
-The `.gitlab-ci.yml` file defines the structure and order of the pipelines and determines:
-
-- What to execute using [GitLab Runner](https://docs.gitlab.com/runner/).
-- What decisions to make when specific conditions are encountered. For example, when a process succeeds or fails.
-
-This topic covers CI/CD pipeline configuration. For other CI/CD configuration information, see:
-
-- [GitLab CI/CD Variables](../variables/README.md), for configuring the environment the pipelines run in.
-- [GitLab Runner advanced configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html), for configuring GitLab Runner.
-
-We have complete examples of configuring pipelines:
-
-- For a quick introduction to GitLab CI/CD, follow our [quick start guide](../quick_start/README.md).
+- For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/README.md).
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/README.md).
-- To see a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
+- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
-> For some additional information about GitLab CI/CD:
->
-> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch the [CI/CD Ease of configuration](https://www.youtube.com/embed/opdLqwz6tcE) video.
-> - Watch the [Making the case for CI/CD in your organization](https://about.gitlab.com/compare/github-actions-alternative/)
->   webcast to learn the benefits of CI/CD and how to measure the results of CI/CD automation.
-> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Learn how [Verizon reduced rebuilds](https://about.gitlab.com/blog/2019/02/14/verizon-customer-story/)
->   from 30 days to under 8 hours with GitLab.
-
-If you have a [mirrored repository that GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
-you may need to enable pipeline triggering. Go to your project's **Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
-
-## Introduction
-
-Pipeline configuration begins with jobs. Jobs are the most fundamental element of a `.gitlab-ci.yml` file.
-
-Jobs are:
-
-- Defined with constraints stating under what conditions they should be executed.
-- Top-level elements with an arbitrary name and must contain at least the [`script`](#script) clause.
-- Not limited in how many can be defined.
-
-For example:
-
-```yaml
-job1:
-  script: "execute-script-for-job1"
-
-job2:
-  script: "execute-script-for-job2"
-```
-
-The above example is the simplest possible CI/CD configuration with two separate
-jobs, where each of the jobs executes a different command.
-Of course a command can execute code directly (`./configure;make;make install`)
-or run a script (`test.sh`) in the repository.
-
-Jobs are picked up by [runners](../runners/README.md) and executed within the
-environment of the runner. What is important is that each job is run
-independently from each other.
-
-### Validate the `.gitlab-ci.yml`
-
-Each instance of GitLab CI/CD has an embedded debug tool called Lint, which validates the
-content of your `.gitlab-ci.yml` files. You can find the Lint under the page `ci/lint` of your
+While you are authoring your `.gitlab-ci.yml` file, you can validate it
+by using the [CI Lint](../lint.md) tool.
 project namespace. For example, `https://gitlab.example.com/gitlab-org/project-123/-/ci/lint`.
-
-### Unavailable names for jobs
-
-Each job must have a unique name, but there are a few **reserved `keywords` that
-can't be used as job names**:
-
-- `image`
-- `services`
-- `stages`
-- `types`
-- `before_script`
-- `after_script`
-- `variables`
-- `cache`
-- `include`
-
-### Using reserved keywords
-
-If you get validation error when using specific values (for example, `true` or `false`), try to:
-
-- Quote them.
-- Change them to a different form. For example, `/bin/true`.
 
 ## Job keywords
 
@@ -130,9 +54,31 @@ The following table lists available keywords for jobs:
 | [`variables`](#variables)                          | Define job variables on a job level.                                                                                                                                                |
 | [`when`](#when)                                    | When to run job. Also available: `when:manual` and `when:delayed`.                                                                                                                  |
 
+### Unavailable names for jobs
+
+Each job must have a unique name, but there are a few **reserved `keywords` that
+can't be used as job names**:
+
+- `image`
+- `services`
+- `stages`
+- `types`
+- `before_script`
+- `after_script`
+- `variables`
+- `cache`
+- `include`
+
 ## Global keywords
 
 Some keywords must be defined at a global level, affecting all jobs in the pipeline.
+
+### Using reserved keywords
+
+If you get validation error when using specific values (for example, `true` or `false`), try to:
+
+- Quote them.
+- Change them to a different form. For example, `/bin/true`.
 
 ### Global defaults
 
@@ -491,6 +437,42 @@ include:
 All [nested includes](#nested-includes) are executed in the scope of the target project.
 This means you can use local (relative to target project), project, remote,
 or template includes.
+
+##### Multiple files from a project
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26793) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it. **(CORE ONLY)**
+
+You can include multiple files from the same project:
+
+```yaml
+include:
+  - project: 'my-group/my-project'
+    ref: master
+    file:
+      - '/templates/.builds.yml'
+      - '/templates/.tests.yml'
+```
+
+Including multiple files from the same project is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_include_multiple_files_from_project)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_include_multiple_files_from_project)
+```
 
 #### `include:remote`
 
@@ -1426,10 +1408,18 @@ To determine if jobs should be added to a pipeline, `rules: changes` clauses che
 the files changed by Git push events.
 
 `rules: changes` works exactly the same way as [`only: changes` and `except: changes`](#onlychangesexceptchanges),
-accepting an array of paths. Similarly, it always returns true if there is no
-Git push event, for example, when a new tag is created. It's recommended to use it
-only with branch pipelines or merge request pipelines. For example, it's common to
-use `rules: changes` with one of the following `if` clauses:
+accepting an array of paths.
+
+It always returns true and adds jobs to the pipeline if there is no Git push event.
+For example, jobs with `rules: changes` always run on scheduled and tag pipelines,
+because they are not associated with a Git push event. Only certain pipelines have
+a Git push event associated with them:
+
+- All pipelines with a `$CI_PIPELINE_SOURCE` of `merge_request` or `external_merge_request`.
+- Branch pipelines, which have the `$CI_COMMIT_BRANCH` variable present and a `$CI_PIPELINE_SOURCE` of `push`.
+
+It's recommended to use it only with branch pipelines or merge request pipelines.
+For example, it's common to use `rules: changes` with one of the following `if` clauses:
 
 - `if: $CI_COMMIT_BRANCH`
 - `if: '$CI_PIPELINE_SOURCE == "merge_request_event"'`

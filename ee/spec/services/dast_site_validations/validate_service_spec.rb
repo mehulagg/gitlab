@@ -40,11 +40,12 @@ RSpec.describe DastSiteValidations::ValidateService do
       end
 
       it 'validates the url before making an http request' do
-        uri = double('uri')
+        uri = URI(dast_site_validation.validation_url)
+        opt = hash_including(allow_local_network: false, allow_localhost: false, dns_rebind_protection: true)
 
         aggregate_failures do
-          expect(Gitlab::UrlBlocker).to receive(:validate!).and_return([uri, nil])
-          expect(Gitlab::HTTP).to receive(:get).with(uri).and_return(double('response', body: token))
+          expect(Gitlab::UrlBlocker).to receive(:validate!).with(uri, opt).and_call_original
+          expect(Gitlab::HTTP).to receive(:get).with(dast_site_validation.validation_url).and_call_original
         end
 
         subject

@@ -16,7 +16,7 @@ import searchUsers from '~/boards/queries/users_search.query.graphql';
 
 export default {
   i18n: {
-    unassign: __('Unassign'),
+    unassigned: __('Unassigned'),
     assignee: __('Assignee'),
     assignees: __('Assignees'),
     assignTo: __('Assign to'),
@@ -136,13 +136,12 @@ export default {
             data-testid="unassign"
             class="mt-2"
             @click="selectAssignee()"
-            >{{ $options.i18n.unassign }}</gl-dropdown-item
+            >{{ $options.i18n.unassigned }}</gl-dropdown-item
           >
           <gl-dropdown-divider data-testid="unassign-divider" />
           <gl-dropdown-item
             v-for="item in selected"
             :key="item.id"
-            :user="item"
             :is-checked="isChecked(item.username)"
             @click="unselect(item.username)"
           >
@@ -160,7 +159,6 @@ export default {
             v-for="unselectedUser in unSelectedFiltered"
             :key="unselectedUser.id"
             :data-testid="`item_${unselectedUser.name}`"
-            :user="unselectedUser"
             @click="selectAssignee(unselectedUser)"
           >
             <gl-avatar-link>

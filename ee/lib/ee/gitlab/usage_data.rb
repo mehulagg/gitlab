@@ -274,6 +274,22 @@ module EE
           }, approval_rules_counts)
         end
 
+        override :usage_activity_by_stage_enablement
+        def usage_activity_by_stage_enablement(time_period)
+          return super unless ::Gitlab::Geo.enabled?
+
+          super.merge({
+                      geo_secondary_web_oauth_users: distinct_count(
+                        OauthAccessGrant
+                            .where(time_period)
+                            .where(
+                              application_id: GeoNode.secondary_nodes.select(:oauth_application_id)
+                            ),
+                        :resource_owner_id
+                      )
+                  })
+        end
+
         # Omitted because no user, creator or author associated: `campaigns_imported_from_github`, `ldap_group_links`
         override :usage_activity_by_stage_manage
         def usage_activity_by_stage_manage(time_period)

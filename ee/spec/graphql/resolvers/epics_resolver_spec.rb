@@ -200,11 +200,15 @@ RSpec.describe Resolvers::EpicsResolver do
           expect(resolve_epics(iids: iids)).to contain_exactly(epic1, epic2)
         end
 
-        it 'return all epics' do
+        it 'returns all epics' do
           expect(resolve_epics).to contain_exactly(epic1, epic2, epic3, epic4)
         end
 
-        it 'filter by milestones in subgroups' do
+        it 'does not return subgroup epics when include_descendant_groups is false' do
+          expect(resolve_epics(include_descendant_groups: false)).to contain_exactly(epic1, epic2)
+        end
+
+        it 'filters by milestones in subgroups' do
           subgroup_project = create(:project, group: sub_group)
           milestone = create(:milestone, group: sub_group)
           create(:issue, project: subgroup_project, epic: epic1, milestone: milestone)

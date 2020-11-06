@@ -47,6 +47,11 @@ module EE
       end
     end
 
+    override :project_feature_attributes
+    def project_feature_attributes
+      super + [:requirements_access_level]
+    end
+
     override :project_params_attributes
     def project_params_attributes
       super + project_params_ee

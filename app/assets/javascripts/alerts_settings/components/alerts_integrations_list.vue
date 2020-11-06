@@ -1,5 +1,12 @@
 <script>
-import { GlTable, GlIcon, GlTooltipDirective, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlButtonGroup,
+  GlButton,
+  GlIcon,
+  GlLoadingIcon,
+  GlTable,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import Tracking from '~/tracking';
 import { trackAlertIntegrationsViewsOptions } from '../constants';
@@ -25,9 +32,11 @@ const bodyTrClass =
 export default {
   i18n,
   components: {
-    GlTable,
+    GlButtonGroup,
+    GlButton,
     GlIcon,
     GlLoadingIcon,
+    GlTable,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -57,6 +66,10 @@ export default {
       key: 'type',
       label: __('Type'),
     },
+    {
+      key: 'actions',
+      label: __('Actions'),
+    },
   ],
   computed: {
     tbodyTrClass() {
@@ -81,7 +94,6 @@ export default {
   <div class="incident-management-list">
     <h5 class="gl-font-lg">{{ $options.i18n.title }}</h5>
     <gl-table
-      :empty-text="$options.i18n.emptyState"
       :items="integrations"
       :fields="$options.fields"
       :busy="loading"
@@ -112,8 +124,23 @@ export default {
         </span>
       </template>
 
+      <template #cell(actions)="{ item }">
+        <gl-button-group>
+          <gl-button icon="pencil" @click="$emit('edit-integration', { id: item.id })" />
+          <gl-button icon="remove" @click="$emit('delete-integration', { id: item.id })" />
+        </gl-button-group>
+      </template>
+
       <template #table-busy>
         <gl-loading-icon size="lg" color="dark" class="mt-3" />
+      </template>
+
+      <template #empty>
+        <div
+          class="gl-border-t-solid gl-border-b-solid gl-border-1 gl-border gl-border-gray-100 mt-n3"
+        >
+          <p class="gl-text-gray-400 gl-py-3 gl-my-3">{{ $options.i18n.emptyState }}</p>
+        </div>
       </template>
     </gl-table>
   </div>

@@ -10,6 +10,10 @@ module EE
         argument :iteration_id, ::GraphQL::ID_TYPE.to_list_type,
                  required: false,
                  description: 'Iterations applied to the issue'
+
+        argument :epic_id, GraphQL::STRING_TYPE,
+                 required: false,
+                 description: 'ID of an epic associated with the issues, "none" and "any" values are supported'
       end
 
       private

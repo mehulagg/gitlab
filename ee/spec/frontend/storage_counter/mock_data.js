@@ -61,7 +61,7 @@ export const projects = [
 export const namespaceData = {
   totalUsage: 'N/A',
   limit: 10000000,
-  projects,
+  projects: { data: projects },
 };
 
 export const withRootStorageStatistics = {
@@ -86,5 +86,5 @@ export const withRootStorageStatistics = {
 };
 
 export const mockGetStorageCounterGraphQLResponse = {
-  edges: projects.map(node => ({ node })),
+  nodes: projects.map(node => node),
 };

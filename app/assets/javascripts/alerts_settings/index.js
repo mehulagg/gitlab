@@ -48,9 +48,9 @@ export default el => {
     el,
     provide: {
       prometheus: {
-        activated: parseBoolean(prometheusActivated),
-        prometheusUrl,
-        authorizationKey: prometheusAuthorizationKey,
+        active: parseBoolean(prometheusActivated),
+        url: prometheusUrl,
+        token: prometheusAuthorizationKey,
         prometheusFormPath,
         prometheusResetKeyPath,
         prometheusApiUrl,
@@ -58,14 +58,14 @@ export default el => {
       generic: {
         alertsSetupUrl,
         alertsUsageUrl,
-        activated: parseBoolean(activatedStr),
+        active: parseBoolean(activatedStr),
         formPath,
-        authorizationKey,
+        token: authorizationKey,
         url,
       },
       opsgenie: {
         formPath: opsgenieMvcFormPath,
-        activated: parseBoolean(opsgenieMvcEnabled),
+        active: parseBoolean(opsgenieMvcEnabled),
         opsgenieMvcTargetUrl,
         opsgenieMvcIsAvailable: parseBoolean(opsgenieMvcAvailable),
       },

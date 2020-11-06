@@ -5,7 +5,6 @@ mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $proje
     issue {
       assignees {
         nodes {
-          name
           username
           id
           name

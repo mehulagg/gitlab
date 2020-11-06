@@ -2,6 +2,7 @@ import mockData, { mockStore } from 'jest/vue_mr_widget/mock_data';
 
 export default {
   ...mockData,
+  can_read_vulnerabilities: true,
   vulnerability_feedback_help_path: '/help/user/application_security/index',
   enabled_reports: {
     sast: false,
@@ -126,3 +127,14 @@ export const codequalityParsedIssues = [
 ];
 
 export { mockStore };
+
+// TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/249544
+export const pipelineJobs = [
+  {
+    artifacts: [
+      {
+        file_type: 'sast',
+      },
+    ],
+  },
+];

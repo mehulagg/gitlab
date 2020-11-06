@@ -1,5 +1,4 @@
 <script>
-import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
@@ -22,7 +21,8 @@ export default {
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
     BlockingMergeRequestsReport,
-    GroupedSecurityReportsApp,
+    GroupedSecurityReportsApp: () =>
+      import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
     GroupedMetricsReportsApp,
     ReportSection,
   },
@@ -88,9 +88,13 @@ export default {
 
       return Boolean(loadPerformance.head_path && loadPerformance.base_path);
     },
-    shouldRenderSecurityReport() {
+    shouldRenderBaseSecurityReport() {
+      return !this.mr.canReadVulnerabilities && this.shouldRenderSecurityReport;
+    },
+    shouldRenderExtendedSecurityReport() {
       const { enabledReports } = this.mr;
       return (
+        this.mr.canReadVulnerabilities &&
         enabledReports &&
         this.$options.securityReportTypes.some(reportType => enabledReports[reportType])
       );
@@ -306,8 +310,15 @@ export default {
         :endpoint="mr.metricsReportsPath"
         class="js-metrics-reports-container"
       />
+
+      <security-reports-app
+        v-if="shouldRenderBaseSecurityReport"
+        :pipeline-id="mr.pipeline.id"
+        :project-id="mr.targetProjectId"
+        :security-reports-docs-path="mr.securityReportsDocsPath"
+      />
       <grouped-security-reports-app
-        v-if="shouldRenderSecurityReport"
+        v-else-if="shouldRenderExtendedSecurityReport"
         :head-blob-path="mr.headBlobPath"
         :source-branch="mr.sourceBranch"
         :target-branch="mr.targetBranch"

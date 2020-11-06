@@ -6,7 +6,7 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        implements ::Types::TimeboxBurnupTimeSeriesInterface
+        implements ::Types::TimeboxReportInterface
       end
     end
   end

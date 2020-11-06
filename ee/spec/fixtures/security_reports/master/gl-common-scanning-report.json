@@ -16,7 +16,7 @@
             "identifiers": [],
             "links": [
                 {
-                    "url": ""
+                    "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1020"
                 }
             ]
         },
@@ -37,7 +37,8 @@
             "identifiers": [],
             "links": [
                 {
-                    "url": ""
+                  "name": "CVE-1030",
+                  "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1030"
                 }
             ]
         },
@@ -56,12 +57,6 @@
             "location": {},
             "identifiers": [],
             "links": [
-                {
-                    "url": ""
-                },
-                {
-                    "url": ""
-                }
             ]
         }
     ],

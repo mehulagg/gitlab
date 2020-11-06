@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Generating the urls for the project and groups is the most
+# expensive part of the sitemap generation because we need
+# to call the Rails route helpers.
+#
+# We could hardcode them but if a route changes the sitemap
+# urls will be invalid.
 module Gitlab
   module Sitemaps
     class UrlExtractor

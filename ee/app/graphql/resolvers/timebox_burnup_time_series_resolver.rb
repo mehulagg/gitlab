@@ -9,11 +9,11 @@ module Resolvers
     def resolve(*args)
       return [] unless timebox.burnup_charts_available?
 
-      response = TimeboxBurnupChartService.new(timebox).execute
+      response = TimeboxReportService.new(timebox).execute
 
       raise GraphQL::ExecutionError, response.message if response.error?
 
-      response.payload
+      response.payload[:burnup_time_series]
     end
   end
 end

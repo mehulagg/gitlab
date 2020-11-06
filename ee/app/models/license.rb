@@ -19,6 +19,7 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
+    instance_level_devops_adoption
     issuable_default_templates
     issue_weights
     iterations
@@ -131,6 +132,7 @@ class License < ApplicationRecord
     credentials_inventory
     dast
     dependency_scanning
+    devops_adoption
     enterprise_templates
     api_fuzzing
     group_level_compliance_dashboard
