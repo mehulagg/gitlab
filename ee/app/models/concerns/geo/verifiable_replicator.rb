@@ -25,6 +25,13 @@ module Geo
         Feature.enabled?(:geo_framework_verification)
       end
 
+      # Called every minute by VerificationCronWorker
+      def trigger_background_verification
+        return false unless verification_enabled?
+
+        # TODO: ::Geo::VerificationBatchWorker.perform_with_capacity(self)
+      end
+
       def checksummed
         model.available_replicables.verification_success
       end
