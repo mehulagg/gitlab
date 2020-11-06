@@ -39,4 +39,28 @@ RSpec.shared_examples 'a replicable model' do
       expect(model_record.class.replicables_for_current_secondary(model_record.id)).to be_an(ActiveRecord::Relation)
     end
   end
+
+  context 'verification' do
+    before do
+      # TODO: Remove this skip before releasing verification of all Replicators https://gitlab.com/gitlab-org/gitlab/-/issues/277400
+      skip 'not testing verification on anything but Package files at the moment' unless model_record.class == Packages::PackageFile
+    end
+
+    describe '.model_record_ids_never_attempted_verification' do
+      before do
+        model_record.save!
+      end
+
+      it 'returns IDs of rows pending verification that never started' do
+        expect(model_record.class.model_record_ids_never_attempted_verification(batch_size: 5)).to include(model_record.id)
+      end
+
+      it 'marks verification as started' do
+        model_record.class.model_record_ids_never_attempted_verification(batch_size: 5)
+
+        expect(model_record.reload.verification_started?).to be_truthy
+        expect(model_record.verification_started_at).to be_present
+      end
+    end
+  end
 end
