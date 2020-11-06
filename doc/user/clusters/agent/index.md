@@ -401,9 +401,11 @@ This basic GitOps example deploys NGINX:
 If you face any issues while using GitLab Kubernetes Agent, you can read the
 service logs with the following commands:
 
-- KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`. In case of Omnibus GitLab the logs
-will reside in `/var/log/gitlab/gitlab-kas/`.
-- Agent pod logs: you may tail them using `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>`.
+- KAS pod logs - Tail these logs with the
+  `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`
+  command. In Omnibus GitLab, the logs reside in `/var/log/gitlab/gitlab-kas/`.
+- Agent pod logs - Tail these logs with the
+  `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>` command.
 
 ### KAS logs - GitOps: failed to get project info
 
