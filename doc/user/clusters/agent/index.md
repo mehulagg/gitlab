@@ -398,51 +398,47 @@ This basic GitOps example deploys NGINX:
 
 ## Troubleshooting
 
-If you face any issues while using Kubernetes GitLab Agent, should be able to find any related errors in two places:
+If you face any issues while using Kubernetes GitLab Agent, you should be able to find any related errors in two places:
 
-- KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`
-- agent pod logs: you may tail them using `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>`
+- KAS pod logs: you may tail them using `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`. In case of Omnibus GitLab the logs
+will reside in `/var/log/gitlab/gitlab-kas/`.
+- Agent pod logs: you may tail them using `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>`.
 
-### GitOps: failed to get project info
-
-You may see the error mentioned below in KAS pod logs:
+### KAS logs - GitOps: failed to get project info
 
 ```plaintext
 {"level":"warn","time":"2020-10-30T08:37:26.123Z","msg":"GitOps: failed to get project info","agent_id":4,"project_id":"root/kas-manifest001","error":"error kind: 0; status: 404"}
 ```
 
-It will be shown if the specified manifest project `root/kas-manifest001` does not exist or if a project is private. To fix it, make sure
-that the project exists and its visibility is set to public.
+Such error could be shown if the specified manifest project `root/kas-manifest001` does not exist or if a project is private. To fix it, make sure that the project exists and its visibility is set to public.
 
-### Transport: Error while dialing failed to WebSocket dial
-
-The error below may be found in the agent pod logs:
-
-```plaintext
-{"level":"warn","time":"2020-11-04T10:14:39.368Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://gitlab-kas:443/-/kubernetes-agent\\\": dial tcp: lookup gitlab-kas on 10.60.0.10:53: no such host\""}
-```
-
-It will be shown if there are some connectivity issues between the hostname/IP address specified as `kas-address` and your agent pod.
-To fix it, make sure that you specified the correct `kas-address` correctly. In most of the cases, it should be set to `wss://gitlab.host.tld:443/-/kubernetes-agent`.
-
-### configuration file not found
+### KAS logs - Configuration file not found
 
 ```plaintext
 time="2020-10-29T04:44:14Z" level=warning msg="Config: failed to fetch" agent_id=2 error="configuration file not found: \".gitlab/agents/test-agent/config.yaml\
 ```
 
-This error will be shown in KAS pod logs if the path to the configuration project was specified incorrectly of if the path to `config.yaml` is not valid.
+This error will be shown if the path to the configuration project was specified incorrectly or
+if the path to `config.yaml` inside the project is not valid.
 
-### ValidationError in agent pod logs
+### Agent logs - Transport: Error while dialing failed to WebSocket dial
+
+```plaintext
+{"level":"warn","time":"2020-11-04T10:14:39.368Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://gitlab-kas:443/-/kubernetes-agent\\\": dial tcp: lookup gitlab-kas on 10.60.0.10:53: no such host\""}
+```
+
+Such error will be shown if there are some connectivity issues between the address specified as `kas-address` and your Agent pod. To fix it, make sure that you specified the correct `kas-address` correctly.
+
+### Agent logs - ValidationError(Deployment.metadata
 
 ```plaintext
 {"level":"info","time":"2020-10-30T08:56:54.329Z","msg":"Synced","project_id":"root/kas-manifest001","resource_key":"apps/Deployment/kas-test001/nginx-deployment","sync_result":"error validating data: [ValidationError(Deployment.metadata): unknown field \"replicas\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"selector\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"template\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]"}
 ```
 
-You may see similar errors if your `manifest.yaml` file is malformed, and Kubernetes cannot create specified objects. Make sure that
+You may see similar error if your `manifest.yaml` file is malformed, and Kubernetes cannot create specified objects. Make sure that
 your `manifest.yaml` file is valid. You may try using it to create objects in Kubernetes directly for further trobleshooting.
 
-### Error while dialing failed to WebSocket dial: failed to send handshake request
+### Agent logs - Error while dialing failed to WebSocket dial: failed to send handshake request
 
 ```plaintext
 {"level":"warn","time":"2020-10-30T09:50:51.173Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent\\\": net/http: HTTP/1.x transport connection broken: malformed HTTP response \\\"\\\\x00\\\\x00\\\\x06\\\\x04\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x05\\\\x00\\\\x00@\\\\x00\\\"\""}
@@ -450,10 +446,10 @@ your `manifest.yaml` file is valid. You may try using it to create objects in Ku
 
 You may see such error if you configured `wss` as `kas-address` on the agent side but KAS on the server side is not available via `wss`.
 To fix it, you need to make sure that the same schemes are configured on both sides. Note that it is currently not possible to set `grpc` scheme
-due to the issue [It is not possible to configure gitlab-kas to work with grpc without directly editing gitlab-kas deployment](https://gitlab.com/gitlab-org/gitlab/-/issues/276888). While the issue is in progress, to use `grpc` you may directly edit the deployment via `kubectl edit deployment gitlab-kas` 
+due to the issue [It is not possible to configure KAS to work with grpc without directly editing gitlab-kas deployment](https://gitlab.com/gitlab-org/gitlab/-/issues/276888). While the issue is in progress, to use `grpc` you may directly edit the deployment via `kubectl edit deployment gitlab-kas` 
 and change `--listen-websocket=true` to `--listen-websocket=false`. After that you should be able to use `grpc://gitlab-kas.<YOUR-NAMESPACE>:5005`.
 
-#### Decompressor is not installed for grpc-encoding
+#### Agent logs - Decompressor is not installed for grpc-encoding
 
 ```plaintext
 {"level":"warn","time":"2020-11-05T05:25:46.916Z","msg":"GetConfiguration.Recv failed","error":"rpc error: code = Unimplemented desc = grpc: Decompressor is not installed for grpc-encoding \"gzip\""}
