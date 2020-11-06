@@ -27,6 +27,7 @@ query getStorageCounter(
       packagesSize
       wikiSize
       snippetsSize
+      uploadsSize
     }
     projects(
       includeSubgroups: true
@@ -54,6 +55,7 @@ query getStorageCounter(
           packagesSize
           wikiSize
           snippetsSize
+          uploadsSize
         }
       }
       pageInfo {

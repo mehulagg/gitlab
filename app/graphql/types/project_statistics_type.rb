@@ -23,5 +23,7 @@ module Types
           description: 'Wiki size of the project'
     field :snippets_size, GraphQL::FLOAT_TYPE, null: true,
           description: 'Snippets size of the project'
+    field :uploads_size, GraphQL::FLOAT_TYPE, null: true,
+          description: 'Uploads size of the project'
   end
 end
