@@ -11,7 +11,8 @@
   - source scripts/utils.sh
   - rm -rf /usr/local/share/.cache/yarn/
   - yarn cache clean
-  - run_timed_command "retry yarn install --frozen-lockfile --verbose"
+  - yarn config get registry
+  # - run_timed_command "retry yarn install --frozen-lockfile --verbose"
 
 .compile-assets-base:
   extends:
