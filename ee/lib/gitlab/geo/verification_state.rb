@@ -96,6 +96,30 @@ module Gitlab
         def verification_state_value(state_string)
           VERIFICATION_STATE_VALUES[state_string]
         end
+
+        # Atomically marks the records as started, and returns the IDs. This
+        # allows VerificationBatchWorker to concurrently get unique batches of
+        # IDs to process.
+        #
+        def mark_started_and_return_ids(where_clause)
+          started_enum_value = VERIFICATION_STATE_VALUES[:verification_started]
+          where_sql = where_clause.arel.where_sql
+
+          query =
+            <<~SQL.squish
+              UPDATE #{table_name}
+              SET "verification_state" = #{started_enum_value},
+                "verification_started_at" = NOW()
+              #{where_sql}
+              RETURNING #{self.primary_key}
+            SQL
+
+          # This query performs a write, so we need to wrap it in a transaction
+          # to stick to the primary database.
+          self.transaction do
+            self.connection.execute(query).to_a.map { |row| row["id"] }
+          end
+        end
       end
 
       # Convenience method to update checksum and transition to success state.

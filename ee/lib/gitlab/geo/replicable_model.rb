@@ -38,6 +38,34 @@ module Gitlab
             end
           RUBY
         end
+
+        # Returns IDs of records that have never attempted verification.
+        #
+        # Atomically marks the records "verification_started".
+        #
+        def model_record_ids_never_attempted_verification(batch_size:)
+          where_clause = never_attempted_verification.limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+
+          mark_started_and_return_ids(where_clause)
+        end
+
+        # Returns IDs of records that need to attempt verification again. I.e.:
+        #
+        # - Failed to verify (calculate and save checksum)
+        # - Needs reverification # TODO https://gitlab.com/gitlab-org/gitlab/-/issues/13843
+        #
+        # Atomically marks the records "verification_started".
+        #
+        def model_record_ids_needs_verification_again(batch_size:)
+          where_clause = needs_verification_again.order(:verification_retry_at).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+
+          mark_started_and_return_ids(where_clause)
+        end
+
+        # @return [Integer] number of records that need verification
+        def needs_verification_count(limit:)
+          needs_verification.limit(limit).count # rubocop:disable CodeReuse/ActiveRecord
+        end
       end
 
       # Geo Replicator

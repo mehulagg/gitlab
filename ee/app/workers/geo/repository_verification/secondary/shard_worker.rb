@@ -35,8 +35,9 @@ module Geo
           { shard: shard_name }
         end
 
+        # Half capacity since SSF verification is handled elsewhere
         def max_capacity
-          current_node.verification_max_capacity
+          [1, current_node.verification_max_capacity / 2].max
         end
 
         # rubocop:disable CodeReuse/ActiveRecord
