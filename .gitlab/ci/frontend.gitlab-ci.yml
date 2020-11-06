@@ -49,6 +49,8 @@ compile-production-assets:
 compile-test-assets:
   extends:
     - .frontend:rules:compile-test-assets
+  script:
+    - echo "noop"
   artifacts:
     expire_in: 7d
     paths:
