@@ -12,7 +12,8 @@
   - rm -rf /usr/local/share/.cache/yarn/
   - yarn cache clean
   - yarn config get registry
-  # - run_timed_command "retry yarn install --frozen-lockfile --verbose"
+  - rm ~/.config/yarn/global/yarn.lock
+  - run_timed_command "retry yarn install --frozen-lockfile --verbose"
 
 .compile-assets-base:
   extends:
