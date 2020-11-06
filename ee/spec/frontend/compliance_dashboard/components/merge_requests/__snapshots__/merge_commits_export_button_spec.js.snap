@@ -1,37 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MergeCommitsExportButton component Merge commit CSV export button matches the snapshot 1`] = `
+exports[`MergeCommitsExportButton component Layout matches the snapshot 1`] = `
 <div>
-  <gl-button-stub
-    buttontextclasses=""
-    category="primary"
-    class="gl-align-self-center"
-    href="/merge_commit_reports"
-    icon="export"
+  <gl-dropdown-stub
+    category="tertiary"
+    headertext=""
     size="medium"
+    split="true"
+    text=""
     variant="default"
   >
-    
-    List of all merge commits
-  
-  </gl-button-stub>
-   
-  <gl-tooltip-stub
-    boundary="viewport"
-    placement="top"
-    target="[object Object]"
-  >
-    <p
-      class="gl-my-0"
-    >
-      Export as CSV
-    </p>
      
-    <p
-      class="gl-my-0"
-    >
-      (max size 15 MB)
-    </p>
-  </gl-tooltip-stub>
+    <gl-dropdown-form-stub>
+      <gl-form-stub
+        action="/merge_commit_reports"
+        method="GET"
+      >
+        <gl-form-group-stub
+          invalid-feedback="Invalid hash"
+          label="Merge commit SHA"
+          label-for="merge-commits-export-custody-report"
+          label-size="sm"
+        >
+          <gl-form-input-stub
+            debounce="500"
+            id="merge-commits-export-custody-report"
+            name="commit_sha"
+          />
+        </gl-form-group-stub>
+         
+        <gl-button-stub
+          buttontextclasses=""
+          category="primary"
+          data-test-id="merge-commit-submit-button"
+          disabled="true"
+          icon=""
+          size="medium"
+          type="submit"
+          variant="success"
+        >
+          Export commit custody report
+        </gl-button-stub>
+      </gl-form-stub>
+    </gl-dropdown-form-stub>
+  </gl-dropdown-stub>
+   
+  <!---->
 </div>
 `;
