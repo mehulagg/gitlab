@@ -7,7 +7,7 @@ import * as getters from './getters';
 import mutations from './mutations';
 import state from './state';
 
-import sast from '~/vue_shared/security_reports/store/modules/sast';
+import sast from './modules/sast';
 
 Vue.use(Vuex);
 
