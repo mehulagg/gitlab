@@ -82,7 +82,7 @@ and **will** be rejected if the sum of their sizes exceeds the maximum allowed
 repository size.
 
 NOTE: **Note:**
-The repository size limit includes repository files and LFS, and does not include artifacts.
+The repository size limit includes repository files and LFS, and does not include artifacts, uploads, wiki, packages or snippets.
 
 For details on manually purging files, see [reducing the repository size using Git](../../project/repository/reducing_the_repo_size_using_git.md).
 
