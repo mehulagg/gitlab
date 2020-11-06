@@ -30,7 +30,7 @@ module DastOnDemandScans
     end
 
     def dast_site_profile
-      @dast_site ||= params.fetch(:dast_site_profile)
+      @dast_site_profile ||= params.fetch(:dast_site_profile)
     end
 
     def dast_site
@@ -47,9 +47,9 @@ module DastOnDemandScans
 
     def default_config
       {
+        environment_scope: dast_site_profile.environment_scope,
         branch: container.default_branch,
-        target_url: dast_site.url,
-        dast_site_profile_id: dast_site_profile.id
+        target_url: dast_site.url
       }
     end
 
