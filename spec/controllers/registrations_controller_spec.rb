@@ -54,12 +54,9 @@ RSpec.describe RegistrationsController do
         end
 
         it 'emails the admin the access request' do
-          created_user = User.find_by(email: 'new@user.com')
-
           expect_next_instance_of(NotificationService) do |notification|
-            allow(notification).to receive(:new_instance_access_request).with(created_user)
+            allow(notification).to receive(:new_instance_access_request)
           end
-
 
           subject
         end

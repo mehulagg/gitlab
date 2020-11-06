@@ -9,6 +9,15 @@ module Emails
       mail(to: @user.notification_email, subject: subject("Account was created for you"))
     end
 
+    def instance_access_request_email(member, recipient)
+      @member = member
+      @recipient = recipient
+
+      member_email_with_layout(
+        to: recipient.notification_email,
+        subject: subject("GitLab Account Request"))
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def new_ssh_key_email(key_id)
       @key = Key.find_by(id: key_id)

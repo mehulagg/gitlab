@@ -371,7 +371,7 @@ class NotificationService
   end
 
   def new_instance_access_request(member)
-    recipients = User.admins.order_recent_sign_in.limit(10) # Change this for https://gitlab.com/gitlab-org/gitlab/-/issues/277016
+    recipients = User.admins.order_recent_sign_in.limit(10) # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
 
     return true if recipients.empty?
 
