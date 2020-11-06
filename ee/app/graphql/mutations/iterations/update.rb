@@ -15,12 +15,12 @@ module Mutations
             null: true,
             description: 'The updated iteration'
 
-      argument :group_path, GraphQL::ID_TYPE,
+      argument :group_path, ::Types::GlobalIDType[::Group],
                required: true,
                description: "The group of the iteration"
 
       argument :id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Iteration],
                required: true,
                description: 'The id of the iteration'
 

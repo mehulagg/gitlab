@@ -11,10 +11,10 @@ module Resolvers
     argument :title, GraphQL::STRING_TYPE,
              required: false,
              description: 'Fuzzy search by title'
-    argument :id, GraphQL::ID_TYPE,
+    argument :id, ::Types::GlobalIDType[::Iteration],
              required: false,
              description: 'The ID of the Iteration to look up'
-    argument :iid, GraphQL::ID_TYPE,
+    argument :iid, ::Types::GlobalIDType[::Iteration],
              required: false,
              description: 'The internal ID of the Iteration to look up'
     argument :include_ancestors, GraphQL::BOOLEAN_TYPE,
