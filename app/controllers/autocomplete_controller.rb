@@ -53,9 +53,7 @@ class AutocompleteController < ApplicationController
   end
 
   def deploy_keys_with_owners
-    deploy_keys = DeployKeys::CollectKeysService.new(project, current_user).execute
-
-    render json: DeployKeySerializer.new.represent(deploy_keys, { with_owner: true, user: current_user })
+    render json: DeployKeySerializer.new.represent(DeployKey.with_write_access_for_project(project), { with_owner: true, user: current_user })
   end
 
   private

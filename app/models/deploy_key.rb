@@ -7,7 +7,8 @@ class DeployKey < Key
   has_many :deploy_keys_projects, inverse_of: :deploy_key, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :projects, through: :deploy_keys_projects
 
-  scope :in_projects, ->(projects) { joins(:deploy_keys_projects).where('deploy_keys_projects.project_id in (?)', projects) }
+  scope :in_projects, ->(projects) { joins(:deploy_keys_projects).where(deploy_keys_projects: { project_id: projects }) }
+  scope :with_write_access, -> { joins(:deploy_keys_projects).where(deploy_keys_projects: { can_push: true }) }
   scope :are_public,  -> { where(public: true) }
   scope :with_projects, -> { includes(deploy_keys_projects: { project: [:route, namespace: :route] }) }
 
@@ -53,5 +54,12 @@ class DeployKey < Key
 
   def projects_with_write_access
     Project.with_route.where(id: deploy_keys_projects.with_write_access.select(:project_id))
+  end
+
+  def self.with_write_access_for_project(project, deploy_key: nil)
+    query = in_projects(project&.id).with_write_access
+    query = query.where(id: deploy_key.id) if deploy_key
+
+    query
   end
 end
