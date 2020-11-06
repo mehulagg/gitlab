@@ -8,6 +8,7 @@
     NODE_OPTIONS: --max_old_space_size=3584
 
 .yarn-install: &yarn-install
+  - yarn config set @dappelt:registry https://gitlab.example.com/api/v4/packages/npm/
   - source scripts/utils.sh
   - run_timed_command "retry yarn install --frozen-lockfile"
 
