@@ -1,8 +1,8 @@
 import {
   SAST_HAS_ERROR,
   SAST_IS_LOADING,
-} from 'ee/vue_shared/security_reports/store/modules/sast/constants';
-import * as getters from 'ee/vue_shared/security_reports/store/modules/sast/getters';
+} from '~/vue_shared/security_reports/store/modules/sast/constants';
+import * as getters from '~/vue_shared/security_reports/store/modules/sast/getters';
 
 const createReport = (config = {}) => ({
   paths: [],

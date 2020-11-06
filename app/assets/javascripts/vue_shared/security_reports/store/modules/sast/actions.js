@@ -5,9 +5,6 @@ export const setDiffEndpoint = ({ commit }, path) => commit(types.SET_DIFF_ENDPO
 
 export const requestDiff = ({ commit }) => commit(types.REQUEST_DIFF);
 
-export const updateVulnerability = ({ commit }, vulnerability) =>
-  commit(types.UPDATE_VULNERABILITY, vulnerability);
-
 export const receiveDiffSuccess = ({ commit }, response) =>
   commit(types.RECEIVE_DIFF_SUCCESS, response);
 
