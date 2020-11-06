@@ -154,8 +154,8 @@ dependency_scanning:
 
 # The job below analysis dependencies for malicous behavior
 package_hunter:
-  extends:
-  - .reports:schedule-dast
+  # extends:
+  # - .reports:schedule-dast
   stage: test
   image:
     name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli:latest
