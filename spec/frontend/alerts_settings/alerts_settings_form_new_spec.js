@@ -37,6 +37,8 @@ describe('AlertsSettingsFormNew', () => {
   const findSubmitButton = () => wrapper.find(`[type = "submit"]`);
   const findMultiSupportText = () =>
     wrapper.find(`[data-testid="multi-integrations-not-supported"]`);
+  const findJsonTestSubmit = () => wrapper.find(`[data-testid="integration-test-and-submit"]`);
+  const findJsonTextArea = () => wrapper.find(`[id = "test-integration"]`);
 
   afterEach(() => {
     if (wrapper) {
@@ -231,6 +233,37 @@ describe('AlertsSettingsFormNew', () => {
       expect(wrapper.emitted('update-integration')[0]).toEqual([
         { type: typeSet.prometheus, variables: { apiUrl: 'https://test-post.com', active: true } },
       ]);
+    });
+  });
+
+  describe('submitting the integration with a JSON test payload', () => {
+    it('should not allow a user to test invalid JSON', async () => {
+      createComponent({
+        data: {
+          selectedIntegration: typeSet.http,
+          integrationTestPayload: {
+            json: 'Invalid JSON',
+            error: 'Invalid JSON Error',
+          },
+        },
+        props: {
+          currentIntegration: { id: '1', name: 'Test', active: true },
+          loading: false,
+        },
+      });
+
+      expect(findJsonTestSubmit().exists()).toBe(true);
+      expect(findJsonTestSubmit().text()).toBe('Save and test payload');
+      expect(findJsonTestSubmit().props('disabled')).toBe(true);
+    });
+
+    it('should allow for the form to be automatically saved if the test payload is successfully submitted', async () => {
+      createComponent({});
+      await findJsonTextArea().setValue('{ "value": "value" }');
+
+      await wrapper.vm.$nextTick();
+
+      expect(findJsonTestSubmit().props('disabled')).toBe(false);
     });
   });
 
