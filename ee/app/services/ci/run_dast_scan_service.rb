@@ -8,7 +8,8 @@ module Ci
       target_url: 'DAST_WEBSITE',
       use_ajax_spider: 'DAST_USE_AJAX_SPIDER',
       show_debug_messages: 'DAST_DEBUG',
-      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
+      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED',
+      dast_site_profile_id: 'DAST_SITE_PROFILE_ID'
     }.freeze
 
     def self.ci_template_raw
