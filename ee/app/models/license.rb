@@ -90,6 +90,7 @@ class License < ApplicationRecord
     group_saml
     group_wikis
     incident_sla
+    incident_metric_upload
     ide_schema_config
     issues_analytics
     jira_issues_integration

@@ -10,8 +10,8 @@ class AddIncidentMetricImages < ActiveRecord::Migration[6.0]
   def up
     create_table :metric_images do |t|
       t.references :issue, null: false, index: true, foreign_key: { on_delete: :cascade }
-      t.text :url, limit: 255
-      t.text :file, limit: 255
+      t.text :url
+      t.text :file, null: false
       t.integer :file_store, limit: 2
     end
 

@@ -7,6 +7,7 @@ module IncidentManagement
         super
 
         @issuable = issuable
+        @project = issuable&.project
         @file = params.fetch(:file)
         @url = params.fetch(:url)
       end
@@ -21,7 +22,7 @@ module IncidentManagement
         error(e.message)
       end
 
-      attr_reader :issuable, :file, :url, :metric
+      attr_reader :issuable, :project, :file, :url, :metric
 
       private
 
@@ -34,7 +35,8 @@ module IncidentManagement
       end
 
       def can_upload_metrics?
-        Ability.allowed?(current_user, :upload_metric, issuable)
+        project.feature_available?(:incident_metric_upload) &&
+          Ability.allowed?(current_user, :upload_metric, issuable)
       end
     end
   end

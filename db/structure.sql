@@ -13741,7 +13741,7 @@ CREATE TABLE metric_images (
     id bigint NOT NULL,
     issue_id bigint NOT NULL,
     url text,
-    file text,
+    file text NOT NULL,
     file_store smallint,
     CONSTRAINT check_1d5bf28f79 CHECK ((char_length(file) <= 255)),
     CONSTRAINT check_bfa8eacfe4 CHECK ((char_length(url) <= 255))

@@ -6,7 +6,7 @@ RSpec.describe Mutations::Issues::UploadMetric do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:project) { create(:project, :public) }
+  let_it_be_with_refind(:project) { create(:project, :public) }
   let_it_be(:issue) { create(:incident, project: project) }
   let(:file) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
 
@@ -30,25 +30,38 @@ RSpec.describe Mutations::Issues::UploadMetric do
         project.add_developer(current_user)
       end
 
-      it 'creates the metric image' do
+      it 'returns an error' do
         expect { subject }
-          .to change(issue.metric_images, :count)
+              .not_to change(issue.metric_images, :count)
 
-        expect(subject[:issue]).to eq(issue)
-        expect(subject[:errors]).to be_empty
+        expect(subject[:errors]).to include('Not allowed!')
       end
 
-      context 'file size is too large' do
+      context 'with license' do
         before do
-          allow(file).to receive(:size).and_return(2.megabytes)
+          stub_licensed_features(incident_metric_upload: true)
         end
 
-        it 'returns an error' do
-        expect { subject }
-          .not_to change(issue.metric_images, :count)
+        it 'creates the metric image' do
+          expect { subject }
+            .to change(issue.metric_images, :count)
 
-        expect(subject[:errors]).to include('File size too large!')
-      end
+          expect(subject[:issue]).to eq(issue)
+          expect(subject[:errors]).to be_empty
+        end
+
+        context 'file size is too large' do
+          before do
+            allow(file).to receive(:size).and_return(2.megabytes)
+          end
+
+          it 'returns an error' do
+            expect { subject }
+              .not_to change(issue.metric_images, :count)
+
+            expect(subject[:errors]).to include('File size too large!')
+          end
+        end
       end
     end
   end
