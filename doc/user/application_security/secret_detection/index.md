@@ -53,10 +53,6 @@ Encryption keys:
   - Stripe API
   - Generic API key strings starting with `api-`
 
-NOTE: **Note:**
-NOTE: **Note:**
-You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets)
-
 ## Requirements
 
 To run Secret Detection jobs, by default, you need GitLab Runner with the
