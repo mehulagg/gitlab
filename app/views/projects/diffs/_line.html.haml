@@ -1,4 +1,3 @@
-- email = local_assigns.fetch(:email, false)
 - plain = local_assigns.fetch(:plain, false)
 - discussions = local_assigns.fetch(:discussions, nil)
 - line_code = diff_file.line_code(line)
@@ -15,24 +14,20 @@
     %td.line_content.match= line.text
   - else
     %td.old_line.diff-line-num{ class: [line.type, ("js-avatar-container" if !plain)], data: { linenumber: line.old_pos } }
-      - link_text = line.type == "new" ? " " : line.old_pos
-
       - if plain
-        = link_text
+        = diff_link_text(line.type, "old", line.old_pos)
       - else
         = add_diff_note_button(line_code, diff_file.position(line), line.type)
-        %a{ href: "##{line_code}", data: { linenumber: link_text } }
+        %a{ href: "##{line_code}", data: { linenumber: diff_link_text(line.type, "old", line.old_pos) } }
 
     %td.new_line.diff-line-num{ class: line.type, data: { linenumber: line.new_pos } }
-      - link_text = line.type == "old" ? " " : line.new_pos
-
       - if plain
-        = link_text
+        = diff_link_text(line.type, "new", line.new_pos)
       - else
-        %a{ href: "##{line_code}", data: { linenumber: link_text } }
+        %a{ href: "##{line_code}", data: { linenumber: diff_link_text(line.type, "new", line.new_pos) } }
 
     %td.line_content{ class: line.type }<
-      - if email
+      - if local_assigns.fetch(:email, false)
         %pre= line.rich_text
       - else
         = diff_line_content(line.rich_text)
