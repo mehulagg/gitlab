@@ -28,6 +28,10 @@ describe('MemberList', () => {
       state: {
         members: [],
         tableFields: [],
+        tableAttrs: {
+          table: { 'data-qa-selector': 'members_list' },
+          tr: { 'data-qa-selector': 'member_row' },
+        },
         sourceId: 1,
         currentUserId: 1,
         ...state,

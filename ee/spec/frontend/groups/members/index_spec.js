@@ -6,7 +6,7 @@ describe('initGroupMembersApp', () => {
   let vm;
 
   const createVm = () => {
-    vm = initGroupMembersApp(el, ['account'], () => ({}));
+    vm = initGroupMembersApp(el, ['account'], {}, () => ({}));
   };
 
   beforeEach(() => {
