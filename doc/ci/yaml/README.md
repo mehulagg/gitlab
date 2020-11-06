@@ -238,17 +238,17 @@ The top-level `workflow:` keyword determines whether or not a pipeline is create
 It accepts a single `rules:` keyword that is similar to [`rules:` defined within jobs](#rules).
 Use it to define what can trigger a new pipeline.
 
-The [`workflow:rules` templates](#workflowrules-templates) can be used to import
+You can use the [`workflow:rules` templates](#workflowrules-templates) to import
 a preconfigured `workflow: rules` entry.
 
 `workflow: rules` accepts these keywords:
 
-- [`if`](#rulesif): Defines a rule that is checked to determine when to run a pipeline.
-- [`when`](#when): Defines what to do if an `if` rule evaluates to true. Set to
-  `always` to run a pipeline when the `if` rule is true, or set to `never` to prevent
-  pipelines from running when the rule is true.
+- [`if`](#rulesif): Check this rule to determine when to run a pipeline.
+- [`when`](#when): Specify what to do when the `if` rule evaluates to true. 
+  - To run a pipeline, set to `always`.
+  - To prevent pipelines from running, set to `never`.
 
-A pipeline does not run when there are no rules that evaluate to true.
+When no rules evaluate to true, the pipeline does not run.
 
 Some example `if` clauses for `workflow: rules`:
 
@@ -263,7 +263,7 @@ See the [common `if` clauses for `rules`](#common-if-clauses-for-rules) for more
 
 For example, in the following configuration, pipelines run for all `push` events (changes to
 branches and new tags). Pipelines for push events with `-wip` in the commit message
-don't run, because they are set to `when: never`. Pipelines for schedules or merge request
+don't run, because they are set to `when: never`. Pipelines for schedules or merge requests
 don't run either, because no rules evaluate to true for them:
 
 ```yaml
@@ -294,7 +294,7 @@ This example prevents pipelines for schedules or `push` (branches and tags) pipe
 The final `when: always` rule lets all other pipeline types run, **including** merge
 request pipelines.
 
-Be careful not to use a configuration where the rules can match both branch pipelines
+Be careful not to have rules that match both branch pipelines
 and merge request pipelines. Similar to `rules` defined in jobs, this can cause
 [duplicate pipelines](#prevent-duplicate-pipelines).
 
