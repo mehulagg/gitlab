@@ -65,7 +65,7 @@ RSpec.shared_examples 'group emails are disabled' do
   end
 end
 
-RSpec.shared_examples 'sends notification only to a maximum of ten, most recently active instance admins' do
+RSpec.shared_examples 'notifies up to the ten most recently active instance admins' do
   let(:admins) { create_list(:user, :admin, 12, :with_sign_ins) }
 
   before do

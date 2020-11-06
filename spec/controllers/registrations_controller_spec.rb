@@ -55,7 +55,7 @@ RSpec.describe RegistrationsController do
 
         it 'emails the admin the access request' do
           expect_next_instance_of(NotificationService) do |notification|
-            allow(notification).to receive(:new_instance_access_request)
+            expect(notification).to receive(:new_instance_access_request)
           end
 
           subject
@@ -95,7 +95,7 @@ RSpec.describe RegistrationsController do
         end
 
         it 'does not email the admin the access request' do
-          expect { subject }.not_to have_enqueued_mail(DeviseMailer, :user_access_request)
+          expect { subject }.not_to have_enqueued_mail(NotificationService, :user_access_request)
         end
 
         context 'email confirmation' do

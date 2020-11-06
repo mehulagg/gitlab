@@ -2312,7 +2312,7 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
-  describe '#instance_access_request', :deliver_mails_inline do
+  describe '#new_instance_access_request', :deliver_mails_inline do
     let_it_be(:user) { create(:user) }
 
     subject { notification.new_instance_access_request(user) }
@@ -2321,7 +2321,7 @@ RSpec.describe NotificationService, :mailer do
       stub_application_setting(require_admin_approval_after_user_signup: true)
     end
 
-    it_behaves_like 'sends notification only to a maximum of ten, most recently active instance admins'
+    it_behaves_like 'notifies up to the ten most recently active instance admins'
   end
 
   describe 'GroupMember', :deliver_mails_inline do
