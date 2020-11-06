@@ -77,13 +77,5 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
         expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError)
       end
     end
-
-    context ":parallel_push_checks feature is disabled" do
-      before do
-        stub_feature_flags(parallel_push_checks: false)
-      end
-
-      it_behaves_like "push checks"
-    end
   end
 end

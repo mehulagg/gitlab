@@ -7,11 +7,7 @@ module EE
         def validate!
           return unless push_rule
 
-          if ::Feature.enabled?(:parallel_push_checks, project, type: :ops)
-            run_checks_in_parallel!
-          else
-            run_checks_in_sequence!
-          end
+          run_checks_in_parallel!
         end
 
         private
@@ -30,15 +26,6 @@ module EE
         # @raise [Gitlab::GitAccess::ForbiddenError] if check fails
         def check_file_size!
           PushRules::FileSizeCheck.new(change_access).validate!
-        end
-
-        # Run the checks one after the other.
-        #
-        # @return [Nil] returns nil unless an error is raised
-        # @raise [Gitlab::GitAccess::ForbiddenError] if any check fails
-        def run_checks_in_sequence!
-          check_tag_or_branch!
-          check_file_size!
         end
 
         # Run the checks in separate threads for performance benefits.
