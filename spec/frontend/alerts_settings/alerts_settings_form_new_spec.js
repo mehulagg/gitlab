@@ -79,37 +79,6 @@ describe('AlertsSettingsFormNew', () => {
       expect(findSelect().attributes('disabled')).toBe('disabled');
       expect(findMultiSupportText().exists()).toBe(true);
     });
-
-    it('shows the form with pre-filled values if currentIntegration is set', async () => {
-      createComponent({
-        props: {
-          currentIntegration: {
-            id: '1',
-            name: 'Test integration to show',
-            type: typeSet.http,
-            active: false,
-          },
-          loading: false,
-        },
-      });
-
-      await wrapper.vm.$nextTick();
-
-      expect(findSelect().attributes('disabled')).toBe('disabled');
-      expect(findFormFields().at(0).element.value).toBe('Test integration to show');
-      expect(findFormToggle().props('value')).toBe(false);
-    });
-
-    it('does not show the form with pre-filled values if currentIntegration is not set', async () => {
-      createComponent({
-        props: {
-          currentIntegration: null,
-          loading: false,
-        },
-      });
-
-      expect(findSelect().attributes('disabled')).toBe(undefined);
-    });
   });
 
   describe('submitting integration form', () => {
@@ -230,37 +199,6 @@ describe('AlertsSettingsFormNew', () => {
       expect(wrapper.emitted('update-integration')).toBeTruthy();
       expect(wrapper.emitted('update-integration')[0]).toEqual([
         { type: typeSet.prometheus, variables: { apiUrl: 'https://test-post.com', active: true } },
-      ]);
-    });
-
-    it('allows for on-update-integration with the correct form values for HTTP', async () => {
-      createComponent({
-        data: {
-          selectedIntegration: typeSet.http,
-        },
-        props: {
-          currentIntegration: { id: '1', name: 'Test integration pre' },
-          loading: false,
-        },
-      });
-
-      await findFormFields()
-        .at(0)
-        .setValue('Test integration post');
-      await findFormToggle().trigger('click');
-
-      await wrapper.vm.$nextTick();
-
-      expect(findSubmitButton().exists()).toBe(true);
-      expect(findSubmitButton().text()).toBe('Save integration');
-
-      findForm().trigger('submit');
-
-      await wrapper.vm.$nextTick();
-
-      expect(wrapper.emitted('update-integration')).toBeTruthy();
-      expect(wrapper.emitted('update-integration')[0]).toEqual([
-        { type: typeSet.http, variables: { name: 'Test integration post', active: true } },
       ]);
     });
   });
