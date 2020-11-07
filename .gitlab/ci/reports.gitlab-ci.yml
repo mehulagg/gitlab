@@ -163,7 +163,7 @@ package_hunter:
   needs: []
   script:
     - rm -r spec locale .git app/assets/images doc/
-    - tar --directory=/builds/gitlab-org -I "gzip --best" -cf gitlab.tgz gitlab/
+    - cd .. && tar -I "gzip --best" -cf gitlab.tgz gitlab/
     - DEBUG=* HTR_user=$PACKAGE_HUNTER_USER HTR_pass=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze --format gitlab gitlab.tgz | tee $CI_PROJECT_DIR/gl-dependency-scanning-report.json
   artifacts:
     paths:
