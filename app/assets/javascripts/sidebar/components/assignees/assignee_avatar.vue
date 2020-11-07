@@ -1,6 +1,6 @@
 <script>
 import { __, sprintf } from '~/locale';
-
+// rm
 export default {
   props: {
     user: {

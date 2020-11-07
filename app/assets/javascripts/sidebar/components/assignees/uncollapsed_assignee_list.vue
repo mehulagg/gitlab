@@ -1,12 +1,17 @@
 <script>
+import { GlAvatarLink, GlAvatarLabeled, GlAvatar, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import AssigneeAvatarLink from './assignee_avatar_link.vue';
 
 const DEFAULT_RENDER_COUNT = 5;
 
 export default {
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   components: {
-    AssigneeAvatarLink,
+    GlAvatarLink,
+    GlAvatarLabeled,
+    GlAvatar,
   },
   props: {
     users: {
@@ -55,27 +60,31 @@ export default {
     toggleShowLess() {
       this.showLess = !this.showLess;
     },
+    avatarUrl(user) {
+      return user.avatarUrl || user.avatar || user.avatar_url || gon.default_avatar_url;
+    },
+    userName(name) {
+      return `@${name}`;
+    },
   },
 };
 </script>
 
 <template>
-  <assignee-avatar-link
-    v-if="hasOneUser"
-    tooltip-placement="left"
-    :tooltip-has-name="false"
-    :user="firstUser"
-    :issuable-type="issuableType"
-  >
-    <div class="ml-2 gl-line-height-normal">
-      <div>{{ firstUser.name }}</div>
-      <div>{{ username }}</div>
-    </div>
-  </assignee-avatar-link>
+  <gl-avatar-link v-if="hasOneUser">
+    <gl-avatar-labeled
+      :size="32"
+      :label="firstUser.name"
+      :sub-label="userName(firstUser.username)"
+      :src="avatarUrl(firstUser)"
+    />
+  </gl-avatar-link>
   <div v-else>
     <div class="user-list">
       <div v-for="user in uncollapsedUsers" :key="user.id" class="user-item">
-        <assignee-avatar-link :user="user" :issuable-type="issuableType" />
+        <gl-avatar-link :href="user.webUrl || user.web_url">
+          <gl-avatar v-gl-tooltip="user.name" :size="32" :src="avatarUrl(user)" />
+        </gl-avatar-link>
       </div>
     </div>
     <div v-if="renderShowMoreSection" class="user-list-more">

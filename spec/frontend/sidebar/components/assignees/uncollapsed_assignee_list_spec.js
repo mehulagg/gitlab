@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
+import { GlAvatarLink, GlAvatarLabeled, GlAvatar } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import UncollapsedAssigneeList from '~/sidebar/components/assignees/uncollapsed_assignee_list.vue';
-import AssigneeAvatarLink from '~/sidebar/components/assignees/assignee_avatar_link.vue';
 import userDataMock from '../../user_data_mock';
 import UsersMockHelper from '../../../helpers/user_mock_data_helper';
 
@@ -40,12 +40,19 @@ describe('UncollapsedAssigneeList component', () => {
     });
 
     it('only has one user', () => {
-      expect(wrapper.findAll(AssigneeAvatarLink).length).toBe(1);
+      expect(wrapper.findAll(GlAvatarLink).length).toBe(1);
     });
 
-    it('calls the AssigneeAvatarLink with the proper props', () => {
-      expect(wrapper.find(AssigneeAvatarLink).exists()).toBe(true);
-      expect(wrapper.find(AssigneeAvatarLink).props().tooltipPlacement).toEqual('left');
+    it('contains the GlAvatarLinkLabeled with the correct props', () => {
+      expect(wrapper.find(GlAvatarLabeled).props()).toEqual(
+        expect.objectContaining({ label: user.name, subLabel: `@${user.name.toLowerCase()}` }),
+      );
+    });
+
+    it('contains the GlAvatarLinkLabeled with the correct attrs', () => {
+      expect(wrapper.find(GlAvatarLabeled).attributes()).toEqual(
+        expect.objectContaining({ size: '32', src: user.avatar_url }),
+      );
     });
 
     it('Shows one user with avatar, username and author name', () => {
@@ -79,7 +86,7 @@ describe('UncollapsedAssigneeList component', () => {
       });
 
       it('shows truncated users', () => {
-        expect(wrapper.findAll(AssigneeAvatarLink).length).toBe(DEFAULT_RENDER_COUNT);
+        expect(wrapper.findAll(GlAvatar).length).toBe(DEFAULT_RENDER_COUNT);
       });
 
       describe('when more button is clicked', () => {
@@ -94,7 +101,7 @@ describe('UncollapsedAssigneeList component', () => {
         });
 
         it('shows all users', () => {
-          expect(wrapper.findAll(AssigneeAvatarLink).length).toBe(DEFAULT_RENDER_COUNT + 1);
+          expect(wrapper.findAll(GlAvatar).length).toBe(DEFAULT_RENDER_COUNT + 1);
         });
       });
     });
