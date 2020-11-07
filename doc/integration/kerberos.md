@@ -91,7 +91,7 @@ GitLab will now offer the `negotiate` authentication method for signing in and
 HTTP Git access, enabling Git clients that support this authentication protocol
 to authenticate with Kerberos tokens.
 
-**Enable single sign-on**
+#### Enable single sign-on
 
 See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration)
 for initial settings to enable single sign-on and add Kerberos servers
