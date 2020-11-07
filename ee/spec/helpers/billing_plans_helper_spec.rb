@@ -15,7 +15,7 @@ RSpec.describe BillingPlansHelper do
       it 'returns data attributes' do
         upgrade_href =
           "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
-        billable_seats_href = helper.seat_usage_group_billings_path(group)
+        billable_seats_href = helper.group_seat_usage_path(group)
 
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
@@ -38,7 +38,7 @@ RSpec.describe BillingPlansHelper do
       let(:plan) { Hashie::Mash.new(id: nil) }
 
       it 'returns data attributes without upgrade href' do
-        billable_seats_href = helper.seat_usage_group_billings_path(group)
+        billable_seats_href = helper.group_seat_usage_path(group)
 
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Groups::SeatUsageController do
-  let_it_be(:user)  { create(:user) }
+  let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
 
   describe 'GET show' do
@@ -17,15 +17,11 @@ RSpec.describe Groups::SeatUsageController do
       get :show, params: { group_id: group }
     end
 
-    def add_group_owner
-      group.add_owner(user)
-    end
-
     subject { response }
 
-    context 'authorized' do
+    context 'when authorized' do
       before do
-        add_group_owner
+        group.add_owner(user)
       end
 
       it 'renders show with 200 status code' do
@@ -36,10 +32,12 @@ RSpec.describe Groups::SeatUsageController do
       end
     end
 
-    context 'unauthorized' do
-      it 'renders 404 when user is not an owner' do
+    context 'when unauthorized' do
+      before do
         group.add_developer(user)
+      end
 
+      it 'renders 404 when user is not an owner' do
         get_show
 
         is_expected.to have_gitlab_http_status(:not_found)

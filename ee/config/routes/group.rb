@@ -91,11 +91,9 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
     end
 
-    resources :billings, only: [:index] do
-      collection do
-        get :seat_usage, to: 'seat_usage#show'
-      end
-    end
+    resources :billings, only: [:index]
+
+    get :seat_usage, to: 'seat_usage#show'
 
     resources :epics, concerns: :awardable, constraints: { id: /\d+/ } do
       member do
