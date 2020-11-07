@@ -176,6 +176,7 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
+    puts Rails.application.config.cache_classes
     Timecop.safe_mode = true
     TestEnv.init
 
