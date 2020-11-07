@@ -74,7 +74,7 @@ For source installations, make sure the `kerberos` gem group
 
 1. [Restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-**Omnibus package installations**
+#### Omnibus package installations
 
 1. Edit `/etc/gitlab/gitlab.rb`:
 
