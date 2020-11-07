@@ -47,7 +47,7 @@ sudo chmod 0600 /etc/http.keytab
 
 ### Configure GitLab
 
-**Installations from source**
+#### Installations from source
 
 NOTE: **Note:**
 For source installations, make sure the `kerberos` gem group
