@@ -842,8 +842,8 @@
 
 "@dappelt/twilio-npm@^1.0.2":
   version "1.0.2"
-  resolved "https://gitlab.com/api/v4/projects/22281581/packages/npm/@dappelt/twilio-npm/-/@dappelt/twilio-npm-1.0.2.tgz#89d2170448e7337e082b0667e65aced119c8406a"
-  integrity sha1-idIXBEjnM34IKwZn5lrO0RnIQGo=
+  resolved "https://gitlab.com/api/v4/projects/22281581/packages/npm/@dappelt/twilio-npm/-/@dappelt/twilio-npm-1.0.2.tgz#36ec787d70c411d19518e20c27c00e2f4ab8aa41"
+  integrity sha1-Nux4fXDEEdGVGOIMJ8AOL0q4qkE=
 
 "@gitlab/at.js@1.5.5":
   version "1.5.5"
