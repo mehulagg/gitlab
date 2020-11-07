@@ -718,4 +718,4 @@ fail with one of the mentioned errors.
 The following are the most likely reasons that a user is blocked when signing in through SAML:
 
 - In the configuration, `gitlab_rails['omniauth_block_auto_created_users'] = true` is set and this is the user's first time signing in.
-- There are `required_groups` configured, but the user is not a member of one.
+- There are [`required_groups`](#required-groups) configured, but the user is not a member of one.
