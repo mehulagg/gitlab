@@ -2,31 +2,24 @@
 
 module BulkImports
   module Pipeline
-    class Context
-      include Gitlab::Utils::LazyAttributes
-
-      Attribute = Struct.new(:name, :type)
-
-      PIPELINE_ATTRIBUTES = [
-        Attribute.new(:current_user, User),
-        Attribute.new(:entity, ::BulkImports::Entity),
-        Attribute.new(:configuration, ::BulkImports::Configuration)
-      ].freeze
-
-      def initialize(args)
-        assign_attributes(args)
+    class Context < SimpleDelegator
+      def http_client
+        @http_client ||= BulkImports::Clients::Http.new(
+          uri: @configuration.url,
+          token: @configuration.access_token,
+          per_page: 100
+        )
       end
 
-      private
-
-      PIPELINE_ATTRIBUTES.each do |attr|
-        lazy_attr_reader attr.name, type: attr.type
+      def graphql_client
+        @graphql_client ||= BulkImports::Clients::Graphql.new(
+          url: @context.configuration.url,
+          token: @context.configuration.access_token
+        )
       end
 
-      def assign_attributes(values)
-        values.slice(*PIPELINE_ATTRIBUTES.map(&:name)).each do |name, value|
-          instance_variable_set("@#{name}", value)
-        end
+      def current_user
+        bulk_import.user
       end
     end
   end

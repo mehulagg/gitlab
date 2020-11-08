@@ -9,14 +9,8 @@ module BulkImports
 
       def execute
         entity.start!
-        bulk_import = entity.bulk_import
-        configuration = bulk_import.configuration
 
-        context = BulkImports::Pipeline::Context.new(
-          current_user: bulk_import.user,
-          entity: entity,
-          configuration: configuration
-        )
+        context = BulkImports::Pipeline::Context.new(entity)
 
         BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
         BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline.new.run(context)

@@ -13,7 +13,7 @@ module BulkImports
 
           group = ::Groups::CreateService.new(context.current_user, data).execute
 
-          context.entity.update!(group: group)
+          context.update!(group: group)
 
           group
         end

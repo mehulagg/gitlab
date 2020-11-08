@@ -6,13 +6,21 @@ module BulkImports
       class GroupPipeline
         include Pipeline
 
-        extractor Common::Extractors::GraphqlExtractor, query: Graphql::GetGroupQuery
+        extractor Common::Extractors::GraphqlExtractor.new(
+          Graphql::GetGroupQuery.new
+        )
 
-        transformer Common::Transformers::GraphqlCleanerTransformer
-        transformer Common::Transformers::UnderscorifyKeysTransformer
-        transformer Groups::Transformers::GroupAttributesTransformer
+        transformer do |context, entry|
+          data.dig(:data, :group)
+        end
 
-        loader Groups::Loaders::GroupLoader
+        transformer do |context, entry|
+          data.deep_transform_keys { |key| key.underscore }
+        end
+
+        transformer Groups::Transformers::GroupAttributesTransformer.new
+
+        loader Groups::Loaders::GroupLoader.new
       end
     end
   end

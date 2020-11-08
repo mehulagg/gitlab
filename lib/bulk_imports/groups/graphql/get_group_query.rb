@@ -3,9 +3,7 @@
 module BulkImports
   module Groups
     module Graphql
-      module GetGroupQuery
-        extend self
-
+      class GetGroupQuery
         def to_s
           <<-'GRAPHQL'
           query($full_path: ID!) {
@@ -29,8 +27,8 @@ module BulkImports
           GRAPHQL
         end
 
-        def variables
-          { full_path: :source_full_path }
+        def variables(entity)
+          { full_path: entity.source_full_path }
         end
       end
     end
