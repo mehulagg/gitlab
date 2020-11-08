@@ -526,7 +526,7 @@ There are some cases where `users` passed in the code is actually referring to a
 In some scenarios such as [this one](https://gitlab.com/gitlab-org/gitlab/-/issues/237795), user impersonation is possible because a `DeployToken` ID can be used in place of a `User` ID. This happened because there was no check on the line with `Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)`. In this case, the `id` is actually a `DeployToken` ID instead of a `User` ID.
 
 ```ruby
-def find_current_user!
+      def find_current_user!
         user = find_user_from_sources
         return unless user
 
