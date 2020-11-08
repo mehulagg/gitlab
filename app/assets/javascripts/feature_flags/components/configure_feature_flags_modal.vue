@@ -9,10 +9,11 @@ import {
   GlSprintf,
   GlLink,
   GlIcon,
+  GlAlert,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import Callout from '~/vue_shared/components/callout.vue';
+import Callout from '~/vue_shared/components/callout.vue'; // TODO: remove after 1st test
 
 export default {
   components: {
@@ -22,10 +23,11 @@ export default {
     GlModal,
     ModalCopyButton,
     GlIcon,
-    Callout,
+    Callout, // TODO: remove after 1st test
     GlLoadingIcon,
     GlSprintf,
     GlLink,
+    GlAlert,
   },
 
   directives: {
@@ -154,7 +156,7 @@ export default {
       </gl-sprintf>
     </p>
 
-    <callout category="warning">
+    <gl-alert variant="warning">
       <gl-sprintf
         :message="
           s__(
@@ -168,7 +170,7 @@ export default {
           }}</gl-link>
         </template>
       </gl-sprintf>
-    </callout>
+    </gl-alert>
     <gl-form-group :label="$options.translations.apiUrlLabelText" label-for="api-url">
       <gl-form-input-group id="api-url" :value="unleashApiUrl" readonly type="text" name="api-url">
         <template #append>
