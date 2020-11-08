@@ -156,7 +156,7 @@ export default {
       </gl-sprintf>
     </p>
 
-    <gl-alert variant="warning">
+    <gl-alert variant="warning" :dismissible="false">
       <gl-sprintf
         :message="
           s__(
@@ -171,6 +171,7 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
+
     <gl-form-group :label="$options.translations.apiUrlLabelText" label-for="api-url">
       <gl-form-input-group id="api-url" :value="unleashApiUrl" readonly type="text" name="api-url">
         <template #append>
