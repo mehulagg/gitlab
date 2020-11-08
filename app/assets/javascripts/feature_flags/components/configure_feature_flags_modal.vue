@@ -13,7 +13,7 @@ import {
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import Callout from '~/vue_shared/components/callout.vue'; // TODO: remove after 1st test
+// import Callout from '~/vue_shared/components/callout.vue'; // TODO: remove after 1st test
 
 export default {
   components: {
@@ -23,7 +23,7 @@ export default {
     GlModal,
     ModalCopyButton,
     GlIcon,
-    Callout, // TODO: remove after 1st test
+    // Callout, // TODO: remove after 1st test
     GlLoadingIcon,
     GlSprintf,
     GlLink,
@@ -171,7 +171,6 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
-
     <gl-form-group :label="$options.translations.apiUrlLabelText" label-for="api-url">
       <gl-form-input-group id="api-url" :value="unleashApiUrl" readonly type="text" name="api-url">
         <template #append>
@@ -215,9 +214,10 @@ export default {
       <gl-icon name="warning" class="gl-mr-2" />
       <span>{{ $options.translations.instanceIdRegenerateError }}</span>
     </div>
-    <callout
+    <gl-alert
       v-if="canUserRotateToken"
-      category="danger"
+      variant="danger"
+      :dismissible="false"
       :message="$options.translations.instanceIdRegenerateText"
     />
     <p v-if="canUserRotateToken" data-testid="prevent-accident-text">
