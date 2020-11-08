@@ -6,7 +6,6 @@ import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
 import { polyfillSticky } from '~/lib/utils/sticky';
 import CiHeader from '~/vue_shared/components/header_ci_component.vue';
-// import Callout from '~/vue_shared/components/callout.vue'; // todo: remove after first test
 import EmptyState from './empty_state.vue';
 import EnvironmentsBlock from './environments_block.vue';
 import ErasedBlock from './erased_block.vue';
@@ -22,7 +21,6 @@ export default {
   name: 'JobPageApp',
   components: {
     CiHeader,
-    // Callout, // todo: remove after first test
     EmptyState,
     EnvironmentsBlock,
     ErasedBlock,
