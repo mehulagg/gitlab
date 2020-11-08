@@ -540,4 +540,4 @@ In some scenarios such as [this one](https://gitlab.com/gitlab-org/gitlab/-/issu
 ```
 
 ### Best Practices
-In order to prevent this from happening, it is recommended to use the method `user.is_a?(User)` to make sure it returns `true` when we are expecting to deal with an `User` object. This could prevent the id confusion from the method `find_user_from_sources` mentioned above.
+In order to prevent this from happening, it is recommended to use the method `user.is_a?(User)` to make sure it returns `true` when we are expecting to deal with a `User` object. This could prevent the ID confusion from the method `find_user_from_sources` mentioned above.
