@@ -522,7 +522,7 @@ gem 'webauthn', '~> 2.3'
 gem 'ipaddress', '~> 0.8.3'
 
 # Secure-related
-gem 'ctags4ruby', '0.0.0',
+gem 'ctags4ruby', '1.0.0',
   :path => '/home/james/ws/dev/gitlab/vr/ctags4ruby'
   #:branch => "useffi"
   #:git => 'git@gitlab.com:gitlab-org/secure/vulnerability-research/pocs/ctags4ruby.git',

@@ -100,7 +100,7 @@ module Gitlab
           private
 
           def generate_project_fingerprint
-            Digest::SHA1.hexdigest(compare_key)
+            @location.fingerprint
           end
         end
       end

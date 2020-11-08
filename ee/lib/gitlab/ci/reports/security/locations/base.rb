@@ -16,6 +16,10 @@ module Gitlab
               ""
             end
 
+            def fingerprint_method
+              ""
+            end
+
             def fingerprint
               strong_memoize(:fingerprint) do
                 "#{fingerprint_type}:#{Digest::SHA1.hexdigest(fingerprint_data)}"

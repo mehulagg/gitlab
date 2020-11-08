@@ -112,7 +112,8 @@ module Security
         a_severity, b_severity = a.severity, b.severity
 
         if a_severity == b_severity
-          a.compare_key <=> b.compare_key
+          # TODO compare matching fingerprints!
+          a.location.fingerprint <=> b.location.fingerprint
         else
           Vulnerabilities::Finding::SEVERITY_LEVELS[b_severity] <=>
             Vulnerabilities::Finding::SEVERITY_LEVELS[a_severity]

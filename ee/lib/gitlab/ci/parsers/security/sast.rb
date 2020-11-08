@@ -12,12 +12,16 @@ module Gitlab
           private
 
           def create_location(location_data, report)
-            ::Gitlab::Ci::Reports::Security::Tracking::Source.new(
+            ::Gitlab::Ci::Reports::Security::Tracking::Source.highest_supported(
+              location_data['file'],
+              location_data['start_line'],
+              location_data['end_line'],
+            ).new(
               report.pipeline.project.repository,
               report.pipeline.sha,
               location_data['file'],
               location_data['start_line'],
-              end_line: location_data['end_line'],
+              location_data['end_line'],
             )
           end
         end
