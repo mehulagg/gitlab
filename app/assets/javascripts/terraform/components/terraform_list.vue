@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlBadge, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlBadge, GlKeysetPagination, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
 import StatesTable from './states_table.vue';
@@ -17,6 +17,7 @@ export default {
         return {
           count: data?.project?.terraformStates?.count,
           list: data?.project?.terraformStates?.nodes,
+          pageInfo: data?.project?.terraformStates?.pageInfo,
         };
       },
       error() {
@@ -28,6 +29,7 @@ export default {
     EmptyState,
     GlAlert,
     GlBadge,
+    GlKeysetPagination,
     GlLoadingIcon,
     GlTab,
     GlTabs,
@@ -46,6 +48,9 @@ export default {
   computed: {
     isLoading() {
       return this.$apollo.queries.states.loading;
+    },
+    pageInfo() {
+      return this.states?.pageInfo || {};
     },
     statesCount() {
       return this.states?.count;
@@ -71,7 +76,13 @@ export default {
         <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" />
 
         <div v-else-if="statesList">
-          <states-table v-if="statesCount" :states="statesList" />
+          <div v-if="statesCount">
+            <states-table :states="statesList" />
+
+            <div class="gl-display-flex gl-justify-content-center gl-mt-5">
+              <gl-keyset-pagination v-bind="pageInfo" />
+            </div>
+          </div>
 
           <empty-state v-else :image="emptyStateImage" />
         </div>
