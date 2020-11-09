@@ -163,11 +163,7 @@ class RegistrationsController < Devise::RegistrationsController
   def pending_approval?(resource)
     return false unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
 
-    if resource.persisted? && resource.blocked_pending_approval?
-      return true
-    else
-      return false
-    end
+    return false unless resource.persisted? && resource.blocked_pending_approval?
   end
 
   def sign_up_params
