@@ -288,6 +288,23 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         it_behaves_like 'custom cycle analytics stage'
       end
 
+      context 'between first commit at and merge request merged time' do
+        let(:start_event_identifier) { :merge_request_first_commit_at }
+        let(:end_event_identifier) { :merge_request_merged }
+
+        def create_data_for_start_event(example_class)
+          create(:merge_request, :merged, source_project: example_class.project).tap do |mr|
+            mr.metrics.update!(first_commit_at: Time.now)
+          end
+        end
+
+        def create_data_for_end_event(mr, example_class)
+          mr.metrics.update!(merged_at: Time.now)
+        end
+
+        it_behaves_like 'custom cycle analytics stage'
+      end
+
       context 'between merge request build started time and build finished time' do
         let(:start_event_identifier) { :merge_request_last_build_started }
         let(:end_event_identifier) { :merge_request_last_build_finished }
@@ -367,17 +384,12 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         it_behaves_like 'custom cycle analytics stage'
       end
 
-      context 'between code stage start time and merge request created time with label filter' do
+      context 'between code stage start time and merge request created time' do
         let(:start_event_identifier) { :code_stage_start }
         let(:end_event_identifier) { :merge_request_created }
 
-        before do
-          params[:label_name] = [label.name, other_label.name]
-        end
-
         def create_data_for_start_event(example_class)
           issue = create(:issue, project: example_class.project)
-          issue.metrics.update!(first_mentioned_in_commit_at: Time.zone.now)
 
           mr = create(:merge_request, {
             source_project: example_class.project,
@@ -389,9 +401,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           MergeRequests::UpdateService.new(
             example_class.project,
             user,
-            label_ids: [label.id, other_label.id]
+            assignees: [user]
           ).execute(mr)
 
+          mr.metrics.update!(first_commit_at: Time.zone.now)
           mr
         end
 
@@ -400,6 +413,38 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         end
 
         it_behaves_like 'custom cycle analytics stage'
+
+        context 'label filter' do
+          before do
+            params[:label_name] = [label.name, other_label.name]
+          end
+
+          def create_data_for_start_event(example_class)
+            issue = create(:issue, project: example_class.project)
+            issue.metrics.update!(first_mentioned_in_commit_at: Time.zone.now)
+
+            mr = create(:merge_request, {
+              source_project: example_class.project,
+              target_branch: example_class.project.default_branch,
+              description: "Description\n\nclosing #{issue.to_reference}",
+              allow_broken: true
+            })
+
+            MergeRequests::UpdateService.new(
+              example_class.project,
+              user,
+              label_ids: [label.id, other_label.id]
+            ).execute(mr)
+
+            mr
+          end
+
+          def create_data_for_end_event(mr, example_class)
+            mr.update!(created_at: Time.zone.now)
+          end
+
+          it_behaves_like 'custom cycle analytics stage'
+        end
       end
     end
   end

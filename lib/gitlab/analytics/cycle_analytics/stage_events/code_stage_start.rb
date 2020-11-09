@@ -18,12 +18,15 @@ module Gitlab
           end
 
           def timestamp_projection
-            issue_metrics_table[:first_mentioned_in_commit_at]
+            Arel::Nodes::NamedFunction.new('COALESCE', column_list)
           end
 
           override :column_list
           def column_list
-            [timestamp_projection]
+            [
+              issue_metrics_table[:first_mentioned_in_commit_at],
+              mr_metrics_table[:first_commit_at]
+            ]
           end
 
           # rubocop: disable CodeReuse/ActiveRecord
@@ -33,7 +36,10 @@ module Gitlab
               .on(mr_closing_issues_table[:issue_id].eq(issue_metrics_table[:issue_id]))
               .join_sources
 
-            query.joins(:merge_requests_closing_issues).joins(issue_metrics_join)
+            query
+              .joins(:merge_requests_closing_issues)
+              .joins(:metrics)
+              .joins(issue_metrics_join)
           end
           # rubocop: enable CodeReuse/ActiveRecord
         end
