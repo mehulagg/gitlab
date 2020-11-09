@@ -104,6 +104,10 @@ export default {
     canAddIntegration() {
       return this.multiIntegrations || this.integrations?.list?.length < 2;
     },
+    canAddOpsgenie() {
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+      return this.integrations?.list?.filter(({ active }) => active === true).length === 0;
+    },
   },
   methods: {
     createNewIntegration({ type, variables }) {
@@ -266,6 +270,7 @@ export default {
       :loading="isUpdating"
       :current-integration="currentIntegration"
       :can-add-integration="canAddIntegration"
+      :can-add-opsgenie='canAddOpsgenie'
       @create-new-integration="createNewIntegration"
       @update-integration="updateIntegration"
       @reset-token="resetToken"
