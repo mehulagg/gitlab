@@ -12,7 +12,7 @@ module BreadcrumbsHelper
   def breadcrumb_title_link
     return @breadcrumb_link if @breadcrumb_link
 
-    "#{request.base_url}#{request.path}"
+    request.path
   end
 
   def breadcrumb_title(title)

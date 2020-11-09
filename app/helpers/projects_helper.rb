@@ -778,7 +778,7 @@ module ProjectsHelper
   def build_project_breadcrumb_link(project)
     project_name = simple_sanitize(project.name)
 
-    push_to_schema_breadcrumb(project_name, project_url(project))
+    push_to_schema_breadcrumb(project_name, project_path(project))
 
     link_to project_path(project) do
       icon = project_icon(project, alt: project_name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
@@ -792,7 +792,7 @@ module ProjectsHelper
     else
       owner = project.namespace.owner
       name = simple_sanitize(owner.name)
-      url = user_url(owner)
+      url = user_path(owner)
 
       push_to_schema_breadcrumb(name, url)
       link_to(name, url)
