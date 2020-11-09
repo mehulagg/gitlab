@@ -20,6 +20,7 @@ class TrialRegistrationsController < RegistrationsController
 
 
 
+
     end
   end
 
