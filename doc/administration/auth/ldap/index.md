@@ -97,7 +97,8 @@ library. `start_tls` corresponds to StartTLS, not to be confused with regular TL
 Normally, if you specify `simple_tls` it will be on port 636, while `start_tls` (StartTLS)
 would be on port 389. `plain` also operates on port 389. Removed values: `tls` was replaced with `start_tls` and `ssl` was replaced with `simple_tls`.
 
-LDAP users must have an email address set, regardless of whether it is used to sign in.
+LDAP users must have a set email address, regardless of whether or not it's used
+to sign in.
 
 ### Example Configurations **(CORE ONLY)**
 
