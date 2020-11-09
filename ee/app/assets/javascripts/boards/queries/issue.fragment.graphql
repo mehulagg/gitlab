@@ -10,6 +10,7 @@ fragment IssueNode on Issue {
   totalTimeSpent
   humanTimeEstimate
   humanTotalTimeSpent
+  emailsDisabled
   weight
   confidential
   webUrl
