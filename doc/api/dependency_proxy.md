@@ -25,14 +25,3 @@ Example request:
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/dependency_proxy/cache"
 ```
-
-# Dependency Proxy Rails Console **(PREMIUM)** **Self-Managed Only**
-
-## Purge the dependency proxy for a group
-
-Deletes the cached blobs for a group. Replace `GROUP_ID` with the numeric ID for the group.
-
-```
-@group = Group.find_by_id(GROUP_ID)
-@group.dependency_proxy_blobs.destroy_all
-```
