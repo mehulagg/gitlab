@@ -15,7 +15,11 @@ module Emails
 
       mail(
         to: recipient.notification_email,
-        subject: subject(_("GitLab Account Request")))
+        subject: subject(_("GitLab Account Request"))
+      ) do |format|
+          format.html { render layout: 'mailer' }
+          format.text { render layout: 'mailer' }
+      end
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
