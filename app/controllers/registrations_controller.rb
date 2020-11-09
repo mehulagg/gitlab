@@ -32,7 +32,7 @@ class RegistrationsController < Devise::RegistrationsController
       yield new_user if block_given?
     end
 
-    if pending_approval?(resource)
+    if pending_approval?
       NotificationService.new.new_instance_access_request(resource)
     end
 
@@ -160,7 +160,7 @@ class RegistrationsController < Devise::RegistrationsController
     render action: 'new'
   end
 
-  def pending_approval?(resource)
+  def pending_approval?
     return false unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
 
     resource.persisted? && resource.blocked_pending_approval?
