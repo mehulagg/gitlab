@@ -21,7 +21,7 @@ Changing the minimum or maximum length does not affect existing user passwords. 
 not asked to reset their password to adhere to the new limits. The new limit restriction applies
 only during new user sign-ups and when an existing user performs a password reset.
 
-## Modify minimum password length using the GitLab UI
+## Modify minimum password length using GitLab UI
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20661) in GitLab 12.6
 
