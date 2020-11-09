@@ -84,6 +84,8 @@ To enable the Packages feature:
 
 **Helm Chart installations**
 
+**Helm Chart installations**
+
 1. After the installation is complete, you will have to configure the `packages`
    section in `global.appConfig.packages`. Set to `true` to enable it:
 
