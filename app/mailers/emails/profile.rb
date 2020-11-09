@@ -13,13 +13,9 @@ module Emails
       @member = member
       @recipient = recipient
 
-      mail(
+      profile_email_with_layout(
         to: recipient.notification_email,
-        subject: subject(_("GitLab Account Request"))
-      ) do |format|
-        format.html { render layout: 'mailer' }
-        format.text { render layout: 'mailer' }
-      end
+        subject: subject(_("GitLab Account Request")))
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -76,13 +72,9 @@ module Emails
       @target_url = edit_profile_password_url
 
       Gitlab::I18n.with_locale(@user.preferred_language) do
-        mail(
+        profile_email_with_layout(
           to: @user.notification_email,
-          subject: subject(_("%{host} sign-in from new location") % { host: Gitlab.config.gitlab.host })
-        ) do |format|
-          format.html { render layout: 'mailer' }
-          format.text { render layout: 'mailer' }
-        end
+          subject: subject(_("%{host} sign-in from new location") % { host: Gitlab.config.gitlab.host }))
       end
     end
 
@@ -93,6 +85,16 @@ module Emails
 
       Gitlab::I18n.with_locale(@user.preferred_language) do
         mail(to: @user.notification_email, subject: subject(_("Two-factor authentication disabled")))
+      end
+    end
+
+    private
+
+
+    def profile_email_with_layout(to:, subject:, layout: 'mailer')
+      mail(to: to, subject: subject) do |format|
+        format.html { render layout: layout }
+        format.text { render layout: layout }
       end
     end
   end
