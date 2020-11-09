@@ -293,7 +293,6 @@ module Gitlab
           end.map(&:to_reference).to_sentence
         end
 
-
         def assignees_for_removal(users)
           assignees = quick_action_target.assignees
           if users.present? && quick_action_target.allows_multiple_assignees?
