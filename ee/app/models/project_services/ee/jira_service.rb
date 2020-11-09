@@ -12,7 +12,7 @@ module EE
       client
         .Issuetype
         .all
-        .select { |issue_type| !issue_type.subtask }
+        .reject { |issue_type| issue_type.subtask }
         .map { |issue_type| { id: issue_type.id, name: issue_type.name, description: issue_type.description } }
     end
 
