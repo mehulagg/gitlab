@@ -47,8 +47,9 @@ module QA
       end
 
       def fetch_group_id
-        group_search_response = get Runtime::API::Request.new(@api_client, "/groups", search: ENV['GROUP_NAME_OR_PATH'] || 'gitlab-qa-sandbox-group').url
-        JSON.parse(group_search_response.body).first["id"]
+        group_name = ENV['GROUP_NAME_OR_PATH'] || 'gitlab-qa-sandbox-group'
+        group_search_response = get Runtime::API::Request.new(@api_client, "/groups/#{group_name}" ).url
+        JSON.parse(group_search_response.body)["id"]
       end
 
       def fetch_subgroup_ids(group_id, group_pages)
