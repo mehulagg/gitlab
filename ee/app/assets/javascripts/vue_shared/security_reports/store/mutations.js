@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import * as types from './mutation_types';
-import { findIssueIndex, parseDiff } from './utils';
+import { findIssueIndex } from './utils';
+import { parseDiff } from '~/vue_shared/security_reports/store/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {

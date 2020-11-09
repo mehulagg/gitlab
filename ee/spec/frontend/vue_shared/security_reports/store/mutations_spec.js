@@ -8,7 +8,9 @@ jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
 }));
 
-describe('security reports mutations', () => {
+// See also the corresponding CE specs in
+// spec/frontend/vue_shared/security_reports/store/modules/sast/mutations_spec.js
+describe('EE sast reports mutations', () => {
   let stateCopy;
 
   beforeEach(() => {

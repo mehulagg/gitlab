@@ -10,40 +10,6 @@ export const findIssueIndex = (issues, issue) =>
   issues.findIndex(el => el.project_fingerprint === issue.project_fingerprint);
 
 /**
- * Returns given vulnerability enriched with the corresponding
- * feedback (`dismissal` or `issue` type)
- * @param {Object} vulnerability
- * @param {Array} feedback
- */
-export const enrichVulnerabilityWithFeedback = (vulnerability, feedback = []) =>
-  feedback
-    .filter(fb => fb.project_fingerprint === vulnerability.project_fingerprint)
-    .reduce((vuln, fb) => {
-      if (fb.feedback_type === 'dismissal') {
-        return {
-          ...vuln,
-          isDismissed: true,
-          dismissalFeedback: fb,
-        };
-      }
-      if (fb.feedback_type === 'issue' && fb.issue_iid) {
-        return {
-          ...vuln,
-          hasIssue: true,
-          issue_feedback: fb,
-        };
-      }
-      if (fb.feedback_type === 'merge_request' && fb.merge_request_iid) {
-        return {
-          ...vuln,
-          hasMergeRequest: true,
-          merge_request_feedback: fb,
-        };
-      }
-      return vuln;
-    }, vulnerability);
-
-/**
  * Takes an object of options and returns an externalized string representing
  * the critical, high, and other severity vulnerabilities for a given report.
  *
@@ -201,25 +167,4 @@ export const groupedReportText = (report, reportType, errorMessage, loadingMessa
     reportType,
     ...countVulnerabilities(report.newIssues),
   });
-};
-
-/**
- * Generates the added, fixed, and existing vulnerabilities from the API report.
- *
- * @param {Object} diff The original reports.
- * @param {Object} enrichData Feedback data to add to the reports.
- * @returns {Object}
- */
-export const parseDiff = (diff, enrichData) => {
-  const enrichVulnerability = vulnerability => ({
-    ...enrichVulnerabilityWithFeedback(vulnerability, enrichData),
-    category: vulnerability.report_type,
-    title: vulnerability.message || vulnerability.name,
-  });
-
-  return {
-    added: diff.added ? diff.added.map(enrichVulnerability) : [],
-    fixed: diff.fixed ? diff.fixed.map(enrichVulnerability) : [],
-    existing: diff.existing ? diff.existing.map(enrichVulnerability) : [],
-  };
 };
