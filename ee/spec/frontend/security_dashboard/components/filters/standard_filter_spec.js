@@ -161,12 +161,18 @@ describe('Standard Filter component', () => {
       expectAllOptionSelected();
     });
 
+    it('emits filter-changed event with default options when created', async () => {
+      const expectedIds = optionIdsAt([1, 2, 3]);
+      expect(wrapper.emitted('filter-changed')).toHaveLength(1);
+      expect(wrapper.emitted('filter-changed')[0][0]).toEqual({ [filter.id]: expectedIds });
+    });
+
     it('emits filter-changed event when an option is clicked', async () => {
       const expectedIds = optionIdsAt([1, 2, 3, 4]);
       await clickItemAt(4);
 
-      expect(wrapper.emitted('filter-changed')).toHaveLength(1);
-      expect(wrapper.emitted('filter-changed')[0][0]).toEqual({ [filter.id]: expectedIds });
+      expect(wrapper.emitted('filter-changed')).toHaveLength(2);
+      expect(wrapper.emitted('filter-changed')[1][0]).toEqual({ [filter.id]: expectedIds });
     });
   });
 
