@@ -29,6 +29,10 @@ describe('Suggestion Diff component', () => {
     });
   };
 
+  beforeEach(() => {
+    window.gon.current_user_id = 1;
+  });
+
   afterEach(() => {
     wrapper.destroy();
   });
