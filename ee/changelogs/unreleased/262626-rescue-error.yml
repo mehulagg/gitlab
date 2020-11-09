@@ -1,0 +1,5 @@
+---
+title: Handle empty project within Security Configuration
+merge_request: 47226
+author:
+type: fixed
