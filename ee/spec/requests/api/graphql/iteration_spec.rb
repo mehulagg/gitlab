@@ -58,7 +58,7 @@ RSpec.describe 'Querying an Iteration' do
           }
         NODES
 
-        query_graphql_field('iterations', { id: queried_iteration.id }, nodes)
+        query_graphql_field('iterations', { id: GitlabSchema.id_from_object(queried_iteration).to_s }, nodes)
       end
 
       before_all do

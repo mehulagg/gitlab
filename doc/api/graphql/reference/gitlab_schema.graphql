@@ -8610,12 +8610,12 @@ type Group {
     """
     The ID of the Iteration to look up
     """
-    id: ID
+    id: IterationID
 
     """
     The internal ID of the Iteration to look up
     """
-    iid: ID
+    iid: IterationID
 
     """
     Whether to include ancestor iterations. Defaults to true
@@ -15221,12 +15221,12 @@ type Project {
     """
     The ID of the Iteration to look up
     """
-    id: ID
+    id: IterationID
 
     """
     The internal ID of the Iteration to look up
     """
-    iid: ID
+    iid: IterationID
 
     """
     Whether to include ancestor iterations. Defaults to true
@@ -21565,12 +21565,12 @@ input UpdateIterationInput {
   """
   The group of the iteration
   """
-  groupPath: ID!
+  groupPath: GroupID!
 
   """
   The id of the iteration
   """
-  id: ID!
+  id: IterationID!
 
   """
   The start date of the iteration

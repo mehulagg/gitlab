@@ -53,9 +53,10 @@ RSpec.describe 'Updating an Iteration' do
         stub_licensed_features(iterations: false)
       end
 
-      it_behaves_like 'a mutation that returns top-level errors',
-                      errors: ['The resource that you are attempting to access does not '\
-                 'exist or you don\'t have permission to perform this action']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) { include('The resource that you are attempting to access does not '\
+                 'exist or you don\'t have permission to perform this action') }
+      end
     end
 
     context 'when iterations are enabled' do

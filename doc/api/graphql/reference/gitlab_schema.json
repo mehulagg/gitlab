@@ -23567,7 +23567,7 @@
                   "description": "The ID of the Iteration to look up",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "IterationID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -23577,7 +23577,7 @@
                   "description": "The internal ID of the Iteration to look up",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "IterationID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -44458,7 +44458,7 @@
                   "description": "The ID of the Iteration to look up",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "IterationID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -44468,7 +44468,7 @@
                   "description": "The internal ID of the Iteration to look up",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "IterationID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -62513,7 +62513,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "GroupID",
                   "ofType": null
                 }
               },
@@ -62527,7 +62527,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "IterationID",
                   "ofType": null
                 }
               },
