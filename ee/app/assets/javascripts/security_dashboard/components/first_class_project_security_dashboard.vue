@@ -68,7 +68,7 @@ export default {
 
 <template>
   <div>
-    <template v-if="hasVulnerabilities">
+    <template v-if="pipeline.id">
       <auto-fix-user-callout
         v-if="shoudShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"

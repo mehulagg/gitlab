@@ -7,6 +7,7 @@ import UnavailableState from './components/unavailable_state.vue';
 import createStore from './store';
 import createRouter from './router';
 import apolloProvider from './graphql/provider';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default (el, dashboardType) => {
   if (!el) {
@@ -29,12 +30,10 @@ export default (el, dashboardType) => {
 
   const provide = {};
   const props = {
-    hasVulnerabilities: Boolean(el.dataset.hasVulnerabilities),
     securityDashboardHelpPath: el.dataset.securityDashboardHelpPath,
     projectAddEndpoint: el.dataset.projectAddEndpoint,
     projectListEndpoint: el.dataset.projectListEndpoint,
     vulnerabilitiesExportEndpoint: el.dataset.vulnerabilitiesExportEndpoint,
-    noVulnerabilitiesSvgPath: el.dataset.noVulnerabilitiesSvgPath,
   };
 
   let component;
@@ -80,6 +79,7 @@ export default (el, dashboardType) => {
       emptyStateSvgPath: el.dataset.emptyStateSvgPath,
       notEnabledScannersHelpPath: el.dataset.notEnabledScannersHelpPath,
       noPipelineRunScannersHelpPath: el.dataset.noPipelineRunScannersHelpPath,
+      hasVulnerabilities: parseBoolean(el.dataset.hasVulnerabilities),
       ...provide,
     }),
     render(createElement) {
