@@ -1,0 +1,8 @@
+mutation IssueSetSubscription($input: IssueSetSubscriptionInput!) {
+  issueSetSubscription(input: $input) {
+    issue {
+      subscribed
+    }
+    errors
+  }
+}

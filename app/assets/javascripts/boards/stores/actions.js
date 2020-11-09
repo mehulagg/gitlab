@@ -21,6 +21,7 @@ import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
+import issueSetSubscription from '../graphql/mutations/issue_set_subscription.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -369,6 +370,30 @@ export default {
       issueId: activeIssue.id,
       prop: 'dueDate',
       value: data.updateIssue.issue.dueDate,
+    });
+  },
+
+  setActiveIssueNotification: async ({ commit, getters }, input) => {
+    const activeIssue = getters.getActiveIssue;
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetSubscription,
+      variables: {
+        input: {
+          iid: String(activeIssue.iid),
+          projectPath: input.projectPath,
+          subscribedState: input.subscribed,
+        },
+      },
+    });
+
+    if (data.issueSetSubscription?.errors?.length > 0) {
+      throw new Error(data.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: activeIssue.id,
+      prop: 'subscribed',
+      value: data.issueSetSubscription.issue.subscribed,
     });
   },
 

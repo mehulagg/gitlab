@@ -734,6 +734,57 @@ describe('setActiveIssueDueDate', () => {
   });
 });
 
+describe('setActiveIssueNotification', () => {
+  const state = { issues: { [mockIssue.id]: mockIssue } };
+  const getters = { getActiveIssue: mockIssue };
+  const subscribedState = true;
+  const input = {
+    dueDate: subscribedState,
+    projectPath: 'h/b',
+  };
+
+  it('should commit subscribed status', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        updateIssue: {
+          issue: {
+            subscribed: subscribedState,
+          },
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      issueId: getters.getActiveIssue.id,
+      prop: 'subscribed',
+      value: subscribedState,
+    };
+
+    testAction(
+      actions.setActiveIssueNotification,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueNotification({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
 describe('fetchBacklog', () => {
   expectNotImplemented(actions.fetchBacklog);
 });

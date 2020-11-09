@@ -158,6 +158,7 @@ export const mockIssue = {
   dueDate: null,
   timeEstimate: 0,
   weight: null,
+  subscribed: false,
   confidential: false,
   referencePath: 'gitlab-org/test-subgroup/gitlab-test#27',
   path: '/gitlab-org/test-subgroup/gitlab-test/-/issues/27',
