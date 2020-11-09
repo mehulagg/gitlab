@@ -699,7 +699,7 @@ To configure Vale within your editor, install one of the following as appropriat
 - The Sublime Text [`SublimeLinter-contrib-vale` plugin](https://packagecontrol.io/packages/SublimeLinter-contrib-vale).
 - The Visual Studio Code [`errata-ai.vale-server` extension](https://marketplace.visualstudio.com/items?itemName=errata-ai.vale-server).
   You don't need Vale Server to use the plugin. You can configure the plugin to
-  [display only a subset of alerts](#set-vale-alert-levels).
+  [display only a subset of alerts](#show-subset-of-vale-alerts).
 - [Vim](https://github.com/dense-analysis/ale).
 
 We don't use [Vale Server](https://errata-ai.github.io/vale/#using-vale-with-a-text-editor-or-another-third-party-application).
@@ -727,7 +727,7 @@ You can set Visual Studio Code to display only a subset of Vale alerts when view
 1. In **Vale CLI: Min Alert Level**, select the minimum alert level you want displayed in files.
 
 To display only a subset of Vale alerts when running Vale from the command line, use
-the `--minAlertLevel` flag, which accepts `error` or `warning`. Combine it with `--config`
+the `--minAlertLevel` flag, which accepts `error`, `warning`, or `suggestion`. Combine it with `--config`
 to point to the configuration file within the project, if needed:
 
 ```shell
