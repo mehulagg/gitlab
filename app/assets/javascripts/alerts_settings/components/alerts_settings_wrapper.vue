@@ -1,4 +1,5 @@
 <script>
+import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { fetchPolicies } from '~/lib/graphql';
@@ -36,6 +37,10 @@ export default {
     integrationRemoved: s__('AlertsIntegrations|The integration has been successfully removed.'),
   },
   components: {
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    GlAlert,
+    GlLink,
+    GlSprintf,
     IntegrationsList,
     SettingsFormOld,
     SettingsFormNew,
@@ -46,6 +51,10 @@ export default {
       default: {},
     },
     prometheus: {
+      default: {},
+    },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    opsgenie: {
       default: {},
     },
     projectPath: {
@@ -104,8 +113,8 @@ export default {
     canAddIntegration() {
       return this.multiIntegrations || this.integrations?.list?.length < 2;
     },
-    canAddOpsgenie() {
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    canAddOrEditOpsgenie() {
       return this.integrations?.list?.filter(({ active }) => active === true).length === 0;
     },
   },
@@ -258,7 +267,27 @@ export default {
 
 <template>
   <div>
+    <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
+    <gl-alert v-if="opsgenie.active" :dismissible="false" variant="tip">
+      <gl-sprintf
+        :message="
+          s__(
+            'AlertSettings|We will shortly be introducing the ability to create custom mappings for your HTTP endpoints. When this new feature is introduced, the existing MVC Opsgenie option will be depreciated. We encourage you to migrate your Opsgenie integration to the HTTP functionality so you can view your Opsgenie alerts directly within GitLab. %{linkStart}More Information%{linkEnd}',
+          )
+        "
+      >
+        <template #link="{ content }">
+          <gl-link
+            class="gl-display-inline-block"
+            href="https://gitlab.com/gitlab-org/gitlab/-/issues/273657"
+            target="_blank"
+            >{{ content }}</gl-link
+          >
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <integrations-list
+      v-else
       :integrations="glFeatures.httpIntegrationsList ? integrations.list : intergrationsOptionsOld"
       :loading="loading"
       :current-integration="currentIntegration"
@@ -270,7 +299,7 @@ export default {
       :loading="isUpdating"
       :current-integration="currentIntegration"
       :can-add-integration="canAddIntegration"
-      :can-add-opsgenie='canAddOpsgenie'
+      :can-add-or-edit-opsgenie="canAddOrEditOpsgenie"
       @create-new-integration="createNewIntegration"
       @update-integration="updateIntegration"
       @reset-token="resetToken"
