@@ -13,12 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleEmojiMenuButton = document.querySelector(toggleEmojiMenuButtonSelector);
   const statusEmojiField = document.getElementById('js-status-emoji-field');
   const statusMessageField = document.getElementById('js-status-message-field');
-  const statusAvailabilityField = document.getElementById('js-status-availability-field');
-  const statusAvailabilityValue = document.querySelector('[name="user[status][availability]"]');
-
-  statusAvailabilityField.addEventListener('click', ({ currentTarget }) => {
-    statusAvailabilityValue.value = currentTarget?.checked ? 'busy' : 'not_set';
-  });
 
   const toggleNoEmojiPlaceholder = isVisible => {
     const placeholderElement = document.getElementById('js-no-emoji-placeholder');

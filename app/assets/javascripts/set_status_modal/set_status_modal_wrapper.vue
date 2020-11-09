@@ -15,6 +15,11 @@ const AVAILABILITY_STATUS = {
   NOT_SET: 'not_set',
 };
 
+const validAvailibility = availability =>
+  availability.length ? Object.values(AVAILABILITY_STATUS).includes(availability) : true;
+
+const isBusy = status => status === AVAILABILITY_STATUS.BUSY;
+
 export default {
   components: {
     GlIcon,
@@ -32,6 +37,12 @@ export default {
       type: String,
       required: true,
     },
+    currentAvailability: {
+      type: String,
+      required: false,
+      validator: validAvailibility,
+      default: '',
+    },
   },
   data() {
     return {
@@ -43,8 +54,7 @@ export default {
       message: this.currentMessage,
       modalId: 'set-user-status-modal',
       noEmoji: true,
-      // availability:
-      availability_status: '',
+      availability: isBusy(this.currentAvailability),
     };
   },
   computed: {
@@ -128,7 +138,7 @@ export default {
       this.emoji = '';
       this.message = '';
       this.noEmoji = true;
-      this.availability_status = AVAILABILITY_STATUS.NOT_SET;
+      this.availability = false;
       this.clearEmoji();
       this.hideEmojiMenu();
     },
@@ -137,17 +147,18 @@ export default {
       this.setStatus();
     },
     setStatus() {
-      const { emoji, message, availability_status } = this;
+      const { emoji, message, availability } = this;
 
       Api.postUserStatus({
         emoji,
         message,
-        availability: availability_status,
+        availability: availability ? AVAILABILITY_STATUS.BUSY : AVAILABILITY_STATUS.NOT_SET,
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);
     },
     onUpdateSuccess() {
+      this.$toast.show(__('Status updated'), { type: 'success', position: 'top-center' });
       this.closeModal();
       window.location.reload();
     },
@@ -157,11 +168,6 @@ export default {
       );
 
       this.closeModal();
-    },
-    onToggleAvailability({ currentTarget }) {
-      this.availability_status = currentTarget.checked
-        ? AVAILABILITY_STATUS.BUSY
-        : AVAILABILITY_STATUS.NOT_SET;
     },
   },
 };
@@ -244,7 +250,6 @@ export default {
                 type="checkbox"
                 name="user[status][availability]"
                 :placeholder="s__('SetStatusModal|Busy')"
-                @change="onToggleAvailability"
               />
               {{ s__('SetStatusModal|Busy') }}
             </label>
