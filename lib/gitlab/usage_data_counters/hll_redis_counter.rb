@@ -23,7 +23,7 @@ module Gitlab
       # Track event on entity_id
       # Increment a Redis HLL counter for unique event_name and entity_id
       #
-      # All events should be added to know_events yml files lib/gitlab/usage_data_counters/known_events/
+      # All events should be added to known_events yml files lib/gitlab/usage_data_counters/known_events/
       #
       # Event example:
       #
