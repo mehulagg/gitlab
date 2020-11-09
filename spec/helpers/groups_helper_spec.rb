@@ -87,14 +87,31 @@ RSpec.describe GroupsHelper do
   end
 
   describe 'group_title' do
-    let(:group) { create(:group) }
-    let(:nested_group) { create(:group, parent: group) }
-    let(:deep_nested_group) { create(:group, parent: nested_group) }
-    let!(:very_deep_nested_group) { create(:group, parent: deep_nested_group) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:nested_group) { create(:group, parent: group) }
+    let_it_be(:deep_nested_group) { create(:group, parent: nested_group) }
+    let_it_be(:very_deep_nested_group) { create(:group, parent: deep_nested_group) }
+
+    subject { helper.group_title(very_deep_nested_group) }
 
     it 'outputs the groups in the correct order' do
-      expect(helper.group_title(very_deep_nested_group))
+      expect(subject)
         .to match(%r{<li style="text-indent: 16px;"><a.*>#{deep_nested_group.name}.*</li>.*<a.*>#{very_deep_nested_group.name}</a>}m)
+    end
+
+    it 'enqueues the elements in the breadcrumb schema list' do
+      stub_default_url_options(host: 'test.host')
+
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(group.name, urls.group_url(group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(nested_group.name, urls.group_url(nested_group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(deep_nested_group.name, urls.group_url(deep_nested_group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(very_deep_nested_group.name, urls.group_url(very_deep_nested_group))
+
+      subject
+    end
+
+    def urls
+      Gitlab::Routing.url_helpers
     end
   end
 

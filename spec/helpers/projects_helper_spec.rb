@@ -999,4 +999,21 @@ RSpec.describe ProjectsHelper do
       end
     end
   end
+
+  describe '#project_title' do
+    subject { helper.project_title(project) }
+
+    it 'enqueues the elements in the breadcrumb schema list' do
+      stub_default_url_options(host: 'test.host')
+
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.namespace.name, urls.user_url(project.owner))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, urls.project_url(project))
+
+      subject
+    end
+
+    def urls
+      Gitlab::Routing.url_helpers
+    end
+  end
 end
