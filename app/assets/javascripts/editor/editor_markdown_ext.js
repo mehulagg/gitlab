@@ -1,4 +1,80 @@
+import { debounce } from 'lodash';
+import { __ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { EDITOR_LITE_PANEL_WIDGET_POS } from '~/editor/constants';
+
+const MARKDOWN_PREVIEW_WIDGET = "'gitlab.markdown.preview.widget";
+const MARKDOWN_PREVIEW_ERROR = __('An error occurred previewing the file');
+
+const getPreview = editor => {
+  const url = window.location.href.replace('edit', 'preview');
+  return axios
+    .post(url, {
+      content: editor.getValue(),
+    })
+    .then(({ data }) => {
+      return data;
+    });
+};
+
 export default {
+  init() {
+    this.addAction({
+      id: 'markdown-preview',
+      label: __('Toggle Preview'),
+      keybindings: [
+        // eslint-disable-next-line no-bitwise,no-undef
+        monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_K, monaco.KeyCode.KEY_V),
+      ],
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.5,
+
+      // Method that will be executed when the action is triggered.
+      // @param editor The editor instance is passed in as a convinience
+      run(ed) {
+        const panelWidget = {
+          domNode: null,
+          getId() {
+            return MARKDOWN_PREVIEW_WIDGET;
+          },
+          getDomNode() {
+            if (!this.domNode) {
+              this.domNode = document.createElement('section');
+            }
+            return this.domNode;
+          },
+          getPosition() {
+            return {
+              position: EDITOR_LITE_PANEL_WIDGET_POS.right,
+              widthIndex: 0.5,
+              heightIndex: 1,
+            };
+          },
+        };
+        const fetchPreview = () => {
+          getPreview(ed)
+            .then(data => {
+              panelWidget.getDomNode().innerHTML = data;
+            })
+            .catch(() => createFlash(MARKDOWN_PREVIEW_ERROR));
+        };
+
+        if (Object.keys(ed.panelWidgets).indexOf(MARKDOWN_PREVIEW_WIDGET) !== -1) {
+          ed.removePanelWidget(panelWidget);
+          ed.disposeDisposableEvent(MARKDOWN_PREVIEW_WIDGET);
+        } else {
+          fetchPreview();
+          ed.addListenerAndStoreDisposable(
+            MARKDOWN_PREVIEW_WIDGET,
+            debounce(fetchPreview.bind(this), 250),
+          );
+
+          ed.addPanelWidget(panelWidget);
+        }
+      },
+    });
+  },
   getSelectedText(selection = this.getSelection()) {
     const { startLineNumber, endLineNumber, startColumn, endColumn } = selection;
     const valArray = this.getValue().split('\n');

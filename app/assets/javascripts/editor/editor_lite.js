@@ -5,7 +5,11 @@ import { defaultEditorOptions } from '~/ide/lib/editor_options';
 import { registerLanguages } from '~/ide/utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { clearDomElement } from './utils';
-import { EDITOR_LITE_INSTANCE_ERROR_NO_EL, URI_PREFIX } from './constants';
+import {
+  EDITOR_LITE_INSTANCE_ERROR_NO_EL,
+  URI_PREFIX,
+  EDITOR_LITE_PANEL_WIDGET_POS,
+} from './constants';
 import { uuids } from '~/diffs/utils/uuids';
 
 export default class Editor {
@@ -95,6 +99,8 @@ export default class Editor {
       ...this.options,
       ...instanceOptions,
     });
+    instance.panelWidgets = {};
+    instance.disposableEvents = {};
     instance.setModel(model);
     instance.onDidDispose(() => {
       const index = this.instances.findIndex(inst => inst === instance);
@@ -103,6 +109,61 @@ export default class Editor {
     });
     instance.updateModelLanguage = path => Editor.updateModelLanguage(path, instance);
     instance.use = args => this.use(args, instance);
+    instance.addPanelWidget = widget => {
+      const domNode = widget.getDomNode();
+      const instanceLayout = instance.getLayoutInfo();
+      const widgetPos = widget.getPosition() || {
+        width: 1,
+        height: 'auto',
+        position: EDITOR_LITE_PANEL_WIDGET_POS.after,
+      };
+      const { widthIndex, heightIndex, position } = widgetPos;
+
+      domNode.style.width = `${100 * widthIndex}%`;
+      domNode.style.height = `${100 * heightIndex}%`;
+      domNode.style.overflow = 'auto';
+      domNode.dataset.widgetid = widget.getId();
+
+      switch (position) {
+        case EDITOR_LITE_PANEL_WIDGET_POS.before:
+          el.insertBefore(domNode, el.firstElementChild);
+          break;
+        case EDITOR_LITE_PANEL_WIDGET_POS.right:
+          instance.layout({
+            width: instanceLayout.width - instanceLayout.width * widthIndex,
+            height: instanceLayout.height,
+          });
+          el.appendChild(domNode);
+          el.style.display = 'flex';
+          break;
+        case EDITOR_LITE_PANEL_WIDGET_POS.left:
+          instance.layout({
+            width: instanceLayout.width - instanceLayout.width * widthIndex,
+            height: instanceLayout.height,
+          });
+          el.insertBefore(domNode, el.firstElementChild);
+          el.style.display = 'flex';
+          break;
+        default:
+          el.appendChild(domNode);
+          break;
+      }
+
+      instance.panelWidgets[widget.getId()] = widget;
+    };
+    instance.removePanelWidget = widget => {
+      const domNode = el.querySelector(`[data-widgetid="${widget.getId()}"]`);
+      el.removeChild(domNode);
+      instance.layout();
+      delete instance.panelWidgets[widget.getId()];
+    };
+    instance.addListenerAndStoreDisposable = (marker, fn) => {
+      instance.disposableEvents[marker] = instance.onDidChangeModelContent(fn);
+    };
+    instance.disposeDisposableEvent = marker => {
+      instance.disposableEvents[marker].dispose();
+      delete instance.disposableEvents[marker];
+    };
 
     Editor.loadExtensions(extensions, instance)
       .then(modules => {
@@ -130,9 +191,13 @@ export default class Editor {
   use(exts = [], instance = null) {
     const extensions = Array.isArray(exts) ? exts : [exts];
     if (instance) {
+      extensions.forEach(ext => ext.init?.bind(instance)());
       Object.assign(instance, ...extensions);
     } else {
-      this.instances.forEach(inst => Object.assign(inst, ...extensions));
+      this.instances.forEach(inst => {
+        extensions.map(ext => ext.init?.bind(inst)());
+        Object.assign(inst, ...extensions);
+      });
     }
   }
 }
