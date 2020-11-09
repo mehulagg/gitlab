@@ -56,7 +56,7 @@ export default {
 <template>
   <gl-button
     v-gl-tooltip="{ id: $options.deleteEnvironmentTooltipId }"
-    v-gl-modal-directive="'delete_environment_modal'"
+    v-gl-modal-directive="'delete-environment-modal'"
     :loading="isLoading"
     :title="title"
     :aria-label="title"
