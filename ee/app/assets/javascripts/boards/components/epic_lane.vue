@@ -118,7 +118,7 @@ export default {
 <template>
   <div>
     <div class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block">
-      <div class="gl-py-5 gl-px-3 gl-display-flex gl-align-items-center">
+      <div class="gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
         <gl-button
           v-gl-tooltip.hover.right
           :aria-label="chevronTooltip"
@@ -131,7 +131,7 @@ export default {
         />
         <h4
           ref="epicTitle"
-          class="gl-mr-3 gl-font-weight-bold gl-font-base gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
+          class="gl-my-0 gl-mr-3 gl-font-weight-bold gl-font-base gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
         >
           {{ epic.title }}
         </h4>
@@ -158,7 +158,7 @@ export default {
         <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="!isCollapsed" class="gl-display-flex" data-testid="board-epic-lane-issues">
+    <div v-if="!isCollapsed" class="gl-display-flex gl-pb-5" data-testid="board-epic-lane-issues">
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

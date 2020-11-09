@@ -107,7 +107,7 @@ export default {
     <component
       :is="treeRootWrapper"
       v-bind="treeRootOptions"
-      class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-bg-white gl-top-0 gl-z-index-3"
+      class="board-swimlanes-headers gl-display-table gl-sticky gl-py-5 gl-bg-white gl-top-0 gl-z-index-3"
       data-testid="board-swimlanes-headers"
       @end="handleDragOnEnd"
     >
