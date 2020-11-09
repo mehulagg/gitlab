@@ -3,13 +3,16 @@
 module Resolvers
   module ErrorTracking
     class SentryDetailedErrorResolver < BaseResolver
-      argument :id, GraphQL::ID_TYPE,
+      ErrorID = ::Types::GlobalIDType[::Gitlab::ErrorTracking::DetailedError]
+
+      argument :id, ErrorID.to_non_null_type,
                 required: true,
                 description: 'ID of the Sentry issue'
 
-      def resolve(**args)
+      def resolve(id:)
         current_user = context[:current_user]
-        issue_id = GlobalID.parse(args[:id])&.model_id
+        id = ErrorID.coerce_isolated_input(id)
+        issue_id = GlobalID.parse(id)&.model_id
 
         # Get data from Sentry
         response = ::ErrorTracking::IssueDetailsService.new(

@@ -43,8 +43,6 @@ Graphql/IDType:
     - 'app/graphql/resolvers/design_management/version_in_collection_resolver.rb'
     - 'app/graphql/resolvers/design_management/version_resolver.rb'
     - 'app/graphql/resolvers/design_management/versions_resolver.rb'
-    - 'app/graphql/resolvers/error_tracking/sentry_detailed_error_resolver.rb'
-    - 'app/graphql/resolvers/error_tracking/sentry_error_stack_trace_resolver.rb'
     - 'app/graphql/resolvers/snippets_resolver.rb'
     - 'app/graphql/resolvers/user_merge_requests_resolver.rb'
 
