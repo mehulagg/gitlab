@@ -12472,6 +12472,9 @@ msgstr ""
 msgid "GitLab API"
 msgstr ""
 
+msgid "GitLab Account Request"
+msgstr ""
+
 msgid "GitLab Billing Team."
 msgstr ""
 
@@ -31722,6 +31725,9 @@ msgid "has already been taken"
 msgstr ""
 
 msgid "help"
+msgstr ""
+
+msgid "here"
 msgstr ""
 
 msgid "http:"

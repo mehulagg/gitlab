@@ -54,7 +54,9 @@ RSpec.describe RegistrationsController do
         end
 
         it 'emails the access request to approvers' do
-          expect { subject }.to have_enqueued_mail(NotificationService.new, :new_instance_access_request)
+          expect_next_instance_of(NotificationService) do |notification|
+            expect(notification).to receive(:new_instance_access_request)
+          end
 
           subject
         end
