@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe 'Signup on EE' do
   let(:new_user) { build_stubbed(:user) }
 
+  before do
+    stub_application_setting(require_admin_approval_after_user_signup: false)
+  end
+
   def fill_in_signup_form
     fill_in 'new_user_username', with: new_user.username
     fill_in 'new_user_email', with: new_user.email

@@ -10,6 +10,7 @@ RSpec.describe 'Group or Project invitations' do
   let(:dev_env_or_com) { true }
 
   before do
+    stub_application_setting(require_admin_approval_after_user_signup: false)
     allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
 
     visit invite_path(group_invite.raw_invite_token)
