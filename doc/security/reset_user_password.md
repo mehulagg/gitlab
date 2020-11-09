@@ -56,7 +56,7 @@ Don't forget to save the changes.
 user.save!
 ```
 
-Exit the console and try to login with your new password.
+Exit the console and try to log in with your new password.
 
 NOTE: **Note:**
 Passwords can also be reset via the [Users API](../api/users.md#user-modification)

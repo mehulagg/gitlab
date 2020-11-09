@@ -103,7 +103,7 @@ Hub](https://hub.docker.com/). We've also added the [`only`
 clause](../../yaml/README.md#onlyexcept-basic)
 to ensure our deployments only happen when we push to the master branch.
 
-Now, since the steps defined in `.gitlab-ci.yml` require credentials to login
+Now, since the steps defined in `.gitlab-ci.yml` require credentials to log in
 to CF, you'll need to add your CF credentials as [environment
 variables](../../variables/README.md#predefined-environment-variables)
 on GitLab CI/CD. To set the environment variables, navigate to your project's

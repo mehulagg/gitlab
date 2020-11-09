@@ -97,7 +97,7 @@ library. `start_tls` corresponds to StartTLS, not to be confused with regular TL
 Normally, if you specify `simple_tls` it will be on port 636, while `start_tls` (StartTLS)
 would be on port 389. `plain` also operates on port 389. Removed values: `tls` was replaced with `start_tls` and `ssl` was replaced with `simple_tls`.
 
-LDAP users must have an email address set, regardless of whether it is used to sign-in.
+LDAP users must have an email address set, regardless of whether it is used to sign in.
 
 ### Example Configurations **(CORE ONLY)**
 
@@ -445,7 +445,7 @@ has bit 2 set.
 For more information, see <https://ctovswild.com/2009/09/03/bitmask-searches-in-ldap/>
 
 The user will be set to `ldap_blocked` state in GitLab if the above conditions
-fail. This means the user will not be able to sign-in or push/pull code.
+fail. This means the user will not be able to sign in or push/pull code.
 
 The process will also update the following user information:
 

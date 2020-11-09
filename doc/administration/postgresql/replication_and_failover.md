@@ -580,7 +580,7 @@ in the Troubleshooting section before proceeding.
 ### Ensure GitLab is running
 
 At this point, your GitLab instance should be up and running. Verify you are
-able to login, and create issues and merge requests. If you have troubles check
+able to log in, and create issues and merge requests. If you have troubles check
 the [Troubleshooting section](#troubleshooting).
 
 ## Example configuration

@@ -562,7 +562,7 @@ See below for examples of each.
 #### Determining your `DOCKER_AUTH_CONFIG` data
 
 As an example, let's assume that you want to use the `registry.example.com:5000/private/image:latest`
-image which is private and requires you to login into a private container registry.
+image which is private and requires you to log in into a private container registry.
 
 Let's also assume that these are the login credentials:
 

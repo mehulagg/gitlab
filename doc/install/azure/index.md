@@ -347,7 +347,7 @@ connect to it using SSH ([Secure Shell](https://en.wikipedia.org/wiki/Secure_She
 If you're running Windows, you'll need to connect using [PuTTY](https://www.putty.org) or an equivalent Windows SSH client.
 If you're running Linux or macOS, then you already have an SSH client installed.
 
-Remember that you will need to login with the username and password you specified
+Remember that you will need to log in with the username and password you specified
 [when you created](#basics) your Azure VM.
 
 If you need to reset your VM password, read

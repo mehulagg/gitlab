@@ -103,16 +103,16 @@ A user can have trouble signing in for any number of reasons. To get started,
 here are some questions to ask yourself:
 
 - Does the user fall under the [configured `base`](index.md#configuration) in
-  LDAP? The user must fall under this `base` to sign-in.
+  LDAP? The user must fall under this `base` to sign in.
 - Does the user pass through the [configured `user_filter`](index.md#set-up-ldap-user-filter)?
   If one is not configured, this question can be ignored. If it is, then the
-  user must also pass through this filter to be allowed to sign-in.
+  user must also pass through this filter to be allowed to sign in.
   - Refer to our docs on [debugging the `user_filter`](#debug-ldap-user-filter).
 
 If the above are both okay, the next place to look for the problem is
 the logs themselves while reproducing the issue.
 
-- Ask the user to sign-in and let it fail.
+- Ask the user to sign in and let it fail.
 - [Look through the output](#gitlab-logs) for any errors or other
   messages about the sign-in. You may see one of the other error messages on
   this page, in which case that section can help resolve the issue.
@@ -159,7 +159,7 @@ The user should now be able to sign in.
 
 #### Email has already been taken
 
-A user tries to sign-in with the correct LDAP credentials, is denied access,
+A user tries to sign in with the correct LDAP credentials, is denied access,
 and the [production.log](../../logs.md#productionlog) shows an error that looks like this:
 
 ```plaintext

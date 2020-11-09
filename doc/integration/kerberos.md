@@ -96,7 +96,7 @@ to authenticate with Kerberos tokens.
 The Administrative user can navigate to **Admin > Users > Example User > Identities**
 and attach a Kerberos account. Existing GitLab users can go to **Profile > Account**
 and attach a Kerberos account. If you want to allow users without a GitLab
-account to login, you should enable the option `allow_single_sign_on` as
+account to log in, you should enable the option `allow_single_sign_on` as
 described in the [Configure GitLab](#configure-gitlab) section. Then, the first
 time a user signs in with Kerberos credentials, GitLab will create a new GitLab
 user associated with the email, which is built from the Kerberos username and

@@ -196,7 +196,7 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    yes | cp pam-ssh-conf-$timestamp /etc/pam.d/sshd
    ```
 
-1. Verify the installed version. In another window, attempt to login to the server:
+1. Verify the installed version. In another window, attempt to log in to the server:
 
    ```shell
    ssh -v <your-centos-machine>

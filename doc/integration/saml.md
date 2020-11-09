@@ -373,7 +373,7 @@ Please keep in mind that every sign in attempt will be redirected to the SAML se
 so you will not be able to sign in using local credentials. Make sure that at least one
 of the SAML users has admin permissions.
 
-You may also bypass the auto signin feature by browsing to
+You may also bypass the auto sign in feature by browsing to
 `https://gitlab.example.com/users/sign_in?auto_sign_in=false`.
 
 ### `attribute_statements`
@@ -543,7 +543,7 @@ This integration uses the `certificate` and `private_key` settings for both asse
 
 Another optional configuration is to sign SAML authentication requests. GitLab SAML Requests uses the SAML redirect binding so this is not necessary, unlike the SAML POST binding where signing is required to prevent intermediaries tampering with the requests.
 
-In order to sign, you need to create a private key and public certificate pair for your GitLab instance to use for SAML. The settings related to signing can be set in the `security` section of the configuration.
+In order to sign, you need to create a private key and public certificate pair for your GitLab instance to use for SAML. The settings for signing can be set in the `security` section of the configuration.
 
 For example:
 
@@ -654,7 +654,7 @@ this likely indicates that GitLab could not get the email address for the SAML u
 Make sure the IdP provides a claim containing the user's email address, using claim name
 `email` or `mail`.
 
-### Redirect back to login screen with no evident error
+### Redirect back to the login screen with no evident error
 
 If after signing in into your SAML server you are redirected back to the sign in page and
 no error is displayed, check your `production.log` file. It will most likely contain the

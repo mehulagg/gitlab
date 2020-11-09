@@ -185,7 +185,7 @@ you left off.
 
 Sometimes though, you may encounter some issues, like OpenShift not running
 when booting up the VM. The web UI may not responding or you may see issues
-when trying to login with `oc`, like:
+when trying to log in with `oc`, like:
 
 ```plaintext
 The connection to the server 10.2.2.2:8443 was refused - did you specify the right host or port?
@@ -213,7 +213,7 @@ In that case, the OpenShift service might not be running, so in order to fix it:
    systemctl status openshift -l
    ```
 
-Now you will be able to login using `oc` (like we did before) and visit the web
+Now you will be able to log in using `oc` (like we did before) and visit the web
 console.
 
 ## Deploy GitLab
@@ -502,7 +502,7 @@ and a sense of how things work using the web console or the CLI.
 
 GitLab was hard to install in previous versions of OpenShift,
 but now that belongs to the past. Upload a template, create a project, add an
-application and you are done. You are ready to login to your new GitLab instance.
+application and you are done. You are ready to log in to your new GitLab instance.
 
 And remember that in this tutorial we just scratched the surface of what Origin
 is capable of. As always, you can refer to the detailed
