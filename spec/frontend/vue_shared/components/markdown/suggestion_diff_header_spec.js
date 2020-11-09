@@ -75,6 +75,14 @@ describe('Suggestion Diff component', () => {
     expect(addToBatchBtn.html().includes('Add suggestion to batch')).toBe(true);
   });
 
+  it('does not render apply suggestion button with anonymous user', () => {
+    window.gon.current_user_id = null;
+
+    createComponent();
+
+    expect(findApplyButton().exists()).toBe(false);
+  });
+
   describe('when apply suggestion is clicked', () => {
     beforeEach(() => {
       createComponent();
