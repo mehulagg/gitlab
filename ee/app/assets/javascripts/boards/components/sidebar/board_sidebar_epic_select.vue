@@ -20,7 +20,11 @@ export default {
   inject: ['groupId'],
   computed: {
     ...mapState(['epics']),
-    ...mapGetters({ getEpicById: 'getEpicById', issue: 'getActiveIssue' }),
+    ...mapGetters({
+      getEpicById: 'getEpicById',
+      issue: 'getActiveIssue',
+      projectPath: 'projectPathForActiveIssue',
+    }),
     storedEpic() {
       const storedEpic = this.getEpicById(this.issue.epic?.id);
       const epicId = getIdFromGraphQLId(storedEpic?.id);
@@ -29,10 +33,6 @@ export default {
         ...storedEpic,
         id: Number(epicId),
       };
-    },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
     },
   },
   methods: {

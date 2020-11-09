@@ -18,7 +18,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ issue: 'getActiveIssue' }),
+    ...mapGetters({ issue: 'getActiveIssue', projectPath: 'projectPathForActiveIssue' }),
     hasDueDate() {
       return this.issue.dueDate != null;
     },
@@ -35,10 +35,6 @@ export default {
       }
 
       return dateInWords(this.parsedDueDate, true);
-    },
-    projectPath() {
-      const referencePath = this.issue.referencePath || '';
-      return referencePath.slice(0, referencePath.indexOf('#'));
     },
   },
   methods: {

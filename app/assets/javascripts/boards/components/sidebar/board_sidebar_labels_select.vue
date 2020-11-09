@@ -21,7 +21,7 @@ export default {
   },
   inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
   computed: {
-    ...mapGetters({ issue: 'getActiveIssue' }),
+    ...mapGetters({ issue: 'getActiveIssue', projectPath: 'projectPathForActiveIssue' }),
     selectedLabels() {
       const { labels = [] } = this.issue;
 
@@ -37,10 +37,6 @@ export default {
         ...label,
         scoped: isScopedLabel(label),
       }));
-    },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
     },
   },
   methods: {

@@ -124,6 +124,22 @@ describe('Boards - Getters', () => {
     });
   });
 
+  describe('projectPathByIssueId', () => {
+    it('returns project path for the active issue', () => {
+      const mockGetActiveIssue = {
+        referencePath: 'gitlab-org/gitlab-test#1',
+      };
+      expect(getters.projectPathForActiveIssue({ getActiveIssue: mockGetActiveIssue })).toEqual(
+        'gitlab-org/gitlab-test',
+      );
+    });
+
+    it('returns empty string as project when active issue is an empty object', () => {
+      const mockGetActiveIssue = {};
+      expect(getters.projectPathForActiveIssue({ getActiveIssue: mockGetActiveIssue })).toEqual('');
+    });
+  });
+
   describe('getIssues', () => {
     const boardsState = {
       issuesByListId: mockIssuesByListId,

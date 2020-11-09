@@ -24,6 +24,11 @@ export default {
     return state.issues[state.activeId] || {};
   },
 
+  projectPathForActiveIssue: (state, getters) => {
+    const referencePath = getters.getActiveIssue.referencePath || '';
+    return referencePath.slice(0, referencePath.indexOf('#'));
+  },
+
   getListByLabelId: state => labelId => {
     return find(state.boardLists, l => l.label?.id === labelId);
   },
