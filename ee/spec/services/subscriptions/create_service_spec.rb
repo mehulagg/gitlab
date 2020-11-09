@@ -29,7 +29,6 @@ RSpec.describe Subscriptions::CreateService do
   end
 
   let_it_be(:customer_email) { 'first.last@gitlab.com' }
-
   let_it_be(:client) { Gitlab::SubscriptionPortal::Client }
   let_it_be(:create_service_params) { Gitlab::Json.parse(fixture_file('create_service_params.json', dir: 'ee')).deep_symbolize_keys }
 
