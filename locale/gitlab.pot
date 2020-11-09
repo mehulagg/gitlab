@@ -7126,6 +7126,9 @@ msgstr ""
 msgid "Consistency guarantee method"
 msgstr ""
 
+msgid "Contact Sales to upgrade"
+msgstr ""
+
 msgid "Contact sales to upgrade"
 msgstr ""
 
@@ -13778,9 +13781,6 @@ msgid "How many shards to split the Elasticsearch index over."
 msgstr ""
 
 msgid "How many users will be evaluating the trial?"
-msgstr ""
-
-msgid "How to upgrade"
 msgstr ""
 
 msgid "However, you are already a member of this %{member_source}. Sign in using a different account to accept the invitation."

@@ -18,8 +18,8 @@
           %strong= @license.plan.capitalize
           - unless @license.ultimate?
             = ' - '
-            = link_to _('How to upgrade'),
-              help_page_path('subscriptions/self_managed/index.md', anchor: 'upgrade-your-subscription-tier'),
+            = link_to _('Contact Sales to upgrade'),
+              'https://about.gitlab.com/sales/?inapplink=contactsalessm',
               class: 'inline-link',
               target: :_blank,
               rel: :noreferrer
