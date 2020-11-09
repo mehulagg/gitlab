@@ -62,7 +62,6 @@ To change that for installations from source:
 1. [Restart GitLab](../administration/restart_gitlab.md#installations-from-source)
    for the changes to take effect.
 
-
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
