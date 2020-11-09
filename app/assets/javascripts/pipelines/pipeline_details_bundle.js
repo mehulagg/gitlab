@@ -126,6 +126,9 @@ const createTestDetails = () => {
 };
 
 export default async function() {
+  createTestDetails();
+  createDagApp();
+
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
   let mediator;
 
@@ -166,7 +169,4 @@ export default async function() {
   } else {
     createLegacyPipelineHeaderApp(mediator);
   }
-
-  createTestDetails();
-  createDagApp();
 }
