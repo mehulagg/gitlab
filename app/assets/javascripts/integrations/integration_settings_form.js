@@ -40,7 +40,7 @@ export default class IntegrationSettingsForm {
     // 2) If this service can be saved
     // If both conditions are true, we override form submission
     // and save the service using provided configuration.
-    if (this.$form.get(0).checkValidity()) {
+    if (this.$form.get(0).checkValidity() || this.formActive === false) {
       this.$form.submit();
     } else {
       eventHub.$emit('validateForm');
