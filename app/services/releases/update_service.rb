@@ -7,7 +7,7 @@ module Releases
         return error
       end
 
-      if param_for_milestone_titles_provided?
+      if param_for_milestone_titles_present?
         previous_milestones = release.milestones.map(&:title)
         params[:milestones] = milestones
       end
@@ -47,7 +47,7 @@ module Releases
     end
 
     def milestones_updated?(previous_milestones)
-      return false unless param_for_milestone_titles_provided?
+      return false unless param_for_milestone_titles_present?
 
       previous_milestones.to_set != release.milestones.map(&:title)
     end

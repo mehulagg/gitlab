@@ -56,7 +56,7 @@ module Releases
     end
 
     def milestones
-      return [] unless param_for_milestone_titles_provided?
+      return [] unless param_for_milestone_titles_present?
 
       strong_memoize(:milestones) do
         MilestonesFinder.new(
@@ -71,14 +71,14 @@ module Releases
     end
 
     def inexistent_milestones
-      return [] unless param_for_milestone_titles_provided?
+      return [] unless param_for_milestone_titles_present?
 
       existing_milestone_titles = milestones.map(&:title)
       Array(params[:milestones]) - existing_milestone_titles
     end
 
-    def param_for_milestone_titles_provided?
-      params.key?(:milestones)
+    def param_for_milestone_titles_present?
+      params[:milestones].present?
     end
 
     def execute_hooks(release, action = 'create')
