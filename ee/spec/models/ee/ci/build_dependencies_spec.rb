@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Ci::BuildDependencies do
-  describe '#cross_pipeline' do
+  describe '#cross_project' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project, refind: true) { create(:project, :repository) }
     let(:dependencies) { }
@@ -26,7 +26,7 @@ RSpec.describe Ci::BuildDependencies do
         options: { cross_dependencies: dependencies })
     end
 
-    subject { described_class.new(job).cross_pipeline }
+    subject { described_class.new(job).cross_project }
 
     before do
       project.add_developer(user)
