@@ -27,6 +27,7 @@ class Environment < ApplicationRecord
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   has_one :last_deployment, -> { success.order('deployments.id DESC') }, class_name: 'Deployment'
+  has_one :last_successful_deployment, -> { success.order('deployments.id DESC') }, class_name: 'Deployment'
   has_one :last_deployable, through: :last_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_pipeline, through: :last_deployable, source: 'pipeline'
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
