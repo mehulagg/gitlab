@@ -183,9 +183,9 @@ Using the all-in-one VM gives you the ability to test OpenShift whenever you
 want. That means you get to play with it, shutdown the VM, and pick up where
 you left off.
 
-Sometimes though, you may encounter some issues, like OpenShift not running
-when booting up the VM. The web UI may not responding or you may see issues
-when trying to log in with `oc`, like:
+Occasionally, you may encounter issues, like OpenShift not running when booting
+up the VM. The web UI may not respond, or you may see issues when trying to sign
+in with `oc`, like:
 
 ```plaintext
 The connection to the server 10.2.2.2:8443 was refused - did you specify the right host or port?
@@ -213,8 +213,7 @@ In that case, the OpenShift service might not be running, so in order to fix it:
    systemctl status openshift -l
    ```
 
-Now you will be able to log in using `oc` (like we did before) and visit the web
-console.
+You can now sign in by using `oc` (like we did before) and visit the web console.
 
 ## Deploy GitLab
 
