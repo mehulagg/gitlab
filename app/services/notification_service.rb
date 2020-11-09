@@ -370,9 +370,8 @@ class NotificationService
     end
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def new_instance_access_request(member)
-    recipients = User.admins.active.order_recent_sign_in.limit(10) # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
+    recipients = User.instance_access_request_approvers_to_be_notified # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
 
     return true if recipients.empty?
 
@@ -380,7 +379,6 @@ class NotificationService
       mailer.instance_access_request_email(member, recipient).deliver_later
     end
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   # Members
   def new_access_request(member)
