@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import createStore from 'ee/billings/stores/index_subscriptions';
+import initialStore from 'ee/billings/stores';
 import SubscriptionApp from 'ee/billings/subscriptions/components/app.vue';
 import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import * as types from 'ee/billings/stores/modules/subscriptions/mutation_types';
@@ -21,7 +21,7 @@ describe('SubscriptionApp component', () => {
   };
 
   const factory = () => {
-    store = createStore();
+    store = new Vuex.Store(initialStore());
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionApp, {

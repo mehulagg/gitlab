@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import SubscriptionSeats from './components/subscription_seats.vue';
-import store from '../stores/index_seat_usage';
+import initialStore from '../stores';
 
 Vue.use(Vuex);
 
@@ -16,7 +16,7 @@ export default (containerId = 'js-seat-usage') => {
 
   return new Vue({
     el: containerEl,
-    store,
+    store: new Vuex.Store(initialStore()),
     provide: {
       namespaceId,
       namespaceName,

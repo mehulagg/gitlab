@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import SubscriptionApp from './components/app.vue';
-import store from '../stores/index_subscriptions';
+import initialStore from '../stores';
 
 Vue.use(Vuex);
 
@@ -22,7 +22,7 @@ export default (containerId = 'js-billing-plans') => {
 
   return new Vue({
     el: containerEl,
-    store,
+    store: new Vuex.Store(initialStore()),
     provide: {
       namespaceId,
       namespaceName,

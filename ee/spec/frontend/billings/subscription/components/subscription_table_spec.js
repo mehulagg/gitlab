@@ -2,7 +2,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
-import createStore from 'ee/billings/stores/index_subscriptions';
+import initialStore from 'ee/billings/stores';
 import * as types from 'ee/billings/stores/modules/subscriptions/mutation_types';
 import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscription_table_row.vue';
@@ -22,7 +22,7 @@ describe('SubscriptionTable component', () => {
     wrapper.findAll('a').wrappers.map(x => ({ text: x.text(), href: x.attributes('href') }));
 
   const factory = (options = {}) => {
-    store = createStore();
+    store = new Vuex.Store(initialStore());
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionTable, {
