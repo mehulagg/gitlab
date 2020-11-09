@@ -24,10 +24,13 @@ class Projects::TemplatesController < Projects::ApplicationController
   end
 
   def names
-    templates = @template_type.dropdown_names(project)
+    supported_issuable_types = %w[issue merge_request]
+    issuable_type = params[:template_type]
+
+    return [] unless supported_issuable_types.include?(issuable_type)
 
     respond_to do |format|
-      format.json { render json: templates }
+      format.json { render json: project.issuable_templates(issuable_type) }
     end
   end
 

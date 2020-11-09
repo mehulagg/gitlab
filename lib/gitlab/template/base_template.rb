@@ -8,6 +8,7 @@ module Gitlab
       def initialize(path, project = nil, category: nil)
         @path = path
         @category = category
+        @project = project
         @finder = self.class.finder(project)
       end
 
@@ -24,6 +25,14 @@ module Gitlab
 
       def content
         @finder.read(@path)
+      end
+
+      def project_path
+        @project.path
+      end
+
+      def namespace_path
+        @project.namespace&.full_path
       end
 
       # Present for compatibility with license templates, which can replace text
@@ -81,7 +90,7 @@ module Gitlab
           directory = category_directory(category)
           files = finder(project).list_files_for(directory)
 
-          files.map { |f| new(f, project, category: category) }.sort
+          files.map { |f| new(f, project, category: category.presence || _("Project Templates")) }.sort
         end
 
         def category_directory(category)

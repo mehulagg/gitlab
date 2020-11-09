@@ -35,9 +35,9 @@ RSpec.describe Group do
 
   describe 'scopes' do
     describe '.with_custom_file_templates' do
-      let_it_be(:excluded_group) { create(:group) }
-      let_it_be(:included_group, reload: true) { create(:group) }
-      let_it_be(:project, reload: true) { create(:project, namespace: included_group) }
+      let!(:excluded_group) { create(:group) }
+      let(:included_group) { create(:group) }
+      let(:project) { create(:project, namespace: included_group) }
 
       before do
         stub_licensed_features(custom_file_templates_for_namespace: true)
@@ -47,54 +47,14 @@ RSpec.describe Group do
 
       subject(:relation) { described_class.with_custom_file_templates }
 
-      it { expect(included_group.file_template_project_id).to eq(project.id) }
       it { is_expected.to contain_exactly(included_group) }
 
       it 'preloads everything needed to show a valid checked_file_template_project' do
         group = relation.first
 
-        expect { group.checked_file_template_project }.not_to exceed_query_limit(2)
+        expect { group.checked_file_template_project }.not_to exceed_query_limit(0)
 
         expect(group.checked_file_template_project).to be_present
-      end
-
-      context 'with inheritance' do
-        let_it_be(:subgroup) { create(:group, parent: included_group) }
-
-        it { expect(subgroup.checked_file_template_project).to eq(project) }
-        it { expect { subgroup.checked_file_template_project }.not_to exceed_query_limit(2) }
-
-        context 'when both ancestor and descendant groups specify file_template_project' do
-          let_it_be(:subgroup_project) { create(:project, namespace: subgroup) }
-
-          before do
-            subgroup.update!(file_template_project: subgroup_project)
-          end
-
-          it { expect(included_group.checked_file_template_project).to eq(project) }
-          it { expect(subgroup.checked_file_template_project).to eq(subgroup_project) }
-          it { expect { subgroup.checked_file_template_project }.not_to exceed_query_limit(2) }
-        end
-      end
-
-      context 'with shared projects' do
-        let_it_be(:subgroup1) { create(:group, parent: included_group) }
-
-        it { expect(subgroup1.checked_file_template_project).to eq(project) }
-        it { expect { subgroup1.checked_file_template_project }.not_to exceed_query_limit(2) }
-
-        context 'when both ancestor and descendant groups specify file_template_project' do
-          let_it_be(:subgroup2) { create(:group, parent: subgroup1) }
-          let_it_be(:subgroup_project) { create(:project, namespace: included_group) }
-          let_it_be(:project_group_link) { create(:project_group_link, project: subgroup_project, group: subgroup1) }
-
-          before do
-            subgroup1.update!(file_template_project: subgroup_project)
-          end
-
-          it { expect(subgroup2.checked_file_template_project).to eq(subgroup_project) }
-          it { expect { subgroup2.checked_file_template_project }.not_to exceed_query_limit(2) }
-        end
       end
     end
 

@@ -369,19 +369,12 @@ module IssuablesHelper
 
   def issuable_templates(issuable)
     strong_memoize(:issuable_templates) do
-      issuable_templates = {}
       supported_issuable_types = %w[issue merge_request]
       issuable_type = issuable.class.name.underscore
 
-      return {} if issuable.blank? || !supported_issuable_types.include?(issuable_type)
+      next [] unless supported_issuable_types.include?(issuable_type)
 
-      project_own_issuable_templates = ref_project.own_issuable_templates(issuable_type)
-      project_inherited_issuable_templates = ref_project.inherited_issuable_templates(issuable_type)
-
-      issuable_templates[_('Project Templates')] = project_own_issuable_templates unless project_own_issuable_templates.blank?
-      issuable_templates[_('Inherited Templates')] = project_inherited_issuable_templates unless project_inherited_issuable_templates.blank?
-
-      issuable_templates
+      ref_project.issuable_templates(issuable_type)
     end
   end
 

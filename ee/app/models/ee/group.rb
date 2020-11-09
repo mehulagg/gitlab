@@ -272,14 +272,17 @@ module EE
     # Overrides a method defined in `::EE::Namespace`
     override :checked_file_template_project
     def checked_file_template_project(*args, &blk)
+      project = file_template_project(*args, &blk)
+
+      return unless project && (
+          project_ids.include?(project.id) || shared_project_ids.include?(project.id))
+
+      # The license check would normally be the cheapest to perform, so would
+      # come first. In this case, the method is carefully designed to perform
+      # no SQL at all, but `feature_available?` will cause an ApplicationSetting
+      # to be created if it doesn't already exist! This is mostly a problem in
+      # the specs, but best avoided in any case.
       return unless feature_available?(:custom_file_templates_for_namespace)
-
-      # Find closest ancestor with given non nil setting or just use itself
-      self_or_ancestor = closest_ancestor_for_setting(:file_template_project_id, rollup_to_instance: true) || self
-      project_id = file_template_project_id || self_or_ancestor&.file_template_project_id
-
-      # check that template project is part of the ancestor hierarchy or its shared projects
-      return if !project_id || !project = accessible_template_project?(self_or_ancestor, project_id)
 
       project
     end
@@ -458,12 +461,6 @@ module EE
     end
 
     private
-
-    def accessible_template_project?(self_or_ancestor, project_id)
-      return self_or_ancestor.file_template_project if self_or_ancestor.is_a?(ApplicationSetting)
-
-      self_or_ancestor&.all_projects&.where(id: project_id)&.first || self_or_ancestor&.shared_projects&.where(id: project_id)&.first
-    end
 
     def custom_project_templates_group_allowed
       return if custom_project_templates_group_id.blank?

@@ -2541,20 +2541,21 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
-  def own_issuable_templates(issuable_type)
-    repository.send("#{issuable_type}_template_names").map do |template_names_hash| # rubocop:disable GitlabSecurity/PublicSend
-      template_names_hash.merge(project_path: self.path, namespace_path: self.group&.full_path)
-    end.flatten.compact
+  def issuable_templates(issuable_type)
+    strong_memoize("#{issuable_type}_templates") do
+      template_dropdown_names(TemplateFinder.build(issuable_type.pluralize.to_sym, self).execute)
+    end
   end
 
-  def inherited_issuable_templates(issuable_type)
-    templates_project = group&.checked_file_template_project
+  def template_dropdown_names(items)
+    grouped = items.group_by(&:category)
+    categories = grouped.keys
 
-    return [] if templates_project&.id == self.id
-
-    templates_project&.repository&.send("#{issuable_type}_template_names")&.map do |template_names_hash| # rubocop:disable GitlabSecurity/PublicSend
-      template_names_hash.merge(project_path: templates_project.path, namespace_path: templates_project.group&.full_path)
-    end&.flatten&.compact
+    categories.each_with_object({}) do |category, hash|
+      hash[category] = grouped[category].map do |item|
+        { name: item.name, id: item.key, project_path: item.project_path, namespace_path: item.namespace_path }
+      end
+    end
   end
 
   private
