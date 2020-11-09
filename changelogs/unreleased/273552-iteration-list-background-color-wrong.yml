@@ -1,0 +1,5 @@
+---
+title: Fix gray background on iterations list page
+merge_request: 47153
+author:
+type: fixed
