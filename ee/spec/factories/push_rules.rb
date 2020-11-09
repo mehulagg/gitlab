@@ -7,7 +7,6 @@ FactoryBot.define do
     force_push_regex { 'feature\/.*' }
     deny_delete_tag { false }
     delete_branch_regex { 'bug\/.*' }
-    project
 
     trait :commit_message do
       commit_message_regex { "(f|F)ixes #\d+.*" }

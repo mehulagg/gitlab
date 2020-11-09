@@ -16,8 +16,7 @@ module EE
           return unless project.feature_available?(:push_rules)
 
           unless project.push_rule
-            push_rule = project.create_push_rule
-            project.project_setting.update(push_rule_id: push_rule.id)
+            project.project_setting.update(push_rule: PushRule.create)
           end
 
           @push_rule = project.push_rule # rubocop:disable Gitlab/ModuleWithInstanceVariables

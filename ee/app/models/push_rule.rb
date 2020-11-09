@@ -2,6 +2,8 @@
 
 class PushRule < ApplicationRecord
   extend Gitlab::Cache::RequestCache
+  include IgnorableColumns
+  ignore_column :project_id, remove_with: '13.8', remove_after: '2021-01-22'
 
   request_cache_key do
     [self.id]
@@ -18,8 +20,6 @@ class PushRule < ApplicationRecord
     file_name_regex
     branch_name_regex
   ].freeze
-
-  belongs_to :project
 
   validates :max_file_size, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates(*REGEX_COLUMNS, untrusted_regexp: true)
@@ -49,7 +49,7 @@ class PushRule < ApplicationRecord
   end
 
   def commit_signature_allowed?(commit)
-    return true unless available?(:reject_unsigned_commits)
+    return true unless available?(:reject_unsigned_commits, object: commit.project)
     return true unless reject_unsigned_commits
 
     commit.has_signature?
@@ -94,7 +94,6 @@ class PushRule < ApplicationRecord
     if global?
       License.feature_available?(feature_sym)
     else
-      object ||= project
       object&.feature_available?(feature_sym)
     end
   end

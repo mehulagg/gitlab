@@ -35,7 +35,6 @@ module EE
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
       has_one :project_registry, class_name: 'Geo::ProjectRegistry', inverse_of: :project
-      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
       has_one :index_status
 
       has_one :jenkins_service
@@ -191,6 +190,8 @@ module EE
       delegate :closest_gitlab_subscription, to: :namespace
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
+      delegate :push_rule, to: :project_setting
+      delegate :push_rule=, to: :project_setting
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
