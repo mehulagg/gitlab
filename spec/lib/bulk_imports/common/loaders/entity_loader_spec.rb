@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Common::Loaders::EntitiesLoader do
+RSpec.describe BulkImports::Common::Loaders::EntityLoader do
   describe '#load' do
     it "creates entities for the given data" do
       group = create(:group, path: "imported-group")

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Groups::Transformers::SubgroupsToEntitiesTransformer do
+RSpec.describe BulkImports::Groups::Transformers::SubgroupToEntityTransformer do
   describe "#transform" do
     it "transforms subgroups data in entity params" do
       parent = create(:group)
