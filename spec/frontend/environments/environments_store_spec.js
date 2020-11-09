@@ -1,5 +1,5 @@
 import Store from '~/environments/stores/environments_store';
-import { environmentsList, serverData } from './mock_data';
+import { environmentsList, serverData, deployBoardMockData } from './mock_data';
 
 describe('Store', () => {
   let store;
@@ -74,6 +74,27 @@ describe('Store', () => {
     store.storeEnvironments(serverData);
 
     expect(store.state.environments[1].folderName).toEqual(serverData[1].name);
+  });
+
+  describe('deploy boards', () => {
+    beforeEach(() => {
+      const environment = {
+        name: 'foo',
+        size: 1,
+        latest: {
+          id: 1,
+        },
+        rollout_status: deployBoardMockData,
+      };
+
+      store.storeEnvironments([environment]);
+    });
+
+    it('should toggle deploy board property for given environment id', () => {
+      store.toggleDeployBoard(1);
+
+      expect(store.state.environments[0].isDeployBoardVisible).toEqual(false);
+    });
   });
 
   describe('toggleFolder', () => {

@@ -39,12 +39,6 @@ describe('Store', () => {
       store.storeEnvironments([environment]);
     });
 
-    it('should toggle deploy board property for given environment id', () => {
-      store.toggleDeployBoard(1);
-
-      expect(store.state.environments[0].isDeployBoardVisible).toEqual(false);
-    });
-
     it('should keep deploy board data when updating environments', () => {
       expect(store.state.environments[0].deployBoardData).toEqual(deployBoardMockData);
 

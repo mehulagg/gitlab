@@ -1,3 +1,4 @@
+// TODO remove
 export const deployBoardMockData = {
   instances: [
     { status: 'finished', tooltip: 'tanuki-2334 Finished', pod_name: 'production-tanuki-1' },

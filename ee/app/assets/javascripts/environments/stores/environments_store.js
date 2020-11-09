@@ -1,6 +1,7 @@
 import CeEnvironmentsStore from '~/environments/stores/environments_store';
 
 export default class EnvironmentsStore extends CeEnvironmentsStore {
+  // TODO: delete when deploy boards moved to Core
   storeEnvironments(environments = []) {
     super.storeEnvironments(environments);
 
@@ -14,25 +15,5 @@ export default class EnvironmentsStore extends CeEnvironmentsStore {
     } else if (this.state.environments.length === 1) {
       this.state.environments[0].showCanaryCallout = true;
     }
-  }
-  /**
-   * Toggles deploy board visibility for the provided environment ID.
-   *
-   * @param  {Object} environment
-   * @return {Array}
-   */
-  toggleDeployBoard(environmentID) {
-    const environments = this.state.environments.slice();
-
-    this.state.environments = environments.map(env => {
-      let updated = { ...env };
-
-      if (env.id === environmentID) {
-        updated = { ...updated, isDeployBoardVisible: !env.isDeployBoardVisible };
-      }
-      return updated;
-    });
-
-    return this.state.environments;
   }
 }

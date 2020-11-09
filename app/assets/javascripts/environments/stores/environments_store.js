@@ -135,12 +135,22 @@ export default class EnvironmentsStore {
 
   /**
    * Toggles deploy board visibility for the provided environment ID.
-   * Currently only works on EE.
    *
    * @param  {Object} environment
    * @return {Array}
    */
-  toggleDeployBoard() {
+  toggleDeployBoard(environmentID) {
+    const environments = this.state.environments.slice();
+
+    this.state.environments = environments.map(env => {
+      let updated = { ...env };
+
+      if (env.id === environmentID) {
+        updated = { ...updated, isDeployBoardVisible: !env.isDeployBoardVisible };
+      }
+      return updated;
+    });
+
     return this.state.environments;
   }
 
