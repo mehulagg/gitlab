@@ -12,6 +12,7 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
+import { doesHashExistInUrl } from '~/lib/utils/url_utility';
 import MappingBuilder from './alert_mapping_builder.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
@@ -24,6 +25,7 @@ import {
   targetPrometheusUrlPlaceholder,
   targetOpsgenieUrlPlaceholder,
   typeSet,
+  sectionHash,
 } from '../constants';
 
 export default {
@@ -76,6 +78,7 @@ export default {
           'AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in.',
         ),
       },
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
       opsgenie: {
         label: s__('AlertSettings|2. Add link to your Opsgenie alert list'),
         info: s__(
@@ -109,7 +112,7 @@ export default {
     prometheus: {
       default: {},
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
     opsgenie: {
       default: {},
     },
@@ -129,11 +132,10 @@ export default {
       type: Boolean,
       required: true,
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
-    canAddOpsgenie: {
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    canAddOrEditOpsgenie: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
   },
   data() {
@@ -146,8 +148,8 @@ export default {
         json: null,
         error: null,
       },
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
-      isAddingOpsgenie: false,
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+      isAddingOrEditingOpsgenie: false,
     };
   },
   computed: {
@@ -160,6 +162,9 @@ export default {
           return this.generic;
         case this.$options.typeSet.prometheus:
           return this.prometheus;
+        // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+        case this.$options.typeSet.opsgenie:
+          return this.opsgenie;
         default:
           return {};
       }
@@ -191,7 +196,28 @@ export default {
       return this.integrationTypeSelect();
     },
   },
+  // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+  mounted() {
+    this.setDisabledOptionKeys();
+  },
   methods: {
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    setDisabledOptionKeys() {
+      if (this.opsgenie.active) {
+        this.setDisabledOptions([this.$options.typeSet.http, this.$options.typeSet.prometheus]);
+      } else {
+        this.setDisabledOptions([this.$options.typeSet.opsgenie]);
+      }
+    },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    setDisabledOptions(keys) {
+      this.options = this.options.map(el => {
+        if (keys.includes(el.value)) {
+          return { ...el, disabled: true };
+        }
+        return { ...el, disabled: false };
+      });
+    },
     integrationTypeSelect() {
       if (this.selectedIntegration === integrationTypesNew[0].value) {
         this.formVisible = false;
@@ -199,12 +225,17 @@ export default {
         this.formVisible = true;
       }
 
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
-      if (this.canAddOpsgenie && this.selectedIntegration === this.$options.typeSet.opsgenie) {
-        this.isAddingOpsgenie = true;
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+      if (
+        (this.canAddOrEditOpsgenie || this.opsgenie.active) &&
+        this.selectedIntegration === this.$options.typeSet.opsgenie
+      ) {
+        this.isAddingOrEditingOpsgenie = true;
+        this.active = this.opsgenie.active;
+        this.integrationForm.apiUrl = this.opsgenie.opsgenieMvcTargetUrl;
       }
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
     submitWithOpsgenie() {
       return service
         .updateGenericActive({
@@ -217,10 +248,13 @@ export default {
           },
         })
         .then(() => {
-          console.log('suceess');
+          if (!doesHashExistInUrl(sectionHash)) {
+            window.location.hash = sectionHash;
+          }
+          window.location.reload();
         })
-        .catch(() => {
-          console.log('suceess');
+        .catch(err => {
+          throw err;
         });
     },
     submitWithTestPayload() {
@@ -234,8 +268,8 @@ export default {
         });
     },
     submit() {
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
-      if (this.isAddingOpsgenie) {
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+      if (this.isAddingOrEditingOpsgenie) {
         return this.submitWithOpsgenie();
       }
 
@@ -327,8 +361,8 @@ export default {
       </div>
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
-      <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407 -->
-      <div v-if="isAddingOpsgenie">
+      <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
+      <div v-if="isAddingOrEditingOpsgenie">
         <gl-form-group
           id="integration-webhook"
           :label="$options.i18n.integrationFormSteps.opsgenie.label"
@@ -346,7 +380,7 @@ export default {
           />
 
           <gl-form-input
-            id="integration-apiUrl"
+            id="opsgenie-opsgenieMvcTargetUrl"
             v-model="integrationForm.apiUrl"
             type="text"
             :placeholder="$options.placeholders.opsgenie"
@@ -492,7 +526,7 @@ export default {
       </div>
       <div class="gl-display-flex gl-justify-content-end">
         <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
-        <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407 -->
+        <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
         <gl-button
           data-testid="integration-test-and-submit"
           :disabled="Boolean(integrationTestPayload.error) || isAddingOpsgenie"

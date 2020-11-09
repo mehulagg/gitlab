@@ -2,7 +2,7 @@ import VueApollo from 'vue-apollo';
 import { mount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import AlertsSettingsFormOld from '~/alerts_settings/components/alerts_settings_form_old.vue';
 import AlertsSettingsFormNew from '~/alerts_settings/components/alerts_settings_form_new.vue';
@@ -376,6 +376,29 @@ describe('AlertsSettingsWrapper', () => {
       await waitForPromises();
       expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
       expect(createFlash).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+  describe('Opsgenie integration', () => {
+    it('it shows an alert when opsgenie is active', async () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true }, opsgenie: { active: true } },
+        loading: false,
+      });
+
+      expect(wrapper.find(GlAlert).exists()).toBe(true);
+    });
+
+    it('it does not show an alert when opsgenie is disabled', async () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true }, opsgenie: { active: false } },
+        loading: false,
+      });
+
+      expect(wrapper.find(GlAlert).exists()).toBe(false);
     });
   });
 });
