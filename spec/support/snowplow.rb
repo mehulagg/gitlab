@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.configure do |config|
-  config.include SnowplowHelpers
+  config.include SnowplowHelpers, :snowplow
 
   config.before(:each, :snowplow) do
     # Using a high buffer size to not cause early flushes
