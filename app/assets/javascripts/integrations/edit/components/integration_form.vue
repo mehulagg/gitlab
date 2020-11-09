@@ -12,6 +12,7 @@ import JiraIssuesFields from './jira_issues_fields.vue';
 import TriggerFields from './trigger_fields.vue';
 import DynamicField from './dynamic_field.vue';
 import ConfirmationModal from './confirmation_modal.vue';
+import UninstallConfirmationModal from './uninstall_confirmation_modal.vue';
 
 export default {
   name: 'IntegrationForm',
@@ -23,6 +24,7 @@ export default {
     TriggerFields,
     DynamicField,
     ConfirmationModal,
+    UninstallConfirmationModal,
     GlButton,
   },
   directives: {
@@ -58,6 +60,7 @@ export default {
       this.setIsTesting(true);
       eventHub.$emit('testIntegration');
     },
+    onUninstallClick() {},
   },
 };
 </script>
@@ -129,6 +132,19 @@ export default {
       >
         {{ __('Test settings') }}
       </gl-button>
+
+      <template v-if="isInstanceOrGroupLevel">
+        <gl-button
+          v-gl-modal.confirmUninstallIntegration
+          category="secondary"
+          variant="danger"
+          :loading="isUninstalling"
+          :disabled="isDisabled"
+        >
+          {{ __('Uninstall') }}
+        </gl-button>
+        <uninstall-confirmation-modal @uninstall="onUninstallClick" />
+      </template>
 
       <gl-button class="btn-cancel" :href="propsSource.cancelPath">{{ __('Cancel') }}</gl-button>
     </div>
