@@ -10,6 +10,8 @@ export default {
       query: getStatesQuery,
       variables() {
         return {
+          after: this.cursor.after,
+          before: this.cursor.before,
           projectPath: this.projectPath,
         };
       },
@@ -45,6 +47,14 @@ export default {
       type: String,
     },
   },
+  data() {
+    return {
+      cursor: {
+        before: null,
+        after: null,
+      },
+    };
+  },
   computed: {
     isLoading() {
       return this.$apollo.queries.states.loading;
@@ -57,6 +67,21 @@ export default {
     },
     statesList() {
       return this.states?.list;
+    },
+  },
+  methods: {
+    updatePagination(item) {
+      if (item === this.pageInfo.endCursor) {
+        this.cursor = {
+          after: item,
+          before: null,
+        };
+      } else {
+        this.cursor = {
+          after: null,
+          before: item,
+        };
+      }
     },
   },
 };
@@ -80,7 +105,11 @@ export default {
             <states-table :states="statesList" />
 
             <div class="gl-display-flex gl-justify-content-center gl-mt-5">
-              <gl-keyset-pagination v-bind="pageInfo" />
+              <gl-keyset-pagination
+                v-bind="pageInfo"
+                @prev="updatePagination"
+                @next="updatePagination"
+              />
             </div>
           </div>
 
