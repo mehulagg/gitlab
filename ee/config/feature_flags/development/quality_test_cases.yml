@@ -2,6 +2,7 @@
 name: quality_test_cases
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40019
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/241983
-group: group::certify
+milestone: '13.4'
 type: development
+group: group::certify
 default_enabled: false

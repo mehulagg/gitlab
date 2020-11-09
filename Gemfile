@@ -19,7 +19,7 @@ gem 'default_value_for', '~> 3.3.0'
 gem 'pg', '~> 1.1'
 
 gem 'rugged', '~> 0.28'
-gem 'grape-path-helpers', '~> 1.4'
+gem 'grape-path-helpers', '~> 1.5'
 
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.9.0'
@@ -367,7 +367,7 @@ group :development, :test do
   # Generate Fake data
   gem 'ffaker', '~> 2.10'
 
-  gem 'spring', '~> 2.0.0'
+  gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
   gem 'gitlab-styles', '~> 5.0.0', require: false

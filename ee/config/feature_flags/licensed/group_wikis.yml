@@ -2,6 +2,7 @@
 name: group_wikis
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29176
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/207888
-group: group::knowledge
+milestone: '12.10'
 type: licensed
+group: group::knowledge
 default_enabled: true

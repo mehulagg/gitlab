@@ -63,8 +63,7 @@ RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |
         it 'renders a not found message' do
           subject
 
-          expect(response).to redirect_to(credentials_path)
-          expect(flash[:notice]).to eql 'Cannot find user key.'
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
