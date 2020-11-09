@@ -6,13 +6,13 @@ module Gitlab
       module CodeQuality
         class CodeClimate
           def parse!(json_data, codequality_report)
-            root = Gitlab::Json.parse(json_data).with_indifferent_access
+            root = Gitlab::Json.parse(json_data)
 
             parse_all(root, codequality_report)
-          # rescue JSON::ParserError => e
-          #   accessibility_report.set_error_message("JSON parsing failed: #{e}")
-          # rescue StandardError => e
-          #   accessibility_report.set_error_message("Pa11y parsing failed: #{e}")
+          rescue JSON::ParserError => e
+            codequality_report.set_error_message("JSON parsing failed: #{e}")
+          rescue StandardError => e
+            codequality_report.set_error_message("CodeClimate parsing failed: #{e}")
           end
 
           private
@@ -20,11 +20,11 @@ module Gitlab
           def parse_all(root, codequality_report)
             return unless root.present?
 
-            # root.dig("results").each do |url, value|
-            #   codequality_report.add_url(url, value)
-            # end
+            root.each do |degredation|
+              codequality_report.add_degredation(degredation.dig('fingerprint'), degredation)
+            end
 
-            # codequality_report
+            codequality_report
           end
         end
       end
