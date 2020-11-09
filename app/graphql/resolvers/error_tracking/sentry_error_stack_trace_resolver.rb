@@ -3,7 +3,7 @@
 module Resolvers
   module ErrorTracking
     class SentryErrorStackTraceResolver < BaseResolver
-      ErrorID = ::Types::GlobalIDType[::Gitlab::ErrorTracking::DetailedError]
+      ErrorID = ::Types::GlobalIDType[::Gitlab::ErrorTracking::Error]
 
       argument :id, ErrorID.to_non_null_type,
                 required: true,
