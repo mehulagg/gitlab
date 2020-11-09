@@ -139,7 +139,10 @@ export default {
         :saving-changes="isSavingChanges"
         :return-url="appData.returnUrl"
         :mounts="appData.mounts"
+        :branch="appData.branch"
+        :base-url="appData.baseUrl"
         :project="appData.project"
+        :image-root="appData.imageUploadPath"
         @submit="onPrepareSubmit"
       />
       <edit-meta-modal

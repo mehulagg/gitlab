@@ -20,7 +20,7 @@ describe('BoardCardAssigneeDropdown', () => {
       data() {
         return {
           search,
-          selected: store.getters.getActiveIssue.assignees,
+          selected: store.getters.activeIssue.assignees,
           participants,
         };
       },

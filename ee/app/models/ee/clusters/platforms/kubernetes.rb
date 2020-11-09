@@ -38,6 +38,15 @@ module EE
           ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods_attrs: pods, ingresses: ingresses)
         end
 
+        def ingresses(namespace)
+          ingresses = read_ingresses(namespace)
+          ingresses.map { |ingress| ::Gitlab::Kubernetes::Ingress.new(ingress) }
+        end
+
+        def patch_ingress(namespace, ingress, data)
+          kubeclient.patch_ingress(ingress.name, data, namespace)
+        end
+
         private
 
         def read_deployments(namespace)

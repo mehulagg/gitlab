@@ -333,7 +333,7 @@ export default {
       mutation: issueSetEpic,
       variables: {
         input: {
-          iid: String(getters.getActiveIssue.iid),
+          iid: String(getters.activeIssue.iid),
           epicId: input.epicId,
           projectPath: input.projectPath,
         },
@@ -352,7 +352,7 @@ export default {
       mutation: issueSetWeight,
       variables: {
         input: {
-          iid: String(getters.getActiveIssue.iid),
+          iid: String(getters.activeIssue.iid),
           weight: input.weight,
           projectPath: input.projectPath,
         },
@@ -364,7 +364,7 @@ export default {
     }
 
     commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'weight',
       value: data.issueSetWeight.issue.weight,
     });

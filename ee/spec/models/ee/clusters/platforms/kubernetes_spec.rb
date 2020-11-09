@@ -380,4 +380,62 @@ RSpec.describe Clusters::Platforms::Kubernetes do
       it { is_expected.to include(deployments: [], ingresses: []) }
     end
   end
+
+  describe '#ingresses' do
+    subject { service.ingresses(namespace) }
+
+    let(:service) { create(:cluster_platform_kubernetes, :configured) }
+    let(:namespace) { 'project-namespace' }
+
+    context 'when there is an ingress in the namespace' do
+      before do
+        stub_kubeclient_ingresses(namespace)
+      end
+
+      it 'returns an ingress' do
+        expect(subject.count).to eq(1)
+        expect(subject.first).to be_kind_of(::Gitlab::Kubernetes::Ingress)
+        expect(subject.first.name).to eq('production-auto-deploy')
+      end
+    end
+
+    context 'when there are no ingresss in the namespace' do
+      before do
+        allow(service.kubeclient).to receive(:get_ingresses) { raise Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil) }
+      end
+
+      it 'returns nothing' do
+        is_expected.to be_empty
+      end
+    end
+  end
+
+  describe '#patch_ingress' do
+    subject { service.patch_ingress(namespace, ingress, data) }
+
+    let(:service) { create(:cluster_platform_kubernetes, :configured) }
+    let(:namespace) { 'project-namespace' }
+    let(:ingress) { Gitlab::Kubernetes::Ingress.new(kube_ingress) }
+    let(:data) { { metadata: { annotations: { name: 'test' } } } }
+
+    context 'when there is an ingress in the namespace' do
+      before do
+        stub_kubeclient_ingresses(namespace, method: :patch, resource_path: "/#{ingress.name}")
+      end
+
+      it 'returns an ingress' do
+        expect(subject[:items][0][:metadata][:name]).to eq('production-auto-deploy')
+      end
+    end
+
+    context 'when there are no ingresss in the namespace' do
+      before do
+        allow(service.kubeclient).to receive(:patch_ingress) { raise Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil) }
+      end
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(Kubeclient::ResourceNotFoundError)
+      end
+    end
+  end
 end

@@ -17,4 +17,54 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
       end
     end
   end
+
+  context 'for Issue iteration changed actions' do
+    it_behaves_like 'a tracked issue edit event' do
+      let(:action) { described_class::ISSUE_ITERATION_CHANGED }
+
+      def track_action(params)
+        described_class.track_issue_iteration_changed_action(**params)
+      end
+    end
+  end
+
+  context 'for Issue weight changed actions' do
+    it_behaves_like 'a tracked issue edit event' do
+      let(:action) { described_class::ISSUE_WEIGHT_CHANGED }
+
+      def track_action(params)
+        described_class.track_issue_weight_changed_action(**params)
+      end
+    end
+  end
+
+  context 'for Issue added to epic actions' do
+    it_behaves_like 'a tracked issue edit event' do
+      let(:action) { described_class::ISSUE_ADDED_TO_EPIC}
+
+      def track_action(params)
+        described_class.track_issue_added_to_epic_action(**params)
+      end
+    end
+  end
+
+  context 'for Issue removed from epic actions' do
+    it_behaves_like 'a tracked issue edit event' do
+      let(:action) { described_class::ISSUE_REMOVED_FROM_EPIC}
+
+      def track_action(params)
+        described_class.track_issue_removed_from_epic_action(**params)
+      end
+    end
+  end
+
+  context 'for Issue changed epic actions' do
+    it_behaves_like 'a tracked issue edit event' do
+      let(:action) { described_class::ISSUE_CHANGED_EPIC}
+
+      def track_action(params)
+        described_class.track_issue_changed_epic_action(**params)
+      end
+    end
+  end
 end

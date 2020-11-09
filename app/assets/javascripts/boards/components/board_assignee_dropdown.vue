@@ -35,7 +35,7 @@ export default {
     return {
       search: '',
       participants: [],
-      selected: this.$store.getters.getActiveIssue.assignees,
+      selected: this.$store.getters.activeIssue.assignees,
     };
   },
   apollo: {
@@ -53,6 +53,7 @@ export default {
             id: `gid://gitlab/Issue/${this.getActiveIssue.iid}`,
           };
         }
+
         return {
           search: this.search,
         };
@@ -70,7 +71,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['getActiveIssue']),
+    ...mapGetters(['activeIssue']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
@@ -118,7 +119,7 @@ export default {
 <template>
   <board-editable-item :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
-      <issuable-assignees :users="getActiveIssue.assignees" />
+      <issuable-assignees :users="activeIssue.assignees" />
     </template>
 
     <template #default>

@@ -170,18 +170,6 @@ RSpec.describe Admin::CredentialsController do
 
               put :revoke, params: { id: personal_access_token.id }
             end
-
-            context 'when credentials_inventory_revocation_emails flag is disabled' do
-              before do
-                stub_feature_flags(credentials_inventory_revocation_emails: false)
-              end
-
-              it 'does not inform the token owner' do
-                expect do
-                  put :revoke, params: { id: personal_access_token.id }
-                end.not_to change { ActionMailer::Base.deliveries.size }
-              end
-            end
           end
         end
       end

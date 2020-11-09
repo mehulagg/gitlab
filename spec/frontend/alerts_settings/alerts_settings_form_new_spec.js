@@ -9,7 +9,7 @@ describe('AlertsSettingsFormNew', () => {
 
   const createComponent = ({
     data = {},
-    props = { loading: false },
+    props = {},
     multipleHttpIntegrationsCustomMapping = false,
   } = {}) => {
     wrapper = mount(AlertsSettingsForm, {
@@ -17,6 +17,8 @@ describe('AlertsSettingsFormNew', () => {
         return { ...data };
       },
       propsData: {
+        loading: false,
+        canAddIntegration: true,
         ...props,
       },
       provide: {
@@ -33,6 +35,8 @@ describe('AlertsSettingsFormNew', () => {
   const findFormToggle = () => wrapper.find(GlToggle);
   const findMappingBuilderSection = () => wrapper.find(`[id = "mapping-builder"]`);
   const findSubmitButton = () => wrapper.find(`[type = "submit"]`);
+  const findMultiSupportText = () =>
+    wrapper.find(`[data-testid="multi-integrations-not-supported"]`);
 
   afterEach(() => {
     if (wrapper) {
@@ -53,6 +57,7 @@ describe('AlertsSettingsFormNew', () => {
     it('render the initial form with only an integration type dropdown', () => {
       expect(findForm().exists()).toBe(true);
       expect(findSelect().exists()).toBe(true);
+      expect(findMultiSupportText().exists()).toBe(false);
       expect(findFormSteps().attributes('visible')).toBeUndefined();
     });
 
@@ -67,6 +72,12 @@ describe('AlertsSettingsFormNew', () => {
           .at(0)
           .isVisible(),
       ).toBe(true);
+    });
+
+    it('disabled the dropdown and shows help text when multi integrations are not supported', async () => {
+      createComponent({ props: { canAddIntegration: false } });
+      expect(findSelect().attributes('disabled')).toBe('disabled');
+      expect(findMultiSupportText().exists()).toBe(true);
     });
   });
 
@@ -128,18 +139,18 @@ describe('AlertsSettingsFormNew', () => {
 
     it('allows for update-integration with the correct form values for HTTP', async () => {
       createComponent({
+        data: {
+          selectedIntegration: typeSet.http,
+        },
         props: {
-          currentIntegration: { id: '1' },
+          currentIntegration: { id: '1', name: 'Test integration pre' },
           loading: false,
         },
       });
 
-      const options = findSelect().findAll('option');
-      await options.at(1).setSelected();
-
       await findFormFields()
         .at(0)
-        .setValue('Test integration');
+        .setValue('Test integration post');
       await findFormToggle().trigger('click');
 
       await wrapper.vm.$nextTick();
@@ -153,27 +164,27 @@ describe('AlertsSettingsFormNew', () => {
 
       expect(wrapper.emitted('update-integration')).toBeTruthy();
       expect(wrapper.emitted('update-integration')[0]).toEqual([
-        { type: typeSet.http, variables: { name: 'Test integration', active: true } },
+        { type: typeSet.http, variables: { name: 'Test integration post', active: true } },
       ]);
     });
 
     it('allows for update-integration with the correct form values for PROMETHEUS', async () => {
       createComponent({
+        data: {
+          selectedIntegration: typeSet.prometheus,
+        },
         props: {
-          currentIntegration: { id: '1' },
+          currentIntegration: { id: '1', apiUrl: 'https://test-pre.com' },
           loading: false,
         },
       });
-
-      const options = findSelect().findAll('option');
-      await options.at(2).setSelected();
 
       await findFormFields()
         .at(0)
         .setValue('Test integration');
       await findFormFields()
         .at(1)
-        .setValue('https://test.com');
+        .setValue('https://test-post.com');
       await findFormToggle().trigger('click');
 
       await wrapper.vm.$nextTick();
@@ -187,7 +198,7 @@ describe('AlertsSettingsFormNew', () => {
 
       expect(wrapper.emitted('update-integration')).toBeTruthy();
       expect(wrapper.emitted('update-integration')[0]).toEqual([
-        { type: typeSet.prometheus, variables: { apiUrl: 'https://test.com', active: true } },
+        { type: typeSet.prometheus, variables: { apiUrl: 'https://test-post.com', active: true } },
       ]);
     });
   });

@@ -234,23 +234,23 @@ There are also two edge cases worth mentioning:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29654) in GitLab 12.5
 
-The top-level `workflow:` key applies to the entirety of a pipeline, and
-determines whether or not a pipeline is created. It accepts a single
-`rules:` key that operates similarly to [`rules:` defined within jobs](#rules),
-enabling dynamic configuration of the pipeline.
+The top-level `workflow:` keyword determines whether or not a pipeline is created.
+It accepts a single `rules:` keyword that is similar to [`rules:` defined within jobs](#rules).
+Use it to define what can trigger a new pipeline.
 
-If you are new to GitLab CI/CD and `workflow: rules`, you may find the [`workflow:rules` templates](#workflowrules-templates) useful.
+You can use the [`workflow:rules` templates](#workflowrules-templates) to import
+a preconfigured `workflow: rules` entry.
 
-To define your own `workflow: rules`, the available configuration options are:
+`workflow: rules` accepts these keywords:
 
-- [`if`](#rulesif): Define a rule.
-- [`when`](#when): May be set to `always` or `never` only. If not provided, the default value is `always`​.
+- [`if`](#rulesif): Check this rule to determine when to run a pipeline.
+- [`when`](#when): Specify what to do when the `if` rule evaluates to true. 
+  - To run a pipeline, set to `always`.
+  - To prevent pipelines from running, set to `never`.
 
-If a pipeline attempts to run but matches no rule, it's dropped and doesn't run.
+When no rules evaluate to true, the pipeline does not run.
 
-Use the example rules below exactly as written to allow pipelines that match the rule
-to run. Add `when: never` to prevent pipelines that match the rule from running. See
-the [common `if` clauses for `rules`](#common-if-clauses-for-rules) for more examples.
+Some example `if` clauses for `workflow: rules`:
 
 | Example rules                                        | Details                                                   |
 |------------------------------------------------------|-----------------------------------------------------------|
@@ -259,9 +259,12 @@ the [common `if` clauses for `rules`](#common-if-clauses-for-rules) for more exa
 | `if: $CI_COMMIT_TAG`                                 | Control when tag pipelines run.                           |
 | `if: $CI_COMMIT_BRANCH`                              | Control when branch pipelines run.                        |
 
+See the [common `if` clauses for `rules`](#common-if-clauses-for-rules) for more examples.
+
 For example, in the following configuration, pipelines run for all `push` events (changes to
-branches and new tags). Only push events with `-wip` in the commit message are excluded. Scheduled
-pipelines and merge request pipelines don't run, as there's no rule allowing them.
+branches and new tags). Pipelines for push events with `-wip` in the commit message
+don't run, because they are set to `when: never`. Pipelines for schedules or merge requests
+don't run either, because no rules evaluate to true for them:
 
 ```yaml
 workflow:
@@ -271,11 +274,11 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "push"'
 ```
 
-This example has strict rules, and no other pipelines can run.
+This example has strict rules, and pipelines do **not** run in any other case.
 
-Alternatively, you can have loose rules by using only `when: never` rules, followed
-by a final `when: always` rule. This allows all types of pipelines, except for any
-that match the `when: never` rules:
+Alternatively, all of the rules can be `when: never`, with a final
+`when: always` rule. Pipelines that match the `when: never` rules do not run.
+All other pipeline types run:
 
 ```yaml
 workflow:
@@ -287,12 +290,13 @@ workflow:
     - when: always
 ```
 
-This example never allows pipelines for schedules or `push` (branches and tags) pipelines,
-but does allow pipelines in **all** other cases, *including* merge request pipelines.
+This example prevents pipelines for schedules or `push` (branches and tags) pipelines.
+The final `when: always` rule lets all other pipeline types run, **including** merge
+request pipelines.
 
-Be careful not to use a configuration that might run
-merge request pipelines and branch pipelines at the same time. As with `rules` defined in jobs,
-it can cause [duplicate pipelines](#prevent-duplicate-pipelines).
+Be careful not to have rules that match both branch pipelines
+and merge request pipelines. Similar to `rules` defined in jobs, this can cause
+[duplicate pipelines](#prevent-duplicate-pipelines).
 
 #### `workflow:rules` templates
 
@@ -1404,37 +1408,20 @@ Other commonly used variables for `if` clauses:
 
 #### `rules:changes`
 
-To determine if jobs should be added to a pipeline, `rules: changes` clauses check
-the files changed by Git push events.
+`rules:changes` determines whether or not to add jobs to a pipeline by checking for
+changes to specific files.
 
 `rules: changes` works exactly the same way as [`only: changes` and `except: changes`](#onlychangesexceptchanges),
-accepting an array of paths.
-
-It always returns true and adds jobs to the pipeline if there is no Git push event.
-For example, jobs with `rules: changes` always run on scheduled and tag pipelines,
-because they are not associated with a Git push event. Only certain pipelines have
-a Git push event associated with them:
-
-- All pipelines with a `$CI_PIPELINE_SOURCE` of `merge_request` or `external_merge_request`.
-- Branch pipelines, which have the `$CI_COMMIT_BRANCH` variable present and a `$CI_PIPELINE_SOURCE` of `push`.
-
-It's recommended to use it only with branch pipelines or merge request pipelines.
-For example, it's common to use `rules: changes` with one of the following `if` clauses:
-
-- `if: $CI_COMMIT_BRANCH`
-- `if: '$CI_PIPELINE_SOURCE == "merge_request_event"'`
-
-For example:
+accepting an array of paths. It's recommended to only use `rules: changes` with branch
+pipelines or merge request pipelines. For example, it's common to use `rules: changes`
+with merge request pipelines:
 
 ```yaml
-workflow:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
 docker build:
   script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
   rules:
-    - changes:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
         - Dockerfile
       when: manual
       allow_failure: true
@@ -1442,13 +1429,28 @@ docker build:
 
 In this example:
 
-- [`workflow: rules`](#workflowrules) allows only pipelines for merge requests for all jobs.
+- If the pipeline is a merge request pipeline, check `Dockerfile` for changes.
 - If `Dockerfile` has changed, add the job to the pipeline as a manual job, and allow the pipeline
   to continue running even if the job is not triggered (`allow_failure: true`).
 - If `Dockerfile` has not changed, do not add job to any pipeline (same as `when: never`).
 
-To implement a rule similar to [`except: changes`](#onlychangesexceptchanges),
+To use `rules: changes` with branch pipelines instead of merge request pipelines,
+change the `if:` clause in the example above to:
+
+```yaml
+rules:
+  - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+```
+
+To implement a rule similar to [`except:changes`](#onlychangesexceptchanges),
 use `when: never`.
+
+CAUTION: **Caution:**
+You can use `rules: changes` with other pipeline types, but it is not recommended
+because `rules: changes` always evaluates to true when there is no Git `push` event.
+Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
+associated with them. A `rules: changes` job is **always** added to those pipeline
+if there is no `if:` statement that limits the job to branch or merge request pipelines.
 
 #### `rules:exists`
 

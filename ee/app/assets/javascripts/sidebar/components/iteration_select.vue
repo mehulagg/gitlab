@@ -12,7 +12,7 @@ import {
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
-import { iterationSelectTextMap } from '../constants';
+import { iterationSelectTextMap, iterationDisplayState } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
@@ -71,6 +71,7 @@ export default {
         return {
           fullPath: this.groupPath,
           title: search,
+          state: iterationDisplayState,
         };
       },
       update(data) {

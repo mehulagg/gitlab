@@ -57,14 +57,7 @@ export const typeSet = {
   prometheus: 'PROMETHEUS',
 };
 
-export const defaultFormState = {
-  name: '',
-  active: false,
-  token: '',
-  url: '',
-  apiUrl: '',
-  integrationTestPayload: { json: null, error: null },
-};
+export const integrationToDeleteDefault = { id: null, name: '' };
 
 export const JSON_VALIDATE_DELAY = 250;
 

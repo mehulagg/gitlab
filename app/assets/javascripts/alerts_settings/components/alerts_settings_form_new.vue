@@ -22,19 +22,20 @@ import {
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   typeSet,
-  defaultFormState,
 } from '../constants';
 
 export default {
   targetPrometheusUrlPlaceholder,
   JSON_VALIDATE_DELAY,
   typeSet,
-  defaultFormState,
   i18n: {
     integrationFormSteps: {
       step1: {
         label: s__('AlertSettings|1. Select integration type'),
         help: s__('AlertSettings|Learn more about our upcoming %{linkStart}integrations%{linkEnd}'),
+        enterprise: s__(
+          'AlertSettings|In free versions of GitLab, only one integration for each type can be added. %{linkStart}Upgrade your subscription%{linkEnd} to add additional integrations.',
+        ),
       },
       step2: {
         label: s__('AlertSettings|2. Name integration'),
@@ -109,18 +110,26 @@ export default {
       required: false,
       default: null,
     },
+    canAddIntegration: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
       selectedIntegration: integrationTypesNew[0].value,
-      active: false,
       options: integrationTypesNew,
+      active: false,
       formVisible: false,
+      integrationTestPayload: {
+        json: null,
+        error: null,
+      },
     };
   },
   computed: {
     jsonIsValid() {
-      return this.integrationForm.integrationTestPayload.error === null;
+      return this.integrationTestPayload.error === null;
     },
     selectedIntegrationType() {
       switch (this.selectedIntegration) {
@@ -129,43 +138,42 @@ export default {
         case this.$options.typeSet.prometheus:
           return this.prometheus;
         default:
-          return this.defaultFormState;
+          return {};
       }
     },
     integrationForm() {
       return {
         name: this.currentIntegration?.name || '',
-        integrationTestPayload: {
-          json: null,
-          error: null,
-        },
         active: this.currentIntegration?.active || false,
-        token: this.currentIntegration?.token || '',
-        url: this.currentIntegration?.url || '',
+        token: this.currentIntegration?.token || this.selectedIntegrationType.token,
+        url: this.currentIntegration?.url || this.selectedIntegrationType.url,
         apiUrl: this.currentIntegration?.apiUrl || '',
       };
     },
   },
   watch: {
     currentIntegration(val) {
+      if (val === null) {
+        return this.reset();
+      }
       this.selectedIntegration = val.type;
       this.active = val.active;
-      this.onIntegrationTypeSelect();
+      return this.integrationTypeSelect();
     },
   },
   methods: {
-    onIntegrationTypeSelect() {
+    integrationTypeSelect() {
       if (this.selectedIntegration === integrationTypesNew[0].value) {
         this.formVisible = false;
       } else {
         this.formVisible = true;
       }
     },
-    onSubmitWithTestPayload() {
+    submitWithTestPayload() {
       // TODO: Test payload before saving via GraphQL
-      this.onSubmit();
+      this.submit();
     },
-    onSubmit() {
+    submit() {
       const { name, apiUrl } = this.integrationForm;
       const variables =
         this.selectedIntegration === this.$options.typeSet.http
@@ -179,27 +187,45 @@ export default {
 
       return this.$emit('create-new-integration', integrationPayload);
     },
-    onReset() {
-      this.integrationForm = this.defaultFormState;
+    reset() {
       this.selectedIntegration = integrationTypesNew[0].value;
-      this.onIntegrationTypeSelect();
+      this.integrationTypeSelect();
+
+      if (this.currentIntegration) {
+        return this.$emit('clear-current-integration');
+      }
+
+      return this.resetFormValues();
     },
-    onResetAuthKey() {
+    resetFormValues() {
+      this.integrationForm.name = '';
+      this.integrationForm.apiUrl = '';
+      this.integrationTestPayload = {
+        json: null,
+        error: null,
+      };
+      this.active = false;
+    },
+    resetAuthKey() {
+      if (!this.currentIntegration) {
+        return;
+      }
+
       this.$emit('reset-token', {
         type: this.selectedIntegration,
         variables: { id: this.currentIntegration.id },
       });
     },
     validateJson() {
-      this.integrationForm.integrationTestPayload.error = null;
-      if (this.integrationForm.integrationTestPayload.json === '') {
+      this.integrationTestPayload.error = null;
+      if (this.integrationTestPayload.json === '') {
         return;
       }
 
       try {
-        JSON.parse(this.integrationForm.integrationTestPayload.json);
+        JSON.parse(this.integrationTestPayload.json);
       } catch (e) {
-        this.integrationForm.integrationTestPayload.error = JSON.stringify(e.message);
+        this.integrationTestPayload.error = JSON.stringify(e.message);
       }
     },
   },
@@ -207,7 +233,7 @@ export default {
 </script>
 
 <template>
-  <gl-form class="gl-mt-6" @submit.prevent="onSubmit" @reset.prevent="onReset">
+  <gl-form class="gl-mt-6" @submit.prevent="submit" @reset.prevent="reset">
     <h5 class="gl-font-lg gl-my-5">{{ s__('AlertSettings|Add new integrations') }}</h5>
 
     <gl-form-group
@@ -217,14 +243,24 @@ export default {
     >
       <gl-form-select
         v-model="selectedIntegration"
+        :disabled="currentIntegration !== null || !canAddIntegration"
         :options="options"
-        @change="onIntegrationTypeSelect"
+        @change="integrationTypeSelect"
       />
 
-      <alert-settings-form-help-block
-        :message="$options.i18n.integrationFormSteps.step1.help"
-        link="https://gitlab.com/groups/gitlab-org/-/epics/4390"
-      />
+      <div class="gl-my-4">
+        <alert-settings-form-help-block
+          :message="$options.i18n.integrationFormSteps.step1.help"
+          link="https://gitlab.com/groups/gitlab-org/-/epics/4390"
+        />
+      </div>
+
+      <div v-if="!canAddIntegration" class="gl-my-4" data-testid="multi-integrations-not-supported">
+        <alert-settings-form-help-block
+          :message="$options.i18n.integrationFormSteps.step1.enterprise"
+          link="https://about.gitlab.com/pricing"
+        />
+      </div>
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
       <gl-form-group
@@ -279,7 +315,11 @@ export default {
 
           <gl-form-input-group id="url" readonly :value="integrationForm.url">
             <template #append>
-              <clipboard-button :text="integrationForm.url" :title="__('Copy')" class="gl-m-0!" />
+              <clipboard-button
+                :text="integrationForm.url || ''"
+                :title="__('Copy')"
+                class="gl-m-0!"
+              />
             </template>
           </gl-form-input-group>
         </div>
@@ -296,7 +336,11 @@ export default {
             :value="integrationForm.token"
           >
             <template #append>
-              <clipboard-button :text="integrationForm.token" :title="__('Copy')" class="gl-m-0!" />
+              <clipboard-button
+                :text="integrationForm.token || ''"
+                :title="__('Copy')"
+                class="gl-m-0!"
+              />
             </template>
           </gl-form-input-group>
 
@@ -308,7 +352,7 @@ export default {
             :title="$options.i18n.integrationFormSteps.step3.reset"
             :ok-title="$options.i18n.integrationFormSteps.step3.reset"
             ok-variant="danger"
-            @ok="onResetAuthKey"
+            @ok="resetAuthKey"
           >
             {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
           </gl-modal>
@@ -318,7 +362,7 @@ export default {
         id="test-integration"
         :label="$options.i18n.integrationFormSteps.step4.label"
         label-for="test-integration"
-        :invalid-feedback="integrationForm.integrationTestPayload.error"
+        :invalid-feedback="integrationTestPayload.error"
       >
         <alert-settings-form-help-block
           :message="$options.i18n.integrationFormSteps.step4.help"
@@ -327,8 +371,8 @@ export default {
 
         <gl-form-textarea
           id="test-integration"
-          v-model.trim="integrationForm.integrationTestPayload.json"
-          :disabled="!integrationForm.active"
+          v-model.trim="integrationTestPayload.json"
+          :disabled="!active"
           :state="jsonIsValid"
           :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
           class="gl-my-4"
@@ -354,7 +398,7 @@ export default {
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"
-          @click="onSubmitWithTestPayload"
+          @click="submitWithTestPayload"
           >{{ s__('AlertSettings|Save and test payload') }}</gl-button
         >
         <gl-button
