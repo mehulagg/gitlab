@@ -14,20 +14,16 @@ You can enforce the following restrictions on sign ups:
 - Require user email confirmation.
 - Allow or deny sign ups using specific email domains.
 
-## Disable new sign-ups
+## Disable new sign ups
 
-By default, any user visiting your GitLab domain can sign up for an account. For customers running public-facing GitLab instances, we **highly** recommend that you
-consider disabling new sign-ups if you do not expect public users to sign up for an
-account.
+By default, any user visiting your GitLab domain can sign up for an account. For customers running
+public-facing GitLab instances, we **highly** recommend that you consider disabling new sign ups if
+you do not expect public users to sign up for an account.
 
-To disable sign-ups:
+To disable sign ups:
 
 1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
 1. Clear the **Sign-up enabled** checkbox, then select **Save changes**.
-
-Alternatively, you could also consider setting up a
-[allowlist](#allowlist-email-domains) or [denylist](#denylist-email-domains) on
-email domains to prevent malicious users from creating accounts.
 
 ## Require administrator approval for new sign ups
 
@@ -84,8 +80,8 @@ reduce the risk of malicious users creating spam accounts with disposable email 
 To create an email domain allowlist or denylist:
 
 1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
-1. For the allowlist, you must enter the list manually. For the denylist, you can enter the list manually or upload a `.txt` file that
-contains list entries.
+1. For the allowlist, you must enter the list manually. For the denylist, you can enter the list
+   manually or upload a `.txt` file that contains list entries.
 
    Both the allowlist and denylist accept wildcards. For example, you can use
 `*.company.com` to accept every `company.com` subdomain, or `*.io` to block all
