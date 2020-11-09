@@ -32,7 +32,7 @@ class RegistrationsController < Devise::RegistrationsController
       yield new_user if block_given?
     end
 
-    if resource.blocked_pending_approval?
+    if pending_approval?(resource)
       NotificationService.new.new_instance_access_request(resource)
     end
 
@@ -158,6 +158,16 @@ class RegistrationsController < Devise::RegistrationsController
     flash[:alert] = _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
     flash.delete :recaptcha_error
     render action: 'new'
+  end
+
+  def pending_approval?(resource)
+    return false unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+
+    if resource.persisted? && resource.blocked_pending_approval?
+      return true
+    else
+      return false
+    end
   end
 
   def sign_up_params

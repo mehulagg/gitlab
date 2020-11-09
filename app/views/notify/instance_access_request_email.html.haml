@@ -1,5 +1,5 @@
 #content
-  = email_default_heading("Hello, #{@recipient.name}!")
+  = email_default_heading(say_hello(@recipient))
   %p
     = instance_access_request_text(@member, format: :html)
   %p

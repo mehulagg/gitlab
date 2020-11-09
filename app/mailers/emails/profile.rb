@@ -13,9 +13,9 @@ module Emails
       @member = member
       @recipient = recipient
 
-      member_email_with_layout(
+      mail(
         to: recipient.notification_email,
-        subject: subject("GitLab Account Request"))
+        subject: subject(_("GitLab Account Request")))
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

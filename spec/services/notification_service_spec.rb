@@ -2313,7 +2313,7 @@ RSpec.describe NotificationService, :mailer do
   end
 
   describe '#new_instance_access_request', :deliver_mails_inline do
-    let_it_be(:user) { create(:user) }
+    let_it_be(:user) { create(:user, :blocked_pending_approval) }
 
     subject { notification.new_instance_access_request(user) }
 
