@@ -47,10 +47,12 @@ module DiffHelper
     end
 
     discussions = diff_file.highlighted_diff_lines.map do |line|
-      render(
-        partial: "projects/diffs/line_discussions",
-        locals: { diff_file: diff_file, line: line, discussions: @grouped_diff_discussions }
-      )
+      if @grouped_diff_discussions[diff_file.line_code(line)]&.any?
+        render(
+          partial: "projects/diffs/line_discussions",
+          locals: { diff_file: diff_file, line: line, discussions: @grouped_diff_discussions }
+        )
+      end
     end
 
     lines.zip(discussions).map(&:join).join.html_safe
