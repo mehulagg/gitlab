@@ -19,7 +19,7 @@ export default {
   data() {
     return {
       searchTerm: '',
-      selectedOptions: this.filter.defaultOptions,
+      selectedOptions: undefined,
     };
   },
   computed: {
