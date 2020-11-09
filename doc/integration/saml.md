@@ -541,9 +541,14 @@ This integration uses the `certificate` and `private_key` settings for both asse
 
 ## Request signing (optional)
 
-Another optional configuration is to sign SAML authentication requests. GitLab SAML Requests uses the SAML redirect binding so this is not necessary, unlike the SAML POST binding where signing is required to prevent intermediaries tampering with the requests.
+Another optional configuration is to sign SAML authentication requests. GitLab
+SAML Requests use the SAML redirect binding, so this isn't necessary (unlike the
+SAML POST binding, where signing is required to prevent intermediaries from
+tampering with the requests).
 
-In order to sign, you need to create a private key and public certificate pair for your GitLab instance to use for SAML. The settings for signing can be set in the `security` section of the configuration.
+To sign, you need to create a private key and public certificate pair for your
+GitLab instance to use for SAML. The settings for signing can be set in the
+`security` section of the configuration.
 
 For example:
 
@@ -648,11 +653,12 @@ If you only need a SAML provider for testing, a [quick start guide to start a Do
 
 ### 500 error after login
 
-If you see a "500 error" in GitLab when you are redirected back from the SAML sign in page,
-this likely indicates that GitLab could not get the email address for the SAML user.
+If you see a "500 error" in GitLab when you are redirected back from the SAML
+sign-in page, this likely indicates that GitLab couldn't get the email address
+for the SAML user.
 
-Make sure the IdP provides a claim containing the user's email address, using claim name
-`email` or `mail`.
+Ensure the IdP provides a claim containing the user's email address, using the
+claim name `email` or `mail`.
 
 ### Redirect back to the login screen with no evident error
 
