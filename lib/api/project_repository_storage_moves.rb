@@ -34,6 +34,24 @@ module API
 
         present storage_move, with: Entities::ProjectRepositoryStorageMove, current_user: current_user
       end
+
+      desc 'Schedule bulk project repository storage moves' do
+        detail 'This feature was introduced in GitLab 13.6.'
+        success Entities::ProjectRepositoryStorageMove
+      end
+      params do
+        requires :source_storage_name, type: String, desc: 'The source storage shard'
+        optional :destination_storage_name, type: String, desc: 'The destination storage shard'
+      end
+      post do
+        storage_moves = Project.id_in(ProjectRepository.for_repository_storage(declared_params[:source_storage_name]).select(:project_id)).map do |project|
+          project.repository_storage_moves.build(declared_params).tap do |storage_move|
+            storage_move.schedule!
+          end
+        end
+
+        present storage_moves, with: Entities::ProjectRepositoryStorageMove, current_user: current_user
+      end
     end
 
     params do
