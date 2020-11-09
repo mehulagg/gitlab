@@ -42,6 +42,15 @@ FactoryBot.define do
         manual_configuration: true
       }
     end
+
+    trait :inactive do
+      active { false }
+      properties do
+        {
+          manual_configuration: false
+        }
+      end
+    end
   end
 
   factory :alerts_service do

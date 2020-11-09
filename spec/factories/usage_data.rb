@@ -18,7 +18,6 @@ FactoryBot.define do
       create(:jira_import_state, :finished, project: projects[1], label: jira_label, imported_issues_count: 3, total_issue_count: 3)
       create(:jira_import_state, :finished, project: projects[1], label: jira_label, imported_issues_count: 3)
       create(:jira_import_state, :scheduled, project: projects[1], label: jira_label)
-      create(:prometheus_service, project: projects[1])
       create(:service, project: projects[0], type: 'SlackSlashCommandsService', active: true)
       create(:service, project: projects[1], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'SlackService', active: true)
@@ -56,6 +55,8 @@ FactoryBot.define do
       create(:alert_management_http_integration, project: projects[0], name: 'DataDog')
       create(:alert_management_http_integration, project: projects[0], name: 'DataCat')
       create(:alert_management_http_integration, :inactive, project: projects[1], name: 'DataFox')
+      create(:prometheus_service, project: projects[1])
+      create(:prometheus_service, :inactive, project: projects[0])
 
       # Tracing
       create(:project_tracing_setting, project: projects[0])
