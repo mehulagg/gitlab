@@ -369,18 +369,18 @@ omniauth:
   auto_sign_in_with_provider: saml
 ```
 
-Please keep in mind that every sign in attempt will be redirected to the SAML server,
-so you will not be able to sign in using local credentials. Make sure that at least one
-of the SAML users has admin permissions.
+Keep in mind that every sign in attempt will be redirected to the SAML server;
+you won't be able to sign in using local credentials. Ensure at least one of the
+SAML users has admin permissions.
 
-You may also bypass the auto sign in feature by browsing to
+You may also bypass the auto sign-in feature by browsing to
 `https://gitlab.example.com/users/sign_in?auto_sign_in=false`.
 
 ### `attribute_statements`
 
 NOTE: **Note:**
-This setting should only be used to map attributes that are part of the
-OmniAuth `info` hash schema.
+This setting should be used only to map attributes that are part of the OmniAuth
+`info` hash schema.
 
 `attribute_statements` is used to map Attribute Names in a SAMLResponse to entries
 in the OmniAuth [`info` hash](https://github.com/omniauth/omniauth/wiki/Auth-Hash-Schema#schema-10-and-later).
