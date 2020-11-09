@@ -1004,10 +1004,8 @@ RSpec.describe ProjectsHelper do
     subject { helper.project_title(project) }
 
     it 'enqueues the elements in the breadcrumb schema list' do
-      stub_default_url_options(host: 'test.host')
-
-      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.namespace.name, urls.user_url(project.owner))
-      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, urls.project_url(project))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.namespace.name, urls.user_path(project.owner))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, urls.project_path(project))
 
       subject
     end

@@ -100,12 +100,10 @@ RSpec.describe GroupsHelper do
     end
 
     it 'enqueues the elements in the breadcrumb schema list' do
-      stub_default_url_options(host: 'test.host')
-
-      expect(helper).to receive(:push_to_schema_breadcrumb).with(group.name, urls.group_url(group))
-      expect(helper).to receive(:push_to_schema_breadcrumb).with(nested_group.name, urls.group_url(nested_group))
-      expect(helper).to receive(:push_to_schema_breadcrumb).with(deep_nested_group.name, urls.group_url(deep_nested_group))
-      expect(helper).to receive(:push_to_schema_breadcrumb).with(very_deep_nested_group.name, urls.group_url(very_deep_nested_group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(group.name, urls.group_path(group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(nested_group.name, urls.group_path(nested_group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(deep_nested_group.name, urls.group_path(deep_nested_group))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(very_deep_nested_group.name, urls.group_path(very_deep_nested_group))
 
       subject
     end

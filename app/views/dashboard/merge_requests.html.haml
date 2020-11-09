@@ -1,6 +1,6 @@
 - @hide_top_links = true
 - page_title _("Merge Requests")
-- @breadcrumb_link = merge_requests_dashboard_url(assignee_username: current_user.username)
+- @breadcrumb_link = merge_requests_dashboard_path(assignee_username: current_user.username)
 
 = render_dashboard_gold_trial(current_user)
 
