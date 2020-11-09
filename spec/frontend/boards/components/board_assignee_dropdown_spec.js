@@ -206,7 +206,6 @@ describe('BoardCardAssigneeDropdown', () => {
   );
 
   describe('Apollo Schema', () => {
-    // TODO: move .each to describe
     it.each`
       search      | expected
       ${''}       | ${getIssueParticipants}
@@ -233,27 +232,22 @@ describe('BoardCardAssigneeDropdown', () => {
       expect(boundVariable()).toEqual(expected);
     });
 
-    it('returns the correct data from update', () => {
-      createComponent();
+    it.each`
+      search      | data                                                     | expected
+      ${''}       | ${{ issue: { participants: { nodes: [{ test: 1 }] } } }} | ${[{ test: 1 }]}
+      ${'search'} | ${{ users: { nodes: [{ test: 1 }] } }}                   | ${[{ test: 1 }]}
+    `(
+      'when search is $search update returns $expected when data is $data',
+      ({ search, data, expected }) => {
+        createComponent(search);
 
-      const node = { test: 1 };
-      const { update } = wrapper.vm.$options.apollo.participants;
+        const { update } = wrapper.vm.$options.apollo.participants;
 
-      const boundUpdate = update.bind(wrapper.vm);
+        const boundUpdate = update.bind(wrapper.vm);
 
-      expect(boundUpdate({ issue: { participants: { nodes: [node] } } })).toEqual([node]);
-    });
-
-    it('returns the correct query', () => {
-      expect(wrapper.vm.$options.apollo.participants.query).toEqual(getIssueParticipants);
-    });
-
-    it('contains the correct variables', () => {
-      const { variables } = wrapper.vm.$options.apollo.participants;
-      const boundVariable = variables.bind(wrapper.vm);
-
-      expect(boundVariable()).toEqual({ id: 'gid://gitlab/Issue/111' });
-    });
+        expect(boundUpdate(data)).toEqual(expected);
+      },
+    );
   });
 
   it('finds GlSearchBoxByType', async () => {

@@ -50,7 +50,7 @@ export default {
       variables() {
         if (this.isSearchEmpty) {
           return {
-            id: `gid://gitlab/Issue/${this.getActiveIssue.iid}`,
+            id: `gid://gitlab/Issue/${this.activeIssue.iid}`,
           };
         }
 
