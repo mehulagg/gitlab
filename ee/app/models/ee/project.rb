@@ -189,7 +189,9 @@ module EE
       delegate :merge_trains_enabled?, to: :ci_cd_settings
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
-
+      delegate :push_rule, to: :project_setting
+      delegate :push_rule=, to: :project_setting
+      delegate :create_push_rule, to: :project_setting
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
 
       validates :repository_size_limit,

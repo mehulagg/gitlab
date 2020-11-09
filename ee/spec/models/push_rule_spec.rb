@@ -10,10 +10,6 @@ RSpec.describe PushRule do
   let(:user) { create(:user) }
   let(:project) { Projects::CreateService.new(user, { name: 'test', namespace: user.namespace }).execute }
 
-  describe "Associations" do
-    it { is_expected.to belong_to(:project) }
-  end
-
   describe "Validation" do
     it { is_expected.to validate_numericality_of(:max_file_size).is_greater_than_or_equal_to(0).only_integer }
 
@@ -148,8 +144,8 @@ RSpec.describe PushRule do
 
   describe '#commit_signature_allowed?' do
     let!(:premium_license) { create(:license, plan: License::PREMIUM_PLAN) }
-    let(:signed_commit) { double(has_signature?: true) }
-    let(:unsigned_commit) { double(has_signature?: false) }
+    let(:signed_commit) { double(has_signature?: true, project: project) }
+    let(:unsigned_commit) { double(has_signature?: false, project: project) }
 
     context 'when feature is not licensed and it is enabled' do
       before do
@@ -253,13 +249,13 @@ RSpec.describe PushRule do
   describe '#available?' do
     shared_examples 'an unavailable push_rule' do
       it 'is not available' do
-        expect(push_rule.available?(:reject_unsigned_commits)).to eq(false)
+        expect(push_rule.available?(:reject_unsigned_commits, object: project)).to eq(false)
       end
     end
 
     shared_examples 'an available push_rule' do
       it 'is available' do
-        expect(push_rule.available?(:reject_unsigned_commits)).to eq(true)
+        expect(push_rule.available?(:reject_unsigned_commits, object: project)).to eq(true)
       end
     end
 
@@ -284,8 +280,8 @@ RSpec.describe PushRule do
         let(:group) { create(:group) }
         let(:plan) { :free }
         let!(:gitlab_subscription) { create(:gitlab_subscription, plan, namespace: group) }
-        let(:project) { create(:project, namespace: group) }
-        let(:push_rule) { create(:push_rule, project: project) }
+        let(:project) { create(:project, :with_push_rule, namespace: group) }
+        let(:push_rule) { project.push_rule }
 
         before do
           create(:license, plan: License::PREMIUM_PLAN)

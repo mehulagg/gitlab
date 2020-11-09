@@ -13,6 +13,10 @@ FactoryBot.modify do
       end
     end
 
+    trait :with_push_rule do
+      push_rule
+    end
+
     trait :mirror do
       mirror { true }
       import_url { generate(:url) }

@@ -49,7 +49,7 @@ class PushRule < ApplicationRecord
   end
 
   def commit_signature_allowed?(commit)
-    return true unless available?(:reject_unsigned_commits)
+    return true unless available?(:reject_unsigned_commits, object: commit.project)
     return true unless reject_unsigned_commits
 
     commit.has_signature?
@@ -94,7 +94,6 @@ class PushRule < ApplicationRecord
     if global?
       License.feature_available?(feature_sym)
     else
-      object ||= project
       object&.feature_available?(feature_sym)
     end
   end
