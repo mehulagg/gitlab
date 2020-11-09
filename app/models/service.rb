@@ -276,12 +276,12 @@ class Service < ApplicationRecord
 
   def self.inherited_descendants_from_self_or_ancestors_from(integration)
     inherit_from_ids =
-      where(id: min_id..max_id, type: integration.type, group: integration.group.self_and_ancestors)
-        .or(where(id: min_id..max_id, type: integration.type, instance: true)).select(:id)
+      unscope(:where).where(type: integration.type, group: integration.group.self_and_ancestors)
+        .or(unscope(:where).where(type: integration.type, instance: true)).select(:id)
 
     from_union([
-      where(id: min_id..max_id, type: integration.type, inherit_from_id: inherit_from_ids, group: integration.group.descendants),
-      where(id: min_id..max_id, type: integration.type, inherit_from_id: inherit_from_ids, project: Project.in_namespace(integration.group.self_and_descendants))
+      unscope(:where).where(type: integration.type, inherit_from_id: inherit_from_ids, group: integration.group.descendants),
+      unscope(:where).where(type: integration.type, inherit_from_id: inherit_from_ids, project: Project.in_namespace(integration.group.self_and_descendants))
     ])
   end
 
