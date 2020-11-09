@@ -125,7 +125,7 @@ To pull packages in the GitLab package registry, you'll need to:
 
 1. Create a Deploy Token with `read_package_registry` as a scope.
 1. Take note of your `username` and `token`.
-1. For the [package type of your choice](./../../packages/index.md), follow the
+1. For the [package type of your choice](../../packages/index.md), follow the
    authentication instructions for deploy tokens.
 
 ### Push or upload packages
@@ -136,7 +136,7 @@ To upload packages in the GitLab package registry, you'll need to:
 
 1. Create a Deploy Token with `write_package_registry` as a scope.
 1. Take note of your `username` and `token`.
-1. For the [package type of your choice](./../../packages/index.md), follow the
+1. For the [package type of your choice](../../packages/index.md), follow the
    authentication instructions for deploy tokens.
 
 ### Group Deploy Token
