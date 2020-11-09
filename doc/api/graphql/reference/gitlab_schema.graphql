@@ -8052,6 +8052,11 @@ type GeoNode {
   verificationMaxCapacity: Int
 }
 
+"""
+Identifier of Gitlab::ErrorTracking::Error
+"""
+scalar GitlabErrorTrackingErrorID
+
 type GrafanaIntegration {
   """
   Timestamp of the issue's creation
@@ -15849,7 +15854,7 @@ type Project {
     """
     ID of the Sentry issue
     """
-    id: ID!
+    id: GitlabErrorTrackingErrorID!!
   ): SentryDetailedError
 
   """
@@ -19148,7 +19153,7 @@ type SentryErrorCollection {
     """
     ID of the Sentry issue
     """
-    id: ID!
+    id: GitlabErrorTrackingErrorID!!
   ): SentryDetailedError
 
   """
@@ -19158,7 +19163,7 @@ type SentryErrorCollection {
     """
     ID of the Sentry issue
     """
-    id: ID!
+    id: GitlabErrorTrackingErrorID!!
   ): SentryErrorStackTrace
 
   """

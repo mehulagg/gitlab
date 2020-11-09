@@ -22227,6 +22227,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "GitlabErrorTrackingErrorID",
+          "description": "Identifier of Gitlab::ErrorTracking::Error",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "GrafanaIntegration",
           "description": null,
@@ -45927,9 +45937,13 @@
                     "kind": "NON_NULL",
                     "name": null,
                     "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ID",
-                      "ofType": null
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "GitlabErrorTrackingErrorID",
+                        "ofType": null
+                      }
                     }
                   },
                   "defaultValue": null
@@ -55314,9 +55328,13 @@
                     "kind": "NON_NULL",
                     "name": null,
                     "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ID",
-                      "ofType": null
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "GitlabErrorTrackingErrorID",
+                        "ofType": null
+                      }
                     }
                   },
                   "defaultValue": null
@@ -55341,9 +55359,13 @@
                     "kind": "NON_NULL",
                     "name": null,
                     "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ID",
-                      "ofType": null
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "GitlabErrorTrackingErrorID",
+                        "ofType": null
+                      }
                     }
                   },
                   "defaultValue": null
