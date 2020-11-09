@@ -14,6 +14,18 @@ module Gitlab
 
             private
 
+            def self.priority
+              Vulnerabilities::TrackingFingerprint.priority_hash_hash
+            end
+
+            def fingerprint_type
+              Vulnerabilities::TrackingFingerprint.type_hash
+            end
+
+            def fingerprint_method
+              Vulnerabilities::TrackingFingerprint.method_hash
+            end
+
             def fingerprint_data
               @data.to_s
             end

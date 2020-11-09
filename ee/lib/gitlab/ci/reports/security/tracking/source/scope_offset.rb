@@ -13,8 +13,12 @@ module Gitlab
                 return true
               end
 
+              def self.priority
+                Vulnerabilities::TrackingFingerprint.priority_source_scope_offset
+              end
+
               def fingerprint_method
-                "Scope+Offset"
+                Vulnerabilities::TrackingFingerprint.method_scope_offset
               end
 
               def fingerprint_data

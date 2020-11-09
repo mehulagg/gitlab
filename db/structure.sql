@@ -11270,6 +11270,23 @@ CREATE SEQUENCE conversational_development_index_metrics_id_seq
 
 ALTER SEQUENCE conversational_development_index_metrics_id_seq OWNED BY conversational_development_index_metrics.id;
 
+CREATE TABLE csv_issue_imports (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE csv_issue_imports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE csv_issue_imports_id_seq OWNED BY csv_issue_imports.id;
+
 CREATE TABLE custom_emoji (
     id bigint NOT NULL,
     namespace_id bigint NOT NULL,
@@ -15753,6 +15770,25 @@ CREATE SEQUENCE routes_id_seq
 
 ALTER SEQUENCE routes_id_seq OWNED BY routes.id;
 
+CREATE TABLE saml_group_links (
+    id bigint NOT NULL,
+    access_level smallint NOT NULL,
+    group_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    saml_group_name text NOT NULL,
+    CONSTRAINT check_1b3fc49d1e CHECK ((char_length(saml_group_name) <= 255))
+);
+
+CREATE SEQUENCE saml_group_links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE saml_group_links_id_seq OWNED BY saml_group_links.id;
+
 CREATE TABLE saml_providers (
     id integer NOT NULL,
     group_id integer NOT NULL,
@@ -17080,6 +17116,27 @@ CREATE SEQUENCE vulnerability_statistics_id_seq
 
 ALTER SEQUENCE vulnerability_statistics_id_seq OWNED BY vulnerability_statistics.id;
 
+CREATE TABLE vulnerability_tracking_fingerprints (
+    id bigint NOT NULL,
+    finding_id bigint NOT NULL,
+    inner_sha bytea NOT NULL,
+    priority integer NOT NULL,
+    type integer NOT NULL,
+    method integer NOT NULL,
+    full_sha bytea NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE vulnerability_tracking_fingerprints_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_tracking_fingerprints_id_seq OWNED BY vulnerability_tracking_fingerprints.id;
+
 CREATE TABLE vulnerability_user_mentions (
     id bigint NOT NULL,
     vulnerability_id bigint NOT NULL,
@@ -17169,6 +17226,7 @@ CREATE TABLE webauthn_registrations (
     credential_xid text NOT NULL,
     name text NOT NULL,
     public_key text NOT NULL,
+    u2f_registration_id integer,
     CONSTRAINT check_242f0cc65c CHECK ((char_length(credential_xid) <= 255)),
     CONSTRAINT check_2f02e74321 CHECK ((char_length(name) <= 255))
 );
@@ -17503,6 +17561,8 @@ ALTER TABLE ONLY compliance_management_frameworks ALTER COLUMN id SET DEFAULT ne
 ALTER TABLE ONLY container_repositories ALTER COLUMN id SET DEFAULT nextval('container_repositories_id_seq'::regclass);
 
 ALTER TABLE ONLY conversational_development_index_metrics ALTER COLUMN id SET DEFAULT nextval('conversational_development_index_metrics_id_seq'::regclass);
+
+ALTER TABLE ONLY csv_issue_imports ALTER COLUMN id SET DEFAULT nextval('csv_issue_imports_id_seq'::regclass);
 
 ALTER TABLE ONLY custom_emoji ALTER COLUMN id SET DEFAULT nextval('custom_emoji_id_seq'::regclass);
 
@@ -17898,6 +17958,8 @@ ALTER TABLE ONLY reviews ALTER COLUMN id SET DEFAULT nextval('reviews_id_seq'::r
 
 ALTER TABLE ONLY routes ALTER COLUMN id SET DEFAULT nextval('routes_id_seq'::regclass);
 
+ALTER TABLE ONLY saml_group_links ALTER COLUMN id SET DEFAULT nextval('saml_group_links_id_seq'::regclass);
+
 ALTER TABLE ONLY saml_providers ALTER COLUMN id SET DEFAULT nextval('saml_providers_id_seq'::regclass);
 
 ALTER TABLE ONLY scim_identities ALTER COLUMN id SET DEFAULT nextval('scim_identities_id_seq'::regclass);
@@ -18009,6 +18071,8 @@ ALTER TABLE ONLY vulnerability_occurrences ALTER COLUMN id SET DEFAULT nextval('
 ALTER TABLE ONLY vulnerability_scanners ALTER COLUMN id SET DEFAULT nextval('vulnerability_scanners_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_statistics ALTER COLUMN id SET DEFAULT nextval('vulnerability_statistics_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_tracking_fingerprints ALTER COLUMN id SET DEFAULT nextval('vulnerability_tracking_fingerprints_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_user_mentions ALTER COLUMN id SET DEFAULT nextval('vulnerability_user_mentions_id_seq'::regclass);
 
@@ -18560,6 +18624,9 @@ ALTER TABLE ONLY container_repositories
 
 ALTER TABLE ONLY conversational_development_index_metrics
     ADD CONSTRAINT conversational_development_index_metrics_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY csv_issue_imports
+    ADD CONSTRAINT csv_issue_imports_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY custom_emoji
     ADD CONSTRAINT custom_emoji_pkey PRIMARY KEY (id);
@@ -19206,6 +19273,9 @@ ALTER TABLE ONLY reviews
 ALTER TABLE ONLY routes
     ADD CONSTRAINT routes_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY saml_group_links
+    ADD CONSTRAINT saml_group_links_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY saml_providers
     ADD CONSTRAINT saml_providers_pkey PRIMARY KEY (id);
 
@@ -19391,6 +19461,9 @@ ALTER TABLE ONLY vulnerability_scanners
 
 ALTER TABLE ONLY vulnerability_statistics
     ADD CONSTRAINT vulnerability_statistics_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vulnerability_tracking_fingerprints
+    ADD CONSTRAINT vulnerability_tracking_fingerprints_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY vulnerability_user_mentions
     ADD CONSTRAINT vulnerability_user_mentions_pkey PRIMARY KEY (id);
@@ -19598,6 +19671,8 @@ CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_ev
 
 CREATE INDEX idx_ci_pipelines_artifacts_locked ON ci_pipelines USING btree (ci_ref_id, id) WHERE (locked = 1);
 
+CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at_enabled ON container_expiration_policies USING btree (project_id, next_run_at, enabled);
+
 CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON deployment_clusters USING btree (cluster_id, kubernetes_namespace);
 
 CREATE UNIQUE INDEX idx_deployment_merge_requests_unique_index ON deployment_merge_requests USING btree (deployment_id, merge_request_id);
@@ -19675,6 +19750,10 @@ CREATE UNIQUE INDEX idx_security_scans_on_build_and_scan_type ON security_scans 
 CREATE INDEX idx_security_scans_on_scan_type ON security_scans USING btree (scan_type);
 
 CREATE UNIQUE INDEX idx_serverless_domain_cluster_on_clusters_applications_knative ON serverless_domain_cluster USING btree (clusters_applications_knative_id);
+
+CREATE UNIQUE INDEX idx_vuln_tracking_fingerprints_on_occurrences_id_and_full_sha ON vulnerability_tracking_fingerprints USING btree (finding_id, full_sha);
+
+CREATE UNIQUE INDEX idx_vuln_tracking_fingerprints_uniqueness ON vulnerability_tracking_fingerprints USING btree (finding_id, type, method, inner_sha);
 
 CREATE UNIQUE INDEX idx_vulnerability_issue_links_on_vulnerability_id_and_issue_id ON vulnerability_issue_links USING btree (vulnerability_id, issue_id);
 
@@ -20195,6 +20274,10 @@ CREATE UNIQUE INDEX index_container_repositories_on_project_id_and_name ON conta
 CREATE INDEX index_container_repository_on_name_trigram ON container_repositories USING gin (name gin_trgm_ops);
 
 CREATE INDEX index_created_at_on_codeowner_approval_merge_request_rules ON approval_merge_request_rules USING btree (created_at) WHERE ((rule_type = 2) AND (section <> 'codeowners'::text));
+
+CREATE INDEX index_csv_issue_imports_on_project_id ON csv_issue_imports USING btree (project_id);
+
+CREATE INDEX index_csv_issue_imports_on_user_id ON csv_issue_imports USING btree (user_id);
 
 CREATE UNIQUE INDEX index_custom_emoji_on_namespace_id_and_name ON custom_emoji USING btree (namespace_id, name);
 
@@ -21454,6 +21537,8 @@ CREATE INDEX index_routes_on_path_trigram ON routes USING gin (path gin_trgm_ops
 
 CREATE UNIQUE INDEX index_routes_on_source_type_and_source_id ON routes USING btree (source_type, source_id);
 
+CREATE UNIQUE INDEX index_saml_group_links_on_group_id_and_saml_group_name ON saml_group_links USING btree (group_id, saml_group_name);
+
 CREATE INDEX index_saml_providers_on_group_id ON saml_providers USING btree (group_id);
 
 CREATE INDEX index_scim_identities_on_group_id ON scim_identities USING btree (group_id);
@@ -21505,6 +21590,8 @@ CREATE INDEX index_services_on_type ON services USING btree (type);
 CREATE UNIQUE INDEX index_services_on_type_and_instance_partial ON services USING btree (type, instance) WHERE (instance = true);
 
 CREATE UNIQUE INDEX index_services_on_type_and_template_partial ON services USING btree (type, template) WHERE (template = true);
+
+CREATE INDEX index_services_on_type_id_when_active_and_project_id_not_null ON services USING btree (type, id) WHERE ((active = true) AND (project_id IS NOT NULL));
 
 CREATE INDEX index_services_on_type_id_when_active_not_instance_not_template ON services USING btree (type, id) WHERE ((active = true) AND (instance = false) AND (template = false));
 
@@ -21762,8 +21849,6 @@ CREATE INDEX index_vulnerabilities_on_milestone_id ON vulnerabilities USING btre
 
 CREATE INDEX index_vulnerabilities_on_project_id ON vulnerabilities USING btree (project_id);
 
-CREATE INDEX index_vulnerabilities_on_project_id_and_id ON vulnerabilities USING btree (project_id, id);
-
 CREATE INDEX index_vulnerabilities_on_resolved_by_id ON vulnerabilities USING btree (resolved_by_id);
 
 CREATE INDEX index_vulnerabilities_on_start_date_sourcing_milestone_id ON vulnerabilities USING btree (start_date_sourcing_milestone_id);
@@ -21824,6 +21909,8 @@ CREATE INDEX index_vulnerability_statistics_on_letter_grade ON vulnerability_sta
 
 CREATE UNIQUE INDEX index_vulnerability_statistics_on_unique_project_id ON vulnerability_statistics USING btree (project_id);
 
+CREATE INDEX index_vulnerability_tracking_fingerprints_on_finding_id ON vulnerability_tracking_fingerprints USING btree (finding_id);
+
 CREATE UNIQUE INDEX index_vulnerability_user_mentions_on_note_id ON vulnerability_user_mentions USING btree (note_id) WHERE (note_id IS NOT NULL);
 
 CREATE UNIQUE INDEX index_vulns_user_mentions_on_vulnerability_id ON vulnerability_user_mentions USING btree (vulnerability_id) WHERE (note_id IS NULL);
@@ -21841,6 +21928,8 @@ CREATE INDEX index_web_hooks_on_project_id ON web_hooks USING btree (project_id)
 CREATE INDEX index_web_hooks_on_type ON web_hooks USING btree (type);
 
 CREATE UNIQUE INDEX index_webauthn_registrations_on_credential_xid ON webauthn_registrations USING btree (credential_xid);
+
+CREATE INDEX index_webauthn_registrations_on_u2f_registration_id ON webauthn_registrations USING btree (u2f_registration_id) WHERE (u2f_registration_id IS NOT NULL);
 
 CREATE INDEX index_webauthn_registrations_on_user_id ON webauthn_registrations USING btree (user_id);
 
@@ -22243,6 +22332,9 @@ ALTER TABLE ONLY vulnerabilities
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT fk_131d289c65 FOREIGN KEY (milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY webauthn_registrations
+    ADD CONSTRAINT fk_13e04d719a FOREIGN KEY (u2f_registration_id) REFERENCES u2f_registrations(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY protected_branch_push_access_levels
     ADD CONSTRAINT fk_15d2a7a4ae FOREIGN KEY (deploy_key_id) REFERENCES keys(id) ON DELETE CASCADE;
 
@@ -22389,6 +22481,9 @@ ALTER TABLE ONLY deploy_keys_projects
 
 ALTER TABLE ONLY issue_assignees
     ADD CONSTRAINT fk_5e0c8d9154 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY csv_issue_imports
+    ADD CONSTRAINT fk_5e1572387c FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_access_tokens
     ADD CONSTRAINT fk_5f7e8450e1 FOREIGN KEY (personal_access_token_id) REFERENCES personal_access_tokens(id) ON DELETE CASCADE;
@@ -22762,6 +22857,9 @@ ALTER TABLE ONLY merge_requests
 ALTER TABLE ONLY issue_links
     ADD CONSTRAINT fk_e71bb44f1f FOREIGN KEY (target_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY csv_issue_imports
+    ADD CONSTRAINT fk_e71c0ae362 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_e7a0b20a6b FOREIGN KEY (custom_project_templates_group_id) REFERENCES namespaces(id) ON DELETE SET NULL;
 
@@ -23019,6 +23117,9 @@ ALTER TABLE ONLY clusters_applications_runners
 
 ALTER TABLE ONLY service_desk_settings
     ADD CONSTRAINT fk_rails_223a296a85 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY saml_group_links
+    ADD CONSTRAINT fk_rails_22e312c530 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -23310,6 +23411,9 @@ ALTER TABLE ONLY protected_environment_deploy_access_levels
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_5be1abfc25 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_tracking_fingerprints
+    ADD CONSTRAINT fk_rails_5c211d404f FOREIGN KEY (finding_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY cluster_providers_gcp
     ADD CONSTRAINT fk_rails_5c2c3bc814 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;

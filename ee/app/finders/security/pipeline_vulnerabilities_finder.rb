@@ -79,7 +79,8 @@ module Security
 
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
-        finding.location_fingerprint = report_finding.location.fingerprint
+        #finding.location_fingerprint = report_finding.location.fingerprint
+        finding.tracking_fingerprints = report_finding.tracking_fingerprints
         finding.vulnerability = vulnerabilities[finding.project_fingerprint]
         finding.project = pipeline.project
         finding.sha = pipeline.sha

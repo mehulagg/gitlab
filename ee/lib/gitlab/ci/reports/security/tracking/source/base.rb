@@ -9,7 +9,6 @@ module Gitlab
         module Tracking
           module Source
             class Base < Tracking::Base
-
               def self.supports(filepath, line_start, line_end)
                 raise NotImplementedError
               end
@@ -23,7 +22,7 @@ module Gitlab
               end
 
               def fingerprint_type
-                "Source"
+                Vulnerabilities::TrackingFingerprint.type_source
               end
 
               def fingerprint_data

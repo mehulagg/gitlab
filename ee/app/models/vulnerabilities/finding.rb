@@ -28,6 +28,8 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
+    has_many :tracking_fingerprints, class_name: 'Vulnerabilities::TrackingFingerprint', inverse_of: :finding, foreign_key: 'finding_id'
+
     attr_writer :sha
     attr_accessor :scan
 

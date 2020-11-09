@@ -13,8 +13,12 @@ module Gitlab
                 true
               end
 
+              def self.priority
+                Vulnerabilities::TrackingFingerprint.priority_source_location
+              end
+
               def fingerprint_method
-                "Location"
+                Vulnerabilities::TrackingFingerprint.method_location
               end
 
               def fingerprint_data

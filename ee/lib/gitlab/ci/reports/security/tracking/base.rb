@@ -5,13 +5,11 @@ module Gitlab
     module Reports
       module Security
         module Tracking
-          class Base < ::Gitlab::Ci::Reports::Security::Locations::Base
+          class Base
             include ::Gitlab::Utils::StrongMemoize
 
-            def ==(other)
-              other.fingerprint == fingerprint &&
-                other.fingerprint_type == fingerprint_type &&
-                other.fingerprint_method == fingerprint_method
+            def self.priority
+              raise NotImplementedError
             end
 
             def fingerprint_type
@@ -26,14 +24,26 @@ module Gitlab
               raise NotImplementedError
             end
 
-            def fingerprint
-              strong_memoize(:fingerprint) do
+            # -----------------------------------------------------------------
+
+            def ==(other)
+              other.full_sha == full_sha
+            end
+
+            def inner_sha
+              strong_memoize(:inner_sha) do
+                Digest::SHA1.hexdigest(fingerprint_data)
+              end
+            end
+
+            def full_sha
+              strong_memoize(:full_sha) do
                 "#{fingerprint_type}:#{fingerprint_method}:#{Digest::SHA1.hexdigest(fingerprint_data)}"
               end
             end
 
             def as_json(options = nil)
-              fingerprint # side-effect call to initialize the ivar for serialization
+              full_sha # side-effect call to initialize the ivar for serialization
 
               super
             end

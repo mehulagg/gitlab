@@ -20,6 +20,7 @@ module Gitlab
           attr_reader :scan
           attr_reader :severity
           attr_reader :uuid
+          attr_reader :tracking_fingerprints
 
           delegate :file_path, :start_line, :end_line, to: :location
 
@@ -35,6 +36,7 @@ module Gitlab
             @scan = scan
             @severity = severity
             @uuid = uuid
+            @tracking_fingerprints = []
 
             @project_fingerprint = generate_project_fingerprint
           end

@@ -8,14 +8,14 @@ module Gitlab
       module Security
         module Tracking
           module Source
-            PREFERRED_METHODS = [
-              ScopeOffset,
-              Location,
-            ]
+            SOURCE_METHODS = [
+              Tracking::Source::Location,
+              Tracking::Source::ScopeOffset,
+            ].freeze
 
             def self.highest_supported(file_path, line_start, line_end)
-              PREFERRED_METHODS.each do |pref_method|
-                return pref_method if pref_method.supports(file_path, line_start, line_end)
+              SOURCE_METHODS.sort_by(&:priority).reverse.each do |source_method|
+                return source_method if source_method.supports(file_path, line_start, line_end)
               end
             end
           end
