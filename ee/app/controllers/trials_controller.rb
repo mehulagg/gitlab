@@ -9,6 +9,7 @@ class TrialsController < ApplicationController
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
   before_action :record_user_for_group_only_trials_experiment, only: :select
+  before_action :reset_flash, only: :new
 
   feature_category :purchase
 
@@ -53,6 +54,10 @@ class TrialsController < ApplicationController
     return if current_user
 
     redirect_to new_trial_registration_path, alert: I18n.t('devise.failure.unauthenticated')
+  end
+
+  def reset_flash
+    flash[:alert] = nil if flash[:alert] == I18n.t('devise.failure.already_authenticated')
   end
 
   def company_params
