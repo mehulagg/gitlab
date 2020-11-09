@@ -97,7 +97,7 @@ See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration)
 for initial settings to enable single sign-on and add Kerberos servers
 as an identity provider.
 
-## Create and linking Kerberos accounts
+## Create and link Kerberos accounts
 
 You can either link a Kerberos account to an existing GitLab account, or
 set up GitLab to create a new account when a Kerberos user tries to sign in.
@@ -113,11 +113,11 @@ existing GitLab account. To do so:
 1. Make sure the **Identifier** corresponds to the Kerberos username.
 1. Select **Save changes**.
 
-If you're a regular user:
+If you're not an administrator:
 
 1. Select your avatar in the upper-right corner, and select **Settings**.
 1. Select Account. In the **Social sign-in** section, select
-   **Connect Kerberos Spango**.
+   **Connect Kerberos Spnego**.
    If you don't see a **Social sign-in** Kerberos option, follow the
    requirements in [Enable single sign-on](#enable-single-sign-on).
 
@@ -151,7 +151,7 @@ With that information at hand:
       ```
 
       1. As an administrator, you can confirm the new, blocked account.
-       Select **Admin Area > Overview > Users** and review the Blocked tab.
+         Select **Admin Area > Overview > Users** and review the Blocked tab.
       1. You can enable the user.
    1. If `block_auto_created_users` is false, the Kerberos user is
       authenticated and is signed in to GitLab.
