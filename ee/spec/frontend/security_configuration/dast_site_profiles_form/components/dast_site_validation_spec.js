@@ -222,7 +222,7 @@ describe('DastSiteValidation', () => {
 
       it('shows a code block containing the http-header key with the given token', () => {
         expect(
-          withinComponent().getByText(`Gitlab-On-Demand-DAST: uuid-code-${token}`, {
+          withinComponent().getByText(`Gitlab-On-Demand-DAST: ${token}`, {
             selector: 'code',
           }),
         ).not.toBe(null);
@@ -233,7 +233,7 @@ describe('DastSiteValidation', () => {
 
         expect(clipboardButton.exists()).toBe(true);
         expect(clipboardButton.props()).toMatchObject({
-          text: `Gitlab-On-Demand-DAST: uuid-code-${token}`,
+          text: `Gitlab-On-Demand-DAST: ${token}`,
           title: 'Copy HTTP header to clipboard',
         });
       });
