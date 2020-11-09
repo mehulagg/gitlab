@@ -1,4 +1,4 @@
-import { setDeployBoard } from 'ee_else_ce/environments/stores/helpers';
+import { setDeployBoard } from './helpers';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 
 /**
