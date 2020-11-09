@@ -45,6 +45,10 @@ module Gitlab
         old_blob_lazy
       end
 
+      def cache_key
+        [repository.project, file_hash]
+      end
+
       def position(position_marker, position_type: :text)
         return unless diff_refs
 

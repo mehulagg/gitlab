@@ -1,0 +1,9 @@
+- discussions = local_assigns.fetch(:discussions, nil)
+- line_code = diff_file.line_code(line)
+
+- if discussions && line.discussable?
+  - line_discussions = discussions[line_code]
+
+- if line_discussions&.any?
+  - discussion_expanded = local_assigns.fetch(:discussion_expanded, line_discussions.any?(&:expanded?))
+  = render "discussions/diff_discussion", discussions: line_discussions, expanded: discussion_expanded

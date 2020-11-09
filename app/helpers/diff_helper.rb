@@ -36,6 +36,26 @@ module DiffHelper
     options
   end
 
+  def cached_diff_lines(diff_file)
+    lines = Rails.cache.fetch [:diff_lines, diff_file.cache_key], expires_in: 1.week do
+      diff_file.highlighted_diff_lines.map do |line|
+        render(
+          partial: "projects/diffs/cacheable_line",
+          locals: { diff_file: diff_file, line: line }
+        )
+      end
+    end
+
+    discussions = diff_file.highlighted_diff_lines.map do |line|
+      render(
+        partial: "projects/diffs/line_discussions",
+        locals: { diff_file: diff_file, line: line, discussions: @grouped_diff_discussions }
+      )
+    end
+
+    lines.zip(discussions).map(&:join).join.html_safe
+  end
+
   def diff_match_line(old_pos, new_pos, text: '', view: :inline, bottom: false)
     content_line_class = %w[line_content match]
     content_line_class << 'parallel' if view == :parallel
@@ -64,13 +84,15 @@ module DiffHelper
     else
       # `sub` and substring-ing would destroy HTML-safeness of `line`
       if line.start_with?('+', '-', ' ')
-        line.dup.tap do |line|
-          line[0] = ''
-        end
-      else
-        line
+        line[0] = ''
       end
+
+      line
     end
+  end
+
+  def diff_link_text(line_type, required_type, text)
+    line_type == required_type ? text : " "
   end
 
   def parallel_diff_discussions(left, right, diff_file)
