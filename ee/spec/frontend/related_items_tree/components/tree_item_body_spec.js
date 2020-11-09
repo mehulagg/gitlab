@@ -213,6 +213,48 @@ describe('RelatedItemsTree', () => {
         });
       });
 
+      describe('stateIconName', () => {
+        it('returns string `issues` when issue `item.state` value is `open`', () => {
+          wrapper.setProps({
+            item: { ...mockItem, state: ChildState.Open },
+          });
+
+          return wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.stateIconName).toBe('issues');
+          });
+        });
+
+        it('returns string `issue-closed` when issue `item.state` value is `closed`', () => {
+          wrapper.setProps({
+            item: { ...mockItem, state: ChildState.Closed },
+          });
+
+          return wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.stateIconName).toBe('issue-closed');
+          });
+        });
+
+        it('returns string `epic` when epic `item.state` value is `open`', () => {
+          wrapper.setProps({
+            item: createEpicItem(mockOpenEpic),
+          });
+
+          return wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.stateIconName).toBe('epic');
+          });
+        });
+
+        it('returns string `epic-closed` when epic `item.state` value is `closed`', () => {
+          wrapper.setProps({
+            item: createEpicItem(mockClosedEpic),
+          });
+
+          return wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.stateIconName).toBe('epic-closed');
+          });
+        });
+      });
+
       describe('itemId', () => {
         it('returns string containing item id', () => {
           expect(wrapper.vm.itemId).toBe('8');
