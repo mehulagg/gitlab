@@ -291,7 +291,7 @@ describe('Actions RegistryExplorer Store', () => {
           },
           {
             type: 'requestTagsList',
-            payload: { pagination: {} },
+            payload: {},
           },
         ],
         done,

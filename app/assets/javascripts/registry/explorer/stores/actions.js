@@ -93,13 +93,13 @@ export const requestDeleteTag = ({ commit, dispatch, state }, { tag }) => {
 export const requestDeleteTags = ({ commit, dispatch, state }, { ids }) => {
   commit(types.SET_MAIN_LOADING, true);
 
-  const tagsPath = pathGenerator(state.imageDetails, 'bulk_destroy');
+  const tagsPath = pathGenerator(state.imageDetails, '/bulk_destroy');
 
   return axios
     .delete(tagsPath, { params: { ids } })
     .then(() => {
       dispatch('setShowGarbageCollectionTip', true);
-      return dispatch('requestTagsList', { pagination: state.tagsPagination });
+      return dispatch('requestTagsList', state.tagsPagination);
     })
     .finally(() => {
       commit(types.SET_MAIN_LOADING, false);
