@@ -120,8 +120,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   end
 
   before(:all) do
-    clean_frontend_fixtures('analytics/')
-    clean_frontend_fixtures('cycle_analytics/')
+    clean_frontend_fixtures('analytics/value_stream_analytics/')
   end
 
   describe Groups::Analytics::CycleAnalytics::StagesController, type: :controller do
@@ -177,73 +176,6 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
     it "analytics/value_stream_analytics/stages/label-based-stage/median.json" do
       get(:median, params: params.merge({ id: label_based_stage.id }), format: :json)
-
-      expect(response).to be_successful
-    end
-  end
-
-  describe Groups::Analytics::CycleAnalytics::SummaryController, type: :controller do
-    render_views
-
-    let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
-
-    def prepare_cycle_time_data
-      issue.update!(created_at: 5.days.ago)
-      issue.metrics.update!(first_mentioned_in_commit_at: 4.days.ago)
-      issue.update!(closed_at: 3.days.ago)
-
-      issue_1.update!(created_at: 8.days.ago)
-      issue_1.metrics.update!(first_mentioned_in_commit_at: 6.days.ago)
-      issue_1.update!(closed_at: 1.day.ago)
-    end
-
-    before do
-      stub_licensed_features(cycle_analytics_for_groups: true)
-
-      prepare_cycle_analytics_data
-      prepare_cycle_time_data
-
-      sign_in(user)
-    end
-
-    it 'analytics/value_stream_analytics/summary.json' do
-      get(:show, params: params, format: :json)
-
-      expect(response).to be_successful
-    end
-
-    it 'analytics/value_stream_analytics/time_summary.json' do
-      get(:time_summary, params: params, format: :json)
-
-      expect(response).to be_successful
-    end
-  end
-
-  describe Groups::Analytics::TasksByTypeController, type: :controller do
-    render_views
-
-    let(:label) { create(:group_label, group: group) }
-    let(:label2) { create(:group_label, group: group) }
-    let(:label3) { create(:group_label, group: group) }
-
-    before do
-      5.times do |i|
-        create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [label])
-        create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [label2])
-        create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [label3])
-      end
-
-      stub_licensed_features(type_of_work_analytics: true)
-
-      group.add_maintainer(user)
-
-      sign_in(user)
-    end
-
-    it 'analytics/type_of_work/tasks_by_type.json' do
-      params = { group_id: group.full_path, label_ids: [label.id, label2.id, label3.id], created_after: 10.days.ago, subject: 'Issue' }
-
-      get(:show, params: params, format: :json)
 
       expect(response).to be_successful
     end
