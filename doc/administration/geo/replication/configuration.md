@@ -230,7 +230,7 @@ Meanwhile, the **primary** node will start to notify each **secondary** node of 
 that the **secondary** node can act on those notifications immediately.
 
 Make sure the **secondary** node is running and accessible.
-You can login to the **secondary** node with the same credentials as used for the **primary** node.
+You can log in to the **secondary** node with the same credentials as used for the **primary** node.
 
 ### Step 4. Enabling Hashed Storage
 
@@ -262,7 +262,7 @@ method to be enabled. Navigate to **Admin Area > Settings**
 
 Your **secondary** node is now configured!
 
-You can login to the **secondary** node with the same credentials you used for the
+You can log in to the **secondary** node with the same credentials you used for the
 **primary** node. Visit the **secondary** node's **Admin Area > Geo**
 (`/admin/geo/nodes`) in your browser to check if it's correctly identified as a
 **secondary** Geo node and if Geo is enabled.

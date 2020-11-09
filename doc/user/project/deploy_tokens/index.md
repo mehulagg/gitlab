@@ -161,7 +161,7 @@ named `gitlab-deploy-token`, the username and token of the Deploy Token will be
 automatically exposed to the CI/CD jobs as environment variables: `CI_DEPLOY_USER` and
 `CI_DEPLOY_PASSWORD`, respectively.
 
-After you create the token, you can login to the Container Registry using
+After you create the token, you can log in to the Container Registry using
 those variables:
 
 ```shell
