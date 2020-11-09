@@ -20480,6 +20480,9 @@ msgstr ""
 msgid "Profiles| You are going to change the username %{currentUsernameBold} to %{newUsernameBold}. Profile and projects will be redirected to the %{newUsername} namespace but this redirect will expire once the %{currentUsername} namespace is registered by another user or group. Please update your Git repository remotes as soon as possible."
 msgstr ""
 
+msgid "Profiles|\"Busy\" will be shown next to your name"
+msgstr ""
+
 msgid "Profiles|%{provider} Active"
 msgstr ""
 
@@ -20508,6 +20511,9 @@ msgid "Profiles|Avatar will be removed. Are you sure?"
 msgstr ""
 
 msgid "Profiles|Bio"
+msgstr ""
+
+msgid "Profiles|Busy"
 msgstr ""
 
 msgid "Profiles|Change username"
@@ -24619,7 +24625,13 @@ msgstr ""
 msgid "SetPasswordToCloneLink|set a password"
 msgstr ""
 
+msgid "SetStatusModal|\"Busy\" will be shown next to your name"
+msgstr ""
+
 msgid "SetStatusModal|Add status emoji"
+msgstr ""
+
+msgid "SetStatusModal|Busy"
 msgstr ""
 
 msgid "SetStatusModal|Clear status"

@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import Vue from 'vue';
+import { GlToast } from '@gitlab/ui';
 import Translate from '~/vue_shared/translate';
 import { highCountTrim } from '~/lib/utils/text_utility';
 import Tracking from '~/tracking';
@@ -34,26 +35,33 @@ function initStatusTriggers() {
           const statusModalElement = document.createElement('div');
           setStatusModalWrapperEl.appendChild(statusModalElement);
 
+          Vue.use(GlToast);
           Vue.use(Translate);
 
           // eslint-disable-next-line no-new
           new Vue({
             el: statusModalElement,
             data() {
-              const { currentEmoji, currentMessage } = setStatusModalWrapperEl.dataset;
+              const {
+                currentEmoji,
+                currentMessage,
+                currentAvailability,
+              } = setStatusModalWrapperEl.dataset;
 
               return {
                 currentEmoji,
                 currentMessage,
+                currentAvailability,
               };
             },
             render(createElement) {
-              const { currentEmoji, currentMessage } = this;
+              const { currentEmoji, currentMessage, currentAvailability } = this;
 
               return createElement(SetStatusModalWrapper, {
                 props: {
                   currentEmoji,
                   currentMessage,
+                  currentAvailability,
                 },
               });
             },
