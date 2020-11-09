@@ -22,11 +22,15 @@ import {
   integrationTypesNew,
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
+  targetOpsgenieUrlPlaceholder,
   typeSet,
 } from '../constants';
 
 export default {
-  targetPrometheusUrlPlaceholder,
+  placeholders: {
+    prometheus: targetPrometheusUrlPlaceholder,
+    opsgenie: targetOpsgenieUrlPlaceholder,
+  },
   JSON_VALIDATE_DELAY,
   typeSet,
   i18n: {
@@ -72,6 +76,12 @@ export default {
           'AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in.',
         ),
       },
+      opsgenie: {
+        label: s__('AlertSettings|2. Add link to your Opsgenie alert list'),
+        info: s__(
+          'AlertSettings|Utilizing this option will link the GitLab Alerts navigation item to your exisiting Opsgenie instance. By selecting this option, you cannot recieve alerts from any other source in GitLab; it will effectivley be turing Alerts within GitLab off as a feature.',
+        ),
+      },
     },
   },
   components: {
@@ -99,6 +109,10 @@ export default {
     prometheus: {
       default: {},
     },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+    opsgenie: {
+      default: {},
+    },
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -115,6 +129,12 @@ export default {
       type: Boolean,
       required: true,
     },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+    canAddOpsgenie: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -126,6 +146,8 @@ export default {
         json: null,
         error: null,
       },
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+      isAddingOpsgenie: false,
     };
   },
   computed: {
@@ -176,6 +198,30 @@ export default {
       } else {
         this.formVisible = true;
       }
+
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+      if (this.canAddOpsgenie && this.selectedIntegration === this.$options.typeSet.opsgenie) {
+        this.isAddingOpsgenie = true;
+      }
+    },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+    submitWithOpsgenie() {
+      return service
+        .updateGenericActive({
+          endpoint: this.opsgenie.formPath,
+          params: {
+            service: {
+              opsgenie_mvc_target_url: this.integrationForm.apiUrl,
+              opsgenie_mvc_enabled: this.active,
+            },
+          },
+        })
+        .then(() => {
+          console.log('suceess');
+        })
+        .catch(() => {
+          console.log('suceess');
+        });
     },
     submitWithTestPayload() {
       return service
@@ -188,6 +234,11 @@ export default {
         });
     },
     submit() {
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407
+      if (this.isAddingOpsgenie) {
+        return this.submitWithOpsgenie();
+      }
+
       const { name, apiUrl } = this.integrationForm;
       const variables =
         this.selectedIntegration === this.$options.typeSet.http
@@ -249,7 +300,6 @@ export default {
 <template>
   <gl-form class="gl-mt-6" @submit.prevent="submit" @reset.prevent="reset">
     <h5 class="gl-font-lg gl-my-5">{{ s__('AlertSettings|Add new integrations') }}</h5>
-
     <gl-form-group
       id="integration-type"
       :label="$options.i18n.integrationFormSteps.step1.label"
@@ -277,139 +327,175 @@ export default {
       </div>
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
-      <gl-form-group
-        id="name-integration"
-        :label="$options.i18n.integrationFormSteps.step2.label"
-        label-for="name-integration"
-      >
-        <gl-form-input
-          v-model="integrationForm.name"
-          type="text"
-          :placeholder="$options.i18n.integrationFormSteps.step2.placeholder"
-        />
-      </gl-form-group>
-      <gl-form-group
-        id="integration-webhook"
-        :label="$options.i18n.integrationFormSteps.step3.label"
-        label-for="integration-webhook"
-      >
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step3.help"
-          link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
-        />
-
-        <gl-toggle
-          v-model="active"
-          :is-loading="loading"
-          :label="__('Active')"
-          class="gl-my-4 gl-font-weight-normal"
-        />
-
-        <div v-if="selectedIntegration === $options.typeSet.prometheus" class="gl-my-4">
-          <span>
-            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
+      <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407 -->
+      <div v-if="isAddingOpsgenie">
+        <gl-form-group
+          id="integration-webhook"
+          :label="$options.i18n.integrationFormSteps.opsgenie.label"
+          label-for="integration-webhook"
+        >
+          <span class="gl-my-4">
+            {{ $options.i18n.integrationFormSteps.opsgenie.info }}
           </span>
+
+          <gl-toggle
+            v-model="active"
+            :is-loading="loading"
+            :label="__('Active')"
+            class="gl-my-4 gl-font-weight-normal"
+          />
 
           <gl-form-input
             id="integration-apiUrl"
             v-model="integrationForm.apiUrl"
             type="text"
-            :placeholder="$options.targetPrometheusUrlPlaceholder"
+            :placeholder="$options.placeholders.opsgenie"
           />
 
-          <span class="gl-text-gray-400">
+          <span class="gl-text-gray-400 gl-my-1">
             {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
           </span>
-        </div>
+        </gl-form-group>
+      </div>
+      <div v-else>
+        <gl-form-group
+          id="name-integration"
+          :label="$options.i18n.integrationFormSteps.step2.label"
+          label-for="name-integration"
+        >
+          <gl-form-input
+            v-model="integrationForm.name"
+            type="text"
+            :placeholder="$options.i18n.integrationFormSteps.step2.placeholder"
+          />
+        </gl-form-group>
+        <gl-form-group
+          id="integration-webhook"
+          :label="$options.i18n.integrationFormSteps.step3.label"
+          label-for="integration-webhook"
+        >
+          <alert-settings-form-help-block
+            :message="$options.i18n.integrationFormSteps.step3.help"
+            link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
+          />
 
-        <div class="gl-my-4">
-          <span>
-            {{ s__('AlertSettings|Webhook URL') }}
-          </span>
+          <gl-toggle
+            v-model="active"
+            :is-loading="loading"
+            :label="__('Active')"
+            class="gl-my-4 gl-font-weight-normal"
+          />
 
-          <gl-form-input-group id="url" readonly :value="integrationForm.url">
-            <template #append>
-              <clipboard-button
-                :text="integrationForm.url || ''"
-                :title="__('Copy')"
-                class="gl-m-0!"
-              />
-            </template>
-          </gl-form-input-group>
-        </div>
+          <div v-if="selectedIntegration === $options.typeSet.prometheus" class="gl-my-4">
+            <span>
+              {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
+            </span>
 
-        <div class="gl-my-4">
-          <span>
-            {{ $options.i18n.integrationFormSteps.step3.info }}
-          </span>
+            <gl-form-input
+              id="integration-apiUrl"
+              v-model="integrationForm.apiUrl"
+              type="text"
+              :placeholder="$options.placeholders.prometheus"
+            />
 
-          <gl-form-input-group
-            id="authorization-key"
-            class="gl-mb-2"
-            readonly
-            :value="integrationForm.token"
-          >
-            <template #append>
-              <clipboard-button
-                :text="integrationForm.token || ''"
-                :title="__('Copy')"
-                class="gl-m-0!"
-              />
-            </template>
-          </gl-form-input-group>
+            <span class="gl-text-gray-400">
+              {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
+            </span>
+          </div>
 
-          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
-            $options.i18n.integrationFormSteps.step3.reset
-          }}</gl-button>
-          <gl-modal
-            modal-id="authKeyModal"
-            :title="$options.i18n.integrationFormSteps.step3.reset"
-            :ok-title="$options.i18n.integrationFormSteps.step3.reset"
-            ok-variant="danger"
-            @ok="resetAuthKey"
-          >
-            {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
-          </gl-modal>
-        </div>
-      </gl-form-group>
-      <gl-form-group
-        :label="$options.i18n.integrationFormSteps.step4.label"
-        label-for="test-integration"
-        :invalid-feedback="integrationTestPayload.error"
-      >
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step4.help"
-          :link="generic.alertsUsageUrl"
-        />
+          <div class="gl-my-4">
+            <span>
+              {{ s__('AlertSettings|Webhook URL') }}
+            </span>
 
-        <gl-form-textarea
-          id="test-integration"
-          v-model.trim="integrationTestPayload.json"
-          :disabled="!active"
-          :state="jsonIsValid"
-          :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
-          class="gl-my-4"
-          :debounce="$options.JSON_VALIDATE_DELAY"
-          rows="6"
-          max-rows="10"
-          @input="validateJson"
-        />
-      </gl-form-group>
+            <gl-form-input-group id="url" readonly :value="integrationForm.url">
+              <template #append>
+                <clipboard-button
+                  :text="integrationForm.url || ''"
+                  :title="__('Copy')"
+                  class="gl-m-0!"
+                />
+              </template>
+            </gl-form-input-group>
+          </div>
 
-      <gl-form-group
-        v-if="glFeatures.multipleHttpIntegrationsCustomMapping"
-        id="mapping-builder"
-        :label="$options.i18n.integrationFormSteps.step5.label"
-        label-for="mapping-builder"
-      >
-        <span class="gl-text-gray-500">{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
-        <mapping-builder />
-      </gl-form-group>
+          <div class="gl-my-4">
+            <span>
+              {{ $options.i18n.integrationFormSteps.step3.info }}
+            </span>
+
+            <gl-form-input-group
+              id="authorization-key"
+              class="gl-mb-2"
+              readonly
+              :value="integrationForm.token"
+            >
+              <template #append>
+                <clipboard-button
+                  :text="integrationForm.token || ''"
+                  :title="__('Copy')"
+                  class="gl-m-0!"
+                />
+              </template>
+            </gl-form-input-group>
+
+            <gl-button
+              v-gl-modal.authKeyModal
+              :disabled="!integrationForm.active"
+              class="gl-mt-3"
+              >{{ $options.i18n.integrationFormSteps.step3.reset }}</gl-button
+            >
+            <gl-modal
+              modal-id="authKeyModal"
+              :title="$options.i18n.integrationFormSteps.step3.reset"
+              :ok-title="$options.i18n.integrationFormSteps.step3.reset"
+              ok-variant="danger"
+              @ok="resetAuthKey"
+            >
+              {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
+            </gl-modal>
+          </div>
+        </gl-form-group>
+        <gl-form-group
+          :label="$options.i18n.integrationFormSteps.step4.label"
+          label-for="test-integration"
+          :invalid-feedback="integrationTestPayload.error"
+        >
+          <alert-settings-form-help-block
+            :message="$options.i18n.integrationFormSteps.step4.help"
+            :link="generic.alertsUsageUrl"
+          />
+
+          <gl-form-textarea
+            id="test-integration"
+            v-model.trim="integrationTestPayload.json"
+            :disabled="!active"
+            :state="jsonIsValid"
+            :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
+            class="gl-my-4"
+            :debounce="$options.JSON_VALIDATE_DELAY"
+            rows="6"
+            max-rows="10"
+            @input="validateJson"
+          />
+        </gl-form-group>
+
+        <gl-form-group
+          v-if="glFeatures.multipleHttpIntegrationsCustomMapping"
+          id="mapping-builder"
+          :label="$options.i18n.integrationFormSteps.step5.label"
+          label-for="mapping-builder"
+        >
+          <span class="gl-text-gray-500">{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
+          <mapping-builder />
+        </gl-form-group>
+      </div>
       <div class="gl-display-flex gl-justify-content-end">
         <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
+        <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/254407 -->
         <gl-button
           data-testid="integration-test-and-submit"
-          :disabled="Boolean(integrationTestPayload.error)"
+          :disabled="Boolean(integrationTestPayload.error) || isAddingOpsgenie"
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"
