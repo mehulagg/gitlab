@@ -88,7 +88,7 @@ module Gitlab
     end
 
     def self.oauth_authentication
-      return false unless Gitlab::Geo.secondary?
+      return unless Gitlab::Geo.secondary?
 
       self.cache_value(:oauth_application) do
         Gitlab::Geo.current_node.oauth_application || raise(OauthApplicationUndefinedError)
