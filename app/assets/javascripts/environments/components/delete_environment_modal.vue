@@ -42,8 +42,7 @@ export default {
       );
     },
     modalTitle() {
-      return sprintf(
-        s__(`Environments|Delete '%{environmentName}'?`), {
+      return sprintf(s__(`Environments|Delete '%{environmentName}'?`), {
         environmentName: this.environment.name,
       });
     },

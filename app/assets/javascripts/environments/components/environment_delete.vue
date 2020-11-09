@@ -11,7 +11,6 @@ import eventHub from '../event_hub';
 export default {
   components: {
     GlButton,
-    GlModal: GlModalDirective,
   },
   directives: {
     GlTooltip: GlTooltipDirective,

@@ -10340,6 +10340,9 @@ msgstr ""
 msgid "Environments|Delete"
 msgstr ""
 
+msgid "Environments|Delete '%{environmentName}'?"
+msgstr ""
+
 msgid "Environments|Delete environment"
 msgstr ""
 
