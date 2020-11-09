@@ -2,12 +2,13 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { sortBy } from 'lodash';
 import BoardColumn from 'ee_else_ce/boards/components/board_column.vue';
+import BoardColumnNew from 'ee_else_ce/boards/components/board_column_new.vue';
 import { GlAlert } from '@gitlab/ui';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
-    BoardColumn,
+    BoardColumn: gon.features?.graphqlBoardLists ? BoardColumnNew : BoardColumn,
     BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,
