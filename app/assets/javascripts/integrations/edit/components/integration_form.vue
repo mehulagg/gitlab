@@ -32,8 +32,8 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
-    ...mapGetters(['currentKey', 'propsSource', 'isSavingOrTesting']),
-    ...mapState(['defaultState', 'override', 'isSaving', 'isTesting']),
+    ...mapGetters(['currentKey', 'propsSource', 'isDisabled']),
+    ...mapState(['defaultState', 'override', 'isSaving', 'isTesting', 'isUninstalling']),
     isEditable() {
       return this.propsSource.editable;
     },
@@ -51,7 +51,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setOverride', 'setIsSaving', 'setIsTesting']),
+    ...mapActions(['setOverride', 'setIsSaving', 'setIsTesting', 'setIsUninstalling']),
     onSaveClick() {
       this.setIsSaving(true);
       eventHub.$emit('saveIntegration');
@@ -103,7 +103,7 @@ export default {
           category="primary"
           variant="success"
           :loading="isSaving"
-          :disabled="isSavingOrTesting"
+          :disabled="isDisabled"
           data-qa-selector="save_changes_button"
         >
           {{ __('Save changes') }}
@@ -116,7 +116,7 @@ export default {
         variant="success"
         type="submit"
         :loading="isSaving"
-        :disabled="isSavingOrTesting"
+        :disabled="isDisabled"
         data-qa-selector="save_changes_button"
         @click.prevent="onSaveClick"
       >
@@ -126,7 +126,7 @@ export default {
       <gl-button
         v-if="propsSource.canTest"
         :loading="isTesting"
-        :disabled="isSavingOrTesting"
+        :disabled="isDisabled"
         :href="propsSource.testPath"
         @click.prevent="onTestClick"
       >
