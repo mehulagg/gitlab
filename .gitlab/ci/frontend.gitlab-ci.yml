@@ -12,7 +12,7 @@
   - rm -rf /usr/local/share/.cache/yarn/
   - yarn cache clean
   - yarn config get registry
-  - run_timed_command "retry yarn install --frozen-lockfile --verbose"
+  - run_timed_command "retry yarn install --frozen-lockfile --verbose --registry https://gitlab.com/api/v4/packages/npm/"
 
 .compile-assets-base:
   extends:
