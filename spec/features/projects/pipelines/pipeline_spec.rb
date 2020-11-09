@@ -1151,6 +1151,7 @@ RSpec.describe 'Pipeline', :js do
 
       before do
         visit project_pipeline_path(project, pipeline)
+        wait_for_requests
       end
 
       it 'contains badge that indicates errors' do
