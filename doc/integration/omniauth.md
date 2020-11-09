@@ -343,7 +343,6 @@ omniauth:
   auto_sign_in_with_provider: azure_oauth2
 ```
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 Keep in mind that every sign-in attempt will be redirected to the OmniAuth
 provider; you won't be able to sign in using local credentials. Ensure at least
 one of the OmniAuth users has admin permissions.
