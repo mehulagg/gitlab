@@ -11,6 +11,7 @@ import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constant
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 const POLL_INTERVAL = 10000;
+const STOP_POLLING_STATUSES = ['FAILED', 'SUCCESS', 'CANCELED'];
 
 export default {
   name: 'PipelineHeaderSection',
@@ -123,6 +124,13 @@ export default {
       }
     },
   },
+  watch: {
+    pipeline(newPipeline) {
+      if (STOP_POLLING_STATUSES.includes(newPipeline.status)) {
+        this.$apollo.queries.pipeline.stopPolling();
+      }
+    },
+  },
   methods: {
     reportFailure(errorType) {
       this.failureType = errorType;
@@ -142,6 +150,7 @@ export default {
           this.reportFailure(POST_FAILURE);
         } else {
           this.$apollo.queries.pipeline.refetch();
+          this.$apollo.queries.pipeline.startPolling(POLL_INTERVAL);
         }
       } catch {
         this.reportFailure(POST_FAILURE);
