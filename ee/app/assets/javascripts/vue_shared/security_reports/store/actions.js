@@ -5,8 +5,8 @@ import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import toast from '~/vue_shared/plugins/global_toast';
-import * as types from './mutation_types';
 import { fetchDiffData } from '~/vue_shared/security_reports/store/utils';
+import * as types from './mutation_types';
 
 /**
  * A lot of this file has duplicate actions to

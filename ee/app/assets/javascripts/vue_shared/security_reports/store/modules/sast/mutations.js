@@ -1,6 +1,6 @@
-import * as types from './mutation_types';
-import { findIssueIndex } from '../../utils';
 import ceMutations from '~/vue_shared/security_reports/store/modules/sast/mutations';
+import { findIssueIndex } from '../../utils';
+import * as types from './mutation_types';
 
 export default {
   ...ceMutations,
