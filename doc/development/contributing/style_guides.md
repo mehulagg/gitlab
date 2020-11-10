@@ -111,7 +111,7 @@ We're following [Ciro Santilli's Markdown Style Guide](https://cirosantilli.com/
 
 ## Documentation
 
-See the dedicated [Documentation Style Guide](../documentation/styleguide.md).
+See the dedicated [Documentation Style Guide](../documentation/styleguide/index.md).
 
 ## Python
 
