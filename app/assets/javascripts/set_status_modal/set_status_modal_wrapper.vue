@@ -152,7 +152,7 @@ export default {
       Api.postUserStatus({
         emoji,
         message,
-        availability: availability ? AVAILABILITY_STATUS.BUSY : AVAILABILITY_STATUS.NOT_SET,
+        availability: availability ? AVAILABILITY_STATUS.BUSY : '',
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);
@@ -247,6 +247,7 @@ export default {
             <label class="form-control-inline">
               <input
                 v-model="availability"
+                data-testid="user-availability-checkbox"
                 type="checkbox"
                 name="user[status][availability]"
                 :placeholder="s__('SetStatusModal|Busy')"
