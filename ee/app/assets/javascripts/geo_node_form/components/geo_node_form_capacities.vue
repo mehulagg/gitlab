@@ -23,25 +23,25 @@ export default {
       formGroups: [
         {
           id: 'node-repository-capacity-field',
-          label: __('Repository sync capacity'),
+          label: __('Repository synchronization concurrency limit'),
           key: VALIDATION_FIELD_KEYS.REPOS_MAX_CAPACITY,
           conditional: 'secondary',
         },
         {
           id: 'node-file-capacity-field',
-          label: __('File sync capacity'),
+          label: __('File synchronization concurrency limit'),
           key: VALIDATION_FIELD_KEYS.FILES_MAX_CAPACITY,
           conditional: 'secondary',
         },
         {
           id: 'node-container-repository-capacity-field',
-          label: __('Container repositories sync capacity'),
+          label: __('Container repositories synchronization concurrency limit'),
           key: VALIDATION_FIELD_KEYS.CONTAINER_REPOSITORIES_MAX_CAPACITY,
           conditional: 'secondary',
         },
         {
           id: 'node-verification-capacity-field',
-          label: __('Verification capacity'),
+          label: __('Verification concurrency limit'),
           key: VALIDATION_FIELD_KEYS.VERIFICATION_MAX_CAPACITY,
         },
         {
@@ -68,9 +68,9 @@ export default {
     },
     sectionDescription() {
       return this.nodeData.primary
-        ? __('Set the synchronization and verification capacity for the secondary node.')
+        ? __('Set verification limit and frequency.')
         : __(
-            'Set the number of concurrent requests this secondary node will make to the primary node while backfilling.',
+            'Limit the number of concurrent operations this secondary node can run in the background.',
           );
     },
     sectionLink() {

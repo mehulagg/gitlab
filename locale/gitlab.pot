@@ -5327,6 +5327,9 @@ msgstr ""
 msgid "Choose labels"
 msgstr ""
 
+msgid "Choose specific groups or storage shards"
+msgstr ""
+
 msgid "Choose the top-level group for your repository imports."
 msgstr ""
 
@@ -7156,7 +7159,7 @@ msgstr ""
 msgid "Container repositories"
 msgstr ""
 
-msgid "Container repositories sync capacity"
+msgid "Container repositories synchronization concurrency limit"
 msgstr ""
 
 msgid "Container repository"
@@ -11754,7 +11757,7 @@ msgstr ""
 msgid "File renamed with no changes."
 msgstr ""
 
-msgid "File sync capacity"
+msgid "File synchronization concurrency limit"
 msgstr ""
 
 msgid "File templates"
@@ -16054,6 +16057,9 @@ msgid "Limit display of time tracking units to hours."
 msgstr ""
 
 msgid "Limit namespaces and projects that can be indexed"
+msgstr ""
+
+msgid "Limit the number of concurrent operations this secondary node can run in the background."
 msgstr ""
 
 msgid "Limited to showing %d event at most"
@@ -22844,7 +22850,7 @@ msgstr ""
 msgid "Repository storage"
 msgstr ""
 
-msgid "Repository sync capacity"
+msgid "Repository synchronization concurrency limit"
 msgstr ""
 
 msgid "Repository: %{counter_repositories} / Wikis: %{counter_wikis} / Build Artifacts: %{counter_build_artifacts} / LFS: %{counter_lfs_objects} / Snippets: %{counter_snippets}"
@@ -24550,12 +24556,6 @@ msgstr ""
 msgid "Set the milestone to %{milestone_reference}."
 msgstr ""
 
-msgid "Set the number of concurrent requests this secondary node will make to the primary node while backfilling."
-msgstr ""
-
-msgid "Set the synchronization and verification capacity for the secondary node."
-msgstr ""
-
 msgid "Set the timeout in seconds to send a secondary node status to the primary and IPs allowed for the secondary nodes."
 msgstr ""
 
@@ -24598,13 +24598,16 @@ msgstr ""
 msgid "Set up your project to automatically push and/or pull changes to/from another repository. Branches, tags, and commits will be synced automatically."
 msgstr ""
 
+msgid "Set verification limit and frequency."
+msgstr ""
+
 msgid "Set weight"
 msgstr ""
 
 msgid "Set weight to %{weight}."
 msgstr ""
 
-msgid "Set what should be replicated by choosing specific projects or groups by the secondary node."
+msgid "Set what should be replicated by this secondary node."
 msgstr ""
 
 msgid "SetPasswordToCloneLink|set a password"
@@ -26199,6 +26202,9 @@ msgid "Synced"
 msgstr ""
 
 msgid "Synchronization disabled"
+msgstr ""
+
+msgid "Synchronization settings"
 msgstr ""
 
 msgid "Syncing…"
@@ -29626,7 +29632,7 @@ msgstr ""
 msgid "Various settings that affect GitLab performance."
 msgstr ""
 
-msgid "Verification capacity"
+msgid "Verification concurrency limit"
 msgstr ""
 
 msgid "Verification information"
