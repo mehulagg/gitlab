@@ -124,7 +124,7 @@ If you're not an administrator:
 In either case, you should now be able to sign in to your GitLab account
 with your Kerberos credentials.
 
-### Set up GitLab to create a new account for Kerberos users
+### Create accounts on first sign-in
 
 You can let users register for GitLab with their Kerberos accounts.
 Before you continue, read about the following configuration options
