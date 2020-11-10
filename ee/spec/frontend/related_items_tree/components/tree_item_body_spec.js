@@ -213,48 +213,6 @@ describe('RelatedItemsTree', () => {
         });
       });
 
-      describe('stateIconName', () => {
-        it('returns string `issues` when issue `item.state` value is `open`', () => {
-          wrapper.setProps({
-            item: { ...mockItem, state: ChildState.Open },
-          });
-
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconName).toBe('issues');
-          });
-        });
-
-        it('returns string `issue-closed` when issue `item.state` value is `closed`', () => {
-          wrapper.setProps({
-            item: { ...mockItem, state: ChildState.Closed },
-          });
-
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconName).toBe('issue-closed');
-          });
-        });
-
-        it('returns string `epic` when epic `item.state` value is `open`', () => {
-          wrapper.setProps({
-            item: createEpicItem(mockOpenEpic),
-          });
-
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconName).toBe('epic');
-          });
-        });
-
-        it('returns string `epic-closed` when epic `item.state` value is `closed`', () => {
-          wrapper.setProps({
-            item: createEpicItem(mockClosedEpic),
-          });
-
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconName).toBe('epic-closed');
-          });
-        });
-      });
-
       describe('itemId', () => {
         it('returns string containing item id', () => {
           expect(wrapper.vm.itemId).toBe('8');
@@ -284,10 +242,10 @@ describe('RelatedItemsTree', () => {
       });
 
       describe.each`
-        createItem         | itemType   | isEpic   | stateIconName
-        ${createEpicItem}  | ${'epic'}  | ${true}  | ${'epic'}
-        ${createIssueItem} | ${'issue'} | ${false} | ${'issues'}
-      `(`when dependent on item type`, ({ createItem, isEpic, stateIconName, itemType }) => {
+        createItem         | itemType   | isEpic 
+        ${createEpicItem}  | ${'epic'}  | ${true}
+        ${createIssueItem} | ${'issue'} | ${false}
+      `(`when dependent on item type`, ({ createItem, isEpic, itemType }) => {
         beforeEach(() => {
           mockItem = createItem();
           wrapper = createComponent();
@@ -298,12 +256,28 @@ describe('RelatedItemsTree', () => {
             expect(wrapper.vm.isEpic).toBe(isEpic);
           });
         });
+      });
+
+      describe.each`
+        createItem                              | testDesc               | stateIconName
+        ${createEpicItem(mockOpenEpic)}         | ${'epic is `open`'}    | ${'epic'}
+        ${createEpicItem(mockClosedEpic)}       | ${'epic is `closed`'}  | ${'epic-closed'}
+        ${createIssueItem(mockIssue1)}          | ${'issue is `open`'}   | ${'issues'}
+        ${createIssueItem(mockClosedIssue)}     | ${'issue is `closed`'} | ${'issue-closed'}
+      `(`when dependent on item type and state`, ({ createItem, testDesc, stateIconName }) => {
+        beforeEach(() => {
+          mockItem = createItem;
+        });
 
         describe('stateIconName', () => {
-          it(`returns string ${stateIconName}`, async () => {
+          it(`returns string \`${stateIconName}\` when ${testDesc}`, async () => {
+            wrapper.setProps({
+              item: mockItem,
+            });
+
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.vm.stateIconName).toBe(stateIconName);
+            expect(wrapper.vm.stateIconName).toBe(stateIconName); 
           });
         });
       });
