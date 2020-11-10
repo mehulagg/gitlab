@@ -479,7 +479,11 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   def endpoint_metadata_url(project, merge_request)
     params = request.query_parameters
-    params[:view] = cookies[:diff_view] if params[:view].blank? && cookies[:diff_view].present?
+    params[:view] = if Feature.enabled?(:unified_diff_lines, project, default_enabled: true)
+                      'inline'
+                    elsif params[:view].blank? && cookies[:diff_view].present?
+                      cookies[:diff_view]
+                    end
 
     if Feature.enabled?(:default_merge_ref_for_diffs, project)
       params = params.merge(diff_head: true)
