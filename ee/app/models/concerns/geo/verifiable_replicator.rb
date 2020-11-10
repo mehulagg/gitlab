@@ -51,7 +51,7 @@ module Geo
     end
 
     def verify
-      checksum = model_record.calculate_checksum!
+      checksum = model_record.calculate_checksum
       update_verification_state!(checksum: checksum)
     rescue => e
       log_error('Error calculating the checksum', e)

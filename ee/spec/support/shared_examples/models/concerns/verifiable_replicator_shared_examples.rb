@@ -54,7 +54,7 @@ RSpec.shared_examples 'a verifiable replicator' do
     end
 
     it 'calculates the checksum' do
-      expect(model_record).to receive(:calculate_checksum!).and_return('abc123')
+      expect(model_record).to receive(:calculate_checksum).and_return('abc123')
 
       replicator.verify
 
@@ -63,7 +63,7 @@ RSpec.shared_examples 'a verifiable replicator' do
     end
 
     it 'saves the error message and increments retry counter' do
-      allow(model_record).to receive(:calculate_checksum!) do
+      allow(model_record).to receive(:calculate_checksum) do
         raise StandardError.new('Failure to calculate checksum')
       end
 

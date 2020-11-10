@@ -49,7 +49,7 @@ module Gitlab
       # Returns a checksum of the file (assumed to be a "blob" type)
       #
       # @return [String] SHA256 hash of the carrierwave file
-      def calculate_checksum!
+      def calculate_checksum
         return unless checksummable?
 
         self.class.hexdigest(replicator.carrierwave_uploader.path)
