@@ -304,7 +304,7 @@ module IssuablesHelper
       issuePath: project_issue_path(@project, issuable),
       canAddRelatedIssues: can?(current_user, :admin_issue_link, issuable),
       issueLinkEndpoint: can?(current_user, :read_issue_link, @project) ? project_issue_links_path(@project, issuable) : '',
-      relatedIssuesHelpPath: help_page_path('user/project/issues/related_issues')
+      relatedIssuesHelpPath: help_page_path('user/project/issues/related_issues'),
       iid: issuable.iid.to_s
     }
   end
