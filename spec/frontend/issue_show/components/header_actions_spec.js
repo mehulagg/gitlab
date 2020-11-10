@@ -129,15 +129,17 @@ describe('HeaderActions component', () => {
       ${'desktop dropdown'} | ${false}                | ${findDesktopDropdownItems}
     `('$description', ({ isCloseIssueItemVisible, findDropdownItems }) => {
       describe.each`
-        description                               | itemText                | isItemVisible              | canUpdateIssue | canCreateIssue | isIssueAuthor | canReportSpam
-        ${`when user can update ${issueType}`}    | ${`Close ${issueType}`} | ${isCloseIssueItemVisible} | ${true}        | ${true}        | ${true}       | ${true}
-        ${`when user cannot update ${issueType}`} | ${`Close ${issueType}`} | ${false}                   | ${false}       | ${true}        | ${true}       | ${true}
-        ${`when user can create ${issueType}`}    | ${`New ${issueType}`}   | ${true}                    | ${true}        | ${true}        | ${true}       | ${true}
-        ${`when user cannot create ${issueType}`} | ${`New ${issueType}`}   | ${false}                   | ${true}        | ${false}       | ${true}       | ${true}
-        ${'when user can report abuse'}           | ${'Report abuse'}       | ${true}                    | ${true}        | ${true}        | ${false}      | ${true}
-        ${'when user cannot report abuse'}        | ${'Report abuse'}       | ${false}                   | ${true}        | ${true}        | ${true}       | ${true}
-        ${'when user can submit as spam'}         | ${'Submit as spam'}     | ${true}                    | ${true}        | ${true}        | ${true}       | ${true}
-        ${'when user cannot submit as spam'}      | ${'Submit as spam'}     | ${false}                   | ${true}        | ${true}        | ${true}       | ${false}
+        description                               | itemText                | isItemVisible              | canUpdateIssue | canCreateIssue | isIssueAuthor | canReportSpam | canPromoteToEpic
+        ${`when user can update ${issueType}`}    | ${`Close ${issueType}`} | ${isCloseIssueItemVisible} | ${true}        | ${true}        | ${true}       | ${true}       | ${true}
+        ${`when user cannot update ${issueType}`} | ${`Close ${issueType}`} | ${false}                   | ${false}       | ${true}        | ${true}       | ${true}       | ${true}
+        ${`when user can create ${issueType}`}    | ${`New ${issueType}`}   | ${true}                    | ${true}        | ${true}        | ${true}       | ${true}       | ${true}
+        ${`when user cannot create ${issueType}`} | ${`New ${issueType}`}   | ${false}                   | ${true}        | ${false}       | ${true}       | ${true}       | ${true}
+        ${'when user can promote to epic'}        | ${'Promote to epic'}    | ${true}                    | ${true}        | ${true}        | ${true}       | ${true}       | ${true}
+        ${'when user cannot promote to epic'}     | ${'Promote to epic'}    | ${false}                   | ${true}        | ${true}        | ${true}       | ${true}       | ${false}
+        ${'when user can report abuse'}           | ${'Report abuse'}       | ${true}                    | ${true}        | ${true}        | ${false}      | ${true}       | ${true}
+        ${'when user cannot report abuse'}        | ${'Report abuse'}       | ${false}                   | ${true}        | ${true}        | ${true}       | ${true}       | ${true}
+        ${'when user can submit as spam'}         | ${'Submit as spam'}     | ${true}                    | ${true}        | ${true}        | ${true}       | ${true}       | ${true}
+        ${'when user cannot submit as spam'}      | ${'Submit as spam'}     | ${false}                   | ${true}        | ${true}        | ${true}       | ${false}      | ${true}
       `(
         '$description',
         ({
@@ -147,6 +149,7 @@ describe('HeaderActions component', () => {
           canCreateIssue,
           isIssueAuthor,
           canReportSpam,
+          canPromoteToEpic,
         }) => {
           beforeEach(() => {
             wrapper = mountComponent({
@@ -156,6 +159,7 @@ describe('HeaderActions component', () => {
                 isIssueAuthor,
                 issueType,
                 canReportSpam,
+                canPromoteToEpic,
               },
             });
           });

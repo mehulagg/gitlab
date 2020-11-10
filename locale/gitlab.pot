@@ -21698,6 +21698,9 @@ msgstr ""
 msgid "Promote issue to an epic"
 msgstr ""
 
+msgid "Promote to epic"
+msgstr ""
+
 msgid "Promote to group label"
 msgstr ""
 
@@ -25208,6 +25211,9 @@ msgstr ""
 msgid "Something went wrong while performing the action."
 msgstr ""
 
+msgid "Something went wrong while promoting the issue to an epic. Please try again."
+msgstr ""
+
 msgid "Something went wrong while reopening a requirement."
 msgstr ""
 
@@ -26809,6 +26815,9 @@ msgid "The invitation was successfully resent."
 msgstr ""
 
 msgid "The issue stage shows the time it takes from creating an issue to assigning the issue to a milestone, or add the issue to a list on your Issue Board. Begin creating issues to see data for this stage."
+msgstr ""
+
+msgid "The issue was successfully promoted to an epic. Redirecting to epic..."
 msgstr ""
 
 msgid "The license for Deploy Board is required to use this feature."
