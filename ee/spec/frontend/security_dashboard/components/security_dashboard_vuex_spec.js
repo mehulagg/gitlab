@@ -29,7 +29,6 @@ jest.mock('~/lib/utils/url_utility', () => ({
 describe('Security Dashboard component', () => {
   let wrapper;
   let mock;
-  let lockFilterSpy;
   let setPipelineIdSpy;
   let fetchPipelineJobsSpy;
   let store;
@@ -41,7 +40,6 @@ describe('Security Dashboard component', () => {
         SecurityDashboardLayout,
       },
       methods: {
-        lockFilter: lockFilterSpy,
         setPipelineId: setPipelineIdSpy,
         fetchPipelineJobs: fetchPipelineJobsSpy,
       },
@@ -59,7 +57,6 @@ describe('Security Dashboard component', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    lockFilterSpy = jest.fn();
     setPipelineIdSpy = jest.fn();
     fetchPipelineJobsSpy = jest.fn();
     store = createStore();
@@ -89,16 +86,8 @@ describe('Security Dashboard component', () => {
       expect(wrapper.find(VulnerabilityChart).exists()).toBe(true);
     });
 
-    it('does not render the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(false);
-    });
-
-    it('does not lock to a project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(false);
-    });
-
-    it('does not lock project filters', () => {
-      expect(lockFilterSpy).not.toHaveBeenCalled();
+    it('renders the vulnerability count list', () => {
+      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(true);
     });
 
     it('sets the pipeline id', () => {
@@ -175,32 +164,6 @@ describe('Security Dashboard component', () => {
         expect(wrapper.find(IssueModal).props()).toStrictEqual(expectedProps);
       },
     );
-  });
-
-  describe('with project lock', () => {
-    const project = {
-      id: 123,
-    };
-    beforeEach(() => {
-      createComponent({
-        lockToProject: project,
-      });
-    });
-
-    it('renders the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(true);
-    });
-
-    it('locks to a given project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(true);
-    });
-
-    it('locks the filters to a given project', () => {
-      expect(lockFilterSpy).toHaveBeenCalledWith({
-        filterId: 'project_id',
-        optionId: project.id,
-      });
-    });
   });
 
   describe.each`

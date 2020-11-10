@@ -14,7 +14,7 @@ export default store => {
       // want to preserve the page number that was set in the sync_with_router plugin
       case `filters/${filtersMutationTypes.SET_ALL_FILTERS}`:
         refreshVulnerabilities({
-          ...store.getters['filters/activeFilters'],
+          ...store.state.filters.filters,
           page: store.state.vulnerabilities.pageInfo.page,
         });
         break;
@@ -24,7 +24,7 @@ export default store => {
       case `filters/${filtersMutationTypes.SET_FILTER}`:
       case `filters/${filtersMutationTypes.SET_TOGGLE_VALUE}`: {
         if (!payload.lazy) {
-          refreshVulnerabilities(store.getters['filters/activeFilters']);
+          refreshVulnerabilities(store.state.filters.filters);
         }
         break;
       }

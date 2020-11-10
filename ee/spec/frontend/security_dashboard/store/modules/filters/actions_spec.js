@@ -2,7 +2,6 @@ import testAction from 'helpers/vuex_action_helper';
 import createState from 'ee/security_dashboard/store/modules/filters/state';
 import * as types from 'ee/security_dashboard/store/modules/filters/mutation_types';
 import * as actions from 'ee/security_dashboard/store/modules/filters/actions';
-import { ALL } from 'ee/security_dashboard/store/modules/filters/constants';
 import Tracking from '~/tracking';
 import { getParameterValues } from '~/lib/utils/url_utility';
 
@@ -27,7 +26,7 @@ describe('filters actions', () => {
         [
           {
             type: types.SET_FILTER,
-            payload: { ...payload, lazy: false },
+            payload,
           },
         ],
         [],
@@ -46,101 +45,6 @@ describe('filters actions', () => {
         [
           {
             type: types.SET_FILTER,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('setFilterOptions', () => {
-    it('should commit the SET_FILTER_OPTIONS mutuation', done => {
-      const state = createState();
-      const payload = { filterId: 'project_id', options: [{ id: ALL }] };
-
-      testAction(
-        actions.setFilterOptions,
-        payload,
-        state,
-        [
-          {
-            type: types.SET_FILTER_OPTIONS,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-
-    it('should commit the SET_FILTER_OPTIONS and SET_FILTER mutation when filter selection is invalid', done => {
-      const state = createState();
-      const payload = { filterId: 'project_id', options: [{ id: 'foo' }] };
-
-      testAction(
-        actions.setFilterOptions,
-        payload,
-        state,
-        [
-          {
-            type: types.SET_FILTER_OPTIONS,
-            payload,
-          },
-          {
-            type: types.SET_FILTER,
-            payload: expect.objectContaining({
-              filterId: 'project_id',
-              optionId: ALL,
-            }),
-          },
-        ],
-        [],
-        done,
-      );
-    });
-
-    it('should commit the SET_FILTER_OPTIONS and SET_FILTER mutation when filter selection is invalid, passing the lazy flag', done => {
-      const state = createState();
-      const payload = { filterId: 'project_id', options: [{ id: 'foo' }] };
-
-      testAction(
-        actions.setFilterOptions,
-        { ...payload, lazy: true },
-        state,
-        [
-          {
-            type: types.SET_FILTER_OPTIONS,
-            payload,
-          },
-          {
-            type: types.SET_FILTER,
-            payload: {
-              filterId: 'project_id',
-              optionId: ALL,
-              lazy: true,
-            },
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('setAllFilters', () => {
-    it('should commit the SET_ALL_FILTERS mutuation', done => {
-      const state = createState();
-      const payload = { project_id: ['12', '15'] };
-
-      testAction(
-        actions.setAllFilters,
-        payload,
-        state,
-        [
-          {
-            type: types.SET_ALL_FILTERS,
             payload,
           },
         ],

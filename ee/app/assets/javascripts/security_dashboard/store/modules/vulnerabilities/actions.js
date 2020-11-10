@@ -1,8 +1,12 @@
 import $ from 'jquery';
-import _ from 'lodash';
+import { uniqueId, mapValues } from 'lodash';
 import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
-import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import {
+  parseIntPagination,
+  normalizeHeaders,
+  convertObjectPropsToSnakeCase,
+} from '~/lib/utils/common_utils';
 import { s__, n__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
@@ -73,10 +77,16 @@ export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
   }
   dispatch('requestVulnerabilities');
 
+  // Convert the keys to snake case and the values to lower case if they're in an array. This is
+  // a requirement of the API endpoint.
+  const requestParams = mapValues(convertObjectPropsToSnakeCase(params), value =>
+    Array.isArray(value) ? value.map(element => element.toLowerCase()) : value,
+  );
+
   axios({
     method: 'GET',
     url: state.vulnerabilitiesEndpoint,
-    params,
+    params: requestParams,
   })
     .then(response => {
       const { headers, data } = response;
@@ -98,7 +108,7 @@ export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => 
   // We need to add dummy IDs here to avoid rendering issues.
   const vulnerabilities = data.map(vulnerability => ({
     ...vulnerability,
-    id: vulnerability.id || _.uniqueId('client_'),
+    id: vulnerability.id || uniqueId('client_'),
   }));
 
   commit(types.RECEIVE_VULNERABILITIES_SUCCESS, { pageInfo, vulnerabilities });

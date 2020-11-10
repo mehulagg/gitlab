@@ -1,6 +1,5 @@
 import * as types from './mutation_types';
 import { ALL } from './constants';
-import { setFilter } from './utils';
 
 export default {
   [types.SET_ALL_FILTERS](state, payload = {}) {
@@ -21,8 +20,8 @@ export default {
     });
     state.hideDismissed = payload.scope !== 'all';
   },
-  [types.SET_FILTER](state, payload) {
-    state.filters = setFilter(state.filters, payload);
+  [types.SET_FILTER](state, filter) {
+    state.filters = { ...state.filters, ...filter };
   },
   [types.SET_FILTER_OPTIONS](state, payload) {
     const { filterId, options } = payload;
