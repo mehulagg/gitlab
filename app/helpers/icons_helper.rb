@@ -8,6 +8,14 @@ module IconsHelper
 
   DEFAULT_ICON_SIZE = 16
 
+  def memoized_icon(key)
+    @rendered_icons ||= {}
+
+    @rendered_icons[key] || (
+      @rendered_icons[key] = yield
+    )
+  end
+
   # Creates an icon tag given icon name(s) and possible icon modifiers.
   #
   # Right now this method simply delegates directly to `fa_icon` from the
@@ -24,9 +32,11 @@ module IconsHelper
   end
 
   def custom_icon(icon_name, size: DEFAULT_ICON_SIZE)
-    # We can't simply do the below, because there are some .erb SVGs.
-    #  File.read(Rails.root.join("app/views/shared/icons/_#{icon_name}.svg")).html_safe
-    render "shared/icons/#{icon_name}.svg", size: size
+    memoized_icon("#{icon_name}_#{size}") do
+      # We can't simply do the below, because there are some .erb SVGs.
+      #  File.read(Rails.root.join("app/views/shared/icons/_#{icon_name}.svg")).html_safe
+      render "shared/icons/#{icon_name}.svg", size: size
+    end
   end
 
   def sprite_icon_path
@@ -46,21 +56,23 @@ module IconsHelper
   end
 
   def sprite_icon(icon_name, size: DEFAULT_ICON_SIZE, css_class: nil)
-    if known_sprites&.exclude?(icon_name)
-      exception = ArgumentError.new("#{icon_name} is not a known icon in @gitlab-org/gitlab-svg")
-      Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception)
+    memoized_icon("#{icon_name}_#{size}_#{css_class}") do
+      if known_sprites&.exclude?(icon_name)
+        exception = ArgumentError.new("#{icon_name} is not a known icon in @gitlab-org/gitlab-svg")
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception)
+      end
+
+      css_classes = []
+      css_classes << "s#{size}" if size
+      css_classes << "#{css_class}" unless css_class.blank?
+
+      content_tag(
+        :svg,
+        content_tag(:use, '', { 'xlink:href' => "#{sprite_icon_path}##{icon_name}" } ),
+        class: css_classes.empty? ? nil : css_classes.join(' '),
+        data: { testid: "#{icon_name}-icon" }
+      )
     end
-
-    css_classes = []
-    css_classes << "s#{size}" if size
-    css_classes << "#{css_class}" unless css_class.blank?
-
-    content_tag(
-      :svg,
-      content_tag(:use, '', { 'xlink:href' => "#{sprite_icon_path}##{icon_name}" } ),
-      class: css_classes.empty? ? nil : css_classes.join(' '),
-      data: { testid: "#{icon_name}-icon" }
-    )
   end
 
   def loading_icon(container: false, color: 'orange', size: 'sm', css_class: nil)
