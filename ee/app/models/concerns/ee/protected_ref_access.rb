@@ -44,20 +44,15 @@ module EE
       end
     end
 
+    override :type
     def type
       if self.user.present?
         :user
       elsif self.group.present?
         :group
       else
-        :role
+        super
       end
-    end
-
-    # Is this a role-based access level?
-    override :role?
-    def role?
-      type == :role
     end
 
     override :humanize
