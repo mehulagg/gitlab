@@ -95,7 +95,9 @@ RSpec.describe RegistrationsController do
         end
 
         it 'does not email the approvers' do
-          expect { subject }.not_to have_enqueued_mail(NotificationService, :new_instance_access_request)
+          expect(NotificationService).not_to receive(:new)
+
+          subject
         end
 
         context 'email confirmation' do

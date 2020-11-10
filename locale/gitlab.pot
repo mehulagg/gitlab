@@ -5487,6 +5487,9 @@ msgstr ""
 msgid "Clears weight."
 msgstr ""
 
+msgid "Click %{link_start}here%{link_end} to view the request."
+msgstr ""
+
 msgid "Click %{link_to} to view the request."
 msgstr ""
 
@@ -9900,6 +9903,9 @@ msgid "Email the pipelines status to a list of recipients."
 msgstr ""
 
 msgid "Email updates (optional)"
+msgstr ""
+
+msgid "Email: %{email}"
 msgstr ""
 
 msgid "EmailError|It appears that the email is blank. Make sure your reply is at the top of the email, we can't process inline replies."
@@ -29351,6 +29357,9 @@ msgstr ""
 msgid "Username or email"
 msgstr ""
 
+msgid "Username: %{username}"
+msgstr ""
+
 msgid "Users"
 msgstr ""
 
@@ -31725,9 +31734,6 @@ msgid "has already been taken"
 msgstr ""
 
 msgid "help"
-msgstr ""
-
-msgid "here"
 msgstr ""
 
 msgid "http:"

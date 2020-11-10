@@ -225,8 +225,8 @@ module EmailsHelper
 
     case format
     when :html
-      link_to = generate_link(_("here"), url).html_safe
-      _('Click %{link_to} to view the request.').html_safe % { link_to: link_to }
+      user_page = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: url }
+      _("Click %{link_start}here%{link_end} to view the request.").html_safe % { link_start: user_page, link_end: '</a>'.html_safe }
     else
       _('Click %{link_to} to view the request.') % { link_to: url }
     end

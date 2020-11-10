@@ -370,13 +370,15 @@ class NotificationService
     end
   end
 
-  def new_instance_access_request(member)
+  def new_instance_access_request(user)
+    return true unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+
     recipients = User.instance_access_request_approvers_to_be_notified # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
 
     return true if recipients.empty?
 
     recipients.each do |recipient|
-      mailer.instance_access_request_email(member, recipient).deliver_later
+      mailer.instance_access_request_email(user, recipient).deliver_later
     end
   end
 

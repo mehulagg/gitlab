@@ -9,8 +9,8 @@ module Emails
       mail(to: @user.notification_email, subject: subject("Account was created for you"))
     end
 
-    def instance_access_request_email(member, recipient)
-      @member = member
+    def instance_access_request_email(user, recipient)
+      @user = user
       @recipient = recipient
 
       profile_email_with_layout(
