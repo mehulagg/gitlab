@@ -3,6 +3,7 @@
 - @content_class = "limit-container-width" unless fluid_layout
 - gravatar_link = link_to Gitlab.config.gravatar.host, 'https://' + Gitlab.config.gravatar.host
 - availability = availability_values
+- custom_emoji = has_custom_status_emoji?(@user)
 
 = bootstrap_form_for @user, url: profile_path, method: :put, html: { multipart: true, class: 'edit-user gl-mt-3 js-quick-submit gl-show-field-errors' }, authenticity_token: true do |f|
   = form_errors(@user)
@@ -49,9 +50,9 @@
         - emoji_button = button_tag type: :button,
           class: 'js-toggle-emoji-menu emoji-menu-toggle-button gl-button btn has-tooltip',
           title: s_("Profiles|Add status emoji") do
-          - if has_custom_status_emoji?
+          - if custom_emoji
             = emoji_icon @user.status.emoji
-          %span#js-no-emoji-placeholder.no-emoji-placeholder{ class: ('hidden' if has_custom_status_emoji?) }
+          %span#js-no-emoji-placeholder.no-emoji-placeholder{ class: ('hidden' if custom_emoji) }
             = sprite_icon('slight-smile', css_class: 'award-control-icon-neutral')
             = sprite_icon('smiley', css_class: 'award-control-icon-positive')
             = sprite_icon('smile', css_class: 'award-control-icon-super-positive')

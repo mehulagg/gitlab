@@ -29,6 +29,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
+    defaultEmoji: {
+      type: String,
+      required: false,
+      default: '',
+    },
     currentEmoji: {
       type: String,
       required: true,
@@ -58,8 +63,11 @@ export default {
     };
   },
   computed: {
+    isCustomEmoji() {
+      return this?.emoji !== this.defaultEmoji;
+    },
     isDirty() {
-      return this.message.length || this.emoji.length;
+      return Boolean(this.message.length || this.isCustomEmoji);
     },
   },
   mounted() {
@@ -83,7 +91,7 @@ export default {
             this.emojiTag = Emoji.glEmojiTag(this.emoji);
           }
           this.noEmoji = this.emoji === '';
-          this.defaultEmojiTag = Emoji.glEmojiTag('speech_balloon');
+          this.defaultEmojiTag = Emoji.glEmojiTag(this.defaultEmoji);
 
           this.emojiMenu = new EmojiMenuInModal(
             Emoji,
@@ -92,6 +100,7 @@ export default {
             this.setEmoji,
             this.$refs.userStatusForm,
           );
+          this.setDefaultEmoji();
         })
         .catch(() => createFlash(__('Failed to load emoji list.')));
     },
@@ -110,7 +119,7 @@ export default {
     },
     setDefaultEmoji() {
       const { emojiTag } = this;
-      const hasStatusMessage = this.message;
+      const hasStatusMessage = Boolean(this.message.length);
       if (hasStatusMessage && emojiTag) {
         return;
       }
@@ -138,11 +147,11 @@ export default {
       this.emoji = '';
       this.message = '';
       this.noEmoji = true;
-      this.availability = false;
       this.clearEmoji();
       this.hideEmojiMenu();
     },
     removeStatus() {
+      this.availability = false;
       this.clearStatusInputs();
       this.setStatus();
     },

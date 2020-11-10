@@ -34,9 +34,13 @@ module ProfilesHelper
     Types::AvailabilityEnum.enum
   end
 
-  def has_custom_status_emoji?
+  def has_custom_status_emoji?(user)
     # the default emoji is set when we update either the emoji field or message field
     # if there is no message and the emoji is "speech_balloon" we are using the default
-    @user.status && (@user.status.message.present? || @user.status.emoji != UserStatus::DEFAULT_EMOJI)
+    user.status && (user.status.message.present? || user.status.emoji != UserStatus::DEFAULT_EMOJI)
+  end
+
+  def default_emoji
+    UserStatus::DEFAULT_EMOJI
   end
 end

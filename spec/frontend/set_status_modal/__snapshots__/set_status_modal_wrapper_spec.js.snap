@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SetStatusModalWrapper should mount 1`] = `
+"<gl-modal-stub modalid=\\"set-user-status-modal\\" titletag=\\"h4\\" modalclass=\\"set-user-status-modal\\" size=\\"md\\" title=\\"Set a status\\" ok-title=\\"Set status\\" cancel-title=\\"Remove status\\" ok-variant=\\"success\\">
+  <div><input type=\\"hidden\\" name=\\"user[status][emoji]\\" class=\\"js-status-emoji-field\\" value=\\"speech_balloon\\">
+    <div class=\\"form-group position-relative m-0\\">
+      <div class=\\"input-group\\"><span class=\\"input-group-prepend\\"><button title=\\"Add status emoji\\" aria-label=\\"Add status emoji\\" name=\\"button\\" type=\\"button\\" class=\\"js-toggle-emoji-menu emoji-menu-toggle-button btn\\"><span></span> <span class=\\"js-no-emoji-placeholder no-emoji-placeholder position-relative\\"><gl-icon-stub name=\\"slight-smile\\" size=\\"16\\" class=\\"award-control-icon-neutral\\"></gl-icon-stub> <gl-icon-stub name=\\"smiley\\" size=\\"16\\" class=\\"award-control-icon-positive\\"></gl-icon-stub> <gl-icon-stub name=\\"smile\\" size=\\"16\\" class=\\"award-control-icon-super-positive\\"></gl-icon-stub></span></button></span> <input placeholder=\\"What's your status?\\" type=\\"text\\" name=\\"user[status][message]\\" class=\\"form-control form-control input-lg js-status-message-field\\"> <span class=\\"input-group-append\\"><button title=\\"Clear status\\" aria-label=\\"Clear status\\" name=\\"button\\" type=\\"button\\" class=\\"js-clear-user-status-button clear-user-status btn\\"><gl-icon-stub name=\\"close\\" size=\\"16\\"></gl-icon-stub></button></span></div>
+      <div class=\\"form-group gl-my-2\\">
+        <div class=\\"gl-display-flex\\"><label class=\\"form-control-inline\\"><input data-testid=\\"user-availability-checkbox\\" type=\\"checkbox\\" name=\\"user[status][availability]\\" placeholder=\\"Busy\\">
+            Busy
+          </label></div>
+        <div class=\\"gl-display-flex\\"><span class=\\"gl-text-gray-600 gl-ml-4\\">
+            \\"Busy\\" will be shown next to your name
+          </span></div>
+      </div>
+    </div>
+  </div>
+</gl-modal-stub>"
+`;
