@@ -14,7 +14,7 @@ For broader information about the documentation, see the [Documentation guidelin
 
 For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
 
-For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](index.md#testing).
+For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](../index.md#testing).
 
 Use this guide for standards on grammar, formatting, word usage, and more.
 
@@ -166,7 +166,7 @@ all markup supported for display in the GitLab application itself. For now, use
 regular Markdown markup, following the rules in the linked style guide.
 
 Note that Kramdown-specific markup (for example, `{:.class}`) doesn't render
-properly on GitLab instances under [`/help`](index.md#gitlab-help).
+properly on GitLab instances under [`/help`](../index.md#gitlab-help).
 
 ### HTML in Markdown
 
@@ -181,8 +181,8 @@ have `/help`. HTML is permitted if:
 ### Markdown Rules
 
 GitLab ensures that the Markdown used across all documentation is consistent, as
-well as easy to review and maintain, by [testing documentation changes](index.md#testing)
-with [markdownlint](index.md#markdownlint). This lint test fails when any
+well as easy to review and maintain, by [testing documentation changes](../index.md#testing)
+with [markdownlint](../index.md#markdownlint). This lint test fails when any
 document has an issue with Markdown formatting that may cause the page to render
 incorrectly within GitLab. It will also fail when a document is using
 non-standard Markdown (which may render correctly, but is not the current
@@ -1069,7 +1069,7 @@ To link to internal documentation:
   - `../../issues/tags.md#stages`
 
 NOTE: **Note:**
-Using the Markdown extension is necessary for the [`/help`](index.md#gitlab-help)
+Using the Markdown extension is necessary for the [`/help`](../index.md#gitlab-help)
 section of GitLab.
 
 ### Links to external documentation
