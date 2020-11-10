@@ -18,10 +18,10 @@ With the Go proxy for GitLab, every project in GitLab can be fetched with the
 
 ## Enable the Go proxy
 
-The Go proxy for GitLab is under development and not ready for production use, due to
-[potential performance issues with large repositories](https://gitlab.com/gitlab-org/gitlab/-/issues/218083).
+The Go proxy for GitLab is under development and not ready for production use,
+due to [potential performance issues with large repositories](https://gitlab.com/gitlab-org/gitlab/-/issues/218083).
 
-It is deployed behind a feature flag that is **disabled by default**.
+It is deployed behind a feature flag that is _disabled by default_.
 
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
 can enable it for your instance.
@@ -46,8 +46,9 @@ Feature.disable(:go_proxy, Project.find(2))
 ```
 
 NOTE: **Note:**
-Even if it is enabled, GitLab does not display Go modules in the **Package Registry**.
-Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213770) for details.
+Even if it's enabled, GitLab doesn't display Go modules in the **Package Registry**.
+Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213770) for
+details.
 
 ## Add GitLab as a Go proxy
 
@@ -70,19 +71,20 @@ With this configuration, Go fetches dependencies in this order:
 1. Go fetches directly with version control system operations (like `git clone`,
    `svn checkout`, and so on).
 
-If `GOPROXY` is not specified, Go follows steps 2 and 3, which corresponds to
+If `GOPROXY` isn't specified, Go follows steps 2 and 3, which corresponds to
 setting `GOPROXY` to `https://proxy.golang.org,direct`. If `GOPROXY`
-contains only the project-specific endpoint, Go only queries that endpoint.
+contains only the project-specific endpoint, Go queries only that endpoint.
 
-For details on setting Go environment variables, see [Set environment variables](#set-environment-variables).
+For details about how to set Go environment variables, see
+[Set environment variables](#set-environment-variables).
 
 For details on configuring `GOPROXY`, see
 [Dependency Management in Go > Proxies](../../../development/go_guide/dependencies.md#proxies).
 
 ## Fetch modules from private projects
 
-`go` does not support transmitting credentials over insecure connections. The
-steps below work only if GitLab is configured for HTTPS.
+`go` doesn't support transmitting credentials over insecure connections. The
+following steps work only if GitLab is configured for HTTPS:
 
 1. Configure Go to include HTTP basic authentication credentials when fetching
    from the Go proxy for GitLab.
@@ -100,27 +102,29 @@ Add it to [`~/.netrc`](https://ec.haxx.se/usingcurl/usingcurl-netrc):
 machine <url> login <username> password <token>
 ```
 
-- `<url>` is be the GitLab URL, for example `gitlab.com`.
-- `<username>` is your username.
-- `<token>` is your personal access token.
+- `<url>`: The GitLab URL, for example `gitlab.com`.
+- `<username>`: Your username.
+- `<token>`: Your personal access token.
 
 ### Disable checksum database queries
 
-When downloading dependencies, in Go 1.13 and later, fetched
-sources are validated against the checksum database `sum.golang.org`.
+When downloading dependencies with Go 1.13 and later, fetched sources are
+validated against the checksum database `sum.golang.org`.
 
-If the checksum of the fetched sources does not match the checksum
-from the database, Go does not build the dependency. 
+If the checksum of the fetched sources doesn't match the checksum from the
+database, Go doesn't build the dependency. 
 
-Private modules fail to build, because `sum.golang.org` cannot fetch the source
-of private modules and so cannot provide a checksum.
+Private modules fail to build because `sum.golang.org` can't fetch the source
+of private modules, and so it cannot provide a checksum.
 
-To resolve this issue, set `GONOSUMDB` to a comma-separated list of private projects.
-For details on setting Go environment variables, see [Set environment variables](#set-environment-variables).
-For more details on disabling this feature of Go, see
+To resolve this issue, set `GONOSUMDB` to a comma-separated list of private
+projects. For details about setting Go environment variables, see
+[Set environment variables](#set-environment-variables). For more details about
+disabling this feature of Go, see
 [Dependency Management in Go > Checksums](../../../development/go_guide/dependencies.md#checksums).
 
-For example, to disable checksum queries for `gitlab.com/my/project`, set `GONOSUMDB`:
+For example, to disable checksum queries for `gitlab.com/my/project`, set
+`GONOSUMDB`:
 
 ```shell
 go env -w GONOSUMDB='gitlab.com/my/project,<previous value>'
@@ -128,8 +132,8 @@ go env -w GONOSUMDB='gitlab.com/my/project,<previous value>'
 
 ## Working with Go
 
-If you are unfamiliar with managing dependencies in Go, or Go in general,
-review the following documentation:
+If you're unfamiliar with managing dependencies in Go, or Go in general, review
+the following documentation:
 
 - [Dependency Management in Go](../../../development/go_guide/dependencies.md)
 - [Go Modules Reference](https://golang.org/ref/mod)
@@ -139,8 +143,9 @@ review the following documentation:
 ### Set environment variables
 
 Go uses environment variables to control various features. You can manage these
-variables in all the usual ways. However, Go 1.14 reads and writes Go environment variables
-to and from a special Go environment file, `~/.go/env` by default.
+variables in all the usual ways. However, Go 1.14 reads and writes Go
+environment variables to and from a special Go environment file, `~/.go/env` by
+default.
 
 - If `GOENV` is set to a file, Go reads and writes to and from that file instead.
 - If `GOENV` is not set but `GOPATH` is set, Go reads and writes `$GOPATH/env`.
@@ -152,11 +157,11 @@ later, can be written with `go env -w <var>=<value>`. For example,
 ### Release a module
 
 Go modules and module versions are defined by source repositories, such as Git,
-SVN, Mercurial, and so on. A module is a repository that contains `go.mod` and Go
+SVN, and Mercurial. A module is a repository that contains `go.mod` and Go
 files. Module versions are defined by VCS tags.
 
-To publish a module, push `go.mod` and source files to a VCS repository.
-To publish a module version, push a VCS tag.
+To publish a module, push `go.mod` and source files to a VCS repository. To
+publish a module version, push a VCS tag.
 
 See [Dependency Management in Go > Versioning](../../../development/go_guide/dependencies.md#versioning)
-for more details on what constitutes a valid module or module version.
+for more details about what constitutes a valid module or module version.
