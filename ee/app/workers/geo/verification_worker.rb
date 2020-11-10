@@ -14,7 +14,7 @@ module Geo
     def perform(replicable_name, replicable_id)
       replicator = ::Gitlab::Geo::Replicator.for_replicable_params(replicable_name: replicable_name, replicable_id: replicable_id)
 
-      replicator.calculate_checksum!
+      replicator.verify
     rescue ActiveRecord::RecordNotFound
       log_error("Couldn't find the record, skipping", replicable_name: replicable_name, replicable_id: replicable_id)
     end

@@ -9,11 +9,11 @@ RSpec.describe Geo::VerificationWorker, :geo do
   let(:job_args) { ['package_file', package_file.id] }
 
   describe '#perform' do
-    it 'calls calculate_checksum!' do
+    it 'calls verify' do
       replicator = double(:replicator)
       allow(::Gitlab::Geo::Replicator).to receive(:for_replicable_params).with(replicable_name: 'package_file', replicable_id: package_file.id).and_return(replicator)
 
-      expect(replicator).to receive(:calculate_checksum!)
+      expect(replicator).to receive(:verify)
 
       described_class.new.perform(*job_args)
     end

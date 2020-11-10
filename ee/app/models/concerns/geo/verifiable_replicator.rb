@@ -50,7 +50,7 @@ module Geo
       schedule_checksum_calculation if needs_checksum?
     end
 
-    def calculate_checksum!
+    def verify
       checksum = model_record.calculate_checksum!
       update_verification_state!(checksum: checksum)
     rescue => e
