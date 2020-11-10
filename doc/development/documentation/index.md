@@ -187,7 +187,8 @@ To add a redirect:
 
       This document was moved to [another location](../path/to/file/index.md).
 
-      <!-- This redirect file can be removed after: YYYY-MM-DD -->
+      <!-- This redirect file can be deleted after <month day, year>. -->
+      <!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->
       ```
 
       Redirect files linking to docs in any of the 4 internal docs projects can be
