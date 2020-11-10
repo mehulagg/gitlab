@@ -38,6 +38,8 @@ module DiffHelper
 
   def cached_diff_lines(diff_file)
     lines = Rails.cache.fetch [:diff_lines, diff_file.cache_key], expires_in: 1.week do
+      puts "Cache miss for diff lines"
+
       diff_file.highlighted_diff_lines.map do |line|
         render(
           partial: "projects/diffs/cacheable_line",
@@ -46,7 +48,7 @@ module DiffHelper
       end
     end
 
-    discussions = diff_file.highlighted_diff_lines.map do |line|
+    discussions = diff_file.diff_lines.map do |line|
       if @grouped_diff_discussions[diff_file.line_code(line)]&.any?
         render(
           partial: "projects/diffs/line_discussions",
@@ -55,7 +57,7 @@ module DiffHelper
       end
     end
 
-    lines.zip(discussions).map(&:join).join.html_safe
+    lines.zip(discussions).map!(&:join).join.html_safe
   end
 
   def diff_match_line(old_pos, new_pos, text: '', view: :inline, bottom: false)
