@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# This is included by BlobReplicatorStrategy and RepositoryReplicatorStrategy.
+# This should be included on any Replicator which implements verification.
 #
 RSpec.shared_examples 'a verifiable replicator' do
   include EE::GeoHelpers
