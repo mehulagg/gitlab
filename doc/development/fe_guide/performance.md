@@ -118,6 +118,8 @@ browser's developer console while on any page within GitLab.
   waitForCSSLoaded(initMyWidget);
   ```
 
+  Note that `waitForCSSLoaded()` supports receiving the action in different ways as explained [here](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/helpers/startup_css_helper.js#L23).
+
 - **Supporting Module Placement:**
   - If a class or a module is _specific to a particular route_, try to locate
     it close to the entry point it will be used. For instance, if
