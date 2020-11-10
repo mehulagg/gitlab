@@ -40,8 +40,8 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#after_verifiable_update' do
-    it 'schedules the checksum calculation if needed' do
-      expect(replicator).to receive(:schedule_checksum_calculation)
+    it 'calls verify_async if needed' do
+      expect(replicator).to receive(:verify_async)
       expect(replicator).to receive(:needs_checksum?).and_return(true)
 
       replicator.after_verifiable_update
