@@ -11,6 +11,7 @@ import {
   GlSprintf,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Tracking from '~/tracking';
 import { trackAlertIntegrationsViewsOptions, integrationToDeleteDefault } from '../constants';
 
@@ -47,6 +48,7 @@ export default {
     GlTooltip: GlTooltipDirective,
     GlModal: GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     integrations: {
       type: Array,
@@ -148,7 +150,7 @@ export default {
       </template>
 
       <template #cell(actions)="{ item }">
-        <gl-button-group>
+        <gl-button-group v-if="glFeatures.httpIntegrationsList">
           <gl-button icon="pencil" @click="$emit('edit-integration', { id: item.id })" />
           <gl-button
             v-gl-modal.deleteIntegration
