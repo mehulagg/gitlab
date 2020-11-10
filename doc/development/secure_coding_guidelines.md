@@ -521,7 +521,7 @@ There are some cases where `users` passed in the code is actually referring to a
       end
 ```
 
-### Past vulnerable code
+### Past Vulnerable Code
 
 In some scenarios such as [this one](https://gitlab.com/gitlab-org/gitlab/-/issues/237795), user impersonation is possible because a `DeployToken` ID can be used in place of a `User` ID. This happened because there was no check on the line with `Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)`. In this case, the `id` is actually a `DeployToken` ID instead of a `User` ID.
 
@@ -536,8 +536,23 @@ In some scenarios such as [this one](https://gitlab.com/gitlab-org/gitlab/-/issu
         unless api_access_allowed?(user)
           forbidden!(api_access_denied_message(user))
         end
-
 ```
 
+
 ### Best Practices
-In order to prevent this from happening, it is recommended to use the method `user.is_a?(User)` to make sure it returns `true` when we are expecting to deal with a `User` object. This could prevent the ID confusion from the method `find_user_from_sources` mentioned above.
+In order to prevent this from happening, it is recommended to use the method `user.is_a?(User)` to make sure it returns `true` when we are expecting to deal with a `User` object. This could prevent the ID confusion from the method `find_user_from_sources` mentioned above. Below code snippet shows the fixed code after applying the best practice to the vulnerable code above.
+
+```ruby
+      def find_current_user!
+        user = find_user_from_sources
+        return unless user
+
+        if user.is_a?(User) && Feature.enabled?(:user_mode_in_session)
+          # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
+          Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)
+        end
+
+        unless api_access_allowed?(user)
+          forbidden!(api_access_denied_message(user))
+        end
+```
