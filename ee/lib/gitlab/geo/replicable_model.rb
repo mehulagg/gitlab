@@ -48,13 +48,10 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      # Clear model verification checksum and force recalculation
       def calculate_checksum!
-        self.verification_checksum = nil
+        return unless checksummable?
 
-        return unless needs_checksum?
-
-        self.verification_checksum = self.class.hexdigest(replicator.carrierwave_uploader.path)
+        self.class.hexdigest(replicator.carrierwave_uploader.path)
       end
 
       # Checks whether model needs checksum to be performed
