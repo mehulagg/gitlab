@@ -3,15 +3,9 @@
 require 'spec_helper'
 
 RSpec.shared_examples 'Signup name validation' do |field, max_length, label|
-
-  before(:all) do
-    stub_application_setting(require_admin_approval_after_user_signup: false)
-  end
-
   before do
     visit new_user_registration_path
   end
-
 
   describe "#{field} validation", :js do
     it "does not show an error border if the user's fullname length is not longer than #{max_length} characters" do
@@ -340,6 +334,13 @@ RSpec.describe 'Signup' do
     expect(page).to have_current_path(new_project_path)
   end
 
-  it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
-  it_behaves_like 'Signup name validation', 'new_user_last_name', 127, 'Last name'
+  context 'testing' do
+
+    before do
+      stub_application_setting(require_admin_approval_after_user_signup: false)
+    end
+
+    it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
+    it_behaves_like 'Signup name validation', 'new_user_last_name', 127, 'Last name'
+  end
 end
