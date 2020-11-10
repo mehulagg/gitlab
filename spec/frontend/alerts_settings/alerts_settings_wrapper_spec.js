@@ -329,7 +329,7 @@ describe('AlertsSettingsWrapper', () => {
       expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
     });
 
-    it('shows an error alert when integration test payload fails ', () => {
+    it('shows an error alert when integration test payload fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -338,9 +338,9 @@ describe('AlertsSettingsWrapper', () => {
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('test-payload-failure');
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
-      });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
+      expect(createFlash).toHaveBeenCalledTimes(1);
     });
   });
 

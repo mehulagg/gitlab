@@ -2692,9 +2692,6 @@ msgstr ""
 msgid "AlertsIntegrations|The integration has been successfully saved. Alerts from this new integration should now appear on your alerts list."
 msgstr ""
 
-msgid "AlertsIntegrations|The integration payload test has failed, however you can still save your changes."
-msgstr ""
-
 msgid "AlertsIntegrations|The integration token could not be reset. Please try again."
 msgstr ""
 
