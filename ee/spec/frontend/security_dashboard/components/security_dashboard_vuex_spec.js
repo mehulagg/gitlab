@@ -194,13 +194,6 @@ describe('Security Dashboard component', () => {
     it('locks to a given project', () => {
       expect(wrapper.vm.isLockedToProject).toBe(true);
     });
-
-    it('locks the filters to a given project', () => {
-      expect(lockFilterSpy).toHaveBeenCalledWith({
-        filterId: 'project_id',
-        optionId: project.id,
-      });
-    });
   });
 
   describe.each`

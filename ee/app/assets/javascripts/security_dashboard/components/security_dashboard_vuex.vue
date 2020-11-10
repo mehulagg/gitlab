@@ -43,12 +43,6 @@ export default {
       required: false,
       default: '',
     },
-    lockToProject: {
-      type: Object,
-      required: false,
-      default: null,
-      validator: project => !isUndefined(project.id),
-    },
     pipelineId: {
       type: Number,
       required: false,
@@ -70,7 +64,7 @@ export default {
       'isCreatingMergeRequest',
     ]),
     ...mapState('pipelineJobs', ['projectId']),
-    ...mapGetters('filters', ['activeFilters']),
+    ...mapState('filters', ['filters']),
     ...mapGetters('vulnerabilities', ['loadingVulnerabilitiesFailedWithRecognizedErrorCode']),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     canCreateIssue() {
@@ -88,9 +82,6 @@ export default {
     vulnerability() {
       return this.modal.vulnerability;
     },
-    isLockedToProject() {
-      return this.lockToProject !== null;
-    },
     shouldShowAside() {
       return this.shouldShowChart || this.shouldShowVulnerabilitySeverities;
     },
@@ -101,27 +92,20 @@ export default {
       return Boolean(this.vulnerableProjectsEndpoint);
     },
     shouldShowCountList() {
-      return this.isLockedToProject && Boolean(this.vulnerabilitiesCountEndpoint);
+      return Boolean(this.vulnerabilitiesCountEndpoint);
     },
   },
   watch: {
     'pageInfo.total': 'emitVulnerabilitiesCountChanged',
   },
   created() {
-    if (this.isLockedToProject) {
-      this.lockFilter({
-        filterId: 'project_id',
-        optionId: this.lockToProject.id,
-      });
-    }
     this.setPipelineId(this.pipelineId);
-    this.setHideDismissedToggleInitialState();
     this.setVulnerabilitiesEndpoint(this.vulnerabilitiesEndpoint);
     this.setVulnerabilitiesCountEndpoint(this.vulnerabilitiesCountEndpoint);
     this.setVulnerabilitiesHistoryEndpoint(this.vulnerabilitiesHistoryEndpoint);
-    this.fetchVulnerabilities({ ...this.activeFilters, page: this.pageInfo.page });
-    this.fetchVulnerabilitiesCount(this.activeFilters);
-    this.fetchVulnerabilitiesHistory(this.activeFilters);
+    this.fetchVulnerabilities({ ...this.filters, page: this.pageInfo.page });
+    this.fetchVulnerabilitiesCount(this.filters);
+    this.fetchVulnerabilitiesHistory(this.filters);
     this.fetchPipelineJobs();
   },
   methods: {
@@ -146,7 +130,7 @@ export default {
       'downloadPatch',
     ]),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs']),
-    ...mapActions('filters', ['lockFilter', 'setHideDismissedToggleInitialState']),
+    ...mapActions('filters', ['setHideDismissedToggleInitialState']),
     emitVulnerabilitiesCountChanged(count) {
       this.$emit('vulnerabilitiesCountChanged', count);
     },

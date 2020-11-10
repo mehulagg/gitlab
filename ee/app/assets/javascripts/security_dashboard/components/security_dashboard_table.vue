@@ -23,7 +23,7 @@ export default {
       'pageInfo',
       'vulnerabilities',
     ]),
-    ...mapGetters('filters', ['activeFilters']),
+    ...mapState('filters', ['filters']),
     ...mapGetters('vulnerabilities', [
       'dashboardListError',
       'hasSelectedAllVulnerabilities',
@@ -49,7 +49,7 @@ export default {
       'selectAllVulnerabilities',
     ]),
     fetchPage(page) {
-      this.fetchVulnerabilities({ ...this.activeFilters, page });
+      this.fetchVulnerabilities({ ...this.filters, page });
     },
     handleSelectAll() {
       return this.hasSelectedAllVulnerabilities

@@ -1,6 +1,5 @@
 import createStore from 'ee/security_dashboard/store/index';
 import * as filtersMutationTypes from 'ee/security_dashboard/store/modules/filters/mutation_types';
-import * as vulnerabilityMutationTypes from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 
 function expectRefreshDispatches(store, payload) {
   expect(store.dispatch).toHaveBeenCalledTimes(3);
@@ -24,50 +23,24 @@ describe('mediator', () => {
 
   it('triggers fetching vulnerabilities after one filter changes', () => {
     store.commit(`filters/${filtersMutationTypes.SET_FILTER}`, {});
-    const activeFilters = store.getters['filters/activeFilters'];
 
-    expectRefreshDispatches(store, activeFilters);
+    expectRefreshDispatches(store, store.state.filters.filters);
   });
 
-  it('does not fetch vulnerabilities after one filter changes with lazy = true', () => {
-    store.commit(`filters/${filtersMutationTypes.SET_FILTER}`, { lazy: true });
-
-    expect(store.dispatch).not.toHaveBeenCalled();
-  });
-
-  it('triggers fetching vulnerabilities after filters change', () => {
+  it('triggers fetching vulnerabilities after multiple filters change', () => {
     const payload = {
-      ...store.getters['filters/activeFilters'],
+      ...store.state.filters.filters,
       page: store.state.vulnerabilities.pageInfo.page,
     };
 
-    store.commit(`filters/${filtersMutationTypes.SET_ALL_FILTERS}`, {});
+    store.commit(`filters/${filtersMutationTypes.SET_FILTER}`, payload);
 
     expectRefreshDispatches(store, payload);
   });
 
-  it('triggers fetching vulnerabilities multiple vulnerabilities have been dismissed', () => {
-    const activeFilters = store.getters['filters/activeFilters'];
-
-    store.commit(
-      `vulnerabilities/${vulnerabilityMutationTypes.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_SUCCESS}`,
-      {},
-    );
-
-    expectRefreshDispatches(store, activeFilters);
-  });
-
   it('triggers fetching vulnerabilities after "Hide dismissed" toggle changes', () => {
-    const activeFilters = store.getters['filters/activeFilters'];
+    store.commit(`filters/${filtersMutationTypes.TOGGLE_HIDE_DISMISSED}`);
 
-    store.commit(`filters/${filtersMutationTypes.SET_TOGGLE_VALUE}`, {});
-
-    expectRefreshDispatches(store, activeFilters);
-  });
-
-  it('does not fetch vulnerabilities after "Hide dismissed" toggle changes with lazy = true', () => {
-    store.commit(`filters/${filtersMutationTypes.SET_TOGGLE_VALUE}`, { lazy: true });
-
-    expect(store.dispatch).not.toHaveBeenCalled();
+    expectRefreshDispatches(store, store.state.filters.filters);
   });
 });
