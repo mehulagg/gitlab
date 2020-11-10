@@ -69,17 +69,19 @@ export default {
     },
   },
   methods: {
-    toggleBacktrace(keyIndex) {
-      const index = this.openedBacktraces.indexOf(keyIndex);
+    toggleBacktrace(toggledIndex) {
+      const toggledOpenedIndex = this.openedBacktraces.indexOf(toggledIndex);
 
-      if (index === -1) {
-        this.openedBacktraces = [...this.openedBacktraces, keyIndex];
+      if (toggledOpenedIndex === -1) {
+        this.openedBacktraces = [...this.openedBacktraces, toggledIndex];
       } else {
-        this.openedBacktraces = this.openedBacktraces.filter(el => el !== keyIndex);
+        this.openedBacktraces = this.openedBacktraces.filter(
+          openedIndex => openedIndex !== toggledIndex,
+        );
       }
     },
-    itemHasOpenedBacktrace(keyIndex) {
-      return this.openedBacktraces.find(el => el === keyIndex) >= 0;
+    itemHasOpenedBacktrace(toggledIndex) {
+      return this.openedBacktraces.find(openedIndex => openedIndex === toggledIndex) >= 0;
     },
   },
 };
@@ -88,10 +90,10 @@ export default {
   <div
     v-if="currentRequest.details && metricDetails"
     :id="`peek-view-${metric}`"
-    class="view"
+    class="gl-display-flex gl-align-items-center view"
     data-qa-selector="detailed_metric_content"
   >
-    <gl-button v-gl-modal="modalId" type="button" variant="link">
+    <gl-button v-gl-modal="modalId" class="gl-mr-2" type="button" variant="link">
       {{ metricDetailsLabel }}
     </gl-button>
     <gl-modal :modal-id="modalId" :title="header" size="lg" modal-class="gl-mt-7" scrollable>
