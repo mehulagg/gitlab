@@ -118,3 +118,78 @@ export const mockInstanceVulnerabilityGrades = () => ({
     },
   },
 });
+
+export const mockProjectSecurityChartsWithoutData = () => ({
+  data: {
+    project: {
+      vulnerabilitiesCountByDay: {
+        edges: [],
+      },
+    },
+  },
+});
+
+export const mockProjectSecurityChartsWithData = () => ({
+  data: {
+    project: {
+      vulnerabilitiesCountByDay: {
+        nodes: [
+          {
+            date: '2020-07-22',
+            critical: 4,
+            high: 3,
+            info: 2,
+            low: 10,
+            medium: 2,
+            unknown: 1,
+          },
+          {
+            date: '2020-07-23',
+            critical: 2,
+            high: 3,
+            info: 2,
+            low: 10,
+            medium: 2,
+            unknown: 1,
+          },
+          {
+            date: '2020-07-24',
+            critical: 2,
+            high: 3,
+            info: 2,
+            low: 10,
+            medium: 2,
+            unknown: 1,
+          },
+          {
+            date: '2020-07-25',
+            critical: 2,
+            high: 3,
+            info: 2,
+            low: 10,
+            medium: 2,
+            unknown: 1,
+          },
+          {
+            date: '2020-07-26',
+            critical: 2,
+            high: 3,
+            info: 2,
+            low: 10,
+            medium: 2,
+            unknown: 1,
+          },
+          {
+            date: '2020-07-27',
+            critical: 2,
+            high: 3,
+            info: 2,
+            low: 10,
+            medium: 2,
+            unknown: 1,
+          },
+        ],
+      },
+    },
+  },
+});

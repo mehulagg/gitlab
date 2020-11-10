@@ -163,9 +163,9 @@ knowledge can be a security risk.
 
 ## Linking Kerberos and LDAP accounts together
 
-If your users log in with Kerberos, but you also have [LDAP integration](../administration/auth/ldap/index.md)
-enabled, then your users will be automatically linked to their LDAP accounts on
-first login. For this to work, some prerequisites must be met:
+If your users sign in with Kerberos, but you also have [LDAP integration](../administration/auth/ldap/index.md)
+enabled, your users will be linked to their LDAP accounts on their first sign-in.
+For this to work, some prerequisites must be met:
 
 The Kerberos username must match the LDAP user's UID. You can choose which LDAP
 attribute is used as the UID in GitLab's [LDAP configuration](../administration/auth/ldap/index.md#configuration)
@@ -183,10 +183,10 @@ LDAP Distinguished Names look like `sAMAccountName=foo,dc=ad,dc=example,dc=com`.
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9962) in GitLab 13.5.
 
-You can configure custom allowed realms when
-the user's Kerberos realm doesn't match the domain from the user's LDAP DN. The
-configuration value must specify all domains that users may be expected to
-have. Any other domains will be ignored and an LDAP identity will not be linked.
+You can configure custom allowed realms when the user's Kerberos realm doesn't
+match the domain from the user's LDAP DN. The configuration value must specify
+all domains that users may be expected to have. Any other domains will be
+ignored and an LDAP identity won't be linked.
 
 **For Omnibus installations**
 

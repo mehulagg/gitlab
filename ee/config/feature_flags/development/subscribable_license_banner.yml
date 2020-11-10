@@ -2,6 +2,7 @@
 name: subscribable_license_banner
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30304
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/215950
-group: group::retention
+milestone: '13.0'
 type: development
+group: group::retention
 default_enabled: true

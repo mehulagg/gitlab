@@ -4,7 +4,6 @@ import * as vulnerabilitiesMutationTypes from '../modules/vulnerabilities/mutati
 export default store => {
   const refreshVulnerabilities = payload => {
     store.dispatch('vulnerabilities/fetchVulnerabilities', payload);
-    store.dispatch('vulnerabilities/fetchVulnerabilitiesCount', payload);
     store.dispatch('vulnerabilities/fetchVulnerabilitiesHistory', payload);
   };
 

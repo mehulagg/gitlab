@@ -1,10 +1,10 @@
 - return unless show_trial_banner?(namespace)
 .user-callout
-  .alert.bordered-box.landing.justify-content-start.pl-md-8
-    %button{ type:"button", class:"btn btn-default close", "data-dismiss":"alert", "aria-label": _("Close") }
-      = sprite_icon('close')
-    .svg-container
+  %section.gl-banner.gl-banner-introduction.my-2
+    .gl-banner-illustration
       = custom_icon('trial_activated_banner')
-    .user-callout-copy
-      %h4
+    .gl-banner-content.gl-display-flex.gl-flex-direction-column.gl-justify-content-center
+      %h4.gl-banner-title
         = s_("BillingPlans|Congratulations, your free trial is activated.")
+    %button.gl-banner-close.close{ "aria-label" => _('Dismiss'), :type => "button" }
+      = sprite_icon('close', size: 16, css_class: 'gl-icon')

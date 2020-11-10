@@ -146,7 +146,7 @@ export default {
       return DAST_SITE_VALIDATION_METHODS[this.validationMethod].i18n.locationStepLabel;
     },
     httpHeader() {
-      return `${DAST_SITE_VALIDATION_HTTP_HEADER_KEY}: uuid-code-${this.token}`;
+      return `${DAST_SITE_VALIDATION_HTTP_HEADER_KEY}: ${this.token}`;
     },
   },
   watch: {
@@ -193,7 +193,7 @@ export default {
             projectFullPath: this.fullPath,
             dastSiteTokenId: this.tokenId,
             validationPath: this.validationPath,
-            strategy: this.validationMethod,
+            validationStrategy: this.validationMethod,
           },
         });
         if (errors?.length) {

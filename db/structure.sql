@@ -9083,7 +9083,6 @@ CREATE TABLE application_settings (
     max_attachment_size integer DEFAULT 10 NOT NULL,
     default_project_visibility integer DEFAULT 0 NOT NULL,
     default_snippet_visibility integer DEFAULT 0 NOT NULL,
-    domain_whitelist text,
     user_oauth_applications boolean DEFAULT true,
     after_sign_out_path character varying,
     session_expire_delay integer DEFAULT 10080 NOT NULL,
@@ -9119,8 +9118,6 @@ CREATE TABLE application_settings (
     elasticsearch_search boolean DEFAULT false NOT NULL,
     repository_storages character varying DEFAULT 'default'::character varying,
     enabled_git_access_protocol character varying,
-    domain_blacklist_enabled boolean DEFAULT false,
-    domain_blacklist text,
     usage_ping_enabled boolean DEFAULT true NOT NULL,
     sign_in_text_html text,
     help_page_text_html text,
@@ -9341,6 +9338,9 @@ CREATE TABLE application_settings (
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    domain_denylist_enabled boolean DEFAULT false,
+    domain_denylist text,
+    domain_allowlist text,
     new_user_signups_cap integer,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
@@ -14631,7 +14631,7 @@ CREATE TABLE plan_limits (
     offset_pagination_limit integer DEFAULT 50000 NOT NULL,
     ci_instance_level_variables integer DEFAULT 25 NOT NULL,
     storage_size_limit integer DEFAULT 0 NOT NULL,
-    ci_max_artifact_size_lsif integer DEFAULT 20 NOT NULL,
+    ci_max_artifact_size_lsif integer DEFAULT 100 NOT NULL,
     ci_max_artifact_size_archive integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_metadata integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_trace integer DEFAULT 0 NOT NULL,
@@ -17364,6 +17364,7 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL
 );
 

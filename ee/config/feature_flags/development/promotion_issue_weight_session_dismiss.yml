@@ -2,6 +2,7 @@
 name: promotion_issue_weight_session_dismiss
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23358
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/223772
-group: group::conversion
+milestone: '13.1'
 type: development
+group: group::conversion
 default_enabled: false

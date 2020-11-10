@@ -21,7 +21,7 @@ describe('DismissalButton', () => {
       expect(wrapper.text()).toBe('Dismiss vulnerability');
     });
 
-    it('should emit dismiss vulnerabilty when clicked', () => {
+    it('should emit dismiss vulnerability when clicked', () => {
       wrapper.find(GlButton).trigger('click');
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().dismissVulnerability).toBeTruthy();
@@ -52,7 +52,7 @@ describe('DismissalButton', () => {
       expect(wrapper.text()).toBe('Undo dismiss');
     });
 
-    it('should emit revertDismissVulnerabilty when clicked', () => {
+    it('should emit revertDismissVulnerability when clicked', () => {
       wrapper.find(GlButton).trigger('click');
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().revertDismissVulnerability).toBeTruthy();

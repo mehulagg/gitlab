@@ -12,10 +12,6 @@ module QA
               element :security_report_content, required: true
             end
 
-            view 'ee/app/assets/javascripts/security_dashboard/components/vulnerability_severity.vue' do
-              element :project_name_text, required: true
-            end
-
             view 'ee/app/assets/javascripts/security_dashboard/components/first_class_vulnerability_severities.vue' do
               element :project_name_text, required: true
             end

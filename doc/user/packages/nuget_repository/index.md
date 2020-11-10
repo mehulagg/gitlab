@@ -71,7 +71,7 @@ Prerequisites:
 - A personal access token or deploy token. For repository authentication:
   - You can generate a [personal access token](../../../user/profile/personal_access_tokens.md)
     with the scope set to `api`.
-  - You can generate a [deploy token](./../../project/deploy_tokens/index.md)
+  - You can generate a [deploy token](../../project/deploy_tokens/index.md)
     with the scope set to `read_package_registry`, `write_package_registry`, or
     both.
 - A name for your source.
@@ -220,8 +220,6 @@ updated:
    deploy:
      stage: deploy
      script:
-       - dotnet restore -p:Configuration=Release
-       - dotnet build -c Release
        - dotnet pack -c Release
        - dotnet nuget add source "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/nuget/index.json" --name gitlab --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
        - dotnet nuget push "bin/Release/*.nupkg" --source gitlab

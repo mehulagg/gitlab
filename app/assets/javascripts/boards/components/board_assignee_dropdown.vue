@@ -4,7 +4,7 @@ import { GlDropdownItem, GlDropdownDivider, GlAvatarLabeled, GlAvatarLink } from
 import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
+import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 
 export default {
@@ -17,7 +17,7 @@ export default {
   components: {
     BoardEditableItem,
     IssuableAssignees,
-    AssigneesDropdown,
+    MultiSelectDropdown,
     GlDropdownItem,
     GlDropdownDivider,
     GlAvatarLabeled,
@@ -26,7 +26,7 @@ export default {
   data() {
     return {
       participants: [],
-      selected: this.$store.getters.getActiveIssue.assignees,
+      selected: this.$store.getters.activeIssue.assignees,
     };
   },
   apollo: {
@@ -34,7 +34,7 @@ export default {
       query: getIssueParticipants,
       variables() {
         return {
-          id: `gid://gitlab/Issue/${this.getActiveIssue.iid}`,
+          id: `gid://gitlab/Issue/${this.activeIssue.iid}`,
         };
       },
       update(data) {
@@ -43,7 +43,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['getActiveIssue']),
+    ...mapGetters(['activeIssue']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
@@ -88,11 +88,11 @@ export default {
 <template>
   <board-editable-item :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
-      <issuable-assignees :users="getActiveIssue.assignees" />
+      <issuable-assignees :users="activeIssue.assignees" />
     </template>
 
     <template #default>
-      <assignees-dropdown
+      <multi-select-dropdown
         class="w-100"
         :text="$options.i18n.assignees"
         :header-text="$options.i18n.assignTo"
@@ -138,7 +138,7 @@ export default {
             </gl-avatar-link>
           </gl-dropdown-item>
         </template>
-      </assignees-dropdown>
+      </multi-select-dropdown>
     </template>
   </board-editable-item>
 </template>

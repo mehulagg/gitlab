@@ -442,7 +442,7 @@ The configuration in this section provides a full development workflow where you
 - Tested.
 - Built.
 - Deployed as a Review App.
-- Deployed to a staging server once the merge request is merged.
+- Deployed to a staging server after the merge request is merged.
 - Finally, able to be manually deployed to the production server.
 
 The following combines the previous configuration examples, including:
@@ -697,7 +697,7 @@ stop_review:
 ```
 
 If you can't use [Pipelines for merge requests](../merge_request_pipelines/index.md),
-setting the [`GIT_STRATEGY`](../yaml/README.md#git-strategy) to `none` is necessary in the
+setting the [`GIT_STRATEGY`](../runners/README.md#git-strategy) to `none` is necessary in the
 `stop_review` job so that the [runner](https://docs.gitlab.com/runner/) won't
 try to check out the code after the branch is deleted.
 

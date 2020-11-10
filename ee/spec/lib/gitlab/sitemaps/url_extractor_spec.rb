@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Sitemaps::UrlExtractor do
+  include Gitlab::Routing
+
   before do
     stub_default_url_options(host: 'localhost')
   end
@@ -53,48 +55,115 @@ RSpec.describe Gitlab::Sitemaps::UrlExtractor do
     subject { described_class.extract_from_group(group) }
 
     it 'returns several group urls' do
+      stub_licensed_features(epics: true)
+
       expected_urls = [
-        "http://localhost/#{group.full_path}",
-        "http://localhost/groups/#{group.full_path}/-/issues",
-        "http://localhost/groups/#{group.full_path}/-/merge_requests",
-        "http://localhost/groups/#{group.full_path}/-/packages",
-        "http://localhost/groups/#{group.full_path}/-/epics"
+        group_url(group),
+        issues_group_url(group),
+        merge_requests_group_url(group),
+        group_packages_url(group),
+        group_epics_url(group)
       ]
 
       expect(subject).to match_array(expected_urls)
     end
+
+    context 'when epics are not enabled' do
+      it 'does nor include epics url' do
+        stub_licensed_features(epics: false)
+
+        expect(subject).not_to include(group_epics_url(group))
+      end
+    end
   end
 
   describe '.extract_from_project' do
-    let(:project) { build(:project) }
+    let_it_be_with_reload(:project) { create(:project) }
+    let(:project_feature) { project.project_feature }
 
     subject { described_class.extract_from_project(project) }
 
     it 'returns several project urls' do
       expected_urls = [
-        "http://localhost/#{project.full_path}",
-        "http://localhost/#{project.full_path}/-/issues",
-        "http://localhost/#{project.full_path}/-/merge_requests",
-        "http://localhost/#{project.full_path}/-/snippets",
-        "http://localhost/#{project.full_path}/-/wikis/home"
+        project_url(project),
+        project_issues_url(project),
+        project_merge_requests_url(project),
+        project_snippets_url(project),
+        project_wiki_url(project, Wiki::HOMEPAGE)
       ]
 
       expect(subject).to match_array(expected_urls)
     end
 
-    context 'when wiki is disabled' do
-      let(:project) { build(:project, :wiki_disabled) }
+    context 'when wiki access level is' do
+      context 'disabled' do
+        it 'does not include wiki url' do
+          project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
-      it 'does not include wiki url' do
-        expect(subject).not_to include("http://localhost/#{project.full_path}/-/wiki_home")
+          expect(subject).not_to include(project_wiki_url(project, Wiki::HOMEPAGE))
+        end
+      end
+
+      context 'private' do
+        it 'does not include wiki url' do
+          project_feature.update!(wiki_access_level: ProjectFeature::PRIVATE)
+
+          expect(subject).not_to include(project_wiki_url(project, Wiki::HOMEPAGE))
+        end
       end
     end
 
     context 'when snippets are disabled' do
-      let(:project) { build(:project, :snippets_disabled) }
+      context 'disabled' do
+        it 'does not include snippets url' do
+          project_feature.update!(snippets_access_level: ProjectFeature::DISABLED)
 
-      it 'does not include snippets url' do
-        expect(subject).not_to include("http://localhost/#{project.full_path}/-/wiki_home")
+          expect(subject).not_to include(project_snippets_url(project))
+        end
+      end
+
+      context 'private' do
+        it 'does not include snippets url' do
+          project_feature.update!(snippets_access_level: ProjectFeature::PRIVATE)
+
+          expect(subject).not_to include(project_snippets_url(project))
+        end
+      end
+    end
+
+    context 'when issues are disabled' do
+      context 'disabled' do
+        it 'does not include issues url' do
+          project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+
+          expect(subject).not_to include(project_issues_url(project))
+        end
+      end
+
+      context 'private' do
+        it 'does not include issues url' do
+          project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
+
+          expect(subject).not_to include(project_issues_url(project))
+        end
+      end
+    end
+
+    context 'when merge requests are disabled' do
+      context 'disabled' do
+        it 'does not include merge requests url' do
+          project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED)
+
+          expect(subject).not_to include(project_merge_requests_url(project))
+        end
+      end
+
+      context 'private' do
+        it 'does not include merge requests url' do
+          project_feature.update!(merge_requests_access_level: ProjectFeature::PRIVATE)
+
+          expect(subject).not_to include(project_merge_requests_url(project))
+        end
       end
     end
   end

@@ -1042,12 +1042,14 @@ To link to internal documentation:
 - Use relative links to Markdown files in the same repository.
 - Do not use absolute URLs or URLs from `docs.gitlab.com`.
 - Use `../` to navigate to higher-level directories.
-- Do not link relative to root. For example, `/ee/user/gitlab_com/index.md`.
+- Don't prepend `./` to links to files or directories.
+- Don't link relative to root. For example, `/ee/user/gitlab_com/index.md`.
 
   Don't:
 
   - `https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html`
   - `/ee/administration/geo/replication/troubleshooting.md`
+  - `./troubleshooting.md`
 
   Do: `../../geo/replication/troubleshooting.md`
 
@@ -1208,10 +1210,10 @@ When you take screenshots:
   or concept in the image. If the image is of the GitLab interface, append the
   GitLab version to the file name, based on the following format:
   `image_name_vX_Y.png`. For example, for a screenshot taken from the pipelines
-  page of GitLab 11.1, a valid name is `pipelines_v11_1.png`. If you're adding an
+  page of GitLab 11.1, a valid name is `pipelines_v11_1.png`. If you're adding an
   illustration that doesn't include parts of the user interface, add the release
   number corresponding to the release the image was added to; for an MR added to
-  11.1's milestone, a valid name for an illustration is `devops_diagram_v11_1.png`.
+  11.1's milestone, a valid name for an illustration is `devops_diagram_v11_1.png`.
 - Place images in a separate directory named `img/` in the same directory where
   the `.md` document that you're working on is located.
 - Consider using PNG images instead of JPEG.

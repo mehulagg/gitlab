@@ -10,7 +10,6 @@ import axios from '~/lib/utils/axios_utils';
 import toast from '~/vue_shared/plugins/global_toast';
 
 import mockDataVulnerabilities from './data/mock_data_vulnerabilities';
-import mockDataVulnerabilitiesCount from './data/mock_data_vulnerabilities_count.json';
 import mockDataVulnerabilitiesHistory from './data/mock_data_vulnerabilities_history.json';
 
 const sourceBranch = 'feature-branch-1';
@@ -22,9 +21,6 @@ jest.mock('jquery', () => () => ({
 }));
 
 describe('vulnerabilities count actions', () => {
-  const data = mockDataVulnerabilitiesCount;
-  const params = { filters: { type: ['sast'] } };
-  const filteredData = mockDataVulnerabilitiesCount.sast;
   let state;
 
   beforeEach(() => {
@@ -67,149 +63,6 @@ describe('vulnerabilities count actions', () => {
             payload: sourceBranch,
           },
         ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('setVulnerabilitiesCountEndpoint', () => {
-    it('should commit the correct mutuation', done => {
-      const endpoint = 'fakepath.json';
-
-      testAction(
-        actions.setVulnerabilitiesCountEndpoint,
-        endpoint,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_COUNT_ENDPOINT,
-            payload: endpoint,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('fetchVulnerabilitiesCount', () => {
-    let mock;
-
-    beforeEach(() => {
-      state.vulnerabilitiesCountEndpoint = `${TEST_HOST}/vulnerabilities_count.json`;
-      mock = new MockAdapter(axios);
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
-
-    describe('on success', () => {
-      beforeEach(() => {
-        mock
-          .onGet(state.vulnerabilitiesCountEndpoint, { params })
-          .replyOnce(200, filteredData)
-          .onGet(state.vulnerabilitiesCountEndpoint)
-          .replyOnce(200, data);
-      });
-
-      it('should dispatch the request and success actions', done => {
-        testAction(
-          actions.fetchVulnerabilitiesCount,
-          {},
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesCount' },
-            {
-              type: 'receiveVulnerabilitiesCountSuccess',
-              payload: { data },
-            },
-          ],
-          done,
-        );
-      });
-
-      it('should send the passed filters to the endpoint', done => {
-        testAction(
-          actions.fetchVulnerabilitiesCount,
-          params,
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesCount' },
-            {
-              type: 'receiveVulnerabilitiesCountSuccess',
-              payload: { data: filteredData },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('on error', () => {
-      beforeEach(() => {
-        mock.onGet(state.vulnerabilitiesCountEndpoint).replyOnce(404, {});
-      });
-
-      it('should dispatch the request and error actions', done => {
-        testAction(
-          actions.fetchVulnerabilitiesCount,
-          {},
-          state,
-          [],
-          [{ type: 'requestVulnerabilitiesCount' }, { type: 'receiveVulnerabilitiesCountError' }],
-          done,
-        );
-      });
-    });
-
-    describe('with an empty endpoint', () => {
-      beforeEach(() => {
-        state.vulnerabilitiesCountEndpoint = '';
-      });
-
-      it('should not do anything', done => {
-        testAction(actions.fetchVulnerabilitiesCount, {}, state, [], [], done);
-      });
-    });
-  });
-
-  describe('requestVulnerabilitiesCount', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestVulnerabilitiesCount,
-        {},
-        state,
-        [{ type: types.REQUEST_VULNERABILITIES_COUNT }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveVulnerabilitiesCountSuccess', () => {
-    it('should commit the success mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesCountSuccess,
-        { data },
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS, payload: data }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveVulnerabilitiesCountError', () => {
-    it('should commit the error mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesCountError,
-        {},
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_COUNT_ERROR }],
         [],
         done,
       );

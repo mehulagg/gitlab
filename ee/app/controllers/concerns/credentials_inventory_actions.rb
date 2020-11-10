@@ -17,15 +17,13 @@ module CredentialsInventoryActions
   def destroy
     key = KeysFinder.new({ users: users, key_type: 'ssh' }).find_by_id(params[:id])
 
-    alert = if key.present?
-              if Keys::DestroyService.new(current_user).execute(key)
-                notify_deleted_or_revoked_credential(key)
-                _('User key was successfully removed.')
-              else
-                _('Failed to remove user key.')
-              end
+    return render_404 if key.nil?
+
+    alert = if Keys::DestroyService.new(current_user).execute(key)
+              notify_deleted_or_revoked_credential(key)
+              _('User key was successfully removed.')
             else
-              _('Cannot find user key.')
+              _('Failed to remove user key.')
             end
 
     redirect_to credentials_inventory_path(filter: 'ssh_keys'), status: :found, notice: alert

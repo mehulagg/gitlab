@@ -17,6 +17,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
+import service from '../services';
 import {
   integrationTypesNew,
   JSON_VALIDATE_DELAY,
@@ -33,6 +34,9 @@ export default {
       step1: {
         label: s__('AlertSettings|1. Select integration type'),
         help: s__('AlertSettings|Learn more about our upcoming %{linkStart}integrations%{linkEnd}'),
+        enterprise: s__(
+          'AlertSettings|In free versions of GitLab, only one integration for each type can be added. %{linkStart}Upgrade your subscription%{linkEnd} to add additional integrations.',
+        ),
       },
       step2: {
         label: s__('AlertSettings|2. Name integration'),
@@ -86,7 +90,7 @@ export default {
     MappingBuilder,
   },
   directives: {
-    'gl-modal': GlModalDirective,
+    GlModal: GlModalDirective,
   },
   inject: {
     generic: {
@@ -106,6 +110,10 @@ export default {
       type: Object,
       required: false,
       default: null,
+    },
+    canAddIntegration: {
+      type: Boolean,
+      required: true,
     },
   },
   data() {
@@ -143,6 +151,13 @@ export default {
         apiUrl: this.currentIntegration?.apiUrl || '',
       };
     },
+    testAlertPayload() {
+      return {
+        data: this.integrationTestPayload.json,
+        endpoint: this.integrationForm.url,
+        token: this.integrationForm.token,
+      };
+    },
   },
   watch: {
     currentIntegration(val) {
@@ -163,8 +178,14 @@ export default {
       }
     },
     submitWithTestPayload() {
-      // TODO: Test payload before saving via GraphQL
-      this.submit();
+      return service
+        .updateTestAlert(this.testAlertPayload)
+        .then(() => {
+          this.submit();
+        })
+        .catch(() => {
+          this.$emit('test-payload-failure');
+        });
     },
     submit() {
       const { name, apiUrl } = this.integrationForm;
@@ -236,15 +257,24 @@ export default {
     >
       <gl-form-select
         v-model="selectedIntegration"
-        :disabled="currentIntegration !== null"
+        :disabled="currentIntegration !== null || !canAddIntegration"
         :options="options"
         @change="integrationTypeSelect"
       />
 
-      <alert-settings-form-help-block
-        :message="$options.i18n.integrationFormSteps.step1.help"
-        link="https://gitlab.com/groups/gitlab-org/-/epics/4390"
-      />
+      <div class="gl-my-4">
+        <alert-settings-form-help-block
+          :message="$options.i18n.integrationFormSteps.step1.help"
+          link="https://gitlab.com/groups/gitlab-org/-/epics/4390"
+        />
+      </div>
+
+      <div v-if="!canAddIntegration" class="gl-my-4" data-testid="multi-integrations-not-supported">
+        <alert-settings-form-help-block
+          :message="$options.i18n.integrationFormSteps.step1.enterprise"
+          link="https://about.gitlab.com/pricing"
+        />
+      </div>
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
       <gl-form-group
@@ -343,7 +373,6 @@ export default {
         </div>
       </gl-form-group>
       <gl-form-group
-        id="test-integration"
         :label="$options.i18n.integrationFormSteps.step4.label"
         label-for="test-integration"
         :invalid-feedback="integrationTestPayload.error"
@@ -379,6 +408,8 @@ export default {
       <div class="gl-display-flex gl-justify-content-end">
         <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
         <gl-button
+          data-testid="integration-test-and-submit"
+          :disabled="Boolean(integrationTestPayload.error)"
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"

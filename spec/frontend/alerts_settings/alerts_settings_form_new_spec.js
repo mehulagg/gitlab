@@ -9,7 +9,7 @@ describe('AlertsSettingsFormNew', () => {
 
   const createComponent = ({
     data = {},
-    props = { loading: false },
+    props = {},
     multipleHttpIntegrationsCustomMapping = false,
   } = {}) => {
     wrapper = mount(AlertsSettingsForm, {
@@ -17,6 +17,8 @@ describe('AlertsSettingsFormNew', () => {
         return { ...data };
       },
       propsData: {
+        loading: false,
+        canAddIntegration: true,
         ...props,
       },
       provide: {
@@ -33,6 +35,10 @@ describe('AlertsSettingsFormNew', () => {
   const findFormToggle = () => wrapper.find(GlToggle);
   const findMappingBuilderSection = () => wrapper.find(`[id = "mapping-builder"]`);
   const findSubmitButton = () => wrapper.find(`[type = "submit"]`);
+  const findMultiSupportText = () =>
+    wrapper.find(`[data-testid="multi-integrations-not-supported"]`);
+  const findJsonTestSubmit = () => wrapper.find(`[data-testid="integration-test-and-submit"]`);
+  const findJsonTextArea = () => wrapper.find(`[id = "test-integration"]`);
 
   afterEach(() => {
     if (wrapper) {
@@ -53,6 +59,7 @@ describe('AlertsSettingsFormNew', () => {
     it('render the initial form with only an integration type dropdown', () => {
       expect(findForm().exists()).toBe(true);
       expect(findSelect().exists()).toBe(true);
+      expect(findMultiSupportText().exists()).toBe(false);
       expect(findFormSteps().attributes('visible')).toBeUndefined();
     });
 
@@ -67,6 +74,12 @@ describe('AlertsSettingsFormNew', () => {
           .at(0)
           .isVisible(),
       ).toBe(true);
+    });
+
+    it('disabled the dropdown and shows help text when multi integrations are not supported', async () => {
+      createComponent({ props: { canAddIntegration: false } });
+      expect(findSelect().attributes('disabled')).toBe('disabled');
+      expect(findMultiSupportText().exists()).toBe(true);
     });
   });
 
@@ -189,6 +202,42 @@ describe('AlertsSettingsFormNew', () => {
       expect(wrapper.emitted('update-integration')[0]).toEqual([
         { type: typeSet.prometheus, variables: { apiUrl: 'https://test-post.com', active: true } },
       ]);
+    });
+  });
+
+  describe('submitting the integration with a JSON test payload', () => {
+    beforeEach(() => {
+      createComponent({
+        data: {
+          selectedIntegration: typeSet.http,
+          active: true,
+        },
+        props: {
+          currentIntegration: { id: '1', name: 'Test' },
+          loading: false,
+        },
+      });
+    });
+
+    it('should not allow a user to test invalid JSON', async () => {
+      jest.useFakeTimers();
+      await findJsonTextArea().setValue('Invalid JSON');
+
+      jest.runAllTimers();
+      await wrapper.vm.$nextTick();
+
+      expect(findJsonTestSubmit().exists()).toBe(true);
+      expect(findJsonTestSubmit().text()).toBe('Save and test payload');
+      expect(findJsonTestSubmit().props('disabled')).toBe(true);
+    });
+
+    it('should allow for the form to be automatically saved if the test payload is successfully submitted', async () => {
+      jest.useFakeTimers();
+      await findJsonTextArea().setValue('{ "value": "value" }');
+
+      jest.runAllTimers();
+      await wrapper.vm.$nextTick();
+      expect(findJsonTestSubmit().props('disabled')).toBe(false);
     });
   });
 
