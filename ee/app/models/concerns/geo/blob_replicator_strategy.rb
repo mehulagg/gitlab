@@ -65,9 +65,5 @@ module Geo
     def deleted_params
       { model_record_id: model_record.id, blob_path: blob_path }
     end
-
-    def verify_async
-      Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
-    end
   end
 end

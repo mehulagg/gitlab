@@ -50,6 +50,10 @@ module Geo
       verify_async if needs_checksum?
     end
 
+    def verify_async
+      Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
+    end
+
     def verify
       checksum = model_record.calculate_checksum
       update_verification_state!(checksum: checksum)
@@ -105,10 +109,6 @@ module Geo
     def calculate_next_retry_attempt
       retry_count = model_record.verification_retry_count.to_i + 1
       [next_retry_time(retry_count), retry_count]
-    end
-
-    def verify_async
-      raise NotImplementedError
     end
   end
 end
