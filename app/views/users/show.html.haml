@@ -48,7 +48,7 @@
           .cover-title{ itemprop: 'name' }
             = @user.name
 
-          - if @user.status
+          - if has_custom_status_emoji?(@user)
             .cover-status
               = emoji_icon(@user.status.emoji)
               = markdown_field(@user.status, :message)

@@ -44,22 +44,25 @@ function initStatusTriggers() {
             data() {
               const {
                 currentEmoji,
+                defaultEmoji,
                 currentMessage,
                 currentAvailability,
               } = setStatusModalWrapperEl.dataset;
 
               return {
                 currentEmoji,
+                defaultEmoji,
                 currentMessage,
                 currentAvailability,
               };
             },
             render(createElement) {
-              const { currentEmoji, currentMessage, currentAvailability } = this;
+              const { currentEmoji, defaultEmoji, currentMessage, currentAvailability } = this;
 
               return createElement(SetStatusModalWrapper, {
                 props: {
                   currentEmoji,
+                  defaultEmoji,
                   currentMessage,
                   currentAvailability,
                 },
