@@ -1,0 +1,5 @@
+---
+title: 'GraphQL: Adds config_lint mutation to CI'
+merge_request: 46912
+author:
+type: added
