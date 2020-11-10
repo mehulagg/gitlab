@@ -10,12 +10,14 @@ import {
   GlModal,
   GlToggle,
 } from '@gitlab/ui';
+import { initFormField } from 'ee/security_configuration/utils';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
-import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
+import { redirectTo } from '~/lib/utils/url_utility';
+import { serializeFormObject } from '~/lib/utils/forms';
 import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import validation from '~/vue_shared/directives/validation';
 import DastSiteValidation from './dast_site_validation.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
@@ -24,12 +26,6 @@ import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graph
 import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
 
 const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
-
-const initField = value => ({
-  value,
-  state: null,
-  feedback: null,
-});
 
 export default {
   name: 'DastSiteProfileForm',
@@ -43,6 +39,9 @@ export default {
     GlModal,
     GlToggle,
     DastSiteValidation,
+  },
+  directives: {
+    validation: validation(),
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -64,14 +63,18 @@ export default {
     const { name = '', targetUrl = '' } = this.siteProfile || {};
 
     const form = {
-      profileName: initField(name),
-      targetUrl: initField(targetUrl),
+      state: false,
+      showValidation: false,
+      fields: {
+        profileName: initFormField({ value: name }),
+        targetUrl: initFormField({ value: targetUrl }),
+      },
     };
 
     return {
       fetchValidationTimeout: null,
       form,
-      initialFormValues: serializeFormObject(form),
+      initialFormValues: serializeFormObject(form.fields),
       isFetchingValidationStatus: false,
       isValidatingSite: false,
       isLoading: false,
@@ -90,7 +93,7 @@ export default {
       return Boolean(this.siteProfile?.id);
     },
     isSiteValidationDisabled() {
-      return !this.form.targetUrl.state || this.validationStatusMatches(INPROGRESS);
+      return !this.form.fields.targetUrl.state || this.validationStatusMatches(INPROGRESS);
     },
     i18n() {
       const { isEdit } = this;
@@ -119,20 +122,12 @@ export default {
       };
     },
     formTouched() {
-      return !isEqual(serializeFormObject(this.form), this.initialFormValues);
-    },
-    formHasErrors() {
-      return Object.values(this.form).some(({ state }) => state === false);
-    },
-    someFieldEmpty() {
-      return Object.values(this.form).some(({ value }) => isEmptyValue(value));
+      return !isEqual(serializeFormObject(this.form.fields), this.initialFormValues);
     },
     isSubmitDisabled() {
       return (
-        (this.isSiteValidationActive && !this.validationStatusMatches(PASSED)) ||
-        this.formHasErrors ||
-        this.someFieldEmpty ||
-        this.validationStatusMatches(INPROGRESS)
+        this.validationStatusMatches(INPROGRESS) ||
+        (this.isSiteValidationActive && !this.validationStatusMatches(PASSED))
       );
     },
     showValidationSection() {
@@ -169,9 +164,9 @@ export default {
         : defaultDescription;
     },
   },
-  async created() {
+  async mounted() {
     if (this.isEdit) {
-      this.validateTargetUrl();
+      this.form.showValidation = true;
 
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
@@ -213,36 +208,23 @@ export default {
     validationStatusMatches(status) {
       return this.validationStatus === status;
     },
-    validateTargetUrl() {
-      if (!isAbsolute(this.form.targetUrl.value)) {
-        this.form.targetUrl.state = false;
-        this.form.targetUrl.feedback = s__(
-          'DastProfiles|Please enter a valid URL format, ex: http://www.example.com/home',
-        );
-        return;
-      }
-      this.form.targetUrl.state = true;
-      this.form.targetUrl.feedback = null;
-    },
     async fetchValidationStatus() {
       this.isFetchingValidationStatus = true;
 
       try {
         const {
           data: {
-            project: {
-              dastSiteValidation: { status },
-            },
+            project: { dastSiteValidation },
           },
         } = await this.$apollo.query({
           query: dastSiteValidationQuery,
           variables: {
             fullPath: this.fullPath,
-            targetUrl: this.form.targetUrl.value,
+            targetUrl: this.form.fields.targetUrl.value,
           },
           fetchPolicy: fetchPolicies.NETWORK_ONLY,
         });
-        this.validationStatus = status;
+        this.validationStatus = dastSiteValidation?.status || null;
 
         if (this.validationStatusMatches(INPROGRESS)) {
           await new Promise(resolve => {
@@ -269,7 +251,10 @@ export default {
           },
         } = await this.$apollo.mutate({
           mutation: dastSiteTokenCreateMutation,
-          variables: { projectFullPath: this.fullPath, targetUrl: this.form.targetUrl.value },
+          variables: {
+            fullPath: this.fullPath,
+            targetUrl: this.form.fields.targetUrl.value,
+          },
         });
         if (errors.length) {
           this.showErrors({ message: errorMessage, errors });
@@ -284,6 +269,12 @@ export default {
       }
     },
     onSubmit() {
+      this.form.showValidation = true;
+
+      if (!this.form.state) {
+        return;
+      }
+
       this.isLoading = true;
       this.hideErrors();
       const { errorMessage } = this.i18n;
@@ -291,7 +282,7 @@ export default {
       const variables = {
         fullPath: this.fullPath,
         ...(this.isEdit ? { id: this.siteProfile.id } : {}),
-        ...serializeFormObject(this.form),
+        ...serializeFormObject(this.form.fields),
       };
 
       this.$apollo
@@ -351,7 +342,7 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit">
+  <gl-form novalidate @submit.prevent="onSubmit">
     <h2 class="gl-mb-6">
       {{ i18n.title }}
     </h2>
@@ -369,12 +360,19 @@ export default {
       </ul>
     </gl-alert>
 
-    <gl-form-group :label="s__('DastProfiles|Profile name')">
+    <gl-form-group
+      :label="s__('DastProfiles|Profile name')"
+      :invalid-feedback="form.fields.profileName.feedback"
+    >
       <gl-form-input
-        v-model="form.profileName.value"
+        v-model="form.fields.profileName.value"
+        v-validation:[form.showValidation]
+        name="profileName"
         class="mw-460"
         data-testid="profile-name-input"
         type="text"
+        required
+        :state="form.fields.profileName.state"
       />
     </gl-form-group>
 
@@ -382,7 +380,7 @@ export default {
 
     <gl-form-group
       data-testid="target-url-input-group"
-      :invalid-feedback="form.targetUrl.feedback"
+      :invalid-feedback="form.fields.targetUrl.feedback"
       :description="
         isSiteValidationActive && !isValidatingSite
           ? s__('DastProfiles|Validation must be turned off to change the target URL')
@@ -391,13 +389,15 @@ export default {
       :label="s__('DastProfiles|Target URL')"
     >
       <gl-form-input
-        v-model="form.targetUrl.value"
+        v-model="form.fields.targetUrl.value"
+        v-validation:[form.showValidation]
+        name="targetUrl"
         class="mw-460"
         data-testid="target-url-input"
+        required
         type="url"
-        :state="form.targetUrl.state"
+        :state="form.fields.targetUrl.state"
         :disabled="isSiteValidationActive"
-        @input="validateTargetUrl"
       />
     </gl-form-group>
 
@@ -429,7 +429,7 @@ export default {
           :full-path="fullPath"
           :token-id="tokenId"
           :token="token"
-          :target-url="form.targetUrl.value"
+          :target-url="form.fields.targetUrl.value"
           @success="onValidationSuccess"
         />
       </gl-collapse>

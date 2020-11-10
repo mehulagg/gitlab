@@ -51,6 +51,8 @@ describe('Issue card component', () => {
       reference_path: '#1',
       real_path: '/test/1',
       weight: 1,
+      blocked: true,
+      blockedByCount: 2,
     });
   });
 
@@ -103,6 +105,35 @@ describe('Issue card component', () => {
       createComponent({}, store);
 
       expect(wrapper.findAll('.board-card-labels')).toHaveLength(0);
+    });
+  });
+
+  describe('blocked', () => {
+    const findBlockedIcon = () => wrapper.find('[data-testid="issue-blocked-icon"');
+
+    it('shows blocked icon if issue is blocked, when blocked by multiple issues', () => {
+      createComponent();
+      const blockedIcon = findBlockedIcon();
+
+      expect(blockedIcon.exists()).toBe(true);
+      expect(blockedIcon.attributes('title')).toBe('Blocked by 2 issues');
+    });
+
+    it('shows blocked icon if issue is blocked, when blocked by one issue', () => {
+      issue.blockedByCount = 1;
+      createComponent();
+      const blockedIcon = findBlockedIcon();
+
+      expect(blockedIcon.exists()).toBe(true);
+      expect(blockedIcon.attributes('title')).toBe('Blocked by 1 issue');
+    });
+
+    it('does not show blocked icon if issue is not blocked', () => {
+      issue.blocked = false;
+      issue.blockedByCount = 0;
+      createComponent();
+
+      expect(findBlockedIcon().exists()).toBe(false);
     });
   });
 

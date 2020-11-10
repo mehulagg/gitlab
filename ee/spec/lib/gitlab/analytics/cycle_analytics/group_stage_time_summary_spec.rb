@@ -13,7 +13,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::GroupStageTimeSummary do
   subject { described_class.new(group, options: options).data }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   describe '#lead_time' do

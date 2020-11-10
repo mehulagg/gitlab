@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     // The GlTable component mutates the `_showDetails` property on items
-    // passed to it in order to track the visibilty of each row's `row-details`
+    // passed to it in order to track the visibility of each row's `row-details`
     // slot. So, create a deep clone of them here to avoid mutating the
     // `dependencies` prop.
     // We also make sure that `vulnerabilities` is always defined to prevent rendering

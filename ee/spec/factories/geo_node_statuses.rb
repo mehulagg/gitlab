@@ -77,6 +77,33 @@ FactoryBot.define do
       repositories_verification_failed_count { 0 }
       wikis_verification_failed_count { 0 }
       repositories_checked_failed_count { 0 }
+
+      repositories_synced_count { 10 }
+      repositories_checksummed_count { 10 }
+      repositories_verified_count { 10 }
+      repositories_checked_count { 10 }
+      wikis_synced_count { 10 }
+      wikis_checksummed_count { 10 }
+      wikis_verified_count { 10 }
+      lfs_objects_synced_count { 10 }
+      job_artifacts_synced_count { 10 }
+      attachments_synced_count { 10 }
+      replication_slots_used_count { 10 }
+      container_repositories_synced_count { 10 }
+      design_repositories_synced_count { 10 }
+
+      repositories_count { 10 }
+      wikis_count { 10 }
+      lfs_objects_count { 10 }
+      job_artifacts_count { 10 }
+      attachments_count { 10 }
+      replication_slots_count { 10 }
+      container_repositories_count { 10 }
+      design_repositories_count { 10 }
+
+      GeoNodeStatus.replicator_class_status_fields.each do |field|
+        send(field) { 10 }
+      end
     end
 
     trait :unhealthy do

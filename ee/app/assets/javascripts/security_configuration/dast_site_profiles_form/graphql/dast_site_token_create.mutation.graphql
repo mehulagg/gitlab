@@ -1,5 +1,5 @@
-mutation dastSiteTokenCreate($projectFullPath: ID!, $targetUrl: String!) {
-  dastSiteTokenCreate(input: { projectFullPath: $projectFullPath, targetUrl: $targetUrl }) {
+mutation dastSiteTokenCreate($fullPath: ID!, $targetUrl: String!) {
+  dastSiteTokenCreate(input: { fullPath: $fullPath, targetUrl: $targetUrl }) {
     id
     token
     errors

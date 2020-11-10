@@ -6,7 +6,7 @@ import { apiTasksByTypeData, rawTasksByTypeData } from '../../../mock_data';
 
 let state = null;
 
-describe('Cycle analytics mutations', () => {
+describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
     state = {};
   });

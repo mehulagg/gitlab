@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GraphQL API style guide
 
 This document outlines the style guide for GitLab's [GraphQL API](../api/graphql/index.md).
@@ -126,8 +132,23 @@ Non-nullable fields should only be used when a field is required, very unlikely
 to become optional in the future, and very easy to calculate. An example would
 be `id` fields.
 
+A non-nullable GraphQL schema field is an object type followed by the exclamation point (bang) `!`. Here's an example from the `gitlab_schema.graphql` file:
+
+```graphql
+  id: ProjectID!
+```
+
+Here's an example of a non-nullable GraphQL array:
+
+```graphql
+
+  errors: [String!]!
+```
+
 Further reading:
 
+- [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability).
+- GraphQL documentation on [Object types and fields](https://graphql.org/learn/schema/#object-types-and-fields).
 - [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability)
 - [Using nullability in GraphQL](https://www.apollographql.com/blog/using-nullability-in-graphql-2254f84c4ed7)
 
@@ -683,7 +704,7 @@ end
 ```
 
 Fields can also be authorized against multiple abilities, in which case
-all of ability checks must pass. **Note:** This requires explicitly
+all of ability checks must pass. This requires explicitly
 passing a block to `field`:
 
 ```ruby
@@ -696,7 +717,6 @@ module Types
 end
 ```
 
-NOTE: **Note:**
 If the field's type already [has a particular
 authorization](#type-authorization) then there is no need to add that
 same authorization to the field.
@@ -1385,6 +1405,62 @@ it 'returns a successful response' do
    expect(graphql_mutation_response(:merge_request_set_wip)['errors']).to be_empty
 end
 ```
+
+### Testing tips and tricks
+
+- Avoid false positives:
+
+  Authenticating a user with the `current_user:` argument for `post_graphql`
+  generates more queries on the first request than on subsequent requests on that
+  same user. If you are testing for N+1 queries using
+  [QueryRecorder](query_recorder.md), use a **different** user for each request.
+
+  The below example shows how a test for avoiding N+1 queries should look:
+
+  ```ruby
+  RSpec.describe 'Query.project(fullPath).pipelines' do
+    include GraphqlHelpers
+
+    let(:project) { create(:project) }
+
+    let(:query) do
+      %(
+        {
+          project(fullPath: "#{project.full_path}") {
+            pipelines {
+              nodes {
+                id
+              }
+            }
+          }
+        }
+      )
+    end
+
+    it 'avoids N+1 queries' do
+      first_user = create(:user)
+      second_user = create(:user)
+      create(:ci_pipeline, project: project)
+
+      control_count = ActiveRecord::QueryRecorder.new do
+        post_graphql(query, current_user: first_user)
+      end
+
+      create(:ci_pipeline, project: project)
+
+      expect do
+        post_graphql(query, current_user: second_user)  # use a different user to avoid a false positive from authentication queries
+      end.not_to exceed_query_limit(control_count)
+    end
+  end
+  ```
+
+- Mimic the folder structure of `app/graphql/types`:
+
+  For example, tests for fields on `Types::Ci::PipelineType`
+  in `app/graphql/types/ci/pipeline_type.rb` should live in
+  `spec/requests/api/graphql/ci/pipeline_spec.rb` regardless of the query being
+  used to fetch the pipeline data.
 
 ## Notes about Query flow and GraphQL infrastructure
 

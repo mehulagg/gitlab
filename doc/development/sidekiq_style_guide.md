@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Sidekiq Style Guide
 
 This document outlines various guidelines that should be followed when adding or
@@ -112,7 +118,6 @@ As a general rule, a worker can be considered idempotent if:
 
 A good example of that would be a cache expiration worker.
 
-NOTE: **Note:**
 A job scheduled for an idempotent worker will automatically be
 [deduplicated](#deduplication) when an unstarted job with the same
 arguments is already in the queue.
@@ -152,7 +157,6 @@ end
 It's encouraged to only have the `idempotent!` call in the top-most worker class, even if
 the `perform` method is defined in another class or module.
 
-NOTE: **Note:**
 If the worker class is not marked as idempotent, a cop will fail.
 Consider skipping the cop if you're not confident your job can safely
 run multiple times.
@@ -478,9 +482,7 @@ class ExternalDependencyWorker
 end
 ```
 
-NOTE: **Note:**
-Note that a job cannot be both high urgency and have
-external dependencies.
+A job cannot be both high urgency and have external dependencies.
 
 ## CPU-bound and Memory-bound Workers
 

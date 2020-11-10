@@ -308,8 +308,10 @@ RSpec.describe Group do
   end
 
   describe 'scopes' do
-    let!(:private_group)  { create(:group, :private)  }
-    let!(:internal_group) { create(:group, :internal) }
+    let_it_be(:private_group)  { create(:group, :private)  }
+    let_it_be(:internal_group) { create(:group, :internal) }
+    let_it_be(:user1) { create(:user) }
+    let_it_be(:user2) { create(:user) }
 
     describe 'public_only' do
       subject { described_class.public_only.to_a }
@@ -327,6 +329,27 @@ RSpec.describe Group do
       subject { described_class.non_public_only.to_a }
 
       it { is_expected.to match_array([private_group, internal_group]) }
+    end
+
+    describe 'for_authorized_group_members' do
+      let_it_be(:group_member1) { create(:group_member, source: private_group, user_id: user1.id, access_level: Gitlab::Access::OWNER) }
+
+      it do
+        result = described_class.for_authorized_group_members([user1.id, user2.id])
+
+        expect(result).to match_array([private_group])
+      end
+    end
+
+    describe 'for_authorized_project_members' do
+      let_it_be(:project) { create(:project, group: internal_group) }
+      let_it_be(:project_member1) { create(:project_member, source: project, user_id: user1.id, access_level: Gitlab::Access::DEVELOPER) }
+
+      it do
+        result = described_class.for_authorized_project_members([user1.id, user2.id])
+
+        expect(result).to match_array([internal_group])
+      end
     end
   end
 
@@ -944,23 +967,72 @@ RSpec.describe Group do
       context 'expanded group members' do
         let(:indirect_user) { create(:user) }
 
-        it 'enables two_factor_requirement for subgroup member' do
-          subgroup = create(:group, :nested, parent: group)
-          subgroup.add_user(indirect_user, GroupMember::OWNER)
+        context 'two_factor_requirement is enabled' do
+          context 'two_factor_requirement is also enabled for ancestor group' do
+            it 'enables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
 
-          group.update!(require_two_factor_authentication: true)
+              group.update!(require_two_factor_authentication: true)
 
-          expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+          end
+
+          context 'two_factor_requirement is disabled for ancestor group' do
+            it 'enables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group, require_two_factor_authentication: true)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
+
+              group.update!(require_two_factor_authentication: false)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+
+            it 'enable two_factor_requirement for ancestor group member' do
+              ancestor_group = create(:group)
+              ancestor_group.add_user(indirect_user, GroupMember::OWNER)
+              group.update!(parent: ancestor_group)
+
+              group.update!(require_two_factor_authentication: true)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+          end
         end
 
-        it 'does not enable two_factor_requirement for ancestor group member' do
-          ancestor_group = create(:group)
-          ancestor_group.add_user(indirect_user, GroupMember::OWNER)
-          group.update!(parent: ancestor_group)
+        context 'two_factor_requirement is disabled' do
+          context 'two_factor_requirement is enabled for ancestor group' do
+            it 'enables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
 
-          group.update!(require_two_factor_authentication: true)
+              group.update!(require_two_factor_authentication: true)
 
-          expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+          end
+
+          context 'two_factor_requirement is also disabled for ancestor group' do
+            it 'disables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
+
+              group.update!(require_two_factor_authentication: false)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
+            end
+
+            it 'disables two_factor_requirement for ancestor group member' do
+              ancestor_group = create(:group, require_two_factor_authentication: false)
+              indirect_user.update!(require_two_factor_authentication_from_group: true)
+              ancestor_group.add_user(indirect_user, GroupMember::OWNER)
+
+              group.update!(require_two_factor_authentication: false)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
+            end
+          end
         end
       end
 

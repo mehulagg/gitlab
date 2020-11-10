@@ -22,4 +22,32 @@ RSpec.describe SamlGroupLink do
       it { is_expected.to validate_uniqueness_of(:saml_group_name).scoped_to([:group_id]) }
     end
   end
+
+  describe '.by_id_and_group_id' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:group_link) { create(:saml_group_link, group: group) }
+
+    it 'finds the group link' do
+      results = described_class.by_id_and_group_id(group_link.id, group.id)
+
+      expect(results).to match_array([group_link])
+    end
+
+    context 'with multiple groups and group links' do
+      let_it_be(:group2) { create(:group) }
+      let_it_be(:group_link2) { create(:saml_group_link, group: group2) }
+
+      it 'finds group links within the given groups' do
+        results = described_class.by_id_and_group_id([group_link, group_link2], [group, group2])
+
+        expect(results).to match_array([group_link, group_link2])
+      end
+
+      it 'does not find group links outside the given groups' do
+        results = described_class.by_id_and_group_id([group_link, group_link2], [group])
+
+        expect(results).to match_array([group_link])
+      end
+    end
+  end
 end

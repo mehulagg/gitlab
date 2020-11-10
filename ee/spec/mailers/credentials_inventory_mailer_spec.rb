@@ -23,8 +23,16 @@ RSpec.describe CredentialsInventoryMailer do
 
   describe '#ssh_key_deleted_email' do
     let_it_be(:ssh_key) { create(:personal_key, last_used_at: 3.weeks.ago) }
+    let(:params) do
+      {
+          notification_email: ssh_key.user.notification_email,
+          title: ssh_key.title,
+          last_used_at: ssh_key.last_used_at,
+          created_at: ssh_key.created_at
+      }
+    end
 
-    subject(:email) { described_class.ssh_key_deleted_email(key: ssh_key, deleted_by: administrator) }
+    subject(:email) { described_class.ssh_key_deleted_email(params: params, deleted_by: administrator) }
 
     it { is_expected.to have_subject 'Your SSH key was deleted' }
     it { is_expected.to have_body_text 'The following SSH key was deleted by an administrator, Revoker' }

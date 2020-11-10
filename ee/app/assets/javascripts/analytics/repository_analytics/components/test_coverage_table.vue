@@ -1,7 +1,9 @@
 <script>
 import Vue from 'vue';
-import { GlCard, GlEmptyState, GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
@@ -11,13 +13,14 @@ export default {
   components: {
     GlCard,
     GlEmptyState,
+    GlLink,
     GlSkeletonLoader,
     GlTable,
     SelectProjectsDropdown,
     TimeAgoTooltip,
   },
   apollo: {
-    coverageData: {
+    projects: {
       query: getProjectsTestCoverage,
       debounce: 500,
       variables() {
@@ -28,7 +31,19 @@ export default {
       result({ data }) {
         // Keep data from all queries so that we don't
         // fetch the same data more than once
-        this.allCoverageData = [...this.allCoverageData, ...data.projects.nodes];
+        this.allCoverageData = [
+          ...this.allCoverageData,
+          // Remove the projects that don't have any code coverage
+          ...data.projects.nodes
+            .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
+            .map(project => ({
+              ...project,
+              codeCoveragePath: joinPaths(
+                gon.relative_url_root || '',
+                `/${project.fullPath}/-/graphs/${project.repository.rootRef}/charts`,
+              ),
+            })),
+        ];
       },
       error() {
         this.handleError();
@@ -67,6 +82,17 @@ export default {
     selectedCoverageData() {
       return this.allCoverageData.filter(({ id }) => this.projectIds[id]);
     },
+    sortedCoverageData() {
+      // Sort the table by most recently updated coverage report
+      return [...this.selectedCoverageData].sort((a, b) => {
+        if (a.codeCoverageSummary.lastUpdatedOn > b.codeCoverageSummary.lastUpdatedOn) {
+          return -1;
+        } else if (a.codeCoverageSummary.lastUpdatedOn < b.codeCoverageSummary.lastUpdatedOn) {
+          return 1;
+        }
+        return 0;
+      });
+    },
   },
   methods: {
     handleError() {
@@ -99,19 +125,20 @@ export default {
       label: __('Project'),
     },
     {
-      key: 'coverage',
+      key: 'averageCoverage',
       label: s__('RepositoriesAnalytics|Coverage'),
     },
     {
-      key: 'numberOfCoverages',
-      label: s__('RepositoriesAnalytics|Number of Coverages'),
+      key: 'coverageCount',
+      label: s__('RepositoriesAnalytics|Coverage Jobs'),
     },
     {
-      key: 'lastUpdate',
+      key: 'lastUpdatedOn',
       label: s__('RepositoriesAnalytics|Last Update'),
     },
   ],
   text: {
+    header: s__('RepositoriesAnalytics|Latest test coverage results'),
     emptyStateTitle: s__('RepositoriesAnalytics|Please select projects to display.'),
     emptyStateDescription: s__(
       'RepositoriesAnalytics|Please select a project or multiple projects to display their most recent test coverage data.',
@@ -126,17 +153,21 @@ export default {
     totalWidth: 430,
     totalHeight: 15,
   },
+  averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
 };
 </script>
 <template>
   <gl-card>
     <template #header>
-      <select-projects-dropdown
-        class="gl-w-quarter"
-        @projects-query-error="handleError"
-        @select-all-projects="selectAllProjects"
-        @select-project="toggleProject"
-      />
+      <div class="gl-display-flex gl-justify-content-space-between">
+        <h5>{{ $options.text.header }}</h5>
+        <select-projects-dropdown
+          class="gl-w-quarter"
+          @projects-query-error="handleError"
+          @select-all-projects="selectAllProjects"
+          @select-project="toggleProject"
+        />
+      </div>
     </template>
 
     <template v-if="isLoading">
@@ -164,33 +195,37 @@ export default {
       data-testid="test-coverage-data-table"
       thead-class="thead-white"
       :fields="$options.tableFields"
-      :items="selectedCoverageData"
+      :items="sortedCoverageData"
     >
       <template #head(project)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(coverage)="data">
+      <template #head(averageCoverage)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(numberOfCoverages)="data">
+      <template #head(coverageCount)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(lastUpdate)="data">
+      <template #head(lastUpdatedOn)="data">
         <div>{{ data.label }}</div>
       </template>
 
       <template #cell(project)="{ item }">
-        <div :data-testid="`${item.id}-name`">{{ item.name }}</div>
+        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
+          {{ item.name }}
+        </gl-link>
       </template>
-      <template #cell(coverage)="{ item }">
-        <div :data-testid="`${item.id}-average`">{{ item.codeCoverage.average }}%</div>
+      <template #cell(averageCoverage)="{ item }">
+        <div :data-testid="`${item.id}-average`">
+          {{ $options.averageCoverageFormatter(item.codeCoverageSummary.averageCoverage, 2) }}
+        </div>
       </template>
-      <template #cell(numberOfCoverages)="{ item }">
-        <div :data-testid="`${item.id}-count`">{{ item.codeCoverage.count }}</div>
+      <template #cell(coverageCount)="{ item }">
+        <div :data-testid="`${item.id}-count`">{{ item.codeCoverageSummary.coverageCount }}</div>
       </template>
-      <template #cell(lastUpdate)="{ item }">
+      <template #cell(lastUpdatedOn)="{ item }">
         <time-ago-tooltip
-          :time="item.codeCoverage.lastUpdatedAt"
+          :time="item.codeCoverageSummary.lastUpdatedOn"
           :data-testid="`${item.id}-date`"
         />
       </template>

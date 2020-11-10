@@ -42,7 +42,7 @@ const stageEndpoint = ({ stageId }) =>
 
 jest.mock('~/flash');
 
-describe('Cycle analytics actions', () => {
+describe('Value Stream Analytics actions', () => {
   let state;
   let mock;
 
@@ -755,9 +755,19 @@ describe('Cycle analytics actions', () => {
     let mockCommit;
     let store;
 
+    const selectedAuthor = 'Noam Chomsky';
+    const selectedMilestone = '13.6';
+    const selectedAssigneeList = ['nchom'];
+    const selectedLabelList = ['label 1', 'label 2'];
     const initialData = {
       group: currentGroup,
       projectIds: [1, 2],
+      milestonesPath,
+      labelsPath,
+      selectedAuthor,
+      selectedMilestone,
+      selectedAssigneeList,
+      selectedLabelList,
     };
 
     beforeEach(() => {
@@ -784,6 +794,17 @@ describe('Cycle analytics actions', () => {
     });
 
     describe('with initialData', () => {
+      it.each`
+        action                        | args
+        ${'setPaths'}                 | ${{ milestonesPath, labelsPath, groupPath: currentGroup.fullPath }}
+        ${'filters/initialize'}       | ${{ selectedAuthor, selectedMilestone, selectedAssigneeList, selectedLabelList }}
+        ${'durationChart/setLoading'} | ${true}
+        ${'typeOfWork/setLoading'}    | ${true}
+      `('dispatches $action', async ({ action, args }) => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockDispatch).toHaveBeenCalledWith(action, args);
+      });
+
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
         expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');

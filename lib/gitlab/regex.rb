@@ -22,6 +22,10 @@ module Gitlab
         @composer_package_version_regex ||= %r{^v?(\d+(\.(\d+|x))*(-.+)?)}.freeze
       end
 
+      def composer_dev_version_regex
+        @composer_dev_version_regex ||= %r{(^dev-)|(-dev$)}.freeze
+      end
+
       def package_name_regex
         @package_name_regex ||= %r{\A\@?(([\w\-\.\+]*)\/)*([\w\-\.]+)@?(([\w\-\.\+]*)\/)*([\w\-\.]*)\z}.freeze
       end
@@ -44,6 +48,10 @@ module Gitlab
 
       def maven_app_group_regex
         maven_app_name_regex
+      end
+
+      def nuget_package_name_regex
+        @nuget_package_name_regex ||= %r{\A[-+\.\_a-zA-Z0-9]+\z}.freeze
       end
 
       def nuget_version_regex
@@ -204,7 +212,7 @@ module Gitlab
     # See https://github.com/docker/distribution/blob/master/reference/regexp.go.
     #
     def container_repository_name_regex
-      @container_repository_regex ||= %r{\A[a-z0-9]+((?:[._/]|__|[-]{0,10})[a-z0-9]+)*\Z}
+      @container_repository_regex ||= %r{\A[a-z0-9]+(([._/]|__|-*)[a-z0-9])*\z}
     end
 
     ##

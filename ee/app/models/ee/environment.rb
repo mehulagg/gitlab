@@ -75,6 +75,18 @@ module EE
       result || ::Gitlab::Kubernetes::RolloutStatus.loading
     end
 
+    def ingresses
+      return unless rollout_status_available?
+
+      deployment_platform.ingresses(deployment_namespace)
+    end
+
+    def patch_ingress(ingress, data)
+      return unless rollout_status_available?
+
+      deployment_platform.patch_ingress(deployment_namespace, ingress, data)
+    end
+
     private
 
     def rollout_status_available?

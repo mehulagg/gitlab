@@ -115,6 +115,24 @@ RSpec.describe OperationsHelper, :routing do
         it { is_expected.not_to include(opsgenie_keys) }
       end
     end
+
+    describe 'Multiple Integrations Support' do
+      before do
+        stub_licensed_features(multiple_alert_http_integrations: multi_integrations)
+      end
+
+      context 'when available' do
+        let(:multi_integrations) { true }
+
+        it { is_expected.to include('multi_integrations' => 'true') }
+      end
+
+      context 'when not available' do
+        let(:multi_integrations) { false }
+
+        it { is_expected.to include('multi_integrations' => 'false') }
+      end
+    end
   end
 
   describe '#operations_settings_data' do

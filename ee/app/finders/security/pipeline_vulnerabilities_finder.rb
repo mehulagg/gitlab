@@ -75,7 +75,7 @@ module Security
     def normalize_report_findings(report_findings, vulnerabilities)
       report_findings.map do |report_finding|
         finding_hash = report_finding.to_hash
-          .except(:compare_key, :identifiers, :location, :scanner)
+          .except(:compare_key, :identifiers, :location, :scanner, :links)
 
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
@@ -84,6 +84,9 @@ module Security
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
+        finding.finding_links = report_finding.links.map do |link|
+          Vulnerabilities::FindingLink.new(link.to_hash)
+        end
         finding.identifiers = report_finding.identifiers.map do |identifier|
           Vulnerabilities::Identifier.new(identifier.to_hash)
         end

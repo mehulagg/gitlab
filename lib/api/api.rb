@@ -161,6 +161,7 @@ module API
       mount ::API::Commits
       mount ::API::CommitStatuses
       mount ::API::ContainerRegistryEvent
+      mount ::API::ContainerRepositories
       mount ::API::DeployKeys
       mount ::API::DeployTokens
       mount ::API::Deployments
@@ -185,6 +186,7 @@ module API
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
       mount ::API::IssueLinks
+      mount ::API::Invitations
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -236,6 +238,7 @@ module API
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
       mount ::API::Terraform::StateVersion
+      mount ::API::PersonalAccessTokens
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
@@ -280,7 +283,7 @@ module API
       end
     end
 
-    route :any, '*path' do
+    route :any, '*path', feature_category: :not_owned do
       error!('404 Not Found', 404)
     end
   end

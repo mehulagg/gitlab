@@ -5,13 +5,20 @@ module Gitlab
     module HLLRedisCounter
       DEFAULT_WEEKLY_KEY_EXPIRY_LENGTH = 6.weeks
       DEFAULT_DAILY_KEY_EXPIRY_LENGTH = 29.days
-      DEFAULT_REDIS_SLOT = ''.freeze
+      DEFAULT_REDIS_SLOT = ''
 
-      UnknownEvent = Class.new(StandardError)
-      UnknownAggregation = Class.new(StandardError)
+      EventError = Class.new(StandardError)
+      UnknownEvent = Class.new(EventError)
+      UnknownAggregation = Class.new(EventError)
+      AggregationMismatch = Class.new(EventError)
+      SlotMismatch = Class.new(EventError)
+      CategoryMismatch = Class.new(EventError)
+      UnknownAggregationOperator = Class.new(EventError)
 
-      KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events.yml'.freeze
+      KNOWN_EVENTS_PATH = File.expand_path('known_events/*.yml', __dir__)
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
+      AGGREGATED_METRICS_PATH = File.expand_path('aggregated_metrics/*.yml', __dir__)
+      ALLOWED_METRICS_AGGREGATIONS = %w[ANY].freeze
 
       # Track event on entity_id
       # Increment a Redis HLL counter for unique event_name and entity_id
@@ -38,23 +45,17 @@ module Gitlab
 
           event = event_for(event_name)
 
-          raise UnknownEvent.new("Unknown event #{event_name}") unless event.present?
+          raise UnknownEvent, "Unknown event #{event_name}" unless event.present?
 
           Gitlab::Redis::HLL.add(key: redis_key(event, time), value: entity_id, expiry: expiry(event))
         end
 
         def unique_events(event_names:, start_date:, end_date:)
-          events = events_for(Array(event_names).map(&:to_s))
-
-          raise 'Events should be in same slot' unless events_in_same_slot?(events)
-          raise 'Events should be in same category' unless events_in_same_category?(events)
-          raise 'Events should have same aggregation level' unless events_same_aggregation?(events)
-
-          aggregation = events.first[:aggregation]
-
-          keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date)
-
-          redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
+          count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date) do |events|
+            raise SlotMismatch, events unless events_in_same_slot?(events)
+            raise CategoryMismatch, events unless events_in_same_category?(events)
+            raise AggregationMismatch, events unless events_same_aggregation?(events)
+          end
         end
 
         def categories
@@ -72,8 +73,8 @@ module Gitlab
             events_names = events_for_category(category)
 
             event_results = events_names.each_with_object({}) do |event, hash|
-              hash["#{event}_weekly"] = unique_events(event_names: event, start_date: 7.days.ago.to_date, end_date: Date.current)
-              hash["#{event}_monthly"] = unique_events(event_names: event, start_date: 4.weeks.ago.to_date, end_date: Date.current)
+              hash["#{event}_weekly"] = unique_events(event_names: [event], start_date: 7.days.ago.to_date, end_date: Date.current)
+              hash["#{event}_monthly"] = unique_events(event_names: [event], start_date: 4.weeks.ago.to_date, end_date: Date.current)
             end
 
             if eligible_for_totals?(events_names)
@@ -89,7 +90,47 @@ module Gitlab
           event_for(event_name).present?
         end
 
+        def aggregated_metrics_monthly_data
+          aggregated_metrics.to_h do |aggregation|
+            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 4.weeks.ago.to_date, end_date: Date.current)]
+          end
+        end
+
+        def aggregated_metrics_weekly_data
+          aggregated_metrics.to_h do |aggregation|
+            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 7.days.ago.to_date, end_date: Date.current)]
+          end
+        end
+
+        def known_events
+          @known_events ||= load_events(KNOWN_EVENTS_PATH)
+        end
+
+        def aggregated_metrics
+          @aggregated_metrics ||= load_events(AGGREGATED_METRICS_PATH)
+        end
+
         private
+
+        def calculate_count_for_aggregation(aggregation, start_date:, end_date:)
+          validate_aggregation_operator!(aggregation[:operator])
+
+          count_unique_events(event_names: aggregation[:events], start_date: start_date, end_date: end_date) do |events|
+            raise SlotMismatch, events unless events_in_same_slot?(events)
+            raise AggregationMismatch, events unless events_same_aggregation?(events)
+          end
+        end
+
+        def count_unique_events(event_names:, start_date:, end_date:)
+          events = events_for(Array(event_names).map(&:to_s))
+
+          yield events if block_given?
+
+          aggregation = events.first[:aggregation]
+
+          keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date)
+          redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
+        end
 
         # Allow to add totals for events that are in the same redis slot, category and have the same aggregation level
         # and if there are more than 1 event
@@ -108,8 +149,14 @@ module Gitlab
           end
         end
 
-        def known_events
-          @known_events ||= YAML.load_file(Rails.root.join(KNOWN_EVENTS_PATH)).map(&:with_indifferent_access)
+        def load_events(wildcard)
+          Dir[wildcard].each_with_object([]) do |path, events|
+            events.push(*load_yaml_from_path(path))
+          end
+        end
+
+        def load_yaml_from_path(path)
+          YAML.safe_load(File.read(path))&.map(&:with_indifferent_access)
         end
 
         def known_events_names
@@ -177,6 +224,12 @@ module Gitlab
           (start_date.to_date..end_date.to_date).map do |date|
             events.map { |event| redis_key(event, date) }
           end.flatten
+        end
+
+        def validate_aggregation_operator!(operator)
+          return true if ALLOWED_METRICS_AGGREGATIONS.include?(operator)
+
+          raise UnknownAggregationOperator.new("Events should be aggregated with one of operators #{ALLOWED_METRICS_AGGREGATIONS}")
         end
 
         def weekly_redis_keys(events:, start_date:, end_date:)

@@ -33,8 +33,7 @@ module DastSiteValidations
     end
 
     def make_http_request!
-      uri, _ = Gitlab::UrlBlocker.validate!(dast_site_validation.validation_url)
-      Gitlab::HTTP.get(uri)
+      Gitlab::HTTP.get(dast_site_validation.validation_url)
     end
 
     def token_found?(response)
@@ -42,7 +41,7 @@ module DastSiteValidations
 
       case dast_site_validation.validation_strategy
       when 'text_file'
-        response.body.include?(token)
+        response.content_type == 'text/plain' && response.body == token
       when 'header'
         response.headers[DastSiteValidation::HEADER] == token
       else

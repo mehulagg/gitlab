@@ -12,7 +12,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageTimeSumma
   subject { described_class.new(group, options: { from: from, to: to, current_user: user }).data }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   describe '#lead_time' do

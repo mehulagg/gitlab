@@ -32,7 +32,7 @@ module Gitlab
       end
 
       # NOTE: The feature flag `disallow_to_create_merge_request_pipelines_in_target_project`
-      # is a safe switch to disable the feature for a parituclar project when something went wrong,
+      # is a safe switch to disable the feature for a particular project when something went wrong,
       # therefore it's not supposed to be enabled by default.
       def self.disallow_to_create_merge_request_pipelines_in_target_project?(target_project)
         ::Feature.enabled?(:ci_disallow_to_create_merge_request_pipelines_in_target_project, target_project)
@@ -63,8 +63,16 @@ module Gitlab
         ::Feature.enabled?(:ci_manual_bridges, project, default_enabled: true)
       end
 
+      def self.auto_rollback_available?(project)
+        ::Feature.enabled?(:cd_auto_rollback, project) && project&.feature_available?(:auto_rollback)
+      end
+
       def self.seed_block_run_before_workflow_rules_enabled?(project)
         ::Feature.enabled?(:ci_seed_block_run_before_workflow_rules, project, default_enabled: false)
+      end
+
+      def self.ci_pipeline_editor_page_enabled?(project)
+        ::Feature.enabled?(:ci_pipeline_editor_page, project, default_enabled: false)
       end
     end
   end

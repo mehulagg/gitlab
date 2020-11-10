@@ -22,6 +22,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['default_ci_config_path']).to be_nil
       expect(json_response['sourcegraph_enabled']).to be_falsey
       expect(json_response['sourcegraph_url']).to be_nil
+      expect(json_response['secret_detection_token_revocation_url']).to be_nil
       expect(json_response['sourcegraph_public_only']).to be_truthy
       expect(json_response['default_project_visibility']).to be_a String
       expect(json_response['default_snippet_visibility']).to be_a String
@@ -40,6 +41,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
       expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(false)
     end
   end
 
@@ -105,7 +107,7 @@ RSpec.describe API::Settings, 'Settings' do
             enforce_terms: true,
             terms: 'Hello world!',
             performance_bar_allowed_group_path: group.full_path,
-            diff_max_patch_bytes: 150_000,
+            diff_max_patch_bytes: 300_000,
             default_branch_protection: ::Gitlab::Access::PROTECTION_DEV_CAN_MERGE,
             local_markdown_version: 3,
             allow_local_requests_from_web_hooks_and_services: true,
@@ -148,7 +150,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['enforce_terms']).to be(true)
         expect(json_response['terms']).to eq('Hello world!')
         expect(json_response['performance_bar_allowed_group_id']).to eq(group.id)
-        expect(json_response['diff_max_patch_bytes']).to eq(150_000)
+        expect(json_response['diff_max_patch_bytes']).to eq(300_000)
         expect(json_response['default_branch_protection']).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
         expect(json_response['local_markdown_version']).to eq(3)
         expect(json_response['allow_local_requests_from_web_hooks_and_services']).to eq(true)
@@ -421,6 +423,14 @@ RSpec.describe API::Settings, 'Settings' do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['abuse_notification_email']).to eq('test@example.com')
+    end
+
+    it 'supports setting require_admin_approval_after_user_signup' do
+      put api('/application/settings', admin),
+          params: { require_admin_approval_after_user_signup: true }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
     end
 
     context "missing sourcegraph_url value when sourcegraph_enabled is true" do

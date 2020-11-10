@@ -68,7 +68,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gi
         end
 
         it 'sets resync_repository_was_scheduled_at to the scheduled time' do
-          Timecop.freeze do
+          freeze_time do
             subject.process
             reloaded_registry = registry.reload
 
@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gi
         end
 
         it 'sets resync_wiki_was_scheduled_at to the scheduled time' do
-          Timecop.freeze do
+          freeze_time do
             subject.process
             reloaded_registry = registry.reload
 

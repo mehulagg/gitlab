@@ -33,6 +33,10 @@ RSpec.describe Security::StoreReportsService do
         subject
       end
 
+      it 'marks the project as vulnerable' do
+        expect { subject }.to change { project.project_setting.has_vulnerabilities }.from(false).to(true)
+      end
+
       context 'when StoreReportService returns an error for a report' do
         let(:reports) { Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
         let(:sast_report) { reports.get_report('sast', sast_artifact) }

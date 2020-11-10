@@ -10,6 +10,12 @@ RSpec.describe Gitlab::Sitemaps::SitemapFile do
   end
 
   describe '#render' do
+    it 'returns if no elements has been provided' do
+      expect(File).not_to receive(:read)
+
+      described_class.new.save # rubocop: disable Rails/SaveBang
+    end
+
     it 'generates a valid sitemap file' do
       freeze_time do
         content = subject.render

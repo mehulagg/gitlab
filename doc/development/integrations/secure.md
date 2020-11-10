@@ -1,7 +1,13 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Security scanner integration
 
 Integrating a security scanner into GitLab consists of providing end users
-with a [CI job definition](../../ci/yaml/README.md#introduction)
+with a [CI job definition](../../ci/yaml/README.md)
 they can add to their CI configuration files to scan their GitLab projects.
 This CI job should then output its results in a GitLab-specified format. These results are then
 automatically presented in various places in GitLab, such as the Pipeline view, Merge Request

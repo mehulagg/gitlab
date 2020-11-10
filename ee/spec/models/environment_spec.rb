@@ -229,4 +229,78 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
       end
     end
   end
+
+  describe '#ingresses' do
+    subject { environment.ingresses }
+
+    let(:deployment_platform) { double(:deployment_platform) }
+    let(:deployment_namespace) { 'production' }
+
+    before do
+      allow(environment).to receive(:deployment_platform) { deployment_platform }
+      allow(environment).to receive(:deployment_namespace) { deployment_namespace }
+    end
+
+    context 'when rollout status is available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { true }
+      end
+
+      it 'fetches ingresses from the deployment platform' do
+        expect(deployment_platform).to receive(:ingresses).with(deployment_namespace)
+
+        subject
+      end
+    end
+
+    context 'when rollout status is not available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { false }
+      end
+
+      it 'does nothing' do
+        expect(deployment_platform).not_to receive(:ingresses)
+
+        subject
+      end
+    end
+  end
+
+  describe '#patch_ingress' do
+    subject { environment.patch_ingress(ingress, data) }
+
+    let(:ingress) { double(:ingress) }
+    let(:data) { double(:data) }
+    let(:deployment_platform) { double(:deployment_platform) }
+    let(:deployment_namespace) { 'production' }
+
+    before do
+      allow(environment).to receive(:deployment_platform) { deployment_platform }
+      allow(environment).to receive(:deployment_namespace) { deployment_namespace }
+    end
+
+    context 'when rollout status is available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { true }
+      end
+
+      it 'fetches ingresses from the deployment platform' do
+        expect(deployment_platform).to receive(:patch_ingress).with(deployment_namespace, ingress, data)
+
+        subject
+      end
+    end
+
+    context 'when rollout status is not available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { false }
+      end
+
+      it 'does nothing' do
+        expect(deployment_platform).not_to receive(:patch_ingress)
+
+        subject
+      end
+    end
+  end
 end

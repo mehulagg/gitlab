@@ -35,7 +35,7 @@
       .card-footer.p-3
         .float-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current_plan) }
           - if show_contact_sales_button?(purchase_link.action)
-            = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success btn-inverted", data: { **experiment_tracking_data_for_button_click('contact_sales') }
+            = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success-secondary gl-button", data: { **experiment_tracking_data_for_button_click('contact_sales') }
           - upgrade_button_class = "disabled" if is_current_plan && !namespace.trial_active?
           - cta_class = '-new' if use_new_purchase_flow?(namespace)
-          = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan, current_plan), class: "btn btn-success #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }
+          = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan, current_plan), class: "btn btn-success gl-button #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }

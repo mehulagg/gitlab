@@ -27,7 +27,7 @@ export default {
     <h4 data-testid="test-coverage-header">
       {{ $options.text.codeCoverageHeader }}
     </h4>
-    <test-coverage-table v-if="shouldShowCoverageReport" />
+    <test-coverage-table v-if="shouldShowCoverageReport" class="gl-mb-5" />
     <download-test-coverage />
   </div>
 </template>

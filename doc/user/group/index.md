@@ -130,7 +130,7 @@ give a user access to all projects in the group with one action.
 
 Add members to a group by navigating to the group's dashboard and clicking **Members**.
 
-![add members to group](img/add_new_members.png)
+![add members to group](img/add_new_members_v13_6.png)
 
 Select the [permission level](../permissions.md#permissions), and add the new member. You can also set the expiring date for that user; this is the date on which they will no longer have access to your group.
 
@@ -375,9 +375,9 @@ In GitLab [8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) and 
 
 1. Go to your group's **Members** page.
 1. Select the pencil icon in the row for the user you are editing.
-1. Select the orange `Change permissions` button.
+1. Select the brown `Edit permissions` button in the modal.
 
-![Setting manual permissions](img/manual_permissions_v13_1.png)
+![Setting manual permissions](img/manual_permissions_v13_6.png)
 
 Now you will be able to edit the user's permissions from the **Members** page.
 
@@ -422,7 +422,7 @@ For updates, you can follow:
 - [The epic tracking feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
 - [The issue for adding the ability to move group wikis using the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
 
-### Enable or disable group wikis **(CORE ONLY)**
+### Enable or disable group wikis **(PREMIUM ONLY)**
 
 Group wikis are under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -518,6 +518,23 @@ If you want to retain ownership over the original namespace and
 protect the URL redirects, then instead of changing a group's path or renaming a
 username, you can create a new group and transfer projects to it.
 
+### Group repository settings
+
+You can change settings that are specific to repositories in your group.
+
+#### Custom initial branch name **(CORE ONLY)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
+
+By default, when you create a new project in GitLab, the initial branch is called `master`.
+For groups, a group administrator can customize the initial branch name to something
+else. This way, every new project created under that group from then on will start from the custom branch name rather than `master`. To do so:
+
+1. Go to the **Group page > Settings > Repository** and expand **Default initial
+   branch name**.
+1. Change the default initial branch to a custom name of your choice.
+1. **Save Changes**.
+
 ### Remove a group
 
 To remove a group and its contents:
@@ -530,7 +547,10 @@ To remove a group and its contents:
 This action either:
 
 - Removes the group, and also queues a background job to delete all projects in that group.
-- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/premium/) or higher tiers, marks a group for deletion. The deletion will happen 7 days later by default, but this can be changed in the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/premium/) or higher tiers, this action adds a background job to mark a group for deletion. By default, the job schedules the deletion 7 days in the future. You can modify this waiting period through the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+
+Since [GitLab 13.6](https://gitlab.com/gitlab-org/gitlab/-/issues/39504), if the user who sets up the deletion leaves or is otherwise removed from the group before the
+actual deletion happens, the job is cancelled, and the group is no longer scheduled for deletion.
 
 ### Restore a group **(PREMIUM)**
 
@@ -613,6 +633,8 @@ To enable this feature:
 1. Expand the **Permissions, LFS, 2FA** section, and enter IP address ranges into **Allow access to the following IP addresses** field.
 1. Click **Save changes**.
 
+![Domain restriction by IP address](img/restrict-by-ip.gif)
+
 #### Allowed domain restriction **(PREMIUM)**
 
 >- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7297) in [GitLab Premium and Silver](https://about.gitlab.com/pricing/) 12.2.
@@ -640,6 +662,8 @@ To enable this feature:
 1. Navigate to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section, and enter the domain names into **Restrict membership by email** field.
 1. Click **Save changes**.
+
+![Domain restriction by email](img/restrict-by-email.gif)
 
 This will enable the domain-checking for all new users added to the group from this moment on.
 

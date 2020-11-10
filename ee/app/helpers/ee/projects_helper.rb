@@ -39,7 +39,25 @@ module EE
         nav_tabs << :project_insights
       end
 
+      if can?(current_user, :read_requirement, project)
+        nav_tabs << :requirements
+      end
+
       nav_tabs
+    end
+
+    override :project_permissions_settings
+    def project_permissions_settings(project)
+      super.merge(
+        requirementsAccessLevel: project.requirements_access_level
+      )
+    end
+
+    override :project_permissions_panel_data
+    def project_permissions_panel_data(project)
+      super.merge(
+        requirementsAvailable: project.feature_available?(:requirements)
+      )
     end
 
     override :default_url_to_repo

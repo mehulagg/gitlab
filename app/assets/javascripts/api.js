@@ -70,6 +70,7 @@ const Api = {
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
   billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
+  containerRegistryDetailsPath: '/api/:version/registry/repositories/:id/',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -104,6 +105,11 @@ const Api = {
   deleteProjectPackage(projectId, packageId) {
     const url = this.buildProjectPackageUrl(projectId, packageId);
     return axios.delete(url);
+  },
+
+  containerRegistryDetails(registryId, options = {}) {
+    const url = Api.buildUrl(this.containerRegistryDetailsPath).replace(':id', registryId);
+    return axios.get(url, options);
   },
 
   groupMembers(id, options) {
@@ -610,12 +616,12 @@ const Api = {
     return axios.get(url);
   },
 
-  pipelineJobs(projectId, pipelineId) {
+  pipelineJobs(projectId, pipelineId, params) {
     const url = Api.buildUrl(this.pipelineJobsPath)
       .replace(':id', encodeURIComponent(projectId))
       .replace(':pipeline_id', encodeURIComponent(pipelineId));
 
-    return axios.get(url);
+    return axios.get(url, { params });
   },
 
   // Return all pipelines for a project or filter by query params
@@ -735,6 +741,12 @@ const Api = {
     const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
 
     return axios.get(url, { params: { page } });
+  },
+
+  searchFeatureFlagUserLists(id, search) {
+    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
+
+    return axios.get(url, { params: { search } });
   },
 
   createFeatureFlagUserList(id, list) {

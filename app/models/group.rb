@@ -98,6 +98,19 @@ class Group < Namespace
 
   scope :by_id, ->(groups) { where(id: groups) }
 
+  scope :for_authorized_group_members, -> (user_ids) do
+    joins(:group_members)
+      .where("members.user_id IN (?)", user_ids)
+      .where("access_level >= ?", Gitlab::Access::GUEST)
+  end
+
+  scope :for_authorized_project_members, -> (user_ids) do
+    joins(projects: :project_authorizations)
+      .where("project_authorizations.user_id IN (?)", user_ids)
+  end
+
+  delegate :default_branch_name, to: :namespace_settings
+
   class << self
     def sort_by_attribute(method)
       if method == 'storage_size_desc'
@@ -576,7 +589,7 @@ class Group < Namespace
   def update_two_factor_requirement
     return unless saved_change_to_require_two_factor_authentication? || saved_change_to_two_factor_grace_period?
 
-    members_with_descendants.find_each(&:update_two_factor_requirement)
+    direct_and_indirect_members.find_each(&:update_two_factor_requirement)
   end
 
   def path_changed_hook

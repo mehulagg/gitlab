@@ -223,7 +223,7 @@ RSpec.describe Burndown do
     end
 
     it 'avoids N+1 database queries' do
-      Timecop.freeze(milestone.due_date) do
+      travel_to(milestone.due_date) do
         create(:issue, milestone: milestone, weight: 2, project: project, author: user)
 
         control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do

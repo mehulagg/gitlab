@@ -1,5 +1,12 @@
 <script>
-import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
+import {
+  GlLink,
+  GlSprintf,
+  GlModalDirective,
+  GlButton,
+  GlIcon,
+  GlKeysetPagination,
+} from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
@@ -9,18 +16,20 @@ import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { formatUsageSize, parseGetStorageResults } from '../utils';
+import { PROJECTS_PER_PAGE } from '../constants';
 
 export default {
   name: 'StorageCounterApp',
   components: {
-    ProjectsTable,
     GlLink,
+    GlIcon,
     GlButton,
     GlSprintf,
-    GlIcon,
-    StorageInlineAlert,
     UsageGraph,
+    ProjectsTable,
     UsageStatistics,
+    StorageInlineAlert,
+    GlKeysetPagination,
     TemporaryStorageIncreaseModal,
   },
   directives: {
@@ -53,20 +62,27 @@ export default {
       variables() {
         return {
           fullPath: this.namespacePath,
+          searchTerm: this.searchTerm,
           withExcessStorageData: this.isAdditionalStorageFlagEnabled,
+          first: PROJECTS_PER_PAGE,
         };
       },
       update: parseGetStorageResults,
+      result() {
+        this.firstFetch = false;
+      },
     },
   },
   data() {
     return {
       namespace: {},
+      searchTerm: '',
+      firstFetch: true,
     };
   },
   computed: {
     namespaceProjects() {
-      return this.namespace?.projects ?? [];
+      return this.namespace?.projects?.data ?? [];
     },
     isStorageIncreaseModalVisible() {
       return parseBoolean(this.isTemporaryStorageIncreaseVisible);
@@ -90,11 +106,57 @@ export default {
         additionalPurchasedStorageSize: this.namespace.additionalPurchasedStorageSize,
       };
     },
+    isQueryLoading() {
+      return this.$apollo.queries.namespace.loading;
+    },
+    pageInfo() {
+      return this.namespace.projects?.pageInfo ?? {};
+    },
     shouldShowStorageInlineAlert() {
-      return this.isAdditionalStorageFlagEnabled && !this.$apollo.queries.namespace.loading;
+      if (this.firstFetch) {
+        // for initial load check if the data fetch is done (isQueryLoading)
+        return this.isAdditionalStorageFlagEnabled && !this.isQueryLoading;
+      }
+      // for all subsequent queries the storage inline alert doesn't
+      // have to be re-rendered as the data from graphql will remain
+      // the same.
+      return this.isAdditionalStorageFlagEnabled;
+    },
+    showPagination() {
+      return Boolean(this.pageInfo?.hasPreviousPage || this.pageInfo?.hasNextPage);
     },
   },
-
+  methods: {
+    handleSearch(input) {
+      // if length === 0 clear the search, if length > 2 update the search term
+      if (input.length === 0 || input.length > 2) {
+        this.searchTerm = input;
+      }
+    },
+    fetchMoreProjects(vars) {
+      this.$apollo.queries.namespace.fetchMore({
+        variables: {
+          fullPath: this.namespacePath,
+          withExcessStorageData: this.isAdditionalStorageFlagEnabled,
+          first: PROJECTS_PER_PAGE,
+          ...vars,
+        },
+        updateQuery(previousResult, { fetchMoreResult }) {
+          return fetchMoreResult;
+        },
+      });
+    },
+    onPrev(before) {
+      if (this.pageInfo?.hasPreviousPage) {
+        this.fetchMoreProjects({ before });
+      }
+    },
+    onNext(after) {
+      if (this.pageInfo?.hasNextPage) {
+        this.fetchMoreProjects({ after });
+      }
+    },
+  },
   modalId: 'temporary-increase-storage-modal',
 };
 </script>
@@ -171,8 +233,13 @@ export default {
     </div>
     <projects-table
       :projects="namespaceProjects"
+      :is-loading="isQueryLoading"
       :additional-purchased-storage-size="namespace.additionalPurchasedStorageSize || 0"
+      @search="handleSearch"
     />
+    <div class="gl-display-flex gl-justify-content-center gl-mt-5">
+      <gl-keyset-pagination v-if="showPagination" v-bind="pageInfo" @prev="onPrev" @next="onNext" />
+    </div>
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
       :limit="formattedNamespaceLimit"

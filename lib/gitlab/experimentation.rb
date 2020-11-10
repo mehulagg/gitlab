@@ -33,10 +33,6 @@ require 'zlib'
 module Gitlab
   module Experimentation
     EXPERIMENTS = {
-      signup_flow: {
-        tracking_category: 'Growth::Acquisition::Experiment::SignUpFlow',
-        use_backwards_compatible_subject_index: true
-      },
       onboarding_issues: {
         tracking_category: 'Growth::Conversion::Experiment::OnboardingIssues',
         use_backwards_compatible_subject_index: true
@@ -91,15 +87,13 @@ module Gitlab
       }
     }.freeze
 
-    GROUP_CONTROL = :control
-    GROUP_EXPERIMENTAL = :experimental
-
     # Controller concern that checks if an `experimentation_subject_id cookie` is present and sets it if absent.
     # Used for A/B testing of experimental features. Exposes the `experiment_enabled?(experiment_name)` method
     # to controllers and views. It returns true when the experiment is enabled and the user is selected as part
     # of the experimental group.
     #
     module ControllerConcern
+      include ::Gitlab::Experimentation::GroupTypes
       extend ActiveSupport::Concern
 
       included do

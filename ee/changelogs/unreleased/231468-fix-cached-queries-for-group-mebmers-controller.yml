@@ -1,0 +1,5 @@
+---
+title: Fix cached queries for Groups::GroupMembersController#index
+merge_request: 44626
+author:
+type: performance

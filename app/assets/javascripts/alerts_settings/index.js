@@ -29,28 +29,25 @@ export default el => {
     opsgenieMvcEnabled,
     opsgenieMvcTargetUrl,
     projectPath,
+    multiIntegrations,
   } = el.dataset;
 
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(
-      {},
-      {
-        cacheConfig: {},
-      },
-    ),
-  });
+  const resolvers = {};
 
-  apolloProvider.clients.defaultClient.cache.writeData({
-    data: {},
+  const apolloProvider = new VueApollo({
+    defaultClient: createDefaultClient(resolvers, {
+      cacheConfig: {},
+      assumeImmutableResults: true,
+    }),
   });
 
   return new Vue({
     el,
     provide: {
       prometheus: {
-        activated: parseBoolean(prometheusActivated),
-        prometheusUrl,
-        authorizationKey: prometheusAuthorizationKey,
+        active: parseBoolean(prometheusActivated),
+        url: prometheusUrl,
+        token: prometheusAuthorizationKey,
         prometheusFormPath,
         prometheusResetKeyPath,
         prometheusApiUrl,
@@ -58,18 +55,19 @@ export default el => {
       generic: {
         alertsSetupUrl,
         alertsUsageUrl,
-        activated: parseBoolean(activatedStr),
+        active: parseBoolean(activatedStr),
         formPath,
-        authorizationKey,
+        token: authorizationKey,
         url,
       },
       opsgenie: {
         formPath: opsgenieMvcFormPath,
-        activated: parseBoolean(opsgenieMvcEnabled),
+        active: parseBoolean(opsgenieMvcEnabled),
         opsgenieMvcTargetUrl,
         opsgenieMvcIsAvailable: parseBoolean(opsgenieMvcAvailable),
       },
       projectPath,
+      multiIntegrations: parseBoolean(multiIntegrations),
     },
     apolloProvider,
     components: {

@@ -5,6 +5,8 @@ module Resolvers
     class RequirementsResolver < BaseResolver
       include LooksAhead
 
+      type ::Types::RequirementsManagement::RequirementType.connection_type, null: true
+
       argument :iid, GraphQL::ID_TYPE,
                required: false,
                description: 'IID of the requirement, e.g., "1"'
@@ -28,8 +30,6 @@ module Resolvers
       argument :author_username, [GraphQL::STRING_TYPE],
                required: false,
                description: 'Filter requirements by author username'
-
-      type Types::RequirementsManagement::RequirementType, null: true
 
       def resolve_with_lookahead(**args)
         # The project could have been loaded in batch by `BatchLoader`.

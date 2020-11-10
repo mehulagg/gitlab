@@ -1,181 +1,187 @@
-import Vue from 'vue';
-import weight from 'ee/sidebar/components/weight/weight.vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
+import { shallowMount } from '@vue/test-utils';
 import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
+import Weight from 'ee/sidebar/components/weight/weight.vue';
 import eventHub from '~/sidebar/event_hub';
 import { ENTER_KEY_CODE } from '~/lib/utils/keycodes';
 
-const DEFAULT_PROPS = {
-  weightNoneValue: 'None',
-};
-
 describe('Weight', () => {
-  let vm;
-  let Weight;
+  let wrapper;
 
-  beforeEach(() => {
-    Weight = Vue.extend(weight);
-  });
+  const defaultProps = {
+    weightNoneValue: 'None',
+  };
+
+  const createComponent = (props = {}) => {
+    wrapper = shallowMount(Weight, {
+      propsData: { ...defaultProps, ...props },
+    });
+  };
 
   afterEach(() => {
-    vm.$destroy();
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
+  const containsCollapsedLoadingIcon = () => wrapper.contains('.js-weight-collapsed-loading-icon');
+  const containsLoadingIcon = () => wrapper.contains('.js-weight-loading-icon');
+  const findCollapsedLabel = () => wrapper.find('.js-weight-collapsed-weight-label');
+  const findLabelValue = () => wrapper.find('.js-weight-weight-label-value');
+  const findLabelNoValue = () => wrapper.find('.js-weight-weight-label .no-value');
+  const findCollapsedBlock = () => wrapper.find('.js-weight-collapsed-block');
+  const findEditLink = () => wrapper.find('.js-weight-edit-link');
+  const findRemoveLink = () => wrapper.find('.js-weight-remove-link');
+  const containsEditableField = () => wrapper.contains({ ref: 'editableField' });
+  const containsInputError = () => wrapper.contains('.gl-field-error');
+
   it('shows loading spinner when fetching', () => {
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+    createComponent({
       fetching: true,
     });
 
-    expect(vm.$el.querySelector('.js-weight-collapsed-loading-icon')).not.toBeNull();
-    expect(vm.$el.querySelector('.js-weight-loading-icon')).not.toBeNull();
+    expect(containsCollapsedLoadingIcon()).toBe(true);
+    expect(containsLoadingIcon()).toBe(true);
   });
 
   it('shows loading spinner when loading', () => {
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+    createComponent({
       fetching: false,
       loading: true,
     });
 
     // We show the value in the collapsed view instead of the loading icon
-    expect(vm.$el.querySelector('.js-weight-collapsed-loading-icon')).toBeNull();
-    expect(vm.$el.querySelector('.js-weight-loading-icon')).not.toBeNull();
+    expect(containsCollapsedLoadingIcon()).toBe(false);
+    expect(containsLoadingIcon()).toBe(true);
   });
 
   it('shows weight value', () => {
-    const WEIGHT = 3;
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+    const expectedWeight = 3;
+
+    createComponent({
       fetching: false,
-      weight: WEIGHT,
+      weight: expectedWeight,
     });
 
-    expect(vm.$el.querySelector('.js-weight-collapsed-weight-label').textContent.trim()).toBe(
-      `${WEIGHT}`,
-    );
-
-    expect(vm.$el.querySelector('.js-weight-weight-label-value').textContent.trim()).toBe(
-      `${WEIGHT}`,
-    );
+    expect(findCollapsedLabel().text()).toBe(`${expectedWeight}`);
+    expect(findLabelValue().text()).toBe(`${expectedWeight}`);
   });
 
   it('shows weight no-value', () => {
-    const WEIGHT = null;
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+    const expectedWeight = null;
+
+    createComponent({
       fetching: false,
-      weight: WEIGHT,
+      weight: expectedWeight,
     });
 
-    expect(vm.$el.querySelector('.js-weight-collapsed-weight-label').textContent.trim()).toBe(
-      'None',
-    );
-
-    expect(vm.$el.querySelector('.js-weight-weight-label .no-value').textContent.trim()).toBe(
-      'None',
-    );
+    expect(findCollapsedLabel().text()).toBe(defaultProps.weightNoneValue);
+    expect(findLabelNoValue().text()).toBe(defaultProps.weightNoneValue);
   });
 
-  it('adds `collapse-after-update` class when clicking the collapsed block', () => {
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
-    });
+  it('adds `collapse-after-update` class when clicking the collapsed block', async () => {
+    createComponent();
 
-    vm.$el.querySelector('.js-weight-collapsed-block').click();
+    findCollapsedBlock().trigger('click');
 
-    return vm.$nextTick().then(() => {
-      expect(vm.$el.classList.contains('collapse-after-update')).toBe(true);
-    });
+    await wrapper.vm.$nextTick;
+
+    expect(wrapper.classes()).toContain('collapse-after-update');
   });
 
-  it('shows dropdown on "Edit" link click', () => {
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+  it('shows dropdown on "Edit" link click', async () => {
+    createComponent({
       editable: true,
     });
 
-    expect(vm.shouldShowEditField).toBe(false);
+    expect(containsEditableField()).toBe(false);
 
-    vm.$el.querySelector('.js-weight-edit-link').click();
+    findEditLink().trigger('click');
 
-    return vm.$nextTick().then(() => {
-      expect(vm.shouldShowEditField).toBe(true);
-    });
+    await wrapper.vm.$nextTick;
+
+    expect(containsEditableField()).toBe(true);
   });
 
-  it('emits event on input submission', () => {
-    const ID = 123;
+  it('emits event on input submission', async () => {
+    const mockId = 123;
     const expectedWeightValue = '3';
+
     jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+
+    createComponent({
       editable: true,
-      id: ID,
+      id: mockId,
     });
 
-    vm.$el.querySelector('.js-weight-edit-link').click();
+    findEditLink().trigger('click');
 
-    return vm.$nextTick(() => {
-      const event = new CustomEvent('keydown');
-      event.keyCode = ENTER_KEY_CODE;
+    await wrapper.vm.$nextTick;
 
-      vm.$refs.editableField.click();
-      vm.$refs.editableField.value = expectedWeightValue;
-      vm.$refs.editableField.dispatchEvent(event);
+    const event = new CustomEvent('keydown');
+    event.keyCode = ENTER_KEY_CODE;
 
-      expect(vm.hasValidInput).toBe(true);
-      expect(eventHub.$emit).toHaveBeenCalledWith('updateWeight', expectedWeightValue, ID);
-    });
+    const { editableField } = wrapper.vm.$refs;
+    editableField.click();
+    editableField.value = expectedWeightValue;
+    editableField.dispatchEvent(event);
+
+    await wrapper.vm.$nextTick;
+
+    expect(containsInputError()).toBe(false);
+    expect(eventHub.$emit).toHaveBeenCalledWith('updateWeight', expectedWeightValue, mockId);
   });
 
-  it('emits event on remove weight link click', () => {
-    const ID = 123;
+  it('emits event on remove weight link click', async () => {
+    const mockId = 234;
+
     jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+
+    createComponent({
       editable: true,
       weight: 3,
-      id: ID,
+      id: mockId,
     });
 
-    vm.$el.querySelector('.js-weight-remove-link').click();
+    findRemoveLink().trigger('click');
 
-    return vm.$nextTick(() => {
-      expect(vm.hasValidInput).toBe(true);
-      expect(eventHub.$emit).toHaveBeenCalledWith('updateWeight', '', ID);
-    });
+    await wrapper.vm.$nextTick;
+
+    expect(containsInputError()).toBe(false);
+    expect(eventHub.$emit).toHaveBeenCalledWith('updateWeight', '', mockId);
   });
 
-  it('triggers error on invalid negative integer value', () => {
-    vm = mountComponent(Weight, {
-      ...DEFAULT_PROPS,
+  it('triggers error on invalid negative integer value', async () => {
+    createComponent({
       editable: true,
     });
 
-    vm.$el.querySelector('.js-weight-edit-link').click();
+    findEditLink().trigger('click');
 
-    return vm.$nextTick(() => {
-      const event = new CustomEvent('keydown');
-      event.keyCode = ENTER_KEY_CODE;
+    await wrapper.vm.$nextTick;
 
-      vm.$refs.editableField.click();
-      vm.$refs.editableField.value = -9001;
-      vm.$refs.editableField.dispatchEvent(event);
+    const event = new CustomEvent('keydown');
+    event.keyCode = ENTER_KEY_CODE;
 
-      expect(vm.hasValidInput).toBe(false);
-    });
+    const { editableField } = wrapper.vm.$refs;
+    editableField.click();
+    editableField.value = -9001;
+    editableField.dispatchEvent(event);
+
+    await wrapper.vm.$nextTick;
+
+    expect(containsInputError()).toBe(true);
   });
 
   describe('tracking', () => {
     let trackingSpy;
 
     beforeEach(() => {
-      vm = mountComponent(Weight, {
-        ...DEFAULT_PROPS,
+      createComponent({
         editable: true,
       });
-      trackingSpy = mockTracking('_category_', vm.$el, (obj, what) =>
+
+      trackingSpy = mockTracking('_category_', wrapper.element, (obj, what) =>
         jest.spyOn(obj, what).mockImplementation(() => {}),
       );
     });
@@ -184,12 +190,12 @@ describe('Weight', () => {
       unmockTracking();
     });
 
-    it('calls trackEvent when "Edit" is clicked', () => {
-      triggerEvent(vm.$el.querySelector('.js-weight-edit-link'));
+    it('calls trackEvent when "Edit" is clicked', async () => {
+      triggerEvent(findEditLink().element);
 
-      return vm.$nextTick().then(() => {
-        expect(trackingSpy).toHaveBeenCalled();
-      });
+      await wrapper.vm.$nextTick;
+
+      expect(trackingSpy).toHaveBeenCalled();
     });
   });
 });

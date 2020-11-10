@@ -792,6 +792,50 @@ RSpec.describe Group do
     end
   end
 
+  describe '#saml_group_sync_available?' do
+    subject { group.saml_group_sync_available? }
+
+    context 'when saml_group_links is not enabled' do
+      before do
+        stub_feature_flags(saml_group_links: false)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when saml_group_links is enabled' do
+      before do
+        stub_feature_flags(saml_group_links: true)
+      end
+
+      it { is_expected.to eq(false) }
+
+      context 'with group_saml_group_sync feature licensed' do
+        before do
+          stub_licensed_features(group_saml_group_sync: true)
+        end
+
+        it { is_expected.to eq(false) }
+
+        context 'with saml enabled' do
+          before do
+            create(:saml_provider, group: group, enabled: true)
+          end
+
+          it { is_expected.to eq(true) }
+
+          context 'when the group is a subgroup' do
+            let(:subgroup) { create(:group, :private, parent: group) }
+
+            subject { subgroup.saml_group_sync_available? }
+
+            it { is_expected.to eq(true) }
+          end
+        end
+      end
+    end
+  end
+
   describe "#insights_config" do
     context 'when group has no Insights project configured' do
       it 'returns the default config' do

@@ -374,6 +374,22 @@ RSpec.describe Gitlab::UsageData do
     end
   end
 
+  describe 'usage_data_by_stage_enablement' do
+    it 'returns empty hash if geo is not enabled' do
+      expect(described_class.usage_activity_by_stage_enablement({})).to eq({})
+    end
+
+    it 'excludes data outside of the date range' do
+      create_list(:geo_node, 2).each do |node|
+        for_defined_days_back do
+          create(:oauth_access_grant, application: node.oauth_application)
+        end
+      end
+
+      expect(described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)).to eq(geo_secondary_web_oauth_users: 2)
+    end
+  end
+
   describe 'usage_activity_by_stage_manage' do
     it 'includes accurate usage_activity_by_stage data' do
       stub_config(
@@ -436,20 +452,17 @@ RSpec.describe Gitlab::UsageData do
         project = create(:project, creator: user)
         create(:users_ops_dashboard_project, user: user)
         create(:prometheus_service, project: project)
-        create(:project_error_tracking_setting, project: project)
         create(:project_incident_management_setting, :sla_enabled, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
         projects_prometheus_active: 2,
-        projects_with_error_tracking_enabled: 2,
         projects_incident_sla_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_prometheus_active: 1,
-        projects_with_error_tracking_enabled: 1,
         projects_incident_sla_enabled: 2
       )
     end

@@ -23,7 +23,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ issue: 'getActiveIssue' }),
+    ...mapGetters({ issue: 'activeIssue' }),
     hasWeight() {
       return this.issue.weight > 0;
     },

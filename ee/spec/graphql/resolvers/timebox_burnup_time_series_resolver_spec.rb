@@ -54,7 +54,7 @@ RSpec.describe Resolvers::TimeboxBurnupTimeSeriesResolver do
 
       context 'when the service returns an error' do
         before do
-          stub_const('TimeboxBurnupChartService::EVENT_COUNT_LIMIT', 1)
+          stub_const('TimeboxReportService::EVENT_COUNT_LIMIT', 1)
         end
 
         it 'raises a GraphQL exception' do

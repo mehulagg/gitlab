@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Frontend testing standards and style guidelines
 
 There are two types of test suites you'll encounter while developing frontend code
@@ -24,7 +30,6 @@ We have started to migrate frontend tests to the [Jest](https://jestjs.io) testi
 
 Jest tests can be found in `/spec/frontend` and `/ee/spec/frontend` in EE.
 
-NOTE: **Note:**
 Most examples have a Jest and Karma example. See the Karma examples only as explanation to what's going on in the code, should you stumble over some use cases during your discovery. The Jest examples are the one you should follow.
 
 ## Karma test suite
@@ -305,7 +310,6 @@ it('tests a promise rejection', async () => {
 
 You can also simply return a promise from the test function.
 
-NOTE: **Note:**
 Using the `done` and `done.fail` callbacks is discouraged when working with
 promises. They should only be used when testing callback-based code.
 
@@ -755,7 +759,7 @@ While you work on a test suite, you may want to run these specs in watch mode, s
 # Watch and rerun all specs matching the name icon
 yarn jest --watch icon
 
-# Watch and rerun one specifc file
+# Watch and rerun one specific file
 yarn jest --watch path/to/spec/file.spec.js
 ```
 

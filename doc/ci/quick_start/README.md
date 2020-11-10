@@ -13,7 +13,12 @@ GitLab offers a [continuous integration](https://about.gitlab.com/stages-devops-
 - Add a [`.gitlab-ci.yml` file](#creating-a-gitlab-ciyml-file) to your repository's root directory.
 - Ensure your project is configured to use a [runner](#configuring-a-runner).
 
-The `.gitlab-ci.yml` file tells the runner what to do. A simple pipeline commonly has
+The `.gitlab-ci.yml` file defines the structure and order of the pipelines, and determines:
+
+- What to execute using [GitLab Runner](https://docs.gitlab.com/runner/).
+- What decisions to make when specific conditions are encountered. For example, when a process succeeds or fails.
+
+A simple pipeline commonly has
 three [stages](../yaml/README.md#stages):
 
 - `build`
@@ -125,7 +130,7 @@ in the future, but it's available for anyone who wants to try it at the above li
 
 ### Push `.gitlab-ci.yml` to GitLab
 
-Once you've created `.gitlab-ci.yml`, you should add it to your Git repository
+After you've created a `.gitlab-ci.yml`, you should add it to your Git repository
 and push it to GitLab.
 
 ```shell

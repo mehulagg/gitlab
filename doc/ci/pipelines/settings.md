@@ -29,7 +29,7 @@ There are two options. Using:
 - `git fetch`, which is faster as it re-uses the local working copy (falling
   back to clone if it doesn't exist).
 
-The default Git strategy can be overridden by the [GIT_STRATEGY variable](../yaml/README.md#git-strategy)
+The default Git strategy can be overridden by the [GIT_STRATEGY variable](../runners/README.md#git-strategy)
 in `.gitlab-ci.yml`.
 
 ## Git shallow clone
@@ -183,7 +183,7 @@ Job logs and artifacts are [not visible for guest users and non-project members]
 If **Public pipelines** is enabled (default):
 
 - For **public** projects, anyone can view the pipelines and related features.
-- For **internal** projects, any logged in user can view the pipelines
+- For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines
   and related features.
 - For **private** projects, any project member (guest or higher) can view the pipelines
   and related features.
@@ -192,7 +192,7 @@ If **Public pipelines** is disabled:
 
 - For **public** projects, anyone can view the pipelines, but only members
   (reporter or higher) can access the related features.
-- For **internal** projects, any logged in user can view the pipelines.
+- For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines.
   However, only members (reporter or higher) can access the job related features.
 - For **private** projects, only project members (reporter or higher)
   can view the pipelines or access the related features.

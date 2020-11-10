@@ -144,7 +144,7 @@ export default {
           data-testid="actions-dropdown"
           :text="__('Options')"
           :right="true"
-          class="d-md-none d-lg-none d-xl-none gl-flex-grow-1"
+          class="d-md-none gl-flex-grow-1"
         >
           <gl-dropdown-item>{{ testCaseActionTitle }}</gl-dropdown-item>
           <gl-dropdown-divider />
@@ -154,7 +154,7 @@ export default {
           v-if="canEditTestCase"
           data-testid="archive-test-case"
           category="secondary"
-          class="d-none d-sm-none d-md-inline-block gl-mr-2"
+          class="d-none d-md-inline-block gl-mr-2"
           :variant="testCaseActionButtonVariant"
           :loading="testCaseStateChangeInProgress"
           @click="handleTestCaseStateChange"
@@ -165,7 +165,7 @@ export default {
           category="secondary"
           variant="success"
           class="d-md-inline-block"
-          :class="{ 'd-none d-sm-none': canEditTestCase, 'gl-flex-grow-1': !canEditTestCase }"
+          :class="{ 'd-none': canEditTestCase, 'gl-flex-grow-1': !canEditTestCase }"
           :href="testCaseNewPath"
           >{{ __('New test case') }}</gl-button
         >

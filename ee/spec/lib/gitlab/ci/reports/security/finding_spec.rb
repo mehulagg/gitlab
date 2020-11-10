@@ -10,6 +10,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
 
     let(:primary_identifier) { create(:ci_reports_security_identifier) }
     let(:other_identifier) { create(:ci_reports_security_identifier) }
+    let(:link) { create(:ci_reports_security_link) }
     let(:scanner) { create(:ci_reports_security_scanner) }
     let(:location) { create(:ci_reports_security_locations_sast) }
 
@@ -18,6 +19,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         compare_key: 'this_is_supposed_to_be_a_unique_value',
         confidence: :medium,
         identifiers: [primary_identifier, other_identifier],
+        links: [link],
         location: location,
         metadata_version: 'sast:1.0',
         name: 'Cipher with no integrity',
@@ -39,6 +41,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
           confidence: :medium,
           project_fingerprint: '9a73f32d58d87d94e3dc61c4c1a94803f6014258',
           identifiers: [primary_identifier, other_identifier],
+          links: [link],
           location: location,
           metadata_version: 'sast:1.0',
           name: 'Cipher with no integrity',
@@ -84,6 +87,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         compare_key: occurrence.compare_key,
         confidence: occurrence.confidence,
         identifiers: occurrence.identifiers,
+        links: occurrence.links,
         location: occurrence.location,
         metadata_version: occurrence.metadata_version,
         name: occurrence.name,
