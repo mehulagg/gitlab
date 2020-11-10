@@ -23981,6 +23981,12 @@ msgstr ""
 msgid "See the affected projects in the GitLab admin panel"
 msgstr ""
 
+msgid "See vulnerability %{vulnerability_link} for any Remediation details."
+msgstr ""
+
+msgid "See vulnerability %{vulnerability_link} for any Solution details."
+msgstr ""
+
 msgid "See what's new at GitLab"
 msgstr ""
 
