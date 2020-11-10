@@ -1,3 +1,4 @@
+import { produce } from 'immer';
 /**
  * Appends paginated results to existing ones
  * - to be used with $apollo.queries.x.fetchMore
@@ -24,10 +25,15 @@ export const appendToPreviousResult = profileType => (previousResult, { fetchMor
  * @param queryBody
  */
 export const removeProfile = ({ profileId, profileType, store, queryBody }) => {
-  const data = store.readQuery(queryBody);
+  const sourceData = store.readQuery(queryBody);
 
-  data.project[profileType].edges = data.project[profileType].edges.filter(({ node }) => {
-    return node.id !== profileId;
+  const data = produce(sourceData, draftState => {
+    // eslint-disable-next-line no-param-reassign
+    draftState.project[profileType].edges = draftState.project[profileType].edges.filter(
+      ({ node }) => {
+        return node.id !== profileId;
+      },
+    );
   });
 
   store.writeQuery({ ...queryBody, data });
