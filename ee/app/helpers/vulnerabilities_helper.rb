@@ -36,7 +36,7 @@ module VulnerabilitiesHelper
   def create_jira_issue_url_for(vulnerability)
     return unless vulnerability.project.try(:jira_vulnerabilities_integration_enabled?)
 
-    summary = "Investigate vulnerability: #{vulnerability.title}"
+    summary = _('Investigate vulnerability: %{title}') % { title: vulnerability.title }
     description = ApplicationController.render(template: 'vulnerabilities/jira_issue_description.md.erb', locals: { vulnerability: vulnerability.present })
 
     vulnerability.project&.jira_service&.new_issue_url_with_predefined_fields(summary, description)

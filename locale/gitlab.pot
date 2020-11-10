@@ -14663,6 +14663,9 @@ msgstr ""
 msgid "Invalid yaml"
 msgstr ""
 
+msgid "Investigate vulnerability: %{title}"
+msgstr ""
+
 msgid "Invitation"
 msgstr ""
 
