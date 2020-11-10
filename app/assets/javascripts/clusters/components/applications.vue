@@ -573,11 +573,7 @@ export default {
         title-link="https://github.com/knative/docs"
       >
         <template #description>
-<<<<<<< HEAD
           <gl-alert v-if="!rbac" variant="info" class="gl-my-3" :dismissible="false">
-=======
-          <gl-alert v-if="!rbac" variant="info" :dismissible="false">
->>>>>>> e11c9718f3f (Replaces elements with the bs-callout class with gl-alert vue component)
             {{
               s__(`ClusterIntegration|You must have an RBAC-enabled cluster
             to install Knative.`)
