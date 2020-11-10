@@ -92,6 +92,9 @@ export default {
   },
   methods: {
     ...mapActions(['setAssignees']),
+    assigneSelf(currentUser) {
+      this.selected = this.selected.concat(currentUser);
+    },
     clearSelected() {
       this.selected = [];
     },
@@ -119,7 +122,7 @@ export default {
 <template>
   <board-editable-item :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
-      <issuable-assignees :users="activeIssue.assignees" />
+      <issuable-assignees :users="activeIssue.assignees" @assignSelf="assigneSelf" />
     </template>
 
     <template #default>
