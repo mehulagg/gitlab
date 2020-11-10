@@ -16,7 +16,7 @@ module API
       end
       resource source_type.pluralize, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
         desc "Gets a list of access requests for a #{source_type}." do
-          detail 'This feature was introduced in GitLab 8.11.'
+          detail 'This feature was introduced in GitLab 8.11'
           success Entities::AccessRequester
         end
         params do
