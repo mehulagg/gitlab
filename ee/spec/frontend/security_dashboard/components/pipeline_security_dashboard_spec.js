@@ -88,7 +88,6 @@ describe('Pipeline Security Dashboard component', () => {
       const dashboard = wrapper.find(SecurityDashboard);
       expect(dashboard.exists()).toBe(true);
       expect(dashboard.props()).toMatchObject({
-        lockToProject: { id: projectId },
         pipelineId,
         vulnerabilitiesEndpoint,
       });

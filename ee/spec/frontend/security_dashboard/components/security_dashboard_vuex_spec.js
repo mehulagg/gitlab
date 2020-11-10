@@ -11,7 +11,6 @@ import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_c
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 
 import createStore from 'ee/security_dashboard/store';
-import { getParameterValues } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
 
 const pipelineId = 123;
@@ -25,7 +24,6 @@ jest.mock('~/lib/utils/url_utility', () => ({
 describe('Security Dashboard component', () => {
   let wrapper;
   let mock;
-  let lockFilterSpy;
   let setPipelineIdSpy;
   let fetchPipelineJobsSpy;
   let store;
@@ -37,7 +35,6 @@ describe('Security Dashboard component', () => {
         SecurityDashboardLayout,
       },
       methods: {
-        lockFilter: lockFilterSpy,
         setPipelineId: setPipelineIdSpy,
         fetchPipelineJobs: fetchPipelineJobsSpy,
       },
@@ -53,7 +50,6 @@ describe('Security Dashboard component', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    lockFilterSpy = jest.fn();
     setPipelineIdSpy = jest.fn();
     fetchPipelineJobsSpy = jest.fn();
     store = createStore();
@@ -81,14 +77,6 @@ describe('Security Dashboard component', () => {
 
     it('renders the vulnerability chart', () => {
       expect(wrapper.find(VulnerabilityChart).exists()).toBe(true);
-    });
-
-    it('does not lock to a project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(false);
-    });
-
-    it('does not lock project filters', () => {
-      expect(lockFilterSpy).not.toHaveBeenCalled();
     });
 
     it('sets the pipeline id', () => {
@@ -155,28 +143,6 @@ describe('Security Dashboard component', () => {
     );
   });
 
-  describe('with project lock', () => {
-    const project = {
-      id: 123,
-    };
-    beforeEach(() => {
-      createComponent({
-        lockToProject: project,
-      });
-    });
-
-    it('locks to a given project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(true);
-    });
-
-    it('locks the filters to a given project', () => {
-      expect(lockFilterSpy).toHaveBeenCalledWith({
-        filterId: 'project_id',
-        optionId: project.id,
-      });
-    });
-  });
-
   describe.each`
     endpointProp                        | Component
     ${'vulnerabilitiesHistoryEndpoint'} | ${VulnerabilityChart}
@@ -189,19 +155,6 @@ describe('Security Dashboard component', () => {
 
     it(`does not show the ${Component.name}`, () => {
       expect(wrapper.find(Component).exists()).toBe(false);
-    });
-  });
-
-  describe('dismissed vulnerabilities', () => {
-    it.each`
-      description                                                        | getParameterValuesReturnValue | expected
-      ${'hides dismissed vulnerabilities by default'}                    | ${[]}                         | ${true}
-      ${'shows dismissed vulnerabilities if scope param is "all"'}       | ${['all']}                    | ${false}
-      ${'hides dismissed vulnerabilities if scope param is "dismissed"'} | ${['dismissed']}              | ${true}
-    `('$description', ({ getParameterValuesReturnValue, expected }) => {
-      getParameterValues.mockImplementation(() => getParameterValuesReturnValue);
-      createComponent();
-      expect(wrapper.vm.$store.state.filters.hideDismissed).toBe(expected);
     });
   });
 

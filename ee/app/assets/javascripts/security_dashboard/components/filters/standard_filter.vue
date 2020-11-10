@@ -46,7 +46,7 @@ export default {
       );
     },
     routeQueryIds() {
-      const ids = this.$route.query[this.filter.id] || [];
+      const ids = this.$route?.query[this.filter.id] || [];
       return Array.isArray(ids) ? ids : [ids];
     },
     routeQueryOptions() {
@@ -83,7 +83,9 @@ export default {
       this.updateRouteQuery();
     },
     updateRouteQuery() {
-      const query = { query: { ...this.$route.query, ...this.queryObject } };
+      if (!this.router) return;
+
+      const query = { query: { ...this.$route?.query, ...this.queryObject } };
       // To avoid a console error, don't update the querystring if it's the same as the current one.
       if (!isEqual(this.routeQueryIds, this.queryObject[this.filter.id])) {
         this.$router.push(query);
