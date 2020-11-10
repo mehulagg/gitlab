@@ -340,7 +340,7 @@ RSpec.describe Projects::TransferService do
       end
 
       it 'updates shared runners based on the parent group' do
-        expect(project.shared_runners_enabled).to eq(expected_shared_runners_enabled)
+        expect(project.reload.shared_runners_enabled).to eq(expected_shared_runners_enabled)
       end
     end
   end
