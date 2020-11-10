@@ -1,7 +1,8 @@
 ---
 name: roadmap_buffered_rendering
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19875
-rollout_issue_url:
-group: group::portfolio management
+rollout_issue_url: 
+milestone: '12.6'
 type: development
+group: group::portfolio management
 default_enabled: false

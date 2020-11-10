@@ -21,62 +21,19 @@ RSpec.describe Environments::CanaryIngress::UpdateService, :clean_gitlab_redis_c
     stub_licensed_features(deploy_board: true)
   end
 
-  describe '#execute' do
-    subject { service.execute(environment) }
+  shared_examples_for 'failed request' do
+    it 'returns an error' do
+      expect(subject[:status]).to eq(:error)
+      expect(subject[:message]).to eq(message)
+    end
+  end
+
+  describe '#execute_async' do
+    subject { service.execute_async(environment) }
 
     let(:environment) { create(:environment, project: project) }
     let(:params) { { weight: 50 } }
     let(:canary_ingress) { ::Gitlab::Kubernetes::Ingress.new(kube_ingress(track: :canary)) }
-
-    shared_examples_for 'failed request' do
-      it 'returns an error' do
-        expect(subject[:status]).to eq(:error)
-        expect(subject[:message]).to eq(message)
-      end
-    end
-
-    context 'when canary ingress is present in the environment' do
-      before do
-        allow(environment).to receive(:ingresses) { [canary_ingress] }
-      end
-
-      context 'when patch request succeeds' do
-        let(:patch_data) do
-          {
-            metadata: {
-              annotations: {
-                Gitlab::Kubernetes::Ingress::ANNOTATION_KEY_CANARY_WEIGHT => params[:weight].to_s
-              }
-            }
-          }
-        end
-
-        before do
-          allow(environment).to receive(:patch_ingress).with(canary_ingress, patch_data) { true }
-        end
-
-        it 'returns success' do
-          expect(subject[:status]).to eq(:success)
-          expect(subject[:message]).to be_nil
-        end
-      end
-
-      context 'when patch request does not succeed' do
-        before do
-          allow(environment).to receive(:patch_ingress) { false }
-        end
-
-        it_behaves_like 'failed request' do
-          let(:message) { 'Failed to update the Canary Ingress.' }
-        end
-      end
-    end
-
-    context 'when canary ingress is not present in the environment' do
-      it_behaves_like 'failed request' do
-        let(:message) { 'Canary Ingress does not exist in the environment.' }
-      end
-    end
 
     context 'when canary_ingress_weight_control feature flag is disabled' do
       before do
@@ -139,6 +96,57 @@ RSpec.describe Environments::CanaryIngress::UpdateService, :clean_gitlab_redis_c
 
       it_behaves_like 'failed request' do
         let(:message) { "This environment's canary ingress has been updated recently. Please retry later." }
+      end
+    end
+  end
+
+  describe '#execute' do
+    subject { service.execute(environment) }
+
+    let(:environment) { create(:environment, project: project) }
+    let(:params) { { weight: 50 } }
+    let(:canary_ingress) { ::Gitlab::Kubernetes::Ingress.new(kube_ingress(track: :canary)) }
+
+    context 'when canary ingress is present in the environment' do
+      before do
+        allow(environment).to receive(:ingresses) { [canary_ingress] }
+      end
+
+      context 'when patch request succeeds' do
+        let(:patch_data) do
+          {
+            metadata: {
+              annotations: {
+                Gitlab::Kubernetes::Ingress::ANNOTATION_KEY_CANARY_WEIGHT => params[:weight].to_s
+              }
+            }
+          }
+        end
+
+        before do
+          allow(environment).to receive(:patch_ingress).with(canary_ingress, patch_data) { true }
+        end
+
+        it 'returns success' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:message]).to be_nil
+        end
+      end
+
+      context 'when patch request does not succeed' do
+        before do
+          allow(environment).to receive(:patch_ingress) { false }
+        end
+
+        it_behaves_like 'failed request' do
+          let(:message) { 'Failed to update the Canary Ingress.' }
+        end
+      end
+    end
+
+    context 'when canary ingress is not present in the environment' do
+      it_behaves_like 'failed request' do
+        let(:message) { 'Canary Ingress does not exist in the environment.' }
       end
     end
   end

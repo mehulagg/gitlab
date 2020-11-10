@@ -3,11 +3,20 @@
 module Environments
   module CanaryIngress
     class UpdateService < ::BaseService
-      def execute(environment)
+      def execute_async(environment)
         result = validate(environment)
 
         return result unless result[:status] == :success
 
+        Environments::CanaryIngress::UpdateWorker.perform_async(environment.id, params)
+
+        success
+      end
+
+      # This method actually executes the PATCH request to Kubernetes,
+      # that is used by internal processes i.e. sidekiq worker.
+      # You should always use `execute_async` to properly validate user's requests.
+      def execute(environment)
         canary_ingress = environment.ingresses&.find(&:canary?)
 
         unless canary_ingress.present?

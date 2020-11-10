@@ -82,7 +82,10 @@ module Gitlab
         [].tap do |status|
           Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
             status.push current_node_status.synced_in_percentage_for(replicator_class)
-            status.push current_node_status.checksummed_in_percentage_for(replicator_class)
+
+            if replicator_class.verification_enabled?
+              status.push current_node_status.checksummed_in_percentage_for(replicator_class)
+            end
           end
 
           if Gitlab::Geo.repository_verification_enabled?
@@ -280,7 +283,9 @@ module Gitlab
       end
 
       def print_replicators_checked_status
-        Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+        verifiable_replicator_classes = Gitlab::Geo.enabled_replicator_classes.select(&:verification_enabled?)
+
+        verifiable_replicator_classes.each do |replicator_class|
           print "#{replicator_class.replicable_title_plural} Checked: ".rjust(GEO_STATUS_COLUMN_WIDTH)
           show_failed_value(replicator_class.checksum_failed_count)
           print "#{replicator_class.checksummed_count}/#{replicator_class.registry_count} "

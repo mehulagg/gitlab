@@ -8,6 +8,12 @@ module Geo
       ::Packages::PackageFile
     end
 
+    # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46998 for
+    # reasoning about this override.
+    def self.verification_feature_flag_enabled?
+      Feature.enabled?(:geo_package_file_verification)
+    end
+
     def carrierwave_uploader
       model_record.file
     end

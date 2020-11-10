@@ -64,6 +64,9 @@ export default {
     isContentLoaded() {
       return Boolean(this.sourceContent);
     },
+    projectSplit() {
+      return this.appData.project.split('/'); // TODO: refactor so `namespace` and `project` remain distinct
+    },
   },
   mounted() {
     Tracking.event(document.body.dataset.page, TRACKING_ACTION_INITIALIZE_EDITOR);
@@ -139,6 +142,8 @@ export default {
         :saving-changes="isSavingChanges"
         :return-url="appData.returnUrl"
         :mounts="appData.mounts"
+        :branch="appData.branch"
+        :base-url="appData.baseUrl"
         :project="appData.project"
         :image-root="appData.imageUploadPath"
         @submit="onPrepareSubmit"
@@ -146,6 +151,8 @@ export default {
       <edit-meta-modal
         ref="editMetaModal"
         :source-path="appData.sourcePath"
+        :namespace="projectSplit[0]"
+        :project="projectSplit[1]"
         @primary="onSubmit"
         @hide="onHideModal"
       />

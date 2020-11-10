@@ -122,7 +122,7 @@ module EE
               ::Types::Clusters::AgentType,
               null: true,
               description: 'Find a single cluster agent by name',
-              resolver: ::Resolvers::Clusters::AgentResolver.single
+              resolver: ::Resolvers::Clusters::AgentsResolver.single
 
         field :cluster_agents,
               ::Types::Clusters::AgentType.connection_type,

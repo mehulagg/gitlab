@@ -19,6 +19,7 @@ import { typeSet } from '~/alerts_settings/constants';
 import {
   ADD_INTEGRATION_ERROR,
   RESET_INTEGRATION_TOKEN_ERROR,
+  UPDATE_INTEGRATION_ERROR,
 } from '~/alerts_settings/utils/error_messages';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
@@ -141,16 +142,6 @@ describe('AlertsSettingsWrapper', () => {
     it('renders the IntegrationsList table using the API data', () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true } },
-        loading: false,
-      });
-      expect(findLoader().exists()).toBe(false);
-      expect(findIntegrations()).toHaveLength(mockIntegrations.length);
-    });
-
-    it('shows an error message when a user cannot create a new integration', () => {
-      createComponent({
-        data: { integrations: { list: mockIntegrations } },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -292,7 +283,7 @@ describe('AlertsSettingsWrapper', () => {
       });
     });
 
-    it('shows error alert when integration creation fails ', async () => {
+    it('shows an error alert when integration creation fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -307,7 +298,7 @@ describe('AlertsSettingsWrapper', () => {
       expect(createFlash).toHaveBeenCalledWith({ message: ADD_INTEGRATION_ERROR });
     });
 
-    it('shows error alert when integration token reset fails ', async () => {
+    it('shows an error alert when integration token reset fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -322,7 +313,7 @@ describe('AlertsSettingsWrapper', () => {
       expect(createFlash).toHaveBeenCalledWith({ message: RESET_INTEGRATION_TOKEN_ERROR });
     });
 
-    it('shows error alert when integration update fails ', async () => {
+    it('shows an error alert when integration update fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -334,7 +325,7 @@ describe('AlertsSettingsWrapper', () => {
       wrapper.find(AlertsSettingsFormNew).vm.$emit('update-integration', {});
 
       await waitForPromises();
-      expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
     });
   });
 

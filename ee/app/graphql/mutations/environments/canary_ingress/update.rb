@@ -23,7 +23,7 @@ module Mutations
 
           result = ::Environments::CanaryIngress::UpdateService
             .new(environment.project, current_user, kwargs)
-            .execute(environment)
+            .execute_async(environment)
 
           { errors: Array.wrap(result[:message]) }
         end

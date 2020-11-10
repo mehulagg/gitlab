@@ -2,6 +2,7 @@
 name: convert_user_to_group_managed_accounts
 introduced_by_url: 
 rollout_issue_url: 
-group: 
+milestone: 
 type: development
+group: 
 default_enabled: false
