@@ -84,13 +84,13 @@ $white-gc-bg: #eaf2f5;
 
   &.conflict_marker,
   &.conflict_our {
-    background-color: #e1fad7;
-    border-color: #e1fad7;
+    background-color: map-get($conflict-colors, 'white-header-head-neutral');
+    border-color: map-get($conflict-colors, 'white-header-head-neutral');
   }
 
   &.conflict_their {
-    background-color: #e0f0ff;
-    border-color: #e0f0ff;
+    background-color: map-get($conflict-colors, 'white-header-origin-neutral');
+    border-color: map-get($conflict-colors, 'white-header-origin-neutral');
   }
 }
 
@@ -180,17 +180,6 @@ pre.code,
   }
 
   .line_content {
-    &.conflict_our,
-    &.conflict_marker {
-      background-color: #e1fad7;
-      border-color: #e1fad7;
-    }
-
-    &.conflict_their {
-      background-color: #e0f0ff;
-      border-color: #e0f0ff;
-    }
-
     &.old {
       background-color: $line-removed;
 
@@ -226,17 +215,6 @@ pre.code,
 
   .line-coverage {
     @include line-coverage-border-color($green-500, $orange-500);
-
-    &.conflict_marker,
-    &.conflict_our {
-      background-color: #e1fad7;
-      border-color: #e1fad7;
-    }
-
-    &.conflict_their {
-      background-color: #e0f0ff;
-      border-color: #e0f0ff;
-    }
 
     &.old {
       background-color: $line-removed;
