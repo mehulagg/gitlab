@@ -50,26 +50,40 @@ RSpec.shared_examples 'a verifiable replicator' do
 
   describe '#verify' do
     before do
+      model_record.verification_started
       model_record.save!
     end
 
-    context 'when a Geo primary' do
-      context 'when an error is raised during calculate_checksum!' do
-        it 'delegates checksum calculation and the state change to model_record' do
-          expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-          expect(model_record).to receive(:update_verification_state!).with(checksum: 'abc123')
+    context 'on a Geo primary' do
+      before do
+        stub_primary_node
+      end
 
-          replicator.verify
+      context 'when verification was started' do
+        before do
+          model_record.verification_started!
         end
 
-        it 'passes the error message' do
-          allow(model_record).to receive(:calculate_checksum) do
-            raise StandardError.new('Failure to calculate checksum')
+        context 'when the checksum succeeds' do
+          it 'delegates checksum calculation and the state change to model_record' do
+            expect(model_record).to receive(:calculate_checksum).and_return('abc123')
+            expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123')
+
+            replicator.verify
           end
+        end
 
-          expect(model_record).to receive(:update_verification_state!).with(failure: 'Failure to calculate checksum')
+        context 'when an error is raised during calculate_checksum' do
+          it 'passes the error message' do
+            error = StandardError.new('Some exception')
+            allow(model_record).to receive(:calculate_checksum) do
+              raise error
+            end
 
-          replicator.verify
+            expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
+
+            replicator.verify
+          end
         end
       end
     end
