@@ -115,9 +115,7 @@ browser's developer console while on any page within GitLab.
   import initMyWidget from './my_widget';
   import { waitForCSSLoaded } from '~/helpers/startup_css_helper';
 
-  waitForCSSLoaded(() => {
-    initMyWidget();
-  });
+  waitForCSSLoaded(initMyWidget);
   ```
 
 - **Supporting Module Placement:**
