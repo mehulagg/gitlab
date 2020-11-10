@@ -26,6 +26,9 @@ export default {
     selectedSet() {
       return new Set(this.selectedOptions);
     },
+    isNoOptionsSelected() {
+      return this.selectedOptions.length <= 0;
+    },
     selectedOptionsOrAll() {
       return this.selectedOptions.length ? this.selectedOptions : [this.filter.allOption];
     },
@@ -102,7 +105,7 @@ export default {
   >
     <filter-item
       v-if="filter.allOption && !searchTerm.length"
-      :is-checked="selectedOptions.length <= 0"
+      :is-checked="isNoOptionsSelected"
       :text="filter.allOption.name"
       data-testid="allOption"
       @click="deselectAllOptions"
@@ -112,7 +115,7 @@ export default {
       :key="option.id"
       :is-checked="isSelected(option)"
       :text="option.name"
-      data-testid="option"
+      data-testid="filterOption"
       @click="toggleOption(option)"
     />
   </filter-body>
