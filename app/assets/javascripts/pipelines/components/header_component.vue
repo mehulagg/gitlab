@@ -11,12 +11,12 @@ import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constant
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 const POLL_INTERVAL = 10000;
-const STOP_POLLING_STATUSES = ['FAILED', 'SUCCESS', 'CANCELED'];
 
 export default {
   name: 'PipelineHeaderSection',
   pipelineCancel: 'pipelineCancel',
   pipelineRetry: 'pipelineRetry',
+  finishedStatuses: ['FAILED', 'SUCCESS', 'CANCELED'],
   components: {
     ciHeader,
     GlAlert,
@@ -125,8 +125,8 @@ export default {
     },
   },
   watch: {
-    pipeline(newPipeline) {
-      if (STOP_POLLING_STATUSES.includes(newPipeline.status)) {
+    pipeline({ status }) {
+      if (this.$options.finishedStatuses.includes(status)) {
         this.$apollo.queries.pipeline.stopPolling();
       }
     },
@@ -150,6 +150,8 @@ export default {
           this.reportFailure(POST_FAILURE);
         } else {
           this.$apollo.queries.pipeline.refetch();
+          // start polling back up
+          // it will be stopped again if status is one of finishedStatues
           this.$apollo.queries.pipeline.startPolling(POLL_INTERVAL);
         }
       } catch {
