@@ -822,3 +822,6 @@ In particular `set_crop_data` accepts as arguments: a `DOM` element and a paddin
 #### Live example
 
 Please use `spec/docs_screenshots/container_registry_docs.rb` as a guide and as an example to create your own scripts.
+
+<!-- This redirect file can be deleted February 1, 2021, or later. -->
+<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->

@@ -3,3 +3,6 @@ redirect_to: '../../administration/monitoring/performance/gitlab_configuration.m
 ---
 
 This document was moved to [administration/monitoring/performance/gitlab_configuration](../../administration/monitoring/performance/gitlab_configuration.md).
+
+<!-- This redirect file can be deleted February 1, 2021, or later. -->
+<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->
