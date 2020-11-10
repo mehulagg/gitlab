@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlModal } from '@gitlab/ui';
+import { GlButton, GlIcon, GlModal, GlModalDirective } from '@gitlab/ui';
 import RequestWarning from './request_warning.vue';
 
 export default {
@@ -8,6 +8,9 @@ export default {
     GlButton,
     GlModal,
     GlIcon,
+  },
+  directives: {
+    'gl-modal': GlModalDirective,
   },
   props: {
     currentRequest: {
@@ -34,7 +37,15 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      openedBacktraces: [],
+    };
+  },
   computed: {
+    modalId() {
+      return `modal-peek-${this.metric}-details`;
+    },
     metricDetails() {
       return this.currentRequest.details[this.metric];
     },
@@ -57,6 +68,20 @@ export default {
       return '';
     },
   },
+  methods: {
+    toggleBacktrace(keyIndex) {
+      const index = this.openedBacktraces.indexOf(keyIndex);
+
+      if (index === -1) {
+        this.openedBacktraces = [...this.openedBacktraces, keyIndex];
+      } else {
+        this.openedBacktraces = this.openedBacktraces.filter(el => el !== keyIndex);
+      }
+    },
+    itemHasOpenedBacktrace(keyIndex) {
+      return this.openedBacktraces.find(el => el === keyIndex) >= 0;
+    },
+  },
 };
 </script>
 <template>
@@ -66,20 +91,10 @@ export default {
     class="view"
     data-qa-selector="detailed_metric_content"
   >
-    <gl-button
-      :data-target="`#modal-peek-${metric}-details`"
-      class="btn-blank btn-link bold"
-      type="button"
-      data-toggle="modal"
-    >
+    <gl-button v-gl-modal="modalId" type="button" variant="link">
       {{ metricDetailsLabel }}
     </gl-button>
-    <gl-modal
-      :modal-id="`modal-peek-${metric}-details`"
-      :header-title-text="header"
-      modal-size="xl"
-      class="performance-bar-modal"
-    >
+    <gl-modal :modal-id="modalId" :title="header" size="lg" modal-class="gl-mt-7" scrollable>
       <table class="table">
         <template v-if="detailsList.length">
           <tr v-for="(item, index) in detailsList" :key="index">
@@ -89,7 +104,7 @@ export default {
               }}</span>
             </td>
             <td>
-              <div class="js-toggle-container">
+              <div>
                 <div
                   v-for="(key, keyIndex) in keys"
                   :key="key"
@@ -99,14 +114,16 @@ export default {
                   {{ item[key] }}
                   <gl-button
                     v-if="keyIndex == 0 && item.backtrace"
-                    class="text-expander js-toggle-button"
+                    class="gl-ml-3"
+                    data-testid="backtrace-expand-btn"
                     type="button"
                     :aria-label="__('Toggle backtrace')"
+                    @click="toggleBacktrace(index)"
                   >
                     <gl-icon :size="12" name="ellipsis_h" />
                   </gl-button>
                 </div>
-                <pre v-if="item.backtrace" class="backtrace-row js-toggle-content mt-2">{{
+                <pre v-if="itemHasOpenedBacktrace(index)" class="backtrace-row mt-2">{{
                   item.backtrace
                 }}</pre>
               </div>
