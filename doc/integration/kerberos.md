@@ -127,14 +127,7 @@ with your Kerberos credentials.
 ### Create accounts on first sign-in
 
 You can let users register for GitLab with their Kerberos accounts.
-Before you continue, read about the following configuration options
-in Omnibus and GitLab source:
-
-- The `allow_single_sign_on` option in the
-  [Configure GitLab](#configure-gitlab) section.
-  Make sure you've included `kerberos` in the list.
-- The `block_auto_created_users` option, as described in the
-  [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration).
+Before you continue, review the [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) options in Omnibus and GitLab source. You must also include `kerberos`.
 
 With that information at hand:
 
