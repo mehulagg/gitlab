@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27376) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.1.
 > - It's deployed behind a feature flag, disabled by default.
-> - It's disabled on GitLab.com.
+> - It's disabled for GitLab.com.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-the-go-proxy).
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
@@ -78,7 +78,7 @@ contains only the project-specific endpoint, Go queries only that endpoint.
 For details about how to set Go environment variables, see
 [Set environment variables](#set-environment-variables).
 
-For details on configuring `GOPROXY`, see
+For details about configuring `GOPROXY`, see
 [Dependency Management in Go > Proxies](../../../development/go_guide/dependencies.md#proxies).
 
 ## Fetch modules from private projects
