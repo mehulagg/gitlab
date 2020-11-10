@@ -21,7 +21,7 @@ With the Go proxy for GitLab, every project in GitLab can be fetched with the
 The Go proxy for GitLab is under development, and isn't ready for production use
 due to [potential performance issues with large repositories](https://gitlab.com/gitlab-org/gitlab/-/issues/218083).
 
-It is deployed behind a feature flag that is _disabled by default_.
+It's deployed behind a feature flag that is _disabled by default_.
 
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
 can enable it for your instance.
