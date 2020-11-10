@@ -64,10 +64,10 @@ module DiffHelper
     else
       # `sub` and substring-ing would destroy HTML-safeness of `line`
       if line.start_with?('+', '-', ' ')
-        line[0] = ''
+        line[1, line.length]
+      else
+        line
       end
-
-      line
     end
   end
 
