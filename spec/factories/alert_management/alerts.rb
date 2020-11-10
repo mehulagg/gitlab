@@ -47,32 +47,24 @@ FactoryBot.define do
       hosts { [FFaker::Internet.ip_v4_address] }
     end
 
-    trait :with_ended_at do
-      ended_at { Time.current }
-    end
-
-    trait :without_ended_at do
-      ended_at { nil }
-    end
-
     trait :triggered do
       status { AlertManagement::Alert.status_value(:triggered) }
-      without_ended_at
+      ended_at { nil }
     end
 
     trait :acknowledged do
       status { AlertManagement::Alert.status_value(:acknowledged) }
-      without_ended_at
+      ended_at { nil }
     end
 
     trait :resolved do
       status { AlertManagement::Alert.status_value(:resolved) }
-      with_ended_at
+      ended_at { Time.current }
     end
 
     trait :ignored do
       status { AlertManagement::Alert.status_value(:ignored) }
-      without_ended_at
+      ended_at { nil }
     end
 
     trait :critical do
