@@ -19,7 +19,6 @@ RSpec.shared_examples 'a repository replicator' do
   end
 
   it_behaves_like 'a replicator'
-  it_behaves_like 'a verifiable replicator'
 
   # This could be included in each model's spec, but including it here is DRYer.
   include_examples 'a replicable model'
