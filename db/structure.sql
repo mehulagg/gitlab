@@ -14422,6 +14422,8 @@ CREATE TABLE packages_package_files (
     verification_failure character varying(255),
     verification_retry_count integer,
     verification_checksum bytea,
+    verification_state smallint DEFAULT 0,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL))
 );
 
@@ -21347,6 +21349,8 @@ CREATE UNIQUE INDEX index_packages_on_project_id_name_version_unique_when_generi
 CREATE INDEX index_packages_package_files_on_file_store ON packages_package_files USING btree (file_store);
 
 CREATE INDEX index_packages_package_files_on_package_id_and_file_name ON packages_package_files USING btree (package_id, file_name);
+
+CREATE INDEX index_packages_package_files_on_verification_state ON packages_package_files USING btree (verification_state);
 
 CREATE INDEX index_packages_packages_on_creator_id ON packages_packages USING btree (creator_id);
 
