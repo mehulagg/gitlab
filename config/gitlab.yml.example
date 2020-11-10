@@ -548,6 +548,7 @@ production: &base
     # path: shared/registry
     # issuer: gitlab-issuer
     # notification_secret: '' # only set it when you use Geo replication feature without built-in Registry
+    # api_ca: nil # optional, set when the api_url is https using a self-signed cert
 
     # Add notification settings if you plan to use Geo Replication for the registry
     # notifications:

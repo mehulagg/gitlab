@@ -12,7 +12,7 @@ class UpdateContainerRegistryInfoService
     # so we need to generate a valid JWT token with no access permissions to
     # authenticate as a trusted client.
     token = Auth::ContainerRegistryAuthenticationService.access_token([], [])
-    client = ContainerRegistry::Client.new(registry_config.api_url, token: token)
+    client = ContainerRegistry::Client.new(registry_config.api_url, token: token, api_ca: registry_config.api_ca)
     info = client.registry_info
 
     Gitlab::CurrentSettings.update!(

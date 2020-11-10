@@ -44,10 +44,11 @@ class ContainerRepository < ApplicationRecord
     @registry ||= begin
       token = Auth::ContainerRegistryAuthenticationService.full_access_token(path)
 
-      url = Gitlab.config.registry.api_url
+      api_url = Gitlab.config.registry.api_url
       host_port = Gitlab.config.registry.host_port
+      api_ca = Gitlab.config.registry.api_ca
 
-      ContainerRegistry::Registry.new(url, token: token, path: host_port)
+      ContainerRegistry::Registry.new(api_url, token: token, path: host_port, api_ca: api_ca)
     end
   end
   # rubocop: enable CodeReuse/ServiceClass

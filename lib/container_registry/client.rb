@@ -156,6 +156,12 @@ module ContainerRegistry
         conn.request(:authorization, :bearer, options[:token].to_s)
       end
 
+      if options[:api_ca]
+        conn.ssl.cert_store = OpenSSL::X509::Store.new.tap do |store|
+          store.add_file(options[:api_ca])
+        end
+      end
+
       yield(conn) if block_given?
 
       conn.adapter :net_http
