@@ -104,18 +104,39 @@ RSpec.describe 'Filter issues by iteration', :js do
     let(:issue_title_selector) { '.board-card .board-card-title' }
 
     it_behaves_like 'filters by iteration'
+
+    context 'when graphql_board_lists is disabled' do
+      before do
+        stub_feature_flags(graphql_board_lists: false)
+      end
+
+      it_behaves_like 'filters by iteration'
+    end
   end
 
   context 'group board' do
     let_it_be(:board) { create(:board, group: group) }
+    let_it_be(:user) { create(:user) }
 
     let(:page_path) { group_board_path(group, board) }
     let(:issue_title_selector) { '.board-card .board-card-title' }
 
+    before_all do
+      group.add_developer(user)
+    end
+
     before do
-      stub_feature_flags(graphql_board_lists: false)
+      sign_in user
     end
 
     it_behaves_like 'filters by iteration'
+
+    context 'when graphql_board_lists is disabled' do
+      before do
+        stub_feature_flags(graphql_board_lists: false)
+      end
+
+      it_behaves_like 'filters by iteration'
+    end
   end
 end

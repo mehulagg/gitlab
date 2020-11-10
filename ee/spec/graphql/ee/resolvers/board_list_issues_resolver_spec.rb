@@ -11,32 +11,56 @@ RSpec.describe Resolvers::BoardListIssuesResolver do
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:label) { create(:label, project: project) }
   let_it_be(:list) { create(:list, board: board, label: label) }
-  let_it_be(:issue) { create(:issue, project: project, labels: [label]) }
-  let_it_be(:epic) { create(:epic, group: group) }
-  let_it_be(:epic_issue) { create(:epic_issue, epic: epic, issue: issue) }
+
+  before_all do
+    group.add_developer(user)
+  end
 
   describe '#resolve' do
-    before do
-      stub_licensed_features(epics: true)
-      group.add_developer(user)
+    context 'filtering by epic' do
+      let_it_be(:issue) { create(:issue, project: project, labels: [label]) }
+      let_it_be(:epic) { create(:epic, group: group) }
+      let_it_be(:epic_issue) { create(:epic_issue, epic: epic, issue: issue) }
+
+      before do
+        stub_licensed_features(epics: true)
+      end
+
+      it 'raises an exception if both epic_id and epic_wildcard_id are present' do
+        expect do
+          resolve_board_list_issues({ filters: { epic_id: epic.to_global_id, epic_wildcard_id: 'NONE' } })
+        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+      end
+
+      it 'accepts epic global id' do
+        result = resolve_board_list_issues({ filters: { epic_id: epic.to_global_id } }).items
+
+        expect(result).to match_array([issue])
+      end
+
+      it 'accepts epic wildcard id' do
+        result = resolve_board_list_issues({ filters: { epic_wildcard_id: 'NONE' } }).items
+
+        expect(result).to match_array([])
+      end
     end
 
-    it 'raises an exception if both epic_id and epic_wildcard_id are present' do
-      expect do
-        resolve_board_list_issues({ filters: { epic_id: epic.to_global_id, epic_wildcard_id: 'NONE' } })
-      end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
-    end
+    context 'filtering by iteration' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+      let_it_be(:issue_with_iteration) { create(:issue, project: project, labels: [label], iteration: iteration) }
+      let_it_be(:issue_without_iteration) { create(:issue, project: project, labels: [label]) }
 
-    it 'accepts epic global id' do
-      result = resolve_board_list_issues({ filters: { epic_id: epic.to_global_id } }).items
+      it 'accepts iteration title' do
+        result = resolve_board_list_issues({ filters: { iteration_title: iteration.title } }).items
 
-      expect(result).to match_array([issue])
-    end
+        expect(result).to contain_exactly(issue_with_iteration)
+      end
 
-    it 'accepts epic wildcard id' do
-      result = resolve_board_list_issues({ filters: { epic_wildcard_id: 'NONE' } }).items
+      it 'accepts iteration wildcard id' do
+        result = resolve_board_list_issues({ filters: { iteration_wildcard_id: 'NONE' } }).items
 
-      expect(result).to match_array([])
+        expect(result).to contain_exactly(issue_without_iteration)
+      end
     end
   end
 
