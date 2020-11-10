@@ -375,5 +375,5 @@ GitLab.com’s production database has a 15 second timeout, however a general gu
 | Query Type | Maximum Query Time | Notes |
 |----|----|---|
 | User facing queries | `500ms` | This is not a hard limit, but if a query is getting into the multiple second range, it is important to spend time understanding why it can or cannot be optimized. |
-| Queries in a migration | `1s` | This is different than the total [migration time](./database_review.md#timing-guidelines-for-migrations) |
+| Queries in a migration | `1s` | This is different than the total [migration time](database_review.md#timing-guidelines-for-migrations) |
 | Usage Ping | `1s` | With cold cache. |
