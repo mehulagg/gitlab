@@ -116,8 +116,11 @@ export default {
 </script>
 
 <template>
-  <div>
-    <div class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block">
+  <div v-if="issuesCount > 0">
+    <div
+      class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block"
+      data-testid="board-epic-lane"
+    >
       <div class="gl-py-5 gl-px-3 gl-display-flex gl-align-items-center">
         <gl-button
           v-gl-tooltip.hover.right
