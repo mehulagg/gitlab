@@ -77,11 +77,8 @@ module Gitlab
       #   link_regex(/(github:|:github =>)\s*['"](?<name>[^'"]+)['"]/)
       #   # Will link `user/repo` in `github: "user/repo"` or `:github => "user/repo"`
       def link_regex(regex, &url_proc)
-        i = 0
-
-        highlighted_lines.map! do |rich_line|
+        highlighted_lines.map!.with_index do |rich_line, i|
           marker = StringRegexMarker.new((plain_lines[i].chomp! || plain_lines[i]), rich_line.html_safe)
-          i += 1
 
           marker.mark(regex, group: :name) do |text, left:, right:|
             url = yield(text)
