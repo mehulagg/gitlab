@@ -529,7 +529,7 @@ export default {
         <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
         <gl-button
           data-testid="integration-test-and-submit"
-          :disabled="Boolean(integrationTestPayload.error) || isAddingOpsgenie"
+          :disabled="Boolean(integrationTestPayload.error) || isAddingOrEditingOpsgenie"
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"
