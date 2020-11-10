@@ -83,6 +83,25 @@ curl "https://gitlab.example.com/api/v4/projects"
 The API uses JSON to serialize data. You don't need to specify `.json` at the
 end of an API URL.
 
+Example with option `--include` using cURL to expose the HTTP response headers:
+
+```shell
+curl --include "https://gitlab.example.com/api/v4/projects"
+HTTP/2 200
+...
+```
+
+Useful when investigating an unexpected response.
+
+Example with option `--fail` using cURL to impact the command exit code:
+
+```shell script
+curl --fail "https://gitlab.example.com/api/v4/does-not-exist"
+curl: (22) The requested URL returned error: 404
+```
+
+Useful when using the exit code to determine success or failure.
+  
 ## Authentication
 
 Most API requests require authentication, or will return public data only when
