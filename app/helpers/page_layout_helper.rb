@@ -183,4 +183,13 @@ module PageLayoutHelper
     # Therefore, we need to process `original_fullpath`
     request.original_fullpath.sub(request.path, '')[0] == '/'
   end
+
+  def user_status_properties(user)
+    return {} unless user && user.status
+    {
+      current_emoji: user.status.emoji.present? ? user.status.emoji : '',
+      current_message: user.status.message.present? ? current_user.status.message : '', current_availability: current_user.status.present? ? current_user.status.availability : '',
+      default_emoji: default_emoji
+    }
+  end
 end

@@ -24,14 +24,14 @@ module Users
     private
 
     def set_status
+      params.delete(:availability) if params[:availability].blank?
+      return false if params[:availability].present? && UserStatus.availabilities.keys.exclude?(params[:availability])
+
       if params[:emoji] || params[:message]
         params[:emoji] = UserStatus::DEFAULT_EMOJI if params[:emoji].blank?
       else
         remove_status
       end
-
-      params.delete(:availability) if params[:availability].blank?
-      return false if params[:availability].present? && UserStatus.availabilities.keys.exclude?(params[:availability])
 
       user_status.update(params)
     end
