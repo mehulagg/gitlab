@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlLoadingIcon, GlSprintf, GlLink, GlAlert } from '@gitlab/ui';
 import gitlabLogo from 'images/cluster_app_logos/gitlab.png';
 import helmLogo from 'images/cluster_app_logos/helm.png';
 import jupyterhubLogo from 'images/cluster_app_logos/jupyterhub.png';
@@ -30,6 +30,7 @@ export default {
     CrossplaneProviderStack,
     IngressModsecuritySettings,
     FluentdOutputSettings,
+    GlAlert,
   },
   props: {
     type: {
@@ -293,7 +294,8 @@ export default {
             </p>
           </template>
           <template v-else>
-            <div class="bs-callout bs-callout-info">
+
+            <gl-alert variant="info" :dismissible="false">
               <strong data-testid="ingressCostWarning">
                 <gl-sprintf
                   :message="
@@ -309,7 +311,7 @@ export default {
                   </template>
                 </gl-sprintf>
               </strong>
-            </div>
+            </gl-alert>
           </template>
         </template>
       </application-row>
@@ -572,13 +574,13 @@ export default {
         title-link="https://github.com/knative/docs"
       >
         <template #description>
-          <p v-if="!rbac" class="rbac-notice bs-callout bs-callout-info">
+          <gl-alert v-if="!rbac" variant="info" :dismissible="false">
             {{
               s__(`ClusterIntegration|You must have an RBAC-enabled cluster
             to install Knative.`)
             }}
             <gl-link :href="helpPath" target="_blank">{{ __('More information') }}</gl-link>
-          </p>
+          </gl-alert>
           <p>
             {{
               s__(`ClusterIntegration|Knative extends Kubernetes to provide
