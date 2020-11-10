@@ -4,19 +4,19 @@ require 'spec_helper'
 RSpec.describe Packages::PackageFile, type: :model do
   include ::EE::GeoHelpers
 
-  describe '#calculate_checksum!' do
+  describe '#calculate_checksum' do
     let(:package_file) { create(:conan_package_file, :conan_recipe_file) }
 
     it 'returns SHA256 sum of the file' do
       expected = Digest::SHA256.file(package_file.file.path).hexdigest
 
-      expect(package_file.calculate_checksum!).to eq(expected)
+      expect(package_file.calculate_checksum).to eq(expected)
     end
 
     it 'returns nil for a non-existent file' do
       allow(package_file).to receive(:file_exist?).and_return(false)
 
-      expect(package_file.calculate_checksum!).to eq(nil)
+      expect(package_file.calculate_checksum).to eq(nil)
     end
   end
 

@@ -48,7 +48,7 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      def calculate_checksum!
+      def calculate_checksum
         return unless checksummable?
 
         self.class.hexdigest(replicator.carrierwave_uploader.path)
