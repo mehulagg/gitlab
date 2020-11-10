@@ -67,9 +67,10 @@ else
   MERGE_BASE=$(git merge-base ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA})
   MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
   if [ -n "${MD_DOC_PATH}" ]
+  then
     echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
   fi
- fi
+fi
 
 function run_locally_or_in_docker() {
   local cmd=$1
@@ -101,6 +102,7 @@ function run_locally_or_in_docker() {
 echo '=> Linting markdown style...'
 echo
 if [ -z "${MD_DOC_PATH}" ]
+then
   echo "Merged results pipeline detected, but no markdown files found. Skipping."
 else
   run_locally_or_in_docker 'markdownlint' "--config .markdownlint.json ${MD_DOC_PATH}"
