@@ -14420,6 +14420,8 @@ CREATE TABLE packages_package_files (
     verification_failure character varying(255),
     verification_retry_count integer,
     verification_checksum bytea,
+    verification_state smallint DEFAULT 0,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL))
 );
 

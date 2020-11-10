@@ -5,7 +5,6 @@ module Gitlab
     module ReplicableModel
       extend ActiveSupport::Concern
       include Checksummable
-      include ::ShaAttribute
 
       included do
         # If this hook turns out not to apply to all Models, perhaps we should extract a `ReplicableBlobModel`
@@ -15,8 +14,6 @@ module Gitlab
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :checksum_failed, -> { where.not(verification_failure: nil) }
         scope :available_replicables, -> { all }
-
-        sha_attribute :verification_checksum
       end
 
       class_methods do
