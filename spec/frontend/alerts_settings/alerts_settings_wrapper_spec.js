@@ -21,6 +21,7 @@ import {
   RESET_INTEGRATION_TOKEN_ERROR,
   UPDATE_INTEGRATION_ERROR,
   INTEGRATION_PAYLOAD_TEST_ERROR,
+  DELETE_INTEGRATION_ERROR,
 } from '~/alerts_settings/utils/error_messages';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
@@ -57,6 +58,12 @@ describe('AlertsSettingsWrapper', () => {
     localWrapper
       .find(IntegrationsList)
       .vm.$emit('delete-integration', { id: integrationToDestroy.id });
+  }
+
+  async function awaitApolloDomMock() {
+    await wrapper.vm.$nextTick(); // kick off the DOM update
+    await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
+    await wrapper.vm.$nextTick(); // kick off the DOM update for flash
   }
 
   const createComponent = ({ data = {}, provide = {}, loading = false } = {}) => {
@@ -372,10 +379,22 @@ describe('AlertsSettingsWrapper', () => {
       });
 
       await destroyHttpIntegration(wrapper);
+      await awaitApolloDomMock();
 
-      await waitForPromises();
-      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
-      expect(createFlash).toHaveBeenCalledTimes(1);
+      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
+    });
+
+    it('displays flash if mutation had a non-recoverable error', async () => {
+      createComponentWithApollo({
+        destroyHandler: jest.fn().mockRejectedValue('Error'),
+      });
+
+      await destroyHttpIntegration(wrapper);
+      await awaitApolloDomMock();
+
+      expect(createFlash).toHaveBeenCalledWith({
+        message: DELETE_INTEGRATION_ERROR,
+      });
     });
   });
 
