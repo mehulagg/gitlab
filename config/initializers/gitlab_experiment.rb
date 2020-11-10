@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 Gitlab::Experiment.configure do |config|
-  # Prefix all experiment names with a given value. Use `nil` for none.
-  config.name_prefix = 'gitlab_experiment'
-
   # Logic this project uses to resolve a variant for a given experiment.
   #
   # This can return an instance of any object that responds to `name`, or can
