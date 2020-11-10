@@ -19,26 +19,29 @@ RSpec.describe Gitlab::Geo::VerificationState do
   before do
     stub_dummy_replicator_class
     stub_dummy_model_class
+
+    subject.verification_started
+    subject.save!
   end
 
   subject { DummyModel.new }
 
-  describe '#update_verification_state!' do
-    before do
-      subject.save!
-    end
-
+  describe '#verification_succeeded_with_checksum!' do
     it 'saves the checksum' do
-      subject.update_verification_state!(checksum: 'abc123')
+      subject.verification_succeeded_with_checksum!('abc123')
 
       expect(subject.reload.verification_checksum).to eq('abc123')
       expect(subject.verified_at).not_to be_nil
     end
+  end
 
+  describe '#verification_failed_with_message!' do
     it 'saves the error message and increments retry counter' do
-      subject.update_verification_state!(failure: 'Failure to calculate checksum')
+      error = double('error', message: 'An error message')
 
-      expect(subject.reload.verification_failure).to eq 'Failure to calculate checksum'
+      subject.verification_failed_with_message!('Failure to calculate checksum', error)
+
+      expect(subject.reload.verification_failure).to eq 'Failure to calculate checksum: An error message'
       expect(subject.verification_retry_count).to be 1
     end
   end

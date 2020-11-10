@@ -52,10 +52,9 @@ module Geo
 
     def verify
       checksum = model_record.calculate_checksum
-      model_record.update_verification_state!(checksum: checksum)
+      model_record.verification_succeeded_with_checksum!(checksum)
     rescue => e
-      log_error('Error calculating the checksum', e)
-      model_record.update_verification_state!(failure: e.message)
+      model_record.verification_failed_with_message!('Error calculating the checksum', e)
     end
 
     # Check if given checksum matches known one
