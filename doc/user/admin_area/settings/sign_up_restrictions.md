@@ -51,6 +51,25 @@ their email address before they are allowed to sign in.
 
 ![Email confirmation](img/sign_up_restrictions_v13_5.png)
 
+### Allow users to sign in without confirming their email first
+
+To improve the sign up experience for new users, you can enable the soft-email confirmation [feature flag](../../../../user/feature_flags.md).
+Users are then able to sign up and sign in immediately without a confirmation. They will get shown a banner on GitLab as a reminder to confirm their
+email address and will not be able to create or update pipelines until the email address is confirmed.
+
+[GitLab administrators with access to the GitLab Rails console](../../../../administration/feature_flags.md)
+can enable the feature flag to enable soft email confirmation:
+
+```ruby
+Feature.enable(:soft_email_confirmation)
+```
+
+To disable the feature flag again run:
+
+```ruby
+Feature.disable(:soft_email_confirmation)
+```
+
 ## Minimum password length limit
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20661) in GitLab 12.6
