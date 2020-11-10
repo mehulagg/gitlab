@@ -35,7 +35,7 @@ module API
 
     version 'v3', using: :path do
       route :any, '*path' do
-        error!('API V3 is no longer supported. Use API V4 instead.', 410)
+        error!('API  V3 is no longer supported. Use API V4 instead.', 410)
       end
     end
 
