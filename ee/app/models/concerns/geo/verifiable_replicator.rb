@@ -47,7 +47,7 @@ module Geo
     end
 
     def after_verifiable_update
-      schedule_checksum_calculation if needs_checksum?
+      verify_async if needs_checksum?
     end
 
     def verify
@@ -107,7 +107,7 @@ module Geo
       [next_retry_time(retry_count), retry_count]
     end
 
-    def schedule_checksum_calculation
+    def verify_async
       raise NotImplementedError
     end
   end
