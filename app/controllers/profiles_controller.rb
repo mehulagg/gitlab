@@ -14,11 +14,15 @@ class ProfilesController < Profiles::ApplicationController
   feature_category :users
 
   def show
+    pp user.status
   end
 
   def update
     respond_to do |format|
+      pp params
       result = Users::UpdateService.new(current_user, user_params.merge(user: @user)).execute
+
+      pp result
 
       if result[:status] == :success
         message = s_("Profiles|Profile was successfully updated")

@@ -49,9 +49,9 @@
         - emoji_button = button_tag type: :button,
           class: 'js-toggle-emoji-menu emoji-menu-toggle-button gl-button btn has-tooltip',
           title: s_("Profiles|Add status emoji") do
-          - if @user.status
+          - if has_custom_status_emoji?
             = emoji_icon @user.status.emoji
-          %span#js-no-emoji-placeholder.no-emoji-placeholder{ class: ('hidden' if @user.status) }
+          %span#js-no-emoji-placeholder.no-emoji-placeholder{ class: ('hidden' if has_custom_status_emoji?) }
             = sprite_icon('slight-smile', css_class: 'award-control-icon-neutral')
             = sprite_icon('smiley', css_class: 'award-control-icon-positive')
             = sprite_icon('smile', css_class: 'award-control-icon-super-positive')
@@ -70,7 +70,7 @@
           append: reset_message_button,
           placeholder: s_("Profiles|What's your status?")
         .checkbox-icon-inline-wrapper
-          = status_form.check_box :availability, { id: 'js-status-availability-field', label: s_("Profiles|Busy"), wrapper_class: 'gl-mr-0 gl-font-weight-bold' }, availability["busy"], availability["not_set"]
+          = status_form.check_box :availability, { data: { testid: "user-availability-checkbox" }, label: s_("Profiles|Busy"), wrapper_class: 'gl-mr-0 gl-font-weight-bold' }, availability["busy"], ""
           .gl-text-gray-600.gl-ml-5= s_('Profiles|"Busy" will be shown next to your name')
   - if Feature.enabled?(:user_time_settings)
     %hr
