@@ -21101,7 +21101,7 @@ CREATE INDEX index_merge_request_metrics_on_pipeline_id ON merge_request_metrics
 
 CREATE INDEX index_merge_request_metrics_on_target_project_id ON merge_request_metrics USING btree (target_project_id);
 
-CREATE INDEX index_merge_request_metrics_on_target_project_id_merged_at ON merge_request_metrics USING btree (target_project_id, merged_at);
+CREATE INDEX index_merge_request_metrics_on_target_project_id_merged_at ON merge_request_metrics USING btree (target_project_id, merged_at DESC NULLS LAST);
 
 CREATE UNIQUE INDEX index_merge_request_reviewers_on_merge_request_id_and_user_id ON merge_request_reviewers USING btree (merge_request_id, user_id);
 
