@@ -22,8 +22,6 @@
 
 = render 'shared/issuable/form/type_selector', issuable: issuable, form: form
 
-= render 'shared/form_elements/apply_template_warning', issuable: issuable
-
 = render 'shared/form_elements/description', model: issuable, form: form, project: project
 
 - if issuable.respond_to?(:confidential)
