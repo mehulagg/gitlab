@@ -51,12 +51,26 @@ module Geo
     end
 
     def verify_async
+      # Marking started prevents backfill (VerificationBatchWorker) from picking
+      # this up too.
+      # Also, if another verification job is running, this will make that job
+      # set state to pending after it finishes, since the calculated checksum
+      # is already invalidated.
+      model_record.verification_started!
+
       Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
     end
 
+    # Calculates checksum and asks the model/registry to update verification
+    # state.
     def verify
+      # Deduplicate verification job
+      return unless model_record.verification_started?
+
+      calculation_started_at = Time.current
       checksum = model_record.calculate_checksum
-      model_record.verification_succeeded_with_checksum!(checksum)
+
+      model_record.verification_succeeded_with_checksum!(checksum, calculation_started_at)
     rescue => e
       model_record.verification_failed_with_message!('Error calculating the checksum', e)
     end

@@ -48,12 +48,26 @@ RSpec.shared_examples 'a verifiable replicator' do
     end
   end
 
-  describe '#verify' do
+  describe '#verify_async' do
     before do
-      model_record.verification_started
       model_record.save!
     end
 
+    context 'on a Geo primary' do
+      before do
+        stub_primary_node
+      end
+
+      it 'calls verification_started! and enqueues VerificationWorker' do
+        expect(model_record).to receive(:verification_started!)
+        expect(Geo::VerificationWorker).to receive(:perform_async).with(replicator.replicable_name, model_record.id)
+
+        replicator.verify_async
+      end
+    end
+  end
+
+  describe '#verify' do
     context 'on a Geo primary' do
       before do
         stub_primary_node
@@ -67,7 +81,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         context 'when the checksum succeeds' do
           it 'delegates checksum calculation and the state change to model_record' do
             expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-            expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123')
+            expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
 
             replicator.verify
           end
@@ -84,6 +98,14 @@ RSpec.shared_examples 'a verifiable replicator' do
 
             replicator.verify
           end
+        end
+      end
+
+      context 'when verification was not started' do
+        it 'does not call calculate_checksum!' do
+          expect(model_record).not_to receive(:calculate_checksum)
+
+          replicator.verify
         end
       end
     end

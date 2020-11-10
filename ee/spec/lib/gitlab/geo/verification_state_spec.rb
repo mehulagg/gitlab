@@ -27,11 +27,26 @@ RSpec.describe Gitlab::Geo::VerificationState do
   subject { DummyModel.new }
 
   describe '#verification_succeeded_with_checksum!' do
-    it 'saves the checksum' do
-      subject.verification_succeeded_with_checksum!('abc123')
+    context 'when the resource was updated during checksum calculation' do
+      let(:calculation_started_at) { subject.verification_started_at - 1.second }
 
-      expect(subject.reload.verification_checksum).to eq('abc123')
-      expect(subject.verified_at).not_to be_nil
+      it 'sets state to pending' do
+        subject.verification_succeeded_with_checksum!('abc123', calculation_started_at)
+
+        expect(subject.reload.verification_pending?).to be_truthy
+      end
+    end
+
+    context 'when the resource was not updated during checksum calculation' do
+      let(:calculation_started_at) { subject.verification_started_at + 1.second }
+
+      it 'saves the checksum' do
+        subject.verification_succeeded_with_checksum!('abc123', calculation_started_at)
+
+        expect(subject.reload.verification_succeeded?).to be_truthy
+        expect(subject.reload.verification_checksum).to eq('abc123')
+        expect(subject.verified_at).not_to be_nil
+      end
     end
   end
 
@@ -41,6 +56,7 @@ RSpec.describe Gitlab::Geo::VerificationState do
 
       subject.verification_failed_with_message!('Failure to calculate checksum', error)
 
+      expect(subject.reload.verification_failed?).to be_truthy
       expect(subject.reload.verification_failure).to eq 'Failure to calculate checksum: An error message'
       expect(subject.verification_retry_count).to be 1
     end
