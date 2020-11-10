@@ -107,7 +107,7 @@ set up GitLab to create a new account when a Kerberos user tries to sign in.
 If you're an administrator, you can link a Kerberos account to an
 existing GitLab account. To do so:
 
-1. Navigate to **Admin > Users > Example User**.
+1. Navigate to **Admin Area > Overview > Users > Example User**.
 1. Select the Identities tab.
 1. Include the **Provider** name of your choice.
 1. Make sure the **Identifier** corresponds to the Kerberos username.
