@@ -855,7 +855,81 @@ To avoid duplicated argument definitions, you can place these arguments in a reu
 class, if the arguments are nested). Alternatively, you can consider to add a
 [helper resolver method](https://gitlab.com/gitlab-org/gitlab/-/issues/258969).
 
-## Pass a parent object into a child Presenter
+### Metadata
+
+When using resolvers, they can and should serve as the SSOT for field metadata.
+All field options (apart from the field name) can be declared on the resolver.
+These include:
+
+- type (this is particularly important, and will soon be mandatory)
+- extras
+- description
+
+### Re-using resolvers
+
+You should never re-use resolvers. Resolvers have a complex life-cycle, with
+authorization, readiness and resolution orchestrated by the framework, and at
+each stage lazy values can be returned to take advantage of batching
+opportunities. Never instantiate a resolver or a mutation in application code.
+
+Instead, the units of code reuse are much the same as in the rest of the
+application:
+
+- Finders in queries to lookup data
+- Services in mutations to apply operations
+- Loaders (batch-aware finders) - specific to queries
+
+Note that there is never any reason to use batching in a mutation. Mutations are
+executed in series, so there are no batching opportunities. All values are
+evaluated eagerly as soon as they are requested, so batching is unnecessary
+overhead.
+
+Ideally our code should aim to be thin declarative wrappers around finders and
+services. It is OK to repeat lists of arguments, or they can be extracted to
+concerns - composition is to be preferred over inheritance in most cases.
+
+For some simple use cases, however, we can derive some resolvers from others.
+The main use case for this is one resolver to find all items, and another to
+find one specific one. For this, we supply a convenience method
+`BaseResolver.single` which constructs a new resolver that selects the first
+item.
+
+Using `BaseResolver.single` too freely is an anti-pattern. It can lead to
+non-sensical fields, such as a `Project.mergeRequest` field that just returns
+the first MR if no arguments are given. Whenever we derive a single resolver
+from a collection resolver, it must have more restrictive arguments. For
+example:
+
+```ruby
+class JobsResolver < BaseResolver
+  type JobType.connection_type, null: true
+  authorize :read_pipeline
+
+  argument :name, ::GraphQL::STRING_TYPE, required: false
+
+  when_single do
+    argument :name, ::GraphQL::STRING_TYPE, required: true
+  end
+
+  def resolve(name: :not_given)
+    jobs = object.jobs
+    jobs = jobs.where(name: name) unless name == :not_given
+    jobs
+  end
+```
+
+Here we have a simple resolver for getting pipeline jobs. The name argument is
+optional when getting a list, but required when getting a single job. We can use
+this as follows:
+
+```ruby
+# In PipelineType
+
+field :jobs, resolver: JobsResolver, description: 'All jobs'
+field :job, resolver: JobsResolver.single, description: 'A single job'
+```
+
+### Pass a parent object into a child Presenter
 
 Sometimes you need to access the resolved query parent in a child context to compute fields. Usually the parent is only
 available in the `Resolver` class as `parent`.
@@ -870,7 +944,7 @@ To find the parent object in your `Presenter` class:
      end
    ```
 
-1. Declare that your fields require the `parent` field context. For example:
+1. Declare that your resolver or fields require the `parent` field context. For example:
 
    ```ruby
      # in ChildType
@@ -878,6 +952,14 @@ To find the parent object in your `Presenter` class:
            method: :my_computing_method,
            extras: [:parent], # Necessary
            description: 'My field description'
+
+     field :resolver_field, resolver: SomeTypeResolver
+
+     # In SomeTypeResolver
+
+     extras [:parent]
+     type SomeType, null: true
+     description 'My field description'
    ```
 
 1. Declare your field's method in your Presenter class and have it accept the `parent` keyword argument.
@@ -889,9 +971,16 @@ This argument contains the parent **GraphQL context**, so you have to access the
      def my_computing_method(parent:)
        # do something with `parent[:parent_object]` here
      end
+
+     # In SomeTypeResolver
+
+     def resolve(parent:)
+       # ...
+     end
    ```
 
 For an example of real-world use, check [this MR that added `scopedPath` and `scopedUrl` to `IterationPresenter`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39543)
+
 
 ## Mutations
 
