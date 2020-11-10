@@ -569,14 +569,16 @@ Metrics are gathered by `Geo::MetricsUpdateWorker`, persisted in
 1. Add the following to `spec/factories/widgets.rb`:
 
    ```ruby
-   trait(:checksummed) do
+   trait(:verification_succeeded) do
      with_file
      verification_checksum { 'abc' }
+     verification_state { Widget.verification_state_value(:verification_succeeded) }
    end
 
-   trait(:checksum_failure) do
+   trait(:verification_failed) do
      with_file
      verification_failure { 'Could not calculate the checksum' }
+     verification_state { Widget.verification_state_value(:verification_failed) }
    end
    ```
 

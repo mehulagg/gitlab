@@ -86,6 +86,12 @@ module Gitlab
         end
       end
 
+      class_methods do
+        def verification_state_value(state_string)
+          VERIFICATION_STATE_VALUES[state_string]
+        end
+      end
+
       # @param [String] message error information
       # @param [StandardError] error exception
       def set_verification_failure(message, error = nil)
