@@ -161,7 +161,7 @@ We recommend that you retain the default for `block_auto_created_users`.
 Kerberos users who create accounts on GitLab without administrator
 knowledge can be a security risk.
 
-## Linking Kerberos and LDAP accounts together
+## Link Kerberos and LDAP accounts together
 
 If your users sign in with Kerberos, but you also have [LDAP integration](../administration/auth/ldap/index.md)
 enabled, your users will be linked to their LDAP accounts on their first sign-in.
