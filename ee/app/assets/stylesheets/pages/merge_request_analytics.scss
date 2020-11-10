@@ -6,4 +6,8 @@
   .milestone-title {
     max-width: px-to-rem($milestone-title-max-width);
   }
+
+  .gl-filtered-search-suggestion-list {
+    z-index: 9999;
+  }
 }
