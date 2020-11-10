@@ -5,6 +5,10 @@ class MergeRequestDiffDetail < ApplicationRecord
 
   belongs_to :merge_request_diff, inverse_of: :merge_request_diff_detail
 
-  scope :checksummed, -> { where.not(verification_checksum: nil) }
-  scope :checksum_failed, -> { where.not(verification_failure: nil) }
+  # Temporarily defining `verification_success` and `verification_failed`
+  # for unverified models while verification is under development to avoid
+  # breaking GeoNodeStatusCheck code.
+  # Remove these after including `Gitlab::Geo::VerificationState` on this model.
+  scope :verification_success, -> { none }
+  scope :verification_failed, -> { none }
 end

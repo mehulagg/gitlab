@@ -11,8 +11,13 @@ module Gitlab
         after_create_commit -> { replicator.handle_after_create_commit if replicator.respond_to?(:handle_after_create_commit) }
         after_destroy -> { replicator.handle_after_destroy if replicator.respond_to?(:handle_after_destroy) }
 
-        scope :checksummed, -> { where.not(verification_checksum: nil) }
-        scope :checksum_failed, -> { where.not(verification_failure: nil) }
+        # Temporarily defining `verification_success` and `verification_failed`
+        # for unverified models while verification is under development to avoid
+        # breaking GeoNodeStatusCheck code.
+        # Remove these after including `Gitlab::Geo::VerificationState` on all
+        # models.
+        scope :verification_success, -> { none }
+        scope :verification_failed, -> { none }
         scope :available_replicables, -> { all }
       end
 
