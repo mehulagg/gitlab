@@ -4,13 +4,11 @@ group: Geo
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Geo self-service framework (alpha)
+# Geo self-service framework
 
 NOTE: **Note:**
-This document might be subjected to change. It's a
-proposal we're working on and once the implementation is complete this
-documentation will be updated. Follow progress in the
-[epic](https://gitlab.com/groups/gitlab-org/-/epics/2161).
+This document is subject to change as we continue to implement and iterate on the framework.
+Follow the progress in the [epic](https://gitlab.com/groups/gitlab-org/-/epics/2161).
 If you need to replicate a new data type, reach out to the Geo
 team to discuss the options. You can contact them in `#g_geo` on Slack
 or mention `@geo-team` in the issue or merge request.
@@ -33,7 +31,7 @@ naming conventions:
 - **Resource**:
   A resource is a piece of data that belongs to a model and is
   produced by a GitLab feature. It is persisted using a storage
-  mechanism. By default, a resource is not a replicable.
+  mechanism. By default, a resource is not a Geo replicable.
 
 - **Data type**:
   Data type is how a resource is stored. Each resource should
