@@ -81,6 +81,17 @@ $white-gc-bg: #eaf2f5;
 .line-numbers,
 .diff-line-num {
   background-color: $gray-light;
+
+  &.conflict_marker,
+  &.conflict_our {
+    background-color: #e1fad7;
+    border-color: #e1fad7;
+  }
+
+  &.conflict_their {
+    background-color: #e0f0ff;
+    border-color: #e0f0ff;
+  }
 }
 
 .diff-line-num,
@@ -115,7 +126,7 @@ pre.code,
 
   .diff-grid-left:hover,
   .diff-grid-right:hover {
-    .diff-line-num:not(.empty-cell) {
+    .diff-line-num:not(.empty-cell):not(.conflict_marker) {
       @include line-number-hover($white-over-bg);
     }
   }
@@ -169,6 +180,17 @@ pre.code,
   }
 
   .line_content {
+    &.conflict_our,
+    &.conflict_marker {
+      background-color: #e1fad7;
+      border-color: #e1fad7;
+    }
+
+    &.conflict_their {
+      background-color: #e0f0ff;
+      border-color: #e0f0ff;
+    }
+
     &.old {
       background-color: $line-removed;
 
@@ -204,6 +226,17 @@ pre.code,
 
   .line-coverage {
     @include line-coverage-border-color($green-500, $orange-500);
+
+    &.conflict_marker,
+    &.conflict_our {
+      background-color: #e1fad7;
+      border-color: #e1fad7;
+    }
+
+    &.conflict_their {
+      background-color: #e0f0ff;
+      border-color: #e0f0ff;
+    }
 
     &.old {
       background-color: $line-removed;

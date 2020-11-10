@@ -71,6 +71,12 @@ export default {
     addCommentTooltipRight() {
       return utils.addCommentTooltip(this.line.right);
     },
+    emptyCellRightClassMap() {
+      return { conflict_their: this.line.left?.type === 'conflict_our' };
+    },
+    emptyCellLeftClassMap() {
+      return { conflict_our: this.line.right?.type === 'conflict_their' };
+    },
     shouldRenderCommentButton() {
       return (
         this.isLoggedIn &&
@@ -120,29 +126,31 @@ export default {
           data-testid="leftLineNumber"
           class="diff-td diff-line-num old_line"
         >
-          <span
-            v-if="shouldRenderCommentButton"
-            v-gl-tooltip
-            data-testid="leftCommentButton"
-            class="add-diff-note tooltip-wrapper"
-            :title="addCommentTooltipLeft"
-          >
-            <button
-              type="button"
-              class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
-              :disabled="line.left.commentsDisabled"
-              @click="handleCommentButton(line.left)"
+          <template v-if="line.left.type !== 'conflict_marker'">
+            <span
+              v-if="shouldRenderCommentButton"
+              v-gl-tooltip
+              data-testid="leftCommentButton"
+              class="add-diff-note tooltip-wrapper"
+              :title="addCommentTooltipLeft"
             >
-              <gl-icon :size="12" name="comment" />
-            </button>
-          </span>
-          <a
-            v-if="line.left.old_line"
-            :data-linenumber="line.left.old_line"
-            :href="line.lineHrefOld"
-            @click="setHighlightedRow(line.lineCode)"
-          >
-          </a>
+              <button
+                type="button"
+                class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+                :disabled="line.left.commentsDisabled"
+                @click="handleCommentButton(line.left)"
+              >
+                <gl-icon :size="12" name="comment" />
+              </button>
+            </span>
+            <a
+              v-if="line.left.old_line"
+              :data-linenumber="line.left.old_line"
+              :href="line.lineHrefOld"
+              @click="setHighlightedRow(line.lineCode)"
+            >
+            </a>
+          </template>
           <diff-gutter-avatars
             v-if="line.hasDiscussionsLeft"
             :discussions="line.left.discussions"
@@ -170,53 +178,72 @@ export default {
         <div
           :id="line.left.line_code"
           :key="line.left.line_code"
-          v-safe-html="line.left.rich_text"
           :class="parallelViewLeftLineType"
           class="diff-td line_content with-coverage parallel left-side"
           data-testid="leftContent"
           @mousedown="handleParallelLineMouseDown"
-        ></div>
+        >
+          <strong v-if="line.left.type === 'conflict_marker'">HEAD//our changes</strong>
+          <span v-else v-safe-html="line.left.rich_text"></span>
+        </div>
       </template>
       <template v-else>
-        <div data-testid="leftEmptyCell" class="diff-td diff-line-num old_line empty-cell"></div>
-        <div class="diff-td diff-line-num old_line empty-cell"></div>
-        <div class="diff-td line-coverage left-side empty-cell"></div>
-        <div class="diff-td line_content with-coverage parallel left-side empty-cell"></div>
+        <div
+          data-testid="leftEmptyCell"
+          class="diff-td diff-line-num old_line empty-cell"
+          :class="emptyCellLeftClassMap"
+        ></div>
+        <div class="diff-td diff-line-num old_line empty-cell" :class="emptyCellLeftClassMap"></div>
+        <div
+          class="diff-td line-coverage left-side empty-cell"
+          :class="emptyCellLeftClassMap"
+        ></div>
+        <div
+          class="diff-td line_content with-coverage parallel left-side empty-cell"
+          :class="emptyCellLeftClassMap"
+        ></div>
       </template>
     </div>
     <div
-      v-if="!inline || (line.right && Boolean(line.right.type))"
+      v-if="
+        !inline || (line.right && Boolean(line.right.type) && line.right.type !== 'conflict_marker')
+      "
       class="diff-grid-right right-side"
     >
       <template v-if="line.right">
         <div
-          :class="classNameMapCellRight"
+          :class="[
+            classNameMapCellRight,
+            { conflict_their: line.right.type === 'conflict_marker' },
+          ]"
           data-testid="rightLineNumber"
           class="diff-td diff-line-num new_line"
         >
-          <span
-            v-if="shouldRenderCommentButton"
-            v-gl-tooltip
-            data-testid="rightCommentButton"
-            class="add-diff-note tooltip-wrapper"
-            :title="addCommentTooltipRight"
-          >
-            <button
-              type="button"
-              class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
-              :disabled="line.right.commentsDisabled"
-              @click="handleCommentButton(line.right)"
+          <template v-if="line.right.type !== 'conflict_marker'">
+            <span
+              v-if="shouldRenderCommentButton"
+              v-gl-tooltip
+              data-testid="rightCommentButton"
+              class="add-diff-note tooltip-wrapper"
+              :title="addCommentTooltipRight"
             >
-              <gl-icon :size="12" name="comment" />
-            </button>
-          </span>
-          <a
-            v-if="line.right.new_line"
-            :data-linenumber="line.right.new_line"
-            :href="line.lineHrefNew"
-            @click="setHighlightedRow(line.lineCode)"
-          >
-          </a>
+              <button
+                type="button"
+                class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+                :disabled="line.right.commentsDisabled"
+                @click="handleCommentButton(line.right)"
+              >
+                <gl-icon :size="12" name="comment" />
+              </button>
+            </span>
+            <a
+              v-if="line.right.new_line"
+              :data-linenumber="line.right.new_line"
+              :href="line.lineHrefNew"
+              @click="setHighlightedRow(line.lineCode)"
+            >
+            </a>
+          </template>
           <diff-gutter-avatars
             v-if="line.hasDiscussionsRight"
             :discussions="line.right.discussions"
@@ -243,28 +270,48 @@ export default {
         <div
           v-gl-tooltip.hover
           :title="coverageState.text"
-          :class="[line.right.type, coverageState.class, { hll: isHighlighted }]"
+          :class="[
+            line.right.type,
+            coverageState.class,
+            { hll: isHighlighted, conflict_their: line.right.type === 'conflict_marker' },
+          ]"
           class="diff-td line-coverage right-side"
         ></div>
         <div
           :id="line.right.line_code"
           :key="line.right.rich_text"
-          v-safe-html="line.right.rich_text"
           :class="[
             line.right.type,
             {
               hll: isHighlighted,
+              conflict_their: line.right.type === 'conflict_marker',
             },
           ]"
           class="diff-td line_content with-coverage parallel right-side"
           @mousedown="handleParallelLineMouseDown"
-        ></div>
+        >
+          <strong v-if="line.right.type === 'conflict_marker'">origin//their changes</strong>
+          <span v-else v-safe-html="line.right.rich_text"></span>
+        </div>
       </template>
       <template v-else>
-        <div data-testid="rightEmptyCell" class="diff-td diff-line-num old_line empty-cell"></div>
-        <div class="diff-td diff-line-num old_line empty-cell"></div>
-        <div class="diff-td line-coverage right-side empty-cell"></div>
-        <div class="diff-td line_content with-coverage parallel right-side empty-cell"></div>
+        <div
+          data-testid="rightEmptyCell"
+          class="diff-td diff-line-num old_line empty-cell"
+          :class="emptyCellRightClassMap"
+        ></div>
+        <div
+          class="diff-td diff-line-num old_line empty-cell"
+          :class="emptyCellRightClassMap"
+        ></div>
+        <div
+          class="diff-td line-coverage right-side empty-cell"
+          :class="emptyCellRightClassMap"
+        ></div>
+        <div
+          class="diff-td line_content with-coverage parallel right-side empty-cell"
+          :class="emptyCellRightClassMap"
+        ></div>
       </template>
     </div>
   </div>

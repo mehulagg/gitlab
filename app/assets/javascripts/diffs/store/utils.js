@@ -23,6 +23,9 @@ export const isAdded = line => ['new', 'new-nonewline'].includes(line.type);
 export const isRemoved = line => ['old', 'old-nonewline'].includes(line.type);
 export const isUnchanged = line => !line.type;
 export const isMeta = line => ['match', 'new-nonewline', 'old-nonewline'].includes(line.type);
+export const isConflictMarker = line => line.type === 'conflict_marker';
+export const isConflictOur = line => line.type === 'conflict_our';
+export const isConflictTheir = line => line.type === 'conflict_their';
 
 /**
  * Pass in the inline diff lines array which gets converted
@@ -40,12 +43,14 @@ export const isMeta = line => ['match', 'new-nonewline', 'old-nonewline'].includ
  */
 export const parallelizeDiffLines = (diffLines = []) => {
   let freeRightIndex = null;
+  let a = false;
+  let conflictStartIndex = -1;
   const lines = [];
 
   for (let i = 0, diffLinesLength = diffLines.length, index = 0; i < diffLinesLength; i += 1) {
     const line = diffLines[i];
 
-    if (isRemoved(line)) {
+    if (isRemoved(line) || isConflictOur(line)) {
       lines.push({
         [LINE_POSITION_LEFT]: line,
         [LINE_POSITION_RIGHT]: null,
@@ -56,7 +61,8 @@ export const parallelizeDiffLines = (diffLines = []) => {
         freeRightIndex = index;
       }
       index += 1;
-    } else if (isAdded(line)) {
+      a = true;
+    } else if (isAdded(line) || isConflictTheir(line)) {
       if (freeRightIndex !== null) {
         // If an old line came before this without a line on the right, this
         // line can be put to the right of it.
@@ -75,15 +81,24 @@ export const parallelizeDiffLines = (diffLines = []) => {
         freeRightIndex = null;
         index += 1;
       }
-    } else if (isMeta(line) || isUnchanged(line)) {
-      // line in the right panel is the same as in the left one
-      lines.push({
-        [LINE_POSITION_LEFT]: line,
-        [LINE_POSITION_RIGHT]: line,
-      });
+      a = false;
+    } else if (isMeta(line) || isUnchanged(line) || (isConflictMarker(line) && !a)) {
+      if (conflictStartIndex <= 0) {
+        // line in the right panel is the same as in the left one
+        lines.push({
+          [LINE_POSITION_LEFT]: line,
+          [LINE_POSITION_RIGHT]: line,
+        });
 
-      freeRightIndex = null;
-      index += 1;
+        if (isConflictMarker(line)) {
+          conflictStartIndex = index;
+        }
+        freeRightIndex = null;
+        index += 1;
+      } else {
+        lines[conflictStartIndex][LINE_POSITION_RIGHT] = line;
+        conflictStartIndex = -1;
+      }
     }
   }
 
