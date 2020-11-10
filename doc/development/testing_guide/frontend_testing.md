@@ -898,6 +898,7 @@ it.each([
  }
 );
 ```
+**Note**: only use if pretty print is not needed for spec output. For example, empty strings, nested objctes etc.
 
 ```javascript
 // test suite with tagged template literal block
