@@ -61,6 +61,7 @@ describe('GeoNodeFormCapacities', () => {
   const findGeoNodeFormReverificationIntervalField = () =>
     wrapper.find('#node-reverification-interval-field');
   const findErrorMessage = () => wrapper.find('.invalid-feedback');
+  const findFieldLabel = id => wrapper.vm.formGroups.find(el => el.id === id).label;
 
   describe('template', () => {
     describe.each`
@@ -169,7 +170,7 @@ describe('GeoNodeFormCapacities', () => {
             );
             if (showError) {
               expect(findErrorMessage().text()).toBe(
-                `Verification concurrency limit ${errorMessage}`,
+                `${findFieldLabel('node-verification-capacity-field')} ${errorMessage}`,
               );
             }
           });
@@ -185,7 +186,9 @@ describe('GeoNodeFormCapacities', () => {
               showError,
             );
             if (showError) {
-              expect(findErrorMessage().text()).toBe(`Re-verification interval ${errorMessage}`);
+              expect(findErrorMessage().text()).toBe(
+                `${findFieldLabel('node-reverification-interval-field')} ${errorMessage}`,
+              );
             }
           });
         });
@@ -205,7 +208,7 @@ describe('GeoNodeFormCapacities', () => {
             expect(findGeoNodeFormRepositoryCapacityField().classes('is-invalid')).toBe(showError);
             if (showError) {
               expect(findErrorMessage().text()).toBe(
-                `Repository synchronization concurrency limit ${errorMessage}`,
+                `${findFieldLabel('node-repository-capacity-field')} ${errorMessage}`,
               );
             }
           });
@@ -220,7 +223,7 @@ describe('GeoNodeFormCapacities', () => {
             expect(findGeoNodeFormFileCapacityField().classes('is-invalid')).toBe(showError);
             if (showError) {
               expect(findErrorMessage().text()).toBe(
-                `File synchronization concurrency limit ${errorMessage}`,
+                `${findFieldLabel('node-file-capacity-field')} ${errorMessage}`,
               );
             }
           });
@@ -237,7 +240,7 @@ describe('GeoNodeFormCapacities', () => {
             );
             if (showError) {
               expect(findErrorMessage().text()).toBe(
-                `Container repositories synchronization concurrency limit ${errorMessage}`,
+                `${findFieldLabel('node-container-repository-capacity-field')} ${errorMessage}`,
               );
             }
           });
@@ -254,7 +257,7 @@ describe('GeoNodeFormCapacities', () => {
             );
             if (showError) {
               expect(findErrorMessage().text()).toBe(
-                `Verification concurrency limit ${errorMessage}`,
+                `${findFieldLabel('node-verification-capacity-field')} ${errorMessage}`,
               );
             }
           });
