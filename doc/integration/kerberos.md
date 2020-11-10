@@ -109,7 +109,7 @@ existing GitLab account. To do so:
 
 1. Navigate to **Admin Area > Overview > Users > Example User**.
 1. Select the Identities tab.
-1. Include the **Provider** name of your choice.
+1. Select 'Kerberos Spnego' in the 'Provider' dropdown box.
 1. Make sure the **Identifier** corresponds to the Kerberos username.
 1. Select **Save changes**.
 
