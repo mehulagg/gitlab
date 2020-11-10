@@ -26,7 +26,7 @@ several different ways:
   By default, such issues are [confidential](../../project/issues/confidential_issues.md).
 - [Link issues](#link-issues-to-the-vulnerability) - Link existing issues to vulnerability.
 - [Automatic remediation](#automatic-remediation-for-vulnerabilities) - For some vulnerabilities,
-  a solution is provided for how to automatically fix the vulnerability.
+  a solution is provided for how to fix the vulnerability automatically.
 
 ## Changing vulnerability status
 
@@ -40,7 +40,7 @@ the following values:
 | Dismissed | A user has seen this vulnerability and dismissed it because it is not accurate or otherwise will not be resolved |
 | Resolved  | The vulnerability has been fixed and is no longer valid                                                          |
 
-A timeline shows you when the vulnerability status has changed,
+A timeline shows you when the vulnerability status has changed
 and allows you to comment on a change.
 
 ## Creating an issue for a vulnerability
@@ -48,7 +48,7 @@ and allows you to comment on a change.
 You can create an issue for a vulnerability by selecting the **Create issue** button.
 
 This creates a [confidential issue](../../project/issues/confidential_issues.md) in the
-project the vulnerability came from, and pre-populates it with useful information from
+project the vulnerability came from and pre-populates it with useful information from
 the vulnerability report. After the issue is created, GitLab redirects you to the
 issue page so you can edit, assign, or comment on the issue.
 
