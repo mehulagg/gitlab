@@ -112,11 +112,11 @@ Please see [Getting help for GitLab](https://about.gitlab.com/getting-help/) on 
 
 ## Why?
 
-[Read here](https://about.gitlab.com/why/)
+[Read here](https://about.gitlab.com/why/).
 
 ## Is it any good?
 
-[Yes](https://about.gitlab.com/is-it-any-good/)
+[Yes](https://about.gitlab.com/is-it-any-good/).
 
 ## Is it awesome?
 
