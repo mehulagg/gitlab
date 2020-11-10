@@ -242,7 +242,7 @@ describe('RelatedItemsTree', () => {
       });
 
       describe.each`
-        createItem         | itemType   | isEpic 
+        createItem         | itemType   | isEpic
         ${createEpicItem}  | ${'epic'}  | ${true}
         ${createIssueItem} | ${'issue'} | ${false}
       `(`when dependent on item type`, ({ createItem, isEpic, itemType }) => {
@@ -259,11 +259,11 @@ describe('RelatedItemsTree', () => {
       });
 
       describe.each`
-        createItem                              | testDesc               | stateIconName
-        ${createEpicItem(mockOpenEpic)}         | ${'epic is `open`'}    | ${'epic'}
-        ${createEpicItem(mockClosedEpic)}       | ${'epic is `closed`'}  | ${'epic-closed'}
-        ${createIssueItem(mockIssue1)}          | ${'issue is `open`'}   | ${'issues'}
-        ${createIssueItem(mockClosedIssue)}     | ${'issue is `closed`'} | ${'issue-closed'}
+        createItem                          | testDesc               | stateIconName
+        ${createEpicItem(mockOpenEpic)}     | ${'epic is `open`'}    | ${'epic'}
+        ${createEpicItem(mockClosedEpic)}   | ${'epic is `closed`'}  | ${'epic-closed'}
+        ${createIssueItem(mockIssue1)}      | ${'issue is `open`'}   | ${'issues'}
+        ${createIssueItem(mockClosedIssue)} | ${'issue is `closed`'} | ${'issue-closed'}
       `(`when dependent on item type and state`, ({ createItem, testDesc, stateIconName }) => {
         beforeEach(() => {
           mockItem = createItem;
@@ -277,7 +277,7 @@ describe('RelatedItemsTree', () => {
 
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.vm.stateIconName).toBe(stateIconName); 
+            expect(wrapper.vm.stateIconName).toBe(stateIconName);
           });
         });
       });
