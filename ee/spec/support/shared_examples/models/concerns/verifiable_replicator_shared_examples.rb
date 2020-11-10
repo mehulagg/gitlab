@@ -53,24 +53,25 @@ RSpec.shared_examples 'a verifiable replicator' do
       model_record.save!
     end
 
-    it 'calculates the checksum' do
-      expect(model_record).to receive(:calculate_checksum).and_return('abc123')
+    context 'when a Geo primary' do
+      context 'when an error is raised during calculate_checksum!' do
+        it 'delegates checksum calculation and the state change to model_record' do
+          expect(model_record).to receive(:calculate_checksum).and_return('abc123')
+          expect(model_record).to receive(:update_verification_state!).with(checksum: 'abc123')
 
-      replicator.verify
+          replicator.verify
+        end
 
-      expect(model_record.reload.verification_checksum).to eq('abc123')
-      expect(model_record.verified_at).not_to be_nil
-    end
+        it 'passes the error message' do
+          allow(model_record).to receive(:calculate_checksum) do
+            raise StandardError.new('Failure to calculate checksum')
+          end
 
-    it 'saves the error message and increments retry counter' do
-      allow(model_record).to receive(:calculate_checksum) do
-        raise StandardError.new('Failure to calculate checksum')
+          expect(model_record).to receive(:update_verification_state!).with(failure: 'Failure to calculate checksum')
+
+          replicator.verify
+        end
       end
-
-      replicator.verify
-
-      expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
-      expect(model_record.verification_retry_count).to be 1
     end
   end
 end
