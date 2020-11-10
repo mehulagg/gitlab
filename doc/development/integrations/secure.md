@@ -309,8 +309,14 @@ The value of the `category` field matches the report type:
 
 #### Scanner
 
-The `scanner` field is an object that embeds a human-readable `name` and a technical `id`.
+The `scanner` field is an object that describes the tool performing the scan.
+It must contain a human-readable `name`, a technical `id`, a `version`, and a `vendor` name.
 The `id` should not collide with any other scanner another integrator would provide.
+
+The scanner `version` shouldn't be confused with the report `version`.
+The former is only descriptive, whereas the latter is used for JSON schema validation.
+
+The scanner object might also have a `url` field.
 
 #### Name, message, and description
 
