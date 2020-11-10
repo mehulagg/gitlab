@@ -86,7 +86,7 @@ module IssuablesHelper
   end
 
   def template_dropdown_tag(issuable, &block)
-    title = selected_template(issuable) || "Choose a template"
+    title = selected_template(issuable) || "Choose template"
     options = {
       toggle_class: 'js-issuable-selector',
       title: title,
