@@ -71,8 +71,8 @@ module DiffHelper
     end
   end
 
-  def diff_link_text(line_type, required_type, text)
-    line_type == required_type ? " " : text
+  def diff_link_number(line_type, match, text)
+    line_type == match ? " " : text
   end
 
   def parallel_diff_discussions(left, right, diff_file)
