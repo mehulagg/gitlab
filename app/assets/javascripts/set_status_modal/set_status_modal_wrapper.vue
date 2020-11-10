@@ -10,7 +10,7 @@ import EmojiMenuInModal from './emoji_menu_in_modal';
 import * as Emoji from '~/emoji';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
-const AVAILABILITY_STATUS = {
+export const AVAILABILITY_STATUS = {
   BUSY: 'busy',
   NOT_SET: 'not_set',
 };
@@ -161,7 +161,7 @@ export default {
       Api.postUserStatus({
         emoji,
         message,
-        availability: availability ? AVAILABILITY_STATUS.BUSY : '',
+        availability: availability ? AVAILABILITY_STATUS.BUSY : AVAILABILITY_STATUS.NOT_SET,
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);

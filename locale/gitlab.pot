@@ -25857,6 +25857,9 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
+msgid "Status updated"
+msgstr ""
+
 msgid "Status was retried."
 msgstr ""
 
