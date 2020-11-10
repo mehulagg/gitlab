@@ -471,6 +471,7 @@ module ProjectsHelper
   def can_view_operations_tab?(current_user, project)
     [
       :metrics_dashboard,
+      :read_alert_management_alert,
       :read_on_call_schedule,
       :read_environment,
       :read_issue,
