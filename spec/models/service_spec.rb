@@ -224,7 +224,7 @@ RSpec.describe Service do
   describe '.find_or_initialize_all' do
     shared_examples 'service instances' do
       it 'returns the available service instances' do
-        expect(Service.find_or_initialize_all(Service.for_instance).pluck(:type)).to match_array(Service.available_services_types)
+        expect(Service.find_or_initialize_all(Service.for_instance).pluck(:type)).to match_array(Service.available_services_types(include_project_specific: false))
       end
 
       it 'does not create service instances' do
@@ -237,7 +237,7 @@ RSpec.describe Service do
     context 'with all existing instances' do
       before do
         Service.insert_all(
-          Service.available_services_types.map { |type| { instance: true, type: type } }
+          Service.available_services_types(include_project_specific: false).map { |type| { instance: true, type: type } }
         )
       end
 
@@ -265,13 +265,13 @@ RSpec.describe Service do
   describe 'template' do
     shared_examples 'retrieves service templates' do
       it 'returns the available service templates' do
-        expect(Service.find_or_create_templates.pluck(:type)).to match_array(Service.available_services_types)
+        expect(Service.find_or_create_templates.pluck(:type)).to match_array(Service.available_services_types(include_project_specific: false))
       end
     end
 
     describe '.find_or_create_templates' do
       it 'creates service templates' do
-        expect { Service.find_or_create_templates }.to change { Service.count }.from(0).to(Service.available_services_names.size)
+        expect { Service.find_or_create_templates }.to change { Service.count }.from(0).to(Service.available_services_names(include_project_specific: false).size)
       end
 
       it_behaves_like 'retrieves service templates'
@@ -279,7 +279,7 @@ RSpec.describe Service do
       context 'with all existing templates' do
         before do
           Service.insert_all(
-            Service.available_services_types.map { |type| { template: true, type: type } }
+            Service.available_services_types(include_project_specific: false).map { |type| { template: true, type: type } }
           )
         end
 
@@ -305,7 +305,7 @@ RSpec.describe Service do
         end
 
         it 'creates the rest of the service templates' do
-          expect { Service.find_or_create_templates }.to change { Service.count }.from(1).to(Service.available_services_names.size)
+          expect { Service.find_or_create_templates }.to change { Service.count }.from(1).to(Service.available_services_names(include_project_specific: false).size)
         end
 
         it_behaves_like 'retrieves service templates'
@@ -900,9 +900,9 @@ RSpec.describe Service do
     end
 
     it 'returns the available services names depending on the filters', :aggregate_failures do
-      expect(described_class.available_services_names).to eq(%w[asana prometheus pushover teamcity])
-      expect(described_class.available_services_names(include_project_specific: true, include_dev: false)).to eq(%w[assembla prometheus pushover teamcity])
-      expect(described_class.available_services_names(include_project_specific: true, include_dev: true)).to eq(%w[asana assembla prometheus pushover teamcity])
+      expect(described_class.available_services_names).to eq(%w[asana assembla prometheus pushover teamcity])
+      expect(described_class.available_services_names(include_project_specific: false)).to eq(%w[asana prometheus pushover teamcity])
+      expect(described_class.available_services_names(include_dev: false)).to eq(%w[assembla prometheus pushover teamcity])
     end
   end
 end

@@ -65,9 +65,9 @@ class Service < ApplicationRecord
   scope :by_type, -> (type) { where(type: type) }
   scope :by_active_flag, -> (flag) { where(active: flag) }
   scope :inherit_from_id, -> (id) { where(inherit_from_id: id) }
-  scope :for_group, -> (group) { where(group_id: group, type: available_services_types) }
-  scope :for_template, -> { where(template: true, type: available_services_types) }
-  scope :for_instance, -> { where(instance: true, type: available_services_types) }
+  scope :for_group, -> (group) { where(group_id: group, type: available_services_types(include_project_specific: false)) }
+  scope :for_template, -> { where(template: true, type: available_services_types(include_project_specific: false)) }
+  scope :for_instance, -> { where(instance: true, type: available_services_types(include_project_specific: false)) }
 
   scope :push_hooks, -> { where(push_events: true, active: true) }
   scope :tag_push_hooks, -> { where(tag_push_events: true, active: true) }
@@ -169,7 +169,7 @@ class Service < ApplicationRecord
   private_class_method :create_nonexistent_templates
 
   def self.find_or_initialize_integration(name, instance: false, group_id: nil)
-    if name.in?(available_services_names)
+    if name.in?(available_services_names(include_project_specific: false))
       "#{name}_service".camelize.constantize.find_or_initialize_by(instance: instance, group_id: group_id)
     end
   end
@@ -188,11 +188,11 @@ class Service < ApplicationRecord
   def self.list_nonexistent_services_for(scope)
     # Using #map instead of #pluck to save one query count. This is because
     # ActiveRecord loaded the object here, so we don't need to query again later.
-    available_services_types - scope.map(&:type)
+    available_services_types(include_project_specific: false) - scope.map(&:type)
   end
   private_class_method :list_nonexistent_services_for
 
-  def self.available_services_names(include_project_specific: false, include_dev: true)
+  def self.available_services_names(include_project_specific: true, include_dev: true)
     service_names = services_names
     service_names += project_specific_services_names if include_project_specific
     service_names += dev_services_names if include_dev
@@ -214,7 +214,7 @@ class Service < ApplicationRecord
     []
   end
 
-  def self.available_services_types(include_project_specific: false, include_dev: true)
+  def self.available_services_types(include_project_specific: true, include_dev: true)
     available_services_names(include_project_specific: include_project_specific, include_dev: include_dev).map do |service_name|
       "#{service_name}_service".camelize
     end
