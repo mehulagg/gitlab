@@ -90,7 +90,6 @@ module Emails
 
     private
 
-
     def profile_email_with_layout(to:, subject:, layout: 'mailer')
       mail(to: to, subject: subject) do |format|
         format.html { render layout: layout }
