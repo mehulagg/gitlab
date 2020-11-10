@@ -17,6 +17,7 @@ module EE
           def reference_filters
             [
               ::Banzai::Filter::EpicReferenceFilter,
+              ::Banzai::Filter::VulnerabilityReferenceFilter,
               ::Banzai::Filter::IterationReferenceFilter,
               *super
             ]

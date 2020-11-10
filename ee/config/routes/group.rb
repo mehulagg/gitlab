@@ -86,6 +86,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get 'merge_requests'
         get 'labels'
         get 'epics'
+        get 'vulnerabilities'
         get 'commands'
         get 'milestones'
       end
