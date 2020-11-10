@@ -2,7 +2,10 @@
 
 module Types
   # rubocop: disable Graphql/AuthorizeTypes
-  class IssueConnectionType < CountableConnectionType
+  class IssueConnectionType < IssuableConnectionType
+    def issuable_model
+      Issue
+    end
   end
 end
 

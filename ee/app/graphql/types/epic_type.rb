@@ -9,6 +9,8 @@ module Types
     accepts ::Epic
     authorize :read_epic
 
+    connection_type_class(Types::EpicConnectionType)
+
     expose_permissions Types::PermissionTypes::Epic
 
     present_using EpicPresenter
