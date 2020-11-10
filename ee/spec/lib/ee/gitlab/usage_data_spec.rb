@@ -740,4 +740,11 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class).to have_received(:clear_memoization).with(key)
     end
   end
+
+  describe '.usage_data_counters' do
+    subject { described_class.usage_data_counters }
+
+    it { is_expected.to all(respond_to :totals) }
+    it { is_expected.to all(respond_to :fallback_totals) }
+  end
 end

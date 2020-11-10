@@ -42,6 +42,11 @@ module Gitlab
           KNOWN_EVENTS.map { |event| [counter_key(event), -1] }.to_h
         end
 
+        # TODO: fixed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47405
+        def fetch_supported_event(event_name)
+          KNOWN_EVENTS.find { |event| counter_key(event) == event_name.to_sym }
+        end
+
         private
 
         def redis_key(event)
