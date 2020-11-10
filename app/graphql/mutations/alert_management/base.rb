@@ -33,13 +33,12 @@ module Mutations
 
       private
 
-      def find_object(project_path:, iid:)
-        project = resolve_project(full_path: project_path)
+      def find_object(project_path:, **args)
+        project = ::Gitlab::Graphql::Lazy.force(resolve_project(full_path: project_path))
 
         return unless project
 
-        resolver = Resolvers::AlertManagement::AlertResolver.single.new(object: project, context: context, field: nil)
-        resolver.resolve(iid: iid)
+        ::AlertManagement::AlertsFinder.new(current_user, project, args).execute.first
       end
     end
   end
