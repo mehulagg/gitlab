@@ -667,3 +667,7 @@ against the given glob pattern. If the number of matches exceeds the maximum, th
 parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
 triggered even if the scanner doesn't support your project. For more details about this issue, see
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
+
+### Error: `sast is used for configuration only, and its script should not be executed`
+
+For information on this, see the [GitLab Secure troubleshooting section](../index.md#error-job-is-used-for-configuration-only-and-its-script-should-not-be-executed)

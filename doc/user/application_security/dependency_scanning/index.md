@@ -510,3 +510,7 @@ uses the [`rules:exists`](../../../ci/yaml/README.md#rulesexists)
 syntax. This directive is limited to 10000 checks and always returns `true` after reaching this
 number. Because of this, and depending on the number of files in your repository, a dependency
 scanning job might be triggered even if the scanner doesn't support your project.
+
+### Error: `dependency_scanning is used for configuration only, and its script should not be executed`
+
+For information on this, see the [GitLab Secure troubleshooting section](../index.md#error-job-is-used-for-configuration-only-and-its-script-should-not-be-executed)
