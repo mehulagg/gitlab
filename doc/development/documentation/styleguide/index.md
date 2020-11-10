@@ -85,7 +85,7 @@ different types. For example, [Divio recommends](https://www.divio.com/blog/docu
 At GitLab, we have so many product changes in our monthly releases that we can't
 afford to continuously update multiple types of information. If we have multiple
 types, the information will become outdated. Therefore, we have a
-[single template](structure.md) for documentation.
+[single template](../structure.md) for documentation.
 
 We currently do not distinguish specific document types, although we are open to
 reconsidering this policy after the documentation has reached a future stage of
@@ -135,7 +135,7 @@ that among any other documentation changes, you can either:
 
 - Add a [Troubleshooting section](#troubleshooting) to a doc if none exists.
 - Un-comment and use the placeholder Troubleshooting section included as part of
-  our [documentation template](structure.md#template-for-new-docs), if present.
+  our [documentation template](../structure.md#template-for-new-docs), if present.
 
 The more we reflexively add useful information to the documentation, the more
 (and more successfully) the documentation will be used to efficiently accomplish
@@ -161,7 +161,7 @@ Markdown rendering engine. For a complete Kramdown reference, see the
 [GitLab Markdown Kramdown Guide](https://about.gitlab.com/handbook/markdown-guide/).
 
 The [`gitlab-kramdown`](https://gitlab.com/gitlab-org/gitlab_kramdown) Ruby gem
-will support all [GFM markup](../../user/markdown.md) in the future, which is
+will support all [GFM markup](../../../user/markdown.md) in the future, which is
 all markup supported for display in the GitLab application itself. For now, use
 regular Markdown markup, following the rules in the linked style guide.
 
@@ -318,7 +318,7 @@ Do not include the same information in multiple places.
 ### Structure within documents
 
 - Include any and all applicable subsections as described on the
-  [structure and template](structure.md) page.
+  [structure and template](../structure.md) page.
 - Structure content in alphabetical order in tables, lists, and so on, unless
   there's a logical reason not to (for example, when mirroring the user
   interface or an otherwise ordered sequence).
@@ -571,10 +571,10 @@ tenses, words, and phrases:
   for additional users. Using the words *scale* or *scaling* in other cases is
   acceptable, but references to increasing GitLab's performance for additional
   users should direct readers to the GitLab
-  [reference architectures](../../administration/reference_architectures/index.md)
+  [reference architectures](../../../administration/reference_architectures/index.md)
   page.
 - Avoid all forms of the phrases *high availability* and *HA*, and instead
-  direct readers to the GitLab [reference architectures](../../administration/reference_architectures/index.md)
+  direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md)
   for information about configuring GitLab to have the performance needed for
   additional users over time.
 - Don't use profanity or obscenities. Doing so may negatively affect other
@@ -887,7 +887,7 @@ Consider installing a plugin or extension in your editor for formatting tables:
 ### Feature tables
 
 When creating tables of lists of features (such as whether or not features are
-available to certain roles on the [Permissions](../../user/permissions.md#project-members-permissions)
+available to certain roles on the [Permissions](../../../user/permissions.md#project-members-permissions)
 page), use the following phrases (based on the SVG icons):
 
 | Option | Markdown                 | Displayed result       |
@@ -996,7 +996,7 @@ We include guidance for links in the following categories:
 
 - How to set up [anchor links](#anchor-links) for headings.
 - How to set up [criteria](#basic-link-criteria) for configuring a link.
-- What to set up when [linking to a `help`](../documentation/index.md#linking-to-help)
+- What to set up when [linking to a `help`](../../documentation/index.md#linking-to-help)
   page.
 - How to set up [links to internal documentation](#links-to-internal-documentation)
   for cross-references.
@@ -1118,8 +1118,8 @@ extensively cited or peer-reviewed.
 
 Don't link directly to:
 
-- [Confidential issues](../../user/project/issues/confidential_issues.md).
-- Project features that require [special permissions](../../user/permissions.md)
+- [Confidential issues](../../../user/project/issues/confidential_issues.md).
+- Project features that require [special permissions](../../../user/permissions.md)
   to view.
 
 These will fail for:
@@ -1138,7 +1138,7 @@ Instead:
 Example:
 
 ```markdown
-For more information, see the [confidential issue](../../user/project/issues/confidential_issues.md) `https://gitlab.com/gitlab-org/gitlab-foss/-/issues/<issue_number>`.
+For more information, see the [confidential issue](../../../user/project/issues/confidential_issues.md) `https://gitlab.com/gitlab-org/gitlab-foss/-/issues/<issue_number>`.
 ```
 
 ### Link to specific lines of code
@@ -1902,11 +1902,11 @@ sections are outlined in this section.
 
 There are many cases that a restart/reconfigure of GitLab is required. To avoid
 duplication, link to the special document that can be found in
-[`doc/administration/restart_gitlab.md`](../../administration/restart_gitlab.md).
+[`doc/administration/restart_gitlab.md`](../../../administration/restart_gitlab.md).
 Usually the text will read like:
 
 ```markdown
-Save the file and [reconfigure GitLab](../../administration/restart_gitlab.md)
+Save the file and [reconfigure GitLab](../../../administration/restart_gitlab.md)
 for the changes to take effect.
 ```
 
@@ -1918,7 +1918,7 @@ If the document you are editing resides in a place other than the GitLab CE/EE
 ### Installation guide
 
 **Ruby:**
-In [step 2 of the installation guide](../../install/installation.md#2-ruby),
+In [step 2 of the installation guide](../../../install/installation.md#2-ruby),
 we install Ruby from source. Whenever there is a new version that needs to
 be updated, remember to change it throughout the codeblock and also replace
 the sha256sum (it can be found in the [downloads page](https://www.ruby-lang.org/en/downloads/)
@@ -1995,5 +1995,5 @@ _Error message_ \| _Solution_.
 
 ## Feature flags
 
-Learn how to [document features deployed behind flags](feature_flags.md). For
-guidance on developing GitLab with feature flags, see [Feature flags in development of GitLab](../feature_flags/index.md).
+Learn how to [document features deployed behind flags](../feature_flags.md). For
+guidance on developing GitLab with feature flags, see [Feature flags in development of GitLab](../../feature_flags/index.md).
