@@ -5,7 +5,6 @@ import { savedContentMeta, returnUrl, sourcePath } from '../mock_data';
 import { HOME_ROUTE } from '~/static_site_editor/router/constants';
 
 describe('~/static_site_editor/pages/success.vue', () => {
-  const mergeRequestsIllustrationPath = 'illustrations/merge_requests.svg';
   let wrapper;
   let router;
 
@@ -24,9 +23,6 @@ describe('~/static_site_editor/pages/success.vue', () => {
         GlButton,
         GlEmptyState,
         GlLoadingIcon,
-      },
-      propsData: {
-        mergeRequestsIllustrationPath,
       },
       data() {
         return {
@@ -65,7 +61,6 @@ describe('~/static_site_editor/pages/success.vue', () => {
         primaryButtonText: 'View merge request',
         primaryButtonLink: savedContentMeta.mergeRequest.url,
         title: 'Your merge request has been created',
-        svgPath: mergeRequestsIllustrationPath,
         svgHeight: 146,
       });
     });
@@ -106,7 +101,6 @@ describe('~/static_site_editor/pages/success.vue', () => {
       expect(findEmptyState().exists()).toBe(true);
       expect(findEmptyState().props()).toMatchObject({
         title: 'Creating your merge request',
-        svgPath: mergeRequestsIllustrationPath,
       });
       expect(findLoadingIcon().exists()).toBe(true);
     });

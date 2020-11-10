@@ -12,12 +12,7 @@ export default {
     GlEmptyState,
     GlLoadingIcon,
   },
-  props: {
-    mergeRequestsIllustrationPath: {
-      type: String,
-      required: true,
-    },
-  },
+  mergeRequestsIllustrationPath: () => import('@gitlab/svgs/dist/illustrations/merge_requests.svg'),
   apollo: {
     savedContentMeta: {
       query: savedContentMetaQuery,
@@ -84,7 +79,7 @@ export default {
         :title="savedContentMeta ? $options.title : $options.submittingTitle"
         :primary-button-text="savedContentMeta && $options.primaryButtonText"
         :primary-button-link="savedContentMeta && savedContentMeta.mergeRequest.url"
-        :svg-path="mergeRequestsIllustrationPath"
+        :svg-path="$options.mergeRequestsIllustrationPath"
         :svg-height="146"
       >
         <template #description>

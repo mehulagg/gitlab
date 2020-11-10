@@ -12,7 +12,6 @@ const initStaticSiteEditor = el => {
     branch,
     namespace,
     project,
-    mergeRequestsIllustrationPath,
     // NOTE: The following variables are not yet used, but are supported by the config file,
     //       so we are adding them here as a convenience for future use.
     // eslint-disable-next-line no-unused-vars
@@ -44,11 +43,7 @@ const initStaticSiteEditor = el => {
       App,
     },
     render(createElement) {
-      return createElement('app', {
-        props: {
-          mergeRequestsIllustrationPath,
-        },
-      });
+      return createElement('app');
     },
   });
 };
