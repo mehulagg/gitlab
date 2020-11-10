@@ -87,19 +87,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     subject { described_class.with_jira_issue_keys }
 
     it { is_expected.to contain_exactly(mr_with_jira_title, mr_with_jira_description) }
-
-    it 'has a database index where title or description match jira_issue_key_regex', :aggregate_failures do
-      jira_reference_index_names = %w[index_merge_requests_on_target_project_id_iid_jira_description index_merge_requests_on_target_project_id_and_iid_jira_title]
-
-      jira_reference_indexes = ActiveRecord::Base.connection.indexes(:merge_requests).select do |index|
-        jira_reference_index_names.include? index.name
-      end
-
-      jira_reference_indexes.each do |index|
-        expect(index.where).to include("~ '#{Gitlab::Regex.jira_issue_key_regex.source}'::text")
-      end
-      expect(jira_reference_indexes.size).to eq(2)
-    end
   end
 
   describe '#squash_in_progress?' do
