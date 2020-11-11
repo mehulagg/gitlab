@@ -4,6 +4,7 @@ import { deprecatedCreateFlash as Flash } from '../flash';
 import Poll from '../lib/utils/poll';
 import { __ } from '../locale';
 import PipelineService from './services/pipeline_service';
+import { performanceMarkAndMeasure } from '../performance/utils.js';
 
 export default class pipelinesMediator {
   constructor(options = {}) {
@@ -13,6 +14,10 @@ export default class pipelinesMediator {
 
     this.state = {};
     this.state.isLoading = false;
+
+    performanceMarkAndMeasure({
+      mark: 'MEDIATOR_LOADED',
+    })
   }
 
   fetchPipeline() {

@@ -6,6 +6,7 @@ import ciHeader from '~/vue_shared/components/header_ci_component.vue';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
 import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constants';
+import { performanceMarkAndMeasure } from '../../performance/utils.js';
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 
@@ -71,6 +72,11 @@ export default {
       isRetrying: false,
       isDeleting: false,
     };
+  },
+  mounted(){
+    performanceMarkAndMeasure({
+      mark: 'NEW_HEADER_LOADED',
+    });
   },
   computed: {
     deleteModalConfirmationText() {

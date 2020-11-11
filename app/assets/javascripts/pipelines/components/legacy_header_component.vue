@@ -3,6 +3,8 @@ import { GlLoadingIcon, GlModal, GlModalDirective, GlButton } from '@gitlab/ui';
 import ciHeader from '~/vue_shared/components/header_ci_component.vue';
 import eventHub from '../event_hub';
 import { __ } from '~/locale';
+import { performanceMarkAndMeasure } from '../../performance/utils.js';
+
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 
@@ -48,7 +50,11 @@ export default {
       );
     },
   },
-
+  mounted(){
+    performanceMarkAndMeasure({
+      mark: 'LEGACY_HEADER_LOADED',
+    });
+  },
   methods: {
     cancelPipeline() {
       this.isCanceling = true;

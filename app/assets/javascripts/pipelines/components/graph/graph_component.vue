@@ -5,6 +5,7 @@ import StageColumnComponent from './stage_column_component.vue';
 import GraphWidthMixin from '../../mixins/graph_width_mixin';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import GraphBundleMixin from '../../mixins/graph_pipeline_bundle_mixin';
+import { performanceMarkAndMeasure } from '../../../performance/utils.js';
 
 export default {
   name: 'PipelineGraph',
@@ -49,6 +50,11 @@ export default {
         expanded: false,
       },
     };
+  },
+  mounted() {
+    performanceMarkAndMeasure({
+      mark: 'OLD_GRAPH_LOADED',
+    })
   },
   computed: {
     graph() {

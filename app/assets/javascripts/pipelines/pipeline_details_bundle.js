@@ -10,6 +10,9 @@ import legacyPipelineHeader from './components/legacy_header_component.vue';
 import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
 import createTestReportsStore from './stores/test_reports';
+import PipelinesMediator from './pipeline_details_mediator';
+import { createPipelineHeaderApp } from './pipeline_details_header';
+import { createPipelinesDetailApp } from './pipeline_details_graph';
 
 Vue.use(Translate);
 
@@ -125,6 +128,53 @@ const createTestDetails = () => {
   });
 };
 
+// export default async function() {
+//   createTestDetails();
+//   createDagApp();
+//
+//   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
+//   let mediator;
+//
+//   if (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails) {
+//     // try {
+//     //   const { default: PipelinesMediator } = await import(
+//     //     /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
+//     //   );
+//       mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
+//       mediator.fetchPipeline();
+//     // } catch {
+//     //   Flash(__('An error occurred while loading the pipeline.'));
+//     // }
+//   }
+//
+//   if (gon.features.graphqlPipelineHeader) {
+//     // try {
+//     //   const { createPipelineHeaderApp } = await import(
+//     //     /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
+//     //   );
+//       createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
+//     // } catch {
+//     //   Flash(__('An error occurred while loading a section of this page.'));
+//     // }
+//   } else {
+//     createLegacyPipelineHeaderApp(mediator);
+//   }
+//
+//   if (gon.features.graphqlPipelineDetails) {
+//     // try {
+//     //   const { createPipelinesDetailApp } = await import(
+//     //     /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
+//     //   );
+//       createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH);
+//     // } catch (err) {
+//     //   Flash(__('An error occurred while loading the pipeline.'));
+//     // }
+//   } else {
+//     createLegacyPipelinesDetailApp(mediator);
+//   }
+//
+// }
+
 export default async function() {
   createTestDetails();
   createDagApp();
@@ -132,41 +182,57 @@ export default async function() {
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
   let mediator;
 
-  if (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails) {
-    try {
-      const { default: PipelinesMediator } = await import(
-        /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
-      );
-      mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
-      mediator.fetchPipeline();
-    } catch {
-      Flash(__('An error occurred while loading the pipeline.'));
-    }
+  let awaitMed = (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails)
+    ? import(
+         /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
+       )
+    : { mediator: 'hi'};
+
+  let awaitHead = gon.features.graphqlPipelineHeader ? import(
+        /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
+      )
+    : { createLegacyPipelineHeaderApp };
+
+  let awaitGraph = gon.features.graphqlPipelineDetails ? import(
+          /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
+        )
+    : { createLegacyPipelinesDetailApp };
+
+  const toAwait = [
+   awaitMed,
+   awaitHead,
+   awaitGraph,
+  ].filter(Boolean);
+
+  let asyncModules;
+
+  try {
+    asyncModules = await Promise.all(toAwait);
+  } catch (err) {
+    console.error(err);
   }
 
-  if (gon.features.graphqlPipelineDetails) {
-    try {
-      const { createPipelinesDetailApp } = await import(
-        /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
-      );
-      createPipelinesDetailApp();
-    } catch {
-      Flash(__('An error occurred while loading the pipeline.'));
-    }
-  } else {
-    createLegacyPipelinesDetailApp(mediator);
+  console.log('asyncModules', asyncModules);
+
+  if (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails) {
+    const { default: PipelinesMediator } = asyncModules[0];
+    mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
+    mediator.fetchPipeline();
   }
 
   if (gon.features.graphqlPipelineHeader) {
-    try {
-      const { createPipelineHeaderApp } = await import(
-        /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
-      );
-      createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
-    } catch {
-      Flash(__('An error occurred while loading a section of this page.'));
-    }
+    const { createPipelineHeaderApp } = asyncModules[1];
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
   } else {
+    const { createPipelineHeaderApp } = asyncModules[1];
     createLegacyPipelineHeaderApp(mediator);
+  }
+
+  if (gon.features.graphqlPipelineDetails) {
+    const { createPipelinesDetailApp } = asyncModules[2];
+    createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH);
+  } else {
+    const { createPipelinesDetailApp } = asyncModules[2];
+    createLegacyPipelinesDetailApp(mediator);
   }
 }
