@@ -112,4 +112,18 @@ RSpec.describe 'Signup on EE' do
       expect(user.email_opted_in_at).to be_nil
     end
   end
+
+  context 'with admin approval on sign-up enabled' do
+    before do
+      visit new_user_registration_path
+      stub_application_setting(require_admin_approval_after_user_signup: true)
+    end
+
+    it 'does not sign the user in' do
+      fill_in_signup_form
+      click_button "Register"
+
+      expect(page).to have_content('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator')
+    end
+  end
 end

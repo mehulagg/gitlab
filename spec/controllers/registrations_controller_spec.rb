@@ -7,6 +7,7 @@ RSpec.describe RegistrationsController do
 
   before do
     stub_feature_flags(invisible_captcha: false)
+    stub_application_setting(require_admin_approval_after_user_signup: false)
   end
 
   describe '#new' do
@@ -24,10 +25,6 @@ RSpec.describe RegistrationsController do
     let(:user_params) { { user: base_user_params } }
 
     subject { post(:create, params: user_params) }
-
-    before do
-      stub_application_setting(require_admin_approval_after_user_signup: false)
-    end
 
     context '`blocked_pending_approval` state' do
       context 'when the `require_admin_approval_after_user_signup` setting is turned on' do

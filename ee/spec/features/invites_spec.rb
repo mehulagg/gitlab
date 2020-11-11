@@ -56,4 +56,17 @@ RSpec.describe 'Group or Project invitations' do
       expect(page).not_to have_content('My company or team')
     end
   end
+
+  context 'with admin approval on sign-up enabled' do
+    before do
+      stub_application_setting(require_admin_approval_after_user_signup: true)
+    end
+
+    it 'does not sign the user in' do
+      fill_in_sign_up_form(new_user)
+
+      expect(page).not_to have_content('My company or team')
+      expect(page).to have_content('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator')
+    end
+  end
 end
