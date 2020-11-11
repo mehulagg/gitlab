@@ -37,4 +37,12 @@ module ProfilesHelper
   def show_status_emoji?(status)
     status&.message.present? || status&.emoji != UserStatus::DEFAULT_EMOJI
   end
+
+  def user_set_to_busy?(user)
+    user.status && user.status.availability == availability_values[:busy]
+  end
+
+  def default_emoji
+    UserStatus::DEFAULT_EMOJI
+  end
 end
