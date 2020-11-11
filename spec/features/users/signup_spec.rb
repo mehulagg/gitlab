@@ -232,6 +232,22 @@ RSpec.describe 'Signup' do
         expect(current_path).to eq users_sign_up_welcome_path
       end
     end
+
+    context 'with required admin approval enabled' do
+      before do
+        stub_application_setting(require_admin_approval_after_user_signup: true)
+      end
+
+      it 'creates the user in the pending approval state' do
+        visit new_user_registration_path
+
+        fill_in_signup_form
+
+        expect { click_button 'Register' }.to change { User.count }.by(1)
+        expect(current_path).to eq new_user_session_path
+        expect(page).to have_content("You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator")
+      end
+    end
   end
 
   context 'with errors' do
