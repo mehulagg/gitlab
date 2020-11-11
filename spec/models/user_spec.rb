@@ -1745,6 +1745,7 @@ RSpec.describe User do
 
     it 'returns up to the ten most recently active instance admins' do
       active_admins_in_recent_sign_in_desc_order = User.admins.active.order_recent_sign_in.limit(10)
+      binding.pry
 
       expect(User.instance_access_request_approvers_to_be_notified).to eq(active_admins_in_recent_sign_in_desc_order)
     end

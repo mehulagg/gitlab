@@ -29,12 +29,13 @@ class RegistrationsController < Devise::RegistrationsController
     super do |new_user|
       persist_accepted_terms_if_required(new_user)
       set_role_required(new_user)
+      if pending_approval?
+        NotificationService.new.new_instance_access_request(new_user)
+      end
       yield new_user if block_given?
     end
 
-    if pending_approval?
-      NotificationService.new.new_instance_access_request(resource)
-    end
+
 
     # Devise sets a flash message on both successful & failed signups,
     # but we only want to show a message if the resource is blocked by a pending approval.

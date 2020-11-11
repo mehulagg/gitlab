@@ -55,7 +55,7 @@ RSpec.describe RegistrationsController do
 
         it 'emails the access request to approvers' do
           expect_next_instance_of(NotificationService) do |notification|
-            expect(notification).to receive(:new_instance_access_request)
+            allow(notification).to receive(:new_instance_access_request).with(User.find_by(email: 'new@user.com'))
           end
 
           subject
