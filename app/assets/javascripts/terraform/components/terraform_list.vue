@@ -3,6 +3,7 @@ import { GlAlert, GlBadge, GlKeysetPagination, GlLoadingIcon, GlTab, GlTabs } fr
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
 import StatesTable from './states_table.vue';
+import { MaxListCount } from '../constants';
 
 export default {
   apollo: {
@@ -10,11 +11,8 @@ export default {
       query: getStatesQuery,
       variables() {
         return {
-          after: this.cursor.after,
-          before: this.cursor.before,
-          first: this.cursor.first,
-          last: this.cursor.last,
           projectPath: this.projectPath,
+          ...this.cursor,
         };
       },
       update: data => {
@@ -52,10 +50,10 @@ export default {
   data() {
     return {
       cursor: {
-        first: 3,
+        first: MaxListCount,
+        after: null,
         last: null,
         before: null,
-        after: null,
       },
     };
   },
@@ -64,7 +62,10 @@ export default {
       return this.$apollo.queries.states.loading;
     },
     pageInfo() {
-      return this.states?.pageInfo || {};
+      return this.states?.pageInfo;
+    },
+    showPagination() {
+      return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
     },
     statesCount() {
       return this.states?.count;
@@ -77,16 +78,16 @@ export default {
     updatePagination(item) {
       if (item === this.pageInfo.endCursor) {
         this.cursor = {
-          first: 3,
-          last: null,
+          first: MaxListCount,
           after: item,
+          last: null,
           before: null,
         };
       } else {
         this.cursor = {
           first: null,
-          last: 3,
           after: null,
+          last: MaxListCount,
           before: item,
         };
       }
@@ -112,7 +113,7 @@ export default {
           <div v-if="statesCount">
             <states-table :states="statesList" />
 
-            <div class="gl-display-flex gl-justify-content-center gl-mt-5">
+            <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
               <gl-keyset-pagination
                 v-bind="pageInfo"
                 @prev="updatePagination"
