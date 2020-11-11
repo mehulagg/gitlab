@@ -32,24 +32,6 @@ module Clusters
         self.status = status_states[:installable] if cluster&.platform_kubernetes_active?
       end
 
-      # It can only be uninstalled if there are no other applications installed
-      # or with intermitent installation statuses in the database.
-      def allowed_to_uninstall?
-        strong_memoize(:allowed_to_uninstall) do
-          applications = nil
-
-          Clusters::Cluster::APPLICATIONS.each do |application_name, klass|
-            next if application_name == 'helm'
-
-            extra_apps = Clusters::Applications::Helm.where('EXISTS (?)', klass.select(1).where(cluster_id: cluster_id))
-
-            applications = applications ? applications.or(extra_apps) : extra_apps
-          end
-
-          !applications.exists?
-        end
-      end
-
       def install_command
         Gitlab::Kubernetes::Helm::V2::InitCommand.new(
           name: name,
@@ -68,13 +50,6 @@ module Clusters
 
       def has_ssl?
         ca_key.present? && ca_cert.present?
-      end
-
-      def post_uninstall
-        cluster.kubeclient.delete_namespace(Gitlab::Kubernetes::Helm::NAMESPACE)
-      rescue Kubeclient::ResourceNotFoundError
-        # we actually don't care if the namespace is not present
-        # since we want to delete it anyway.
       end
 
       private

@@ -37,6 +37,15 @@
         = s_("ClusterIntegration|This is necessary to clear existing environment-namespace associations from clusters previously managed by GitLab.")
     = link_to(s_('ClusterIntegration|Clear cluster cache'), clusterable.clear_cluster_cache_path(@cluster), method: :delete, class: 'btn gl-button btn-info')
 
+  - if @cluster.application_helm&.installed?
+    .sub-section.form-group
+      %h4
+        = s_('ClusterIntegration|Remove legacy Tiller server')
+      %p
+        = html_escape(s_('ClusterIntegration|Remove the Tiller server from the %{code_open}gitlab-managed-apps%{code_close} namespace. This server is not being used by GitLab and can be safely removed if you have no other dependency on it. Note: After clicking the button, you may need to refresh the page for the changes to be reflected.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+        = link_to _('More information'), help_page_path('user/clusters/applications.md', anchor: 'Helm'), target: '_blank'
+      = link_to(s_('ClusterIntegration|Remove Tiller server'), clusterable.install_applications_cluster_path(@cluster, 'helm'), method: :delete, class: 'btn gl-button btn-info')
+
   .sub-section.form-group
     %h4.text-danger
       = s_('ClusterIntegration|Remove Kubernetes cluster integration')
