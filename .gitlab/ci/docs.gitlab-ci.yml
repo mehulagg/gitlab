@@ -48,7 +48,7 @@ docs-lint markdown:
   script:
     - scripts/lint-doc.sh
 
-docs-lint html:
+docs-lint links:
   extends:
     - .default-retry
     - .docs:rules:docs-lint
