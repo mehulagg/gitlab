@@ -48,10 +48,13 @@ You can choose to add the `CODEOWNERS` file in three places:
 - Inside the `.gitlab/` directory
 - Inside the `docs/` directory
 
-The `CODEOWNERS` file is scoped to a branch, which means that as
-new files are introduced, the user adding the new content can
-specify themselves as a code owner, all before the new changes
-get merged to the target branch.
+The `CODEOWNERS` file is scoped to a branch. Only the rules in the `CODEOWNERS` 
+file already present in the TARGET branch (usually `master`) apply . Any changes 
+ made to the `CODEOWNERS` file within the Merge Request branch will not take affect.
+This also means that, as new files are introduced, the user adding the new 
+content needs to specify themselves as a code owner for those new files before
+the new changes get merged to the target branch, if they are to be owner of the 
+newly added content from this point on.
 
 When a file matches multiple entries in the `CODEOWNERS` file,
 the users from last pattern matching the file are displayed on the
