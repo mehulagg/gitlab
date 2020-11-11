@@ -84,8 +84,11 @@ module QA
       end
 
       def fabricate_via_api!
-        resource_web_url(api_get)
+        api_get_resp = api_get
+        QA::Runtime::Logger.info ">>>>>>>>>>> User api_get response:#{api_get_resp}"
+        resource_web_url(api_get_resp)
       rescue ResourceNotFoundError
+        QA::Runtime::Logger.info ">>>>>>>>>>> User with name: #{name} was not found. Will try to create."
         super
       end
 
