@@ -15,6 +15,11 @@ module QA
 
   RSpec.describe 'Manage', :skip_signup_disabled, :requires_admin do
     before(:all) do
+      QA::Runtime::Logger.info " "
+      QA::Runtime::Logger.info ">>>>>> driver.current_url: #{page.driver.current_url}"
+      QA::Runtime::Logger.info page.save_screenshot(::File.join(QA::Runtime::Namespace.name, "before_all.png"), full: true)
+
+      QA::Runtime::Logger.info " "
       Runtime::ApplicationSettings.set_application_settings(require_admin_approval_after_user_signup: false)
       sleep 5 # It takes a moment for the setting to come into effect
     end
