@@ -67,7 +67,7 @@ To configure a job to be executed only when the pipeline has been
 scheduled (or the opposite), use
 [only and except](../yaml/README.md#onlyexcept-basic) configuration keywords.
 
-For example:
+In the example below, `make world` will be run when the pipeline run was scheduled, and `make build` otherwise.
 
 ```yaml
 job:on-schedule:
