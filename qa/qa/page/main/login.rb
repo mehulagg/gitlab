@@ -185,7 +185,7 @@ module QA
           QA::Runtime::Logger.info " "
           QA::Runtime::Logger.info ">>>>>> Just set initial password"
           QA::Runtime::Logger.info ">>>>>> driver.current_url: #{page.driver.current_url}"
-          QA::Runtime::Logger.info page.save_screenshot(::File.join(QA::Runtime::Namespace.name, "initial_password.png"), full: true)
+          QA::Runtime::Logger.info page.save_screenshot(::File.join(QA::Runtime::Namespace.name, "initial_password_complete.png"), full: true)
 
           QA::Runtime::Logger.info " "
 
