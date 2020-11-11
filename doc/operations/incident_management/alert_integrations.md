@@ -26,16 +26,12 @@ The list displays the integration name, type, and status (enabled or disabled):
 
 ## Configuration
 
-You can either configure alerts to integrate with an [external Prometheus server](#external-prometheus-integration),
-or provide a [generic HTTP endpoint](#generic-http-endpoint) to receive alerts
-from other services.
+GitLab can recieve alerts via a [HTTP endpoint](#http-endpoint) that you configure or the [Prometheus integration](#external-prometheus-integration). 
 
-### Generic HTTP Endpoint
+### Generic HTTP Endpoint - **CORE**
 
-Enabling the Generic HTTP Endpoint creates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
+Enabling the Generic HTTP Endpoint activates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
 [customize the payload](#customizing-the-payload) to your liking.
-
-You will need to activate the endpoint and obtain credentials to set up this integration:
 
 1. Sign in to GitLab as a user with maintainer [permissions](../../user/permissions.md)
    for a project.
@@ -44,11 +40,28 @@ You will need to activate the endpoint and obtain credentials to set up this int
 1. Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
    for the webhook configuration.
 
+### HTTP Endpoints - **PREMIUM**
+
+In GitLab Premium, you have the option of creating multiple unique HTTP endpoints to receive alerts from any external source in the JSON format. You can also have the option to [customize the payload](#customizing-the-payload).
+
+1. Sign in to GitLab as a user with maintainer [permissions](../../user/permissions.md)
+   for a project.
+1. Navigate to **Settings > Operations** in your project.
+1. Expand the **Alerts** section.
+1. Step 1 - In the **Integration** dropdown menu, select **HTTP Endpoint**.
+1. Step 2 - Name the integration
+1. Step 3 -  Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
+   for the webhook configuration. You will input the URL and Authorization Key in your external service.
+1. Step 4 (option) - To generate a test alert to test the new integration, enter a sample payload (valid JSON is required).
+1. Click **Save and test alert payload**. If you choose not to test the integration, click **Save Integration**.
+
+The new HTTP Endpoint will appear in the [integrations list](#integrations-list). The integration can be edited by selecting the pencil icon that appears on the righthand side of the integrations list.
+
 ### External Prometheus integration
 
 For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration.
 
-## Customizing the payload
+## Customizing the alert payload outside of GitLab
 
 You can customize the payload by sending the following parameters. This applies to all types of integrations. All fields
 other than `title` are optional:
