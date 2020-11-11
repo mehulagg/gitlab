@@ -110,6 +110,19 @@ module UsersHelper
     !user.confirmed?
   end
 
+  def block_user_modal_data(user)
+    {
+      path: block_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Block user %{username}') % { username: sanitize_name(user.name) },
+        message: s_('AdminUsers|You can always unblock their account, their data will remain intact.'),
+        okVariant: 'warning',
+        okTitle: _('Block')
+      }.to_json
+    }
+  end
+
   private
 
   def blocked_user_badge(user)

@@ -4,8 +4,5 @@
   .card-body
     = render partial: 'admin/users/user_block_effects'
     %br
-    %button.btn.gl-button.btn-warning{ data: { 'gl-modal-action': 'block',
-      content: s_('AdminUsers|You can always unblock their account, their data will remain intact.'),
-      url: block_admin_user_path(user),
-      username: sanitize_name(user.name) } }
+    %button.btn.gl-button.btn-warning.js-confirm-modal-button{ data: block_user_modal_data(user) }
       = s_('AdminUsers|Block user')
