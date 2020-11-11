@@ -49,6 +49,9 @@ export default {
     showJiraIssuesFields() {
       return this.isJira && this.glFeatures.jiraIssuesIntegration;
     },
+    showReset() {
+      return this.isInstanceOrGroupLevel && this.propsSource.resetPath;
+    },
   },
   methods: {
     ...mapActions(['setOverride', 'setIsSaving', 'setIsTesting', 'setIsResetting']),
@@ -133,7 +136,7 @@ export default {
         {{ __('Test settings') }}
       </gl-button>
 
-      <template v-if="isInstanceOrGroupLevel">
+      <template v-if="showReset">
         <gl-button
           v-gl-modal.confirmResetIntegration
           category="secondary"
