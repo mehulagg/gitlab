@@ -217,6 +217,7 @@ class Project < ApplicationRecord
   has_many :services
   has_many :events
   has_many :milestones
+  has_many :oncall_schedules, inverse_of: :project, class_name: 'IncidentManagement::OncallSchedule'
   has_many :iterations
   has_many :notes
   has_many :snippets, class_name: 'ProjectSnippet'
