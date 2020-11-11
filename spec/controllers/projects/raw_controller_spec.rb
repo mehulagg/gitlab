@@ -226,6 +226,14 @@ RSpec.describe Projects::RawController do
         get(:show, params: { namespace_id: project.namespace, project_id: project, id: 'master/README.md' })
       end
 
+      it 'sets appropriate caching headers' do
+        sign_in create(:user)
+        request_file
+
+        expect(response.headers['Cache-Control']).to include('max-age=60, public')
+        expect(response.headers['Cache-Control']).not_to include('no-store')
+      end
+
       context 'when If-None-Match header is set' do
         it 'returns a 304 status' do
           request_file
