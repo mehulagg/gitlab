@@ -3,7 +3,7 @@
 module WhatsNewHelper
   def whats_new_most_recent_release_items_count
     Gitlab::ProcessMemoryCache.cache_backend.fetch('whats_new:release_items_count', expires_in: ReleaseHighlight::CACHE_DURATION) do
-      most_recent = ReleaseHighlight.most_recent
+      most_recent = ReleaseHighlight.paginated
 
       most_recent&.[](:items)&.count
     end
@@ -19,7 +19,7 @@ module WhatsNewHelper
 
   def whats_new_most_recent_version
     Gitlab::ProcessMemoryCache.cache_backend.fetch('whats_new:release_version', expires_in: ReleaseHighlight::CACHE_DURATION) do
-      most_recent = ReleaseHighlight.most_recent
+      most_recent = ReleaseHighlight.paginated
 
       most_recent&.[](:items)&.first&.[]('release')
     end

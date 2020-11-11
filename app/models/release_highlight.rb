@@ -4,19 +4,20 @@ class ReleaseHighlight
   CACHE_DURATION = 1.hour
   FILES_PATH = Rails.root.join('data', 'whats_new', '*.yml')
 
-  def self.most_recent(page: 1)
+  def self.for_version(version:)
+    index = self.versions.index(version)
+    page = index + 1
+
+    self.paginated(page: page)
+  end
+
+  def self.paginated(page: 1)
     Rails.cache.fetch(cache_key(page), expires_in: CACHE_DURATION) do
       items = self.load_items(page: page)
 
-      platform = Gitlab.com? ? 'gitlab-com' : 'self-managed'
-      items&.select! {|item| item[platform] }
-
       next if items.nil?
 
-      {
-        items: items,
-        next_page: next_page(current_page: page)
-      }
+      QueryResult.new(items: items, next_page: next_page(current_page: page))
     end
   end
 
@@ -26,11 +27,19 @@ class ReleaseHighlight
 
     file = File.read(file_path)
 
-    YAML.safe_load(file, permitted_classes: [Date])
+    items = YAML.safe_load(file, permitted_classes: [Date])
+
+    platform = Gitlab.com? ? 'gitlab-com' : 'self-managed'
+
+    items&.select {|item| item[platform] }
   rescue => e
     Gitlab::ErrorTracking.track_exception(e, file_path: file_path)
 
     nil
+  end
+
+  def self.versions
+    self.file_paths.map{|p| /\d*\_(\d*\_\d*)/.match(p).captures[0].gsub("_",".") }
   end
 
   def self.file_paths
@@ -49,5 +58,9 @@ class ReleaseHighlight
     next_index = next_page - 1
 
     next_page if self.file_paths[next_index]
+  end
+
+  QueryResult = Struct.new(:items, :next_page, keyword_init: true) do
+    delegate :map, to: :items
   end
 end
