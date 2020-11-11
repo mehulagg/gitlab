@@ -8413,9 +8413,6 @@ msgstr ""
 msgid "DastProfiles|Authentication URL"
 msgstr ""
 
-msgid "DastProfiles|Copy HTTP header to clipboard"
-msgstr ""
-
 msgid "DastProfiles|Could not create the scanner profile. Please try again."
 msgstr ""
 
@@ -8461,9 +8458,6 @@ msgstr ""
 msgid "DastProfiles|Do you want to discard your changes?"
 msgstr ""
 
-msgid "DastProfiles|Download validation text file"
-msgstr ""
-
 msgid "DastProfiles|Edit scanner profile"
 msgstr ""
 
@@ -8474,9 +8468,6 @@ msgid "DastProfiles|Enable Authentication"
 msgstr ""
 
 msgid "DastProfiles|Error Details"
-msgstr ""
-
-msgid "DastProfiles|Header validation"
 msgstr ""
 
 msgid "DastProfiles|Hide debug messages"
@@ -8551,34 +8542,13 @@ msgstr ""
 msgid "DastProfiles|Site Profiles"
 msgstr ""
 
-msgid "DastProfiles|Site is not validated yet, please follow the steps."
-msgstr ""
-
 msgid "DastProfiles|Spider timeout"
-msgstr ""
-
-msgid "DastProfiles|Step 1 - Choose site validation method"
-msgstr ""
-
-msgid "DastProfiles|Step 2 - Add following HTTP header to your site"
-msgstr ""
-
-msgid "DastProfiles|Step 2 - Add following text to the target site"
-msgstr ""
-
-msgid "DastProfiles|Step 3 - Confirm header location and validate"
-msgstr ""
-
-msgid "DastProfiles|Step 3 - Confirm text file location and validate"
 msgstr ""
 
 msgid "DastProfiles|Target URL"
 msgstr ""
 
 msgid "DastProfiles|Target timeout"
-msgstr ""
-
-msgid "DastProfiles|Text file validation"
 msgstr ""
 
 msgid "DastProfiles|The maximum number of minutes allowed for the spider to traverse the site."
@@ -8596,13 +8566,40 @@ msgstr ""
 msgid "DastProfiles|Username form field"
 msgstr ""
 
-msgid "DastProfiles|Validate"
+msgid "DastSiteValidation|Copy HTTP header to clipboard"
 msgstr ""
 
-msgid "DastProfiles|Validating..."
+msgid "DastSiteValidation|Could not create validation token. Please try again."
 msgstr ""
 
-msgid "DastProfiles|Validation failed, please make sure that you follow the steps above with the chosen method."
+msgid "DastSiteValidation|Download validation text file"
+msgstr ""
+
+msgid "DastSiteValidation|Header validation"
+msgstr ""
+
+msgid "DastSiteValidation|Step 1 - Choose site validation method"
+msgstr ""
+
+msgid "DastSiteValidation|Step 2 - Add following HTTP header to your site"
+msgstr ""
+
+msgid "DastSiteValidation|Step 2 - Add following text to the target site"
+msgstr ""
+
+msgid "DastSiteValidation|Step 3 - Confirm header location and validate"
+msgstr ""
+
+msgid "DastSiteValidation|Step 3 - Confirm text file location and validate"
+msgstr ""
+
+msgid "DastSiteValidation|Text file validation"
+msgstr ""
+
+msgid "DastSiteValidation|Validate"
+msgstr ""
+
+msgid "DastSiteValidation|Validate target site"
 msgstr ""
 
 msgid "Data is still calculating..."
