@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe PrometheusServicePolicy, :models do
+RSpec.describe PrometheusService, :models do
   let(:integration) { create(:prometheus_service) }
   let(:project) { integration.project }
   let(:user) { create(:user) }
 
-  subject(:policy) { described_class.new(user, integration) }
+  subject(:policy) { Ability.policy_for(user, integration) }
 
   describe 'rules' do
     it { is_expected.to be_disallowed :admin_project }
