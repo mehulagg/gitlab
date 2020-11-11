@@ -63,7 +63,7 @@ supported by GitLab before installing any of the applications.
 
 > - Introduced in GitLab 10.2 for project-level clusters.
 > - Introduced in GitLab 11.6 for group-level clusters.
-> - [Uses a local Tiller](https://gitlab.com/gitlab-org/gitlab/-/issues/209736) in GitLab 13.2 and later for clusters created before 13.6.
+> - [Uses a local Tiller](https://gitlab.com/gitlab-org/gitlab/-/issues/209736) in GitLab 13.2 and later.
 > - [Uses Helm 3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46267) for clusters created with GitLab 13.6 and later
 
 [Helm](https://helm.sh/docs/) is a package manager for Kubernetes and is
@@ -89,7 +89,7 @@ GitLab does not currently offer a way to migrate existing application management
 on existing clusters from Helm 2 to Helm 3. To migrate a cluster to Helm 3:
 
 1. Uninstall all applications
-1. Remove the cluster from GitLab
+1. [Remove the cluster integration](https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html#removing-integration) from GitLab
 1. [Re-add the cluster to GitLab](../project/clusters/add_remove_clusters.md#existing-kubernetes-cluster) as
    an existing cluster
 
