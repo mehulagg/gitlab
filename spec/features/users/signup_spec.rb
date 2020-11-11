@@ -177,6 +177,10 @@ RSpec.describe 'Signup' do
   end
 
   context 'with no errors' do
+    before do
+      stub_application_setting(require_admin_approval_after_user_signup: false)
+    end
+
     context 'when sending confirmation email' do
       before do
         stub_application_setting(send_user_confirmation_email: true)
@@ -185,7 +189,6 @@ RSpec.describe 'Signup' do
       context 'when soft email confirmation is not enabled' do
         before do
           stub_feature_flags(soft_email_confirmation: false)
-          stub_application_setting(require_admin_approval_after_user_signup: false)
         end
 
         it 'creates the user account and sends a confirmation email' do
@@ -202,7 +205,6 @@ RSpec.describe 'Signup' do
       context 'when soft email confirmation is enabled' do
         before do
           stub_feature_flags(soft_email_confirmation: true)
-          stub_application_setting(require_admin_approval_after_user_signup: false)
         end
 
         it 'creates the user account and sends a confirmation email' do
@@ -219,7 +221,6 @@ RSpec.describe 'Signup' do
     context "when not sending confirmation email" do
       before do
         stub_application_setting(send_user_confirmation_email: false)
-        stub_application_setting(require_admin_approval_after_user_signup: false)
       end
 
       it 'creates the user account and goes to dashboard' do
@@ -345,11 +346,6 @@ RSpec.describe 'Signup' do
     end
   end
 
-
-
-
-
-    it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
-    it_behaves_like 'Signup name validation', 'new_user_last_name', 127, 'Last name'
-
+  it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
+  it_behaves_like 'Signup name validation', 'new_user_last_name', 127, 'Last name'
 end
