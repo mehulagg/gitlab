@@ -313,6 +313,8 @@ class MergeRequest < ApplicationRecord
 
   scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
 
+  scope :with_order_metrics_merge_request_id_desc, -> { order('merge_request_metrics.merge_request_id DESC') }
+
   after_save :keep_around_commit, unless: :importing?
 
   alias_attribute :project, :target_project
@@ -353,8 +355,8 @@ class MergeRequest < ApplicationRecord
 
   def self.sort_by_attribute(method, excluded_labels: [])
     case method.to_s
-    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_id_desc
-    when 'merged_at_desc' then order_merged_at_desc.with_order_id_desc
+    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_metrics_merge_request_id_desc
+    when 'merged_at_desc' then order_merged_at_desc.with_order_metrics_merge_request_id_desc
     else
       super
     end
