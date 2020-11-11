@@ -1,0 +1,314 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Subscription Seats table matches the snapshot 1`] = `
+<table
+  aria-busy="false"
+  aria-colcount="2"
+  class="table b-table gl-table seats-table"
+  id="__BVID__25"
+  role="table"
+>
+  <!---->
+  <!---->
+  <thead
+    class=""
+    role="rowgroup"
+  >
+    <!---->
+    <tr
+      class=""
+      role="row"
+    >
+      <th
+        aria-colindex="1"
+        class=""
+        role="columnheader"
+        scope="col"
+      >
+        User
+      </th>
+      <th
+        aria-colindex="2"
+        class=""
+        role="columnheader"
+        scope="col"
+      >
+        Email
+      </th>
+    </tr>
+  </thead>
+  <tbody
+    role="rowgroup"
+  >
+    <!---->
+    <tr
+      class=""
+      role="row"
+    >
+      <td
+        aria-colindex="1"
+        class=""
+        role="cell"
+      >
+        <div
+          class="gl-display-flex"
+        >
+          <a
+            alt="Administrator"
+            class="gl-link gl-avatar-link"
+            href="path/to/administrator"
+            target="blank"
+          >
+            <div
+              class="gl-avatar-labeled"
+              size="32"
+              src="path/to/img_administrator"
+            >
+              <img
+                alt=""
+                class="gl-avatar gl-avatar-circle gl-avatar-s32"
+                src="path/to/img_administrator"
+              />
+               
+              <div
+                class="gl-avatar-labeled-labels gl-text-left!"
+              >
+                <div
+                  class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
+                >
+                  <span
+                    class="gl-avatar-labeled-label"
+                  >
+                    Administrator
+                  </span>
+                   
+                </div>
+                 
+                <span
+                  class="gl-avatar-labeled-sublabel"
+                >
+                  @root
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </td>
+      <td
+        aria-colindex="2"
+        class=""
+        role="cell"
+      >
+        <div>
+          <span
+            class="gl-text-gray-900"
+          >
+            administrator@email.com
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr
+      class=""
+      role="row"
+    >
+      <td
+        aria-colindex="1"
+        class=""
+        role="cell"
+      >
+        <div
+          class="gl-display-flex"
+        >
+          <a
+            alt="Agustin Walker"
+            class="gl-link gl-avatar-link"
+            href="path/to/agustin_walker"
+            target="blank"
+          >
+            <div
+              class="gl-avatar-labeled"
+              size="32"
+              src="path/to/img_agustin_walker"
+            >
+              <img
+                alt=""
+                class="gl-avatar gl-avatar-circle gl-avatar-s32"
+                src="path/to/img_agustin_walker"
+              />
+               
+              <div
+                class="gl-avatar-labeled-labels gl-text-left!"
+              >
+                <div
+                  class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
+                >
+                  <span
+                    class="gl-avatar-labeled-label"
+                  >
+                    Agustin Walker
+                  </span>
+                   
+                </div>
+                 
+                <span
+                  class="gl-avatar-labeled-sublabel"
+                >
+                  @lester.orn
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </td>
+      <td
+        aria-colindex="2"
+        class=""
+        role="cell"
+      >
+        <div>
+          <span
+            class="gl-text-gray-900"
+          >
+            agustin_walker@email.com
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr
+      class=""
+      role="row"
+    >
+      <td
+        aria-colindex="1"
+        class=""
+        role="cell"
+      >
+        <div
+          class="gl-display-flex"
+        >
+          <a
+            alt="Joella Miller"
+            class="gl-link gl-avatar-link"
+            href="path/to/joella_miller"
+            target="blank"
+          >
+            <div
+              class="gl-avatar-labeled"
+              size="32"
+              src="path/to/img_joella_miller"
+            >
+              <img
+                alt=""
+                class="gl-avatar gl-avatar-circle gl-avatar-s32"
+                src="path/to/img_joella_miller"
+              />
+               
+              <div
+                class="gl-avatar-labeled-labels gl-text-left!"
+              >
+                <div
+                  class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
+                >
+                  <span
+                    class="gl-avatar-labeled-label"
+                  >
+                    Joella Miller
+                  </span>
+                   
+                </div>
+                 
+                <span
+                  class="gl-avatar-labeled-sublabel"
+                >
+                  @era
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </td>
+      <td
+        aria-colindex="2"
+        class=""
+        role="cell"
+      >
+        <div>
+          <span
+            class="gl-font-style-italic"
+          >
+            Private
+          </span>
+        </div>
+      </td>
+    </tr>
+    <!---->
+    <!---->
+  </tbody>
+  <!---->
+</table>
+`;
+
+exports[`Subscription Seats table when data is loading matches the snapshot 1`] = `
+<table
+  aria-busy="true"
+  aria-colcount="2"
+  class="table b-table gl-table seats-table"
+  id="__BVID__458"
+  role="table"
+>
+  <!---->
+  <!---->
+  <thead
+    class=""
+    role="rowgroup"
+  >
+    <!---->
+    <tr
+      class=""
+      role="row"
+    >
+      <th
+        aria-colindex="1"
+        class=""
+        role="columnheader"
+        scope="col"
+      >
+        User
+      </th>
+      <th
+        aria-colindex="2"
+        class=""
+        role="columnheader"
+        scope="col"
+      >
+        Email
+      </th>
+    </tr>
+  </thead>
+  <tbody
+    role="rowgroup"
+  >
+    <tr
+      class="b-table-busy-slot"
+      role="row"
+    >
+      <td
+        class=""
+        colspan="2"
+        role="cell"
+      >
+        <div
+          class="gl-spinner-container gl-mt-5"
+        >
+          <span
+            aria-label="Loading"
+            class="align-text-bottom gl-spinner gl-spinner-dark gl-spinner-lg"
+          />
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <!---->
+</table>
+`;

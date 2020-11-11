@@ -17,16 +17,19 @@ export default {
   inject: ['namespaceName', 'namespaceId'],
   data() {
     return {
-      fields: ['user'],
+      fields: ['user', 'email'],
     };
   },
   computed: {
     ...mapState('seats', ['members', 'isLoading', 'page', 'perPage', 'total']),
     items() {
-      return this.members.map(({ name, username, avatar_url, web_url }) => {
+      return this.members.map(({ name, username, avatar_url, web_url, email }) => {
         const formattedUserName = `@${username}`;
 
-        return { user: { name, username: formattedUserName, avatar_url, web_url } };
+        return {
+          user: { name, username: formattedUserName, avatar_url, web_url },
+          email,
+        };
       });
     },
     headingText() {
@@ -72,7 +75,6 @@ export default {
     <h4 data-testid="heading">{{ headingText }}</h4>
     <p>{{ subHeadingText }}</p>
     <gl-table
-      data-testid="seats-table"
       class="seats-table"
       :items="items"
       :fields="fields"
@@ -80,14 +82,23 @@ export default {
       :show-empty="true"
     >
       <template #cell(user)="data">
-        <gl-avatar-link target="blank" :href="data.value.web_url" :alt="data.value.name">
-          <gl-avatar-labeled
-            :src="data.value.avatar_url"
-            :size="$options.avatarSize"
-            :label="data.value.name"
-            :sub-label="data.value.username"
-          />
-        </gl-avatar-link>
+        <div class="gl-display-flex">
+          <gl-avatar-link target="blank" :href="data.value.web_url" :alt="data.value.name">
+            <gl-avatar-labeled
+              :src="data.value.avatar_url"
+              :size="$options.avatarSize"
+              :label="data.value.name"
+              :sub-label="data.value.username"
+            />
+          </gl-avatar-link>
+        </div>
+      </template>
+
+      <template #cell(email)="data">
+        <div>
+          <span v-if="data.value" class="gl-text-gray-900">{{ data.value }}</span>
+          <span v-else class="gl-font-style-italic">{{ s__('Billing|Private') }}</span>
+        </div>
       </template>
 
       <template #empty>

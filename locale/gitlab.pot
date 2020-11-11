@@ -4332,6 +4332,9 @@ msgstr ""
 msgid "Billing|No users to display."
 msgstr ""
 
+msgid "Billing|Private"
+msgstr ""
+
 msgid "Billing|Updated live"
 msgstr ""
 

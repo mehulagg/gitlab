@@ -70,20 +70,23 @@ export const mockDataSeats = {
     {
       name: 'Administrator',
       username: 'root',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      avatar_url: 'path/to/img_administrator',
+      web_url: 'path/to/administrator',
+      email: 'administrator@email.com',
     },
     {
       name: 'Agustin Walker',
       username: 'lester.orn',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      avatar_url: 'path/to/img_agustin_walker',
+      web_url: 'path/to/agustin_walker',
+      email: 'agustin_walker@email.com',
     },
     {
       name: 'Joella Miller',
       username: 'era',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      avatar_url: 'path/to/img_joella_miller',
+      web_url: 'path/to/joella_miller',
+      email: null,
     },
   ],
   headers: {
@@ -92,30 +95,3 @@ export const mockDataSeats = {
     [HEADER_ITEMS_PER_PAGE]: '1',
   },
 };
-
-export const seatsTableItems = [
-  {
-    user: {
-      name: 'Administrator',
-      username: '@root',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
-    },
-  },
-  {
-    user: {
-      name: 'Agustin Walker',
-      username: '@lester.orn',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
-    },
-  },
-  {
-    user: {
-      name: 'Joella Miller',
-      username: '@era',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
-    },
-  },
-];
