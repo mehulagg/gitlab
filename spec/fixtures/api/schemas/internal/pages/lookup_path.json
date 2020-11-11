@@ -15,7 +15,8 @@
       "required": ["type", "path"],
       "properties" : {
         "type": { "type": "string", "enum": ["file", "zip"] },
-        "path": { "type": "string" }
+        "path": { "type": "string" },
+        "sha256": { "type": "string" }
       },
       "additionalProperties": false
     },

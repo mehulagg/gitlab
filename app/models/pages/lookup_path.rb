@@ -40,37 +40,33 @@ module Pages
     def artifacts_archive
       return unless Feature.enabled?(:pages_serve_from_artifacts_archive, project)
 
-      archive = project.pages_metadatum.artifacts_archive
-
-      archive&.file
+      project.pages_metadatum.artifacts_archive
     end
 
     def deployment
       return unless Feature.enabled?(:pages_serve_from_deployments, project)
 
-      deployment = project.pages_metadatum.pages_deployment
-
-      deployment&.file
+      project.pages_metadatum.pages_deployment
     end
 
     def zip_source
       source = deployment || artifacts_archive
 
-      return unless source
+      return unless source&.file
 
-      if source.file_storage?
-        return unless Feature.enabled?(:pages_serve_with_zip_file_protocol, project)
+      return if source.file.file_storage? && !Feature.enabled?(:pages_serve_with_zip_file_protocol, project)
 
-        {
-          type: 'zip',
-          path: 'file://' + source.path
-        }
-      else
-        {
-          type: 'zip',
-          path: source.url(expire_at: 1.day.from_now)
-        }
-      end
+      path = if source.file.file_storage?
+               'file://' + source.file.path
+             else
+               source.file.url(expire_at: 1.day.from_now)
+             end
+
+      {
+        type: 'zip',
+        path: path,
+        sha256: source.file_sha256
+      }
     end
 
     def file_source

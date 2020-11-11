@@ -200,7 +200,8 @@ RSpec.describe API::Internal::Pages do
                   'prefix' => '/',
                   'source' => {
                     'type' => 'zip',
-                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now)
+                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now),
+                    'sha256' => project.pages_metadatum.pages_deployment.file_sha256
                   }
                 }
               ]
@@ -236,7 +237,8 @@ RSpec.describe API::Internal::Pages do
                   'prefix' => '/myproject/',
                   'source' => {
                     'type' => 'zip',
-                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now)
+                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now),
+                    'sha256' => project.pages_metadatum.pages_deployment.file_sha256
                   }
                 }
               ]
@@ -277,7 +279,8 @@ RSpec.describe API::Internal::Pages do
                   'prefix' => '/',
                   'source' => {
                     'type' => 'zip',
-                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now)
+                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now),
+                    'sha256' => project.pages_metadatum.pages_deployment.file_sha256
                   }
                 }
               ]

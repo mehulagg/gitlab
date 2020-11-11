@@ -70,6 +70,7 @@ RSpec.describe Pages::LookupPath do
           expect(source[:type]).to eq('zip')
           expect(source[:path]).to eq(deployment.file.url(expire_at: 1.day.from_now))
           expect(source[:path]).to include("Expires=86400")
+          expect(source[:sha256]).to eq(deployment.file_sha256)
         end
       end
 
@@ -82,6 +83,7 @@ RSpec.describe Pages::LookupPath do
           Timecop.freeze do
             expect(source[:type]).to eq('zip')
             expect(source[:path]).to eq('file://' + deployment.file.path)
+            expect(source[:sha256]).to eq(deployment.file_sha256)
           end
         end
 
@@ -115,6 +117,7 @@ RSpec.describe Pages::LookupPath do
           expect(source[:type]).to eq('zip')
           expect(source[:path]).to eq(artifacts_archive.file.url(expire_at: 1.day.from_now))
           expect(source[:path]).to include("Expires=86400")
+          expect(source[:sha256]).to eq(artifacts_archive.file_sha256)
         end
       end
 
@@ -125,6 +128,7 @@ RSpec.describe Pages::LookupPath do
           Timecop.freeze do
             expect(source[:type]).to eq('zip')
             expect(source[:path]).to eq('file://' + artifacts_archive.file.path)
+            expect(source[:sha256]).to eq(artifacts_archive.file_sha256)
           end
         end
 
