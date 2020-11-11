@@ -1,5 +1,5 @@
 - has_impersonation_link = header_link?(:admin_impersonation)
-- user_status_data = user_status_properties(current_user)
+- user_status_data = user_status_properties(current_user, @project)
 
 %header.navbar.navbar-gitlab.navbar-expand-sm.js-navbar{ data: { qa_selector: 'navbar' } }
   %a.sr-only.gl-accessibility{ href: "#content-body", tabindex: "1" } Skip to content
