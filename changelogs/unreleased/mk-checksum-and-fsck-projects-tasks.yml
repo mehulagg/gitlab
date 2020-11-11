@@ -1,0 +1,5 @@
+---
+title: Add gitlab:git:fsck_projects and gitlab:git:checksum_projects tasks
+merge_request: 47324
+author:
+type: added
