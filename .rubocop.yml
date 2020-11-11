@@ -355,6 +355,15 @@ Cop/SidekiqOptionsQueue:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
 
+Graphql/ResolverType:
+  Enabled: true
+  Include:
+    - 'app/graphql/resolvers/**/*'
+    - 'ee/app/graphql/resolvers/**/*'
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
 Graphql/AuthorizeTypes:
   Enabled: true
   Include:
