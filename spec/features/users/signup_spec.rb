@@ -43,6 +43,10 @@ end
 RSpec.describe 'Signup' do
   include TermsHelper
 
+  before do
+    stub_application_setting(require_admin_approval_after_user_signup: false)
+  end
+
   let(:new_user) { build_stubbed(:user) }
 
   def fill_in_signup_form
@@ -177,10 +181,6 @@ RSpec.describe 'Signup' do
   end
 
   context 'with no errors' do
-    before do
-      stub_application_setting(require_admin_approval_after_user_signup: false)
-    end
-
     context 'when sending confirmation email' do
       before do
         stub_application_setting(send_user_confirmation_email: true)
@@ -261,7 +261,6 @@ RSpec.describe 'Signup' do
 
   context 'when terms are enforced' do
     before do
-      stub_application_setting(require_admin_approval_after_user_signup: false)
       enforce_terms
     end
 
@@ -319,31 +318,24 @@ RSpec.describe 'Signup' do
     end
   end
 
-  context 'redirects to step 2 of the signup process, sets the role and redirects back' do
-    before do
-      stub_application_setting(require_admin_approval_after_user_signup: false)
-    end
+  it 'redirects to step 2 of the signup process, sets the role and redirects back' do
+    visit new_user_registration_path
 
-    it 'is a test' do
+    fill_in_signup_form
+    click_button 'Register'
 
-      visit new_user_registration_path
+    visit new_project_path
 
-      fill_in_signup_form
-      click_button 'Register'
+    expect(page).to have_current_path(users_sign_up_welcome_path)
 
-      visit new_project_path
+    select 'Software Developer', from: 'user_role'
+    click_button 'Get started!'
 
-      expect(page).to have_current_path(users_sign_up_welcome_path)
+    created_user = User.find_by_username(new_user.username)
 
-      select 'Software Developer', from: 'user_role'
-      click_button 'Get started!'
-
-      created_user = User.find_by_username(new_user.username)
-
-      expect(created_user.software_developer_role?).to be_truthy
-      expect(created_user.setup_for_company).to be_nil
-      expect(page).to have_current_path(new_project_path)
-    end
+    expect(created_user.software_developer_role?).to be_truthy
+    expect(created_user.setup_for_company).to be_nil
+    expect(page).to have_current_path(new_project_path)
   end
 
   it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
