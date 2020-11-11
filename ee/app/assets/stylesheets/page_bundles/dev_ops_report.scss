@@ -8,6 +8,7 @@
   @include gl-display-inline-block;
 
   &-enabled {
+    border: 1px solid var(--indigo-800, $indigo-800);
     background-color: var(--indigo-600, $indigo-600);
   }
 }
