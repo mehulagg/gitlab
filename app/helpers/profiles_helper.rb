@@ -39,8 +39,4 @@ module ProfilesHelper
     # if there is no message and the emoji is "speech_balloon" we are using the default
     user.status && (user.status.message.present? || user.status.emoji != UserStatus::DEFAULT_EMOJI)
   end
-
-  def default_emoji
-    UserStatus::DEFAULT_EMOJI
-  end
 end
