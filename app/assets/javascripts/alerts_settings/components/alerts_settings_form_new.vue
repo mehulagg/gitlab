@@ -38,6 +38,7 @@ export default {
     opsgenie: targetOpsgenieUrlPlaceholder,
   },
   JSON_VALIDATE_DELAY,
+  typeSet,
   i18n: {
     integrationFormSteps: {
       step1: {
@@ -140,7 +141,8 @@ export default {
     // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
     canManageOpsgenie: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
   },
   apollo: {
@@ -162,7 +164,7 @@ export default {
       parsingPayload: false,
       currentIntegration: null,
       // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      isAddingOrEditingOpsgenie: false,
+      isManagingOpsgenie: false,
     };
   },
   computed: {
@@ -170,15 +172,15 @@ export default {
       return this.integrationTestPayload.error === null;
     },
     // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-   disabledIntegrations() {
-     return this.opsgenie.active ? [typeSet.http, typeSet.prometheus] : [typeSet.opsgenie];
-   },
-   options() {
-     return integrationTypesNew.map(el => ({
-       ...el,
-       disabled: this.disabledIntegrations.includes(el.value),
-     }));
-   },
+    disabledIntegrations() {
+      return this.opsgenie.active ? [typeSet.http, typeSet.prometheus] : [typeSet.opsgenie];
+    },
+    options() {
+      return integrationTypesNew.map(el => ({
+        ...el,
+        disabled: this.disabledIntegrations.includes(el.value),
+      }));
+    },
     selectedIntegrationType() {
       switch (this.selectedIntegration) {
         case typeSet.http:
@@ -250,11 +252,8 @@ export default {
       }
 
       // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      if (
-        (this.canManageOpsgenie || this.opsgenie.active) &&
-        this.selectedIntegration === typeSet.opsgenie
-      ) {
-        this.isAddingOrEditingOpsgenie = true;
+      if (this.opsgenie.active && this.selectedIntegration === typeSet.opsgenie) {
+        this.isManagingOpsgenie = true;
         this.active = this.opsgenie.active;
         this.integrationForm.apiUrl = this.opsgenie.opsgenieMvcTargetUrl;
       }
@@ -288,7 +287,7 @@ export default {
     },
     submit() {
       // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      if (this.isAddingOrEditingOpsgenie) {
+      if (this.isManagingOpsgenie) {
         return this.submitWithOpsgenie();
       }
 
@@ -406,7 +405,7 @@ export default {
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
       <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
-      <div v-if="isAddingOrEditingOpsgenie">
+      <div v-if="isManagingOpsgenie">
         <gl-form-group
           id="integration-webhook"
           :label="$options.i18n.integrationFormSteps.opsgenie.label"
@@ -601,7 +600,7 @@ export default {
         <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
         <gl-button
           data-testid="integration-test-and-submit"
-          :disabled="Boolean(integrationTestPayload.error) || isAddingOrEditingOpsgenie"
+          :disabled="Boolean(integrationTestPayload.error) || isManagingOpsgenie"
           category="secondary"
           variant="success"
           class="gl-mr-1 js-no-auto-disable"
