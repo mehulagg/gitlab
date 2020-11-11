@@ -5,6 +5,23 @@ module BulkImports
     class Graphql
       attr_reader :client
 
+      class HTTP < Graphlient::Adapters::HTTP::Adapter
+        def execute(document:, operation_name: nil, variables: {}, context: {})
+          response = ::Gitlab::HTTP.post(
+            url,
+            headers: headers,
+            follow_redirects: false,
+            body: {
+              query: document.to_query_string,
+              operationName: operation_name,
+              variables: variables
+            }.to_json
+          )
+
+          ::Gitlab::Json.parse(response.body)
+        end
+      end
+
       delegate :query, :parse, :execute, to: :client
 
       def initialize(url: Gitlab::COM_URL, token: nil)
@@ -12,19 +29,19 @@ module BulkImports
         @token = token
         @client = Graphlient::Client.new(
           @url,
-          request_headers
+          options(http: HTTP)
         )
       end
 
-      def request_headers
-        return {} unless @token
+      def options(extra = {})
+        return extra unless @token
 
         {
           headers: {
             'Content-Type' => 'application/json',
             'Authorization' => "Bearer #{@token}"
           }
-        }
+        }.merge(extra)
       end
     end
   end
