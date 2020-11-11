@@ -12,7 +12,7 @@ import JiraIssuesFields from './jira_issues_fields.vue';
 import TriggerFields from './trigger_fields.vue';
 import DynamicField from './dynamic_field.vue';
 import ConfirmationModal from './confirmation_modal.vue';
-import UninstallConfirmationModal from './uninstall_confirmation_modal.vue';
+import ResetConfirmationModal from './reset_confirmation_modal.vue';
 
 export default {
   name: 'IntegrationForm',
@@ -24,7 +24,7 @@ export default {
     TriggerFields,
     DynamicField,
     ConfirmationModal,
-    UninstallConfirmationModal,
+    ResetConfirmationModal,
     GlButton,
   },
   directives: {
@@ -33,7 +33,7 @@ export default {
   mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapGetters(['currentKey', 'propsSource', 'isDisabled']),
-    ...mapState(['defaultState', 'override', 'isSaving', 'isTesting', 'isUninstalling']),
+    ...mapState(['defaultState', 'override', 'isSaving', 'isTesting', 'isResetting']),
     isEditable() {
       return this.propsSource.editable;
     },
@@ -51,7 +51,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setOverride', 'setIsSaving', 'setIsTesting', 'setIsUninstalling']),
+    ...mapActions(['setOverride', 'setIsSaving', 'setIsTesting', 'setIsResetting']),
     onSaveClick() {
       this.setIsSaving(true);
       eventHub.$emit('saveIntegration');
@@ -60,7 +60,7 @@ export default {
       this.setIsTesting(true);
       eventHub.$emit('testIntegration');
     },
-    onUninstallClick() {},
+    onResetClick() {},
   },
 };
 </script>
@@ -135,15 +135,15 @@ export default {
 
       <template v-if="isInstanceOrGroupLevel">
         <gl-button
-          v-gl-modal.confirmUninstallIntegration
+          v-gl-modal.confirmResetIntegration
           category="secondary"
-          variant="danger"
-          :loading="isUninstalling"
+          variant="default"
+          :loading="isResetting"
           :disabled="isDisabled"
         >
-          {{ __('Uninstall') }}
+          {{ __('Reset') }}
         </gl-button>
-        <uninstall-confirmation-modal @uninstall="onUninstallClick" />
+        <reset-confirmation-modal @reset="onResetClick" />
       </template>
 
       <gl-button class="btn-cancel" :href="propsSource.cancelPath">{{ __('Cancel') }}</gl-button>

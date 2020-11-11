@@ -7,7 +7,7 @@ describe('Integration form state factory', () => {
       customState: {},
       isSaving: false,
       isTesting: false,
-      isUninstalling: false,
+      isResetting: false,
       override: false,
     });
   });

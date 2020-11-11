@@ -14569,10 +14569,7 @@ msgstr ""
 msgid "Integrations|All details"
 msgstr ""
 
-msgid "Integrations|All projects inheriting these settings will be cleared and deactivated"
-msgstr ""
-
-msgid "Integrations|Apply to all inheriting projects"
+msgid "Integrations|All projects inheriting these settings will also be reset."
 msgstr ""
 
 msgid "Integrations|Comment detail:"
@@ -14596,13 +14593,7 @@ msgstr ""
 msgid "Integrations|Default settings are inherited from the instance level."
 msgstr ""
 
-msgid "Integrations|Do not apply to all inheriting projects"
-msgstr ""
-
 msgid "Integrations|Enable comments"
-msgstr ""
-
-msgid "Integrations|How do you want to apply the changes to these projects?"
 msgstr ""
 
 msgid "Integrations|Includes Standard plus entire commit message, commit hash, and issue IDs"
@@ -14614,13 +14605,16 @@ msgstr ""
 msgid "Integrations|Issues created in Jira are shown here once you have created the issues in project setup in Jira."
 msgstr ""
 
+msgid "Integrations|Projects using custom settings will not be affected."
+msgstr ""
+
 msgid "Integrations|Projects using custom settings will not be impacted unless the project owner chooses to use parent level defaults."
 msgstr ""
 
-msgid "Integrations|Projects using custom settings will not be impacted."
+msgid "Integrations|Reset integration?"
 msgstr ""
 
-msgid "Integrations|Projects will be switched to custom settings and remain active"
+msgid "Integrations|Resetting this integration will clear the settings and deactivate this integration."
 msgstr ""
 
 msgid "Integrations|Return to GitLab for Jira"
@@ -14635,16 +14629,10 @@ msgstr ""
 msgid "Integrations|Search Jira issues"
 msgstr ""
 
-msgid "Integrations|Some projects are using these settings as the default."
-msgstr ""
-
 msgid "Integrations|Standard"
 msgstr ""
 
 msgid "Integrations|To keep this project going, create a new issue."
-msgstr ""
-
-msgid "Integrations|Uninstall integration?"
 msgstr ""
 
 msgid "Integrations|Update your projects on Packagist, the main Composer repository"
@@ -22999,6 +22987,9 @@ msgid "Resend invite"
 msgstr ""
 
 msgid "Resend it"
+msgstr ""
+
+msgid "Reset"
 msgstr ""
 
 msgid "Reset authorization key"
