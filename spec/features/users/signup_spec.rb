@@ -185,6 +185,7 @@ RSpec.describe 'Signup' do
       context 'when soft email confirmation is not enabled' do
         before do
           stub_feature_flags(soft_email_confirmation: false)
+          stub_application_setting(require_admin_approval_after_user_signup: false)
         end
 
         it 'creates the user account and sends a confirmation email' do
@@ -201,6 +202,7 @@ RSpec.describe 'Signup' do
       context 'when soft email confirmation is enabled' do
         before do
           stub_feature_flags(soft_email_confirmation: true)
+          stub_application_setting(require_admin_approval_after_user_signup: false)
         end
 
         it 'creates the user account and sends a confirmation email' do
@@ -217,6 +219,7 @@ RSpec.describe 'Signup' do
     context "when not sending confirmation email" do
       before do
         stub_application_setting(send_user_confirmation_email: false)
+        stub_application_setting(require_admin_approval_after_user_signup: false)
       end
 
       it 'creates the user account and goes to dashboard' do
@@ -257,6 +260,7 @@ RSpec.describe 'Signup' do
 
   context 'when terms are enforced' do
     before do
+      stub_application_setting(require_admin_approval_after_user_signup: false)
       enforce_terms
     end
 
@@ -314,33 +318,38 @@ RSpec.describe 'Signup' do
     end
   end
 
-  it 'redirects to step 2 of the signup process, sets the role and redirects back' do
-    visit new_user_registration_path
-
-    fill_in_signup_form
-    click_button 'Register'
-
-    visit new_project_path
-
-    expect(page).to have_current_path(users_sign_up_welcome_path)
-
-    select 'Software Developer', from: 'user_role'
-    click_button 'Get started!'
-
-    created_user = User.find_by_username(new_user.username)
-
-    expect(created_user.software_developer_role?).to be_truthy
-    expect(created_user.setup_for_company).to be_nil
-    expect(page).to have_current_path(new_project_path)
-  end
-
-  context 'testing' do
-
+  context 'redirects to step 2 of the signup process, sets the role and redirects back' do
     before do
       stub_application_setting(require_admin_approval_after_user_signup: false)
     end
 
+    it 'is a test' do
+
+      visit new_user_registration_path
+
+      fill_in_signup_form
+      click_button 'Register'
+
+      visit new_project_path
+
+      expect(page).to have_current_path(users_sign_up_welcome_path)
+
+      select 'Software Developer', from: 'user_role'
+      click_button 'Get started!'
+
+      created_user = User.find_by_username(new_user.username)
+
+      expect(created_user.software_developer_role?).to be_truthy
+      expect(created_user.setup_for_company).to be_nil
+      expect(page).to have_current_path(new_project_path)
+    end
+  end
+
+
+
+
+
     it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
     it_behaves_like 'Signup name validation', 'new_user_last_name', 127, 'Last name'
-  end
+
 end
