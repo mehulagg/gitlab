@@ -257,6 +257,6 @@ Output indicates that the package has been successfully installed.
 
 CAUTION: **Important:**
 Never commit the `auth.json` file to your repository. To install packages from a CI/CD job,
-consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md#authentication) tool with your personal access token
+consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages.md#authentication) tool with your personal access token
 stored in a [GitLab CI/CD environment variable](../../../ci/variables/README.md) or in
 [HashiCorp Vault](../../../ci/secrets/index.md).
