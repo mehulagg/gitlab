@@ -40,7 +40,7 @@ module MergeCommits
 
     def header_to_value_hash
       {
-        'Merge Commit' => 'merge_commit_sha',
+        'Merge Commit' => 'merged_commit_sha',
         'Author' => -> (merge_request) { merge_request.author&.name },
         'Merge Request' => 'id',
         'Merged By' => -> (merge_request) { merge_request.metrics&.merged_by&.name },

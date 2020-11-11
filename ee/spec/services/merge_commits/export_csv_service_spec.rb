@@ -64,6 +64,26 @@ RSpec.describe MergeCommits::ExportCsvService do
     end
   end
 
+  context 'possible merge commit SHA values' do
+    context 'when squash_commit_sha is present' do
+      let_it_be(:squash_commit_merge_request) do
+        create(:merged_merge_request, squash_commit_sha: 'f7ce827c314c9340b075657fd61c789fb01cf74d', source_project: project, target_project: project, state: :merged)
+      end
+
+      it { expect(csv[1]['Merge Commit']).to eq squash_commit_merge_request.squash_commit_sha }
+    end
+
+    context 'when diff_head_sha is present' do
+      let_it_be(:diff_head_merge_request) do
+        create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged)
+      end
+
+      it do
+        expect(csv[1]['Merge Commit']).to eq diff_head_merge_request.diff_head_sha
+      end
+    end
+  end
+
   def csv
     CSV.parse(subject.csv_data, headers: true)
   end
