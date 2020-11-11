@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
   subject { build(:devops_adoption_segment) }
 
+  it { is_expected.to have_many(:segment_selections) }
+  it { is_expected.to have_many(:groups) }
+  it { is_expected.to have_many(:snapshots) }
+
   describe 'validation' do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name) }

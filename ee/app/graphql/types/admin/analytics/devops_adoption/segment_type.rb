@@ -15,8 +15,15 @@ module Types
           field :name, GraphQL::STRING_TYPE, null: false,
             description: 'Name of the segment'
 
-          field :groups, Types::GroupType.connection_type, null: true,
+          field :groups, [Types::GroupType], null: true,
                 description: 'Assigned groups'
+
+          field :last_recorded_at, Types::TimeType, null: true
+          field :latest_snapshot, SnapshotType, null: true
+
+          def latest_snapshot
+            object.snapshots.last
+          end
         end
       end
     end
