@@ -131,6 +131,12 @@ RSpec.shared_examples 'a verifiable replicator' do
 
         described_class.trigger_background_verification
       end
+
+      it 'enqueues VerificationTimeoutWorker' do
+        expect(::Geo::VerificationTimeoutWorker).to receive(:perform_async).with(described_class.replicable_name)
+
+        described_class.trigger_background_verification
+      end
     end
 
     context 'when verification is disabled' do
@@ -140,6 +146,12 @@ RSpec.shared_examples 'a verifiable replicator' do
 
       it 'does not enqueue VerificationBatchWorker' do
         expect(::Geo::VerificationBatchWorker).not_to receive(:perform_with_capacity)
+
+        described_class.trigger_background_verification
+      end
+
+      it 'does not enqueue VerificationTimeoutWorker' do
+        expect(::Geo::VerificationTimeoutWorker).not_to receive(:perform_async)
 
         described_class.trigger_background_verification
       end
@@ -261,6 +273,26 @@ RSpec.shared_examples 'a verifiable replicator' do
         expect(described_class.registry_class).to receive(:model_record_ids_needs_verification_again)
 
         described_class.model_record_ids_needs_verification_again
+      end
+    end
+  end
+
+  describe '.fail_verification_timeouts' do
+    context 'when current node is a primary' do
+      it 'delegates to the model class of the replicator' do
+        expect(described_class.model).to receive(:fail_verification_timeouts)
+
+        described_class.fail_verification_timeouts
+      end
+    end
+
+    context 'when current node is a secondary' do
+      it 'delegates to the registry class of the replicator' do
+        stub_current_geo_node(secondary)
+
+        expect(described_class.registry_class).to receive(:fail_verification_timeouts)
+
+        described_class.fail_verification_timeouts
       end
     end
   end

@@ -7,7 +7,7 @@ module Geo
     include Delay
 
     class_methods do
-      delegate :model_record_ids_never_attempted_verification, :model_record_ids_needs_verification_again, :needs_verification_count, to: :verification_query_class
+      delegate :model_record_ids_never_attempted_verification, :model_record_ids_needs_verification_again, :needs_verification_count, :fail_verification_timeouts, to: :verification_query_class
 
       # If replication is disabled, then so is verification.
       def verification_enabled?
@@ -32,6 +32,8 @@ module Geo
         return false unless verification_enabled?
 
         ::Geo::VerificationBatchWorker.perform_with_capacity(replicable_name)
+
+        ::Geo::VerificationTimeoutWorker.perform_async(replicable_name)
       end
 
       # Called by VerificationBatchWorker.

@@ -13,6 +13,7 @@ module Gitlab
       extend ActiveSupport::Concern
       include ::ShaAttribute
       include Delay
+      include EachBatch
       include Gitlab::Geo::LogHelpers
 
       VERIFICATION_STATE_VALUES = {
@@ -93,6 +94,8 @@ module Gitlab
       end
 
       class_methods do
+        include Delay
+
         def verification_state_value(state_string)
           VERIFICATION_STATE_VALUES[state_string]
         end
@@ -118,6 +121,22 @@ module Gitlab
           # to stick to the primary database.
           self.transaction do
             self.connection.execute(query).to_a.map { |row| row["id"] }
+          end
+        end
+
+        # Fail verification for records which started verification a long time ago
+        def fail_verification_timeouts
+          attrs = {
+            verification_state: verification_state_value(:verification_failed),
+            verification_failure: "Verification timed out after #{VERIFICATION_TIMEOUT}",
+            verification_checksum: nil,
+            verification_retry_count: 1,
+            verification_retry_at: next_retry_time(1),
+            verified_at: Time.current
+          }
+
+          verification_timed_out.each_batch do |relation|
+            relation.update_all(attrs)
           end
         end
       end

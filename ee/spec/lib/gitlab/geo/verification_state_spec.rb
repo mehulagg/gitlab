@@ -26,6 +26,28 @@ RSpec.describe Gitlab::Geo::VerificationState do
 
   subject { DummyModel.new }
 
+  describe '.fail_verification_timeouts' do
+    context 'when verification has not timed out for a record' do
+      it 'does not update verification state' do
+        subject.update!(verification_started_at: (described_class::VERIFICATION_TIMEOUT - 1.minute).ago)
+
+        DummyModel.fail_verification_timeouts
+
+        expect(subject.reload.verification_started?).to be_truthy
+      end
+    end
+
+    context 'when verification has timed out for a record' do
+      it 'sets verification state to failed' do
+        subject.update!(verification_started_at: (described_class::VERIFICATION_TIMEOUT + 1.minute).ago)
+
+        DummyModel.fail_verification_timeouts
+
+        expect(subject.reload.verification_failed?).to be_truthy
+      end
+    end
+  end
+
   describe '#verification_succeeded_with_checksum!' do
     context 'when the resource was updated during checksum calculation' do
       let(:calculation_started_at) { subject.verification_started_at - 1.second }
