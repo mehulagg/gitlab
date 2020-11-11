@@ -13,17 +13,21 @@ export default () => {
     dataset: { newDastScannerProfilePath, newDastSiteProfilePath, projectFullPath },
   } = el;
 
+  const provide = {
+    projectFullPath,
+  };
+
   const props = {
     createNewProfilePaths: {
       scannerProfile: newDastScannerProfilePath,
       siteProfile: newDastSiteProfilePath,
     },
-    projectFullPath,
   };
 
   return new Vue({
     el,
     apolloProvider,
+    provide,
     render(h) {
       return h(DastProfiles, {
         props,

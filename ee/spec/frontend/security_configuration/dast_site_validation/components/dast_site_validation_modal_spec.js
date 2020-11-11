@@ -5,11 +5,11 @@ import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-ut
 import { createMockClient } from 'mock-apollo-client';
 import { GlLoadingIcon } from '@gitlab/ui';
 import waitForPromises from 'jest/helpers/wait_for_promises';
-import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_validation.vue';
-import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
-import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
-import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
-import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_profiles_form/constants';
+import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
+import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_token_create.mutation.graphql';
+import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_create.mutation.graphql';
+import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
+import * as responses from '../mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
@@ -26,18 +26,17 @@ const token = 'validation-token-123';
 const validationMethods = ['text file', 'header'];
 
 const defaultProps = {
-  fullPath,
   targetUrl,
-  tokenId,
-  token,
 };
 
 const defaultRequestHandlers = {
-  dastSiteValidation: jest.fn().mockResolvedValue(responses.dastSiteValidation()),
+  dastSiteTokenCreate: jest
+    .fn()
+    .mockResolvedValue(responses.dastSiteTokenCreate({ id: tokenId, token })),
   dastSiteValidationCreate: jest.fn().mockResolvedValue(responses.dastSiteValidationCreate()),
 };
 
-describe('DastSiteValidation', () => {
+describe('DastSiteValidationModal', () => {
   let wrapper;
   let apolloProvider;
   let requestHandlers;
@@ -50,7 +49,7 @@ describe('DastSiteValidation', () => {
       ...handlers,
     };
 
-    mockClient.setRequestHandler(dastSiteValidationQuery, requestHandlers.dastSiteValidation);
+    mockClient.setRequestHandler(dastSiteTokenCreateMutation, requestHandlers.dastSiteTokenCreate);
 
     mockClient.setRequestHandler(
       dastSiteValidationCreateMutation,
@@ -70,13 +69,17 @@ describe('DastSiteValidation', () => {
     });
 
     wrapper = mountFn(
-      DastSiteValidation,
+      DastSiteValidationModal,
       merge(
         {},
         {
           propsData: defaultProps,
           provide: {
+            projectFullPath: fullPath,
             glFeatures: { securityOnDemandScansHttpHeaderValidation: true },
+          },
+          stubs: {
+            GlModal: '<div><slot /></div>',
           },
         },
         options,
@@ -174,7 +177,7 @@ describe('DastSiteValidation', () => {
             expect(findValidationPathPrefix().text()).toBe(expectedPrefix);
           });
 
-          it(`input value defaults to "${expectedValue}"`, () => {
+          it(`input value defaults to "${expectedValue}"`, async () => {
             expect(findValidationPathInput().element.value).toBe(expectedValue);
           });
         },

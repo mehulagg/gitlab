@@ -1,8 +1,6 @@
 <script>
 import {
-  GlAlert,
   GlButton,
-  GlCard,
   GlFormGroup,
   GlFormInput,
   GlFormInputGroup,
@@ -10,6 +8,7 @@ import {
   GlIcon,
   GlInputGroupText,
   GlLoadingIcon,
+  GlModal,
 } from '@gitlab/ui';
 import { omit } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
@@ -17,25 +16,21 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import download from '~/lib/utils/downloader';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
-import { fetchPolicies } from '~/lib/graphql';
 import {
   DAST_SITE_VALIDATION_HTTP_HEADER_KEY,
   DAST_SITE_VALIDATION_METHOD_HTTP_HEADER,
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
   DAST_SITE_VALIDATION_METHODS,
   DAST_SITE_VALIDATION_STATUS,
-  DAST_SITE_VALIDATION_POLL_INTERVAL,
 } from '../constants';
+import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
 import dastSiteValidationCreateMutation from '../graphql/dast_site_validation_create.mutation.graphql';
-import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
 
 export default {
-  name: 'DastSiteValidation',
+  name: 'DastSiteValidationModal',
   components: {
     ClipboardButton,
-    GlAlert,
     GlButton,
-    GlCard,
     GlFormGroup,
     GlFormInput,
     GlFormInputGroup,
@@ -43,61 +38,18 @@ export default {
     GlIcon,
     GlInputGroupText,
     GlLoadingIcon,
+    GlModal,
   },
   mixins: [glFeatureFlagsMixin()],
-  apollo: {
-    dastSiteValidation: {
-      query: dastSiteValidationQuery,
-      variables() {
-        return {
-          fullPath: this.fullPath,
-          targetUrl: this.targetUrl,
-        };
-      },
-      manual: true,
-      result({
-        data: {
-          project: {
-            dastSiteValidation: { status },
-          },
-        },
-      }) {
-        if (status === DAST_SITE_VALIDATION_STATUS.PASSED) {
-          this.onSuccess();
-        }
-
-        if (status === DAST_SITE_VALIDATION_STATUS.FAILED) {
-          this.onError();
-        }
-      },
-      skip() {
-        return !(this.isCreatingValidation || this.isValidating);
-      },
-      pollInterval: DAST_SITE_VALIDATION_POLL_INTERVAL,
-      fetchPolicy: fetchPolicies.NETWORK_ONLY,
-      error(e) {
-        this.onError(e);
-      },
+  inject: {
+    fullPath: {
+      from: 'projectFullPath',
     },
   },
   props: {
-    fullPath: {
-      type: String,
-      required: true,
-    },
     targetUrl: {
       type: String,
       required: true,
-    },
-    tokenId: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    token: {
-      type: String,
-      required: false,
-      default: null,
     },
   },
   data() {
@@ -107,6 +59,9 @@ export default {
       hasValidationError: false,
       validationMethod: DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
       validationPath: '',
+      isCreatingToken: false,
+      token: null,
+      tokenId: null,
     };
   },
   computed: {
@@ -150,8 +105,9 @@ export default {
     },
   },
   watch: {
-    targetUrl() {
-      this.hasValidationError = false;
+    targetUrl: {
+      immediate: true,
+      handler: 'createValidationToken',
     },
   },
   created() {
@@ -178,10 +134,37 @@ export default {
     downloadTextFile() {
       download({ fileName: this.textFileName, fileData: btoa(this.token) });
     },
+    async createValidationToken() {
+      this.isCreatingToken = true;
+      try {
+        const {
+          data: {
+            dastSiteTokenCreate: { errors, id, token },
+          },
+        } = await this.$apollo.mutate({
+          mutation: dastSiteTokenCreateMutation,
+          variables: {
+            fullPath: this.fullPath,
+            targetUrl: this.targetUrl,
+          },
+        });
+        if (errors?.length) {
+          this.onError();
+        } else {
+          this.token = token;
+          this.tokenId = id;
+        }
+        this.isCreatingToken = false;
+      } catch (exception) {
+        this.onError(exception);
+        this.isCreatingToken = false;
+      }
+    },
     async validate() {
       this.hasValidationError = false;
       this.isCreatingValidation = true;
       this.isValidating = true;
+      this.$emit('validate-site', this.targetUrl);
       try {
         const {
           data: {
@@ -225,10 +208,14 @@ export default {
 </script>
 
 <template>
-  <gl-card class="gl-bg-gray-10">
-    <gl-alert variant="warning" :dismissible="false" class="gl-mb-3">
-      {{ s__('DastProfiles|Site is not validated yet, please follow the steps.') }}
-    </gl-alert>
+  <!-- TODO: Change translation namespaces? -->
+  <gl-modal
+    modal-id="dast-site-validation-modal"
+    :title="s__('DastProfiles|Validate target site')"
+    :ok-title="s__('DastProfiles|Validate')"
+    :cancel-title="__('Cancel')"
+    @primary="validate"
+  >
     <gl-form-group :label="s__('DastProfiles|Step 1 - Choose site validation method')">
       <gl-form-radio-group v-model="validationMethod" :options="validationMethodOptions" />
     </gl-form-group>
@@ -301,5 +288,5 @@ export default {
         }}
       </template>
     </span>
-  </gl-card>
+  </gl-modal>
 </template>

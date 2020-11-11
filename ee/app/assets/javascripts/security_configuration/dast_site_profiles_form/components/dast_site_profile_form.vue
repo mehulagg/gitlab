@@ -18,12 +18,13 @@ import { serializeFormObject } from '~/lib/utils/forms';
 import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import validation from '~/vue_shared/directives/validation';
-import DastSiteValidation from './dast_site_validation.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
-import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
 import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
-import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
+import {
+  DAST_SITE_VALIDATION_STATUS,
+  DAST_SITE_VALIDATION_POLL_INTERVAL,
+} from '../../dast_site_validation/constants';
 
 const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
 

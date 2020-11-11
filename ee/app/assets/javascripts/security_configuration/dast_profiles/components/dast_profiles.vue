@@ -1,5 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
+import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
 import { camelCase, kebabCase } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
@@ -10,22 +11,20 @@ import { getProfileSettings } from '../settings/profiles';
 
 export default {
   components: {
+    DastSiteValidationModal,
     GlDropdown,
     GlDropdownItem,
     GlTab,
     GlTabs,
     ProfilesList,
   },
+  inject: ['projectFullPath'],
   props: {
     createNewProfilePaths: {
       type: Object,
       required: true,
       validator: ({ scannerProfile, siteProfile }) =>
         Boolean(scannerProfile) && Boolean(siteProfile),
-    },
-    projectFullPath: {
-      type: String,
-      required: true,
     },
   },
   data() {
@@ -60,6 +59,9 @@ export default {
   },
   created() {
     this.addSmartQueriesForEnabledProfileTypes();
+  },
+  mounted() {
+    this.$root.$emit('bv::show::modal', 'dast-site-validation-modal');
   },
   methods: {
     addSmartQueriesForEnabledProfileTypes() {
@@ -266,5 +268,7 @@ export default {
         />
       </gl-tab>
     </gl-tabs>
+
+    <dast-site-validation-modal target-url="http://gitlab.com" />
   </section>
 </template>
