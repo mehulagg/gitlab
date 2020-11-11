@@ -165,13 +165,19 @@ module EE
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
       scope :order_by_total_repository_size_excess_desc, -> (limit) do
-        excess = ::ProjectStatistics.arel_table[:repository_size] +
-                   ::ProjectStatistics.arel_table[:lfs_objects_size] -
-                   ::Project.arel_table.coalesce(::Project.arel_table[:repository_size_limit], limit, 0)
-
-        joins(:statistics).order(
-          Arel.sql(Arel::Nodes::Descending.new(excess).to_sql)
-        )
+        joins(:statistics).order(Arel::Nodes::Descending.new(excess_storage_calculation_arel(limit)))
+      end
+      # needed for GraphQL pagination
+      scope :select_with_total_repository_size_excess, -> (limit) do
+        select(
+          [
+            arel_table[Arel.star],
+            Arel::Nodes::As.new(
+              excess_storage_calculation_arel(limit),
+              Arel::Nodes::SqlLiteral.new('excess_storage')
+            )
+          ]
+        ).joins(:statistics)
       end
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
@@ -253,6 +259,12 @@ module EE
       override :with_api_entity_associations
       def with_api_entity_associations
         super.preload(group: [:ip_restrictions, :saml_provider])
+      end
+
+      def excess_storage_calculation_arel(limit)
+        ::ProjectStatistics.arel_table[:repository_size] +
+          ::ProjectStatistics.arel_table[:lfs_objects_size] -
+          arel_table.coalesce(arel_table[:repository_size_limit], limit, 0)
       end
     end
 

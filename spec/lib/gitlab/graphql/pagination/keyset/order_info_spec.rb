@@ -86,6 +86,21 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::OrderInfo do
         expect(order_list.first.sort_direction).to eq :asc
       end
     end
+
+    context 'when ordering by STORAGE' do
+      let(:relation) do
+        limit = 1_000
+        Project.select_with_total_repository_size_excess(limit).order_by_total_repository_size_excess_desc(limit)
+      end
+
+      it 'assigns the right attribute name, named function, and direction' do
+        expect(order_list.count).to eq 1
+        expect(order_list.first.attribute_name).to eq 'excess_storage'
+        expect(order_list.first.named_function).to be_kind_of(Arel::Nodes::Grouping)
+        expect(order_list.first.named_function.to_sql.delete('"')).to include '(project_statistics.repository_size + project_statistics.lfs_objects_size)'
+        expect(order_list.first.sort_direction).to eq :desc
+      end
+    end
   end
 
   describe '#validate_ordering' do
