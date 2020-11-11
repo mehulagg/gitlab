@@ -40,6 +40,10 @@ module ProfilesHelper
     user.status && (user.status.message.present? || user.status.emoji != UserStatus::DEFAULT_EMOJI)
   end
 
+  def user_set_to_busy?(user)
+    user.status && user.status.availability == availability_values[:busy]
+  end
+
   def default_emoji
     UserStatus::DEFAULT_EMOJI
   end
