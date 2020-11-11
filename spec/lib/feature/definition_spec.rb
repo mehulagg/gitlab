@@ -64,6 +64,11 @@ RSpec.describe Feature::Definition do
         expect { definition.valid_usage!(type_in_code: :development, default_enabled_in_code: false) }
           .to raise_error(/The `default_enabled:` of `feature_flag` is not equal to config/)
       end
+
+      it 'allows passing `default_enabled: nil`' do
+        expect { definition.valid_usage!(type_in_code: :development, default_enabled_in_code: nil) }
+          .not_to raise_error
+      end
     end
   end
 

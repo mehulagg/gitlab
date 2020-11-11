@@ -249,9 +249,11 @@ RSpec.describe Feature, stub_feature_flags: false do
         Feature::Definition.new('development/my_feature_flag.yml',
           name: 'my_feature_flag',
           type: 'development',
-          default_enabled: false
+          default_enabled: default_enabled
         ).tap(&:validate!)
       end
+
+      let(:default_enabled) { false }
 
       before do
         stub_env('LAZILY_CREATE_FEATURE_FLAG', '0')
@@ -274,6 +276,54 @@ RSpec.describe Feature, stub_feature_flags: false do
       it 'when invalid default_enabled is used' do
         expect { described_class.enabled?(:my_feature_flag, default_enabled: true) }
           .to raise_error(/The `default_enabled:` of/)
+      end
+
+      context 'when `default_enabled: nil` is used in code' do
+        it 'reads the default from the YAML definition' do
+          expect(described_class.enabled?(:my_feature_flag, default_enabled: nil)).to eq(false)
+        end
+
+        it 'does not check if database exists' do
+          expect(Gitlab::Database).not_to receive(:exists?)
+
+          described_class.enabled?(:my_feature_flag, default_enabled: nil)
+        end
+
+        context 'when default_enabled is true in the YAML definition' do
+          let(:default_enabled) { true }
+
+          it 'reads the default from the YAML definition' do
+            expect(described_class.enabled?(:my_feature_flag, default_enabled: nil)).to eq(true)
+          end
+        end
+
+        context 'when YAML definition does not exist for an optional type' do
+          let(:optional_type) { described_class::Shared::TYPES.find { |name, attrs| attrs[:optional] }.first }
+
+          context 'when database exists' do
+            before do
+              allow(Gitlab::Database).to receive(:exists?).and_return(true)
+            end
+
+            it 'checks the persisted status' do
+              expect(described_class).to receive(:get).with(:non_existent_flag).and_call_original
+
+              expect(described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: nil)).to eq(false)
+            end
+          end
+
+          context 'when database does not exist' do
+            before do
+              allow(Gitlab::Database).to receive(:exists?).and_return(false)
+            end
+
+            it 'returns false immediately' do
+              expect(described_class).not_to receive(:get)
+
+              expect(described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: nil)).to be_falsey
+            end
+          end
+        end
       end
     end
   end

@@ -67,7 +67,7 @@ class Feature
 
       # We accept an array of defaults as some features are undefined
       # and have `default_enabled: true/false`
-      unless Array(default_enabled).include?(default_enabled_in_code)
+      unless default_enabled_in_code.nil? || Array(default_enabled).include?(default_enabled_in_code)
         # Raise exception in test and dev
         raise Feature::InvalidFeatureFlagError, "The `default_enabled:` of `#{key}` is not equal to config: " \
           "#{default_enabled_in_code} vs #{default_enabled}. Ensure to update #{path}"
@@ -90,12 +90,16 @@ class Feature
         @definitions ||= load_all!
       end
 
+      def get(key)
+        definitions[key.to_sym]
+      end
+
       def reload!
         @definitions = load_all!
       end
 
       def valid_usage!(key, type:, default_enabled:)
-        if definition = definitions[key.to_sym]
+        if definition = get(key)
           definition.valid_usage!(type_in_code: type, default_enabled_in_code: default_enabled)
         elsif type_definition = self::TYPES[type]
           raise InvalidFeatureFlagError, "Missing feature definition for `#{key}`" unless type_definition[:optional]

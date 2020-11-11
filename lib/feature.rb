@@ -68,6 +68,12 @@ class Feature
         Feature::Definition.valid_usage!(key, type: type, default_enabled: default_enabled)
       end
 
+      # If `default_enabled: nil` we fetch the value from the YAML definition instead.
+      # A definition may not exist for optional types (e.g. ops).
+      if default_enabled.nil? && (definition = Feature::Definition.get(key))
+        return definition.default_enabled
+      end
+
       # During setup the database does not exist yet. So we haven't stored a value
       # for the feature yet and return the default.
       return default_enabled unless Gitlab::Database.exists?
