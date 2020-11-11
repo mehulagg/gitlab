@@ -91,5 +91,11 @@ RSpec.describe Projects::Quality::TestCasesController do
 
       it_behaves_like 'test case action', :new
     end
+
+    describe '#show' do
+      subject { get :new, params: { namespace_id: project.namespace, project_id: project } }
+
+      it_behaves_like 'test case action', :show
+    end
   end
 end
