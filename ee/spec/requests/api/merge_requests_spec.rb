@@ -267,9 +267,17 @@ RSpec.describe API::MergeRequests do
     end
 
     context 'filter merge requests by approval IDs' do
-      let!(:merge_request_with_approval) do
+      let_it_be(:user3) { create(:user) }
+      let_it_be(:merge_request_with_approval) do
         create(:merge_request, author: user, source_project: project, target_project: project, source_branch: 'other-branch').tap do |mr|
           create(:approval, merge_request: mr, user: user2)
+        end
+      end
+
+      let_it_be(:merge_request_with_multiple_approvals) do
+        create(:merge_request, author: user, source_project: project, target_project: project, source_branch: 'another-branch').tap do |mr|
+          create(:approval, merge_request: mr, user: user2)
+          create(:approval, merge_request: mr, user: user3)
         end
       end
 
@@ -281,7 +289,25 @@ RSpec.describe API::MergeRequests do
         let(:approvals_param) { [user2.id] }
 
         it 'returns an array of merge requests which have specified the user as an approver' do
-          expect_response_contain_exactly(merge_request_with_approval.id)
+          expect_response_contain_exactly(merge_request_with_approval.id, merge_request_with_multiple_approvals.id)
+        end
+      end
+
+      context 'with multiple specified approved_by ids' do
+        context 'when approved by all users' do
+          let(:approvals_param) { [user2.id, user3.id] }
+
+          it 'returns an array of merge requests which have specified the user as an approver' do
+            expect_response_contain_exactly(merge_request_with_multiple_approvals.id)
+          end
+        end
+
+        context 'when approved by only one user' do
+          let(:approvals_param) { [user.id, user2.id] }
+
+          it 'does not returns any merge request' do
+            expect_empty_array_response
+          end
         end
       end
 
@@ -297,7 +323,7 @@ RSpec.describe API::MergeRequests do
         let(:approvals_param) { 'Any' }
 
         it 'returns an array of merge requests with any approver' do
-          expect_response_contain_exactly(merge_request_with_approval.id)
+          expect_response_contain_exactly(merge_request_with_approval.id, merge_request_with_multiple_approvals.id)
         end
       end
 
