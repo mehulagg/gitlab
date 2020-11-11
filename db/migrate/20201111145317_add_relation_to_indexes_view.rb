@@ -31,7 +31,7 @@ class AddRelationToIndexesView < ActiveRecord::Migration[6.0]
   end
 
   def down
-      execute(<<~SQL)
+    execute(<<~SQL)
       DROP VIEW postgres_indexes;
 
       CREATE VIEW postgres_indexes AS
