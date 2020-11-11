@@ -171,6 +171,13 @@ module QA
         def set_initial_password_if_present
           return unless has_content?('Change your password')
 
+          QA::Runtime::Logger.info " "
+          QA::Runtime::Logger.info ">>>>>> Setting initial password:  "
+          QA::Runtime::Logger.info ">>>>>> driver.current_url: #{page.driver.current_url}"
+          QA::Runtime::Logger.info page.save_screenshot(::File.join(QA::Runtime::Namespace.name, "initial_password.png"), full: true)
+
+          QA::Runtime::Logger.info " "
+
           fill_element :password_field, Runtime::User.password
           fill_element :password_confirmation_field, Runtime::User.password
           click_element :change_password_button
