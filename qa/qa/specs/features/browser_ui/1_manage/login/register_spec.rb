@@ -13,11 +13,23 @@ module QA
     end
   end
 
-  RSpec.describe 'Manage', :skip_signup_disabled do
+  RSpec.describe 'Manage', :skip_signup_disabled, :requires_admin do
+    before(:all) do
+      Runtime::ApplicationSettings.set_application_settings(require_admin_approval_after_user_signup: false)
+      Support::Waiter.wait_until(sleep_interval: 1) do
+        settings = Runtime::ApplicationSettings.get_application_settings
+        settings[:require_admin_approval_after_user_signup] == false
+      end
+    end
+
+    describe 'while LDAP is enabled', :orchestrated, :ldap_no_tls, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/935' do
+      it_behaves_like 'registration and login'
+    end
+
     describe 'standard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/936' do
       it_behaves_like 'registration and login'
 
-      context 'when user account is deleted', :requires_admin do
+      context 'when user account is deleted' do
         let(:user) do
           Resource::User.fabricate_via_api! do |resource|
             resource.api_client = admin_api_client
@@ -60,12 +72,6 @@ module QA
           @admin_api_client ||= Runtime::API::Client.as_admin
         end
       end
-    end
-  end
-
-  RSpec.describe 'Manage', :orchestrated, :ldap_no_tls, :skip_signup_disabled do
-    describe 'while LDAP is enabled', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/935' do
-      it_behaves_like 'registration and login'
     end
   end
 end
