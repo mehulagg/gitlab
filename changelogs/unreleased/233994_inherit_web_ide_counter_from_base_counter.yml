@@ -1,0 +1,5 @@
+---
+title: Inherit WebIdeCounter from BaseCounter
+merge_request: 47405
+author:
+type: other
