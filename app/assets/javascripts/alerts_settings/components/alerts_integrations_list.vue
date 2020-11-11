@@ -88,7 +88,18 @@ export default {
     };
   },
   mounted() {
-    this.trackPageViews();
+    this.observer = new MutationObserver(mutations => {
+      const found = mutations.find(m => m.target.classList.contains('expanded'));
+
+      if (found) {
+        this.trackPageViews();
+        this.observer.disconnect();
+      }
+    });
+    const expandableParent = document.getElementById('js-alert-management-settings');
+    this.observer.observe(expandableParent, {
+      attributeFilter: ['class'],
+    });
   },
   methods: {
     tbodyTrClass(item) {
