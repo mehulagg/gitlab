@@ -204,7 +204,7 @@ issue has been fixed in GitLab 13.4 and later.
 
 CAUTION: **Caution:**
 Pausing and resuming of replication is currently only supported for Geo installations using an
-Omnibus GitLab-managed database on a single-node Geo secondary. Multiple node and external databases and are currently not supported.
+Omnibus GitLab-managed database on a single-node Geo secondary. Multiple node installations and external databases and are currently not supported.
 
 In some circumstances, like during [upgrades](replication/updating_the_geo_nodes.md) or a [planned failover](disaster_recovery/planned_failover.md), it is desirable to pause replication between the primary and secondary.
 
