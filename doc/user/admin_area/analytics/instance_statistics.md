@@ -8,9 +8,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235754) in GitLab 13.4.
 
-CAUTION: **Warning:**
-This feature might not be available to you. Check the **version history** note above for details.
-
 Instance Statistics gives you an overview of how much data your instance contains, and how quickly this volume is changing over time.
 
 To see Instance Statistics, go to **Admin Area > Analytics > Instance Statistics**.
