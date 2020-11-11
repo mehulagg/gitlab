@@ -151,15 +151,19 @@ is recommended.
 instance to other geographical locations as a read-only fully operational instance
 that can also be promoted in case of disaster.
 
-## Deviating from the suggested installation methods
-
-The reference architectures are using the official GitLab Linux packages (Omnibus
+## Deviating from the suggested architectures
+As a general rule of thumb the further away you move from the Reference Architectures
+the harder it will be get support for it. With any deviation, you're introducing
+a layer of complexity that will add challenges to finding out where potential
+issues might lie. This includes both environmental makeup as well as installation
+method.
+The reference architectures use the official GitLab Linux packages (Omnibus
 GitLab) to install and configure the various components. The components are
-installed on separate machines (virtualized or bare metal), with bare metal hardware
-requirements listed in the "Configuration" column and VM specifications listed
+installed on separate machines (virtualized or bare metal), with machine hardware
+requirements listed in the "Configuration" column and equivalent VM standard sizes listed
 in GCP/AWS/Azure columns of each [available reference architecture](#available-reference-architectures).
 
-Running select components on Docker with the same specs should be fine, as in
+Running components on Docker (including Compose) with the same specs should be fine, as in
 terms of support, Docker is well known, and there's been no evidence that Docker
 itself needs notable additional specs.
 
