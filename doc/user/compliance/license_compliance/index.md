@@ -82,7 +82,7 @@ which means that the reported licenses might be incomplete or inaccurate.
 | Elixir     | [Mix](https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | C++/C      | [Conan](https://conan.io/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Scala      | [sbt](https://www.scala-sbt.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Rust       | [Cargo](https://crates.io) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| Rust       | [Cargo](https://crates.io/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | PHP        | [Composer](https://getcomposer.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 
 ## Requirements
@@ -277,13 +277,13 @@ to specify its location.
 
 ### Configuring NPM projects
 
-You can configure NPM projects by using an [`.npmrc`](https://docs.npmjs.com/configuring-npm/npmrc.html)
+You can configure NPM projects by using an [`.npmrc`](https://docs.npmjs.com/configuring-npm/npmrc.html/)
 file.
 
 #### Using private NPM registries
 
 If you have a private NPM registry you can use the
-[`registry`](https://docs.npmjs.com/using-npm/config#registry)
+[`registry`](https://docs.npmjs.com/cli/v6/using-npm/config#registry)
 setting to specify its location.
 
 For example:
@@ -297,7 +297,7 @@ registry = https://npm.example.com
 You can supply a custom root certificate to complete TLS verification by using the
 `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
 
-To disable TLS verification you can provide the [`strict-ssl`](https://docs.npmjs.com/using-npm/config#strict-ssl)
+To disable TLS verification you can provide the [`strict-ssl`](https://docs.npmjs.com/cli/v6/using-npm/config#strict-ssl)
 setting.
 
 For example:
