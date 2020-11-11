@@ -127,7 +127,7 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
       end
     end
 
-    describe '.initialize_metrics', :prometheus do
+    describe '.initialize_metrics', :prometheus, :quarantine do
       it "sets labels for http_requests_total" do
         expected_labels = []
 
