@@ -12,6 +12,8 @@ export default {
         return {
           after: this.cursor.after,
           before: this.cursor.before,
+          first: this.cursor.first,
+          last: this.cursor.last,
           projectPath: this.projectPath,
         };
       },
@@ -50,6 +52,8 @@ export default {
   data() {
     return {
       cursor: {
+        first: 3,
+        last: null,
         before: null,
         after: null,
       },
@@ -73,11 +77,15 @@ export default {
     updatePagination(item) {
       if (item === this.pageInfo.endCursor) {
         this.cursor = {
+          first: 3,
+          last: null,
           after: item,
           before: null,
         };
       } else {
         this.cursor = {
+          first: null,
+          last: 3,
           after: null,
           before: item,
         };
