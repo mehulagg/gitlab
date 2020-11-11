@@ -400,24 +400,14 @@ describe('AlertsSettingsWrapper', () => {
 
   // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
   describe('Opsgenie integration', () => {
-    it('it shows an alert when opsgenie is active', async () => {
+    it.each([true, false])('it shows/hides the alert when opsgenie is %s', active => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true }, opsgenie: { active: true } },
+        provide: { glFeatures: { httpIntegrationsList: true }, opsgenie: { active } },
         loading: false,
       });
 
-      expect(wrapper.find(GlAlert).exists()).toBe(true);
-    });
-
-    it('it does not show an alert when opsgenie is disabled', async () => {
-      createComponent({
-        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true }, opsgenie: { active: false } },
-        loading: false,
-      });
-
-      expect(wrapper.find(GlAlert).exists()).toBe(false);
+      expect(wrapper.find(GlAlert).exists()).toBe(active);
     });
   });
 });

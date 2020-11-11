@@ -119,8 +119,8 @@ export default {
       return this.multiIntegrations || this.integrations?.list?.length < 2;
     },
     // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    canAddOrEditOpsgenie() {
-      return this.integrations?.list?.filter(({ active }) => active === true).length === 0;
+    canManageOpsgenie() {
+      return this.integrations?.list?.every(({ active }) => active === false);
     },
   },
   methods: {
@@ -317,7 +317,7 @@ export default {
       v-if="glFeatures.httpIntegrationsList"
       :loading="isUpdating"
       :can-add-integration="canAddIntegration"
-      :can-add-or-edit-opsgenie="canAddOrEditOpsgenie"
+      :can-manage-opsgenie="canManageOpsgenie"
       @create-new-integration="createNewIntegration"
       @update-integration="updateIntegration"
       @reset-token="resetToken"

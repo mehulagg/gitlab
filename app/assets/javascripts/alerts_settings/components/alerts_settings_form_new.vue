@@ -38,7 +38,6 @@ export default {
     opsgenie: targetOpsgenieUrlPlaceholder,
   },
   JSON_VALIDATE_DELAY,
-  typeSet,
   i18n: {
     integrationFormSteps: {
       step1: {
@@ -139,7 +138,7 @@ export default {
       required: true,
     },
     // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    canAddOrEditOpsgenie: {
+    canManageOpsgenie: {
       type: Boolean,
       required: true,
     },
@@ -152,7 +151,6 @@ export default {
   data() {
     return {
       selectedIntegration: integrationTypesNew[0].value,
-      options: integrationTypesNew,
       active: false,
       formVisible: false,
       integrationTestPayload: {
@@ -171,14 +169,24 @@ export default {
     jsonIsValid() {
       return this.integrationTestPayload.error === null;
     },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+   disabledIntegrations() {
+     return this.opsgenie.active ? [typeSet.http, typeSet.prometheus] : [typeSet.opsgenie];
+   },
+   options() {
+     return integrationTypesNew.map(el => ({
+       ...el,
+       disabled: this.disabledIntegrations.includes(el.value),
+     }));
+   },
     selectedIntegrationType() {
       switch (this.selectedIntegration) {
-        case this.$options.typeSet.http:
+        case typeSet.http:
           return this.generic;
-        case this.$options.typeSet.prometheus:
+        case typeSet.prometheus:
           return this.prometheus;
         // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-        case this.$options.typeSet.opsgenie:
+        case typeSet.opsgenie:
           return this.opsgenie;
         default:
           return {};
@@ -233,28 +241,7 @@ export default {
       return this.integrationTypeSelect();
     },
   },
-  // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-  mounted() {
-    this.setDisabledOptionKeys();
-  },
   methods: {
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    setDisabledOptionKeys() {
-      if (this.opsgenie.active) {
-        this.setDisabledOptions([this.$options.typeSet.http, this.$options.typeSet.prometheus]);
-      } else {
-        this.setDisabledOptions([this.$options.typeSet.opsgenie]);
-      }
-    },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    setDisabledOptions(keys) {
-      this.options = this.options.map(el => {
-        if (keys.includes(el.value)) {
-          return { ...el, disabled: true };
-        }
-        return { ...el, disabled: false };
-      });
-    },
     integrationTypeSelect() {
       if (this.selectedIntegration === integrationTypesNew[0].value) {
         this.formVisible = false;
@@ -264,8 +251,8 @@ export default {
 
       // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
       if (
-        (this.canAddOrEditOpsgenie || this.opsgenie.active) &&
-        this.selectedIntegration === this.$options.typeSet.opsgenie
+        (this.canManageOpsgenie || this.opsgenie.active) &&
+        this.selectedIntegration === typeSet.opsgenie
       ) {
         this.isAddingOrEditingOpsgenie = true;
         this.active = this.opsgenie.active;
@@ -285,13 +272,8 @@ export default {
           },
         })
         .then(() => {
-          if (!doesHashExistInUrl(sectionHash)) {
-            window.location.hash = sectionHash;
-          }
+          window.location.hash = sectionHash;
           window.location.reload();
-        })
-        .catch(err => {
-          throw err;
         });
     },
     submitWithTestPayload() {
@@ -312,7 +294,7 @@ export default {
 
       const { name, apiUrl } = this.integrationForm;
       const variables =
-        this.selectedIntegration === this.$options.typeSet.http
+        this.selectedIntegration === typeSet.http
           ? { name, active: this.active }
           : { apiUrl, active: this.active };
       const integrationPayload = { type: this.selectedIntegration, variables };

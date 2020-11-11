@@ -27,7 +27,7 @@ describe('AlertsSettingsFormNew', () => {
       propsData: {
         loading: false,
         canAddIntegration: true,
-        canAddOrEditOpsgenie: true,
+        canManageOpsgenie: true,
         ...props,
       },
       provide: {
