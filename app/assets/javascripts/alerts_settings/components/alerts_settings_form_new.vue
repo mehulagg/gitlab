@@ -12,11 +12,10 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
-import MappingBuilder from './alert_mapping_builder.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
+import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 import service from '../services';
 import {
   integrationTypesNew,
@@ -24,6 +23,8 @@ import {
   targetPrometheusUrlPlaceholder,
   typeSet,
 } from '../constants';
+import MappingBuilder from './alert_mapping_builder.vue';
+import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
 
 export default {
   targetPrometheusUrlPlaceholder,
@@ -106,14 +107,14 @@ export default {
       type: Boolean,
       required: true,
     },
-    currentIntegration: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     canAddIntegration: {
       type: Boolean,
       required: true,
+    },
+  },
+  apollo: {
+    currentIntegration: {
+      query: getCurrentIntegrationQuery,
     },
   },
   data() {
@@ -126,6 +127,7 @@ export default {
         json: null,
         error: null,
       },
+      currentIntegration: null,
     };
   },
   computed: {
