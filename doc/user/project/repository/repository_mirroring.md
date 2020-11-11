@@ -320,7 +320,7 @@ fingerprints in the open for you to check:
 
 - [AWS CodeCommit](https://docs.aws.amazon.com/codecommit/latest/userguide/regions.html#regions-fingerprints)
 - [Bitbucket](https://support.atlassian.com/bitbucket-cloud/docs/configure-ssh-and-two-step-verification/)
-- [GitHub](https://docs.github.com/en/github/authenticating-to-github/githubs-ssh-key-fingerprints)
+- [GitHub](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/githubs-ssh-key-fingerprints)
 - [GitLab.com](../../gitlab_com/index.md#ssh-host-keys-fingerprints)
 - [Launchpad](https://help.launchpad.net/SSHFingerprints)
 - [Savannah](http://savannah.gnu.org/maintenance/SshAccess/)
