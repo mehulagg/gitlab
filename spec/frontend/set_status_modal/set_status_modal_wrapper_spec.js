@@ -19,6 +19,7 @@ describe('SetStatusModalWrapper', () => {
     currentEmoji: defaultEmoji,
     currentMessage: defaultMessage,
     defaultEmoji,
+    canSetUserAvailability: true,
   };
 
   const createComponent = (props = {}) => {
@@ -195,6 +196,18 @@ describe('SetStatusModalWrapper', () => {
 
         expect(wrapper.vm.onUpdateFail).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('with canSetUserAvailability=false', () => {
+    beforeEach(async () => {
+      mockEmoji = await initEmojiMock();
+      wrapper = createComponent({ canSetUserAvailability: false });
+      return initModal();
+    });
+
+    it('hides the set availability checkbox', () => {
+      expect(findFormField('availability').exists()).toBe(false);
     });
   });
 });

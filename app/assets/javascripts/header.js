@@ -47,6 +47,7 @@ function initStatusTriggers() {
                 defaultEmoji,
                 currentMessage,
                 currentAvailability,
+                canSetUserAvailability,
               } = setStatusModalWrapperEl.dataset;
 
               return {
@@ -54,10 +55,17 @@ function initStatusTriggers() {
                 defaultEmoji,
                 currentMessage,
                 currentAvailability,
+                canSetUserAvailability,
               };
             },
             render(createElement) {
-              const { currentEmoji, defaultEmoji, currentMessage, currentAvailability } = this;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
+              } = this;
 
               return createElement(SetStatusModalWrapper, {
                 props: {
@@ -65,6 +73,7 @@ function initStatusTriggers() {
                   defaultEmoji,
                   currentMessage,
                   currentAvailability,
+                  canSetUserAvailability,
                 },
               });
             },

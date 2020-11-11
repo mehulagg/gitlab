@@ -48,6 +48,11 @@ export default {
       validator: validAvailibility,
       default: '',
     },
+    canSetUserAvailability: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -251,7 +256,7 @@ export default {
             </button>
           </span>
         </div>
-        <div class="form-group gl-my-2">
+        <div v-if="canSetUserAvailability" class="form-group gl-my-2">
           <div class="gl-display-flex">
             <label class="form-control-inline">
               <input
