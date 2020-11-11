@@ -3,13 +3,12 @@ import VueApollo from 'vue-apollo';
 import { within } from '@testing-library/dom';
 import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { createMockClient } from 'mock-apollo-client';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
 import waitForPromises from 'jest/helpers/wait_for_promises';
-import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_validation.vue';
-import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
-import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
-import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
-import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_profiles_form/constants';
+import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
+import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_token_create.mutation.graphql';
+import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_create.mutation.graphql';
+import * as responses from '../mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
@@ -28,18 +27,18 @@ const validationMethods = ['text file', 'header'];
 const defaultProps = {
   fullPath,
   targetUrl,
-  tokenId,
-  token,
 };
 
 const defaultRequestHandlers = {
-  dastSiteValidation: jest.fn().mockResolvedValue(responses.dastSiteValidation()),
+  dastSiteTokenCreate: jest
+    .fn()
+    .mockResolvedValue(responses.dastSiteTokenCreate({ id: tokenId, token })),
   dastSiteValidationCreate: jest.fn().mockResolvedValue(responses.dastSiteValidationCreate()),
 };
 
-describe('DastSiteValidation', () => {
+describe('DastSiteValidationModal', () => {
   let wrapper;
-  let apolloProvider;
+  let graphQLClient;
   let requestHandlers;
 
   const mockClientFactory = handlers => {
@@ -50,27 +49,22 @@ describe('DastSiteValidation', () => {
       ...handlers,
     };
 
-    mockClient.setRequestHandler(dastSiteValidationQuery, requestHandlers.dastSiteValidation);
+    mockClient.setRequestHandler(dastSiteTokenCreateMutation, requestHandlers.dastSiteTokenCreate);
 
     mockClient.setRequestHandler(
       dastSiteValidationCreateMutation,
       requestHandlers.dastSiteValidationCreate,
     );
 
-    return mockClient;
-  };
-
-  const respondWith = handlers => {
-    apolloProvider.defaultClient = mockClientFactory(handlers);
+    graphQLClient = mockClient;
   };
 
   const componentFactory = (mountFn = shallowMount) => options => {
-    apolloProvider = new VueApollo({
-      defaultClient: mockClientFactory(),
-    });
-
+    if (!graphQLClient) {
+      mockClientFactory();
+    }
     wrapper = mountFn(
-      DastSiteValidation,
+      DastSiteValidationModal,
       merge(
         {},
         {
@@ -78,11 +72,17 @@ describe('DastSiteValidation', () => {
           provide: {
             glFeatures: { securityOnDemandScansHttpHeaderValidation: true },
           },
+          attrs: {
+            static: true,
+            visible: true,
+          },
         },
         options,
         {
           localVue,
-          apolloProvider,
+          apolloProvider: new VueApollo({
+            defaultClient: graphQLClient,
+          }),
         },
       ),
     );
@@ -90,17 +90,12 @@ describe('DastSiteValidation', () => {
   const createComponent = componentFactory();
   const createFullComponent = componentFactory(mount);
 
-  const withinComponent = () => within(wrapper.element);
+  const withinComponent = () => within(wrapper.find(GlModal).element);
   const findByTestId = id => wrapper.find(`[data-testid="${id}"`);
   const findDownloadButton = () => findByTestId('download-dast-text-file-validation-button');
   const findValidationPathPrefix = () => findByTestId('dast-site-validation-path-prefix');
   const findValidationPathInput = () => findByTestId('dast-site-validation-path-input');
   const findValidateButton = () => findByTestId('validate-dast-site-button');
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findErrorMessage = () =>
-    withinComponent().queryByText(
-      /validation failed, please make sure that you follow the steps above with the chosen method./i,
-    );
   const findRadioInputForValidationMethod = validationMethod =>
     withinComponent().queryByRole('radio', {
       name: new RegExp(`${validationMethod} validation`, 'i'),
@@ -110,30 +105,77 @@ describe('DastSiteValidation', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    graphQLClient = null;
   });
 
   describe('rendering', () => {
-    beforeEach(() => {
-      createFullComponent();
-    });
-
-    it('renders a download button containing the token', () => {
-      const downloadButton = withinComponent().getByRole('button', {
-        name: 'Download validation text file',
+    describe('loading', () => {
+      beforeEach(() => {
+        createFullComponent();
       });
-      expect(downloadButton).not.toBeNull();
-    });
 
-    it.each(validationMethods)('renders a radio input for "%s" validation', validationMethod => {
-      expect(findRadioInputForValidationMethod(validationMethod)).not.toBe(null);
-    });
-
-    it('renders an input group with the target URL prepended', () => {
-      const inputGroup = withinComponent().getByRole('group', {
-        name: 'Step 3 - Confirm text file location and validate',
+      it('renders a skeleton loader, no alert and no form group while token is being created', () => {
+        expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
+        expect(wrapper.find(GlAlert).exists()).toBe(false);
+        expect(wrapper.find(GlFormGroup).exists()).toBe(false);
       });
-      expect(inputGroup).not.toBeNull();
-      expect(inputGroup.textContent).toContain(targetUrl);
+    });
+
+    describe('error', () => {
+      beforeEach(async () => {
+        mockClientFactory({
+          dastSiteTokenCreate: jest.fn().mockRejectedValue(new Error('GraphQL Network Error')),
+        });
+        createFullComponent();
+        await waitForPromises();
+      });
+
+      it('renders an alert and no skeleton loader or form group if token could not be created', () => {
+        expect(wrapper.find(GlAlert).exists()).toBe(true);
+        expect(wrapper.find(GlSkeletonLoader).exists()).toBe(false);
+        expect(wrapper.find(GlFormGroup).exists()).toBe(false);
+      });
+    });
+
+    describe('loaded', () => {
+      beforeEach(async () => {
+        createFullComponent();
+        await waitForPromises();
+      });
+
+      it('renders form groups, no alert and no skeleton loader', () => {
+        expect(wrapper.find(GlFormGroup).exists()).toBe(true);
+        expect(wrapper.find(GlAlert).exists()).toBe(false);
+        expect(wrapper.find(GlSkeletonLoader).exists()).toBe(false);
+      });
+
+      it('renders a download button containing the token', () => {
+        const downloadButton = withinComponent().getByRole('button', {
+          name: 'Download validation text file',
+        });
+        expect(downloadButton).not.toBeNull();
+      });
+
+      it.each(validationMethods)('renders a radio input for "%s" validation', validationMethod => {
+        expect(findRadioInputForValidationMethod(validationMethod)).not.toBe(null);
+      });
+
+      it('renders an input group with the target URL prepended', () => {
+        const inputGroup = withinComponent().getByRole('group', {
+          name: 'Step 3 - Confirm text file location and validate',
+        });
+        expect(inputGroup).not.toBeNull();
+        expect(inputGroup.textContent).toContain(targetUrl);
+      });
+    });
+  });
+
+  it('triggers the dastSiteTokenCreate GraphQL mutation', () => {
+    createComponent();
+
+    expect(requestHandlers.dastSiteTokenCreate).toHaveBeenCalledWith({
+      fullPath,
+      targetUrl,
     });
   });
 
@@ -161,8 +203,7 @@ describe('DastSiteValidation', () => {
                 targetUrl: url,
               },
             });
-
-            await wrapper.vm.$nextTick();
+            await waitForPromises();
 
             enableValidationMethod(validationMethod);
           });
@@ -182,6 +223,7 @@ describe('DastSiteValidation', () => {
 
       it("input value isn't automatically updated if it has been changed manually", async () => {
         createFullComponent();
+        await waitForPromises();
         const customValidationPath = 'custom/validation/path.txt';
         findValidationPathInput().setValue(customValidationPath);
         await wrapper.setProps({
@@ -193,8 +235,9 @@ describe('DastSiteValidation', () => {
     });
 
     describe('text file validation', () => {
-      it('clicking on the download button triggers a download of a text file containing the token', () => {
+      it('clicking on the download button triggers a download of a text file containing the token', async () => {
         createComponent();
+        await waitForPromises();
         findDownloadButton().vm.$emit('click');
 
         expect(download).toHaveBeenCalledWith({
@@ -208,7 +251,7 @@ describe('DastSiteValidation', () => {
       beforeEach(async () => {
         createFullComponent();
 
-        await wrapper.vm.$nextTick();
+        await waitForPromises();
 
         enableValidationMethod('header');
       });
@@ -257,22 +300,14 @@ describe('DastSiteValidation', () => {
   });
 
   describe.each(validationMethods)('"%s" validation submission', validationMethod => {
-    beforeEach(() => {
+    beforeEach(async () => {
       createFullComponent();
+      await waitForPromises();
     });
 
     describe('passed', () => {
       beforeEach(() => {
         enableValidationMethod(validationMethod);
-      });
-
-      it('while validating, shows a loading state', async () => {
-        findValidateButton().trigger('click');
-
-        await wrapper.vm.$nextTick();
-
-        expect(findLoadingIcon().exists()).toBe(true);
-        expect(wrapper.text()).toContain('Validating...');
       });
 
       it('triggers the dastSiteValidationCreate GraphQL mutation', () => {
@@ -284,60 +319,6 @@ describe('DastSiteValidation', () => {
           validationPath: wrapper.vm.validationPath,
           validationStrategy: wrapper.vm.validationMethod,
         });
-      });
-
-      it('on success, emits success event', async () => {
-        respondWith({
-          dastSiteValidation: jest
-            .fn()
-            .mockResolvedValue(responses.dastSiteValidation('PASSED_VALIDATION')),
-        });
-
-        findValidateButton().trigger('click');
-
-        await waitForPromises();
-
-        expect(wrapper.emitted('success')).toHaveLength(1);
-      });
-    });
-
-    describe('failed', () => {
-      beforeEach(() => {
-        respondWith({
-          dastSiteValidation: () =>
-            Promise.resolve(responses.dastSiteValidation(DAST_SITE_VALIDATION_STATUS.FAILED)),
-        });
-      });
-
-      it('shows failure message', async () => {
-        expect(findErrorMessage()).toBe(null);
-
-        findValidateButton().vm.$emit('click');
-        await waitForPromises();
-
-        expect(findErrorMessage()).not.toBe(null);
-      });
-    });
-
-    describe.each`
-      errorKind            | errorResponse
-      ${'top level error'} | ${() => Promise.reject(new Error('GraphQL Network Error'))}
-      ${'errors as data'}  | ${() => Promise.resolve(responses.dastSiteValidationCreate(['error#1', 'error#2']))}
-    `('$errorKind', ({ errorResponse }) => {
-      beforeEach(() => {
-        respondWith({
-          dastSiteValidationCreate: errorResponse,
-        });
-      });
-
-      it('on error, shows error state', async () => {
-        expect(findErrorMessage()).toBe(null);
-
-        findValidateButton().vm.$emit('click');
-
-        await waitForPromises();
-
-        expect(findErrorMessage()).not.toBe(null);
       });
     });
   });
