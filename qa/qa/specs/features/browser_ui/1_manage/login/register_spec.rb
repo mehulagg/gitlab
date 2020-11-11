@@ -16,10 +16,7 @@ module QA
   RSpec.describe 'Manage', :skip_signup_disabled, :requires_admin do
     before(:all) do
       Runtime::ApplicationSettings.set_application_settings(require_admin_approval_after_user_signup: false)
-      Support::Waiter.wait_until(sleep_interval: 1) do
-        settings = Runtime::ApplicationSettings.get_application_settings
-        settings[:require_admin_approval_after_user_signup] == false
-      end
+      sleep 5 # It takes a moment for the setting to come into effect
     end
 
     describe 'while LDAP is enabled', :orchestrated, :ldap_no_tls, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/935' do
