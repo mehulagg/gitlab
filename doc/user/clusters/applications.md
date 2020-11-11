@@ -89,8 +89,8 @@ GitLab does not currently offer a way to migrate existing application management
 on existing clusters from Helm 2 to Helm 3. To migrate a cluster to Helm 3:
 
 1. Uninstall all applications
-1. [Remove the cluster integration](https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html#removing-integration) from GitLab
-1. [Re-add the cluster to GitLab](../project/clusters/add_remove_clusters.md#existing-kubernetes-cluster) as
+1. [Remove the cluster integration](../project/clusters/add_remove_clusters.md#removing-integration) as
+1. [Re-add the cluster](../project/clusters/add_remove_clusters.md#existing-kubernetes-cluster) as
    an existing cluster
 
 ### cert-manager
