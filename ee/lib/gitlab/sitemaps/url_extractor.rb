@@ -25,10 +25,9 @@ module Gitlab
            "#{base_url}#{full_path}",
            "#{base_url}groups/#{full_path}/-/issues",
            "#{base_url}groups/#{full_path}/-/merge_requests",
-           "#{base_url}groups/#{full_path}/-/packages"
-          ].tap do |urls|
-            urls << "#{base_url}groups/#{full_path}/-/epics" if group.feature_available?(:epics)
-          end
+           "#{base_url}groups/#{full_path}/-/packages",
+           "#{base_url}groups/#{full_path}/-/epics"
+          ]
         end
 
         def extract_from_project(project)
