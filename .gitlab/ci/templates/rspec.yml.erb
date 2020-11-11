@@ -1,0 +1,355 @@
+##############################
+# defaults from .gitlab-ci.yml
+default:
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-golang-1.14-git-2.29-lfs-2.9-chrome-85-node-12.18-yarn-1.22-postgresql-11-graphicsmagick-1.3.34"
+  tags:
+    - gitlab-org
+  # All jobs are interruptible by default
+  interruptible: true
+  # Default job timeout set to 90m https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10520
+  timeout: 90m
+
+variables:
+  RAILS_ENV: "test"
+  NODE_ENV: "test"
+  SIMPLECOV: "true"
+  GIT_DEPTH: "20"
+  GIT_SUBMODULE_STRATEGY: "none"
+  GET_SOURCES_ATTEMPTS: "3"
+  KNAPSACK_RSPEC_SUITE_REPORT_PATH: knapsack/report-master.json
+  FLAKY_RSPEC_SUITE_REPORT_PATH: rspec_flaky/report-suite.json
+  RSPEC_TESTS_MAPPING_PATH: crystalball/mapping.json
+  RSPEC_PACKED_TESTS_MAPPING_PATH: crystalball/packed-mapping.json
+  BUILD_ASSETS_IMAGE: "false"
+  ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+  ELASTIC_URL: "http://elastic:changeme@elasticsearch:9200"
+  DOCKER_VERSION: "19.03.0"
+  CACHE_CLASSES: "true"
+
+  # Preparing custom clone path to reduce space used by all random forks
+  # on GitLab.com's Shared Runners. Our main forks - especially the security
+  # ones - will have this variable overwritten in the project settings, so that
+  # a security-related code or code using our protected variables will be never
+  # stored on the same path as the community forks.
+  # Part of the solution for the `no space left on device` problem described at
+  # https://gitlab.com/gitlab-org/gitlab/issues/197876.
+  #
+  # For this purpose the https://gitlab.com/gitlab-org-forks group was created
+  # to host a placeholder for the `/builds/gitlab-org-forks` path and ensure
+  # that no legitimate project will ever use it and - by mistake - execute its
+  # job on a shared working directory. It also requires proper configuration of
+  # the Runner that executes the job (which was prepared for our shared runners
+  # by https://ops.gitlab.net/gitlab-cookbooks/chef-repo/-/merge_requests/3977).
+  #
+  # Because of all of that PLEASE DO NOT CHANGE THE PATH.
+  #
+  # For more details and reasoning that brought this change please check
+  # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24887
+  GIT_CLONE_PATH: "/builds/gitlab-org-forks/${CI_PROJECT_NAME}"
+# defaults from .gitlab-ci.yml
+##############################
+
+#######################
+# rspec job base specs
+.rails-job-base:
+  extends:
+    - .default-retry
+    - .default-before_script
+    - .rails-cache
+
+.base-script: &base-script
+  # Only install knapsack after bundle install! Otherwise oddly some native
+  # gems could not be found under some circumstance. No idea why, hours wasted.
+  - run_timed_command "gem install knapsack --no-document"
+  - run_timed_command "scripts/gitaly-test-build"
+  - run_timed_command "scripts/gitaly-test-spawn"
+  - source ./scripts/rspec_helpers.sh
+
+.rspec-base:
+  extends: .rails-job-base
+  stage: test
+  variables:
+    RUBY_GC_MALLOC_LIMIT: 67108864
+    RUBY_GC_MALLOC_LIMIT_MAX: 134217728
+    CRYSTALBALL: "true"
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
+  script:
+    - *base-script
+    - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
+  artifacts:
+    expire_in: 31d
+    when: always
+    paths:
+      - coverage/
+      - crystalball/
+      - knapsack/
+      - rspec_flaky/
+      - rspec_profiling/
+      - tmp/capybara/
+      - tmp/memory_test/
+      - tmp/feature_flags/
+      - log/*.log
+    reports:
+      junit: junit_rspec.xml
+
+.rspec-base-migration:
+  extends: .rails:rules:ee-and-foss-migration
+  script:
+    - *base-script
+    - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag level:migration"
+
+.rspec-base-pg11:
+  extends:
+    - .rspec-base
+    - .use-pg11
+
+.rspec-base-pg12:
+  extends:
+    - .rspec-base
+    - .use-pg12
+
+.rspec-base-pg11-as-if-foss:
+  extends:
+    - .rspec-base
+    - .as-if-foss
+    - .use-pg11
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss"]
+
+.rspec-ee-base-pg11:
+  extends:
+    - .rspec-base
+    - .use-pg11-ee
+
+.rspec-ee-base-pg12:
+  extends:
+    - .rspec-base
+    - .use-pg12-ee
+
+.rspec-ee-base-geo:
+  extends: .rspec-base
+  script:
+    - *base-script
+    - rspec_paralellized_job "--tag ~quarantine --tag geo"
+
+.rspec-ee-base-geo-pg11:
+  extends:
+    - .rspec-ee-base-geo
+    - .use-pg11-ee
+
+.rspec-ee-base-geo-pg12:
+  extends:
+    - .rspec-ee-base-geo
+    - .use-pg12-ee
+
+.db-job-base:
+  extends:
+    - .rails-job-base
+    - .rails:rules:ee-and-foss-migration
+    - .use-pg11
+  stage: test
+  needs: ["setup-test-env"]
+# rspec job base specs
+######################
+
+############################
+# rspec job parallel configs
+.rspec-migration-parallel:
+  parallel: <%= ENV['RSPEC_MIGRATION_PARALLEL'] %>
+
+.rspec-ee-migration-parallel:
+  parallel: <%= ENV['RSPEC_EE_MIGRATION_PARALLEL'] %>
+
+.rspec-unit-parallel:
+  parallel: <%= ENV['RSPEC_UNIT_PARALLEL'] %>
+
+.rspec-ee-unit-parallel:
+  parallel: <%= ENV['RSPEC_EE_UNIT_PARALLEL'] %>
+
+.rspec-ee-unit-geo-parallel:
+  parallel: <%= ENV['RSPEC_EE_UNIT_GEO_PARALLEL'] %>
+
+.rspec-integration-parallel:
+  parallel: <%= ENV['RSPEC_INTEGRATION_PARALLEL'] %>
+
+.rspec-ee-integration-parallel:
+  parallel: <%= ENV['RSPEC_EE_INTEGRATION_PARALLEL'] %>
+
+.rspec-system-parallel:
+  parallel: <%= ENV['RSPEC_SYSTEM_PARALLEL'] %>
+
+.rspec-ee-system-parallel:
+  parallel: <%= ENV['RSPEC_EE_SYSTEM_PARALLEL'] %>
+# rspec job parallel configs
+############################
+
+#######################################################
+# EE/FOSS: default refs (MRs, master, schedules) jobs #
+rspec migration pg11:
+  extends:
+    - .rspec-base-pg11
+    - .rspec-base-migration
+    - .rspec-migration-parallel
+
+rspec unit pg11:
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-unit
+    - .rspec-unit-parallel
+
+rspec integration pg11:
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-integration
+    - .rspec-integration-parallel
+
+rspec system pg11:
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-system
+    - .rspec-system-parallel
+# EE/FOSS: default refs (MRs, master, schedules) jobs #
+#######################################################
+
+##################################################
+# EE: default refs (MRs, master, schedules) jobs #
+rspec migration pg11-as-if-foss:
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rspec-base-migration
+    - .rails:rules:as-if-foss-migration
+    - .rspec-migration-parallel
+
+rspec unit pg11-as-if-foss:
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:as-if-foss-unit
+    - .rspec-unit-parallel
+
+rspec integration pg11-as-if-foss:
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:as-if-foss-integration
+    - .rspec-integration-parallel
+
+rspec system pg11-as-if-foss:
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:as-if-foss-system
+    - .rspec-system-parallel
+
+rspec-ee migration pg11:
+  extends:
+    - .rspec-ee-base-pg11
+    - .rspec-base-migration
+    - .rails:rules:ee-only-migration
+    - .rspec-ee-migration-parallel
+
+rspec-ee unit pg11:
+  extends:
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-unit
+    - .rspec-ee-unit-parallel
+
+rspec-ee integration pg11:
+  extends:
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-integration
+    - .rspec-ee-integration-parallel
+
+rspec-ee system pg11:
+  extends:
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-system
+    - .rspec-ee-system-parallel
+
+rspec-ee unit pg11 geo:
+  extends:
+    - .rspec-ee-base-geo-pg11
+    - .rails:rules:ee-only-unit
+    - .rspec-ee-unit-geo-parallel
+
+rspec-ee integration pg11 geo:
+  extends:
+    - .rspec-ee-base-geo-pg11
+    - .rails:rules:ee-only-integration
+
+rspec-ee system pg11 geo:
+  extends:
+    - .rspec-ee-base-geo-pg11
+    - .rails:rules:ee-only-system
+# EE: default refs (MRs, master, schedules) jobs #
+##################################################
+
+##########################################
+# EE/FOSS: master nightly scheduled jobs #
+rspec migration pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rspec-base-migration
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-migration-parallel
+
+rspec unit pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-unit-parallel
+
+rspec integration pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-integration-parallel
+
+rspec system pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-system-parallel
+# EE/FOSS: master nightly scheduled jobs #
+##########################################
+
+#####################################
+# EE: master nightly scheduled jobs #
+rspec-ee migration pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rspec-base-migration
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-migration-parallel
+
+rspec-ee unit pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-unit-parallel
+
+rspec-ee integration pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-integration-parallel
+
+rspec-ee system pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-system-parallel
+
+rspec-ee unit pg12 geo:
+  extends:
+    - .rspec-ee-base-geo-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-unit-geo-parallel
+
+rspec-ee integration pg12 geo:
+  extends:
+    - .rspec-ee-base-geo-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+
+rspec-ee system pg12 geo:
+  extends:
+    - .rspec-ee-base-geo-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+# EE: master nightly scheduled jobs #
+#####################################

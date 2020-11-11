@@ -602,3 +602,39 @@ fail-pipeline-early:
     - fail_pipeline_early
 # EE: Canonical MR pipelines
 ##################################################
+
+##############################
+# Test rspec as child pipeline
+create-rspec-child-pipeline-yml:
+  stage: prepare
+  variables:
+    RSPEC_MIGRATION_PARALLEL: 5
+    RSPEC_EE_MIGRATION_PARALLEL: 2
+    RSPEC_UNIT_PARALLEL: 20
+    RSPEC_EE_UNIT_PARALLEL: 10
+    RSPEC_EE_UNIT_GEO_PARALLEL: 2
+    RSPEC_INTEGRATION_PARALLEL: 8
+    RSPEC_EE_INTEGRATION_PARALLEL: 4
+    RSPEC_SYSTEM_PARALLEL: 24
+    RSPEC_EE_SYSTEM_PARALLEL: 6
+  script:
+    - ruby -rerb -e 'puts ERB.new(File.read(".gitlab/ci/templates/rspec.yml.erb")).result' > rspec_pipeline.yml
+  artifacts:
+    paths:
+      - rspec_pipeline.yml
+
+rspec-child-pipeline:
+  stage: test
+  needs:
+    - create-rspec-child-pipeline-yml
+    - setup-test-env
+    - retrieve-tests-metadata
+    - compile-test-assets
+  trigger:
+    include:
+      - local: .gitlab/ci/global.gitlab-ci.yml
+      - local: .gitlab/ci/rules.gitlab-ci.yml
+      - artifact: rspec_pipeline.yml
+        job: create-rspec-child-pipeline-yml
+    strategy: depend
+##############################
