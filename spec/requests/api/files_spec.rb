@@ -252,6 +252,15 @@ RSpec.describe API::Files do
         expect(headers[Gitlab::Workhorse::DETECT_HEADER]).to eq "true"
       end
 
+      it 'caches subsequent requests' do
+        url = route(file_path) + "/raw"
+
+        get api(url, api_user, **options), params: params
+        get api(url, api_user, **options), params: params, headers: { 'If-None-Match': response.headers['ETag'] }
+
+        expect(response).to have_gitlab_http_status(:not_modified)
+      end
+
       it 'returns blame file info' do
         url = route(file_path) + '/blame'
 

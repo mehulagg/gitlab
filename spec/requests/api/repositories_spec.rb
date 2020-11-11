@@ -177,10 +177,11 @@ RSpec.describe API::Repositories do
         expect(headers['Content-Disposition']).to eq 'inline'
       end
 
-      it_behaves_like 'uncached response' do
-        before do
-          get api(route, current_user)
-        end
+      it 'caches subsequent requests' do
+        get api(route, current_user)
+        get api(route, current_user), headers: { 'If-None-Match': response.headers['ETag'] }
+
+        expect(response).to have_gitlab_http_status(:not_modified)
       end
 
       context 'when sha does not exist' do

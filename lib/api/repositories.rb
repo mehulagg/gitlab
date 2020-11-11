@@ -73,8 +73,6 @@ module API
       get ':id/repository/blobs/:sha/raw' do
         assign_blob_vars!
 
-        no_cache_headers
-
         send_git_blob @repo, @blob
       end
 
