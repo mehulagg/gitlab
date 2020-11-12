@@ -131,7 +131,7 @@ module QA
         Page::Project::Menu.perform(&:go_to_integrations_settings)
         Page::Project::Settings::Integrations.perform(&:click_jenkins_ci_link)
 
-        QA::EE::Page::Project::Settings::Services::Jenkins.perform do |jenkins|
+        QA::Page::Project::Settings::Services::Jenkins.perform do |jenkins|
           jenkins.setup_service_with(jenkins_url: patch_host_name(Vendor::Jenkins::Page::Base.host, 'jenkins-server'),
             project_name: project_name)
         end
