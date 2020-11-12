@@ -219,13 +219,11 @@ Publish a Conan package to the Package Registry, so that anyone who can access t
 
 Prerequisites:
 
-To publish a Conan package, you need:
-
-- The Package Registry [set as a remote](#add-the-package-registry-as-a-conan-remote).
-- [Authentication](#authenticate-to-the-package-registry) set up with the Package Registry.
-- A local [Conan package](https://docs.conan.io/en/latest/creating_packages/getting_started.html).
+- The Conan remote [must be set](#add-the-package-registry-as-a-conan-remote).
+- [Authentication](#authenticate-to-the-package-registry) with the Package Registry must be set up.
+- A local [Conan package](https://docs.conan.io/en/latest/creating_packages/getting_started.html) must exist.
   - For an instance remote, the package must meet the [naming convention](#package-recipe-naming-convention-for-instance-remotes).
-- A project ID, which is on the project's homepage.
+- You must have the project ID, which is on the project's homepage.
 
 To publish the package, use the `conan upload` command:
 
@@ -266,10 +264,8 @@ Conan packages are often installed as dependencies by using the `conanfile.txt` 
 
 Prerequisites:
 
-To install a Conan package, you need:
-
-- The Package Registry [set as a remote](#add-the-package-registry-as-a-conan-remote).
-- [Authentication](#authenticate-to-the-package-registry) set up with the Package Registry.
+- The Conan remote [must be set](#add-the-package-registry-as-a-conan-remote).
+- [Authentication](#authenticate-to-the-package-registry) with the Package Registry must be set up.
 
 1. In the project where you want to install the package as a dependency, open `conanfile.txt`.
    Or, in the root of your project, create a file called `conanfile.txt`.
