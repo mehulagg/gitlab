@@ -1,0 +1,10 @@
+name: recorded_at
+full_path_generation_1: recorded_at
+description: Time when usage data is recorded
+milestone:
+introduced_by_url:
+group: group::product analytics
+time_frame:
+type: license
+distribution: [ee, ce]
+tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']

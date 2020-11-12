@@ -1,0 +1,10 @@
+name: deployments
+full_path_generation_1: counts_monthly.deployments
+description: 'Total deployments'
+milestone:
+introduced_by_url:
+group: 'group::ops release'
+time_frame: counts_all
+type: count
+distribution: [ee, ce]
+tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']
