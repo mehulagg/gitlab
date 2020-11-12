@@ -195,6 +195,17 @@ RSpec.describe Ci::PipelinesFinder do
       end
     end
 
+    context 'when iids filter is specified' do
+      let(:params) { { iids: [pipeline1.iid, pipeline3.iid] } }
+      let!(:pipeline1) { create(:ci_pipeline, project: project) }
+      let!(:pipeline2) { create(:ci_pipeline, project: project) }
+      let!(:pipeline3) { create(:ci_pipeline, project: project) }
+
+      it 'returns matches pipelines' do
+        is_expected.to match_array([pipeline1, pipeline3])
+      end
+    end
+
     context 'when sha is specified' do
       let!(:pipeline) { create(:ci_pipeline, project: project, sha: '97de212e80737a608d939f648d959671fb0a0142') }
 

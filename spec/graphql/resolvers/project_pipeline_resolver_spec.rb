@@ -18,6 +18,10 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
     resolve(described_class, obj: project, args: args, ctx: { current_user: current_user })
   end
 
+  before do
+    project.add_developer(current_user)
+  end
+
   it 'resolves pipeline for the passed iid' do
     result = batch_sync do
       resolve_pipeline(project, { iid: '1234' })
