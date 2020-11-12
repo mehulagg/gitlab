@@ -173,7 +173,7 @@ add a token to every Conan command.
 Prerequisites:
 
 - You must have an authentication token.
-- The Conan remote [must be set](#add-the-package-registry-as-a-conan-remote).
+- The Conan remote [must be configured](#add-the-package-registry-as-a-conan-remote).
 
 In a terminal, run this command. In this example, the remote name is `gitlab`. Use the name of your remote.
 
@@ -219,8 +219,8 @@ Publish a Conan package to the Package Registry, so that anyone who can access t
 
 Prerequisites:
 
-- The Conan remote [must be set](#add-the-package-registry-as-a-conan-remote).
-- [Authentication](#authenticate-to-the-package-registry) with the Package Registry must be set up.
+- The Conan remote [must be configured](#add-the-package-registry-as-a-conan-remote).
+- [Authentication](#authenticate-to-the-package-registry) with the Package Registry must be configured.
 - A local [Conan package](https://docs.conan.io/en/latest/creating_packages/getting_started.html) must exist.
   - For an instance remote, the package must meet the [naming convention](#package-recipe-naming-convention-for-instance-remotes).
 - You must have the project ID, which is on the project's homepage.
@@ -264,8 +264,8 @@ Conan packages are often installed as dependencies by using the `conanfile.txt` 
 
 Prerequisites:
 
-- The Conan remote [must be set](#add-the-package-registry-as-a-conan-remote).
-- [Authentication](#authenticate-to-the-package-registry) with the Package Registry must be set up.
+- The Conan remote [must be configured](#add-the-package-registry-as-a-conan-remote).
+- [Authentication](#authenticate-to-the-package-registry) with the Package Registry must be configured.
 
 1. In the project where you want to install the package as a dependency, open `conanfile.txt`.
    Or, in the root of your project, create a file called `conanfile.txt`.
