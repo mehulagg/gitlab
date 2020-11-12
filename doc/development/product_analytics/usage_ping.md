@@ -443,10 +443,11 @@ In staging environment, trigger the events for testing.
 
 After, get the unique events data for current week.
 
-```ruby
-# Get unique events for metric for current_week
-Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events', start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
-```
+   ```ruby
+   # Get unique events for metric for current_week
+   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events', 
+   start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
+   ```
 
 Recommendations:
 
