@@ -20,4 +20,12 @@ RSpec.describe GitlabSchema.types['ContainerRepository'] do
       is_expected.to have_graphql_type(Types::ContainerRepositoryStatusEnum)
     end
   end
+
+  describe 'expiration_policy_cleanup_status' do
+    subject { described_class.fields['expirationPolicyCleanupStatus'] }
+
+    it 'returns cleanup status enum' do
+      is_expected.to have_graphql_type(Types::ContainerRepositoryCleanupStatusEnum)
+    end
+  end
 end
