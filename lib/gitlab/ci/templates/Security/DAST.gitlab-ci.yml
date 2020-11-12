@@ -16,6 +16,18 @@ variables:
   # (SAST, Dependency Scanning, ...)
   SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
 
+dast_unlicensed:
+  stage: dast
+  allow_failure: true
+  rules:
+    - if: '$GITLAB_FEATURES !~ /\bdast\b/ && $DAST_DISABLED == null'
+    - when: never
+  script:
+    - |
+        echo "Error: Your GitLab project is not licensed for DAST."
+    - exit 1
+
+
 dast:
   stage: dast
   image:

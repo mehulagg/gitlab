@@ -21,8 +21,8 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
     end
 
     context 'when project has no license' do
-      it 'includes no jobs' do
-        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+      it 'includes job to display error' do
+        expect(build_names).to match_array(%w[dast_unlicensed])
       end
     end
 
