@@ -98,7 +98,7 @@ describe('Pipeline details header', () => {
   });
 
   describe('polling', () => {
-    it('polling is stopped when pipeline is finished', async () => {
+    it('is stopped when pipeline is finished', async () => {
       wrapper = createComponent({ ...mockRunningPipelineHeader });
 
       await wrapper.setData({
@@ -108,8 +108,8 @@ describe('Pipeline details header', () => {
       expect(wrapper.vm.$apollo.queries.pipeline.stopPolling).toHaveBeenCalled();
     });
 
-    it('polling is not stopped when pipeline is not finished', () => {
-      wrapper = createComponent(mockRunningPipelineHeader);
+    it('is not stopped when pipeline is not finished', () => {
+      wrapper = createComponent();
 
       expect(wrapper.vm.$apollo.queries.pipeline.stopPolling).not.toHaveBeenCalled();
     });
