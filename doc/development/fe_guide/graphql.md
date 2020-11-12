@@ -836,7 +836,7 @@ fakeApollo = createMockApollo(requestHandlers, {});
 
 Sometimes we want to test a `result` hook of the local query. In order to have it triggered, we need to populate a cache with correct data to be fetched with this query:
 
-```
+```javascript
 query fetchLocalUser {
   fetchLocalUser @client {
     name
