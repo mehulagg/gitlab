@@ -189,6 +189,51 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
       end
     end
 
+    context 'when the model specifies a batch_column_name' do
+      let!(:id1) { create(:container_expiration_policy).id }
+      let!(:id2) { create(:container_expiration_policy).id }
+      let!(:id3) { create(:container_expiration_policy).id }
+
+      around do |example|
+        freeze_time { example.run }
+      end
+
+      before do
+        ContainerExpirationPolicy.class_eval do
+          include EachBatch
+        end
+      end
+
+      it 'returns the final expected delay' do
+        Sidekiq::Testing.fake! do
+          final_delay = model.queue_background_migration_jobs_by_range_at_intervals(ContainerExpirationPolicy, 'FooJob', 10.minutes, batch_size: 2)
+
+          expect(final_delay.to_f).to eq(20.minutes.to_f)
+        end
+      end
+
+      it 'returns zero when nothing gets queued' do
+        Sidekiq::Testing.fake! do
+          final_delay = model.queue_background_migration_jobs_by_range_at_intervals(ContainerExpirationPolicy.none, 'FooJob', 10.minutes)
+
+          expect(final_delay).to eq(0)
+        end
+      end
+
+      context 'with batch_size option' do
+        it 'queues jobs correctly' do
+          Sidekiq::Testing.fake! do
+            model.queue_background_migration_jobs_by_range_at_intervals(ContainerExpirationPolicy, 'FooJob', 10.minutes, batch_size: 2)
+
+            expect(BackgroundMigrationWorker.jobs[0]['args']).to eq(['FooJob', [id1, id2]])
+            expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(10.minutes.from_now.to_f)
+            expect(BackgroundMigrationWorker.jobs[1]['args']).to eq(['FooJob', [id3, id3]])
+            expect(BackgroundMigrationWorker.jobs[1]['at']).to eq(20.minutes.from_now.to_f)
+          end
+        end
+      end
+    end
+
     context "when the model doesn't have an ID column" do
       it 'raises error (for now)' do
         expect do

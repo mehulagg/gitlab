@@ -87,8 +87,8 @@ module Gitlab
         #         # do something
         #       end
         #     end
-        def queue_background_migration_jobs_by_range_at_intervals(model_class, job_class_name, delay_interval, batch_size: BACKGROUND_MIGRATION_BATCH_SIZE, other_job_arguments: [], initial_delay: 0, track_jobs: false)
-          raise "#{model_class} does not have an ID to use for batch ranges" unless model_class.column_names.include?('id')
+        def queue_background_migration_jobs_by_range_at_intervals(model_class, job_class_name, delay_interval, batch_size: BACKGROUND_MIGRATION_BATCH_SIZE, other_job_arguments: [], initial_delay: 0, track_jobs: false, batch_column_name: :id)
+          raise "#{model_class} does not have an ID to use for batch ranges" unless model_class.column_names.include?(batch_column_name.to_s)
 
           # To not overload the worker too much we enforce a minimum interval both
           # when scheduling and performing jobs.
@@ -99,7 +99,7 @@ module Gitlab
           final_delay = 0
 
           model_class.each_batch(of: batch_size) do |relation, index|
-            start_id, end_id = relation.pluck(Arel.sql('MIN(id), MAX(id)')).first
+            start_id, end_id = relation.pluck(Arel.sql("MIN(#{batch_column_name}), MAX(#{batch_column_name})")).first
 
             # `BackgroundMigrationWorker.bulk_perform_in` schedules all jobs for
             # the same time, which is not helpful in most cases where we wish to
