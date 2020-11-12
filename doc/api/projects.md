@@ -2385,6 +2385,21 @@ Read more in the [Project import/export](project_import_export.md) documentation
 
 Read more in the [Project members](members.md) documentation.
 
+## Configure pull mirroring for a project **(STARTER)**
+
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.2.
+
+Configure pull mirroring while [creating a new project](#create-project) or [update an existing project](#edit-project) using the API if the remote repository is publicly accessible or via `username/password authentication.`
+
+NOTE: **Note:**
+If your HTTP repository is not publicly accessible, add authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git` where password is a personal access token with the api scope enabled.
+
+The relevant API parameters to update are:
+
+* `import_url`: URL (with `username:password` if needed) of remote repository being mirrored
+* `mirror`: enables pull mirroring on project when set to `true`
+* `only_mirror_protected_branches`: set to `true` for protected branches
+
 ## Start the pull mirroring process for a Project **(STARTER)**
 
 > Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 10.3.
