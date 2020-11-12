@@ -314,6 +314,19 @@ class MergeRequest < ApplicationRecord
 
   scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
 
+  scope :reviewer_assigned_to, ->(user) do
+    mr_reviewers_table = MergeRequestReviewer.arel_table
+
+    inner_sql = mr_reviewers_table
+                  .project(Arel::Nodes::True.new)
+                  .where(
+                    mr_reviewers_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
+                      .and(mr_reviewers_table[:user_id].eq(user.id))
+                  ).exists
+
+    where(inner_sql)
+  end
+
   after_save :keep_around_commit, unless: :importing?
 
   alias_attribute :project, :target_project
