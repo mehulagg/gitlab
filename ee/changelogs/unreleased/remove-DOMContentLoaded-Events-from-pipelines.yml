@@ -1,0 +1,5 @@
+---
+title: Removed DOMContentLoaded Eventlistener from Pipeline Pages
+merge_request: 47535
+author:
+type: changed
