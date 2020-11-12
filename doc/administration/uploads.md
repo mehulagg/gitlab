@@ -56,7 +56,7 @@ _The uploads are stored by default in `/var/opt/gitlab/gitlab-rails/uploads`._
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 CAUTION: **Caution:**
-`gitlab_rails['uploads_storage_path']` must not be set when setting uploads directory via `gitlab_rails['uploads_directory']`.
+`gitlab_rails['uploads_directory']` only applies if you haven't changed the `gitlab_rails['uploads_storage_path']` directory.
 
 **In installations from source:**
 
