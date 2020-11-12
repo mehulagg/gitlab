@@ -14632,6 +14632,9 @@ msgstr ""
 msgid "Integrations|Standard"
 msgstr ""
 
+msgid "Integrations|This integration, and inheriting projects were reset."
+msgstr ""
+
 msgid "Integrations|To keep this project going, create a new issue."
 msgstr ""
 
