@@ -71,6 +71,9 @@ To add a broadcast message:
 1. Click the **Add broadcast message** button.
 
 NOTE: **Note:**
+The "Background color" field expects a value in hex code. This is because the form uses the [color_field](https://api.rubyonrails.org/v6.0.3.4/classes/ActionView/Helpers/FormHelper.html#method-i-color_field) helper method which generates the proper HTML to render. 
+
+NOTE: **Note:**
 Once a broadcast message has expired, it is no longer displayed in the UI but is still listed in the
 list of broadcast messages. User can also dismiss a broadcast message if the option **Dismissable** is set.
 
