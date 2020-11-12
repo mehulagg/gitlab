@@ -213,7 +213,7 @@ Potential resolutions:
 - If you're using GitLab Core or GitLab Starter, be sure you're using
   GitLab 13.4 or later.
 
-[Contact GitLab Support](https://about.gitlab.com/support) if none of these reasons apply.
+[Contact GitLab Support](https://about.gitlab.com/support/) if none of these reasons apply.
 
 #### Fixing synchronization issues
 
@@ -226,7 +226,7 @@ resynchronize the information. To do so:
 1. For each project, there's a sync button displayed next to the **last activity** date.
    To perform a *soft resync*, click the button, or complete a *full sync* by shift clicking
    the button. For more information, see
-   [Atlassian's documentation](https://confluence.atlassian.com/adminjiracloud/synchronize-an-account-972332890.html).
+   [Atlassian's documentation](https://support.atlassian.com/jira-cloud-administration/docs/synchronize-jira-cloud-to-bitbucket/).
 
 ### GitLab for Jira app
 

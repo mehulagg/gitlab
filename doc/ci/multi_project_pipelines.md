@@ -21,7 +21,7 @@ adopting a [microservices architecture](https://about.gitlab.com/blog/2016/08/16
 
 For a demonstration of how cross-functional development teams can use cross-pipeline
 triggering to trigger multiple pipelines for different microservices projects, see
-[Cross-project Pipeline Triggering and Visualization](https://about.gitlab.com/handbook/marketing/product-marketing/demo/#cross-project-pipeline-triggering-and-visualization-may-2019---1110).
+[Cross-project Pipeline Triggering and Visualization](https://about.gitlab.com/handbook/marketing/strategic-marketing/demo/#cross-project-pipeline-triggering-and-visualization-may-2019---1110).
 
 Additionally, it's possible to visualize the entire pipeline, including all cross-project
 inter-dependencies. **(PREMIUM)**

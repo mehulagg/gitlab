@@ -23,7 +23,7 @@ After configuring a GitLab instance with an internal CA certificate, you might n
   ```shell
   curl https://gitlab.domain.tld
   curl: (60) SSL certificate problem: unable to get local issuer certificate
-  More details here: https://curl.haxx.se/docs/sslcerts.html
+  More details here: https://curl.se/docs/sslcerts.html
   ```
 
 - Testing via the [rails console](../operations/rails_console.md#starting-a-rails-console-session) also fails:
@@ -113,7 +113,7 @@ The cause of the issue can be confirmed by checking if:
   ```shell
   $ curl https://gitlab.domain.tld
   curl: (60) SSL certificate problem: self signed certificate
-  More details here: https://curl.haxx.se/docs/sslcerts.html
+  More details here: https://curl.se/docs/sslcerts.html
   ```
 
 - Testing via the Rails console also fails:
