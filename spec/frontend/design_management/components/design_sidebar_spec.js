@@ -6,6 +6,10 @@ import Participants from '~/sidebar/components/participants/participants.vue';
 import DesignDiscussion from '~/design_management/components/design_notes/design_discussion.vue';
 import design from '../mock_data/design';
 import updateActiveDiscussionMutation from '~/design_management/graphql/mutations/update_active_discussion.mutation.graphql';
+import DesignTodoButton from '~/design_management/components/design_todo_button.vue';
+
+const scrollIntoViewMock = jest.fn();
+HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
 
 const updateActiveDiscussionMutationVariables = {
   mutation: updateActiveDiscussionMutation,
@@ -53,6 +57,7 @@ describe('Design management design sidebar component', () => {
           mutate,
         },
       },
+      stubs: { GlPopover },
     });
   }
 
@@ -70,6 +75,12 @@ describe('Design management design sidebar component', () => {
     createComponent();
 
     expect(findParticipants().props('participants')).toHaveLength(1);
+  });
+
+  it('renders To-Do button', () => {
+    createComponent();
+
+    expect(wrapper.find(DesignTodoButton).exists()).toBe(true);
   });
 
   describe('when has no discussions', () => {
@@ -146,22 +157,22 @@ describe('Design management design sidebar component', () => {
     });
 
     it('emits correct event on discussion create note error', () => {
-      findFirstDiscussion().vm.$emit('createNoteError', 'payload');
+      findFirstDiscussion().vm.$emit('create-note-error', 'payload');
       expect(wrapper.emitted('onDesignDiscussionError')).toEqual([['payload']]);
     });
 
     it('emits correct event on discussion update note error', () => {
-      findFirstDiscussion().vm.$emit('updateNoteError', 'payload');
+      findFirstDiscussion().vm.$emit('update-note-error', 'payload');
       expect(wrapper.emitted('updateNoteError')).toEqual([['payload']]);
     });
 
     it('emits correct event on discussion resolve error', () => {
-      findFirstDiscussion().vm.$emit('resolveDiscussionError', 'payload');
+      findFirstDiscussion().vm.$emit('resolve-discussion-error', 'payload');
       expect(wrapper.emitted('resolveDiscussionError')).toEqual([['payload']]);
     });
 
     it('changes prop correctly on opening discussion form', () => {
-      findFirstDiscussion().vm.$emit('openForm', 'some-id');
+      findFirstDiscussion().vm.$emit('open-form', 'some-id');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(findFirstDiscussion().props('discussionWithOpenForm')).toBe('some-id');
@@ -218,6 +229,10 @@ describe('Design management design sidebar component', () => {
 
     it('renders a popover if we show resolved comments collapsible for the first time', () => {
       expect(findPopover().exists()).toBe(true);
+    });
+
+    it('scrolls to resolved threads link', () => {
+      expect(scrollIntoViewMock).toHaveBeenCalled();
     });
 
     it('dismisses a popover on the outside click', () => {

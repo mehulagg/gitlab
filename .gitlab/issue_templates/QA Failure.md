@@ -68,10 +68,10 @@ a nightly pipeline, select ~"found:nightly".
 
 <!--
 https://about.gitlab.com/handbook/engineering/quality/guidelines/#priorities:
-- ~P1: Tests that are needed to verify fundamental GitLab functionality.
-- ~P2: Tests that deal with external integrations which may take a longer time to debug and fix.
+- ~"priority::1": Tests that are needed to verify fundamental GitLab functionality.
+- ~"priority::2": Tests that deal with external integrations which may take a longer time to debug and fix.
 -->
-/label ~P
+/label ~priority::
 
-<!-- Select the current milestone if ~P1 or the next milestone if ~P2. -->
+<!-- Select the current milestone if ~"priority::1" or the next milestone if ~"priority::2". -->
 /milestone %

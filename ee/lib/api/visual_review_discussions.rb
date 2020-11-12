@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class VisualReviewDiscussions < Grape::API::Instance
+  class VisualReviewDiscussions < ::API::Base
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
     helpers ::RendersNotes
+
+    feature_category :code_review
 
     params do
       requires :id, type: String, desc: "The ID of a Project"
@@ -41,10 +43,8 @@ module API
         note = ::Notes::CreateVisualReviewService.new(
           merge_request,
           current_user,
-          {
-            body: params[:body],
-            position: params[:position]
-          }
+          body: params[:body],
+          position: params[:position]
         ).execute
 
         if note.valid?

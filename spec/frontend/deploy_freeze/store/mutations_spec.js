@@ -1,14 +1,16 @@
 import state from '~/deploy_freeze/store/state';
 import mutations from '~/deploy_freeze/store/mutations';
 import * as types from '~/deploy_freeze/store/mutation_types';
-import { mockFreezePeriods, mockTimezoneData } from '../mock_data';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { findTzByName, formatTz, freezePeriodsFixture, timezoneDataFixture } from '../helpers';
 
-describe('CI variable list mutations', () => {
+describe('Deploy freeze mutations', () => {
   let stateCopy;
+
   beforeEach(() => {
     stateCopy = state({
       projectId: '8',
-      timezoneData: mockTimezoneData,
+      timezoneData: timezoneDataFixture,
     });
   });
 
@@ -24,18 +26,26 @@ describe('CI variable list mutations', () => {
   });
 
   describe('RECEIVE_FREEZE_PERIODS_SUCCESS', () => {
-    it('should set environments', () => {
-      mutations[types.RECEIVE_FREEZE_PERIODS_SUCCESS](stateCopy, mockFreezePeriods);
+    it('should set freeze periods and format timezones from identifiers to names', () => {
+      const timezoneNames = ['Berlin', 'UTC', 'Eastern Time (US & Canada)'];
 
-      expect(stateCopy.freezePeriods).toEqual(mockFreezePeriods);
+      mutations[types.RECEIVE_FREEZE_PERIODS_SUCCESS](stateCopy, freezePeriodsFixture);
+
+      const expectedFreezePeriods = freezePeriodsFixture.map((freezePeriod, index) => ({
+        ...convertObjectPropsToCamelCase(freezePeriod),
+        cronTimezone: timezoneNames[index],
+      }));
+
+      expect(stateCopy.freezePeriods).toMatchObject(expectedFreezePeriods);
     });
   });
 
   describe('SET_SELECTED_TIMEZONE', () => {
     it('should set the cron timezone', () => {
+      const selectedTz = findTzByName('Pacific Time (US & Canada)');
       const timezone = {
-        formattedTimezone: '[UTC -7] Pacific Time (US & Canada)',
-        identifier: 'America/Los_Angeles',
+        formattedTimezone: formatTz(selectedTz),
+        identifier: selectedTz.identifier,
       };
       mutations[types.SET_SELECTED_TIMEZONE](stateCopy, timezone);
 

@@ -10,8 +10,7 @@
     %p
       = _('Slack integration allows you to interact with GitLab via slash commands in a chat window.')
   .settings-content
-
-    = form_for @application_setting, url: integrations_admin_application_settings_path(anchor: 'js-slack-settings'), html: { class: 'fieldset-form' } do |f|
+    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-slack-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting) if expanded
 
       %fieldset
@@ -32,5 +31,4 @@
           = f.label :slack_app_verification_token, 'Verification token', class: 'label-bold'
           = f.text_field :slack_app_verification_token, class: 'form-control'
 
-      = f.submit _('Save changes'), class: "btn btn-success"
-
+      = f.submit _('Save changes'), class: "gl-button btn btn-success"

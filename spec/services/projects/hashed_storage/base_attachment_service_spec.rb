@@ -30,7 +30,7 @@ RSpec.describe Projects::HashedStorage::BaseAttachmentService do
       target_path = Dir.mktmpdir
       expect(Dir.exist?(target_path)).to be_truthy
 
-      Timecop.freeze do
+      freeze_time do
         suffix = Time.current.utc.to_i
         subject.send(:discard_path!, target_path)
 
@@ -45,7 +45,7 @@ RSpec.describe Projects::HashedStorage::BaseAttachmentService do
   describe '#move_folder!' do
     context 'when old_path is not a directory' do
       it 'adds information to the logger and returns true' do
-        Tempfile.create do |old_path|
+        Tempfile.create do |old_path| # rubocop:disable Rails/SaveBang
           new_path = "#{old_path}-new"
 
           expect(subject.send(:move_folder!, old_path, new_path)).to be_truthy

@@ -22,6 +22,12 @@ RSpec.describe Releases::CreateService do
       it 'creates a new release' do
         expected_job_count = MailScheduler::NotificationServiceWorker.jobs.size + 1
 
+        expect_next_instance_of(Release) do |release|
+          expect(release)
+            .to receive(:execute_hooks)
+            .with('create')
+        end
+
         result = service.execute
 
         expect(project.releases.count).to eq(1)
@@ -198,10 +204,11 @@ RSpec.describe Releases::CreateService do
         released_at: released_at
       }.compact
     end
+
     let(:last_release) { project.releases.last }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     subject { service.execute }

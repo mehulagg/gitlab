@@ -10,6 +10,10 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
   let_it_be(:third_user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
+  specify do
+    expect(described_class).to have_nullable_graphql_type(::Types::RequirementsManagement::RequirementType.connection_type)
+  end
+
   context 'with a project' do
     let_it_be(:requirement1) { create(:requirement, project: project, state: :opened, created_at: 5.hours.ago, title: 'it needs to do the thing', author: current_user) }
     let_it_be(:requirement2) { create(:requirement, project: project, state: :archived, created_at: 3.hours.ago, title: 'it needs to not break', author: other_user) }
@@ -55,16 +59,6 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
         create(:requirement, project: another_project, iid: requirement1.iid)
 
         expect(resolve_requirements).to contain_exactly(requirement1, requirement2, requirement3)
-      end
-    end
-
-    context 'when `requirements_management` flag is disabled' do
-      before do
-        stub_feature_flags(requirements_management: false)
-      end
-
-      it 'returns an empty list' do
-        expect(resolve_requirements).to be_empty
       end
     end
 

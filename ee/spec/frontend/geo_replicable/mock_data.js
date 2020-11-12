@@ -51,18 +51,16 @@ export const MOCK_GRAPHQL_PAGINATION_DATA = {
 
 export const MOCK_BASIC_GRAPHQL_QUERY_RESPONSE = {
   geoNode: {
-    packageFileRegistries: {
+    [MOCK_GRAPHQL_REGISTRY]: {
       pageInfo: MOCK_GRAPHQL_PAGINATION_DATA,
       nodes: [
         {
           id: 'git/1',
-          packageFileId: '1',
           state: 'PENDING',
           lastSyncedAt: null,
         },
         {
           id: 'git/2',
-          packageFileId: '2',
           state: 'SYNCED',
           lastSyncedAt: null,
         },

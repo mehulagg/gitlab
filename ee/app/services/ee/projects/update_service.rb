@@ -68,12 +68,16 @@ module EE
         settings = params[:compliance_framework_setting_attributes]
         return unless settings.present?
 
-        unless can?(current_user, :admin_compliance_framework, project)
+        if can?(current_user, :admin_compliance_framework, project)
+          framework_identifier = settings.delete(:framework)
+          if framework_identifier.blank?
+            settings.merge!(_destroy: true)
+          else
+            settings[:compliance_management_framework] = ComplianceManagement::Framework.find_or_create_legacy_default_framework(project, framework_identifier)
+          end
+        else
           params.delete(:compliance_framework_setting_attributes)
-          return
         end
-
-        settings.merge!(_destroy: settings[:framework].blank?)
       end
 
       def log_audit_events

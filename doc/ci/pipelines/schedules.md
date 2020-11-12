@@ -11,9 +11,6 @@ type: reference, howto
 > - Introduced in GitLab 9.1 as [Trigger Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10533).
 > - [Renamed to Pipeline Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10853) in GitLab 9.2.
 
-NOTE: **Note:**
-Cron notation is parsed by [Fugit](https://github.com/floraison/fugit).
-
 Pipelines are normally run based on certain conditions being met. For example, when a branch is pushed to repository.
 
 Pipeline schedules can be used to also run [pipelines](index.md) at specific intervals. For example:
@@ -23,6 +20,8 @@ Pipeline schedules can be used to also run [pipelines](index.md) at specific int
 
 In addition to using the GitLab UI, pipeline schedules can be maintained using the
 [Pipeline schedules API](../../api/pipeline_schedules.md).
+
+Schedule timing is configured with cron notation, parsed by [Fugit](https://github.com/floraison/fugit).
 
 ## Prerequisites
 
@@ -86,10 +85,10 @@ job:
 
 ### Advanced configuration
 
-The pipelines won't be executed exactly on schedule because schedules are handled by
+The pipelines are not executed exactly on schedule because schedules are handled by
 Sidekiq, which runs according to its interval.
 
-For example, only two pipelines will be created per day if:
+For example, only two pipelines are created per day if:
 
 - You set a schedule to create a pipeline every minute (`* * * * *`).
 - The Sidekiq worker runs on 00:00 and 12:00 every day (`0 */12 * * *`).
@@ -113,8 +112,8 @@ To trigger a pipeline schedule manually, click the "Play" button:
 
 ![Play Pipeline Schedule](img/pipeline_schedule_play.png)
 
-This will schedule a background job to run the pipeline schedule. A flash
-message will provide a link to the CI/CD Pipeline index page.
+This schedules a background job to run the pipeline schedule. A flash
+message provides a link to the CI/CD Pipeline index page.
 
 NOTE: **Note:**
 To help avoid abuse, users are rate limited to triggering a pipeline once per
@@ -125,12 +124,12 @@ minute.
 Pipelines are executed as a user, who owns a schedule. This influences what projects and other resources the pipeline has access to.
 
 If a user does not own a pipeline, you can take ownership by clicking the **Take ownership** button.
-The next time a pipeline is scheduled, your credentials will be used.
+The next time a pipeline is scheduled, your credentials are used.
 
 ![Schedules list](img/pipeline_schedules_ownership.png)
 
-If the owner of a pipeline schedule doesn't have the ability to create
-pipelines on the target branch, the schedule will stop creating new
+If the owner of a pipeline schedule does not have the ability to create
+pipelines on the target branch, the schedule stops creating new
 pipelines.
 
 This can happen if, for example:

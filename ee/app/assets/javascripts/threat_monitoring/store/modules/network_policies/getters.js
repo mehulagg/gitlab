@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 
 export const policiesWithDefaults = ({ policies }) => {

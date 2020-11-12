@@ -19,5 +19,17 @@ module EE
         project_url(iteration.project, *args)
       end
     end
+
+    def inherited_iteration_path(project, iteration, *args)
+      return unless iteration.group_timebox?
+
+      project_iterations_inherited_path(project, iteration.id, *args)
+    end
+
+    def inherited_iteration_url(project, iteration, *args)
+      return unless iteration.group_timebox?
+
+      project_iterations_inherited_url(project, iteration.id, *args)
+    end
   end
 end

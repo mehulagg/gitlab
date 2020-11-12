@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Vue
 
 To get started with Vue, read through [their documentation](https://vuejs.org/v2/guide/).
@@ -47,7 +53,7 @@ of the new feature should be.
 The Store and the Service should be imported and initialized in this file and
 provided as a prop to the main component.
 
-Be sure to read about [page-specific JavaScript](./performance.md#page-specific-javascript).
+Be sure to read about [page-specific JavaScript](performance.md#page-specific-javascript).
 
 ### Bootstrapping Gotchas
 
@@ -56,34 +62,39 @@ Be sure to read about [page-specific JavaScript](./performance.md#page-specific-
 While mounting a Vue application, you might need to provide data from Rails to JavaScript.
 To do that, you can use the `data` attributes in the HTML element and query them while mounting the application.
 
-_Note:_ You should only do this while initializing the application, because the mounted element will be replaced with Vue-generated DOM.
+You should only do this while initializing the application, because the mounted element will be replaced with Vue-generated DOM.
 
 The advantage of providing data from the DOM to the Vue instance through `props` in the `render` function
 instead of querying the DOM inside the main Vue component is avoiding the need to create a fixture or an HTML element in the unit test,
-which will make the tests easier. See the following example:
+which will make the tests easier.
+
+See the following example, also, please refer to our [Vue style guide](style/vue.md#basic-rules) for additional
+information on why we explicitly declare the data being passed into the Vue app;
 
 ```javascript
 // haml
-.js-vue-app{ data: { endpoint: 'foo' }}
+#js-vue-app{ data: { endpoint: 'foo' }}
 
 // index.js
-document.addEventListener('DOMContentLoaded', () => new Vue({
-  el: '.js-vue-app',
-  data() {
-    const dataset = this.$options.el.dataset;
-    return {
-      endpoint: dataset.endpoint,
-    };
-  },
+const el = document.getElementById('js-vue-app');
+
+if (!el) return false;
+
+const { endpoint } = el.dataset;
+
+return new Vue({
+  el,
   render(createElement) {
     return createElement('my-component', {
       props: {
-        endpoint: this.endpoint,
+        endpoint
       },
     });
   },
-}));
+}
 ```
+
+> When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique across the codebase
 
 #### Accessing the `gl` object
 
@@ -92,7 +103,7 @@ By following this practice, we can avoid the need to mock the `gl` object, which
 It should be done while initializing our Vue instance, and the data should be provided as `props` to the main component:
 
 ```javascript
-document.addEventListener('DOMContentLoaded', () => new Vue({
+return new Vue({
   el: '.js-vue-app',
   render(createElement) {
     return createElement('my-component', {
@@ -101,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => new Vue({
       },
     });
   },
-}));
+});
 ```
 
 #### Accessing feature flags
@@ -180,9 +191,12 @@ Check this [page](vuex.md) for more details.
 ## Style guide
 
 Please refer to the Vue section of our [style guide](style/vue.md)
-for best practices while writing your Vue components and templates.
+for best practices while writing and testing your Vue components and templates.
 
 ## Testing Vue Components
+
+Please refer to the [Vue testing style guide](style/vue.md#vue-testing)
+for guidelines and best practices for testing your Vue components.
 
 Each Vue component has a unique output. This output is always present in the render function.
 
@@ -224,7 +238,7 @@ describe('~/todos/app.vue', () => {
     mock.restore();
   });
 
-  // NOTE: It is very helpful to separate setting up the component from
+  // It is very helpful to separate setting up the component from
   // its collaborators (i.e. Vuex, axios, etc.)
   const createWrapper = (props = {}) => {
     wrapper = shallowMount(App, {
@@ -234,7 +248,7 @@ describe('~/todos/app.vue', () => {
       },
     });
   };
-  // NOTE: Helper methods greatly help test maintainability and readability.
+  // Helper methods greatly help test maintainability and readability.
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findAddButton = () => wrapper.find('[data-testid="add-button"]');
   const findTextInput = () => wrapper.find('[data-testid="text-input"]');
@@ -283,7 +297,7 @@ describe('~/todos/app.vue', () => {
 ### Test the component's output
 
 The main return value of a Vue component is the rendered output. In order to test the component we
-need to test the rendered output. [Vue](https://vuejs.org/v2/guide/unit-testing.html) guide's to unit test show us exactly that:
+need to test the rendered output. Visit the [Vue testing guide](https://vuejs.org/v2/guide/testing.html#Unit-Testing).
 
 ### Events
 

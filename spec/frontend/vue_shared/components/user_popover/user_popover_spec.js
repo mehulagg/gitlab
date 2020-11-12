@@ -1,7 +1,6 @@
-import { GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import UserPopover from '~/vue_shared/components/user_popover/user_popover.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const DEFAULT_PROPS = {
   user: {
@@ -22,6 +21,9 @@ describe('User Popover Component', () => {
   let wrapper;
 
   beforeEach(() => {
+    window.gon.features = {
+      securityAutoFix: true,
+    };
     loadFixtures(fixtureTemplate);
   });
 
@@ -29,6 +31,7 @@ describe('User Popover Component', () => {
     wrapper.destroy();
   });
 
+  const findByTestId = testid => wrapper.find(`[data-testid="${testid}"]`);
   const findUserStatus = () => wrapper.find('.js-user-status');
   const findTarget = () => document.querySelector('.js-user-link');
 
@@ -74,7 +77,7 @@ describe('User Popover Component', () => {
     });
 
     it('shows icon for location', () => {
-      const iconEl = wrapper.find(Icon);
+      const iconEl = wrapper.find(GlIcon);
 
       expect(iconEl.props('name')).toEqual('location');
     });
@@ -139,9 +142,9 @@ describe('User Popover Component', () => {
 
       createWrapper({ user });
 
-      expect(wrapper.findAll(Icon).filter(icon => icon.props('name') === 'profile').length).toEqual(
-        1,
-      );
+      expect(
+        wrapper.findAll(GlIcon).filter(icon => icon.props('name') === 'profile').length,
+      ).toEqual(1);
     });
 
     it('shows icon for work information', () => {
@@ -152,7 +155,9 @@ describe('User Popover Component', () => {
 
       createWrapper({ user });
 
-      expect(wrapper.findAll(Icon).filter(icon => icon.props('name') === 'work').length).toEqual(1);
+      expect(wrapper.findAll(GlIcon).filter(icon => icon.props('name') === 'work').length).toEqual(
+        1,
+      );
     });
   });
 
@@ -193,6 +198,32 @@ describe('User Popover Component', () => {
       createWrapper({ user });
 
       expect(findUserStatus().exists()).toBe(false);
+    });
+  });
+
+  describe('security bot', () => {
+    const SECURITY_BOT_USER = {
+      ...DEFAULT_PROPS.user,
+      name: 'GitLab Security Bot',
+      username: 'GitLab-Security-Bot',
+      websiteUrl: '/security/bot/docs',
+    };
+    const findSecurityBotDocsLink = () => findByTestId('user-popover-bot-docs-link');
+
+    it("shows a link to the bot's documentation", () => {
+      createWrapper({ user: SECURITY_BOT_USER });
+      const securityBotDocsLink = findSecurityBotDocsLink();
+      expect(securityBotDocsLink.exists()).toBe(true);
+      expect(securityBotDocsLink.attributes('href')).toBe(SECURITY_BOT_USER.websiteUrl);
+    });
+
+    it('does not show the link if the feature flag is disabled', () => {
+      window.gon.features = {
+        securityAutoFix: false,
+      };
+      createWrapper({ user: SECURITY_BOT_USER });
+
+      expect(findSecurityBotDocsLink().exists()).toBe(false);
     });
   });
 });

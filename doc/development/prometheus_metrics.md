@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Working with Prometheus Metrics
 
 ## Adding to the library
@@ -29,11 +35,6 @@ After you add or change an existing common metric, you must [re-run the import s
 
 Or, you can create a database migration:
 
-NOTE: **Note:**
-If a query metric (which is identified by `id:`) is removed it will not be removed from database by default.
-You might want to add additional database migration that makes a decision what to do with removed one.
-For example: you might be interested in migrating all dependent data to a different metric.
-
 ```ruby
 class ImportCommonMetrics < ActiveRecord::Migration[4.2]
   include Gitlab::Database::MigrationHelpers
@@ -49,6 +50,10 @@ class ImportCommonMetrics < ActiveRecord::Migration[4.2]
   end
 end
 ```
+
+If a query metric (which is identified by `id:`) is removed it will not be removed from database by default.
+You might want to add additional database migration that makes a decision what to do with removed one.
+For example: you might be interested in migrating all dependent data to a different metric.
 
 ## GitLab Prometheus metrics
 

@@ -4,9 +4,11 @@ module QA
   module Page
     module Project
       class Show < Page::Base
+        include Layout::Flash
         include Page::Component::ClonePanel
         include Page::Component::Breadcrumbs
         include Page::Project::SubMenus::Settings
+        include Page::File::Shared::CommitMessage
 
         view 'app/assets/javascripts/repository/components/preview/index.vue' do
           element :blob_viewer_content
@@ -56,7 +58,7 @@ module QA
           element :new_file_option
         end
 
-        view 'app/assets/javascripts/repository/components/web_ide_link.vue' do
+        view 'app/assets/javascripts/vue_shared/components/web_ide_link.vue' do
           element :web_ide_button
         end
 
@@ -103,6 +105,8 @@ module QA
         end
 
         def click_commit(commit_msg)
+          wait_for_requests
+
           within_element(:file_tree_table) do
             click_on commit_msg
           end
@@ -119,16 +123,18 @@ module QA
           end
         end
 
+        def has_no_file?(name)
+          within_element(:file_tree_table) do
+            has_no_element?(:file_name_link, text: name)
+          end
+        end
+
         def has_name?(name)
           has_element?(:project_name_content, text: name)
         end
 
         def has_readme_content?(text)
           has_element?(:blob_viewer_content, text: text)
-        end
-
-        def last_commit_content
-          find_element(:commit_content).text
         end
 
         def new_merge_request
@@ -141,6 +147,10 @@ module QA
 
         def open_web_ide!
           click_element :web_ide_button
+        end
+
+        def has_edit_fork_button?
+          has_element?(:web_ide_button, text: 'Edit fork in Web IDE')
         end
 
         def project_name

@@ -45,6 +45,10 @@ RSpec.describe Jira::Requests::Projects::ListService do
           end
 
           it 'returns an error response' do
+            expect(Gitlab::ProjectServiceLogger).to receive(:error).with(
+              hash_including(
+                error: hash_including(:exception_class, :exception_message, :exception_backtrace)))
+              .and_call_original
             expect(subject.error?).to be_truthy
             expect(subject.message).to eq('Jira request error: Timeout::Error')
           end
@@ -66,15 +70,27 @@ RSpec.describe Jira::Requests::Projects::ListService do
 
         context 'when the request returns values' do
           before do
-            expect(client).to receive(:get).and_return([{ "key" => 'project1' }, { "key" => 'project2' }])
+            expect(client).to receive(:get).and_return([{ 'key' => 'pr1', 'name' => 'First Project' }, { 'key' => 'pr2', 'name' => 'Second Project' }])
           end
 
-          it 'returns a paylod with jira projets' do
+          it 'returns a paylod with Jira projects' do
             payload = subject.payload
 
             expect(subject.success?).to be_truthy
-            expect(payload[:projects].map(&:key)).to eq(%w(project1 project2))
+            expect(payload[:projects].map(&:key)).to eq(%w(pr1 pr2))
             expect(payload[:is_last]).to be_truthy
+          end
+
+          context 'when filtering projects by name' do
+            let(:params) { { query: 'first' } }
+
+            it 'returns a paylod with Jira procjets' do
+              payload = subject.payload
+
+              expect(subject.success?).to be_truthy
+              expect(payload[:projects].map(&:key)).to eq(%w(pr1))
+              expect(payload[:is_last]).to be_truthy
+            end
           end
         end
       end

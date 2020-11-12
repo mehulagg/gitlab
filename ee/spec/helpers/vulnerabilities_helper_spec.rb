@@ -6,7 +6,7 @@ RSpec.describe VulnerabilitiesHelper do
   let_it_be(:user) { create(:user) }
   let(:project) { create(:project, :repository, :public) }
   let(:pipeline) { create(:ci_pipeline, :success, project: project) }
-  let(:finding) { create(:vulnerabilities_occurrence, pipelines: [pipeline], project: project, severity: :high) }
+  let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
   let(:vulnerability) { create(:vulnerability, title: "My vulnerability", project: project, findings: [finding]) }
 
   before do
@@ -52,21 +52,32 @@ RSpec.describe VulnerabilitiesHelper do
     end
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'has expected vulnerability properties' do
       expect(subject).to include(
         timestamp: Time.now.to_i,
-        create_issue_url: "/#{project.full_path}/-/vulnerability_feedback",
+        create_issue_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/create_issue",
         has_mr: anything,
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",
         notes_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/notes",
         vulnerability_feedback_help_path: kind_of(String),
+        related_issues_help_path: kind_of(String),
         pipeline: anything,
         can_modify_related_issues: false
       )
+    end
+
+    context 'when the issues are disabled for the project' do
+      before do
+        allow(project).to receive(:issues_enabled?).and_return(false)
+      end
+
+      it 'has `create_issue_url` set as nil' do
+        expect(subject).to include(create_issue_url: nil)
+      end
     end
   end
 
@@ -150,7 +161,10 @@ RSpec.describe VulnerabilitiesHelper do
         evidence: kind_of(String),
         scanner: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         request: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
-        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder)
+        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
+        evidence_source: anything,
+        assets: kind_of(Array),
+        supporting_messages: kind_of(Array)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))

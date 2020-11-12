@@ -7,7 +7,12 @@ RSpec.describe MergeRequestDiffCommit do
   let(:project) { merge_request.project }
 
   it_behaves_like 'a BulkInsertSafe model', MergeRequestDiffCommit do
-    let(:valid_items_for_bulk_insertion) { build_list(:merge_request_diff_commit, 10) }
+    let(:valid_items_for_bulk_insertion) do
+      build_list(:merge_request_diff_commit, 10) do |mr_diff_commit|
+        mr_diff_commit.merge_request_diff = create(:merge_request_diff)
+      end
+    end
+
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
 
@@ -30,6 +35,7 @@ RSpec.describe MergeRequestDiffCommit do
         project.commit('570e7b2abdd848b95f2f578043fc23bd6f6fd24d')
       ]
     end
+
     let(:rows) do
       [
         {
@@ -73,6 +79,7 @@ RSpec.describe MergeRequestDiffCommit do
         # This commit's date is "Sun Aug 17 07:12:55 292278994 +0000"
         [project.commit('ba3343bc4fa403a8dfbfcab7fc1a8c29ee34bd69')]
       end
+
       let(:timestamp) { Time.zone.at((1 << 31) - 1) }
       let(:rows) do
         [{

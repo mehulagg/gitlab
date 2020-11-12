@@ -35,7 +35,7 @@ module EE
         merge_request.enabled_reports
       end
 
-      expose :license_scanning, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:license_scanning) } do
+      expose :license_scanning, if: -> (mr, _) { can?(current_user, :read_licenses, mr.target_project) } do
         expose :managed_licenses_path do |merge_request|
           expose_path(api_v4_projects_managed_licenses_path(id: merge_request.target_project.id))
         end
@@ -63,6 +63,10 @@ module EE
 
       expose :pipeline_iid, if: -> (mr, _) { mr.head_pipeline } do |merge_request|
         merge_request.head_pipeline.iid
+      end
+
+      expose :can_read_vulnerabilities do |merge_request|
+        can?(current_user, :read_vulnerability, merge_request.project)
       end
 
       expose :can_read_vulnerability_feedback do |merge_request|

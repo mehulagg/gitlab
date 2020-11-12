@@ -1,15 +1,15 @@
 - if @group.ldap_sync_started?
-  %span.btn.disabled
-    = icon("refresh spin")
-    Syncing&hellip;
+  %span.btn.gl-button.disabled
+    = sprite_icon("retry", css_class: 'spin gl-mr-2')
+    = _('Syncing…')
 - elsif @group.ldap_sync_pending?
-  %span.btn.disabled
-    = icon("refresh spin")
-    Pending sync&hellip;
+  %span.btn.gl-button.disabled
+    = sprite_icon("retry", css_class: 'spin gl-mr-2')
+    = ('Pending sync…')
 - else
-  = link_to sync_group_ldap_path(@group), method: :put, class: 'btn qa-sync-now-button' do
-    = icon("refresh")
-    Sync now
+  = link_to sync_group_ldap_path(@group), method: :put, class: 'btn btn-default gl-button qa-sync-now-button' do
+    = sprite_icon("retry", css_class: "gl-mr-2")
+    = _('Sync now')
 - if @group.ldap_sync_ready? && @group.ldap_sync_last_successful_update_at
   %p.inline.gl-ml-3
-    Successfully synced #{time_ago_with_tooltip(@group.ldap_sync_last_successful_update_at)}.
+    = _('Successfully synced %{synced_timeago}.').html_safe % { synced_timeago: time_ago_with_tooltip(@group.ldap_sync_last_successful_update_at) }

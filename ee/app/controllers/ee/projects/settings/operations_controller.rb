@@ -8,24 +8,20 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          helper_method :tracing_setting, :status_page_setting
+          helper_method :status_page_setting
 
           private
-
-          def tracing_setting
-            @tracing_setting ||= project.tracing_setting || project.build_tracing_setting
-          end
 
           def status_page_setting
             @status_page_setting ||= project.status_page_setting || project.build_status_page_setting
           end
 
-          def has_tracing_license?
-            project.feature_available?(:tracing, current_user)
-          end
-
           def has_status_page_license?
             project.feature_available?(:status_page, current_user)
+          end
+
+          def sla_feature_available?
+            ::IncidentManagement::IncidentSla.available_for?(@project)
           end
 
           def track_tracing_external_url
@@ -41,12 +37,13 @@ module EE
         def permitted_project_params
           permitted_params = super
 
-          if has_tracing_license?
-            permitted_params[:tracing_setting_attributes] = [:external_url]
-          end
-
           if has_status_page_license?
             permitted_params.merge!(status_page_setting_params)
+          end
+
+          if sla_feature_available?
+            incident_params = Array(permitted_params[:incident_management_setting_attributes])
+            permitted_params[:incident_management_setting_attributes] = incident_params.push(*sla_timer_params)
           end
 
           permitted_params
@@ -54,6 +51,10 @@ module EE
 
         def status_page_setting_params
           { status_page_setting_attributes: [:status_page_url, :aws_s3_bucket_name, :aws_region, :aws_access_key, :aws_secret_key, :enabled] }
+        end
+
+        def sla_timer_params
+          [:sla_timer, :sla_timer_minutes]
         end
 
         override :track_events

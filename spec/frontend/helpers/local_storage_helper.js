@@ -10,7 +10,7 @@
  */
 const useLocalStorage = fn => {
   const origLocalStorage = window.localStorage;
-  let currentLocalStorage;
+  let currentLocalStorage = origLocalStorage;
 
   Object.defineProperty(window, 'localStorage', {
     get: () => currentLocalStorage,
@@ -35,7 +35,7 @@ export const createLocalStorageSpy = () => {
     clear: jest.fn(() => {
       storage = {};
     }),
-    getItem: jest.fn(key => storage[key]),
+    getItem: jest.fn(key => (key in storage ? storage[key] : null)),
     setItem: jest.fn((key, value) => {
       storage[key] = value;
     }),

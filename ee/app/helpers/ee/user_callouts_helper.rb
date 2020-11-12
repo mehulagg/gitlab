@@ -11,8 +11,6 @@ module EE
     GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
     THREAT_MONITORING_INFO = 'threat_monitoring_info'
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
-    USERS_OVER_LICENSE_BANNER = 'users_over_license_banner'
-    STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER = 'standalone_vulnerabilities_introduction_banner'
     ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
     PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
 
@@ -56,7 +54,6 @@ module EE
     def render_dashboard_gold_trial(user)
       return unless show_gold_trial?(user, GOLD_TRIAL) &&
           user_default_dashboard?(user) &&
-          ::Feature.enabled?(:render_dashboard_gold_trial, default_enabled: true) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 
@@ -82,10 +79,6 @@ module EE
 
     def show_threat_monitoring_info?
       !user_dismissed?(THREAT_MONITORING_INFO)
-    end
-
-    def show_standalone_vulnerabilities_introduction_banner?
-      !user_dismissed?(STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER)
     end
 
     def show_token_expiry_notification?

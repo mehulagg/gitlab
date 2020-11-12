@@ -8,7 +8,7 @@ import {
 import { debounce } from 'lodash';
 import { sprintf, s__, __ } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { isNumeric } from '../../../utils';
 
 export default {

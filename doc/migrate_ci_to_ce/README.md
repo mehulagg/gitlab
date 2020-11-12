@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto
 ---
 
@@ -205,7 +208,7 @@ If you were running GitLab and GitLab CI on the same server you can skip this
 step.
 
 Copy your CI data archive to your GitLab server. There are many ways to do
-this, below we use SSH agent forwarding and 'scp', which will be easy and fast
+this, below we use SSH agent forwarding and `scp`, which will be easy and fast
 for most setups. You can also copy the data archive first from the CI server to
 your laptop and then from your laptop to the GitLab server.
 

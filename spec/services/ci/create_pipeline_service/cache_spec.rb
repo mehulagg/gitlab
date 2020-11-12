@@ -4,13 +4,13 @@ require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService do
   context 'cache' do
-    let(:user)     { create(:admin) }
+    let(:project)  { create(:project, :custom_repo, files: files) }
+    let(:user)     { project.owner }
     let(:ref)      { 'refs/heads/master' }
     let(:source)   { :push }
     let(:service)  { described_class.new(project, user, { ref: ref }) }
     let(:pipeline) { service.execute(source) }
     let(:job)      { pipeline.builds.find_by(name: 'job') }
-    let(:project)  { create(:project, :custom_repo, files: files) }
 
     before do
       stub_ci_pipeline_yaml_file(config)
@@ -36,7 +36,8 @@ RSpec.describe Ci::CreatePipelineService do
           'key'       => 'a-key',
           'paths'     => ['logs/', 'binaries/'],
           'policy'    => 'pull-push',
-          'untracked' => true
+          'untracked' => true,
+          'when'      => 'on_success'
         }
 
         expect(pipeline).to be_persisted
@@ -67,7 +68,8 @@ RSpec.describe Ci::CreatePipelineService do
           expected = {
             'key'       => /[a-f0-9]{40}/,
             'paths'     => ['logs/'],
-            'policy'    => 'pull-push'
+            'policy'    => 'pull-push',
+            'when'      => 'on_success'
           }
 
           expect(pipeline).to be_persisted
@@ -82,7 +84,8 @@ RSpec.describe Ci::CreatePipelineService do
           expected = {
             'key'       => /default/,
             'paths'     => ['logs/'],
-            'policy'    => 'pull-push'
+            'policy'    => 'pull-push',
+            'when'      => 'on_success'
           }
 
           expect(pipeline).to be_persisted
@@ -114,7 +117,8 @@ RSpec.describe Ci::CreatePipelineService do
           expected = {
             'key'       => /\$ENV_VAR-[a-f0-9]{40}/,
             'paths'     => ['logs/'],
-            'policy'    => 'pull-push'
+            'policy'    => 'pull-push',
+            'when'      => 'on_success'
           }
 
           expect(pipeline).to be_persisted
@@ -129,7 +133,8 @@ RSpec.describe Ci::CreatePipelineService do
           expected = {
             'key'       => /\$ENV_VAR-default/,
             'paths'     => ['logs/'],
-            'policy'    => 'pull-push'
+            'policy'    => 'pull-push',
+            'when'      => 'on_success'
           }
 
           expect(pipeline).to be_persisted

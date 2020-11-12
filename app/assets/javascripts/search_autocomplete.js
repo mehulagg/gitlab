@@ -12,6 +12,8 @@ import {
   getProjectSlug,
   spriteIcon,
 } from './lib/utils/common_utils';
+import Tracking from '~/tracking';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 /**
  * Search input in top navigation bar.
@@ -118,7 +120,7 @@ export class SearchAutocomplete {
   }
 
   createAutocomplete() {
-    return this.searchInput.glDropdown({
+    return initDeprecatedJQueryDropdown(this.searchInput, {
       filterInputBlur: false,
       filterable: true,
       filterRemote: true,
@@ -133,6 +135,7 @@ export class SearchAutocomplete {
       data: this.getData.bind(this),
       selectable: true,
       clicked: this.onClick.bind(this),
+      trackSuggestionClickedLabel: 'search_autocomplete_suggestion',
     });
   }
 
@@ -144,10 +147,10 @@ export class SearchAutocomplete {
     if (!term) {
       const contents = this.getCategoryContents();
       if (contents) {
-        const glDropdownInstance = this.searchInput.data('glDropdown');
+        const deprecatedJQueryDropdownInstance = this.searchInput.data('deprecatedJQueryDropdown');
 
-        if (glDropdownInstance) {
-          glDropdownInstance.filter.options.callback(contents);
+        if (deprecatedJQueryDropdownInstance) {
+          deprecatedJQueryDropdownInstance.filter.options.callback(contents);
         }
         this.enableAutocomplete();
       }
@@ -355,6 +358,15 @@ export class SearchAutocomplete {
     if (!this.dropdown.hasClass('show')) {
       this.loadingSuggestions = false;
       this.dropdownToggle.dropdown('toggle');
+
+      const trackEvent = 'click_search_bar';
+      const trackCategory = undefined; // will be default set in event method
+
+      Tracking.event(trackCategory, trackEvent, {
+        label: 'main_navigation',
+        property: 'navigation',
+      });
+
       return this.searchInput.removeClass('js-autocomplete-disabled');
     }
   }
@@ -453,7 +465,7 @@ export class SearchAutocomplete {
   }
 
   highlightFirstRow() {
-    this.searchInput.data('glDropdown').highlightRowAtIndex(null, 0);
+    this.searchInput.data('deprecatedJQueryDropdown').highlightRowAtIndex(null, 0);
   }
 
   getAvatar(item) {

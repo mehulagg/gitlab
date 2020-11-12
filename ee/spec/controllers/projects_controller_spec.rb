@@ -3,36 +3,90 @@
 require 'spec_helper'
 
 RSpec.describe ProjectsController do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+
   let(:project) { create(:project) }
-  let(:user) { create(:user) }
+
+  let_it_be(:public_project) { create(:project, :public, :repository, namespace: group) }
 
   before do
     project.add_maintainer(user)
     sign_in(user)
   end
 
-  describe "GET show" do
-    let(:public_project) { create(:project, :public, :repository) }
-
+  describe 'GET show' do
     render_views
 
     subject { get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path } }
 
-    it 'shows the over size limit warning message if above_size_limit' do
-      allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
-        expect(checker).to receive(:above_size_limit?).and_return(true)
+    context 'additional repo storage by namespace' do
+      using RSpec::Parameterized::TableSyntax
+      let(:namespace) { public_project.namespace }
+
+      where(:automatic_purchased_storage_allocation, :additional_repo_storage_by_namespace, :expected_to_render) do
+        true | true | true
+        true | false | false
+        false | true | false
+        false | false | false
       end
-      allow(controller).to receive(:current_user).and_return(user)
 
-      subject
+      with_them do
+        before do
+          allow_next_instance_of(EE::Namespace::RootExcessStorageSize) do |root_storage|
+            allow(root_storage).to receive(:usage_ratio).and_return(0.5)
+            allow(root_storage).to receive(:above_size_limit?).and_return(true)
+          end
+          stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
+          stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace, namespace_storage_limit: false)
 
-      expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+          namespace.add_owner(user)
+        end
+
+        it do
+          subject
+
+          expect(response.body.include?("Please purchase additional storage")).to eq(expected_to_render)
+        end
+      end
     end
 
-    it 'does not show an over size warning if not above_size_limit' do
-      subject
+    context 'with additional_repo_storage_by_namespace_enabled? enabled' do
+      before do
+        allow_any_instance_of(EE::Namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(true)
+      end
 
-      expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      it 'does not show over size limit warning when above_size_limit' do
+        allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+          expect(checker).to receive(:above_size_limit?).and_return(true)
+        end
+
+        subject
+
+        expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      end
+    end
+
+    context 'with additional_repo_storage_by_namespace_enabled? disabled' do
+      before do
+        allow_any_instance_of(EE::Namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(false)
+      end
+
+      it 'shows the over size limit warning message if above_size_limit' do
+        allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+          expect(checker).to receive(:above_size_limit?).and_return(true)
+        end
+
+        subject
+
+        expect(response.body).to match(/The size of this repository.+exceeds the limit/)
+      end
+
+      it 'does not show an over size warning if not above_size_limit' do
+        subject
+
+        expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+      end
     end
 
     context 'namespace storage limit' do
@@ -102,8 +156,7 @@ RSpec.describe ProjectsController do
     end
 
     context 'custom project templates' do
-      let(:group) { create(:group) }
-      let(:project_template) { create(:project, :repository, :public, namespace: group) }
+      let(:project_template) { create(:project, :repository, :public, :metrics_dashboard_enabled, namespace: group) }
       let(:templates_params) do
         {
           path: 'foo',
@@ -245,7 +298,7 @@ RSpec.describe ProjectsController do
         end
       end
 
-      context 'when lisence is not sufficient' do
+      context 'when license is not sufficient' do
         before do
           stub_licensed_features(merge_pipelines: false)
         end
@@ -254,6 +307,48 @@ RSpec.describe ProjectsController do
           request
 
           expect(project.reload.merge_pipelines_enabled).to be_falsy
+        end
+      end
+    end
+
+    context 'when auto_rollback_enabled param is specified' do
+      let(:params) { { auto_rollback_enabled: true } }
+
+      let(:request) do
+        put :update, params: { namespace_id: project.namespace, id: project, project: params }
+      end
+
+      before do
+        stub_licensed_features(auto_rollback: true)
+      end
+
+      it 'updates the attribute' do
+        request
+
+        expect(project.reload.auto_rollback_enabled).to be_truthy
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(auto_rollback: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.reload.auto_rollback_enabled).to be_falsy
+        end
+      end
+
+      context 'when license is not sufficient' do
+        before do
+          stub_licensed_features(auto_rollback: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.reload.auto_rollback_enabled).to be_falsy
         end
       end
     end
@@ -384,8 +479,8 @@ RSpec.describe ProjectsController do
     end
 
     context 'compliance framework settings' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:params) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
+      let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
 
       context 'when unlicensed' do
         before do
@@ -419,7 +514,7 @@ RSpec.describe ProjectsController do
               }
           project.reload
 
-          expect(project.compliance_framework_setting.framework).to eq(framework)
+          expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
         end
       end
     end
@@ -430,7 +525,7 @@ RSpec.describe ProjectsController do
 
     context 'when project export is enabled' do
       it 'logs the audit event' do
-        expect { request }.to change { SecurityEvent.count }.by(1)
+        expect { request }.to change { AuditEvent.count }.by(1)
       end
     end
 
@@ -440,13 +535,12 @@ RSpec.describe ProjectsController do
       end
 
       it 'does not log an audit event' do
-        expect { request }.not_to change { SecurityEvent.count }
+        expect { request }.not_to change { AuditEvent.count }
       end
     end
   end
 
   context 'Archive & Unarchive actions' do
-    let(:group) { create(:group) }
     let(:project) { create(:project, group: group) }
     let(:archived_project) { create(:project, :archived, group: group) }
 
@@ -459,8 +553,8 @@ RSpec.describe ProjectsController do
         end
 
         it 'logs the audit event' do
-          expect { request }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:custom_message]).to eq('Project archived')
+          expect { request }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:custom_message]).to eq('Project archived')
         end
       end
 
@@ -470,7 +564,7 @@ RSpec.describe ProjectsController do
         end
 
         it 'does not log the audit event' do
-          expect { request }.not_to change { SecurityEvent.count }
+          expect { request }.not_to change { AuditEvent.count }
         end
       end
     end
@@ -484,8 +578,8 @@ RSpec.describe ProjectsController do
         end
 
         it 'logs the audit event' do
-          expect { request }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:custom_message]).to eq('Project unarchived')
+          expect { request }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:custom_message]).to eq('Project unarchived')
         end
       end
 
@@ -495,21 +589,19 @@ RSpec.describe ProjectsController do
         end
 
         it 'does not log the audit event' do
-          expect { request }.not_to change { SecurityEvent.count }
+          expect { request }.not_to change { AuditEvent.count }
         end
       end
     end
   end
 
   describe 'DELETE #destroy' do
-    let(:owner) { create(:user) }
-    let(:group) { create(:group) }
-    let(:project) { create(:project, group: group)}
+    let(:project) { create(:project, group: group) }
 
     before do
-      group.add_user(owner, Gitlab::Access::OWNER)
+      group.add_user(user, Gitlab::Access::OWNER)
       controller.instance_variable_set(:@project, project)
-      sign_in(owner)
+      sign_in(user)
     end
 
     shared_examples 'deletes project right away' do
@@ -578,7 +670,7 @@ RSpec.describe ProjectsController do
       end
 
       context 'for projects in user namespace' do
-        let(:project) { create(:project, namespace: owner.namespace)}
+        let(:project) { create(:project, namespace: user.namespace) }
 
         it_behaves_like 'deletes project right away'
       end
@@ -594,12 +686,11 @@ RSpec.describe ProjectsController do
   end
 
   describe 'POST #restore' do
-    let(:owner) { create(:user) }
-    let(:project) { create(:project, namespace: owner.namespace)}
+    let(:project) { create(:project, namespace: user.namespace) }
 
     before do
       controller.instance_variable_set(:@project, project)
-      sign_in(owner)
+      sign_in(user)
     end
 
     it 'restores project deletion' do

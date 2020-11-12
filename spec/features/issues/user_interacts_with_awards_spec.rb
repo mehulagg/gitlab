@@ -68,7 +68,7 @@ RSpec.describe 'User interacts with awards' do
       page.within('.awards') do
         expect(page).to have_selector('.js-emoji-btn')
         expect(page.find('.js-emoji-btn.active .js-counter')).to have_content('1')
-        expect(page).to have_css(".js-emoji-btn.active[data-original-title='You']")
+        expect(page).to have_css(".js-emoji-btn.active[title='You']")
 
         expect do
           page.find('.js-emoji-btn.active').click
@@ -184,6 +184,31 @@ RSpec.describe 'User interacts with awards' do
         wait_for_requests
       end
 
+      context 'when the issue is locked' do
+        before do
+          create(:award_emoji, awardable: issue, name: '100')
+          issue.update!(discussion_locked: true)
+
+          visit project_issue_path(project, issue)
+          wait_for_requests
+        end
+
+        it 'hides the add award button' do
+          page.within('.awards') do
+            expect(page).not_to have_css('.js-add-award')
+          end
+        end
+
+        it 'does not allow toggling existing emoji' do
+          page.within('.awards') do
+            find('gl-emoji[data-name="100"]').click
+          end
+          wait_for_requests
+
+          expect(issue.reload.award_emoji.size).to eq(1)
+        end
+      end
+
       it 'adds award to issue' do
         first('.js-emoji-btn').click
 
@@ -269,7 +294,7 @@ RSpec.describe 'User interacts with awards' do
           end
         end
 
-        it 'toggles the smiley emoji on a note', :js do
+        it 'toggles the smiley emoji on a note', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/267525' do
           toggle_smiley_emoji(true)
 
           within('.note-body') do

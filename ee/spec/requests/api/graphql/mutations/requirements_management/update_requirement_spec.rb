@@ -17,9 +17,7 @@ RSpec.describe 'Updating a Requirement' do
   end
 
   shared_examples 'requirement update fails' do
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not update requirement' do
       expect do
@@ -83,15 +81,7 @@ RSpec.describe 'Updating a Requirement' do
         let(:attributes) { {} }
 
         it_behaves_like 'a mutation that returns top-level errors',
-          errors: ['title or state argument is required']
-      end
-
-      context 'when requirements_management flag is disabled' do
-        before do
-          stub_feature_flags(requirements_management: false)
-        end
-
-        it_behaves_like 'requirement update fails'
+          errors: ['At least one of title, state, last_test_report_state, description is required']
       end
     end
   end

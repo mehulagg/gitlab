@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 module API
-  class AuditEvents < ::Grape::API::Instance
+  class AuditEvents < ::API::Base
     include ::API::PaginationParams
+
+    feature_category :audit_events
 
     before do
       authenticated_as_admin!
       forbidden! unless ::License.feature_available?(:admin_audit_log)
+      increment_unique_values('a_compliance_audit_events_api', current_user.id)
     end
 
     resources :audit_events do

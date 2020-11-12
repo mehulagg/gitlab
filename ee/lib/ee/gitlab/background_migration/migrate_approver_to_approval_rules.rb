@@ -32,13 +32,20 @@ module EE
           self.table_name = 'approval_merge_request_rules'
 
           belongs_to :merge_request
-          scope :code_owner, -> { where(code_owner: true) }
-          scope :regular, -> { where(code_owner: false) } # Non code owner rule
+          scope :code_owner, -> { where(code_owner: true).or(where(rule_type: :code_owner)) }
+          scope :regular, -> { where(code_owner: false).or(where(rule_type: :regular)) } # Non code owner rule
 
           has_and_belongs_to_many :users
           has_and_belongs_to_many :groups, class_name: 'Group', join_table: :approval_merge_request_rules_groups
           has_one :approval_merge_request_rule_source
           has_one :approval_project_rule, through: :approval_merge_request_rule_source
+
+          enum rule_type: {
+            regular: 1,
+            code_owner: 2,
+            report_approver: 3,
+            any_approver: 4
+          }
 
           def project
             merge_request.target_project
@@ -46,7 +53,7 @@ module EE
 
           def self.find_or_create_code_owner_rule(merge_request, entry)
             merge_request.approval_rules.safe_find_or_create_by(
-              code_owner: true,
+              rule_type: :code_owner,
               name: entry.pattern
             )
           end

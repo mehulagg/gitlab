@@ -6,14 +6,17 @@ const _links = {
 export const mockPipelineInfo = {
   id: 1,
   ref: 'branch-name',
-  sha: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+  sha: 'sha-baz',
   user: {
     name: 'foo',
   },
   project: {
     name: 'foo-project',
     web_url: 'foo-project-link',
+    commit_url: 'foo-commit-link',
+    pipeline_url: 'foo-pipeline-link',
   },
+  created_at: '2015-12-10',
 };
 
 export const mavenPackage = {
@@ -27,6 +30,7 @@ export const mavenPackage = {
   name: 'Test package',
   package_type: 'maven',
   project_path: 'foo/bar/baz',
+  projectPathName: 'foo/bar/baz',
   project_id: 1,
   updated_at: '2015-12-10',
   version: '1.0.0',
@@ -56,6 +60,7 @@ export const npmPackage = {
   name: '@Test/package',
   package_type: 'npm',
   project_path: 'foo/bar/baz',
+  projectPathName: 'foo/bar/baz',
   project_id: 1,
   updated_at: '2015-12-10',
   version: '',
@@ -79,14 +84,15 @@ export const conanPackage = {
     package_channel: 'stable',
     package_username: 'conan+conan-package',
   },
+  conan_package_name: 'conan-package',
   created_at: '2015-12-10',
   id: 3,
-  name: 'conan-package',
+  name: 'conan-package/1.0.0@conan+conan-package/stable',
   project_path: 'foo/bar/baz',
+  projectPathName: 'foo/bar/baz',
   package_files: [],
   package_type: 'conan',
   project_id: 1,
-  recipe: 'conan-package/1.0.0@conan+conan-package/stable',
   updated_at: '2015-12-10',
   version: '1.0.0',
   _links,
@@ -131,6 +137,18 @@ export const pypiPackage = {
   name: 'PyPiPackage',
   package_files: [],
   package_type: 'pypi',
+  project_id: 1,
+  tags: [],
+  updated_at: '2015-12-10',
+  version: '1.0.0',
+};
+
+export const composerPackage = {
+  created_at: '2015-12-10',
+  id: 5,
+  name: 'ComposerPackage',
+  package_files: [],
+  package_type: 'composer',
   project_id: 1,
   tags: [],
   updated_at: '2015-12-10',

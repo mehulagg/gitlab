@@ -1,10 +1,13 @@
+import { isNil } from 'lodash';
+
 export default class GeoNodesStore {
-  constructor(primaryVersion, primaryRevision) {
+  constructor(primaryVersion, primaryRevision, replicableTypes) {
     this.state = {};
     this.state.nodes = [];
     this.state.nodeDetails = {};
     this.state.primaryVersion = primaryVersion;
     this.state.primaryRevision = primaryRevision;
+    this.state.replicableTypes = replicableTypes;
   }
 
   setNodes(nodes) {
@@ -16,7 +19,10 @@ export default class GeoNodesStore {
   }
 
   setNodeDetails(nodeId, nodeDetails) {
-    this.state.nodeDetails[nodeId] = GeoNodesStore.formatNodeDetails(nodeDetails);
+    this.state.nodeDetails[nodeId] = GeoNodesStore.formatNodeDetails(
+      nodeDetails,
+      this.state.replicableTypes,
+    );
   }
 
   removeNode(node) {
@@ -60,7 +66,39 @@ export default class GeoNodesStore {
     };
   }
 
-  static formatNodeDetails(rawNodeDetails) {
+  static formatNodeDetails(rawNodeDetails, replicableTypes) {
+    const syncStatuses = replicableTypes.map(replicable => {
+      return {
+        itemEnabled: rawNodeDetails[`${replicable.namePlural}_replication_enabled`],
+        itemTitle: replicable.titlePlural,
+        itemName: replicable.namePlural,
+        itemValue: {
+          totalCount: rawNodeDetails[`${replicable.namePlural}_count`],
+          successCount: rawNodeDetails[`${replicable.namePlural}_synced_count`],
+          failureCount: rawNodeDetails[`${replicable.namePlural}_failed_count`],
+          verificationSuccessCount: rawNodeDetails[`${replicable.namePlural}_verified_count`],
+          verificationFailureCount:
+            rawNodeDetails[`${replicable.namePlural}_verification_failed_count`],
+          checksumSuccessCount: rawNodeDetails[`${replicable.namePlural}_checksummed_count`],
+          checksumFailureCount: rawNodeDetails[`${replicable.namePlural}_checksum_failed_count`],
+        },
+        ...replicable,
+      };
+    });
+
+    // Adds replicable to array as long as value is defined
+    const verificationStatuses = syncStatuses.filter(s =>
+      Boolean(
+        !isNil(s.itemValue.verificationSuccessCount) ||
+          !isNil(s.itemValue.verificationFailureCount),
+      ),
+    );
+
+    // Adds replicable to array as long as value is defined
+    const checksumStatuses = syncStatuses.filter(s =>
+      Boolean(!isNil(s.itemValue.checksumSuccessCount) || !isNil(s.itemValue.checksumFailureCount)),
+    );
+
     return {
       id: rawNodeDetails.geo_node_id,
       health: rawNodeDetails.health,
@@ -81,73 +119,9 @@ export default class GeoNodesStore {
         successCount: rawNodeDetails.replication_slots_used_count || 0,
         failureCount: 0,
       },
-      repositories: {
-        enabled: rawNodeDetails.repositories_replication_enabled,
-        totalCount: rawNodeDetails.projects_count || 0,
-        successCount: rawNodeDetails.repositories_synced_count || 0,
-        failureCount: rawNodeDetails.repositories_failed_count || 0,
-      },
-      wikis: {
-        enabled: rawNodeDetails.repositories_replication_enabled,
-        totalCount: rawNodeDetails.projects_count || 0,
-        successCount: rawNodeDetails.wikis_synced_count || 0,
-        failureCount: rawNodeDetails.wikis_failed_count || 0,
-      },
-      repositoriesChecksummed: {
-        totalCount: rawNodeDetails.projects_count || 0,
-        successCount: rawNodeDetails.repositories_checksummed_count || 0,
-        failureCount: rawNodeDetails.repositories_checksum_failed_count || 0,
-      },
-      wikisChecksummed: {
-        totalCount: rawNodeDetails.projects_count || 0,
-        successCount: rawNodeDetails.wikis_checksummed_count || 0,
-        failureCount: rawNodeDetails.wikis_checksum_failed_count || 0,
-      },
-      verifiedRepositories: {
-        totalCount: rawNodeDetails.projects_count || 0,
-        successCount: rawNodeDetails.repositories_verified_count || 0,
-        failureCount: rawNodeDetails.repositories_verification_failed_count || 0,
-      },
-      verifiedWikis: {
-        totalCount: rawNodeDetails.projects_count || 0,
-        successCount: rawNodeDetails.wikis_verified_count || 0,
-        failureCount: rawNodeDetails.wikis_verification_failed_count || 0,
-      },
-      lfs: {
-        enabled: rawNodeDetails.lfs_objects_replication_enabled,
-        totalCount: rawNodeDetails.lfs_objects_count || 0,
-        successCount: rawNodeDetails.lfs_objects_synced_count || 0,
-        failureCount: rawNodeDetails.lfs_objects_failed_count || 0,
-      },
-      jobArtifacts: {
-        enabled: rawNodeDetails.job_artifacts_replication_enabled,
-        totalCount: rawNodeDetails.job_artifacts_count || 0,
-        successCount: rawNodeDetails.job_artifacts_synced_count || 0,
-        failureCount: rawNodeDetails.job_artifacts_failed_count || 0,
-      },
-      containerRepositories: {
-        enabled: rawNodeDetails.container_repositories_replication_enabled,
-        totalCount: rawNodeDetails.container_repositories_count || 0,
-        successCount: rawNodeDetails.container_repositories_synced_count || 0,
-        failureCount: rawNodeDetails.container_repositories_failed_count || 0,
-      },
-      designRepositories: {
-        enabled: rawNodeDetails.design_repositories_replication_enabled,
-        totalCount: rawNodeDetails.design_repositories_count || 0,
-        successCount: rawNodeDetails.design_repositories_synced_count || 0,
-        failureCount: rawNodeDetails.design_repositories_failed_count || 0,
-      },
-      packageFiles: {
-        totalCount: rawNodeDetails.package_files_registry_count || 0,
-        successCount: rawNodeDetails.package_files_synced_count || 0,
-        failureCount: rawNodeDetails.package_files_failed_count || 0,
-      },
-      attachments: {
-        enabled: rawNodeDetails.attachments_replication_enabled,
-        totalCount: rawNodeDetails.attachments_count || 0,
-        successCount: rawNodeDetails.attachments_synced_count || 0,
-        failureCount: rawNodeDetails.attachments_failed_count || 0,
-      },
+      syncStatuses,
+      verificationStatuses,
+      checksumStatuses,
       lastEvent: {
         id: rawNodeDetails.last_event_id || 0,
         timeStamp: rawNodeDetails.last_event_timestamp,

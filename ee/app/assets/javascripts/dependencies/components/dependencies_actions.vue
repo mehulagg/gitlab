@@ -1,19 +1,13 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import {
-  GlDeprecatedButton,
-  GlDropdown,
-  GlDropdownItem,
-  GlIcon,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
 import { SORT_FIELDS, SORT_ORDER } from '../store/modules/list/constants';
 
 export default {
   name: 'DependenciesActions',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
     GlIcon,
@@ -84,23 +78,24 @@ export default {
           </span>
         </gl-dropdown-item>
       </gl-dropdown>
-      <gl-deprecated-button
+      <gl-button
         v-gl-tooltip
         :title="__('Sort direction')"
         class="flex-grow-0 js-sort-order"
         @click="toggleSortOrder"
       >
         <gl-icon :name="sortOrderIcon" />
-      </gl-deprecated-button>
+      </gl-button>
     </div>
-    <gl-deprecated-button
+    <gl-button
       v-gl-tooltip
       :href="downloadEndpoint"
       download="dependencies.json"
       :title="s__('Dependencies|Export as JSON')"
       class="js-download"
+      icon="export"
     >
-      <gl-icon name="export" />
-    </gl-deprecated-button>
+      {{ __('Export') }}
+    </gl-button>
   </div>
 </template>

@@ -28,14 +28,17 @@ RSpec.describe IterationsUpdateStatusWorker do
     end
 
     context 'when iterations are in `started` state' do
-      let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, start_date: 10.days.ago, due_date: 1.day.ago, state_enum: ::Iteration::STATE_ENUM_MAP[:started]) }
+      let_it_be(:iteration1) { create(:iteration, :skip_future_date_validation, start_date: 10.days.ago, due_date: 2.days.ago, state_enum: ::Iteration::STATE_ENUM_MAP[:started]) }
+      let_it_be(:iteration2) { create(:iteration, :skip_future_date_validation, start_date: 1.day.ago, due_date: Date.today, state_enum: ::Iteration::STATE_ENUM_MAP[:started]) }
 
-      it 'updates from started to closed when due date is past' do
-        expect(iteration.state).to eq('started')
+      it 'updates from started to closed when due date is past, does not touch others', :aggregate_failures do
+        expect(iteration1.state).to eq('started')
+        expect(iteration2.state).to eq('started')
 
         worker.perform
 
-        expect(iteration.reload.state).to eq('closed')
+        expect(iteration1.reload.state).to eq('closed')
+        expect(iteration2.reload.state).to eq('started')
       end
     end
   end

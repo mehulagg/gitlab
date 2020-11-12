@@ -10,29 +10,47 @@ RSpec.describe 'Admin Dashboard' do
       sign_in(create(:admin))
     end
 
-    context 'for tooltip' do
+    describe 'license' do
       before do
         allow(License).to receive(:current).and_return(license)
-
-        visit admin_dashboard_stats_path
       end
 
-      context 'when license is empty' do
-        let(:license) { nil }
+      context 'for tooltip' do
+        before do
+          visit admin_dashboard_stats_path
+        end
 
-        it { expect(page).not_to have_css('span.has-tooltip') }
+        context 'when license is empty' do
+          let(:license) { nil }
+
+          it { expect(page).not_to have_css('span.has-tooltip') }
+        end
+
+        context 'when license is on a plan Ultimate' do
+          let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+
+          it { expect(page).to have_css('span.has-tooltip') }
+        end
+
+        context 'when license is on a plan other than Ultimate' do
+          let(:license) { create(:license, plan: License::PREMIUM_PLAN) }
+
+          it { expect(page).not_to have_css('span.has-tooltip') }
+        end
       end
 
-      context 'when license is on a plan Ultimate' do
-        let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+      context 'when user count over license maximum' do
+        let_it_be(:license_seats_limit) { 5 }
 
-        it { expect(page).to have_css('span.has-tooltip') }
-      end
+        let(:license) { create(:license, restrictions: { active_user_count: license_seats_limit }) }
 
-      context 'when license is on a plan other than Ultimate' do
-        let(:license) { create(:license, plan: License::PREMIUM_PLAN) }
+        before do
+          create(:historical_data, date: license.created_at, active_user_count: license_seats_limit + 1)
 
-        it { expect(page).not_to have_css('span.has-tooltip') }
+          visit admin_root_path
+        end
+
+        it { expect(page).to have_content("Your instance has exceeded your subscription\'s licensed user count.") }
       end
     end
 
@@ -46,9 +64,9 @@ RSpec.describe 'Admin Dashboard' do
       expect(page).to have_content("Users with highest role Maintainer 6")
       expect(page).to have_content("Users with highest role Owner 5")
       expect(page).to have_content("Bots 2")
-      expect(page).to have_content("Active users (Billable users) 71")
       expect(page).to have_content("Blocked users 7")
       expect(page).to have_content("Total users 78")
+      expect(page).to have_content("Billable users 71")
     end
   end
 end

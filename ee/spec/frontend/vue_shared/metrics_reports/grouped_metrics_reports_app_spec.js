@@ -2,7 +2,7 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import MetricsReportsIssueBody from 'ee/vue_shared/metrics_reports/components/metrics_reports_issue_body.vue';
-import store from 'ee/vue_shared/metrics_reports/store';
+import { getStoreConfig } from 'ee/vue_shared/metrics_reports/store';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -25,7 +25,7 @@ describe('Grouped metrics reports app', () => {
   };
 
   beforeEach(() => {
-    mockStore = store();
+    mockStore = new Vuex.Store(getStoreConfig());
     mountComponent();
   });
 

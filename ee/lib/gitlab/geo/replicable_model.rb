@@ -12,8 +12,9 @@ module Gitlab
         after_create_commit -> { replicator.handle_after_create_commit if replicator.respond_to?(:handle_after_create_commit) }
         after_destroy -> { replicator.handle_after_destroy if replicator.respond_to?(:handle_after_destroy) }
 
-        scope :checksummed, -> { where('verification_checksum IS NOT NULL') }
-        scope :checksum_failed, -> { where('verification_failure IS NOT NULL') }
+        scope :checksummed, -> { where.not(verification_checksum: nil) }
+        scope :checksum_failed, -> { where.not(verification_failure: nil) }
+        scope :available_replicables, -> { all }
 
         sha_attribute :verification_checksum
       end
@@ -51,7 +52,7 @@ module Gitlab
 
         return unless needs_checksum?
 
-        self.verification_checksum = self.class.hexdigest(file.path)
+        self.verification_checksum = self.class.hexdigest(replicator.carrierwave_uploader.path)
       end
 
       # Checks whether model needs checksum to be performed
@@ -81,6 +82,10 @@ module Gitlab
         else
           replicator.carrierwave_uploader.exists?
         end
+      end
+
+      def in_replicables_for_current_secondary?
+        self.class.replicables_for_current_secondary(self).exists?
       end
     end
   end

@@ -17,4 +17,5 @@ export default () => ({
   existingLicenses: [],
   hasLicenseCheckApprovalRule: false,
   isLoadingLicenseCheckApprovalRule: false,
+  knownLicenses: [],
 });

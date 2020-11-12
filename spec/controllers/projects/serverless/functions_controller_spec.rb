@@ -18,6 +18,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
   let(:knative_stub_options) do
     { namespace: namespace.namespace, name: function_name, description: function_description }
   end
+
   let(:knative) { create(:clusters_applications_knative, :installed, cluster: cluster) }
 
   let(:namespace) do
@@ -205,7 +206,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
       context 'on Knative 0.5.0' do
         before do
-          prepare_knative_stubs(knative_05_service(knative_stub_options))
+          prepare_knative_stubs(knative_05_service(**knative_stub_options))
         end
 
         include_examples 'GET #show with valid data'
@@ -213,7 +214,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
       context 'on Knative 0.6.0' do
         before do
-          prepare_knative_stubs(knative_06_service(knative_stub_options))
+          prepare_knative_stubs(knative_06_service(**knative_stub_options))
         end
 
         include_examples 'GET #show with valid data'
@@ -221,7 +222,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
       context 'on Knative 0.7.0' do
         before do
-          prepare_knative_stubs(knative_07_service(knative_stub_options))
+          prepare_knative_stubs(knative_07_service(**knative_stub_options))
         end
 
         include_examples 'GET #show with valid data'
@@ -229,7 +230,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
       context 'on Knative 0.9.0' do
         before do
-          prepare_knative_stubs(knative_09_service(knative_stub_options))
+          prepare_knative_stubs(knative_09_service(**knative_stub_options))
         end
 
         include_examples 'GET #show with valid data'
@@ -274,7 +275,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
     context 'on Knative 0.5.0' do
       before do
-        prepare_knative_stubs(knative_05_service(knative_stub_options))
+        prepare_knative_stubs(knative_05_service(**knative_stub_options))
       end
 
       include_examples 'GET #index with data'
@@ -282,7 +283,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
     context 'on Knative 0.6.0' do
       before do
-        prepare_knative_stubs(knative_06_service(knative_stub_options))
+        prepare_knative_stubs(knative_06_service(**knative_stub_options))
       end
 
       include_examples 'GET #index with data'
@@ -290,7 +291,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
     context 'on Knative 0.7.0' do
       before do
-        prepare_knative_stubs(knative_07_service(knative_stub_options))
+        prepare_knative_stubs(knative_07_service(**knative_stub_options))
       end
 
       include_examples 'GET #index with data'
@@ -298,7 +299,7 @@ RSpec.describe Projects::Serverless::FunctionsController do
 
     context 'on Knative 0.9.0' do
       before do
-        prepare_knative_stubs(knative_09_service(knative_stub_options))
+        prepare_knative_stubs(knative_09_service(**knative_stub_options))
       end
 
       include_examples 'GET #index with data'

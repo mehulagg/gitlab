@@ -3,6 +3,7 @@ mutation createIteration($input: CreateIterationInput!) {
     iteration {
       title
       description
+      descriptionHtml
       startDate
       dueDate
       webUrl

@@ -1,11 +1,12 @@
 import { mount } from '@vue/test-utils';
-import { GlLink } from '@gitlab/ui';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
-import ReleaseBlockFooter from '~/releases/components/release_block_footer.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-import { release as originalRelease } from '../mock_data';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { getJSONFixture } from 'helpers/fixtures';
 import { cloneDeep } from 'lodash';
+import ReleaseBlockFooter from '~/releases/components/release_block_footer.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+const originalRelease = getJSONFixture('api/releases/release.json');
 
 const mockFutureDate = new Date(9999, 0, 0).toISOString();
 let mockIsFutureRelease = false;
@@ -56,7 +57,7 @@ describe('Release block footer', () => {
     beforeEach(() => factory());
 
     it('renders the commit icon', () => {
-      const commitIcon = commitInfoSection().find(Icon);
+      const commitIcon = commitInfoSection().find(GlIcon);
 
       expect(commitIcon.exists()).toBe(true);
       expect(commitIcon.props('name')).toBe('commit');
@@ -71,7 +72,7 @@ describe('Release block footer', () => {
     });
 
     it('renders the tag icon', () => {
-      const commitIcon = tagInfoSection().find(Icon);
+      const commitIcon = tagInfoSection().find(GlIcon);
 
       expect(commitIcon.exists()).toBe(true);
       expect(commitIcon.props('name')).toBe('tag');

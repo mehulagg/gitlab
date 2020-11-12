@@ -1,5 +1,0 @@
----
-title: Add is_standard as part of frontend payload for NetworkPolicyController
-merge_request: 37527
-author:
-type: changed

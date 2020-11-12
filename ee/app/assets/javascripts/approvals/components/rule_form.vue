@@ -1,6 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { groupBy, isNumber } from 'lodash';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { sprintf, __ } from '~/locale';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
@@ -9,7 +10,12 @@ import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
 
 const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
-const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT];
+const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
+const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
+
+function mapServerResponseToValidationErrors(messages) {
+  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map(msg => `${key} ${msg}`));
+}
 
 export default {
   components: {
@@ -17,6 +23,8 @@ export default {
     ApproversSelect,
     BranchesSelect,
   },
+  // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
+  mixins: [glFeatureFlagsMixin()],
   props: {
     initRule: {
       type: Object,
@@ -28,9 +36,14 @@ export default {
       default: true,
       required: false,
     },
+    defaultRuleName: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
-    return {
+    const defaults = {
       name: '',
       approvalsRequired: 1,
       minApprovalsRequired: 0,
@@ -41,11 +54,22 @@ export default {
       showValidation: false,
       isFallback: false,
       containsHiddenGroups: false,
+      serverValidationErrors: [],
       ...this.getInitialData(),
     };
+    // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
+    if (this.glFeatures.approvalSuggestions) {
+      return { ...defaults, name: this.defaultRuleName || defaults.name };
+    }
+
+    return defaults;
   },
   computed: {
     ...mapState(['settings']),
+    rule() {
+      // If we are creating a new rule with a suggested approval name
+      return this.defaultRuleName ? null : this.initRule;
+    },
     approversByType() {
       return groupBy(this.approvers, x => x.type);
     },
@@ -79,11 +103,17 @@ export default {
       return invalidObject;
     },
     invalidName() {
-      if (!this.isMultiSubmission) {
-        return '';
+      let error = '';
+
+      if (this.isMultiSubmission) {
+        if (this.serverValidationErrors.includes('name has already been taken')) {
+          error = __('Rule name is already taken.');
+        } else if (!this.name) {
+          error = __('Please provide a name');
+        }
       }
 
-      return !this.name ? __('Please provide a name') : '';
+      return error;
     },
     invalidApprovalsRequired() {
       if (!isNumber(this.approvalsRequired)) {
@@ -132,6 +162,12 @@ export default {
       return !this.settings.lockedApprovalsRuleName;
     },
     isNameDisabled() {
+      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
+      if (this.glFeatures.approvalSuggestions) {
+        return (
+          Boolean(this.isPersisted || this.defaultRuleName) && READONLY_NAMES.includes(this.name)
+        );
+      }
       return this.isPersisted && READONLY_NAMES.includes(this.name);
     },
     removeHiddenGroups() {
@@ -179,15 +215,27 @@ export default {
      * - Multi rule?
      */
     submit() {
+      let submission;
+
+      this.serverValidationErrors = [];
+
       if (!this.validate()) {
-        return Promise.resolve();
+        submission = Promise.resolve();
       } else if (this.isFallbackSubmission) {
-        return this.submitFallback();
+        submission = this.submitFallback();
       } else if (!this.isMultiSubmission) {
-        return this.submitSingleRule();
+        submission = this.submitSingleRule();
+      } else {
+        submission = this.submitRule();
       }
 
-      return this.submitRule();
+      submission.catch(failureResponse => {
+        this.serverValidationErrors = mapServerResponseToValidationErrors(
+          failureResponse?.response?.data?.message || {},
+        );
+      });
+
+      return submission;
     },
     /**
      * Submit the rule, by either put-ing or post-ing.
@@ -232,7 +280,7 @@ export default {
       return this.isValid;
     },
     getInitialData() {
-      if (!this.initRule) {
+      if (!this.initRule || this.defaultRuleName) {
         return {};
       }
 
@@ -309,7 +357,7 @@ export default {
             v-model="branchesToAdd"
             :project-id="settings.projectId"
             :is-invalid="!!validation.branches"
-            :init-rule="initRule"
+            :init-rule="rule"
           />
           <div class="invalid-feedback">{{ validation.branches }}</div>
         </div>

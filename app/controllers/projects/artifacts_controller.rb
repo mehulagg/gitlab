@@ -15,6 +15,8 @@ class Projects::ArtifactsController < Projects::ApplicationController
 
   MAX_PER_PAGE = 20
 
+  feature_category :continuous_integration
+
   def index
     # Loading artifacts is very expensive in projects with a lot of artifacts.
     # This feature flag prevents a DOS attack vector.
@@ -108,7 +110,7 @@ class Projects::ArtifactsController < Projects::ApplicationController
   end
 
   def validate_artifacts!
-    render_404 unless build&.artifacts?
+    render_404 unless build&.available_artifacts?
   end
 
   def build

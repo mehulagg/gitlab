@@ -32,25 +32,26 @@ module Geo
     #
     # @return [Array] resources to be transferred
     def load_pending_resources
-      resources = find_unsynced_jobs(batch_size: db_retrieve_batch_size)
+      resources = find_jobs_never_attempted_sync(batch_size: db_retrieve_batch_size)
       remaining_capacity = db_retrieve_batch_size - resources.count
 
-      if remaining_capacity.zero?
+      if remaining_capacity == 0
         resources
       else
-        resources + find_low_priority_jobs(batch_size: remaining_capacity)
+        resources + find_jobs_needs_sync_again(batch_size: remaining_capacity)
       end
     end
 
-    # Get a batch of unsynced resources, taking equal parts from each resource.
+    # Get a batch of resources that never have an attempt to sync, taking
+    # equal parts from each resource.
     #
-    # @return [Array] job arguments of unsynced resources
-    def find_unsynced_jobs(batch_size:)
+    # @return [Array] job arguments of resources that never have an attempt to sync
+    def find_jobs_never_attempted_sync(batch_size:)
       jobs = replicator_classes.reduce([]) do |jobs, replicator_class|
         except_ids = scheduled_replicable_ids(replicator_class.replicable_name)
 
         jobs << replicator_class
-                  .find_unsynced_registries(batch_size: batch_size, except_ids: except_ids)
+                  .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: except_ids)
                   .map { |registry| [replicator_class.replicable_name, registry.model_record_id] }
       end
 
@@ -61,12 +62,12 @@ module Geo
     # equal parts from each resource.
     #
     # @return [Array] job arguments of low priority resources
-    def find_low_priority_jobs(batch_size:)
+    def find_jobs_needs_sync_again(batch_size:)
       jobs = replicator_classes.reduce([]) do |jobs, replicator_class|
         except_ids = scheduled_replicable_ids(replicator_class.replicable_name)
 
         jobs << replicator_class
-                  .find_failed_registries(batch_size: batch_size, except_ids: except_ids)
+                  .find_registries_needs_sync_again(batch_size: batch_size, except_ids: except_ids)
                   .map { |registry| [replicator_class.replicable_name, registry.model_record_id] }
       end
 
@@ -78,7 +79,7 @@ module Geo
     end
 
     def replicator_classes
-      Gitlab::Geo.replicator_classes
+      Gitlab::Geo.enabled_replicator_classes
     end
   end
 end

@@ -60,19 +60,6 @@ RSpec.describe Epics::UpdateService do
       it 'updates the last_edited_at value' do
         expect { update_epic(opts) }.to change { epic.last_edited_at }
       end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential attribute on update' do
-          update_epic(opts)
-
-          expect(epic).to be_valid
-          expect(epic.confidential).to be_falsey
-        end
-      end
     end
 
     context 'when title has changed' do
@@ -171,6 +158,7 @@ RSpec.describe Epics::UpdateService do
             author: user,
             user: user)
         end
+
         let!(:todo2) do
           create(:todo, :mentioned, :pending,
             target: epic,

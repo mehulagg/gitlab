@@ -7,14 +7,22 @@ RSpec.describe Gitlab::Kubernetes::NetworkPolicy do
     described_class.new(
       name: name,
       namespace: namespace,
-      creation_timestamp: '2020-04-14T00:08:30Z',
-      pod_selector: pod_selector,
-      policy_types: %w(Ingress Egress),
+      selector: selector,
       ingress: ingress,
-      egress: egress
+      labels: labels
     )
   end
 
+  let(:resource) do
+    ::Kubeclient::Resource.new(
+      kind: Gitlab::Kubernetes::NetworkPolicy::KIND,
+      metadata: { name: name, namespace: namespace },
+      spec: { podSelector: pod_selector, policyTypes: %w(Ingress), ingress: ingress, egress: nil }
+    )
+  end
+
+  let(:selector) { pod_selector }
+  let(:labels) { nil }
   let(:name) { 'example-name' }
   let(:namespace) { 'example-namespace' }
   let(:pod_selector) { { matchLabels: { role: 'db' } } }
@@ -37,6 +45,8 @@ RSpec.describe Gitlab::Kubernetes::NetworkPolicy do
     ]
   end
 
+  include_examples 'network policy common specs'
+
   describe '.from_yaml' do
     let(:manifest) do
       <<~POLICY
@@ -45,8 +55,6 @@ RSpec.describe Gitlab::Kubernetes::NetworkPolicy do
         metadata:
           name: example-name
           namespace: example-namespace
-          labels:
-            app: foo
         spec:
           podSelector:
             matchLabels:
@@ -59,12 +67,6 @@ RSpec.describe Gitlab::Kubernetes::NetworkPolicy do
                 matchLabels:
                   project: myproject
       POLICY
-    end
-    let(:resource) do
-      ::Kubeclient::Resource.new(
-        metadata: { name: name, namespace: namespace, labels: { app: 'foo' } },
-        spec: { podSelector: pod_selector, policyTypes: %w(Ingress), ingress: ingress, egress: nil }
-      )
     end
 
     subject { Gitlab::Kubernetes::NetworkPolicy.from_yaml(manifest)&.generate }
@@ -156,8 +158,10 @@ RSpec.describe Gitlab::Kubernetes::NetworkPolicy do
         spec: { podSelector: pod_selector, policyTypes: %w(Ingress), ingress: ingress, egress: nil }
       )
     end
+
     let(:generated_resource) do
       ::Kubeclient::Resource.new(
+        kind: Gitlab::Kubernetes::NetworkPolicy::KIND,
         metadata: { name: name, namespace: namespace, labels: { app: 'foo' } },
         spec: { podSelector: pod_selector, policyTypes: %w(Ingress), ingress: ingress, egress: nil }
       )
@@ -194,201 +198,30 @@ RSpec.describe Gitlab::Kubernetes::NetworkPolicy do
     end
   end
 
-  describe '#generate' do
+  describe '#resource' do
+    subject { policy.resource }
+
     let(:resource) do
-      ::Kubeclient::Resource.new(
-        metadata: { name: name, namespace: namespace },
-        spec: { podSelector: pod_selector, policyTypes: %w(Ingress Egress), ingress: ingress, egress: egress }
-      )
-    end
-
-    subject { policy.generate }
-
-    it { is_expected.to eq(resource) }
-  end
-
-  describe '#as_json' do
-    let(:json_policy) do
       {
-        name: name,
-        namespace: namespace,
-        creation_timestamp: '2020-04-14T00:08:30Z',
-        manifest: YAML.dump(
-          {
-            metadata: { name: name, namespace: namespace },
-            spec: { podSelector: pod_selector, policyTypes: %w(Ingress Egress), ingress: ingress, egress: egress }
-          }.deep_stringify_keys
-        ),
-        is_autodevops: false,
-        is_enabled: true
+        kind: Gitlab::Kubernetes::NetworkPolicy::KIND,
+        metadata: { name: name, namespace: namespace },
+        spec: { podSelector: pod_selector, policyTypes: %w(Ingress), ingress: ingress, egress: nil }
       }
     end
 
-    subject { policy.as_json }
+    it { is_expected.to eq(resource) }
 
-    it { is_expected.to eq(json_policy) }
-  end
-
-  describe '#autodevops?' do
-    subject { policy.autodevops? }
-
-    let(:chart) { nil }
-    let(:policy) do
-      described_class.new(
-        name: name,
-        namespace: namespace,
-        labels: { chart: chart },
-        pod_selector: pod_selector,
-        ingress: ingress
-      )
-    end
-
-    it { is_expected.to be false }
-
-    context 'with non-autodevops chart' do
-      let(:chart) { 'foo' }
-
-      it { is_expected.to be false }
-    end
-
-    context 'with autodevops chart' do
-      let(:chart) { 'auto-deploy-app-0.6.0' }
-
-      it { is_expected.to be true }
-    end
-  end
-
-  describe '#enabled?' do
-    subject { policy.enabled? }
-
-    let(:pod_selector) { nil }
-    let(:policy) do
-      described_class.new(
-        name: name,
-        namespace: namespace,
-        pod_selector: pod_selector,
-        ingress: ingress
-      )
-    end
-
-    it { is_expected.to be true }
-
-    context 'with empty pod_selector' do
-      let(:pod_selector) { {} }
-
-      it { is_expected.to be true }
-    end
-
-    context 'with nil matchLabels in pod_selector' do
-      let(:pod_selector) { { matchLabels: nil } }
-
-      it { is_expected.to be true }
-    end
-
-    context 'with empty matchLabels in pod_selector' do
-      let(:pod_selector) { { matchLabels: {} } }
-
-      it { is_expected.to be true }
-    end
-
-    context 'with disabled_by label in matchLabels in pod_selector' do
-      let(:pod_selector) do
-        { matchLabels: { Gitlab::Kubernetes::NetworkPolicy::DISABLED_BY_LABEL => 'gitlab' } }
+    context 'with labels' do
+      let(:labels) { { app: 'foo' } }
+      let(:resource) do
+        {
+          kind: Gitlab::Kubernetes::NetworkPolicy::KIND,
+          metadata: { name: name, namespace: namespace, labels: { app: 'foo' } },
+          spec: { podSelector: pod_selector, policyTypes: %w(Ingress), ingress: ingress, egress: nil }
+        }
       end
 
-      it { is_expected.to be false }
-    end
-  end
-
-  describe '#enable' do
-    subject { policy.enabled? }
-
-    let(:pod_selector) { nil }
-    let(:policy) do
-      described_class.new(
-        name: name,
-        namespace: namespace,
-        pod_selector: pod_selector,
-        ingress: ingress
-      )
-    end
-
-    before do
-      policy.enable
-    end
-
-    it { is_expected.to be true }
-
-    context 'with empty pod_selector' do
-      let(:pod_selector) { {} }
-
-      it { is_expected.to be true }
-    end
-
-    context 'with nil matchLabels in pod_selector' do
-      let(:pod_selector) { { matchLabels: nil } }
-
-      it { is_expected.to be true }
-    end
-
-    context 'with empty matchLabels in pod_selector' do
-      let(:pod_selector) { { matchLabels: {} } }
-
-      it { is_expected.to be true }
-    end
-
-    context 'with disabled_by label in matchLabels in pod_selector' do
-      let(:pod_selector) do
-        { matchLabels: { Gitlab::Kubernetes::NetworkPolicy::DISABLED_BY_LABEL => 'gitlab' } }
-      end
-
-      it { is_expected.to be true }
-    end
-  end
-
-  describe '#disable' do
-    subject { policy.enabled? }
-
-    let(:pod_selector) { nil }
-    let(:policy) do
-      described_class.new(
-        name: name,
-        namespace: namespace,
-        pod_selector: pod_selector,
-        ingress: ingress
-      )
-    end
-
-    before do
-      policy.disable
-    end
-
-    it { is_expected.to be false }
-
-    context 'with empty pod_selector' do
-      let(:pod_selector) { {} }
-
-      it { is_expected.to be false }
-    end
-
-    context 'with nil matchLabels in pod_selector' do
-      let(:pod_selector) { { matchLabels: nil } }
-
-      it { is_expected.to be false }
-    end
-
-    context 'with empty matchLabels in pod_selector' do
-      let(:pod_selector) { { matchLabels: {} } }
-
-      it { is_expected.to be false }
-    end
-
-    context 'with disabled_by label in matchLabels in pod_selector' do
-      let(:pod_selector) do
-        { matchLabels: { Gitlab::Kubernetes::NetworkPolicy::DISABLED_BY_LABEL => 'gitlab' } }
-      end
-
-      it { is_expected.to be false }
+      it { is_expected.to eq(resource) }
     end
   end
 end

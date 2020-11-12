@@ -66,7 +66,7 @@ module QA
 
               # GitLab UI Token Selector (https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-token-selector--default)
               # `data-qa-*` can only be added to the wrapper so custom selector used to find token close buttons and text input
-              find_element(:ip_restriction_field).all('.gl-token-close', minimum: 0).each do |el|
+              find_element(:ip_restriction_field).all('[data-testid="close-icon"]', minimum: 0).each do |el|
                 el.click
               end
 

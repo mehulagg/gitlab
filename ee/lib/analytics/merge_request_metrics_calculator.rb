@@ -19,8 +19,6 @@ module Analytics
 
     # rubocop: disable CodeReuse/ActiveRecord
     def line_counts_data
-      return {} if Feature.disabled?(:store_merge_request_line_metrics, merge_request.target_project, default_enabled: true)
-
       {
         added_lines: raw_diff_files.sum(&:added_lines),
         removed_lines: raw_diff_files.sum(&:removed_lines)

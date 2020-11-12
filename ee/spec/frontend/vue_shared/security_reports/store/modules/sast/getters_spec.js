@@ -15,21 +15,29 @@ describe('groupedSastText', () => {
     const sast = createReport({ hasError: true });
     const result = getters.groupedSastText(sast);
 
-    expect(result).toBe(SAST_HAS_ERROR);
+    expect(result).toStrictEqual({ message: SAST_HAS_ERROR });
   });
 
   it("should return the loading message if it's still loading", () => {
     const sast = createReport({ isLoading: true });
     const result = getters.groupedSastText(sast);
 
-    expect(result).toBe(SAST_IS_LOADING);
+    expect(result).toStrictEqual({ message: SAST_IS_LOADING });
   });
 
   it('should call groupedTextBuilder if everything is fine', () => {
     const sast = createReport();
     const result = getters.groupedSastText(sast);
 
-    expect(result).toBe('SAST detected no new vulnerabilities.');
+    expect(result).toStrictEqual({
+      countMessage: '',
+      critical: 0,
+      high: 0,
+      message: 'SAST detected %{totalStart}no%{totalEnd} vulnerabilities.',
+      other: 0,
+      status: '',
+      total: 0,
+    });
   });
 });
 

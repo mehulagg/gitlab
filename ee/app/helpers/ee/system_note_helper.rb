@@ -5,8 +5,6 @@ module EE
     extend ::Gitlab::Utils::Override
 
     EE_ICON_NAMES_BY_ACTION = {
-      'approved' => 'approval',
-      'unapproved' => 'unapproval',
       'relate' => 'link',
       'unrelate' => 'unlink',
       'epic_issue_added' => 'issues',
@@ -16,9 +14,11 @@ module EE
       'issue_removed_from_epic' => 'epic',
       'issue_changed_epic' => 'epic',
       'epic_date_changed' => 'calendar',
+      'iteration' => 'iteration',
       'weight' => 'weight',
       'relate_epic' => 'epic',
       'unrelate_epic' => 'epic',
+      'vulnerability_detected' => 'search-dot',
       'vulnerability_confirmed' => 'shield',
       'vulnerability_dismissed' => 'cancel',
       'vulnerability_resolved' => 'status_closed',

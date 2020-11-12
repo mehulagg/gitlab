@@ -1,8 +1,8 @@
-import createEventHub from '~/helpers/event_hub_factory';
 import Vuex from 'vuex';
-
 import { createLocalVue, mount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'jest/helpers/test_constants';
+import createEventHub from '~/helpers/event_hub_factory';
 
 import axios from '~/lib/utils/axios_utils';
 import notesModule from '~/notes/stores/modules';
@@ -10,7 +10,6 @@ import DiscussionFilter from '~/notes/components/discussion_filter.vue';
 import { DISCUSSION_FILTERS_DEFAULT_VALUE, DISCUSSION_FILTER_TYPES } from '~/notes/constants';
 
 import { discussionFiltersMock, discussionMock } from '../mock_data';
-import { TEST_HOST } from 'jest/helpers/test_constants';
 
 const localVue = createLocalVue();
 
@@ -25,6 +24,8 @@ describe('DiscussionFilter component', () => {
   let mock;
 
   const filterDiscussion = jest.fn();
+
+  const findFilter = filterType => wrapper.find(`.dropdown-item[data-filter-type="${filterType}"]`);
 
   const mountComponent = () => {
     const discussions = [
@@ -75,22 +76,22 @@ describe('DiscussionFilter component', () => {
   });
 
   it('renders the all filters', () => {
-    expect(wrapper.findAll('.dropdown-menu li').length).toBe(discussionFiltersMock.length);
+    expect(wrapper.findAll('.discussion-filter-container .dropdown-item').length).toBe(
+      discussionFiltersMock.length,
+    );
   });
 
   it('renders the default selected item', () => {
     expect(
       wrapper
-        .find('#discussion-filter-dropdown')
+        .find('#discussion-filter-dropdown .dropdown-item')
         .text()
         .trim(),
     ).toBe(discussionFiltersMock[0].title);
   });
 
   it('updates to the selected item', () => {
-    const filterItem = wrapper.find(
-      `.dropdown-menu li[data-filter-type="${DISCUSSION_FILTER_TYPES.HISTORY}"] button`,
-    );
+    const filterItem = findFilter(DISCUSSION_FILTER_TYPES.ALL);
 
     filterItem.trigger('click');
 
@@ -98,37 +99,37 @@ describe('DiscussionFilter component', () => {
   });
 
   it('only updates when selected filter changes', () => {
-    wrapper
-      .find(`.dropdown-menu li[data-filter-type="${DISCUSSION_FILTER_TYPES.ALL}"] button`)
-      .trigger('click');
+    findFilter(DISCUSSION_FILTER_TYPES.ALL).trigger('click');
 
     expect(filterDiscussion).not.toHaveBeenCalled();
   });
 
+  it('disables timeline view if it was enabled', () => {
+    store.state.isTimelineEnabled = true;
+
+    findFilter(DISCUSSION_FILTER_TYPES.HISTORY).trigger('click');
+
+    expect(wrapper.vm.$store.state.isTimelineEnabled).toBe(false);
+  });
+
   it('disables commenting when "Show history only" filter is applied', () => {
-    const filterItem = wrapper.find(
-      `.dropdown-menu li[data-filter-type="${DISCUSSION_FILTER_TYPES.HISTORY}"] button`,
-    );
-    filterItem.trigger('click');
+    findFilter(DISCUSSION_FILTER_TYPES.HISTORY).trigger('click');
 
     expect(wrapper.vm.$store.state.commentsDisabled).toBe(true);
   });
 
   it('enables commenting when "Show history only" filter is not applied', () => {
-    const filterItem = wrapper.find(
-      `.dropdown-menu li[data-filter-type="${DISCUSSION_FILTER_TYPES.ALL}"] button`,
-    );
-    filterItem.trigger('click');
+    findFilter(DISCUSSION_FILTER_TYPES.ALL).trigger('click');
 
     expect(wrapper.vm.$store.state.commentsDisabled).toBe(false);
   });
 
   it('renders a dropdown divider for the default filter', () => {
     const defaultFilter = wrapper.findAll(
-      `.dropdown-menu li[data-filter-type="${DISCUSSION_FILTER_TYPES.ALL}"] > *`,
+      `.discussion-filter-container .dropdown-item-wrapper > *`,
     );
 
-    expect(defaultFilter.at(defaultFilter.length - 1).classes('dropdown-divider')).toBe(true);
+    expect(defaultFilter.at(1).classes('gl-new-dropdown-divider')).toBe(true);
   });
 
   describe('Merge request tabs', () => {
@@ -151,7 +152,7 @@ describe('DiscussionFilter component', () => {
       eventHub.$emit('MergeRequestTabChange', 'commit');
 
       wrapper.vm.$nextTick(() => {
-        expect(wrapper.isEmpty()).toBe(true);
+        expect(wrapper.html()).toBe('');
         done();
       });
     });

@@ -381,6 +381,12 @@ module API
               type: String,
               desc: 'The Hangouts Chat webhook. e.g. https://chat.googleapis.com/v1/spaces…'
             },
+            {
+              required: false,
+              name: :branches_to_be_notified,
+              type: String,
+              desc: 'Branches for which notifications are to be sent'
+            },
             chat_notification_events
           ].flatten,
           'hipchat' => [
@@ -631,12 +637,26 @@ module API
               name: :issues_url,
               type: String,
               desc: 'The issues URL'
+            }
+          ],
+          'ewm' => [
+            {
+              required: true,
+              name: :new_issue_url,
+              type: String,
+              desc: 'New Issue URL'
             },
             {
-              required: false,
-              name: :description,
+              required: true,
+              name: :project_url,
               type: String,
-              desc: 'The description of the tracker'
+              desc: 'Project URL'
+            },
+            {
+              required: true,
+              name: :issues_url,
+              type: String,
+              desc: 'Issues URL'
             }
           ],
           'youtrack' => [
@@ -651,12 +671,6 @@ module API
               name: :issues_url,
               type: String,
               desc: 'The issues URL'
-            },
-            {
-              required: false,
-              name: :description,
-              type: String,
-              desc: 'The description of the tracker'
             }
           ],
           'slack' => [
@@ -747,6 +761,7 @@ module API
           ::DiscordService,
           ::DroneCiService,
           ::EmailsOnPushService,
+          ::EwmService,
           ::ExternalWikiService,
           ::FlowdockService,
           ::HangoutsChatService,

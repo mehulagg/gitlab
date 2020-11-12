@@ -1,4 +1,4 @@
-import { GlPath, GlSkeletonLoading } from '@gitlab/ui';
+import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Component from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
 import { transformedStagePathData, issueStage } from '../mock_data';
@@ -84,10 +84,10 @@ describe('PathNavigation', () => {
       clickItemAt(1);
       clickItemAt(2);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        { name: 'selected', args: [transformedStagePathData[0]] },
-        { name: 'selected', args: [transformedStagePathData[1]] },
-        { name: 'selected', args: [transformedStagePathData[2]] },
+      expect(wrapper.emitted().selected).toEqual([
+        [transformedStagePathData[0]],
+        [transformedStagePathData[1]],
+        [transformedStagePathData[2]],
       ]);
     });
   });

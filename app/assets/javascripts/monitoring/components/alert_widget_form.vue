@@ -3,7 +3,7 @@ import { isEmpty, findKey } from 'lodash';
 import Vue from 'vue';
 import {
   GlLink,
-  GlDeprecatedButton,
+  GlButton,
   GlButtonGroup,
   GlFormGroup,
   GlFormInput,
@@ -11,12 +11,12 @@ import {
   GlDropdownItem,
   GlModal,
   GlTooltipDirective,
+  GlIcon,
 } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import Icon from '~/vue_shared/components/icon.vue';
 import { alertsValidator, queriesValidator } from '../validators';
 import { OPERATORS } from '../constants';
 
@@ -36,7 +36,7 @@ const SUBMIT_BUTTON_CLASS = {
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlButtonGroup,
     GlFormGroup,
     GlFormInput,
@@ -44,7 +44,7 @@ export default {
     GlDropdownItem,
     GlModal,
     GlLink,
-    Icon,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -88,6 +88,7 @@ export default {
       operator: null,
       threshold: null,
       prometheusMetricId: null,
+      runbookUrl: null,
       selectedAlert: {},
       alertQuery: '',
     };
@@ -116,7 +117,8 @@ export default {
         this.operator &&
         this.threshold === Number(this.threshold) &&
         (this.operator !== this.selectedAlert.operator ||
-          this.threshold !== this.selectedAlert.threshold)
+          this.threshold !== this.selectedAlert.threshold ||
+          this.runbookUrl !== this.selectedAlert.runbookUrl)
       );
     },
     submitAction() {
@@ -153,13 +155,17 @@ export default {
       const existingAlert = this.alertsToManage[existingAlertPath];
 
       if (existingAlert) {
+        const { operator, threshold, runbookUrl } = existingAlert;
+
         this.selectedAlert = existingAlert;
-        this.operator = existingAlert.operator;
-        this.threshold = existingAlert.threshold;
+        this.operator = operator;
+        this.threshold = threshold;
+        this.runbookUrl = runbookUrl;
       } else {
         this.selectedAlert = {};
         this.operator = this.operators.greaterThan;
         this.threshold = null;
+        this.runbookUrl = null;
       }
 
       this.prometheusMetricId = queryId;
@@ -168,13 +174,13 @@ export default {
       this.resetAlertData();
       this.$emit('cancel');
     },
-    handleSubmit(e) {
-      e.preventDefault();
+    handleSubmit() {
       this.$emit(this.submitAction, {
         alert: this.selectedAlert.alert_path,
         operator: this.operator,
         threshold: this.threshold,
         prometheus_metric_id: this.prometheusMetricId,
+        runbookUrl: this.runbookUrl,
       });
     },
     handleShown() {
@@ -189,6 +195,7 @@ export default {
       this.threshold = null;
       this.prometheusMetricId = null;
       this.selectedAlert = {};
+      this.runbookUrl = null;
     },
     getAlertFormActionTrackingOption() {
       const label = `${this.submitAction}_alert`;
@@ -217,7 +224,7 @@ export default {
     :modal-id="modalId"
     :ok-variant="submitAction === 'delete' ? 'danger' : 'success'"
     :ok-disabled="formDisabled"
-    @ok="handleSubmit"
+    @ok.prevent="handleSubmit"
     @hidden="handleHidden"
     @shown="handleShown"
   >
@@ -235,7 +242,7 @@ export default {
         <template #description>
           <div class="d-flex align-items-center">
             {{ __('Single or combined queries') }}
-            <icon
+            <gl-icon
               v-gl-tooltip="$options.alertQueryText.descriptionTooltip"
               name="question"
               class="gl-ml-2"
@@ -247,7 +254,7 @@ export default {
         <gl-dropdown
           id="alert-query-dropdown"
           :text="queryDropdownLabel"
-          toggle-class="dropdown-menu-toggle qa-alert-query-dropdown"
+          toggle-class="dropdown-menu-toggle gl-border-1! qa-alert-query-dropdown"
         >
           <gl-dropdown-item
             v-for="query in relevantQueries"
@@ -259,31 +266,28 @@ export default {
           </gl-dropdown-item>
         </gl-dropdown>
       </gl-form-group>
-      <gl-button-group class="mb-2" :label="s__('PrometheusAlerts|Operator')">
-        <gl-deprecated-button
+      <gl-button-group class="mb-3" :label="s__('PrometheusAlerts|Operator')">
+        <gl-button
           :class="{ active: operator === operators.greaterThan }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.greaterThan"
         >
           {{ operators.greaterThan }}
-        </gl-deprecated-button>
-        <gl-deprecated-button
+        </gl-button>
+        <gl-button
           :class="{ active: operator === operators.equalTo }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.equalTo"
         >
           {{ operators.equalTo }}
-        </gl-deprecated-button>
-        <gl-deprecated-button
+        </gl-button>
+        <gl-button
           :class="{ active: operator === operators.lessThan }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.lessThan"
         >
           {{ operators.lessThan }}
-        </gl-deprecated-button>
+        </gl-button>
       </gl-button-group>
       <gl-form-group :label="s__('PrometheusAlerts|Threshold')" label-for="alerts-threshold">
         <gl-form-input
@@ -292,6 +296,19 @@ export default {
           :disabled="formDisabled"
           type="number"
           data-qa-selector="alert_threshold_field"
+        />
+      </gl-form-group>
+      <gl-form-group
+        :label="s__('PrometheusAlerts|Runbook URL (optional)')"
+        label-for="alert-runbook"
+      >
+        <gl-form-input
+          id="alert-runbook"
+          v-model="runbookUrl"
+          :disabled="formDisabled"
+          data-testid="alertRunbookField"
+          type="text"
+          :placeholder="s__('PrometheusAlerts|https://gitlab.com/gitlab-com/runbooks')"
         />
       </gl-form-group>
     </div>

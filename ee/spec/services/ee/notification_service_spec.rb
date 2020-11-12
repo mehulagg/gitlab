@@ -439,7 +439,7 @@ RSpec.describe EE::NotificationService, :mailer do
         let(:guest) { create(:user) }
         let(:admin) { create(:admin) }
         let(:confidential_issue) { create(:issue, :confidential, project: project, title: 'Confidential issue', author: author, assignees: [assignee]) }
-        let(:iteration) { create(:iteration, project: project, issues: [confidential_issue]) }
+        let(:iteration) { create(:iteration, :skip_project_validation, project: project, issues: [confidential_issue]) }
 
         it "emails subscribers of the issue's iteration that can read the issue" do
           project.add_developer(member)
@@ -470,7 +470,7 @@ RSpec.describe EE::NotificationService, :mailer do
       let(:mailer_method) { :changed_iteration_issue_email }
 
       context do
-        let(:new_iteration) { create(:iteration, project: project, issues: [issue]) }
+        let(:new_iteration) { create(:iteration, :skip_project_validation, project: project, issues: [issue]) }
         let!(:subscriber_to_new_iteration) { create(:user) { |u| issue.toggle_subscription(u, project) } }
 
         it_behaves_like 'altered iteration notification on issue' do
@@ -493,7 +493,7 @@ RSpec.describe EE::NotificationService, :mailer do
         let(:guest) { create(:user) }
         let(:admin) { create(:admin) }
         let(:confidential_issue) { create(:issue, :confidential, project: project, title: 'Confidential issue', author: author, assignees: [assignee]) }
-        let(:new_iteration) { create(:iteration, project: project, issues: [confidential_issue]) }
+        let(:new_iteration) { create(:iteration, :skip_project_validation, project: project, issues: [confidential_issue]) }
 
         it "emails subscribers of the issue's iteration that can read the issue" do
           project.add_developer(member)

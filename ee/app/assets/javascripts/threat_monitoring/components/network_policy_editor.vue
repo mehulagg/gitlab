@@ -7,6 +7,16 @@ export default {
       type: String,
       required: true,
     },
+    readOnly: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    height: {
+      type: Number,
+      required: false,
+      default: 300,
+    },
   },
   data() {
     return { editor: null };
@@ -42,7 +52,7 @@ export default {
         occurrencesHighlight: false,
         hideCursorInOverviewRuler: true,
         overviewRulerBorder: false,
-        readOnly: true,
+        readOnly: this.readOnly,
       });
       this.editor.onDidChangeModelContent(() => {
         this.$emit('input', this.editor.getValue());
@@ -53,8 +63,5 @@ export default {
 </script>
 
 <template>
-  <div
-    ref="editor"
-    class="multi-file-editor-holer network-policy-editor gl-bg-gray-50 p-2 gl-overflow-x-hidden"
-  ></div>
+  <div ref="editor" class="gl-overflow-hidden" :style="{ height: `${height}px` }"></div>
 </template>

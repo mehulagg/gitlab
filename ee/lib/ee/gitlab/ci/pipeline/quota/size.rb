@@ -45,7 +45,7 @@ module EE
             end
 
             def seeds_size
-              @command.stage_seeds.sum(&:size) # rubocop: disable CodeReuse/ActiveRecord
+              @command.stage_seeds.sum(&:size)
             end
           end
         end

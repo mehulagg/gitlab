@@ -6,6 +6,7 @@
 # Experiment options:
 # - environment (optional, defaults to enabled for development and GitLab.com)
 # - tracking_category (optional, used to set the category when tracking an experiment event)
+# - use_backwards_compatible_subject_index (optional, set this to true if you need backwards compatibility)
 #
 # The experiment is controlled by a Feature Flag (https://docs.gitlab.com/ee/development/feature_flags/controls.html),
 # which is named "#{experiment_key}_experiment_percentage" and *must* be set with a percentage and not be used for other purposes.
@@ -30,122 +31,59 @@
 module Gitlab
   module Experimentation
     EXPERIMENTS = {
-      signup_flow: {
-        tracking_category: 'Growth::Acquisition::Experiment::SignUpFlow'
-      },
       onboarding_issues: {
-        tracking_category: 'Growth::Conversion::Experiment::OnboardingIssues'
-      },
-      suggest_pipeline: {
-        tracking_category: 'Growth::Expansion::Experiment::SuggestPipeline'
+        tracking_category: 'Growth::Conversion::Experiment::OnboardingIssues',
+        use_backwards_compatible_subject_index: true
       },
       ci_notification_dot: {
-        tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot'
-      },
-      buy_ci_minutes_version_a: {
-        tracking_category: 'Growth::Expansion::Experiment::BuyCiMinutesVersionA'
+        tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot',
+        use_backwards_compatible_subject_index: true
       },
       upgrade_link_in_user_menu_a: {
-        tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA'
+        tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA',
+        use_backwards_compatible_subject_index: true
       },
       invite_members_version_a: {
-        tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionA'
+        tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionA',
+        use_backwards_compatible_subject_index: true
+      },
+      invite_members_version_b: {
+        tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionB',
+        use_backwards_compatible_subject_index: true
+      },
+      invite_members_empty_group_version_a: {
+        tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyGroupVersionA',
+        use_backwards_compatible_subject_index: true
       },
       new_create_project_ui: {
-        tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi'
+        tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi',
+        use_backwards_compatible_subject_index: true
+      },
+      contact_sales_btn_in_app: {
+        tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
+        use_backwards_compatible_subject_index: true
+      },
+      customize_homepage: {
+        tracking_category: 'Growth::Expansion::Experiment::CustomizeHomepage',
+        use_backwards_compatible_subject_index: true
+      },
+      invite_email: {
+        tracking_category: 'Growth::Acquisition::Experiment::InviteEmail',
+        use_backwards_compatible_subject_index: true
+      },
+      invitation_reminders: {
+        tracking_category: 'Growth::Acquisition::Experiment::InvitationReminders',
+        use_backwards_compatible_subject_index: true
+      },
+      group_only_trials: {
+        tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials',
+        use_backwards_compatible_subject_index: true
+      },
+      default_to_issues_board: {
+        tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
+        use_backwards_compatible_subject_index: true
       }
     }.freeze
-
-    # Controller concern that checks if an `experimentation_subject_id cookie` is present and sets it if absent.
-    # Used for A/B testing of experimental features. Exposes the `experiment_enabled?(experiment_name)` method
-    # to controllers and views. It returns true when the experiment is enabled and the user is selected as part
-    # of the experimental group.
-    #
-    module ControllerConcern
-      extend ActiveSupport::Concern
-
-      included do
-        before_action :set_experimentation_subject_id_cookie, unless: :dnt_enabled?
-        helper_method :experiment_enabled?
-      end
-
-      def set_experimentation_subject_id_cookie
-        return if cookies[:experimentation_subject_id].present?
-
-        cookies.permanent.signed[:experimentation_subject_id] = {
-          value: SecureRandom.uuid,
-          secure: ::Gitlab.config.gitlab.https,
-          httponly: true
-        }
-      end
-
-      def experiment_enabled?(experiment_key)
-        return false if dnt_enabled?
-
-        return true if Experimentation.enabled_for_user?(experiment_key, experimentation_subject_index)
-        return true if forced_enabled?(experiment_key)
-
-        false
-      end
-
-      def track_experiment_event(experiment_key, action, value = nil)
-        track_experiment_event_for(experiment_key, action, value) do |tracking_data|
-          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), tracking_data)
-        end
-      end
-
-      def frontend_experimentation_tracking_data(experiment_key, action, value = nil)
-        track_experiment_event_for(experiment_key, action, value) do |tracking_data|
-          gon.push(tracking_data: tracking_data)
-        end
-      end
-
-      private
-
-      def dnt_enabled?
-        Gitlab::Utils.to_boolean(request.headers['DNT'])
-      end
-
-      def experimentation_subject_id
-        cookies.signed[:experimentation_subject_id]
-      end
-
-      def experimentation_subject_index
-        return if experimentation_subject_id.blank?
-
-        experimentation_subject_id.delete('-').hex % 100
-      end
-
-      def track_experiment_event_for(experiment_key, action, value)
-        return unless Experimentation.enabled?(experiment_key)
-
-        yield experimentation_tracking_data(experiment_key, action, value)
-      end
-
-      def experimentation_tracking_data(experiment_key, action, value)
-        {
-          category: tracking_category(experiment_key),
-          action: action,
-          property: tracking_group(experiment_key),
-          label: experimentation_subject_id,
-          value: value
-        }.compact
-      end
-
-      def tracking_category(experiment_key)
-        Experimentation.experiment(experiment_key).tracking_category
-      end
-
-      def tracking_group(experiment_key)
-        return unless Experimentation.enabled?(experiment_key)
-
-        experiment_enabled?(experiment_key) ? 'experimental_group' : 'control_group'
-      end
-
-      def forced_enabled?(experiment_key)
-        params.has_key?(:force_experiment) && params[:force_experiment] == experiment_key.to_s
-      end
-    end
 
     class << self
       def experiment(key)
@@ -156,18 +94,28 @@ module Gitlab
         return false unless EXPERIMENTS.key?(experiment_key)
 
         experiment = experiment(experiment_key)
-        experiment.enabled? && experiment.enabled_for_environment?
+        experiment.enabled_for_environment? && experiment.enabled?
       end
 
-      def enabled_for_user?(experiment_key, experimentation_subject_index)
-        enabled?(experiment_key) &&
-          experiment(experiment_key).enabled_for_experimentation_subject?(experimentation_subject_index)
+      def enabled_for_attribute?(experiment_key, attribute)
+        index = Digest::SHA1.hexdigest(attribute).hex % 100
+        enabled_for_value?(experiment_key, index)
+      end
+
+      def enabled_for_value?(experiment_key, value)
+        enabled?(experiment_key) && experiment(experiment_key).enabled_for_index?(value)
       end
     end
 
-    Experiment = Struct.new(:key, :environment, :tracking_category, keyword_init: true) do
+    Experiment = Struct.new(
+      :key,
+      :environment,
+      :tracking_category,
+      :use_backwards_compatible_subject_index,
+      keyword_init: true
+    ) do
       def enabled?
-        experiment_percentage.positive?
+        experiment_percentage > 0
       end
 
       def enabled_for_environment?
@@ -176,10 +124,10 @@ module Gitlab
         environment
       end
 
-      def enabled_for_experimentation_subject?(experimentation_subject_index)
-        return false if experimentation_subject_index.blank?
+      def enabled_for_index?(index)
+        return false if index.blank?
 
-        experimentation_subject_index <= experiment_percentage
+        index <= experiment_percentage
       end
 
       private

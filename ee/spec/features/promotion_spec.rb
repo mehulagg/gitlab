@@ -368,7 +368,7 @@ RSpec.describe 'Promotions', :js do
 
       submit_search('chosen')
 
-      expect(find('#promote_advanced_search')).to have_content 'Improve search with Advanced Global Search and GitLab Enterprise Edition.'
+      expect(find('#promote_advanced_search')).to have_content 'Improve search with Advanced Search and GitLab Enterprise Edition.'
     end
 
     it 'does not show when cookie is set' do

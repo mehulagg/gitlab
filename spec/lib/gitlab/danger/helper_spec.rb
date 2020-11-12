@@ -76,6 +76,38 @@ RSpec.describe Gitlab::Danger::Helper do
     end
   end
 
+  describe '#changed_lines' do
+    subject { helper.changed_lines('changed_file.rb') }
+
+    before do
+      allow(fake_git).to receive(:diff_for_file).with('changed_file.rb').and_return(diff)
+    end
+
+    context 'when file has diff' do
+      let(:diff) { double(:diff, patch: "+ # New change here\n+ # New change there") }
+
+      it 'returns file changes' do
+        is_expected.to eq(['+ # New change here', '+ # New change there'])
+      end
+    end
+
+    context 'when file has no diff (renamed without changes)' do
+      let(:diff) { nil }
+
+      it 'returns a blank array' do
+        is_expected.to eq([])
+      end
+    end
+  end
+
+  describe "changed_files" do
+    it 'returns list of changed files matching given regex' do
+      expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb usage_data.rb])
+
+      expect(helper.changed_files(/usage_data/)).to contain_exactly('usage_data.rb')
+    end
+  end
+
   describe '#all_ee_changes' do
     subject { helper.all_ee_changes }
 
@@ -204,22 +236,33 @@ RSpec.describe Gitlab::Danger::Helper do
 
       '.gitlab/ci/frontend.gitlab-ci.yml' | %i[frontend engineering_productivity]
 
-      'app/models/foo' | [:backend]
-      'bin/foo'        | [:backend]
-      'config/foo'     | [:backend]
-      'lib/foo'        | [:backend]
-      'rubocop/foo'    | [:backend]
-      'spec/foo'       | [:backend]
-      'spec/foo/bar'   | [:backend]
+      'app/models/foo'             | [:backend]
+      'bin/foo'                    | [:backend]
+      'config/foo'                 | [:backend]
+      'lib/foo'                    | [:backend]
+      'rubocop/foo'                | [:backend]
+      '.rubocop.yml'               | [:backend]
+      '.rubocop_todo.yml'          | [:backend]
+      '.rubocop_manual_todo.yml'   | [:backend]
+      'spec/foo'                   | [:backend]
+      'spec/foo/bar'               | [:backend]
 
       'ee/app/foo'      | [:backend]
       'ee/bin/foo'      | [:backend]
       'ee/spec/foo'     | [:backend]
       'ee/spec/foo/bar' | [:backend]
 
+      'spec/features/foo'                            | [:test]
+      'ee/spec/features/foo'                         | [:test]
+      'spec/support/shared_examples/features/foo'    | [:test]
+      'ee/spec/support/shared_examples/features/foo' | [:test]
+      'spec/support/shared_contexts/features/foo'    | [:test]
+      'ee/spec/support/shared_contexts/features/foo' | [:test]
+      'spec/support/helpers/features/foo'            | [:test]
+      'ee/spec/support/helpers/features/foo'         | [:test]
+
       'generator_templates/foo' | [:backend]
       'vendor/languages.yml'    | [:backend]
-      'vendor/licenses.csv'     | [:backend]
       'file_hooks/examples/'    | [:backend]
 
       'Gemfile'        | [:backend]
@@ -238,13 +281,14 @@ RSpec.describe Gitlab::Danger::Helper do
       'scripts/foo'                                           | [:engineering_productivity]
       'lib/gitlab/danger/foo'                                 | [:engineering_productivity]
       'ee/lib/gitlab/danger/foo'                              | [:engineering_productivity]
-      '.overcommit.yml.example'                               | [:engineering_productivity]
+      'lefthook.yml'                                          | [:engineering_productivity]
       '.editorconfig'                                         | [:engineering_productivity]
-      'tooling/overcommit/foo'                                | [:engineering_productivity]
+      'tooling/bin/find_foss_tests'                           | [:engineering_productivity]
       '.codeclimate.yml'                                      | [:engineering_productivity]
       '.gitlab/CODEOWNERS'                                    | [:engineering_productivity]
 
-      'lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml'   | [:backend]
+      'lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml'   | [:ci_template]
+      'lib/gitlab/ci/templates/dotNET-Core.yml'               | [:ci_template]
 
       'ee/FOO_VERSION' | [:unknown]
 
@@ -271,6 +315,8 @@ RSpec.describe Gitlab::Danger::Helper do
 
       'db/fixtures/foo.rb'                                 | [:backend]
       'ee/db/fixtures/foo.rb'                              | [:backend]
+      'doc/api/graphql/reference/gitlab_schema.graphql'    | [:backend]
+      'doc/api/graphql/reference/gitlab_schema.json'       | [:backend]
 
       'qa/foo' | [:qa]
       'ee/qa/foo' | [:qa]
@@ -336,6 +382,7 @@ RSpec.describe Gitlab::Danger::Helper do
       :none      | ''
       :qa        | '~QA'
       :engineering_productivity | '~"Engineering Productivity" for CI, Danger'
+      :ci_template | '~"ci::templates"'
     end
 
     with_them do
@@ -352,22 +399,6 @@ RSpec.describe Gitlab::Danger::Helper do
       teammates = helper.new_teammates(usernames)
 
       expect(teammates.map(&:username)).to eq(usernames)
-    end
-  end
-
-  describe '#missing_database_labels' do
-    subject { helper.missing_database_labels(current_mr_labels) }
-
-    context 'when current merge request has ~database::review pending' do
-      let(:current_mr_labels) { ['database::review pending', 'feature'] }
-
-      it { is_expected.to match_array(['database']) }
-    end
-
-    context 'when current merge request does not have ~database::review pending' do
-      let(:current_mr_labels) { ['feature'] }
-
-      it { is_expected.to match_array(['database', 'database::review pending']) }
     end
   end
 
@@ -408,6 +439,28 @@ RSpec.describe Gitlab::Danger::Helper do
         .and_return('web_url' => 'https://gitlab.com/gitlab-org/security/gitlab/-/merge_requests/1')
 
       expect(helper).to be_security_mr
+    end
+  end
+
+  describe '#draft_mr?' do
+    it 'returns false when `gitlab_helper` is unavailable' do
+      expect(helper).to receive(:gitlab_helper).and_return(nil)
+
+      expect(helper).not_to be_draft_mr
+    end
+
+    it 'returns true for a draft MR' do
+      expect(fake_gitlab).to receive(:mr_json)
+        .and_return('title' => 'Draft: My MR title')
+
+      expect(helper).to be_draft_mr
+    end
+
+    it 'returns false for non draft MR' do
+      expect(fake_gitlab).to receive(:mr_json)
+        .and_return('title' => 'My MR title')
+
+      expect(helper).not_to be_draft_mr
     end
   end
 

@@ -15,7 +15,7 @@ RSpec.describe ElasticNamespaceRolloutWorker do
 
   before_all do
     Plan::PAID_HOSTED_PLANS.each do |plan|
-      create_list(:gitlab_subscription, 4, :without_index_namespace_callback, hosted_plan: public_send("#{plan}_plan"))
+      create_list(:gitlab_subscription, 4, hosted_plan: public_send("#{plan}_plan"))
     end
   end
 

@@ -5,7 +5,7 @@ module EE
     include RequestAwareEntity
 
     prepended do
-      expose :weight, if: ->(issue, _) { issue.supports_weight? }
+      expose :weight, if: ->(issue, _) { issue.weight_available? }
       expose :blocked do |issue, options|
         options[:blocked_issue_ids].present? && options[:blocked_issue_ids].include?(issue.id)
       end

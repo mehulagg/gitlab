@@ -1,6 +1,7 @@
 .custom-project-templates
   - if groups_with_project_templates.present?
     - groups_with_project_templates.each do |group|
+      - projects = group.projects.not_aimed_for_deletion
       .template-group-options.js-template-group-options{ class: ('expanded border-top-0' if groups_with_project_templates.first == group) }
         .template-header.d-flex.align-items-center
           .template-subgroup.d-flex.flex-fill.align-items-center
@@ -17,9 +18,9 @@
           .template-subgroup-project-count
             %span.badge.badge-pill
               %strong
-                = group.projects.count
+                = projects.count
 
-        - group.projects.each do |project|
+        - projects.each do |project|
           .template-option.align-items-center.qa-template-option-row
             .avatar-container.s40
               = project_icon(project, alt: project.name, class: 'btn-template-icon avatar s40 avatar-tile', lazy: false)

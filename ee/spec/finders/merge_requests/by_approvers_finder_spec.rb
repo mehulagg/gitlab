@@ -32,6 +32,7 @@ RSpec.describe MergeRequests::ByApproversFinder do
       merge_request.approval_rules << rule
     end
   end
+
   let!(:merge_request_with_project_group_approver) do
     rule = create(:approval_project_rule, groups: [group])
     create(:merge_request, source_project: create(:project, approval_rules: [rule]))

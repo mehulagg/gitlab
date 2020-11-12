@@ -1,3 +1,9 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Terraform state administration (alpha)
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2673) in GitLab 12.10.
@@ -26,7 +32,6 @@ below.
    `/etc/gitlab/gitlab.rb` and add the following line:
 
    ```ruby
-   gitlab_rails['terraform_state_enabled'] = true
    gitlab_rails['terraform_state_storage_path'] = "/mnt/storage/terraform_state"
    ```
 
@@ -76,7 +81,6 @@ See [the available connection settings for different providers](object_storage.m
    the values you want:
 
    ```ruby
-   gitlab_rails['terraform_state_enabled'] = true
    gitlab_rails['terraform_state_object_store_enabled'] = true
    gitlab_rails['terraform_state_object_store_remote_directory'] = "terraform"
    gitlab_rails['terraform_state_object_store_connection'] = {

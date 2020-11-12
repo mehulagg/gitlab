@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class DeployKeys < Grape::API::Instance
+  class DeployKeys < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     helpers do
       def add_deploy_keys_project(project, attrs = {})

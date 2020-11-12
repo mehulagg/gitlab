@@ -8,6 +8,7 @@ query groupEpics(
   $dueDate: Time
   $labelName: [String!] = []
   $authorUsername: String = ""
+  $milestoneTitle: String = ""
   $search: String = ""
 ) {
   group(fullPath: $fullPath) {
@@ -20,6 +21,7 @@ query groupEpics(
       endDate: $dueDate
       labelName: $labelName
       authorUsername: $authorUsername
+      milestoneTitle: $milestoneTitle
       search: $search
     ) {
       edges {

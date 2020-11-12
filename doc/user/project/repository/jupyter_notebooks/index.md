@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference
+---
 # Jupyter Notebook Files
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/2508/) in GitLab 9.1.
@@ -16,8 +22,8 @@ GitLab.
 
 ## Jupyter Hub as a GitLab Managed App
 
-You can deploy [Jupyter Hub as a GitLab managed app](./../../../clusters/applications.md#jupyterhub).
+You can deploy [Jupyter Hub as a GitLab managed app](../../../clusters/applications.md#jupyterhub).
 
 ## Jupyter Git integration
 
-Find out how to [leverage JupyterLab’s Git extension on your Kubernetes cluster](./../../../clusters/applications.md#jupyter-git-integration).
+Find out how to [leverage JupyterLab’s Git extension on your Kubernetes cluster](../../../clusters/applications.md#jupyter-git-integration).

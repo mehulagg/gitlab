@@ -30,6 +30,7 @@ RSpec.describe GroupSamlIdentityFinder do
     let!(:group_managed_identity) do
       create(:group_saml_identity, saml_provider: saml_provider, user: create(:user, managing_group: group))
     end
+
     let!(:different_group_managed_identity) do
       create(:group_saml_identity, saml_provider: saml_provider, user: create(:user, :group_managed))
     end

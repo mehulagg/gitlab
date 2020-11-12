@@ -25,7 +25,7 @@ module Security
     end
 
     def destroy
-      if !remove_project.zero?
+      if remove_project != 0
         head :ok
       else
         head :no_content

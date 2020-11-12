@@ -6,32 +6,35 @@ module Security
   class StoreReportsService < ::BaseService
     def initialize(pipeline)
       @pipeline = pipeline
+      @errors = []
     end
 
     def execute
-      errors = []
-      @pipeline.security_reports.reports.each do |report_type, report|
-        result = StoreReportService.new(@pipeline, report).execute
+      store_reports
+      mark_project_as_vulnerable!
+
+      errors.any? ? error(full_errors) : success
+    end
+
+    private
+
+    attr_reader :pipeline, :errors
+
+    delegate :project, to: :pipeline, private: true
+
+    def store_reports
+      pipeline.security_reports.reports.each do |report_type, report|
+        result = StoreReportService.new(pipeline, report).execute
         errors << result[:message] if result[:status] == :error
-      end
-
-      cache_vulnerabilities
-
-      if errors.any?
-        error(errors.join(", "))
-      else
-        success
       end
     end
 
-    # Silently swallow errors if there are any problems caching vulnerabilities
-    def cache_vulnerabilities
-      project = @pipeline.project
+    def mark_project_as_vulnerable!
+      project.project_setting.update!(has_vulnerabilities: true)
+    end
 
-      Gitlab::Vulnerabilities::HistoryCache.new(project.group, project.id)
-        .fetch(Gitlab::Vulnerabilities::History::HISTORY_RANGE, force: true)
-    rescue => err
-      error("Failed to cache vulnerabilities for pipeline #{@pipeline.id}: #{err}")
+    def full_errors
+      errors.join(", ")
     end
   end
 end

@@ -17,25 +17,27 @@ RSpec.describe 'Epics through GroupQuery' do
 
   # similar to GET /groups/:id/epics
   describe 'Get list of epics from a group' do
-    let(:query) do
-      epic_node = <<~NODE
-      edges {
-        node {
-          id
-          iid
-          title
-          upvotes
-          downvotes
-          userPermissions {
-            adminEpic
+    let(:epic_node) do
+      <<~NODE
+        edges {
+          node {
+            id
+            iid
+            title
+            upvotes
+            downvotes
+            userPermissions {
+              adminEpic
+            }
           }
         }
-      }
       NODE
+    end
 
+    def query(params = {})
       graphql_query_for("group", { "fullPath" => group.full_path },
                         ['epicsEnabled',
-                         query_graphql_field("epics", {}, epic_node)]
+                         query_graphql_field("epics", params, epic_node)]
       )
     end
 
@@ -103,6 +105,42 @@ RSpec.describe 'Epics through GroupQuery' do
 
             expect(epic_node_array('userPermissions')).to all(include('adminEpic' => true))
           end
+        end
+      end
+
+      context 'query performance' do
+        let!(:child_epic) { create(:epic, group: group, parent: epic2) }
+        let(:epic_node) do
+          <<~NODE
+            edges {
+              node {
+                parent {
+                  id
+                }
+              }
+            }
+          NODE
+        end
+
+        before do
+          group.reload
+          post_graphql(query, current_user: user)
+        end
+
+        it 'avoids n+1 queries when loading parent field' do
+          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+            post_graphql(query, current_user: user)
+          end.count
+
+          epics_with_parent = create_list(:epic, 3, group: group) do |epic|
+            epic.update(parent: create(:epic, group: group))
+          end
+          group.reload
+
+          # Added +1 to control_count due to an existing N+1 with licenses
+          expect do
+            post_graphql(query({ iids: epics_with_parent.pluck(:iid) }), current_user: user)
+          end.not_to exceed_all_query_limit(control_count + 1)
         end
       end
     end

@@ -7,7 +7,7 @@ import * as types from 'ee/security_dashboard/store/modules/unscanned_projects/m
 import * as actions from 'ee/security_dashboard/store/modules/unscanned_projects/actions';
 
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 

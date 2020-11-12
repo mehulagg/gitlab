@@ -35,7 +35,7 @@ RSpec.describe ProductivityAnalyticsFinder do
       let(:search_params) { { days_to_merge: [30] } }
 
       it 'returns all MRs with merged_at - created_at IN specified values' do
-        Timecop.freeze do
+        freeze_time do
           long_mr
           short_mr
           expect(subject.execute).to match_array([long_mr])
@@ -51,7 +51,7 @@ RSpec.describe ProductivityAnalyticsFinder do
       end
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       context 'with merged_after specified as timestamp' do

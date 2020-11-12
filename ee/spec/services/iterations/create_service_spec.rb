@@ -31,6 +31,10 @@ RSpec.describe Iterations::CreateService do
 
         context 'valid params' do
           it 'creates an iteration' do
+            allow_next_instance_of(Iteration) do |iteration|
+              allow(iteration).to receive(:skip_project_validation).and_return(true)
+            end
+
             expect(response.success?).to be_truthy
             expect(iteration).to be_persisted
             expect(iteration.title).to eq('v2.1.9')
@@ -45,6 +49,10 @@ RSpec.describe Iterations::CreateService do
           end
 
           it 'does not create an iteration but returns errors' do
+            allow_next_instance_of(Iteration) do |iteration|
+              allow(iteration).to receive(:skip_project_validation).and_return(true)
+            end
+
             expect(response.error?).to be_truthy
             expect(errors.messages).to match({ title: ["can't be blank"], due_date: ["can't be blank"], start_date: ["can't be blank"] })
           end

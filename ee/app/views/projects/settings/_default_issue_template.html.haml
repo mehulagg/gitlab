@@ -7,13 +7,13 @@
       %p= _('Set a default template for issue descriptions.')
 
     .settings-content
-      = form_for [@project.namespace.becomes(Namespace), @project], remote: true, html: { multipart: true, class: "issue-settings-form" }, authenticity_token: true do |f|
+      = form_for @project, remote: true, html: { multipart: true, class: "issue-settings-form" }, authenticity_token: true do |f|
         %input{ type: 'hidden', name: 'update_section', value: 'js-issue-settings' }
         .row
           .form-group.col-md-9
             = f.label :issues_template, class: 'label-bold' do
               = _('Default description template for issues')
-              = link_to icon('question-circle'), help_page_path('user/project/description_templates'), target: '_blank'
+              = link_to sprite_icon('question-o'), help_page_path('user/project/description_templates'), target: '_blank'
             = f.text_area :issues_template, class: "form-control", rows: 3
             .text-secondary
               - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }

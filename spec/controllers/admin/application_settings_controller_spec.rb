@@ -15,6 +15,37 @@ RSpec.describe Admin::ApplicationSettingsController do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
   end
 
+  describe 'GET #integrations' do
+    before do
+      sign_in(admin)
+    end
+
+    context 'when GitLab.com' do
+      before do
+        allow(::Gitlab).to receive(:com?) { true }
+      end
+
+      it 'returns 404' do
+        get :integrations
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when not GitLab.com' do
+      before do
+        allow(::Gitlab).to receive(:com?) { false }
+      end
+
+      it 'renders correct template' do
+        get :integrations
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template('admin/application_settings/integrations')
+      end
+    end
+  end
+
   describe 'GET #usage_data with no access' do
     before do
       stub_usage_data_connections
@@ -54,6 +85,13 @@ RSpec.describe Admin::ApplicationSettingsController do
   describe 'PUT #update' do
     before do
       sign_in(admin)
+    end
+
+    it 'updates the require_admin_approval_after_user_signup setting' do
+      put :update, params: { application_setting: { require_admin_approval_after_user_signup: true } }
+
+      expect(response).to redirect_to(general_admin_application_settings_path)
+      expect(ApplicationSetting.current.require_admin_approval_after_user_signup).to eq(true)
     end
 
     it 'updates the password_authentication_enabled_for_git setting' do
@@ -105,22 +143,6 @@ RSpec.describe Admin::ApplicationSettingsController do
       expect(ApplicationSetting.current.minimum_password_length).to eq(10)
     end
 
-    it 'updates namespace_storage_size_limit setting' do
-      put :update, params: { application_setting: { namespace_storage_size_limit: '100' } }
-
-      expect(response).to redirect_to(general_admin_application_settings_path)
-      expect(response).to set_flash[:notice].to('Application settings saved successfully')
-      expect(ApplicationSetting.current.namespace_storage_size_limit).to eq(100)
-    end
-
-    it 'does not accept an invalid namespace_storage_size_limit' do
-      put :update, params: { application_setting: { namespace_storage_size_limit: '-100' } }
-
-      expect(response).to render_template(:general)
-      expect(assigns(:application_setting).errors[:namespace_storage_size_limit]).to be_present
-      expect(ApplicationSetting.current.namespace_storage_size_limit).not_to eq(-100)
-    end
-
     it 'updates repository_storages_weighted setting' do
       put :update, params: { application_setting: { repository_storages_weighted_default: 75 } }
 
@@ -158,22 +180,11 @@ RSpec.describe Admin::ApplicationSettingsController do
     end
 
     describe 'verify panel actions' do
-      before do
-        stub_feature_flags(instance_level_integrations: false)
-      end
-
       Admin::ApplicationSettingsController::VALID_SETTING_PANELS.each do |valid_action|
         it_behaves_like 'renders correct panels' do
           let(:action) { valid_action }
         end
       end
-    end
-  end
-
-  describe 'PATCH #integrations' do
-    before do
-      stub_feature_flags(instance_level_integrations: false)
-      sign_in(admin)
     end
 
     describe 'EKS integration' do
@@ -188,7 +199,7 @@ RSpec.describe Admin::ApplicationSettingsController do
       end
 
       it 'updates EKS settings' do
-        patch :integrations, params: { application_setting: settings_params }
+        put :update, params: { application_setting: settings_params }
 
         expect(application_setting.eks_integration_enabled).to be_truthy
         expect(application_setting.eks_account_id).to eq '123456789012'
@@ -202,7 +213,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         it 'does not update the secret key' do
           application_setting.update!(eks_secret_access_key: 'dummy secret key')
 
-          patch :integrations, params: { application_setting: settings_params }
+          put :update, params: { application_setting: settings_params }
 
           expect(application_setting.reload.eks_secret_access_key).to eq 'dummy secret key'
         end

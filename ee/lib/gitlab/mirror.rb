@@ -41,7 +41,7 @@ module Gitlab
 
         available = max_capacity - current_capacity
         if available < 0
-          Rails.logger.info("Mirror available capacity is below 0: #{available}") # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.info("Mirror available capacity is below 0: #{available}")
           available = 0
         end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Package', :docker, :orchestrated, :packages do
+  RSpec.describe 'Package', :orchestrated, :packages do
     describe 'NPM registry' do
       include Runtime::Fixtures
 
@@ -14,13 +14,14 @@ module QA
 
         Resource::PersonalAccessToken.fabricate!.access_token
       end
+
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'npm-registry-project'
         end
       end
 
-      it 'publishes an npm package and then deletes it' do
+      it 'publishes an npm package and then deletes it', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/944' do
         uri = URI.parse(Runtime::Scenario.gitlab_address)
         gitlab_host_with_port = "#{uri.host}:#{uri.port}"
         gitlab_address_with_port = "#{uri.scheme}://#{uri.host}:#{uri.port}"
@@ -67,7 +68,7 @@ module QA
         end
 
         Page::Project::Packages::Index.perform do |index|
-          expect(index).to have_content("Package was removed")
+          expect(index).to have_content("Package deleted successfully")
           expect(index).to have_no_package(package_name)
         end
       end

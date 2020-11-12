@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     page: 'epics',
     isGroup: true,
     isGroupDecendent: true,
+    useDefaultState: false,
     filteredSearchTokenKeys: FilteredSearchTokenKeysEpics,
     stateFiltersSelector: '.epics-state-filters',
   });

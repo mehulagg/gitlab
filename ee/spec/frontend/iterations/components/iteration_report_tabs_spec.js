@@ -1,13 +1,14 @@
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { mount } from '@vue/test-utils';
 import { GlAlert, GlAvatar, GlLoadingIcon, GlPagination, GlTable, GlTab } from '@gitlab/ui';
+import { Namespace } from 'ee/iterations/constants';
 
 describe('Iterations report tabs', () => {
   let wrapper;
   const id = 3;
-  const groupPath = 'gitlab-org';
+  const fullPath = 'gitlab-org';
   const defaultProps = {
-    groupPath,
+    fullPath,
     iterationId: `gid://gitlab/Iteration/${id}`,
   };
 
@@ -40,8 +41,8 @@ describe('Iterations report tabs', () => {
       loading: true,
     });
 
-    expect(wrapper.contains(GlLoadingIcon)).toBe(true);
-    expect(wrapper.contains(GlTable)).toBe(false);
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    expect(wrapper.find(GlTable).exists()).toBe(false);
   });
 
   it('shows iterations list when not loading', () => {
@@ -49,8 +50,8 @@ describe('Iterations report tabs', () => {
       loading: false,
     });
 
-    expect(wrapper.contains(GlLoadingIcon)).toBe(false);
-    expect(wrapper.contains(GlTable)).toBe(true);
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+    expect(wrapper.find(GlTable).exists()).toBe(true);
     expect(wrapper.text()).toContain('No issues found');
   });
 
@@ -113,7 +114,7 @@ describe('Iterations report tabs', () => {
     });
 
     it('shows issue list in table', () => {
-      expect(wrapper.contains(GlTable)).toBe(true);
+      expect(wrapper.find(GlTable).exists()).toBe(true);
       expect(findIssues()).toHaveLength(issues.length);
     });
 
@@ -145,9 +146,10 @@ describe('Iterations report tabs', () => {
         return setPage(1).then(() => {
           expect(wrapper.vm.queryVariables).toEqual({
             beforeCursor: 'first-item',
-            groupPath,
+            fullPath,
             id,
             lastPageSize: 20,
+            isGroup: true,
           });
         });
       });
@@ -156,10 +158,52 @@ describe('Iterations report tabs', () => {
         return setPage(2).then(() => {
           expect(wrapper.vm.queryVariables).toEqual({
             afterCursor: 'last-item',
-            groupPath,
+            fullPath,
             id,
             firstPageSize: 20,
+            isGroup: true,
           });
+        });
+      });
+    });
+  });
+
+  describe('IterationReportTabs query variables', () => {
+    const expected = {
+      afterCursor: undefined,
+      firstPageSize: 20,
+      fullPath: defaultProps.fullPath,
+      id,
+    };
+
+    describe('when group', () => {
+      it('has expected query variable values', () => {
+        mountComponent({
+          props: {
+            ...defaultProps,
+            namespaceType: Namespace.Group,
+          },
+        });
+
+        expect(wrapper.vm.queryVariables).toEqual({
+          ...expected,
+          isGroup: true,
+        });
+      });
+    });
+
+    describe('when project', () => {
+      it('has expected query variable values', () => {
+        mountComponent({
+          props: {
+            ...defaultProps,
+            namespaceType: Namespace.Project,
+          },
+        });
+
+        expect(wrapper.vm.queryVariables).toEqual({
+          ...expected,
+          isGroup: false,
         });
       });
     });

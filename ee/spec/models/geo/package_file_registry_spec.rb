@@ -6,7 +6,7 @@ RSpec.describe Geo::PackageFileRegistry, :geo, type: :model do
   include ::EE::GeoHelpers
 
   it_behaves_like 'a BulkInsertSafe model', Geo::PackageFileRegistry do
-    let(:valid_items_for_bulk_insertion) { build_list(:geo_package_file_registry, 10, created_at: Time.zone.now) }
+    let(:valid_items_for_bulk_insertion) { build_list(:geo_package_file_registry, 10, package_file: create(:package_file, :npm), created_at: Time.zone.now) }
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
 

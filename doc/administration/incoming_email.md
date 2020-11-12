@@ -13,7 +13,7 @@ GitLab has several features based on receiving incoming emails:
 - [New issue by email](../user/project/issues/managing_issues.md#new-issue-via-email):
   allow GitLab users to create a new issue by sending an email to a
   user-specific email address.
-- [New merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email-core-only):
+- [New merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email):
   allow GitLab users to create a new merge request by sending an email to a
   user-specific email address.
 - [Service Desk](../user/project/service_desk.md): provide e-mail support to
@@ -42,6 +42,8 @@ a mail server feature where any email to `user+arbitrary_tag@example.com` will e
 in the mailbox for `user@example.com` . It is supported by providers such as
 Gmail, Google Apps, Yahoo! Mail, Outlook.com, and iCloud, as well as the
 [Postfix mail server](reply_by_email_postfix_setup.md), which you can run on-premises.
+Microsoft Exchange Server [does not support sub-addressing](#microsoft-exchange-server),
+and Microsoft Office 365 [does not support sub-addressing by default](#microsoft-office-365)
 
 TIP: **Tip:**
 If your provider or server supports email sub-addressing, we recommend using it.
@@ -82,20 +84,20 @@ instead of the regular password for the mailbox.
 To set up a basic Postfix mail server with IMAP access on Ubuntu, follow the
 [Postfix setup documentation](reply_by_email_postfix_setup.md).
 
-### Security Concerns
+### Security concerns
 
-**WARNING:** Be careful when choosing the domain used for receiving incoming
-email.
+CAUTION: **Caution:**
+Be careful when choosing the domain used for receiving incoming email.
 
-For the sake of example, suppose your top-level company domain is `hooli.com`.
+For example, suppose your top-level company domain is `hooli.com`.
 All employees in your company have an email address at that domain via Google
 Apps, and your company's private Slack instance requires a valid `@hooli.com`
-email address in order to sign up.
+email address to sign up.
 
 If you also host a public-facing GitLab instance at `hooli.com` and set your
 incoming email domain to `hooli.com`, an attacker could abuse the "Create new
 issue by email" or
-"[Create new merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email-core-only)"
+"[Create new merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email)"
 features by using a project's unique address as the email when signing up for
 Slack. This would send a confirmation email, which would create a new issue or
 merge request on the project owned by the attacker, allowing them to click the
@@ -111,8 +113,8 @@ Alternatively, use a dedicated domain for GitLab email communications such as
 See GitLab issue [#30366](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30366)
 for a real-world example of this exploit.
 
-CAUTION:**Caution:**
-Be sure to use a mail server that has been configured to reduce
+CAUTION: **Caution:**
+Use a mail server that has been configured to reduce
 spam.
 A Postfix mail server that is running on a default configuration, for example,
 can result in abuse. All messages received on the configured mailbox will be processed
@@ -326,11 +328,11 @@ incoming_email:
 
 #### Microsoft Exchange Server
 
-Example configurations for Microsoft Exchange Server with IMAP enabled. Since
+Example configurations for Microsoft Exchange Server with IMAP enabled. Because
 Exchange does not support sub-addressing, only two options exist:
 
-- Catch-all mailbox (recommended for Exchange-only)
-- Dedicated email address (supports Reply by Email only)
+- [Catch-all mailbox](#catch-all-mailbox) (recommended for Exchange-only)
+- [Dedicated email address](#dedicated-email-address) (supports Reply by Email only)
 
 ##### Catch-all mailbox
 
@@ -417,7 +419,8 @@ Example for source installs:
 incoming_email:
     enabled: true
 
-    # Exchange does not support sub-addressing, and we're not using a catch-all mailbox so %{key} is not used here
+    # Exchange does not support sub-addressing,
+    # and we're not using a catch-all mailbox so %{key} is not used here
     address: "incoming@exchange.example.com"
 
     # Email account username
@@ -428,6 +431,183 @@ incoming_email:
 
     # IMAP server host
     host: "exchange.example.com"
+    # IMAP server port
+    port: 993
+    # Whether the IMAP server uses SSL
+    ssl: true
+```
+
+#### Microsoft Office 365
+
+Example configurations for Microsoft Office 365 with IMAP enabled.
+
+##### Sub-addressing mailbox
+
+NOTE: **Note:**
+As of September 2020 sub-addressing support
+[has been added to Office 365](https://office365.uservoice.com/forums/273493-office-365-admin/suggestions/18612754-support-for-dynamic-email-aliases-in-office-36). This feature is not
+enabled by default, and must be enabled through PowerShell.
+
+This series of PowerShell commands enables [sub-addressing](#email-sub-addressing)
+at the organization level in Office 365. This allows all mailboxes in the organization
+to receive sub-addressed mail:
+
+NOTE: **Note:**
+This series of commands will enable sub-addressing at the organization
+level in Office 365. This will allow all mailboxes in the organization
+to receive sub-addressed mail.
+
+```powershell
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+$UserCredential = Get-Credential
+
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
+
+Import-PSSession $Session -DisableNameChecking
+
+Set-OrganizationConfig -AllowPlusAddressInRecipients $true
+```
+
+This example for Omnibus GitLab assumes the mailbox `incoming@office365.example.com`:
+
+```ruby
+gitlab_rails['incoming_email_enabled'] = true
+
+# The email address including the `%{key}` placeholder that will be replaced
+# to reference the item being replied to. The placeholder can be omitted, but if
+# present, it must appear in the "user" part of the address (before the `@`).
+gitlab_rails['incoming_email_address'] = "incoming+%{key}@office365.example.com"
+
+# Email account username
+# Typically this is the userPrincipalName (UPN)
+gitlab_rails['incoming_email_email'] = "incoming@office365.example.com"
+# Email account password
+gitlab_rails['incoming_email_password'] = "[REDACTED]"
+
+# IMAP server host
+gitlab_rails['incoming_email_host'] = "outlook.office365.com"
+# IMAP server port
+gitlab_rails['incoming_email_port'] = 993
+# Whether the IMAP server uses SSL
+gitlab_rails['incoming_email_ssl'] = true
+```
+
+This example for source installs assumes the mailbox `incoming@office365.example.com`:
+
+```yaml
+incoming_email:
+    enabled: true
+
+    # The email address including the `%{key}` placeholder that will be replaced
+    # to reference the item being replied to. The placeholder can be omitted, but
+    # if present, it must appear in the "user" part of the address (before the `@`).
+    address: "incoming+%{key}@office365.example.comm"
+
+    # Email account username
+    # Typically this is the userPrincipalName (UPN)
+    user: "incoming@office365.example.comm"
+    # Email account password
+    password: "[REDACTED]"
+
+    # IMAP server host
+    host: "outlook.office365.com"
+    # IMAP server port
+    port: 993
+    # Whether the IMAP server uses SSL
+    ssl: true
+```
+
+##### Catch-all mailbox
+
+This example for Omnibus installs assumes the catch-all mailbox `incoming@office365.example.com`:
+
+```ruby
+gitlab_rails['incoming_email_enabled'] = true
+
+# The email address including the `%{key}` placeholder that will be replaced to
+# reference the item being replied to. The placeholder can be omitted, but if present,
+# it must appear in the "user" part of the address (before the `@`).
+gitlab_rails['incoming_email_address'] = "incoming-%{key}@office365.example.com"
+
+# Email account username
+# Typically this is the userPrincipalName (UPN)
+gitlab_rails['incoming_email_email'] = "incoming@office365.example.com"
+# Email account password
+gitlab_rails['incoming_email_password'] = "[REDACTED]"
+
+# IMAP server host
+gitlab_rails['incoming_email_host'] = "outlook.office365.com"
+# IMAP server port
+gitlab_rails['incoming_email_port'] = 993
+# Whether the IMAP server uses SSL
+gitlab_rails['incoming_email_ssl'] = true
+```
+
+This example for source installs assumes the catch-all mailbox `incoming@office365.example.com`:
+
+```yaml
+incoming_email:
+    enabled: true
+
+    # The email address including the `%{key}` placeholder that will be replaced
+    # to reference the item being replied to. The placeholder can be omitted, but
+    # if present, it must appear in the "user" part of the address (before the `@`).
+    address: "incoming-%{key}@office365.example.com"
+
+    # Email account username
+    # Typically this is the userPrincipalName (UPN)
+    user: "incoming@ad-domain.example.com"
+    # Email account password
+    password: "[REDACTED]"
+
+    # IMAP server host
+    host: "outlook.office365.com"
+    # IMAP server port
+    port: 993
+    # Whether the IMAP server uses SSL
+    ssl: true
+```
+
+##### Dedicated email address
+
+This example for Omnibus installs assumes the dedicated email address `incoming@office365.example.com`:
+
+```ruby
+gitlab_rails['incoming_email_enabled'] = true
+
+gitlab_rails['incoming_email_address'] = "incoming@office365.example.com"
+
+# Email account username
+# Typically this is the userPrincipalName (UPN)
+gitlab_rails['incoming_email_email'] = "incoming@office365.example.com"
+# Email account password
+gitlab_rails['incoming_email_password'] = "[REDACTED]"
+
+# IMAP server host
+gitlab_rails['incoming_email_host'] = "outlook.office365.com"
+# IMAP server port
+gitlab_rails['incoming_email_port'] = 993
+# Whether the IMAP server uses SSL
+gitlab_rails['incoming_email_ssl'] = true
+```
+
+This example for source installs assumes the dedicated email address `incoming@office365.example.com`:
+
+```yaml
+incoming_email:
+    enabled: true
+
+    address: "incoming@office365.example.com"
+
+    # Email account username
+    # Typically this is the userPrincipalName (UPN)
+    user: "incoming@office365.example.com"
+    # Email account password
+    password: "[REDACTED]"
+
+    # IMAP server host
+    host: "outlook.office365.com"
     # IMAP server port
     port: 993
     # Whether the IMAP server uses SSL

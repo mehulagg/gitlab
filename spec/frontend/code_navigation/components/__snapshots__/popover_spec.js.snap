@@ -12,7 +12,7 @@ exports[`Code navigation popover component renders popover 1`] = `
    
   <gl-tabs-stub
     contentclass="gl-py-0"
-    nav-class="gl-hidden"
+    navclass="gl-hidden"
     theme="indigo"
   >
     <gl-tab-stub
@@ -56,7 +56,8 @@ exports[`Code navigation popover component renders popover 1`] = `
         class="popover-body border-top"
       >
         <gl-button-stub
-          category="tertiary"
+          buttontextclasses=""
+          category="primary"
           class="w-100"
           data-testid="go-to-definition-btn"
           href="http://gitlab.com/test.js"

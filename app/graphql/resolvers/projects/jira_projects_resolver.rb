@@ -5,6 +5,8 @@ module Resolvers
     class JiraProjectsResolver < BaseResolver
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
+      type Types::Projects::Services::JiraProjectType.connection_type, null: true
+
       argument :name,
                GraphQL::STRING_TYPE,
                required: false,
@@ -16,7 +18,14 @@ module Resolvers
         response = jira_projects(name: name)
 
         if response.success?
-          response.payload[:projects]
+          projects_array = response.payload[:projects]
+
+          GraphQL::Pagination::ArrayConnection.new(
+            projects_array,
+            # override default max_page_size to whatever the size of the response is,
+            # see https://gitlab.com/gitlab-org/gitlab/-/issues/231394
+            **args.merge({ max_page_size: projects_array.size })
+          )
         else
           raise Gitlab::Graphql::Errors::BaseError, response.message
         end

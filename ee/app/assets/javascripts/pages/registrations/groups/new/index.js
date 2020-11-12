@@ -1,12 +1,12 @@
 /* eslint-disable no-new */
 
-import mountProgressBar from 'ee/registrations/groups/new';
+import mountComponents from 'ee/registrations/groups/new';
 import GroupPathValidator from '~/pages/groups/new/group_path_validator';
 import BindInOut from '~/behaviors/bind_in_out';
 import Group from '~/group';
 
 document.addEventListener('DOMContentLoaded', () => {
-  mountProgressBar();
+  mountComponents();
   new GroupPathValidator();
   BindInOut.initAll();
   new Group();

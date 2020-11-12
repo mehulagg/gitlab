@@ -12,7 +12,7 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-export function initIterationsList() {
+export function initIterationsList(namespaceType) {
   const el = document.querySelector('.js-iterations-list');
 
   return new Vue({
@@ -21,8 +21,9 @@ export function initIterationsList() {
     render(createElement) {
       return createElement(Iterations, {
         props: {
-          groupPath: el.dataset.groupFullPath,
+          fullPath: el.dataset.fullPath,
           canAdmin: parseBoolean(el.dataset.canAdmin),
+          namespaceType,
           newIterationPath: el.dataset.newIterationPath,
         },
       });
@@ -48,10 +49,16 @@ export function initIterationForm() {
   });
 }
 
-export function initIterationReport() {
+export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const el = document.querySelector('.js-iteration');
 
-  const { groupPath, iterationIid, editIterationPath } = el.dataset;
+  const {
+    fullPath,
+    iterationId,
+    iterationIid,
+    editIterationPath,
+    previewMarkdownPath,
+  } = el.dataset;
   const canEdit = parseBoolean(el.dataset.canEdit);
 
   return new Vue({
@@ -60,10 +67,14 @@ export function initIterationReport() {
     render(createElement) {
       return createElement(IterationReport, {
         props: {
-          groupPath,
+          fullPath,
+          iterationId,
           iterationIid,
           canEdit,
           editIterationPath,
+          namespaceType,
+          previewMarkdownPath,
+          initiallyEditing,
         },
       });
     },

@@ -1,10 +1,16 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Frontend Development Process
 
 You can find more about the organization of the frontend team in the [handbook](https://about.gitlab.com/handbook/engineering/frontend/).
 
 ## Development Checklist
 
-The idea is to remind us about specific topics during the time we build a new feature or start something. This is a common practice in other industries (like pilots) that also use standardised checklists to reduce problems early on.
+The idea is to remind us about specific topics during the time we build a new feature or start something. This is a common practice in other industries (like pilots) that also use standardized checklists to reduce problems early on.
 
 Copy the content over to your issue or merge request and if something doesn't apply simply remove it from your current list.
 

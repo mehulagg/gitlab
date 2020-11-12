@@ -22,6 +22,12 @@ export const PRESET_TYPES = {
   WEEKS: 'WEEKS',
 };
 
+export const EPICS_STATES = {
+  ALL: 'all',
+  OPENED: 'opened',
+  CLOSED: 'closed',
+};
+
 export const EXTEND_AS = {
   PREPEND: 'prepend',
   APPEND: 'append',

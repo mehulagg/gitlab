@@ -1,7 +1,8 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { mockTracking } from 'helpers/tracking_helper';
 import GroupedTestReportsApp from '~/reports/components/grouped_test_reports_app.vue';
-import store from '~/reports/store';
+import { getStoreConfig } from '~/reports/store';
 
 import { failedReport } from '../mock_data/mock_data';
 import successTestReports from '../mock_data/no_failures_report.json';
@@ -20,10 +21,7 @@ describe('Grouped test reports app', () => {
   let wrapper;
   let mockStore;
 
-  const mountComponent = ({
-    glFeatures = { junitPipelineView: false },
-    props = { pipelinePath },
-  } = {}) => {
+  const mountComponent = ({ props = { pipelinePath } } = {}) => {
     wrapper = mount(Component, {
       store: mockStore,
       localVue,
@@ -31,12 +29,6 @@ describe('Grouped test reports app', () => {
         endpoint,
         pipelinePath,
         ...props,
-      },
-      methods: {
-        fetchReports: () => {},
-      },
-      provide: {
-        glFeatures,
       },
     });
   };
@@ -48,6 +40,7 @@ describe('Grouped test reports app', () => {
   };
 
   const findHeader = () => wrapper.find('[data-testid="report-section-code-text"]');
+  const findExpandButton = () => wrapper.find('[data-testid="report-section-expand-button"]');
   const findFullTestReportLink = () => wrapper.find('[data-testid="group-test-reports-full-link"]');
   const findSummaryDescription = () => wrapper.find('[data-testid="test-summary-row-description"]');
   const findIssueDescription = () => wrapper.find('[data-testid="test-issue-body-description"]');
@@ -55,7 +48,13 @@ describe('Grouped test reports app', () => {
     wrapper.findAll('[data-testid="test-issue-body-description"]');
 
   beforeEach(() => {
-    mockStore = store();
+    mockStore = new Vuex.Store({
+      ...getStoreConfig(),
+      actions: {
+        fetchReports: () => {},
+        setEndpoint: () => {},
+      },
+    });
     mountComponent();
   });
 
@@ -78,28 +77,17 @@ describe('Grouped test reports app', () => {
   });
 
   describe('`View full report` button', () => {
-    it('should not render the full test report link', () => {
-      expect(findFullTestReportLink().exists()).toBe(false);
-    });
+    it('should render the full test report link', () => {
+      const fullTestReportLink = findFullTestReportLink();
 
-    describe('With junitPipelineView feature flag enabled', () => {
-      beforeEach(() => {
-        mountComponent({ glFeatures: { junitPipelineView: true } });
-      });
-
-      it('should render the full test report link', () => {
-        const fullTestReportLink = findFullTestReportLink();
-
-        expect(fullTestReportLink.exists()).toBe(true);
-        expect(pipelinePath).not.toBe('');
-        expect(fullTestReportLink.attributes('href')).toBe(`${pipelinePath}/test_report`);
-      });
+      expect(fullTestReportLink.exists()).toBe(true);
+      expect(pipelinePath).not.toBe('');
+      expect(fullTestReportLink.attributes('href')).toBe(`${pipelinePath}/test_report`);
     });
 
     describe('Without a pipelinePath', () => {
       beforeEach(() => {
         mountComponent({
-          glFeatures: { junitPipelineView: true },
           props: { pipelinePath: '' },
         });
       });
@@ -107,6 +95,35 @@ describe('Grouped test reports app', () => {
       it('should not render the full test report link', () => {
         expect(findFullTestReportLink().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('`Expand` button', () => {
+    let trackingSpy;
+
+    beforeEach(() => {
+      setReports(newFailedTestReports);
+      mountComponent();
+      document.body.dataset.page = 'projects:merge_requests:show';
+      trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
+    });
+
+    it('tracks an event on click', () => {
+      findExpandButton().trigger('click');
+
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'expand_test_report_widget', {});
+    });
+
+    it('only tracks the first expansion', () => {
+      expect(trackingSpy).not.toHaveBeenCalled();
+
+      const button = findExpandButton();
+
+      button.trigger('click');
+      button.trigger('click');
+      button.trigger('click');
+
+      expect(trackingSpy).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
 import { GlLink, GlButton } from '@gitlab/ui';
 import GeoReplicableItem from 'ee/geo_replicable/components/geo_replicable_item.vue';
-import createStore from 'ee/geo_replicable/store';
+import { getStoreConfig } from 'ee/geo_replicable/store';
 import { ACTION_TYPES } from 'ee/geo_replicable/constants';
 import { MOCK_BASIC_FETCH_DATA_MAP, MOCK_REPLICABLE_TYPE } from '../mock_data';
 
@@ -27,15 +27,17 @@ describe('GeoReplicableItem', () => {
   };
 
   const createComponent = (props = {}) => {
+    const fakeStore = new Vuex.Store({
+      ...getStoreConfig({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
+      actions: actionSpies,
+    });
+
     wrapper = mount(GeoReplicableItem, {
       localVue,
-      store: createStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
+      store: fakeStore,
       propsData: {
         ...defaultProps,
         ...props,
-      },
-      methods: {
-        ...actionSpies,
       },
     });
   };
@@ -81,7 +83,7 @@ describe('GeoReplicableItem', () => {
 
         it('calls initiateReplicableSync when clicked', () => {
           findGlButton().trigger('click');
-          expect(actionSpies.initiateReplicableSync).toHaveBeenCalledWith({
+          expect(actionSpies.initiateReplicableSync).toHaveBeenCalledWith(expect.any(Object), {
             projectId: mockReplicable.projectId,
             name: mockReplicable.name,
             action: ACTION_TYPES.RESYNC,

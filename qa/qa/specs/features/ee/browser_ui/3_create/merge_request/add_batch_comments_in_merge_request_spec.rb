@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'batch comments in merge request' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-with-merge-request'
         end
       end
+
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.title = 'This is a merge request'
@@ -16,7 +17,7 @@ module QA
         end
       end
 
-      it 'user submits a non-diff review' do
+      it 'user submits a non-diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/637' do
         Flow::Login.sign_in
 
         merge_request.visit!
@@ -31,13 +32,13 @@ module QA
           show.start_review
           show.submit_pending_reviews
 
-          expect(show).to have_content("I'm starting a new discussion")
-          expect(show).to have_content("Could you please check this?")
+          expect(show).to have_comment("I'm starting a new discussion")
+          expect(show).to have_comment("Could you please check this?")
           expect(show).to have_content("1 unresolved thread")
         end
       end
 
-      it 'user submits a diff review' do
+      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638' do
         Flow::Login.sign_in
 
         merge_request.visit!
@@ -71,7 +72,7 @@ module QA
           show.click_discussions_tab
           show.resolve_discussion_at_index(0)
 
-          expect(show).to have_content("Can you check this line of code?")
+          expect(show).to have_comment("Can you check this line of code?")
           expect(show).to have_content("All threads resolved")
         end
       end

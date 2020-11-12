@@ -1,0 +1,133 @@
+@import '../../../../../app/assets/stylesheets/page_bundles/boards';
+
+.boards-add-list {
+  &.show {
+    .dropdown-menu-tabs {
+      max-height: 400px;
+      min-width: 240px;
+      overflow-y: hidden;
+    }
+  }
+
+  .dropdown-tabs-list {
+    box-shadow: 0 0 0 1px var(--border-color, $border-color);
+  }
+
+  .dropdown-tab-item {
+    border-left: 1px solid var(--border-color, $border-color);
+
+    a {
+      border-bottom: 2px solid transparent;
+      background-color: var(--gray-50, $gray-50);
+
+      &:focus,
+      &.active {
+        background-color: $white;
+      }
+
+      &.active {
+        font-weight: bold;
+        border-bottom-color: var(--indigo-500, $indigo-500);
+      }
+    }
+  }
+
+  .issue-board-dropdown-content {
+    margin: 0;
+    padding: $gl-padding;
+    border-bottom: 0;
+    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
+  }
+}
+
+.tab-pane-labels {
+  .dropdown-page-one .dropdown-content {
+    height: 140px;
+  }
+
+  .dropdown-page-two {
+    margin-top: 10px;
+
+    .dropdown-content {
+      max-height: initial;
+      height: 205px;
+    }
+  }
+}
+
+.tab-pane-assignees {
+  .dropdown-content {
+    height: 225px;
+    max-height: 252px;
+  }
+}
+
+.board-title-text {
+  margin-right: $gl-padding-8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-type-assignee {
+  .board-title-sub-text {
+    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
+  }
+}
+
+.boards-selector-wrapper > .show.dropdown .dropdown-menu {
+  // we cannot use d-flex from Bootstrap because of !important
+  // see https://gitlab.com/gitlab-org/gitlab-ui/issues/38
+  display: flex;
+
+  &.dropdown-extended-height {
+    max-height: $dropdown-max-height-lg;
+  }
+}
+
+.board-config-modal {
+  width: 440px;
+
+  .block {
+    padding: $gl-padding-8 0;
+
+    // add a border between all items, but not at the start or end
+    + .block {
+      border-top: solid 1px var(--border-color, $border-color);
+    }
+  }
+}
+
+.board-swimlanes {
+  overflow-x: auto;
+}
+
+$epic-icons-spacing: 40px;
+
+.board-epic-lane {
+  max-width: calc(100vw - #{$contextual-sidebar-width} - #{$epic-icons-spacing});
+
+  .page-with-icon-sidebar & {
+    max-width: calc(100vw - #{$contextual-sidebar-collapsed-width} - #{$epic-icons-spacing});
+  }
+
+  .page-with-icon-sidebar .is-compact & {
+    max-width: calc(100vw - #{$contextual-sidebar-collapsed-width} - #{$gutter-width} - #{$epic-icons-spacing});
+  }
+
+  .is-compact & {
+    max-width: calc(100vw - #{$contextual-sidebar-width} - #{$gutter-width} - #{$epic-icons-spacing});
+  }
+}
+
+.swimlanes-sidebar-time-tracker {
+  .time-tracking-help-state {
+    margin: 16px -24px 0;
+    @include gl-px-6;
+    @include gl-py-2;
+    @include gl-border-gray-100;
+    @include gl-border-t-solid;
+    @include gl-border-t-1;
+    @include gl-border-b-0;
+  }
+}

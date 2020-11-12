@@ -45,7 +45,7 @@ module EE
             def delete_batch_of_orphans!
               deleted = where(id: orphans.limit(BATCH_SIZE)).delete_all
 
-              vacuum! if deleted.positive?
+              vacuum! if deleted > 0
 
               deleted
             end
@@ -64,7 +64,7 @@ module EE
           return if ::Gitlab::Database.read_only?
 
           deleted_rows = prune_orphaned_rows(table_name)
-          table_name   = next_table(table_name) if deleted_rows.zero?
+          table_name   = next_table(table_name) if deleted_rows == 0
 
           ::BackgroundMigrationWorker.perform_in(RESCHEDULE_DELAY, self.class.name.demodulize, table_name) if table_name
         end

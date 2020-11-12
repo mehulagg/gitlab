@@ -10,6 +10,10 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
   let_it_be(:other_pipeline) { create(:ci_pipeline) }
   let(:current_user) { create(:user) }
 
+  specify do
+    expect(described_class).to have_nullable_graphql_type(::Types::Ci::PipelineType)
+  end
+
   def resolve_pipeline(project, args)
     resolve(described_class, obj: project, args: args, ctx: { current_user: current_user })
   end
@@ -32,5 +36,20 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
 
   it 'errors when no iid is passed' do
     expect { resolve_pipeline(project, {}) }.to raise_error(ArgumentError)
+  end
+
+  context 'when the pipeline is a dangling pipeline' do
+    let(:pipeline) do
+      dangling_source = ::Enums::Ci::Pipeline.dangling_sources.each_value.first
+      create(:ci_pipeline, source: dangling_source, project: project)
+    end
+
+    it 'resolves pipeline for the passed iid' do
+      result = batch_sync do
+        resolve_pipeline(project, { iid: pipeline.iid.to_s })
+      end
+
+      expect(result).to eq(pipeline)
+    end
   end
 end

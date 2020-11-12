@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import createStore from '~/notes/stores';
 import awardsNote from '~/notes/components/note_awards_list.vue';
 import { noteableDataMock, notesDataMock } from '../mock_data';
-import { TEST_HOST } from 'jest/helpers/test_constants';
 
 describe('note_awards_list component', () => {
   let store;
@@ -92,15 +92,14 @@ describe('note_awards_list component', () => {
       }).$mount();
     };
 
-    const findTooltip = () =>
-      vm.$el.querySelector('[data-original-title]').getAttribute('data-original-title');
+    const findTooltip = () => vm.$el.querySelector('[title]').getAttribute('title');
 
     it('should only escape & and " characters', () => {
       awardsMock = [...new Array(1)].map(createAwardEmoji);
       mountComponent();
       const escapedName = awardsMock[0].user.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
-      expect(vm.$el.querySelector('[data-original-title]').outerHTML).toContain(escapedName);
+      expect(vm.$el.querySelector('[title]').outerHTML).toContain(escapedName);
     });
 
     it('should not escape special HTML characters twice when only 1 person awarded', () => {

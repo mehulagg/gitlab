@@ -187,7 +187,7 @@ RSpec.describe GitlabRoutingHelper do
       let(:ref) { 'test-ref' }
       let(:args) { {} }
 
-      subject { gitlab_raw_snippet_blob_path(snippet, blob.path, ref, args) }
+      subject { gitlab_raw_snippet_blob_path(snippet, blob.path, ref, **args) }
 
       it_behaves_like 'snippet blob raw path'
 
@@ -222,23 +222,12 @@ RSpec.describe GitlabRoutingHelper do
       let(:ref)  { 'snippet-test-ref' }
       let(:args) { {} }
 
-      subject { gitlab_raw_snippet_blob_url(snippet, blob.path, ref, args) }
+      subject { gitlab_raw_snippet_blob_url(snippet, blob.path, ref, **args) }
 
-      context 'for a PersonalSnippet' do
-        let(:snippet) { personal_snippet }
-
-        it { expect(subject).to eq("http://test.host/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}") }
-      end
-
-      context 'for a ProjectSnippet' do
-        let(:snippet) { project_snippet }
-
-        it { expect(subject).to eq("http://test.host/#{snippet.project.full_path}/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}") }
-      end
+      it_behaves_like 'snippet blob raw url'
 
       context 'when an argument is set' do
         let(:args) { { inline: true } }
-
         let(:snippet) { personal_snippet }
 
         it { expect(subject).to eq("http://test.host/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}?inline=true") }
@@ -330,6 +319,16 @@ RSpec.describe GitlabRoutingHelper do
     describe '#wiki_page_path' do
       it 'returns the url for the wiki page' do
         expect(wiki_page_path(wiki, 'page')).to eq("/#{wiki.project.full_path}/-/wikis/page")
+      end
+    end
+  end
+
+  context 'releases' do
+    let(:release) { create(:release) }
+
+    describe '#release_url' do
+      it 'returns the url for the release page' do
+        expect(release_url(release)).to eq("http://test.host/#{release.project.full_path}/-/releases/#{release.tag}")
       end
     end
   end

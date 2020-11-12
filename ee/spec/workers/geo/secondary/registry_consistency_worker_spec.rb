@@ -2,19 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
+RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
   include EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
-  let(:primary) { create(:geo_node, :primary) }
-  let(:secondary) { create(:geo_node) }
+  let_it_be(:primary) { create(:geo_node, :primary) }
+  let_it_be(:secondary) { create(:geo_node) }
+
+  let(:batch_size) { described_class::BATCH_SIZE }
+
+  subject(:job) { described_class.new }
 
   before do
     stub_current_geo_node(secondary)
+    stub_registry_replication_config(enabled: true)
   end
-
-  let(:worker_class) { described_class }
-  let(:batch_size) { described_class::BATCH_SIZE }
 
   it_behaves_like 'reenqueuer'
 
@@ -30,9 +32,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
       allow(subject).to receive(:sleep) # faster tests
     end
 
-    it_behaves_like 'it is rate limited to 1 call per', 5.seconds do
-      let(:rate_limited_method) { subject.perform }
-    end
+    it_behaves_like '#perform is rate limited to 1 call per', 5.seconds
 
     context 'when RegistryConsistencyService#execute returns true at least once' do
       before do
@@ -77,72 +77,37 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
 
     # Somewhat of an integration test
     it 'creates missing registries for each registry class' do
+      project = create(:project)
+      container_repository = create(:container_repository, project: project)
+      create(:design, project: project)
       job_artifact = create(:ci_job_artifact)
       lfs_object = create(:lfs_object)
-      project = create(:project)
-      create(:design, project: project)
-      upload = create(:upload)
+      merge_request_diff = create(:merge_request_diff, :external)
       package_file = create(:conan_package_file, :conan_package)
+      terraform_state_version = create(:terraform_state_version)
+      upload = create(:upload)
 
-      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(0)
-      expect(Geo::JobArtifactRegistry.where(artifact_id: job_artifact.id).count).to eq(0)
-      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(0)
+      expect(Geo::ContainerRepositoryRegistry.where(container_repository_id: container_repository.id).count).to eq(0)
       expect(Geo::DesignRegistry.where(project_id: project.id).count).to eq(0)
-      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(0)
+      expect(Geo::JobArtifactRegistry.where(artifact_id: job_artifact.id).count).to eq(0)
+      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(0)
+      expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(0)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(0)
+      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(0)
+      expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(0)
+      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(0)
 
       subject.perform
 
-      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(1)
-      expect(Geo::JobArtifactRegistry.where(artifact_id: job_artifact.id).count).to eq(1)
-      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(1)
+      expect(Geo::ContainerRepositoryRegistry.where(container_repository_id: container_repository.id).count).to eq(1)
       expect(Geo::DesignRegistry.where(project_id: project.id).count).to eq(1)
-      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(1)
+      expect(Geo::JobArtifactRegistry.where(artifact_id: job_artifact.id).count).to eq(1)
+      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(1)
+      expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(1)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(1)
-    end
-
-    context 'when geo_project_registry_ssot_sync is disabled' do
-      before do
-        stub_feature_flags(geo_project_registry_ssot_sync: false)
-      end
-
-      it 'returns false' do
-        expect(subject.perform).to be_falsey
-      end
-
-      it 'does not execute RegistryConsistencyService for projects' do
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::JobArtifactRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::LfsObjectRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::PackageFileRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::UploadRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::DesignRegistry, batch_size: batch_size).and_call_original
-
-        expect(Geo::RegistryConsistencyService).not_to receive(:new).with(Geo::ProjectRegistry, batch_size: batch_size)
-
-        subject.perform
-      end
-    end
-
-    context 'when geo_design_registry_ssot_sync is disabled' do
-      before do
-        stub_feature_flags(geo_design_registry_ssot_sync: false)
-      end
-
-      it 'returns false' do
-        expect(subject.perform).to be_falsey
-      end
-
-      it 'does not execute RegistryConsistencyService for designs' do
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::JobArtifactRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::LfsObjectRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::PackageFileRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::UploadRegistry, batch_size: batch_size).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::ProjectRegistry, batch_size: batch_size).and_call_original
-
-        expect(Geo::RegistryConsistencyService).not_to receive(:new).with(Geo::DesignRegistry, batch_size: batch_size)
-
-        subject.perform
-      end
+      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(1)
+      expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(1)
+      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(1)
     end
 
     context 'when the current Geo node is disabled or primary' do

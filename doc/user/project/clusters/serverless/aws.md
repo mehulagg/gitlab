@@ -136,8 +136,8 @@ This example code does the following:
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be defined in your GitLab settings under **Settings > CI/CD > Variables**.
 For more information please see [Create a custom variable in the UI](../../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
 
-NOTE: **Note:**
-   The AWS credentials you provide must include IAM policies that provision correct access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
+ The AWS credentials you provide must include IAM policies that provision correct
+ access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 
 #### Deploying your function
 
@@ -154,9 +154,7 @@ endpoints:
 #### Manually testing your function
 
 Running the following `curl` command should trigger your function.
-
-NOTE: **Note:**
-Your URL should be the one retrieved from the GitLab deploy stage log.
+Your URL should be the one retrieved from the GitLab deploy stage log:
 
 ```shell
 curl https://u768nzby1j.execute-api.us-east-1.amazonaws.com/production/hello
@@ -222,7 +220,8 @@ the environment of the deployed function:
 
 ```yaml
 provider:
-  ...
+  # Other configuration omitted
+  # ...
   environment:
     A_VARIABLE: ${env:A_VARIABLE}
 ```
@@ -245,10 +244,10 @@ functions:
   hello:
     handler: src/handler.hello
     events:
-      - http: # Rewrite this part to enable CORS
+      - http:  # Rewrite this part to enable CORS
           path: hello
           method: get
-          cors: true # <-- CORS here
+          cors: true  # <-- CORS here
 ```
 
 You also need to return CORS specific headers in your function response:
@@ -336,7 +335,7 @@ Some steps in this documentation use SAM CLI. Follow the instructions for
 [installing SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 to install and configure SAM CLI.
 
-If you use [AWS Cloud9](https://aws.amazon.com/cloud9/) as your integrated development
+If you use [AWS Cloud9](https://aws.amazon.com/cloud9/) as your integrated development
 environment (IDE), the following are installed for you:
 
 - [AWS Command Line Interface](https://docs.aws.amazon.com/en_pv/cli/latest/userguide/cli-chap-install.html)
@@ -358,7 +357,7 @@ To create a new AWS SAM application:
 1. `git push` the application back to the GitLab project.
 
 This creates a SAM app named `gitlabpoc` using the default configuration, a single
-Python 3.8 function invoked by an [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
+Python 3.8 function invoked by an [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
 endpoint. To see additional runtimes supported by SAM and options for `sam init`, run:
 
 ```shell
@@ -368,17 +367,16 @@ sam init -h
 ### Setting up your AWS credentials with your GitLab account
 
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both
-`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be set in the project's CI/CD
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be set in the project's CI/CD
 variables.
 
 To set these:
 
-1. Navigate to the project's **{settings}** **Settings > CI / CD**.
-1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
+1. Navigate to the project's **Settings > CI / CD**.
+1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
    `AWS_SECRET_ACCESS_KEY`.
 1. Mask the credentials so they do not show in logs using the **Masked** toggle.
 
-NOTE: **Note:**
 The AWS credentials you provide must include IAM policies that provision correct access
 control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 
@@ -462,7 +460,7 @@ CLI installed locally for you to test locally.
 
 First, test the function.
 
-SAM provides a default event in `events/event.json` that includes a message body of:
+SAM provides a default event in `events/event.json` that includes a message body of:
 
 ```plaintext
 {\"message\": \"hello world\"}
@@ -493,7 +491,7 @@ sam local start-api
 ```
 
 SAM again launches a Docker container, this time with a mocked Amazon API Gateway
-listening on `localhost:3000`.
+listening on `localhost:3000`.
 
 Call the `hello` API by running:
 

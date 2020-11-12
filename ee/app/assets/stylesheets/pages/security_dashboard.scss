@@ -57,3 +57,13 @@ $selection-summary-height: 68px;
     @include sticky-top-positioning($security-filter-height + $selection-summary-height);
   }
 }
+
+.security-dashboard-accordion > ul {
+  @include gl-display-flex;
+  @include gl-flex-fill-1;
+}
+
+.security-charts > section {
+  flex: 1 1 40%;
+  margin: 1rem;
+}

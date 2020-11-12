@@ -2,76 +2,48 @@
 
 require 'spec_helper'
 
-RSpec.shared_examples_for 'snippet editor' do
-  before do
-    stub_feature_flags(snippets_vue: false)
-    stub_feature_flags(snippets_edit_vue: false)
-    sign_in(user)
-  end
+RSpec.describe 'User creates snippet', :js do
+  include DropzoneHelper
+  include Spec::Support::Helpers::Features::SnippetSpecHelpers
 
-  def description_field
-    find('.js-description-input').find('input,textarea')
+  let_it_be(:user) { create(:user) }
+
+  let(:title) { 'My Snippet Title' }
+  let(:file_content) { 'Hello World!' }
+  let(:md_description) { 'My Snippet **Description**' }
+  let(:description) { 'My Snippet Description' }
+  let(:created_snippet) { Snippet.last }
+  let(:snippet_title_field) { 'snippet-title' }
+
+  before do
+    sign_in(user)
+
+    visit new_snippet_path
   end
 
   def fill_form
-    fill_in 'personal_snippet_title', with: 'My Snippet Title'
-
-    # Click placeholder first to expand full description field
-    description_field.click
-    fill_in 'personal_snippet_description', with: 'My Snippet **Description**'
-
-    page.within('.file-editor') do
-      el = find('.inputarea')
-      el.send_keys 'Hello World!'
-    end
+    snippet_fill_in_form(title: title, content: file_content, description: md_description)
   end
 
   it 'Authenticated user creates a snippet' do
-    visit new_snippet_path
-
     fill_form
 
     click_button('Create snippet')
     wait_for_requests
 
-    expect(page).to have_content('My Snippet Title')
-    page.within('.snippet-header .description') do
-      expect(page).to have_content('My Snippet Description')
+    expect(page).to have_content(title)
+    page.within(snippet_description_view_selector) do
+      expect(page).to have_content(description)
       expect(page).to have_selector('strong')
     end
-    expect(page).to have_content('Hello World!')
-  end
-
-  it 'previews a snippet with file' do
-    visit new_snippet_path
-
-    # Click placeholder first to expand full description field
-    description_field.click
-    fill_in 'personal_snippet_description', with: 'My Snippet'
-    dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
-    find('.js-md-preview-button').click
-
-    page.within('#new_personal_snippet .md-preview-holder') do
-      expect(page).to have_content('My Snippet')
-
-      link = find('a.no-attachment-icon img.js-lazy-loaded[alt="banana_sample"]')['src']
-      expect(link).to match(%r{/uploads/-/system/user/#{user.id}/\h{32}/banana_sample\.gif\z})
-
-      # Adds a cache buster for checking if the image exists as Selenium is now handling the cached regquests
-      # not anymore as requests when they come straight from memory cache.
-      reqs = inspect_requests { visit("#{link}?ran=#{SecureRandom.base64(20)}") }
-      expect(reqs.first.status_code).to eq(200)
-    end
+    expect(page).to have_content(file_content)
   end
 
   it 'uploads a file when dragging into textarea' do
-    visit new_snippet_path
-
     fill_form
-
     dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
 
-    expect(page.find_field("personal_snippet_description").value).to have_content('banana_sample')
+    expect(snippet_description_value).to have_content('banana_sample')
 
     click_button('Create snippet')
     wait_for_requests
@@ -91,77 +63,24 @@ RSpec.shared_examples_for 'snippet editor' do
         allow(instance).to receive(:create_commit).and_raise(StandardError, error)
       end
 
-      visit new_snippet_path
-
       fill_form
-
       click_button('Create snippet')
       wait_for_requests
     end
 
-    it 'displays the error' do
+    it 'renders the new page and displays the error' do
       expect(page).to have_content(error)
-    end
-
-    it 'renders new page' do
       expect(page).to have_content('New Snippet')
-    end
 
-    it 'has the correct action path' do
       action = find('form.snippet-form')['action']
-      expect(action).to match(%r{/snippets\z})
+      expect(action).to include("/snippets")
     end
-  end
-
-  it 'validation fails for the first time' do
-    visit new_snippet_path
-
-    fill_in 'personal_snippet_title', with: 'My Snippet Title'
-    click_button('Create snippet')
-
-    expect(page).to have_selector('#error_explanation')
-
-    fill_form
-    dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
-
-    click_button('Create snippet')
-    wait_for_requests
-
-    expect(page).to have_content('My Snippet Title')
-    page.within('.snippet-header .description') do
-      expect(page).to have_content('My Snippet Description')
-      expect(page).to have_selector('strong')
-    end
-    expect(page).to have_content('Hello World!')
-    link = find('a.no-attachment-icon img.js-lazy-loaded[alt="banana_sample"]')['src']
-    expect(link).to match(%r{/uploads/-/system/personal_snippet/#{Snippet.last.id}/\h{32}/banana_sample\.gif\z})
-
-    reqs = inspect_requests { visit("#{link}?ran=#{SecureRandom.base64(20)}") }
-    expect(reqs.first.status_code).to eq(200)
-  end
-
-  it 'Authenticated user creates a snippet with + in filename' do
-    visit new_snippet_path
-
-    fill_in 'personal_snippet_title', with: 'My Snippet Title'
-    page.within('.file-editor') do
-      find(:xpath, "//input[@id='personal_snippet_file_name']").set 'snippet+file+name'
-      el = find('.inputarea')
-      el.send_keys 'Hello World!'
-    end
-
-    click_button 'Create snippet'
-    wait_for_requests
-
-    expect(page).to have_content('My Snippet Title')
-    expect(page).to have_content('snippet+file+name')
-    expect(page).to have_content('Hello World!')
   end
 
   context 'when snippets default visibility level is restricted' do
     before do
       stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PRIVATE],
-                              default_snippet_visibility: Gitlab::VisibilityLevel::PRIVATE)
+                                default_snippet_visibility: Gitlab::VisibilityLevel::PRIVATE)
     end
 
     it 'creates a snippet using the lowest available visibility level as default' do
@@ -172,20 +91,49 @@ RSpec.shared_examples_for 'snippet editor' do
       click_button('Create snippet')
       wait_for_requests
 
-      visit snippets_path
-      click_link('Internal')
-
-      expect(page).to have_content('My Snippet Title')
-      created_snippet = Snippet.last
-      expect(created_snippet.visibility_level).to eq(Gitlab::VisibilityLevel::INTERNAL)
+      expect(find('.blob-content')).to have_content(file_content)
+      expect(Snippet.last.visibility_level).to eq(Gitlab::VisibilityLevel::INTERNAL)
     end
   end
-end
 
-RSpec.describe 'User creates snippet', :js do
-  include DropzoneHelper
+  it_behaves_like 'personal snippet with references' do
+    let(:container) { snippet_description_view_selector }
+    let(:md_description) { references }
 
-  let_it_be(:user) { create(:user) }
+    subject do
+      fill_form
+      click_button('Create snippet')
 
-  it_behaves_like "snippet editor"
+      wait_for_requests
+    end
+  end
+
+  it 'validation fails for the first time' do
+    fill_in snippet_title_field, with: title
+
+    expect(page).not_to have_button('Create snippet')
+
+    snippet_fill_in_form(title: title, content: file_content)
+    expect(page).to have_button('Create snippet')
+  end
+
+  it 'previews a snippet with file' do
+    # Click placeholder first to expand full description field
+    snippet_fill_in_description('My Snippet')
+    dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
+    find('.js-md-preview-button').click
+
+    page.within('.md-preview-holder') do
+      expect(page).to have_content('My Snippet')
+
+      link = find('a.no-attachment-icon img.js-lazy-loaded[alt="banana_sample"]')['src']
+      expect(link).to match(%r{/uploads/-/system/user/#{user.id}/\h{32}/banana_sample\.gif\z})
+
+      # Adds a cache buster for checking if the image exists as Selenium is now handling the cached requests
+      # not anymore as requests when they come straight from memory cache.
+      # accept_confirm is needed because of https://gitlab.com/gitlab-org/gitlab/-/issues/262102
+      reqs = inspect_requests { accept_confirm { visit("#{link}?ran=#{SecureRandom.base64(20)}") } }
+      expect(reqs.first.status_code).to eq(200)
+    end
+  end
 end

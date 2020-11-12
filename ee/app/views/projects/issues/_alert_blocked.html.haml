@@ -3,7 +3,7 @@
 
 - if @issue.blocked? && @issue.blocked_by_issues(current_user).length > 0
   .hidden.js-close-blocked-issue-warning.js-issuable-buttons.gl-alert.gl-alert-warning.gl-mt-5{ role: 'alert', data: { 'action': "close-reopen" } }
-    = sprite_icon('warning', size: 16, css_class: 'gl-icon gl-alert-icon')
+    = sprite_icon('warning', css_class: 'gl-icon gl-alert-icon')
     %h4.gl-alert-title
       = _('Are you sure you want to close this blocked issue?')
     .gl-alert-body
@@ -11,5 +11,5 @@
     .gl-alert-actions
       %button{ class: "btn btn-close-anyway gl-alert-action btn-warning btn-md gl-button", data: { endpoint: close_issuable_path(@issue) } }
         = _("Yes, close issue")
-      %button.btn.gl-alert-action.btn-warning.btn-md.gl-button.btn-secondary
+      %button.btn.gl-alert-action.btn-warning.btn-md.gl-button.btn-warning-secondary.js-cancel-blocked-issue-warning
         = s_('Cancel')

@@ -1,6 +1,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { GlFormGroup, GlDeprecatedButton } from '@gitlab/ui';
+import { convertToSnakeCase, dasherize } from '~/lib/utils/text_utility';
 import StepHeader from './step_header.vue';
 import StepSummary from './step_summary.vue';
 
@@ -40,6 +41,9 @@ export default {
     isEditable() {
       return this.isFinished && this.stepIndex(this.step) < this.currentStepIndex;
     },
+    snakeCasedStep() {
+      return dasherize(convertToSnakeCase(this.step));
+    },
     ...mapGetters(['currentStep', 'stepIndex', 'currentStepIndex']),
   },
   methods: {
@@ -58,7 +62,7 @@ export default {
 <template>
   <div class="mb-3 mb-lg-5">
     <step-header :title="title" :is-finished="isFinished" />
-    <div class="card">
+    <div :class="['card', snakeCasedStep]">
       <div v-show="isActive" @keyup.enter="nextStep">
         <slot name="body" :active="isActive"></slot>
         <gl-form-group v-if="nextStepButtonText" class="gl-mt-3 gl-mb-0">

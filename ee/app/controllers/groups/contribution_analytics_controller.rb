@@ -11,6 +11,8 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
 
   track_unique_visits :show, target_id: 'g_analytics_contribution'
 
+  feature_category :planning_analytics
+
   def show
     @start_date = data_collector.from
 

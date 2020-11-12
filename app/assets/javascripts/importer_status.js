@@ -2,8 +2,8 @@ import $ from 'jquery';
 import { escape } from 'lodash';
 import { __, sprintf } from './locale';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
-import { parseBoolean } from './lib/utils/common_utils';
+import { deprecatedCreateFlash as flash } from './flash';
+import { parseBoolean, spriteIcon } from './lib/utils/common_utils';
 
 class ImporterStatus {
   constructor({ jobsUrl, importUrl, ciCdOnly }) {
@@ -108,7 +108,7 @@ class ImporterStatus {
         switch (job.import_status) {
           case 'finished':
             jobItem.removeClass('table-active').addClass('table-success');
-            statusField.html(`<span><i class="fa fa-check"></i> ${__('Done')}</span>`);
+            statusField.html(`<span>${spriteIcon('check', 's16')} ${__('Done')}</span>`);
             break;
           case 'scheduled':
             statusField.html(`${spinner} ${__('Scheduled')}`);

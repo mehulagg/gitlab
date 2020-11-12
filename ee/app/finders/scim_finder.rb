@@ -21,22 +21,12 @@ class ScimFinder
 
   private
 
-  def scim_identities_enabled?
-    strong_memoize(:scim_identities_enabled) do
-      ::EE::Gitlab::Scim::Feature.scim_identities_enabled?(group)
-    end
-  end
-
   def null_identity
-    return ScimIdentity.none if scim_identities_enabled?
-
-    Identity.none
+    ScimIdentity.none
   end
 
   def all_identities
-    return group.scim_identities if scim_identities_enabled?
-
-    saml_provider.identities
+    group.scim_identities
   end
 
   def unfiltered?(params)
@@ -63,9 +53,7 @@ class ScimFinder
   end
 
   def by_extern_uid(extern_uid)
-    return group.scim_identities.with_extern_uid(extern_uid) if scim_identities_enabled?
-
-    Identity.where_group_saml_uid(saml_provider, extern_uid)
+    group.scim_identities.with_extern_uid(extern_uid)
   end
 
   def eq_filter_on_username?(parser)
@@ -73,10 +61,20 @@ class ScimFinder
   end
 
   def by_username(username)
-    user = User.find_by_username(username) || User.find_by_any_email(username)
+    user = User.find_by_username(username)
 
-    return group.scim_identities.for_user(user) if scim_identities_enabled?
+    if !user && email?(username)
+      user ||= User.find_by_any_email(username) || User.find_by_username(email_local_part(username))
+    end
 
-    saml_provider.identities.for_user(user)
+    group.scim_identities.for_user(user)
+  end
+
+  def email?(email)
+    ::ValidateEmail.valid?(email)
+  end
+
+  def email_local_part(email)
+    ::Mail::Address.new(email).local
   end
 end

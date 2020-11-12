@@ -1,12 +1,11 @@
 <script>
-import { GlTooltipDirective, GlLink, GlButton } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlButton, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ProjectAvatar,
     GlLink,
     GlButton,
@@ -54,7 +53,7 @@ export default {
         data-toggle="dropdown"
         :title="$options.moreActionsText"
       >
-        <icon name="ellipsis_v" class="text-secondary" />
+        <gl-icon name="ellipsis_v" class="text-secondary" />
       </button>
       <ul class="dropdown-menu dropdown-menu-right">
         <li>

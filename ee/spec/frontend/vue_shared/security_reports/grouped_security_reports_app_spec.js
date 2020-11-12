@@ -1,19 +1,17 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
-import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
-import state from 'ee/vue_shared/security_reports/store/state';
+import appStore from 'ee/vue_shared/security_reports/store';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
-import sastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
 import { mount } from '@vue/test-utils';
 import { waitForMutation } from 'helpers/vue_test_utils_helper';
 import { trimText } from 'helpers/text_helper';
-import axios from '~/lib/utils/axios_utils';
-import { mrStates } from '~/mr_popover/constants';
-import { TEST_HOST } from 'helpers/test_constants';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import axios from '~/lib/utils/axios_utils';
+import { mrStates } from '~/mr_popover/constants';
+import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
 
 import {
@@ -30,7 +28,8 @@ const CONTAINER_SCANNING_DIFF_ENDPOINT = 'container_scanning.json';
 const DEPENDENCY_SCANNING_DIFF_ENDPOINT = 'dependency_scanning.json';
 const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
-const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_scanning.json';
+const PIPELINE_JOBS_ENDPOINT = 'jobs.json';
+const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_detection.json';
 const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
 describe('Grouped security reports app', () => {
@@ -52,26 +51,38 @@ describe('Grouped security reports app', () => {
     vulnerabilityFeedbackHelpPath: 'path',
     coverageFuzzingHelpPath: 'path',
     pipelineId: 123,
+    projectId: 321,
     projectFullPath: 'path',
+  };
+
+  const defaultDastSummary = {
+    scannedResourcesCount: 211,
+    scannedResources: { nodes: [] },
+    scannedResourcesCsvPath: '',
   };
 
   const glModalDirective = jest.fn();
 
-  const createWrapper = (propsData, provide = {}) => {
+  const createWrapper = (propsData, options, provide) => {
     wrapper = mount(GroupedSecurityReportsApp, {
       propsData,
       data() {
         return {
-          dastSummary: null,
+          dastSummary: defaultDastSummary,
+          ...options?.data,
         };
       },
-      provide,
       directives: {
         glModal: {
           bind(el, { value }) {
             glModalDirective(value);
           },
         },
+      },
+      store: appStore(),
+      provide: {
+        glFeatures: { coverageFuzzingMrWidget: true },
+        ...provide,
       },
     });
   };
@@ -82,11 +93,8 @@ describe('Grouped security reports app', () => {
   });
 
   afterEach(() => {
-    wrapper.vm.$store.replaceState({
-      ...state(),
-      sast: sastState(),
-    });
-    wrapper.vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
     mock.restore();
   });
 
@@ -98,7 +106,7 @@ describe('Grouped security reports app', () => {
         dast: true,
         containerScanning: true,
         dependencyScanning: true,
-        secretScanning: true,
+        secretDetection: true,
         coverageFuzzing: true,
       },
     };
@@ -136,9 +144,11 @@ describe('Grouped security reports app', () => {
 
       it('renders error state', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning failed loading any results',
-        );
+        expect(
+          wrapper.vm.$el
+            .querySelector('[data-testid="report-section-code-text"]')
+            .textContent.trim(),
+        ).toEqual('Security scanning failed loading any results');
 
         expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
           'Expand',
@@ -164,6 +174,7 @@ describe('Grouped security reports app', () => {
 
     describe('while loading', () => {
       beforeEach(() => {
+        mock.onGet(PIPELINE_JOBS_ENDPOINT).reply(200, {});
         mock.onGet(CONTAINER_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {});
@@ -176,9 +187,11 @@ describe('Grouped security reports app', () => {
 
       it('renders loading summary text + spinner', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).not.toBeNull();
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning is loading',
-        );
+        expect(
+          wrapper.vm.$el
+            .querySelector('[data-testid="report-section-code-text"]')
+            .textContent.trim(),
+        ).toEqual('Security scanning is loading');
 
         expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
           'Expand',
@@ -219,27 +232,27 @@ describe('Grouped security reports app', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
 
         // Renders the summary text
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning detected no new vulnerabilities.',
-        );
+        expect(
+          wrapper.vm.$el
+            .querySelector('[data-testid="report-section-code-text"]')
+            .textContent.trim(),
+        ).toEqual('Security scanning detected no vulnerabilities.');
 
         // Renders Sast result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'SAST detected no new vulnerabilities.',
-        );
+        expect(trimText(wrapper.vm.$el.textContent)).toContain('SAST detected no vulnerabilities.');
 
         // Renders DSS result
         expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'Dependency scanning detected no new vulnerabilities.',
+          'Dependency scanning detected no vulnerabilities.',
         );
 
         // Renders container scanning result
         expect(wrapper.vm.$el.textContent).toContain(
-          'Container scanning detected no new vulnerabilities.',
+          'Container scanning detected no vulnerabilities.',
         );
 
         // Renders DAST result
-        expect(wrapper.vm.$el.textContent).toContain('DAST detected no new vulnerabilities.');
+        expect(wrapper.vm.$el.textContent).toContain('DAST detected no vulnerabilities.');
       });
     });
 
@@ -269,8 +282,12 @@ describe('Grouped security reports app', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
 
         // Renders the summary text
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning detected 5 new critical and 3 new high severity vulnerabilities.',
+        expect(
+          trimText(
+            wrapper.vm.$el.querySelector('[data-testid="report-section-code-text"]').textContent,
+          ),
+        ).toEqual(
+          'Security scanning detected 10 potential vulnerabilities 6 Critical 4 High and 0 Others',
         );
 
         // Renders the expand button
@@ -280,32 +297,32 @@ describe('Grouped security reports app', () => {
 
         // Renders Sast result
         expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'SAST detected 1 new critical severity vulnerability',
+          'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders DSS result
         expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'Dependency scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+          'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders container scanning result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'Container scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders DAST result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'DAST detected 1 new critical severity vulnerability.',
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders container scanning result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'Coverage fuzzing detected 1 new critical and 1 new high severity vulnerabilities.',
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
 
       it('opens modal with more information', () => {
-        wrapper.vm.$el.querySelector('.break-link').click();
+        wrapper.vm.$el.querySelector('[aria-label="Vulnerability Name"]').click();
 
         return Vue.nextTick().then(() => {
           expect(wrapper.vm.$el.querySelector('.modal-title').textContent.trim()).toEqual(
@@ -355,8 +372,46 @@ describe('Grouped security reports app', () => {
     });
 
     it('should calculate the security tab path', () => {
-      expect(wrapper.vm.securityTab).toEqual(`${pipelinePath}/security`);
+      const button = wrapper.find('.report-btn');
+      expect(button.attributes('target')).toBe('_blank');
+      expect(button.attributes('href')).toBe(`${pipelinePath}/security`);
     });
+
+    it('should render view full report button', () => {
+      const button = wrapper.find('.report-btn');
+      expect(button.exists()).toBe(true);
+    });
+  });
+
+  describe('coverage fuzzing reports', () => {
+    describe.each([true, false])(
+      'given coverage fuzzing comparison endpoint is /fuzzing and featureEnabled is %s',
+      shouldShowFuzzing => {
+        beforeEach(() => {
+          gl.mrWidgetData = gl.mrWidgetData || {};
+          gl.mrWidgetData.coverage_fuzzing_comparison_path = '/fuzzing';
+
+          createWrapper(
+            {
+              ...props,
+              enabledReports: {
+                coverageFuzzing: true,
+              },
+            },
+            {},
+            {
+              glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
+            },
+          );
+        });
+
+        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
+            shouldShowFuzzing,
+          );
+        });
+      },
+    );
   });
 
   describe('container scanning reports', () => {
@@ -383,8 +438,8 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.text()).toContain(
-        'Container scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+      expect(trimText(wrapper.text())).toContain(
+        'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
       );
     });
   });
@@ -413,15 +468,13 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.vm.$el.textContent).toContain(
-        'Dependency scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
       );
     });
   });
 
   describe('dast reports', () => {
-    const scanUrl = `${TEST_HOST}/group/project/-/jobs/123546789`;
-
     beforeEach(() => {
       gl.mrWidgetData = gl.mrWidgetData || {};
       gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
@@ -429,12 +482,6 @@ describe('Grouped security reports app', () => {
       mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
         ...dastDiffSuccessMock,
         base_report_out_of_date: true,
-        scans: [
-          {
-            scanned_resources_count: 211,
-            job_path: scanUrl,
-          },
-        ],
       });
 
       createWrapper({
@@ -452,8 +499,8 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.vm.$el.textContent).toContain(
-        'DAST detected 1 new critical severity vulnerability',
+      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
       );
     });
 
@@ -474,22 +521,31 @@ describe('Grouped security reports app', () => {
       mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
         ...dastDiffSuccessMock,
         base_report_out_of_date: true,
-        scans: [
-          {
-            scanned_resources_count: 0,
-            job_path: scanUrl,
+      });
+
+      // set scanned urls count to 0
+      const summaryWithoutUrls = {
+        ...defaultDastSummary,
+        scannedResourcesCount: 0,
+      };
+
+      createWrapper(
+        {
+          ...props,
+          enabledReports: {
+            dast: true,
           },
-        ],
-      });
-      createWrapper({
-        ...props,
-        enabledReports: {
-          dast: true,
         },
-      });
+        {
+          data: {
+            dastSummary: summaryWithoutUrls,
+          },
+        },
+      );
+
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         expect(wrapper.text()).not.toContain('0 URLs scanned');
-        expect(wrapper.contains('[data-qa-selector="dast-ci-job-link"]')).toBe(false);
+        expect(wrapper.find('[data-qa-selector="dast-ci-job-link"]').exists()).toBe(false);
       });
     });
   });
@@ -504,7 +560,7 @@ describe('Grouped security reports app', () => {
       createWrapper({
         ...props,
         enabledReports: {
-          secretScanning: isEnabled,
+          secretDetection: isEnabled,
         },
       });
 
@@ -517,7 +573,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should render the component', () => {
-        expect(wrapper.contains('[data-qa-selector="secret_scan_report"]')).toBe(true);
+        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(true);
       });
 
       it('should set setSecretScanningDiffEndpoint', () => {
@@ -525,8 +581,8 @@ describe('Grouped security reports app', () => {
       });
 
       it('should display the correct numbers of vulnerabilities', () => {
-        expect(wrapper.text()).toContain(
-          'Secret scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+        expect(trimText(wrapper.text())).toContain(
+          'Secret scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
     });
@@ -537,7 +593,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not render the component', () => {
-        expect(wrapper.contains('[data-qa-selector="secret_scan_report"]')).toBe(false);
+        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(false);
       });
     });
   });
@@ -564,8 +620,8 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.vm.$el.textContent).toContain(
-        'SAST detected 1 new critical severity vulnerability.',
+      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
       );
     });
   });

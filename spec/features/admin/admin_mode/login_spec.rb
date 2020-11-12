@@ -48,7 +48,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
 
           it 'allows login with valid code' do
             # Cannot reuse the TOTP
-            Timecop.travel(30.seconds.from_now) do
+            travel_to(30.seconds.from_now) do
               enter_code(user.current_otp)
 
               expect(current_path).to eq admin_root_path
@@ -58,7 +58,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
 
           it 'blocks login with invalid code' do
             # Cannot reuse the TOTP
-            Timecop.travel(30.seconds.from_now) do
+            travel_to(30.seconds.from_now) do
               enter_code('foo')
 
               expect(page).to have_content('Invalid two-factor code')
@@ -67,7 +67,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
 
           it 'allows login with invalid code, then valid code' do
             # Cannot reuse the TOTP
-            Timecop.travel(30.seconds.from_now) do
+            travel_to(30.seconds.from_now) do
               enter_code('foo')
 
               expect(page).to have_content('Invalid two-factor code')
@@ -163,7 +163,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
             expect(page).to have_content('Two-Factor Authentication')
 
             # Cannot reuse the TOTP
-            Timecop.travel(30.seconds.from_now) do
+            travel_to(30.seconds.from_now) do
               enter_code(user.current_otp)
 
               expect(current_path).to eq admin_root_path
@@ -196,6 +196,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
             'base' => 'dc=example,dc=com'
           }
         end
+
         let(:user) { create(:omniauth_user, :admin, :two_factor, extern_uid: uid, provider: provider) }
 
         before do
@@ -214,7 +215,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
             expect(page).to have_content('Two-Factor Authentication')
 
             # Cannot reuse the TOTP
-            Timecop.travel(30.seconds.from_now) do
+            travel_to(30.seconds.from_now) do
               enter_code(user.current_otp)
 
               expect(current_path).to eq admin_root_path

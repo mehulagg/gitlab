@@ -3,22 +3,23 @@
 require 'securerandom'
 
 module QA
-  RSpec.describe 'Release', :docker, :runner do
+  RSpec.describe 'Release', :runner do
     describe 'Pipelines for merged results and merge trains' do
-      before(:context) do
-        @group = Resource::Group.fabricate_via_api!
+      let(:group) { Resource::Group.fabricate_via_api! }
 
-        @runner = Resource::Runner.fabricate_via_api! do |runner|
-          runner.token = @group.reload!.runners_token
-          runner.name = @group.name
-          runner.tags = [@group.name]
+      let!(:runner) do
+        Resource::Runner.fabricate_via_api! do |runner|
+          runner.token = group.reload!.runners_token
+          runner.name = group.name
+          runner.tags = [group.name]
+          runner.project = project
         end
       end
 
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'pipelines-for-merged-results-and-merge-trains'
-          project.group = @group
+          project.group = group
         end
       end
 
@@ -30,9 +31,9 @@ module QA
             [
               {
                 file_path: '.gitlab-ci.yml',
-                content:  <<~EOF
+                content: <<~EOF
                   test:
-                    tags: [#{@group.name}]
+                    tags: [#{group.name}]
                     script: echo 'OK'
                     only:
                     - merge_requests
@@ -54,11 +55,11 @@ module QA
         end
       end
 
-      after(:context) do
-        @runner.remove_via_api! if @runner
+      after do
+        runner.remove_via_api! if runner
       end
 
-      it 'creates a pipeline with merged results' do
+      it 'creates a pipeline with merged results', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/562' do
         branch_name = "merged-results-#{SecureRandom.hex(8)}"
 
         # Create a branch that will be merged into master
@@ -93,7 +94,7 @@ module QA
         expect(merged).to be_truthy, "Expected content 'The changes were merged' but it did not appear."
       end
 
-      it 'merges via a merge train' do
+      it 'merges via a merge train', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/561' do
         branch_name = "merge-train-#{SecureRandom.hex(8)}"
 
         # Create a branch that will be merged into master

@@ -19,42 +19,32 @@ RSpec.describe Ci::ProcessPipelineService, '#execute' do
   end
 
   describe 'cross-project pipelines' do
-    using RSpec::Parameterized::TableSyntax
+    before do
+      create_processable(:build, name: 'test', stage: 'test')
+      create_processable(:bridge, :variables,  name: 'cross',
+                                              stage: 'build',
+                                              downstream: downstream)
+      create_processable(:build, name: 'deploy', stage: 'deploy')
 
-    where(:ci_atomic_processing) do
-      [true, false]
+      stub_ci_pipeline_to_return_yaml_file
     end
 
-    with_them do
-      before do
-        stub_feature_flags(ci_atomic_processing: ci_atomic_processing)
+    it 'creates a downstream cross-project pipeline' do
+      service.execute
+      Sidekiq::Worker.drain_all
 
-        create_processable(:build, name: 'test', stage: 'test')
-        create_processable(:bridge, :variables,  name: 'cross',
-                                                stage: 'build',
-                                                downstream: downstream)
-        create_processable(:build, name: 'deploy', stage: 'deploy')
+      expect_statuses(%w[test pending], %w[cross created], %w[deploy created])
 
-        stub_ci_pipeline_to_return_yaml_file
-      end
+      update_build_status(:test, :success)
+      Sidekiq::Worker.drain_all
 
-      it 'creates a downstream cross-project pipeline' do
-        service.execute
-        Sidekiq::Worker.drain_all
+      expect_statuses(%w[test success], %w[cross success], %w[deploy pending])
 
-        expect_statuses(%w[test pending], %w[cross created], %w[deploy created])
-
-        update_build_status(:test, :success)
-        Sidekiq::Worker.drain_all
-
-        expect_statuses(%w[test success], %w[cross success], %w[deploy pending])
-
-        expect(downstream.ci_pipelines).to be_one
-        expect(downstream.ci_pipelines.first).to be_pending
-        expect(downstream.builds).not_to be_empty
-        expect(downstream.builds.first.variables)
-          .to include(key: 'BRIDGE', value: 'cross', public: false, masked: false)
-      end
+      expect(downstream.ci_pipelines).to be_one
+      expect(downstream.ci_pipelines.first).to be_pending
+      expect(downstream.builds).not_to be_empty
+      expect(downstream.builds.first.variables)
+        .to include(key: 'BRIDGE', value: 'cross', public: false, masked: false)
     end
   end
 

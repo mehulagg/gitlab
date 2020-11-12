@@ -41,6 +41,11 @@ export default {
       required: false,
       default: '',
     },
+    pipelineExpanded: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
   },
   computed: {
     hasAction() {
@@ -66,7 +71,7 @@ export default {
         :action-icon="action.icon"
         :tooltip-text="action.title"
         :link="action.path"
-        class="js-stage-action stage-action position-absolute position-top-0 rounded"
+        class="js-stage-action stage-action rounded"
         @pipelineActionRequestComplete="pipelineActionRequestComplete"
       />
     </div>
@@ -86,6 +91,7 @@ export default {
             v-if="group.size === 1"
             :job="group.jobs[0]"
             :job-hovered="jobHovered"
+            :pipeline-expanded="pipelineExpanded"
             css-class-job-name="build-content"
             @pipelineActionRequestComplete="pipelineActionRequestComplete"
           />

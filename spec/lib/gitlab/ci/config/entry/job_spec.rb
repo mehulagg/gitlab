@@ -74,16 +74,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
       it { is_expected.to be_falsey }
     end
 
-    context 'when config does not contain script' do
-      let(:name) { :build }
-
-      let(:config) do
-        { before_script: "cd ${PROJ_DIR} " }
-      end
-
-      it { is_expected.to be_truthy }
-    end
-
     context 'when using the default job without script' do
       let(:name) { :default }
       let(:config) do
@@ -103,14 +93,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
       end
 
       it { is_expected.to be_truthy }
-    end
-
-    context 'there are no shared keys between jobs and bridges' do
-      subject(:shared_values) do
-        described_class::ALLOWED_KEYS & Gitlab::Ci::Config::Entry::Bridge::ALLOWED_KEYS
-      end
-
-      it { is_expected.to be_empty }
     end
   end
 
@@ -555,7 +537,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       it 'overrides default config' do
         expect(entry[:image].value).to eq(name: 'some_image')
-        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push')
+        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
       end
     end
 
@@ -570,7 +552,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       it 'uses config from default entry' do
         expect(entry[:image].value).to eq 'specified'
-        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push')
+        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
       end
     end
 

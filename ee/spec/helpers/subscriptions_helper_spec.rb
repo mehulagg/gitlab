@@ -35,7 +35,6 @@ RSpec.describe SubscriptionsHelper do
     before do
       allow(helper).to receive(:params).and_return(plan_id: 'bronze_id', namespace_id: group.id.to_s)
       allow(helper).to receive(:current_user).and_return(user)
-      allow(helper).to receive(:experiment_enabled?).with(:onboarding_issues).and_return(false)
       group.add_owner(user)
     end
 
@@ -51,7 +50,6 @@ RSpec.describe SubscriptionsHelper do
     describe 'new_user' do
       where(:referer, :expected_result) do
         'http://example.com/users/sign_up/welcome?foo=bar'             | 'true'
-        'http://example.com/users/sign_up/update_registration?foo=bar' | 'true'
         'http://example.com'                                           | 'false'
         nil                                                            | 'false'
       end

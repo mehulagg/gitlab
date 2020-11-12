@@ -3,11 +3,9 @@ import {
   GlAlert,
   GlButton,
   GlCollapse,
-  GlDeprecatedButton,
   GlFormCheckbox,
   GlFormCombobox,
   GlFormGroup,
-  GlFormInput,
   GlFormSelect,
   GlFormTextarea,
   GlIcon,
@@ -39,11 +37,9 @@ export default {
     GlAlert,
     GlButton,
     GlCollapse,
-    GlDeprecatedButton,
     GlFormCheckbox,
     GlFormCombobox,
     GlFormGroup,
-    GlFormInput,
     GlFormSelect,
     GlFormTextarea,
     GlIcon,
@@ -124,11 +120,6 @@ export default {
       return '';
     },
     tokenValidationState() {
-      // If the feature flag is off, do not validate. Remove when flag is removed.
-      if (!this.glFeatures.ciKeyAutocomplete) {
-        return true;
-      }
-
       const validator = this.$options.tokens?.[this.variable.key]?.validation;
 
       if (validator) {
@@ -206,19 +197,11 @@ export default {
   >
     <form>
       <gl-form-combobox
-        v-if="glFeatures.ciKeyAutocomplete"
         v-model="key"
         :token-list="$options.tokenList"
         :label-text="__('Key')"
+        data-qa-selector="ci_variable_key_field"
       />
-
-      <gl-form-group v-else :label="__('Key')" label-for="ci-variable-key">
-        <gl-form-input
-          id="ci-variable-key"
-          v-model="key"
-          data-qa-selector="ci_variable_key_field"
-        />
-      </gl-form-group>
 
       <gl-form-group
         :label="__('Value')"
@@ -253,6 +236,7 @@ export default {
           :label="__('Environment scope')"
           label-for="ci-variable-env"
           class="w-50"
+          data-testid="environment-scope"
         >
           <ci-environments-dropdown
             class="w-100"
@@ -264,7 +248,11 @@ export default {
       </div>
 
       <gl-form-group :label="__('Flags')" label-for="ci-variable-flags">
-        <gl-form-checkbox v-model="protected_variable" class="mb-0">
+        <gl-form-checkbox
+          v-model="protected_variable"
+          class="mb-0"
+          data-testid="ci-variable-protected-checkbox"
+        >
           {{ __('Protect variable') }}
           <gl-link target="_blank" :href="protectedEnvironmentVariablesLink">
             <gl-icon name="question" :size="12" />
@@ -278,6 +266,7 @@ export default {
           ref="masked-ci-variable"
           v-model="masked"
           data-qa-selector="ci_variable_masked_checkbox"
+          data-testid="ci-variable-masked-checkbox"
         >
           {{ __('Mask variable') }}
           <gl-link target="_blank" :href="maskedEnvironmentVariablesLink">
@@ -339,24 +328,25 @@ export default {
       </gl-alert>
     </gl-collapse>
     <template #modal-footer>
-      <gl-deprecated-button @click="hideModal">{{ __('Cancel') }}</gl-deprecated-button>
-      <gl-deprecated-button
+      <gl-button @click="hideModal">{{ __('Cancel') }}</gl-button>
+      <gl-button
         v-if="variableBeingEdited"
         ref="deleteCiVariable"
-        category="secondary"
         variant="danger"
+        category="secondary"
         data-qa-selector="ci_variable_delete_button"
         @click="deleteVarAndClose"
-        >{{ __('Delete variable') }}</gl-deprecated-button
+        >{{ __('Delete variable') }}</gl-button
       >
-      <gl-deprecated-button
+      <gl-button
         ref="updateOrAddVariable"
         :disabled="!canSubmit"
         variant="success"
+        category="primary"
         data-qa-selector="ci_variable_save_button"
         @click="updateOrAddVariable"
         >{{ modalActionText }}
-      </gl-deprecated-button>
+      </gl-button>
     </template>
   </gl-modal>
 </template>

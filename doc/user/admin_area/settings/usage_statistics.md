@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -58,16 +61,13 @@ sequenceDiagram
 
 ## Usage Ping **(CORE ONLY)**
 
-See [Usage Ping guide](../../../development/telemetry/usage_ping.md).
+See [Usage Ping guide](../../../development/product_analytics/usage_ping.md).
 
-## Instance statistics visibility **(CORE ONLY)**
+## Instance-level statistics **(CORE ONLY)**
 
 Once usage ping is enabled, GitLab will gather data from other instances and
-will be able to show [usage statistics](../../instance_statistics/index.md)
-of your instance to your users.
-
-To make this visible only to admins, go to **Admin Area > Settings > Metrics and profiling**, expand
-**Usage statistics**, and set the **Instance Statistics visibility** option to **Only admins**.
+will be able to show [usage statistics](../analytics/index.md)
+of your instance to your admins in **Admin Area > Analytics**.
 
 <!-- ## Troubleshooting
 

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import AlertManagementList from './components/alert_management_list_wrapper.vue';
 
@@ -16,13 +16,14 @@ export default () => {
     enableAlertManagementPath,
     emptyAlertSvgPath,
     populatingAlertsHelpUrl,
+    alertsHelpUrl,
     opsgenieMvcTargetUrl,
+    textQuery,
+    assigneeUsernameQuery,
+    alertManagementEnabled,
+    userCanEnableAlertManagement,
+    opsgenieMvcEnabled,
   } = domEl.dataset;
-  let { alertManagementEnabled, userCanEnableAlertManagement, opsgenieMvcEnabled } = domEl.dataset;
-
-  alertManagementEnabled = parseBoolean(alertManagementEnabled);
-  userCanEnableAlertManagement = parseBoolean(userCanEnableAlertManagement);
-  opsgenieMvcEnabled = parseBoolean(opsgenieMvcEnabled);
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(
@@ -41,25 +42,32 @@ export default () => {
     ),
   });
 
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      alertsHelpUrl,
+    },
+  });
+
   return new Vue({
     el: selector,
+    provide: {
+      projectPath,
+      textQuery,
+      assigneeUsernameQuery,
+      enableAlertManagementPath,
+      populatingAlertsHelpUrl,
+      emptyAlertSvgPath,
+      opsgenieMvcTargetUrl,
+      alertManagementEnabled: parseBoolean(alertManagementEnabled),
+      userCanEnableAlertManagement: parseBoolean(userCanEnableAlertManagement),
+      opsgenieMvcEnabled: parseBoolean(opsgenieMvcEnabled),
+    },
     apolloProvider,
     components: {
       AlertManagementList,
     },
     render(createElement) {
-      return createElement('alert-management-list', {
-        props: {
-          projectPath,
-          enableAlertManagementPath,
-          populatingAlertsHelpUrl,
-          emptyAlertSvgPath,
-          alertManagementEnabled,
-          userCanEnableAlertManagement,
-          opsgenieMvcTargetUrl,
-          opsgenieMvcEnabled,
-        },
-      });
+      return createElement('alert-management-list');
     },
   });
 };

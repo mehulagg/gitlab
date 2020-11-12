@@ -43,7 +43,8 @@ RSpec.describe Gitlab::Diff::HighlightCache, :clean_gitlab_redis_cache do
 
   describe '#decorate' do
     # Manually creates a Diff::File object to avoid triggering the cache on
-    # the FileCollection::MergeRequestDiff
+    #   the FileCollection::MergeRequestDiff
+    #
     let(:diff_file) do
       diffs = merge_request.diffs
       raw_diff = diffs.diffable.raw_diffs(diffs.diff_options.merge(paths: ['CHANGELOG'])).first
@@ -72,6 +73,37 @@ RSpec.describe Gitlab::Diff::HighlightCache, :clean_gitlab_redis_cache do
       rich_texts = diff_file.highlighted_diff_lines.map(&:rich_text)
 
       expect(rich_texts).to all(be_html_safe)
+    end
+
+    context "when diff_file is uncached due to default_max_patch_bytes change" do
+      before do
+        expect(cache).to receive(:read_file).at_least(:once).and_return([])
+
+        # Stub out the application's default and current patch size limits. We
+        #   want them to be different, and the diff file to be sized between
+        #   the 2 values.
+        #
+        diff_file_size_kb = (diff_file.diff.diff.bytesize * 10)
+
+        stub_const("#{diff_file.diff.class}::DEFAULT_MAX_PATCH_BYTES", diff_file_size_kb - 1 )
+        expect(diff_file.diff.class).to receive(:patch_safe_limit_bytes).and_return(diff_file_size_kb + 1)
+        expect(diff_file.diff.class)
+          .to receive(:patch_safe_limit_bytes)
+          .with(diff_file.diff.class::DEFAULT_MAX_PATCH_BYTES)
+          .and_call_original
+      end
+
+      it "manually writes highlighted lines to the cache" do
+        expect(cache).to receive(:write_to_redis_hash).and_call_original
+
+        cache.decorate(diff_file)
+      end
+
+      it "assigns highlighted diff lines to the DiffFile" do
+        expect(diff_file.highlighted_diff_lines.size).to be > 5
+
+        cache.decorate(diff_file)
+      end
     end
   end
 
@@ -173,57 +205,32 @@ RSpec.describe Gitlab::Diff::HighlightCache, :clean_gitlab_redis_cache do
                              fallback_diff_refs: diffs.fallback_diff_refs)
     end
 
-    context "feature flag :gzip_diff_cache disabled" do
-      before do
-        stub_feature_flags(gzip_diff_cache: true)
-      end
+    it "uses ActiveSupport::Gzip when reading from the cache" do
+      expect(ActiveSupport::Gzip).to receive(:decompress).at_least(:once).and_call_original
 
-      it "uses ActiveSupport::Gzip when reading from the cache" do
-        expect(ActiveSupport::Gzip).to receive(:decompress).at_least(:once).and_call_original
-
-        cache.write_if_empty
-        cache.decorate(diff_file)
-      end
-
-      it "uses ActiveSupport::Gzip to compress data when writing to cache" do
-        expect(ActiveSupport::Gzip).to receive(:compress).and_call_original
-
-        cache.send(:write_to_redis_hash, diff_hash)
-      end
+      cache.write_if_empty
+      cache.decorate(diff_file)
     end
 
-    context "feature flag :gzip_diff_cache disabled" do
-      before do
-        stub_feature_flags(gzip_diff_cache: false)
-      end
+    it "uses ActiveSupport::Gzip to compress data when writing to cache" do
+      expect(ActiveSupport::Gzip).to receive(:compress).and_call_original
 
-      it "doesn't use ActiveSupport::Gzip when reading from the cache" do
-        expect(ActiveSupport::Gzip).not_to receive(:decompress)
-
-        cache.write_if_empty
-        cache.decorate(diff_file)
-      end
-
-      it "doesn't use ActiveSupport::Gzip to compress data when writing to cache" do
-        expect(ActiveSupport::Gzip).not_to receive(:compress)
-
-        expect { cache.send(:write_to_redis_hash, diff_hash) }
-          .to change { Gitlab::Redis::Cache.with { |r| r.hgetall(cache_key) } }
-      end
+      cache.send(:write_to_redis_hash, diff_hash)
     end
   end
 
   describe 'metrics' do
-    it 'defines :gitlab_redis_diff_caching_memory_usage_bytes histogram' do
-      expect(described_class).to respond_to(:gitlab_redis_diff_caching_memory_usage_bytes)
+    let(:transaction) { Gitlab::Metrics::WebTransaction.new({} ) }
+
+    before do
+      allow(cache).to receive(:current_transaction).and_return(transaction)
     end
 
-    it 'defines :gitlab_redis_diff_caching_hit' do
-      expect(described_class).to respond_to(:gitlab_redis_diff_caching_hit)
-    end
+    it 'observes :gitlab_redis_diff_caching_memory_usage_bytes' do
+      expect(transaction)
+        .to receive(:observe).with(:gitlab_redis_diff_caching_memory_usage_bytes, a_kind_of(Numeric))
 
-    it 'defines :gitlab_redis_diff_caching_miss' do
-      expect(described_class).to respond_to(:gitlab_redis_diff_caching_miss)
+      cache.write_if_empty
     end
   end
 end

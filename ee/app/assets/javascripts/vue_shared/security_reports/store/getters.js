@@ -44,6 +44,7 @@ export const summaryCounts = ({
   dependencyScanning,
   sast,
   secretScanning,
+  coverageFuzzing,
 } = {}) => {
   const allNewVulns = [
     ...containerScanning.newIssues,
@@ -51,6 +52,7 @@ export const summaryCounts = ({
     ...dependencyScanning.newIssues,
     ...sast.newIssues,
     ...secretScanning.newIssues,
+    ...coverageFuzzing.newIssues,
   ];
 
   return countVulnerabilities(allNewVulns);
@@ -62,20 +64,20 @@ export const groupedSummaryText = (state, getters) => {
 
   // All reports are loading
   if (getters.areAllReportsLoading) {
-    return sprintf(messages.TRANSLATION_IS_LOADING, { reportType });
+    return { message: sprintf(messages.TRANSLATION_IS_LOADING, { reportType }) };
   }
 
   // All reports returned error
   if (getters.allReportsHaveError) {
-    return s__('ciReport|Security scanning failed loading any results');
+    return { message: s__('ciReport|Security scanning failed loading any results') };
   }
 
   if (getters.areReportsLoading && getters.anyReportHasError) {
-    status = s__('ciReport|(is loading, errors when loading results)');
+    status = s__('ciReport|is loading, errors when loading results');
   } else if (getters.areReportsLoading && !getters.anyReportHasError) {
-    status = s__('ciReport|(is loading)');
+    status = s__('ciReport|is loading');
   } else if (!getters.areReportsLoading && getters.anyReportHasError) {
-    status = s__('ciReport|(errors when loading results)');
+    status = s__('ciReport|: Loading resulted in an error');
   }
 
   const { critical, high, other } = getters.summaryCounts;
@@ -123,49 +125,56 @@ export const areReportsLoading = state =>
   state.dast.isLoading ||
   state.containerScanning.isLoading ||
   state.dependencyScanning.isLoading ||
-  state.secretScanning.isLoading;
+  state.secretScanning.isLoading ||
+  state.coverageFuzzing.isLoading;
 
 export const areAllReportsLoading = state =>
   state.sast.isLoading &&
   state.dast.isLoading &&
   state.containerScanning.isLoading &&
   state.dependencyScanning.isLoading &&
-  state.secretScanning.isLoading;
+  state.secretScanning.isLoading &&
+  state.coverageFuzzing.isLoading;
 
 export const allReportsHaveError = state =>
   state.sast.hasError &&
   state.dast.hasError &&
   state.containerScanning.hasError &&
   state.dependencyScanning.hasError &&
-  state.secretScanning.hasError;
+  state.secretScanning.hasError &&
+  state.coverageFuzzing.hasError;
 
 export const anyReportHasError = state =>
   state.sast.hasError ||
   state.dast.hasError ||
   state.containerScanning.hasError ||
   state.dependencyScanning.hasError ||
-  state.secretScanning.hasError;
+  state.secretScanning.hasError ||
+  state.coverageFuzzing.hasError;
 
 export const noBaseInAllReports = state =>
   !state.sast.hasBaseReport &&
   !state.dast.hasBaseReport &&
   !state.containerScanning.hasBaseReport &&
   !state.dependencyScanning.hasBaseReport &&
-  !state.secretScanning.hasBaseReport;
+  !state.secretScanning.hasBaseReport &&
+  !state.coverageFuzzing.hasBaseReport;
 
 export const anyReportHasIssues = state =>
   state.sast.newIssues.length > 0 ||
   state.dast.newIssues.length > 0 ||
   state.containerScanning.newIssues.length > 0 ||
   state.dependencyScanning.newIssues.length > 0 ||
-  state.secretScanning.newIssues.length > 0;
+  state.secretScanning.newIssues.length > 0 ||
+  state.coverageFuzzing.newIssues.length > 0;
 
 export const isBaseSecurityReportOutOfDate = state =>
   state.sast.baseReportOutofDate ||
   state.dast.baseReportOutofDate ||
   state.containerScanning.baseReportOutofDate ||
   state.dependencyScanning.baseReportOutofDate ||
-  state.secretScanning.baseReportOutofDate;
+  state.secretScanning.baseReportOutofDate ||
+  state.coverageFuzzing.baseReportOutofDate;
 
 export const canCreateIssue = state => Boolean(state.createVulnerabilityFeedbackIssuePath);
 

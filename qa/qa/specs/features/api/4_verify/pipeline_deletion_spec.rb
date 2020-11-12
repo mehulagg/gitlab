@@ -48,15 +48,31 @@ module QA
 
       let(:pipeline_data_request) { Runtime::API::Request.new(api_client, "/projects/#{project.id}/pipelines/#{pipeline_id}") }
 
+      before do
+        Support::Waiter.wait_until(sleep_interval: 3) { !pipeline.empty? && pipeline['status'] != 'pending' }
+      end
+
       after do
         runner.remove_via_api!
       end
 
       context 'when deleted via API' do
-        it 'is not found' do
+        it 'is not found', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/931' do
           delete(pipeline_data_request.url)
-          expect(JSON.parse(get(pipeline_data_request.url))['message'].downcase).to have_content('404 not found')
+
+          deleted_pipeline = nil
+          Support::Waiter.wait_until(sleep_interval: 3) do
+            deleted_pipeline = pipeline
+            !pipeline.empty?
+          end
+          expect(deleted_pipeline['message'].downcase).to have_content('404 not found')
         end
+      end
+
+      private
+
+      def pipeline
+        JSON.parse(get(pipeline_data_request.url))
       end
     end
   end

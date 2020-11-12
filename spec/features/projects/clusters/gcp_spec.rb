@@ -33,7 +33,7 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
       before do
         visit project_clusters_path(project)
 
-        click_link 'Add Kubernetes cluster'
+        click_link 'Integrate with a cluster certificate'
         click_link 'Create new cluster'
         click_link 'Google GKE'
       end
@@ -143,8 +143,8 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
         before do
           visit project_clusters_path(project)
 
-          click_link 'Add Kubernetes cluster'
-          click_link 'Add existing cluster'
+          click_link 'Connect cluster with certificate'
+          click_link 'Connect existing cluster'
         end
 
         it 'user sees the "Environment scope" field' do
@@ -162,7 +162,7 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
 
         it 'user sees creation form with the successful message' do
           expect(page).to have_content('Kubernetes cluster integration was successfully removed.')
-          expect(page).to have_link('Add Kubernetes cluster')
+          expect(page).to have_link('Integrate with a cluster certificate')
         end
       end
     end
@@ -178,7 +178,7 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
     end
 
     it 'user sees offer on cluster create page' do
-      click_link 'Add Kubernetes cluster'
+      click_link 'Integrate with a cluster certificate'
 
       expect(page).to have_css('.gcp-signup-offer')
     end
@@ -192,10 +192,10 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
     it 'user does not see offer after dismissing' do
       expect(page).to have_css('.gcp-signup-offer')
 
-      find('.gcp-signup-offer .close').click
+      find('.gcp-signup-offer .js-close').click
       wait_for_requests
 
-      click_link 'Add Kubernetes cluster'
+      click_link 'Integrate with a cluster certificate'
 
       expect(page).not_to have_css('.gcp-signup-offer')
     end
@@ -205,11 +205,10 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
     let(:admin) { create(:admin) }
 
     before do
-      stub_feature_flags(instance_level_integrations: false)
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
       sign_in(admin)
       gitlab_enable_admin_mode_sign_in(admin)
-      visit integrations_admin_application_settings_path
+      visit general_admin_application_settings_path
     end
 
     it 'user does not see the offer' do

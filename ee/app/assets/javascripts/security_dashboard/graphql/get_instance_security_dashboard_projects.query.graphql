@@ -1,5 +1,5 @@
 #import "ee/security_dashboard/graphql/project.fragment.graphql"
-#import "./vulnerablity_severities_count.fragment.graphql"
+#import "./vulnerability_severities_count.fragment.graphql"
 
 query projectsQuery {
   instanceSecurityDashboard {

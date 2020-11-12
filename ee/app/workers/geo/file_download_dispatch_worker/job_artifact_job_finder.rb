@@ -8,7 +8,7 @@ module Geo
       FILE_SERVICE_OBJECT_TYPE = :job_artifact
 
       def registry_finder
-        @registry_finder ||= Geo::JobArtifactRegistryFinder.new(current_node_id: Gitlab::Geo.current_node.id)
+        @registry_finder ||= Geo::JobArtifactRegistryFinder.new
       end
     end
   end

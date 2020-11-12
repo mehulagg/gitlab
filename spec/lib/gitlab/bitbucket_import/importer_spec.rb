@@ -87,6 +87,7 @@ RSpec.describe Gitlab::BitbucketImport::Importer do
       values: sample_issues_statuses
     }
   end
+
   let(:counter) { double('counter', increment: true) }
 
   subject { described_class.new(project) }
@@ -109,6 +110,7 @@ RSpec.describe Gitlab::BitbucketImport::Importer do
         created_at: Time.now,
         updated_at: Time.now)
     end
+
     let(:author_line) { "*Created by: someuser*\n\n" }
 
     before do
@@ -310,7 +312,7 @@ RSpec.describe Gitlab::BitbucketImport::Importer do
         # attributes later.
         existing_label.reload
 
-        Timecop.freeze(Time.now + 1.minute) do
+        travel_to(Time.now + 1.minute) do
           importer.execute
 
           label_after_import = project.labels.find(existing_label.id)

@@ -4,7 +4,7 @@
 
 = render_ce 'projects/merge_request_merge_options_settings', project: @project, form: form
 
-- if Feature.enabled?(:squash_options, @project)
+- if Feature.enabled?(:squash_options, @project, default_enabled: true)
   = render_ce 'projects/merge_request_squash_options_settings', form: form
 
 = render_ce 'projects/merge_request_merge_checks_settings', project: @project, form: form
@@ -15,7 +15,7 @@
   .form-group
     = form.label :merge_requests_template, class: 'label-bold' do
       = _('Default description template for merge requests')
-      = link_to icon('question-circle'), help_page_path('user/project/description_templates'), target: '_blank'
+      = link_to sprite_icon('question-o'), help_page_path('user/project/description_templates'), target: '_blank'
     = form.text_area :merge_requests_template, class: "form-control", rows: 3
     .text-secondary
       - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }

@@ -138,12 +138,6 @@
   }
 
   .tree-item {
-    .file-icon,
-    .folder-icon {
-      position: relative;
-      top: 2px;
-    }
-
     .link-container {
       padding: 0;
 
@@ -179,7 +173,7 @@
 
   .tree-truncated-warning {
     color: $orange-600;
-    background-color: $orange-100;
+    background-color: $orange-50;
   }
 
   .tree-time-ago {

@@ -15,7 +15,8 @@
       = s_('Promotions|This feature is locked.')
       %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#', data: { track_event: 'click_callout' }.merge(tracking_options) }
         = s_('Promotions|Learn more')
-        = icon('chevron-down')
+        = sprite_icon('chevron-up', css_class: 'js-sidebar-collapse hidden')
+        = sprite_icon('chevron-down', css_class: 'js-sidebar-expand')
       .js-toggle-content{ style:'display: none' }
         %div
           %h4

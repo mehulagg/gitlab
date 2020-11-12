@@ -39,6 +39,16 @@ RSpec.describe Issuable::Clone::AttributesRewriter do
           subject.execute
         end
       end
+
+      context 'when issue has weight events' do
+        it 'ignores copying weight events' do
+          create_list(:resource_weight_event, 2, issue: original_issue)
+
+          expect(subject).not_to receive(:copy_events).with(ResourceWeightEvent.table_name, any_args)
+
+          expect { subject.execute }.not_to change { ResourceWeightEvent.count }
+        end
+      end
     end
   end
 end

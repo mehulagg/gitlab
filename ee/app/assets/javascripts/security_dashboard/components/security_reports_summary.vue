@@ -1,5 +1,13 @@
 <script>
-import { GlButton, GlCard, GlCollapse, GlCollapseToggleDirective, GlSprintf } from '@gitlab/ui';
+import {
+  GlButton,
+  GlCard,
+  GlCollapse,
+  GlCollapseToggleDirective,
+  GlSprintf,
+  GlModalDirective,
+} from '@gitlab/ui';
+import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import { __ } from '~/locale';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { getFormattedSummary } from '../helpers';
@@ -12,9 +20,11 @@ export default {
     GlCard,
     GlCollapse,
     GlSprintf,
+    Modal,
   },
   directives: {
     collapseToggle: GlCollapseToggleDirective,
+    GlModal: GlModalDirective,
   },
   props: {
     summary: {
@@ -54,6 +64,14 @@ export default {
       this.isVisible = !shouldHideSummaryDetails;
     }
   },
+  methods: {
+    hasScannedResources(scanSummary) {
+      return scanSummary.scannedResources?.nodes?.length > 0;
+    },
+    downloadLink(scanSummary) {
+      return scanSummary.scannedResourcesCsvPath || '';
+    },
+  },
 };
 </script>
 
@@ -86,9 +104,33 @@ export default {
             "
           />
           <template v-if="scanSummary.scannedResourcesCount !== undefined">
-            (<gl-sprintf
-              :message="n__('%d URL scanned', '%d URLs scanned', scanSummary.scannedResourcesCount)"
-            />)
+            <gl-button
+              v-if="hasScannedResources(scanSummary)"
+              v-gl-modal.dastUrl
+              variant="link"
+              data-testid="modal-button"
+            >
+              (<gl-sprintf
+                :message="
+                  n__('%d URL scanned', '%d URLs scanned', scanSummary.scannedResourcesCount)
+                "
+              />)
+            </gl-button>
+
+            <template v-else>
+              (<gl-sprintf
+                :message="
+                  n__('%d URL scanned', '%d URLs scanned', scanSummary.scannedResourcesCount)
+                "
+              />)
+            </template>
+
+            <modal
+              v-if="hasScannedResources(scanSummary)"
+              :scanned-urls="scanSummary.scannedResources.nodes"
+              :scanned-resources-count="scanSummary.scannedResourcesCount"
+              :download-link="downloadLink(scanSummary)"
+            />
           </template>
         </div>
       </div>

@@ -4,8 +4,8 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import $ from 'jquery';
 import { GlLoadingIcon } from '@gitlab/ui';
 
-import { __ } from '~/locale';
 import { noneEpic } from 'ee/vue_shared/constants';
+import { __ } from '~/locale';
 
 import createStore from './store';
 
@@ -39,11 +39,13 @@ export default {
     },
     issueId: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     epicIssueId: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     canEdit: {
       type: Boolean,

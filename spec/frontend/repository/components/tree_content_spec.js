@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import TreeContent from '~/repository/components/tree_content.vue';
+import TreeContent, { INITIAL_FETCH_COUNT } from '~/repository/components/tree_content.vue';
 import FilePreview from '~/repository/components/preview/index.vue';
+import FileTable from '~/repository/components/table/index.vue';
 
 let vm;
 let $apollo;
@@ -25,14 +26,24 @@ describe('Repository table component', () => {
     vm.destroy();
   });
 
-  it('renders file preview', () => {
+  it('renders file preview', async () => {
     factory('/');
 
     vm.setData({ entries: { blobs: [{ name: 'README.md' }] } });
 
-    return vm.vm.$nextTick().then(() => {
-      expect(vm.find(FilePreview).exists()).toBe(true);
-    });
+    await vm.vm.$nextTick();
+
+    expect(vm.find(FilePreview).exists()).toBe(true);
+  });
+
+  it('trigger fetchFiles when mounted', async () => {
+    factory('/');
+
+    jest.spyOn(vm.vm, 'fetchFiles').mockImplementation(() => {});
+
+    await vm.vm.$nextTick();
+
+    expect(vm.vm.fetchFiles).toHaveBeenCalled();
   });
 
   describe('normalizeData', () => {
@@ -68,6 +79,56 @@ describe('Repository table component', () => {
       });
 
       expect(output).toEqual({ hasNextPage: true, nextCursor: 'test' });
+    });
+  });
+
+  describe('FileTable showMore', () => {
+    describe('when is present', () => {
+      const fileTable = () => vm.find(FileTable);
+
+      beforeEach(async () => {
+        factory('/');
+      });
+
+      it('is changes hasShowMore to false when "showMore" event is emitted', async () => {
+        fileTable().vm.$emit('showMore');
+
+        await vm.vm.$nextTick();
+
+        expect(vm.vm.hasShowMore).toBe(false);
+      });
+
+      it('changes clickedShowMore when "showMore" event is emitted', async () => {
+        fileTable().vm.$emit('showMore');
+
+        await vm.vm.$nextTick();
+
+        expect(vm.vm.clickedShowMore).toBe(true);
+      });
+
+      it('triggers fetchFiles when "showMore" event is emitted', () => {
+        jest.spyOn(vm.vm, 'fetchFiles');
+
+        fileTable().vm.$emit('showMore');
+
+        expect(vm.vm.fetchFiles).toHaveBeenCalled();
+      });
+    });
+
+    it('is not rendered if less than 1000 files', async () => {
+      factory('/');
+
+      vm.setData({ fetchCounter: 5, clickedShowMore: false });
+
+      await vm.vm.$nextTick();
+
+      expect(vm.vm.hasShowMore).toBe(false);
+    });
+
+    it('has limit of 1000 files on initial load', () => {
+      factory('/');
+
+      expect(INITIAL_FETCH_COUNT * vm.vm.pageSize).toBe(1000);
     });
   });
 });

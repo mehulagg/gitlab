@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Guidelines for implementing Enterprise Edition features
 
 - **Write the code and the tests.**: As with any code, EE features should have
@@ -25,6 +31,16 @@ You can force GitLab to act as CE by either deleting the `ee/` directory or by
 setting the [`FOSS_ONLY` environment variable](https://gitlab.com/gitlab-org/gitlab/blob/master/config/helpers/is_ee_env.js)
 to something that evaluates as `true`. The same works for running tests
 (for example `FOSS_ONLY=1 yarn jest`).
+
+## CI pipelines in a FOSS context
+
+By default, merge request pipelines for development run in an EE-context only. If you are
+developing features that differ between FOSS and EE, you may wish to run pipelines in a
+FOSS context as well.
+
+To run pipelines in both contexts, include `RUN AS-IF-FOSS` in the merge request title.
+
+See the [As-if-FOSS jobs](pipelines.md#as-if-foss-jobs) pipelines documentation for more information.
 
 ## Separation of EE code
 
@@ -55,6 +71,12 @@ is applied not only to models. Here's a list of other examples:
 This works because for every path that is present in CE's eager-load/auto-load
 paths, we add the same `ee/`-prepended path in [`config/application.rb`](https://gitlab.com/gitlab-org/gitlab/blob/925d3d4ebc7a2c72964ce97623ae41b8af12538d/config/application.rb#L42-52).
 This also applies to views.
+
+#### Testing EE-only features
+
+To test an EE class that doesn't exist in CE, create the spec file as you normally
+would in the `ee/spec` directory, but without the second `ee/` subdirectory.
+For example, a class `ee/app/models/vulnerability.rb` would have its tests in `ee/spec/models/vulnerability_spec.rb`.
 
 ### EE features based on CE features
 
@@ -95,6 +117,21 @@ This is also not just applied to models. Here's a list of other examples:
 - `ee/app/services/ee/foo/create_service.rb`
 - `ee/app/validators/ee/foo_attr_validator.rb`
 - `ee/app/workers/ee/foo_worker.rb`
+
+#### Testing EE features based on CE features
+
+To test an `EE` namespaced module that extends a CE class with EE features,
+create the spec file as you normally would in the `ee/spec` directory, including the second `ee/` subdirectory.
+For example, an extension `ee/app/models/ee/user.rb` would have its tests in `ee/app/models/ee/user_spec.rb`.
+
+In the `RSpec.describe` call, use the CE class name where the EE module would be used.
+For example, in `ee/app/models/ee/user_spec.rb`, the test would start with:
+
+```ruby
+RSpec.describe User do
+  describe 'ee feature added through extension'
+end
+```
 
 #### Overriding CE methods
 
@@ -388,6 +425,38 @@ module EE
           table_name   = next_table(table_name) if deleted_rows.zero?
 
           ::BackgroundMigrationWorker.perform_in(RESCHEDULE_DELAY, self.class.name.demodulize, table_name) if table_name
+        end
+      end
+    end
+  end
+end
+```
+
+### Code in `app/graphql/`
+
+EE-specific mutations, resolvers, and types should be added to
+`ee/app/graphql/{mutations,resolvers,types}`.
+
+To override a CE mutation, resolver, or type, create the file in
+`ee/app/graphql/ee/{mutations,resolvers,types}` and add new code to a
+`prepended` block.
+
+For example, if CE has a mutation called `Mutations::Tanukis::Create` and you
+wanted to add a new argument, place the EE override in
+`ee/app/graphql/ee/mutations/tanukis/create.rb`:
+
+```ruby
+module EE
+  module Mutations
+    module Tanukis
+      module Create
+        extend ActiveSupport::Concern
+
+        prepended do
+          argument :name,
+                   GraphQL::STRING_TYPE,
+                   required: false,
+                   description: 'Tanuki name'
         end
       end
     end
@@ -904,11 +973,11 @@ export default {
 
 - Please do not use mixins unless ABSOLUTELY NECESSARY. Please try to find an alternative pattern.
 
-##### Reccomended alternative approach (named/scoped slots)
+##### Recommended alternative approach (named/scoped slots)
 
 - We can use slots and/or scoped slots to achieve the same thing as we did with mixins. If you only need an EE component there is no need to create the CE component.
 
-1. First, we have a CE component that can render a slot incase we need EE template and functionality to be decorated on top of the CE base.
+1. First, we have a CE component that can render a slot in case we need EE template and functionality to be decorated on top of the CE base.
 
 ```vue
 // ./ce/my_component.vue
@@ -1009,7 +1078,7 @@ separate SCSS file in an appropriate directory within `app/assets/stylesheets`.
 
 In some cases, this is not entirely possible or creating dedicated SCSS file is an overkill,
 e.g. a text style of some component is different for EE. In such cases,
-styles are usually kept in stylesheet that is common for both CE and EE, and it is wise
+styles are usually kept in a stylesheet that is common for both CE and EE, and it is wise
 to isolate such ruleset from rest of CE rules (along with adding comment describing the same)
 to avoid conflicts during CE to EE merge.
 

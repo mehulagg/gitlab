@@ -138,6 +138,25 @@ RSpec.describe InstanceSecurityDashboard do
     end
   end
 
+  describe '#vulnerability_historical_statistics' do
+    let_it_be(:vulnerability_historical_statistic_1) { create(:vulnerability_historical_statistic, project: project1) }
+    let_it_be(:vulnerability_historical_statistic_2) { create(:vulnerability_historical_statistic, project: project2) }
+
+    context 'when the user cannot read all resources' do
+      it 'returns only vulnerability scanners from projects on their dashboard that they can read' do
+        expect(subject.vulnerability_historical_statistics).to contain_exactly(vulnerability_historical_statistic_1)
+      end
+    end
+
+    context 'when the user can read all resources' do
+      let(:user) { create(:auditor) }
+
+      it "returns vulnerability scanners from all projects on the user's dashboard" do
+        expect(subject.vulnerability_historical_statistics).to contain_exactly(vulnerability_historical_statistic_1, vulnerability_historical_statistic_2)
+      end
+    end
+  end
+
   describe '#full_path' do
     let(:user) { create(:user) }
 

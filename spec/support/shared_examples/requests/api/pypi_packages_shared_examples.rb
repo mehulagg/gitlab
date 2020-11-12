@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'PyPi package creation' do |user_type, status, add_member = true|
+RSpec.shared_examples 'PyPI package creation' do |user_type, status, add_member = true|
   RSpec.shared_examples 'creating pypi package files' do
     it 'creates package files' do
       expect { subject }
@@ -24,6 +24,20 @@ RSpec.shared_examples 'PyPi package creation' do |user_type, status, add_member 
 
     it_behaves_like 'creating pypi package files'
 
+    context 'with a pre-existing file' do
+      it 'rejects the duplicated file' do
+        existing_package = create(:pypi_package, name: base_params[:name], version: base_params[:version], project: project)
+        create(:package_file, :pypi, package: existing_package, file_name: params[:content].original_filename)
+
+        expect { subject }
+            .to change { project.packages.pypi.count }.by(0)
+            .and change { Packages::PackageFile.count }.by(0)
+            .and change { Packages::Pypi::Metadatum.count }.by(0)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+
     context 'with object storage disabled' do
       before do
         stub_package_file_object_storage(enabled: false)
@@ -38,17 +52,18 @@ RSpec.shared_examples 'PyPi package creation' do |user_type, status, add_member 
       context 'with correct params' do
         it_behaves_like 'package workhorse uploads'
         it_behaves_like 'creating pypi package files'
-        it_behaves_like 'a gitlab tracking event', described_class.name, 'push_package'
+        it_behaves_like 'a package tracking event', described_class.name, 'push_package'
       end
     end
 
     context 'with object storage enabled' do
       let(:tmp_object) do
-        fog_connection.directories.new(key: 'packages').files.create(
+        fog_connection.directories.new(key: 'packages').files.create( # rubocop:disable Rails/SaveBang
           key: "tmp/uploads/#{file_name}",
           body: 'content'
         )
       end
+
       let(:fog_file) { fog_to_uploaded_file(tmp_object) }
       let(:params) { base_params.merge(content: fog_file, 'content.remote_id' => file_name) }
 
@@ -91,7 +106,7 @@ RSpec.shared_examples 'PyPi package creation' do |user_type, status, add_member 
   end
 end
 
-RSpec.shared_examples 'PyPi package versions' do |user_type, status, add_member = true|
+RSpec.shared_examples 'PyPI package versions' do |user_type, status, add_member = true|
   context "for user type #{user_type}" do
     before do
       project.send("add_#{user_type}", user) if add_member && user_type != :anonymous
@@ -104,11 +119,11 @@ RSpec.shared_examples 'PyPi package versions' do |user_type, status, add_member 
     end
 
     it_behaves_like 'returning response status', status
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'list_package'
+    it_behaves_like 'a package tracking event', described_class.name, 'list_package'
   end
 end
 
-RSpec.shared_examples 'PyPi package download' do |user_type, status, add_member = true|
+RSpec.shared_examples 'PyPI package download' do |user_type, status, add_member = true|
   context "for user type #{user_type}" do
     before do
       project.send("add_#{user_type}", user) if add_member && user_type != :anonymous
@@ -121,11 +136,11 @@ RSpec.shared_examples 'PyPi package download' do |user_type, status, add_member 
     end
 
     it_behaves_like 'returning response status', status
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+    it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
   end
 end
 
-RSpec.shared_examples 'process PyPi api request' do |user_type, status, add_member = true|
+RSpec.shared_examples 'process PyPI api request' do |user_type, status, add_member = true|
   context "for user type #{user_type}" do
     before do
       project.send("add_#{user_type}", user) if add_member && user_type != :anonymous
@@ -140,13 +155,13 @@ RSpec.shared_examples 'rejects PyPI access with unknown project id' do
     let(:project) { OpenStruct.new(id: 1234567890) }
 
     context 'as anonymous' do
-      it_behaves_like 'process PyPi api request', :anonymous, :not_found
+      it_behaves_like 'process PyPI api request', :anonymous, :not_found
     end
 
     context 'as authenticated user' do
-      subject { get api(url), headers: build_basic_auth_header(user.username, personal_access_token.token) }
+      subject { get api(url), headers: basic_auth_header(user.username, personal_access_token.token) }
 
-      it_behaves_like 'process PyPi api request', :anonymous, :not_found
+      it_behaves_like 'process PyPI api request', :anonymous, :not_found
     end
   end
 end

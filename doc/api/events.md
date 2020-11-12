@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Events
 
 ## Filter parameters
@@ -80,6 +86,7 @@ Example response:
 ```json
 [
   {
+    "id": 1,
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -99,6 +106,7 @@ Example response:
     "author_username":"user3"
   },
   {
+    "id": 2,
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -152,6 +160,7 @@ Example response:
 ```json
 [
   {
+    "id": 3,
     "title": null,
     "project_id": 15,
     "action_name": "closed",
@@ -170,6 +179,7 @@ Example response:
     "author_username": "root"
   },
   {
+    "id": 4,
     "title": null,
     "project_id": 15,
     "action_name": "pushed",
@@ -197,6 +207,7 @@ Example response:
     "target_title": null
   },
   {
+    "id": 5,
     "title": null,
     "project_id": 15,
     "action_name": "closed",
@@ -215,6 +226,7 @@ Example response:
     "author_username": "root"
   },
   {
+    "id": 7,
     "title": null,
     "project_id": 15,
     "action_name": "commented on",
@@ -286,6 +298,7 @@ Example response:
 ```json
 [
   {
+    "id": 8
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -306,6 +319,7 @@ Example response:
     "author_username":"user3"
   },
   {
+    "id": 9,
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -326,6 +340,7 @@ Example response:
     "author_username":"ted"
   },
   {
+    "id": 10,
     "title": null,
     "project_id": 1,
     "action_name": "commented on",

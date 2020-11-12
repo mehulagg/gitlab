@@ -1,6 +1,13 @@
+/* global ListIssue */
+/* global List */
+
+import Vue from 'vue';
+import '~/boards/models/list';
+import '~/boards/models/issue';
+
 export const mockLists = [
   {
-    id: 1,
+    id: 'gid://gitlab/List/1',
     title: 'Backlog',
     position: null,
     listType: 'backlog',
@@ -9,9 +16,10 @@ export const mockLists = [
     maxIssueCount: 0,
     assignee: null,
     milestone: null,
+    preset: true,
   },
   {
-    id: 10,
+    id: 'gid://gitlab/List/2',
     title: 'To Do',
     position: 0,
     listType: 'label',
@@ -26,8 +34,13 @@ export const mockLists = [
     maxIssueCount: 0,
     assignee: null,
     milestone: null,
+    preset: false,
   },
 ];
+
+export const mockListsWithModel = mockLists.map(listMock =>
+  Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
+);
 
 const defaultDescendantCounts = {
   openedIssues: 0,
@@ -53,7 +66,35 @@ const labels = [
   },
 ];
 
-const mockIssue = {
+export const rawIssue = {
+  title: 'Issue 1',
+  id: 'gid://gitlab/Issue/436',
+  iid: 27,
+  dueDate: null,
+  timeEstimate: 0,
+  weight: null,
+  confidential: false,
+  referencePath: 'gitlab-org/test-subgroup/gitlab-test#27',
+  path: '/gitlab-org/test-subgroup/gitlab-test/-/issues/27',
+  labels: {
+    nodes: [
+      {
+        id: 1,
+        title: 'test',
+        color: 'red',
+        description: 'testing',
+      },
+    ],
+  },
+  assignees: {
+    nodes: assignees,
+  },
+  epic: {
+    id: 'gid://gitlab/Epic/41',
+  },
+};
+
+export const mockIssue = {
   id: 'gid://gitlab/Issue/436',
   iid: 27,
   title: 'Issue 1',
@@ -65,27 +106,66 @@ const mockIssue = {
   path: '/gitlab-org/gitlab-test/-/issues/27',
   assignees,
   labels,
+  epic: {
+    id: 'gid://gitlab/Epic/41',
+  },
 };
 
-export const mockIssues = [
-  mockIssue,
-  {
-    id: 'gid://gitlab/Issue/437',
-    iid: 28,
-    title: 'Issue 2',
-    referencePath: '#28',
-    dueDate: null,
-    timeEstimate: 0,
-    weight: null,
-    confidential: false,
-    path: '/gitlab-org/gitlab-test/-/issues/28',
-    assignees,
-    labels,
+export const mockIssueWithModel = new ListIssue({ ...mockIssue, id: '436' });
+
+export const mockIssue2 = {
+  id: 'gid://gitlab/Issue/437',
+  iid: 28,
+  title: 'Issue 2',
+  referencePath: '#28',
+  dueDate: null,
+  timeEstimate: 0,
+  weight: null,
+  confidential: false,
+  path: '/gitlab-org/gitlab-test/-/issues/28',
+  assignees,
+  labels,
+  epic: {
+    id: 'gid://gitlab/Epic/40',
   },
-];
+};
+
+export const mockIssue2WithModel = new ListIssue({ ...mockIssue2, id: '437' });
+
+export const mockIssue3 = {
+  id: 'gid://gitlab/Issue/438',
+  iid: 29,
+  title: 'Issue 3',
+  referencePath: '#29',
+  dueDate: null,
+  timeEstimate: 0,
+  weight: null,
+  confidential: false,
+  path: '/gitlab-org/gitlab-test/-/issues/28',
+  assignees,
+  labels,
+  epic: null,
+};
+
+export const mockIssue4 = {
+  id: 'gid://gitlab/Issue/439',
+  iid: 30,
+  title: 'Issue 4',
+  referencePath: '#30',
+  dueDate: null,
+  timeEstimate: 0,
+  weight: null,
+  confidential: false,
+  path: '/gitlab-org/gitlab-test/-/issues/28',
+  assignees,
+  labels,
+  epic: null,
+};
+
+export const mockIssues = [mockIssue, mockIssue2];
 
 export const mockEpic = {
-  id: 1,
+  id: 'gid://gitlab/Epic/41',
   iid: 1,
   title: 'Epic title',
   state: 'opened',
@@ -99,7 +179,7 @@ export const mockEpic = {
 
 export const mockEpics = [
   {
-    id: 41,
+    id: 'gid://gitlab/Epic/41',
     iid: 2,
     description: null,
     title: 'Another marketing',
@@ -116,7 +196,7 @@ export const mockEpics = [
     },
   },
   {
-    id: 40,
+    id: 'gid://gitlab/Epic/40',
     iid: 1,
     description: null,
     title: 'Marketing epic',
@@ -130,7 +210,7 @@ export const mockEpics = [
     hasParent: false,
   },
   {
-    id: 39,
+    id: 'gid://gitlab/Epic/39',
     iid: 12,
     description: null,
     title: 'Epic with end in first timeframe month',
@@ -144,7 +224,7 @@ export const mockEpics = [
     hasParent: false,
   },
   {
-    id: 38,
+    id: 'gid://gitlab/Epic/38',
     iid: 11,
     description: null,
     title: 'Epic with end date out of range',
@@ -158,7 +238,7 @@ export const mockEpics = [
     hasParent: false,
   },
   {
-    id: 37,
+    id: 'gid://gitlab/Epic/37',
     iid: 10,
     description: null,
     title: 'Epic with timeline in same month',
@@ -172,3 +252,15 @@ export const mockEpics = [
     hasParent: false,
   },
 ];
+
+export const mockIssuesByListId = {
+  'gid://gitlab/List/1': [mockIssue.id, mockIssue3.id, mockIssue4.id],
+  'gid://gitlab/List/2': mockIssues.map(({ id }) => id),
+};
+
+export const issues = {
+  [mockIssue.id]: mockIssue,
+  [mockIssue2.id]: mockIssue2,
+  [mockIssue3.id]: mockIssue3,
+  [mockIssue4.id]: mockIssue4,
+};

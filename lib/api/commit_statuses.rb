@@ -3,7 +3,9 @@
 require 'mime/types'
 
 module API
-  class CommitStatuses < Grape::API::Instance
+  class CommitStatuses < ::API::Base
+    feature_category :continuous_integration
+
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
@@ -117,8 +119,10 @@ module API
             render_api_error!('invalid state', 400)
           end
 
-          MergeRequest.where(source_project: user_project, source_branch: ref)
-            .update_all(head_pipeline_id: pipeline.id) if pipeline.latest?
+          if pipeline.latest?
+            MergeRequest.where(source_project: user_project, source_branch: ref)
+              .update_all(head_pipeline_id: pipeline.id)
+          end
 
           present status, with: Entities::CommitStatus
         rescue StateMachines::InvalidTransition => e

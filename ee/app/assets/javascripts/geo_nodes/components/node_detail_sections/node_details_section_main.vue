@@ -76,9 +76,9 @@ export default {
     <div class="col-md-12">
       <div class="gl-display-flex gl-flex-wrap gl-flex-direction-column gl-sm-flex-direction-row">
         <div data-testid="nodeUrl" class="d-flex flex-column">
-          <span class="gl-text-gray-700">{{ s__('GeoNodes|Node URL') }}</span>
+          <span class="gl-text-gray-500">{{ s__('GeoNodes|Node URL') }}</span>
           <gl-link
-            class="gl-display-flex gl-align-items-center gl-text-black-normal gl-font-weight-bold gl-text-decoration-underline gl-mt-1"
+            class="gl-display-flex gl-align-items-center gl-text-body gl-font-weight-bold gl-text-decoration-underline gl-mt-1"
             :href="node.url"
             target="_blank"
             >{{ node.url }} <gl-icon name="external-link" class="gl-ml-1"
@@ -94,7 +94,7 @@ export default {
         />
       </div>
       <div data-testid="nodeVersion" class="d-flex flex-column mt-2">
-        <span class="gl-text-gray-700">{{ s__('GeoNodes|GitLab version') }}</span>
+        <span class="gl-text-gray-500">{{ s__('GeoNodes|GitLab version') }}</span>
         <span :class="{ 'gl-text-red-500': versionMismatch }" class="gl-mt-1 gl-font-weight-bold">
           {{ nodeVersion }}
         </span>

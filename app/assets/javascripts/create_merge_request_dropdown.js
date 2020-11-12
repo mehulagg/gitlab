@@ -1,7 +1,7 @@
 /* eslint-disable no-new */
 import { debounce } from 'lodash';
 import axios from './lib/utils/axios_utils';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import DropLab from './droplab/drop_lab';
 import ISetter from './droplab/plugins/input_setter';
 import { __, sprintf } from './locale';
@@ -168,9 +168,6 @@ export default class CreateMergeRequestDropdown {
 
   disable() {
     this.disableCreateAction();
-
-    this.dropdownToggle.classList.add('disabled');
-    this.dropdownToggle.setAttribute('disabled', 'disabled');
   }
 
   disableCreateAction() {
@@ -189,9 +186,6 @@ export default class CreateMergeRequestDropdown {
 
     this.createTargetButton.classList.remove('disabled');
     this.createTargetButton.removeAttribute('disabled');
-
-    this.dropdownToggle.classList.remove('disabled');
-    this.dropdownToggle.removeAttribute('disabled');
   }
 
   static findByValue(objects, ref, returnFirstMatch = false) {

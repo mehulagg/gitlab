@@ -16,6 +16,7 @@ class Discussion
             :commit_id,
             :confidential?,
             :for_commit?,
+            :for_design?,
             :for_merge_request?,
             :noteable_ability_name,
             :to_ability_name,
@@ -23,7 +24,7 @@ class Discussion
             :resolved_by_id,
             :system_note_with_references_visible_for?,
             :resource_parent,
-
+            :save,
             to: :first_note
 
   def declarative_policy_delegate

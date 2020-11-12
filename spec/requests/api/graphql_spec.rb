@@ -4,12 +4,20 @@ require 'spec_helper'
 RSpec.describe 'GraphQL' do
   include GraphqlHelpers
 
-  let(:query) { graphql_query_for('echo', 'text' => 'Hello world' ) }
+  let(:query) { graphql_query_for('echo', text: 'Hello world' ) }
 
   context 'logging' do
     shared_examples 'logging a graphql query' do
       let(:expected_params) do
-        { query_string: query, variables: variables.to_s, duration_s: anything, depth: 1, complexity: 1 }
+        {
+          query_string: query,
+          variables: variables.to_s,
+          duration_s: anything,
+          depth: 1,
+          complexity: 1,
+          used_fields: ['Query.echo'],
+          used_deprecated_fields: []
+        }
       end
 
       it 'logs a query with the expected params' do

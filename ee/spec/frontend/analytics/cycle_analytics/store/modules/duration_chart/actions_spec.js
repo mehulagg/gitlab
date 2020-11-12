@@ -5,16 +5,16 @@ import * as rootGetters from 'ee/analytics/cycle_analytics/store/getters';
 import * as getters from 'ee/analytics/cycle_analytics/store/modules/duration_chart/getters';
 import * as actions from 'ee/analytics/cycle_analytics/store/modules/duration_chart/actions';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/duration_chart/mutation_types';
+import httpStatusCodes from '~/lib/utils/http_status';
 import {
   group,
   allowedStages as stages,
   startDate,
   endDate,
   rawDurationData,
-  rawDurationMedianData,
   transformedDurationData,
-  transformedDurationMedianData,
   endpoints,
+  valueStreams,
 } from '../../../mock_data';
 import { shouldFlashAMessage } from '../../../helpers';
 
@@ -22,26 +22,30 @@ const selectedGroup = { fullPath: group.path };
 const [stage1, stage2] = stages;
 const hiddenStage = { ...stage1, hidden: true, id: 3, slug: 3 };
 const activeStages = [stage1, stage2];
+const [selectedValueStream] = valueStreams;
+const error = new Error(`Request failed with status code ${httpStatusCodes.BAD_REQUEST}`);
 
 const rootState = {
   startDate,
   endDate,
   stages: [...activeStages, hiddenStage],
   selectedGroup,
+  selectedValueStream,
   featureFlags: {
     hasDurationChart: true,
-    hasDurationChartMedian: true,
-  },
-  getters,
-  rootGetters: {
-    ...rootGetters,
-    activeStages,
   },
 };
 
 describe('DurationChart actions', () => {
-  let state;
   let mock;
+  const state = {
+    ...rootState,
+    ...getters,
+    ...rootGetters,
+    activeStages,
+    currentGroupPath: () => selectedGroup.fullPath,
+    currentValueStreamId: () => selectedValueStream.id,
+  };
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
@@ -49,6 +53,18 @@ describe('DurationChart actions', () => {
 
   afterEach(() => {
     mock.restore();
+  });
+
+  describe('setLoading', () => {
+    it(`commits the '${types.SET_LOADING}' action`, () => {
+      return testAction(
+        actions.setLoading,
+        true,
+        state,
+        [{ type: types.SET_LOADING, payload: true }],
+        [],
+      );
+    });
   });
 
   describe('fetchDurationData', () => {
@@ -60,15 +76,14 @@ describe('DurationChart actions', () => {
       return testAction(
         actions.fetchDurationData,
         null,
-        { activeStages },
-        [],
+        state,
         [
-          { type: 'requestDurationData' },
           {
-            type: 'receiveDurationDataSuccess',
+            type: types.RECEIVE_DURATION_DATA_SUCCESS,
             payload: transformedDurationData,
           },
         ],
+        [{ type: 'requestDurationData' }],
       );
     });
 
@@ -77,7 +92,11 @@ describe('DurationChart actions', () => {
       return actions
         .fetchDurationData({
           dispatch,
-          ...rootState,
+          rootState,
+          rootGetters: {
+            ...rootGetters,
+            activeStages,
+          },
         })
         .then(() => {
           const requestedUrls = mock.history.get.map(({ url }) => url);
@@ -87,9 +106,40 @@ describe('DurationChart actions', () => {
         });
     });
 
+    describe(`Status ${httpStatusCodes.OK} and error message in response`, () => {
+      const dataError = 'Too much data';
+
+      beforeEach(() => {
+        mock.onGet(endpoints.durationData).reply(httpStatusCodes.OK, { error: dataError });
+      });
+
+      it(`dispatches the 'receiveDurationDataError' with ${dataError}`, () => {
+        const dispatch = jest.fn();
+        const commit = jest.fn();
+
+        return actions
+          .fetchDurationData({
+            dispatch,
+            commit,
+            rootState,
+            rootGetters: {
+              ...rootGetters,
+              activeStages,
+            },
+          })
+          .then(() => {
+            expect(commit).not.toHaveBeenCalled();
+            expect(dispatch.mock.calls).toEqual([
+              ['requestDurationData'],
+              ['receiveDurationDataError', new Error(dataError)],
+            ]);
+          });
+      });
+    });
+
     describe('receiveDurationDataError', () => {
       beforeEach(() => {
-        mock.onGet(endpoints.durationData).reply(404);
+        mock.onGet(endpoints.durationData).reply(httpStatusCodes.BAD_REQUEST, error);
       });
 
       it("dispatches the 'receiveDurationDataError' action when there is an error", () => {
@@ -98,58 +148,18 @@ describe('DurationChart actions', () => {
         return actions
           .fetchDurationData({
             dispatch,
-            ...rootState,
+            rootState,
+            rootGetters: {
+              ...rootGetters,
+              activeStages,
+            },
           })
           .then(() => {
-            expect(dispatch).toHaveBeenCalledWith('receiveDurationDataError');
+            expect(dispatch.mock.calls).toEqual([
+              ['requestDurationData'],
+              ['receiveDurationDataError', error],
+            ]);
           });
-      });
-    });
-  });
-
-  describe('receiveDurationDataSuccess', () => {
-    describe('with hasDurationChartMedian feature flag enabled', () => {
-      it('commits the transformed duration data and dispatches fetchDurationMedianData', () => {
-        testAction(
-          actions.receiveDurationDataSuccess,
-          transformedDurationData,
-          rootState,
-          [
-            {
-              type: types.RECEIVE_DURATION_DATA_SUCCESS,
-              payload: transformedDurationData,
-            },
-          ],
-          [
-            {
-              type: 'fetchDurationMedianData',
-            },
-          ],
-        );
-      });
-    });
-
-    describe('with hasDurationChartMedian feature flag disabled', () => {
-      const disabledState = {
-        ...rootState,
-        featureFlags: {
-          hasDurationChartMedian: false,
-        },
-      };
-
-      it('commits the transformed duration data', () => {
-        testAction(
-          actions.receiveDurationDataSuccess,
-          transformedDurationData,
-          disabledState,
-          [
-            {
-              type: types.RECEIVE_DURATION_DATA_SUCCESS,
-              payload: transformedDurationData,
-            },
-          ],
-          [],
-        );
       });
     });
   });
@@ -167,6 +177,7 @@ describe('DurationChart actions', () => {
         [
           {
             type: types.RECEIVE_DURATION_DATA_ERROR,
+            payload: {},
           },
         ],
         [],
@@ -189,7 +200,6 @@ describe('DurationChart actions', () => {
       const stateWithDurationData = {
         ...state,
         durationData: transformedDurationData,
-        durationMedianData: transformedDurationMedianData,
       };
 
       testAction(
@@ -201,7 +211,6 @@ describe('DurationChart actions', () => {
             type: types.UPDATE_SELECTED_DURATION_CHART_STAGES,
             payload: {
               updatedDurationStageData: transformedDurationData,
-              updatedDurationStageMedianData: transformedDurationMedianData,
             },
           },
         ],
@@ -213,7 +222,6 @@ describe('DurationChart actions', () => {
       const stateWithDurationData = {
         ...state,
         durationData: transformedDurationData,
-        durationMedianData: transformedDurationMedianData,
       };
 
       testAction(
@@ -231,13 +239,6 @@ describe('DurationChart actions', () => {
                   selected: false,
                 },
               ],
-              updatedDurationStageMedianData: [
-                transformedDurationMedianData[0],
-                {
-                  ...transformedDurationMedianData[1],
-                  selected: false,
-                },
-              ],
             },
           },
         ],
@@ -249,7 +250,6 @@ describe('DurationChart actions', () => {
       const stateWithDurationData = {
         ...state,
         durationData: transformedDurationData,
-        durationMedianData: transformedDurationMedianData,
       };
 
       testAction(
@@ -270,111 +270,10 @@ describe('DurationChart actions', () => {
                   selected: false,
                 },
               ],
-              updatedDurationStageMedianData: [
-                {
-                  ...transformedDurationMedianData[0],
-                  selected: false,
-                },
-                {
-                  ...transformedDurationMedianData[1],
-                  selected: false,
-                },
-              ],
             },
           },
         ],
         [],
-      );
-    });
-  });
-
-  describe('fetchDurationMedianData', () => {
-    beforeEach(() => {
-      mock.onGet(endpoints.durationData).reply(200, [...rawDurationMedianData]);
-    });
-
-    it('dispatches the receiveDurationMedianDataSuccess action on success', () => {
-      return testAction(
-        actions.fetchDurationMedianData,
-        null,
-        { ...rootState, activeStages },
-        [],
-        [
-          {
-            type: 'receiveDurationMedianDataSuccess',
-            payload: transformedDurationMedianData,
-          },
-        ],
-      );
-    });
-
-    describe('receiveDurationMedianDataError', () => {
-      beforeEach(() => {
-        mock.onGet(endpoints.durationData).reply(404);
-      });
-
-      it('dispatches the receiveDurationMedianDataError action when there is an error', () => {
-        const dispatch = jest.fn();
-        return actions
-          .fetchDurationMedianData({
-            dispatch,
-            rootState,
-            rootGetters: { activeStages },
-          })
-          .then(() => {
-            const requestedUrls = mock.history.get.map(({ url }) => url);
-            expect(requestedUrls).not.toContain(
-              `/groups/foo/-/analytics/value_stream_analytics/stages/${hiddenStage.id}/duration_chart`,
-            );
-            expect(dispatch).toHaveBeenCalledWith('receiveDurationMedianDataError');
-          });
-      });
-    });
-  });
-
-  describe('receiveDurationMedianDataSuccess', () => {
-    it('commits the transformed duration median data', () => {
-      return testAction(
-        actions.receiveDurationMedianDataSuccess,
-        transformedDurationMedianData,
-        rootState,
-        [
-          {
-            type: types.RECEIVE_DURATION_MEDIAN_DATA_SUCCESS,
-            payload: transformedDurationMedianData,
-          },
-        ],
-        [],
-      );
-    });
-  });
-
-  describe('receiveDurationMedianDataError', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
-    it("commits the 'RECEIVE_DURATION_MEDIAN_DATA_ERROR' mutation", () => {
-      return testAction(
-        actions.receiveDurationMedianDataError,
-        {},
-        rootState,
-        [
-          {
-            type: types.RECEIVE_DURATION_MEDIAN_DATA_ERROR,
-          },
-        ],
-        [],
-      );
-    });
-
-    it('will flash an error', () => {
-      actions.receiveDurationMedianDataError({
-        commit: () => {},
-      });
-
-      shouldFlashAMessage(
-        'There was an error while fetching value stream analytics duration median data.',
       );
     });
   });

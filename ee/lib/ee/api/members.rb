@@ -41,6 +41,25 @@ module EE
 
             present_member(updated_member)
           end
+
+          desc 'Gets a list of billable users of root group.' do
+            success Entities::Member
+          end
+          params do
+            use :pagination
+          end
+          get ":id/billable_members" do
+            group = find_group!(params[:id])
+
+            not_found! unless ::Feature.enabled?(:api_billable_member_list, group)
+
+            bad_request!(nil) if group.subgroup?
+            bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
+
+            users = paginate_billable_from_user_ids(group.billed_user_ids)
+
+            present users, with: ::API::Entities::UserBasic, current_user: current_user
+          end
         end
       end
     end

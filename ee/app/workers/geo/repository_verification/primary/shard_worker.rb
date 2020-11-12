@@ -49,11 +49,11 @@ module Geo
         def load_pending_resources
           resources = find_never_verified_project_ids(batch_size: db_retrieve_batch_size)
           remaining_capacity = db_retrieve_batch_size - resources.size
-          return resources if remaining_capacity.zero?
+          return resources if remaining_capacity == 0
 
           resources += find_recently_updated_project_ids(batch_size: remaining_capacity)
           remaining_capacity = db_retrieve_batch_size - resources.size
-          return resources if remaining_capacity.zero?
+          return resources if remaining_capacity == 0
 
           resources + find_project_ids_to_reverify(batch_size: remaining_capacity)
         end

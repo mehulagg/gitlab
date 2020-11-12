@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -17,6 +17,8 @@ The [Prometheus service](../prometheus.md) must be enabled.
 ## Metrics supported
 
 NGINX server metrics are detected, which tracks the pages and content directly served by NGINX.
+
+[`environment_filter`](../../../../operations/metrics/dashboards/variables.md#environment_filter) is one of the predefined variables that metrics dashboards support.
 
 | Name | Query |
 | ---- | ----- |

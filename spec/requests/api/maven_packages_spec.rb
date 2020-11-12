@@ -12,13 +12,16 @@ RSpec.describe API::MavenPackages do
   let_it_be(:package_file) { package.package_files.with_file_name_like('%.xml').first }
   let_it_be(:jar_file) { package.package_files.with_file_name_like('%.jar').first }
   let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
-  let_it_be(:job) { create(:ci_build, user: user) }
+  let_it_be(:job, reload: true) { create(:ci_build, user: user, status: :running) }
   let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
   let_it_be(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
+  let_it_be(:deploy_token_for_group) { create(:deploy_token, :group, read_package_registry: true, write_package_registry: true) }
+  let_it_be(:group_deploy_token) { create(:group_deploy_token, deploy_token: deploy_token_for_group, group: group) }
 
   let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
   let(:headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
   let(:headers_with_token) { headers.merge('Private-Token' => personal_access_token.token) }
+  let(:group_deploy_token_headers) { { Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => deploy_token_for_group.token } }
 
   let(:headers_with_deploy_token) do
     headers.merge(
@@ -36,7 +39,7 @@ RSpec.describe API::MavenPackages do
     context 'with jar file' do
       let_it_be(:package_file) { jar_file }
 
-      it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+      it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
     end
   end
 
@@ -102,11 +105,25 @@ RSpec.describe API::MavenPackages do
   end
 
   shared_examples 'downloads with a job token' do
-    it 'allows download with job token' do
-      download_file(package_file.file_name, job_token: job.token)
+    context 'with a running job' do
+      it 'allows download with job token' do
+        download_file(package_file.file_name, job_token: job.token)
 
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(response.media_type).to eq('application/octet-stream')
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq('application/octet-stream')
+      end
+    end
+
+    context 'with a finished job' do
+      before do
+        job.update!(status: :failed)
+      end
+
+      it 'returns unauthorized error' do
+        download_file(package_file.file_name, job_token: job.token)
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
     end
   end
 
@@ -193,6 +210,24 @@ RSpec.describe API::MavenPackages do
       it_behaves_like 'downloads with a job token'
 
       it_behaves_like 'downloads with a deploy token'
+
+      it 'does not allow download by a unauthorized deploy token with same id as a user with access' do
+        unauthorized_deploy_token = create(:deploy_token, read_package_registry: true, write_package_registry: true)
+
+        another_user = create(:user)
+        project.add_developer(another_user)
+
+        # We force the id of the deploy token and the user to be the same
+        unauthorized_deploy_token.update!(id: another_user.id)
+
+        download_file(
+          package_file.file_name,
+          {},
+          Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => unauthorized_deploy_token.token
+        )
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
     end
 
     context 'project name is different from a package name' do
@@ -251,7 +286,7 @@ RSpec.describe API::MavenPackages do
 
     context 'internal project' do
       before do
-        group.group_member(user).destroy
+        group.group_member(user).destroy!
         project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
       end
 
@@ -310,6 +345,17 @@ RSpec.describe API::MavenPackages do
       it_behaves_like 'downloads with a job token'
 
       it_behaves_like 'downloads with a deploy token'
+
+      context 'with group deploy token' do
+        subject { download_file_with_token(package_file.file_name, {}, group_deploy_token_headers) }
+
+        it 'returns the file' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type).to eq('application/octet-stream')
+        end
+      end
     end
 
     def download_file(file_name, params = {}, request_headers = headers)
@@ -451,6 +497,20 @@ RSpec.describe API::MavenPackages do
       expect(response).to have_gitlab_http_status(:ok)
     end
 
+    it 'rejects requests by a unauthorized deploy token with same id as a user with access' do
+      unauthorized_deploy_token = create(:deploy_token, read_package_registry: true, write_package_registry: true)
+
+      another_user = create(:user)
+      project.add_developer(another_user)
+
+      # We force the id of the deploy token and the user to be the same
+      unauthorized_deploy_token.update!(id: another_user.id)
+
+      authorize_upload({}, headers.merge(Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => unauthorized_deploy_token.token))
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+    end
+
     def authorize_upload(params = {}, request_headers = headers)
       put api("/projects/#{project.id}/packages/maven/com/example/my-app/#{version}/maven-metadata.xml/authorize"), params: params, headers: request_headers
     end
@@ -496,6 +556,18 @@ RSpec.describe API::MavenPackages do
     context 'when params from workhorse are correct' do
       let(:params) { { file: file_upload } }
 
+      context 'file size is too large' do
+        it 'rejects the request' do
+          allow_next_instance_of(UploadedFile) do |uploaded_file|
+            allow(uploaded_file).to receive(:size).and_return(project.actual_limits.maven_max_file_size + 1)
+          end
+
+          upload_file_with_token(params: params)
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
       it 'rejects a malicious request' do
         put api("/projects/#{project.id}/packages/maven/com/example/my-app/#{version}/%2e%2e%2f.ssh%2fauthorized_keys"), params: params, headers: headers_with_token
 
@@ -505,19 +577,19 @@ RSpec.describe API::MavenPackages do
       context 'without workhorse header' do
         let(:workhorse_header) { {} }
 
-        subject { upload_file_with_token(params) }
+        subject { upload_file_with_token(params: params) }
 
         it_behaves_like 'package workhorse uploads'
       end
 
       context 'event tracking' do
-        subject { upload_file_with_token(params) }
+        subject { upload_file_with_token(params: params) }
 
-        it_behaves_like 'a gitlab tracking event', described_class.name, 'push_package'
+        it_behaves_like 'a package tracking event', described_class.name, 'push_package'
       end
 
       it 'creates package and stores package file' do
-        expect { upload_file_with_token(params) }.to change { project.packages.count }.by(1)
+        expect { upload_file_with_token(params: params) }.to change { project.packages.count }.by(1)
           .and change { Packages::Maven::Metadatum.count }.by(1)
           .and change { Packages::PackageFile.count }.by(1)
 
@@ -525,33 +597,84 @@ RSpec.describe API::MavenPackages do
         expect(jar_file.file_name).to eq(file_upload.original_filename)
       end
 
-      it 'allows upload with job token' do
-        upload_file(params.merge(job_token: job.token))
+      it 'allows upload with running job token' do
+        upload_file(params: params.merge(job_token: job.token))
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(project.reload.packages.last.build_info.pipeline).to eq job.pipeline
       end
 
+      it 'rejects upload without running job token' do
+        job.update!(status: :failed)
+        upload_file(params: params.merge(job_token: job.token))
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+
       it 'allows upload with deploy token' do
-        upload_file(params, headers_with_deploy_token)
+        upload_file(params: params, request_headers: headers_with_deploy_token)
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'rejects uploads by a unauthorized deploy token with same id as a user with access' do
+        unauthorized_deploy_token = create(:deploy_token, read_package_registry: true, write_package_registry: true)
+
+        another_user = create(:user)
+        project.add_developer(another_user)
+
+        # We force the id of the deploy token and the user to be the same
+        unauthorized_deploy_token.update!(id: another_user.id)
+
+        upload_file(
+          params: params,
+          request_headers: headers.merge(Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => unauthorized_deploy_token.token)
+        )
+
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       context 'version is not correct' do
         let(:version) { '$%123' }
 
         it 'rejects request' do
-          expect { upload_file_with_token(params) }.not_to change { project.packages.count }
+          expect { upload_file_with_token(params: params) }.not_to change { project.packages.count }
 
           expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response['message']).to include('Validation failed')
         end
       end
+
+      context 'for sha1 file' do
+        let(:dummy_package) { double(Packages::Package) }
+
+        it 'checks the sha1' do
+          # The sha verification done by the maven api is between:
+          # - the sha256 set by workhorse helpers
+          # - the sha256 of the sha1 of the uploaded package file
+          # We're going to send `file_upload` for the sha1 and stub the sha1 of the package file so that
+          # both sha256 being the same
+          expect(::Packages::PackageFileFinder).to receive(:new).and_return(double(execute!: dummy_package))
+          expect(dummy_package).to receive(:file_sha1).and_return(File.read(file_upload.path))
+
+          upload_file_with_token(params: params, file_extension: 'jar.sha1')
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'for md5 file' do
+        it 'returns an empty body' do
+          upload_file_with_token(params: params, file_extension: 'jar.md5')
+
+          expect(response.body).to eq('')
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
     end
 
-    def upload_file(params = {}, request_headers = headers)
-      url = "/projects/#{project.id}/packages/maven/com/example/my-app/#{version}/my-app-1.0-20180724.124855-1.jar"
+    def upload_file(params: {}, request_headers: headers, file_extension: 'jar')
+      url = "/projects/#{project.id}/packages/maven/com/example/my-app/#{version}/my-app-1.0-20180724.124855-1.#{file_extension}"
       workhorse_finalize(
         api(url),
         method: :put,
@@ -562,8 +685,8 @@ RSpec.describe API::MavenPackages do
       )
     end
 
-    def upload_file_with_token(params = {}, request_headers = headers_with_token)
-      upload_file(params, request_headers)
+    def upload_file_with_token(params: {}, request_headers: headers_with_token, file_extension: 'jar')
+      upload_file(params: params, request_headers: request_headers, file_extension: file_extension)
     end
   end
 end

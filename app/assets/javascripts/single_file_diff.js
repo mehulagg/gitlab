@@ -3,15 +3,18 @@
 import $ from 'jquery';
 import { __ } from './locale';
 import axios from './lib/utils/axios_utils';
-import createFlash from './flash';
+import { deprecatedCreateFlash as createFlash } from './flash';
 import FilesCommentButton from './files_comment_button';
 import initImageDiffHelper from './image_diff/helpers/init_image_diff';
 import syntaxHighlight from './syntax_highlight';
+import { spriteIcon } from '~/lib/utils/common_utils';
 
 const WRAPPER = '<div class="diff-content"></div>';
 const LOADING_HTML = '<span class="spinner"></span>';
-const ERROR_HTML =
-  '<div class="nothing-here-block"><i class="fa fa-warning"></i> Could not load diff</div>';
+const ERROR_HTML = `<div class="nothing-here-block">${spriteIcon(
+  'warning-solid',
+  's16',
+)} Could not load diff</div>`;
 const COLLAPSED_HTML =
   '<div class="nothing-here-block diff-collapsed">This diff is collapsed. <button class="click-to-expand btn btn-link">Click to expand it.</button></div>';
 
@@ -57,16 +60,10 @@ export default class SingleFileDiff {
       this.content.hide();
       this.$toggleIcon.addClass('fa-caret-right').removeClass('fa-caret-down');
       this.collapsedContent.show();
-      if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-        gl.diffNotesCompileComponents();
-      }
     } else if (this.content) {
       this.collapsedContent.hide();
       this.content.show();
       this.$toggleIcon.addClass('fa-caret-down').removeClass('fa-caret-right');
-      if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-        gl.diffNotesCompileComponents();
-      }
     } else {
       this.$toggleIcon.addClass('fa-caret-down').removeClass('fa-caret-right');
       return this.getContentHTML(cb);
@@ -89,10 +86,6 @@ export default class SingleFileDiff {
           this.content = $(ERROR_HTML);
         }
         this.collapsedContent.after(this.content);
-
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
 
         const $file = $(this.file);
         FilesCommentButton.init($file);

@@ -10,62 +10,51 @@ exports[`Code Coverage when fetching data is successful matches the snapshot 1`]
     <!---->
      
     <gl-dropdown-stub
+      category="tertiary"
+      headertext=""
+      size="medium"
       text="rspec"
+      variant="default"
     >
       <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        ischecked="true"
+        ischeckitem="true"
+        secondarytext=""
         value="rspec"
       >
-        <div
-          class="gl-display-flex"
-        >
-          <gl-icon-stub
-            class="gl-absolute"
-            name="mobile-issue-close"
-            size="16"
-          />
-           
-          <span
-            class="gl-display-flex align-items-center ml-4"
-          >
-            
-            rspec
-          
-          </span>
-        </div>
+        
+        rspec
+      
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        ischeckitem="true"
+        secondarytext=""
         value="cypress"
       >
-        <div
-          class="gl-display-flex"
-        >
-          <!---->
-           
-          <span
-            class="gl-display-flex align-items-center ml-4"
-          >
-            
-            cypress
-          
-          </span>
-        </div>
+        
+        cypress
+      
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        ischeckitem="true"
+        secondarytext=""
         value="karma"
       >
-        <div
-          class="gl-display-flex"
-        >
-          <!---->
-           
-          <span
-            class="gl-display-flex align-items-center ml-4"
-          >
-            
-            karma
-          
-          </span>
-        </div>
+        
+        karma
+      
       </gl-dropdown-item-stub>
     </gl-dropdown-stub>
   </div>

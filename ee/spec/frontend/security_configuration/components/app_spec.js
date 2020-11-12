@@ -2,8 +2,12 @@ import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import { GlAlert, GlLink } from '@gitlab/ui';
 import SecurityConfigurationApp from 'ee/security_configuration/components/app.vue';
-import CreateMergeRequestButton from 'ee/security_configuration/components/create_merge_request_button.vue';
+import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
+import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import stubChildren from 'helpers/stub_children';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import { generateFeatures } from './helpers';
 
 const propsData = {
   features: [],
@@ -12,6 +16,8 @@ const propsData = {
   autoDevopsHelpPagePath: 'http://autoDevopsHelpPagePath',
   autoDevopsPath: 'http://autoDevopsPath',
   helpPagePath: 'http://helpPagePath',
+  gitlabCiPresent: false,
+  gitlabCiHistoryPath: '/ci/history',
   autoFixSettingsProps: {},
   createSastMergeRequestPath: 'http://createSastMergeRequestPath',
 };
@@ -36,27 +42,19 @@ describe('Security Configuration App', () => {
     );
   };
 
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
   });
 
-  const generateFeatures = (n, overrides = {}) => {
-    return [...Array(n).keys()].map(i => ({
-      type: `scan-type-${i}`,
-      name: `name-feature-${i}`,
-      description: `description-feature-${i}`,
-      link: `link-feature-${i}`,
-      configured: i % 2 === 0,
-      ...overrides,
-    }));
-  };
-
   const getPipelinesLink = () => wrapper.find({ ref: 'pipelinesLink' });
   const getFeaturesTable = () => wrapper.find({ ref: 'securityControlTable' });
   const getFeaturesRows = () => getFeaturesTable().findAll('tbody tr');
   const getAlert = () => wrapper.find(GlAlert);
-  const getCreateMergeRequestButton = () => wrapper.find(CreateMergeRequestButton);
   const getRowCells = row => {
     const [feature, status, manage] = row.findAll('td').wrappers;
     return { feature, status, manage };
@@ -80,20 +78,28 @@ describe('Security Configuration App', () => {
 
   describe('Auto DevOps alert', () => {
     describe.each`
-      gitlabCiPresent | autoDevopsEnabled | canEnableAutoDevops | shouldShowAlert
-      ${false}        | ${false}          | ${true}             | ${true}
-      ${true}         | ${false}          | ${true}             | ${false}
-      ${false}        | ${true}           | ${true}             | ${false}
-      ${false}        | ${false}          | ${false}            | ${false}
+      gitlabCiPresent | autoDevopsEnabled | canEnableAutoDevops | dismissed | shouldShowAlert
+      ${false}        | ${false}          | ${true}             | ${false}  | ${true}
+      ${false}        | ${false}          | ${true}             | ${true}   | ${false}
+      ${true}         | ${false}          | ${true}             | ${false}  | ${false}
+      ${false}        | ${true}           | ${true}             | ${false}  | ${false}
+      ${false}        | ${false}          | ${false}            | ${false}  | ${false}
     `(
-      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled, canEnableAutoDevops is $canEnableAutoDevops',
-      ({ gitlabCiPresent, autoDevopsEnabled, canEnableAutoDevops, shouldShowAlert }) => {
+      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled, dismissed is $dismissed, canEnableAutoDevops is $canEnableAutoDevops',
+      ({ gitlabCiPresent, autoDevopsEnabled, canEnableAutoDevops, dismissed, shouldShowAlert }) => {
         beforeEach(() => {
+          if (dismissed) {
+            localStorage.setItem(SecurityConfigurationApp.autoDevopsAlertStorageKey, 'true');
+          }
+
           createComponent({
             propsData: {
               gitlabCiPresent,
               autoDevopsEnabled,
               canEnableAutoDevops,
+            },
+            stubs: {
+              LocalStorageSync,
             },
           });
         });
@@ -119,12 +125,40 @@ describe('Security Configuration App', () => {
               title: 'Auto DevOps',
               primaryButtonText: 'Enable Auto DevOps',
               primaryButtonLink: propsData.autoDevopsPath,
-              dismissible: false,
             });
           });
         }
       },
     );
+
+    describe('dismissing the alert', () => {
+      useLocalStorageSpy();
+
+      beforeEach(() => {
+        createComponent({
+          propsData: {
+            gitlabCiPresent: false,
+            autoDevopsEnabled: false,
+            canEnableAutoDevops: true,
+          },
+          stubs: {
+            LocalStorageSync,
+          },
+        });
+
+        getAlert().vm.$emit('dismiss');
+      });
+
+      it('hides the alert', () => {
+        expect(getAlert().exists()).toBe(false);
+      });
+
+      it('saves dismissal in localStorage', () => {
+        expect(localStorage.setItem.mock.calls).toEqual([
+          [SecurityConfigurationApp.autoDevopsAlertStorageKey, 'true'],
+        ]);
+      });
+    });
   });
 
   describe('features table', () => {
@@ -141,61 +175,18 @@ describe('Security Configuration App', () => {
         const { feature, status, manage } = getRowCells(rows.at(i));
         expect(feature.text()).toMatch(features[i].name);
         expect(feature.text()).toMatch(features[i].description);
-        expect(status.text()).toMatch(features[i].configured ? 'Enabled' : 'Not enabled');
-        expect(manage.find(GlLink).attributes('href')).toBe(features[i].link);
+        expect(status.find(FeatureStatus).props()).toEqual({
+          feature: features[i],
+          gitlabCiPresent: propsData.gitlabCiPresent,
+          gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+        });
+        expect(manage.find(ManageFeature).props()).toEqual({
+          feature: features[i],
+          autoDevopsEnabled: propsData.autoDevopsEnabled,
+          createSastMergeRequestPath: propsData.createSastMergeRequestPath,
+        });
+        expect(feature.find(GlLink).props('href')).toBe(features[i].href);
       }
     });
-
-    describe('given a feature enabled by Auto DevOps', () => {
-      it('displays the expected status text', () => {
-        const features = generateFeatures(1, { configured: true });
-
-        createComponent({ propsData: { features, autoDevopsEnabled: true } });
-
-        const { status } = getRowCells(getFeaturesRows().at(0));
-        expect(status.text()).toMatch('Enabled with Auto DevOps');
-      });
-    });
-  });
-
-  describe('enabling SAST by merge request', () => {
-    describe.each`
-      gitlabCiPresent | autoDevopsEnabled | buttonExpected
-      ${false}        | ${false}          | ${true}
-      ${false}        | ${true}           | ${true}
-      ${true}         | ${false}          | ${false}
-    `(
-      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled',
-      ({ gitlabCiPresent, autoDevopsEnabled, buttonExpected }) => {
-        beforeEach(() => {
-          const features = generateFeatures(1, { type: 'sast', configured: false });
-
-          createComponent({
-            propsData: { features, gitlabCiPresent, autoDevopsEnabled },
-          });
-        });
-
-        if (buttonExpected) {
-          it('renders the CreateMergeRequestButton component', () => {
-            const button = getCreateMergeRequestButton();
-            expect(button.exists()).toBe(true);
-            expect(button.props()).toMatchObject({
-              endpoint: propsData.createSastMergeRequestPath,
-              autoDevopsEnabled,
-            });
-          });
-
-          it('does not render the documentation link', () => {
-            const { manage } = getRowCells(getFeaturesRows().at(0));
-
-            expect(manage.contains(GlLink)).toBe(false);
-          });
-        } else {
-          it('does not render the CreateMergeRequestButton component', () => {
-            expect(getCreateMergeRequestButton().exists()).toBe(false);
-          });
-        }
-      },
-    );
   });
 });

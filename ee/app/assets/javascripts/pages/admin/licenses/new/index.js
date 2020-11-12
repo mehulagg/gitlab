@@ -1,16 +1,23 @@
-import $ from 'jquery';
-
 document.addEventListener('DOMContentLoaded', () => {
-  const $licenseFile = $('.license-file');
-  const $licenseKey = $('.license-key');
+  const licenseFile = document.querySelector('.license-file');
+  const licenseKey = document.querySelector('.license-key');
+  const acceptEULACheckBox = document.querySelector('#accept_eula');
+  const uploadLicenseBtn = document.querySelector('#js-upload-license');
+  const licenseType = document.querySelectorAll('input[name="license_type"]');
 
   const showLicenseType = () => {
-    const $checkedFile = $('input[name="license_type"]:checked').val() === 'file';
+    const checkedFile =
+      document.querySelector('input[name="license_type"]:checked').value === 'file';
 
-    $licenseFile.toggle($checkedFile);
-    $licenseKey.toggle(!$checkedFile);
+    licenseFile.classList.toggle('hidden', !checkedFile);
+    licenseKey.classList.toggle('hidden', checkedFile);
   };
 
-  $('input[name="license_type"]').on('change', showLicenseType);
+  const toggleUploadLicenseButton = () => {
+    uploadLicenseBtn.toggleAttribute('disabled', !acceptEULACheckBox.checked);
+  };
+
+  licenseType.forEach(el => el.addEventListener('change', showLicenseType));
+  acceptEULACheckBox.addEventListener('change', toggleUploadLicenseButton);
   showLicenseType();
 });

@@ -2,7 +2,7 @@ import Visibility from 'visibilityjs';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Poll from '~/lib/utils/poll';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import CommitPipelineStatus from '~/projects/tree/components/commit_pipeline_status_component.vue';
 import { getJSONFixture } from '../helpers/fixtures';
@@ -142,7 +142,7 @@ describe('Commit pipeline status component', () => {
       });
 
       it('renders CI icon', () => {
-        expect(findCiIcon().attributes('data-original-title')).toEqual('Pipeline: pending');
+        expect(findCiIcon().attributes('title')).toEqual('Pipeline: pending');
         expect(findCiIcon().props('status')).toEqual(mockCiStatus);
       });
     });
@@ -161,7 +161,7 @@ describe('Commit pipeline status component', () => {
       });
 
       it('renders not found CI icon', () => {
-        expect(findCiIcon().attributes('data-original-title')).toEqual('Pipeline: not found');
+        expect(findCiIcon().attributes('title')).toEqual('Pipeline: not found');
         expect(findCiIcon().props('status')).toEqual({
           text: 'not found',
           icon: 'status_notfound',

@@ -1,10 +1,15 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Documentation process
 
 The process for creating and maintaining GitLab product documentation allows
 anyone to contribute a merge request or create an issue for GitLab's
 documentation.
 
-NOTE: **Note:**
 Documentation updates relating to new features or feature enhancements must
 use the [feature workflow process](https://about.gitlab.com/handbook/engineering/ux/technical-writing/workflow/#for-a-product-change) described in the GitLab Handbook.
 
@@ -29,7 +34,7 @@ is added or updated. The following are added by the issue or merge request autho
 
 The following are also added by members of the Technical Writing team:
 
-- A documentation [scoped label](../../user/project/labels.md#scoped-labels-premium) with the
+- A documentation [scoped label](../../user/project/labels.md#scoped-labels) with the
   `docs::` prefix. For example, `~docs::improvement`.
 - The `~Technical Writing` [team label](../contributing/issue_workflow.md#team-labels).
 
@@ -159,6 +164,5 @@ Ensure the following if skipping an initial Technical Writer review:
   - For [directories and files](styleguide.md#work-with-directories-and-files).
   - For [images](styleguide.md#images).
 
-NOTE: **Note:**
 Merge requests that change the location of documentation must always be reviewed by a Technical
 Writer prior to merging.

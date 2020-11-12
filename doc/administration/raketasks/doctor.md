@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Doctor Rake tasks **(CORE ONLY)**
 
 This is a collection of tasks to help investigate and repair
@@ -15,7 +21,6 @@ Automatic resolution is not yet implemented. If you have values that
 cannot be decrypted, you can follow steps to reset them, see our
 docs on what to do [when the secrets file is lost](../../raketasks/backup_restore.md#when-the-secrets-file-is-lost).
 
-NOTE: **Note:**
 This can take a very long time, depending on the size of your
 database, as it checks all rows in all tables.
 
@@ -33,7 +38,6 @@ bundle exec rake gitlab:doctor:secrets RAILS_ENV=production
 
 **Example output**
 
-<!-- vale gitlab.SentenceSpacing = NO -->
 ```plaintext
 I, [2020-06-11T17:17:54.951815 #27148]  INFO -- : Checking encrypted values in the database
 I, [2020-06-11T17:18:12.677708 #27148]  INFO -- : - ApplicationSetting failures: 0
@@ -45,13 +49,11 @@ I, [2020-06-11T17:18:15.575533 #27148]  INFO -- : - ScimOauthAccessToken failure
 I, [2020-06-11T17:18:15.575678 #27148]  INFO -- : Total: 1 row(s) affected
 I, [2020-06-11T17:18:15.575711 #27148]  INFO -- : Done!
 ```
-<!-- vale gitlab.SentenceSpacing = YES -->
 
 ### Verbose mode
 
-In order to get more detailed information about which
-rows and columns cannot be decrypted, you can pass a VERBOSE
-environment variable:
+To get more detailed information about which rows and columns can't be
+decrypted, you can pass a `VERBOSE` environment variable:
 
 **Omnibus Installation**
 

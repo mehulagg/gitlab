@@ -32,6 +32,10 @@ describe('Registry Breadcrumb', () => {
     { name: 'baz', meta: { nameGenerator } },
   ];
 
+  const state = {
+    imageDetails: { foo: 'bar' },
+  };
+
   const findDivider = () => wrapper.find('.js-divider');
   const findRootRoute = () => wrapper.find({ ref: 'rootRouteLink' });
   const findChildRoute = () => wrapper.find({ ref: 'childRouteLink' });
@@ -51,6 +55,9 @@ describe('Registry Breadcrumb', () => {
           options: {
             routes,
           },
+        },
+        $store: {
+          state,
         },
       },
     });
@@ -80,7 +87,7 @@ describe('Registry Breadcrumb', () => {
     });
 
     it('the link text is calculated by nameGenerator', () => {
-      expect(nameGenerator).toHaveBeenCalledWith(routes[0]);
+      expect(nameGenerator).toHaveBeenCalledWith(state);
       expect(nameGenerator).toHaveBeenCalledTimes(1);
     });
   });
@@ -104,7 +111,7 @@ describe('Registry Breadcrumb', () => {
     });
 
     it('the link text is calculated by nameGenerator', () => {
-      expect(nameGenerator).toHaveBeenCalledWith(routes[1]);
+      expect(nameGenerator).toHaveBeenCalledWith(state);
       expect(nameGenerator).toHaveBeenCalledTimes(2);
     });
   });
@@ -117,7 +124,7 @@ describe('Registry Breadcrumb', () => {
     });
 
     it('has the same tag as the last children of the crumbs', () => {
-      expect(findLastCrumb().is(lastChildren.tagName)).toBe(true);
+      expect(findLastCrumb().element.tagName).toBe(lastChildren.tagName.toUpperCase());
     });
 
     it('has the same classes as the last children of the crumbs', () => {

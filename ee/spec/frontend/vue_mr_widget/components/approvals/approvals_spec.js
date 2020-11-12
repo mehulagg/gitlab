@@ -1,13 +1,13 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
-import MrWidgetContainer from '~/vue_merge_request_widget/components/mr_widget_container.vue';
 import Approvals from 'ee/vue_merge_request_widget/components/approvals/approvals.vue';
+import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
+import ApprovalsAuth from 'ee/vue_merge_request_widget/components/approvals/approvals_auth.vue';
+import MrWidgetContainer from '~/vue_merge_request_widget/components/mr_widget_container.vue';
 import ApprovalsFoss from '~/vue_merge_request_widget/components/approvals/approvals.vue';
 import ApprovalsSummary from '~/vue_merge_request_widget/components/approvals/approvals_summary.vue';
 import ApprovalsSummaryOptional from '~/vue_merge_request_widget/components/approvals/approvals_summary_optional.vue';
-import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
-import ApprovalsAuth from 'ee/vue_merge_request_widget/components/approvals/approvals_auth.vue';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import {
   FETCH_LOADING,

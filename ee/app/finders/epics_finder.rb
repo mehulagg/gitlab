@@ -8,6 +8,7 @@
 #   author_id: integer
 #   author_username: string
 #   label_name: string
+#   milestone_title: string
 #   search: string
 #   sort: string
 #   start_date: datetime
@@ -33,6 +34,7 @@ class EpicsFinder < IssuableFinder
       author_id
       author_username
       label_name
+      milestone_title
       start_date
       end_date
       search
@@ -41,7 +43,7 @@ class EpicsFinder < IssuableFinder
   end
 
   def self.array_params
-    @array_params ||= { label_name: [] }
+    @array_params ||= { issues: [], label_name: [] }
   end
 
   def self.valid_iid_query?(query)
@@ -63,15 +65,13 @@ class EpicsFinder < IssuableFinder
     items = filter_negated_items(items)
 
     # This has to be last as we use a CTE as an optimization fence
-    # for counts by passing the force_cte param and enabling the
-    # attempt_group_search_optimizations feature flag
+    # for counts by passing the force_cte param
     # https://www.postgresql.org/docs/current/static/queries-with.html
     items = by_search(items)
 
     sort(items)
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def init_collection
     groups = if params[:iids].present?
                # If we are querying for specific iids, then we should only be looking at
@@ -82,21 +82,22 @@ class EpicsFinder < IssuableFinder
                permissioned_related_groups
              end
 
-    epics = Epic.where(group: groups)
+    epics = Epic.in_selected_groups(groups)
     with_confidentiality_access_check(epics, groups)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   private
 
   def permissioned_related_groups
-    groups = related_groups
+    strong_memoize(:permissioned_related_groups) do
+      groups = related_groups
 
-    # if user is member of top-level related group, he can automatically read
-    # all epics in all subgroups
-    return groups if can_read_all_epics_in_related_groups?(groups)
+      # if user is member of top-level related group, he can automatically read
+      # all epics in all subgroups
+      next groups if can_read_all_epics_in_related_groups?(groups)
 
-    groups_user_can_read_epics(groups)
+      groups_user_can_read_epics(groups)
+    end
   end
 
   def groups_user_can_read_epics(groups)
@@ -116,6 +117,7 @@ class EpicsFinder < IssuableFinder
     items = by_iids(items)
     items = by_my_reaction_emoji(items)
     items = by_confidential(items)
+    items = by_milestone(items)
 
     starts_with_iid(items)
   end
@@ -203,7 +205,7 @@ class EpicsFinder < IssuableFinder
   end
 
   def can_read_all_epics_in_related_groups?(groups)
-    return true if skip_visibility_check?
+    return true if @skip_visibility_check
     return false unless current_user
 
     # If a user is a member of a group, he also inherits access to all subgroups,
@@ -220,13 +222,24 @@ class EpicsFinder < IssuableFinder
     Ability.allowed?(current_user, :read_confidential_epic, parent)
   end
 
-  def skip_visibility_check?
-    @skip_visibility_check && Feature.enabled?(:skip_epic_count_visibility_check, group, default_enabled: true)
-  end
-
   def by_confidential(items)
     return items if params[:confidential].nil?
 
     params[:confidential] ? items.confidential : items.public_only
+  end
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_milestone(items)
+    return items unless params[:milestone_title].present?
+
+    milestones = Milestone.for_projects_and_groups(group_projects, permissioned_related_groups)
+                          .where(title: params[:milestone_title])
+
+    items.in_milestone(milestones)
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  def group_projects
+    Project.in_namespace(permissioned_related_groups).with_issues_available_for_user(current_user)
   end
 end

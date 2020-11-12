@@ -56,6 +56,7 @@ export default {
         v-model="timeout"
         class="col-sm-2"
         type="number"
+        number
         :class="{ 'is-invalid': Boolean(formErrors.timeout) }"
         @blur="checkTimeout"
       />

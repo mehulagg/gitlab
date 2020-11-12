@@ -35,7 +35,37 @@ RSpec.describe EventPresenter do
     context 'with project label' do
       subject { project_event.present.target_link_options }
 
-      it { is_expected.to eq([group.becomes(Namespace), project, target]) }
+      it { is_expected.to eq([project, target]) }
+    end
+  end
+
+  describe '#target_type_name' do
+    it 'returns design for a design event' do
+      expect(build(:design_event).present).to have_attributes(target_type_name: 'design')
+    end
+
+    it 'returns project for a project event' do
+      expect(build(:project_created_event).present).to have_attributes(target_type_name: 'project')
+    end
+
+    it 'returns milestone for a milestone event' do
+      expect(group_event.present).to have_attributes(target_type_name: 'milestone')
+    end
+  end
+
+  describe '#note_target_type_name' do
+    it 'returns design for an event on a comment on a design' do
+      expect(build(:event, :commented, :for_design).present)
+        .to have_attributes(note_target_type_name: 'design')
+    end
+
+    it 'returns nil for an event without a target' do
+      expect(build(:event).present).to have_attributes(note_target_type_name: be_nil)
+    end
+
+    it 'returns issue for an issue comment event' do
+      expect(build(:event, :commented, target: build(:note_on_issue)).present)
+        .to have_attributes(note_target_type_name: 'issue')
     end
   end
 end

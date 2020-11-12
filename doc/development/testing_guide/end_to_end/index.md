@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # End-to-end Testing
 
 ## What is end-to-end testing?
@@ -177,6 +183,13 @@ Once you decided where to put [test environment orchestration scenarios](https:/
 [instance-level scenarios](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/qa/qa/specs/features), take a look at the [GitLab QA README](https://gitlab.com/gitlab-org/gitlab/tree/master/qa/README.md),
 the [GitLab QA orchestrator README](https://gitlab.com/gitlab-org/gitlab-qa/tree/master/README.md), and [the already existing
 instance-level scenarios](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/qa/qa/specs/features).
+
+### Consider **not** writing an end-to-end test
+
+We should follow these best practices for end-to-end tests:
+
+- Do not write an end-to-end test if a lower-level feature test exists. End-to-end tests require more work and resources.
+- Troubleshooting for end-to-end tests can be more complex as connections to the application under test are not known.
 
 Continued reading:
 

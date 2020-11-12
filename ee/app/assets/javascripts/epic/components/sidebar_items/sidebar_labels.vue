@@ -100,6 +100,10 @@ export default {
         }
       }
     },
+    handleLabelRemove(labelId) {
+      const labelToRemove = [{ id: labelId, set: false }];
+      this.updateEpicLabels(labelToRemove);
+    },
     handleUpdateSelectedLabels(labels) {
       // Iterate over selection and check if labels which were
       // either selected or removed aren't leading to same selection
@@ -124,6 +128,7 @@ export default {
 
 <template>
   <labels-select-vue
+    :allow-label-remove="canUpdate"
     :allow-label-edit="canUpdate"
     :allow-label-create="true"
     :allow-multiselect="true"
@@ -137,6 +142,7 @@ export default {
     class="block labels js-labels-block"
     @updateSelectedLabels="handleUpdateSelectedLabels"
     @onDropdownClose="handleDropdownClose"
+    @onLabelRemove="handleLabelRemove"
     @toggleCollapse="toggleSidebarRevealLabelsDropdown"
     >{{ __('None') }}</labels-select-vue
   >

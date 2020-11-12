@@ -1,11 +1,14 @@
 ---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
 # Configuring PostgreSQL for scaling
 
 In this section, you'll be guided through configuring a PostgreSQL database to
-be used with GitLab in one of our [Scalable and Highly Available Setups](../reference_architectures/index.md).
+be used with GitLab in one of our [reference architectures](../reference_architectures/index.md).
 There are essentially three setups to choose from.
 
 ## PostgreSQL replication and failover with Omnibus GitLab **(PREMIUM ONLY)**
@@ -13,7 +16,7 @@ There are essentially three setups to choose from.
 This setup is for when you have installed GitLab using the
 [Omnibus GitLab **Enterprise Edition** (EE) package](https://about.gitlab.com/install/?version=ee).
 
-All the tools that are needed like PostgreSQL, PgBouncer, Repmgr are bundled in
+All the tools that are needed like PostgreSQL, PgBouncer, Patroni, and repmgr are bundled in
 the package, so you can it to set up the whole PostgreSQL infrastructure (primary, replica).
 
 [> Read how to set up PostgreSQL replication and failover using Omnibus GitLab](replication_and_failover.md)

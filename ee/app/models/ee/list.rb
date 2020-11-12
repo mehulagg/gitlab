@@ -37,6 +37,8 @@ module EE
       base.validates :list_type,
         exclusion: { in: %w[milestone], message: _('Milestone lists not available with your current license') },
         unless: -> { board&.resource_parent&.feature_available?(:board_milestone_lists) }
+
+      base.scope :without_types, ->(list_types) { where.not(list_type: list_types) }
     end
 
     def assignee=(user)

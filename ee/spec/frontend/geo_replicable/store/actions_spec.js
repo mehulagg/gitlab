@@ -1,7 +1,4 @@
 import testAction from 'helpers/vuex_action_helper';
-import flash from '~/flash';
-import toast from '~/vue_shared/plugins/global_toast';
-import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import Api from 'ee/api';
 import * as actions from 'ee/geo_replicable/store/actions';
 import * as types from 'ee/geo_replicable/store/mutation_types';
@@ -9,6 +6,9 @@ import createState from 'ee/geo_replicable/store/state';
 import { ACTION_TYPES, PREV, NEXT, DEFAULT_PAGE_SIZE } from 'ee/geo_replicable/constants';
 import { gqClient } from 'ee/geo_replicable/utils';
 import buildReplicableTypeQuery from 'ee/geo_replicable/graphql/replicable_type_query_builder';
+import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
+import toast from '~/vue_shared/plugins/global_toast';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import {
   MOCK_BASIC_FETCH_DATA_MAP,
   MOCK_BASIC_FETCH_RESPONSE,
@@ -120,6 +120,38 @@ describe('GeoReplicable Store Actions', () => {
       state.graphqlFieldName = MOCK_GRAPHQL_REGISTRY;
     });
 
+    describe('on success with no registry data', () => {
+      beforeEach(() => {
+        jest.spyOn(gqClient, 'query').mockResolvedValue({
+          data: {},
+        });
+      });
+
+      const direction = null;
+      const data = [];
+
+      it('should not error and pass empty values to the mutations', () => {
+        testAction(
+          actions.fetchReplicableItemsGraphQl,
+          direction,
+          state,
+          [],
+          [
+            {
+              type: 'receiveReplicableItemsSuccess',
+              payload: { data, pagination: null },
+            },
+          ],
+          () => {
+            expect(gqClient.query).toHaveBeenCalledWith({
+              query: buildReplicableTypeQuery(MOCK_GRAPHQL_REGISTRY),
+              variables: { before: '', after: '', first: DEFAULT_PAGE_SIZE, last: null },
+            });
+          },
+        );
+      });
+    });
+
     describe('on success', () => {
       beforeEach(() => {
         jest.spyOn(gqClient, 'query').mockResolvedValue({
@@ -131,7 +163,7 @@ describe('GeoReplicable Store Actions', () => {
 
       describe('with no direction set', () => {
         const direction = null;
-        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode?.packageFileRegistries;
+        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
         const data = registries.nodes;
 
         it('should call gqClient with no before/after variables as well as a first variable but no last variable', () => {
@@ -158,7 +190,7 @@ describe('GeoReplicable Store Actions', () => {
 
       describe('with direction set to "next"', () => {
         const direction = NEXT;
-        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode?.packageFileRegistries;
+        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
         const data = registries.nodes;
 
         it('should call gqClient with after variable but no before variable as well as a first variable but no last variable', () => {
@@ -190,7 +222,7 @@ describe('GeoReplicable Store Actions', () => {
 
       describe('with direction set to "prev"', () => {
         const direction = PREV;
-        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode?.packageFileRegistries;
+        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
         const data = registries.nodes;
 
         it('should call gqClient with before variable but no after variable as well as a last variable but no first variable', () => {

@@ -1,10 +1,9 @@
 import Vuex from 'vuex';
-import TimezoneDropdown from '~/vue_shared/components/timezone_dropdown.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlDropdownItem, GlDropdown } from '@gitlab/ui';
+import TimezoneDropdown from '~/vue_shared/components/timezone_dropdown.vue';
 import createStore from '~/deploy_freeze/store';
-import { mockTimezoneData } from '../mock_data';
-
-import { GlDropdownItem, GlNewDropdown } from '@gitlab/ui';
+import { findTzByName, formatTz, timezoneDataFixture } from '../helpers';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -16,14 +15,14 @@ describe('Deploy freeze timezone dropdown', () => {
   const createComponent = (searchTerm, selectedTimezone) => {
     store = createStore({
       projectId: '8',
-      timezoneData: mockTimezoneData,
+      timezoneData: timezoneDataFixture,
     });
     wrapper = shallowMount(TimezoneDropdown, {
       store,
       localVue,
       propsData: {
         value: selectedTimezone,
-        timezoneData: mockTimezoneData,
+        timezoneData: timezoneDataFixture,
       },
     });
 
@@ -54,7 +53,7 @@ describe('Deploy freeze timezone dropdown', () => {
     });
 
     it('renders all timezones when search term is empty', () => {
-      expect(findAllDropdownItems()).toHaveLength(mockTimezoneData.length);
+      expect(findAllDropdownItems()).toHaveLength(timezoneDataFixture.length);
     });
   });
 
@@ -64,8 +63,9 @@ describe('Deploy freeze timezone dropdown', () => {
     });
 
     it('renders only the time zone searched for', () => {
+      const selectedTz = findTzByName('Alaska');
       expect(findAllDropdownItems()).toHaveLength(1);
-      expect(findDropdownItemByIndex(0).text()).toBe('[UTC -8] Alaska');
+      expect(findDropdownItemByIndex(0).text()).toBe(formatTz(selectedTz));
     });
 
     it('should not display empty results message', () => {
@@ -73,13 +73,15 @@ describe('Deploy freeze timezone dropdown', () => {
     });
 
     describe('Custom events', () => {
+      const selectedTz = findTzByName('Alaska');
+
       it('should emit input if a time zone is clicked', () => {
         findDropdownItemByIndex(0).vm.$emit('click');
         expect(wrapper.emitted('input')).toEqual([
           [
             {
-              formattedTimezone: '[UTC -8] Alaska',
-              identifier: 'America/Juneau',
+              formattedTimezone: formatTz(selectedTz),
+              identifier: selectedTz.identifier,
             },
           ],
         ]);
@@ -93,7 +95,7 @@ describe('Deploy freeze timezone dropdown', () => {
     });
 
     it('renders selected time zone as dropdown label', () => {
-      expect(wrapper.find(GlNewDropdown).vm.text).toBe('Alaska');
+      expect(wrapper.find(GlDropdown).vm.text).toBe('Alaska');
     });
   });
 });

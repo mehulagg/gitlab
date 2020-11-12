@@ -22,15 +22,8 @@ module Gitlab
             validates :config, allowed_keys: ALLOWED_KEYS + PROCESSABLE_ALLOWED_KEYS
             validates :config, required_keys: REQUIRED_BY_NEEDS, if: :has_needs?
             validates :script, presence: true
-            validates :config,
-              disallowed_keys: {
-                in: %i[release],
-                message: 'release features are not enabled'
-              },
-              unless: -> { Gitlab::Ci::Features.release_generation_enabled? }
 
             with_options allow_nil: true do
-              validates :allow_failure, boolean: true
               validates :when, inclusion: {
                 in: ALLOWED_WHEN,
                 message: "should be one of: #{ALLOWED_WHEN.join(', ')}"
@@ -124,43 +117,13 @@ module Gitlab
             description: 'Parallel configuration for this job.',
             inherit: false
 
-          attributes :script, :tags, :allow_failure, :when, :dependencies,
+          attributes :script, :tags, :when, :dependencies,
                      :needs, :retry, :parallel, :start_in,
                      :interruptible, :timeout, :resource_group, :release
 
-          Matcher = Struct.new(:name, :config) do
-            def applies?
-              job_is_not_hidden? &&
-              config_is_a_hash? &&
-              has_job_keys?
-            end
-
-            private
-
-            def job_is_not_hidden?
-              !name.to_s.start_with?('.')
-            end
-
-            def config_is_a_hash?
-              config.is_a?(Hash)
-            end
-
-            def has_job_keys?
-              if name == :default
-                config.key?(:script)
-              else
-                (ALLOWED_KEYS & config.keys).any?
-              end
-            end
-          end
-
           def self.matching?(name, config)
-            if Gitlab::Ci::Features.job_entry_matches_all_keys?
-              Matcher.new(name, config).applies?
-            else
-              !name.to_s.start_with?('.') &&
-                config.is_a?(Hash) && config.key?(:script)
-            end
+            !name.to_s.start_with?('.') &&
+              config.is_a?(Hash) && config.key?(:script)
           end
 
           def self.visible?
@@ -177,16 +140,8 @@ module Gitlab
             end
           end
 
-          def manual_action?
-            self.when == 'manual'
-          end
-
           def delayed?
             self.when == 'delayed'
-          end
-
-          def ignored?
-            allow_failure.nil? ? manual_action? : allow_failure
           end
 
           def value

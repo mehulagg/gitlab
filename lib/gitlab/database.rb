@@ -2,28 +2,13 @@
 
 module Gitlab
   module Database
-    include Gitlab::Metrics::Methods
-
     # Minimum PostgreSQL version requirement per documentation:
     # https://docs.gitlab.com/ee/install/requirements.html#postgresql-requirements
     MINIMUM_POSTGRES_VERSION = 11
 
-    # Upcoming PostgreSQL version requirements
-    # Allows a soft warning about an upcoming minimum version requirement
-    # so administrators can prepare to upgrade
-    UPCOMING_POSTGRES_VERSION_DETAILS = {
-      gl_version: '13.6.0',
-      gl_version_date: 'November 22, 2020',
-      pg_version_minimum: 12,
-      url: 'https://gitlab.com/groups/gitlab-org/-/epics/2374'
-    }.freeze
-
-    # Specifies the maximum number of days in advance to display a notice
-    # regarding an upcoming PostgreSQL version deprecation.
-    DEPRECATION_WINDOW_DAYS = 90
-
     # https://www.postgresql.org/docs/9.2/static/datatype-numeric.html
     MAX_INT_VALUE = 2147483647
+    MIN_INT_VALUE = -2147483648
 
     # The max value between MySQL's TIMESTAMP and PostgreSQL's timestampz:
     # https://www.postgresql.org/docs/9.1/static/datatype-datetime.html
@@ -49,10 +34,6 @@ module Gitlab
     # This is an extensive list of postgres schemas owned by GitLab
     # It does not include the default public schema
     EXTRA_SCHEMAS = [DYNAMIC_PARTITIONS_SCHEMA, STATIC_PARTITIONS_SCHEMA].freeze
-
-    define_histogram :gitlab_database_transaction_seconds do
-      docstring "Time spent in database transactions, in seconds"
-    end
 
     def self.config
       ActiveRecord::Base.configurations[Rails.env]
@@ -80,7 +61,7 @@ module Gitlab
 
     # @deprecated
     def self.postgresql?
-      adapter_name.casecmp('postgresql').zero?
+      adapter_name.casecmp('postgresql') == 0
     end
 
     def self.read_only?
@@ -111,28 +92,8 @@ module Gitlab
       @version ||= database_version.match(/\A(?:PostgreSQL |)([^\s]+).*\z/)[1]
     end
 
-    def self.postgresql_9_or_less?
-      version.to_f < 10
-    end
-
     def self.postgresql_minimum_supported_version?
       version.to_f >= MINIMUM_POSTGRES_VERSION
-    end
-
-    def self.postgresql_upcoming_deprecation?
-      version.to_f < UPCOMING_POSTGRES_VERSION_DETAILS[:pg_version_minimum]
-    end
-
-    def self.days_until_deprecation
-      (
-        Date.parse(UPCOMING_POSTGRES_VERSION_DETAILS[:gl_version_date]) -
-        Date.today
-      ).to_i
-    end
-    private_class_method :days_until_deprecation
-
-    def self.within_deprecation_notice_window?
-      days_until_deprecation <= DEPRECATION_WINDOW_DAYS
     end
 
     def self.check_postgres_version_and_print_warning
@@ -160,28 +121,6 @@ module Gitlab
       EOS
     rescue ActiveRecord::ActiveRecordError, PG::Error
       # ignore - happens when Rake tasks yet have to create a database, e.g. for testing
-    end
-
-    # map some of the function names that changed between PostgreSQL 9 and 10
-    # https://wiki.postgresql.org/wiki/New_in_postgres_10
-    def self.pg_wal_lsn_diff
-      Gitlab::Database.postgresql_9_or_less? ? 'pg_xlog_location_diff' : 'pg_wal_lsn_diff'
-    end
-
-    def self.pg_current_wal_insert_lsn
-      Gitlab::Database.postgresql_9_or_less? ? 'pg_current_xlog_insert_location' : 'pg_current_wal_insert_lsn'
-    end
-
-    def self.pg_last_wal_receive_lsn
-      Gitlab::Database.postgresql_9_or_less? ? 'pg_last_xlog_receive_location' : 'pg_last_wal_receive_lsn'
-    end
-
-    def self.pg_last_wal_replay_lsn
-      Gitlab::Database.postgresql_9_or_less? ? 'pg_last_xlog_replay_location' : 'pg_last_wal_replay_lsn'
-    end
-
-    def self.pg_last_xact_replay_timestamp
-      'pg_last_xact_replay_timestamp'
     end
 
     def self.nulls_last_order(field, direction = 'ASC')
@@ -311,6 +250,20 @@ module Gitlab
       false
     end
 
+    def self.system_id
+      row = connection.execute('SELECT system_identifier FROM pg_control_system()').first
+
+      row['system_identifier']
+    end
+
+    def self.get_write_location(ar_connection)
+      row = ar_connection
+        .select_all("SELECT pg_current_wal_insert_lsn()::text AS location")
+        .first
+
+      row['location'] if row
+    end
+
     private_class_method :database_version
 
     def self.add_post_migrate_path_to_rails(force: false)
@@ -363,11 +316,14 @@ module Gitlab
     # observe_transaction_duration is called from ActiveRecordBaseTransactionMetrics.transaction and used to
     # record transaction durations.
     def self.observe_transaction_duration(duration_seconds)
-      labels = Gitlab::Metrics::Transaction.current&.labels || {}
-      gitlab_database_transaction_seconds.observe(labels, duration_seconds)
+      if current_transaction = ::Gitlab::Metrics::Transaction.current
+        current_transaction.observe(:gitlab_database_transaction_seconds, duration_seconds) do
+          docstring "Time spent in database transactions, in seconds"
+        end
+      end
     rescue Prometheus::Client::LabelSetValidator::LabelSetError => err
       # Ensure that errors in recording these metrics don't affect the operation of the application
-      Rails.logger.error("Unable to observe database transaction duration: #{err}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("Unable to observe database transaction duration: #{err}")
     end
 
     # MonkeyPatch for ActiveRecord::Base for adding observability

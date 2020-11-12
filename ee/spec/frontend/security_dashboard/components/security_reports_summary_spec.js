@@ -1,9 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
-import AccessorUtilities from '~/lib/utils/accessor';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
+import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
+import AccessorUtilities from '~/lib/utils/accessor';
 
 describe('Security reports summary component', () => {
   useLocalStorageSpy();
@@ -19,12 +20,14 @@ describe('Security reports summary component', () => {
       stubs: {
         GlSprintf,
         GlCard: { template: '<div><slot name="header" /><slot /></div>' },
+        Modal,
       },
       ...options,
     });
   };
 
   const findToggleButton = () => wrapper.find('[data-testid="collapse-button"]');
+  const findModalButton = () => wrapper.find('[data-testid="modal-button"]');
 
   beforeEach(() => {
     jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
@@ -52,6 +55,7 @@ describe('Security reports summary component', () => {
     });
 
     expect(trimText(wrapper.text())).toContain(string);
+    expect(findModalButton().exists()).toBe(false);
   });
 
   it.each`
@@ -152,6 +156,56 @@ describe('Security reports summary component', () => {
 
     it('does not show the collapse button', () => {
       expect(findToggleButton().exists()).toBe(false);
+    });
+  });
+
+  describe('with scanned resources', () => {
+    const glModalDirective = jest.fn();
+
+    const dastProps = {
+      vulnerabilitiesCount: 10,
+      scannedResourcesCount: 149,
+      scannedResources: {
+        nodes: [
+          {
+            requestMethod: 'GET',
+            url: 'https://weburl',
+          },
+        ],
+      },
+    };
+
+    beforeEach(() => {
+      createWrapper({
+        directives: {
+          glModal: {
+            bind(el, { modifiers }) {
+              glModalDirective(modifiers);
+            },
+          },
+        },
+        propsData: {
+          summary: { dast: dastProps },
+        },
+      });
+    });
+
+    it('should have the modal with id dastUrl', () => {
+      const modal = wrapper.find(Modal);
+
+      expect(modal.exists()).toBe(true);
+      expect(modal.attributes('modalid')).toBe('dastUrl');
+    });
+
+    it('should contain a link with Scanned URLs count', () => {
+      expect(findModalButton().exists()).toBe(true);
+      expect(findModalButton().text()).toContain(
+        `(${dastProps.scannedResourcesCount} URLs scanned)`,
+      );
+    });
+
+    it('should link it to the given modal', () => {
+      expect(glModalDirective).toHaveBeenCalledWith({ dastUrl: true });
     });
   });
 });

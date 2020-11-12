@@ -1,7 +1,7 @@
 <script>
 import { GlPopover, GlIcon, GlLink, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import createFlash from '~/flash';
+import { __, s__ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
@@ -29,6 +29,16 @@ export default {
     isPreparingCsvExport: false,
     showPopover: localStorage.getItem(STORAGE_KEY) !== 'true',
   }),
+  computed: {
+    buttonProps() {
+      const { isPreparingCsvExport } = this;
+      return {
+        title: __('Export as CSV'),
+        loading: isPreparingCsvExport,
+        ...(!isPreparingCsvExport ? { icon: 'export' } : {}),
+      };
+    },
+  },
   methods: {
     closePopover() {
       this.showPopover = false;
@@ -47,6 +57,9 @@ export default {
         .post(this.vulnerabilitiesExportEndpoint)
         .then(({ data }) => pollUntilComplete(data._links.self))
         .then(({ data }) => {
+          if (data.status !== 'finished') {
+            throw new Error();
+          }
           download({
             fileName: `csv-export-${formatDate(new Date(), 'isoDateTime')}.csv`,
             url: data._links.download,
@@ -66,17 +79,11 @@ export default {
   <gl-button
     ref="csvExportButton"
     v-gl-tooltip.hover
-    class="align-self-center"
-    :title="__('Export as CSV')"
-    :loading="isPreparingCsvExport"
+    class="gl-align-self-center"
+    v-bind="buttonProps"
     @click="initiateCsvExport"
   >
-    <gl-icon
-      v-if="!isPreparingCsvExport"
-      ref="exportIcon"
-      name="export"
-      class="mr-0 gl-display-block"
-    />
+    {{ __('Export') }}
     <gl-popover
       ref="popover"
       :target="() => $refs.csvExportButton.$el"

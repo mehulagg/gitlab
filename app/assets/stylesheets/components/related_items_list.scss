@@ -48,7 +48,7 @@ $item-remove-button-space: 42px;
   }
 
   .confidential-icon {
-    color: $orange-600;
+    color: $orange-500;
   }
 
   .item-title-wrapper {
@@ -81,30 +81,9 @@ $item-remove-button-space: 42px;
     max-width: 0;
   }
 
-  .status {
-    &-at-risk {
-      color: $red-500;
-      background-color: $red-100;
-    }
-
-    &-needs-attention {
-      color: $orange-700;
-      background-color: $orange-100;
-    }
-
-    &-on-track {
-      color: $green-600;
-      background-color: $green-100;
-    }
-  }
-
-  .gl-label-text {
-    font-weight: $gl-font-weight-bold;
-  }
-
   .bullet-separator {
     font-size: 9px;
-    color: $gray-400;
+    color: $gray-200;
   }
 }
 
@@ -144,20 +123,10 @@ $item-remove-button-space: 42px;
   .item-milestone {
     text-decoration: none;
     max-width: $item-milestone-max-width;
-
-    .ic-clock {
-      margin-right: $gl-padding-4;
-    }
   }
 
   .item-weight {
     max-width: $item-weight-max-width;
-  }
-
-  .item-milestone .ic-clock,
-  .item-weight .ic-weight,
-  .item-due-date .ic-calendar {
-    color: $gl-text-color-secondary;
   }
 }
 
@@ -213,6 +182,7 @@ $item-remove-button-space: 42px;
   margin-right: $gl-padding-4 / 2;
   line-height: 0;
   border-color: transparent;
+  background-color: transparent;
   color: $gl-text-color-secondary;
 
   .related-items-tree & {

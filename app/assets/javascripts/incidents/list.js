@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import IncidentsList from './components/incidents_list.vue';
 
 Vue.use(VueApollo);
@@ -8,7 +9,19 @@ export default () => {
   const selector = '#js-incidents';
 
   const domEl = document.querySelector(selector);
-  const { projectPath } = domEl.dataset;
+  const {
+    projectPath,
+    newIssuePath,
+    incidentTemplateName,
+    incidentType,
+    issuePath,
+    publishedAvailable,
+    emptyListSvgPath,
+    textQuery,
+    authorUsernameQuery,
+    assigneeUsernameQuery,
+    slaFeatureAvailable,
+  } = domEl.dataset;
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(),
@@ -18,17 +31,23 @@ export default () => {
     el: selector,
     provide: {
       projectPath,
+      incidentTemplateName,
+      incidentType,
+      newIssuePath,
+      issuePath,
+      publishedAvailable: parseBoolean(publishedAvailable),
+      emptyListSvgPath,
+      textQuery,
+      authorUsernameQuery,
+      assigneeUsernameQuery,
+      slaFeatureAvailable: parseBoolean(slaFeatureAvailable),
     },
     apolloProvider,
     components: {
       IncidentsList,
     },
     render(createElement) {
-      return createElement('incidents-list', {
-        props: {
-          projectPath,
-        },
-      });
+      return createElement('incidents-list');
     },
   });
 };

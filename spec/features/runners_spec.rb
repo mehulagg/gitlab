@@ -122,6 +122,19 @@ RSpec.describe 'Runners' do
       end
     end
 
+    context 'when multiple runners are configured' do
+      let!(:specific_runner) { create(:ci_runner, :project, projects: [project]) }
+      let!(:specific_runner_2) { create(:ci_runner, :project, projects: [project]) }
+
+      it 'adds pagination to the runner list' do
+        stub_const('Projects::Settings::CiCdController::NUMBER_OF_RUNNERS_PER_PAGE', 1)
+
+        visit project_runners_path(project)
+
+        expect(find('.pagination')).not_to be_nil
+      end
+    end
+
     context 'when a specific runner exists in another project' do
       let(:another_project) { create(:project) }
       let!(:specific_runner) { create(:ci_runner, :project, projects: [another_project]) }
@@ -173,9 +186,9 @@ RSpec.describe 'Runners' do
     it 'user enables shared runners' do
       visit project_runners_path(project)
 
-      click_on 'Enable shared Runners'
+      click_on 'Enable shared runners'
 
-      expect(page.find('.shared-runners-description')).to have_content('Disable shared Runners')
+      expect(page.find('.shared-runners-description')).to have_content('Disable shared runners')
     end
   end
 
@@ -448,6 +461,20 @@ RSpec.describe 'Runners' do
         visit group_settings_ci_cd_path(group)
 
         expect(all(:link, href: group_runner_path(group, runner)).length).to eq(1)
+      end
+    end
+
+    context 'filtered search' do
+      it 'allows user to search by status and type', :js do
+        visit group_settings_ci_cd_path(group)
+
+        find('.filtered-search').click
+
+        page.within('#js-dropdown-hint') do
+          expect(page).to have_content('Status')
+          expect(page).to have_content('Type')
+          expect(page).not_to have_content('Tag')
+        end
       end
     end
   end

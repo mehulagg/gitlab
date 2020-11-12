@@ -4,8 +4,10 @@ require_dependency 'api/validations/validators/limit'
 
 module API
   module Terraform
-    class State < Grape::API::Instance
+    class State < ::API::Base
       include ::Gitlab::Utils::StrongMemoize
+
+      feature_category :infrastructure_as_code
 
       default_format :json
 
@@ -35,11 +37,10 @@ module API
           route_setting :authentication, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
           get do
             remote_state_handler.find_with_lock do |state|
-              no_content! unless state.file.exists?
+              no_content! unless state.latest_file && state.latest_file.exists?
 
               env['api.format'] = :binary # this bypasses json serialization
-              body state.file.read
-              status :ok
+              body state.latest_file.read
             end
           end
 
@@ -52,10 +53,11 @@ module API
             no_content! if data.empty?
 
             remote_state_handler.handle_with_lock do |state|
-              state.file = CarrierWaveStringFile.new(data)
-              state.save!
-              status :ok
+              state.update_file!(CarrierWaveStringFile.new(data), version: params[:serial], build: current_authenticated_job)
             end
+
+            body false
+            status :ok
           end
 
           desc 'Delete a terraform state of a certain name'
@@ -65,8 +67,10 @@ module API
 
             remote_state_handler.handle_with_lock do |state|
               state.destroy!
-              status :ok
             end
+
+            body false
+            status :ok
           end
 
           desc 'Lock a terraform state of a certain name'

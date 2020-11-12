@@ -177,7 +177,72 @@ module EmailsHelper
     strip_tags(render_message(:footer_message, style: ''))
   end
 
+  def say_hi(user)
+    _('Hi %{username}!') % { username: sanitize_name(user.name) }
+  end
+
+  def say_hello(user)
+    _('Hello, %{username}!') % { username: sanitize_name(user.name) }
+  end
+
+  def two_factor_authentication_disabled_text
+    _('Two-factor authentication has been disabled for your GitLab account.')
+  end
+
+  def re_enable_two_factor_authentication_text(format: nil)
+    url = profile_two_factor_auth_url
+
+    case format
+    when :html
+      settings_link_to = generate_link(_('two-factor authentication settings'), url).html_safe
+      _("If you want to re-enable two-factor authentication, visit the %{settings_link_to} page.").html_safe % { settings_link_to: settings_link_to }
+    else
+      _('If you want to re-enable two-factor authentication, visit %{two_factor_link}') %
+        { two_factor_link: url }
+    end
+  end
+
+  def admin_changed_password_text(format: nil)
+    url = Gitlab.config.gitlab.url
+
+    case format
+    when :html
+      link_to = generate_link(url, url).html_safe
+      _('An administrator changed the password for your GitLab account on %{link_to}.').html_safe % { link_to: link_to }
+    else
+      _('An administrator changed the password for your GitLab account on %{link_to}.') % { link_to: url }
+    end
+  end
+
+  def contact_your_administrator_text
+    _('Please contact your administrator with any questions.')
+  end
+
+  def change_reviewer_notification_text(new_reviewers, previous_reviewers, html_tag = nil)
+    new = new_reviewers.any? ? users_to_sentence(new_reviewers) : s_('ChangeReviewer|Unassigned')
+    old = previous_reviewers.any? ? users_to_sentence(previous_reviewers) : nil
+
+    if html_tag.present?
+      new = content_tag(html_tag, new)
+      old = content_tag(html_tag, old) if old.present?
+    end
+
+    if old.present?
+      s_('ChangeReviewer|Reviewer changed from %{old} to %{new}').html_safe % { old: old, new: new }
+    else
+      s_('ChangeReviewer|Reviewer changed to %{new}').html_safe % { new: new }
+    end
+  end
+
   private
+
+  def users_to_sentence(users)
+    sanitize_name(users.map(&:name).to_sentence)
+  end
+
+  def generate_link(text, url)
+    link_to(text, url, target: :_blank, rel: 'noopener noreferrer')
+  end
 
   def show_footer?
     email_header_and_footer_enabled? && current_appearance&.show_footer?

@@ -1,0 +1,23 @@
+mutation dastScannerProfileCreate(
+  $projectFullPath: ID!
+  $profileName: String!
+  $spiderTimeout: Int!
+  $targetTimeout: Int!
+  $scanType: DastScanTypeEnum!
+  $useAjaxSpider: Boolean!
+  $showDebugMessages: Boolean!
+) {
+  dastScannerProfileCreate(
+    input: {
+      fullPath: $projectFullPath
+      profileName: $profileName
+      spiderTimeout: $spiderTimeout
+      targetTimeout: $targetTimeout
+      scanType: $scanType
+      useAjaxSpider: $useAjaxSpider
+      showDebugMessages: $showDebugMessages
+    }
+  ) {
+    errors
+  }
+}

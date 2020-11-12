@@ -45,6 +45,28 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
       allow(refresh_service_2).to receive(:execute) { refresh_service_2_result }
     end
 
+    shared_examples 'logging results' do |count|
+      context 'when ci_merge_train_logging is enabled' do
+        it 'logs results' do
+          expect(Sidekiq.logger).to receive(:info).exactly(count).times
+
+          subject
+        end
+      end
+
+      context 'when ci_merge_train_logging is disabled' do
+        before do
+          stub_feature_flags(ci_merge_train_logging: false)
+        end
+
+        it 'does not log results' do
+          expect(Sidekiq.logger).not_to receive(:info)
+
+          subject
+        end
+      end
+    end
+
     context 'when merge request 1 is passed' do
       let(:merge_request) { merge_request_1 }
 
@@ -55,6 +77,8 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
         subject
       end
 
+      it_behaves_like 'logging results', 3
+
       context 'when refresh service 1 returns error status' do
         let(:refresh_service_1_result) { { status: :error, message: 'Failed to create ref' } }
 
@@ -64,6 +88,8 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 3
       end
 
       context 'when refresh service 1 returns success status and did not create a pipeline' do
@@ -75,6 +101,8 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 3
       end
 
       context 'when refresh service 1 returns success status and created a pipeline' do
@@ -86,6 +114,8 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 3
       end
 
       context 'when merge request 1 is not on a merge train' do
@@ -97,6 +127,8 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 0
       end
 
       context 'when merge request 1 was on a merge train' do
@@ -110,6 +142,8 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 0
       end
 
       context 'when the other thread has already been processing the merge train' do
@@ -132,45 +166,78 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 1
       end
     end
 
     context 'when merge request 2 is passed' do
       let(:merge_request) { merge_request_2 }
 
-      it 'executes RefreshMergeRequestService to all the following merge requests' do
-        expect(refresh_service_1).not_to receive(:execute).with(merge_request_1)
+      it 'executes RefreshMergeRequestService to all the merge requests from beginning' do
+        expect(refresh_service_1).to receive(:execute).with(merge_request_1)
         expect(refresh_service_2).to receive(:execute).with(merge_request_2)
 
         subject
       end
 
-      context 'when merge request 1 was tried to be refreshed while the system is refreshing merge request 2' do
+      context 'when ci_always_refresh_merge_requests_from_beginning is disabled' do
         before do
-          allow_any_instance_of(described_class).to receive(:unsafe_refresh).with(merge_request_2) do
-            service.execute(merge_request_1)
-          end
+          stub_feature_flags(ci_always_refresh_merge_requests_from_beginning: false)
         end
 
-        it 'refreshes the merge request 1 later with AutoMergeProcessWorker' do
-          expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_1.id).once
+        it 'executes RefreshMergeRequestService to all the following merge requests' do
+          expect(refresh_service_1).not_to receive(:execute).with(merge_request_1)
+          expect(refresh_service_2).to receive(:execute).with(merge_request_2)
 
           subject
         end
 
-        context 'when merge request 1 has already been merged' do
+        context 'when merge request 1 was tried to be refreshed while the system is refreshing merge request 2' do
           before do
-            allow(merge_request_1.merge_train).to receive(:cleanup_ref)
-            merge_request_1.merge_train.update_column(:status, MergeTrain.state_machines[:status].states[:merged].value)
+            allow_any_instance_of(described_class).to receive(:unsafe_refresh).with(merge_request_2) do
+              service.execute(merge_request_1)
+            end
           end
 
-          it 'does not refresh the merge request 1' do
-            expect(AutoMergeProcessWorker).not_to receive(:perform_async).with(merge_request_1.id)
+          it 'refreshes the merge request 1 later with AutoMergeProcessWorker' do
+            expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_1.id).once
 
             subject
           end
+
+          context 'when ci_always_refresh_merge_requests_from_beginning is disabled' do
+            before do
+              stub_feature_flags(ci_always_refresh_merge_requests_from_beginning: false)
+            end
+
+            it 'refreshes the merge request 1 later with AutoMergeProcessWorker' do
+              expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_1.id).once
+
+              subject
+            end
+          end
+
+          it_behaves_like 'logging results', 4
+
+          context 'when merge request 1 has already been merged' do
+            before do
+              allow(merge_request_1.merge_train).to receive(:cleanup_ref)
+              merge_request_1.merge_train.update_column(:status, MergeTrain.state_machines[:status].states[:merged].value)
+            end
+
+            it 'does not refresh the merge request 1' do
+              expect(AutoMergeProcessWorker).not_to receive(:perform_async).with(merge_request_1.id)
+
+              subject
+            end
+
+            it_behaves_like 'logging results', 1
+          end
         end
       end
+
+      it_behaves_like 'logging results', 3
     end
   end
 end

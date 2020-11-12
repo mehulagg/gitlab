@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Vuex
 
 When there's a clear benefit to separating state management from components (e.g. due to state complexity) we recommend using [Vuex](https://vuex.vuejs.org) over any other Flux pattern. Otherwise, feel free to manage state within the components.
@@ -9,14 +15,14 @@ Vuex should be strongly considered when:
 - There are complex interactions with Backend, e.g. multiple API calls
 - The app involves interacting with backend via both traditional REST API and GraphQL (especially when moving the REST API over to GraphQL is a pending backend task)
 
-_Note:_ All of the below is explained in more detail in the official [Vuex documentation](https://vuex.vuejs.org).
+The information included in this page is explained in more detail in the
+official [Vuex documentation](https://vuex.vuejs.org).
 
 ## Separation of concerns
 
 Vuex is composed of State, Getters, Mutations, Actions, and Modules.
 
-When a user clicks on an action, we need to `dispatch` it. This action will `commit` a mutation that will change the state.
-_Note:_ The action itself will not update the state, only a mutation should update the state.
+When a user clicks on an action, we need to `dispatch` it. This action will `commit` a mutation that will change the state. The action itself will not update the state; only a mutation should update the state.
 
 ## File structure
 
@@ -32,8 +38,9 @@ When using Vuex at GitLab, separate these concerns into different files to impro
   └── mutation_types.js # mutation types
 ```
 
-The following example shows an application that lists and adds users to the state.
-(For a more complex example implementation take a look at the security applications store in [here](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store))
+The following example shows an application that lists and adds users to the
+state. (For a more complex example implementation, review the security
+applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
 
 ### `index.js`
 
@@ -55,15 +62,11 @@ export const createStore = () =>
   });
 ```
 
-_Note:_ Until this
-[RFC](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/20) is implemented,
-the above will need to disable the `import/prefer-default-export` ESLint rule.
-
 ### `state.js`
 
 The first thing you should do before writing any code is to design the state.
 
-Often we need to provide data from haml to our Vue application. Let's store it in the state for better access.
+Often we need to provide data from HAML to our Vue application. Let's store it in the state for better access.
 
 ```javascript
   export default () => ({
@@ -138,44 +141,12 @@ import { mapActions } from 'vuex';
 ### `mutations.js`
 
 The mutations specify how the application state changes in response to actions sent to the store.
-The only way to change state in a Vuex store should be by committing a mutation.
+The only way to change state in a Vuex store is by committing a mutation.
 
-**It's a good idea to think of the state before writing any code.**
+Most mutations are committed from an action using `commit`. If you don't have any
+asynchronous operations, you can call mutations from a component using the `mapMutations` helper.
 
-Remember that actions only describe that something happened, they don't describe how the application state changes.
-
-**Never commit a mutation directly from a component**
-
-Instead, you should create an action that will commit a mutation.
-
-```javascript
-  import * as types from './mutation_types';
-
-  export default {
-    [types.REQUEST_USERS](state) {
-      state.isLoading = true;
-    },
-    [types.RECEIVE_USERS_SUCCESS](state, data) {
-      // Do any needed data transformation to the received payload here
-      state.users = data;
-      state.isLoading = false;
-    },
-    [types.RECEIVE_USERS_ERROR](state, error) {
-      state.isLoading = false;
-    },
-    [types.REQUEST_ADD_USER](state, user) {
-      state.isAddingUser = true;
-    },
-    [types.RECEIVE_ADD_USER_SUCCESS](state, user) {
-      state.isAddingUser = false;
-      state.users.push(user);
-    },
-    [types.REQUEST_ADD_USER_ERROR](state, error) {
-      state.isAddingUser = false;
-      state.errorAddingUser = error;
-    },
-  };
-```
+See the Vuex docs for examples of [committing mutations from components](https://vuex.vuejs.org/guide/mutations.html#committing-mutations-in-components).
 
 #### Naming Pattern: `REQUEST` and `RECEIVE` namespaces
 
@@ -252,12 +223,15 @@ A mutation written like this is harder to maintain and more error prone. We shou
 // Good
 export default {
   [types.MARK_AS_CLOSED](state, itemId) {
-    const item = state.items.find(i => i.id == itemId);
-    Vue.set(item, 'closed', true)
+    const item = state.items.find(x => x.id === itemId);
 
-    state.items.splice(index, 1, item)
-  }
-}
+    if (!item) {
+      return;
+    }
+
+    Vue.set(item, 'closed', true);
+  },
+};
 ```
 
 This approach is better because:
@@ -386,8 +360,8 @@ export default initialState => ({
 ```
 
 We've made the conscious decision to avoid this pattern to aid in the
-discoverability and searchability of our frontend codebase. The reasoning for
-this is described in [this
+discoverability and searchability of our frontend codebase. The same applies
+when [providing data to a Vue app](vue.md#providing-data-from-haml-to-javascript). The reasoning for this is described in [this
 discussion](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/56#note_302514865):
 
 > Consider a `someStateKey` is being used in the store state. You _may_ not be
@@ -447,29 +421,6 @@ export default {
   </ul>
 </template>
 ```
-
-### Vuex Gotchas
-
-1. Do not call a mutation directly. Always use an action to commit a mutation. Doing so will keep consistency throughout the application. From Vuex docs:
-
-   > Why don't we just call store.commit('action') directly? Well, remember that mutations must be synchronous? Actions aren't. We can perform asynchronous operations inside an action.
-
-   ```javascript
-     // component.vue
-
-     // bad
-     created() {
-       this.$store.commit('mutation');
-     }
-
-     // good
-     created() {
-       this.$store.dispatch('action');
-     }
-   ```
-
-1. Use mutation types instead of hardcoding strings. It will be less error prone.
-1. The State will be accessible in all components descending from the use where the store is instantiated.
 
 ### Testing Vuex
 

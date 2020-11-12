@@ -12,8 +12,6 @@ module EE
         def perform
           if remaining?
             ::BackgroundMigrationWorker.perform_in(RESCHEDULE_DELAY, self.class.name)
-          else
-            ::Feature.enable(:approval_rule)
           end
         end
 

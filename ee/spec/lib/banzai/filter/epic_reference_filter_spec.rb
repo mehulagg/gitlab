@@ -189,6 +189,7 @@ RSpec.describe Banzai::Filter::EpicReferenceFilter do
   context 'url reference' do
     let(:link) { urls.group_epic_url(epic.group, epic) }
     let(:text) { "Check #{link}" }
+    let(:project) { create(:project) }
 
     before do
       epic.update_attribute(:group_id, another_group.id)
@@ -204,6 +205,12 @@ RSpec.describe Banzai::Filter::EpicReferenceFilter do
 
     it 'includes default classes' do
       expect(doc(text).css('a').first.attr('class')).to eq('gfm gfm-epic has-tooltip')
+    end
+
+    it 'matches link reference with trailing slash' do
+      doc2 = reference_filter("Fixed (#{link}/.)")
+
+      expect(doc2).to match(%r{\(#{Regexp.escape(epic.to_reference(group))}\.\)})
     end
   end
 

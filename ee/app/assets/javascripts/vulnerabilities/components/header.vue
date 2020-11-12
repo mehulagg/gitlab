@@ -1,25 +1,26 @@
 <script>
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import Api from 'ee/api';
-import axios from '~/lib/utils/axios_utils';
 import { CancelToken } from 'axios';
+import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
 import { redirectTo } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import UsersCache from '~/lib/utils/users_cache';
 import ResolutionAlert from './resolution_alert.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
-import VulnerabilitiesEventBus from './vulnerabilities_event_bus';
-import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 
 export default {
   name: 'VulnerabilityHeader',
+
   components: {
-    GlDeprecatedButton,
     GlLoadingIcon,
+    GlButton,
+    GlBadge,
     ResolutionAlert,
     VulnerabilityStateDropdown,
     SplitButton,
@@ -35,16 +36,27 @@ export default {
 
   data() {
     return {
-      isLoadingVulnerability: false,
       isProcessingAction: false,
+      isLoadingVulnerability: false,
       isLoadingUser: false,
-      vulnerability: this.initialVulnerability,
+      // Spread operator because the header could modify the `project`
+      // prop leading to an error in the footer component.
+      vulnerability: { ...this.initialVulnerability },
       user: undefined,
       refreshVulnerabilitySource: undefined,
     };
   },
 
+  badgeVariants: {
+    confirmed: 'danger',
+    resolved: 'success',
+    detected: 'warning',
+  },
+
   computed: {
+    stateVariant() {
+      return this.$options.badgeVariants[this.vulnerability.state] || 'neutral';
+    },
     actionButtons() {
       const buttons = [];
 
@@ -54,10 +66,6 @@ export default {
 
       if (this.canDownloadPatch) {
         buttons.push(HEADER_ACTION_BUTTONS.patchDownload);
-      }
-
-      if (!this.hasIssue) {
-        buttons.push(HEADER_ACTION_BUTTONS.issueCreation);
       }
 
       return buttons;
@@ -82,10 +90,6 @@ export default {
         Boolean(this.vulnerability.create_mr_url) &&
         this.hasRemediation
       );
-    },
-    statusBoxStyle() {
-      // Get the badge variant based on the vulnerability state, defaulting to 'expired'.
-      return VULNERABILITY_STATE_OBJECTS[this.vulnerability.state]?.statusBoxStyle || 'expired';
     },
     showResolutionAlert() {
       return (
@@ -119,14 +123,6 @@ export default {
     },
   },
 
-  created() {
-    VulnerabilitiesEventBus.$on('VULNERABILITY_STATE_CHANGED', this.refreshVulnerability);
-  },
-
-  destroyed() {
-    VulnerabilitiesEventBus.$off('VULNERABILITY_STATE_CHANGED', this.refreshVulnerability);
-  },
-
   methods: {
     triggerClick(action) {
       const fn = this[action];
@@ -138,6 +134,7 @@ export default {
       Api.changeVulnerabilityState(this.vulnerability.id, newState)
         .then(({ data }) => {
           Object.assign(this.vulnerability, data);
+          this.$emit('vulnerability-state-change');
         })
         .catch(() => {
           createFlash(
@@ -148,39 +145,6 @@ export default {
         })
         .finally(() => {
           this.isLoadingVulnerability = false;
-          VulnerabilitiesEventBus.$emit('VULNERABILITY_STATE_CHANGE');
-        });
-    },
-    createIssue() {
-      this.isProcessingAction = true;
-
-      const {
-        report_type: category,
-        project_fingerprint: projectFingerprint,
-        id,
-      } = this.vulnerability;
-
-      axios
-        .post(this.vulnerability.create_issue_url, {
-          vulnerability_feedback: {
-            feedback_type: FEEDBACK_TYPES.ISSUE,
-            category,
-            project_fingerprint: projectFingerprint,
-            vulnerability_data: {
-              ...this.vulnerability,
-              category,
-              vulnerability_id: id,
-            },
-          },
-        })
-        .then(({ data: { issue_url } }) => {
-          redirectTo(issue_url);
-        })
-        .catch(() => {
-          this.isProcessingAction = false;
-          createFlash(
-            s__('VulnerabilityManagement|Something went wrong, could not create an issue.'),
-          );
         });
     },
     createMergeRequest() {
@@ -266,15 +230,9 @@ export default {
     <div class="detail-page-header">
       <div class="detail-page-header-body align-items-center">
         <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
-        <span
-          v-else
-          ref="badge"
-          :class="
-            `text-capitalize align-self-center issuable-status-box status-box status-box-${statusBoxStyle}`
-          "
-        >
+        <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}
-        </span>
+        </gl-badge>
 
         <status-description
           class="issuable-meta"
@@ -299,10 +257,9 @@ export default {
           :disabled="isProcessingAction"
           class="js-split-button"
           @createMergeRequest="createMergeRequest"
-          @createIssue="createIssue"
           @downloadPatch="downloadPatch"
         />
-        <gl-deprecated-button
+        <gl-button
           v-else-if="actionButtons.length > 0"
           class="ml-2"
           variant="success"
@@ -311,7 +268,7 @@ export default {
           @click="triggerClick(actionButtons[0].action)"
         >
           {{ actionButtons[0].name }}
-        </gl-deprecated-button>
+        </gl-button>
       </div>
     </div>
   </div>

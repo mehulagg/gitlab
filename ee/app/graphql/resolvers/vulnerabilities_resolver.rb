@@ -26,16 +26,31 @@ module Resolvers
              required: false,
              description: 'Filter vulnerabilities by scanner'
 
+    argument :sort, Types::VulnerabilitySortEnum,
+             required: false,
+             default_value: 'severity_desc',
+             description: 'List vulnerabilities by sort order'
+
+    argument :has_resolution, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Returns only the vulnerabilities which have been resolved on default branch'
+
+    argument :has_issues, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Returns only the vulnerabilities which have linked issues'
+
     def resolve(**args)
       return Vulnerability.none unless vulnerable
 
-      vulnerabilities(args).with_findings_and_scanner.ordered
+      vulnerabilities(args)
+        .with_findings_scanner_and_identifiers
+        .with_created_issue_links_and_issues
     end
 
     private
 
-    def vulnerabilities(filters)
-      Security::VulnerabilitiesFinder.new(vulnerable, filters).execute
+    def vulnerabilities(params)
+      Security::VulnerabilitiesFinder.new(vulnerable, params).execute
     end
   end
 end

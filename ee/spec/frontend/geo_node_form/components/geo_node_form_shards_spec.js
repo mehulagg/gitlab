@@ -11,19 +11,11 @@ describe('GeoNodeFormShards', () => {
     syncShardsOptions: MOCK_SYNC_SHARDS,
   };
 
-  const actionSpies = {
-    toggleShard: jest.fn(),
-    isSelected: jest.fn(),
-  };
-
   const createComponent = (props = {}) => {
     wrapper = mount(GeoNodeFormShards, {
       propsData: {
         ...defaultProps,
         ...props,
-      },
-      methods: {
-        ...actionSpies,
       },
     });
   };
@@ -46,7 +38,6 @@ describe('GeoNodeFormShards', () => {
 
     describe('DropdownItems', () => {
       beforeEach(() => {
-        delete actionSpies.isSelected;
         createComponent({
           selectedShards: [MOCK_SYNC_SHARDS[0].value],
         });
@@ -76,10 +67,6 @@ describe('GeoNodeFormShards', () => {
 
   describe('methods', () => {
     describe('toggleShard', () => {
-      beforeEach(() => {
-        delete actionSpies.toggleShard;
-      });
-
       describe('when shard is in selectedShards', () => {
         beforeEach(() => {
           createComponent({
@@ -108,10 +95,6 @@ describe('GeoNodeFormShards', () => {
     });
 
     describe('isSelected', () => {
-      beforeEach(() => {
-        delete actionSpies.isSelected;
-      });
-
       describe('when shard is in selectedShards', () => {
         beforeEach(() => {
           createComponent({

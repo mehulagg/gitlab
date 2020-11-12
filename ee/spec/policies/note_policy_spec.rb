@@ -101,7 +101,7 @@ RSpec.describe NotePolicy do
 
     context 'for epics in a private group' do
       before do
-        group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
       end
 
       it_behaves_like 'private notes'

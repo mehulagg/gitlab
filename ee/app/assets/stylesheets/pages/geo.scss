@@ -19,3 +19,12 @@
     padding-left: 1.75rem;
   }
 }
+
+// Overrides max-width from `app/assets/stylesheets/framework/dropdowns.scss`
+.geo-node-form-container {
+  #node-synchronization-shards-field {
+    .dropdown-menu {
+      width: auto;
+    }
+  }
+}

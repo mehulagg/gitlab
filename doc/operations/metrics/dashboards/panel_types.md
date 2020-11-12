@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -17,16 +17,16 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - type: area-chart # or line-chart
+      - type: area-chart  # or line-chart
         title: 'Area Chart Title'
-        y_label: "Y-Axis"
+        y_label: 'Y-Axis'
         y_axis:
           format: number
           precision: 0
         metrics:
           - id: area_http_requests_total
             query_range: 'http_requests_total'
-            label: "Instance: {{instance}}, Method: {{method}}"
+            label: 'Instance: {{instance}}, Method: {{method}}'
             unit: "count"
 ```
 
@@ -55,23 +55,23 @@ panel_groups:
   - group: 'Group Title'
     panels:
       - type: anomaly-chart
-        title: "Chart Title"
+        title: 'Chart Title'
         y_label: "Y-Axis"
         metrics:
           - id: anomaly_requests_normal
             query_range: 'http_requests_total'
-            label: "# of Requests"
-            unit: "count"
+            label: '# of Requests'
+            unit: 'count'
         metrics:
           - id: anomaly_requests_upper_limit
             query_range: 10000
-            label: "Max # of requests"
-            unit: "count"
+            label: 'Max # of requests'
+            unit: 'count'
         metrics:
           - id: anomaly_requests_lower_limit
             query_range: 2000
-            label: "Min # of requests"
-            unit: "count"
+            label: 'Min # of requests'
+            unit: 'count'
 ```
 
 Note the following properties:
@@ -93,13 +93,13 @@ panel_groups:
   - group: 'Group title'
     panels:
       - type: bar
-        title: "Http Handlers"
+        title: 'HTTP Handlers'
         x_label: 'Response Size'
         y_axis:
-          name: "Handlers"
+          name: 'Handlers'
         metrics:
           - id: prometheus_http_response_size_bytes_bucket
-            query_range: "sum(increase(prometheus_http_response_size_bytes_bucket[1d])) by (handler)"
+            query_range: 'sum(increase(prometheus_http_response_size_bytes_bucket[1d])) by (handler)'
             unit: 'Bytes'
 ```
 
@@ -121,13 +121,13 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group title'
     panels:
-      - title: "Column"
-        type: "column"
+      - title: 'Column'
+        type: 'column'
         metrics:
         - id: 1024_memory
           query: 'avg(sum(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}) by (job)) without (job) / count(avg(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}) without (job)) /1024/1024'
           unit: MB
-          label: "Memory Usage"
+          label: 'Memory Usage'
 ```
 
 Note the following properties:
@@ -153,19 +153,19 @@ panel_groups:
     priority: 5
     panels:
       - type: 'stacked-column'
-        title: "Stacked column"
-        y_label: "y label"
+        title: 'Stacked column'
+        y_label: 'y label'
         x_label: 'x label'
         metrics:
           - id: memory_1
             query_range: 'memory_query'
-            label: "memory query 1"
-            unit: "count"
+            label: 'memory query 1'
+            unit: 'count'
             series_name: 'group 1'
           - id: memory_2
             query_range: 'memory_query_2'
-            label: "memory query 2"
-            unit: "count"
+            label: 'memory query 2'
+            unit: 'count'
             series_name: 'group 2'
 ```
 
@@ -185,13 +185,13 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Single Stat"
-        type: "single-stat"
+      - title: 'Single Stat'
+        type: 'single-stat'
         metrics:
           - id: 10
             query: 'max(go_memstats_alloc_bytes{job="prometheus"})'
             unit: MB
-            label: "Total"
+            label: 'Total'
 ```
 
 Note the following properties:
@@ -215,17 +215,68 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Single Stat"
-        type: "single-stat"
+      - title: 'Single Stat'
+        type: 'single-stat'
         max_value: 100
         metrics:
           - id: 10
             query: 'max(go_memstats_alloc_bytes{job="prometheus"})'
             unit: '%'
-            label: "Total"
+            label: 'Total'
 ```
 
 For example, if you have a query value of `53.6`, adding `%` as the unit results in a single stat value of `53.6%`, but if the maximum expected value of the query is `120`, the value would be `44.6%`. Adding the `max_value` causes the correct percentage value to display.
+
+## Gauge
+
+CAUTION: **Warning:**
+This panel type is an _alpha_ feature, and is subject to change at any time
+without prior notice!
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207044) in GitLab 13.3.
+
+To add a gauge panel type to a dashboard, look at the following sample dashboard file:
+
+```yaml
+dashboard: 'Dashboard Title'
+panel_groups:
+  - group: 'Group Title'
+    panels:
+      - title: 'Gauge'
+        type: 'gauge'
+        min_value: 0
+        max_value: 1000
+        split: 5
+        thresholds:
+          values: [60, 90]
+          mode: 'percentage'
+        format: 'kilobytes'
+        metrics:
+          - id: 10
+            query: 'floor(max(prometheus_http_response_size_bytes_bucket)/1000)'
+            unit: 'kb'
+```
+
+Note the following properties:
+
+| Property | Type | Required | Description |
+| ------ | ------ | ------ | ------ |
+| type | string | yes | Type of panel to be rendered. For gauge panel types, set to `gauge`. |
+| min_value | number | no, defaults to `0`  | The minimum value of the gauge chart axis. If either of `min_value` or `max_value` are not set, they both get their default values.  |
+| max_value | number | no, defaults to `100` | The maximum value of the gauge chart axis. If either of `min_value` or `max_value` are not set, they both get their default values. |
+| split | number | no, defaults to `10` | The amount of split segments on the gauge chart axis.  |
+| thresholds | object | no | Thresholds configuration for the gauge chart axis.  |
+| format | string | no, defaults to `engineering` | Unit format used. See the [full list of units](yaml_number_format.md). |
+| query | string | yes | For gauge panel types, you must use an [instant query](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries). |
+
+### Thresholds properties
+
+| Property | Type | Required | Description |
+| ------ | ------ | ------ | ------ |
+| values | array | no, defaults to 95% of the range between `min_value` and `max_value`| An array of gauge chart axis threshold values. |
+| mode | string | no, defaults to `absolute` | The mode in which the thresholds are interpreted in relation to `min_value` and `max_value`. Can be either `percentage` or `absolute`. |
+
+![gauge panel type](img/prometheus_dashboard_gauge_panel_type_v13_3.png)
 
 ## Heatmaps
 
@@ -238,13 +289,13 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Heatmap"
-        type: "heatmap"
+      - title: 'Heatmap'
+        type: 'heatmap'
         metrics:
           - id: 10
             query: 'sum(rate(nginx_upstream_responses_total{upstream=~"%{kube_namespace}-%{ci_environment_slug}-.*"}[60m])) by (status_code)'
             unit: req/sec
-            label: "Status code"
+            label: 'Status code'
 ```
 
 Note the following properties:

@@ -40,7 +40,7 @@ module Elastic
       def clear_tracking!
         with_redis do |redis|
           Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
-            redis.del(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
+            redis.unlink(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
           end
         end
       end

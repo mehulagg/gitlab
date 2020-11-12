@@ -16,11 +16,6 @@
       = doorkeeper_errors_for application, :redirect_uri
       %span.form-text.text-muted
         Use one line per URI
-      - if Doorkeeper.configuration.native_redirect_uri
-        %span.form-text.text-muted
-          Use
-          %code= Doorkeeper.configuration.native_redirect_uri
-          for local tests
 
   = content_tag :div, class: 'form-group row' do
     .col-sm-2.col-form-label.pt-0
@@ -45,5 +40,5 @@
       = render 'shared/tokens/scopes_form', prefix: 'doorkeeper_application', token: application, scopes: @scopes
 
   .form-actions
-    = f.submit 'Submit', class: "btn btn-success wide"
-    = link_to "Cancel", admin_applications_path, class: "btn btn-cancel"
+    = f.submit 'Submit', class: "gl-button btn btn-success wide"
+    = link_to "Cancel", admin_applications_path, class: "gl-button btn btn-cancel"

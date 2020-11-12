@@ -6,7 +6,7 @@ module Geo
       EXCEPT_RESOURCE_IDS_KEY = :except_ids
 
       def registry_finder
-        @registry_finder ||= Geo::AttachmentRegistryFinder.new(current_node_id: Gitlab::Geo.current_node.id)
+        @registry_finder ||= Geo::AttachmentRegistryFinder.new
       end
 
       private

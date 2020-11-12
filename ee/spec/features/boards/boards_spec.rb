@@ -77,10 +77,19 @@ RSpec.describe 'issue boards', :js do
   context 'swimlanes dropdown' do
     context 'feature flag on' do
       before do
-        stub_feature_flags(boards_with_swimlanes: true)
+        stub_licensed_features(swimlanes: true)
+        stub_feature_flags(boards_with_swimlanes: true, swimlanes: true)
       end
 
-      it 'shows Group by dropdown' do
+      it 'does not show Group by dropdown when user is not logged in' do
+        visit_board_page
+
+        expect(page).to have_css('.filtered-search-block')
+        expect(page).not_to have_css('.board-swimlanes-toggle-wrapper')
+      end
+
+      it 'shows Group by dropdown when user is logged in' do
+        login_as(user)
         visit_board_page
 
         expect(page).to have_css('.board-swimlanes-toggle-wrapper')
@@ -89,12 +98,21 @@ RSpec.describe 'issue boards', :js do
 
     context 'feature flag off' do
       before do
-        stub_feature_flags(boards_with_swimlanes: false)
+        stub_feature_flags(boards_with_swimlanes: false, swimlanes: false)
       end
 
-      it 'does not show Group by dropdown' do
+      it 'does not show Group by dropdown when user is not logged in' do
         visit_board_page
 
+        expect(page).to have_css('.filtered-search-block')
+        expect(page).not_to have_css('.board-swimlanes-toggle-wrapper')
+      end
+
+      it 'does not show Group by dropdown when user is logged in' do
+        login_as(user)
+        visit_board_page
+
+        expect(page).to have_css('.filtered-search-block')
         expect(page).not_to have_css('.board-swimlanes-toggle-wrapper')
       end
     end

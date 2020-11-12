@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import axios from '~/lib/utils/axios_utils';
 import MockAdapter from 'axios-mock-adapter';
+import axios from '~/lib/utils/axios_utils';
 import { environmentsList } from './mock_data';
 import EnvironmentsFolderViewComponent from '~/environments/folder/environments_folder_view.vue';
 
@@ -54,7 +54,7 @@ describe('Environments Folder View', () => {
 
     describe('deploy boards', () => {
       it('should render arrow to open deploy boards', () => {
-        expect(wrapper.find('.folder-icon.ic-chevron-right').exists()).toBe(true);
+        expect(wrapper.find('.folder-icon[data-testid="chevron-right-icon"]').exists()).toBe(true);
       });
     });
   });

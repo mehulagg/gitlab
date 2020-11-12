@@ -13,7 +13,7 @@ RSpec.describe EE::IssuesHelper do
     context 'with linked issue' do
       context 'with promoted issue' do
         before do
-          issue.update(promoted_to_epic: new_epic)
+          issue.update!(promoted_to_epic: new_epic)
         end
 
         context 'when user has permission to see new epic' do
@@ -67,6 +67,26 @@ RSpec.describe EE::IssuesHelper do
       # When issue_in_subepic? is used, any epic with a different
       # id than the one on the params is considered a child
       expect(helper.issue_in_subepic?(issue, 'subepic_id')).to be_truthy
+    end
+  end
+
+  describe '#show_timeline_view_toggle?' do
+    subject { helper.show_timeline_view_toggle?(issue) }
+
+    it { is_expected.to be_falsy }
+
+    context 'issue is an incident' do
+      let(:issue) { build_stubbed(:incident) }
+
+      it { is_expected.to be_falsy }
+
+      context 'with license' do
+        before do
+          stub_licensed_features(incident_timeline_view: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
     end
   end
 end

@@ -1,23 +1,20 @@
 import { shallowMount } from '@vue/test-utils';
 
 import { GlPagination } from '@gitlab/ui';
-import * as Sentry from '@sentry/browser';
-import createFlash from '~/flash';
-
-import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
 import RequirementsRoot from 'ee/requirements/components/requirements_root.vue';
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 import RequirementsLoading from 'ee/requirements/components/requirements_loading.vue';
 import RequirementsEmptyState from 'ee/requirements/components/requirements_empty_state.vue';
 import RequirementItem from 'ee/requirements/components/requirement_item.vue';
-import RequirementForm from 'ee/requirements/components/requirement_form.vue';
 
 import createRequirement from 'ee/requirements/queries/createRequirement.mutation.graphql';
 import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
 
 import { TEST_HOST } from 'helpers/test_constants';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import createFlash from '~/flash';
 
 import {
   FilterState,
@@ -142,9 +139,9 @@ describe('RequirementsRoot', () => {
     });
 
     describe('showEmptyState', () => {
-      it('returns `false` when `showCreateForm` is true', () => {
+      it('returns `false` when `showRequirementCreateDrawer` is true', () => {
         wrapper.setData({
-          showCreateForm: true,
+          showRequirementCreateDrawer: true,
         });
 
         return wrapper.vm.$nextTick(() => {
@@ -331,6 +328,28 @@ describe('RequirementsRoot', () => {
         );
       });
 
+      it('calls `$apollo.mutate` with variables containing `description` when it is included in object param', () => {
+        jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
+
+        wrapper.vm.updateRequirement({
+          iid: '1',
+          description: '_foo_',
+        });
+
+        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mutation: updateRequirement,
+            variables: {
+              updateRequirementInput: {
+                projectPath: 'gitlab-org/gitlab-shell',
+                iid: '1',
+                description: '_foo_',
+              },
+            },
+          }),
+        );
+      });
+
       it('calls `$apollo.mutate` with variables containing `state` when it is included in object param', () => {
         jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
 
@@ -353,35 +372,95 @@ describe('RequirementsRoot', () => {
         );
       });
 
-      it('calls `createFlash` with provided `errorFlashMessage` param and `Sentry.captureException` when request fails', () => {
-        jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(new Error());
-        jest.spyOn(Sentry, 'captureException').mockImplementation();
+      describe('when `lastTestReportState` is included in object param', () => {
+        beforeEach(() => {
+          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
+        });
+
+        it('calls `$apollo.mutate` with `lastTestReportState` when it is not null', () => {
+          wrapper.vm.updateRequirement({
+            iid: '1',
+            lastTestReportState: 'PASSED',
+          });
+
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mutation: updateRequirement,
+              variables: {
+                updateRequirementInput: {
+                  projectPath: 'gitlab-org/gitlab-shell',
+                  iid: '1',
+                  lastTestReportState: 'PASSED',
+                },
+              },
+            }),
+          );
+        });
+
+        it('calls `$apollo.mutate` without `lastTestReportState` when it is null', () => {
+          wrapper.vm.updateRequirement({
+            iid: '1',
+            lastTestReportState: null,
+          });
+
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mutation: updateRequirement,
+              variables: {
+                updateRequirementInput: {
+                  projectPath: 'gitlab-org/gitlab-shell',
+                  iid: '1',
+                },
+              },
+            }),
+          );
+        });
+      });
+
+      it('calls `createFlash` with provided `errorFlashMessage` param when request fails', () => {
+        jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(new Error({}));
 
         return wrapper.vm
-          .updateRequirement({
-            iid: '1',
-            errorFlashMessage: 'Something went wrong',
-          })
-          .then(() => {
-            expect(createFlash).toHaveBeenCalledWith('Something went wrong');
-            expect(Sentry.captureException).toHaveBeenCalledWith(expect.any(Object));
+          .updateRequirement(
+            {
+              iid: '1',
+            },
+            {
+              errorFlashMessage: 'Something went wrong',
+            },
+          )
+          .catch(() => {
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Something went wrong',
+              captureError: true,
+            });
           });
       });
     });
 
     describe('handleNewRequirementClick', () => {
-      it('sets `showCreateForm` prop to `true`', () => {
+      it('sets `showRequirementCreateDrawer` prop to `true`', () => {
         wrapper.vm.handleNewRequirementClick();
 
-        expect(wrapper.vm.showCreateForm).toBe(true);
+        expect(wrapper.vm.showRequirementCreateDrawer).toBe(true);
+      });
+    });
+
+    describe('handleShowRequirementClick', () => {
+      it('sets `showRequirementViewDrawer` prop to `true`', () => {
+        wrapper.vm.handleShowRequirementClick(mockRequirementsOpen[0]);
+
+        expect(wrapper.vm.showRequirementViewDrawer).toBe(true);
+        expect(wrapper.vm.editedRequirement).toBe(mockRequirementsOpen[0]);
       });
     });
 
     describe('handleEditRequirementClick', () => {
-      it('sets `showUpdateFormForRequirement` prop to value of passed param', () => {
-        wrapper.vm.handleEditRequirementClick('10');
+      it('sets `showRequirementViewDrawer` prop to `true` and `editedRequirement` to value of passed param', () => {
+        wrapper.vm.handleEditRequirementClick(mockRequirementsOpen[0]);
 
-        expect(wrapper.vm.showUpdateFormForRequirement).toBe('10');
+        expect(wrapper.vm.showRequirementViewDrawer).toBe(true);
+        expect(wrapper.vm.editedRequirement).toBe(mockRequirementsOpen[0]);
       });
     });
 
@@ -402,7 +481,10 @@ describe('RequirementsRoot', () => {
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockReturnValue(Promise.resolve(mockMutationResult));
 
-        wrapper.vm.handleNewRequirementSave('foo');
+        wrapper.vm.handleNewRequirementSave({
+          title: 'foo',
+          description: '_bar_',
+        });
 
         expect(wrapper.vm.createRequirementRequestActive).toBe(true);
       });
@@ -412,7 +494,10 @@ describe('RequirementsRoot', () => {
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockReturnValue(Promise.resolve(mockMutationResult));
 
-        wrapper.vm.handleNewRequirementSave('foo');
+        wrapper.vm.handleNewRequirementSave({
+          title: 'foo',
+          description: '_bar_',
+        });
 
         expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -421,13 +506,14 @@ describe('RequirementsRoot', () => {
               createRequirementInput: {
                 projectPath: 'gitlab-org/gitlab-shell',
                 title: 'foo',
+                description: '_bar_',
               },
             },
           }),
         );
       });
 
-      it('sets `showCreateForm` and `createRequirementRequestActive` props to `false` and refetches requirements count and list when request is successful', () => {
+      it('sets `showRequirementCreateDrawer` and `createRequirementRequestActive` props to `false` and refetches requirements count and list when request is successful', () => {
         jest
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockReturnValue(Promise.resolve(mockMutationResult));
@@ -438,31 +524,48 @@ describe('RequirementsRoot', () => {
           .spyOn(wrapper.vm.$apollo.queries.requirements, 'refetch')
           .mockImplementation(jest.fn());
 
-        return wrapper.vm.handleNewRequirementSave('foo').then(() => {
-          expect(wrapper.vm.$apollo.queries.requirementsCount.refetch).toHaveBeenCalled();
-          expect(wrapper.vm.$apollo.queries.requirements.refetch).toHaveBeenCalled();
-          expect(wrapper.vm.showCreateForm).toBe(false);
-          expect(wrapper.vm.createRequirementRequestActive).toBe(false);
-        });
+        return wrapper.vm
+          .handleNewRequirementSave({
+            title: 'foo',
+            description: '_bar_',
+          })
+          .then(() => {
+            expect(wrapper.vm.$apollo.queries.requirementsCount.refetch).toHaveBeenCalled();
+            expect(wrapper.vm.$apollo.queries.requirements.refetch).toHaveBeenCalled();
+            expect(wrapper.vm.showRequirementCreateDrawer).toBe(false);
+            expect(wrapper.vm.createRequirementRequestActive).toBe(false);
+          });
       });
 
       it('calls `$toast.show` with string "Requirement added successfully" when request is successful', () => {
         jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockMutationResult);
 
-        return wrapper.vm.handleNewRequirementSave('foo').then(() => {
-          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Requirement REQ-1 has been added');
-        });
+        return wrapper.vm
+          .handleNewRequirementSave({
+            title: 'foo',
+            description: '_bar_',
+          })
+          .then(() => {
+            expect(wrapper.vm.$toast.show).toHaveBeenCalledWith('Requirement REQ-1 has been added');
+          });
       });
 
       it('sets `createRequirementRequestActive` prop to `false` and calls `createFlash` when `$apollo.mutate` request fails', () => {
         jest.spyOn(wrapper.vm.$apollo, 'mutate').mockReturnValue(Promise.reject(new Error()));
 
-        return wrapper.vm.handleNewRequirementSave('foo').then(() => {
-          expect(createFlash).toHaveBeenCalledWith(
-            'Something went wrong while creating a requirement.',
-          );
-          expect(wrapper.vm.createRequirementRequestActive).toBe(false);
-        });
+        return wrapper.vm
+          .handleNewRequirementSave({
+            title: 'foo',
+            description: '_bar_',
+          })
+          .catch(() => {
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Something went wrong while creating a requirement.',
+              captureError: true,
+              parent: expect.any(Object),
+            });
+            expect(wrapper.vm.createRequirementRequestActive).toBe(false);
+          });
       });
     });
 
@@ -489,12 +592,14 @@ describe('RequirementsRoot', () => {
           expect.objectContaining({
             iid: '1',
             title: 'foo',
+          }),
+          expect.objectContaining({
             errorFlashMessage: 'Something went wrong while updating a requirement.',
           }),
         );
       });
 
-      it('sets `showUpdateFormForRequirement` to `0` and `createRequirementRequestActive` prop to `false` when request is successful', () => {
+      it('sets `showRequirementViewDrawer` to `true`, `editedRequirement` to `null` and `createRequirementRequestActive` prop to `false` when request is successful', () => {
         jest.spyOn(wrapper.vm, 'updateRequirement').mockResolvedValue(mockUpdateMutationResult);
 
         return wrapper.vm
@@ -503,7 +608,10 @@ describe('RequirementsRoot', () => {
             title: 'foo',
           })
           .then(() => {
-            expect(wrapper.vm.showUpdateFormForRequirement).toBe(0);
+            expect(wrapper.vm.enableRequirementEdit).toBe(false);
+            expect(wrapper.vm.editedRequirement).toEqual(
+              mockUpdateMutationResult.data.updateRequirement.requirement,
+            );
             expect(wrapper.vm.createRequirementRequestActive).toBe(false);
           });
       });
@@ -537,14 +645,14 @@ describe('RequirementsRoot', () => {
     });
 
     describe('handleNewRequirementCancel', () => {
-      it('sets `showCreateForm` prop to `false`', () => {
+      it('sets `showRequirementCreateDrawer` prop to `false`', () => {
         wrapper.setData({
-          showCreateForm: true,
+          showRequirementCreateDrawer: true,
         });
 
         wrapper.vm.handleNewRequirementCancel();
 
-        expect(wrapper.vm.showCreateForm).toBe(false);
+        expect(wrapper.vm.showRequirementCreateDrawer).toBe(false);
       });
     });
 
@@ -572,6 +680,8 @@ describe('RequirementsRoot', () => {
               expect.objectContaining({
                 iid: '1',
                 state: FilterState.opened,
+              }),
+              expect.objectContaining({
                 errorFlashMessage: 'Something went wrong while reopening a requirement.',
               }),
             );
@@ -589,6 +699,8 @@ describe('RequirementsRoot', () => {
               expect.objectContaining({
                 iid: '1',
                 state: FilterState.archived,
+              }),
+              expect.objectContaining({
                 errorFlashMessage: 'Something went wrong while archiving a requirement.',
               }),
             );
@@ -648,11 +760,13 @@ describe('RequirementsRoot', () => {
       });
     });
 
-    describe('handleUpdateRequirementCancel', () => {
-      it('sets `showUpdateFormForRequirement` prop to `0`', () => {
-        wrapper.vm.handleUpdateRequirementCancel();
+    describe('handleUpdateRequirementDrawerClose', () => {
+      it('sets `enableRequirementEdit` & `showRequirementViewDrawer` to false and `editedRequirement` to `null`', () => {
+        wrapper.vm.handleUpdateRequirementDrawerClose();
 
-        expect(wrapper.vm.showUpdateFormForRequirement).toBe(0);
+        expect(wrapper.vm.enableRequirementEdit).toBe(false);
+        expect(wrapper.vm.showRequirementViewDrawer).toBe(false);
+        expect(wrapper.vm.editedRequirement).toBe(null);
       });
     });
 
@@ -744,11 +858,11 @@ describe('RequirementsRoot', () => {
     });
 
     it('renders requirements-tabs component', () => {
-      expect(wrapper.contains(RequirementsTabs)).toBe(true);
+      expect(wrapper.find(RequirementsTabs).exists()).toBe(true);
     });
 
     it('renders filtered-search-bar component', () => {
-      expect(wrapper.contains(FilteredSearchBarRoot)).toBe(true);
+      expect(wrapper.find(FilteredSearchBarRoot).exists()).toBe(true);
       expect(wrapper.find(FilteredSearchBarRoot).props('searchInputPlaceholder')).toBe(
         'Search requirements',
       );
@@ -781,7 +895,7 @@ describe('RequirementsRoot', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        expect(wrapper.contains(RequirementsEmptyState)).toBe(true);
+        expect(wrapper.find(RequirementsEmptyState).exists()).toBe(true);
       });
     });
 
@@ -793,23 +907,21 @@ describe('RequirementsRoot', () => {
       wrapperLoading.destroy();
     });
 
-    it('renders requirement-form component when `showCreateForm` prop is `true`', () => {
-      wrapper.setData({
-        showCreateForm: true,
-      });
-
-      return wrapper.vm.$nextTick(() => {
-        expect(wrapper.contains(RequirementForm)).toBe(true);
-      });
+    it('renders requirement-create-form component', () => {
+      expect(wrapper.find('requirement-create-form-stub').exists()).toBe(true);
     });
 
-    it('does not render requirement-empty-state component when `showCreateForm` prop is `true`', () => {
+    it('renders requirement-edit-form component', () => {
+      expect(wrapper.find('requirement-edit-form-stub').exists()).toBe(true);
+    });
+
+    it('does not render requirement-empty-state component when `showRequirementCreateDrawer` prop is `true`', () => {
       wrapper.setData({
-        showCreateForm: true,
+        showRequirementCreateDrawer: true,
       });
 
       return wrapper.vm.$nextTick(() => {
-        expect(wrapper.contains(RequirementsEmptyState)).toBe(false);
+        expect(wrapper.find(RequirementsEmptyState).exists()).toBe(false);
       });
     });
 

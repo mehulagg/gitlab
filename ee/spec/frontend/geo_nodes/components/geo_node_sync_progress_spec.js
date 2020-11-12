@@ -1,8 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlPopover } from '@gitlab/ui';
-import StackedProgressBar from '~/vue_shared/components/stacked_progress_bar.vue';
-
 import GeoNodeSyncProgress from 'ee/geo_nodes/components/geo_node_sync_progress.vue';
+import StackedProgressBar from '~/vue_shared/components/stacked_progress_bar.vue';
 
 describe('GeoNodeSyncProgress', () => {
   let wrapper;
@@ -57,11 +56,47 @@ describe('GeoNodeSyncProgress', () => {
   });
 
   describe('computed', () => {
-    beforeEach(() => {
-      createComponent();
+    describe.each`
+      itemValue                                                          | expectedItemValue
+      ${{ successCount: 5, failureCount: 3, totalCount: 10 }}            | ${{ successCount: 5, failureCount: 3, totalCount: 10 }}
+      ${{ successCount: '5', failureCount: '3', totalCount: '10' }}      | ${{ successCount: 5, failureCount: 3, totalCount: 10 }}
+      ${{ successCount: null, failureCount: null, totalCount: null }}    | ${{ successCount: 0, failureCount: 0, totalCount: 0 }}
+      ${{ successCount: 'abc', failureCount: 'def', totalCount: 'ghi' }} | ${{ successCount: 0, failureCount: 0, totalCount: 0 }}
+    `(`status counts`, ({ itemValue, expectedItemValue }) => {
+      beforeEach(() => {
+        createComponent({ itemValue });
+      });
+
+      it(`when itemValue.totalCount is ${
+        itemValue.totalCount
+      } (${typeof itemValue.totalCount}), it should compute to ${
+        expectedItemValue.totalCount
+      }`, () => {
+        expect(wrapper.vm.totalCount).toBe(expectedItemValue.totalCount);
+      });
+
+      it(`when itemValue.successCount is ${
+        itemValue.successCount
+      } (${typeof itemValue.successCount}), it should compute to ${
+        expectedItemValue.successCount
+      }`, () => {
+        expect(wrapper.vm.successCount).toBe(expectedItemValue.successCount);
+      });
+
+      it(`when itemValue.failureCount is ${
+        itemValue.failureCount
+      } (${typeof itemValue.failureCount}), it should compute to ${
+        expectedItemValue.failureCount
+      }`, () => {
+        expect(wrapper.vm.failureCount).toBe(expectedItemValue.failureCount);
+      });
     });
 
     describe('queuedCount', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
       it('returns total - success - failure', () => {
         expect(wrapper.vm.queuedCount).toEqual(MOCK_ITEM_VALUE.queuedCount);
       });

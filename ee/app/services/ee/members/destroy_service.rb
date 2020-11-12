@@ -13,6 +13,7 @@ module EE
         end
 
         cleanup_group_identity(member)
+        cleanup_group_deletion_schedule(member) if member.source&.is_a?(Group)
       end
 
       private
@@ -39,6 +40,14 @@ module EE
         return unless saml_provider
 
         saml_provider.identities.for_user(member.user).delete_all
+      end
+
+      def cleanup_group_deletion_schedule(member)
+        deletion_schedule = member.source&.deletion_schedule
+
+        return unless deletion_schedule
+
+        deletion_schedule.destroy if deletion_schedule.deleting_user == member.user
       end
     end
   end

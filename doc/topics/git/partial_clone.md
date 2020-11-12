@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
+---
+
 # Partial Clone
 
 As Git repositories grow in size, they can become cumbersome to work with
@@ -84,7 +91,7 @@ Updating files: 100% (28/28), done.
 
 $ cd www-gitlab-com
 
-$ git sparse-checkout init --clone
+$ git sparse-checkout init --cone
 
 $ git sparse-checkout add data
 remote: Enumerating objects: 301, done.

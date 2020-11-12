@@ -1,6 +1,6 @@
 <script>
-import { isSafeURL } from '~/lib/utils/url_utility';
 import { GlModal, GlFormGroup, GlFormInput, GlTabs, GlTab } from '@gitlab/ui';
+import { isSafeURL, joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { IMAGE_TABS } from '../../constants';
@@ -32,8 +32,8 @@ export default {
       uploadImageTab: null,
     };
   },
-  modalTitle: __('Image Details'),
-  okTitle: __('Insert'),
+  modalTitle: __('Image details'),
+  okTitle: __('Insert image'),
   urlTabTitle: __('By URL'),
   urlLabel: __('Image URL'),
   descriptionLabel: __('Description'),
@@ -74,7 +74,7 @@ export default {
         return;
       }
 
-      const imageUrl = `${this.imageRoot}${file.name}`;
+      const imageUrl = joinPaths(this.imageRoot, file.name);
 
       this.$emit('addImage', { imageUrl, file, altText: altText || file.name });
     },

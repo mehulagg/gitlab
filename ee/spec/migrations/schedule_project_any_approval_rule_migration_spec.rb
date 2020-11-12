@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20190905091812_schedule_project_any_approval_rule_migration.rb')
+require_migration!
 
 RSpec.describe ScheduleProjectAnyApprovalRuleMigration do
   let(:namespaces) { table(:namespaces) }
@@ -30,7 +30,7 @@ RSpec.describe ScheduleProjectAnyApprovalRuleMigration do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION)
@@ -53,7 +53,7 @@ RSpec.describe ScheduleProjectAnyApprovalRuleMigration do
       create_project(2)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(BackgroundMigrationWorker.jobs.size).to eq(0)

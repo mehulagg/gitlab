@@ -21,9 +21,7 @@ class Deployment < ApplicationRecord
 
   has_one :deployment_cluster
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) do
-    Deployment.where(project: s.project).maximum(:iid) if s&.project
-  end
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
 
   validates :sha, presence: true
   validates :ref, presence: true
@@ -46,6 +44,8 @@ class Deployment < ApplicationRecord
   scope :older_than, -> (deployment) { where('id < ?', deployment.id) }
   scope :with_deployable, -> { includes(:deployable).where('deployable_id IS NOT NULL') }
 
+  FINISHED_STATUSES = %i[success failed canceled].freeze
+
   state_machine :status, initial: :created do
     event :run do
       transition created: :running
@@ -63,27 +63,39 @@ class Deployment < ApplicationRecord
       transition any - [:canceled] => :canceled
     end
 
-    before_transition any => [:success, :failed, :canceled] do |deployment|
+    before_transition any => FINISHED_STATUSES do |deployment|
       deployment.finished_at = Time.current
     end
 
-    after_transition any => :success do |deployment|
-      deployment.run_after_commit do
-        Deployments::SuccessWorker.perform_async(id)
-      end
-    end
+    after_transition any => :running do |deployment|
+      next unless deployment.project.ci_forward_deployment_enabled?
 
-    after_transition any => [:success, :failed, :canceled] do |deployment|
       deployment.run_after_commit do
-        Deployments::FinishedWorker.perform_async(id)
+        Deployments::DropOlderDeploymentsWorker.perform_async(id)
       end
     end
 
     after_transition any => :running do |deployment|
-      next unless deployment.project.forward_deployment_enabled?
-
       deployment.run_after_commit do
-        Deployments::ForwardDeploymentWorker.perform_async(id)
+        Deployments::ExecuteHooksWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => :success do |deployment|
+      deployment.run_after_commit do
+        Deployments::UpdateEnvironmentWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => FINISHED_STATUSES do |deployment|
+      deployment.run_after_commit do
+        Deployments::LinkMergeRequestWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => FINISHED_STATUSES do |deployment|
+      deployment.run_after_commit do
+        Deployments::ExecuteHooksWorker.perform_async(id)
       end
     end
   end
@@ -148,6 +160,7 @@ class Deployment < ApplicationRecord
 
   def execute_hooks
     deployment_data = Gitlab::DataBuilder::Deployment.build(self)
+    project.execute_hooks(deployment_data, :deployment_hooks)
     project.execute_services(deployment_data, :deployment_hooks)
   end
 
@@ -272,7 +285,7 @@ class Deployment < ApplicationRecord
     SQL
   end
 
-  # Changes the status of a deployment and triggers the correspinding state
+  # Changes the status of a deployment and triggers the corresponding state
   # machine events.
   def update_status(status)
     case status

@@ -9,6 +9,8 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
 
   attr_reader :token
 
+  feature_category :package_registry
+
   def manifest
     result = DependencyProxy::PullManifestService.new(image, tag, token).execute
 

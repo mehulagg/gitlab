@@ -1,6 +1,6 @@
 import Api from 'ee/api';
 import { noneEpic } from 'ee/vue_shared/constants';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__, __ } from '~/locale';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -58,7 +58,7 @@ export const fetchEpics = ({ state, dispatch }, search = '') => {
 
 export const requestIssueUpdate = ({ commit }) => commit(types.REQUEST_ISSUE_UPDATE);
 export const receiveIssueUpdateSuccess = ({ state, commit }, { data, epic, isRemoval = false }) => {
-  /* 
+  /*
    If EpicsSelect is loaded within Boards, -
     we need to update "boardsStore.issue.detail.epic" which has -
     a differently formatted timestamp that includes '<strong>' tag.

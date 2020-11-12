@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class ProtectedEnvironments < Grape::API::Instance
+  class ProtectedEnvironments < ::API::Base
     include PaginationParams
 
     ENVIRONMENT_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(name: API::NO_SLASH_URL_PART_REGEX)
 
     before { authorize_admin_project }
+
+    feature_category :continuous_delivery
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

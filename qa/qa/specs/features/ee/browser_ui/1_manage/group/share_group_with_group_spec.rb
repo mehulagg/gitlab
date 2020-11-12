@@ -32,9 +32,14 @@ module QA
 
       before do
         source_group_with_members.add_member(maintainer_user, Resource::Members::AccessLevel::MAINTAINER)
+        Runtime::Feature.enable('vue_group_members_list', group: target_group_with_project)
       end
 
-      it 'can be shared with another group with correct access level', :requires_admin do
+      after do
+        Runtime::Feature.disable('vue_group_members_list', group: target_group_with_project)
+      end
+
+      it 'can be shared with another group with correct access level', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/945' do
         Flow::Login.sign_in
 
         target_group_with_project.visit!

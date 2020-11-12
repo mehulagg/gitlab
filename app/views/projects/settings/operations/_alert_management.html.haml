@@ -1,5 +1,6 @@
 - return unless can?(current_user, :admin_operations, @project)
 - expanded = expanded_by_default?
+- add_page_specific_style 'page_bundles/alert_management_settings'
 
 %section.settings.no-animate#js-alert-management-settings{ class: ('expanded' if expanded) }
   .settings-header
@@ -9,6 +10,6 @@
       = _('Expand')
     %p
       = _('Display alerts from all your monitoring tools directly within GitLab.')
-      = link_to _('More information'), help_page_path('user/project/operations/alert_management'), target: '_blank', rel: 'noopener noreferrer'
+      = link_to _('More information'), help_page_path('operations/incident_management/index.md'), target: '_blank', rel: 'noopener noreferrer'
   .settings-content
     .js-alerts-settings{ data: alerts_settings_data }

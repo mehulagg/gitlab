@@ -3,8 +3,8 @@
 FactoryBot.define do
   factory :design_version, class: 'DesignManagement::Version' do
     sha
-    issue { designs.first&.issue || create(:issue) }
-    author { issue&.author || create(:user) }
+    issue { designs.first&.issue || association(:issue) }
+    author { issue&.author || association(:user) }
 
     transient do
       designs_count { 1 }
@@ -40,7 +40,7 @@ FactoryBot.define do
       )
       version.designs += specific_designs
 
-      unless evaluator.designs_count.zero? || version.designs.present?
+      unless evaluator.designs_count == 0 || version.designs.present?
         version.designs << create(:design, issue: version.issue)
       end
     end

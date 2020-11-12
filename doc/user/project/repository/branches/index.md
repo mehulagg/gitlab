@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: concepts, howto
 ---
 
@@ -57,13 +60,13 @@ against accidental deletion and forced pushes.
 > - It's enabled on GitLab.com.
 > - It cannot be enabled or disabled per-project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-custom-initial-branch-name-core-only). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-custom-initial-branch-name). **(CORE ONLY)**
 
 By default, when you create a new project in GitLab, the initial branch is called `master`.
 For self-managed instances, a GitLab administrator can customize the initial branch name to something
 else. This way, every new project created from then on will start from the custom branch name rather than `master`. To do so:
 
-1. Go to the **{admin}** **Admin Area > Settings > Repository** and expand **Default initial
+1. Go to the **Admin Area > Settings > Repository** and expand **Default initial
    branch name**.
 1. Change the default initial branch to a custom name of your choice.
 1. **Save Changes**.

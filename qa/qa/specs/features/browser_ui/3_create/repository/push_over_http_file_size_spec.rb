@@ -26,7 +26,7 @@ module QA
         set_file_size_limit(nil)
       end
 
-      it 'push successful when the file size is under the limit' do
+      it 'push successful when the file size is under the limit', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/456' do
         set_file_size_limit(5)
 
         retry_on_fail do
@@ -36,12 +36,12 @@ module QA
         end
       end
 
-      it 'push fails when the file size is above the limit' do
+      it 'push fails when the file size is above the limit', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/458' do
         set_file_size_limit(2)
 
         retry_on_fail do
           expect { push_new_file('oversize_file_2.bin', wait_for_push: false) }
-            .to raise_error(QA::Git::Repository::RepositoryCommandError, /remote: fatal: pack exceeds maximum allowed size/)
+            .to raise_error(QA::Support::Run::CommandError, /remote: fatal: pack exceeds maximum allowed size/)
         end
       end
 

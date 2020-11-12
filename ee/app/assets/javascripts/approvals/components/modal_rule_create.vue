@@ -25,7 +25,12 @@ export default {
       rule: 'data',
     }),
     title() {
-      return this.rule ? __('Update approval rule') : __('Add approval rule');
+      return !this.rule || this.defaultRuleName
+        ? __('Add approval rule')
+        : __('Update approval rule');
+    },
+    defaultRuleName() {
+      return this.rule?.defaultRuleName;
     },
   },
   methods: {
@@ -47,6 +52,11 @@ export default {
     size="sm"
     @ok.prevent="submit"
   >
-    <rule-form ref="form" :init-rule="rule" :is-mr-edit="isMrEdit" />
+    <rule-form
+      ref="form"
+      :init-rule="rule"
+      :is-mr-edit="isMrEdit"
+      :default-rule-name="defaultRuleName"
+    />
   </gl-modal-vuex>
 </template>

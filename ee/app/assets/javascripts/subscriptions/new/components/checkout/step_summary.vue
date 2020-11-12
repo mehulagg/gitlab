@@ -1,10 +1,10 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
   },
   props: {
     isEditable: {
@@ -27,7 +27,7 @@ export default {
       <slot></slot>
     </div>
     <div v-if="isEditable" class="d-flex flex-column justify-content-center">
-      <gl-deprecated-button @click="edit">{{ $options.i18n.edit }}</gl-deprecated-button>
+      <gl-button @click="edit">{{ $options.i18n.edit }}</gl-button>
     </div>
   </div>
 </template>

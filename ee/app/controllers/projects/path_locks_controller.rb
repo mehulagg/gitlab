@@ -13,6 +13,8 @@ class Projects::PathLocksController < Projects::ApplicationController
   before_action :assign_ref_vars, only: :toggle
   before_action :lfs_blob_ids, only: :toggle
 
+  feature_category :source_code_management
+
   def index
     @path_locks = @project.path_locks.page(params[:page])
   end

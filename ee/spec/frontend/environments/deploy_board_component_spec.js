@@ -89,28 +89,6 @@ describe('Deploy Board', () => {
     });
   });
 
-  describe('with hasLegacyAppLabel equal true', () => {
-    beforeEach(done => {
-      wrapper = createComponent({
-        isLoading: false,
-        isEmpty: false,
-        logsPath,
-        hasLegacyAppLabel: true,
-        deployBoardData: {},
-      });
-      wrapper.vm.$nextTick(done);
-    });
-
-    it('should render legacy label warning message', () => {
-      const warningMessage = wrapper.find('.bs-callout-warning');
-
-      expect(warningMessage).toBeTruthy();
-      expect(warningMessage.text()).toContain(
-        'Matching on the app label has been removed for deploy boards.',
-      );
-    });
-  });
-
   describe('has legend component', () => {
     let statuses = [];
     beforeEach(done => {
@@ -118,7 +96,6 @@ describe('Deploy Board', () => {
         isLoading: false,
         isEmpty: false,
         logsPath: environment.log_path,
-        hasLegacyAppLabel: true,
         deployBoardData: deployBoardMockData,
       });
       ({ statuses } = wrapper.vm);

@@ -1,7 +1,6 @@
 <script>
-import { GlProgressBar } from '@gitlab/ui';
+import { GlProgressBar, GlTooltipDirective } from '@gitlab/ui';
 import { parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
-import tooltip from '../../../vue_shared/directives/tooltip';
 import { s__, sprintf } from '~/locale';
 
 export default {
@@ -10,7 +9,7 @@ export default {
     GlProgressBar,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     timeSpent: {
@@ -71,14 +70,19 @@ export default {
 </script>
 
 <template>
-  <div class="time-tracking-comparison-pane">
+  <div data-testid="timeTrackingComparisonPane">
     <div
-      v-tooltip
+      v-gl-tooltip
+      data-testid="compareMeter"
       :title="timeRemainingTooltip"
       :class="timeRemainingStatusClass"
       class="compare-meter"
     >
-      <gl-progress-bar :value="timeRemainingPercent" :variant="progressBarVariant" />
+      <gl-progress-bar
+        data-testid="timeRemainingProgress"
+        :value="timeRemainingPercent"
+        :variant="progressBarVariant"
+      />
       <div class="compare-display-container">
         <div class="compare-display float-left">
           <span class="compare-label">{{ s__('TimeTracking|Spent') }}</span>

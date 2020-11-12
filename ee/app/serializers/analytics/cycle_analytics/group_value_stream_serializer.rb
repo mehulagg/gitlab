@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module Analytics
-  class GroupValueStreamSerializer < BaseSerializer
-    entity ::Analytics::GroupValueStreamEntity
+  module CycleAnalytics
+    class GroupValueStreamSerializer < BaseSerializer
+      entity ::Analytics::CycleAnalytics::GroupValueStreamEntity
+    end
   end
 end

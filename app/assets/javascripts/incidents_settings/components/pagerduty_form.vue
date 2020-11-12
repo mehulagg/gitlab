@@ -11,9 +11,9 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
+import { isEqual } from 'lodash';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { I18N_PAGERDUTY_SETTINGS_FORM, CONFIGURE_PAGERDUTY_WEBHOOK_DOCS_LINK } from '../constants';
-import { isEqual } from 'lodash';
 
 export default {
   components: {
@@ -124,7 +124,6 @@ export default {
         class="col-8 col-md-9 gl-p-0"
         :label="$options.i18n.webhookUrl.label"
         label-for="url"
-        label-class="label-bold"
       >
         <gl-form-input-group id="url" data-testid="webhook-url" readonly :value="webhookUrl">
           <template #append>
@@ -135,7 +134,7 @@ export default {
           </template>
         </gl-form-input-group>
 
-        <div class="gl-text-gray-400 gl-pt-2">
+        <div class="gl-text-gray-200 gl-pt-2">
           <gl-sprintf :message="$options.i18n.webhookUrl.helpText">
             <template #docsLink>
               <gl-link
@@ -168,7 +167,6 @@ export default {
           {{ $options.i18n.webhookUrl.restKeyInfo }}
         </gl-modal>
       </gl-form-group>
-
       <gl-button
         ref="submitBtn"
         :disabled="isSaveDisabled"

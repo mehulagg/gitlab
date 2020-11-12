@@ -14,6 +14,8 @@ RSpec.describe 'Issue Sidebar' do
   let_it_be(:issue_no_group) { create(:labeled_issue, project: project_without_group, labels: [label]) }
 
   before do
+    stub_feature_flags(vue_issue_header: false)
+
     sign_in(user)
   end
 
@@ -84,12 +86,24 @@ RSpec.describe 'Issue Sidebar' do
     end
 
     context 'when health status feature is available' do
-      it 'shows health status on sidebar' do
+      before do
         stub_licensed_features(issuable_health_status: true)
 
         visit_issue(project, issue)
+      end
 
+      it 'shows health status on sidebar' do
         expect(page).to have_selector('.block.health-status')
+      end
+
+      context 'when user closes an issue' do
+        it 'disables the edit button' do
+          page.find('[data-testid="close-issue-button"]').click
+
+          page.within('.health-status') do
+            expect(page).to have_button('Edit', disabled: true)
+          end
+        end
       end
     end
 
@@ -113,26 +127,12 @@ RSpec.describe 'Issue Sidebar' do
         expect(page).not_to have_selector('.block.health-status')
       end
     end
-
-    it 'pushes frontend feature flag saveIssuableHealthStatus' do
-      visit_issue(project, issue)
-
-      expect(page).to have_pushed_frontend_feature_flags(saveIssuableHealthStatus: true)
-    end
-
-    context 'when save_issuable_health_status feature flag is disabled' do
-      it 'pushes disabled frontend feature flag saveIssuableHealthStatus' do
-        stub_feature_flags(save_issuable_health_status: false)
-        visit_issue(project, issue)
-
-        expect(page).to have_pushed_frontend_feature_flags(saveIssuableHealthStatus: false)
-      end
-    end
   end
 
   context 'Iterations', :js do
     context 'when iterations feature available' do
       let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now, title: 'Iteration 1') }
+      let_it_be(:iteration2) { create(:iteration, group: group, start_date: 2.days.ago, due_date: 1.day.ago, title: 'Iteration 2', state: 'closed', skip_future_date_validation: true) }
 
       before do
         iteration
@@ -157,6 +157,14 @@ RSpec.describe 'Issue Sidebar' do
         select_iteration('No iteration')
 
         expect(page.find('[data-testid="select-iteration"]')).to have_content('No iteration')
+      end
+
+      it 'does not show closed iterations' do
+        find_and_click_edit_iteration
+
+        page.within '.milestone' do
+          expect(page).not_to have_content iteration2.title
+        end
       end
     end
 

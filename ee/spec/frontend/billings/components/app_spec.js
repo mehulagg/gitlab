@@ -2,6 +2,9 @@ import { shallowMount } from '@vue/test-utils';
 import createStore from 'ee/billings/stores';
 import SubscriptionApp from 'ee/billings/components/app.vue';
 import SubscriptionTable from 'ee/billings/components/subscription_table.vue';
+import SubscriptionSeats from 'ee/billings/components/subscription_seats.vue';
+import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
+import { mockDataSeats } from '../mock_data';
 
 describe('SubscriptionApp component', () => {
   let store;
@@ -14,13 +17,16 @@ describe('SubscriptionApp component', () => {
     customerPortalUrl: 'https://customers.gitlab.com/subscriptions',
   };
 
-  const factory = (props = appProps) => {
+  const factory = (props = appProps, isFeatureEnabledApiBillableMemberList = true) => {
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionApp, {
       store,
       propsData: { ...props },
+      provide: {
+        glFeatures: { apiBillableMemberList: isFeatureEnabledApiBillableMemberList },
+      },
     });
   };
 
@@ -31,6 +37,8 @@ describe('SubscriptionApp component', () => {
     expect(componentWrapper.props()).toEqual(expect.objectContaining(props));
   };
 
+  const findSubscriptionSeatsTable = () => wrapper.find(SubscriptionSeats);
+
   afterEach(() => {
     wrapper.destroy();
   });
@@ -38,16 +46,14 @@ describe('SubscriptionApp component', () => {
   describe('on creation', () => {
     beforeEach(() => {
       factory();
+      store.commit(`subscription/${types.RECEIVE_HAS_BILLABLE_MEMBERS_SUCCESS}`, mockDataSeats);
     });
 
-    it('dispatches the setNamespaceId on mounted', () => {
+    it('dispatches expected actions on created', () => {
       expect(store.dispatch.mock.calls).toEqual([
-        ['subscription/setNamespaceId', appProps.namespaceId],
+        ['subscription/setNamespaceId', '42'],
+        ['subscription/fetchHasBillableGroupMembers', undefined],
       ]);
-    });
-
-    it('matches the snapshot', () => {
-      expect(wrapper.element).toMatchSnapshot();
     });
 
     it('passes the correct props to the subscriptions table', () => {
@@ -56,6 +62,44 @@ describe('SubscriptionApp component', () => {
         planUpgradeHref: appProps.planUpgradeHref,
         customerPortalUrl: appProps.customerPortalUrl,
       });
+    });
+
+    it('passes the correct props to the subscriptions seats component', () => {
+      expectComponentWithProps(SubscriptionSeats, {
+        namespaceName: appProps.namespaceName,
+        namespaceId: appProps.namespaceId,
+      });
+    });
+  });
+
+  describe('when there are no billable members', () => {
+    beforeEach(() => {
+      factory();
+      store.commit(`subscription/${types.RECEIVE_HAS_BILLABLE_MEMBERS_SUCCESS}`, {
+        data: [],
+        headers: {},
+      });
+    });
+
+    it('does not render the subscription seats table', () => {
+      expect(findSubscriptionSeatsTable().exists()).toBe(false);
+    });
+  });
+
+  describe('when feature flag is disabled', () => {
+    beforeEach(() => {
+      factory(appProps, false);
+    });
+
+    it('does not dispatch fetchBillableGroupMembers action on created', () => {
+      expect(store.dispatch.mock.calls).not.toContainEqual([
+        'subscription/fetchBillableGroupMembers',
+        undefined,
+      ]);
+    });
+
+    it('does not render the subscription seats table', () => {
+      expect(findSubscriptionSeatsTable().exists()).toBe(false);
     });
   });
 });

@@ -14,10 +14,10 @@ import {
   GlTooltipDirective,
   GlPagination,
 } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import AccessorUtils from '~/lib/utils/accessor';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { __ } from '~/locale';
-import { isEmpty } from 'lodash';
 import ErrorTrackingActions from './error_tracking_actions.vue';
 import Tracking from '~/tracking';
 import { trackErrorListViewsOptions, trackErrorStatusUpdateOptions } from '../utils';
@@ -236,7 +236,7 @@ export default {
             <gl-dropdown
               :text="__('Recent searches')"
               class="filtered-search-history-dropdown-wrapper"
-              toggle-class="filtered-search-history-dropdown-toggle-button"
+              toggle-class="filtered-search-history-dropdown-toggle-button gl-shadow-none! gl-border-r-gray-200! gl-border-1! gl-rounded-0!"
               :disabled="loading"
             >
               <div v-if="!$options.hasLocalStorage" class="px-3">
@@ -256,7 +256,7 @@ export default {
               </template>
               <div v-else class="px-3">{{ __("You don't have any recent searches") }}</div>
             </gl-dropdown>
-            <div class="filtered-search-input-container flex-fill">
+            <div class="filtered-search-input-container gl-flex-fill-1">
               <gl-form-input
                 v-model="errorSearchQuery"
                 class="pl-2 filtered-search"
@@ -283,8 +283,8 @@ export default {
         <gl-dropdown
           :text="$options.statusFilters[statusFilter]"
           class="status-dropdown mx-md-1 mb-1 mb-md-0"
-          menu-class="dropdown"
           :disabled="loading"
+          right
         >
           <gl-dropdown-item
             v-for="(label, status) in $options.statusFilters"
@@ -293,7 +293,7 @@ export default {
           >
             <span class="d-flex">
               <gl-icon
-                class="flex-shrink-0 append-right-4"
+                class="gl-new-dropdown-item-check-icon"
                 :class="{ invisible: !isCurrentStatusFilter(status) }"
                 name="mobile-issue-close"
               />
@@ -302,12 +302,7 @@ export default {
           </gl-dropdown-item>
         </gl-dropdown>
 
-        <gl-dropdown
-          :text="$options.sortFields[sortField]"
-          left
-          :disabled="loading"
-          menu-class="dropdown"
-        >
+        <gl-dropdown :text="$options.sortFields[sortField]" right :disabled="loading">
           <gl-dropdown-item
             v-for="(label, field) in $options.sortFields"
             :key="field"
@@ -315,7 +310,7 @@ export default {
           >
             <span class="d-flex">
               <gl-icon
-                class="flex-shrink-0 append-right-4"
+                class="gl-new-dropdown-item-check-icon"
                 :class="{ invisible: !isCurrentSortField(field) }"
                 name="mobile-issue-close"
               />

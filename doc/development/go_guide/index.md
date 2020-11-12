@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Go standards and style guidelines
 
 This document describes various guidelines and best practices for GitLab
@@ -108,13 +114,13 @@ lint:
     - '[ -e .golangci.yml ] || cp /golangci/.golangci.yml .'
     # Write the code coverage report to gl-code-quality-report.json
     # and print linting issues to stdout in the format: path/to/file:line description
-    - golangci-lint run --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+    - golangci-lint run --issues-exit-code 0 --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
     paths:
       - gl-code-quality-report.json
-  allow_failure: true
 ```
 
 Including a `.golangci.yml` in the root directory of the project allows for
@@ -130,7 +136,7 @@ become available, you will be able to share job templates like this
 Dependencies should be kept to the minimum. The introduction of a new
 dependency should be argued in the merge request, as per our [Approval
 Guidelines](../code_review.md#approval-guidelines). Both [License
-Management](../../user/compliance/license_compliance/index.md)
+Scanning](../../user/compliance/license_compliance/index.md)
 **(ULTIMATE)** and [Dependency
 Scanning](../../user/application_security/dependency_scanning/index.md)
 **(ULTIMATE)** should be activated on all projects to ensure new dependencies
@@ -138,7 +144,7 @@ security status and license compatibility.
 
 ### Modules
 
-Since Go 1.11, a standard dependency system is available behind the name [Go
+In Go 1.11 and later, a standard dependency system is available behind the name [Go
 Modules](https://github.com/golang/go/wiki/Modules). It provides a way to
 define and lock dependencies for reproducible builds. It should be used
 whenever possible.
@@ -472,7 +478,7 @@ In case we want to drop support for `go 1.11` in GitLab `12.10`, we need to veri
 
 We will not consider the active milestone, `12.10`, because a backport for `12.7` will be required in case of a critical security release.
 
-1. If both [Omnibus and CNG](#updating-go-version) were using Go `1.12` since GitLab `12.7`, then we safely drop support for `1.11`.
+1. If both [Omnibus and CNG](#updating-go-version) were using Go `1.12` in GitLab `12.7` and later, then we safely drop support for `1.11`.
 1. If Omnibus or CNG were using `1.11` in GitLab `12.7`, then we still need to keep support for Go `1.11` for easier backporting of security fixes.
 
 ## Secure Team standards and style guidelines

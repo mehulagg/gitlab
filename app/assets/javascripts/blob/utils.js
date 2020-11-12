@@ -1,17 +1,16 @@
 import Editor from '~/editor/editor_lite';
 
-export function initEditorLite({ el, blobPath, blobContent }) {
-  if (!el) {
-    throw new Error(`"el" parameter is required to initialize Editor`);
-  }
-  const editor = new Editor();
-  editor.createInstance({
-    el,
-    blobPath,
-    blobContent,
+export function initEditorLite({ el, ...args }) {
+  const editor = new Editor({
+    scrollbar: {
+      alwaysConsumeMouseWheel: false,
+    },
   });
 
-  return editor;
+  return editor.createInstance({
+    el,
+    ...args,
+  });
 }
 
 export default () => ({});

@@ -20,6 +20,15 @@ describe('License store mutations', () => {
     });
   });
 
+  describe('SET_KNOWN_LICENSES', () => {
+    it('assigns knownLicenses to the store', () => {
+      const licenses = [{ name: 'BSD' }, { name: 'Apache' }];
+      store.commit(`licenseManagement/${types.SET_KNOWN_LICENSES}`, licenses);
+
+      expect(store.state.licenseManagement.knownLicenses).toBe(licenses);
+    });
+  });
+
   describe('RESET_LICENSE_IN_MODAL', () => {
     it('closes modal and deletes licenseInApproval', () => {
       store.replaceState({

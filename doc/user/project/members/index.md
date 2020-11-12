@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Members of a project
 
 You can manage the groups and users and their access levels in all of your
@@ -92,6 +98,9 @@ invitation, change their access level, or even delete them.
 
 Once the user accepts the invitation, they will be prompted to create a new
 GitLab account using the same e-mail address the invitation was sent to.
+
+Note: **Note:**
+Unaccepted invites are automatically deleted after 90 days.
 
 ## Project membership and requesting access
 

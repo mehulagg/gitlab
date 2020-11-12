@@ -22,7 +22,7 @@ RSpec.describe API::ImportGithub do
 
     before do
       Grape::Endpoint.before_each do |endpoint|
-        allow(endpoint).to receive(:client).and_return(double('client', user: provider_user, repo: provider_repo).as_null_object)
+        allow(endpoint).to receive(:client).and_return(double('client', user: provider_user, repository: provider_repo).as_null_object)
       end
     end
 
@@ -51,6 +51,22 @@ RSpec.describe API::ImportGithub do
         target_namespace: user.namespace_path,
         personal_access_token: token,
         repo_id: non_existing_record_id
+      }
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response).to be_a Hash
+      expect(json_response['name']).to eq(project.name)
+    end
+
+    it 'returns 201 response when the project is imported successfully from GHE' do
+      allow(Gitlab::LegacyGithubImport::ProjectCreator)
+        .to receive(:new).with(provider_repo, provider_repo.name, user.namespace, user, access_params, type: provider)
+          .and_return(double(execute: project))
+
+      post api("/import/github", user), params: {
+        target_namespace: user.namespace_path,
+        personal_access_token: token,
+        repo_id: non_existing_record_id,
+        github_hostname: "https://github.somecompany.com/"
       }
       expect(response).to have_gitlab_http_status(:created)
       expect(json_response).to be_a Hash

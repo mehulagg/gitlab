@@ -14,6 +14,15 @@ export const RULE_NAME_ANY_APPROVER = 'All Members';
 export const VULNERABILITY_CHECK_NAME = 'Vulnerability-Check';
 export const LICENSE_CHECK_NAME = 'License-Check';
 
+export const JOB_TYPES = {
+  SAST: 'sast',
+  DAST: 'dast',
+  DEPENDENCY_SCANNING: 'dependency_scanning',
+  SECRET_DETECTION: 'secret_detection',
+  COVERAGE_FUZZING: 'coverage_fuzzing',
+  LICENSE_SCANNING: 'license_scanning',
+};
+
 export const APPROVAL_RULE_CONFIGS = {
   [VULNERABILITY_CHECK_NAME]: {
     title: __('Vulnerability-Check'),
@@ -25,7 +34,7 @@ export const APPROVAL_RULE_CONFIGS = {
   [LICENSE_CHECK_NAME]: {
     title: __('License-Check'),
     popoverText: __(
-      'A merge request approval is required when the license compliance report contains a blacklisted license.',
+      'A merge request approval is required when the license compliance report contains a denied license.',
     ),
     documentationText: __('Learn more about License-Check'),
   },

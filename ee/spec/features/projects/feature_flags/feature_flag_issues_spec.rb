@@ -13,7 +13,7 @@ RSpec.describe 'Feature flag issue links', :js do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
+    stub_licensed_features(feature_flags_related_issues: true)
     sign_in(developer)
   end
 
@@ -60,22 +60,9 @@ RSpec.describe 'Feature flag issue links', :js do
       end
     end
 
-    context 'when the feature is disabled' do
+    context 'when the feature is unlicensed' do
       before do
-        stub_feature_flags(feature_flags_issue_links: false)
-      end
-
-      it 'does not show the related issues widget' do
-        visit(edit_project_feature_flag_path(project, feature_flag))
-
-        expect(page).to have_text 'Strategies'
-        expect(page).not_to have_selector '#related-issues'
-      end
-    end
-
-    context 'when the related issues feature is unavailable' do
-      before do
-        stub_licensed_features(related_issues: false, feature_flags: true)
+        stub_licensed_features(feature_flags_related_issues: false)
       end
 
       it 'does not show the related issues widget' do

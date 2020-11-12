@@ -20,6 +20,8 @@ RSpec.describe SamlProvider do
     it { is_expected.to validate_presence_of(:group) }
     it { is_expected.to validate_presence_of(:sso_url) }
     it { is_expected.to validate_presence_of(:certificate_fingerprint) }
+    it { is_expected.to validate_presence_of(:default_membership_role) }
+    it { is_expected.to validate_inclusion_of(:default_membership_role).in_array([10, 20, 30, 40]) }
 
     it 'expects sso_url to be an https URL' do
       expect(subject).to allow_value('https://example.com').for(:sso_url)
@@ -59,6 +61,42 @@ RSpec.describe SamlProvider do
 
       expect(subject).to allow_value(group).for(:group)
       expect(subject).not_to allow_value(nested_group).for(:group)
+    end
+
+    describe 'access level inclusion' do
+      let(:group) { create(:group) }
+
+      context 'when minimal access user feature is switched on' do
+        before do
+          stub_licensed_features(minimal_access_role: true)
+        end
+
+        it 'default membership role can have access levels from minimal access to owner' do
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MINIMAL_ACCESS)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::OWNER)).to be_valid
+        end
+      end
+
+      context 'when minimal access user feature switched off' do
+        before do
+          stub_licensed_features(minimal_access_role: false)
+        end
+
+        it 'default membership role can have access levels from guest to owner' do
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MINIMAL_ACCESS)).to be_invalid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::OWNER)).to be_valid
+        end
+      end
     end
   end
 

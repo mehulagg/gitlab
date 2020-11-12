@@ -43,9 +43,12 @@ $subscriptions-full-width-lg: 541px;
       width: 400px;
     }
 
+    list-style-position: inside;
+    list-style-type: decimal;
+
     .phase {
       border-bottom: 5px solid $gray-100;
-      color: $gray-700;
+      color: $gray-500;
       flex-basis: 100%;
       font-size: $gl-font-size-12;
       line-height: $gl-line-height;
@@ -75,6 +78,14 @@ $subscriptions-full-width-lg: 541px;
 
     @media(min-width: map-get($grid-breakpoints, lg)) {
       width: $subscriptions-full-width-lg;
+    }
+
+    &.payment-method {
+      // Use literals here to avoid dark theme from changing the color
+      // scss-lint:disable ColorVariable
+      background-color: #fff;
+      color: #303030;
+      // scss-lint:enable ColorVariable
     }
   }
 
@@ -141,7 +152,10 @@ $subscriptions-full-width-lg: 541px;
     }
 
     iframe {
-      background-color: $white;
+      // Use literal to avoid dark theme from changing the color
+      // scss-lint:disable ColorVariable
+      background-color: #fff;
+      // scss-lint:enable ColorVariable
       margin: -4px;
       width: 100% !important;
     }
@@ -169,6 +183,7 @@ $subscriptions-full-width-lg: 541px;
     }
 
     .field_with_errors {
+      @include gl-flex-grow-1;
       display: inline;
     }
 

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Migration to Vue 3
 
 In order to prepare for the eventual migration to Vue 3.x, we should be wary about adding the following features to the codebase:
@@ -75,6 +81,8 @@ const FunctionalComp = (props, slots) => {
   return h('div', `Hello! ${props.name}`)
 }
 ```
+
+It is not recommended to replace stateful components with functional components unless you absolutely need a performance improvement right now. In Vue 3, performance gains for functional components will be negligible.
 
 ## Old slots syntax with `slot` attribute
 

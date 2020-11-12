@@ -3,20 +3,30 @@
 module API
   # Internal access API
   module Internal
-    class Base < Grape::API::Instance
+    class Base < ::API::Base
       before { authenticate_by_gitlab_shell_token! }
 
       before do
+        api_endpoint = env['api.endpoint']
+        feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
+
+        header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
+
         Gitlab::ApplicationContext.push(
           user: -> { actor&.user },
           project: -> { project },
-          caller_id: route.origin
+          caller_id: route.origin,
+          feature_category: feature_category
         )
       end
 
       helpers ::API::Helpers::InternalHelpers
 
       UNKNOWN_CHECK_RESULT_ERROR = 'Unknown check result'.freeze
+
+      VALID_PAT_SCOPES = Set.new(
+        Gitlab::Auth::API_SCOPES + Gitlab::Auth::REPOSITORY_SCOPES + Gitlab::Auth::REGISTRY_SCOPES
+      ).freeze
 
       helpers do
         def response_with_status(code: 200, success: true, message: nil, **extra_options)
@@ -95,6 +105,14 @@ module API
             @project = @container = access_checker.container
           end
         end
+
+        def validate_actor_key(actor, key_id)
+          return 'Could not find a user without a key' unless key_id
+
+          return 'Could not find the given key' unless actor.key
+
+          'Could not find a user for the given key' unless actor.user
+        end
       end
 
       namespace 'internal' do
@@ -110,13 +128,13 @@ module API
         #   changes - changes as "oldrev newrev ref", see Gitlab::ChangesList
         #   check_ip - optional, only in EE version, may limit access to
         #     group resources based on its IP restrictions
-        post "/allowed" do
+        post "/allowed", feature_category: :source_code_management do
           # It was moved to a separate method so that EE can alter its behaviour more
           # easily.
           check_allowed(params)
         end
 
-        post "/lfs_authenticate" do
+        post "/lfs_authenticate", feature_category: :source_code_management do
           status 200
 
           unless actor.key_or_user
@@ -134,7 +152,7 @@ module API
         # Get a ssh key using the fingerprint
         #
         # rubocop: disable CodeReuse/ActiveRecord
-        get '/authorized_keys' do
+        get '/authorized_keys', feature_category: :source_code_management do
           fingerprint = params.fetch(:fingerprint) do
             Gitlab::InsecureKeyFingerprint.new(params.fetch(:key)).fingerprint
           end
@@ -147,11 +165,11 @@ module API
         #
         # Discover user by ssh key, user id or username
         #
-        get '/discover' do
+        get '/discover', feature_category: :authentication_and_authorization do
           present actor.user, with: Entities::UserSafe
         end
 
-        get '/check' do
+        get '/check', feature_category: :not_owned do
           {
             api_version: API.version,
             gitlab_version: Gitlab::VERSION,
@@ -159,27 +177,22 @@ module API
             redis: redis_ping
           }
         end
-        post '/two_factor_recovery_codes' do
+
+        post '/two_factor_recovery_codes', feature_category: :authentication_and_authorization do
           status 200
 
           actor.update_last_used_at!
           user = actor.user
 
-          if params[:key_id]
-            unless actor.key
-              break { success: false, message: 'Could not find the given key' }
-            end
+          error_message = validate_actor_key(actor, params[:key_id])
 
-            if actor.key.is_a?(DeployKey)
-              break { success: false, message: 'Deploy keys cannot be used to retrieve recovery codes' }
-            end
-
-            unless user
-              break { success: false, message: 'Could not find a user for the given key' }
-            end
-          elsif params[:user_id] && user.nil?
+          if params[:user_id] && user.nil?
             break { success: false, message: 'Could not find the given user' }
+          elsif error_message
+            break { success: false, message: error_message }
           end
+
+          break { success: false, message: 'Deploy keys cannot be used to retrieve recovery codes' } if actor.key.is_a?(DeployKey)
 
           unless user.two_factor_enabled?
             break { success: false, message: 'Two-factor authentication is not enabled for this user' }
@@ -194,7 +207,57 @@ module API
           { success: true, recovery_codes: codes }
         end
 
-        post '/pre_receive' do
+        post '/personal_access_token', feature_category: :authentication_and_authorization do
+          status 200
+
+          actor.update_last_used_at!
+          user = actor.user
+
+          error_message = validate_actor_key(actor, params[:key_id])
+
+          break { success: false, message: 'Deploy keys cannot be used to create personal access tokens' } if actor.key.is_a?(DeployKey)
+
+          if params[:user_id] && user.nil?
+            break { success: false, message: 'Could not find the given user' }
+          elsif error_message
+            break { success: false, message: error_message }
+          end
+
+          if params[:name].blank?
+            break { success: false, message: "No token name specified" }
+          end
+
+          if params[:scopes].blank?
+            break { success: false, message: "No token scopes specified" }
+          end
+
+          invalid_scope = params[:scopes].find { |scope| VALID_PAT_SCOPES.exclude?(scope.to_sym) }
+
+          if invalid_scope
+            valid_scopes = VALID_PAT_SCOPES.map(&:to_s).sort
+            break { success: false, message: "Invalid scope: '#{invalid_scope}'. Valid scopes are: #{valid_scopes}" }
+          end
+
+          begin
+            expires_at = params[:expires_at].presence && Date.parse(params[:expires_at])
+          rescue ArgumentError
+            break { success: false, message: "Invalid token expiry date: '#{params[:expires_at]}'" }
+          end
+
+          result = ::PersonalAccessTokens::CreateService.new(
+            current_user: user, target_user: user, params: { name: params[:name], scopes: params[:scopes], expires_at: expires_at }
+          ).execute
+
+          unless result.status == :success
+            break { success: false, message: "Failed to create token: #{result.message}" }
+          end
+
+          access_token = result.payload[:personal_access_token]
+
+          { success: true, token: access_token.token, scopes: access_token.scopes, expires_at: access_token.expires_at }
+        end
+
+        post '/pre_receive', feature_category: :source_code_management do
           status 200
 
           reference_counter_increased = Gitlab::ReferenceCounter.new(params[:gl_repository]).increase
@@ -202,12 +265,59 @@ module API
           { reference_counter_increased: reference_counter_increased }
         end
 
-        post '/post_receive' do
+        post '/post_receive', feature_category: :source_code_management do
           status 200
 
           response = PostReceiveService.new(actor.user, repository, project, params).execute
 
           present response, with: Entities::InternalPostReceive::Response
+        end
+
+        post '/two_factor_config', feature_category: :authentication_and_authorization do
+          status 200
+
+          break { success: false } unless Feature.enabled?(:two_factor_for_cli)
+
+          actor.update_last_used_at!
+          user = actor.user
+
+          error_message = validate_actor_key(actor, params[:key_id])
+
+          if error_message
+            { success: false, message: error_message }
+          elsif actor.key.is_a?(DeployKey)
+            { success: true, two_factor_required: false }
+          else
+            {
+              success: true,
+              two_factor_required: user.two_factor_enabled?
+            }
+          end
+        end
+
+        post '/two_factor_otp_check', feature_category: :authentication_and_authorization do
+          status 200
+
+          break { success: false } unless Feature.enabled?(:two_factor_for_cli)
+
+          actor.update_last_used_at!
+          user = actor.user
+
+          error_message = validate_actor_key(actor, params[:key_id])
+
+          break { success: false, message: error_message } if error_message
+
+          break { success: false, message: 'Deploy keys cannot be used for Two Factor' } if actor.key.is_a?(DeployKey)
+
+          break { success: false, message: 'Two-factor authentication is not enabled for this user' } unless user.two_factor_enabled?
+
+          otp_validation_result = ::Users::ValidateOtpService.new(user).execute(params.fetch(:otp_attempt))
+
+          if otp_validation_result[:status] == :success
+            { success: true }
+          else
+            { success: false, message: 'Invalid OTP' }
+          end
         end
       end
     end

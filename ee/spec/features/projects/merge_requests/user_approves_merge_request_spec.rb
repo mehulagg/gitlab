@@ -77,7 +77,7 @@ RSpec.describe 'User approves a merge request', :js do
 
   context 'when user cannot approve' do
     before do
-      merge_request.approvers.create(user_id: user2.id)
+      merge_request.approvers.create!(user_id: user2.id)
 
       visit(merge_request_path(merge_request))
     end

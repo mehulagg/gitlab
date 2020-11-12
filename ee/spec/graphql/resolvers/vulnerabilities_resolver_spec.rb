@@ -6,17 +6,17 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
   include GraphqlHelpers
 
   describe '#resolve' do
-    subject { resolve(described_class, obj: vulnerable, args: filters, ctx: { current_user: current_user }) }
+    subject { resolve(described_class, obj: vulnerable, args: params, ctx: { current_user: current_user }) }
 
     let_it_be(:project) { create(:project) }
     let_it_be(:user) { create(:user, security_dashboard_projects: [project]) }
 
     let_it_be(:low_vulnerability) do
-      create(:vulnerability, :with_findings, :detected, :low, :dast, project: project)
+      create(:vulnerability, :with_findings, :detected, :low, :dast, :with_issue_links, project: project)
     end
 
     let_it_be(:critical_vulnerability) do
-      create(:vulnerability, :with_findings, :detected, :critical, :sast, project: project)
+      create(:vulnerability, :with_findings, :detected, :critical, :sast, resolved_on_default_branch: true, project: project)
     end
 
     let_it_be(:high_vulnerability) do
@@ -24,17 +24,37 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
     end
 
     let(:current_user) { user }
-    let(:filters) { {} }
+    let(:params) { {} }
     let(:vulnerable) { project }
 
-    it 'orders results by severity' do
-      expect(subject.first).to eq(critical_vulnerability)
-      expect(subject.second).to eq(high_vulnerability)
-      expect(subject.third).to eq(low_vulnerability)
+    context 'when given sort' do
+      context 'when sorting descending by severity' do
+        let(:params) { { sort: :severity_desc } }
+
+        it { is_expected.to eq([critical_vulnerability, high_vulnerability, low_vulnerability]) }
+      end
+
+      context 'when sorting ascending by severity' do
+        let(:params) { { sort: :severity_asc } }
+
+        it { is_expected.to eq([low_vulnerability, high_vulnerability, critical_vulnerability]) }
+      end
+
+      context 'when sorting param is not provided' do
+        let(:params) { {} }
+
+        it { is_expected.to eq([critical_vulnerability, high_vulnerability, low_vulnerability]) }
+      end
+
+      context 'when sorting by invalid param' do
+        let(:params) { { sort: :invalid } }
+
+        it { is_expected.to eq([critical_vulnerability, high_vulnerability, low_vulnerability]) }
+      end
     end
 
     context 'when given severities' do
-      let(:filters) { { severity: ['low'] } }
+      let(:params) { { severity: ['low'] } }
 
       it 'only returns vulnerabilities of the given severities' do
         is_expected.to contain_exactly(low_vulnerability)
@@ -42,7 +62,7 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
     end
 
     context 'when given states' do
-      let(:filters) { { state: ['dismissed'] } }
+      let(:params) { { state: ['dismissed'] } }
 
       it 'only returns vulnerabilities of the given states' do
         is_expected.to contain_exactly(high_vulnerability)
@@ -50,7 +70,7 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
     end
 
     context 'when given scanner' do
-      let(:filters) { { scanner: [high_vulnerability.finding_scanner_external_id] } }
+      let(:params) { { scanner: [high_vulnerability.finding_scanner_external_id] } }
 
       it 'only returns vulnerabilities of the given scanner' do
         is_expected.to contain_exactly(high_vulnerability)
@@ -58,10 +78,50 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
     end
 
     context 'when given report types' do
-      let(:filters) { { report_type: %i[dast sast] } }
+      let(:params) { { report_type: %i[dast sast] } }
 
       it 'only returns vulnerabilities of the given report types' do
         is_expected.to contain_exactly(critical_vulnerability, low_vulnerability)
+      end
+    end
+
+    context 'when given value for hasIssues argument' do
+      let(:params) { { has_issues: has_issues } }
+
+      context 'when has_issues is set to true' do
+        let(:has_issues) { true }
+
+        it 'only returns vulnerabilities that have issues' do
+          is_expected.to contain_exactly(low_vulnerability)
+        end
+      end
+
+      context 'when has_issues is set to false' do
+        let(:has_issues) { false }
+
+        it 'only returns vulnerabilities that does not have issues' do
+          is_expected.to contain_exactly(critical_vulnerability, high_vulnerability)
+        end
+      end
+    end
+
+    context 'when given value for has_resolution argument' do
+      let(:params) { { has_resolution: has_resolution } }
+
+      context 'when has_resolution is set to true' do
+        let(:has_resolution) { true }
+
+        it 'only returns resolution that have resolution' do
+          is_expected.to contain_exactly(critical_vulnerability)
+        end
+      end
+
+      context 'when has_resolution is set to false' do
+        let(:has_resolution) { false }
+
+        it 'only returns resolution that does not have resolution' do
+          is_expected.to contain_exactly(low_vulnerability, high_vulnerability)
+        end
       end
     end
 
@@ -70,7 +130,7 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
       let_it_be(:project2) { create(:project, namespace: group) }
       let_it_be(:project2_vulnerability) { create(:vulnerability, project: project2) }
 
-      let(:filters) { { project_id: [project2.id] } }
+      let(:params) { { project_id: [project2.id] } }
       let(:vulnerable) { group }
 
       before do
@@ -79,6 +139,20 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
 
       it 'only returns vulnerabilities belonging to the given projects' do
         is_expected.to contain_exactly(project2_vulnerability)
+      end
+
+      context 'with multiple project IDs' do
+        let(:params) { { project_id: [project.id, project2.id] } }
+
+        it 'avoids N+1 queries' do
+          control_count = ActiveRecord::QueryRecorder.new do
+            resolve(described_class, obj: vulnerable, args: { project_id: [project2.id] }, ctx: { current_user: current_user })
+          end.count
+
+          expect do
+            subject
+          end.not_to exceed_query_limit(control_count)
+        end
       end
     end
 

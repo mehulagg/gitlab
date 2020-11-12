@@ -1,4 +1,4 @@
-import { getFormattedSummary } from 'ee/security_dashboard/helpers';
+import { getFormattedSummary, preparePageInfo } from 'ee/security_dashboard/helpers';
 
 describe('getFormattedSummary', () => {
   it('returns a properly formatted array given a valid, non-empty summary', () => {
@@ -40,4 +40,27 @@ describe('getFormattedSummary', () => {
       expect(getFormattedSummary(summary)).toEqual([]);
     },
   );
+});
+
+describe('preparePageInfo', () => {
+  describe('when pageInfo is empty', () => {
+    it('returns pageInfo object with hasNextPage set to false', () => {
+      expect(preparePageInfo(null)).toEqual({ hasNextPage: false });
+    });
+  });
+
+  describe('when pageInfo.endCursor is NULL', () => {
+    it('returns pageInfo object with hasNextPage set to false', () => {
+      expect(preparePageInfo({ endCursor: null })).toEqual({ endCursor: null, hasNextPage: false });
+    });
+  });
+
+  describe('when pageInfo.endCursor is provided', () => {
+    it('returns pageInfo object with hasNextPage set to true', () => {
+      expect(preparePageInfo({ endCursor: 'ENDCURSORVALUE' })).toEqual({
+        endCursor: 'ENDCURSORVALUE',
+        hasNextPage: true,
+      });
+    });
+  });
 });

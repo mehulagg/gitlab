@@ -1,16 +1,29 @@
 import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'jest/helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import { initEmojiMap, EMOJI_VERSION } from '~/emoji';
 import installGlEmojiElement from '~/behaviors/gl_emoji';
 
 import * as EmojiUnicodeSupport from '~/emoji/support';
-import waitForPromises from 'jest/helpers/wait_for_promises';
 
 jest.mock('~/emoji/support');
 
 describe('gl_emoji', () => {
   let mock;
-  const emojiData = getJSONFixture('emojis/emojis.json');
+  const emojiData = {
+    grey_question: {
+      c: 'symbols',
+      e: '❔',
+      d: 'white question mark ornament',
+      u: '6.0',
+    },
+    bomb: {
+      c: 'objects',
+      e: '💣',
+      d: 'bomb',
+      u: '6.0',
+    },
+  };
 
   beforeAll(() => {
     jest.spyOn(EmojiUnicodeSupport, 'default').mockReturnValue(true);

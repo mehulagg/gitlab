@@ -10,6 +10,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
   end
 
   let(:project) { create(:project, :repository) }
+  let(:user) { project.owner }
+
   let(:expected_from_sha) { Gitlab::Git::EMPTY_TREE_ID }
   let(:to_commit) { project.commit }
   let(:to_sha) { to_commit.try(:sha) }
@@ -83,7 +85,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
 
       it 'runs the indexing command' do
         gitaly_connection_data = {
-          storage: project.repository_storage
+          storage: project.repository_storage,
+          limit_file_size: Gitlab::CurrentSettings.elasticsearch_indexed_file_size_limit_kb.kilobytes
         }.merge(Gitlab::GitalyClient.connection_data(project.repository_storage))
 
         expect_popen.with(
@@ -131,27 +134,12 @@ RSpec.describe Gitlab::Elastic::Indexer do
       it_behaves_like 'index up to the specified commit'
 
       context 'after reverting a change' do
-        let(:user) { project.owner }
         let!(:initial_commit) { project.repository.commit('master').sha }
 
         def change_repository_and_index(project, &blk)
           yield blk if blk
 
-          current_commit = project.repository.commit('master').sha
-
-          described_class.new(project).run(current_commit)
-          ensure_elasticsearch_index!
-        end
-
-        def indexed_file_paths_for(term)
-          blobs = Repository.elastic_search(
-            term,
-            type: 'blob'
-          )[:blobs][:results].response
-
-          blobs.map do |blob|
-            blob['_source']['blob']['path']
-          end
+          index_repository(project)
         end
 
         def indexed_commits_for(term)
@@ -242,8 +230,6 @@ RSpec.describe Gitlab::Elastic::Indexer do
       end
 
       context 'when IndexStatus#last_wiki_commit is no longer in repository' do
-        let(:user) { project.owner }
-
         def change_wiki_and_index(project, &blk)
           yield blk if blk
 
@@ -345,12 +331,79 @@ RSpec.describe Gitlab::Elastic::Indexer do
       allow(Gitlab::Elastic::Client).to receive(:aws_credential_provider).and_return(credentials)
     end
 
-    it 'credentials env vars will be included' do
-      expect(subject).to include({
-        'AWS_ACCESS_KEY_ID' => access_key_id,
-        'AWS_SECRET_ACCESS_KEY' => secret_access_key,
-        'AWS_SESSION_TOKEN' => session_token
-      })
+    context 'when AWS config is not enabled' do
+      it 'credentials env vars will not be included' do
+        expect(subject).not_to include('AWS_ACCESS_KEY_ID')
+        expect(subject).not_to include('AWS_SECRET_ACCESS_KEY')
+        expect(subject).not_to include('AWS_SESSION_TOKEN')
+      end
+    end
+
+    context 'when AWS config is enabled' do
+      before do
+        stub_application_setting(elasticsearch_aws: true)
+      end
+
+      it 'credentials env vars will be included' do
+        expect(subject).to include({
+          'AWS_ACCESS_KEY_ID' => access_key_id,
+          'AWS_SECRET_ACCESS_KEY' => secret_access_key,
+          'AWS_SESSION_TOKEN' => session_token
+        })
+      end
+    end
+  end
+
+  context 'when a file is larger than elasticsearch_indexed_file_size_limit_kb', :elastic do
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_ee_application_setting(elasticsearch_indexed_file_size_limit_kb: 1) # 1 KiB limit
+
+      project.repository.create_file(user, 'small_file.txt', 'Small file contents', message: 'small_file.txt', branch_name: 'master')
+      project.repository.create_file(user, 'large_file.txt', 'Large file' * 1000, message: 'large_file.txt', branch_name: 'master')
+
+      index_repository(project)
+    end
+
+    it 'does not index that file' do
+      files = indexed_file_paths_for('file')
+      expect(files).to include('small_file.txt')
+      expect(files).not_to include('large_file.txt')
+    end
+  end
+
+  context 'when a file path is larger than elasticsearch max size of 512 bytes', :elastic do
+    let(:long_path) { "#{'a' * 1000}_file.txt" }
+
+    before do
+      project.repository.create_file(user, long_path, 'Large path file contents', message: 'long_path.txt', branch_name: 'master')
+
+      index_repository(project)
+    end
+
+    it 'indexes the file' do
+      files = indexed_file_paths_for('file')
+      expect(files).to include(long_path)
+    end
+  end
+
+  context 'when project no longer exists in database' do
+    let!(:logger_double) { instance_double(Gitlab::Elasticsearch::Logger) }
+
+    before do
+      allow(Gitlab::Elasticsearch::Logger).to receive(:build).and_return(logger_double)
+      allow(indexer).to receive(:run_indexer!) { Project.where(id: project.id).delete_all }
+    end
+
+    it 'does not raises an exception and prints log message' do
+      expect(logger_double).to receive(:debug).with(
+        message: 'Index status could not be updated as the project does not exist',
+        project_id: project.id,
+        wiki: false
+      )
+      expect(IndexStatus).not_to receive(:safe_find_or_create_by!).with(project_id: project.id)
+      expect { indexer.run }.not_to raise_error
     end
   end
 
@@ -377,5 +430,23 @@ RSpec.describe Gitlab::Elastic::Indexer do
                  Gitlab::Git::BLANK_SHA,
                  Gitlab::Git::BLANK_SHA,
                  project.repository.__elasticsearch__.elastic_writing_targets.first)
+  end
+
+  def indexed_file_paths_for(term)
+    blobs = Repository.elastic_search(
+      term,
+      type: 'blob'
+    )[:blobs][:results].response
+
+    blobs.map do |blob|
+      blob['_source']['blob']['path']
+    end
+  end
+
+  def index_repository(project)
+    current_commit = project.repository.commit('master').sha
+
+    described_class.new(project).run(current_commit)
+    ensure_elasticsearch_index!
   end
 end

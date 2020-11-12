@@ -16,9 +16,9 @@ RSpec.describe AuditEvent, type: :model do
   describe 'callbacks' do
     context 'parallel_persist' do
       let_it_be(:details) do
-        { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X' }
+        { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X', target_type: 'User' }
       end
-      let_it_be(:event) { create(:project_audit_event, details: details, target_details: nil) }
+      let_it_be(:event) { create(:project_audit_event, details: details, entity_path: nil, target_details: nil) }
 
       it 'sets author_name' do
         expect(event[:author_name]).to eq('Kungfu Panda')
@@ -33,30 +33,66 @@ RSpec.describe AuditEvent, type: :model do
       end
     end
 
-    describe '#truncate_target_details' do
-      where(:database_column, :details_value, :expected_value) do
-        text_limit = described_class::TEXT_LIMIT[:target_details]
-        long_value = 'a' * (text_limit + 1)
-        truncated_long_value = long_value.truncate(text_limit)
-        short_value = 'a' * text_limit
+    context 'truncate_fields' do
+      shared_examples 'a truncated field' do
+        context 'when values are provided' do
+          using RSpec::Parameterized::TableSyntax
 
-        [
-          [nil, nil, nil],
-          [long_value, nil, truncated_long_value],
-          [short_value, nil, short_value],
-          [nil, long_value, truncated_long_value],
-          [nil, short_value, short_value],
-          [long_value, 'something', truncated_long_value]
-        ]
+          where(:database_column, :details_value, :expected_value) do
+            :long  | nil    | :truncated
+            :short | nil    | :short
+            nil    | :long  | :truncated
+            nil    | :short | :short
+            :long  | :short | :truncated
+          end
+
+          with_them do
+            let(:values) do
+              {
+                long: 'a' * (field_limit + 1),
+                short: 'a' * field_limit,
+                truncated: 'a' * (field_limit - 3) + '...'
+              }
+            end
+
+            let(:audit_event) do
+              create(:audit_event,
+                field_name => values[database_column],
+                details: { field_name => values[details_value] }
+              )
+            end
+
+            it 'sets both values to be the same', :aggregate_failures do
+              expect(audit_event.send(field_name)).to eq(values[expected_value])
+              expect(audit_event.details[field_name]).to eq(values[expected_value])
+            end
+          end
+        end
+
+        context 'when values are not provided' do
+          let(:audit_event) do
+            create(:audit_event, field_name => nil, details: {})
+          end
+
+          it 'does not set', :aggregate_failures do
+            expect(audit_event.send(field_name)).to be_nil
+            expect(audit_event.details).not_to have_key(field_name)
+          end
+        end
       end
 
-      with_them do
-        let(:audit_event) { create(:audit_event, target_details: database_column, details: { target_details: details_value }) }
+      context 'entity_path' do
+        let(:field_name) { :entity_path }
+        let(:field_limit) { 5_500 }
 
-        it 'expects both values to be the same and correct' do
-          expect(audit_event.target_details).to eq(expected_value)
-          expect(audit_event.details[:target_details]).to eq(expected_value)
-        end
+        it_behaves_like 'a truncated field'
+      end
+
+      context 'target_details' do
+        let(:field_name) { :target_details }
+        let(:field_limit) { 5_500 }
+
+        it_behaves_like 'a truncated field'
       end
     end
   end
@@ -166,6 +202,26 @@ RSpec.describe AuditEvent, type: :model do
     end
   end
 
+  describe '#ip_address' do
+    context 'when ip_address exists in both details hash and ip_address column' do
+      subject(:event) do
+        described_class.new(ip_address: '10.2.1.1', details: { ip_address: '192.168.0.1' })
+      end
+
+      it 'returns the value from ip_address column' do
+        expect(event.ip_address).to eq('10.2.1.1')
+      end
+    end
+
+    context 'when ip_address exists in details hash but not in ip_address column' do
+      subject(:event) { described_class.new(details: { ip_address: '192.168.0.1' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.ip_address).to eq('192.168.0.1')
+      end
+    end
+  end
+
   describe '#entity_path' do
     context 'when entity_path exists in both details hash and entity_path column' do
       subject(:event) do
@@ -182,6 +238,26 @@ RSpec.describe AuditEvent, type: :model do
 
       it 'returns the value from details hash' do
         expect(event.entity_path).to eq('gitlab-org/gitlab-foss')
+      end
+    end
+  end
+
+  describe '#target_type' do
+    context 'when target_type exists in both details hash and target_type column' do
+      subject(:event) do
+        described_class.new(target_type: 'Group', details: { target_type: 'Project' })
+      end
+
+      it 'returns the value from target_type column' do
+        expect(event.target_type).to eq('Group')
+      end
+    end
+
+    context 'when target_type exists in details hash but not in target_type column' do
+      subject(:event) { described_class.new(details: { target_type: 'Project' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.target_type).to eq('Project')
       end
     end
   end

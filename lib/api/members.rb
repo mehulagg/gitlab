@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Members < Grape::API::Instance
+  class Members < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :authentication_and_authorization
 
     helpers ::API::Helpers::MembersHelpers
 
@@ -88,8 +90,8 @@ module API
           success Entities::Member
         end
         params do
-          requires :user_id, type: Integer, desc: 'The user ID of the new member'
           requires :access_level, type: Integer, desc: 'A valid access level (defaults: `30`, developer access level)'
+          requires :user_id, types: [Integer, String], desc: 'The user ID of the new member or multiple IDs separated by commas.'
           optional :expires_at, type: DateTime, desc: 'Date string in the format YEAR-MONTH-DAY'
         end
         # rubocop: disable CodeReuse/ActiveRecord
@@ -97,20 +99,26 @@ module API
           source = find_source(source_type, params[:id])
           authorize_admin_source!(source_type, source)
 
-          member = source.members.find_by(user_id: params[:user_id])
-          conflict!('Member already exists') if member
+          if params[:user_id].to_s.include?(',')
+            create_service_params = params.except(:user_id).merge({ user_ids: params[:user_id] })
 
-          user = User.find_by_id(params[:user_id])
-          not_found!('User') unless user
+            ::Members::CreateService.new(current_user, create_service_params).execute(source)
+          elsif params[:user_id].present?
+            member = source.members.find_by(user_id: params[:user_id])
+            conflict!('Member already exists') if member
 
-          member = create_member(current_user, user, source, params)
+            user = User.find_by_id(params[:user_id])
+            not_found!('User') unless user
 
-          if !member
-            not_allowed! # This currently can only be reached in EE
-          elsif member.valid? && member.persisted?
-            present_members(member)
-          else
-            render_validation_error!(member)
+            member = create_member(current_user, user, source, params)
+
+            if !member
+              not_allowed! # This currently can only be reached in EE
+            elsif member.valid? && member.persisted?
+              present_members(member)
+            else
+              render_validation_error!(member)
+            end
           end
         end
         # rubocop: enable CodeReuse/ActiveRecord
@@ -128,7 +136,7 @@ module API
           source = find_source(source_type, params.delete(:id))
           authorize_admin_source!(source_type, source)
 
-          member = source.members.find_by!(user_id: params[:user_id])
+          member = source_members(source).find_by!(user_id: params[:user_id])
           updated_member =
             ::Members::UpdateService
               .new(current_user, declared_params(include_missing: false))
@@ -151,7 +159,7 @@ module API
         # rubocop: disable CodeReuse/ActiveRecord
         delete ":id/members/:user_id" do
           source = find_source(source_type, params[:id])
-          member = source.members.find_by!(user_id: params[:user_id])
+          member = source_members(source).find_by!(user_id: params[:user_id])
 
           destroy_conditionally!(member) do
             ::Members::DestroyService.new(current_user).execute(member, unassign_issuables: params[:unassign_issuables])

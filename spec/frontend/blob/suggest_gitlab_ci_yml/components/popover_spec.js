@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import Popover from '~/blob/suggest_gitlab_ci_yml/components/popover.vue';
 import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
+import { GlButton } from '@gitlab/ui';
+import Popover from '~/blob/suggest_gitlab_ci_yml/components/popover.vue';
 import * as utils from '~/lib/utils/common_utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
 
 jest.mock('~/lib/utils/common_utils', () => ({
   ...jest.requireActual('~/lib/utils/common_utils'),
@@ -16,6 +16,7 @@ const commitTrackLabel = 'suggest_commit_first_project_gitlab_ci_yml';
 
 const dismissCookie = 'suggest_gitlab_ci_yml_99';
 const humanAccess = 'owner';
+const mergeRequestPath = '/some/path';
 
 describe('Suggest gitlab-ci.yml Popover', () => {
   let wrapper;
@@ -26,10 +27,11 @@ describe('Suggest gitlab-ci.yml Popover', () => {
         target,
         trackLabel,
         dismissKey,
+        mergeRequestPath,
         humanAccess,
       },
       stubs: {
-        'gl-popover': '<div><slot name="title"></slot><slot></slot></div>',
+        'gl-popover': { template: '<div><slot name="title"></slot><slot></slot></div>' },
       },
     });
   }
@@ -96,7 +98,7 @@ describe('Suggest gitlab-ci.yml Popover', () => {
       const expectedAction = 'click_button';
       const expectedProperty = 'owner';
       const expectedValue = '10';
-      const dismissButton = wrapper.find(GlDeprecatedButton);
+      const dismissButton = wrapper.find(GlButton);
       trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
 
       triggerEvent(dismissButton.element);

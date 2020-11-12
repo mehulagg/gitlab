@@ -36,4 +36,20 @@ RSpec.describe DependencyProxy::Blob, type: :model do
       expect(described_class.find_or_build(blob.file_name)).to eq(blob)
     end
   end
+
+  describe 'file is being stored' do
+    subject { create(:dependency_proxy_blob) }
+
+    context 'when existing object has local store' do
+      it_behaves_like 'mounted file in local store'
+    end
+
+    context 'when direct upload is enabled' do
+      before do
+        stub_dependency_proxy_object_storage(direct_upload: true)
+      end
+
+      it_behaves_like 'mounted file in object store'
+    end
+  end
 end

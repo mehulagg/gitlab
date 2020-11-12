@@ -70,6 +70,10 @@ module GitlabRoutingHelper
     project_commit_url(entity.project, entity.sha, *args)
   end
 
+  def release_url(entity, *args)
+    project_release_url(entity.project, entity, *args)
+  end
+
   def preview_markdown_path(parent, *args)
     return group_preview_markdown_path(parent, *args) if parent.is_a?(Group)
 
@@ -100,8 +104,12 @@ module GitlabRoutingHelper
     toggle_award_emoji_snippet_path(*args)
   end
 
-  def toggle_award_emoji_namespace_project_project_snippet_path(*args)
-    toggle_award_emoji_namespace_project_snippet_path(*args)
+  def toggle_award_emoji_project_project_snippet_path(*args)
+    toggle_award_emoji_project_snippet_path(*args)
+  end
+
+  def toggle_award_emoji_project_project_snippet_url(*args)
+    toggle_award_emoji_project_snippet_url(*args)
   end
 
   ## Members

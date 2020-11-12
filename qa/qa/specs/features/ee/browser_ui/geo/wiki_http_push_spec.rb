@@ -4,7 +4,7 @@ module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab wiki HTTP push' do
       context 'wiki commit' do
-        it 'is replicated to the secondary node' do
+        it 'is replicated to the secondary node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/691' do
           wiki_content = 'This tests replication of wikis via HTTP'
           push_content = 'This is from the Geo wiki push!'
           project = nil

@@ -1,9 +1,6 @@
 import { isAbsolute, isSafeURL } from '~/lib/utils/url_utility';
 import { REGEXES } from './constants';
 
-window.isAbsolute = isAbsolute;
-window.isSafeURL = isSafeURL;
-
 // Get the issue in the format expected by the descendant components of related_issues_block.vue.
 export const getFormattedIssue = issue => ({
   ...issue,

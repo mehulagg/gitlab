@@ -19,9 +19,13 @@ export const iterationSelectTextMap = {
   iterationSelectFail: __('Failed to set iteration on this issue. Please try again.'),
 };
 
+export const iterationDisplayState = 'opened';
+
 export const healthStatusForRestApi = {
   NO_STATUS: '0',
   [healthStatus.ON_TRACK]: 'on_track',
   [healthStatus.NEEDS_ATTENTION]: 'needs_attention',
   [healthStatus.AT_RISK]: 'at_risk',
 };
+
+export const MAX_DISPLAY_WEIGHT = 99999;

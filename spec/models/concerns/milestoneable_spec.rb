@@ -61,7 +61,7 @@ RSpec.describe Milestoneable do
 
       it 'returns true with a milestone from the the parent of the issue project group' do
         parent = create(:group)
-        group.update(parent: parent)
+        group.update!(parent: parent)
         milestone = create(:milestone, group: parent)
 
         expect(build_milestoneable(milestone.id).milestone_available?).to be_truthy
@@ -98,6 +98,14 @@ RSpec.describe Milestoneable do
 
       it 'returns true' do
         expect(merge_request.supports_milestone?).to be_truthy
+      end
+    end
+
+    context "for incidents" do
+      let(:incident) { build(:incident) }
+
+      it 'returns false' do
+        expect(incident.supports_milestone?).to be_falsy
       end
     end
   end

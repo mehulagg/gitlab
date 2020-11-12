@@ -1,7 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
 
 export default {
   name: 'GeoReplicableEmptyState',
@@ -20,18 +19,6 @@ export default {
   },
   computed: {
     ...mapGetters(['replicableTypeName']),
-    linkText() {
-      return sprintf(
-        s__(
-          'Geo|Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information.',
-        ),
-        {
-          linkStart: `<a href="${this.geoTroubleshootingLink}" target="_blank">`,
-          linkEnd: '</a>',
-        },
-        false,
-      );
-    },
   },
 };
 </script>
@@ -42,9 +29,19 @@ export default {
     :svg-path="geoReplicableEmptySvgPath"
   >
     <template #description>
-      <div>
-        <p v-html="linkText"></p>
-      </div>
+      <p>
+        <gl-sprintf
+          :message="
+            s__(
+              'Geo|Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information.',
+            )
+          "
+        >
+          <template #link="{ content }">
+            <gl-link :href="geoTroubleshootingLink" target="_blank">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
     </template>
   </gl-empty-state>
 </template>

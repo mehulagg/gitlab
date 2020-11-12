@@ -587,15 +587,19 @@ RSpec.describe Repository do
       end
 
       it "is expired when the branches caches are expired" do
-        expect(cache).to receive(:delete).with(:merged_branch_names).at_least(:once)
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
 
-        repository.send(:expire_branches_cache)
+        repository.expire_branches_cache
       end
 
       it "is expired when the repository caches are expired" do
-        expect(cache).to receive(:delete).with(:merged_branch_names).at_least(:once)
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
 
-        repository.send(:expire_all_method_caches)
+        repository.expire_all_method_caches
       end
     end
 
@@ -1241,6 +1245,33 @@ RSpec.describe Repository do
 
       it 'is false' do
         is_expected.to eq(false)
+      end
+    end
+  end
+
+  describe '#has_ambiguous_refs?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:branch_names, :tag_names, :result) do
+      nil | nil | false
+      %w() | %w() | false
+      %w(a b) | %w() | false
+      %w() | %w(c d) | false
+      %w(a b) | %w(c d) | false
+      %w(a/b) | %w(c/d) | false
+      %w(a b) | %w(c d a/z) | true
+      %w(a b c/z) | %w(c d) | true
+      %w(a/b/z) | %w(a/b) | false # we only consider refs ambiguous before the first slash
+      %w(a/b/z) | %w(a/b a) | true
+      %w(ab) | %w(abc/d a b) | false
+    end
+
+    with_them do
+      it do
+        allow(repository).to receive(:branch_names).and_return(branch_names)
+        allow(repository).to receive(:tag_names).and_return(tag_names)
+
+        expect(repository.has_ambiguous_refs?).to eq(result)
       end
     end
   end
@@ -1926,8 +1957,9 @@ RSpec.describe Repository do
         :has_visible_content?,
         :issue_template_names,
         :merge_request_template_names,
-        :metrics_dashboard_paths,
-        :xcode_project?
+        :user_defined_metrics_dashboard_paths,
+        :xcode_project?,
+        :has_ambiguous_refs?
       ])
 
       repository.after_change_head
@@ -2072,7 +2104,7 @@ RSpec.describe Repository do
   describe '#expire_branches_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(branch_names merged_branch_names branch_count has_visible_content?))
+        .with(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_branches_cache
@@ -2082,7 +2114,7 @@ RSpec.describe Repository do
   describe '#expire_tags_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(tag_names tag_count))
+        .with(%i(tag_names tag_count has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_tags_cache
@@ -2656,7 +2688,7 @@ RSpec.describe Repository do
         expect(subject).to be_a(Gitlab::Git::Repository)
         expect(subject.relative_path).to eq(project.disk_path + '.wiki.git')
         expect(subject.gl_repository).to eq("wiki-#{project.id}")
-        expect(subject.gl_project_path).to eq(project.full_path)
+        expect(subject.gl_project_path).to eq(project.wiki.full_path)
       end
     end
   end
@@ -2673,6 +2705,7 @@ RSpec.describe Repository do
        build(:commit, author: author_c),
        build(:commit, author: author_c)]
     end
+
     let(:order_by) { nil }
     let(:sort) { nil }
 
@@ -2908,12 +2941,19 @@ RSpec.describe Repository do
       expect(snippet.repository.project).to be_nil
     end
 
+    it 'returns the project for a project wiki' do
+      wiki = create(:project_wiki)
+
+      expect(wiki.project).to be(wiki.repository.project)
+    end
+
     it 'returns the container if it is a project' do
       expect(repository.project).to be(project)
     end
 
     it 'returns nil if the container is not a project' do
-      expect(repository).to receive(:container).and_return(Group.new)
+      repository.container = Group.new
+
       expect(repository.project).to be_nil
     end
   end
@@ -2948,16 +2988,10 @@ RSpec.describe Repository do
     context 'for a project wiki repository' do
       let(:repository) { project.wiki.repository }
 
-      it 'returns true when LFS is enabled' do
-        stub_lfs_setting(enabled: true)
+      it 'delegates to the project' do
+        expect(project).to receive(:lfs_enabled?).and_return(true)
 
         is_expected.to be_truthy
-      end
-
-      it 'returns false when LFS is disabled' do
-        stub_lfs_setting(enabled: false)
-
-        is_expected.to be_falsy
       end
     end
 

@@ -5,7 +5,7 @@ module QA
     module Project
       module Packages
         class Index < QA::Page::Base
-          view 'app/views/projects/packages/packages/_legacy_package_list.html.haml' do
+          view 'app/assets/javascripts/packages/shared/components/package_list_row.vue' do
             element :package_row
             element :package_link
           end
@@ -26,3 +26,5 @@ module QA
     end
   end
 end
+
+QA::Page::Project::Packages::Index.prepend_if_ee('QA::EE::Page::Project::Packages::Index')

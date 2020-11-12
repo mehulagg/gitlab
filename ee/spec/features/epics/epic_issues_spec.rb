@@ -29,6 +29,7 @@ RSpec.describe 'Epic Issues', :js do
 
   before do
     stub_licensed_features(epics: true, subepics: true)
+    stub_const('Epic', ::Epic, transfer_nested_constants: true)
   end
 
   def visit_epic
@@ -214,7 +215,7 @@ RSpec.describe 'Epic Issues', :js do
             add_epics(references)
 
             expect(page).to have_selector('.gl-field-error')
-            expect(find('.gl-field-error')).to have_text("This epic can't be added because the parent is already at the maximum depth from its most distant ancestor")
+            expect(find('.gl-field-error')).to have_text("This epic cannot be added. One or more epics would exceed the maximum depth (5) from its most distant ancestor.")
           end
         end
       end

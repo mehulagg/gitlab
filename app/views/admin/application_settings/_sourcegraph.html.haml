@@ -16,7 +16,7 @@
 
 
   .settings-content
-    = form_for @application_setting, url: integrations_admin_application_settings_path(anchor: 'js-sourcegraph-settings'), html: { class: 'fieldset-form' } do |f|
+    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-sourcegraph-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting)
 
       %fieldset
@@ -35,4 +35,4 @@
           = f.text_field :sourcegraph_url, class: 'form-control', placeholder: s_('SourcegraphAdmin|e.g. https://sourcegraph.example.com')
           .form-text.text-muted
             = s_('SourcegraphAdmin|Configure the URL to a Sourcegraph instance which can read your GitLab projects.')
-      = f.submit s_('SourcegraphAdmin|Save changes'), class: 'btn btn-success'
+      = f.submit s_('SourcegraphAdmin|Save changes'), class: 'gl-button btn btn-success'

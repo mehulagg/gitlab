@@ -48,10 +48,19 @@ module EE
       expose_mr_approval_path? ? APPROVALS_WIDGET_FULL_TYPE : super
     end
 
+    def missing_security_scan_types
+      merge_request.missing_security_scan_types if expose_missing_security_scan_types?
+    end
+
     private
 
     def expose_mr_approval_path?
       approval_feature_available? && merge_request.iid
+    end
+
+    def expose_missing_security_scan_types?
+      ::Feature.enabled?(:missing_mr_security_scan_types, project) &&
+        can?(current_user, :read_pipeline, merge_request.actual_head_pipeline)
     end
   end
 end

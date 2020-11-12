@@ -42,6 +42,14 @@ module EE
       self.title
     end
 
+    def supports_timebox_charts?
+      resource_parent&.feature_available?(:iterations) && weight_available?
+    end
+
+    def burnup_charts_available?
+      ::Feature.enabled?(:iteration_charts, resource_parent)
+    end
+
     private
 
     def timebox_format_reference(format = :id)

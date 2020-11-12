@@ -1,14 +1,14 @@
 - breadcrumb_title _("Repository")
 - page_title _("Edit"), @blob.path, @ref
-- unless Feature.enabled?(:monaco_blobs)
-  - content_for :page_specific_javascripts do
-    = page_specific_javascript_tag('lib/ace.js')
 
 - if @conflict
-  .alert.alert-danger
-    Someone edited the file the same time you did. Please check out
-    = link_to "the file", project_blob_path(@project, tree_join(@branch_name, @file_path)), target: "_blank", rel: 'noopener noreferrer'
-    and make sure your changes will not unintentionally remove theirs.
+  .gl-alert.gl-alert-danger.gl-mb-5.gl-mt-5
+    = sprite_icon('error', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+    .gl-alert-body
+      Someone edited the file the same time you did. Please check out
+      = link_to "the file", project_blob_path(@project, tree_join(@branch_name, @file_path)), target: "_blank", rel: 'noopener noreferrer', class: 'gl-link'
+      and make sure your changes will not unintentionally remove theirs.
+
 .editor-title-row
   %h3.page-title.blob-edit-page-title
     Edit file

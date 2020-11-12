@@ -210,9 +210,6 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
 
       allow(view).to receive(:current_user).and_return(current_user)
       allow(view).to receive(:can?).with(current_user, :read_wiki, group).and_return(can_read_wiki)
-
-      # TODO can be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/207888
-      stub_feature_flags(group_wiki: true)
     end
 
     describe 'when wiki is available to user' do

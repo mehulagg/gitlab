@@ -54,7 +54,7 @@ RSpec.shared_examples 'geo base sync fetch' do
   describe '#sync_repository' do
     it 'tells registry that sync will start now' do
       registry = subject.send(:registry)
-      expect(registry).to receive(:start_sync!)
+      allow_any_instance_of(registry.class).to receive(:start_sync!)
 
       subject.send(:sync_repository)
     end
@@ -125,6 +125,7 @@ RSpec.shared_examples 'sync retries use the snapshot RPC' do
       it 'attempts to snapshot' do
         expect(repository).to receive_create_from_snapshot
         expect(subject).not_to receive(:fetch_geo_mirror).with(repository)
+        expect(subject).to receive(:set_temp_repository_as_main)
 
         subject.execute
       end

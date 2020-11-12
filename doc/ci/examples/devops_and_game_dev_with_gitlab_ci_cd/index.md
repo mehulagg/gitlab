@@ -2,13 +2,7 @@
 stage: Verify
 group: Continuous Integration
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
-author: Ryan Hall
-author_gitlab: blitzgren
-level: intermediate
-article_type: tutorial
 type: tutorial
-date: 2018-03-07
-last_updated: 2019-03-11
 ---
 
 # DevOps and Game Dev with GitLab CI/CD
@@ -267,7 +261,7 @@ Please read through the [documentation on CI/CD configuration](../../../ci/yaml/
 ### Build your game with GitLab CI/CD
 
 We need to update our build job to ensure tests get run as well. Add `gulp build-test`
-to the end of the `script` array for the existing `build` job. Once these commands run,
+to the end of the `script` array for the existing `build` job. After these commands run,
 we know we will need to access everything in the `built` folder, given by GitLab CI/CD's `artifacts`.
 We'll also cache `node_modules` to avoid having to do a full re-pull of those dependencies:
 just pack them up in the cache. Here is the full `build` job:
@@ -435,7 +429,7 @@ fully understand [IAM Best Practices in AWS](https://docs.aws.amazon.com/IAM/lat
 ### Deploy your game with GitLab CI/CD
 
 To deploy our build artifacts, we need to install the [AWS CLI](https://aws.amazon.com/cli/) on
-the Shared Runner. The Shared Runner also needs to be able to authenticate with your AWS
+the shared runner. The shared runner also needs to be able to authenticate with your AWS
 account to deploy the artifacts. By convention, AWS CLI will look for `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY`. GitLab's CI gives us a way to pass the variables we
 set up in the prior section using the `variables` portion of the `deploy` job. At the end,

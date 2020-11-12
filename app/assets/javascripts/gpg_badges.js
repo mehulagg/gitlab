@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { parseQueryStringIntoObject } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 
 export default class GpgBadges {
@@ -13,7 +13,8 @@ export default class GpgBadges {
 
     const badges = $('.js-loading-gpg-badge');
 
-    badges.html('<i class="fa fa-spinner fa-spin"></i>');
+    badges.html('<span class="gl-spinner gl-spinner-orange gl-spinner-sm"></span>');
+    badges.children().attr('aria-label', __('Loading'));
 
     const displayError = () => createFlash(__('An error occurred while loading commit signatures'));
 

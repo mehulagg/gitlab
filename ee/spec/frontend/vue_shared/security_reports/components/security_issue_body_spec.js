@@ -1,7 +1,13 @@
 import { shallowMount } from '@vue/test-utils';
-import { STATUS_FAILED } from '~/reports/constants';
 import SecurityIssueBody from 'ee/vue_shared/security_reports/components/security_issue_body.vue';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import {
+  CRITICAL,
+  HIGH,
+  MEDIUM,
+  LOW,
+} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
+import { STATUS_FAILED } from '~/reports/constants';
 import ReportLink from '~/reports/components/report_link.vue';
 import {
   sastParsedIssues,
@@ -10,12 +16,6 @@ import {
   dependencyScanningIssues,
   secretScanningParsedIssues,
 } from '../mock_data';
-import {
-  CRITICAL,
-  HIGH,
-  MEDIUM,
-  LOW,
-} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 
 describe('Security Issue Body', () => {
   let wrapper;
@@ -53,7 +53,7 @@ describe('Security Issue Body', () => {
       });
     } else {
       it(`does not show SeverityBadge if severity is not present`, () => {
-        expect(wrapper.contains(SeverityBadge)).toBe(false);
+        expect(wrapper.find(SeverityBadge).exists()).toBe(false);
       });
     }
 

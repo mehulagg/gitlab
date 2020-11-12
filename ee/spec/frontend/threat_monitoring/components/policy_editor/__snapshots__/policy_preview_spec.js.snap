@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PolicyPreview component renders policy preview tabs 1`] = `
+<gl-tabs-stub
+  contentclass="gl-pt-0"
+  theme="indigo"
+  value="0"
+>
+  <gl-tab-stub
+    title=".yaml"
+  >
+    <pre
+      class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none"
+    >
+      foo
+    </pre>
+  </gl-tab-stub>
+   
+  <gl-tab-stub
+    title="Rule"
+  >
+    <div
+      class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-py-3 gl-px-4 gl-border-1 gl-border-solid gl-border-gray-100"
+    >
+      <strong>
+        bar
+      </strong>
+      <br />
+      test
+    </div>
+  </gl-tab-stub>
+</gl-tabs-stub>
+`;

@@ -7,10 +7,12 @@ RSpec.describe API::Internal::Pages do
     jwt_token = JWT.encode({ 'iss' => 'gitlab-pages' }, Gitlab::Pages.secret, 'HS256')
     { Gitlab::Pages::INTERNAL_API_REQUEST_HEADER => jwt_token }
   end
+
   let(:pages_secret) { SecureRandom.random_bytes(Gitlab::Pages::SECRET_LENGTH) }
 
   before do
     allow(Gitlab::Pages).to receive(:secret).and_return(pages_secret)
+    stub_pages_object_storage(::Pages::DeploymentUploader)
   end
 
   describe "GET /internal/pages/status" do
@@ -37,6 +39,12 @@ RSpec.describe API::Internal::Pages do
       get api("/internal/pages"), headers: headers, params: { host: host }
     end
 
+    around do |example|
+      freeze_time do
+        example.run
+      end
+    end
+
     context 'not authenticated' do
       it 'responds with 401 Unauthorized' do
         query_host('pages.gitlab.io')
@@ -54,7 +62,9 @@ RSpec.describe API::Internal::Pages do
       end
 
       def deploy_pages(project)
+        deployment = create(:pages_deployment, project: project)
         project.mark_pages_as_deployed
+        project.update_pages_deployment!(deployment)
       end
 
       context 'domain does not exist' do
@@ -189,8 +199,8 @@ RSpec.describe API::Internal::Pages do
                   'https_only' => false,
                   'prefix' => '/',
                   'source' => {
-                    'type' => 'file',
-                    'path' => 'gitlab-org/gitlab-ce/public/'
+                    'type' => 'zip',
+                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now)
                   }
                 }
               ]
@@ -225,13 +235,27 @@ RSpec.describe API::Internal::Pages do
                   'https_only' => false,
                   'prefix' => '/myproject/',
                   'source' => {
-                    'type' => 'file',
-                    'path' => 'mygroup/myproject/public/'
+                    'type' => 'zip',
+                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now)
                   }
                 }
               ]
             )
           end
+        end
+
+        it 'avoids N+1 queries' do
+          project = create(:project, group: group)
+          deploy_pages(project)
+
+          control = ActiveRecord::QueryRecorder.new { query_host('mygroup.gitlab-pages.io') }
+
+          3.times do
+            project = create(:project, group: group)
+            deploy_pages(project)
+          end
+
+          expect { query_host('mygroup.gitlab-pages.io') }.not_to exceed_query_limit(control)
         end
 
         context 'group root project' do
@@ -252,8 +276,8 @@ RSpec.describe API::Internal::Pages do
                   'https_only' => false,
                   'prefix' => '/',
                   'source' => {
-                    'type' => 'file',
-                    'path' => 'mygroup/mygroup.gitlab-pages.io/public/'
+                    'type' => 'zip',
+                    'path' => project.pages_metadatum.pages_deployment.file.url(expire_at: 1.day.from_now)
                   }
                 }
               ]

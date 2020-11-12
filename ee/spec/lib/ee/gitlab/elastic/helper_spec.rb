@@ -39,6 +39,32 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
+  describe '#default_mappings' do
+    context 'custom analyzers' do
+      let(:custom_analyzers_mappings) { { doc: { properties: { title: { fields: { custom: true } } } } } }
+
+      before do
+        allow(::Elastic::Latest::CustomLanguageAnalyzers).to receive(:custom_analyzers_mappings).and_return(custom_analyzers_mappings)
+      end
+
+      it 'merges custom language analyzers mappings' do
+        expect(helper.default_mappings[:doc][:properties][:title]).to include(custom_analyzers_mappings[:doc][:properties][:title])
+      end
+    end
+  end
+
+  describe '#create_migrations_index' do
+    after do
+      helper.delete_index(index_name: helper.migrations_index_name)
+    end
+
+    it 'creates the index' do
+      expect { helper.create_migrations_index }
+             .to change { helper.index_exists?(index_name: helper.migrations_index_name) }
+             .from(false).to(true)
+    end
+  end
+
   describe '#create_empty_index' do
     context 'with an empty cluster' do
       context 'with alias and index' do

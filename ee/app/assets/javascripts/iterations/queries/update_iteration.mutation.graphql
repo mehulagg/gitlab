@@ -4,6 +4,7 @@ mutation updateIteration($input: UpdateIterationInput!) {
       id
       title
       description
+      descriptionHtml
       startDate
       dueDate
     }

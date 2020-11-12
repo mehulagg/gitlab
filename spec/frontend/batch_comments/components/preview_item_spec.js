@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import PreviewItem from '~/batch_comments/components/preview_item.vue';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import PreviewItem from '~/batch_comments/components/preview_item.vue';
 import { createStore } from '~/batch_comments/stores';
 import diffsModule from '~/diffs/store/modules';
 import notesModule from '~/notes/stores/modules';
@@ -41,22 +41,6 @@ describe('Batch comments draft preview item component', () => {
     expect(vm.$el.querySelector('.review-preview-item-content').innerHTML).toEqual(
       '<p>Hello world</p>',
     );
-  });
-
-  it('adds is last class', () => {
-    createComponent(true);
-
-    expect(vm.$el.classList).toContain('is-last');
-  });
-
-  it('scrolls to draft on click', () => {
-    createComponent();
-
-    jest.spyOn(vm.$store, 'dispatch').mockImplementation();
-
-    vm.$el.click();
-
-    expect(vm.$store.dispatch).toHaveBeenCalledWith('batchComments/scrollToDraft', vm.draft);
   });
 
   describe('for file', () => {

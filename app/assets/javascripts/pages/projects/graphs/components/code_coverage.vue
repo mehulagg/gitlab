@@ -1,9 +1,9 @@
 <script>
-import { GlAlert, GlDropdown, GlDropdownItem, GlIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlDropdown, GlDropdownItem, GlSprintf } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
-import axios from '~/lib/utils/axios_utils';
 import { get } from 'lodash';
+import axios from '~/lib/utils/axios_utils';
 
 import { __ } from '~/locale';
 
@@ -13,7 +13,6 @@ export default {
     GlAreaChart,
     GlDropdown,
     GlDropdownItem,
-    GlIcon,
     GlSprintf,
   },
   props: {
@@ -139,18 +138,11 @@ export default {
           v-for="({ group_name }, index) in dailyCoverageData"
           :key="index"
           :value="group_name"
+          :is-check-item="true"
+          :is-checked="index === selectedCoverageIndex"
           @click="setSelectedCoverage(index)"
         >
-          <div class="gl-display-flex">
-            <gl-icon
-              v-if="index === selectedCoverageIndex"
-              name="mobile-issue-close"
-              class="gl-absolute"
-            />
-            <span class="gl-display-flex align-items-center ml-4">
-              {{ group_name }}
-            </span>
-          </div>
+          {{ group_name }}
         </gl-dropdown-item>
       </gl-dropdown>
     </div>

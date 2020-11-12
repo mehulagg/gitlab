@@ -16,11 +16,14 @@ module Geo
       feature_category :geo_replication
 
       REGISTRY_CLASSES = [
+        Geo::ContainerRepositoryRegistry,
         Geo::DesignRegistry,
         Geo::JobArtifactRegistry,
         Geo::LfsObjectRegistry,
+        Geo::MergeRequestDiffRegistry,
         Geo::PackageFileRegistry,
         Geo::ProjectRegistry,
+        Geo::TerraformStateVersionRegistry,
         Geo::UploadRegistry
       ].freeze
 

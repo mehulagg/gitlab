@@ -165,7 +165,7 @@ RSpec.describe '[EE] Internal Project Access' do
 
     context "when allowed for public and internal" do
       before do
-        project.update(public_builds: true)
+        project.update!(public_builds: true)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -173,7 +173,7 @@ RSpec.describe '[EE] Internal Project Access' do
 
     context "when disallowed for public and internal" do
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -188,7 +188,7 @@ RSpec.describe '[EE] Internal Project Access' do
 
     context "when allowed for public and internal" do
       before do
-        project.update(public_builds: true)
+        project.update!(public_builds: true)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -196,7 +196,7 @@ RSpec.describe '[EE] Internal Project Access' do
 
     context "when disallowed for public and internal" do
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }

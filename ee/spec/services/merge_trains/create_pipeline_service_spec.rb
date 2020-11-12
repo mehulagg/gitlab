@@ -9,6 +9,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
   let(:previous_ref) { 'refs/heads/master' }
 
   before do
+    stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
     project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
@@ -30,7 +31,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
 
       specify do
         expect(subject[:status]).to eq(:error)
-        expect(subject[:message]).to eq(expected_reason)
+        expect(subject[:message]).to match(/^#{expected_reason}/)
       end
     end
 
@@ -57,14 +58,14 @@ RSpec.describe MergeTrains::CreatePipelineService do
     end
 
     context 'when merge request is submitted from a forked project' do
-      context 'when ci_allow_to_create_merge_request_pipelines_in_target_project feature flag is disabled' do
+      context 'when ci_disallow_to_create_merge_request_pipelines_in_target_project feature flag is enabled' do
         before do
-          stub_feature_flags(ci_allow_to_create_merge_request_pipelines_in_target_project: false)
-          allow(merge_request).to receive(:for_fork?) { true }
+          stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: true)
+          allow(merge_request).to receive(:for_same_project?) { false }
         end
 
         it_behaves_like 'returns an error' do
-          let(:expected_reason) { 'fork merge request is not available for this project' }
+          let(:expected_reason) { 'this merge request cannot be added to merge train' }
         end
       end
     end

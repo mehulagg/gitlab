@@ -30,6 +30,7 @@ describe('Column component', () => {
           },
           metrics: [
             {
+              label: 'Mock data',
               result: [
                 {
                   metric: {},
@@ -95,12 +96,8 @@ describe('Column component', () => {
 
   describe('wrapped components', () => {
     describe('GitLab UI column chart', () => {
-      it('is a Vue instance', () => {
-        expect(findChart().isVueInstance()).toBe(true);
-      });
-
       it('receives data properties needed for proper chart render', () => {
-        expect(chartProps('data').values).toEqual(dataValues);
+        expect(chartProps('bars')).toEqual([{ name: 'Mock data', data: dataValues }]);
       });
 
       it('passes the y axis name correctly', () => {

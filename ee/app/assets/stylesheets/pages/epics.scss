@@ -12,6 +12,11 @@
   }
 }
 
+.is-ghost {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .epic-discussion-separator {
   border-color: $border-color;
 }
@@ -84,7 +89,7 @@
 .new-epic-form .md-area.gfm-form {
   @include gl-rounded-base;
   @include gl-border-none;
-  @include gl-inset-border-1-gray-400;
+  @include gl-inset-border-1-gray-200;
 
   &.is-focused {
     @include gl-focus($gl-border-size-1, $gray-900);
@@ -92,13 +97,19 @@
   }
 
   .markdown-area::placeholder {
-    @include gl-text-gray-400;
+    @include gl-text-gray-200;
+  }
+}
+
+.new-epic-form .labels-select-wrapper.is-embedded {
+  width: $gl-dropdown-width;
+
+  .labels-select-dropdown-contents {
+    min-height: 335px;
   }
 }
 
 .labels-select-wrapper.is-embedded {
-  width: $gl-dropdown-width;
-
   .labels-select-dropdown-button {
     @include gl-bg-white;
     @include gl-font-regular;
@@ -109,12 +120,12 @@
     @include gl-h-auto;
     @include gl-text-left;
     @include gl-border-none;
-    @include gl-inset-border-1-gray-400;
+    @include gl-inset-border-1-gray-200;
     @include gl-rounded-base;
     @include gl-white-space-nowrap;
 
     .gl-button-text {
-      @include gl-text-gray-700;
+      @include gl-text-gray-500;
       @include gl-display-flex;
       @include gl-justify-content-space-between;
       @include gl-w-full;
@@ -129,8 +140,8 @@
     @include gl-left-0;
     @include gl-shadow-x0-y2-b4-s0;
 
-    bottom: 100%;
     width: 300px !important;
+    min-height: none;
     max-height: none;
     margin-bottom: $gl-spacing-scale-6 !important;
 

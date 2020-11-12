@@ -169,7 +169,7 @@ RSpec.describe Gitlab::GithubImport::Client do
       expect(client).to receive(:raise_or_wait_for_rate_limit)
 
       client.with_rate_limit do
-        if retries.zero?
+        if retries == 0
           retries += 1
           raise(Octokit::TooManyRequests)
         end
@@ -295,6 +295,32 @@ RSpec.describe Gitlab::GithubImport::Client do
           .and_return(endpoint)
 
         expect(client.api_endpoint).to eq(endpoint)
+      end
+    end
+  end
+
+  describe '#web_endpoint' do
+    let(:client) { described_class.new('foo') }
+
+    context 'without a custom endpoint configured in Omniauth' do
+      it 'returns the default web endpoint' do
+        expect(client)
+          .to receive(:custom_api_endpoint)
+          .and_return(nil)
+
+        expect(client.web_endpoint).to eq('https://github.com')
+      end
+    end
+
+    context 'with a custom endpoint configured in Omniauth' do
+      it 'returns the custom endpoint' do
+        endpoint = 'https://github.kittens.com'
+
+        expect(client)
+          .to receive(:custom_api_endpoint)
+          .and_return(endpoint)
+
+        expect(client.web_endpoint).to eq(endpoint)
       end
     end
   end

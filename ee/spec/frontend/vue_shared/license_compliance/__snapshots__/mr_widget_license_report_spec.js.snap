@@ -65,7 +65,7 @@ exports[`License Report MR Widget report section should render correctly 1`] = `
     >
       
         View full report 
-      <icon-stub
+      <gl-icon-stub
         name="external-link"
         size="16"
       />

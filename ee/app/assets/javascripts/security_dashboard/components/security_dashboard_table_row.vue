@@ -1,13 +1,18 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlDeprecatedButton, GlFormCheckbox, GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
+import {
+  GlDeprecatedButton,
+  GlFormCheckbox,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSprintf,
+  GlIcon,
+} from '@gitlab/ui';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
+import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
 import { DASHBOARD_TYPES } from '../store/constants';
-import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
-import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
 
 export default {
   name: 'SecurityDashboardTableRow',
@@ -16,7 +21,7 @@ export default {
     GlFormCheckbox,
     GlSkeletonLoading,
     GlSprintf,
-    Icon,
+    GlIcon,
     SeverityBadge,
     VulnerabilityActionButtons,
     VulnerabilityIssueLink,
@@ -131,7 +136,7 @@ export default {
             >{{ vulnerability.name }}</gl-deprecated-button
           >
           <template v-if="isDismissed">
-            <icon
+            <gl-icon
               v-show="vulnerability.dismissal_feedback.comment_details"
               name="comment"
               class="text-warning vertical-align-middle"
@@ -147,7 +152,7 @@ export default {
             :project-name="vulnerability.project.name"
           />
           <br />
-          <small v-if="vulnerabilityNamespace" class="gl-text-gray-700 gl-word-break-all">
+          <small v-if="vulnerabilityNamespace" class="gl-text-gray-500 gl-word-break-all">
             {{ vulnerabilityNamespace }}
           </small>
         </template>
@@ -160,7 +165,7 @@ export default {
         <div class="gl-text-overflow-ellipsis gl-overflow-hidden" :title="vulnerabilityIdentifier">
           {{ vulnerabilityIdentifier }}
         </div>
-        <div v-if="shouldShowExtraIdentifierCount" class="gl-text-gray-500">
+        <div v-if="shouldShowExtraIdentifierCount" class="gl-text-gray-300">
           <gl-sprintf :message="__('+ %{count} more')">
             <template #count>
               {{ extraIdentifierCount }}
@@ -176,7 +181,7 @@ export default {
         <div class="text-capitalize">
           {{ useConvertReportType }}
         </div>
-        <div v-if="vulnerabilityVendor" class="gl-text-gray-500" data-testid="vulnerability-vendor">
+        <div v-if="vulnerabilityVendor" class="gl-text-gray-300" data-testid="vulnerability-vendor">
           {{ vulnerabilityVendor }}
         </div>
       </div>

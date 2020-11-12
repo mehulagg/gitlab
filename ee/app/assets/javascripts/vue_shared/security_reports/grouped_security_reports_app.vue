@@ -2,19 +2,19 @@
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
+import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import IssueModal from './components/modal.vue';
 import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
 import createStore from './store';
-import { GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import { mrStates } from '~/mr_popover/constants';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
 import SecuritySummary from './components/security_summary.vue';
@@ -27,10 +27,11 @@ export default {
     SummaryRow,
     SecuritySummary,
     IssueModal,
-    Icon,
     GlSprintf,
     GlLink,
     DastModal,
+    GlButton,
+    FuzzingArtifactsDownload,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -172,6 +173,11 @@ export default {
       required: false,
       default: '',
     },
+    projectId: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     projectFullPath: {
       type: String,
       required: true,
@@ -211,6 +217,7 @@ export default {
       'canDismissVulnerability',
     ]),
     ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
     },
@@ -224,13 +231,14 @@ export default {
       return this.enabledReports.dast;
     },
     hasCoverageFuzzingReports() {
-      return this.enabledReports.coverageFuzzing;
+      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
+      return this.enabledReports.coverageFuzzing && this.glFeatures.coverageFuzzingMrWidget;
     },
     hasSastReports() {
       return this.enabledReports.sast;
     },
     hasSecretScanningReports() {
-      return this.enabledReports.secretScanning;
+      return this.enabledReports.secretDetection;
     },
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;
@@ -238,8 +246,8 @@ export default {
     isMRBranchOutdated() {
       return this.divergedCommitsCount > 0;
     },
-    dastScans() {
-      return this.dast.scans.filter(scan => scan.scanned_resources_count > 0);
+    hasDastScannedResources() {
+      return this.dastSummary?.scannedResourcesCount > 0;
     },
     handleToggleEvent() {
       return once(() => {
@@ -268,7 +276,9 @@ export default {
       this.createVulnerabilityFeedbackMergeRequestPath,
     );
     this.setCreateVulnerabilityFeedbackDismissalPath(this.createVulnerabilityFeedbackDismissalPath);
+    this.setProjectId(this.projectId);
     this.setPipelineId(this.pipelineId);
+    this.setPipelineJobsId(this.pipelineId);
 
     const sastDiffEndpoint = gl?.mrWidgetData?.sast_comparison_path;
 
@@ -309,6 +319,7 @@ export default {
     if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
       this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
       this.fetchCoverageFuzzingDiff();
+      this.fetchPipelineJobs();
     }
   },
   methods: {
@@ -350,6 +361,10 @@ export default {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
     }),
+    ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
+    ...mapActions('pipelineJobs', {
+      setPipelineJobsId: 'setPipelineId',
+    }),
   },
   summarySlots: ['success', 'error', 'loading'],
 };
@@ -368,12 +383,14 @@ export default {
     </template>
 
     <template v-if="pipelinePath" #actionButtons>
-      <div>
-        <a :href="securityTab" target="_blank" class="btn btn-default btn-sm float-right gl-mr-3">
-          <span>{{ s__('ciReport|View full report') }}</span>
-          <icon :size="16" name="external-link" />
-        </a>
-      </div>
+      <gl-button
+        :href="securityTab"
+        target="_blank"
+        icon="external-link"
+        class="gl-mr-3 report-btn"
+      >
+        {{ s__('ciReport|View full report') }}
+      </gl-button>
     </template>
 
     <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #subHeading>
@@ -490,15 +507,14 @@ export default {
               <security-summary :message="groupedDastText" />
             </template>
 
-            <template v-if="dastScans.length">
+            <template v-if="hasDastScannedResources">
               <div class="text-nowrap">
-                {{ n__('%d URL scanned', '%d URLs scanned', dastScans[0].scanned_resources_count) }}
+                {{ n__('%d URL scanned', '%d URLs scanned', dastSummary.scannedResourcesCount) }}
               </div>
               <gl-link v-gl-modal.dastUrl class="ml-2" data-qa-selector="dast-ci-job-link">
                 {{ __('View details') }}
               </gl-link>
               <dast-modal
-                v-if="dastSummary"
                 :scanned-urls="dastSummary.scannedResources.nodes"
                 :scanned-resources-count="dastSummary.scannedResourcesCount"
                 :download-link="dastDownloadLink"
@@ -539,7 +555,6 @@ export default {
 
         <template v-if="hasCoverageFuzzingReports">
           <summary-row
-            :summary="groupedCoverageFuzzingText"
             :status-icon="coverageFuzzingStatusIcon"
             :popover-options="coverageFuzzingPopover"
             class="js-coverage-fuzzing-widget"
@@ -548,6 +563,11 @@ export default {
             <template #summary>
               <security-summary :message="groupedCoverageFuzzingText" />
             </template>
+            <fuzzing-artifacts-download
+              v-if="hasFuzzingArtifacts"
+              :jobs="fuzzingJobsWithArtifact"
+              :project-id="projectId"
+            />
           </summary-row>
 
           <grouped-issues-list

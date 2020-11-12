@@ -1,8 +1,8 @@
 <script>
 import { GlSorting, GlSortingItem } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { ASCENDING_ODER, DESCENDING_ORDER } from '../constants';
 import getTableHeaders from '../utils';
-import { mapState, mapActions } from 'vuex';
 
 export default {
   name: 'PackageSort',
@@ -51,7 +51,7 @@ export default {
     <gl-sorting-item
       v-for="item in sortableFields"
       ref="packageListSortItem"
-      :key="item.key"
+      :key="item.orderBy"
       @click="onSortItemClick(item.orderBy)"
     >
       {{ item.label }}

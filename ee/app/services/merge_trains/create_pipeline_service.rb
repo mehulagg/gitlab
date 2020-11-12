@@ -16,7 +16,7 @@ module MergeTrains
     def validate(merge_request)
       return error('merge trains is disabled') unless merge_request.project.merge_trains_enabled?
       return error('merge request is not on a merge train') unless merge_request.on_train?
-      return error('fork merge request is not available for this project') if !Gitlab::Ci::Features.allow_to_create_merge_request_pipelines_in_target_project?(merge_request.target_project) && merge_request.for_fork?
+      return error('this merge request cannot be added to merge train') unless can_add_to_merge_train?(merge_request)
 
       success
     end
@@ -49,6 +49,10 @@ module MergeTrains
       return error(pipeline.full_error_messages) unless pipeline.persisted?
 
       success(pipeline: pipeline)
+    end
+
+    def can_add_to_merge_train?(merge_request)
+      AutoMerge::BaseService.can_add_to_merge_train?(merge_request)
     end
   end
 end

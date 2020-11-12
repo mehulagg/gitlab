@@ -67,7 +67,7 @@ module API
 
         result == 'PONG'
       rescue => e
-        Rails.logger.warn("GitLab: An unexpected error occurred in pinging to Redis: #{e}") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.warn("GitLab: An unexpected error occurred in pinging to Redis: #{e}")
         false
       end
 
@@ -117,7 +117,7 @@ module API
         return unless %w[git-receive-pack git-upload-pack git-upload-archive].include?(action)
 
         {
-          repository: repository.gitaly_repository,
+          repository: repository.gitaly_repository.to_h,
           address: Gitlab::GitalyClient.address(repository.shard),
           token: Gitlab::GitalyClient.token(repository.shard),
           features: Feature::Gitaly.server_feature_flags

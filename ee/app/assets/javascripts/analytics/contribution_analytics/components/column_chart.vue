@@ -1,8 +1,8 @@
 <script>
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { truncateWidth } from '~/lib/utils/text_utility';
-import { GlResizeObserverDirective } from '@gitlab/ui';
 
 import {
   CHART_HEIGHT,
@@ -65,7 +65,7 @@ export default {
       };
     },
     seriesData() {
-      return { full: this.chartData };
+      return [{ name: 'full', data: this.chartData }];
     },
   },
   methods: {
@@ -102,7 +102,7 @@ export default {
       v-bind="$attrs"
       :width="width"
       :height="height"
-      :data="seriesData"
+      :bars="seriesData"
       :x-axis-title="xAxisTitle"
       :y-axis-title="yAxisTitle"
       x-axis-type="category"

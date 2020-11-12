@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # SQL Query Guidelines
 
 This document describes various guidelines to follow when writing SQL queries,
@@ -218,9 +224,9 @@ Project.select(:id, :user_id).joins(:merge_requests)
 
 ## Plucking IDs
 
-This can't be stressed enough: **never** use ActiveRecord's `pluck` to pluck a
-set of values into memory only to use them as an argument for another query. For
-example, this will make the database **very** sad:
+Never use ActiveRecord's `pluck` to pluck a set of values into memory only to
+use them as an argument for another query. For example, this will execute an
+extra unnecessary database query and load a lot of unnecessary data into memory:
 
 ```ruby
 projects = Project.all.pluck(:id)

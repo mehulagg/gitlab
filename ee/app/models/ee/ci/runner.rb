@@ -26,7 +26,7 @@ module EE
 
       def visibility_levels_without_minutes_quota
         ::Gitlab::VisibilityLevel.options.values.reject do |visibility_level|
-          minutes_cost_factor(visibility_level).positive?
+          minutes_cost_factor(visibility_level) > 0
         end
       end
 

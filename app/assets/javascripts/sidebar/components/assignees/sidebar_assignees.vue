@@ -1,5 +1,5 @@
 <script>
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import eventHub from '~/sidebar/event_hub';
 import Store from '~/sidebar/stores/sidebar_store';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
@@ -56,13 +56,16 @@ export default {
       // Note: Realtime is only available on issues right now, future support for MR wil be built later.
       return this.glFeatures.realTimeIssueSidebar && this.issuableType === 'issue';
     },
+    relativeUrlRoot() {
+      return gon.relative_url_root ?? '';
+    },
   },
   created() {
     this.removeAssignee = this.store.removeAssignee.bind(this.store);
     this.addAssignee = this.store.addAssignee.bind(this.store);
     this.removeAllAssignees = this.store.removeAllAssignees.bind(this.store);
 
-    // Get events from glDropdown
+    // Get events from deprecatedJQueryDropdown
     eventHub.$on('sidebar.removeAssignee', this.removeAssignee);
     eventHub.$on('sidebar.addAssignee', this.addAssignee);
     eventHub.$on('sidebar.removeAllAssignees', this.removeAllAssignees);
@@ -89,6 +92,8 @@ export default {
         .saveAssignees(this.field)
         .then(() => {
           this.loading = false;
+          this.store.resetChanging();
+
           refreshUserMergeRequestCounts();
         })
         .catch(() => {
@@ -113,10 +118,11 @@ export default {
       :loading="loading || store.isFetching.assignees"
       :editable="store.editable"
       :show-toggle="!signedIn"
+      :changing="store.changing"
     />
     <assignees
       v-if="!store.isFetching.assignees"
-      :root-path="store.rootPath"
+      :root-path="relativeUrlRoot"
       :users="store.assignees"
       :editable="store.editable"
       :issuable-type="issuableType"

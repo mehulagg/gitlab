@@ -31,29 +31,6 @@ class WikiPage
 
   alias_method :==, :eql?
 
-  # Sorts and groups pages by directory.
-  #
-  # pages - an array of WikiPage objects.
-  #
-  # Returns an array of WikiPage and WikiDirectory objects. The entries are
-  # sorted by alphabetical order (directories and pages inside each directory).
-  # Pages at the root level come before everything.
-  def self.group_by_directory(pages)
-    return [] if pages.blank?
-
-    pages.each_with_object([]) do |page, grouped_pages|
-      next grouped_pages << page unless page.directory.present?
-
-      directory = grouped_pages.find do |obj|
-        obj.is_a?(WikiDirectory) && obj.slug == page.directory
-      end
-
-      next directory.pages << page if directory
-
-      grouped_pages << WikiDirectory.new(page.directory, [page])
-    end
-  end
-
   def self.unhyphenize(name)
     name.gsub(/-+/, ' ')
   end
@@ -285,7 +262,14 @@ class WikiPage
   end
 
   def content_changed?
-    attributes[:content] != page&.text_data
+    if persisted?
+      # gollum-lib always converts CRLFs to LFs in Gollum::Wiki#normalize,
+      # so we need to do the same here.
+      # Also see https://gitlab.com/gitlab-org/gitlab/-/issues/21431
+      raw_content.delete("\r") != page&.text_data
+    else
+      raw_content.present?
+    end
   end
 
   # Updates the current @attributes hash by merging a hash of params

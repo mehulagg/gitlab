@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
-import axios from '~/lib/utils/axios_utils';
 import MockAdapter from 'axios-mock-adapter';
-import { environment } from './mock_data';
-import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 import CanaryDeploymentBoard from 'ee/environments/components/canary_deployment_callout.vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
+import axios from '~/lib/utils/axios_utils';
+import { environment } from './mock_data';
+import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 
 describe('Environment', () => {
   let mock;
@@ -83,7 +83,9 @@ describe('Environment', () => {
       });
 
       it('should render arrow to open deploy boards', () => {
-        expect(wrapper.find('.deploy-board-icon .ic-chevron-down').exists()).toBe(true);
+        expect(wrapper.find('.deploy-board-icon [data-testid="chevron-down-icon"]').exists()).toBe(
+          true,
+        );
       });
     });
 

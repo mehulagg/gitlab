@@ -13,10 +13,16 @@ module Subscriptions
 
     def execute
       response = client.create_customer(create_customer_params)
+
       return response unless response[:success]
 
-      token = response.with_indifferent_access[:data][:customer][:authentication_token]
-      client.create_subscription(create_subscription_params, current_user.email, token)
+      # We can't use an email from GL.com because it may differ from the billing email.
+      # Instead we use the email received from the CustomersDot as a billing email.
+      customer_data = response.with_indifferent_access[:data][:customer]
+      billing_email = customer_data[:email]
+      token = customer_data[:authentication_token]
+
+      client.create_subscription(create_subscription_params, billing_email, token)
     end
 
     private

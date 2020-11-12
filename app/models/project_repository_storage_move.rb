@@ -20,6 +20,10 @@ class ProjectRepositoryStorageMove < ApplicationRecord
     inclusion: { in: ->(_) { Gitlab.config.repositories.storages.keys } }
   validate :project_repository_writable, on: :create
 
+  default_value_for(:destination_storage_name, allows_nil: false) do
+    pick_repository_storage
+  end
+
   state_machine initial: :initial do
     event :schedule do
       transition initial: :scheduled
@@ -29,16 +33,28 @@ class ProjectRepositoryStorageMove < ApplicationRecord
       transition scheduled: :started
     end
 
-    event :finish do
-      transition started: :finished
+    event :finish_replication do
+      transition started: :replicated
+    end
+
+    event :finish_cleanup do
+      transition replicated: :finished
     end
 
     event :do_fail do
       transition [:initial, :scheduled, :started] => :failed
+      transition replicated: :cleanup_failed
     end
 
-    after_transition initial: :scheduled do |storage_move|
-      storage_move.project.update_column(:repository_read_only, true)
+    around_transition initial: :scheduled do |storage_move, block|
+      block.call
+
+      begin
+        storage_move.project.set_repository_read_only!
+      rescue => err
+        errors.add(:project, err.message)
+        next false
+      end
 
       storage_move.run_after_commit do
         ProjectUpdateRepositoryStorageWorker.perform_async(
@@ -47,17 +63,18 @@ class ProjectRepositoryStorageMove < ApplicationRecord
           storage_move.id
         )
       end
+
+      true
     end
 
-    after_transition started: :finished do |storage_move|
-      storage_move.project.update_columns(
-        repository_read_only: false,
-        repository_storage: storage_move.destination_storage_name
-      )
+    before_transition started: :replicated do |storage_move|
+      storage_move.project.set_repository_writable!
+
+      storage_move.project.update_column(:repository_storage, storage_move.destination_storage_name)
     end
 
-    after_transition started: :failed do |storage_move|
-      storage_move.project.update_column(:repository_read_only, false)
+    before_transition started: :failed do |storage_move|
+      storage_move.project.set_repository_writable!
     end
 
     state :initial, value: 1
@@ -65,10 +82,18 @@ class ProjectRepositoryStorageMove < ApplicationRecord
     state :started, value: 3
     state :finished, value: 4
     state :failed, value: 5
+    state :replicated, value: 6
+    state :cleanup_failed, value: 7
   end
 
   scope :order_created_at_desc, -> { order(created_at: :desc) }
   scope :with_projects, -> { includes(project: :route) }
+
+  class << self
+    def pick_repository_storage
+      Project.pick_repository_storage
+    end
+  end
 
   private
 

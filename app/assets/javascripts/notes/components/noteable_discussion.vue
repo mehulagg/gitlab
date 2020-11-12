@@ -1,13 +1,12 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { GlTooltipDirective } from '@gitlab/ui';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
 import { s__, __ } from '~/locale';
 import { clearDraft, getDiscussionReplyKey } from '~/lib/utils/autosave';
-import icon from '~/vue_shared/components/icon.vue';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import diffDiscussionHeader from './diff_discussion_header.vue';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
@@ -22,7 +21,7 @@ import DiscussionActions from './discussion_actions.vue';
 export default {
   name: 'NoteableDiscussion',
   components: {
-    icon,
+    GlIcon,
     userAvatarLink,
     diffDiscussionHeader,
     noteSignedOutWidget,
@@ -149,9 +148,14 @@ export default {
       'removePlaceholderNotes',
       'toggleResolveNote',
       'removeConvertedDiscussion',
+      'expandDiscussion',
     ]),
     showReplyForm() {
       this.isReplying = true;
+
+      if (!this.discussion.expanded) {
+        this.expandDiscussion({ discussionId: this.discussion.id });
+      }
     },
     cancelReplyForm(shouldConfirm, isDirty) {
       if (shouldConfirm && isDirty) {

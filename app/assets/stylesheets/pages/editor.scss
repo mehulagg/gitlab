@@ -8,14 +8,19 @@
     background: $gray-normal;
   }
 
-  #editor {
-    border: 0;
-    border-radius: 0;
+  #editor,
+  .editor {
+    @include gl-border-0;
+    @include gl-m-0;
+    @include gl-p-0;
+    @include gl-relative;
+    @include gl-w-full;
     height: 500px;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    width: 100%;
+
+    .editor-loading-content {
+      @include gl-h-full;
+      @include gl-border-0;
+    }
   }
 
   .ace_gutter-cell {
@@ -160,9 +165,8 @@
   vertical-align: top;
 
   @media(max-width: map-get($grid-breakpoints, lg)-1) {
-    display: block;
+    display: inline-block;
     width: 100%;
-    margin: 5px 0;
     padding: 0;
     border-left: 0;
   }
@@ -182,7 +186,8 @@
   .gitignore-selector,
   .gitlab-ci-yml-selector,
   .dockerfile-selector,
-  .template-type-selector {
+  .template-type-selector,
+  .metrics-dashboard-selector {
     display: inline-block;
     vertical-align: top;
     font-family: $regular_font;

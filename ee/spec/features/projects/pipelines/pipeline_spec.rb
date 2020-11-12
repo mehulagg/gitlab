@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Pipeline', :js do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
 
   before do
     sign_in(user)

@@ -39,6 +39,10 @@ RSpec.describe DiscussionEntity do
     )
   end
 
+  it 'does not include base discussion in the notes' do
+    expect(subject[:notes].first.keys).not_to include(:base_discussion)
+  end
+
   it 'resolved_by matches note_user_entity schema' do
     Notes::ResolveService.new(note.project, user).execute(note)
 
@@ -78,14 +82,6 @@ RSpec.describe DiscussionEntity do
         :line_code,
         :active
       )
-    end
-
-    context 'diff_head_compare feature is disabled' do
-      it 'does not expose positions and line_codes attributes' do
-        stub_feature_flags(merge_ref_head_comments: false)
-
-        expect(subject.keys).not_to include(:positions, :line_codes)
-      end
     end
   end
 end

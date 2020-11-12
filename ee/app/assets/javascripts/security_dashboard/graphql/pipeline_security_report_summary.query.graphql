@@ -5,6 +5,13 @@ query($fullPath: ID!, $pipelineIid: ID!) {
         dast {
           vulnerabilitiesCount
           scannedResourcesCount
+          scannedResourcesCsvPath
+          scannedResources {
+            nodes {
+              requestMethod
+              url
+            }
+          }
         }
         sast {
           vulnerabilitiesCount

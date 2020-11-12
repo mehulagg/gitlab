@@ -13,12 +13,16 @@ RSpec.describe Resolvers::IssuesResolver do
 
   let_it_be(:milestone) { create(:milestone, project: project) }
   let_it_be(:assignee)  { create(:user) }
-  let_it_be(:issue1)    { create(:issue, project: project, state: :opened, created_at: 3.hours.ago, updated_at: 3.hours.ago, milestone: milestone) }
+  let_it_be(:issue1)    { create(:incident, project: project, state: :opened, created_at: 3.hours.ago, updated_at: 3.hours.ago, milestone: milestone) }
   let_it_be(:issue2)    { create(:issue, project: project, state: :closed, title: 'foo', created_at: 1.hour.ago, updated_at: 1.hour.ago, closed_at: 1.hour.ago, assignees: [assignee]) }
   let_it_be(:issue3)    { create(:issue, project: other_project, state: :closed, title: 'foo', created_at: 1.hour.ago, updated_at: 1.hour.ago, closed_at: 1.hour.ago, assignees: [assignee]) }
   let_it_be(:issue4)    { create(:issue) }
   let_it_be(:label1)    { create(:label, project: project) }
   let_it_be(:label2)    { create(:label, project: project) }
+
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::IssueType.connection_type)
+  end
 
   context "with a project" do
     before do
@@ -46,6 +50,13 @@ RSpec.describe Resolvers::IssuesResolver do
         expect(resolve_issues(assignee_username: assignee.username)).to contain_exactly(issue2)
       end
 
+      it 'filters by two assignees' do
+        assignee2 = create(:user)
+        issue2.update!(assignees: [assignee, assignee2])
+
+        expect(resolve_issues(assignee_id: [assignee.id, assignee2.id])).to contain_exactly(issue2)
+      end
+
       it 'filters by assignee_id' do
         expect(resolve_issues(assignee_id: assignee.id)).to contain_exactly(issue2)
       end
@@ -56,6 +67,10 @@ RSpec.describe Resolvers::IssuesResolver do
 
       it 'filters by no assignee' do
         expect(resolve_issues(assignee_id: IssuableFinder::Params::FILTER_NONE)).to contain_exactly(issue1)
+      end
+
+      it 'filters by author' do
+        expect(resolve_issues(author_username: issue1.author.username)).to contain_exactly(issue1, issue2)
       end
 
       it 'filters by labels' do
@@ -92,6 +107,20 @@ RSpec.describe Resolvers::IssuesResolver do
 
         it 'filters by closed_after' do
           expect(resolve_issues(closed_after: 2.hours.ago)).to contain_exactly(issue2)
+        end
+      end
+
+      describe 'filters by issue_type' do
+        it 'filters by a single type' do
+          expect(resolve_issues(issue_types: ['incident'])).to contain_exactly(issue1)
+        end
+
+        it 'filters by more than one type' do
+          expect(resolve_issues(issue_types: %w(incident issue))).to contain_exactly(issue1, issue2)
+        end
+
+        it 'ignores the filter if none given' do
+          expect(resolve_issues(issue_types: [])).to contain_exactly(issue1, issue2)
         end
       end
 
@@ -205,6 +234,21 @@ RSpec.describe Resolvers::IssuesResolver do
             expect(resolve_issues(sort: :milestone_due_desc).items).to eq([milestone_issue3, milestone_issue2, milestone_issue1])
           end
         end
+
+        context 'when sorting by severity' do
+          let_it_be(:project) { create(:project) }
+          let_it_be(:issue_high_severity) { create_issue_with_severity(project, severity: :high) }
+          let_it_be(:issue_low_severity) { create_issue_with_severity(project, severity: :low) }
+          let_it_be(:issue_no_severity) { create(:incident, project: project) }
+
+          it 'sorts issues ascending' do
+            expect(resolve_issues(sort: :severity_asc)).to eq([issue_no_severity, issue_low_severity, issue_high_severity])
+          end
+
+          it 'sorts issues descending' do
+            expect(resolve_issues(sort: :severity_desc)).to eq([issue_high_severity, issue_low_severity, issue_no_severity])
+          end
+        end
       end
 
       it 'returns issues user can see' do
@@ -288,6 +332,13 @@ RSpec.describe Resolvers::IssuesResolver do
 
     expect(field.to_graphql.complexity.call({}, {}, 1)).to eq 4
     expect(field.to_graphql.complexity.call({}, { labelName: 'foo' }, 1)).to eq 8
+  end
+
+  def create_issue_with_severity(project, severity:)
+    issue = create(:incident, project: project)
+    create(:issuable_severity, issue: issue, severity: severity)
+
+    issue
   end
 
   def resolve_issues(args = {}, context = { current_user: current_user })

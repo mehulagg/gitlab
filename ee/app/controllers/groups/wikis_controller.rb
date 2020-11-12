@@ -5,6 +5,8 @@ class Groups::WikisController < Groups::ApplicationController
 
   alias_method :container, :group
 
+  feature_category :wiki
+
   private
 
   def authorize_read_wiki!

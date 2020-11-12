@@ -8,7 +8,7 @@ RSpec.describe GitlabSchema.types['InstanceSecurityDashboard'] do
   let_it_be(:user) { create(:user, security_dashboard_projects: [project]) }
 
   let(:fields) do
-    %i[projects vulnerability_scanners]
+    %i[projects vulnerability_scanners vulnerability_severities_count vulnerability_grades]
   end
 
   before do

@@ -12,8 +12,13 @@ RSpec.describe IssueSerializer do
   end
 
   before do
-    epic = create(:epic, :use_fixed_dates)
-    create(:epic_issue, issue: resource, epic: epic)
+    stub_licensed_features(epics: true)
+
+    create(:epic, :use_fixed_dates).tap do |epic|
+      create(:epic_issue, issue: resource, epic: epic)
+    end
+
+    resource.reload
   end
 
   context 'sidebar issue serialization' do

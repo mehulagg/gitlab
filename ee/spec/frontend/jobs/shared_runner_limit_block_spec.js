@@ -1,6 +1,6 @@
 import SharedRunnerLimitBlock from 'ee/jobs/components/shared_runner_limit_block.vue';
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
 
 describe('Shared Runner Limit Block', () => {
@@ -40,12 +40,12 @@ describe('Shared Runner Limit Block', () => {
       );
     });
 
-    it('renders call to action gl-deprecated-button with the right href', () => {
-      const glDeprecatedButton = wrapper.find(GlDeprecatedButton);
+    it('renders call to action gl-button with the right href', () => {
+      const glButton = wrapper.find(GlButton);
 
-      expect(glDeprecatedButton.isVisible()).toBe(true);
-      expect(glDeprecatedButton.attributes('variant')).toBe('danger');
-      expect(glDeprecatedButton.attributes('href')).toBe(subscriptionsMoreMinutesUrl);
+      expect(glButton.isVisible()).toBe(true);
+      expect(glButton.attributes('variant')).toBe('danger');
+      expect(glButton.attributes('href')).toBe(subscriptionsMoreMinutesUrl);
     });
   });
 

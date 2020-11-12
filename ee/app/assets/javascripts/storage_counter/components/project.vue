@@ -1,15 +1,14 @@
 <script>
-import { GlDeprecatedButton, GlLink } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { numberToHumanSize, isOdd } from '~/lib/utils/number_utils';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
 import StorageRow from './storage_row.vue';
 
 export default {
   components: {
-    Icon,
-    GlDeprecatedButton,
+    GlIcon,
     GlLink,
     ProjectAvatar,
     StorageRow,
@@ -30,7 +29,7 @@ export default {
       const { name, id, avatarUrl, webUrl } = this.project;
       return {
         name,
-        id: Number(id),
+        id: Number(getIdFromGraphQLId(id)),
         avatar_url: avatarUrl,
         path: webUrl,
       };
@@ -55,7 +54,13 @@ export default {
     },
   },
   methods: {
-    toggleProject() {
+    toggleProject(e) {
+      const NO_EXPAND_CLS = 'js-project-link';
+      const targetClasses = e.target.classList;
+
+      if (targetClasses.contains(NO_EXPAND_CLS)) {
+        return;
+      }
       this.isOpen = !this.isOpen;
     },
     getFormattedName(name) {
@@ -84,26 +89,42 @@ export default {
 </script>
 <template>
   <div>
-    <div class="gl-responsive-table-row border-bottom" role="row">
-      <div class="table-section section-wrap section-70 text-truncate" role="gridcell">
-        <div class="table-mobile-header font-weight-bold" role="rowheader">{{ __('Project') }}</div>
-        <div class="table-mobile-content">
-          <gl-deprecated-button
-            class="btn-transparent float-left p-0 mr-2"
-            :aria-label="__('Toggle project')"
-            @click="toggleProject"
+    <div
+      class="gl-responsive-table-row gl-border-solid gl-border-b-1 gl-pt-3 gl-pb-3 gl-border-b-gray-100 gl-hover-bg-blue-50 gl-hover-border-blue-200 gl-hover-cursor-pointer"
+      role="row"
+      data-testid="projectTableRow"
+      @click="toggleProject"
+    >
+      <div
+        class="table-section gl-white-space-normal! gl-flex-sm-wrap section-70 gl-text-truncate"
+        role="gridcell"
+      >
+        <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
+          {{ __('Project') }}
+        </div>
+        <div class="table-mobile-content gl-display-flex gl-align-items-center">
+          <div class="gl-display-flex gl-mr-3 gl-align-items-center">
+            <gl-icon :size="10" :name="iconName" class="gl-mr-2" />
+            <gl-icon name="bookmark" />
+          </div>
+          <div>
+            <project-avatar :project="projectAvatar" :size="32" />
+          </div>
+          <gl-link
+            :href="project.webUrl"
+            class="js-project-link gl-font-weight-bold gl-text-gray-900!"
+            >{{ name }}</gl-link
           >
-            <icon :name="iconName" class="folder-icon" />
-          </gl-deprecated-button>
-
-          <project-avatar :project="projectAvatar" :size="20" />
-
-          <gl-link :href="project.webUrl" class="font-weight-bold">{{ name }}</gl-link>
         </div>
       </div>
-      <div class="table-section section-wrap section-30 text-truncate" role="gridcell">
-        <div class="table-mobile-header font-weight-bold" role="rowheader">{{ __('Usage') }}</div>
-        <div class="table-mobile-content">{{ storageSize }}</div>
+      <div
+        class="table-section gl-white-space-normal! gl-flex-sm-wrap section-30 gl-text-truncate"
+        role="gridcell"
+      >
+        <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
+          {{ __('Usage') }}
+        </div>
+        <div class="table-mobile-content gl-text-gray-900">{{ storageSize }}</div>
       </div>
     </div>
 
@@ -113,7 +134,7 @@ export default {
         :key="index"
         :name="getFormattedName(statisticsName)"
         :value="getValue(value)"
-        :class="{ 'bg-gray-light': isOdd(index) }"
+        :class="{ 'gl-bg-gray-10': isOdd(index) }"
       />
     </template>
   </div>

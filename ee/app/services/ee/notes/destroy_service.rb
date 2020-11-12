@@ -10,7 +10,7 @@ module EE
         super
 
         ::Analytics::RefreshCommentsData.for_note(note)&.execute(force: true)
-        StatusPage.trigger_publish(project, current_user, note)
+        ::Gitlab::StatusPage.trigger_publish(project, current_user, note)
       end
     end
   end

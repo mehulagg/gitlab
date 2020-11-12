@@ -16,7 +16,7 @@ RSpec.describe API::ProjectApprovalSettings do
 
     context 'when the request is correct' do
       let!(:rule) do
-        rule = create(:approval_project_rule, name: 'security', project: project, approvals_required: 7)
+        rule = create(:approval_project_rule, name: 'vulnerability', project: project, approvals_required: 7)
         rule.users << approver
         rule
       end
@@ -40,7 +40,7 @@ RSpec.describe API::ProjectApprovalSettings do
         rule = json['rules'].first
 
         expect(rule['approvals_required']).to eq(7)
-        expect(rule['name']).to eq('security')
+        expect(rule['name']).to eq('vulnerability')
       end
 
       context 'when target_branch is specified' do
@@ -103,7 +103,7 @@ RSpec.describe API::ProjectApprovalSettings do
 
       context 'report_approver rules' do
         let!(:report_approver_rule) do
-          create(:approval_project_rule, :security_report, project: project)
+          create(:approval_project_rule, :vulnerability_report, project: project)
         end
 
         it 'includes report_approver rules' do

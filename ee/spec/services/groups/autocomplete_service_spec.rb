@@ -16,7 +16,7 @@ RSpec.describe Groups::AutocompleteService do
 
   def expect_labels_to_equal(labels, expected_labels)
     extract_title = lambda { |label| label['title'] }
-    expect(labels.map(&extract_title)).to eq(expected_labels.map(&extract_title))
+    expect(labels.map(&extract_title)).to match_array(expected_labels.map(&extract_title))
   end
 
   describe '#labels_as_hash' do

@@ -64,76 +64,42 @@ module Geo
     def load_pending_resources
       return [] unless valid_shard?
 
-      resources = find_project_ids_not_synced(except_ids: scheduled_project_ids, batch_size: db_retrieve_batch_size)
+      resources = find_jobs_never_attempted_sync(except_ids: scheduled_project_ids, batch_size: db_retrieve_batch_size)
       remaining_capacity = db_retrieve_batch_size - resources.size
 
-      if remaining_capacity.zero?
+      if remaining_capacity == 0
         resources
       else
-        resources + find_project_ids_updated_recently(except_ids: scheduled_project_ids + resources, batch_size: remaining_capacity)
+        resources + find_jobs_needs_sync_again(except_ids: scheduled_project_ids + resources, batch_size: remaining_capacity)
       end
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_project_ids_not_synced(except_ids:, batch_size:)
-      if Geo::ProjectRegistry.registry_consistency_worker_enabled?
-        project_ids =
-          find_never_synced_project_ids(batch_size: batch_size, except_ids: except_ids)
+    def find_jobs_never_attempted_sync(except_ids:, batch_size:)
+      project_ids =
+        registry_finder
+          .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: except_ids)
+          .pluck_model_foreign_key
 
-        find_project_ids_within_shard(project_ids, direction: :desc)
-      else
-        find_unsynced_projects(batch_size: batch_size)
-          .id_not_in(except_ids)
-          .reorder(last_repository_updated_at: :desc)
-          .pluck_primary_key
-      end
+      find_project_ids_within_shard(project_ids, direction: :desc)
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    def find_unsynced_projects(batch_size:)
-      Geo::ProjectUnsyncedFinder
-        .new(current_node: current_node, shard_name: shard_name, batch_size: batch_size)
-        .execute
-    end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_project_ids_updated_recently(except_ids:, batch_size:)
-      if Geo::ProjectRegistry.registry_consistency_worker_enabled?
-        project_ids =
-          find_retryable_dirty_project_ids(batch_size: batch_size, except_ids: except_ids)
+    def find_jobs_needs_sync_again(except_ids:, batch_size:)
+      project_ids =
+        registry_finder
+          .find_registries_needs_sync_again(batch_size: batch_size, except_ids: except_ids)
+          .pluck_model_foreign_key
 
-        find_project_ids_within_shard(project_ids, direction: :asc)
-      else
-        find_projects_updated_recently(batch_size: batch_size)
-          .id_not_in(except_ids)
-          .order('project_registry.last_repository_synced_at ASC NULLS FIRST, projects.last_repository_updated_at ASC')
-          .pluck_primary_key
-      end
+      find_project_ids_within_shard(project_ids, direction: :asc)
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    def find_projects_updated_recently(batch_size:)
-      Geo::ProjectUpdatedRecentlyFinder
-        .new(current_node: current_node, shard_name: shard_name, batch_size: batch_size)
-        .execute
-    end
 
     def valid_shard?
       return true unless current_node.selective_sync_by_shards?
 
       current_node.selective_sync_shards.include?(shard_name)
-    end
-
-    def find_never_synced_project_ids(batch_size:, except_ids:)
-      registry_finder
-        .find_never_synced_registries(batch_size: batch_size, except_ids: except_ids)
-        .pluck_model_foreign_key
-    end
-
-    def find_retryable_dirty_project_ids(batch_size:, except_ids:)
-      registry_finder
-        .find_retryable_dirty_registries(batch_size: batch_size, except_ids: except_ids)
-        .pluck_model_foreign_key
     end
 
     # rubocop:disable CodeReuse/ActiveRecord

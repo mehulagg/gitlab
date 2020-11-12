@@ -1,10 +1,9 @@
 <script>
-import { isNumber, isString } from 'lodash';
-import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import ReportSection from '~/reports/components/report_section.vue';
 import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
 
@@ -12,19 +11,23 @@ import { s__, __, sprintf } from '~/locale';
 import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
-import MergeTrainHelperText from './components/merge_train_helper_text.vue';
-import { MTWPS_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
+
+// import ExtensionsContainer from '~/vue_merge_request_widget/components/extensions/container';
 
 export default {
   components: {
-    MergeTrainHelperText,
+    // ExtensionsContainer,
     MrWidgetLicenses,
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
     BlockingMergeRequestsReport,
-    GroupedSecurityReportsApp,
+    GroupedSecurityReportsApp: () =>
+      import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
     GroupedMetricsReportsApp,
     ReportSection,
+  },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
   },
   extends: CEWidgetOptions,
   mixins: [reportsMixin],
@@ -85,9 +88,13 @@ export default {
 
       return Boolean(loadPerformance.head_path && loadPerformance.base_path);
     },
-    shouldRenderSecurityReport() {
+    shouldRenderBaseSecurityReport() {
+      return !this.mr.canReadVulnerabilities && this.shouldRenderSecurityReport;
+    },
+    shouldRenderExtendedSecurityReport() {
       const { enabledReports } = this.mr;
       return (
+        this.mr.canReadVulnerabilities &&
         enabledReports &&
         this.$options.securityReportTypes.some(reportType => enabledReports[reportType])
       );
@@ -154,16 +161,6 @@ export default {
       return this.checkReportStatus(
         this.isLoadingLoadPerformance,
         this.loadingLoadPerformanceFailed,
-      );
-    },
-
-    shouldRenderMergeTrainHelperText() {
-      return (
-        this.mr.pipeline &&
-        isNumber(this.mr.pipeline.id) &&
-        isString(this.mr.pipeline.path) &&
-        this.mr.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY &&
-        !this.mr.autoMergeEnabled
       );
     },
     licensesApiPath() {
@@ -243,11 +240,12 @@ export default {
     'dependencyScanning',
     'containerScanning',
     'coverageFuzzing',
+    'secretDetection',
   ],
 };
 </script>
 <template>
-  <div v-if="mr" class="mr-state-widget gl-mt-3">
+  <div v-if="isLoaded" class="mr-state-widget gl-mt-3">
     <mr-widget-header :mr="mr" />
     <mr-widget-suggest-pipeline
       v-if="shouldSuggestPipelines"
@@ -255,6 +253,9 @@ export default {
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
       :human-access="mr.humanAccess.toLowerCase()"
+      :user-callouts-path="mr.userCalloutsPath"
+      :user-callout-feature-id="mr.suggestPipelineFeatureId"
+      @dismiss="dismissSuggestPipelines"
     />
     <mr-widget-pipeline-container
       v-if="shouldRenderPipelines"
@@ -268,6 +269,7 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
+      <!-- <extensions-container :mr="mr" /> -->
       <blocking-merge-requests-report :mr="mr" />
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
@@ -308,8 +310,15 @@ export default {
         :endpoint="mr.metricsReportsPath"
         class="js-metrics-reports-container"
       />
+
+      <security-reports-app
+        v-if="shouldRenderBaseSecurityReport"
+        :pipeline-id="mr.pipeline.id"
+        :project-id="mr.targetProjectId"
+        :security-reports-docs-path="mr.securityReportsDocsPath"
+      />
       <grouped-security-reports-app
-        v-if="shouldRenderSecurityReport"
+        v-else-if="shouldRenderExtendedSecurityReport"
         :head-blob-path="mr.headBlobPath"
         :source-branch="mr.sourceBranch"
         :target-branch="mr.targetBranch"
@@ -332,6 +341,7 @@ export default {
         :pipeline-path="mr.pipeline.path"
         :pipeline-id="mr.securityReportsPipelineId"
         :pipeline-iid="mr.securityReportsPipelineIid"
+        :project-id="mr.targetProjectId"
         :project-full-path="mr.sourceProjectFullPath"
         :diverged-commits-count="mr.divergedCommitsCount"
         :mr-state="mr.state"
@@ -368,7 +378,6 @@ export default {
 
       <div class="mr-widget-section">
         <component :is="componentName" :mr="mr" :service="service" />
-
         <div class="mr-widget-info">
           <section v-if="mr.allowCollaboration" class="mr-info-list mr-links">
             <p>
@@ -395,19 +404,12 @@ export default {
           </mr-widget-alert-message>
 
           <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            {{ mergeError }}
+            <span v-safe-html="mergeError"></span>
           </mr-widget-alert-message>
 
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
         </div>
       </div>
-      <merge-train-helper-text
-        v-if="shouldRenderMergeTrainHelperText"
-        :pipeline-id="mr.pipeline.id"
-        :pipeline-link="mr.pipeline.path"
-        :merge-train-length="mr.mergeTrainsCount"
-        :merge-train-when-pipeline-succeeds-docs-path="mr.mergeTrainWhenPipelineSucceedsDocsPath"
-      />
       <div v-if="shouldRenderMergeHelp" class="mr-widget-footer"><mr-widget-merge-help /></div>
     </div>
     <mr-widget-pipeline-container

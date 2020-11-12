@@ -4,14 +4,15 @@
 
 import $ from 'jquery';
 import { difference, isEqual, escape, sortBy, template, union } from 'lodash';
-import { sprintf, s__, __ } from './locale';
+import { sprintf, __ } from './locale';
 import axios from './lib/utils/axios_utils';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
 import CreateLabelDropdown from './create_label';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import ModalStore from './boards/stores/modal_store';
 import boardsStore from './boards/stores/boards_store';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class LabelsSelect {
   constructor(els, options = {}) {
@@ -42,7 +43,6 @@ export default class LabelsSelect {
       const $block = $selectbox.closest('.block');
       const $form = $dropdown.closest('form, .js-issuable-update');
       const $sidebarCollapsedValue = $block.find('.sidebar-collapsed-icon span');
-      const $sidebarLabelTooltip = $block.find('.js-sidebar-labels-tooltip');
       const $value = $block.find('.value');
       const $dropdownMenu = $dropdown.parent().find('.dropdown-menu');
       // eslint-disable-next-line no-jquery/no-fade
@@ -56,7 +56,6 @@ export default class LabelsSelect {
         .get();
       const scopedLabels = $dropdown.data('scopedLabels');
       const { handleClick } = options;
-      $sidebarLabelTooltip.tooltip();
 
       if ($dropdown.closest('.dropdown').find('.dropdown-new-label').length) {
         new CreateLabelDropdown(
@@ -90,7 +89,6 @@ export default class LabelsSelect {
         axios
           .put(issueUpdateURL, data)
           .then(({ data }) => {
-            let labelTooltipTitle;
             let template;
             // eslint-disable-next-line no-jquery/no-fade
             $loading.fadeOut();
@@ -150,30 +148,13 @@ export default class LabelsSelect {
             $value.removeAttr('style').html(template);
             $sidebarCollapsedValue.text(labelCount);
 
-            if (data.labels.length) {
-              let labelTitles = data.labels.map(label => label.title);
-
-              if (labelTitles.length > 5) {
-                labelTitles = labelTitles.slice(0, 5);
-                labelTitles.push(
-                  sprintf(s__('Labels|and %{count} more'), { count: data.labels.length - 5 }),
-                );
-              }
-
-              labelTooltipTitle = labelTitles.join(', ');
-            } else {
-              labelTooltipTitle = __('Labels');
-            }
-
-            $sidebarLabelTooltip.attr('title', labelTooltipTitle).tooltip('_fixTitle');
-
             $('.has-tooltip', $value).tooltip({
               container: 'body',
             });
           })
           .catch(() => flash(__('Error saving label update.')));
       };
-      $dropdown.glDropdown({
+      initDeprecatedJQueryDropdown($dropdown, {
         showMenuAbove,
         data(term, callback) {
           const labelUrl = $dropdown.attr('data-labels');
@@ -203,7 +184,7 @@ export default class LabelsSelect {
 
               callback(data);
               if (showMenuAbove) {
-                $dropdown.data('glDropdown').positionMenuAbove();
+                $dropdown.data('deprecatedJQueryDropdown').positionMenuAbove();
               }
             })
             .catch(() => flash(__('Error fetching labels.')));
@@ -348,7 +329,7 @@ export default class LabelsSelect {
             } else {
               if (!$dropdown.hasClass('js-filter-bulk-update')) {
                 saveLabelData();
-                $dropdown.data('glDropdown').clearMenu();
+                $dropdown.data('deprecatedJQueryDropdown').clearMenu();
               }
             }
           }
@@ -455,7 +436,7 @@ export default class LabelsSelect {
           if ($dropdown.hasClass('js-issue-board-sidebar')) {
             const previousSelection = $dropdown.attr('data-selected');
             this.selected = previousSelection ? previousSelection.split(',') : [];
-            $dropdown.data('glDropdown').updateLabel();
+            $dropdown.data('deprecatedJQueryDropdown').updateLabel();
           }
         },
         preserveContext: true,
@@ -477,13 +458,11 @@ export default class LabelsSelect {
 
     const linkOpenTag =
       '<a href="<%- issueUpdateURL.slice(0, issueUpdateURL.lastIndexOf("/")) %>?label_name[]=<%- encodeURIComponent(label.title) %>" class="gl-link gl-label-link has-tooltip" <%= linkAttrs %> title="<%= tooltipTitleTemplate({ label, isScopedLabel, enableScopedLabels, escapeStr }) %>">';
-    const spanOpenTag =
-      '<span class="gl-label-text" style="background-color: <%= escapeStr(label.color) %>; color: <%= escapeStr(label.text_color) %>;">';
     const labelTemplate = template(
       [
         '<span class="gl-label">',
         linkOpenTag,
-        spanOpenTag,
+        '<span class="gl-label-text <%= labelTextClass({ label, escapeStr }) %>" style="background-color: <%= escapeStr(label.color) %>;">',
         '<%- label.title %>',
         '</span>',
         '</a>',
@@ -491,18 +470,24 @@ export default class LabelsSelect {
       ].join(''),
     );
 
-    const rightLabelTextColor = ({ label, escapeStr }) => {
-      return escapeStr(label.text_color === '#FFFFFF' ? label.color : label.text_color);
+    const labelTextClass = ({ label, escapeStr }) => {
+      return escapeStr(
+        label.text_color === '#FFFFFF' ? 'gl-label-text-light' : 'gl-label-text-dark',
+      );
+    };
+
+    const rightLabelTextClass = ({ label, escapeStr }) => {
+      return escapeStr(label.text_color === '#333333' ? labelTextClass({ label, escapeStr }) : '');
     };
 
     const scopedLabelTemplate = template(
       [
         '<span class="gl-label gl-label-scoped" style="color: <%= escapeStr(label.color) %>; --label-inset-border: inset 0 0 0 2px <%= escapeStr(label.color) %>;">',
         linkOpenTag,
-        spanOpenTag,
+        '<span class="gl-label-text <%= labelTextClass({ label, escapeStr }) %>" style="background-color: <%= escapeStr(label.color) %>;">',
         '<%- label.title.slice(0, label.title.lastIndexOf("::")) %>',
         '</span>',
-        '<span class="gl-label-text" style="color: <%= rightLabelTextColor({ label, escapeStr }) %>;">',
+        '<span class="gl-label-text <%= rightLabelTextClass({ label, escapeStr }) %>">',
         '<%- label.title.slice(label.title.lastIndexOf("::") + 2) %>',
         '</span>',
         '</a>',
@@ -526,9 +511,9 @@ export default class LabelsSelect {
       [
         '<% labels.forEach(function(label){ %>',
         '<% if (isScopedLabel(label) && enableScopedLabels) { %>',
-        '<%= scopedLabelTemplate({ label, issueUpdateURL, isScopedLabel, enableScopedLabels, rightLabelTextColor, tooltipTitleTemplate, escapeStr, linkAttrs: \'data-html="true"\' }) %>',
+        '<%= scopedLabelTemplate({ label, issueUpdateURL, isScopedLabel, enableScopedLabels, labelTextClass, rightLabelTextClass, tooltipTitleTemplate, escapeStr, linkAttrs: \'data-html="true"\' }) %>',
         '<% } else { %>',
-        '<%= labelTemplate({ label, issueUpdateURL, isScopedLabel, enableScopedLabels, tooltipTitleTemplate, escapeStr, linkAttrs: "" }) %>',
+        '<%= labelTemplate({ label, issueUpdateURL, isScopedLabel, enableScopedLabels, labelTextClass, tooltipTitleTemplate, escapeStr, linkAttrs: "" }) %>',
         '<% } %>',
         '<% }); %>',
       ].join(''),
@@ -537,7 +522,8 @@ export default class LabelsSelect {
     return tpl({
       ...tplData,
       labelTemplate,
-      rightLabelTextColor,
+      labelTextClass,
+      rightLabelTextClass,
       scopedLabelTemplate,
       tooltipTitleTemplate,
       isScopedLabel,

@@ -6,15 +6,15 @@ module NotificationsHelper
   def notification_icon_class(level)
     case level.to_sym
     when :disabled, :owner_disabled
-      'microphone-slash'
+      'notifications-off'
     when :participating
-      'volume-up'
+      'notifications'
     when :watch
       'eye'
     when :mention
       'at'
     when :global
-      'globe'
+      'earth'
     end
   end
 
@@ -28,8 +28,11 @@ module NotificationsHelper
     end
   end
 
-  def notification_icon(level, text = nil)
-    icon("#{notification_icon_class(level)} fw", text: text)
+  def notification_icon(level)
+    icon = notification_icon_class(level)
+    return '' unless icon
+
+    sprite_icon(icon)
   end
 
   def notification_title(level)
@@ -119,9 +122,5 @@ module NotificationsHelper
 
   def can_read_project?(project)
     can?(current_user, :read_project, project)
-  end
-
-  def notification_event_disabled?(event)
-    event == :fixed_pipeline && !Gitlab::Ci::Features.pipeline_fixed_notifications?
   end
 end

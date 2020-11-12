@@ -6,17 +6,6 @@ import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { trimText } from 'helpers/text_helper';
 
-import mockData, {
-  baseBrowserPerformance,
-  headBrowserPerformance,
-  baseLoadPerformance,
-  headLoadPerformance,
-} from './mock_data';
-
-import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
-import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
 import {
   sastDiffSuccessMock,
   dastDiffSuccessMock,
@@ -25,6 +14,17 @@ import {
   secretScanningDiffSuccessMock,
   coverageFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
+import mockData, {
+  baseBrowserPerformance,
+  headBrowserPerformance,
+  baseLoadPerformance,
+  headLoadPerformance,
+  pipelineJobs,
+} from './mock_data';
+
+import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import axios from '~/lib/utils/axios_utils';
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
@@ -75,7 +75,8 @@ describe('ee merge request widget options', () => {
 
   const findBrowserPerformanceWidget = () => vm.$el.querySelector('.js-browser-performance-widget');
   const findLoadPerformanceWidget = () => vm.$el.querySelector('.js-load-performance-widget');
-  const findSecurityWidget = () => vm.$el.querySelector('.js-security-widget');
+  const findExtendedSecurityWidget = () => vm.$el.querySelector('.js-security-widget');
+  const findBaseSecurityWidget = () => vm.$el.querySelector('[data-testid="security-mr-widget"]');
 
   const setBrowserPerformance = (data = {}) => {
     const browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE, ...data };
@@ -106,14 +107,18 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, sastDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm.loading = false;
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          findSecurityWidget()
+          findExtendedSecurityWidget()
             .querySelector(SAST_SELECTOR)
             .textContent.trim(),
         ).toContain('SAST is loading');
@@ -131,11 +136,11 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('SAST detected 1 new critical severity vulnerability.');
+          ).toEqual('SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others');
           done();
         });
       });
@@ -153,11 +158,11 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ).trim(),
-          ).toEqual('SAST detected no new vulnerabilities.');
+          ).toEqual('SAST detected no vulnerabilities.');
           done();
         });
       });
@@ -173,9 +178,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', done => {
         setImmediate(() => {
-          expect(trimText(findSecurityWidget().querySelector(SAST_SELECTOR).textContent)).toContain(
-            'SAST: Loading resulted in an error',
-          );
+          expect(
+            trimText(findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent),
+          ).toContain('SAST: Loading resulted in an error');
           done();
         });
       });
@@ -197,14 +202,19 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(DEPENDENCY_SCANNING_ENDPOINT).reply(200, dependencyScanningDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          trimText(findSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent),
+          trimText(
+            findExtendedSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent,
+          ),
         ).toContain('Dependency scanning is loading');
       });
     });
@@ -221,12 +231,12 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
           ).toEqual(
-            'Dependency scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+            'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
           );
           done();
         });
@@ -245,15 +255,15 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('renders no new vulnerabilities message', done => {
+      it('renders no vulnerabilities message', done => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected no new vulnerabilities.');
+          ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
         });
       });
@@ -271,11 +281,11 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected no new vulnerabilities.');
+          ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
         });
       });
@@ -291,7 +301,9 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            trimText(findSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent),
+            trimText(
+              findExtendedSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent,
+            ),
           ).toContain('Dependency scanning: Loading resulted in an error');
           done();
         });
@@ -617,14 +629,19 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(CONTAINER_SCANNING_ENDPOINT).reply(200, containerScanningDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          trimText(findSecurityWidget().querySelector(CONTAINER_SCANNING_SELECTOR).textContent),
+          trimText(
+            findExtendedSecurityWidget().querySelector(CONTAINER_SCANNING_SELECTOR).textContent,
+          ),
         ).toContain('Container scanning is loading');
       });
     });
@@ -641,12 +658,12 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${CONTAINER_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
           ).toEqual(
-            'Container scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+            'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
           );
           done();
         });
@@ -664,7 +681,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(CONTAINER_SCANNING_SELECTOR)
               .textContent.trim(),
           ).toContain('Container scanning: Loading resulted in an error');
@@ -689,14 +706,17 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(DAST_ENDPOINT).reply(200, dastDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          findSecurityWidget()
+          findExtendedSecurityWidget()
             .querySelector(DAST_SELECTOR)
             .textContent.trim(),
         ).toContain('DAST is loading');
@@ -714,10 +734,12 @@ describe('ee merge request widget options', () => {
       it('should render provided data', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
-              .querySelector(`${DAST_SELECTOR} .report-block-list-issue-description`)
-              .textContent.trim(),
-          ).toEqual('DAST detected 1 new critical severity vulnerability.');
+            trimText(
+              findExtendedSecurityWidget().querySelector(
+                `${DAST_SELECTOR} .report-block-list-issue-description`,
+              ).textContent,
+            ),
+          ).toEqual('DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others');
           done();
         });
       });
@@ -734,7 +756,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(DAST_SELECTOR)
               .textContent.trim(),
           ).toContain('DAST: Loading resulted in an error');
@@ -746,6 +768,14 @@ describe('ee merge request widget options', () => {
 
   describe('Coverage Fuzzing', () => {
     const COVERAGE_FUZZING_ENDPOINT = 'coverage_fuzzing_report';
+
+    const mountWithFeatureFlag = () =>
+      new Component({
+        propsData: { mrData: gl.mrWidgetData },
+        provide: {
+          glFeatures: { coverageFuzzingMrWidget: true },
+        },
+      }).$mount();
 
     beforeEach(() => {
       gl.mrWidgetData = {
@@ -762,11 +792,10 @@ describe('ee merge request widget options', () => {
       it('should render loading indicator', () => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
 
         expect(
-          findSecurityWidget()
+          findExtendedSecurityWidget()
             .querySelector(COVERAGE_FUZZING_SELECTOR)
             .textContent.trim(),
         ).toContain('Coverage fuzzing is loading');
@@ -777,18 +806,19 @@ describe('ee merge request widget options', () => {
       beforeEach(() => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
       });
 
       it('should render provided data', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
-              .querySelector(`${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`)
-              .textContent.trim(),
+            trimText(
+              findExtendedSecurityWidget().querySelector(
+                `${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`,
+              ).textContent,
+            ),
           ).toEqual(
-            'Coverage fuzzing detected 1 new critical and 1 new high severity vulnerabilities.',
+            'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
           );
           done();
         });
@@ -799,14 +829,13 @@ describe('ee merge request widget options', () => {
       beforeEach(() => {
         mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(500, {});
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, {});
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm = mountWithFeatureFlag();
       });
 
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(COVERAGE_FUZZING_SELECTOR)
               .textContent.trim(),
           ).toContain('Coverage fuzzing: Loading resulted in an error');
@@ -817,13 +846,13 @@ describe('ee merge request widget options', () => {
   });
 
   describe('Secret Scanning', () => {
-    const SECRET_SCANNING_ENDPOINT = 'secret_scanning';
+    const SECRET_SCANNING_ENDPOINT = 'secret_detection_report';
 
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
         enabled_reports: {
-          secret_scanning: true,
+          secret_detection: true,
           // The below property needs to exist until
           // secret scanning is implemented in backend
           // Or for some other reason I'm yet to find
@@ -842,7 +871,9 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
         expect(
-          trimText(findSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent),
+          trimText(
+            findExtendedSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent,
+          ),
         ).toContain('Secret scanning is loading');
       });
     });
@@ -859,12 +890,12 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${SECRET_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
           ).toEqual(
-            'Secret scanning detected 1 new critical and 1 new high severity vulnerabilities.',
+            'Secret scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
           );
           done();
         });
@@ -882,7 +913,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(SECRET_SCANNING_SELECTOR)
               .textContent.trim(),
           ).toContain('Secret scanning: Loading resulted in an error');
@@ -924,6 +955,37 @@ describe('ee merge request widget options', () => {
     });
   });
 
+  describe('CE security report', () => {
+    const PIPELINE_JOBS_ENDPOINT = `/api/undefined/projects/${mockData.target_project_id}/pipelines/${mockData.pipeline.id}/jobs`;
+
+    describe.each`
+      context                               | canReadVulnerabilities | hasPipeline | featureFlag | shouldRender
+      ${'user cannot read vulnerabilities'} | ${false}               | ${true}     | ${true}     | ${true}
+      ${'user can read vulnerabilities'}    | ${true}                | ${true}     | ${true}     | ${false}
+      ${'no pipeline'}                      | ${false}               | ${false}    | ${true}     | ${false}
+      ${'the feature flag is disabled'}     | ${false}               | ${true}     | ${false}    | ${false}
+    `('given $context', ({ canReadVulnerabilities, hasPipeline, featureFlag, shouldRender }) => {
+      beforeEach(() => {
+        gl.mrWidgetData = {
+          ...mockData,
+          can_read_vulnerabilities: canReadVulnerabilities,
+          pipeline: hasPipeline ? mockData.pipeline : undefined,
+        };
+
+        gon.features = { coreSecurityMrWidget: featureFlag };
+
+        mock.onGet(PIPELINE_JOBS_ENDPOINT).replyOnce(200, pipelineJobs);
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        return waitForPromises();
+      });
+
+      it(`${shouldRender ? 'renders' : 'does not render'} the CE security report`, () => {
+        expect(findBaseSecurityWidget()).toEqual(shouldRender ? expect.any(HTMLElement) : null);
+      });
+    });
+  });
+
   describe('computed', () => {
     describe('shouldRenderApprovals', () => {
       it('should return false when in empty state', () => {
@@ -950,20 +1012,6 @@ describe('ee merge request widget options', () => {
         expect(vm.shouldRenderApprovals).toBeTruthy();
       });
     });
-
-    describe('shouldRenderMergeTrainHelperText', () => {
-      it('should return true if MTWPS is available and the user has not yet pressed the MTWPS button', () => {
-        vm = mountComponent(Component, {
-          mrData: {
-            ...mockData,
-            available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-            auto_merge_enabled: false,
-          },
-        });
-
-        expect(vm.shouldRenderMergeTrainHelperText).toBe(true);
-      });
-    });
   });
 
   describe('rendering source branch removal status', () => {
@@ -981,10 +1029,10 @@ describe('ee merge request widget options', () => {
       vm.mr.state = 'readyToMerge';
 
       vm.$nextTick(() => {
-        const tooltip = vm.$el.querySelector('.fa-question-circle');
+        const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
-        expect(tooltip.getAttribute('data-original-title')).toBe(
+        expect(tooltip.getAttribute('title')).toBe(
           'A user with write access to the source branch selected this option',
         );
 
@@ -1062,115 +1110,6 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  describe('merge train helper text', () => {
-    const getHelperTextElement = () => vm.$el.querySelector('.js-merge-train-helper-text');
-
-    it('does not render the merge train helpe text if the MTWPS strategy is not available', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MT_MERGE_STRATEGY],
-          pipeline: {
-            ...mockData.pipeline,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).not.toExist();
-    });
-
-    it('renders the correct merge train helper text when there is an existing merge train', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_trains_count: 2,
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).toExist();
-      expect(helperText.textContent).toContain(
-        'This merge request will be added to the merge train when pipeline #123 succeeds.',
-      );
-    });
-
-    it('renders the correct merge train helper text when there is no existing merge train', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_trains_count: 0,
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).toExist();
-      expect(helperText.textContent).toContain(
-        'This merge request will start a merge train when pipeline #123 succeeds.',
-      );
-    });
-
-    it('renders the correct pipeline link inside the message', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            path: 'path/to/pipeline',
-            active: true,
-          },
-        },
-      });
-
-      const pipelineLink = getHelperTextElement().querySelector('.js-pipeline-link');
-
-      expect(pipelineLink).toExist();
-      expect(pipelineLink.textContent).toContain('#123');
-      expect(pipelineLink).toHaveAttr('href', 'path/to/pipeline');
-    });
-
-    it('renders the documentation link inside the message', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            active: true,
-          },
-        },
-      });
-
-      const pipelineLink = getHelperTextElement().querySelector('.js-documentation-link');
-
-      expect(pipelineLink).toExist();
-      expect(pipelineLink.textContent).toContain('More information');
-      expect(pipelineLink).toHaveAttr('href', 'path/to/help');
-    });
-  });
-
   describe('data', () => {
     it('passes approval api paths to service', () => {
       const paths = {
@@ -1202,7 +1141,7 @@ describe('ee merge request widget options', () => {
         sast: false,
         container_scanning: false,
         dependency_scanning: false,
-        secret_scanning: false,
+        secret_detection: false,
       },
     ];
 
@@ -1223,8 +1162,26 @@ describe('ee merge request widget options', () => {
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        expect(findSecurityWidget()).toBe(null);
+        expect(findExtendedSecurityWidget()).toBe(null);
       });
+    });
+  });
+
+  describe('given the user cannot read vulnerabilites', () => {
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        can_read_vulnerabilities: false,
+        enabled_reports: {
+          sast: true,
+        },
+      };
+
+      vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+    });
+
+    it('does not render the EE security report', () => {
+      expect(findExtendedSecurityWidget()).toBe(null);
     });
   });
 });

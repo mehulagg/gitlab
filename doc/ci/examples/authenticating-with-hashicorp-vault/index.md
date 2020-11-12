@@ -9,6 +9,12 @@ type: tutorial
 
 This tutorial demonstrates how to authenticate, configure, and read secrets with HashiCorp's Vault from GitLab CI/CD.
 
+NOTE: **Note:**
+[GitLab Premium](https://about.gitlab.com/pricing/) supports read access to a
+Hashicorp Vault, and enables you to
+[use Vault secrets in a CI job](../../secrets/index.md#use-vault-secrets-in-a-ci-job).
+To learn more, read [Using external secrets in CI](../../secrets/index.md).
+
 ## Requirements
 
 This tutorial assumes you are familiar with GitLab CI/CD and Vault.
@@ -16,7 +22,8 @@ This tutorial assumes you are familiar with GitLab CI/CD and Vault.
 To follow along, you will need:
 
 - An account on GitLab.
-- A running Vault server and the access required to configure authentication and create roles and policies.
+- A running Vault server and access to it is required to configure authentication and create roles
+  and policies. For HashiCorp Vaults, this can be the Open Source or Enterprise version.
 
 NOTE: **Note:**
 You will need to replace the `vault.example.com` URL below with the URL of your Vault server and `gitlab.example.com` with the URL of your GitLab instance.
@@ -35,15 +42,14 @@ The JWT's payload looks like this:
   "nbf": 1585798372,                             # Not valid before
   "exp": 1585713886,                             # Expire at
   "sub": "job_1212",                             # Subject (job id)
-  "namespace_id": "1",
-  "namespace_path": "mygroup",
-  "project_id": "22",
-  "project_path": "mygroup/myproject",
-  "user_id": "42",
-  "user_login": "myuser",
-  "user_email": "myuser@example.com"
-  "pipeline_id": "1212",
-  "job_id": "1212",
+  "namespace_id": "1",                           # Use this to scope to group or user level namespace by id
+  "namespace_path": "mygroup",                   # Use this to scope to group or user level namespace by path
+  "project_id": "22",                            #
+  "project_path": "mygroup/myproject",           #
+  "user_id": "42",                               # Id of the user executing the job
+  "user_email": "myuser@example.com",            # Email of the user executing the job
+  "pipeline_id": "1212",                         #
+  "job_id": "1212",                              #
   "ref": "auto-deploy-2020-04-01",               # Git ref for this job
   "ref_type": "branch",                          # Git ref type, branch or tag
   "ref_protected": "true"                        # true if this git ref is protected, false otherwise

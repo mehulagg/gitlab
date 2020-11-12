@@ -7,6 +7,33 @@ const intervalSeconds = 120;
 const makeValue = val => [initTime, val];
 const makeValues = vals => vals.map((val, i) => [initTime + intervalSeconds * i, val]);
 
+// Raw Promethues Responses
+
+export const prometheusMatrixMultiResult = ({
+  values1 = ['1', '2', '3'],
+  values2 = ['4', '5', '6'],
+} = {}) => ({
+  resultType: 'matrix',
+  result: [
+    {
+      metric: {
+        __name__: 'up',
+        job: 'prometheus',
+        instance: 'localhost:9090',
+      },
+      values: makeValues(values1),
+    },
+    {
+      metric: {
+        __name__: 'up',
+        job: 'node',
+        instance: 'localhost:9091',
+      },
+      values: makeValues(values2),
+    },
+  ],
+});
+
 // Normalized Prometheus Responses
 
 const scalarResult = ({ value = '1' } = {}) =>
@@ -182,4 +209,66 @@ export const heatmapGraphData = (panelOptions = {}, dataOptions = {}) => {
     })),
     ...panelOptions,
   });
+};
+
+/**
+ * Generate gauge chart mock graph data according to options
+ *
+ * @param {Object} panelOptions - Panel options as in YML.
+ *
+ */
+export const gaugeChartGraphData = (panelOptions = {}) => {
+  const {
+    minValue = 100,
+    maxValue = 1000,
+    split = 20,
+    thresholds = {
+      mode: 'absolute',
+      values: [500, 800],
+    },
+    format = 'kilobytes',
+  } = panelOptions;
+
+  return mapPanelToViewModel({
+    title: 'Gauge Chart Panel',
+    type: panelTypes.GAUGE_CHART,
+    min_value: minValue,
+    max_value: maxValue,
+    split,
+    thresholds,
+    format,
+    metrics: [
+      {
+        label: `Metric`,
+        state: metricStates.OK,
+        result: matrixSingleResult(),
+      },
+    ],
+  });
+};
+
+/**
+ * Generates stacked mock graph data according to options
+ *
+ * @param {Object} panelOptions - Panel options as in YML.
+ * @param {Object} dataOptions
+ */
+export const stackedColumnGraphData = (panelOptions = {}, dataOptions = {}) => {
+  return {
+    ...timeSeriesGraphData(panelOptions, dataOptions),
+    type: panelTypes.STACKED_COLUMN,
+  };
+};
+
+/**
+ * Generates bar mock graph data according to options
+ *
+ * @param {Object} panelOptions - Panel options as in YML.
+ * @param {Object} dataOptions
+ */
+export const barGraphData = (panelOptions = {}, dataOptions = {}) => {
+  return {
+    ...timeSeriesGraphData(panelOptions, dataOptions),
+    type: panelTypes.BAR,
+  };
 };

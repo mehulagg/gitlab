@@ -78,6 +78,7 @@ EOT
           patch: raw_patch
         )
       end
+
       let(:diff) { described_class.new(gitaly_diff) }
 
       context 'with a small diff' do
@@ -134,6 +135,7 @@ EOT
           to_id: '8e5177d718c561d36efde08bad36b43687ee6bf0'
         )
       end
+
       let(:diff) { described_class.new(commit_delta) }
 
       it 'initializes the diff' do
@@ -282,10 +284,18 @@ EOT
   end
 
   describe '#line_count' do
-    it 'returns the correct number of lines' do
-      diff = described_class.new(gitaly_diff)
+    let(:diff) { described_class.new(gitaly_diff) }
 
+    it 'returns the correct number of lines' do
       expect(diff.line_count).to eq(7)
+    end
+  end
+
+  describe "#diff_bytesize" do
+    let(:diff) { described_class.new(gitaly_diff) }
+
+    it "returns the size of the diff in bytes" do
+      expect(diff.diff_bytesize).to eq(diff.diff.bytesize)
     end
   end
 

@@ -1,5 +1,5 @@
 import { memoize, uniqBy, uniqueId, flatten } from 'lodash';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Facebook OAuth2 OmniAuth Provider
 
 To enable the Facebook OmniAuth provider you must register your application with Facebook. Facebook will generate an app ID and secret key for you to use.
@@ -83,7 +89,7 @@ To enable the Facebook OmniAuth provider you must register your application with
 
    ```yaml
    - { name: 'facebook', app_id: 'YOUR_APP_ID',
-     app_secret: 'YOUR_APP_SECRET' }
+       app_secret: 'YOUR_APP_SECRET' }
    ```
 
 1. Change 'YOUR_APP_ID' to the API key from Facebook page in step 10.

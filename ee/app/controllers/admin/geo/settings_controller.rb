@@ -4,6 +4,8 @@ class Admin::Geo::SettingsController < Admin::ApplicationSettingsController
   helper ::EE::GeoHelper
   before_action :check_license!, except: :show
 
+  feature_category :geo_replication
+
   def show
   end
 

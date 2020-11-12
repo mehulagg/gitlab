@@ -5,6 +5,7 @@ import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import toast from '~/vue_shared/plugins/global_toast';
+import { fetchDiffData } from '~/vue_shared/security_reports/store/utils';
 import * as types from './mutation_types';
 
 /**
@@ -43,19 +44,6 @@ export const setCreateVulnerabilityFeedbackDismissalPath = ({ commit }, path) =>
   commit(types.SET_CREATE_VULNERABILITY_FEEDBACK_DISMISSAL_PATH, path);
 
 export const setPipelineId = ({ commit }, id) => commit(types.SET_PIPELINE_ID, id);
-
-export const fetchDiffData = (state, endpoint, category) => {
-  const requests = [pollUntilComplete(endpoint)];
-
-  if (state.canReadVulnerabilityFeedback) {
-    requests.push(axios.get(state.vulnerabilityFeedbackPath, { params: { category } }));
-  }
-
-  return Promise.all(requests).then(([diffResponse, enrichResponse]) => ({
-    diff: diffResponse.data,
-    enrichData: enrichResponse?.data ?? [],
-  }));
-};
 
 /**
  * CONTAINER SCANNING
@@ -203,7 +191,7 @@ export const receiveSecretScanningDiffError = ({ commit }) =>
 export const fetchSecretScanningDiff = ({ state, dispatch }) => {
   dispatch('requestSecretScanningDiff');
 
-  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_scanning')
+  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_detection')
     .then(data => {
       dispatch('receiveSecretScanningDiffSuccess', data);
     })
@@ -370,6 +358,7 @@ export const revertDismissVulnerability = ({ state, dispatch }) => {
         ...state.modal.vulnerability,
         isDismissed: false,
         dismissalFeedback: null,
+        dismissal_feedback: null,
       };
 
       dispatch('receiveDismissVulnerability', updatedIssue);

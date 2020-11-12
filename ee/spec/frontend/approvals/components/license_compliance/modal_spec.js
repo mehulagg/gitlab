@@ -1,9 +1,9 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
-import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 import LicenseComplianceModal from 'ee/approvals/components/license_compliance/modal.vue';
 import { APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
+import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

@@ -1,7 +1,13 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Security scanner integration
 
 Integrating a security scanner into GitLab consists of providing end users
-with a [CI job definition](../../ci/yaml/README.md#introduction)
+with a [CI job definition](../../ci/yaml/README.md)
 they can add to their CI configuration files to scan their GitLab projects.
 This CI job should then output its results in a GitLab-specified format. These results are then
 automatically presented in various places in GitLab, such as the Pipeline view, Merge Request
@@ -40,12 +46,12 @@ Because the `script` entry can't be left empty, it must be set to the command th
 It is not possible to rely on the predefined `ENTRYPOINT` and `CMD` of the Docker image
 to perform the scan automatically, without passing any command.
 
-The [`before_script`](../../ci/yaml/README.md#before_script-and-after_script)
+The [`before_script`](../../ci/yaml/README.md#before_script)
 should not be used in the job definition because users may rely on this to prepare their projects before performing the scan.
 For instance, it is common practice to use `before_script` to install system libraries
 a particular project needs before performing SAST or Dependency Scanning.
 
-Similarly, [`after_script`](../../ci/yaml/README.md#before_script-and-after_script)
+Similarly, [`after_script`](../../ci/yaml/README.md#after_script)
 should not be used in the job definition, because it may be overridden by users.
 
 ### Stage
@@ -248,6 +254,11 @@ It is recommended to use the `debug` level for verbose logging that could be
 useful when debugging. The default value for `SECURE_LOG_LEVEL` should be set
 to `info`.
 
+When executing command lines, scanners should use the `debug` level to log the command line and its output.
+For instance, the [bundler-audit](https://gitlab.com/gitlab-org/security-products/analyzers/bundler-audit) scanner
+uses the `debug` level to log the command line `bundle audit check --quiet`,
+and what `bundle audit` writes to the standard output.
+
 #### common logutil package
 
 If you are using [go](https://golang.org/) and
@@ -265,15 +276,20 @@ This documentation gives an overview of the report JSON format,
 as well as recommendations and examples to help integrators set its fields.
 The format is extensively described in the documentation of
 [SAST](../../user/application_security/sast/index.md#reports-json-format),
+[DAST](../../user/application_security/dast/#reports),
 [Dependency Scanning](../../user/application_security/dependency_scanning/index.md#reports-json-format),
 and [Container Scanning](../../user/application_security/container_scanning/index.md#reports-json-format).
 
-The DAST variant of the report JSON format is not documented at the moment.
+You can find the schemas for these scanners here:
+
+- [SAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json)
+- [DAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dast-report-format.json)
+- [Dependency Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dependency-scanning-report-format.json)
+- [Container Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/container-scanning-report-format.json)
 
 ### Version
 
-This field specifies the version of the report schema you are using. Please reference individual scanner
-pages for the specific versions to use.
+This field specifies the version of the [Security Report Schemas](https://gitlab.com/gitlab-org/security-products/security-report-schemas) you are using. Please refer to the [releases](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/releases) of the schemas for the specific versions to use.
 
 ### Vulnerabilities
 
@@ -281,7 +297,7 @@ The `vulnerabilities` field of the report is an array of vulnerability objects.
 
 #### ID
 
-The `id` field is the unique identifier of the vulnerability.
+The `id` field is the unique identifier of the vulnerability.
 It is used to reference a fixed vulnerability from a [remediation objects](#remediations).
 We recommend that you generate a UUID and use it as the `id` field's value.
 
@@ -358,7 +374,7 @@ It is recommended to reuse the identifiers the GitLab scanners already define:
 | [CVE](https://cve.mitre.org/cve/) | `cve` | CVE-2019-10086 |
 | [CWE](https://cwe.mitre.org/data/index.html) | `cwe` | CWE-1026 |
 | [OSVD](https://cve.mitre.org/data/refs/refmap/source-OSVDB.html) | `osvdb` | OSVDB-113928 |
-| [USN](https://usn.ubuntu.com/) | `usn` | USN-4234-1 |
+| [USN](https://ubuntu.com/security/notices) | `usn` | USN-4234-1 |
 | [WASC](http://projects.webappsec.org/Threat-Classification-Reference-Grid)  | `wasc` | WASC-19 |
 | [RHSA](https://access.redhat.com/errata/#/) | `rhsa` | RHSA-2020:0111 |
 | [ELSA](https://linux.oracle.com/security/) | `elsa` | ELSA-2020-0085 |
@@ -368,11 +384,18 @@ which is shared by the analyzers that GitLab maintains. You can [contribute](htt
 new generic identifiers to if needed. Analyzers may also produce vendor-specific or product-specific
 identifiers, which don't belong in the [common library](https://gitlab.com/gitlab-org/security-products/analyzers/common).
 
-The first item of the `identifiers` array is called the primary identifier.
+The first item of the `identifiers` array is called the [primary
+identifier](../../user/application_security/terminology/#primary-identifier).
 The primary identifier is particularly important, because it is used to
 [track vulnerabilities](#tracking-and-merging-vulnerabilities) as new commits are pushed to the repository.
 Identifiers are also used to [merge duplicate vulnerabilities](#tracking-and-merging-vulnerabilities)
 reported for the same commit, except for `CWE` and `WASC`.
+
+Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, a CVE
+isn't a stable identifier and you shouldn't assume it as such when tracking vulnerabilities.
+
+The maximum number of identifiers for a vulnerability is set as 20. If a vulnerability has more than 20 identifiers,
+the system will save only the first 20 of them.
 
 ### Location
 
@@ -519,7 +542,7 @@ of the available SAST Analyzers and what data is currently available.
 
 The `remediations` field of the report is an array of remediation objects.
 Each remediation describes a patch that can be applied to
-[automatically fix](../../user/application_security/#solutions-for-vulnerabilities-auto-remediation)
+[automatically fix](../../user/application_security/#automatic-remediation-for-vulnerabilities)
 a set of vulnerabilities.
 
 Here is an example of a report that contains remediations.

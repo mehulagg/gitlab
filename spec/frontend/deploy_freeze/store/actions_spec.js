@@ -1,12 +1,12 @@
-import Api from '~/api';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
+import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import getInitialState from '~/deploy_freeze/store/state';
 import * as actions from '~/deploy_freeze/store/actions';
 import * as types from '~/deploy_freeze/store/mutation_types';
-import { mockTimezoneData, mockFreezePeriods } from '../mock_data';
+import { freezePeriodsFixture, timezoneDataFixture } from '../helpers';
 
 jest.mock('~/api.js');
 jest.mock('~/flash.js');
@@ -19,9 +19,9 @@ describe('deploy freeze store actions', () => {
     mock = new MockAdapter(axios);
     state = getInitialState({
       projectId: '8',
-      timezoneData: mockTimezoneData,
+      timezoneData: timezoneDataFixture,
     });
-    Api.freezePeriods.mockResolvedValue({ data: mockFreezePeriods });
+    Api.freezePeriods.mockResolvedValue({ data: freezePeriodsFixture });
     Api.createFreezePeriod.mockResolvedValue();
   });
 
@@ -95,11 +95,11 @@ describe('deploy freeze store actions', () => {
         actions.fetchFreezePeriods,
         {},
         state,
-        [],
         [
-          { type: 'requestFreezePeriods' },
-          { type: 'receiveFreezePeriodsSuccess', payload: mockFreezePeriods },
+          { type: types.REQUEST_FREEZE_PERIODS },
+          { type: types.RECEIVE_FREEZE_PERIODS_SUCCESS, payload: freezePeriodsFixture },
         ],
+        [],
       );
     });
 
@@ -110,8 +110,8 @@ describe('deploy freeze store actions', () => {
         actions.fetchFreezePeriods,
         {},
         state,
+        [{ type: types.REQUEST_FREEZE_PERIODS }],
         [],
-        [{ type: 'requestFreezePeriods' }],
         () =>
           expect(createFlash).toHaveBeenCalledWith(
             'There was an error fetching the deploy freezes.',

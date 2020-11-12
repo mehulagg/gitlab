@@ -1,27 +1,39 @@
 export default ({
   projectId,
+  groupId,
+  groupMilestonesAvailable = false,
+  projectPath,
   markdownDocsPath,
   markdownPreviewPath,
   updateReleaseApiDocsPath,
   releaseAssetsDocsPath,
   manageMilestonesPath,
   newMilestonePath,
+  releasesPagePath,
 
   tagName = null,
-  releasesPagePath = null,
   defaultBranch = null,
 }) => ({
   projectId,
+  groupId,
+  groupMilestonesAvailable: Boolean(groupMilestonesAvailable),
+  projectPath,
   markdownDocsPath,
   markdownPreviewPath,
   updateReleaseApiDocsPath,
   releaseAssetsDocsPath,
   manageMilestonesPath,
   newMilestonePath,
-
-  tagName,
   releasesPagePath,
+
+  /**
+   * The name of the tag associated with the release, provided by the backend.
+   * When creating a new release, this value is null.
+   */
+  tagName,
+
   defaultBranch,
+  createFrom: defaultBranch,
 
   /** The Release object */
   release: null,

@@ -38,6 +38,7 @@ RSpec.describe Gitlab::Insights::Reducers::CountPerPeriodReducer do
         period_limit: 5
       }
     end
+
     let(:expected) do
       {
         'January 2019' => 0,
@@ -71,7 +72,7 @@ RSpec.describe Gitlab::Insights::Reducers::CountPerPeriodReducer do
     end
 
     it 'raises an error for an unknown :period_field option' do
-      expect { reduce(issuable_relation, period: 'month', period_limit: 5, period_field: :foo) }.to raise_error(described_class::InvalidPeriodFieldError, "Invalid value for `period_field`: `foo`. Allowed values are #{described_class::VALID_PERIOD_FIELDS[:issue]}!")
+      expect { reduce(issuable_relation, period: 'month', period_limit: 5, period_field: :foo) }.to raise_error(described_class::InvalidPeriodFieldError, "Invalid value for `period_field`: `foo`. Allowed values are #{described_class::VALID_PERIOD_FIELDS[:issue].join(', ')}!")
     end
 
     it 'raises an error for an unknown :period_limit option' do
@@ -106,6 +107,10 @@ RSpec.describe Gitlab::Insights::Reducers::CountPerPeriodReducer do
     it 'returns issuables with only the needed fields' do
       expect(reduce(issuable_relation, period: query[:group_by], period_field: :closed_at)).to eq(expected)
     end
+
+    it 'works when string `period_field` is passed' do
+      expect(reduce(issuable_relation, period: query[:group_by], period_field: 'closed_at')).to eq(expected)
+    end
   end
 
   context 'with opened merge requests' do
@@ -122,7 +127,7 @@ RSpec.describe Gitlab::Insights::Reducers::CountPerPeriodReducer do
     end
 
     it 'raises an error for an unknown :period_field option' do
-      expect { reduce(issuable_relation, period: 'month', period_limit: 5, period_field: :foo) }.to raise_error(described_class::InvalidPeriodFieldError, "Invalid value for `period_field`: `foo`. Allowed values are #{described_class::VALID_PERIOD_FIELDS[:merge_request]}!")
+      expect { reduce(issuable_relation, period: 'month', period_limit: 5, period_field: :foo) }.to raise_error(described_class::InvalidPeriodFieldError, "Invalid value for `period_field`: `foo`. Allowed values are #{described_class::VALID_PERIOD_FIELDS[:merge_request].join(', ')}!")
     end
 
     it 'returns issuables with only the needed fields' do

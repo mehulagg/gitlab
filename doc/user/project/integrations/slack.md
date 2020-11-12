@@ -25,7 +25,7 @@ separately configured [Slack slash commands](slack_slash_commands.md).
 
 1. Open your project's page, and navigate to your project's
    [Integrations page](overview.md#accessing-integrations) at
-   **{settings}** **Settings > Integrations**.
+   **Settings > Integrations**.
 1. Select the **Slack notifications** integration to configure it.
 1. Click **Enable integration**.
 1. In **Trigger**, select the checkboxes for each type of GitLab event to send to Slack as a
@@ -64,7 +64,7 @@ The following triggers are available for Slack notifications:
 - **Tag push**: Triggered when a new tag is pushed to the repository.
 - **Pipeline**: Triggered when a pipeline status changes.
 - **Wiki page**: Triggered when a wiki page is created or updated.
-- **Deployment**: Triggered when a deployment finishes.
+- **Deployment**: Triggered when a deployment starts or finishes.
 - **Alert**: Triggered when a new, unique alert is recorded.
 
 ## Troubleshooting

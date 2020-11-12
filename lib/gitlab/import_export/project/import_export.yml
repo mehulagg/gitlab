@@ -185,13 +185,26 @@ excluded_attributes:
     - :secret
     - :encrypted_secret_token
     - :encrypted_secret_token_iv
+    - :repository_read_only
   merge_request_diff:
     - :external_diff
     - :stored_externally
     - :external_diff_store
     - :merge_request_id
+    - :verification_retry_at
+    - :verified_at
+    - :verification_retry_count
+    - :verification_checksum
+    - :verification_failure
   merge_request_diff_commits:
     - :merge_request_diff_id
+  merge_request_diff_detail:
+    - :merge_request_diff_id
+    - :verification_retry_at
+    - :verified_at
+    - :verification_retry_count
+    - :verification_checksum
+    - :verification_failure
   merge_request_diff_files:
     - :diff
     - :external_diff_offset
@@ -205,6 +218,7 @@ excluded_attributes:
     - :state_id
     - :duplicated_to_id
     - :promoted_to_epic_id
+    - :blocking_issues_count
   merge_request:
     - :milestone_id
     - :sprint_id
@@ -390,9 +404,32 @@ ee:
       - issues:
         - epic_issue:
           - :epic
+        - :issuable_sla
       - protected_branches:
         - :unprotect_access_levels
       - protected_environments:
         - :deploy_access_levels
       - :service_desk_setting
       - :security_setting
+      - :push_rule
+
+  included_attributes:
+    issuable_sla:
+      - :issue
+      - :due_at
+    push_rule:
+      - :force_push_regex
+      - :delete_branch_regex
+      - :commit_message_regex
+      - :author_email_regex
+      - :file_name_regex
+      - :branch_name_regex
+      - :commit_message_negative_regex
+      - :max_file_size
+      - :deny_delete_tag
+      - :member_check
+      - :is_sample
+      - :prevent_secrets
+      - :reject_unsigned_commits
+      - :commit_committer_check
+      - :regexp_uses_re2

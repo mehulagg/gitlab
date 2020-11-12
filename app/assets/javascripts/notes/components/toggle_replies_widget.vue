@@ -1,12 +1,13 @@
 <script>
 import { uniqBy } from 'lodash';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
   components: {
-    Icon,
+    GlButton,
+    GlIcon,
     UserAvatarLink,
     TimeAgoTooltip,
   },
@@ -44,7 +45,7 @@ export default {
 <template>
   <li :class="className" class="replies-toggle js-toggle-replies">
     <template v-if="collapsed">
-      <icon name="chevron-right" @click.native="toggle" />
+      <gl-icon name="chevron-right" @click.native="toggle" />
       <div>
         <user-avatar-link
           v-for="author in uniqueAuthors"
@@ -57,9 +58,15 @@ export default {
           tooltip-placement="bottom"
         />
       </div>
-      <button class="btn btn-link js-replies-text qa-expand-replies" type="button" @click="toggle">
+      <gl-button
+        class="js-replies-text"
+        category="tertiary"
+        variant="link"
+        data-qa-selector="expand_replies_button"
+        @click="toggle"
+      >
         {{ replies.length }} {{ n__('reply', 'replies', replies.length) }}
-      </button>
+      </gl-button>
       {{ __('Last reply by') }}
       <a :href="lastReply.author.path" class="btn btn-link author-link">
         {{ lastReply.author.name }}
@@ -68,10 +75,11 @@ export default {
     </template>
     <span
       v-else
-      class="collapse-replies-btn js-collapse-replies qa-collapse-replies"
+      class="collapse-replies-btn js-collapse-replies"
+      data-qa-selector="collapse_replies_button"
       @click="toggle"
     >
-      <icon name="chevron-down" /> {{ s__('Notes|Collapse replies') }}
+      <gl-icon name="chevron-down" /> {{ s__('Notes|Collapse replies') }}
     </span>
   </li>
 </template>

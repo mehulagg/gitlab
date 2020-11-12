@@ -29,12 +29,13 @@ module Gitlab
           json_decode(data)
         end
 
-        def consume_relation(importable_path, key)
+        def consume_relation(importable_path, key, mark_as_consumed: true)
           Enumerator.new do |documents|
-            next unless @consumed_relations.add?("#{importable_path}/#{key}")
+            next if mark_as_consumed && !@consumed_relations.add?("#{importable_path}/#{key}")
 
             # This reads from `tree/project/merge_requests.ndjson`
             path = file_path(importable_path, "#{key}.ndjson")
+
             next unless File.exist?(path)
 
             File.foreach(path, MAX_JSON_DOCUMENT_SIZE).with_index do |line, line_num|

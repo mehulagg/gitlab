@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: 'An introduction to reference parsers and reference filters, and a guide to their implementation.'
 ---
 
@@ -10,13 +13,22 @@ abstractions in the `Banzai` pipeline: `ReferenceFilter` and `ReferenceParser`.
 This page explains what these are, how they are used, and how you would
 implement a new filter/parser pair.
 
-NOTE: **Note:**
 Each `ReferenceFilter` must have a corresponding `ReferenceParser`.
 
 It is possible to share reference parsers between filters - if two filters find
 and link the same type of objects (as specified by the `data-reference-type`
 attribute), then we only need one reference parser for that type of domain
 object.
+
+## Banzai pipeline
+
+`Banzai` pipeline returns the `result` Hash after being filtered by the Pipeline.
+
+The `result` Hash is passed to each filter for modification. This is where Filters store extracted information from the content.
+It contains:
+
+- An `:output` key with the DocumentFragment or String HTML markup based on the output of the last filter in the pipeline.
+- A `:reference_filter_nodes` key with the list of DocumentFragment `nodes` that are ready for processing, updated by each filter in the pipeline.
 
 ## Reference filters
 
@@ -67,7 +79,25 @@ a minimum implementation of `AbstractReferenceFilter` should define:
  and an identifier, find the object. For example, this in a reference filter for
  merge requests, this might be `project.merge_requests.where(iid: iid)`.
 
+### Add a new reference prefix and filter
+
+For reference filters for new objects, use a prefix format following the pattern
+`^<object_type>#`, because:
+
+1. Varied single-character prefixes are hard for users to track. Especially for
+   lower-use object types, this can diminish value for the feature.
+1. Suitable single-character prefixes are limited.
+1. Following a consistent pattern allows users to infer the existence of new features.
+
+To add a reference prefix for a new object `apple`,which has both a name and ID,
+format the reference as:
+
+- `^apple#123` for identification by ID.
+- `^apple#"Granny Smith"` for identification by name.
+
 ### Performance
+
+#### Find object optimization
 
 This default implementation is not very efficient, because we need to call
 `#find_object` for each reference, which may require issuing a DB query every
@@ -95,6 +125,22 @@ end
 This makes the number of queries linear in the number of projects. We only need
 to implement `parent_records` method when we call `records_per_parent` in our
 reference filter.
+
+#### Filtering nodes optimization
+
+Each `ReferenceFilter` would iterate over all `<a>` and `text()` nodes in a document.
+
+Not all nodes are processed, document is filtered only for nodes that we want to process.
+We are skipping:
+
+- Link tags already processed by some previous filter (if they have a `gfm` class).
+- Nodes with the ancestor node that we want to ignore (`ignore_ancestor_query`).
+- Empty line.
+- Link tags with the empty `href` attribute.
+
+To avoid filtering such nodes for each `ReferenceFilter`, we do it only once and store the result in the result Hash of the pipeline as `result[:reference_filter_nodes]`.
+
+Pipeline `result` is passed to each filter for modification, so every time when `ReferenceFilter` replaces text or link tag, filtered list (`reference_filter_nodes`) will be updated for the next filter to use.
 
 ## Reference parsers
 
@@ -152,6 +198,5 @@ In practice, all reference parsers inherit from [`BaseParser`](https://gitlab.co
   - `#references_relation` an active record relation for objects by ID.
   - `#nodes_user_can_reference(user, nodes)` to filter nodes directly.
 
-NOTE: **Note:**
 A failure to implement this class for each reference type means that the
 application will raise exceptions during Markdown processing.

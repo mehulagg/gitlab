@@ -17,13 +17,12 @@ module Projects
 
         SUPPORTED_VERSION = '4'
 
-        def execute(token)
+        def execute(token, _integration = nil)
           return bad_request unless valid_payload_size?
           return unprocessable_entity unless self.class.processable?(params)
           return unauthorized unless valid_alert_manager_token?(token)
 
           process_prometheus_alerts
-          send_alert_email if send_email?
 
           ServiceResponse.success
         end
@@ -40,10 +39,6 @@ module Projects
 
         def valid_payload_size?
           Gitlab::Utils::DeepSize.new(params).valid?
-        end
-
-        def send_email?
-          incident_management_setting.send_email && firings.any?
         end
 
         def firings
@@ -122,12 +117,6 @@ module Projects
           return unless expected && actual
 
           ActiveSupport::SecurityUtils.secure_compare(expected, actual)
-        end
-
-        def send_alert_email
-          notification_service
-            .async
-            .prometheus_alerts_fired(project, firings)
         end
 
         def process_prometheus_alerts

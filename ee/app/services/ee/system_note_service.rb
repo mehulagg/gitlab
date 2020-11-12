@@ -16,14 +16,6 @@ module EE
       extend_if_ee('EE::SystemNoteService') # rubocop: disable Cop/InjectEnterpriseEditionModule
     end
 
-    def relate_issue(noteable, noteable_ref, user)
-      issuables_service(noteable, noteable.project, user).relate_issue(noteable_ref)
-    end
-
-    def unrelate_issue(noteable, noteable_ref, user)
-      issuables_service(noteable, noteable.project, user).unrelate_issue(noteable_ref)
-    end
-
     def epic_issue(epic, issue, user, type)
       epics_service(epic, user).epic_issue(issue, type)
     end
@@ -42,27 +34,6 @@ module EE
 
     def issue_epic_change(issue, epic, user)
       epics_service(epic, user).issue_epic_change(issue)
-    end
-
-    def change_iteration(noteable, author, iteration)
-      issuables_service(noteable, noteable.project, author).change_iteration(iteration)
-    end
-
-    # Called when the weight of a Noteable is changed
-    #
-    # noteable   - Noteable object
-    # project    - Project owning noteable
-    # author     - User performing the change
-    #
-    # Example Note text:
-    #
-    #   "removed the weight"
-    #
-    #   "changed weight to 4"
-    #
-    # Returns the created Note object
-    def change_weight_note(noteable, project, author)
-      issuables_service(noteable, project, author).change_weight_note
     end
 
     # Called when the health_stauts of an Issue is changed

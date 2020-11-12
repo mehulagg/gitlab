@@ -37,8 +37,16 @@ RSpec.describe Geo::RepositoryUpdatedService do
       end
 
       context 'when running on a primary node' do
-        it 'creates a repository updated event' do
+        it 'creates a repository updated event when repository exists' do
+          allow(repository).to receive(:exists?).and_return(true)
+
           expect { subject.execute }.to change(Geo::RepositoryUpdatedEvent, :count).by(1)
+        end
+
+        it 'does not create a repository updated event when repository does not exist' do
+          allow(repository).to receive(:exists?).and_return(false)
+
+          expect { subject.execute }.not_to change(Geo::RepositoryUpdatedEvent, :count)
         end
 
         it 'resets the repository verification checksum' do
@@ -91,8 +99,16 @@ RSpec.describe Geo::RepositoryUpdatedService do
     context 'when design repository is being updated' do
       let(:repository) { project.design_repository }
 
-      it 'creates a design repository updated event' do
+      it 'creates a design repository updated event when repository exists' do
+        allow(repository).to receive(:exists?).and_return(true)
+
         expect { subject.execute }.to change(Geo::RepositoryUpdatedEvent, :count).by(1)
+      end
+
+      it 'does not create a repository updated event when repository does not exist' do
+        allow(repository).to receive(:exists?).and_return(false)
+
+        expect { subject.execute }.not_to change(Geo::RepositoryUpdatedEvent, :count)
       end
     end
   end

@@ -16,6 +16,7 @@ RSpec.describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
   let(:pipeline) { merge_request.reload.all_pipelines.first }
 
   before do
+    stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_trains: true, merge_pipelines: true)
     project.add_maintainer(user)
@@ -138,9 +139,9 @@ RSpec.describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
     end
 
     context 'when merge request is submitted from a forked project' do
-      context 'when ci_allow_to_create_merge_request_pipelines_in_target_project feature flag is disabled' do
+      context 'when ci_disallow_to_create_merge_request_pipelines_in_target_project feature flag is enabled' do
         before do
-          stub_feature_flags(ci_allow_to_create_merge_request_pipelines_in_target_project: false)
+          stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: true)
           allow(merge_request).to receive(:for_same_project?) { false }
         end
 

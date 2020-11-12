@@ -27,58 +27,17 @@ RSpec.describe 'Milestones on EE' do
              due_date: Date.tomorrow)
     end
 
-    context 'with the burndown chart feature available' do
+    context 'with the milestone charts feature available' do
       let(:issue_params) { { project: project, assignees: [user], author: user, milestone: milestone } }
 
       before do
-        stub_licensed_features(burndown_charts: true)
+        stub_licensed_features(milestone_charts: true)
       end
 
       it 'shows a burndown chart' do
         visit_milestone
 
         within('#content-body') do
-          expect(page).to have_selector('.burndown-chart')
-        end
-      end
-
-      context 'when a closed issue do not have closed events' do
-        it 'shows warning' do
-          close_issue(create(:issue, issue_params))
-          close_issue(create(:issue, issue_params))
-
-          # Legacy issue: No closed events being created
-          create(:closed_issue, issue_params)
-
-          visit_milestone
-
-          expect(page).to have_selector('#data-warning', count: 1)
-          expect(page.find('#data-warning').text).to include("Some issues can’t be shown in the burndown chart")
-          expect(page).to have_selector('.burndown-chart')
-        end
-      end
-
-      context 'when all closed issues do not have closed events' do
-        it 'shows warning and hides burndown' do
-          create(:closed_issue, issue_params)
-          create(:closed_issue, issue_params)
-
-          visit_milestone
-
-          expect(page).to have_selector('#data-warning', count: 1)
-          expect(page.find('#data-warning').text).to include("The burndown chart can’t be shown")
-          expect(page).not_to have_selector('.burndown-chart')
-        end
-      end
-
-      context 'data is accurate' do
-        it 'does not show warning' do
-          create(:issue, issue_params)
-          close_issue(create(:issue, issue_params))
-
-          visit_milestone
-
-          expect(page).not_to have_selector('#data-warning')
           expect(page).to have_selector('.burndown-chart')
         end
       end
@@ -123,9 +82,9 @@ RSpec.describe 'Milestones on EE' do
       end
     end
 
-    context 'with the burndown chart feature disabled' do
+    context 'with the milestone charts feature disabled' do
       before do
-        stub_licensed_features(burndown_charts: false)
+        stub_licensed_features(milestone_charts: false)
       end
 
       include_examples 'burndown charts disabled'

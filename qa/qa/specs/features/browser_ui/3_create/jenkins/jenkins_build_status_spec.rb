@@ -2,7 +2,7 @@
 require 'securerandom'
 
 module QA
-  context 'Create', :docker, :requires_admin, :skip_live_env, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/195179', type: :flaky } do
+  RSpec.describe 'Create', :requires_admin, :skip_live_env, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/195179', type: :flaky } do
     describe 'Jenkins integration' do
       let(:project_name) { "project_with_jenkins_#{SecureRandom.hex(4)}" }
 
@@ -26,7 +26,7 @@ module QA
         setup_jenkins
       end
 
-      it 'integrates and displays build status for MR pipeline in GitLab' do
+      it 'integrates and displays build status for MR pipeline in GitLab', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/719' do
         login_to_gitlab
 
         setup_project_integration_with_jenkins
@@ -53,9 +53,7 @@ module QA
 
           project.visit!
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-
-          Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+          Flow::Pipeline.visit_latest_pipeline
 
           Page::Project::Pipeline::Show.perform do |show|
             expect(show).to have_build('jenkins', status: :success, wait: 15)

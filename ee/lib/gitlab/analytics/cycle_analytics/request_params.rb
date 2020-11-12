@@ -34,6 +34,7 @@ module Gitlab
         attribute :created_before, :datetime
         attribute :group
         attribute :current_user
+        attribute :value_stream
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -48,7 +49,7 @@ module Gitlab
         def initialize(params = {})
           super(params)
 
-          self.created_before = (self.created_before || Time.now).at_end_of_day
+          self.created_before = (self.created_before || Time.current).at_end_of_day
           self.created_after  = (created_after || default_created_after).at_beginning_of_day
         end
 
@@ -68,6 +69,7 @@ module Gitlab
         def to_data_attributes
           {}.tap do |attrs|
             attrs[:group] = group_data_attributes if group
+            attrs[:value_stream] = value_stream_data_attributes.to_json if value_stream
             attrs[:created_after] = created_after.to_date.iso8601
             attrs[:created_before] = created_before.to_date.iso8601
             attrs[:projects] = group_projects(project_ids) if group && project_ids.present?
@@ -90,6 +92,14 @@ module Gitlab
           }
         end
 
+        def value_stream_data_attributes
+          {
+            id: value_stream.id,
+            name: value_stream.name,
+            is_custom: value_stream.custom?
+          }
+        end
+
         def group_projects(project_ids)
           GroupProjectsFinder.new(
             group: group,
@@ -105,7 +115,7 @@ module Gitlab
 
         def project_data_attributes(project)
           {
-            id: project.id,
+            id: project.to_gid.to_s,
             name: project.name,
             path_with_namespace: project.path_with_namespace,
             avatar_url: project.avatar_url

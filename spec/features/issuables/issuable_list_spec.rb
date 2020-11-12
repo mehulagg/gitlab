@@ -15,7 +15,7 @@ RSpec.describe 'issuable list', :js do
   end
 
   issuable_types.each do |issuable_type|
-    it "avoids N+1 database queries for #{issuable_type.to_s.humanize.pluralize}" do
+    it "avoids N+1 database queries for #{issuable_type.to_s.humanize.pluralize}", quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/231426' } do
       control_count = ActiveRecord::QueryRecorder.new { visit_issuable_list(issuable_type) }.count
 
       create_issuables(issuable_type)
@@ -48,11 +48,19 @@ RSpec.describe 'issuable list', :js do
     end
   end
 
+  it 'displays a warning if counting the number of issues times out' do
+    allow_any_instance_of(IssuesFinder).to receive(:count_by_state).and_raise(ActiveRecord::QueryCanceled)
+
+    visit_issuable_list(:issue)
+
+    expect(page).to have_text('Open ? Closed ? All ?')
+  end
+
   it "counts merge requests closing issues icons for each issue" do
     visit_issuable_list(:issue)
 
-    expect(page).to have_selector('.icon-merge-request-unmerged', count: 1)
-    expect(first('.icon-merge-request-unmerged').find(:xpath, '..')).to have_content(1)
+    expect(page).to have_selector('[data-testid="merge-requests"]', count: 1)
+    expect(first('[data-testid="merge-requests"]').find(:xpath, '..')).to have_content(1)
   end
 
   def visit_issuable_list(issuable_type)

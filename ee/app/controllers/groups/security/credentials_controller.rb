@@ -7,9 +7,11 @@ class Groups::Security::CredentialsController < Groups::ApplicationController
   include CredentialsInventoryActions
   include Groups::SecurityFeaturesHelper
 
-  helper_method :credentials_inventory_path, :user_detail_path
+  helper_method :credentials_inventory_path, :user_detail_path, :ssh_key_delete_path
 
-  before_action :validate_group_level_credentials_inventory_available!, only: [:index]
+  before_action :validate_group_level_credentials_inventory_available!, only: [:index, :destroy]
+
+  feature_category :compliance_management
 
   private
 
@@ -20,6 +22,11 @@ class Groups::Security::CredentialsController < Groups::ApplicationController
   override :credentials_inventory_path
   def credentials_inventory_path(args)
     group_security_credentials_path(args)
+  end
+
+  override :ssh_key_delete_path
+  def ssh_key_delete_path(key)
+    group_security_credential_path(@group, key)
   end
 
   override :user_detail_path

@@ -36,7 +36,7 @@ export default {
 </script>
 
 <template>
-  <event-item :author="feedback.author" :created-at="feedback.created_at" icon-name="issue-created">
+  <event-item :author="feedback.author" :created-at="feedback.created_at" icon-name="issues">
     <gl-sprintf :message="eventText">
       <template #issueLink>
         <gl-link :href="feedback.issue_url">#{{ feedback.issue_iid }}</gl-link>

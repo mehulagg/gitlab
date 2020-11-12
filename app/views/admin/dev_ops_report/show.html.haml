@@ -1,0 +1,10 @@
+- page_title _('DevOps Report')
+- add_page_specific_style 'page_bundles/dev_ops_report'
+
+.container
+  .gl-mt-3
+    - if Gitlab.ee? && Feature.enabled?(:devops_adoption_feature) && License.feature_available?(:devops_adoption)
+      = render_if_exists 'admin/dev_ops_report/devops_tabs'
+    - else
+      = render 'report'
+

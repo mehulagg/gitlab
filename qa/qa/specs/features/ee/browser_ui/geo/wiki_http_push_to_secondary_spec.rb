@@ -40,7 +40,7 @@ module QA
         end
       end
 
-      it 'is redirected to the primary and ultimately replicated to the secondary' do
+      it 'is redirected to the primary and ultimately replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/693' do
         QA::Runtime::Logger.debug('Visiting the secondary geo node')
 
         QA::Flow::Login.while_signed_in(address: :geo_secondary) do

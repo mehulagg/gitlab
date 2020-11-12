@@ -1,9 +1,9 @@
 <script>
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlButton, GlLoadingIcon, GlIcon, GlPopover } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AddLicenseForm from './components/add_license_form.vue';
 import AdminLicenseManagementRow from './components/admin_license_management_row.vue';
 import LicenseManagementRow from './components/license_management_row.vue';
@@ -32,15 +32,17 @@ export default {
     };
   },
   computed: {
-    ...mapState(LICENSE_MANAGEMENT, ['managedLicenses', 'isLoadingManagedLicenses', 'isAdmin']),
+    ...mapState(LICENSE_MANAGEMENT, [
+      'managedLicenses',
+      'isLoadingManagedLicenses',
+      'isAdmin',
+      'knownLicenses',
+    ]),
     ...mapGetters(LICENSE_MANAGEMENT, [
       'isLicenseBeingUpdated',
       'hasPendingLicenses',
       'isAddingNewLicense',
     ]),
-    hasLicenseApprovals() {
-      return Boolean(this.glFeatures.licenseApprovals);
-    },
     showLoadingSpinner() {
       return this.isLoadingManagedLicenses && !this.hasPendingLicenses;
     },
@@ -67,11 +69,9 @@ export default {
       this.formIsOpen = false;
     },
   },
-  emptyMessage: s__(
-    'LicenseCompliance|There are currently no approved or blacklisted licenses in this project.',
-  ),
+  emptyMessage: s__('LicenseCompliance|There are currently no policies in this project.'),
   emptySearchMessage: s__(
-    'LicenseCompliance|There are currently no approved or blacklisted licenses that match in this project.',
+    'LicenseCompliance|There are currently no policies that match in this project.',
   ),
 };
 </script>
@@ -100,7 +100,7 @@ export default {
             {{ s__('LicenseCompliance|Add a license') }}
           </gl-button>
 
-          <license-approvals v-if="hasLicenseApprovals" class="gl-ml-3" />
+          <license-approvals class="gl-ml-3" />
         </div>
 
         <template v-else>
@@ -146,6 +146,7 @@ export default {
         <div v-if="formIsOpen" class="gl-mt-3 gl-mb-3">
           <add-license-form
             :managed-licenses="managedLicenses"
+            :known-licenses="knownLicenses"
             :loading="isAddingNewLicense"
             @addLicense="setLicenseApproval"
             @closeForm="closeAddLicenseForm"

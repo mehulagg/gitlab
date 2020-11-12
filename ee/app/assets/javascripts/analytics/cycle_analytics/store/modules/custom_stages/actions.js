@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
 import * as types from './mutation_types';
@@ -65,15 +65,17 @@ export const receiveCreateStageError = (
   return dispatch('setStageFormErrors', errors);
 };
 
-export const createStage = ({ dispatch, rootState }, data) => {
-  const {
-    selectedGroup: { fullPath },
-  } = rootState;
+export const createStage = ({ dispatch, rootGetters }, data) => {
+  const { currentGroupPath, currentValueStreamId } = rootGetters;
 
   dispatch('clearFormErrors');
   dispatch('setSavingCustomStage');
 
-  return Api.cycleAnalyticsCreateStage(fullPath, data)
+  return Api.cycleAnalyticsCreateStage({
+    groupId: currentGroupPath,
+    valueStreamId: currentValueStreamId,
+    data,
+  })
     .then(response => {
       const { status, data: responseData } = response;
       return dispatch('receiveCreateStageSuccess', { status, data: responseData });

@@ -24,8 +24,12 @@ class MergeRequestComplianceEntity < Grape::Entity
   expose :approved_by_users, using: API::Entities::UserBasic
 
   expose :pipeline_status, if: -> (*) { can_read_pipeline? }, with: DetailedStatusEntity
-
   expose :approval_status
+
+  expose :target_branch
+  expose :target_branch_uri, if: -> (merge_request) { merge_request.target_branch_exists? }
+  expose :source_branch
+  expose :source_branch_uri, if: -> (merge_request) { merge_request.source_branch_exists? }
 
   private
 
@@ -52,5 +56,13 @@ class MergeRequestComplianceEntity < Grape::Entity
     return WARNING_APPROVAL_STATUS if checks.any?
 
     SUCCESS_APPROVAL_STATUS
+  end
+
+  def target_branch_uri
+    project_ref_path(merge_request.project, merge_request.target_branch)
+  end
+
+  def source_branch_uri
+    project_ref_path(merge_request.project, merge_request.source_branch)
   end
 end

@@ -13,6 +13,13 @@ module QA
       attribute :project do
         Project.fabricate! do |resource|
           resource.name = 'project-with-new-file'
+
+          # Creating the first file via the Wed IDE is tested in
+          # browser_ui/3_create/web_ide/create_first_file_in_web_ide_spec.rb
+          # So here we want to use the old blob viewer, which is not
+          # available via the UI unless at least one file exists, which
+          # is why we create the project with a readme file.
+          resource.initialize_with_readme = true
         end
       end
 
@@ -25,7 +32,7 @@ module QA
       def fabricate!
         project.visit!
 
-        Page::Project::Show.perform(&:create_first_new_file!)
+        Page::Project::Show.perform(&:create_new_file!)
 
         Page::File::Form.perform do |form|
           form.add_name(@name)

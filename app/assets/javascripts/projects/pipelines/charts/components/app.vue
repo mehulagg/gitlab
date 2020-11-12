@@ -1,7 +1,7 @@
 <script>
 import dateFormat from 'dateformat';
-import { __, sprintf } from '~/locale';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { __, sprintf } from '~/locale';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import StatisticsList from './statistics_list.vue';
 import PipelinesAreaChart from './pipelines_area_chart.vue';
@@ -45,9 +45,12 @@ export default {
   },
   data() {
     return {
-      timesChartTransformedData: {
-        full: this.mergeLabelsAndValues(this.timesChartData.labels, this.timesChartData.values),
-      },
+      timesChartTransformedData: [
+        {
+          name: 'full',
+          data: this.mergeLabelsAndValues(this.timesChartData.labels, this.timesChartData.values),
+        },
+      ],
     };
   },
   computed: {
@@ -128,7 +131,7 @@ export default {
         <gl-column-chart
           :height="$options.chartContainerHeight"
           :option="$options.timesChartOptions"
-          :data="timesChartTransformedData"
+          :bars="timesChartTransformedData"
           :y-axis-title="__('Minutes')"
           :x-axis-title="__('Commit')"
           x-axis-type="category"

@@ -21,9 +21,9 @@ module EE
 
       def grouped_blocking_issues_count
         strong_memoize(:grouped_blocking_issues_count) do
-          next IssueLink.none unless collection_type == 'Issue'
+          next ::IssueLink.none unless collection_type == 'Issue'
 
-          IssueLink.blocking_issues_for_collection(issuable_ids)
+          ::IssueLink.blocking_issues_for_collection(issuable_ids)
         end
       end
     end

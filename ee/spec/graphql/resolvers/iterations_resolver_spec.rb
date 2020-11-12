@@ -45,7 +45,7 @@ RSpec.describe Resolvers::IterationsResolver do
           search = 'wow'
           id = 1
           iid = 2
-          params = { id: id, iid: iid, group_ids: Group.where(id: group.id).select(:id), state: 'closed', start_date: start_date, end_date: end_date, search_title: search }
+          params = { id: id, iid: iid, group_ids: group.id, state: 'closed', start_date: start_date, end_date: end_date, search_title: search }
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -62,6 +62,14 @@ RSpec.describe Resolvers::IterationsResolver do
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
           resolve_group_iterations({}, subgroup)
+        end
+
+        it 'does not default to include_ancestors if IID is supplied' do
+          params = { id: nil, iid: 1, group_ids: subgroup.id, state: 'all', start_date: nil, end_date: nil, search_title: nil }
+
+          expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
+
+          resolve_group_iterations({ iid: 1, include_ancestors: false }, subgroup)
         end
 
         it 'accepts include_ancestors false' do

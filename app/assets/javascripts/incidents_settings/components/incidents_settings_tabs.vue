@@ -11,6 +11,8 @@ export default {
     GlTab,
     AlertsSettingsForm,
     PagerDutySettingsForm,
+    ServiceLevelAgreementForm: () =>
+      import('ee_component/incidents_settings/components/service_level_agreement_form.vue'),
   },
   tabs: INTEGRATION_TABS_CONFIG,
   i18n: I18N_INTEGRATION_TABS,
@@ -24,9 +26,9 @@ export default {
     class="settings no-animate qa-incident-management-settings"
   >
     <div class="settings-header">
-      <h3 ref="sectionHeader" class="h4">
+      <h4 ref="sectionHeader" class="gl-my-3! gl-py-1">
         {{ $options.i18n.headerText }}
-      </h3>
+      </h4>
       <gl-button ref="toggleBtn" class="js-settings-toggle">{{
         $options.i18n.expandBtnLabel
       }}</gl-button>
@@ -45,6 +47,7 @@ export default {
         >
           <component :is="tab.component" class="gl-pt-3" :data-testid="`${tab.component}-tab`" />
         </gl-tab>
+        <service-level-agreement-form />
       </gl-tabs>
     </div>
   </section>

@@ -109,10 +109,6 @@ module MergeRequestsHelper
     @merge_request_diffs.size - @merge_request_diffs.index(merge_request_diff)
   end
 
-  def different_base?(version1, version2)
-    version1 && version2 && version1.base_commit_sha != version2.base_commit_sha
-  end
-
   def merge_params(merge_request)
     {
       auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
@@ -168,12 +164,6 @@ module MergeRequestsHelper
       project
     else
       current_user.fork_of(project)
-    end
-  end
-
-  def mr_tabs_position_enabled?
-    strong_memoize(:mr_tabs_position_enabled) do
-      Feature.enabled?(:mr_tabs_position, @project, default_enabled: true)
     end
   end
 end

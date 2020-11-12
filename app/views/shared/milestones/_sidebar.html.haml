@@ -32,7 +32,8 @@
 
     .block.due_date
       .sidebar-collapsed-icon
-        = icon('calendar', 'aria-hidden': 'true')
+        %span{ 'aria-hidden': 'true' }
+          = sprite_icon('calendar')
         %span.collapsed-milestone-date
           - if milestone.start_date && milestone.due_date
             - if milestone.start_date.year == milestone.due_date.year
@@ -140,11 +141,11 @@
       .block.releases
         .sidebar-collapsed-icon.has-tooltip{ title: milestone_releases_tooltip_text(milestone), data: { container: 'body', placement: 'left', boundary: 'viewport' } }
           %strong
-            = sprite_icon("rocket", size: 16)
+            = sprite_icon("rocket")
           %span= total_count
         .title.hide-collapsed= n_('Release', 'Releases', total_count)
         .hide-collapsed
-          - if total_count.zero?
+          - if total_count == 0
             .no-value= s_('MilestoneSidebar|None')
           - else
             .font-weight-bold

@@ -18,7 +18,7 @@ RSpec.describe MergeRequests::RemoveApprovalService do
       before do
         project.add_developer(create(:user))
         merge_request.update!(approvals_before_merge: 2)
-        merge_request.approvals.create(user: user)
+        merge_request.approvals.create!(user: user)
       end
 
       it 'removes the approval' do
@@ -54,7 +54,7 @@ RSpec.describe MergeRequests::RemoveApprovalService do
       let(:notification_service) { NotificationService.new }
 
       before do
-        merge_request.approvals.create(user: user)
+        merge_request.approvals.create!(user: user)
         allow(service).to receive(:notification_service).and_return(notification_service)
       end
 

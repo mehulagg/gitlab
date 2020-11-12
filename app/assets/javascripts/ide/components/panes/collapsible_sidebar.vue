@@ -1,16 +1,10 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
-import Icon from '~/vue_shared/components/icon.vue';
 import IdeSidebarNav from '../ide_sidebar_nav.vue';
 
 export default {
   name: 'CollapsibleSidebar',
-  directives: {
-    tooltip,
-  },
   components: {
-    Icon,
     IdeSidebarNav,
   },
   props: {

@@ -1,14 +1,14 @@
 <script>
-import { GlLoadingIcon, GlLink, GlTooltip } from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlLoadingIcon, GlLink, GlTooltip, GlIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   name: 'AncestorsTree',
   components: {
-    Icon,
+    GlIcon,
     GlLoadingIcon,
     GlLink,
     GlTooltip,
@@ -66,7 +66,7 @@ export default {
 <template>
   <div class="ancestor-tree">
     <div ref="sidebarIcon" class="sidebar-collapsed-icon">
-      <div><icon name="epic" /></div>
+      <div><gl-icon name="epic" /></div>
       <span v-if="!isFetching" class="collapse-truncated-title">{{ tooltipText }}</span>
     </div>
 
@@ -78,7 +78,7 @@ export default {
     <ul v-if="!isFetching && ancestors.length" class="vertical-timeline hide-collapsed">
       <li v-for="(ancestor, id) in ancestors" :key="id" class="vertical-timeline-row d-flex">
         <div class="vertical-timeline-icon" :class="getTimelineClass(ancestor)">
-          <icon :name="getIcon(ancestor)" />
+          <gl-icon :name="getIcon(ancestor)" />
         </div>
         <div class="vertical-timeline-content">
           <gl-link :href="ancestor.url">{{ ancestor.title }}</gl-link>

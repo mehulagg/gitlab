@@ -50,5 +50,9 @@ module EE
       # than the filter epic id on params
       epic_id.to_i != issue.epic_issue.epic_id
     end
+
+    def show_timeline_view_toggle?(issue)
+      issue.incident? && issue.project.feature_available?(:incident_timeline_view)
+    end
   end
 end

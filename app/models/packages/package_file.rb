@@ -15,6 +15,8 @@ class Packages::PackageFile < ApplicationRecord
   validates :file, presence: true
   validates :file_name, presence: true
 
+  validates :file_name, uniqueness: { scope: :package }, if: -> { package&.pypi? }
+
   scope :recent, -> { order(id: :desc) }
   scope :with_file_name, ->(file_name) { where(file_name: file_name) }
   scope :with_file_name_like, ->(file_name) { where(arel_table[:file_name].matches(file_name)) }
@@ -60,4 +62,4 @@ class Packages::PackageFile < ApplicationRecord
   end
 end
 
-Packages::PackageFile.prepend_if_ee('EE::Packages::PackageFileGeo')
+Packages::PackageFile.prepend_if_ee('EE::Packages::PackageFile')

@@ -1,6 +1,6 @@
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import * as types from './mutation_types';
 
 export const setEndpoints = ({ commit }, endpoints) => {
@@ -54,19 +54,15 @@ export const fetchEnvironments = ({ state, dispatch }) => {
     .catch(() => dispatch('receiveEnvironmentsError'));
 };
 
-export const setCurrentEnvironmentId = ({ commit, dispatch }, environmentId) => {
+export const setCurrentEnvironmentId = ({ commit }, environmentId) => {
   commit(types.SET_CURRENT_ENVIRONMENT_ID, environmentId);
-  dispatch(`threatMonitoringWaf/fetchStatistics`, null, { root: true });
-  dispatch(`threatMonitoringNetworkPolicy/fetchStatistics`, null, {
-    root: true,
-  });
-  dispatch(`networkPolicies/fetchPolicies`, environmentId, { root: true });
 };
 
-export const setCurrentTimeWindow = ({ commit, dispatch }, timeWindow) => {
+export const setCurrentTimeWindow = ({ commit }, timeWindow) => {
   commit(types.SET_CURRENT_TIME_WINDOW, timeWindow.name);
-  dispatch(`threatMonitoringWaf/fetchStatistics`, null, { root: true });
-  dispatch(`threatMonitoringNetworkPolicy/fetchStatistics`, null, {
-    root: true,
-  });
+};
+
+export const setAllEnvironments = ({ commit, dispatch }) => {
+  commit(types.SET_ALL_ENVIRONMENTS);
+  dispatch(`networkPolicies/fetchPolicies`, null, { root: true });
 };

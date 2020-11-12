@@ -19,6 +19,13 @@ module EE
           old_path_with_namespace: old_path
         ).create!
       end
+
+      override :transfer_missing_group_resources
+      def transfer_missing_group_resources(group)
+        super
+
+        ::Epics::TransferService.new(current_user, group, project).execute
+      end
     end
   end
 end

@@ -9,6 +9,7 @@ module Vulnerabilities
 
       def perform(project_ids)
         AdjustmentService.execute(project_ids)
+        HistoricalStatistics::AdjustmentService.execute(project_ids)
       end
     end
   end

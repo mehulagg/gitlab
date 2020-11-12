@@ -1,6 +1,7 @@
 <script>
-import Tracking from '~/tracking';
+/* eslint-disable vue/no-v-html */
 import { GlPopover } from '@gitlab/ui';
+import Tracking from '~/tracking';
 import LegacyContainer from './legacy_container.vue';
 
 const trackingMixin = Tracking.mixin(gon.tracking_data);

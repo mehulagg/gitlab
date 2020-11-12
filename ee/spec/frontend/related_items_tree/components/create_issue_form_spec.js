@@ -1,17 +1,17 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import {
-  GlDeprecatedButton,
-  GlDropdown,
-  GlDropdownItem,
+  GlButton,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
+import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 import { mockInitialConfig, mockParentItem } from '../mock_data';
 
@@ -163,7 +163,7 @@ describe('CreateIssueForm', () => {
 
     it('renders Projects dropdown field', () => {
       const projectsDropdownLabel = wrapper.findAll('label').at(1);
-      const projectsDropdownButton = wrapper.find(GlDropdown);
+      const projectsDropdownButton = wrapper.find(GlDeprecatedDropdown);
 
       expect(projectsDropdownLabel.text()).toBe('Project');
       expect(projectsDropdownButton.props('text')).toBe('Select a project');
@@ -173,8 +173,8 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('receiveProjectsSuccess', mockProjects);
 
       return wrapper.vm.$nextTick(() => {
-        const projectsDropdownButton = wrapper.find(GlDropdown);
-        const dropdownItems = projectsDropdownButton.findAll(GlDropdownItem);
+        const projectsDropdownButton = wrapper.find(GlDeprecatedDropdown);
+        const dropdownItems = projectsDropdownButton.findAll(GlDeprecatedDropdownItem);
 
         expect(projectsDropdownButton.find(GlSearchBoxByType).exists()).toBe(true);
         expect(projectsDropdownButton.find(GlLoadingIcon).exists()).toBe(true);
@@ -195,7 +195,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter(project => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDropdown).trigger('click');
+      wrapper.find(GlDeprecatedDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -207,7 +207,7 @@ describe('CreateIssueForm', () => {
           wrapper.vm.$store.dispatch('receiveProjectsSuccess', filteredMockProjects);
         })
         .then(() => {
-          expect(wrapper.findAll(GlDropdownItem)).toHaveLength(1);
+          expect(wrapper.findAll(GlDeprecatedDropdownItem)).toHaveLength(1);
         });
     });
 
@@ -216,7 +216,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter(project => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDropdown).trigger('click');
+      wrapper.find(GlDeprecatedDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -233,7 +233,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Create issue` button', () => {
-      const createIssueButton = wrapper.findAll(GlDeprecatedButton).at(0);
+      const createIssueButton = wrapper.findAll(GlButton).at(0);
 
       expect(createIssueButton.exists()).toBe(true);
       expect(createIssueButton.text()).toBe('Create issue');
@@ -243,7 +243,7 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('requestCreateItem');
 
       return wrapper.vm.$nextTick(() => {
-        const createIssueButton = wrapper.findAll(GlDeprecatedButton).at(0);
+        const createIssueButton = wrapper.findAll(GlButton).at(0);
 
         expect(createIssueButton.exists()).toBe(true);
         expect(createIssueButton.props('disabled')).toBe(true);
@@ -252,7 +252,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Cancel` button', () => {
-      const cancelButton = wrapper.findAll(GlDeprecatedButton).at(1);
+      const cancelButton = wrapper.findAll(GlButton).at(1);
 
       expect(cancelButton.exists()).toBe(true);
       expect(cancelButton.text()).toBe('Cancel');

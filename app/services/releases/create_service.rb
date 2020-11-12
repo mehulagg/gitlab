@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Releases
-  class CreateService < BaseService
-    include Releases::Concerns
-
+  class CreateService < Releases::BaseService
     def execute
       return error('Access Denied', 403) unless allowed?
       return error('Release already exists', 409) if release
@@ -53,6 +51,8 @@ module Releases
       release.save!
 
       notify_create_release(release)
+
+      execute_hooks(release, 'create')
 
       create_evidence!(release, evidence_pipeline)
 

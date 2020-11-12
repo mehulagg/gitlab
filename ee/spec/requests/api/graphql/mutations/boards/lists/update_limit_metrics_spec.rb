@@ -37,8 +37,7 @@ RSpec.describe 'Update list limit metrics' do
   it 'returns an error if the gid identifies another object' do
     post_graphql_mutation(mutation('all_metrics', list_id: user.to_global_id.to_s), current_user: create(:user))
 
-    expect(graphql_errors).to include(a_hash_including('message' => "The resource that you are attempting to access does " \
-     "not exist or you don't have permission to perform this action"))
+    expect(graphql_errors).to include(a_hash_including('message' => /"#{GitlabSchema.id_from_object(user)}" does not represent an instance of List/))
   end
 
   %w[all_metrics issue_count issue_weights].each do |metric|

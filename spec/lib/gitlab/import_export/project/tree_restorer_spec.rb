@@ -502,6 +502,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
       let(:project_tree_restorer) do
         described_class.new(user: user, shared: shared, project: project)
       end
+
       let(:restored_project_json) { project_tree_restorer.restore }
 
       it 'does not read a symlink' do
@@ -680,13 +681,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
         end
 
         it 'overrides project feature access levels' do
-          access_level_keys = project.project_feature.attributes.keys.select { |a| a =~ /_access_level/ }
-
-          # `pages_access_level` is not included, since it is not available in the public API
-          # and has a dependency on project's visibility level
-          # see ProjectFeature model
-          access_level_keys.delete('pages_access_level')
-
+          access_level_keys = ProjectFeature.available_features.map { |feature| ProjectFeature.access_level_attribute(feature) }
           disabled_access_levels = Hash[access_level_keys.collect { |item| [item, 'disabled'] }]
 
           project.create_import_data(data: { override_params: disabled_access_levels })
@@ -919,6 +914,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
             }
           ]
         end
+
         let(:tree_hash) { { 'project_members' => project_members } }
 
         before do

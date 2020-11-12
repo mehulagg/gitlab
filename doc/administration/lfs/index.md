@@ -1,15 +1,21 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/lfs/lfs_administration.html'
 ---
 
-# GitLab Git Large File Storage (LFS) Administration
+# GitLab Git Large File Storage (LFS) Administration **(CORE ONLY)**
+
+> - Git LFS is supported in GitLab starting with version 8.2.
+> - Support for object storage, such as AWS S3, was introduced in 10.0.
+> - LFS is enabled in GitLab self-managed instances by default.
 
 Documentation on how to use Git LFS are under [Managing large binary files with Git LFS doc](../../topics/git/lfs/index.md).
 
 ## Requirements
 
-- Git LFS is supported in GitLab starting with version 8.2.
-- Support for object storage, such as AWS S3, was introduced in 10.0.
 - Users need to install [Git LFS client](https://git-lfs.github.com) version 1.0.1 and up.
 
 ## Configuration
@@ -36,6 +42,8 @@ gitlab_rails['lfs_enabled'] = false
 # `/var/opt/gitlab/gitlab-rails/shared/lfs-objects` by default.
 gitlab_rails['lfs_storage_path'] = "/mnt/storage/lfs-objects"
 ```
+
+After you update settings in `/etc/gitlab/gitlab.rb`, make sure to run [Omnibus GitLab reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 ### Configuration for installations from source
 
@@ -152,7 +160,24 @@ On Omnibus installations, the settings are prefixed by `lfs_object_store_`:
 
    This will migrate existing LFS objects to object storage. New LFS objects
    will be forwarded to object storage unless
-   `gitlab_rails['lfs_object_store_background_upload']` is set to false.
+   `gitlab_rails['lfs_object_store_background_upload']` and `gitlab_rails['lfs_object_store_direct_upload']` is set to `false`.
+1. Optional: Verify all files migrated properly.
+   From [PostgreSQL console](https://docs.gitlab.com/omnibus/settings/database.html#connecting-to-the-bundled-postgresql-database)
+   (`sudo gitlab-psql -d gitlabhq_production`) verify `objectstg` below (where `file_store=2`) has count of all artifacts:
+
+   ```shell
+   gitlabhq_production=# SELECT count(*) AS total, sum(case when file_store = '1' then 1 else 0 end) AS filesystem, sum(case when file_store = '2' then 1 else 0 end) AS objectstg FROM lfs_objects;
+
+   total | filesystem | objectstg
+   ------+------------+-----------
+    2409 |          0 |      2409
+   ```
+
+   Verify no files on disk in `artifacts` folder:
+
+   ```shell
+   sudo find /var/opt/gitlab/gitlab-rails/shared/lfs-objects -type f | grep -v tmp/cache | wc -l
+   ```
 
 ### S3 for installations from source
 
@@ -187,14 +212,30 @@ For source installations the settings are nested under `lfs:` and then
    ```
 
    This will migrate existing LFS objects to object storage. New LFS objects
-   will be forwarded to object storage unless `background_upload` is set to
-   false.
+   will be forwarded to object storage unless `background_upload` and `direct_upload` is set to
+   `false`.
+1. Optional: Verify all files migrated properly.
+   From PostgreSQL console (`sudo -u git -H psql -d gitlabhq_production`) verify `objectstg` below (where `file_store=2`) has count of all artifacts:
+
+   ```shell
+   gitlabhq_production=# SELECT count(*) AS total, sum(case when file_store = '1' then 1 else 0 end) AS filesystem, sum(case when file_store = '2' then 1 else 0 end) AS objectstg FROM lfs_objects;
+
+   total | filesystem | objectstg
+   ------+------------+-----------
+    2409 |          0 |      2409
+   ```
+
+   Verify no files on disk in `artifacts` folder:
+
+   ```shell
+   sudo find /var/opt/gitlab/gitlab-rails/shared/lfs-objects -type f | grep -v tmp/cache | wc -l
+   ```
 
 ### Migrating back to local storage
 
 In order to migrate back to local storage:
 
-1. Set both `direct_upload` and `background_upload` to false under the LFS object storage settings. Don't forget to restart GitLab.
+1. Set both `direct_upload` and `background_upload` to `false` under the LFS object storage settings. Don't forget to restart GitLab.
 1. Run `rake gitlab:lfs:migrate_to_local` on your console.
 1. Disable `object_storage` for LFS objects in `gitlab.rb`. Remember to restart GitLab afterwards.
 

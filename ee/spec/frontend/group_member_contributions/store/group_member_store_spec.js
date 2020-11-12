@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
-import createFlash from '~/flash';
 import GroupMemberStore from 'ee/group_member_contributions/store/group_member_store';
 import defaultColumns from 'ee/group_member_contributions/constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 import { rawMembers, contributionsPath } from '../mock_data';

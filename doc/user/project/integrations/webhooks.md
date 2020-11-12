@@ -35,7 +35,7 @@ Navigate to the webhooks page by going to your project's
 **Settings ➔ Webhooks**.
 
 NOTE: **Note:**
-On GitLab.com, the [maximum number of webhooks](../../../user/gitlab_com/index.md#maximum-number-of-webhooks) per project, and per group, is limited.
+On GitLab.com, the [maximum number of webhooks and their size](../../../user/gitlab_com/index.md#webhooks) per project, and per group, is limited.
 
 ## Version history
 
@@ -727,7 +727,7 @@ X-Gitlab-Event: Note Hook
         "type": "ProjectLabel",
         "group_id": null
       }
-    ],
+    ]
   }
 }
 ```
@@ -1300,6 +1300,197 @@ X-Gitlab-Event: Job Hook
 ```
 
 Note that `commit.id` is the ID of the pipeline, not the ID of the commit.
+
+### Deployment events
+
+Triggered when a deployment:
+
+- Starts ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41214) in GitLab 13.5.)
+- Succeeds
+- Fails
+- Is cancelled
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Deployment Hook
+```
+
+**Request Body**:
+
+```json
+{
+  "object_kind": "deployment",
+  "status": "success",
+  "deployable_id": 796,
+  "deployable_url": "http://10.126.0.2:3000/root/test-deployment-webhooks/-/jobs/796",
+  "environment": "staging",
+  "project": {
+    "id": 30,
+    "name": "test-deployment-webhooks",
+    "description": "",
+    "web_url": "http://10.126.0.2:3000/root/test-deployment-webhooks",
+    "avatar_url": null,
+    "git_ssh_url": "ssh://vlad@10.126.0.2:2222/root/test-deployment-webhooks.git",
+    "git_http_url": "http://10.126.0.2:3000/root/test-deployment-webhooks.git",
+    "namespace": "Administrator",
+    "visibility_level": 0,
+    "path_with_namespace": "root/test-deployment-webhooks",
+    "default_branch": "master",
+    "ci_config_path": "",
+    "homepage": "http://10.126.0.2:3000/root/test-deployment-webhooks",
+    "url": "ssh://vlad@10.126.0.2:2222/root/test-deployment-webhooks.git",
+    "ssh_url": "ssh://vlad@10.126.0.2:2222/root/test-deployment-webhooks.git",
+    "http_url": "http://10.126.0.2:3000/root/test-deployment-webhooks.git"
+  },
+  "short_sha": "279484c0",
+  "user": {
+    "name": "Administrator",
+    "username": "root",
+    "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+    "email": "admin@example.com"
+  },
+  "user_url": "http://10.126.0.2:3000/root",
+  "commit_url": "http://10.126.0.2:3000/root/test-deployment-webhooks/-/commit/279484c09fbe69ededfced8c1bb6e6d24616b468",
+  "commit_title": "Add new file"
+}
+```
+
+Note that `deployable_id` is the ID of the CI job.
+
+### Feature Flag events
+
+Triggered when a feature flag is turned on or off.
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Feature Flag Hook
+```
+
+**Request Body**:
+
+```json
+{
+  "object_kind": "feature_flag",
+  "project": {
+    "id": 1,
+    "name":"Gitlab Test",
+    "description":"Aut reprehenderit ut est.",
+    "web_url":"http://example.com/gitlabhq/gitlab-test",
+    "avatar_url":null,
+    "git_ssh_url":"git@example.com:gitlabhq/gitlab-test.git",
+    "git_http_url":"http://example.com/gitlabhq/gitlab-test.git",
+    "namespace":"GitlabHQ",
+    "visibility_level":20,
+    "path_with_namespace":"gitlabhq/gitlab-test",
+    "default_branch":"master",
+    "ci_config_path": null,
+    "homepage":"http://example.com/gitlabhq/gitlab-test",
+    "url":"http://example.com/gitlabhq/gitlab-test.git",
+    "ssh_url":"git@example.com:gitlabhq/gitlab-test.git",
+    "http_url":"http://example.com/gitlabhq/gitlab-test.git"
+  },
+  "user": {
+    "name": "Administrator",
+    "username": "root",
+    "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+    "email": "admin@example.com"
+  },
+  "user_url": "http://example.com/root",
+  "object_attributes": {
+    "id": 6,
+    "name": "test-feature-flag",
+    "description": "test-feature-flag-description",
+    "active": true
+  }
+}
+```
+
+### Release events
+
+Triggered when a release is created or updated.
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Release Hook
+```
+
+**Request Body**:
+
+```json
+{
+  "id": 1,
+  "created_at": "2020-11-02 12:55:12 UTC",
+  "description": "v1.0 has been released",
+  "name": "v1.1",
+  "released_at": "2020-11-02 12:55:12 UTC",
+  "tag": "v1.1",
+  "object_kind": "release",
+  "project": {
+    "id": 2,
+    "name": "release-webhook-example",
+    "description": "",
+    "web_url": "https://example.com/gitlab-org/release-webhook-example",
+    "avatar_url": null,
+    "git_ssh_url": "ssh://git@example.com/gitlab-org/release-webhook-example.git",
+    "git_http_url": "https://example.com/gitlab-org/release-webhook-example.git",
+    "namespace": "Gitlab",
+    "visibility_level": 0,
+    "path_with_namespace": "gitlab-org/release-webhook-example",
+    "default_branch": "master",
+    "ci_config_path": null,
+    "homepage": "https://example.com/gitlab-org/release-webhook-example",
+    "url": "ssh://git@example.com/gitlab-org/release-webhook-example.git",
+    "ssh_url": "ssh://git@example.com/gitlab-org/release-webhook-example.git",
+    "http_url": "https://example.com/gitlab-org/release-webhook-example.git"
+  },
+  "url": "https://example.com/gitlab-org/release-webhook-example/-/releases/v1.1",
+  "action": "create",
+  "assets": {
+    "count": 5,
+    "links": [
+      {
+        "id": 1,
+        "external": true,
+        "link_type": "other",
+        "name": "Changelog",
+        "url": "https://example.net/changelog"
+      }
+    ],
+    "sources": [
+      {
+        "format": "zip",
+        "url": "https://example.com/gitlab-org/release-webhook-example/-/archive/v1.1/release-webhook-example-v1.1.zip"
+      },
+      {
+        "format": "tar.gz",
+        "url": "https://example.com/gitlab-org/release-webhook-example/-/archive/v1.1/release-webhook-example-v1.1.tar.gz"
+      },
+      {
+        "format": "tar.bz2",
+        "url": "https://example.com/gitlab-org/release-webhook-example/-/archive/v1.1/release-webhook-example-v1.1.tar.bz2"
+      },
+      {
+        "format": "tar",
+        "url": "https://example.com/gitlab-org/release-webhook-example/-/archive/v1.1/release-webhook-example-v1.1.tar"
+      }
+    ]
+  },
+  "commit": {
+    "id": "ee0a3fb31ac16e11b9dbb596ad16d4af654d08f8",
+    "message": "Release v1.1",
+    "title": "Release v1.1",
+    "timestamp": "2020-10-31T14:58:32+11:00",
+    "url": "https://example.com/gitlab-org/release-webhook-example/-/commit/ee0a3fb31ac16e11b9dbb596ad16d4af654d08f8",
+    "author": {
+      "name": "Example User",
+      "email": "user@example.com"
+    }
+  }
+}
+```
 
 ## Image URL rewriting
 

@@ -1,15 +1,21 @@
 # frozen_string_literal: true
 
 class Profiles::PersonalAccessTokensController < Profiles::ApplicationController
+  feature_category :authentication_and_authorization
+
   def index
     set_index_vars
     @personal_access_token = finder.build
   end
 
   def create
-    @personal_access_token = finder.build(personal_access_token_params)
+    result = ::PersonalAccessTokens::CreateService.new(
+      current_user: current_user, target_user: current_user, params: personal_access_token_params
+    ).execute
 
-    if @personal_access_token.save
+    @personal_access_token = result.payload[:personal_access_token]
+
+    if result.success?
       PersonalAccessToken.redis_store!(current_user.id, @personal_access_token.token)
       redirect_to profile_personal_access_tokens_path, notice: _("Your new personal access token has been created.")
     else
@@ -20,12 +26,8 @@ class Profiles::PersonalAccessTokensController < Profiles::ApplicationController
 
   def revoke
     @personal_access_token = finder.find(params[:id])
-
-    if @personal_access_token.revoke!
-      flash[:notice] = _("Revoked personal access token %{personal_access_token_name}!") % { personal_access_token_name: @personal_access_token.name }
-    else
-      flash[:alert] = _("Could not revoke personal access token %{personal_access_token_name}.") % { personal_access_token_name: @personal_access_token.name }
-    end
+    service = PersonalAccessTokens::RevokeService.new(current_user, token: @personal_access_token).execute
+    service.success? ? flash[:notice] = service.message : flash[:alert] = service.message
 
     redirect_to profile_personal_access_tokens_path
   end

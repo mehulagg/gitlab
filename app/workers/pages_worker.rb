@@ -6,6 +6,7 @@ class PagesWorker # rubocop:disable Scalability/IdempotentWorker
   sidekiq_options retry: 3
   feature_category :pages
   loggable_arguments 0, 1
+  tags :requires_disk_io
 
   def perform(action, *arg)
     send(action, *arg) # rubocop:disable GitlabSecurity/PublicSend
@@ -14,12 +15,10 @@ class PagesWorker # rubocop:disable Scalability/IdempotentWorker
   # rubocop: disable CodeReuse/ActiveRecord
   def deploy(build_id)
     build = Ci::Build.find_by(id: build_id)
-    result = Projects::UpdatePagesService.new(build.project, build).execute
-    if result[:status] == :success
-      result = Projects::UpdatePagesConfigurationService.new(build.project).execute
+    update_contents = Projects::UpdatePagesService.new(build.project, build).execute
+    if update_contents[:status] == :success
+      Projects::UpdatePagesConfigurationService.new(build.project).execute
     end
-
-    result
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

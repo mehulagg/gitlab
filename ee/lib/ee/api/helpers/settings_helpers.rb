@@ -30,6 +30,11 @@ module EE
               optional :elasticsearch_project_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The project ids to index with Elasticsearch.'
             end
 
+            optional :secret_detection_token_revocation_enabled, type: ::Grape::API::Boolean, desc: 'Enable Secret Detection Token Revocation'
+            given secret_detection_token_revocation_enabled: ->(val) { val } do
+              requires :secret_detection_token_revocation_url, type: String, desc: 'The configured Secret Detection Token Revocation instance URL'
+            end
+
             optional :email_additional_text, type: String, desc: 'Additional text added to the bottom of every email for legal/auditing/compliance reasons'
             optional :default_project_deletion_protection, type: Grape::API::Boolean, desc: 'Disable project owners ability to delete project'
             optional :deletion_adjourned_period, type: Integer, desc: 'Number of days between marking project as deleted and actual removal'

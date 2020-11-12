@@ -1,5 +1,0 @@
----
-title: Fix security dashboard by excluding license scanning information
-merge_request: 37318
-author:
-type: fixed

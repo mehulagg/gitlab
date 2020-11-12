@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Filesystem Performance Benchmarking
 
 Filesystem performance has a big impact on overall GitLab performance,
@@ -26,7 +32,7 @@ To install:
 Then run the following:
 
 ```shell
-fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=/path/to/git-data/testfile --bs=4k --iodepth=64 --size=4G --readwrite=randrw --rwmixread=75
+fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --readwrite=randrw --rwmixread=75 --size=4G --filename=/path/to/git-data/testfile
 ```
 
 This will create a 4GB file in `/path/to/git-data/testfile`. It performs

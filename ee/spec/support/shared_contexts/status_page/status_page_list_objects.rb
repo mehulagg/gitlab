@@ -16,13 +16,13 @@ RSpec.shared_context 'list_objects_v2 result' do
 end
 
 RSpec.shared_context 'oversized list_objects_v2 result' do
-  let(:keys_page_1) { random_keys(desired_size: StatusPage::Storage::MAX_KEYS_PER_PAGE) }
-  let(:keys_page_2) { random_keys(desired_size: StatusPage::Storage::MAX_KEYS_PER_PAGE) }
+  let(:keys_page_1) { random_keys(desired_size: Gitlab::StatusPage::Storage::MAX_KEYS_PER_PAGE) }
+  let(:keys_page_2) { random_keys(desired_size: Gitlab::StatusPage::Storage::MAX_KEYS_PER_PAGE) }
 
   before do
-    stub_const("StatusPage::Storage::MAX_KEYS_PER_PAGE", 2)
-    stub_const("StatusPage::Storage::MAX_PAGES", 1)
-    stub_const("StatusPage::Storage::MAX_UPLOADS", StatusPage::Storage::MAX_PAGES * StatusPage::Storage::MAX_KEYS_PER_PAGE)
+    stub_const("Gitlab::StatusPage::Storage::MAX_KEYS_PER_PAGE", 2)
+    stub_const("Gitlab::StatusPage::Storage::MAX_PAGES", 1)
+    stub_const("Gitlab::StatusPage::Storage::MAX_UPLOADS", Gitlab::StatusPage::Storage::MAX_PAGES * Gitlab::StatusPage::Storage::MAX_KEYS_PER_PAGE)
     # AWS s3 client responses for list_objects is paginated
     # stub_responses allows multiple responses as arguments and they will be returned in sequence
     stub_responses(

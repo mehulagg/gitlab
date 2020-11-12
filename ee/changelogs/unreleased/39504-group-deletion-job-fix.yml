@@ -1,0 +1,5 @@
+---
+title: Unschedule group deletion on deleting member removal
+merge_request: 45715
+author:
+type: changed

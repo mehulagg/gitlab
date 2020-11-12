@@ -50,11 +50,11 @@ export default {
         {{ healthStatus.issuesOnTrack }}
       </span>
     </span>
-    <span class="gl-mr-2 mr-md-2 gl-text-gray-700 health-label-long gl-display-none">
+    <span class="gl-mr-2 mr-md-2 gl-text-gray-500 health-label-long gl-display-none!">
       {{ __('issues on track') }}
     </span>
     <span
-      class="gl-mr-2 mr-md-2 gl-text-gray-700 gl-str-truncated health-label-short gl-display-none"
+      class="gl-mr-2 mr-md-2 gl-text-gray-500 gl-str-truncated health-label-short gl-display-none!"
       >{{ __('on track') }}</span
     >
 
@@ -63,11 +63,11 @@ export default {
         {{ healthStatus.issuesNeedingAttention }}
       </span>
     </span>
-    <span class="gl-mr-2 mr-md-2 gl-text-gray-700 health-label-long gl-display-none">
+    <span class="gl-mr-2 mr-md-2 gl-text-gray-500 health-label-long gl-display-none!">
       {{ __('issues need attention') }}
     </span>
     <span
-      class="gl-mr-2 mr-md-2 gl-text-gray-700 gl-str-truncated health-label-short gl-display-none"
+      class="gl-mr-2 mr-md-2 gl-text-gray-500 gl-str-truncated health-label-short gl-display-none!"
       >{{ __('need attention') }}</span
     >
 
@@ -76,10 +76,10 @@ export default {
         {{ healthStatus.issuesAtRisk }}
       </span>
     </span>
-    <span class="gl-text-gray-700 health-label-long gl-display-none">
+    <span class="gl-text-gray-500 health-label-long gl-display-none!">
       {{ __('issues at risk') }}
     </span>
-    <span class="gl-text-gray-700 gl-str-truncated health-label-short gl-display-none">
+    <span class="gl-text-gray-500 gl-str-truncated health-label-short gl-display-none!">
       {{ __('at risk') }}
     </span>
   </div>

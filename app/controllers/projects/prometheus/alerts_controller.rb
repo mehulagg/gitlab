@@ -16,6 +16,8 @@ module Projects
       before_action :authorize_read_prometheus_alerts!, except: [:notify]
       before_action :alert, only: [:update, :show, :destroy, :metrics_dashboard]
 
+      feature_category :alert_management
+
       def index
         render json: serialize_as_json(alerts)
       end
@@ -39,7 +41,7 @@ module Projects
 
           render json: serialize_as_json(@alert)
         else
-          head :no_content
+          head :bad_request
         end
       end
 
@@ -49,7 +51,7 @@ module Projects
 
           render json: serialize_as_json(alert)
         else
-          head :no_content
+          head :bad_request
         end
       end
 
@@ -59,14 +61,14 @@ module Projects
 
           head :ok
         else
-          head :no_content
+          head :bad_request
         end
       end
 
       private
 
       def alerts_params
-        params.permit(:operator, :threshold, :environment_id, :prometheus_metric_id)
+        params.permit(:operator, :threshold, :environment_id, :prometheus_metric_id, :runbook_url)
       end
 
       def notify_service

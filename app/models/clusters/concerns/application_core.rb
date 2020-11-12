@@ -12,10 +12,21 @@ module Clusters
 
         after_initialize :set_initial_status
 
+        def helm_command_module
+          case cluster.helm_major_version
+          when 3
+            Gitlab::Kubernetes::Helm::V3
+          when 2
+            Gitlab::Kubernetes::Helm::V2
+          else
+            raise "Invalid Helm major version"
+          end
+        end
+
         def set_initial_status
           return unless not_installable?
 
-          self.status = status_states[:installable] if cluster&.application_helm_available? || cluster&.local_tiller_enabled?
+          self.status = status_states[:installable]
         end
 
         def can_uninstall?

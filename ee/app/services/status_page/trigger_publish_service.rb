@@ -105,7 +105,7 @@ module StatusPage
       return note.noteable_id if note.destroyed?
 
       return if note.previous_changes.none?
-      return if note.award_emoji.named(StatusPage::AWARD_EMOJI).none?
+      return if note.award_emoji.named(Gitlab::StatusPage::AWARD_EMOJI).none?
 
       note.noteable_id
     end
@@ -113,7 +113,7 @@ module StatusPage
     def eligable_issue_id_from_award_emoji
       award_emoji = triggered_by
 
-      return unless award_emoji.name == StatusPage::AWARD_EMOJI
+      return unless award_emoji.name == Gitlab::StatusPage::AWARD_EMOJI
       return unless award_emoji.awardable.is_a?(Note)
       return unless award_emoji.awardable.for_issue?
 

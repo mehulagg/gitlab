@@ -3,14 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_project' do
-  let(:project) { create(:project, :repository) }
+  let_it_be_with_refind(:project) { create(:project, :repository) }
 
   before do
     assign(:project, project)
     assign(:repository, project.repository)
     allow(view).to receive(:current_ref).and_return('master')
-
-    stub_licensed_features(tracing: true)
   end
 
   describe 'issue boards' do
@@ -28,9 +26,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     let(:user) { create(:user) }
 
     before do
-      stub_licensed_features(feature_flags: true)
-
-      project.project_feature.update(builds_access_level: feature)
+      project.project_feature.update!(builds_access_level: feature)
 
       project.team.add_developer(user)
       sign_in(user)
@@ -53,43 +49,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         render
 
         expect(rendered).to have_link('Operations', href: metrics_project_environments_path(project))
-      end
-    end
-  end
-
-  describe 'Operations > Tracing' do
-    it 'is not visible when no valid license' do
-      allow(view).to receive(:can?).and_return(true)
-      stub_licensed_features(tracing: false)
-
-      render
-
-      expect(rendered).not_to have_text 'Tracing'
-    end
-
-    it 'is not visible to unauthorized user' do
-      render
-
-      expect(rendered).not_to have_text 'Tracing'
-    end
-
-    it 'links to Tracing page' do
-      allow(view).to receive(:can?).and_return(true)
-
-      render
-
-      expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
-    end
-
-    context 'without project.tracing_external_url' do
-      before do
-        allow(view).to receive(:can?).and_return(true)
-      end
-
-      it 'links to Tracing page' do
-        render
-
-        expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
       end
     end
   end
@@ -224,7 +183,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   describe 'Settings > Operations' do
     it 'is not visible when no valid license' do
       allow(view).to receive(:can?).and_return(true)
-      stub_licensed_features(tracing: false)
 
       render
 
@@ -243,6 +201,68 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       render
 
       expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+    end
+  end
+
+  describe 'iterations link' do
+    context 'with authorized user' do
+      let_it_be(:current_user) { create(:user) }
+
+      before do
+        project.add_guest(current_user)
+
+        allow(view).to receive(:current_user).and_return(current_user)
+      end
+
+      context 'with iterations licensed feature available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_text 'Iterations'
+        end
+      end
+
+      context 'with iterations licensed feature disabled' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'Iterations'
+        end
+      end
+    end
+
+    context 'with unauthorized user' do
+      context 'with iterations licensed feature available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'Iterations'
+        end
+      end
+
+      context 'with iterations licensed feature disabled' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'Iterations'
+        end
+      end
     end
   end
 end

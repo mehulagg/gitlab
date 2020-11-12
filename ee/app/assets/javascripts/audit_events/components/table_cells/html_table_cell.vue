@@ -1,5 +1,6 @@
 <script>
-import sanitize from 'sanitize-html';
+/* eslint-disable vue/no-v-html */
+import { sanitize } from '~/lib/dompurify';
 
 const ALLOWED_TAGS = ['strong'];
 
@@ -12,7 +13,7 @@ export default {
   },
   computed: {
     sanitizedHtml() {
-      return sanitize(this.html, { allowedTags: ALLOWED_TAGS });
+      return sanitize(this.html, { ALLOWED_TAGS });
     },
   },
 };

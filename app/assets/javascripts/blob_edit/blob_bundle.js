@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import NewCommitForm from '../new_commit_form';
-import EditBlob from './edit_blob';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import BlobFileDropzone from '../blob/blob_file_dropzone';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
 import { disableButtonIfEmptyField, setCookie } from '~/lib/utils/common_utils';
@@ -24,6 +24,18 @@ export default () => {
     const commitButton = $('.js-commit-button');
     const cancelLink = $('.btn.btn-cancel');
 
+    import('./edit_blob')
+      .then(({ default: EditBlob } = {}) => {
+        new EditBlob({
+          assetsPath: `${urlRoot}${assetsPath}`,
+          filePath,
+          currentAction,
+          projectId,
+          isMarkdown,
+        });
+      })
+      .catch(e => createFlash(e));
+
     cancelLink.on('click', () => {
       window.onbeforeunload = null;
     });
@@ -32,13 +44,6 @@ export default () => {
       window.onbeforeunload = null;
     });
 
-    new EditBlob({
-      assetsPath: `${urlRoot}${assetsPath}`,
-      filePath,
-      currentAction,
-      projectId,
-      isMarkdown,
-    });
     new NewCommitForm(editBlobForm);
 
     // returning here blocks page navigation
@@ -65,12 +70,15 @@ export default () => {
 
     if (commitButton) {
       const { dismissKey, humanAccess } = suggestEl.dataset;
+      const urlParams = new URLSearchParams(window.location.search);
+      const mergeRequestPath = urlParams.get('mr_path') || true;
+
       const commitCookieName = `suggest_gitlab_ci_yml_commit_${dismissKey}`;
       const commitTrackLabel = 'suggest_gitlab_ci_yml_commit_changes';
       const commitTrackValue = '20';
 
       commitButton.addEventListener('click', () => {
-        setCookie(commitCookieName, true);
+        setCookie(commitCookieName, mergeRequestPath);
 
         Tracking.event(undefined, 'click_button', {
           label: commitTrackLabel,

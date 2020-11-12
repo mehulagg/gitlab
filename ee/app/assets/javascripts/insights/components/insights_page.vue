@@ -1,16 +1,15 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlEmptyState } from '@gitlab/ui';
 import { isUndefined } from 'lodash';
 import { mapActions, mapState } from 'vuex';
 
-import InsightsConfigWarning from './insights_config_warning.vue';
 import InsightsChart from './insights_chart.vue';
+import { __ } from '~/locale';
 
 export default {
   components: {
-    GlLoadingIcon,
+    GlEmptyState,
     InsightsChart,
-    InsightsConfigWarning,
   },
   props: {
     queryEndpoint: {
@@ -23,15 +22,20 @@ export default {
     },
   },
   computed: {
-    ...mapState('insights', ['chartData', 'pageLoading']),
+    ...mapState('insights', ['chartData']),
+    emptyState() {
+      return {
+        title: __('There are no charts configured for this page'),
+        description: __(
+          'Please check the configuration file to ensure that a collection of charts has been declared.',
+        ),
+      };
+    },
     charts() {
       return this.pageConfig.charts;
     },
     chartKeys() {
       return this.charts.map(chart => chart.title);
-    },
-    storeKeys() {
-      return Object.keys(this.chartData);
     },
     hasChartsConfigured() {
       return !isUndefined(this.charts) && this.charts.length > 0;
@@ -39,7 +43,6 @@ export default {
   },
   watch: {
     pageConfig() {
-      this.setPageLoading(true);
       this.fetchCharts();
     },
   },
@@ -47,25 +50,13 @@ export default {
     this.fetchCharts();
   },
   methods: {
-    ...mapActions('insights', ['fetchChartData', 'initChartData', 'setPageLoading']),
+    ...mapActions('insights', ['fetchChartData', 'initChartData']),
     fetchCharts() {
       if (this.hasChartsConfigured) {
         this.initChartData(this.chartKeys);
 
-        const insightsRequests = this.charts.map(chart =>
-          this.fetchChartData({ endpoint: this.queryEndpoint, chart }),
-        );
-        Promise.all(insightsRequests)
-          .then(() => {
-            this.setPageLoading(!this.storePopulated());
-          })
-          .catch(() => {
-            this.setPageLoading(false);
-          });
+        this.charts.forEach(chart => this.fetchChartData({ endpoint: this.queryEndpoint, chart }));
       }
-    },
-    storePopulated() {
-      return this.chartKeys.filter(key => this.storeKeys.includes(key)).length > 0;
     },
   },
 };
@@ -86,19 +77,12 @@ export default {
           :error="error"
         />
       </div>
-      <div v-if="pageLoading" class="insights-chart-loading text-center p-5">
-        <gl-loading-icon :inline="true" size="lg" />
-      </div>
     </div>
-    <insights-config-warning
+    <gl-empty-state
       v-else
-      :title="__('There are no charts configured for this page')"
-      :summary="
-        __(
-          'Please check the configuration file to ensure that a collection of charts has been declared.',
-        )
-      "
-      image="illustrations/monitoring/getting_started.svg"
+      :title="emptyState.title"
+      :description="emptyState.description"
+      svg-path="/assets/illustrations/monitoring/getting_started.svg"
     />
   </div>
 </template>

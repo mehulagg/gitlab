@@ -8,8 +8,6 @@ require 'grpc/health/v1/health_services_pb'
 
 module Gitlab
   module GitalyClient
-    include Gitlab::Metrics::Methods
-
     class TooManyInvocationsError < StandardError
       attr_reader :call_site, :invocation_count, :max_call_stack
 
@@ -190,11 +188,6 @@ module Gitlab
       Gitlab::SafeRequestStore[:gitaly_query_time] ||= 0
       Gitlab::SafeRequestStore[:gitaly_query_time] += duration
     end
-
-    def self.current_transaction_labels
-      Gitlab::Metrics::Transaction.current&.labels || {}
-    end
-    private_class_method :current_transaction_labels
 
     # For some time related tasks we can't rely on `Time.now` since it will be
     # affected by Timecop in some tests, and the clock of some gitaly-related
@@ -457,7 +450,7 @@ module Gitlab
 
       stack_string = Gitlab::BacktraceCleaner.clean_backtrace(caller).drop(1).join("\n")
 
-      Gitlab::SafeRequestStore[:stack_counter] ||= Hash.new
+      Gitlab::SafeRequestStore[:stack_counter] ||= {}
 
       count = Gitlab::SafeRequestStore[:stack_counter][stack_string] || 0
       Gitlab::SafeRequestStore[:stack_counter][stack_string] = count + 1
@@ -483,7 +476,7 @@ module Gitlab
       return unless stack_counter
 
       max = max_call_count
-      return if max.zero?
+      return if max == 0
 
       stack_counter.select { |_, v| v == max }.keys
     end

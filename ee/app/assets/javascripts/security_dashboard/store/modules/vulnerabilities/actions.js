@@ -4,7 +4,7 @@ import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__, n__, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 import * as types from './mutation_types';
 
@@ -25,42 +25,6 @@ export const setSourceBranch = ({ commit }, ref) => commit(types.SET_SOURCE_BRAN
 
 export const setVulnerabilitiesEndpoint = ({ commit }, endpoint) => {
   commit(types.SET_VULNERABILITIES_ENDPOINT, endpoint);
-};
-
-export const setVulnerabilitiesCountEndpoint = ({ commit }, endpoint) => {
-  commit(types.SET_VULNERABILITIES_COUNT_ENDPOINT, endpoint);
-};
-
-export const fetchVulnerabilitiesCount = ({ state, dispatch }, params = {}) => {
-  if (!state.vulnerabilitiesCountEndpoint) {
-    return;
-  }
-  dispatch('requestVulnerabilitiesCount');
-
-  axios({
-    method: 'GET',
-    url: state.vulnerabilitiesCountEndpoint,
-    params,
-  })
-    .then(response => {
-      const { data } = response;
-      dispatch('receiveVulnerabilitiesCountSuccess', { data });
-    })
-    .catch(() => {
-      dispatch('receiveVulnerabilitiesCountError');
-    });
-};
-
-export const requestVulnerabilitiesCount = ({ commit }) => {
-  commit(types.REQUEST_VULNERABILITIES_COUNT);
-};
-
-export const receiveVulnerabilitiesCountSuccess = ({ commit }, { data }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS, data);
-};
-
-export const receiveVulnerabilitiesCountError = ({ commit }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_ERROR);
 };
 
 export const setVulnerabilitiesPage = ({ commit }, page) => {

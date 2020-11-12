@@ -104,17 +104,17 @@ RSpec.describe GroupsHelper do
   describe '#remove_group_message' do
     subject { helper.remove_group_message(group) }
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      it 'returns the message related to adjourned deletion' do
+      it 'returns the message related to delayed deletion' do
         expect(subject).to include("The contents of this group, its subgroups and projects will be permanently removed after")
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
@@ -130,11 +130,8 @@ RSpec.describe GroupsHelper do
     using RSpec::Parameterized::TableSyntax
 
     where(
-      ab_feature_enabled?: [true, false],
       gitlab_com?: [true, false],
       user?: [true, false],
-      created_at: [Time.mktime(2010, 1, 20), Time.mktime(2030, 1, 20)],
-      discover_security_feature_enabled?: [true, false],
       security_dashboard_feature_available?: [true, false],
       can_admin_group?: [true, false]
     )
@@ -143,14 +140,10 @@ RSpec.describe GroupsHelper do
       it 'returns the expected value' do
         allow(helper).to receive(:current_user) { user? ? owner : nil }
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(owner).to receive(:ab_feature_enabled?) { ab_feature_enabled? }
-        allow(owner).to receive(:created_at) { created_at }
-        allow(::Feature).to receive(:enabled?).with(:discover_security) { discover_security_feature_enabled? }
         allow(group).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_group? }
 
-        expected_value = user? && created_at > DateTime.new(2019, 11, 1) && gitlab_com? &&
-                         ab_feature_enabled? && !security_dashboard_feature_available? && can_admin_group?
+        expected_value = user? && gitlab_com? && !security_dashboard_feature_available? && can_admin_group?
 
         expect(helper.show_discover_group_security?(group)).to eq(expected_value)
       end
@@ -159,7 +152,6 @@ RSpec.describe GroupsHelper do
 
   describe '#show_group_activity_analytics?' do
     before do
-      stub_feature_flags(group_activity_analytics: feature_available)
       stub_licensed_features(group_activity_analytics: feature_available)
 
       allow(helper).to receive(:current_user) { current_user }

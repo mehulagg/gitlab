@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Frontend Development Guidelines
 
 This document describes various guidelines to ensure consistency and quality
@@ -5,7 +11,7 @@ across GitLab's frontend team.
 
 ## Overview
 
-GitLab is built on top of [Ruby on Rails](https://rubyonrails.org) using [Haml](http://haml.info/) and also a JavaScript based Frontend with [Vue.js](https://vuejs.org).
+GitLab is built on top of [Ruby on Rails](https://rubyonrails.org) using [Haml](https://haml.info/) and also a JavaScript based Frontend with [Vue.js](https://vuejs.org).
 Be wary of [the limitations that come with using Hamlit](https://github.com/k0kubun/hamlit/blob/master/REFERENCE.md#limitations). We also use [SCSS](https://sass-lang.com) and plain JavaScript with
 modern ECMAScript standards supported through [Babel](https://babeljs.io/) and ES module support through [webpack](https://webpack.js.org/).
 
@@ -75,6 +81,10 @@ How we use SVG for our [Icons and Illustrations](icons.md).
 ## Dependencies
 
 General information about frontend [dependencies](dependencies.md) and how we manage them.
+
+## Keyboard Shortcuts
+
+How we implement [keyboard shortcuts](keyboard_shortcuts.md) that can be customized and disabled.
 
 ## Frontend FAQ
 

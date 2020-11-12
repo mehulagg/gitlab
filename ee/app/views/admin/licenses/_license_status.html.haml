@@ -1,0 +1,12 @@
+- if @license.expired?
+  = _('Expired:')
+- else
+  = _('Expires:')
+- if @license.will_expire? && !@license.expired?
+  - if @license.trial?
+    %strong.has-tooltip{ title: @license.expires_at.to_formatted_s(:long), data: { placement: 'top' } }
+      = _('Free trial will expire in %{days}' % { days: pluralize(@license.remaining_days, 'day') })
+  - else
+    %strong= time_ago_with_tooltip(@license.expires_at)
+- else
+  %strong= _('Never')

@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
 import createStore from 'ee/security_dashboard/store';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,7 +11,7 @@ describe('Filter component', () => {
   let store;
 
   const createWrapper = (props = {}) => {
-    wrapper = mount(Filters, {
+    wrapper = shallowMount(Filters, {
       localVue,
       store,
       propsData: {
@@ -49,7 +49,7 @@ describe('Filter component', () => {
   describe('buttons slot', () => {
     it('should exist', () => {
       createWrapper();
-      expect(wrapper.contains('.button-slot')).toBe(true);
+      expect(wrapper.find('.button-slot').exists()).toBe(true);
     });
   });
 });

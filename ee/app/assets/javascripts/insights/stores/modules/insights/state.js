@@ -4,5 +4,4 @@ export default () => ({
   activeTab: null,
   activePage: null,
   chartData: {},
-  pageLoading: true,
 });

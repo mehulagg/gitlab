@@ -47,7 +47,12 @@ describe('EE Approvals MREditApp', () => {
     });
 
     it('renders hidden inputs', () => {
-      expect(wrapper.find('.js-approval-rules').contains(MRRulesHiddenInputs)).toBe(true);
+      expect(
+        wrapper
+          .find('.js-approval-rules')
+          .find(MRRulesHiddenInputs)
+          .exists(),
+      ).toBe(true);
     });
   });
 
@@ -62,7 +67,12 @@ describe('EE Approvals MREditApp', () => {
     });
 
     it('renders hidden inputs', () => {
-      expect(wrapper.find('.js-approval-rules').contains(MRRulesHiddenInputs)).toBe(true);
+      expect(
+        wrapper
+          .find('.js-approval-rules')
+          .find(MRRulesHiddenInputs)
+          .exists(),
+      ).toBe(true);
     });
   });
 });

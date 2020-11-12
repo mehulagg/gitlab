@@ -15,6 +15,7 @@ export default class AvailableDropdownMappings {
     labelsEndpoint,
     milestonesEndpoint,
     releasesEndpoint,
+    environmentsEndpoint,
     groupsOnly,
     includeAncestorGroups,
     includeDescendantGroups,
@@ -24,6 +25,7 @@ export default class AvailableDropdownMappings {
     this.labelsEndpoint = labelsEndpoint;
     this.milestonesEndpoint = milestonesEndpoint;
     this.releasesEndpoint = releasesEndpoint;
+    this.environmentsEndpoint = environmentsEndpoint;
     this.groupsOnly = groupsOnly;
     this.includeAncestorGroups = includeAncestorGroups;
     this.includeDescendantGroups = includeDescendantGroups;
@@ -69,6 +71,11 @@ export default class AvailableDropdownMappings {
         gl: DropdownUser,
         element: this.container.querySelector('#js-dropdown-assignee'),
       },
+      'approved-by': {
+        reference: null,
+        gl: DropdownUser,
+        element: this.container.querySelector('#js-dropdown-approved-by'),
+      },
       milestone: {
         reference: null,
         gl: DropdownNonUser,
@@ -106,7 +113,7 @@ export default class AvailableDropdownMappings {
         gl: DropdownEmoji,
         element: this.container.querySelector('#js-dropdown-my-reaction'),
       },
-      wip: {
+      draft: {
         reference: null,
         gl: DropdownNonUser,
         element: this.container.querySelector('#js-dropdown-wip'),
@@ -143,6 +150,16 @@ export default class AvailableDropdownMappings {
           symbol: '',
         },
         element: this.container.querySelector('#js-dropdown-target-branch'),
+      },
+      environment: {
+        reference: null,
+        gl: DropdownNonUser,
+        extraArguments: {
+          endpoint: this.getEnvironmentsEndpoint(),
+          symbol: '',
+          preprocessing: data => data.map(env => ({ title: env })),
+        },
+        element: this.container.querySelector('#js-dropdown-environment'),
       },
     };
   }
@@ -187,6 +204,10 @@ export default class AvailableDropdownMappings {
     };
 
     return mergeUrlParams(params, endpoint);
+  }
+
+  getEnvironmentsEndpoint() {
+    return `${this.environmentsEndpoint}.json`;
   }
 
   getGroupId() {

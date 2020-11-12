@@ -6,7 +6,7 @@
       - link_to_read_more = link_to(_("More information"), help_page_path("ci/environments/index.md"))
       = _("Environments allow you to track deployments of your application %{link_to_read_more}.").html_safe % { link_to_read_more: link_to_read_more }
 
-  = form_for [@project.namespace.becomes(Namespace), @project, @environment], html: { class: 'col-lg-9' } do |f|
+  = form_for [@project, @environment], html: { class: 'col-lg-9' } do |f|
     = form_errors(@environment)
 
     .form-group
@@ -17,5 +17,5 @@
       = f.url_field :external_url, class: 'form-control'
 
     .form-actions
-      = f.submit _('Save'), class: 'btn btn-success'
-      = link_to _('Cancel'), project_environments_path(@project), class: 'btn btn-cancel'
+      = f.submit _('Save'), class: 'gl-button btn btn-success'
+      = link_to _('Cancel'), project_environments_path(@project), class: 'gl-button btn btn-cancel'

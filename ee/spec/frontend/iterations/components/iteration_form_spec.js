@@ -1,12 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
 import { ApolloMutation } from 'vue-apollo';
 import { GlForm } from '@gitlab/ui';
-import { visitUrl } from '~/lib/utils/url_utility';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
 import createIteration from 'ee/iterations/queries/create_iteration.mutation.graphql';
 import updateIteration from 'ee/iterations/queries/update_iteration.mutation.graphql';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility');
 
@@ -37,7 +37,7 @@ describe('Iteration Form', () => {
       propsData: props,
       stubs: {
         ApolloMutation,
-        MarkdownField: '<div><slot name="textarea"></slot></div>',
+        MarkdownField: { template: '<div><slot name="textarea"></slot></div>' },
       },
       mocks: {
         $apollo: {

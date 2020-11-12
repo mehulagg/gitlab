@@ -39,7 +39,7 @@ module Analytics
         end
 
         def persist_default_stages!
-          persisted_default_stages = parent.cycle_analytics_stages.default_stages
+          persisted_default_stages = parent.cycle_analytics_stages.by_value_stream(value_stream).default_stages
 
           # make sure that we persist default stages only once
           stages_to_persist = build_default_stages.select do |new_default_stage|

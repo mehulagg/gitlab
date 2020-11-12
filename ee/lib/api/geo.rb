@@ -3,7 +3,8 @@
 require 'base64'
 
 module API
-  class Geo < Grape::API::Instance
+  class Geo < ::API::Base
+    feature_category :geo_replication
     resource :geo do
       helpers do
         def sanitized_node_status_params
@@ -31,7 +32,7 @@ module API
       get 'retrieve/:replicable_name/:replicable_id' do
         check_gitlab_geo_request_ip!
         params_sym = params.symbolize_keys
-        authorize_geo_transfer!(params_sym)
+        authorize_geo_transfer!(**params_sym)
 
         decoded_params = geo_jwt_decoder.decode
         service = ::Geo::BlobUploadService.new(**params_sym, decoded_params: decoded_params)

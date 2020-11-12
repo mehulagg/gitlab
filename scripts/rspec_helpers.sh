@@ -48,12 +48,49 @@ function update_tests_metadata() {
   fi
 }
 
+function retrieve_tests_mapping() {
+  mkdir -p crystalball/
+
+  if [[ ! -f "${RSPEC_PACKED_TESTS_MAPPING_PATH}" ]]; then
+    (wget -O "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz" "http://${TESTS_METADATA_S3_BUCKET}.s3.amazonaws.com/${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz" && gzip -d "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz") || echo "{}" > "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+  fi
+
+  scripts/unpack-test-mapping "${RSPEC_PACKED_TESTS_MAPPING_PATH}" "${RSPEC_TESTS_MAPPING_PATH}"
+}
+
+function update_tests_mapping() {
+  if ! crystalball_rspec_data_exists; then
+    echo "No crystalball rspec data found."
+    return 0
+  fi
+
+  scripts/generate-test-mapping "${RSPEC_TESTS_MAPPING_PATH}" crystalball/rspec*.yml
+
+  scripts/pack-test-mapping "${RSPEC_TESTS_MAPPING_PATH}" "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+
+  gzip "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+
+  if [[ -n "${TESTS_METADATA_S3_BUCKET}" ]]; then
+    if [[ "$CI_PIPELINE_SOURCE" == "schedule" ]]; then
+      scripts/sync-reports put "${TESTS_METADATA_S3_BUCKET}" "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz"
+    else
+      echo "Not uploading report to S3 as the pipeline is not a scheduled one."
+    fi
+  fi
+
+  rm -f crystalball/rspec*.yml
+}
+
+function crystalball_rspec_data_exists() {
+  compgen -G "crystalball/rspec*.yml" > /dev/null;
+}
+
 function rspec_simple_job() {
   local rspec_opts="${1}"
 
   export NO_KNAPSACK="1"
 
-  bin/rspec --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}
+  bin/rspec -Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}
 }
 
 function rspec_paralellized_job() {
@@ -106,12 +143,33 @@ function rspec_paralellized_job() {
 
   export MEMORY_TEST_PATH="tmp/memory_test/${report_name}_memory.csv"
 
-  knapsack rspec "-Ispec --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}"
+  knapsack rspec "-Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}"
 
   date
 }
 
-function rspec_matched_tests() {
+function rspec_fail_fast() {
+  local test_file_count_threshold=${RSPEC_FAIL_FAST_TEST_FILE_COUNT_THRESHOLD:-10}
+  local matching_tests_file=${1}
+  local rspec_opts=${2}
+  local test_files="$(cat "${matching_tests_file}")"
+  local test_file_count=$(wc -w "${matching_tests_file}" | awk {'print $1'})
+
+  if [[ "${test_file_count}" -gt "${test_file_count_threshold}" ]]; then
+    echo "This job is intentionally skipped because there are more than ${test_file_count_threshold} test files matched,"
+    echo "which would take too long to run in this job."
+    echo "All the tests would be run in other rspec jobs."
+    exit 0
+  fi
+
+  if [[ -n $test_files ]]; then
+    rspec_simple_job "${rspec_opts} ${test_files}"
+  else
+    echo "No rspec fail-fast tests to run"
+  fi
+}
+
+function rspec_matched_foss_tests() {
   local test_file_count_threshold=20
   local matching_tests_file=${1}
   local rspec_opts=${2}
@@ -131,6 +189,6 @@ function rspec_matched_tests() {
   if [[ -n $test_files ]]; then
     rspec_simple_job "${rspec_opts} ${test_files}"
   else
-    echo "No test files to run"
+    echo "No impacted FOSS rspec tests to run"
   fi
 }

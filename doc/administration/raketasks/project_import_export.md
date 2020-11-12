@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Project import/export administration **(CORE ONLY)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/3050) in GitLab 8.9.
@@ -46,6 +52,6 @@ Note the following:
   compatible as described in the [Version history](../../user/project/settings/import_export.md#version-history).
 - The project import option must be enabled in
   application settings (`/admin/application_settings/general`) under **Import sources**, which is available
-  under **{admin}** **Admin Area >** **{settings}** **Settings > Visibility and access controls**.
+  under **Admin Area > Settings > Visibility and access controls**.
 - The exports are stored in a temporary [shared directory](../../development/shared_files.md)
   and are deleted every 24 hours by a specific worker.

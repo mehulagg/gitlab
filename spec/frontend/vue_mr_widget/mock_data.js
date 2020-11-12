@@ -37,6 +37,9 @@ export default {
   target_project_id: 19,
   target_project_full_path: '/group2/project2',
   merge_request_add_ci_config_path: '/group2/project2/new/pipeline',
+  is_dismissed_suggest_pipeline: false,
+  user_callouts_path: 'some/callout/path',
+  suggest_pipeline_feature_id: 'suggest_pipeline',
   new_project_pipeline_path: '/group2/project2/pipelines/new',
   metrics: {
     merged_by: {
@@ -190,6 +193,7 @@ export default {
     updated_at: '2017-04-07T15:28:44.800Z',
   },
   pipelineCoverageDelta: '15.25',
+  buildsWithCoverage: [{ name: 'karma', coverage: '40.2' }, { name: 'rspec', coverage: '80.4' }],
   work_in_progress: false,
   source_branch_exists: false,
   mergeable_discussions_state: true,
@@ -258,6 +262,7 @@ export default {
   merge_trains_enabled: true,
   merge_trains_count: 3,
   merge_train_index: 1,
+  security_reports_docs_path: 'security-reports-docs-path',
 };
 
 export const mockStore = {

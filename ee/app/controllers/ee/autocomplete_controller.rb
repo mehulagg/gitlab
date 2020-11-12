@@ -2,6 +2,13 @@
 
 module EE
   module AutocompleteController
+    extend ::ActiveSupport::Concern
+
+    prepended do
+      feature_category :subgroups, [:project_groups, :namespace_routes]
+      feature_category :projects, [:project_routes]
+    end
+
     def project_groups
       groups = ::Autocomplete::ProjectInvitedGroupsFinder
         .new(current_user, params)

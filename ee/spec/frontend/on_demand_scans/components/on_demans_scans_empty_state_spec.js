@@ -47,7 +47,7 @@ describe('OnDemandScansEmptyState', () => {
   });
 
   it('renders empty state', () => {
-    expect(wrapper.contains(GlEmptyStateStub)).toBe(true);
+    expect(wrapper.find(GlEmptyStateStub).exists()).toBe(true);
   });
 
   it('passes correct props to GlEmptyState', () => {

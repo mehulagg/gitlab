@@ -45,7 +45,7 @@ module StatusPage
 
     def publish_markdown_uploads(markdown_field:)
       markdown_field.scan(FileUploader::MARKDOWN_PATTERN).map do |secret, file_name|
-        break if @total_uploads >= StatusPage::Storage::MAX_UPLOADS
+        break if @total_uploads >= Gitlab::StatusPage::Storage::MAX_UPLOADS
 
         key = upload_path(secret, file_name)
         next if existing_keys.include? key
@@ -63,7 +63,7 @@ module StatusPage
         storage_client.multipart_upload(key, open_file)
         @total_uploads += 1
       end
-    rescue StatusPage::Storage::Error => e
+    rescue Gitlab::StatusPage::Storage::Error => e
       # In production continue uploading other files if one fails But report the failure to Sentry
       # raise errors in development and test
       @has_errors = true
@@ -77,11 +77,11 @@ module StatusPage
     end
 
     def upload_path(secret, file_name)
-      StatusPage::Storage.upload_path(issue.iid, secret, file_name)
+      Gitlab::StatusPage::Storage.upload_path(issue.iid, secret, file_name)
     end
 
     def uploads_path
-      StatusPage::Storage.uploads_path(issue.iid)
+      Gitlab::StatusPage::Storage.uploads_path(issue.iid)
     end
 
     def find_file(secret, file_name)

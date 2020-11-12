@@ -61,7 +61,7 @@ Before proceeding with the Pages configuration, make sure that:
    Pages artifacts.
 1. (Optional) You have a **wildcard certificate** for the Pages domain if you
    decide to serve Pages (`*.example.io`) under HTTPS.
-1. (Optional but recommended) You have configured and enabled the [Shared Runners](../../ci/runners/README.md)
+1. (Optional but recommended) You have configured and enabled the [shared runners](../../ci/runners/README.md)
    so that your users don't have to bring their own.
 
 ### DNS configuration
@@ -94,7 +94,7 @@ since that is needed in all configurations.
 
 - [Wildcard DNS setup](#dns-configuration)
 
-URL scheme: `http://page.example.io`
+URL scheme: `http://<namespace>.example.io/<project_slug>`
 
 This is the minimum setup that you can use Pages with. It is the base for all
 other setups as described below. NGINX will proxy all requests to the daemon.
@@ -157,7 +157,7 @@ The Pages daemon doesn't listen to the outside world.
 - [Wildcard DNS setup](#dns-configuration)
 - Wildcard TLS certificate
 
-URL scheme: `https://page.example.io`
+URL scheme: `https://<namespace>.example.io/<project_slug>`
 
 NGINX will proxy all requests to the daemon. Pages daemon doesn't listen to the
 outside world.
@@ -221,7 +221,7 @@ that without TLS certificates.
 - [Wildcard DNS setup](#dns-configuration)
 - Secondary IP
 
-URL scheme: `http://page.example.io` and `http://domain.com`
+URL scheme: `http://<namespace>.example.io/<project_slug>` and `http://custom-domain.com`
 
 In that case, the pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
@@ -286,7 +286,7 @@ world. Custom domains are supported, but no TLS.
 - Wildcard TLS certificate
 - Secondary IP
 
-URL scheme: `https://page.example.io` and `https://domain.com`
+URL scheme: `https://<namespace>.example.io/<project_slug>` and `https://custom-domain.com`
 
 In that case, the pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
@@ -421,7 +421,7 @@ Pages access control is disabled by default. To enable it:
      auth-server=<URL of the GitLab instance>
    ```
 
-1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control-core).
+1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control).
 
 ## Change storage path
 

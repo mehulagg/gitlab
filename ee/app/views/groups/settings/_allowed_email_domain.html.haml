@@ -5,10 +5,13 @@
 .form-group
   %label{ id: label_id }
     = _('Restrict membership by email domain')
-  .js-allowed-email-domains{ data: { hidden_input_id: hidden_input_id, label_id: label_id } }
+  .js-allowed-email-domains{ data: { hidden_input_id: hidden_input_id,
+    label_id: label_id,
+    regex_validator: AllowedEmailDomain::VALID_DOMAIN_REGEX.source,
+    disallowed_values: AllowedEmailDomain::RESERVED_DOMAINS.to_json } }
   = f.hidden_field :allowed_email_domains_list, id: hidden_input_id
   .form-text.text-muted
-    - read_more_link = link_to(_('Read more'), help_page_path('user/group/index', anchor: 'allowed-domain-restriction-premium'))
+    - read_more_link = link_to(_('Read more'), help_page_path('user/group/index', anchor: 'allowed-domain-restriction'))
     = _('Only verified users with an email address in any of these domains can be added to the group.')
     %br
     = _('Multiple domains are supported.')

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:user) { create(:admin) }
+  let_it_be(:user) { project.owner }
   let(:service) { described_class.new(project, user, { ref: 'refs/heads/master' }) }
   let(:content) do
     <<~EOY
@@ -47,15 +47,6 @@ RSpec.describe Ci::CreatePipelineService do
         it 'sets the correct config source' do
           expect(subject.config_source).to eq 'parameter_source'
         end
-      end
-    end
-
-    context 'when source is not a dangling build' do
-      subject { service.execute(:web, content: content) }
-
-      it 'raises an exception' do
-        klass = Gitlab::Ci::Pipeline::Chain::Config::Content::Parameter::UnsupportedSourceError
-        expect { subject }.to raise_error(klass)
       end
     end
   end

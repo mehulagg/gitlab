@@ -94,6 +94,7 @@ const createNonDismissedVulnerability = options =>
     ...options,
     isDismissed: false,
     dismissalFeedback: null,
+    dismissal_feedback: null,
   });
 
 const createDismissedVulnerability = options =>
@@ -1781,7 +1782,7 @@ describe('security reports actions', () => {
         mock
           .onGet('vulnerabilities_feedback', {
             params: {
-              category: 'secret_scanning',
+              category: 'secret_detection',
             },
           })
           .reply(200, secretScanningFeedbacks);

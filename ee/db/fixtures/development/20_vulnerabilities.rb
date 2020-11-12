@@ -12,7 +12,7 @@ class Gitlab::Seeder::Vulnerabilities
   def seed!
     return unless pipeline
 
-    10.times do |rank|
+    30.times do |rank|
       primary_identifier = create_identifier(rank)
       vulnerability = create_vulnerability
       occurrence = create_occurrence(vulnerability, rank, primary_identifier)
@@ -67,7 +67,7 @@ class Gitlab::Seeder::Vulnerabilities
   def create_occurrence(vulnerability, rank, primary_identifier)
     scanner = FactoryBot.create(:vulnerabilities_scanner, project: vulnerability.project)
     FactoryBot.create(
-      :vulnerabilities_occurrence,
+      :vulnerabilities_finding,
       project: project,
       vulnerability: vulnerability,
       scanner: scanner,

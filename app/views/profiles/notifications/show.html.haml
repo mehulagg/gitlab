@@ -3,7 +3,7 @@
 
 %div
   - if @user.errors.any?
-    .alert.alert-danger
+    .gl-alert.gl-alert-danger
       %ul
         - @user.errors.full_messages.each do |msg|
           %li= msg
@@ -39,10 +39,11 @@
 
       %hr
       %h5
-        = _('Groups (%{count})') % { count: @group_notifications.size }
+        = _('Groups (%{count})') % { count: @user_groups.total_count }
       %div
         - @group_notifications.each do |setting|
           = render 'group_settings', setting: setting, group: setting.source
+        = paginate @user_groups, theme: 'gitlab'
       %h5
         = _('Projects (%{count})') % { count: @project_notifications.size }
       %p.account-well

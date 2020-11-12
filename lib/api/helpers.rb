@@ -89,16 +89,15 @@ module API
       @project ||= find_project!(params[:id])
     end
 
-    def available_labels_for(label_parent, include_ancestor_groups: true)
-      search_params = { include_ancestor_groups: include_ancestor_groups }
-
+    def available_labels_for(label_parent, params = { include_ancestor_groups: true, only_group_labels: true })
       if label_parent.is_a?(Project)
-        search_params[:project_id] = label_parent.id
+        params.delete(:only_group_labels)
+        params[:project_id] = label_parent.id
       else
-        search_params.merge!(group_id: label_parent.id, only_group_labels: true)
+        params[:group_id] = label_parent.id
       end
 
-      LabelsFinder.new(current_user, search_params).execute
+      LabelsFinder.new(current_user, params).execute
     end
 
     def find_user(id)
@@ -388,8 +387,8 @@ module API
       render_api_error!('401 Unauthorized', 401)
     end
 
-    def not_allowed!
-      render_api_error!('405 Method Not Allowed', 405)
+    def not_allowed!(message = nil)
+      render_api_error!(message || '405 Method Not Allowed', :method_not_allowed)
     end
 
     def not_acceptable!
@@ -522,7 +521,7 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body
+        body ""
       end
     end
 
@@ -532,9 +531,26 @@ module API
 
       ::Gitlab::Tracking.event(category, action.to_s, **args)
     rescue => error
-      Rails.logger.warn( # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.warn(
         "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
       )
+    end
+
+    # @param event_name [String] the event name
+    # @param values [Array|String] the values counted
+    def increment_unique_values(event_name, values)
+      return unless values.present?
+
+      feature_name = "usage_data_#{event_name}"
+      return unless Feature.enabled?(feature_name)
+
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
+    end
+
+    def with_api_params(&block)
+      yield({ api: true, request: request })
     end
 
     protected
@@ -559,8 +575,8 @@ module API
       finder_params[:search_namespaces] = true if params[:search_namespaces].present?
       finder_params[:user] = params.delete(:user) if params[:user]
       finder_params[:custom_attributes] = params[:custom_attributes] if params[:custom_attributes]
-      finder_params[:id_after] = params[:id_after] if params[:id_after]
-      finder_params[:id_before] = params[:id_before] if params[:id_before]
+      finder_params[:id_after] = sanitize_id_param(params[:id_after]) if params[:id_after]
+      finder_params[:id_before] = sanitize_id_param(params[:id_before]) if params[:id_before]
       finder_params[:last_activity_after] = params[:last_activity_after] if params[:last_activity_after]
       finder_params[:last_activity_before] = params[:last_activity_before] if params[:last_activity_before]
       finder_params[:repository_storage] = params[:repository_storage] if params[:repository_storage]
@@ -658,6 +674,10 @@ module API
 
     def ip_address
       env["action_dispatch.remote_ip"].to_s || request.ip
+    end
+
+    def sanitize_id_param(id)
+      id.present? ? id.to_i : nil
     end
   end
 end

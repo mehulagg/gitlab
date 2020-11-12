@@ -1,14 +1,21 @@
 import Vue from 'vue';
 import MrWidgetOptions from 'ee_else_ce/vue_merge_request_widget/mr_widget_options.vue';
-import Translate from '../vue_shared/translate';
 import VueApollo from 'vue-apollo';
+import Translate from '../vue_shared/translate';
 import createDefaultClient from '~/lib/graphql';
+import { registerExtension } from './components/extensions';
+import issueExtension from './extensions/issues';
 
 Vue.use(Translate);
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      assumeImmutableResults: true,
+    },
+  ),
 });
 
 export default () => {
@@ -16,6 +23,8 @@ export default () => {
 
   gl.mrWidgetData.gitlabLogo = gon.gitlab_logo;
   gl.mrWidgetData.defaultAvatarUrl = gon.default_avatar_url;
+
+  registerExtension(issueExtension);
 
   const vm = new Vue({ ...MrWidgetOptions, apolloProvider });
 

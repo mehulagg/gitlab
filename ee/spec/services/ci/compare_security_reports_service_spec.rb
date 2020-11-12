@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::CompareSecurityReportsService do
   let_it_be(:project) { create(:project, :repository) }
-  let(:current_user) { build(:user, :admin) }
+  let(:current_user) { project.owner }
 
   def collect_ids(collection)
     collection.map { |t| t['identifiers'].first['external_id'] }
@@ -80,17 +80,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
 
         expect(result[:status]).to eq(:error)
         expect(result[:status_reason]).to include('JSON parsing failed')
-      end
-    end
-
-    describe "#build_comparer" do
-      context "when the head_pipeline is nil" do
-        subject { service.build_comparer(base_pipeline, nil) }
-
-        let(:base_pipeline) { create(:ee_ci_pipeline) }
-
-        specify { expect { subject }.not_to raise_error }
-        specify { expect(subject.scans).to be_empty }
       end
     end
   end

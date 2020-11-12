@@ -1,6 +1,10 @@
 import * as types from './mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
+const setPolicies = (state, policies) => {
+  state.policies = policies.map(policy => convertObjectPropsToCamelCase(policy));
+};
+
 export default {
   [types.SET_ENDPOINT](state, endpoint) {
     state.policiesEndpoint = endpoint;
@@ -10,11 +14,12 @@ export default {
     state.errorLoadingPolicies = false;
   },
   [types.RECEIVE_POLICIES_SUCCESS](state, policies) {
-    state.policies = policies.map(policy => convertObjectPropsToCamelCase(policy));
+    setPolicies(state, policies);
     state.isLoadingPolicies = false;
     state.errorLoadingPolicies = false;
   },
-  [types.RECEIVE_POLICIES_ERROR](state) {
+  [types.RECEIVE_POLICIES_ERROR](state, policies = []) {
+    setPolicies(state, policies);
     state.isLoadingPolicies = false;
     state.errorLoadingPolicies = true;
   },
@@ -45,5 +50,18 @@ export default {
   [types.RECEIVE_UPDATE_POLICY_ERROR](state) {
     state.isUpdatingPolicy = false;
     state.errorUpdatingPolicy = true;
+  },
+  [types.REQUEST_DELETE_POLICY](state) {
+    state.isRemovingPolicy = true;
+    state.errorRemovingPolicy = false;
+  },
+  [types.RECEIVE_DELETE_POLICY_SUCCESS](state, { policy }) {
+    state.policies = state.policies.filter(({ name }) => name !== policy.name);
+    state.isRemovingPolicy = false;
+    state.errorRemovingPolicy = false;
+  },
+  [types.RECEIVE_DELETE_POLICY_ERROR](state) {
+    state.isRemovingPolicy = false;
+    state.errorRemovingPolicy = true;
   },
 };

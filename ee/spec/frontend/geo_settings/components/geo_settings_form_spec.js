@@ -1,9 +1,9 @@
 import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
-import { visitUrl } from '~/lib/utils/url_utility';
 import initStore from 'ee/geo_settings/store';
 import * as types from 'ee/geo_settings/store/mutation_types';
 import GeoSettingsForm from 'ee/geo_settings/components/geo_settings_form.vue';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { STRING_OVER_255 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -107,7 +107,7 @@ describe('GeoSettingsForm', () => {
       beforeEach(() => {
         createStore();
         createComponent();
-        findGeoSettingsTimeoutField().vm.$emit('input', data);
+        findGeoSettingsTimeoutField().setValue(data);
         findGeoSettingsTimeoutField().trigger('blur');
       });
 
@@ -134,7 +134,7 @@ describe('GeoSettingsForm', () => {
       beforeEach(() => {
         createStore();
         createComponent();
-        findGeoSettingsAllowedIpField().vm.$emit('input', data);
+        findGeoSettingsAllowedIpField().setValue(data);
         findGeoSettingsAllowedIpField().trigger('blur');
       });
 

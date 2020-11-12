@@ -84,17 +84,14 @@ class Feature
       end
 
       def definitions
-        @definitions ||= {}
+        # We lazily load all definitions
+        # The hot reloading might request a feature flag
+        # before we can properly call `load_all!`
+        @definitions ||= load_all!
       end
 
-      def load_all!
-        definitions.clear
-
-        paths.each do |glob_path|
-          load_all_from_path!(glob_path)
-        end
-
-        definitions
+      def reload!
+        @definitions = load_all!
       end
 
       def valid_usage!(key, type:, default_enabled:)
@@ -107,7 +104,29 @@ class Feature
         end
       end
 
+      def register_hot_reloader!
+        # Reload feature flags on change of this file or any `.yml`
+        file_watcher = Rails.configuration.file_watcher.new(reload_files, reload_directories) do
+          Feature::Definition.reload!
+        end
+
+        Rails.application.reloaders << file_watcher
+        Rails.application.reloader.to_run { file_watcher.execute_if_updated }
+
+        file_watcher
+      end
+
       private
+
+      def load_all!
+        # We currently do not load feature flag definitions
+        # in production environments
+        return [] unless Gitlab.dev_or_test_env?
+
+        paths.each_with_object({}) do |glob_path, definitions|
+          load_all_from_path!(definitions, glob_path)
+        end
+      end
 
       def load_from_file(path)
         definition = File.read(path)
@@ -119,7 +138,7 @@ class Feature
         raise Feature::InvalidFeatureFlagError, "Invalid definition for `#{path}`: #{e.message}"
       end
 
-      def load_all_from_path!(glob_path)
+      def load_all_from_path!(definitions, glob_path)
         Dir.glob(glob_path).each do |path|
           definition = load_from_file(path)
 
@@ -128,6 +147,19 @@ class Feature
           end
 
           definitions[definition.key] = definition
+        end
+      end
+
+      def reload_files
+        []
+      end
+
+      def reload_directories
+        paths.each_with_object({}) do |path, result|
+          path = File.dirname(path)
+          Dir.glob(path).each do |matching_dir|
+            result[matching_dir] = 'yml'
+          end
         end
       end
     end

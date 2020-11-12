@@ -4,8 +4,9 @@ module Projects
   class FeatureFlagIssuesController < Projects::ApplicationController
     include IssuableLinks
 
-    before_action :ensure_feature_enabled!
-    before_action :authorize_admin_feature_flag!
+    before_action :authorize_admin_feature_flags_issue_links!
+
+    feature_category :feature_flags
 
     private
 
@@ -27,10 +28,6 @@ module Projects
 
     def feature_flag
       project.operations_feature_flags.find_by_iid(params[:feature_flag_iid])
-    end
-
-    def ensure_feature_enabled!
-      render_404 unless Feature.enabled?(:feature_flags_issue_links, project, default_enabled: true)
     end
   end
 end

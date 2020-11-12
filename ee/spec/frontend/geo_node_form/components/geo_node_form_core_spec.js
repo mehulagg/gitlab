@@ -1,8 +1,11 @@
 import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
-import { GlLink } from '@gitlab/ui';
 import GeoNodeFormCore from 'ee/geo_node_form/components/geo_node_form_core.vue';
-import { VALIDATION_FIELD_KEYS, NODE_NAME_MORE_INFO } from 'ee/geo_node_form/constants';
+import {
+  VALIDATION_FIELD_KEYS,
+  NODE_NAME_MORE_INFO,
+  NODE_INTERNAL_URL_MORE_INFO,
+} from 'ee/geo_node_form/constants';
 import { MOCK_NODE, STRING_OVER_255 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -46,9 +49,11 @@ describe('GeoNodeFormCore', () => {
   });
 
   const findGeoNodeFormNameField = () => wrapper.find('#node-name-field');
-  const findGeoNodeFormNameMoreInformation = () => wrapper.find(GlLink);
+  const findGeoNodeFormNameMoreInformation = () => wrapper.find('[data-testid="nodeNameMoreInfo"');
   const findGeoNodeFormUrlField = () => wrapper.find('#node-url-field');
   const findGeoNodeInternalUrlField = () => wrapper.find('#node-internal-url-field');
+  const findGeoNodeFormInternalUrlMoreInformation = () =>
+    wrapper.find('[data-testid="nodeInternalUrlMoreInfo"');
   const findErrorMessage = () => wrapper.find('.invalid-feedback');
 
   describe('template', () => {
@@ -80,8 +85,17 @@ describe('GeoNodeFormCore', () => {
           });
         });
 
-        it(`it ${showInternalUrl ? 'shows' : 'hides'} the Internal URL Field`, () => {
+        it(`${showInternalUrl ? 'shows' : 'hides'} the Internal URL Field`, () => {
           expect(findGeoNodeInternalUrlField().exists()).toBe(showInternalUrl);
+        });
+
+        it(`${showInternalUrl ? 'shows' : 'hides'} the Internal URL More Information Link`, () => {
+          expect(findGeoNodeFormInternalUrlMoreInformation().exists()).toBe(showInternalUrl);
+          if (showInternalUrl) {
+            expect(findGeoNodeFormInternalUrlMoreInformation().attributes('href')).toBe(
+              NODE_INTERNAL_URL_MORE_INFO,
+            );
+          }
         });
       });
     });

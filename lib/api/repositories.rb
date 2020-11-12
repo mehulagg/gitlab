@@ -3,12 +3,16 @@
 require 'mime/types'
 
 module API
-  class Repositories < Grape::API::Instance
+  class Repositories < ::API::Base
     include PaginationParams
+
+    content_type :txt, 'text/plain'
 
     helpers ::API::Helpers::HeadersHelpers
 
     before { authorize! :download_code, user_project }
+
+    feature_category :source_code_management
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

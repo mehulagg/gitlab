@@ -1,15 +1,27 @@
-#import "~/graphql_shared/fragments/user.fragment.graphql"
-#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+#import "./iteration_issues.fragment.graphql"
 
-query GroupIteration(
-  $groupPath: ID!
+query IterationIssues(
+  $fullPath: ID!
   $id: ID!
+  $isGroup: Boolean = true
   $beforeCursor: String = ""
   $afterCursor: String = ""
   $firstPageSize: Int
   $lastPageSize: Int
 ) {
-  group(fullPath: $groupPath) {
+  group(fullPath: $fullPath) @include(if: $isGroup) {
+    issues(
+      iterationId: [$id]
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+      includeSubgroups: true
+    ) {
+      ...IterationIssues
+    }
+  }
+  project(fullPath: $fullPath) @skip(if: $isGroup) {
     issues(
       iterationId: [$id]
       before: $beforeCursor
@@ -17,21 +29,7 @@ query GroupIteration(
       first: $firstPageSize
       last: $lastPageSize
     ) {
-      count
-      pageInfo {
-        ...PageInfo
-      }
-      nodes {
-        iid
-        title
-        webUrl
-        state
-        assignees {
-          nodes {
-            ...User
-          }
-        }
-      }
+      ...IterationIssues
     }
   }
 }

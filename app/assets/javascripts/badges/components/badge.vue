@@ -1,14 +1,14 @@
 <script>
-import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlLoadingIcon, GlTooltipDirective, GlIcon, GlButton } from '@gitlab/ui';
 
 export default {
   // name: 'Badge' is a false positive: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'Badge',
   components: {
-    Icon,
+    GlIcon,
     GlLoadingIcon,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -84,22 +84,23 @@ export default {
 
     <div v-show="hasError" class="btn-group">
       <div class="btn btn-default btn-sm disabled">
-        <icon :size="16" class="gl-ml-3 gl-mr-3" name="doc-image" aria-hidden="true" />
+        <gl-icon :size="16" class="gl-ml-3 gl-mr-3" name="doc-image" aria-hidden="true" />
       </div>
       <div class="btn btn-default btn-sm disabled">
         <span class="gl-ml-3 gl-mr-3">{{ s__('Badges|No badge image') }}</span>
       </div>
     </div>
 
-    <button
+    <gl-button
       v-show="hasError"
       v-gl-tooltip.hover
       :title="s__('Badges|Reload badge image')"
-      class="btn btn-transparent btn-sm text-primary"
+      category="tertiary"
+      variant="success"
       type="button"
+      icon="retry"
+      size="small"
       @click="reloadImage"
-    >
-      <icon :size="16" name="retry" />
-    </button>
+    />
   </div>
 </template>

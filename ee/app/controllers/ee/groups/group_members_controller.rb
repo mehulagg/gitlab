@@ -4,6 +4,7 @@ module EE
   module Groups
     module GroupMembersController
       extend ActiveSupport::Concern
+      extend ::Gitlab::Utils::Override
 
       class_methods do
         extend ::Gitlab::Utils::Override
@@ -48,6 +49,13 @@ module EE
 
       def override_params
         params.require(:group_member).permit(:override)
+      end
+
+      override :membershipable_members
+      def membershipable_members
+        return super unless group.feature_available?(:minimal_access_role)
+
+        group.all_group_members
       end
     end
   end

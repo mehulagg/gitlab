@@ -12,7 +12,8 @@ module.exports = path => {
     reporters.push([
       'jest-junit',
       {
-        output: './junit_jest.xml',
+        outputName: './junit_jest.xml',
+        addFileAttribute: 'true',
       },
     ]);
   }
@@ -33,6 +34,7 @@ module.exports = path => {
     '^~(/.*)$': '<rootDir>/app/assets/javascripts$1',
     '^ee_component(/.*)$':
       '<rootDir>/app/assets/javascripts/vue_shared/components/empty_component.js',
+    '^shared_queries(/.*)$': '<rootDir>/app/graphql/queries$1',
     '^ee_else_ce(/.*)$': '<rootDir>/app/assets/javascripts$1',
     '^helpers(/.*)$': '<rootDir>/spec/frontend/helpers$1',
     '^vendor(/.*)$': '<rootDir>/vendor/assets/javascripts$1',
@@ -40,6 +42,8 @@ module.exports = path => {
     'emojis(/.*).json': '<rootDir>/fixtures/emojis$1.json',
     '^spec/test_constants$': '<rootDir>/spec/frontend/helpers/test_constants',
     '^jest/(.*)$': '<rootDir>/spec/frontend/$1',
+    'test_helpers(/.*)$': '<rootDir>/spec/frontend_integration/test_helpers$1',
+    'test_fixtures(/.*)$': '<rootDir>/tmp/tests/frontend/fixtures$1',
   };
 
   const collectCoverageFrom = ['<rootDir>/app/assets/javascripts/**/*.{js,vue}'];
@@ -51,6 +55,7 @@ module.exports = path => {
       '^ee_component(/.*)$': rootDirEE,
       '^ee_else_ce(/.*)$': rootDirEE,
       '^ee_jest/(.*)$': '<rootDir>/ee/spec/frontend/$1',
+      'test_fixtures(/.*)$': '<rootDir>/tmp/tests/frontend/fixtures-ee$1',
     });
 
     collectCoverageFrom.push(rootDirEE.replace('$1', '/**/*.{js,vue}'));
@@ -75,7 +80,7 @@ module.exports = path => {
     cacheDirectory: '<rootDir>/tmp/cache/jest',
     modulePathIgnorePatterns: ['<rootDir>/.yarn-cache/'],
     reporters,
-    setupFilesAfterEnv: ['<rootDir>/spec/frontend/test_setup.js', 'jest-canvas-mock'],
+    setupFilesAfterEnv: [`<rootDir>/${path}/test_setup.js`, 'jest-canvas-mock'],
     restoreMocks: true,
     transform: {
       '^.+\\.(gql|graphql)$': 'jest-transform-graphql',

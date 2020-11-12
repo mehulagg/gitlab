@@ -24,7 +24,7 @@ exports[`Snippet Description Edit component rendering matches the snapshot 1`] =
     </div>
      
     <div
-      class="js-vue-markdown-field md-area position-relative js-expanded gfm-form"
+      class="js-vue-markdown-field md-area position-relative gfm-form js-expanded"
     >
       <markdown-header-stub
         linecontent=""
@@ -41,7 +41,7 @@ exports[`Snippet Description Edit component rendering matches the snapshot 1`] =
           >
             <textarea
               aria-label="Description"
-              class="note-textarea js-gfm-input js-autosize markdown-area"
+              class="note-textarea js-gfm-input js-autosize markdown-area js-gfm-input-initialized"
               data-qa-selector="snippet_description_field"
               data-supports-quick-actions="false"
               dir="auto"
@@ -52,19 +52,23 @@ exports[`Snippet Description Edit component rendering matches the snapshot 1`] =
             <div
               class="div-dropzone-hover"
             >
-              <i
-                class="fa fa-paperclip div-dropzone-icon"
-              />
+              <svg
+                class="div-dropzone-icon s24"
+              >
+                <use
+                  xlink:href="undefined#paperclip"
+                />
+              </svg>
             </div>
           </div>
            
           <a
             aria-label="Leave zen mode"
-            class="zen-control zen-control-leave js-zen-leave gl-text-gray-700"
+            class="zen-control zen-control-leave js-zen-leave gl-text-gray-500"
             href="#"
           >
-            <icon-stub
-              name="screen-normal"
+            <gl-icon-stub
+              name="minimize"
               size="16"
             />
           </a>

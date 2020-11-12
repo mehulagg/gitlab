@@ -14,6 +14,7 @@ export default {
     DeployBoard: () => import('ee_component/environments/components/deploy_board_component.vue'),
     CanaryDeploymentCallout: () =>
       import('ee_component/environments/components/canary_deployment_callout.vue'),
+    EnvironmentAlert: () => import('ee_component/environments/components/environment_alert.vue'),
   },
   props: {
     environments: {
@@ -111,6 +112,9 @@ export default {
     shouldShowCanaryCallout(env) {
       return env.showCanaryCallout && this.showCanaryDeploymentCallout;
     },
+    shouldRenderAlert(env) {
+      return env?.has_opened_alert;
+    },
     sortEnvironments(environments) {
       /*
        * The sorting algorithm should sort in the following priorities:
@@ -180,11 +184,15 @@ export default {
             :deploy-boards-help-path="deployBoardsHelpPath"
             :is-loading="model.isLoadingDeployBoard"
             :is-empty="model.isEmptyDeployBoard"
-            :has-legacy-app-label="model.hasLegacyAppLabel"
             :logs-path="model.logs_path"
           />
         </div>
       </div>
+      <environment-alert
+        v-if="shouldRenderAlert(model)"
+        :key="`alert-row-${i}`"
+        :environment="model"
+      />
 
       <template v-if="shouldRenderFolderContent(model)">
         <div v-if="model.isLoadingFolderContent" :key="`loading-item-${i}`">
@@ -202,7 +210,7 @@ export default {
           />
 
           <div :key="`sub-div-${i}`">
-            <div class="text-center prepend-top-10">
+            <div class="text-center gl-mt-3">
               <a :href="folderUrl(model)" class="btn btn-default">
                 {{ s__('Environments|Show all') }}
               </a>
