@@ -4,7 +4,7 @@ module Ci
   module BuildTraceChunks
     class Fog
       def available?
-        object_store.enabled
+        object_store_config.enabled?
       end
 
       def data(model)
@@ -14,11 +14,7 @@ module Ci
       end
 
       def set_data(model, new_data)
-        # TODO: Support AWS S3 server side encryption
-        files.create({
-          key: key(model),
-          body: new_data
-        })
+        files.create(create_attributes(model, new_data))
       end
 
       def append_data(model, new_data, offset)
@@ -57,6 +53,13 @@ module Ci
         key_raw(model.build_id, model.chunk_index)
       end
 
+      def create_attributes(model, new_data)
+        {
+          key: key(model),
+          body: new_data
+        }.merge(object_store_config.fog_attributes)
+      end
+
       def key_raw(build_id, chunk_index)
         "tmp/builds/#{build_id.to_i}/chunks/#{chunk_index.to_i}.log"
       end
@@ -64,13 +67,13 @@ module Ci
       def bucket_name
         return unless available?
 
-        object_store.remote_directory
+        object_store_config.bucket
       end
 
       def connection
         return unless available?
 
-        @connection ||= ::Fog::Storage.new(object_store.connection.to_hash.deep_symbolize_keys)
+        @connection ||= ::Fog::Storage.new(object_store_config.credentials)
       end
 
       def fog_directory
@@ -81,8 +84,12 @@ module Ci
         @files ||= fog_directory.files
       end
 
-      def object_store
+      def object_store_raw_config
         Gitlab.config.artifacts.object_store
+      end
+
+      def object_store_config
+        @object_store_config ||= ::ObjectStorage::Config.new(object_store_raw_config)
       end
     end
   end
