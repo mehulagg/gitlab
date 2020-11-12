@@ -73,9 +73,9 @@ module Gitlab
 
         command =
           if index_wiki?
-            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", project.id.to_s, repository_path]
+            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", project.id.to_s, repository_path, project.full_path]
           else
-            [path_to_indexer, project.id.to_s, repository_path]
+            [path_to_indexer, project.id.to_s, repository_path, project.full_path]
           end
 
         output, status = Gitlab::Popen.popen(command, nil, vars)

@@ -93,7 +93,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
           [
             TestEnv.indexer_bin_path,
             project.id.to_s,
-            "#{project.repository.disk_path}.git"
+            "#{project.repository.disk_path}.git",
+            "#{project.full_path}"
           ],
           nil,
           hash_including(
@@ -215,7 +216,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
             '--blob-type=wiki_blob',
             '--skip-commits',
             project.id.to_s,
-            "#{project.wiki.repository.disk_path}.git"
+            "#{project.wiki.repository.disk_path}.git",
+            "#{project.full_path}"
           ],
           nil,
           hash_including(
