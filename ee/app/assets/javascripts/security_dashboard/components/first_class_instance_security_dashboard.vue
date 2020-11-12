@@ -7,6 +7,7 @@ import { createProjectLoadingError } from '../helpers';
 import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
+import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
   components: {
@@ -15,6 +16,7 @@ export default {
     InstanceSecurityVulnerabilities,
     Filters,
     DashboardNotConfigured,
+    VulnerabilitiesCountList,
   },
   props: {
     vulnerabilitiesExportEndpoint: {
@@ -75,6 +77,7 @@ export default {
     <template #sticky>
       <filters v-if="shouldShowDashboard" :projects="projects" @filterChange="handleFilterChange" />
     </template>
+    <vulnerabilities-count-list scope="instance" />
     <instance-security-vulnerabilities
       v-if="shouldShowDashboard"
       :projects="projects"

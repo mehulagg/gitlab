@@ -6,6 +6,7 @@ import Filters from 'ee/security_dashboard/components/first_class_vulnerability_
 import CsvExportButton from './csv_export_button.vue';
 import vulnerableProjectsQuery from '../graphql/vulnerable_projects.query.graphql';
 import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
+import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
   components: {
@@ -15,6 +16,7 @@ export default {
     CsvExportButton,
     DashboardNotConfigured,
     GlLoadingIcon,
+    VulnerabilitiesCountList,
   },
   props: {
     groupFullPath: {
@@ -79,6 +81,7 @@ export default {
       <template #sticky>
         <filters :projects="projects" @filterChange="handleFilterChange" />
       </template>
+      <vulnerabilities-count-list scope="group" :full-path="groupFullPath" />
       <group-security-vulnerabilities :group-full-path="groupFullPath" :filters="filters" />
     </security-dashboard-layout>
   </div>
