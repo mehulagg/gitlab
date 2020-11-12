@@ -27,6 +27,7 @@ module Ci
       items = by_username(items)
       items = by_yaml_errors(items)
       items = by_updated_at(items)
+      items = by_iids(items)
       sort_items(items)
     end
 
@@ -135,6 +136,14 @@ module Ci
       items = items.updated_after(params[:updated_after]) if params[:updated_after].present?
 
       items
+    end
+
+    def by_iids(items)
+      if params[:iids].present?
+        items.for_ids(params[:iids])
+      else
+        items
+      end
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
