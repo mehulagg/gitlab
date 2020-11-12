@@ -772,7 +772,7 @@ To enable prevent project forking:
   for the group. **(STARTER ONLY)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
 
-#### Storage usage quotas **(STARTER)**
+#### Storage usage quota **(STARTER)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/13294) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.0.
 
@@ -808,7 +808,7 @@ The following storage usage statistics are available to the namespace's owner:
 
 Storage usage statistics is under development and not ready for production use. It is deployed
 behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can enable it.
 
 To enable it:
