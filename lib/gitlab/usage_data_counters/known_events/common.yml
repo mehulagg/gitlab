@@ -121,6 +121,9 @@
 - name: project_action
   category: source_code
   aggregation: daily
+- name: git_write_action
+  category: source_code
+  aggregation: daily
 - name: merge_request_action
   category: source_code
   aggregation: daily
