@@ -467,7 +467,7 @@ module Gitlab
         empty_diff_stats
       end
 
-      def diff_tree_diff_stats(commits)
+      def find_changed_paths(commits)
         if commits.any? { |ref| ref.blank? || Gitlab::Git.blank_ref?(ref) }
           return empty_diff_stats
         end
@@ -475,11 +475,9 @@ module Gitlab
         commit_shas = commits.map(&:sha)
         commit_shas << commits.first.parent_id if commits.size == 1
 
-        stats = wrapped_gitaly_errors do
-          gitaly_commit_client.diff_tree_diff_stats(commit_shas)
+        wrapped_gitaly_errors do
+          gitaly_commit_client.find_changed_paths(commit_shas)
         end
-
-        Gitlab::Git::DiffStatsCollection.new(stats)
       rescue CommandError, TypeError
         empty_diff_stats
       end

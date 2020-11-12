@@ -216,14 +216,14 @@ module Gitlab
         response.flat_map(&:stats)
       end
 
-      def diff_tree_diff_stats(commits)
-        request = Gitaly::DiffTreeDiffStatsRequest.new(
+      def find_changed_paths(commits)
+        request = Gitaly::FindChangedPathsRequest.new(
           repository: @gitaly_repo,
           commits: commits
         )
 
-        response = GitalyClient.call(@repository.storage, :diff_service, :diff_tree_diff_stats, request, timeout: GitalyClient.medium_timeout)
-        response.flat_map(&:stats)
+        response = GitalyClient.call(@repository.storage, :diff_service, :find_changed_paths, request, timeout: GitalyClient.medium_timeout)
+        response.flat_map(&:paths)
       end
 
       def find_all_commits(opts = {})

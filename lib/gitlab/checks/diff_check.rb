@@ -19,7 +19,7 @@ module Gitlab
 
         if true
           Gitlab::AppLogger.warn("Jimbo")
-          stats = project.repository.diff_tree_diff_stats(commits)
+          stats = project.repository.find_changed_paths(commits)
           stats.each do |diff_stat|
             file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
 
