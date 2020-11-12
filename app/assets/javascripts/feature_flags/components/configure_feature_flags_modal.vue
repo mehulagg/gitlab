@@ -154,7 +154,7 @@ export default {
       </gl-sprintf>
     </p>
 
-    <gl-alert variant="warning" :dismissible="false">
+    <gl-alert variant="warning" class="gl-mb-5" :dismissible="false">
       <gl-sprintf
         :message="
           s__(
