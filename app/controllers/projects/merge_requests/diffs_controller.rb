@@ -116,13 +116,19 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       end
     end
 
+    @end_sha = params[:end_sha].presence
+
     if Gitlab::Utils.to_boolean(params[:diff_head]) && @merge_request.diffable_merge_ref?
       return CompareService.new(@project, @merge_request.merge_ref_head.sha)
         .execute(@project, @merge_request.target_branch)
     end
 
-    if @start_sha
+    if @start_version && @end_sha
+      @start_version.compare_with(@end_sha)
+    elsif @start_sha
       @merge_request_diff.compare_with(@start_sha)
+    elsif @end_sha
+      @merge_request_diff.compare_with(@end_sha)
     else
       @merge_request_diff
     end
