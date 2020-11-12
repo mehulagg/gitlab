@@ -148,6 +148,11 @@ module EE
               description: 'Code coverage summary associated with the project',
               resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver
 
+        field :incident_management_oncall_schedules,
+              ::Types::IncidentManagement::OncallScheduleType.connection_type,
+              null: true,
+              description: 'Incident Management On-call schedules of the project'
+
         def self.sast_ci_configuration(project)
           ::Security::CiConfiguration::SastParserService.new(project).configuration
         end
