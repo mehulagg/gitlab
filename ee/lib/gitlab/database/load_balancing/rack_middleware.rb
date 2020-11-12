@@ -36,11 +36,9 @@ module Gitlab
 
           unstick_or_continue_sticking(env)
 
-          if Feature.enabled?(:query_cache_for_load_balancing)
-            load_balancer.enable_query_cache!
+          result = with_cache do
+            @app.call(env)
           end
-
-          result = @app.call(env)
 
           stick_if_necessary(env)
 
@@ -94,6 +92,10 @@ module Gitlab
           else
             []
           end
+        end
+
+        def with_cache
+          Feature.enabled?(:query_cache_for_load_balancing) ? load_balancer.cache { yield } : yield
         end
       end
     end

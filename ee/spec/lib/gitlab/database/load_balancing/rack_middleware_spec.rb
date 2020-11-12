@@ -32,6 +32,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
 
     before do
       allow(middleware).to receive(:load_balancer).and_return(lb)
+      allow(lb).to receive(:cache).and_yield
     end
 
     it 'handles a request' do
@@ -41,7 +42,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
 
       expect(middleware).to receive(:unstick_or_continue_sticking).with(env)
       expect(middleware).to receive(:stick_if_necessary).with(env)
-      expect(lb).to receive(:enable_query_cache!)
+      expect(lb).to receive(:cache)
 
       expect(app).to receive(:call).with(env).and_return(10)
 
@@ -60,7 +61,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
 
         expect(middleware).to receive(:unstick_or_continue_sticking).with(env)
         expect(middleware).to receive(:stick_if_necessary).with(env)
-        expect(lb).not_to receive(:enable_query_cache!)
+        expect(lb).not_to receive(:cache)
 
         expect(app).to receive(:call).with(env).and_return(10)
 

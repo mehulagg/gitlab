@@ -114,8 +114,8 @@ module Gitlab
           raise 'Failed to determine the write location of the primary database'
         end
 
-        def enable_query_cache!
-          host&.enable_query_cache!
+        def cache
+          host ? host&.connection.cache { yield } : yield
         end
 
         # Returns true if all hosts have caught up to the given transaction
