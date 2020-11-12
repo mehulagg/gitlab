@@ -289,8 +289,9 @@ When running your project pipeline at this point:
 To leverage [Auto DevOps](../../topics/autodevops/index.md) for your project when deploying to
 AWS EC2, first you must define [your AWS credentials as environment variables](#run-aws-commands-from-gitlab-cicd).
 
-Then, you will have to define a job for the `build` stage. To do so, you must reference the `Auto-DevOps.gitlab-ci.yml` template and include a job named
-`build_artifact` in your `.gitlab-ci.yml` file. For example:
+Next, define a job for the `build` stage. To do so, you must reference the
+`Auto-DevOps.gitlab-ci.yml` template and include a job named `build_artifact` in your
+`.gitlab-ci.yml` file. For example:
 
 ```yaml
 # .gitlab-ci.yml
