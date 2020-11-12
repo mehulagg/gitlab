@@ -185,6 +185,7 @@ secret_detection:
   extends:
     - .default-retry
     - .reports:rules:sast
+  stage: test
   needs: []
   artifacts:
     paths:
