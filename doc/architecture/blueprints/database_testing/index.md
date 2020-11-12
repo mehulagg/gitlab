@@ -13,7 +13,7 @@ Our primary goal is to **provide developers with access to production-like datab
 
 ## Current day
 
-Developers are expected to test database migrations prior to deploying to any environment, but we lack the ability to perform testing against large environments such a GitLab.com. The [developer database migration style guide](https://docs.gitlab.com/ee/development/migration_style_guide.html) provides guidelines on migrations, and we focus on validating migrations during testing.
+Developers are expected to test database migrations prior to deploying to any environment, but we lack the ability to perform testing against large environments such a GitLab.com. The [developer database migration style guide](/ee/development/migration_style_guide.md) provides guidelines on migrations, and we focus on validating migrations during testing.
 
 *TODO* - provide details of database changes workflow as it exists today
 
