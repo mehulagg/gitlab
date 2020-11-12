@@ -54,6 +54,10 @@ docs-lint links:
     - .docs:rules:docs-lint
   image: "registry.gitlab.com/gitlab-org/gitlab-docs/lint:ruby-2.7.2-alpine-3.12-vale-2.4.3-markdownlint-0.24.0"
   stage: test
+  cache:
+    key: nanoc-cache
+    paths:
+      - public/
   needs: []
   script:
     # Prepare docs for build
