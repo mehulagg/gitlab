@@ -3,12 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe Ci::ListConfigVariablesService do
+  include ReactiveCachingHelpers
+
   let(:project) { create(:project, :repository) }
   let(:user) { project.creator }
-  let(:service) { described_class.new(project, user) }
+  let(:service) { described_class.new(project, user, sha: sha) }
   let(:result) { YAML.dump(ci_config) }
 
-  subject { service.execute(sha) }
+  subject { service.execute }
 
   before do
     stub_gitlab_ci_yml_for_sha(sha, result)
@@ -98,6 +100,21 @@ RSpec.describe Ci::ListConfigVariablesService do
 
     it 'returns empty result' do
       expect(subject).to eq({})
+    end
+  end
+
+  context 'when reading from cache', :use_clean_rails_memory_store_caching do
+    let(:sha) { 'master' }
+    let(:ci_config) { {} }
+    let(:reactive_cache_params) { [project.id, user.id, sha] }
+    let(:return_value) { { 'KEY1' => { value: 'val 1', description: 'description 1' } } }
+
+    before do
+      stub_reactive_cache(service, return_value, reactive_cache_params)
+    end
+
+    it 'returns variable list' do
+      expect(subject).to eq(return_value)
     end
   end
 
