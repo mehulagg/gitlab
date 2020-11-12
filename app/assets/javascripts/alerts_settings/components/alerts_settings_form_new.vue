@@ -348,6 +348,7 @@ export default {
         <gl-form-input
           v-model="integrationForm.name"
           type="text"
+          class="gl-inset-border-1-gray-100"
           :placeholder="$options.i18n.integrationFormSteps.step2.placeholder"
         />
       </gl-form-group>
@@ -506,7 +507,7 @@ export default {
           :disabled="Boolean(integrationTestPayload.error)"
           category="secondary"
           variant="success"
-          class="gl-mr-1 js-no-auto-disable"
+          class="gl-mr-3 js-no-auto-disable"
           @click="submitWithTestPayload"
           >{{ s__('AlertSettings|Save and test payload') }}</gl-button
         >

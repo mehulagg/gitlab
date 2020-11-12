@@ -96,7 +96,7 @@ export default {
     tbodyTrClass(item) {
       return {
         [bodyTrClass]: this.integrations.length,
-        'gl-bg-blue-50': item?.id === this.currentIntegration?.id,
+        'gl-bg-blue-50': this.currentIntegration && this.currentIntegration.id === item.id,
       };
     },
     trackPageViews() {
