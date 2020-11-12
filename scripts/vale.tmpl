@@ -8,10 +8,9 @@
 {{- /* Range over the linted files */ -}}
 
 {{- range .Files}}
-{{$table := newTable true}}
 
 {{- $f = add1 $f -}}
-{{- .Path | underline | indent 1 -}}
+{{- $path := .Path | underline -}}
 
 {{- /* Range over the file's alerts */ -}}
 
@@ -29,12 +28,18 @@
     {{- $s = add1 $s -}}
 {{- end}}
 
-{{- $loc := printf "%d:%d" .Line (index .Span 0) -}}
-{{- $row := list $loc $error .Message .Check .Link | toStrings -}}
+{{- $path = $path -}}
+{{- $loc := printf "Line %d, position %d" .Line (index .Span 0) -}}
+{{- $check := printf "%s" .Check -}}
+{{- $message := printf "%s" .Message -}}
+{{- $link := printf "%s" .Link -}}
 
-{{- $table = addRow $table $row -}}
+{{ $path }}:
+ {{ $loc }} (rule {{ $check }})
+ {{ $error }}: {{ $message }}
+ More information: {{ $link }}
+
+{{end -}}
 {{end -}}
 
-{{- $table = renderTable $table -}}
-{{end}}
 {{- $e}} {{"errors" | red}}, {{$w}} {{"warnings" | yellow}} and {{$s}} {{"suggestions" | blue}} in {{$f}} {{$f | int | plural "file" "files"}}.
