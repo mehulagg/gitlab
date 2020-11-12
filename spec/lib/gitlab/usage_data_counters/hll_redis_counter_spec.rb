@@ -365,6 +365,24 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
             expect(aggregated_metrics_data).to eq(results)
           end
         end
+
+        context 'hidden behind feature flag' do
+          let(:enabled_feature_flag) { 'test_ff_enabled' }
+          let(:disabled_feature_flag) { 'test_ff_disabled' }
+          let(:aggregated_metrics) do
+            [
+              { name: 'gmau_enabled', events: %w[event4], operator: "ALL", feature_flag: enabled_feature_flag },
+              { name: 'gmau_disabled', events: %w[event4], operator: "ALL", feature_flag: disabled_feature_flag }
+            ].map(&:with_indifferent_access)
+          end
+
+          it 'returns the number of unique events for all known events' do
+            skip_feature_flags_yaml_validation
+            stub_feature_flags(enabled_feature_flag => true, disabled_feature_flag => false)
+
+            expect(aggregated_metrics_data).to eq('gmau_enabled' => 3)
+          end
+        end
       end
     end
 

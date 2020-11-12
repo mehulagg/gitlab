@@ -93,14 +93,18 @@ module Gitlab
         end
 
         def aggregated_metrics_monthly_data
-          aggregated_metrics.to_h do |aggregation|
-            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 4.weeks.ago.to_date, end_date: Date.current)]
+          aggregated_metrics.each_with_object({}) do |aggregation, monthly_data|
+            next if aggregation[:feature_flag] && !Feature.enabled?(aggregation[:feature_flag], default_enabled: false, type: :development)
+
+            monthly_data[aggregation[:name]] = calculate_count_for_aggregation(aggregation, start_date: 4.weeks.ago.to_date, end_date: Date.current)
           end
         end
 
         def aggregated_metrics_weekly_data
-          aggregated_metrics.to_h do |aggregation|
-            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 7.days.ago.to_date, end_date: Date.current)]
+          aggregated_metrics.each_with_object({}) do |aggregation, weekly_data|
+            next if aggregation[:feature_flag] && !Feature.enabled?(aggregation[:feature_flag], default_enabled: false, type: :development)
+
+            weekly_data[aggregation[:name]] = calculate_count_for_aggregation(aggregation, start_date: 7.days.ago.to_date, end_date: Date.current)
           end
         end
 
