@@ -1,0 +1,8 @@
+---
+name: issue_single_vue_app
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36155
+rollout_issue_url:
+milestone: '13.6'
+type: development
+group: group::plan
+default_enabled: false
