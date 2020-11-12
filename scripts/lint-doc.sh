@@ -107,7 +107,7 @@ else
 fi
 
 echo '=> Linting prose...'
-run_locally_or_in_docker 'vale' "--minAlertLevel error --output=scripts/vale.tmpl ${MD_DOC_PATH}"
+run_locally_or_in_docker 'vale' "--minAlertLevel error --output=doc/.vale/vale.tmpl ${MD_DOC_PATH}"
 
 if [ $ERRORCODE -ne 0 ]
 then
