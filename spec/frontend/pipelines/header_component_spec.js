@@ -98,18 +98,20 @@ describe('Pipeline details header', () => {
   });
 
   describe('polling', () => {
-    beforeEach(() => {
-      wrapper = createComponent(mockRunningPipelineHeader);
-    });
-    it('polling is not stopped if pipeline is not finished', () => {
-      wrapper.vm.$options.watch.pipeline.call(wrapper.vm, mockRunningPipelineHeader);
-      expect(wrapper.vm.$apollo.queries.pipeline.stopPolling).not.toHaveBeenCalled();
-    });
-    it('polling is stopped when pipeline is finished', () => {
-      wrapper.vm.$options.finishedStatuses.forEach(status => {
-        wrapper.vm.$options.watch.pipeline.call(wrapper.vm, { status });
-        expect(wrapper.vm.$apollo.queries.pipeline.stopPolling).toHaveBeenCalled();
+    it('polling is stopped when pipeline is finished', async () => {
+      wrapper = createComponent({ ...mockRunningPipelineHeader });
+
+      await wrapper.setData({
+        pipeline: { ...mockCancelledPipelineHeader },
       });
+
+      expect(wrapper.vm.$apollo.queries.pipeline.stopPolling).toHaveBeenCalled();
+    });
+
+    it('polling is not stopped when pipeline is not finished', () => {
+      wrapper = createComponent(mockRunningPipelineHeader);
+
+      expect(wrapper.vm.$apollo.queries.pipeline.stopPolling).not.toHaveBeenCalled();
     });
   });
 

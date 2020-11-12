@@ -96,6 +96,9 @@ export default {
     status() {
       return this.pipeline?.status;
     },
+    isFinished() {
+      return this.$options.finishedStatuses.includes(this.status);
+    },
     shouldRenderContent() {
       return !this.isLoadingInitialQuery && this.hasPipelineData;
     },
@@ -125,8 +128,8 @@ export default {
     },
   },
   watch: {
-    pipeline({ status }) {
-      if (this.$options.finishedStatuses.includes(status)) {
+    isFinished(finished) {
+      if (finished) {
         this.$apollo.queries.pipeline.stopPolling();
       }
     },
@@ -149,10 +152,10 @@ export default {
         if (errors.length > 0) {
           this.reportFailure(POST_FAILURE);
         } else {
-          this.$apollo.queries.pipeline.refetch();
-          // start polling back up
-          // it will be stopped again if status is one of finishedStatues
-          this.$apollo.queries.pipeline.startPolling(POLL_INTERVAL);
+          await this.$apollo.queries.pipeline.refetch();
+          if (!this.isFinished) {
+            this.$apollo.queries.pipeline.startPolling(POLL_INTERVAL);
+          }
         }
       } catch {
         this.reportFailure(POST_FAILURE);
