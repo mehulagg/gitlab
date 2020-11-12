@@ -241,7 +241,7 @@ Proposal:
 | Role                         | Who
 |------------------------------|-------------------------|
 | Author                       |      João Pereira       |
-| Architecture Evolution Coach |                         |
+| Architecture Evolution Coach | Gerardo Lopez-Fernandez |
 | Engineering Leader           |                         |
 | Domain Expert                |          Hayley Swimelar               |
 
