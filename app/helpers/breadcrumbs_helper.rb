@@ -71,7 +71,16 @@ module BreadcrumbsHelper
       '@type' => 'ListItem',
       'position' => position,
       'name' => text,
-      'item' => link
+      'item' => ensure_absolute_link(link)
     }
+  end
+
+  def ensure_absolute_link(link)
+    return "#{request.base_url}#{request.path}" if link.to_s.empty?
+
+    url = URI.parse(link)
+    url.absolute? ? link : URI.join(request.base_url, link).to_s
+  rescue URI::InvalidURIError
+    "#{request.base_url}#{request.path}"
   end
 end
