@@ -324,13 +324,13 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
           allow(described_class).to receive(:aggregated_metrics).and_return(aggregated_metrics)
         end
 
-        context 'with ALL operator' do
+        context 'with AND operator' do
           let(:aggregated_metrics) do
             [
-              { name: 'gmau_1', events: %w[event1_slot event2_slot], operator: "ALL" },
-              { name: 'gmau_2', events: %w[event1_slot event2_slot event3_slot], operator: "ALL" },
-              { name: 'gmau_3', events: %w[event1_slot event2_slot event3_slot event5_slot], operator: "ALL" },
-              { name: 'gmau_4', events: %w[event4], operator: "ALL" }
+              { name: 'gmau_1', events: %w[event1_slot event2_slot], operator: "AND" },
+              { name: 'gmau_2', events: %w[event1_slot event2_slot event3_slot], operator: "AND" },
+              { name: 'gmau_3', events: %w[event1_slot event2_slot event3_slot event5_slot], operator: "AND" },
+              { name: 'gmau_4', events: %w[event4], operator: "AND" }
             ].map(&:with_indifferent_access)
           end
 
@@ -346,12 +346,12 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
           end
         end
 
-        context 'with ANY operator' do
+        context 'with OR operator' do
           let(:aggregated_metrics) do
             [
-              { name: 'gmau_1', events: %w[event3_slot event5_slot], operator: "ANY" },
-              { name: 'gmau_2', events: %w[event1_slot event2_slot event3_slot event5_slot], operator: "ANY" },
-              { name: 'gmau_3', events: %w[event4], operator: "ANY" }
+              { name: 'gmau_1', events: %w[event3_slot event5_slot], operator: "OR" },
+              { name: 'gmau_2', events: %w[event1_slot event2_slot event3_slot event5_slot], operator: "OR" },
+              { name: 'gmau_3', events: %w[event4], operator: "OR" }
             ].map(&:with_indifferent_access)
           end
 
@@ -422,7 +422,7 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       context 'Redis calls' do
         let(:aggregated_metrics) do
           [
-            { name: 'gmau_3', events: %w[event1_slot event2_slot event3_slot event5_slot], operator: "ALL" }
+            { name: 'gmau_3', events: %w[event1_slot event2_slot event3_slot event5_slot], operator: "AND" }
           ].map(&:with_indifferent_access)
         end
 

@@ -694,14 +694,18 @@ In order to add data for aggregated metrics into Usage Ping payload you should a
 
 - name: unique name under which aggregate metric will be added to Usage Ping payload
 - operator: operator that defines how aggregated metric data will be counted. Available operators are:
-  - `ANY`: removes duplicates and counts all entries that triggered any of listed events
+  - `OR`: removes duplicates and counts all entries that triggered any of listed events
+  - `AND`: removes duplicates and counts all elements that were observed triggering all of following events
 - events: list of events names (from [`known_events.yml`](#known-events-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
 
 Example aggregated metric entry:
 
 ```yaml
-- name: example_aggregated_metric
-  operator: ANY
+- name: product_analytics_test_metrics_union
+  operator: OR
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+- name: product_analytics_test_metrics_intersection
+  operator: AND
   events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
 ```
 
