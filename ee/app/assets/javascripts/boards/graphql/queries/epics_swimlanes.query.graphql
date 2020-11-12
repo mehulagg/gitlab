@@ -1,5 +1,5 @@
-#import "ee_else_ce/boards/queries/board_list.fragment.graphql"
-#import "./board_epic.fragment.graphql"
+#import "ee_else_ce/boards/graphql/fragments/board_list.fragment.graphql"
+#import "../fragments/board_epic.fragment.graphql"
 
 query BoardEE(
   $fullPath: ID!

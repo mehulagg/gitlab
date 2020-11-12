@@ -1,4 +1,4 @@
-#import "~/boards/queries/board_list_shared.fragment.graphql"
+#import "~/boards/graphql/fragments/board_list_shared.fragment.graphql"
 
 fragment BoardListFragment on BoardList {
   ...BoardListShared
