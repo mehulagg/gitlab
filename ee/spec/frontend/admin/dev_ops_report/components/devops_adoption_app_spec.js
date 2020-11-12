@@ -1,8 +1,14 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import MockAdapter from 'axios-mock-adapter';
+import VueApollo from 'vue-apollo';
+import { createMockClient } from 'mock-apollo-client';
+import { resolvers as devOpsResolvers } from 'ee/admin/dev_ops_report/graphql';
+import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
 import DevopsAdoptionApp from 'ee/admin/dev_ops_report/components/devops_adoption_app.vue';
 import DevopsAdoptionEmptyState from 'ee/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
 import { DEVOPS_ADOPTION_STRINGS } from 'ee/admin/dev_ops_report/constants';
+import axios from '~/lib/utils/axios_utils';
 import * as Sentry from '~/sentry/wrapper';
 import { groupNodes, groupPageInfo } from '../mock_data';
 
@@ -10,38 +16,36 @@ const localVue = createLocalVue();
 
 describe('DevopsAdoptionApp', () => {
   let wrapper;
+  let mockAdapter;
 
   const createComponent = (options = {}) => {
-    const {
-      loading = true,
-      groups = [],
-      pageInfo = groupPageInfo,
-      fetchMore = jest.fn(),
-    } = options;
+    const { data = {} } = options;
+
+    const mockClient = createMockClient({
+      resolvers: devOpsResolvers,
+    });
+
+    mockClient.cache.writeQuery({
+      query: getGroupsQuery,
+      data,
+    });
+
+    const apolloProvider = new VueApollo({
+      defaultClient: mockClient,
+    });
+
     return shallowMount(DevopsAdoptionApp, {
       localVue,
-      data() {
-        return {
-          groups: {
-            nodes: groups,
-            pageInfo,
-          },
-        };
-      },
-      mocks: {
-        $apollo: {
-          queries: {
-            groups: {
-              loading,
-              fetchMore,
-            },
-          },
-        },
-      },
+      apolloProvider,
     });
   };
 
+  beforeEach(() => {
+    mockAdapter = new MockAdapter(axios);
+  });
+
   afterEach(() => {
+    mockAdapter.restore();
     wrapper.destroy();
     wrapper = null;
   });
@@ -62,7 +66,14 @@ describe('DevopsAdoptionApp', () => {
 
   describe('when no data is present', () => {
     beforeEach(() => {
-      wrapper = createComponent({ loading: false });
+      const data = {
+        groups: {
+          __typename: 'Groups',
+          nodes: [],
+          pageInfo: {},
+        },
+      };
+      wrapper = createComponent({ data });
     });
 
     it('displays the empty state', () => {
@@ -75,13 +86,26 @@ describe('DevopsAdoptionApp', () => {
   });
 
   describe('when data is present', () => {
-    let fetchMore;
-
     beforeEach(() => {
-      const pageInfo = { ...groupPageInfo, nextPage: 1 };
-      fetchMore = jest.fn().mockImplementation(() => new Promise(resolve => resolve()));
-      wrapper = createComponent({ loading: false, groups: groupNodes, pageInfo, fetchMore });
-      wrapper.vm.$options.apollo.groups.result.call(wrapper.vm);
+      const data = {
+        groups: {
+          __typename: 'Groups',
+          nodes: groupNodes,
+          pageInfo: groupPageInfo,
+        },
+      };
+      wrapper = createComponent({ data });
+      jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore').mockReturnValue(
+        new Promise(resolve => {
+          resolve({
+            groups: {
+              __typename: 'Groups',
+              nodes: [],
+              pageInfo: {},
+            },
+          });
+        }),
+      );
     });
 
     it('does not display the empty state', () => {
@@ -93,26 +117,30 @@ describe('DevopsAdoptionApp', () => {
     });
 
     it('should fetch more data', () => {
-      expect(fetchMore).toHaveBeenCalledWith(
+      expect(wrapper.vm.$apollo.queries.groups.fetchMore).toHaveBeenCalledWith(
         expect.objectContaining({
-          variables: { nextPage: 1 },
+          variables: { nextPage: 2 },
         }),
       );
     });
   });
 
   describe('when error is thrown', () => {
-    let fetchMore;
     const error = 'Error: foo!';
 
     beforeEach(() => {
-      const pageInfo = { ...groupPageInfo, nextPage: 1 };
-      fetchMore = jest
-        .fn()
-        .mockImplementation(() => new Promise((resolve, reject) => reject(error)));
       jest.spyOn(Sentry, 'captureException');
-      wrapper = createComponent({ loading: false, groups: groupNodes, pageInfo, fetchMore });
-      wrapper.vm.$options.apollo.groups.result.call(wrapper.vm);
+      const data = {
+        groups: {
+          __typename: 'Groups',
+          nodes: groupNodes,
+          pageInfo: groupPageInfo,
+        },
+      };
+      wrapper = createComponent({ data });
+      jest
+        .spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore')
+        .mockImplementation(jest.fn().mockRejectedValue(error));
     });
 
     it('does not display the empty state', () => {
@@ -123,10 +151,18 @@ describe('DevopsAdoptionApp', () => {
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
     });
 
+    it('should fetch more data', () => {
+      expect(wrapper.vm.$apollo.queries.groups.fetchMore).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: { nextPage: 2 },
+        }),
+      );
+    });
+
     it('displays the error message and calls Sentry', () => {
-      const altert = wrapper.find(GlAlert);
-      expect(altert.exists()).toBe(true);
-      expect(altert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
+      const alert = wrapper.find(GlAlert);
+      expect(alert.exists()).toBe(true);
+      expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
       expect(Sentry.captureException).toHaveBeenCalledWith(error);
     });
   });

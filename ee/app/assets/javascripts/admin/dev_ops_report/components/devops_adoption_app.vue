@@ -39,7 +39,7 @@ export default {
       return this.$apollo.queries.groups.loading;
     },
     isEmpty() {
-      return this.groups.nodes.length === 0;
+      return this.groups?.nodes?.length === 0;
     },
   },
   methods: {
