@@ -30,4 +30,32 @@ RSpec.describe IssuePolicy do
 
     it { is_expected.to be_allowed(:create_issue, :update_issue, :read_issue_iid, :reopen_issue, :create_design, :create_note) }
   end
+
+  context 'promote_to_epic rule' do
+    let(:guest) { create(:user) }
+    let(:author) { create(:user) }
+    let(:assignee) { create(:user) }
+    let(:reporter) { create(:user) }
+    let(:developer) { create(:user) }
+    let(:group) { create(:group, :public) }
+
+    let(:project) { create(:project, group: group) }
+    let(:issue) { create(:issue, project: project) }
+
+    before do
+      project.add_guest(guest)
+      project.add_guest(author)
+      project.add_guest(assignee)
+      project.add_reporter(reporter)
+    end
+
+    it { expect(permissions(guest, issue)).to be_disallowed(:promote_to_epic) }
+    it { expect(permissions(author, issue)).to be_disallowed(:promote_to_epic) }
+    it { expect(permissions(assignee, issue)).to be_disallowed(:promote_to_epic) }
+    it { expect(permissions(reporter, issue)).to be_allowed(:promote_to_epic) }
+  end
+
+  def permissions(user, issue)
+    described_class.new(user, issue)
+  end
 end

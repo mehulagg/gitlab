@@ -153,6 +153,11 @@ module EE
       user&.can?(:admin_epic, project.group)
     end
 
+    def can_be_promoted_to_epic?(user, group = nil)
+      group ||= project.group
+      group.present? && user&.can?(:promote_to_epic, self) && user&.can?(:create_epic, group)
+    end
+
     # Issue position on boards list should be relative to all group projects
     def parent_ids
       return super unless has_group_boards?

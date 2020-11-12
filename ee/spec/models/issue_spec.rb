@@ -835,6 +835,62 @@ RSpec.describe Issue do
     end
   end
 
+  describe '#can_be_promoted_to_epic?' do
+    before do
+      stub_licensed_features(epics: true)
+    end
+
+    let(:group) { nil }
+    let_it_be(:user) { create(:user) }
+
+    subject { issue.can_be_promoted_to_epic?(user) }
+
+    context 'when project on the issue does not have a parent group' do
+      let(:project) { create(:project) }
+      let(:issue) { create(:issue, project: project) }
+
+      before do
+        project.add_developer(user)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when project has a parent group' do
+      let_it_be(:group)   { create(:group) }
+      let_it_be(:project) { create(:project, group: group) }
+      let_it_be(:issue) { create(:issue, project: project) }
+
+      context 'when a user is not a project member' do
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when a user is a project member' do
+        before do
+          project.add_developer(user)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when a user is a group member' do
+        before do
+          group.add_developer(user)
+        end
+
+        it { is_expected.to be_truthy }
+
+        context 'when issue is an incident' do
+          before do
+            issue.update!(issue_type: :incident)
+          end
+
+          it { is_expected.to be_falsey }
+        end
+      end
+    end
+  end
+
   describe '#supports_iterations?' do
     let(:group) { build_stubbed(:group) }
     let(:project_with_group) { build_stubbed(:project, group: group) }

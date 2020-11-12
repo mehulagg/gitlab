@@ -7,6 +7,13 @@ module EE
     prepended do
       condition(:over_storage_limit, scope: :subject) { @subject.namespace.over_storage_limit? }
 
+      condition(:can_be_promoted_to_epic) do
+        @subject.persisted? &&
+          @subject.supports_epic? &&
+          !@subject.promoted? &&
+          @user && @user.can?(:admin_issue, @subject.project)
+      end
+
       rule { over_storage_limit }.policy do
         prevent :create_issue
         prevent :update_issue
@@ -14,6 +21,10 @@ module EE
         prevent :reopen_issue
         prevent :create_design
         prevent :create_note
+      end
+
+      rule { can_be_promoted_to_epic }.policy do
+        enable :promote_to_epic
       end
     end
   end
