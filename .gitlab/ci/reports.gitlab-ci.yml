@@ -4,6 +4,9 @@
 #   - template: Security/Dependency-Scanning.gitlab-ci.yml
 #   - template: Security/DAST.gitlab-ci.yml
 
+include:
+  - template: Secret-Detection.gitlab-ci.yml
+
 # We need to duplicate this job's definition because it seems it's impossible to
 # override an included `only.refs`.
 # See https://gitlab.com/gitlab-org/gitlab/issues/31371.
@@ -77,17 +80,6 @@ nodejs-scan-sast:
   extends: .sast
   image:
     name: "$SAST_ANALYZER_IMAGE_PREFIX/nodejs-scan:$SAST_ANALYZER_IMAGE_TAG"
-
-secrets-sast:
-  extends: .sast
-  image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:3"
-  artifacts:
-    paths:
-      - gl-secret-detection-report.json  # GitLab-specific
-    reports:
-      sast: gl-secret-detection-report.json
-    expire_in: 1 week  # GitLab-specific
 
 # We need to duplicate this job's definition because it seems it's impossible to
 # override an included `only.refs`.
@@ -188,3 +180,15 @@ license_scanning:
       license_scanning: gl-license-scanning-report.json
     expire_in: 1 week  # GitLab-specific
   dependencies: []
+
+secret_detection:
+  extends:
+    - .default-retry
+    - .reports:rules:sast
+  needs: []
+  artifacts:
+    paths:
+      - gl-secret-detection-report.json  # GitLab-specific
+    reports:
+      sast: gl-secret-detection-report.json
+    expire_in: 1 week  # GitLab-specific

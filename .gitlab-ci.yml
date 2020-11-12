@@ -66,7 +66,6 @@ variables:
   ELASTIC_URL: "http://elastic:changeme@elasticsearch:9200"
   DOCKER_VERSION: "19.03.0"
   CACHE_CLASSES: "true"
-  SECRET_DETECTION_EXCLUDED_PATHS: "doc,rubocop,spec"
 
   # Preparing custom clone path to reduce space used by all random forks
   # on GitLab.com's Shared Runners. Our main forks - especially the security
@@ -110,4 +109,3 @@ include:
   - local: .gitlab/ci/releases.gitlab-ci.yml
   - local: .gitlab/ci/notify.gitlab-ci.yml
   - local: .gitlab/ci/dast.gitlab-ci.yml
-  - template: Secret-Detection.gitlab-ci.yml
