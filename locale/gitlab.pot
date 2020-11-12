@@ -9436,7 +9436,31 @@ msgstr ""
 msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
+msgid "DevopsAdoption|Approvals"
+msgstr ""
+
+msgid "DevopsAdoption|Deploys"
+msgstr ""
+
 msgid "DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
+msgstr ""
+
+msgid "DevopsAdoption|Issues"
+msgstr ""
+
+msgid "DevopsAdoption|MRs"
+msgstr ""
+
+msgid "DevopsAdoption|Pipelines"
+msgstr ""
+
+msgid "DevopsAdoption|Runners"
+msgstr ""
+
+msgid "DevopsAdoption|Scanning"
+msgstr ""
+
+msgid "DevopsAdoption|Segment"
 msgstr ""
 
 msgid "DevopsReport|Adoption"
