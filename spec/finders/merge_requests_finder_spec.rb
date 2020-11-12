@@ -373,29 +373,51 @@ RSpec.describe MergeRequestsFinder do
         it_behaves_like 'any assignee filter' do
           let(:expected_issuables) { [merge_request1, merge_request2, merge_request3] }
         end
+      end
 
-        context 'with just reviewers' do
-          it_behaves_like 'assignee username filter' do
-            before do
-              merge_request4.reviewers = [user3]
-              merge_request4.assignees = []
-            end
+      context 'reviewer filtering' do
+        subject(:issuables) { described_class.new(user, params).execute }
 
-            let(:params) { { assignee_username: [user3.username] } }
-            let(:expected_issuables) { [merge_request4] }
-          end
+        context 'reviewer ID filter' do
+          let(:params) { { reviewer_id: user2.id } }
+          let(:expected_issuables) { [merge_request1, merge_request2] }
+
+          it { is_expected.to contain_exactly(*expected_issuables) }
         end
 
-        context 'with an additional reviewer' do
-          it_behaves_like 'assignee username filter' do
-            before do
-              merge_request3.assignees = [user3]
-              merge_request4.reviewers = [user3]
-            end
+        context 'reviewer NOT ID filter' do
+          let(:params) { { not: { reviewer_id: user2.id } } }
+          let(:expected_issuables) { [merge_request3, merge_request4, merge_request5] }
 
-            let(:params) { { assignee_username: [user3.username] } }
-            let(:expected_issuables) { [merge_request3, merge_request4] }
-          end
+          it { is_expected.to contain_exactly(*expected_issuables) }
+        end
+
+        context 'reviewer username filter' do
+          let(:params) { { reviewer_username: [user2.username] } }
+          let(:expected_issuables) { [merge_request1, merge_request2] }
+
+          it { is_expected.to contain_exactly(*expected_issuables) }
+        end
+
+        context 'reviewer NOT username filter' do
+          let(:params) { { not: { reviewer_username: [user.username, user2.username] } } }
+          let(:expected_issuables) { [merge_request4, merge_request5] }
+
+          it { is_expected.to contain_exactly(*expected_issuables) }
+        end
+
+        context 'no reviewer filter' do
+          let(:params) { { reviewer_id: 'None' } }
+          let(:expected_issuables) { [merge_request4, merge_request5] }
+
+          it { is_expected.to contain_exactly(*expected_issuables) }
+        end
+
+        context 'any reviewer filter' do
+          let(:params) { { reviewer_id: 'Any' } }
+          let(:expected_issuables) { [merge_request1, merge_request2, merge_request3] }
+
+          it { is_expected.to contain_exactly(*expected_issuables) }
         end
       end
 
@@ -596,6 +618,7 @@ RSpec.describe MergeRequestsFinder do
           state: 'opened',
           author_username: user.username,
           assignee_username: user.username,
+          reviewer_username: user.username,
           approver_usernames: [user.username],
           approved_by_usernames: [user.username],
           milestone_title: 'none',
