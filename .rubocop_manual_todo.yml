@@ -779,3 +779,4 @@ RSpec/TimecopTravel:
     - 'spec/support/shared_examples/workers/concerns/reenqueuer_shared_examples.rb'
     - 'spec/workers/concerns/reenqueuer_spec.rb'
     - 'spec/lib/gitlab/analytics/cycle_analytics/median_spec.rb'
+
