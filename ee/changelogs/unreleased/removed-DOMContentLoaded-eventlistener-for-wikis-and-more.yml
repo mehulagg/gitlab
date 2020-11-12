@@ -1,0 +1,5 @@
+---
+title: Removed DOMContentLoaded Eventlistener
+merge_request: 47550
+author:
+type: changed
