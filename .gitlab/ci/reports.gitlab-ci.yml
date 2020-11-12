@@ -191,5 +191,5 @@ license_scanning:
     paths:
       - gl-secret-detection-report.json  # GitLab-specific
     reports:
-      sast: gl-secret-detection-report.json
+      secret_detection: gl-secret-detection-report.json
     expire_in: 1 week  # GitLab-specific
