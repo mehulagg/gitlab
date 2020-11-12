@@ -51,6 +51,8 @@ module Gitlab::Throttle
 end
 
 class Rack::Attack
+  prepend Rack::DryRunThrottle
+
   # Order conditions by how expensive they are:
   # 1. The most expensive is the `req.unauthenticated?` and
   #    `req.authenticated_user_id` as it performs an expensive
@@ -184,6 +186,27 @@ class Rack::Attack
     def protected_paths_regex
       Regexp.union(protected_paths.map { |path| /\A#{Regexp.escape(path)}/ })
     end
+  end
+end
+
+module Rack::DryRunThrottle
+  def self.throttle(name, *args)
+    if dry_run?(name)
+      track(name, *args)
+    else
+      super
+    end
+  end
+
+  def self.dry_run?(name)
+    config = ENV['GITLAB_THROTTLE_DRY_RUN'].to_s.strip
+    return false unless config.present?
+
+    raise "invalid throttle name: #{name}" if name.include?(',')
+
+    return true if config == '*'
+
+    config.split(',').include?(name)
   end
 end
 
