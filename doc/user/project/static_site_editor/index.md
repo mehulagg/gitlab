@@ -10,7 +10,7 @@ description: "The static site editor enables users to edit content on static web
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28758) in GitLab 12.10.
 > - WYSIWYG editor [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214559) in GitLab 13.0.
-> - Non-Markdown content blocks uneditable on the WYSIWYG mode [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216836) in GitLab 13.3.
+> - Non-Markdown content blocks are not editable on the WYSIWYG mode [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216836) in GitLab 13.3.
 
 Static Site Editor (SSE) enables users to edit content on static websites without
 prior knowledge of the underlying templating language, site architecture, or
@@ -66,10 +66,12 @@ easily [edit your content](#edit-content).
 1. To get started, create a new project from the [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman)
    template. You can either [fork it](../repository/forking_workflow.md#creating-a-fork)
    or [create a new project from a template](../../../gitlab-basics/create-project.md#built-in-templates).
-1. Edit the [`data/config.yml`](#configuration-files) configuration file
+1. Edit the [`data/config.yml`](#static-site-generator-configuration) configuration file
    to replace `<username>` and `<project-name>` with the proper values for
-   your project's path. This triggers a CI/CD pipeline to deploy your project
-   with GitLab Pages.
+   your project's path. See ["Static Site Generator configuration"](#static-site-generator-configuration) for more details.
+1. (Optional) Edit the [`.gitlab/static-site-editor.yml`](#static-site-editor-configuration-file) file.
+   See ["Static Site Editor configuration file"](#static-site-editor-configuration-file) for more details.
+1. Committing the edits to these files triggers a CI/CD pipeline to deploy your project with GitLab Pages.
 1. When the pipeline finishes, from your project's left-side menu, go to **Settings > Pages** to find the URL of your new website.
 1. Visit your website and look at the bottom-left corner of the screen to see the new **Edit this page** button.
 
@@ -152,6 +154,42 @@ Note that support for adding new attributes to the page's front matter from the 
 yet. You can do so by editing the file locally, through the GitLab regular file editor, or through the Web IDE. Once added, the form will load the new fields.
 
 ## Configuration files
+
+You can customize the behavior of a project which uses the Static Site Editor with
+the following configuration files:
+
+- The `.gitlab/static-site-editor.yml` customizes the behavior of the Static Site Editor.
+- Static Site Generator configuration files, such as `data/config.yml`, customize
+  the behavior of the project itself. It controls the **Edit this page** button when
+  the site is generated.
+
+### Static Site Editor configuration file
+
+The `.gitlab/static-site-editor.yml` configuration file contains entries you can
+use to customize behavior of the Static Site Editor. If the file does not exist
+default values which support a default Middleman project configuration are used.
+The [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman) project template generates a file pre-populated with these defaults.
+
+The following entries are supported in `.gitlab/static-site-editor.yml`:
+
+#### `image_upload_path`
+
+This indicates the path in which newly uploaded image files are placed.
+
+- **Type** - String.
+- **Supported values** - Any path relative to the root of the project. Don't include
+  leading or trailing slashes.
+- **Default value** - `source/images`
+
+Example:
+
+```yaml
+image_upload_path: source/images
+```
+
+### Static Site Generator configuration
+
+#### `data/config.yml`
 
 The Static Site Editor uses Middleman's configuration file, `data/config.yml`
 to customize the behavior of the project itself and to control the **Edit this
