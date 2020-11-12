@@ -151,7 +151,8 @@ module EE
         field :incident_management_oncall_schedules,
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,
-              description: 'Incident Management On-call schedules of the project'
+              description: 'Incident Management On-call schedules of the project',
+              resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         def self.sast_ci_configuration(project)
           ::Security::CiConfiguration::SastParserService.new(project).configuration
