@@ -223,7 +223,7 @@ export default {
             />
           </div>
 
-          <gl-alert v-if="shouldRenderHeaderCallout" :dismissible="false">
+          <gl-alert v-if="shouldRenderHeaderCallout" variant="danger" class="gl-mt-3" :dismissible="false">
             <div v-safe-html="job.callout_message"></div>
           </gl-alert>
         </header>
