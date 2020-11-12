@@ -1209,8 +1209,6 @@ RSpec.describe GroupPolicy do
 
   it_behaves_like 'update namespace limit policy'
 
-  include_examples 'analytics report embedding'
-
   context 'group access tokens' do
     it_behaves_like 'GitLab.com Core resource access tokens'
 

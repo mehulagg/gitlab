@@ -1403,8 +1403,6 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  include_examples 'analytics report embedding'
-
   context 'project access tokens' do
     it_behaves_like 'GitLab.com Core resource access tokens'
 

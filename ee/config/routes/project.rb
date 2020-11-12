@@ -132,7 +132,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       resource :insights, only: [:show], trailing_slash: true do
         collection do
           post :query
-          get :embedded
         end
       end
       # All new routes should go under /-/ scope.
