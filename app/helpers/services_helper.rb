@@ -75,6 +75,14 @@ module ServicesHelper
     end
   end
 
+  def scoped_reset_integration_path(integration)
+    if @group.present?
+      reset_group_settings_integration_path(@group, integration)
+    else
+      reset_admin_application_settings_integration_path(integration)
+    end
+  end
+
   def integration_form_data(integration)
     {
       id: integration.id,
@@ -94,7 +102,7 @@ module ServicesHelper
       cancel_path: scoped_integrations_path,
       can_test: integration.can_test?.to_s,
       test_path: scoped_test_integration_path(integration),
-      reset_path: ''
+      reset_path: scoped_reset_integration_path(integration)
     }
   end
 

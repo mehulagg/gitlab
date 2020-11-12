@@ -126,6 +126,7 @@ namespace :admin do
     resources :integrations, only: [:edit, :update] do
       member do
         put :test
+        post :reset
       end
     end
 

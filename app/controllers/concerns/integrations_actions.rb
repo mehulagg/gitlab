@@ -43,6 +43,10 @@ module IntegrationsActions
     render json: {}, status: :ok
   end
 
+  def reset
+    render json: {}, status: :ok
+  end
+
   private
 
   def integrations_enabled?
