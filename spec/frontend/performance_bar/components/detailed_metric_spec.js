@@ -114,17 +114,19 @@ describe('detailedMetric', () => {
         // Each block click on a new trace and assert that the correct
         // count is open and that the content is what we expect to ensure
         // we opened or closed the right one
+        const secondExpandButton = findExpandedBacktraceBtnAtIndex(1);
+
         findExpandedBacktraceBtnAtIndex(0).vm.$emit('click');
         await nextTick();
         expect(findAllTraceBlocks()).toHaveLength(1);
         expect(findTraceBlockAtIndex(0).text()).toContain(requestDetails[0].backtrace[0]);
 
-        findExpandedBacktraceBtnAtIndex(1).vm.$emit('click');
+        secondExpandButton.vm.$emit('click');
         await nextTick();
         expect(findAllTraceBlocks()).toHaveLength(2);
         expect(findTraceBlockAtIndex(1).text()).toContain(requestDetails[1].backtrace[0]);
 
-        findExpandedBacktraceBtnAtIndex(1).vm.$emit('click');
+        secondExpandButton.vm.$emit('click');
         await nextTick();
         expect(findAllTraceBlocks()).toHaveLength(1);
         expect(findTraceBlockAtIndex(0).text()).toContain(requestDetails[0].backtrace[0]);
