@@ -26,6 +26,8 @@ class BulkImports::Entity < ApplicationRecord
   belongs_to :project, optional: true
   belongs_to :group, foreign_key: :namespace_id, optional: true
 
+  has_many :failures, class_name: 'BulkImports::Failure', inverse_of: :bulk_import_entity, foreign_key: :bulk_import_entity_id
+
   validates :project, absence: true, if: :group
   validates :group, absence: true, if: :project
   validates :source_type, :source_full_path, :destination_name,
