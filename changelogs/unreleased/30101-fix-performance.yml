@@ -1,0 +1,5 @@
+---
+title: Add reactive-cache to pipeline config variables
+merge_request: 47490
+author:
+type: performance
