@@ -75,7 +75,7 @@ Plans are underway for supporting the following languages, dependency managers, 
 | ------------------- | --------- | --------------- | ------------ |
 | [Pipenv](https://pipenv.pypa.io/en/latest/) | Python | `Pipfile.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#11756](https://gitlab.com/gitlab-org/gitlab/-/issues/11756) |
 | [Poetry](https://python-poetry.org/) | Python | `poetry.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#7006](https://gitlab.com/gitlab-org/gitlab/-/issues/7006) |
-| [sbt](https://www.scala-sbt.org/) 1.3+ ([Coursier](https://get-coursier.io/))| Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#249526](https://gitlab.com/gitlab-org/gitlab/-/issues/249526) |
+| [sbt](https://www.scala-sbt.org/) 1.3+ ([Coursier](https://get-coursier.io/))| Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#249526](https://gitlab.com/gitlab-org/gitlab/-/issues/271345) |
 
 ## Contribute your scanner
 
