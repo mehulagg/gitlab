@@ -40,7 +40,7 @@ To change the location where the uploads are stored locally, follow the steps
 below.
 
 NOTE: **Note:**
-For historical reasons, uploads are stored into a base directory, which by default is `uploads/-/system`. It is strongly discouraged to change base directory on an existing GitLab installation.
+For historical reasons, instance level uploads are stored into a base directory, which by default is `uploads/-/system`. It is strongly discouraged to change base directory on an existing GitLab installation.
 
 **In Omnibus installations:**
 
@@ -61,7 +61,7 @@ CAUTION: **Caution:**
 **In installations from source:**
 
 _The uploads are stored by default in
-`/home/git/gitlab/public/uploads/-/system`._
+`/home/git/gitlab/public/uploads`._
 
 1. To change the storage path for example to `/mnt/storage/uploads`, edit
    `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
@@ -111,7 +111,7 @@ See [the available connection settings for different providers](object_storage.m
 **In Omnibus installations:**
 
 _The uploads are stored by default in
-`/var/opt/gitlab/gitlab-rails/public/uploads`._
+`/var/opt/gitlab/gitlab-rails/uploads`._
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following lines by replacing with
    the values you want:
@@ -169,7 +169,7 @@ _The uploads are stored by default in
 **In Omnibus installations:**
 
 _The uploads are stored by default in
-`/var/opt/gitlab/gitlab-rails/public/uploads/-/system`._
+`/var/opt/gitlab/gitlab-rails/uploads`._
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following lines by replacing with
    the values you want:
@@ -195,7 +195,7 @@ _The uploads are stored by default in
 **In installations from source:**
 
 _The uploads are stored by default in
-`/home/git/gitlab/public/uploads/-/system`._
+`/home/git/gitlab/public/uploads`._
 
 1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following
    lines:
