@@ -49,7 +49,6 @@ class Projects::IssuesController < Projects::ApplicationController
 
   before_action only: :show do
     push_frontend_feature_flag(:issue_single_vue_app, @project)
-    push_frontend_feature_flag(:design_management_moved, @project)
 
     real_time_feature_flag = :real_time_issue_sidebar
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
