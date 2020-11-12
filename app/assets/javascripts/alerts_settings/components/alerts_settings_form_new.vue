@@ -67,6 +67,9 @@ export default {
         resetOk: s__('AlertSettings|Proceed with editing'),
         editPayload: s__('AlertSettings|Edit payload'),
         submitPayload: s__('AlertSettings|Submit payload'),
+        payloadParsedSucessMsg: s__(
+          'AlertSettings|Sample payload has been parsed. You can now map the fields.',
+        ),
       },
       step5: {
         label: s__('AlertSettings|5. Map fields (optional)'),
@@ -291,6 +294,10 @@ export default {
           this.customMapping = res;
           this.integrationTestPayload.json = res?.samplePayload.body;
           this.resetSamplePayloadConfirmed = false;
+
+          this.$toast.show(this.$options.i18n.integrationFormSteps.step4.payloadParsedSucessMsg, {
+            position: 'top-center',
+          });
         })
         .finally(() => {
           this.parsingPayload = false;

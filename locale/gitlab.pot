@@ -2601,6 +2601,9 @@ msgstr ""
 msgid "AlertSettings|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
 msgstr ""
 
+msgid "AlertSettings|Sample payload has been parsed. You can now map the fields."
+msgstr ""
+
 msgid "AlertSettings|Save and test payload"
 msgstr ""
 

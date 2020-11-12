@@ -8,12 +8,14 @@ import {
   GlFormTextarea,
   GlButton,
 } from '@gitlab/ui';
+import waitForPromises from 'helpers/wait_for_promises';
 import AlertsSettingsForm from '~/alerts_settings/components/alerts_settings_form_new.vue';
 import { defaultAlertSettingsConfig } from './util';
 import { typeSet } from '~/alerts_settings/constants';
 
 describe('AlertsSettingsFormNew', () => {
   let wrapper;
+  const mockToastShow = jest.fn();
 
   const createComponent = ({
     data = {},
@@ -32,6 +34,11 @@ describe('AlertsSettingsFormNew', () => {
       provide: {
         glFeatures: { multipleHttpIntegrationsCustomMapping },
         ...defaultAlertSettingsConfig,
+      },
+      mocks: {
+        $toast: {
+          show: mockToastShow,
+        },
       },
     });
   };
@@ -312,6 +319,30 @@ describe('AlertsSettingsFormNew', () => {
               .text(),
           ).toBe(caption);
         });
+      });
+    });
+
+    describe('Parsing payload', () => {
+      it('displays a toast message on successful parse', async () => {
+        jest.useFakeTimers();
+        wrapper.setData({
+          selectedIntegration: typeSet.http,
+          customMapping: { samplePayload: false },
+        });
+        await wrapper.vm.$nextTick();
+        findTestPayloadSection()
+          .find(GlButton)
+          .vm.$emit('click');
+        jest.advanceTimersByTime(1000);
+
+        await waitForPromises();
+
+        expect(mockToastShow).toHaveBeenCalledWith(
+          'Sample payload has been parsed. You can now map the fields.',
+          {
+            position: 'top-center',
+          },
+        );
       });
     });
   });

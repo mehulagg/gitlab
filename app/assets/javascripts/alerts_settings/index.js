@@ -1,10 +1,12 @@
 import Vue from 'vue';
+import { GlToast } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
 
 Vue.use(VueApollo);
+Vue.use(GlToast);
 
 export default el => {
   if (!el) {
