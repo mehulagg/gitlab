@@ -786,6 +786,7 @@ Shows information about the merge request including its files and changes.
 ```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/changes
 ```
+
 NOTE: **Note:**
 Starting in GitLab 13.6, diffs associated with the set of changes will have the same size limitations applied as other diffs returned by the API or viewed via the UI. When this occurs, the `overflow` field will contain a value of `true`. Diff data without these limits applied can be retrieved by adding the `access_raw_diffs` parameter, however it will be slower and more resource intensive.
 
@@ -793,7 +794,8 @@ Parameters:
 
 - `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
 - `merge_request_iid` (required) - The internal ID of the merge request
-= `access_raw_diffs` (optional) - Retrieve change diffs without size limitations.
+- `access_raw_diffs` (optional) - Retrieve change diffs without size limitations.
+
 ```json
 {
   "id": 21,
