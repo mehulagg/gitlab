@@ -21,7 +21,7 @@
   - selected.each do |label|
     = hidden_field_tag data_options[:field_name], use_id ? label.try(:id) : label.try(:title), id: nil
 
-.dropdown
+.dropdown.js-applied-labels-parent
   %button.dropdown-menu-toggle.js-label-select.js-multiselect.qa-issuable-label{ class: classes.join(' '), type: "button", data: dropdown_data }
     - apply_is_default_styles = (selected.nil? || selected.empty?) && !no_default_styles
     %span.dropdown-toggle-text{ class: ("is-default" if apply_is_default_styles) }
@@ -32,4 +32,4 @@
     - if show_create && project && can?(current_user, :admin_label, project)
       = render partial: "shared/issuable/label_page_create"
     = dropdown_loading
-  #js-applied-labelsg
+  .js-applied-labels
