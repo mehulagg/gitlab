@@ -93,7 +93,7 @@ The chart used to install this application depends on the version of GitLab used
 - GitLab 12.3 and newer, the [`jetstack/cert-manager`](https://github.com/jetstack/cert-manager)
   chart is used with a [`values.yaml`](https://gitlab.com/gitlab-org/gitlab/blob/master/vendor/cert_manager/values.yaml)
   file.
-- GitLab 12.2 and older, the [`stable/cert-manager`](https://gi2wthub.com/helm/charts/tree/master/stable/cert-manager)
+- GitLab 12.2 and older, the [`stable/cert-manager`](https://github.com/helm/charts/tree/master/stable/cert-manager)
   chart was used.
 
 If you installed cert-manager prior to GitLab 12.3, Let's Encrypt
@@ -761,7 +761,7 @@ certManager:
 You can customize the installation of cert-manager by defining a
 `.gitlab/managed-apps/cert-manager/values.yaml` file in your cluster
 management project. Refer to the
-[chart](https://hub.helm.sh/charts/jetstack/cert-manager) for the
+[chart](https://artifacthub.io/charts/jetstack/cert-manager) for the
 available configuration options.
 
 Support for installing the Cert Manager managed application is provided by the
@@ -841,7 +841,7 @@ least 2 people from the
 
 ### Install PostHog using GitLab CI/CD
 
-[PostHog](https://www.posthog.com) 🦔 is a developer-friendly, open-source product analytics platform.
+[PostHog](https://posthog.com) 🦔 is a developer-friendly, open-source product analytics platform.
 
 To install PostHog into the `gitlab-managed-apps` namespace of your cluster,
 define the `.gitlab/managed-apps/config.yaml` file with:
