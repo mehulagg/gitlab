@@ -14906,8 +14906,7 @@ type Project {
   ): ClusterAgentConnection
 
   """
-  Code coverages summary associated with the project. Available only when
-  feature flag `group_coverage_data_report` is enabled
+  Code coverages summary associated with the project.
   """
   codeCoverageSummary: CodeCoverageSummary
 
