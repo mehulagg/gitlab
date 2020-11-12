@@ -9,7 +9,6 @@ module IncidentManagement
 
     NAME_LENGTH = 200
     DESCRIPTION_LENGTH = 1000
-    TIMEZONE_LENGTH = 100
 
     belongs_to :project, inverse_of: :incident_management_oncall_schedules
 
@@ -17,6 +16,12 @@ module IncidentManagement
 
     validates :name, presence: true, length: { maximum: NAME_LENGTH }
     validates :description, length: { maximum: DESCRIPTION_LENGTH }
-    validates :timezone, presence: true, length: { maximum: TIMEZONE_LENGTH }
+    validates :timezone, presence: true, inclusion: { in: :timezones }
+
+    private
+
+    def timezones
+      @timezones ||= ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.identifier }
+    end
   end
 end
