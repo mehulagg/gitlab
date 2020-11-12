@@ -165,16 +165,14 @@ in GCP/AWS/Azure columns of each [available reference architecture](#available-r
 
 Running components on Docker (including Compose) with the same specs should be fine, as in
 terms of support, Docker is well known, and there's been no evidence that Docker
-itself needs notable additional specs.
+itself needs notable additional specs. Although note that this is
+still an additional layer and may still add some support complexities.
+Such as not being able to run `strace` as it generally doesn't run
+in Docker.
 
 Other technologies, like [Docker swarm](https://docs.docker.com/engine/swarm/)
 are not officially supported, but can be implemented at your own risk. In that
 case, GitLab Support will not be able to help you.
-
-In general, with any deviation, you're introducing a layer of complexity that will
-add challenges to finding out where potential performance issues might lie. Also,
-you may be inadvertently blocking Support's ability to use standard tooling to
-diagnose those issues (`strace` for example doesn't generally run in Docker).
 
 ### Configuring select components with Cloud Native Helm
 
