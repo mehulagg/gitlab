@@ -80,6 +80,7 @@ codebase.
 ## Edit content
 
 > - Support for modifying the default merge request title and description [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216861) in GitLab 13.5.
+> - Support for selecting a merge request template [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263252) in GitLab 13.6.
 
 After setting up your project, you can start editing content directly from the Static Site Editor.
 
@@ -92,6 +93,8 @@ To edit a file:
    in the bottom-right corner.
 1. When you're done, click **Submit changes...**.
 1. (Optional) Adjust the default title and description of the merge request that will be submitted with your changes.
+   1. If you have created [Merge Request Templates](../../../user/project/description_templates.html#creating-merge-request-templates)
+      for your project, there will be a dropdown which allows you to select a template.
 1. Click **Submit changes**.
 1. A new merge request is automatically created and you can assign a colleague for review.
 
