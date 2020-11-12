@@ -345,6 +345,7 @@ class MergeRequest < ApplicationRecord
                   .project('true')
                   .where(reviewers_table[:user_id].in(users))
                   .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+
     where(inner_sql.exists.not)
   end
 
