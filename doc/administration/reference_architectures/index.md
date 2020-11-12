@@ -151,12 +151,14 @@ is recommended.
 instance to other geographical locations as a read-only fully operational instance
 that can also be promoted in case of disaster.
 
-## Deviating from the suggested architectures
+## Deviating from the suggested reference architectures
+
 As a general rule of thumb the further away you move from the Reference Architectures
 the harder it will be get support for it. With any deviation, you're introducing
 a layer of complexity that will add challenges to finding out where potential
 issues might lie. This includes both environmental makeup as well as installation
 method.
+
 The reference architectures use the official GitLab Linux packages (Omnibus
 GitLab) to install and configure the various components. The components are
 installed on separate machines (virtualized or bare metal), with machine hardware
