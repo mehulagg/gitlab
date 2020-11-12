@@ -41,7 +41,7 @@ The Dependency Proxy is not available for projects.
 
 ## Use the Dependency Proxy for Docker images
 
-NOTE:Note There is a known issue in which container images are not pulled correctly from the cache. [gitlab-#](https://gitlab.com/gitlab-org/gitlab/-/issues/208080) will resolve this issue.
+NOTE:Note There is a known issue in which container images are not pulled correctly from the cache when using certain storage configurations. [gitlab-#](https://gitlab.com/gitlab-org/gitlab/-/issues/208080) will resolve this issue.
 
 You can use GitLab as a source for your Docker images.
 
