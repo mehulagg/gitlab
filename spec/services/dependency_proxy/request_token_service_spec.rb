@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe DependencyProxy::RequestTokenService do
-  include EE::DependencyProxyHelpers
+  include DependencyProxyHelpers
 
   let(:image) { 'alpine:3.9' }
   let(:token) { Digest::SHA256.hexdigest('123') }

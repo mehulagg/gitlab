@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import initDependencyProxy from 'ee/dependency_proxy';
+import initDependencyProxy from '~/dependency_proxy';
 
 document.addEventListener('DOMContentLoaded', () => {
   initDependencyProxy();

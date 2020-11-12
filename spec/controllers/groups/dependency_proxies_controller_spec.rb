@@ -26,6 +26,8 @@ RSpec.describe Groups::DependencyProxiesController do
     end
 
     it 'returns 404 when feature is disabled' do
+      disable_dependency_proxy
+
       get :show, params: { group_id: group.to_param }
 
       expect(response).to have_gitlab_http_status(:not_found)
@@ -60,9 +62,12 @@ RSpec.describe Groups::DependencyProxiesController do
   end
 
   def enable_dependency_proxy
-    allow(Gitlab.config.dependency_proxy)
-      .to receive(:enabled).and_return(true)
+    stub_config(dependency_proxy: { enabled: true })
 
-    stub_licensed_features(dependency_proxy: true)
+    group.create_dependency_proxy_setting!(enabled: true)
+  end
+
+  def disable_dependency_proxy
+    group.create_dependency_proxy_setting!(enabled: false)
   end
 end

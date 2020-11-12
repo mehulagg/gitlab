@@ -5,14 +5,14 @@ require 'spec_helper'
 RSpec.describe PurgeDependencyProxyCacheWorker do
   let_it_be(:user) { create(:admin) }
   let_it_be(:blob) { create(:dependency_proxy_blob )}
-  let_it_be(:group) { blob.group }
+  let_it_be(:group, reload: true) { blob.group }
   let_it_be(:group_id) { group.id }
 
   subject { described_class.new.perform(user.id, group_id) }
 
   before do
     stub_config(dependency_proxy: { enabled: true })
-    stub_licensed_features(dependency_proxy: true)
+    group.create_dependency_proxy_setting!(enabled: true)
   end
 
   describe '#perform' do

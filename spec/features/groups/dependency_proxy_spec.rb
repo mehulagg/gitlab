@@ -13,7 +13,6 @@ RSpec.describe 'Group Dependency Proxy' do
     group.add_reporter(reporter)
 
     enable_feature
-    stub_licensed_features(dependency_proxy: true)
   end
 
   describe 'feature settings' do
@@ -90,16 +89,6 @@ RSpec.describe 'Group Dependency Proxy' do
         end
       end
 
-      context 'feature is not supported by the license' do
-        it 'renders 404 page' do
-          stub_licensed_features(dependency_proxy: false)
-
-          visit path
-
-          expect(page).to have_gitlab_http_status(:not_found)
-        end
-      end
-
       context 'feature is disabled globally' do
         it 'renders 404 page' do
           disable_feature
@@ -113,10 +102,10 @@ RSpec.describe 'Group Dependency Proxy' do
   end
 
   def enable_feature
-    allow(Gitlab.config.dependency_proxy).to receive(:enabled).and_return(true)
+    stub_config(dependency_proxy: { enabled: true })
   end
 
   def disable_feature
-    allow(Gitlab.config.dependency_proxy).to receive(:enabled).and_return(false)
+    stub_config(dependency_proxy: { enabled: false })
   end
 end

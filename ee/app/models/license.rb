@@ -69,7 +69,6 @@ class License < ApplicationRecord
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
-    dependency_proxy
     deploy_board
     disable_name_update_for_users
     email_additional_text

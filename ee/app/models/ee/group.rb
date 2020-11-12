@@ -30,9 +30,6 @@ module EE
       has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
 
-      has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
-      has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
-
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
       # We cannot simply set `has_many :audit_events, as: :entity, dependent: :destroy`
@@ -314,10 +311,6 @@ module EE
           billed_invited_group_to_project_members.distinct.pluck(:user_id)).to_set
         end
       end
-    end
-
-    def dependency_proxy_feature_available?
-      ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
     end
 
     override :supports_events?

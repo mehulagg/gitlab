@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+a# frozen_string_literal: true
 
 module NavbarStructureHelper
   def insert_after_nav_item(before_nav_item_name, new_nav_item:)
@@ -34,6 +34,14 @@ module NavbarStructureHelper
       _('Package Registry'),
       within: _('Packages & Registries'),
       new_sub_nav_item_name: _('Container Registry')
+    )
+  end
+
+  def insert_dependency_proxy_nav(within)
+    insert_after_sub_nav_item(
+      _('Package Registry'),
+      within: _('Packages & Registries'),
+      new_sub_nav_item_name: _('Dependency Proxy')
     )
   end
 end

@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe DependencyProxy::DownloadBlobService do
-  include EE::DependencyProxyHelpers
+  include DependencyProxyHelpers
 
   let(:image) { 'alpine' }
   let(:token) { Digest::SHA256.hexdigest('123') }

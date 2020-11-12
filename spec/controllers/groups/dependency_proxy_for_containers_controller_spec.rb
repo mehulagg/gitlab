@@ -6,6 +6,20 @@ RSpec.describe Groups::DependencyProxyForContainersController do
   let(:group) { create(:group) }
   let(:token_response) { { status: :success, token: 'abcd1234' } }
 
+  shared_examples 'not found when disabled' do
+    context 'feature disabled' do
+      before do
+        disable_dependency_proxy
+      end
+
+      it 'returns 404' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
   before do
     allow(Gitlab.config.dependency_proxy)
       .to receive(:enabled).and_return(true)
@@ -72,11 +86,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
       end
     end
 
-    it 'returns 404 when feature is disabled' do
-      get_manifest
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
+    it_behaves_like 'not found when disabled'
 
     def get_manifest
       get :manifest, params: { group_id: group.to_param, image: 'alpine', tag: '3.9.2' }
@@ -130,11 +140,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
       end
     end
 
-    it 'returns 404 when feature is disabled' do
-      get_blob
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
+    it_behaves_like 'not found when disabled'
 
     def get_blob
       get :blob, params: { group_id: group.to_param, image: 'alpine', sha: blob_sha }
@@ -142,7 +148,10 @@ RSpec.describe Groups::DependencyProxyForContainersController do
   end
 
   def enable_dependency_proxy
-    stub_licensed_features(dependency_proxy: true)
     group.create_dependency_proxy_setting!(enabled: true)
+  end
+
+  def disable_dependency_proxy
+    group.create_dependency_proxy_setting!(enabled: false)
   end
 end

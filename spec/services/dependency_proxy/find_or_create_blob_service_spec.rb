@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe DependencyProxy::FindOrCreateBlobService do
-  include EE::DependencyProxyHelpers
+  include DependencyProxyHelpers
 
   let(:blob)  { create(:dependency_proxy_blob) }
   let(:group) { blob.group }

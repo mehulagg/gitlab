@@ -193,6 +193,12 @@ class GroupPolicy < BasePolicy
     enable :read_group
   end
 
+  rule { can?(:read_group) }
+    .enable :read_dependency_proxy
+
+  rule { developer }
+    .enable :admin_dependency_proxy
+
   rule { resource_access_token_available & can?(:admin_group) }.policy do
     enable :admin_resource_access_tokens
   end
