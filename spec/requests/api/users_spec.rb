@@ -2510,6 +2510,100 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
     end
   end
 
+  context 'approve pending user' do
+    shared_examples '404' do
+      it 'returns 404' do
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 User Not Found')
+      end
+    end
+
+    describe 'POST /users/:id/approve' do
+      subject(:approve) { post api("/users/#{user_id}/approve", api_user) }
+
+      let(:pending_user) { create(:user, :blocked_pending_approval) }
+      let(:user_id) { pending_user.id }
+
+      context 'performed by a non-admin user' do
+        let(:api_user) { user }
+
+        it 'is not authorized to perform the action' do
+          approve
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'performed by an admin user' do
+        let(:api_user) { admin }
+
+        context 'for a deactivated user' do
+          before do
+            user.deactivate
+          end
+
+          it 'activates a deactivated user' do
+            approve
+
+            expect(response).to have_gitlab_http_status(:created)
+            expect(user.reload.state).to eq('active')
+          end
+        end
+
+        context 'for an active user' do
+          before do
+            user.activate
+          end
+
+          it 'returns 201' do
+            approve
+
+            expect(response).to have_gitlab_http_status(:created)
+            expect(user.reload.state).to eq('active')
+          end
+        end
+
+        context 'for a blocked user' do
+          before do
+            user.block
+          end
+
+          it 'returns 403' do
+            approve
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+            expect(json_response['message']).to eq('403 Forbidden  - A blocked user must be unblocked to be approved')
+            expect(user.reload.state).to eq('blocked')
+          end
+        end
+
+        context 'for a ldap blocked user' do
+          before do
+            user.ldap_block
+          end
+
+          it 'returns 403' do
+            approve
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+            expect(json_response['message']).to eq('403 Forbidden  - A blocked user must be unblocked to be approved')
+            expect(user.reload.state).to eq('ldap_blocked')
+          end
+        end
+
+        context 'for a user that does not exist' do
+          let(:user_id) { 0 }
+
+          before do
+            approve
+          end
+
+          it_behaves_like '404'
+        end
+      end
+    end
+  end
+
   describe 'POST /users/:id/block' do
     let(:blocked_user) { create(:user, state: 'blocked') }
 

@@ -1337,6 +1337,30 @@ Example response:
 ]
 ```
 
+## Approve user
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263107) in GitLab 13.6.
+
+Approves the specified user. Available only for admin.
+
+```plaintext
+POST /users/:id/approve
+```
+
+Parameters:
+
+- `id` (required) - ID of specified user
+
+Returns:
+
+- `201 OK` on success.
+- `404 User Not Found` if user cannot be found.
+- `403 Forbidden` when trying to activate a user blocked by admin or by LDAP synchronization.
+
+## Get user contribution events
+
+Please refer to the [Events API documentation](events.md#get-user-contribution-events)
+
 ## Get an impersonation token of a user
 
 > Requires admin permissions.

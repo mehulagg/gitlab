@@ -534,6 +534,20 @@ module API
 
         user.activate
       end
+
+      desc 'Approve a pending user. Available only for admins.'
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+      end
+      post ':id/approve', feature_category: :authentication_and_authorization do
+        authenticated_as_admin!
+
+        user = User.find_by(id: params[:id])
+        not_found!('User') unless user
+
+        ::Users::ApproveService.new(current_user).execute(user)
+      end
+
       # rubocop: enable CodeReuse/ActiveRecord
       desc 'Deactivate an active user. Available only for admins.'
       params do
