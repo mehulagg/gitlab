@@ -193,6 +193,7 @@ module API
       params do
         optional :name, type: String, desc: 'The name of the group'
         optional :path, type: String, desc: 'The path of the group'
+        optional :avatar, type: File, desc: 'Avatar image for user' # rubocop:disable Scalability/FileUploads
         use :optional_params
         use :optional_update_params_ee
       end
