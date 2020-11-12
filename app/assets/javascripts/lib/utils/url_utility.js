@@ -12,7 +12,7 @@ function resetRegExp(regex) {
 
 // Returns a decoded url parameter value
 // - Treats '+' as '%20'
-function decodeUrlParameter(val) {
+export function decodeUrlParameter(val) {
   return decodeURIComponent(val.replace(/\+/g, '%20'));
 }
 
