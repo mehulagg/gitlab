@@ -30,7 +30,7 @@ The list displays the integration name, type, and status (enabled or disabled):
 GitLab can receive alerts via a [HTTP endpoint](#generic-http-endpoint) that you configure,
 or the [Prometheus integration](#external-prometheus-integration).
 
-### Generic HTTP Endpoint **CORE**
+### Generic HTTP Endpoint **(CORE)**
 
 Enabling the Generic HTTP Endpoint activates a unique HTTP endpoint that can
 receive alert payloads in JSON format. You can always
@@ -43,7 +43,7 @@ receive alert payloads in JSON format. You can always
 1. Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
    for the webhook configuration.
 
-### HTTP Endpoints **PREMIUM**
+### HTTP Endpoints **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4442) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
 
