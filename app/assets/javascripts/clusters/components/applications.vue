@@ -274,7 +274,7 @@ export default {
                     }}</gl-link>
                   </template>
                 </gl-sprintf>
-              </strong>
+              </span>
             </gl-alert>
           </template>
         </template>
