@@ -1,1 +1,17 @@
-{"__schema":{"types":[{"kind":"UNION","name":"VulnerabilityLocation","possibleTypes":[{"name":"VulnerabilityLocationContainerScanning"},{"name":"VulnerabilityLocationDast"},{"name":"VulnerabilityLocationDependencyScanning"},{"name":"VulnerabilityLocationSast"},{"name":"VulnerabilityLocationSecretDetection"}]}]}}
+{
+  "__schema": {
+    "types": [
+      {
+        "kind": "UNION",
+        "name": "VulnerabilityLocation",
+        "possibleTypes": [
+          { "name": "VulnerabilityLocationContainerScanning" },
+          { "name": "VulnerabilityLocationDast" },
+          { "name": "VulnerabilityLocationDependencyScanning" },
+          { "name": "VulnerabilityLocationSast" },
+          { "name": "VulnerabilityLocationSecretDetection" }
+        ]
+      }
+    ]
+  }
+}
