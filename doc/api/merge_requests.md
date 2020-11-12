@@ -788,7 +788,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/changes
 ```
 
 NOTE: **Note:**
-Starting in GitLab 13.6, diffs associated with the set of changes will have the same size limitations applied as other diffs returned by the API or viewed via the UI. When this occurs, the `overflow` field will contain a value of `true`. Diff data without these limits applied can be retrieved by adding the `access_raw_diffs` parameter, however it will be slower and more resource intensive.
+Starting in GitLab 13.6, diffs associated with the set of changes will have the same size limitations applied as other diffs returned by the API or viewed via the UI. When these limits impact the results, the `overflow` field will contain a value of `true`. Diff data without these limits applied can be retrieved by adding the `access_raw_diffs` parameter, however it will be slower and more resource intensive.
 
 Parameters:
 
