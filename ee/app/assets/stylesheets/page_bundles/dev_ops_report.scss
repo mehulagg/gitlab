@@ -1,0 +1,10 @@
+@import '../../../../../app/assets/stylesheets/page_bundles/dev_ops_report';
+
+@include media-breakpoint-down(sm) {
+  .actions-cell {
+    div {
+      width: 100% !important;
+      text-align: center !important
+    }
+  }
+}

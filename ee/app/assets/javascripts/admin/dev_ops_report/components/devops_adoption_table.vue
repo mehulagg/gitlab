@@ -63,6 +63,7 @@ export default {
       key: 'actions',
       label: '',
       thClass,
+      tdClass: 'actions-cell',
       thAttr: TH_TEST_ID,
     },
   ],
