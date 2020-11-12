@@ -215,6 +215,7 @@ export default {
     <gl-alert
       v-if="canUserRotateToken"
       variant="danger"
+      class="gl-mb-5"
       :dismissible="false">
       {{ $options.translations.instanceIdRegenerateText }}
     </gl-alert>
