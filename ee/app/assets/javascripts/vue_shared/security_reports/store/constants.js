@@ -1,6 +1,4 @@
-export const LOADING = 'LOADING';
-export const ERROR = 'ERROR';
-export const SUCCESS = 'SUCCESS';
+export * from '~/vue_shared/security_reports/store/constants';
 
 /**
  * Tracks snowplow event when user views report details
