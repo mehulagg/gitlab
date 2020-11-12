@@ -1,11 +1,12 @@
 import * as types from './mutation_types';
+import { MODULE_SAST, MODULE_SECRET_DETECTION } from './constants';
 
 export const updateIssueActionsMap = {
-  sast: 'sast/updateVulnerability',
+  sast: `${MODULE_SAST}/updateVulnerability`,
   dependency_scanning: 'updateDependencyScanningIssue',
   container_scanning: 'updateContainerScanningIssue',
   dast: 'updateDastIssue',
-  secret_detection: 'secretDetection/updateVulnerability',
+  secret_detection: `${MODULE_SECRET_DETECTION}/updateVulnerability`,
   coverage_fuzzing: 'updateCoverageFuzzingIssue',
 };
 
