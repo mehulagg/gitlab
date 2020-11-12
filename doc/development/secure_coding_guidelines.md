@@ -508,6 +508,7 @@ This outputs `1` followed by the content of `/etc/passwd`.
 ## GitLab Internal Authorization
 
 ### Introduction
+
 There are some cases where `users` passed in the code is actually referring to a `DeployToken`/`DeployKey` entity instead of a real `User`, because of the code below in **/lib/api/api_guard.rb**
 
 ```ruby
