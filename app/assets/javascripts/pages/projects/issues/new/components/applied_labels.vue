@@ -1,45 +1,81 @@
 <script>
+import { GlLabel } from '@gitlab/ui';
+import axios from '~/lib/utils/axios_utils';
+
 export default {
+  components: {
+    GlLabel,
+  },
   props: {
-    // dom target to watch for changes
     targetParent: {
       type: Element,
       required: true,
     },
-    // preselected labels
     selectedLabels: {
       type: Array,
       required: false,
       default: () => [],
     },
-    // list of labels for this project
-    labels: {
-      type: Array,
+    labelsPath: {
+      type: String,
       required: true,
     },
   },
   data() {
     return {
+      labels: [],
       appliedLabels: this.selectedLabels,
     };
   },
-  methods: {},
+  destroy() {
+    this.targetParent.removeEventListener('click');
+  },
   mounted() {
-    console.log('Mounted::js-applied-labels');
-    console.log('Mounted::target', this.targetParent);
+    axios
+      .get(this.labelsPath)
+      .then(({ data }) => {
+        this.labels = data;
+      })
+      .catch(e => {
+        this.labels = [];
+      });
+
+    const ctx = this;
+    this.targetParent.addEventListener('click', ({ target }) => {
+      if (this.labels.length) {
+        if (target.classList.contains('label-item')) {
+          const { labelId } = target.dataset;
+          ctx.handleLabelSelect(parseInt(labelId, 10));
+        }
+      }
+    });
+  },
+  methods: {
+    isScoped({ title = '' }) {
+      return title.indexOf('::') > -1;
+    },
+    handleLabelSelect(labelId) {
+      const byLabel = item => item.id === labelId;
+      if (!this.appliedLabels.map(({ id }) => id).includes(byLabel)) {
+        const newLabel = this.labels.find(byLabel);
+        this.appliedLabels = [...this.appliedLabels, newLabel];
+      } else {
+        this.appliedLabels = this.appliedLabels.filter(l => l.id !== labelId);
+      }
+    },
   },
 };
 </script>
 <template>
-  <div class="issuable-show-labels">
+  <div v-if="appliedLabels.length" class="issuable-show-labels">
+    <span>{{ 'Applied labels: ' }}</span>
     <template v-for="label in appliedLabels">
       <gl-label
         :key="label.id"
-        :target="labelFilterUrl(label)"
         :background-color="label.color"
         :title="label.title"
         :description="label.description"
-        :scoped="showScopedLabels(label)"
+        :scoped="isScoped(label)"
       />
     </template>
   </div>

@@ -1,21 +1,14 @@
 import Vue from 'vue';
 import AppliedLabels from './components/applied_labels.vue';
 
-console.log('AppliedLabels');
 export default () => {
-  console.log('INITING');
   const targetEl = '.js-applied-labels';
   const parentEl = '.js-applied-labels-parent';
   const el = document.querySelector(targetEl);
 
-  const { labels = [], selectedLabels = [] } = el.dataset;
+  const { selectedLabels = [], labels: labelsPath } = el.dataset;
 
   const parent = el.closest(parentEl);
-
-  console.log('parentEl', parentEl);
-  console.log('targetEl', targetEl);
-  console.log('el', el);
-  console.log('parent', parent);
 
   if (el) {
     // Find the label dropdown we want to target
@@ -31,7 +24,7 @@ export default () => {
           props: {
             targetParent: parent,
             selectedLabels: selectedLabels.map(({ id }) => id),
-            labels,
+            labelsPath,
           },
         });
       },
