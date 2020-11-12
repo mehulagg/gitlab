@@ -120,8 +120,8 @@ RSpec.describe 'Dashboard Merge Requests' do
       expect(page).not_to have_content(labeled_merge_request.title)
     end
 
-    it 'shows review requested merge requests' do
-      expect(page).to have_content(review_requested_merge_request.title)
+    it 'does not show review requested merge requests' do
+      expect(page).not_to have_content(review_requested_merge_request.title)
     end
 
     it 'shows authored merge requests', :js do

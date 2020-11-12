@@ -62,12 +62,14 @@ class MergeRequestsFinder < IssuableFinder
     items = by_merged_at(items)
     items = by_approvals(items)
     items = by_deployments(items)
+    items = by_reviewer(items)
 
     by_source_project_id(items)
   end
 
   def filter_negated_items(items)
     items = super(items)
+    items = by_negated_reviewer(items)
     by_negated_target_branch(items)
   end
 
@@ -164,13 +166,6 @@ class MergeRequestsFinder < IssuableFinder
   end
   # rubocop: enable CodeReuse/Finder
 
-  # rubocop: disable CodeReuse/ActiveRecord
-  def items_assigned_to(items, user)
-    assignee_or_reviewer = MergeRequest.from_union([super, items.reviewer_assigned_to(user)])
-    items.where(id: assignee_or_reviewer)
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
-
   def by_deployments(items)
     env = params[:environment]
     before = params[:deployed_before]
@@ -192,6 +187,30 @@ class MergeRequestsFinder < IssuableFinder
     deploys = deploys.deployed_after(after) if after
 
     items.where_exists(deploys)
+  end
+
+  def by_reviewer(items)
+    if params.filter_by_no_reviewer?
+      items.no_review_requested
+    elsif params.filter_by_any_reviewer?
+      items.review_requested
+    elsif params.reviewer
+      items.review_requested_to(params.reviewer)
+    elsif params.reviewer_id? || params.reviewer_username?
+      items.none
+    else
+      items
+    end
+  end
+
+  def by_negated_reviewer(items)
+    if not_params.reviewers.present?
+      items.no_review_requested_to(not_params.reviewers)
+    elsif not_params.reviewer_id? || not_params.reviewer_username?
+      items.none
+    else
+      items
+    end
   end
 end
 

@@ -314,17 +314,38 @@ class MergeRequest < ApplicationRecord
 
   scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
 
-  scope :reviewer_assigned_to, ->(user) do
-    mr_reviewers_table = MergeRequestReviewer.arel_table
+  scope :review_requested, -> do
+    reviewers_table = Arel::Table.new("#{to_ability_name}_reviewers")
+    inner_sql = reviewers_table
+                  .project('true')
+                  .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+    where(inner_sql.exists)
+  end
 
-    inner_sql = mr_reviewers_table
-                  .project(Arel::Nodes::True.new)
-                  .where(
-                    mr_reviewers_table[:merge_request_id].eq(MergeRequest.arel_table[:id])
-                      .and(mr_reviewers_table[:user_id].eq(user.id))
-                  ).exists
+  scope :no_review_requested, -> do
+    reviewers_table = Arel::Table.new("#{to_ability_name}_reviewers")
+    inner_sql = reviewers_table
+                  .project('true')
+                  .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+    where(inner_sql.exists.not)
+  end
 
-    where(inner_sql)
+  scope :review_requested_to, ->(user) do
+    reviewers_table = Arel::Table.new("#{to_ability_name}_reviewers")
+    inner_sql = reviewers_table
+                  .project('true')
+                  .where(reviewers_table[:user_id].eq(user))
+                  .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+    where(inner_sql.exists)
+  end
+
+  scope :no_review_requested_to, ->(users) do
+    reviewers_table = Arel::Table.new("#{to_ability_name}_reviewers")
+    inner_sql = reviewers_table
+                  .project('true')
+                  .where(reviewers_table[:user_id].in(users))
+                  .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+    where(inner_sql.exists.not)
   end
 
   after_save :keep_around_commit, unless: :importing?

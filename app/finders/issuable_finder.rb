@@ -55,6 +55,8 @@ class IssuableFinder
       assignee_username
       author_id
       author_username
+      reviewer_id
+      reviewer_username
       label_name
       milestone_title
       release_tag
@@ -65,7 +67,7 @@ class IssuableFinder
     end
 
     def array_params
-      @array_params ||= { label_name: [], assignee_username: [] }
+      @array_params ||= { label_name: [], assignee_username: [], reviewer_username: [] }
     end
 
     # This should not be used in controller strong params!
@@ -406,16 +408,12 @@ class IssuableFinder
     elsif params.filter_by_any_assignee?
       items.assigned
     elsif params.assignee
-      items_assigned_to(items, params.assignee)
+      items.assigned_to(params.assignee)
     elsif params.assignee_id? || params.assignee_username? # assignee not found
       items.none
     else
       items
     end
-  end
-
-  def items_assigned_to(items, user)
-    items.assigned_to(user)
   end
 
   def by_negated_assignee(items)
