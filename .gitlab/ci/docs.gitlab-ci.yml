@@ -58,6 +58,7 @@ docs-lint links:
     key: nanoc-cache
     paths:
       - public/
+      - tmp/nanoc/
   needs: []
   script:
     # Prepare docs for build
@@ -65,6 +66,8 @@ docs-lint links:
     # https://gitlab.com/gitlab-org/gitlab-docs/-/blob/887850752fc0e72856da6632db132f005ba77f16/content/index.erb#L44-63
     - mv doc/ /tmp/gitlab-docs/content/ee
     - cd /tmp/gitlab-docs
+    - ls -la public/
+    - ls -la tmp/nanoc/
     # Build HTML from Markdown
     - bundle exec nanoc
     # Check the internal links
