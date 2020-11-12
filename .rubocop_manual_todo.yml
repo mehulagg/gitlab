@@ -47,8 +47,6 @@ Graphql/IDType:
 
 Graphql/ResolverType:
   Exclude:
-    - 'app/graphql/resolvers/assigned_merge_requests_resolver.rb'
-    - 'app/graphql/resolvers/authored_merge_requests_resolver.rb'
     - 'app/graphql/resolvers/base_resolver.rb'
     - 'app/graphql/resolvers/ci/pipeline_stages_resolver.rb'
     - 'app/graphql/resolvers/commit_pipelines_resolver.rb'
