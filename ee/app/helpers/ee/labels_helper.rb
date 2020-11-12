@@ -13,11 +13,11 @@ module EE
 
       render_label_text(
         label.scoped_label_key,
-        css_class: "gl-label-text #{text_color_class_for_bg(label.color)}",
+        css_class: "gl-label-text",
         bg_color: label.color
       ) + render_label_text(
         label.scoped_label_value,
-        css_class: "gl-label-text-scoped #{('gl-label-text-dark' if light_color?(label.color))}",
+        css_class: "gl-label-text-scoped",
         suffix: suffix
       )
     end
@@ -25,16 +25,14 @@ module EE
     def wrap_label_html(label_html, small:, label:)
       return super unless label.scoped_label?
 
-      wrapper_classes = %w(gl-label gl-label-scoped)
-      wrapper_classes << 'gl-label-sm' if small
+      wrapper_classes = gl_label_classes(small, label)
+      wrapper_classes << "gl-label-scoped"
 
       border_width = small ? '1px' : '2px'
 
-      html = %(<span class="#{wrapper_classes.join(' ')}" style="--label-inset-border: inset 0 0 0 #{border_width} #{label.color}; color: #{label.color}">#{label_html}</span>).html_safe
-
-      html
+      %(<span class="#{wrapper_classes.join(' ')}" style="--label-inset-border: inset 0 0 0 #{border_width} #{label.color}; --label-background-color:#{label.color};">#{label_html}</span>).html_safe
     end
-
+    
     def label_tooltip_title(label)
       tooltip = super
       tooltip = %(<span class='font-weight-bold scoped-label-tooltip-title'>Scoped label</span><br />#{tooltip}) if label.scoped_label?

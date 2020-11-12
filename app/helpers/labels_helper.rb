@@ -61,17 +61,18 @@ module LabelsHelper
     render_label_text(
       label.name,
       suffix: suffix,
-      css_class: "gl-label-text #{text_color_class_for_bg(label.color)}",
+      css_class: "gl-label-text",
       bg_color: label.color
     )
   end
 
   # We need the `label` argument here for EE
   def wrap_label_html(label_html, small:, label:)
-    wrapper_classes = %w(gl-label)
-    wrapper_classes << 'gl-label-sm' if small
+    wrapper_classes = gl_label_classes(small, label)
 
-    %(<span class="#{wrapper_classes.join(' ')}">#{label_html}</span>).html_safe
+    border_width = small ? '1px' : '2px'
+
+    %(<span class="#{wrapper_classes.join(' ')}" style="--label-inset-border: inset 0 0 0 #{border_width} #{label.color}; --label-background-color:#{label.color};">#{label_html}</span>).html_safe
   end
 
   def label_tooltip_title(label)
@@ -114,12 +115,14 @@ module LabelsHelper
     end
   end
 
-  def text_color_class_for_bg(bg_color)
-    if light_color?(bg_color)
-      'gl-label-text-dark'
-    else
-      'gl-label-text-light'
-    end
+  def gl_label_classes(small, label)
+    text_color_class = light_color?(label.color) ? 'gl-label-text-dark' : 'gl-label-text-light'
+
+    wrapper_classes = %w(gl-label)
+    wrapper_classes << text_color_class
+    wrapper_classes << 'gl-label-sm' if small
+
+    wrapper_classes
   end
 
   def text_color_for_bg(bg_color)
@@ -269,7 +272,6 @@ module LabelsHelper
         class="#{css_class}"
         data-container="body"
         data-html="true"
-        #{"style=\"background-color: #{bg_color}\"" if bg_color}
       >#{ERB::Util.html_escape_once(name)}#{suffix}</span>
     HTML
   end

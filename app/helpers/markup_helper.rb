@@ -84,6 +84,11 @@ module MarkupHelper
 
     text = truncate_visible(md, max_chars || md.length)
     text = prepare_for_rendering(text, markdown_field_render_context(object, attribute, options))
+
+    Loofah::HTML5::SafeList::ACCEPTABLE_CSS_PROPERTIES.merge Set.new(%w[
+      inset --label-inset-border --label-background-color
+    ])
+
     text = sanitize(
       text,
       tags: tags,

@@ -28,7 +28,14 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
 
   it 'includes default classes' do
     doc = reference_filter("Label #{reference}")
+    expect(doc.css('span').first.attr('class')).to include 'gl-label'
+    expect(doc.css('span').first.attr('class')).to include 'gl-label-sm'
     expect(doc.css('a').first.attr('class')).to eq 'gfm gfm-label has-tooltip gl-link gl-label-link'
+  end
+
+  it 'includes a style attribute' do
+    doc = reference_filter("Label #{reference}")
+    expect(doc.css('span').first.attr('style')).to include "--label-background-color:#"
   end
 
   it 'avoids N+1 cached queries', :use_sql_query_cache, :request_store do
@@ -100,11 +107,6 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     it 'includes default classes' do
       doc = reference_filter("Label #{reference}")
       expect(doc.css('a span').first.attr('class')).to include 'gl-label-text'
-    end
-
-    it 'includes a style attribute' do
-      doc = reference_filter("Label #{reference}")
-      expect(doc.css('a span').first.attr('style')).to match(/\Abackground-color: #\h{6}\z/)
     end
   end
 
@@ -437,7 +439,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style')).to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
@@ -469,7 +471,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style')).to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
@@ -501,8 +503,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style'))
-        .to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
@@ -535,8 +536,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style'))
-        .to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
@@ -584,8 +584,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style'))
-        .to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
@@ -618,8 +617,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style'))
-        .to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
@@ -650,8 +648,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
     end
 
     it 'has valid color' do
-      expect(result.css('a span').first.attr('style'))
-        .to match /background-color: #00ff00/
+      expect(result.css('span').first.attr('style')).to include "--label-background-color:#00ff00"
     end
 
     it 'has valid link text' do
