@@ -80,6 +80,7 @@ export default {
     :fields="$options.tableHeaderFields"
     :items="segments"
     thead-class="gl-border-t-0 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
+    stacked="sm"
   >
     <template #cell(name)="{ item }">
       <div :data-testid="$options.testids.SEGMENT">
