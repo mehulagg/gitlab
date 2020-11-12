@@ -557,3 +557,4 @@ In order to prevent this from happening, it is recommended to use the method `us
           forbidden!(api_access_denied_message(user))
         end
 ```
+  
