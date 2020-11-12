@@ -16,7 +16,7 @@ module Resolvers
       def resolve(**args)
         return Epic.none unless board.present?
         return Epic.none unless group.present?
-        return unless ::Feature.enabled?(:boards_with_swimlanes, group)
+        return unless ::Feature.enabled?(:boards_with_swimlanes, group, default_enabled: true)
 
         context.scoped_set!(:board, board)
 

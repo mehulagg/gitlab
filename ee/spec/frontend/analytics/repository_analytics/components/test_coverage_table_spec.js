@@ -120,7 +120,7 @@ describe('Test coverage table component', () => {
               codeCoverageSummary: {
                 averageCoverage,
                 coverageCount,
-                lastUpdatedAt: yesterday.toISOString(),
+                lastUpdatedOn: yesterday.toISOString(),
               },
             },
           ],
@@ -152,7 +152,7 @@ describe('Test coverage table component', () => {
           codeCoverageSummary: {
             averageCoverage: '1.45',
             coverageCount: '1',
-            lastUpdatedAt: yesterday.toISOString(),
+            lastUpdatedOn: yesterday.toISOString(),
           },
         },
         {
@@ -164,7 +164,7 @@ describe('Test coverage table component', () => {
           codeCoverageSummary: {
             averageCoverage: '1.45',
             coverageCount: '1',
-            lastUpdatedAt: today.toISOString(),
+            lastUpdatedOn: today.toISOString(),
           },
         },
       ];
@@ -215,7 +215,7 @@ describe('Test coverage table component', () => {
                   codeCoverageSummary: {
                     averageCoverage: '1.45',
                     coverageCount: '1',
-                    lastUpdatedAt: new Date().toISOString(),
+                    lastUpdatedOn: new Date().toISOString(),
                   },
                 },
               ],

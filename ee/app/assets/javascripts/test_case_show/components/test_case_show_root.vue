@@ -1,5 +1,13 @@
 <script>
-import { GlLoadingIcon, GlDropdown, GlDropdownDivider, GlDropdownItem, GlButton } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlButton,
+  GlSprintf,
+  GlLink,
+} from '@gitlab/ui';
 
 import { s__, __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -21,6 +29,8 @@ export default {
     GlDropdownDivider,
     GlDropdownItem,
     GlButton,
+    GlSprintf,
+    GlLink,
     IssuableShow,
     TestCaseSidebar,
   },
@@ -136,7 +146,17 @@ export default {
       @edit-issuable="handleEditTestCase"
     >
       <template #status-badge>
-        {{ statusBadgeText }}
+        <gl-sprintf
+          v-if="testCase.moved"
+          :message="__('Archived (%{movedToStart}moved%{movedToEnd})')"
+        >
+          <template #movedTo="{ content }">
+            <gl-link :href="testCase.movedTo.webUrl" class="text-white text-underline">{{
+              content
+            }}</gl-link>
+          </template>
+        </gl-sprintf>
+        <span v-else>{{ statusBadgeText }}</span>
       </template>
       <template #header-actions>
         <gl-dropdown
@@ -144,7 +164,7 @@ export default {
           data-testid="actions-dropdown"
           :text="__('Options')"
           :right="true"
-          class="d-md-none d-lg-none d-xl-none gl-flex-grow-1"
+          class="d-md-none gl-flex-grow-1"
         >
           <gl-dropdown-item>{{ testCaseActionTitle }}</gl-dropdown-item>
           <gl-dropdown-divider />
@@ -154,7 +174,7 @@ export default {
           v-if="canEditTestCase"
           data-testid="archive-test-case"
           category="secondary"
-          class="d-none d-sm-none d-md-inline-block gl-mr-2"
+          class="d-none d-md-inline-block gl-mr-2"
           :variant="testCaseActionButtonVariant"
           :loading="testCaseStateChangeInProgress"
           @click="handleTestCaseStateChange"
@@ -165,7 +185,7 @@ export default {
           category="secondary"
           variant="success"
           class="d-md-inline-block"
-          :class="{ 'd-none d-sm-none': canEditTestCase, 'gl-flex-grow-1': !canEditTestCase }"
+          :class="{ 'd-none': canEditTestCase, 'gl-flex-grow-1': !canEditTestCase }"
           :href="testCaseNewPath"
           >{{ __('New test case') }}</gl-button
         >
@@ -194,6 +214,7 @@ export default {
           :sidebar-expanded="sidebarExpanded"
           :selected-labels="selectedLabels"
           :todo="todo"
+          :moved="testCase.moved"
           @test-case-updated="handleTestCaseUpdated"
         />
       </template>

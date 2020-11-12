@@ -15,6 +15,7 @@ fragment IssueNode on Issue {
   webUrl
   subscribed
   blocked
+  blockedByCount
   relativePosition
   epic {
     id

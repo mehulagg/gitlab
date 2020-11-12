@@ -109,7 +109,7 @@ export default {
     <security-reports-summary
       v-if="securityReportSummary"
       :summary="securityReportSummary"
-      class="gl-mt-5"
+      class="gl-my-5"
     />
     <security-dashboard
       :vulnerabilities-endpoint="vulnerabilitiesEndpoint"

@@ -909,10 +909,11 @@ class User < ApplicationRecord
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
     Group.unscoped do
-      Group.from_union([
-        groups,
-        authorized_projects.joins(:namespace).select('namespaces.*')
-      ])
+      if Feature.enabled?(:shared_group_membership_auth, self)
+        authorized_groups_with_shared_membership
+      else
+        authorized_groups_without_shared_membership
+      end
     end
   end
 
@@ -1807,6 +1808,26 @@ class User < ApplicationRecord
 
   private
 
+  def authorized_groups_without_shared_membership
+    Group.from_union([
+      groups,
+      authorized_projects.joins(:namespace).select('namespaces.*')
+    ])
+  end
+
+  def authorized_groups_with_shared_membership
+    cte = Gitlab::SQL::CTE.new(:direct_groups, authorized_groups_without_shared_membership)
+    cte_alias = cte.table.alias(Group.table_name)
+
+    Group
+      .with(cte.to_arel)
+      .from_union([
+        Group.from(cte_alias),
+        Group.joins(:shared_with_group_links)
+             .where(group_group_links: { shared_with_group_id: Group.from(cte_alias) })
+    ])
+  end
+
   def default_private_profile_to_false
     return unless private_profile_changed? && private_profile.nil?
 
@@ -1843,15 +1864,15 @@ class User < ApplicationRecord
     valid = true
     error = nil
 
-    if Gitlab::CurrentSettings.domain_blacklist_enabled?
-      blocked_domains = Gitlab::CurrentSettings.domain_blacklist
+    if Gitlab::CurrentSettings.domain_denylist_enabled?
+      blocked_domains = Gitlab::CurrentSettings.domain_denylist
       if domain_matches?(blocked_domains, email)
         error = 'is not from an allowed domain.'
         valid = false
       end
     end
 
-    allowed_domains = Gitlab::CurrentSettings.domain_whitelist
+    allowed_domains = Gitlab::CurrentSettings.domain_allowlist
     unless allowed_domains.blank?
       if domain_matches?(allowed_domains, email)
         valid = true

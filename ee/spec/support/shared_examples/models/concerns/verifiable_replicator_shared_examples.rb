@@ -5,6 +5,40 @@
 RSpec.shared_examples 'a verifiable replicator' do
   include EE::GeoHelpers
 
+  describe '.verification_enabled?' do
+    context 'when replication is enabled' do
+      before do
+        expect(described_class).to receive(:enabled?).and_return(true)
+      end
+
+      context 'when the verification feature flag is enabled' do
+        it 'returns true' do
+          allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(true)
+
+          expect(described_class.verification_enabled?).to be_truthy
+        end
+      end
+
+      context 'when geo_framework_verification feature flag is disabled' do
+        it 'returns false' do
+          allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(false)
+
+          expect(described_class.verification_enabled?).to be_falsey
+        end
+      end
+    end
+
+    context 'when replication is disabled' do
+      before do
+        expect(described_class).to receive(:enabled?).and_return(false)
+      end
+
+      it 'returns false' do
+        expect(described_class.verification_enabled?).to be_falsey
+      end
+    end
+  end
+
   describe '#after_verifiable_update' do
     it 'schedules the checksum calculation if needed' do
       expect(replicator).to receive(:schedule_checksum_calculation)
@@ -15,18 +49,20 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#calculate_checksum!' do
-    it 'calculates the checksum' do
+    before do
       model_record.save!
+    end
+
+    it 'calculates the checksum' do
+      expect(model_record).to receive(:calculate_checksum!).and_return('abc123')
 
       replicator.calculate_checksum!
 
-      expect(model_record.reload.verification_checksum).not_to be_nil
-      expect(model_record.reload.verified_at).not_to be_nil
+      expect(model_record.reload.verification_checksum).to eq('abc123')
+      expect(model_record.verified_at).not_to be_nil
     end
 
     it 'saves the error message and increments retry counter' do
-      model_record.save!
-
       allow(model_record).to receive(:calculate_checksum!) do
         raise StandardError.new('Failure to calculate checksum')
       end

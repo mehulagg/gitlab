@@ -85,9 +85,9 @@ export default {
     sortedCoverageData() {
       // Sort the table by most recently updated coverage report
       return [...this.selectedCoverageData].sort((a, b) => {
-        if (a.codeCoverageSummary.lastUpdatedAt > b.codeCoverageSummary.lastUpdatedAt) {
+        if (a.codeCoverageSummary.lastUpdatedOn > b.codeCoverageSummary.lastUpdatedOn) {
           return -1;
-        } else if (a.codeCoverageSummary.lastUpdatedAt < b.codeCoverageSummary.lastUpdatedAt) {
+        } else if (a.codeCoverageSummary.lastUpdatedOn < b.codeCoverageSummary.lastUpdatedOn) {
           return 1;
         }
         return 0;
@@ -133,7 +133,7 @@ export default {
       label: s__('RepositoriesAnalytics|Coverage Jobs'),
     },
     {
-      key: 'lastUpdatedAt',
+      key: 'lastUpdatedOn',
       label: s__('RepositoriesAnalytics|Last Update'),
     },
   ],
@@ -206,7 +206,7 @@ export default {
       <template #head(coverageCount)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(lastUpdatedAt)="data">
+      <template #head(lastUpdatedOn)="data">
         <div>{{ data.label }}</div>
       </template>
 
@@ -223,9 +223,9 @@ export default {
       <template #cell(coverageCount)="{ item }">
         <div :data-testid="`${item.id}-count`">{{ item.codeCoverageSummary.coverageCount }}</div>
       </template>
-      <template #cell(lastUpdatedAt)="{ item }">
+      <template #cell(lastUpdatedOn)="{ item }">
         <time-ago-tooltip
-          :time="item.codeCoverageSummary.lastUpdatedAt"
+          :time="item.codeCoverageSummary.lastUpdatedOn"
           :data-testid="`${item.id}-date`"
         />
       </template>

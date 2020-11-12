@@ -28,6 +28,10 @@ module Gitlab
         annotations[ANNOTATION_KEY_CANARY_WEIGHT].to_i
       end
 
+      def name
+        metadata['name']
+      end
+
       private
 
       def metadata

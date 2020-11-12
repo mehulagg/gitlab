@@ -194,7 +194,7 @@ export default {
     </gl-alert>
 
     <template v-if="isLoadingProfiles">
-      <gl-card v-for="i in 2" :key="i">
+      <gl-card v-for="i in 2" :key="i" class="gl-mb-5">
         <template #header>
           <gl-skeleton-loader :width="1248" :height="15">
             <rect x="0" y="0" width="300" height="15" rx="4" />
@@ -211,6 +211,7 @@ export default {
     <template v-else-if="!failedToLoadProfiles">
       <on-demand-scans-scanner-profile-selector
         v-model="form.dastScannerProfileId"
+        class="gl-mb-5"
         :profiles="scannerProfiles"
       />
       <on-demand-scans-site-profile-selector

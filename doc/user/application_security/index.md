@@ -71,7 +71,7 @@ GitLab uses the following tools to scan and report known vulnerabilities found i
 | [Dependency Scanning](dependency_scanning/index.md) **(ULTIMATE)**           | Analyze your dependencies for known vulnerabilities.                   |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) **(ULTIMATE)**  | Analyze running web applications for known vulnerabilities.            |
 | [API fuzzing](api_fuzzing/index.md) **(ULTIMATE)**                           | Find unknown bugs and vulnerabilities in web APIs with fuzzing.        |
-| [Secret Detection](secret_detection/index.md) **(ULTIMATE)**                 | Analyze Git history for leaked secrets.                                |
+| [Secret Detection](secret_detection/index.md)                                | Analyze Git history for leaked secrets.                                |
 | [Security Dashboard](security_dashboard/index.md) **(ULTIMATE)**             | View vulnerabilities in all your projects and groups.                  |
 | [Static Application Security Testing (SAST)](sast/index.md)                  | Analyze source code for known vulnerabilities.                         |
 | [Coverage fuzzing](coverage_fuzzing/index.md) **(ULTIMATE)**                 | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
@@ -110,7 +110,7 @@ The scanning tools and vulnerabilities database are updated regularly.
 | Secure scanning tool                                         | Vulnerabilities database updates          |
 |:-------------------------------------------------------------|-------------------------------------------|
 | [Container Scanning](container_scanning/index.md)            | Uses `clair`. The latest `clair-db` version is used for each job by running the [`latest` Docker image tag](https://gitlab.com/gitlab-org/gitlab/blob/438a0a56dc0882f22bdd82e700554525f552d91b/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L37). The `clair-db` database [is updated daily according to the author](https://github.com/arminc/clair-local-scan#clair-server-or-local). |
-| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (GitLab's own tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
+| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (GitLab's own tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) | The scanning engine is updated on a periodic basis. See the [version of the underlying tool `zaproxy`](https://gitlab.com/gitlab-org/security-products/dast/blob/master/Dockerfile#L1). The scanning rules are downloaded at scan runtime. |
 | [Static Application Security Testing (SAST)](sast/index.md)  | Relies exclusively on [the tools GitLab wraps](sast/index.md#supported-languages-and-frameworks). The underlying analyzers are updated at least once per month if a relevant update is available. The vulnerabilities database is updated by the upstream tools. |
 
@@ -122,6 +122,24 @@ The Docker images are updated to match the previous GitLab releases, so users au
 latest versions of the scanning tools without having to do anything. There are some known issues
 with this approach, however, and there is a
 [plan to resolve them](https://gitlab.com/gitlab-org/gitlab/-/issues/9725).
+
+## Viewing security scan information in merge requests **(CORE)**
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Core 13.5.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/273205) in 13.6.
+> - It's [deployed behind a feature flag](../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It can be enabled or disabled for a single project.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Merge requests which have run security scans let you know that the generated
+reports are available to download.
+
+![Security widget](img/security_widget_v13_6.png)
 
 ## Interacting with the vulnerabilities
 
@@ -594,3 +612,28 @@ Analyzer results are displayed in the [job logs](../../ci/pipelines/#expand-and-
 [Merge Request widget](sast/index.md#overview)
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
+
+### Enable or disable the basic security widget **(CORE ONLY)**
+
+The basic security widget is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:core_security_mr_widget)
+# For a single project
+Feature.enable(:core_security_mr_widget, Project.find(<project id>))
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:core_security_mr_widget)
+# For a single project
+Feature.disable(:core_security_mr_widget, Project.find(<project id>))
+```

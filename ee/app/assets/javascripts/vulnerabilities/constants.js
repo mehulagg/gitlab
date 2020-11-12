@@ -1,4 +1,8 @@
 import { s__ } from '~/locale';
+import {
+  FEEDBACK_TYPE_ISSUE,
+  FEEDBACK_TYPE_MERGE_REQUEST,
+} from '~/vue_shared/security_reports/constants';
 
 export const VULNERABILITY_STATE_OBJECTS = {
   detected: {
@@ -49,8 +53,8 @@ export const HEADER_ACTION_BUTTONS = {
 };
 
 export const FEEDBACK_TYPES = {
-  ISSUE: 'issue',
-  MERGE_REQUEST: 'merge_request',
+  ISSUE: FEEDBACK_TYPE_ISSUE,
+  MERGE_REQUEST: FEEDBACK_TYPE_MERGE_REQUEST,
 };
 
 export const RELATED_ISSUES_ERRORS = {

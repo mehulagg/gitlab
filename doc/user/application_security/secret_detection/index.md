@@ -5,9 +5,10 @@ group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Secret Detection **(ULTIMATE)**
+# Secret Detection
 
-> [Introduced](https://about.gitlab.com/releases/2019/03/22/gitlab-11-9-released/#detect-secrets-and-credentials-in-the-repository) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.9.
+> - [Introduced](https://about.gitlab.com/releases/2019/03/22/gitlab-11-9-released/#detect-secrets-and-credentials-in-the-repository) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.9.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in 13.3.
 
 A recurring problem when developing applications is that developers may unintentionally commit
 secrets and credentials to their remote repositories. If other people have access to the source,
@@ -29,6 +30,29 @@ GitLab displays identified secrets visibly in a few places:
 
 - Detecting unintentional commit of secrets like keys, passwords, and API tokens.
 - Performing a single or recurring scan of the full history of your repository for secrets.
+
+## Supported secrets
+
+Secret Detection detects a variety of common secrets by default. You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets).
+
+The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types: 
+
+- Cloud services:
+  - Amazon Web Services (AWS)
+  - Google Cloud Platform (GCP) 
+Encryption keys:  
+  - PKCS8
+  - RSA
+  - SSH
+  - PGP
+- Social media platforms:
+  - Facebook API
+  - Twitter API
+- Cloud SaaS vendors: 
+  - GitHub API
+  - Slack Token
+  - Stripe API
+  - Generic API key strings starting with `api-`
 
 ## Requirements
 

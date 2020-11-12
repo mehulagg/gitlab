@@ -10,7 +10,7 @@ query getProjectsTestCoverage($projectIds: [ID!]) {
       codeCoverageSummary {
         averageCoverage
         coverageCount
-        lastUpdatedAt
+        lastUpdatedOn
       }
     }
   }

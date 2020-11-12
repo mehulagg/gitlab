@@ -68,6 +68,9 @@ namespace :gitlab do
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
 
+      helper.create_migrations_index unless helper.index_exists?(index_name: migrations_index_name)
+      ::Elastic::DataMigrationService.mark_all_as_completed!
+
       puts "Index '#{index_name}' has been created.".color(:green)
       puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end

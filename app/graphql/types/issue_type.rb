@@ -73,6 +73,9 @@ module Types
 
     field :participants, Types::UserType.connection_type, null: true, complexity: 5,
           description: 'List of participants in the issue'
+    field :emails_disabled, GraphQL::BOOLEAN_TYPE, null: false,
+          method: :project_emails_disabled?,
+          description: 'Indicates if a project has email notifications disabled'
     field :subscribed, GraphQL::BOOLEAN_TYPE, method: :subscribed?, null: false, complexity: 5,
           description: 'Indicates the currently logged in user is subscribed to the issue'
     field :time_estimate, GraphQL::INT_TYPE, null: false,
@@ -115,6 +118,12 @@ module Types
     field :severity, Types::IssuableSeverityEnum, null: true,
           description: 'Severity level of the incident'
 
+    field :moved, GraphQL::BOOLEAN_TYPE, method: :moved?, null: true,
+          description: 'Indicates if issue got moved from other project'
+
+    field :moved_to, Types::IssueType, null: true,
+          description: 'Updated Issue after it got moved to another project'
+
     def user_notes_count
       BatchLoader::GraphQL.for(object.id).batch(key: :issue_user_notes_count) do |ids, loader, args|
         counts = Note.count_for_collection(ids, 'Issue').index_by(&:noteable_id)
@@ -145,6 +154,10 @@ module Types
 
     def milestone
       Gitlab::Graphql::Loaders::BatchModelLoader.new(Milestone, object.milestone_id).find
+    end
+
+    def moved_to
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(Issue, object.moved_to_id).find
     end
 
     def discussion_locked

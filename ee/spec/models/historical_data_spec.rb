@@ -29,7 +29,7 @@ RSpec.describe HistoricalData do
 
   describe ".track!" do
     before do
-      allow(License).to receive(:current_active_users).and_return([1, 2, 3, 4, 5])
+      allow(User).to receive(:billable).and_return([1, 2, 3, 4, 5])
     end
 
     it "creates a new historical data record" do

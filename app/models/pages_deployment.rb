@@ -4,6 +4,8 @@
 class PagesDeployment < ApplicationRecord
   include FileStoreMounter
 
+  attribute :file_store, :integer, default: -> { ::Pages::DeploymentUploader.default_store }
+
   belongs_to :project, optional: false
   belongs_to :ci_build, class_name: 'Ci::Build', optional: true
 
@@ -17,9 +19,11 @@ class PagesDeployment < ApplicationRecord
 
   before_validation :set_size, if: :file_changed?
 
-  default_value_for(:file_store) { ::Pages::DeploymentUploader.default_store }
-
   mount_file_store_uploader ::Pages::DeploymentUploader
+
+  def log_geo_deleted_event
+    # this is to be adressed in https://gitlab.com/groups/gitlab-org/-/epics/589
+  end
 
   private
 

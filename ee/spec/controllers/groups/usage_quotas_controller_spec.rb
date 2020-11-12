@@ -9,13 +9,16 @@ RSpec.describe Groups::UsageQuotasController do
   before do
     sign_in(user)
     group.add_owner(user)
+
+    allow_next_found_instance_of(Group) do |group|
+      allow(group).to receive(:additional_repo_storage_by_namespace_enabled?)
+        .and_return(additional_repo_storage_by_namespace_enabled)
+    end
   end
 
   describe 'Pushing the `additionalRepoStorageByNamespace` feature flag to the frontend' do
-    context 'when both flags are true' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: true, namespace_storage_limit: true)
-      end
+    context 'when additional_repo_storage_by_namespace_enabled is false' do
+      let(:additional_repo_storage_by_namespace_enabled) { false }
 
       it 'is disabled' do
         get :index, params: { group_id: group }
@@ -24,27 +27,13 @@ RSpec.describe Groups::UsageQuotasController do
       end
     end
 
-    context 'when `namespace_storage_limit` flag is false' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: true, namespace_storage_limit: false)
-      end
+    context 'when additional_repo_storage_by_namespace_enabled is true' do
+      let(:additional_repo_storage_by_namespace_enabled) { true }
 
       it 'is enabled' do
         get :index, params: { group_id: group }
 
         expect(Gon.features).to include('additionalRepoStorageByNamespace' => true)
-      end
-    end
-
-    context 'when both flags are false' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: false, namespace_storage_limit: false)
-      end
-
-      it 'is disabled' do
-        get :index, params: { group_id: group }
-
-        expect(Gon.features).to include('additionalRepoStorageByNamespace' => false)
       end
     end
   end

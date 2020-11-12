@@ -71,6 +71,12 @@ class ReleasePresenter < Gitlab::View::Presenter::Delegated
     can_download_code? ? release.name : "Release-#{release.id}"
   end
 
+  def download_url(filepath)
+    filepath = filepath.sub(%r{^/}, '') if filepath.start_with?('/')
+
+    downloads_project_release_url(project, release, filepath)
+  end
+
   private
 
   def can_download_code?
@@ -82,7 +88,7 @@ class ReleasePresenter < Gitlab::View::Presenter::Delegated
   end
 
   def release_mr_issue_urls_available?
-    ::Feature.enabled?(:release_mr_issue_urls, project)
+    ::Feature.enabled?(:release_mr_issue_urls, project, default_enabled: true)
   end
 
   def release_edit_page_available?

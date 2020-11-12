@@ -9,6 +9,7 @@ class SearchController < ApplicationController
   SCOPE_PRELOAD_METHOD = {
     projects: :with_web_entity_associations,
     issues: :with_web_entity_associations,
+    merge_requests: :with_web_entity_associations,
     epics: :with_web_entity_associations
   }.freeze
 
@@ -21,6 +22,10 @@ class SearchController < ApplicationController
   requires_cross_project_access if: -> do
     search_term_present = params[:search].present? || params[:term].present?
     search_term_present && !params[:project_id].present?
+  end
+
+  before_action do
+    push_frontend_feature_flag(:search_facets)
   end
 
   layout 'search'

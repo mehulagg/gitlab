@@ -2,6 +2,7 @@
 name: api_billable_member_list
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43093
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254947
-group: group::fulfillment
+milestone: '13.5'
 type: development
+group: group::fulfillment
 default_enabled: false

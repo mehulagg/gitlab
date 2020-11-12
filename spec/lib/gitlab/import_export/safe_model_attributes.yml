@@ -489,6 +489,7 @@ ProjectHook:
 - confidential_issues_events
 - confidential_note_events
 - repository_update_events
+- releases_events
 ProtectedBranch:
 - id
 - project_id
@@ -773,6 +774,7 @@ ExternalPullRequest:
 - target_sha
 DesignManagement::Design:
 - id
+- iid
 - project_id
 - filename
 - relative_position
@@ -876,3 +878,9 @@ PushRule:
   - reject_unsigned_commits
   - commit_committer_check
   - regexp_uses_re2
+MergeRequest::CleanupSchedule:
+- id
+- scheduled_at
+- completed_at
+- created_at
+- updated_at

@@ -206,6 +206,7 @@ RSpec.describe ProjectsHelper do
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index

@@ -277,31 +277,6 @@ export const containerScanningFeedbacks = [
   },
 ];
 
-export const secretScanningFeedbacks = [
-  {
-    id: 3,
-    project_id: 17,
-    author_id: 1,
-    issue_iid: null,
-    pipeline_id: 132,
-    category: 'secret_detection',
-    feedback_type: 'dismissal',
-    branch: 'try_new_secret_scanning',
-    project_fingerprint: libTiffCveFingerprint2,
-  },
-  {
-    id: 4,
-    project_id: 17,
-    author_id: 1,
-    issue_iid: 123,
-    pipeline_id: 132,
-    category: 'secret_detection',
-    feedback_type: 'issue',
-    branch: 'try_new_secret_scanning',
-    project_fingerprint: libTiffCveFingerprint2,
-  },
-];
-
 export const coverageFuzzingFeedbacks = [
   {
     id: 3,

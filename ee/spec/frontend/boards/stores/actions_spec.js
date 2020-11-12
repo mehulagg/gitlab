@@ -528,7 +528,7 @@ describe('resetEpics', () => {
 });
 
 describe('setActiveIssueEpic', () => {
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const epicWithData = {
     id: 'gid://gitlab/Epic/42',
     iid: 1,
@@ -560,7 +560,7 @@ describe('setActiveIssueEpic', () => {
 
 describe('setActiveIssueWeight', () => {
   const state = { issues: { [mockIssue.id]: mockIssue } };
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const testWeight = mockIssue.weight + 1;
   const input = {
     weight: testWeight,
@@ -580,7 +580,7 @@ describe('setActiveIssueWeight', () => {
     });
 
     const payload = {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'weight',
       value: testWeight,
     };

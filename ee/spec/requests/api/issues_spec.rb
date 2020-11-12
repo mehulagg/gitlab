@@ -179,6 +179,38 @@ RSpec.describe API::Issues, :mailer do
       it_behaves_like 'filtering by epic_id' do
         let(:endpoint) { '/issues' }
       end
+
+      context 'filtering by iteration' do
+        let_it_be(:iteration_1) { create(:iteration, group: group) }
+        let_it_be(:iteration_2) { create(:iteration, group: group) }
+        let_it_be(:iteration_1_issue) { create(:issue, project: group_project, iteration: iteration_1) }
+        let_it_be(:iteration_2_issue) { create(:issue, project: group_project, iteration: iteration_2) }
+        let_it_be(:no_iteration_issue) { create(:issue, project: group_project) }
+
+        it 'returns issues with specific iteration' do
+          get api('/issues', user), params: { iteration_id: iteration_1.id }
+
+          expect_response_contain_exactly(iteration_1_issue.id)
+        end
+
+        it 'returns issues with no iteration' do
+          get api('/issues', user), params: { iteration_id: 'None' }
+
+          expect_response_contain_exactly(no_iteration_issue.id)
+        end
+
+        it 'returns issues with any iteration' do
+          get api('/issues', user), params: { iteration_id: 'Any' }
+
+          expect_response_contain_exactly(iteration_1_issue.id, iteration_2_issue.id)
+        end
+
+        it 'returns issues with a specific iteration title' do
+          get api('/issues', user), params: { iteration_title: iteration_1.title }
+
+          expect_response_contain_exactly(iteration_1_issue.id)
+        end
+      end
     end
   end
 

@@ -130,7 +130,6 @@ RSpec.configure do |config|
   config.include StubExperiments
   config.include StubGitlabCalls
   config.include StubGitlabData
-  config.include SnowplowHelpers
   config.include NextFoundInstanceOf
   config.include NextInstanceOf
   config.include TestEnv
@@ -284,12 +283,10 @@ RSpec.configure do |config|
       ./ee/spec/lib
       ./ee/spec/requests/admin
       ./ee/spec/serializers
-      ./ee/spec/services
       ./ee/spec/support/protected_tags
       ./ee/spec/support/shared_examples/features
       ./ee/spec/support/shared_examples/finders/geo
       ./ee/spec/support/shared_examples/graphql/geo
-      ./ee/spec/support/shared_examples/services
       ./spec/features
       ./spec/finders
       ./spec/frontend
@@ -297,7 +294,6 @@ RSpec.configure do |config|
       ./spec/lib
       ./spec/requests
       ./spec/serializers
-      ./spec/services
       ./spec/support/protected_tags
       ./spec/support/shared_examples/features
       ./spec/support/shared_examples/requests

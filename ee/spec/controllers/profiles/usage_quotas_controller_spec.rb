@@ -18,10 +18,15 @@ RSpec.describe Profiles::UsageQuotasController do
   end
 
   describe 'Pushing the `additionalRepoStorageByNamespace` feature flag to the frontend' do
-    context 'when both flags are true' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: true, namespace_storage_limit: true)
+    before do
+      allow_next_found_instance_of(Namespace) do |namespace|
+        allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+          .and_return(additional_repo_storage_by_namespace_enabled)
       end
+    end
+
+    context 'when additional_repo_storage_by_namespace_enabled is false' do
+      let(:additional_repo_storage_by_namespace_enabled) { false }
 
       it 'is disabled' do
         get :index
@@ -30,27 +35,13 @@ RSpec.describe Profiles::UsageQuotasController do
       end
     end
 
-    context 'when `namespace_storage_limit` flag is false' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: true, namespace_storage_limit: false)
-      end
+    context 'when additional_repo_storage_by_namespace_enabled is true' do
+      let(:additional_repo_storage_by_namespace_enabled) { true }
 
       it 'is enabled' do
         get :index
 
         expect(Gon.features).to include('additionalRepoStorageByNamespace' => true)
-      end
-    end
-
-    context 'when both flags are false' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: false, namespace_storage_limit: false)
-      end
-
-      it 'is disabled' do
-        get :index
-
-        expect(Gon.features).to include('additionalRepoStorageByNamespace' => false)
       end
     end
   end

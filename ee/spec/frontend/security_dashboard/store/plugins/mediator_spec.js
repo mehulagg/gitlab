@@ -3,11 +3,8 @@ import * as filtersMutationTypes from 'ee/security_dashboard/store/modules/filte
 import * as vulnerabilityMutationTypes from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 
 function expectRefreshDispatches(store, payload) {
-  expect(store.dispatch).toHaveBeenCalledTimes(3);
+  expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/fetchVulnerabilities', payload);
-
-  expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/fetchVulnerabilitiesCount', payload);
-
   expect(store.dispatch).toHaveBeenCalledWith(
     'vulnerabilities/fetchVulnerabilitiesHistory',
     payload,

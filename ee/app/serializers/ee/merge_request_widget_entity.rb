@@ -65,6 +65,10 @@ module EE
         merge_request.head_pipeline.iid
       end
 
+      expose :can_read_vulnerabilities do |merge_request|
+        can?(current_user, :read_vulnerability, merge_request.project)
+      end
+
       expose :can_read_vulnerability_feedback do |merge_request|
         can?(current_user, :read_vulnerability_feedback, merge_request.project)
       end

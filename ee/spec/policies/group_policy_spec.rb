@@ -1174,7 +1174,7 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be(:container) { create(:group_with_plan, plan: :silver_plan) }
+    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :silver_plan) }
     let_it_be(:user) { owner }
 
     before_all do
@@ -1182,29 +1182,19 @@ RSpec.describe GroupPolicy do
     end
 
     before do
-      stub_application_setting(check_namespace_plan: true)
+      enable_namespace_license_check!
     end
 
     # We don't have feature toggles on groups yet, so we currently simulate
-    # this by toggling the feature flag instead.
+    # this by stubbing the license check instead.
     def set_access_level(access_level)
       case access_level
       when ProjectFeature::ENABLED
-        stub_feature_flags(group_wikis: true)
+        stub_licensed_features(group_wikis: true)
       when ProjectFeature::DISABLED
-        stub_feature_flags(group_wikis: false)
+        stub_licensed_features(group_wikis: false)
       when ProjectFeature::PRIVATE
         skip('Access level private is not supported yet for group wikis, see https://gitlab.com/gitlab-org/gitlab/-/issues/208412')
-      end
-    end
-
-    context 'when the feature flag is disabled on this group' do
-      before do
-        stub_feature_flags(group_wikis: create(:group))
-      end
-
-      it 'does not include the wiki permissions' do
-        expect_disallowed(*wiki_permissions[:all])
       end
     end
 

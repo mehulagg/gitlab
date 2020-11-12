@@ -759,7 +759,7 @@ While you work on a test suite, you may want to run these specs in watch mode, s
 # Watch and rerun all specs matching the name icon
 yarn jest --watch icon
 
-# Watch and rerun one specifc file
+# Watch and rerun one specific file
 yarn jest --watch path/to/spec/file.spec.js
 ```
 
@@ -897,6 +897,32 @@ it.each([
     expect(renderPipeline(status)).toEqual(icon)
  }
 );
+```
+
+**Note**: only use template literal block if pretty print is **not** needed for spec output. For example, empty strings, nested objects etc.
+
+For example, when testing the difference between an empty search string and a non-empty search string, the use of the array block syntax with the pretty print option would be preferred. That way the differences between an empty string e.g. `''` and a non-empty string e.g. `'search string'` would be visible in the spec output. Whereas with a template literal block, the empty string would be shown as a space, which could lead to a confusing developer experience
+
+```javascript
+// bad
+it.each`
+    searchTerm | expected
+    ${''} | ${{ issue: { users: { nodes: [] } } }}
+    ${'search term'} | ${{ issue: { other: { nested: [] } } }}
+`('when search term is $searchTerm, it returns $expected', ({ searchTerm, expected }) => {
+  expect(search(searchTerm)).toEqual(expected)
+});
+
+// good
+it.each([
+    ['', { issue: { users: { nodes: [] } } }],
+    ['search term', { issue: { other: { nested: [] } } }],
+])('when search term is %p, expect to return %p',
+ (searchTerm, expected) => {
+    expect(search(searchTerm)).toEqual(expected)
+ }
+);
+
 ```
 
 ```javascript

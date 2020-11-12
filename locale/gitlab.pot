@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-msgid " %{project_name}#%{issue_iid} &middot; opened %{issue_created} by %{author}"
+msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author}"
 msgstr ""
 
 msgid " %{start} to %{end}"
@@ -79,6 +79,11 @@ msgstr ""
 
 msgid "%d Approval"
 msgid_plural "%d Approvals"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%d Other"
+msgid_plural "%d Others"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -445,6 +450,9 @@ msgstr ""
 msgid "%{count} total weight"
 msgstr ""
 
+msgid "%{criticalStart}%{critical} Critical%{criticalEnd} %{highStart}%{high} High%{highEnd} and %{otherStart}%{otherMessage}%{otherEnd}"
+msgstr ""
+
 msgid "%{dashboard_path} could not be found."
 msgstr ""
 
@@ -524,6 +532,9 @@ msgid "%{integrations_link_start}Integrations%{link_end} enable you to make thir
 msgstr ""
 
 msgid "%{issuableType} will be removed! Are you sure?"
+msgstr ""
+
+msgid "%{issueType} actions"
 msgstr ""
 
 msgid "%{issuesCount} issues with a limit of %{maxIssueCount}"
@@ -707,34 +718,13 @@ msgstr[1] ""
 msgid "%{remaining_approvals} left"
 msgstr ""
 
-msgid "%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}."
+msgid "%{reportType} %{status}"
 msgstr ""
 
-msgid "%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities."
+msgid "%{reportType} detected %{totalStart}%{total}%{totalEnd} potential %{vulnMessage}"
 msgstr ""
 
-msgid "%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerabilities out of %{total}."
-msgstr ""
-
-msgid "%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerability."
-msgid_plural "%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerabilities."
-msgstr[0] ""
-msgstr[1] ""
-
-msgid "%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}."
-msgstr ""
-
-msgid "%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerability."
-msgid_plural "%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerabilities."
-msgstr[0] ""
-msgstr[1] ""
-
-msgid "%{reportType} %{status} detected %{other} vulnerability."
-msgid_plural "%{reportType} %{status} detected %{other} vulnerabilities."
-msgstr[0] ""
-msgstr[1] ""
-
-msgid "%{reportType} %{status} detected no vulnerabilities."
+msgid "%{reportType} detected %{totalStart}no%{totalEnd} vulnerabilities."
 msgstr ""
 
 msgid "%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}."
@@ -2276,9 +2266,6 @@ msgstr ""
 msgid "Administration"
 msgstr ""
 
-msgid "Adoption"
-msgstr ""
-
 msgid "Advanced"
 msgstr ""
 
@@ -2488,6 +2475,24 @@ msgstr ""
 msgid "AlertManagement|You have enabled the Opsgenie integration. Your alerts will be visible directly in Opsgenie."
 msgstr ""
 
+msgid "AlertMappingBuilder|Define fallback"
+msgstr ""
+
+msgid "AlertMappingBuilder|GitLab alert key"
+msgstr ""
+
+msgid "AlertMappingBuilder|Make selection"
+msgstr ""
+
+msgid "AlertMappingBuilder|Payload alert key"
+msgstr ""
+
+msgid "AlertMappingBuilder|Select key"
+msgstr ""
+
+msgid "AlertMappingBuilder|Title is a required field for alerts in GitLab. Should the payload field you specified not be available, specifiy which field we should use instead. "
+msgstr ""
+
 msgid "AlertService|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
 msgstr ""
 
@@ -2533,6 +2538,12 @@ msgstr ""
 msgid "AlertSettings|Copy"
 msgstr ""
 
+msgid "AlertSettings|Delete integration"
+msgstr ""
+
+msgid "AlertSettings|Edit payload"
+msgstr ""
+
 msgid "AlertSettings|Enter integration name"
 msgstr ""
 
@@ -2548,6 +2559,12 @@ msgstr ""
 msgid "AlertSettings|HTTP endpoint"
 msgstr ""
 
+msgid "AlertSettings|If you edit the payload, the stored mapping will be reset, and you'll need to re-map the fields."
+msgstr ""
+
+msgid "AlertSettings|In free versions of GitLab, only one integration for each type can be added. %{linkStart}Upgrade your subscription%{linkEnd} to add additional integrations."
+msgstr ""
+
 msgid "AlertSettings|Integration"
 msgstr ""
 
@@ -2560,6 +2577,9 @@ msgstr ""
 msgid "AlertSettings|Opsgenie"
 msgstr ""
 
+msgid "AlertSettings|Proceed with editing"
+msgstr ""
+
 msgid "AlertSettings|Prometheus API base URL"
 msgstr ""
 
@@ -2570,6 +2590,9 @@ msgid "AlertSettings|Reset Key"
 msgstr ""
 
 msgid "AlertSettings|Reset key"
+msgstr ""
+
+msgid "AlertSettings|Reset the mapping"
 msgstr ""
 
 msgid "AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in."
@@ -2585,6 +2608,9 @@ msgid "AlertSettings|Save integration"
 msgstr ""
 
 msgid "AlertSettings|Select integration type"
+msgstr ""
+
+msgid "AlertSettings|Submit payload"
 msgstr ""
 
 msgid "AlertSettings|Test alert payload"
@@ -2644,13 +2670,34 @@ msgstr ""
 msgid "AlertsIntegrations|Integration Name"
 msgstr ""
 
+msgid "AlertsIntegrations|Integration payload is invalid. You can still save your changes."
+msgstr ""
+
 msgid "AlertsIntegrations|No integrations have been added yet"
 msgstr ""
 
 msgid "AlertsIntegrations|Prometheus"
 msgstr ""
 
+msgid "AlertsIntegrations|The current integration could not be updated. Please try again."
+msgstr ""
+
+msgid "AlertsIntegrations|The integration could not be added. Please try again."
+msgstr ""
+
+msgid "AlertsIntegrations|The integration could not be deleted. Please try again."
+msgstr ""
+
+msgid "AlertsIntegrations|The integration has been successfully removed."
+msgstr ""
+
 msgid "AlertsIntegrations|The integration has been successfully saved. Alerts from this new integration should now appear on your alerts list."
+msgstr ""
+
+msgid "AlertsIntegrations|The integration token could not be reset. Please try again."
+msgstr ""
+
+msgid "AlertsIntegrations|You have opted to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer receive alerts from this endpoint in your alert list, and this action cannot be undone."
 msgstr ""
 
 msgid "Algorithm"
@@ -2995,9 +3042,6 @@ msgstr ""
 msgid "An error occurred while fetching terraform reports."
 msgstr ""
 
-msgid "An error occurred while fetching the Service Desk address."
-msgstr ""
-
 msgid "An error occurred while fetching the board lists. Please try again."
 msgstr ""
 
@@ -3041,6 +3085,9 @@ msgid "An error occurred while importing project: %{details}"
 msgstr ""
 
 msgid "An error occurred while initializing path locks"
+msgstr ""
+
+msgid "An error occurred while loading a section of this page."
 msgstr ""
 
 msgid "An error occurred while loading all the files."
@@ -3097,6 +3144,9 @@ msgstr ""
 msgid "An error occurred while loading the merge request."
 msgstr ""
 
+msgid "An error occurred while loading the pipeline."
+msgstr ""
+
 msgid "An error occurred while loading the pipelines jobs."
 msgstr ""
 
@@ -3122,9 +3172,6 @@ msgid "An error occurred while rendering preview broadcast message"
 msgstr ""
 
 msgid "An error occurred while rendering the editor"
-msgstr ""
-
-msgid "An error occurred while rendering the linter"
 msgstr ""
 
 msgid "An error occurred while reordering issues."
@@ -3155,6 +3202,9 @@ msgid "An error occurred while subscribing to notifications."
 msgstr ""
 
 msgid "An error occurred while triggering the job."
+msgstr ""
+
+msgid "An error occurred while trying to generate the report. Please try again later."
 msgstr ""
 
 msgid "An error occurred while trying to run a new pipeline for this Merge Request."
@@ -3504,6 +3554,9 @@ msgstr ""
 msgid "Archived"
 msgstr ""
 
+msgid "Archived (%{movedToStart}moved%{movedToEnd})"
+msgstr ""
+
 msgid "Archived in this version"
 msgstr ""
 
@@ -3555,9 +3608,6 @@ msgstr ""
 msgid "Are you sure you want to delete this device? This action cannot be undone."
 msgstr ""
 
-msgid "Are you sure you want to delete this list?"
-msgstr ""
-
 msgid "Are you sure you want to delete this pipeline schedule?"
 msgstr ""
 
@@ -3606,6 +3656,9 @@ msgid "Are you sure you want to remove the license?"
 msgstr ""
 
 msgid "Are you sure you want to remove this identity?"
+msgstr ""
+
+msgid "Are you sure you want to remove this list?"
 msgstr ""
 
 msgid "Are you sure you want to reset registration token?"
@@ -4320,6 +4373,11 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
+msgid "Blocked by %d issue"
+msgid_plural "Blocked by %d issues"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Blocked issue"
 msgstr ""
 
@@ -4369,6 +4427,9 @@ msgid "Boards|An error occurred while generating lists. Please reload the page."
 msgstr ""
 
 msgid "Boards|An error occurred while moving the issue. Please try again."
+msgstr ""
+
+msgid "Boards|An error occurred while removing the list. Please try again."
 msgstr ""
 
 msgid "Boards|An error occurred while updating the list. Please try again."
@@ -4782,6 +4843,12 @@ msgstr ""
 msgid "Canary Deployments is a popular CI strategy, where a small portion of the fleet is updated to the new version of your application."
 msgstr ""
 
+msgid "Canary Ingress does not exist in the environment."
+msgstr ""
+
+msgid "Canary weight must be specified and valid range (0..100)."
+msgstr ""
+
 msgid "Cancel"
 msgstr ""
 
@@ -4813,9 +4880,6 @@ msgid "Cannot create the abuse report. This user has been blocked."
 msgstr ""
 
 msgid "Cannot enable shared runners because parent group does not allow it"
-msgstr ""
-
-msgid "Cannot find user key."
 msgstr ""
 
 msgid "Cannot have multiple Jira imports running at the same time"
@@ -5274,6 +5338,9 @@ msgstr ""
 msgid "Choose labels"
 msgstr ""
 
+msgid "Choose specific groups or storage shards"
+msgstr ""
+
 msgid "Choose the top-level group for your repository imports."
 msgstr ""
 
@@ -5538,13 +5605,13 @@ msgstr ""
 msgid "Close %{display_issuable_type}"
 msgstr ""
 
+msgid "Close %{issueType}"
+msgstr ""
+
 msgid "Close %{tabname}"
 msgstr ""
 
 msgid "Close epic"
-msgstr ""
-
-msgid "Close issue"
 msgstr ""
 
 msgid "Close milestone"
@@ -7079,6 +7146,9 @@ msgstr ""
 msgid "Consistency guarantee method"
 msgstr ""
 
+msgid "Contact Sales to upgrade"
+msgstr ""
+
 msgid "Contact sales to upgrade"
 msgstr ""
 
@@ -7103,7 +7173,7 @@ msgstr ""
 msgid "Container repositories"
 msgstr ""
 
-msgid "Container repositories sync capacity"
+msgid "Container repositories synchronization concurrency limit"
 msgstr ""
 
 msgid "Container repository"
@@ -8757,9 +8827,6 @@ msgstr ""
 msgid "Delete variable"
 msgstr ""
 
-msgid "DeleteProject|Delete %{name}"
-msgstr ""
-
 msgid "DeleteProject|Failed to remove project repository. Please try again or contact administrator."
 msgstr ""
 
@@ -9360,13 +9427,7 @@ msgstr ""
 msgid "Detect host keys"
 msgstr ""
 
-msgid "DevOps"
-msgstr ""
-
 msgid "DevOps Report"
-msgstr ""
-
-msgid "DevOps Score"
 msgstr ""
 
 msgid "DevopsAdoptionSegmentSelection|The maximum number of selections has been reached"
@@ -9385,6 +9446,18 @@ msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
 msgid "DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
+msgstr ""
+
+msgid "DevopsReport|Adoption"
+msgstr ""
+
+msgid "DevopsReport|DevOps"
+msgstr ""
+
+msgid "DevopsReport|DevOps Score"
+msgstr ""
+
+msgid "DevopsReport|Score"
 msgstr ""
 
 msgid "Diff content limits"
@@ -9650,9 +9723,6 @@ msgstr ""
 msgid "Download as"
 msgstr ""
 
-msgid "Download as CSV"
-msgstr ""
-
 msgid "Download codes"
 msgstr ""
 
@@ -9701,7 +9771,13 @@ msgstr ""
 msgid "Drop or %{linkStart}upload%{linkEnd} designs to attach"
 msgstr ""
 
+msgid "Drop or %{linkStart}upload%{linkEnd} files to attach"
+msgstr ""
+
 msgid "Drop your designs to start your upload."
+msgstr ""
+
+msgid "Drop your files to start your upload."
 msgstr ""
 
 msgid "Due Date"
@@ -10356,6 +10432,9 @@ msgid "Environments|Currently showing all results."
 msgstr ""
 
 msgid "Environments|Delete"
+msgstr ""
+
+msgid "Environments|Delete '%{environmentName}'?"
 msgstr ""
 
 msgid "Environments|Delete environment"
@@ -11129,6 +11208,11 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
+msgid "Failed %d time in the last 14 days"
+msgid_plural "Failed %d times in the last 14 days"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Failed Jobs"
 msgstr ""
 
@@ -11342,6 +11426,9 @@ msgstr ""
 msgid "Failed to update tag!"
 msgstr ""
 
+msgid "Failed to update the Canary Ingress."
+msgstr ""
+
 msgid "Failed to update."
 msgstr ""
 
@@ -11379,6 +11466,9 @@ msgid "Favicon was successfully removed."
 msgstr ""
 
 msgid "Feature Flags"
+msgstr ""
+
+msgid "Feature flag is not enabled on the environment's project."
 msgstr ""
 
 msgid "Feature flag was not removed."
@@ -11683,7 +11773,7 @@ msgstr ""
 msgid "File renamed with no changes."
 msgstr ""
 
-msgid "File sync capacity"
+msgid "File synchronization concurrency limit"
 msgstr ""
 
 msgid "File templates"
@@ -12733,7 +12823,7 @@ msgstr ""
 msgid "Go back (while searching for files)"
 msgstr ""
 
-msgid "Go back to %{startTag}Open issues%{endTag} and select some issues to add to your board."
+msgid "Go back to %{tagStart}Open issues%{tagEnd} and select some issues to add to your board."
 msgstr ""
 
 msgid "Go full screen"
@@ -13489,12 +13579,6 @@ msgstr ""
 msgid "GroupsTree|Are you sure you want to leave the \"%{fullName}\" group?"
 msgstr ""
 
-msgid "GroupsTree|Create a project in this group."
-msgstr ""
-
-msgid "GroupsTree|Create a subgroup in this group."
-msgstr ""
-
 msgid "GroupsTree|Edit group"
 msgstr ""
 
@@ -13719,9 +13803,6 @@ msgid "How many shards to split the Elasticsearch index over."
 msgstr ""
 
 msgid "How many users will be evaluating the trial?"
-msgstr ""
-
-msgid "How to upgrade"
 msgstr ""
 
 msgid "However, you are already a member of this %{member_source}. Sign in using a different account to accept the invitation."
@@ -14393,46 +14474,10 @@ msgstr ""
 msgid "Instance administrators group already exists"
 msgstr ""
 
-msgid "InstanceAnalytics|Canceled"
+msgid "InstanceStatistics|Could not load the issues and merge requests chart. Please refresh the page to try again."
 msgstr ""
 
-msgid "InstanceAnalytics|Could not load the issues and merge requests chart. Please refresh the page to try again."
-msgstr ""
-
-msgid "InstanceAnalytics|Could not load the pipelines chart. Please refresh the page to try again."
-msgstr ""
-
-msgid "InstanceAnalytics|Failed"
-msgstr ""
-
-msgid "InstanceAnalytics|Issues"
-msgstr ""
-
-msgid "InstanceAnalytics|Issues & Merge Requests"
-msgstr ""
-
-msgid "InstanceAnalytics|Items"
-msgstr ""
-
-msgid "InstanceAnalytics|Merge Requests"
-msgstr ""
-
-msgid "InstanceAnalytics|Month"
-msgstr ""
-
-msgid "InstanceAnalytics|Pipelines"
-msgstr ""
-
-msgid "InstanceAnalytics|Skipped"
-msgstr ""
-
-msgid "InstanceAnalytics|Succeeded"
-msgstr ""
-
-msgid "InstanceAnalytics|There is no data available."
-msgstr ""
-
-msgid "InstanceAnalytics|Total"
+msgid "InstanceStatistics|Could not load the pipelines chart. Please refresh the page to try again."
 msgstr ""
 
 msgid "InstanceStatistics|Could not load the projects and groups chart. Please refresh the page to try again."
@@ -14444,7 +14489,16 @@ msgstr ""
 msgid "InstanceStatistics|Issues"
 msgstr ""
 
+msgid "InstanceStatistics|Issues & Merge Requests"
+msgstr ""
+
+msgid "InstanceStatistics|Items"
+msgstr ""
+
 msgid "InstanceStatistics|Merge Requests"
+msgstr ""
+
+msgid "InstanceStatistics|Month"
 msgstr ""
 
 msgid "InstanceStatistics|No data available."
@@ -14453,7 +14507,43 @@ msgstr ""
 msgid "InstanceStatistics|Pipelines"
 msgstr ""
 
+msgid "InstanceStatistics|Pipelines canceled"
+msgstr ""
+
+msgid "InstanceStatistics|Pipelines failed"
+msgstr ""
+
+msgid "InstanceStatistics|Pipelines skipped"
+msgstr ""
+
+msgid "InstanceStatistics|Pipelines succeeded"
+msgstr ""
+
+msgid "InstanceStatistics|Pipelines total"
+msgstr ""
+
 msgid "InstanceStatistics|Projects"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the cancelled pipelines"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the failed pipelines"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the issues"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the merge requests"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the skipped pipelines"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the successful pipelines"
+msgstr ""
+
+msgid "InstanceStatistics|There was an error fetching the total pipelines"
 msgstr ""
 
 msgid "InstanceStatistics|There was an error while loading the groups"
@@ -14879,9 +14969,6 @@ msgstr ""
 msgid "Issue Boards"
 msgstr ""
 
-msgid "Issue actions"
-msgstr ""
-
 msgid "Issue already promoted to epic."
 msgstr ""
 
@@ -15258,6 +15345,15 @@ msgid "Job was retried"
 msgstr ""
 
 msgid "Jobs"
+msgstr ""
+
+msgid "Jobs|Are you sure you want to proceed?"
+msgstr ""
+
+msgid "Jobs|Are you sure you want to retry this job?"
+msgstr ""
+
+msgid "Jobs|You're about to retry a job that failed because it attempted to deploy code that is older than the latest deployment. Retrying this job could result in overwriting the environment with the older source code."
 msgstr ""
 
 msgid "Job|Browse"
@@ -15968,6 +16064,9 @@ msgid "Limit display of time tracking units to hours."
 msgstr ""
 
 msgid "Limit namespaces and projects that can be indexed"
+msgstr ""
+
+msgid "Limit the number of concurrent operations this secondary node can run in the background."
 msgstr ""
 
 msgid "Limited to showing %d event at most"
@@ -17302,6 +17401,9 @@ msgstr ""
 msgid "MilestoneCombobox|An error occurred while searching for milestones"
 msgstr ""
 
+msgid "MilestoneCombobox|Group milestones"
+msgstr ""
+
 msgid "MilestoneCombobox|Milestone"
 msgstr ""
 
@@ -17597,6 +17699,9 @@ msgid "Move selection down"
 msgstr ""
 
 msgid "Move selection up"
+msgstr ""
+
+msgid "Move test case"
 msgstr ""
 
 msgid "Move this issue to another project."
@@ -17987,6 +18092,9 @@ msgstr ""
 msgid "New %{display_issuable_type}"
 msgstr ""
 
+msgid "New %{issueType}"
+msgstr ""
+
 msgid "New Application"
 msgstr ""
 
@@ -18241,9 +18349,6 @@ msgstr ""
 msgid "No containers available"
 msgstr ""
 
-msgid "No content to show"
-msgstr ""
-
 msgid "No contributions"
 msgstr ""
 
@@ -18464,6 +18569,9 @@ msgid "Not all browsers support WebAuthn. Therefore, we require that you set up 
 msgstr ""
 
 msgid "Not all data has been processed yet, the accuracy of the chart for the selected timeframe is limited."
+msgstr ""
+
+msgid "Not applicable to personal namespaced projects, which are deleted immediately on request."
 msgstr ""
 
 msgid "Not available"
@@ -19012,6 +19120,9 @@ msgid "OutdatedBrowser|Please install a %{browser_link_start}supported web brows
 msgstr ""
 
 msgid "Outdent"
+msgstr ""
+
+msgid "Overall Activity"
 msgstr ""
 
 msgid "Overridden"
@@ -22080,6 +22191,9 @@ msgstr ""
 msgid "Redirect to SAML provider to test configuration"
 msgstr ""
 
+msgid "Redis"
+msgstr ""
+
 msgid "Reduce project visibility"
 msgstr ""
 
@@ -22238,6 +22352,9 @@ msgid "ReleaseAssetLinkType|Runbook"
 msgstr ""
 
 msgid "ReleaseAssetLinkType|Runbooks"
+msgstr ""
+
+msgid "Released date"
 msgstr ""
 
 msgid "Releases"
@@ -22495,10 +22612,10 @@ msgstr ""
 msgid "Reopen %{display_issuable_type}"
 msgstr ""
 
-msgid "Reopen epic"
+msgid "Reopen %{issueType}"
 msgstr ""
 
-msgid "Reopen issue"
+msgid "Reopen epic"
 msgstr ""
 
 msgid "Reopen milestone"
@@ -22577,6 +22694,15 @@ msgid "Reporting"
 msgstr ""
 
 msgid "Reports|%{combinedString} and %{resolvedString}"
+msgstr ""
+
+msgid "Reports|%{recentlyFailed} out of %{failed} failed test has failed more than once in the last 14 days"
+msgstr ""
+
+msgid "Reports|%{recentlyFailed} out of %{failed} failed tests has failed more than once in the last 14 days"
+msgstr ""
+
+msgid "Reports|%{recentlyFailed} out of %{failed} failed tests have failed more than once in the last 14 days"
 msgstr ""
 
 msgid "Reports|Accessibility scanning detected %d issue for the source branch only"
@@ -22662,6 +22788,9 @@ msgstr ""
 msgid "Repositories Analytics"
 msgstr ""
 
+msgid "RepositoriesAnalytics|Average Coverage by Job"
+msgstr ""
+
 msgid "RepositoriesAnalytics|Coverage"
 msgstr ""
 
@@ -22692,10 +22821,16 @@ msgstr ""
 msgid "RepositoriesAnalytics|Please select projects to display."
 msgstr ""
 
+msgid "RepositoriesAnalytics|Projects with Tests"
+msgstr ""
+
 msgid "RepositoriesAnalytics|Test Code Coverage"
 msgstr ""
 
 msgid "RepositoriesAnalytics|There was an error fetching the projects."
+msgstr ""
+
+msgid "RepositoriesAnalytics|Total Number of Coverages"
 msgstr ""
 
 msgid "Repository"
@@ -22758,7 +22893,7 @@ msgstr ""
 msgid "Repository storage"
 msgstr ""
 
-msgid "Repository sync capacity"
+msgid "Repository synchronization concurrency limit"
 msgstr ""
 
 msgid "Repository: %{counter_repositories} / Wikis: %{counter_wikis} / Build Artifacts: %{counter_build_artifacts} / LFS: %{counter_lfs_objects} / Snippets: %{counter_snippets}"
@@ -23009,6 +23144,9 @@ msgid "Resync all %{replicableType}"
 msgstr ""
 
 msgid "Retry"
+msgstr ""
+
+msgid "Retry job"
 msgstr ""
 
 msgid "Retry this job"
@@ -23415,9 +23553,6 @@ msgid "Scopes can't be blank"
 msgstr ""
 
 msgid "Scopes: %{scope_list}"
-msgstr ""
-
-msgid "Score"
 msgstr ""
 
 msgid "Scroll down"
@@ -24461,12 +24596,6 @@ msgstr ""
 msgid "Set the milestone to %{milestone_reference}."
 msgstr ""
 
-msgid "Set the number of concurrent requests this secondary node will make to the primary node while backfilling."
-msgstr ""
-
-msgid "Set the synchronization and verification capacity for the secondary node."
-msgstr ""
-
 msgid "Set the timeout in seconds to send a secondary node status to the primary and IPs allowed for the secondary nodes."
 msgstr ""
 
@@ -24509,13 +24638,16 @@ msgstr ""
 msgid "Set up your project to automatically push and/or pull changes to/from another repository. Branches, tags, and commits will be synced automatically."
 msgstr ""
 
+msgid "Set verification limit and frequency."
+msgstr ""
+
 msgid "Set weight"
 msgstr ""
 
 msgid "Set weight to %{weight}."
 msgstr ""
 
-msgid "Set what should be replicated by choosing specific projects or groups by the secondary node."
+msgid "Set what should be replicated by this secondary node."
 msgstr ""
 
 msgid "SetPasswordToCloneLink|set a password"
@@ -25935,6 +26067,9 @@ msgstr ""
 msgid "Succeeded"
 msgstr ""
 
+msgid "Successful purchase image"
+msgstr ""
+
 msgid "Successfully activated"
 msgstr ""
 
@@ -26107,6 +26242,9 @@ msgid "Synced"
 msgstr ""
 
 msgid "Synchronization disabled"
+msgstr ""
+
+msgid "Synchronization settings"
 msgstr ""
 
 msgid "Syncing…"
@@ -26319,6 +26457,9 @@ msgstr ""
 msgid "Terms of Service and Privacy Policy"
 msgstr ""
 
+msgid "Terraform"
+msgstr ""
+
 msgid "Terraform|%{number} Terraform report failed to generate"
 msgid_plural "Terraform|%{number} Terraform reports failed to generate"
 msgstr[0] ""
@@ -26329,16 +26470,37 @@ msgid_plural "Terraform|%{number} Terraform reports were generated in your pipel
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Terraform|%{user} updated %{timeAgo}"
+msgstr ""
+
 msgid "Terraform|A Terraform report failed to generate."
 msgstr ""
 
 msgid "Terraform|A Terraform report was generated in your pipelines."
 msgstr ""
 
+msgid "Terraform|An error occurred while loading your Terraform States"
+msgstr ""
+
+msgid "Terraform|Find out how to use the %{linkStart}GitLab managed Terraform State%{linkEnd}"
+msgstr ""
+
 msgid "Terraform|Generating the report caused an error."
 msgstr ""
 
+msgid "Terraform|Get started with Terraform"
+msgstr ""
+
+msgid "Terraform|Locked"
+msgstr ""
+
+msgid "Terraform|Locked by %{user} %{timeAgo}"
+msgstr ""
+
 msgid "Terraform|Reported Resource Changes: %{addNum} to add, %{changeNum} to change, %{deleteNum} to delete"
+msgstr ""
+
+msgid "Terraform|States"
 msgstr ""
 
 msgid "Terraform|The Terraform report %{name} failed to generate."
@@ -26367,6 +26529,12 @@ msgstr[1] ""
 msgid "Test settings"
 msgstr ""
 
+msgid "TestCases|Move test case"
+msgstr ""
+
+msgid "TestCases|Moving test case"
+msgstr ""
+
 msgid "TestCases|New Test Case"
 msgstr ""
 
@@ -26392,6 +26560,9 @@ msgid "TestCases|Something went wrong while fetching test cases list."
 msgstr ""
 
 msgid "TestCases|Something went wrong while marking test case todo as done."
+msgstr ""
+
+msgid "TestCases|Something went wrong while moving test case."
 msgstr ""
 
 msgid "TestCases|Something went wrong while updating the test case labels."
@@ -26422,6 +26593,9 @@ msgid "TestHooks|Ensure the project has merge requests."
 msgstr ""
 
 msgid "TestHooks|Ensure the project has notes."
+msgstr ""
+
+msgid "TestHooks|Ensure the project has releases."
 msgstr ""
 
 msgid "TestHooks|Ensure the wiki is enabled and has pages."
@@ -26695,6 +26869,9 @@ msgstr ""
 msgid "The issue stage shows the time it takes from creating an issue to assigning the issue to a milestone, or add the issue to a list on your Issue Board. Begin creating issues to see data for this stage."
 msgstr ""
 
+msgid "The license for Deploy Board is required to use this feature."
+msgstr ""
+
 msgid "The license key is invalid. Make sure it is exactly as you received it from GitLab Inc."
 msgstr ""
 
@@ -26890,6 +27067,9 @@ msgstr ""
 msgid "The value of the provided variable exceeds the %{count} character limit"
 msgstr ""
 
+msgid "The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax."
+msgstr ""
+
 msgid "The vulnerability is no longer detected. Verify the vulnerability has been fixed or removed before changing its status."
 msgstr ""
 
@@ -26975,6 +27155,9 @@ msgid "There are no projects shared with this group yet"
 msgstr ""
 
 msgid "There are no variables yet."
+msgstr ""
+
+msgid "There are running deployments on the environment. Please retry later."
 msgstr ""
 
 msgid "There is a limit of %{ci_project_subscriptions_limit} subscriptions from or to a project."
@@ -27347,6 +27530,9 @@ msgid "This environment is being deployed"
 msgstr ""
 
 msgid "This environment is being re-deployed"
+msgstr ""
+
+msgid "This environment's canary ingress has been updated recently. Please retry later."
 msgstr ""
 
 msgid "This epic already has the maximum number of child epics."
@@ -28136,7 +28322,7 @@ msgstr ""
 msgid "To use Gitpod you must first enable the feature in the integrations section of your %{user_prefs}."
 msgstr ""
 
-msgid "To view all %{scannedResourcesCount} scanned URLs, please download the CSV file"
+msgid "To view all %{scannedResourcesCount} scanned URLs, %{linkStart}please download the CSV file%{linkEnd}"
 msgstr ""
 
 msgid "To view instance-level analytics, ask an admin to turn on %{docLinkStart}usage ping%{docLinkEnd}."
@@ -29498,7 +29684,7 @@ msgstr ""
 msgid "Various settings that affect GitLab performance."
 msgstr ""
 
-msgid "Verification capacity"
+msgid "Verification concurrency limit"
 msgstr ""
 
 msgid "Verification information"
@@ -30054,6 +30240,9 @@ msgstr ""
 msgid "Webhooks|Push events"
 msgstr ""
 
+msgid "Webhooks|Releases events"
+msgstr ""
+
 msgid "Webhooks|SSL verification"
 msgstr ""
 
@@ -30067,6 +30256,9 @@ msgid "Webhooks|This URL is triggered when a deployment starts, finishes, fails,
 msgstr ""
 
 msgid "Webhooks|This URL is triggered when a feature flag is turned on or off"
+msgstr ""
+
+msgid "Webhooks|This URL is triggered when a release is created/updated"
 msgstr ""
 
 msgid "Webhooks|This URL will be triggered by a push to the repository"
@@ -30713,6 +30905,9 @@ msgstr ""
 msgid "You do not have permission to run the Web Terminal. Please contact a project administrator."
 msgstr ""
 
+msgid "You do not have permission to update the environment."
+msgstr ""
+
 msgid "You do not have permissions to run the import."
 msgstr ""
 
@@ -30926,7 +31121,7 @@ msgstr ""
 msgid "You won't be able to pull or push project code via SSH until you add an SSH key to your profile"
 msgstr ""
 
-msgid "You'll be charged for %{true_up_link_start}users over license%{link_end} on a quartely or annual basis, depending on the terms of your agreement."
+msgid "You'll be charged for %{true_up_link_start}users over license%{link_end} on a quarterly or annual basis, depending on the terms of your agreement."
 msgstr ""
 
 msgid "You'll be signed out from your current account automatically."
@@ -31008,6 +31203,9 @@ msgid "Your DevOps Report gives an overview of how you are using GitLab from a f
 msgstr ""
 
 msgid "Your GPG keys (%{count})"
+msgstr ""
+
+msgid "Your GitLab account request has been approved!"
 msgstr ""
 
 msgid "Your GitLab group"
@@ -31208,6 +31406,9 @@ msgstr ""
 msgid "Your search didn't match any commits. Try a different query."
 msgstr ""
 
+msgid "Your sign-in page is %{url}."
+msgstr ""
+
 msgid "Your subscription expired!"
 msgstr ""
 
@@ -31215,6 +31416,9 @@ msgid "Your subscription has been downgraded."
 msgstr ""
 
 msgid "Your subscription will expire in %{remaining_days}."
+msgstr ""
+
+msgid "Your username is %{username}."
 msgstr ""
 
 msgid "Zoom meeting added"
@@ -31387,13 +31591,7 @@ msgstr ""
 msgid "ciReport|%{sameNum} same"
 msgstr ""
 
-msgid "ciReport|(errors when loading results)"
-msgstr ""
-
-msgid "ciReport|(is loading)"
-msgstr ""
-
-msgid "ciReport|(is loading, errors when loading results)"
+msgid "ciReport|: Loading resulted in an error"
 msgstr ""
 
 msgid "ciReport|All projects"
@@ -31558,6 +31756,12 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "ciReport|View full report"
+msgstr ""
+
+msgid "ciReport|is loading"
+msgstr ""
+
+msgid "ciReport|is loading, errors when loading results"
 msgstr ""
 
 msgid "closed issue"
@@ -32473,6 +32677,9 @@ msgstr ""
 msgid "security Reports|There was an error creating the merge request"
 msgstr ""
 
+msgid "severity|Blocker"
+msgstr ""
+
 msgid "severity|Critical"
 msgstr ""
 
@@ -32485,7 +32692,13 @@ msgstr ""
 msgid "severity|Low"
 msgstr ""
 
+msgid "severity|Major"
+msgstr ""
+
 msgid "severity|Medium"
+msgstr ""
+
+msgid "severity|Minor"
 msgstr ""
 
 msgid "severity|None"
@@ -32661,6 +32874,11 @@ msgstr ""
 
 msgid "view the source"
 msgstr ""
+
+msgid "vulnerability"
+msgid_plural "vulnerabilities"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "vulnerability|Add a comment"
 msgstr ""

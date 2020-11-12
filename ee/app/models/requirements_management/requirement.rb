@@ -23,7 +23,7 @@ module RequirementsManagement
 
     has_many :test_reports, inverse_of: :requirement
 
-    has_internal_id :iid, scope: :project, init: ->(s) { s&.project&.requirements&.maximum(:iid) }
+    has_internal_id :iid, scope: :project
 
     validates :author, :project, :title, presence: true
 

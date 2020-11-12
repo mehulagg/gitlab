@@ -8,8 +8,6 @@ import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_chart.vue';
-import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list_vuex.vue';
-import VulnerabilitySeverity from 'ee/security_dashboard/components/vulnerability_severity.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 
 import createStore from 'ee/security_dashboard/store';
@@ -18,9 +16,7 @@ import axios from '~/lib/utils/axios_utils';
 
 const pipelineId = 123;
 const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
-const vulnerabilitiesCountEndpoint = `${TEST_HOST}/vulnerabilities_summary`;
 const vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilities_history`;
-const vulnerableProjectsEndpoint = `${TEST_HOST}/vulnerable_projects`;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   getParameterValues: jest.fn().mockReturnValue([]),
@@ -48,9 +44,7 @@ describe('Security Dashboard component', () => {
       propsData: {
         dashboardDocumentation: '',
         vulnerabilitiesEndpoint,
-        vulnerabilitiesCountEndpoint,
         vulnerabilitiesHistoryEndpoint,
-        vulnerableProjectsEndpoint,
         pipelineId,
         ...props,
       },
@@ -89,10 +83,6 @@ describe('Security Dashboard component', () => {
       expect(wrapper.find(VulnerabilityChart).exists()).toBe(true);
     });
 
-    it('does not render the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(false);
-    });
-
     it('does not lock to a project', () => {
       expect(wrapper.vm.isLockedToProject).toBe(false);
     });
@@ -107,18 +97,6 @@ describe('Security Dashboard component', () => {
 
     it('fetchs the pipeline jobs', () => {
       expect(fetchPipelineJobsSpy).toHaveBeenCalledWith();
-    });
-
-    describe('when the total number of vulnerabilities change', () => {
-      const newCount = 3;
-
-      beforeEach(() => {
-        store.state.vulnerabilities.pageInfo = { total: newCount };
-      });
-
-      it('emits a vulnerabilitiesCountChanged event', () => {
-        expect(wrapper.emitted('vulnerabilitiesCountChanged')).toEqual([[newCount]]);
-      });
     });
 
     it('renders the issue modal', () => {
@@ -187,10 +165,6 @@ describe('Security Dashboard component', () => {
       });
     });
 
-    it('renders the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(true);
-    });
-
     it('locks to a given project', () => {
       expect(wrapper.vm.isLockedToProject).toBe(true);
     });
@@ -205,9 +179,7 @@ describe('Security Dashboard component', () => {
 
   describe.each`
     endpointProp                        | Component
-    ${'vulnerabilitiesCountEndpoint'}   | ${VulnerabilityCountList}
     ${'vulnerabilitiesHistoryEndpoint'} | ${VulnerabilityChart}
-    ${'vulnerableProjectsEndpoint'}     | ${VulnerabilitySeverity}
   `('with an empty $endpointProp', ({ endpointProp, Component }) => {
     beforeEach(() => {
       createComponent({

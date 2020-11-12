@@ -19,7 +19,7 @@ gem 'default_value_for', '~> 3.3.0'
 gem 'pg', '~> 1.1'
 
 gem 'rugged', '~> 0.28'
-gem 'grape-path-helpers', '~> 1.4'
+gem 'grape-path-helpers', '~> 1.5'
 
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.9.0'
@@ -159,7 +159,7 @@ gem 'wikicloth', '0.8.1'
 gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
-gem 'rouge', '~> 3.24.0'
+gem 'rouge', '~> 3.25.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
 gem 'nokogiri', '~> 1.10.9'
@@ -173,7 +173,7 @@ gem 'diffy', '~> 3.3'
 gem 'diff_match_patch', '~> 0.1.0'
 
 # Application server
-gem 'rack', '~> 2.1.4'
+gem 'rack', '~> 2.2.3'
 # https://github.com/sharpstone/rack-timeout/blob/master/README.md#rails-apps-manually
 gem 'rack-timeout', '~> 0.5.1', require: 'rack/timeout/base'
 
@@ -367,12 +367,12 @@ group :development, :test do
   # Generate Fake data
   gem 'ffaker', '~> 2.10'
 
-  gem 'spring', '~> 2.0.0'
+  gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
   gem 'gitlab-styles', '~> 5.0.0', require: false
 
-  gem 'scss_lint', '~> 0.56.0', require: false
+  gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
   gem 'bundler-audit', '~> 0.6.1', require: false
 

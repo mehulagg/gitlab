@@ -1,16 +1,27 @@
-import { mount } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
+import { mount, createLocalVue } from '@vue/test-utils';
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import { GlLoadingIcon } from '@gitlab/ui';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import AlertsSettingsFormOld from '~/alerts_settings/components/alerts_settings_form_old.vue';
 import AlertsSettingsFormNew from '~/alerts_settings/components/alerts_settings_form_new.vue';
 import IntegrationsList from '~/alerts_settings/components/alerts_integrations_list.vue';
+import getIntegrationsQuery from '~/alerts_settings/graphql/queries/get_integrations.query.graphql';
 import createHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/create_http_integration.mutation.graphql';
 import createPrometheusIntegrationMutation from '~/alerts_settings/graphql/mutations/create_prometheus_integration.mutation.graphql';
 import updateHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/update_http_integration.mutation.graphql';
 import updatePrometheusIntegrationMutation from '~/alerts_settings/graphql/mutations/update_prometheus_integration.mutation.graphql';
+import destroyHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/destroy_http_integration.mutation.graphql';
 import resetHttpTokenMutation from '~/alerts_settings/graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '~/alerts_settings/graphql/mutations/reset_prometheus_token.mutation.graphql';
 import { typeSet } from '~/alerts_settings/constants';
+import {
+  ADD_INTEGRATION_ERROR,
+  RESET_INTEGRATION_TOKEN_ERROR,
+  UPDATE_INTEGRATION_ERROR,
+  INTEGRATION_PAYLOAD_TEST_ERROR,
+} from '~/alerts_settings/utils/error_messages';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
 import mockIntegrations from './mocks/integrations.json';
@@ -20,15 +31,33 @@ import {
   createPrometheusVariables,
   updatePrometheusVariables,
   ID,
+  errorMsg,
+  getIntegrationsQueryResponse,
+  destroyIntegrationResponse,
+  integrationToDestroy,
+  destroyIntegrationResponseWithErrors,
 } from './mocks/apollo_mock';
 
 jest.mock('~/flash');
 
+const localVue = createLocalVue();
+
 describe('AlertsSettingsWrapper', () => {
   let wrapper;
+  let fakeApollo;
+  let destroyIntegrationHandler;
 
   const findLoader = () => wrapper.find(IntegrationsList).find(GlLoadingIcon);
   const findIntegrations = () => wrapper.find(IntegrationsList).findAll('table tbody tr');
+
+  async function destroyHttpIntegration(localWrapper) {
+    await jest.runOnlyPendingTimers();
+    await localWrapper.vm.$nextTick();
+
+    localWrapper
+      .find(IntegrationsList)
+      .vm.$emit('delete-integration', { id: integrationToDestroy.id });
+  }
 
   const createComponent = ({ data = {}, provide = {}, loading = false } = {}) => {
     wrapper = mount(AlertsSettingsWrapper, {
@@ -53,6 +82,29 @@ describe('AlertsSettingsWrapper', () => {
       },
     });
   };
+
+  function createComponentWithApollo({
+    destroyHandler = jest.fn().mockResolvedValue(destroyIntegrationResponse),
+  } = {}) {
+    localVue.use(VueApollo);
+    destroyIntegrationHandler = destroyHandler;
+
+    const requestHandlers = [
+      [getIntegrationsQuery, jest.fn().mockResolvedValue(getIntegrationsQueryResponse)],
+      [destroyHttpIntegrationMutation, destroyIntegrationHandler],
+    ];
+
+    fakeApollo = createMockApollo(requestHandlers);
+
+    wrapper = mount(AlertsSettingsWrapper, {
+      localVue,
+      apolloProvider: fakeApollo,
+      provide: {
+        ...defaultAlertSettingsConfig,
+        glFeatures: { httpIntegrationsList: true },
+      },
+    });
+  }
 
   afterEach(() => {
     if (wrapper) {
@@ -91,16 +143,6 @@ describe('AlertsSettingsWrapper', () => {
     it('renders the IntegrationsList table using the API data', () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
-        provide: { glFeatures: { httpIntegrationsList: true } },
-        loading: false,
-      });
-      expect(findLoader().exists()).toBe(false);
-      expect(findIntegrations()).toHaveLength(mockIntegrations.length);
-    });
-
-    it('shows an error message when a user cannot create a new integration', () => {
-      createComponent({
-        data: { integrations: { list: mockIntegrations } },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
@@ -242,41 +284,37 @@ describe('AlertsSettingsWrapper', () => {
       });
     });
 
-    it('shows error alert when integration creation fails ', async () => {
-      const errorMsg = 'Something went wrong';
+    it('shows an error alert when integration creation fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
 
-      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(ADD_INTEGRATION_ERROR);
       wrapper.find(AlertsSettingsFormNew).vm.$emit('create-new-integration', {});
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
-      });
+      await waitForPromises();
+
+      expect(createFlash).toHaveBeenCalledWith({ message: ADD_INTEGRATION_ERROR });
     });
 
-    it('shows error alert when integration token reset fails ', () => {
-      const errorMsg = 'Something went wrong';
+    it('shows an error alert when integration token reset fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
         loading: false,
       });
 
-      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(errorMsg);
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(RESET_INTEGRATION_TOKEN_ERROR);
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('reset-token', {});
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
-      });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: RESET_INTEGRATION_TOKEN_ERROR });
     });
 
-    it('shows error alert when integration update fails ', () => {
-      const errorMsg = 'Something went wrong';
+    it('shows an error alert when integration update fails ', async () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         provide: { glFeatures: { httpIntegrationsList: true } },
@@ -287,9 +325,59 @@ describe('AlertsSettingsWrapper', () => {
 
       wrapper.find(AlertsSettingsFormNew).vm.$emit('update-integration', {});
 
-      setImmediate(() => {
-        expect(createFlash).toHaveBeenCalledWith({ message: errorMsg });
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: UPDATE_INTEGRATION_ERROR });
+    });
+
+    it('shows an error alert when integration test payload fails ', async () => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true } },
+        loading: false,
       });
+
+      wrapper.find(AlertsSettingsFormNew).vm.$emit('test-payload-failure');
+
+      await waitForPromises();
+      expect(createFlash).toHaveBeenCalledWith({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
+      expect(createFlash).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('with mocked Apollo client', () => {
+    it('has a selection of integrations loaded via the getIntegrationsQuery', async () => {
+      createComponentWithApollo();
+
+      await jest.runOnlyPendingTimers();
+      await wrapper.vm.$nextTick();
+
+      expect(findIntegrations()).toHaveLength(4);
+    });
+
+    it('calls a mutation with correct parameters and destroys a integration', async () => {
+      createComponentWithApollo();
+
+      await destroyHttpIntegration(wrapper);
+
+      expect(destroyIntegrationHandler).toHaveBeenCalled();
+
+      await wrapper.vm.$nextTick();
+
+      expect(findIntegrations()).toHaveLength(3);
+    });
+
+    it('displays flash if mutation had a recoverable error', async () => {
+      createComponentWithApollo({
+        destroyHandler: jest.fn().mockResolvedValue(destroyIntegrationResponseWithErrors),
+      });
+
+      await destroyHttpIntegration(wrapper);
+
+      await wrapper.vm.$nextTick(); // kick off the DOM update
+      await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
+      await wrapper.vm.$nextTick(); // kick off the DOM update for flash
+
+      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
     });
   });
 });
