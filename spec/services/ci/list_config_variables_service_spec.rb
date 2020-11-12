@@ -118,6 +118,20 @@ RSpec.describe Ci::ListConfigVariablesService do
     end
   end
 
+  context 'when the cache is empty', :use_clean_rails_memory_store_caching do
+    let(:sha) { 'master' }
+    let(:ci_config) { {} }
+    let(:reactive_cache_params) { [project.id, user.id, sha] }
+
+    it 'enquques the worker to fill cache' do
+      expect(ReactiveCachingWorker)
+        .to receive(:perform_async)
+        .with(service.class, service.id, *reactive_cache_params)
+
+      expect(subject).to eq({})
+    end
+  end
+
   private
 
   def stub_gitlab_ci_yml_for_sha(sha, result)
