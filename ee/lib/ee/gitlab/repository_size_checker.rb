@@ -23,11 +23,12 @@ module EE
         [size, 0].max
       end
 
-      private
-
+      override :additional_repo_storage_available?
       def additional_repo_storage_available?
         !!namespace&.additional_repo_storage_by_namespace_enabled?
       end
+
+      private
 
       def total_repository_size_excess
         namespace&.total_repository_size_excess.to_i

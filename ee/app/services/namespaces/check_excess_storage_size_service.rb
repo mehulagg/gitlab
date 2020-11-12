@@ -39,6 +39,10 @@ module Namespaces
       end
     end
 
+    def base_message
+      s_("NamespaceStorageSize|push to your repository, create pipelines, create issues or add comments. To learn more about reducing storage capacity please visit: https://docs.gitlab.com/ee/user/project/repository/reducing_the_repo_size_using_git.html")
+    end
+
     def formatted(number)
       number_to_human_size(number, delimiter: ',', precision: 2)
     end
