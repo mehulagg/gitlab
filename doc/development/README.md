@@ -134,6 +134,7 @@ from:
 - [Feature categorization](feature_categorization/index.md)
 - [Wikis development guide](wikis.md)
 - [Newlines style guide](newlines_styleguide.md)
+- [Image scaling guide](image_scaling.md)
 
 ## Performance guides
 
