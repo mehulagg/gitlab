@@ -281,8 +281,7 @@ Uploads routes belong to one of these categories:
 1. GraphQL API: uploads handled by a GraphQL resolve function.
 
 CAUTION: **Warning:**
-GraphQL uploads do not support [direct upload](#direct-upload) yet. Depending on the use case, the feature may not work on installations without NFS (like gitlab.com or kubernetes installations). Uploading to object storage inside the GraphQL resolve function may result in timeout errors. For more details please follow [gitlab#280819](https://gitlab.com/gitlab-org/gitlab/-/issues/280819).
-
+GraphQL uploads do not support [direct upload](#direct-upload) yet. Depending on the use case, the feature may not work on installations without NFS (like GitLab.com or kubernetes installations). Uploading to object storage inside the GraphQL resolve function may result in timeout errors. For more details please follow [gitlab#280819](https://gitlab.com/gitlab-org/gitlab/-/issues/280819).
 
 ### Update Workhorse for the new route
 
