@@ -1,7 +1,8 @@
 import { s__, sprintf } from '~/locale';
-
-const TRANSLATION_IS_LOADING = s__('ciReport|%{reportType} is loading');
-const TRANSLATION_HAS_ERROR = s__('ciReport|%{reportType}: Loading resulted in an error');
+import {
+  TRANSLATION_IS_LOADING,
+  TRANSLATION_HAS_ERROR,
+} from '~/vue_shared/security_reports/store/messages';
 
 const SAST = s__('ciReport|SAST');
 const DAST = s__('ciReport|DAST');
