@@ -71,4 +71,13 @@ RSpec.describe RuboCop::Cop::Graphql::ResolverType, type: :rubocop do
       end
     TYPE
   end
+
+  it 'ignores BaseResolver' do
+    expect_no_offenses(<<-TYPE)
+      module Resolvers
+        class BaseResolver < GraphQL::Resolver
+        end
+      end
+    TYPE
+  end
 end
