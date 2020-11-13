@@ -63,7 +63,7 @@ This column has four states:
 If you do not see the success icon in your Compliance dashboard; please review the above criteria for the Merge Requests
 project to make sure it complies with the separation of duties described above.
 
-## Chain of Custody report
+## Chain of Custody report **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213364) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.3.
 
@@ -73,11 +73,12 @@ merge request author, merge request ID, merge user, pipeline ID, group name, pro
 
 To download the Chain of Custody report, navigate to **{shield}** **Security & Compliance > Compliance** on the group's menu and click **List of all merge commits**
 
-### Commit-specific Chain of Custody Report
+### Commit-specific Chain of Custody Report **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267629) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
 
-You can generate a commit-specific Chain of Custody report for a given commit SHA. To do so, click on the dropdown next to the **List of all merge commits** button at the top of the Compliance Dashboard.
+You can generate a commit-specific Chain of Custody report for a given commit SHA. To do so, select
+the dropdown next to the **List of all merge commits** button at the top of the Compliance Dashboard.
 
 NOTE: **Note:**
 The Chain of Custody report download is a CSV file, with a maximum size of 15 MB.
