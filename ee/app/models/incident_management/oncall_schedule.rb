@@ -14,7 +14,7 @@ module IncidentManagement
 
     has_internal_id :iid, scope: :project
 
-    validates :name, presence: true, length: { maximum: NAME_LENGTH }
+    validates :name, presence: true, uniqueness: { scope: :project }, length: { maximum: NAME_LENGTH }
     validates :description, length: { maximum: DESCRIPTION_LENGTH }
     validates :timezone, presence: true, inclusion: { in: :timezones }
 

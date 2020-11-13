@@ -10,7 +10,6 @@ module Resolvers
       def resolve(**args)
         return [] unless Ability.allowed?(current_user, :read_incident_management_oncall_schedule, project)
 
-
         project.incident_management_oncall_schedules
       end
     end

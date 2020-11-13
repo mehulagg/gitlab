@@ -45,6 +45,7 @@ module EE
         mount_mutation ::Mutations::Security::CiConfiguration::ConfigureSast
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
+        mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
 
         prepend(Types::DeprecatedMutations)
       end
