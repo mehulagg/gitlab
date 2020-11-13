@@ -437,15 +437,20 @@ w
    - `start_date`: start date of the period for which we want to get event data.
    - `end_date`: end date of the period for which we want to get event data.
 
-1. Get event data for testing
+1. Testing tracking and getting unique events
 
-In staging environment, trigger the events for testing.
+Trigger events in rails console by using `track_event` method
 
-After, get the unique events data for current week.
+   ```ruby
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(1, 'g_compliance_audit_events')
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(2, 'g_compliance_audit_events')
+   ```
+
+Next, get the unique events for the current week.
 
    ```ruby
    # Get unique events for metric for current_week
-   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events', 
+   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events',
    start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
    ```
 
