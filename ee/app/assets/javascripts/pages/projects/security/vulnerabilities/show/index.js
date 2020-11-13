@@ -24,6 +24,4 @@ function createMainApp() {
   });
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  createMainApp();
-});
+createMainApp();
