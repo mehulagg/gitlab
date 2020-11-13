@@ -25,13 +25,13 @@ The following are required to install and test the app:
 
 1. Enable Jira development mode to install apps that are not from the Atlassian Marketplace
 
-   1. Navigate to **Jira settings** (cog icon) > **Apps** > **Manage apps**.
+   1. Navigate to **{settings}** **Jira settings > Apps > Manage apps**.
    1. Scroll to the bottom of the **Manage apps** page and click **Settings**.
    1. Select **Enable development mode** and click **Apply**.
 
 1. Install the app
 
-   1. Navigate to Jira, then choose **Jira settings** (cog icon) > **Apps** > **Manage apps**.
+   1. Navigate to Jira, then choose **{settings}** **Jira settings > Apps > Manage apps**.
    1. Click **Upload app**.
    1. In the **From this URL** field, provide a link to the app descriptor. The host and port must point to your GitLab instance.
 
