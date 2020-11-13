@@ -20,6 +20,7 @@ const handleStartupEvents = () => {
   }
 };
 
+/* For `waitForCSSLoaded` methods, see docs.gitlab.com/ee/development/fe_guide/performance.html#important-considerations */
 export const waitForCSSLoaded = (action = () => {}) => {
   if (!gon.features.startupCss || allLinksLoaded()) {
     return new Promise(resolve => {
