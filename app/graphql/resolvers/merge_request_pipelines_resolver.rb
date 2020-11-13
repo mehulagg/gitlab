@@ -4,6 +4,8 @@ module Resolvers
   class MergeRequestPipelinesResolver < BaseResolver
     include ::ResolvesPipelines
 
+    type ::Types::Ci::PipelineType.connection_type, null: true
+
     alias_method :merge_request, :object
 
     def resolve(**args)

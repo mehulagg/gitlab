@@ -45,13 +45,11 @@ Graphql/ResolverType:
   Exclude:
     - 'app/graphql/resolvers/base_resolver.rb'
     - 'app/graphql/resolvers/ci/pipeline_stages_resolver.rb'
-    - 'app/graphql/resolvers/commit_pipelines_resolver.rb'
     - 'app/graphql/resolvers/error_tracking/sentry_error_stack_trace_resolver.rb'
     - 'app/graphql/resolvers/group_issues_resolver.rb'
     - 'app/graphql/resolvers/group_merge_requests_resolver.rb'
     - 'app/graphql/resolvers/group_milestones_resolver.rb'
     - 'app/graphql/resolvers/members_resolver.rb'
-    - 'app/graphql/resolvers/merge_request_pipelines_resolver.rb'
     - 'app/graphql/resolvers/merge_request_resolver.rb'
     - 'app/graphql/resolvers/merge_requests_resolver.rb'
     - 'app/graphql/resolvers/project_merge_requests_resolver.rb'
