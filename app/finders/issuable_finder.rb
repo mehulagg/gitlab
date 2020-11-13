@@ -55,8 +55,6 @@ class IssuableFinder
       assignee_username
       author_id
       author_username
-      reviewer_id
-      reviewer_username
       label_name
       milestone_title
       release_tag

@@ -41,6 +41,8 @@ class MergeRequestsFinder < IssuableFinder
       :environment,
       :merged_after,
       :merged_before,
+      :reviewer_id,
+      :reviewer_username,
       :target_branch,
       :wip
     ]
@@ -52,6 +54,10 @@ class MergeRequestsFinder < IssuableFinder
 
   def klass
     MergeRequest
+  end
+
+  def params_class
+    MergeRequestsFinder::Params
   end
 
   def filter_items(_items)
