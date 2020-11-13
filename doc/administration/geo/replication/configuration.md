@@ -245,7 +245,7 @@ on the **secondary** node.
 ### Step 5. Enable Git access over HTTP/HTTPS
 
 Geo synchronizes repositories over HTTP/HTTPS, and therefore requires this clone
-method to be enabled. This is enabled by default, but if converting an existing node to GEO it should be checked.
+method to be enabled. This is enabled by default, but if converting an existing node to Geo it should be checked.
 
 1. Navigate to **Admin Area > Settings** (`/admin/application_settings/general`) on the **primary** node
 1. Expand `Visibility and access controls`
