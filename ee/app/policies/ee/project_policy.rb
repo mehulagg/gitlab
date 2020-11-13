@@ -242,6 +242,7 @@ module EE
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
         enable :read_incident_management_oncall_schedule
+        enable :modify_incident_management_oncall_schedule
       end
 
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
