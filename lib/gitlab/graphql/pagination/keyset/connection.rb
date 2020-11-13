@@ -166,7 +166,7 @@ module Gitlab
               end
 
               # ensure there is a primary key ordering
-              if list&.last&.attribute_name != items.primary_key
+              if list&.last&.attribute_name != items.primary_key && list&.last&.attribute_name.to_s != 'merge_request_metrics.id'
                 items.order(arel_table[items.primary_key].desc) # rubocop: disable CodeReuse/ActiveRecord
               else
                 items

@@ -46,13 +46,13 @@ module Gitlab
             end
 
             # make sure the last ordering field is non-nullable
-            attribute_name = order_list.last&.attribute_name
+            attribute_name = order_list.last&.attribute_name.to_s
 
             if relation.columns_hash[attribute_name].null
               raise ArgumentError.new("Column `#{attribute_name}` must not allow NULL")
             end
 
-            if order_list.last.attribute_name != relation.primary_key
+            if order_list.last.attribute_name != relation.primary_key && order_list.last.attribute_name.to_s != 'merge_request_metrics.id'
               raise ArgumentError.new("Last ordering field must be the primary key, `#{relation.primary_key}`")
             end
           end

@@ -287,8 +287,12 @@ class MergeRequest < ApplicationRecord
   scope :order_merged_at, ->(direction) do
     query = join_metrics.order(Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction))
 
-    # Add `merge_request_metrics.merged_at` to the `SELECT` in order to make the keyset pagination work.
-    query.select(*query.arel.projections, MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'))
+    # Add `merge_request_metrics.merged_at` and `merge_request_metrics.id` to the `SELECT` in order to make the keyset pagination work.
+    query.select(
+      *query.arel.projections,
+      MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'),
+      MergeRequest::Metrics.arel_table[:id].as('"merge_request_metrics.id"')
+    )
   end
   scope :order_merged_at_asc, -> { order_merged_at('ASC') }
   scope :order_merged_at_desc, -> { order_merged_at('DESC') }
@@ -312,8 +316,6 @@ class MergeRequest < ApplicationRecord
   end
 
   scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
-
-  scope :with_order_metrics_merge_request_id_desc, -> { order('merge_request_metrics.merge_request_id DESC') }
 
   after_save :keep_around_commit, unless: :importing?
 
@@ -355,8 +357,10 @@ class MergeRequest < ApplicationRecord
 
   def self.sort_by_attribute(method, excluded_labels: [])
     case method.to_s
-    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_metrics_merge_request_id_desc
-    when 'merged_at_desc' then order_merged_at_desc.with_order_metrics_merge_request_id_desc
+    when 'merged_at', 'merged_at_asc' then
+      order_merged_at_asc.order(MergeRequest::Metrics.arel_table['id'].desc)
+    when 'merged_at_desc' then
+      order_merged_at_desc.order(MergeRequest::Metrics.arel_table['id'].desc)
     else
       super
     end

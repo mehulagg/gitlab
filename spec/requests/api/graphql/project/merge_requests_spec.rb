@@ -299,7 +299,7 @@ RSpec.describe 'getting merge request listings nested in a project' do
 
           merge_request_d.metrics.update!(merged_at: five_days_ago)
 
-          # same merged_at, the second order column will decide (merge_request.id)
+          # same merged_at, the second order column will decide (merge_request_metrics.id)
           merge_request_c.metrics.update!(merged_at: five_days_ago)
 
           merge_request_b.metrics.update!(merged_at: 1.day.ago)

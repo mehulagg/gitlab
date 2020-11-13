@@ -24,12 +24,12 @@ module Gitlab
             if ordering_by_merged_at_and_mr_id_desc?(order_values)
               [
                 Gitlab::Database.nulls_first_order('merge_request_metrics.merged_at', 'ASC'), # reversing the order
-                MergeRequest.arel_table[:id].asc
+                MergeRequest::Metrics.arel_table[:id].asc
               ]
             elsif ordering_by_merged_at_and_mr_id_asc?(order_values)
               [
                 Gitlab::Database.nulls_first_order('merge_request_metrics.merged_at', 'DESC'),
-                MergeRequest.arel_table[:id].asc
+                MergeRequest::Metrics.arel_table[:id].asc
               ]
             end
           end
@@ -38,14 +38,14 @@ module Gitlab
             order_values.size == 2 &&
               order_values.first.to_s == Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', 'DESC') &&
               order_values.last.is_a?(Arel::Nodes::Descending) &&
-              order_values.last.to_sql == MergeRequest.arel_table[:id].desc.to_sql
+              order_values.last.to_sql == MergeRequest::Metrics.arel_table[:id].desc.to_sql
           end
 
           def self.ordering_by_merged_at_and_mr_id_asc?(order_values)
             order_values.size == 2 &&
               order_values.first.to_s == Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', 'ASC') &&
               order_values.last.is_a?(Arel::Nodes::Descending) &&
-              order_values.last.to_sql == MergeRequest.arel_table[:id].desc.to_sql
+              order_values.last.to_sql == MergeRequest::Metrics.arel_table[:id].desc.to_sql
           end
 
           private_class_method :ordering_by_merged_at_and_mr_id_desc?
