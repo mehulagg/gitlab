@@ -2,13 +2,13 @@
 .frequent-items-dropdown-container
   .frequent-items-dropdown-sidebar.qa-projects-dropdown-sidebar
     %ul
-      = nav_link(path: 'dashboard/projects#index') do
+      = nav_link(path: 'dashboard/projects#index', data: { track_label: "projects_dropdown_your_projects", track_event: "click_link" }) do
         = link_to dashboard_projects_path, class: 'qa-your-projects-link' do
           = _('Your projects')
-      = nav_link(path: 'projects#starred') do
+      = nav_link(path: 'projects#starred', data: { track_label: "projects_dropdown_starred_projects", track_event: "click_link" }) do
         = link_to starred_dashboard_projects_path do
           = _('Starred projects')
-      = nav_link(path: 'projects#trending') do
+      = nav_link(path: 'projects#trending', data: { track_label: "projects_dropdown_explore_projects", track_event: "click_link" }) do
         = link_to explore_root_path do
           = _('Explore projects')
   .frequent-items-dropdown-content
