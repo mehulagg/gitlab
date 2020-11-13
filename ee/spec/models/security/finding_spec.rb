@@ -85,6 +85,7 @@ RSpec.describe Security::Finding do
     let!(:undismissed_finding) { create(:security_finding, scan: scan) }
     let!(:dismissed_finding) { create(:security_finding, scan: scan) }
     let(:expected_findings) { [undismissed_finding] }
+    let(:different_scan) { create(:security_scan) }
 
     subject { described_class.undismissed }
 
@@ -94,6 +95,12 @@ RSpec.describe Security::Finding do
              project: scan.project,
              category: scan.scan_type,
              project_fingerprint: dismissed_finding.project_fingerprint)
+
+      create(:vulnerability_feedback,
+             :dismissal,
+             project: different_scan.project,
+             category: scan.scan_type,
+             project_fingerprint: undismissed_finding.project_fingerprint)
     end
 
     it { is_expected.to match_array(expected_findings) }
