@@ -1,6 +1,6 @@
 <script>
-import IssueCardInner from './issue_card_inner.vue';
 import boardsStore from '../stores/boards_store';
+import IssueCardInner from './issue_card_inner.vue';
 
 export default {
   name: 'BoardsIssueCard',

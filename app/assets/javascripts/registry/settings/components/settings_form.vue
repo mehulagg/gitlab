@@ -1,13 +1,13 @@
 <script>
 import { GlCard, GlButton } from '@gitlab/ui';
 import Tracking from '~/tracking';
+import { formOptionsGenerator } from '~/registry/shared/utils';
 import {
   UPDATE_SETTINGS_ERROR_MESSAGE,
   UPDATE_SETTINGS_SUCCESS_MESSAGE,
 } from '../../shared/constants';
 import ExpirationPolicyFields from '../../shared/components/expiration_policy_fields.vue';
 import { SET_CLEANUP_POLICY_BUTTON, CLEANUP_POLICY_CARD_HEADER } from '../constants';
-import { formOptionsGenerator } from '~/registry/shared/utils';
 import updateContainerExpirationPolicyMutation from '../graphql/mutations/update_container_expiration_policy.graphql';
 import { updateContainerExpirationPolicy } from '../graphql/utils/cache_update';
 

@@ -1,7 +1,7 @@
 import Api from '~/api';
+import { resolvers } from '~/pipeline_editor/graphql/resolvers';
 import { mockProjectPath, mockDefaultBranch, mockCiConfigPath, mockCiYml } from '../mock_data';
 
-import { resolvers } from '~/pipeline_editor/graphql/resolvers';
 
 jest.mock('~/api', () => {
   return {

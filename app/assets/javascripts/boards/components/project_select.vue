@@ -3,10 +3,10 @@ import $ from 'jquery';
 import { escape } from 'lodash';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import eventHub from '../eventhub';
-import Api from '../../api';
 import { featureAccessLevel } from '~/pages/projects/shared/permissions/constants';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import eventHub from '../eventhub';
+import Api from '../../api';
 
 export default {
   name: 'BoardProjectSelect',

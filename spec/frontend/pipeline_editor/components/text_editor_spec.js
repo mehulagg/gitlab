@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 import { mockCiYml } from '../mock_data';
 
-import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 
 describe('~/pipeline_editor/components/text_editor.vue', () => {
   let wrapper;

@@ -7,11 +7,11 @@ import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
 import DiffFileHeader from '~/diffs/components/diff_file_header.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
-import diffDiscussionsMockData from '../mock_data/diff_discussions';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { diffViewerModes } from '~/ide/constants';
 import { __, sprintf } from '~/locale';
 import { scrollToElement } from '~/lib/utils/common_utils';
+import diffDiscussionsMockData from '../mock_data/diff_discussions';
 
 jest.mock('~/lib/utils/common_utils');
 

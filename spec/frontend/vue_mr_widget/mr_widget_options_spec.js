@@ -8,9 +8,9 @@ import eventHub from '~/vue_merge_request_widget/event_hub';
 import notify from '~/lib/utils/notify';
 import SmartInterval from '~/smart_interval';
 import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
-import mockData from './mock_data';
-import { faviconDataUrl, overlayDataUrl } from '../lib/utils/mock_data';
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+import { faviconDataUrl, overlayDataUrl } from '../lib/utils/mock_data';
+import mockData from './mock_data';
 
 jest.mock('~/smart_interval');
 

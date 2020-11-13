@@ -1,6 +1,6 @@
 <script>
-import LinkedPipeline from './linked_pipeline.vue';
 import { __ } from '~/locale';
+import LinkedPipeline from './linked_pipeline.vue';
 
 export default {
   components: {

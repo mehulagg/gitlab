@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlTab } from '@gitlab/ui';
-import { yamlString } from './mock_data';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import GitlabCiYamlVisualization from '~/pipelines/components/pipeline_graph/gitlab_ci_yaml_visualization.vue';
+import { yamlString } from './mock_data';
 
 describe('gitlab yaml visualization component', () => {
   const defaultProps = { blobData: yamlString };

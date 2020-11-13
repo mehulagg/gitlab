@@ -1,8 +1,8 @@
 <script>
 import { debounce } from 'lodash';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
-import { USER_SEARCH_DELAY } from '../constants';
 import Api from '~/api';
+import { USER_SEARCH_DELAY } from '../constants';
 
 export default {
   components: {

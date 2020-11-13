@@ -3,9 +3,9 @@ import createStore from '~/notes/stores';
 import NoteForm from '~/notes/components/note_form.vue';
 import batchComments from '~/batch_comments/stores/modules/batch_comments';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import { getDraft, updateDraft } from '~/lib/utils/autosave';
 import { noteableDataMock, notesDataMock, discussionMock } from '../mock_data';
 
-import { getDraft, updateDraft } from '~/lib/utils/autosave';
 
 jest.mock('~/lib/utils/autosave');
 

@@ -1,8 +1,8 @@
 <script>
 import { GlLoadingIcon, GlModal, GlModalDirective, GlButton } from '@gitlab/ui';
 import ciHeader from '~/vue_shared/components/header_ci_component.vue';
-import eventHub from '../event_hub';
 import { __ } from '~/locale';
+import eventHub from '../event_hub';
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 

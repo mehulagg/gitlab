@@ -1,9 +1,9 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import ServiceDeskSetting from './service_desk_setting.vue';
 import ServiceDeskService from '../services/service_desk_service';
 import eventHub from '../event_hub';
+import ServiceDeskSetting from './service_desk_setting.vue';
 
 export default {
   name: 'ServiceDeskRoot',

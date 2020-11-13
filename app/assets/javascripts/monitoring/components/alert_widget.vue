@@ -3,10 +3,10 @@ import { GlBadge, GlLoadingIcon, GlModalDirective, GlIcon, GlTooltip, GlSprintf 
 import { values, get } from 'lodash';
 import { s__ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import AlertWidgetForm from './alert_widget_form.vue';
 import AlertsService from '../services/alerts_service';
 import { alertsValidator, queriesValidator } from '../validators';
 import { OPERATORS } from '../constants';
+import AlertWidgetForm from './alert_widget_form.vue';
 
 export default {
   components: {

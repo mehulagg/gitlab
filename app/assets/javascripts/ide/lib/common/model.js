@@ -1,8 +1,8 @@
 import { editor as monacoEditor, Uri } from 'monaco-editor';
-import Disposable from './disposable';
 import eventHub from '../../eventhub';
 import { trimTrailingWhitespace, insertFinalNewline } from '../../utils';
 import { defaultModelOptions } from '../editor_options';
+import Disposable from './disposable';
 
 export default class Model {
   constructor(file, head = null) {

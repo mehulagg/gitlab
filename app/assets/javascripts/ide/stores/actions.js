@@ -3,11 +3,11 @@ import { escape } from 'lodash';
 import { __, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import * as types from './mutation_types';
 import { decorateFiles } from '../lib/files';
 import { stageKeys, commitActionTypes } from '../constants';
 import service from '../services';
 import eventHub from '../eventhub';
+import * as types from './mutation_types';
 
 export const redirectToUrl = (self, url) => visitUrl(url);
 

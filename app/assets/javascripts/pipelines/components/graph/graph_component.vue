@@ -1,10 +1,10 @@
 <script>
 import { escape, capitalize } from 'lodash';
 import { GlLoadingIcon } from '@gitlab/ui';
-import StageColumnComponent from './stage_column_component.vue';
 import GraphWidthMixin from '../../mixins/graph_width_mixin';
-import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import GraphBundleMixin from '../../mixins/graph_pipeline_bundle_mixin';
+import StageColumnComponent from './stage_column_component.vue';
+import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 
 export default {
   name: 'PipelineGraph',

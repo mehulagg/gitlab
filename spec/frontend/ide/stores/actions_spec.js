@@ -19,9 +19,9 @@ import {
 } from '~/ide/stores/actions';
 import axios from '~/lib/utils/axios_utils';
 import * as types from '~/ide/stores/mutation_types';
+import eventHub from '~/ide/eventhub';
 import { file, createTriggerRenameAction, createTriggerChangeAction } from '../helpers';
 import testAction from '../../helpers/vuex_action_helper';
-import eventHub from '~/ide/eventhub';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn(),

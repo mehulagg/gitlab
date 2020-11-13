@@ -2,8 +2,8 @@
 import { GlLoadingIcon, GlAlert, GlTabs, GlTab } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 
-import TextEditor from './components/text_editor.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
+import TextEditor from './components/text_editor.vue';
 
 import getBlobContent from './graphql/queries/blob_content.graphql';
 

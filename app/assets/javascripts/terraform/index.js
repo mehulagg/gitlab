@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import TerraformList from './components/terraform_list.vue';
 import createDefaultClient from '~/lib/graphql';
+import TerraformList from './components/terraform_list.vue';
 
 Vue.use(VueApollo);
 

@@ -11,9 +11,6 @@ import updatePrometheusIntegrationMutation from '../graphql/mutations/update_pro
 import destroyHttpIntegrationMutation from '../graphql/mutations/destroy_http_integration.mutation.graphql';
 import resetHttpTokenMutation from '../graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '../graphql/mutations/reset_prometheus_token.mutation.graphql';
-import IntegrationsList from './alerts_integrations_list.vue';
-import SettingsFormOld from './alerts_settings_form_old.vue';
-import SettingsFormNew from './alerts_settings_form_new.vue';
 import { typeSet } from '../constants';
 import {
   updateStoreAfterIntegrationDelete,
@@ -26,6 +23,9 @@ import {
   UPDATE_INTEGRATION_ERROR,
   INTEGRATION_PAYLOAD_TEST_ERROR,
 } from '../utils/error_messages';
+import IntegrationsList from './alerts_integrations_list.vue';
+import SettingsFormOld from './alerts_settings_form_old.vue';
+import SettingsFormNew from './alerts_settings_form_new.vue';
 
 export default {
   typeSet,

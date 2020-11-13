@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import axios from '../lib/utils/axios_utils';
 import { __, s__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
+import axios from '../lib/utils/axios_utils';
 import initForm from './edit';
 import eventHub from './edit/event_hub';
 

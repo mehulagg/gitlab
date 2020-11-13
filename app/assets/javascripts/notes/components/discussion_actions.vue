@@ -1,9 +1,9 @@
 <script>
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReplyPlaceholder from './discussion_reply_placeholder.vue';
 import ResolveDiscussionButton from './discussion_resolve_button.vue';
 import ResolveWithIssueButton from './discussion_resolve_with_issue_button.vue';
 import JumpToNextDiscussionButton from './discussion_jump_to_next_button.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'DiscussionActions',

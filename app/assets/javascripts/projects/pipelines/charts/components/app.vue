@@ -3,8 +3,6 @@ import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import { __, sprintf } from '~/locale';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
-import StatisticsList from './statistics_list.vue';
-import PipelinesAreaChart from './pipelines_area_chart.vue';
 import {
   CHART_CONTAINER_HEIGHT,
   INNER_CHART_HEIGHT,
@@ -14,6 +12,8 @@ import {
   ONE_WEEK_AGO_DAYS,
   ONE_MONTH_AGO_DAYS,
 } from '../constants';
+import StatisticsList from './statistics_list.vue';
+import PipelinesAreaChart from './pipelines_area_chart.vue';
 
 export default {
   components: {

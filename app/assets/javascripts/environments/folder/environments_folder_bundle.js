@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import canaryCalloutMixin from '../mixins/canary_callout_mixin';
-import environmentsFolderApp from './environments_folder_view.vue';
 import { parseBoolean } from '../../lib/utils/common_utils';
 import Translate from '../../vue_shared/translate';
-import createDefaultClient from '~/lib/graphql';
+import environmentsFolderApp from './environments_folder_view.vue';
 
 Vue.use(Translate);
 Vue.use(VueApollo);

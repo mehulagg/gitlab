@@ -52,12 +52,12 @@ import {
 import eventHub from '~/notes/event_hub';
 import * as types from '~/diffs/store/mutation_types';
 import axios from '~/lib/utils/axios_utils';
-import testAction from '../../helpers/vuex_action_helper';
 import * as utils from '~/diffs/store/utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
-import { diffMetadata } from '../mock_data/diff_metadata';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { diffMetadata } from '../mock_data/diff_metadata';
+import testAction from '../../helpers/vuex_action_helper';
 
 jest.mock('~/flash');
 

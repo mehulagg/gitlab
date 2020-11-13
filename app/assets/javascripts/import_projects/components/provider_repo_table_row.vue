@@ -3,9 +3,9 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlIcon, GlBadge } from '@gitlab/ui';
 import Select2Select from '~/vue_shared/components/select2_select.vue';
 import { __ } from '~/locale';
-import ImportStatus from './import_status.vue';
 import { STATUSES } from '../constants';
 import { isProjectImportable, isIncompatible, getImportStatus } from '../utils';
+import ImportStatus from './import_status.vue';
 
 export default {
   name: 'ProviderRepoTableRow',

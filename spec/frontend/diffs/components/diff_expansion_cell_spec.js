@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { cloneDeep } from 'lodash';
-import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { getByText } from '@testing-library/dom';
+import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { createStore } from '~/mr_notes/stores';
 import DiffExpansionCell from '~/diffs/components/diff_expansion_cell.vue';
 import { getPreviousLineIndex } from '~/diffs/store/utils';

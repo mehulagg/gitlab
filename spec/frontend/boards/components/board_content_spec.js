@@ -4,8 +4,8 @@ import { GlAlert } from '@gitlab/ui';
 import EpicsSwimlanes from 'ee_component/boards/components/epics_swimlanes.vue';
 import BoardColumn from 'ee_else_ce/boards/components/board_column.vue';
 import getters from 'ee_else_ce/boards/stores/getters';
-import { mockListsWithModel } from '../mock_data';
 import BoardContent from '~/boards/components/board_content.vue';
+import { mockListsWithModel } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

@@ -6,8 +6,8 @@ import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import * as actions from '~/registry/explorer/stores/actions';
 import * as types from '~/registry/explorer/stores/mutation_types';
-import { reposServerResponse, registryServerResponse } from '../mock_data';
 import * as utils from '~/registry/explorer/utils';
+import { reposServerResponse, registryServerResponse } from '../mock_data';
 
 jest.mock('~/flash.js');
 jest.mock('~/registry/explorer/utils');

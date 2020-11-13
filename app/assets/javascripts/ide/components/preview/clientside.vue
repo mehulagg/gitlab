@@ -4,9 +4,9 @@ import { isEmpty } from 'lodash';
 import { Manager } from 'smooshpack';
 import { listen } from 'codesandbox-api';
 import { GlLoadingIcon } from '@gitlab/ui';
-import Navigator from './navigator.vue';
 import { packageJsonPath } from '../../constants';
 import { createPathWithExt } from '../../utils';
+import Navigator from './navigator.vue';
 
 export default {
   components: {

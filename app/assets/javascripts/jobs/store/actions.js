@@ -1,5 +1,4 @@
 import Visibility from 'visibilityjs';
-import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
 import { setFaviconOverlay, resetFavicon } from '~/lib/utils/common_utils';
@@ -13,6 +12,7 @@ import {
   scrollDown,
   scrollUp,
 } from '~/lib/utils/scroll_utils';
+import * as types from './mutation_types';
 
 export const init = ({ dispatch }, { endpoint, logState, pagePath }) => {
   dispatch('setJobEndpoint', endpoint);

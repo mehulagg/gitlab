@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import { pipelineData, singleStageData } from './mock_data';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import StagePill from '~/pipelines/components/pipeline_graph/stage_pill.vue';
 import JobPill from '~/pipelines/components/pipeline_graph/job_pill.vue';
+import { pipelineData, singleStageData } from './mock_data';
 
 describe('pipeline graph component', () => {
   const defaultProps = { pipelineData };

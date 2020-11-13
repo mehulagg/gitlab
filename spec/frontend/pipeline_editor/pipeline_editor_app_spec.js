@@ -2,11 +2,11 @@ import { nextTick } from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
 
-import { mockProjectPath, mockDefaultBranch, mockCiConfigPath, mockCiYml } from './mock_data';
 import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 import EditorLite from '~/vue_shared/components/editor_lite.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
+import { mockProjectPath, mockDefaultBranch, mockCiConfigPath, mockCiYml } from './mock_data';
 
 describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   let wrapper;

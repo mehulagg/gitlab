@@ -1,18 +1,18 @@
 <script>
 import { Sortable, MultiDrag } from 'sortablejs';
 import { GlLoadingIcon } from '@gitlab/ui';
-import boardNewIssue from './board_new_issue.vue';
-import boardCard from './board_card.vue';
-import eventHub from '../eventhub';
-import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import boardsStore from '../stores/boards_store';
+import eventHub from '../eventhub';
 import {
   getBoardSortableDefaultOptions,
   sortableStart,
   sortableEnd,
 } from '../mixins/sortable_default_options';
+import boardCard from './board_card.vue';
+import boardNewIssue from './board_new_issue.vue';
 
 // This component is being replaced in favor of './board_list_new.vue' for GraphQL boards
 

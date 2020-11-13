@@ -10,14 +10,14 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { n__, s__ } from '~/locale';
-import AccessorUtilities from '../../lib/utils/accessor';
-import IssueCount from './issue_count.vue';
-import boardsStore from '../stores/boards_store';
-import eventHub from '../eventhub';
 import sidebarEventHub from '~/sidebar/event_hub';
-import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import boardsStore from '../stores/boards_store';
+import eventHub from '../eventhub';
+import { inactiveId, LIST, ListType } from '../constants';
+import AccessorUtilities from '../../lib/utils/accessor';
+import IssueCount from './issue_count.vue';
 
 export default {
   components: {

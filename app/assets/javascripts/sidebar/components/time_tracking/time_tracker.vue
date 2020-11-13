@@ -1,5 +1,6 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
+import eventHub from '../../event_hub';
 import TimeTrackingHelpState from './help_state.vue';
 import TimeTrackingCollapsedState from './collapsed_state.vue';
 import TimeTrackingSpentOnlyPane from './spent_only_pane.vue';
@@ -7,7 +8,6 @@ import TimeTrackingNoTrackingPane from './no_tracking_pane.vue';
 import TimeTrackingEstimateOnlyPane from './estimate_only_pane.vue';
 import TimeTrackingComparisonPane from './comparison_pane.vue';
 
-import eventHub from '../../event_hub';
 
 export default {
   name: 'IssuableTimeTracker',

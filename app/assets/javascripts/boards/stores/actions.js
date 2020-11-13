@@ -4,7 +4,9 @@ import boardListsQuery from 'ee_else_ce/boards/queries/board_lists.query.graphql
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { BoardType, ListType, inactiveId, DEFAULT_LABELS } from '~/boards/constants';
-import * as types from './mutation_types';
+import boardStore from '~/boards/stores/boards_store';
+
+import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import {
   formatBoardLists,
   formatListIssues,
@@ -12,9 +14,6 @@ import {
   formatListsPageInfo,
   formatIssue,
 } from '../boards_util';
-import boardStore from '~/boards/stores/boards_store';
-
-import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import listsIssuesQuery from '../queries/lists_issues.query.graphql';
 import boardLabelsQuery from '../queries/board_labels.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
@@ -24,6 +23,7 @@ import destroyBoardListMutation from '../queries/board_list_destroy.mutation.gra
 import issueCreateMutation from '../queries/issue_create.mutation.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
+import * as types from './mutation_types';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */

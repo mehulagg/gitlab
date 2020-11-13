@@ -1,8 +1,8 @@
 <script>
 import { GlTab, GlTabs } from '@gitlab/ui';
 import jsYaml from 'js-yaml';
-import PipelineGraph from './pipeline_graph.vue';
 import { preparePipelineGraphData } from '../../utils';
+import PipelineGraph from './pipeline_graph.vue';
 
 export default {
   FILE_CONTENT_SELECTOR: '#blob-content',

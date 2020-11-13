@@ -2,12 +2,12 @@
 import { isEmpty } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
-import JobPill from './job_pill.vue';
-import StagePill from './stage_pill.vue';
-import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
 import { DRAW_FAILURE, DEFAULT } from '../../constants';
 import { generateJobNeedsDict } from '../../utils';
+import JobPill from './job_pill.vue';
+import StagePill from './stage_pill.vue';
+import { generateLinksData } from './drawing_utils';
 
 export default {
   components: {

@@ -7,9 +7,9 @@ import BlobViewer from '~/blob/viewer/index';
 import Activities from '~/activities';
 import initReadMore from '~/read_more';
 import leaveByUrl from '~/namespaces/leave_by_url';
+import { showLearnGitLabProjectPopover } from '~/onboarding_issues';
 import Star from '../../../star';
 import notificationsDropdown from '../../../notifications_dropdown';
-import { showLearnGitLabProjectPopover } from '~/onboarding_issues';
 
 initReadMore();
 new Star(); // eslint-disable-line no-new

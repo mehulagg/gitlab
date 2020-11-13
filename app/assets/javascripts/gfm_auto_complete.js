@@ -2,10 +2,10 @@ import $ from 'jquery';
 import '~/lib/utils/jquery_at_who';
 import { escape, template } from 'lodash';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
+import * as Emoji from '~/emoji';
 import glRegexp from './lib/utils/regexp';
 import AjaxCache from './lib/utils/ajax_cache';
 import { spriteIcon } from './lib/utils/common_utils';
-import * as Emoji from '~/emoji';
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');

@@ -10,18 +10,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { updateHistory } from '~/lib/utils/url_utility';
 import eventHub from '../../notes/event_hub';
-import CompareVersions from './compare_versions.vue';
-import DiffFile from './diff_file.vue';
-import NoChanges from './no_changes.vue';
-import CommitWidget from './commit_widget.vue';
-import TreeList from './tree_list.vue';
-
-import HiddenFilesWarning from './hidden_files_warning.vue';
-import MergeConflictWarning from './merge_conflict_warning.vue';
-import CollapsedFilesWarning from './collapsed_files_warning.vue';
-
 import { diffsApp } from '../utils/performance';
-
 import {
   TREE_LIST_WIDTH_STORAGE_KEY,
   INITIAL_TREE_WIDTH,
@@ -34,6 +23,17 @@ import {
   ALERT_MERGE_CONFLICT,
   ALERT_COLLAPSED_FILES,
 } from '../constants';
+import CompareVersions from './compare_versions.vue';
+import DiffFile from './diff_file.vue';
+import NoChanges from './no_changes.vue';
+import CommitWidget from './commit_widget.vue';
+import TreeList from './tree_list.vue';
+
+import HiddenFilesWarning from './hidden_files_warning.vue';
+import MergeConflictWarning from './merge_conflict_warning.vue';
+import CollapsedFilesWarning from './collapsed_files_warning.vue';
+
+
 
 export default {
   name: 'DiffsApp',

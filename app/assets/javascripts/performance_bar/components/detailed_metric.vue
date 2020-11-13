@@ -1,8 +1,8 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
+import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import RequestWarning from './request_warning.vue';
 
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 
 export default {
   components: {

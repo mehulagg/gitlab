@@ -2,12 +2,12 @@ import { shallowMount } from '@vue/test-utils';
 import { GlTab } from '@gitlab/ui';
 import INVALID_URL from '~/lib/utils/invalid_url';
 import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
-import { descriptionProps } from '../../mock_data';
 import DescriptionComponent from '~/issue_show/components/description.vue';
 import HighlightBar from '~/issue_show/components/incidents/highlight_bar.vue';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import Tracking from '~/tracking';
 import { trackIncidentDetailsViewsOptions } from '~/incidents/constants';
+import { descriptionProps } from '../../mock_data';
 
 const mockAlert = {
   __typename: 'AlertManagementAlert',

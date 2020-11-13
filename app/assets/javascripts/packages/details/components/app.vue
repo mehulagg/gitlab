@@ -14,20 +14,20 @@ import {
 } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import Tracking from '~/tracking';
-import PackageHistory from './package_history.vue';
-import PackageTitle from './package_title.vue';
-import PackagesListLoader from '../../shared/components/packages_list_loader.vue';
-import PackageListRow from '../../shared/components/package_list_row.vue';
-import DependencyRow from './dependency_row.vue';
-import AdditionalMetadata from './additional_metadata.vue';
-import InstallationCommands from './installation_commands.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { __, s__ } from '~/locale';
+import { objectToQueryString } from '~/lib/utils/common_utils';
+import PackagesListLoader from '../../shared/components/packages_list_loader.vue';
+import PackageListRow from '../../shared/components/package_list_row.vue';
 import { PackageType, TrackingActions, SHOW_DELETE_SUCCESS_ALERT } from '../../shared/constants';
 import { packageTypeToTrackCategory } from '../../shared/utils';
-import { objectToQueryString } from '~/lib/utils/common_utils';
+import PackageHistory from './package_history.vue';
+import PackageTitle from './package_title.vue';
+import DependencyRow from './dependency_row.vue';
+import AdditionalMetadata from './additional_metadata.vue';
+import InstallationCommands from './installation_commands.vue';
 
 export default {
   name: 'PackagesApp',

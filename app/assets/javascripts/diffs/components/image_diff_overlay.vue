@@ -1,8 +1,8 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { isArray } from 'lodash';
-import imageDiffMixin from 'ee_else_ce/diffs/mixins/image_diff';
 import { GlIcon } from '@gitlab/ui';
+import imageDiffMixin from 'ee_else_ce/diffs/mixins/image_diff';
 
 export default {
   name: 'ImageDiffOverlay',

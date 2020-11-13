@@ -1,9 +1,9 @@
-import { membersJsonString, membersParsed } from './mock_data';
 import {
   parseDataAttributes,
   memberRequestFormatter,
   groupLinkRequestFormatter,
 } from '~/groups/members/utils';
+import { membersJsonString, membersParsed } from './mock_data';
 
 describe('group member utils', () => {
   describe('parseDataAttributes', () => {

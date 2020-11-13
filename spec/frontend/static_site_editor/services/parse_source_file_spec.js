@@ -1,3 +1,4 @@
+import parseSourceFile from '~/static_site_editor/services/parse_source_file';
 import {
   sourceContentYAML as content,
   sourceContentHeaderYAML as yamlFrontMatter,
@@ -5,7 +6,6 @@ import {
   sourceContentBody as body,
 } from '../mock_data';
 
-import parseSourceFile from '~/static_site_editor/services/parse_source_file';
 
 describe('static_site_editor/services/parse_source_file', () => {
   const contentComplex = [content, content, content].join('');

@@ -2,11 +2,11 @@
 import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlModal, GlSafeHtmlDirective, GlButton } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
+import { leftSidebarViews, MAX_WINDOW_HEIGHT_COMPACT } from '../../constants';
+import { createUnexpectedCommitError } from '../../lib/errors';
 import CommitMessageField from './message_field.vue';
 import Actions from './actions.vue';
 import SuccessMessage from './success_message.vue';
-import { leftSidebarViews, MAX_WINDOW_HEIGHT_COMPACT } from '../../constants';
-import { createUnexpectedCommitError } from '../../lib/errors';
 
 export default {
   components: {

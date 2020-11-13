@@ -1,12 +1,12 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
-import BoardNewIssue from './board_new_issue_new.vue';
-import BoardCard from './board_card.vue';
-import eventHub from '../eventhub';
-import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import eventHub from '../eventhub';
+import boardsStore from '../stores/boards_store';
+import BoardNewIssue from './board_new_issue_new.vue';
+import BoardCard from './board_card.vue';
 
 export default {
   name: 'BoardList',

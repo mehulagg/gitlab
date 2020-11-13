@@ -7,19 +7,10 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import { handleLocationHash, historyPushState, scrollToElement } from '~/lib/utils/common_utils';
 import { mergeUrlParams, getLocationHash } from '~/lib/utils/url_utility';
+import { diffViewerModes } from '~/ide/constants';
 import TreeWorker from '../workers/tree_worker';
 import notesEventHub from '../../notes/event_hub';
 import eventHub from '../event_hub';
-import {
-  getDiffPositionByLineCode,
-  getNoteFormData,
-  convertExpandLines,
-  idleCallback,
-  allDiscussionWrappersExpanded,
-  prepareDiffData,
-  prepareLineForRenamedFile,
-} from './utils';
-import * as types from './mutation_types';
 import {
   PARALLEL_DIFF_VIEW_TYPE,
   INLINE_DIFF_VIEW_TYPE,
@@ -47,8 +38,17 @@ import {
   EVT_PERF_MARK_FILE_TREE_END,
   EVT_PERF_MARK_DIFF_FILES_START,
 } from '../constants';
-import { diffViewerModes } from '~/ide/constants';
 import { isCollapsed } from '../diff_file';
+import {
+  getDiffPositionByLineCode,
+  getNoteFormData,
+  convertExpandLines,
+  idleCallback,
+  allDiscussionWrappersExpanded,
+  prepareDiffData,
+  prepareLineForRenamedFile,
+} from './utils';
+import * as types from './mutation_types';
 
 export const setBaseConfig = ({ commit }, options) => {
   const {

@@ -5,13 +5,13 @@ import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
 import eventHub from '~/boards/eventhub';
-import waitForPromises from '../helpers/wait_for_promises';
 import BoardList from '~/boards/components/board_list.vue';
 import '~/boards/models/issue';
 import '~/boards/models/list';
-import { listObj, boardsMockInterceptor } from './mock_data';
 import store from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
+import waitForPromises from '../helpers/wait_for_promises';
+import { listObj, boardsMockInterceptor } from './mock_data';
 
 const createComponent = ({ done, listIssueProps = {}, componentProps = {}, listProps = {} }) => {
   const el = document.createElement('div');

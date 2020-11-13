@@ -1,10 +1,10 @@
 import Vue from 'vue';
 
 import Translate from '~/vue_shared/translate';
+import csrf from '~/lib/utils/csrf';
 import ModalManager from './components/user_modal_manager.vue';
 import DeleteUserModal from './components/delete_user_modal.vue';
 import UserOperationConfirmationModal from './components/user_operation_confirmation_modal.vue';
-import csrf from '~/lib/utils/csrf';
 
 const MODAL_TEXTS_CONTAINER_SELECTOR = '#modal-texts';
 const MODAL_MANAGER_SELECTOR = '#user-modal';

@@ -11,13 +11,13 @@ import {
   WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { modalTypes } from '../constants';
 import eventHub from '../eventhub';
+import { measurePerformance } from '../utils';
 import IdeSidebar from './ide_side_bar.vue';
 import RepoEditor from './repo_editor.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-import { measurePerformance } from '../utils';
 
 eventHub.$on(WEBIDE_MEASURE_TREE_FROM_REQUEST, () =>
   measurePerformance(WEBIDE_MARK_TREE_FINISH, WEBIDE_MEASURE_TREE_FROM_REQUEST),

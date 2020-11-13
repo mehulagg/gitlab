@@ -2,8 +2,8 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { GlToast } from '@gitlab/ui';
 import { parseDataAttributes } from 'ee_else_ce/groups/members/utils';
-import App from './components/app.vue';
 import membersModule from '~/vuex_shared/modules/members';
+import App from './components/app.vue';
 
 export const initGroupMembersApp = (el, tableFields, tableAttrs, requestFormatter) => {
   if (!el) {

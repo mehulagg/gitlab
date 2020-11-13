@@ -2,10 +2,10 @@
 import { GlButton } from '@gitlab/ui';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
 import ListIssue from 'ee_else_ce/boards/models/issue';
-import eventHub from '../eventhub';
-import ProjectSelect from './project_select.vue';
-import boardsStore from '../stores/boards_store';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import eventHub from '../eventhub';
+import boardsStore from '../stores/boards_store';
+import ProjectSelect from './project_select.vue';
 
 // This component is being replaced in favor of './board_new_issue_new.vue' for GraphQL boards
 

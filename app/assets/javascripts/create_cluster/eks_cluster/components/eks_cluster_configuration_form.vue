@@ -3,8 +3,8 @@ import { createNamespacedHelpers, mapState, mapActions, mapGetters } from 'vuex'
 import { GlFormGroup, GlFormInput, GlFormCheckbox, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ClusterFormDropdown from '~/create_cluster/components/cluster_form_dropdown.vue';
-import { KUBERNETES_VERSIONS } from '../constants';
 import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { KUBERNETES_VERSIONS } from '../constants';
 
 const { mapState: mapRolesState, mapActions: mapRolesActions } = createNamespacedHelpers('roles');
 const { mapState: mapKeyPairsState, mapActions: mapKeyPairsActions } = createNamespacedHelpers(

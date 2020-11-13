@@ -1,7 +1,7 @@
 <script>
 import { GlModal, GlLink } from '@gitlab/ui';
-import eventHub from '../event_hub';
 import { s__, __ } from '~/locale';
+import eventHub from '../event_hub';
 import { OPEN_MODAL, MODAL_ID } from '../constants';
 
 export default {

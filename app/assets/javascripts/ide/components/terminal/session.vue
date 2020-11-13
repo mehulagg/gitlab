@@ -1,8 +1,8 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
-import Terminal from './terminal.vue';
 import { isEndingStatus } from '../../stores/modules/terminal/utils';
+import Terminal from './terminal.vue';
 
 export default {
   components: {

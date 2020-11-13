@@ -1,7 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import Api from '~/api';
-import * as types from './mutation_types';
 import {
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
   DEFAULT_PAGE,
@@ -10,6 +9,7 @@ import {
   FETCH_IMAGE_DETAILS_ERROR_MESSAGE,
 } from '../constants/index';
 import { pathGenerator } from '../utils';
+import * as types from './mutation_types';
 
 export const setInitialState = ({ commit }, data) => commit(types.SET_INITIAL_STATE, data);
 export const setShowGarbageCollectionTip = ({ commit }, data) =>

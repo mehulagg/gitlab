@@ -3,10 +3,6 @@ import { mapState, mapActions } from 'vuex';
 import { isEmpty } from 'lodash';
 import { GlAlert, GlButton, GlModalDirective, GlSprintf, GlTabs } from '@gitlab/ui';
 
-import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
-import FeatureFlagsTab from './feature_flags_tab.vue';
-import FeatureFlagsTable from './feature_flags_table.vue';
-import UserListsTable from './user_lists_table.vue';
 import { s__ } from '~/locale';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import {
@@ -14,6 +10,10 @@ import {
   getParameterByName,
   historyPushState,
 } from '~/lib/utils/common_utils';
+import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
+import FeatureFlagsTab from './feature_flags_tab.vue';
+import FeatureFlagsTable from './feature_flags_table.vue';
+import UserListsTable from './user_lists_table.vue';
 
 import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
 

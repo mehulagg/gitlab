@@ -18,6 +18,7 @@ import { doesHashExistInUrl } from '~/lib/utils/url_utility';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
 import csrf from '~/lib/utils/csrf';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import service from '../services';
 import {
   i18n,
@@ -27,7 +28,6 @@ import {
   targetOpsgenieUrlPlaceholder,
   sectionHash,
 } from '../constants';
-import createFlash, { FLASH_TYPES } from '~/flash';
 
 export default {
   i18n,

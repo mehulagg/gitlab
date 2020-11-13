@@ -2,15 +2,15 @@
 /* global ListIssue */
 
 import Vuex from 'vuex';
-import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import { createLocalVue, mount } from '@vue/test-utils';
+import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import eventHub from '~/boards/eventhub';
 import BoardList from '~/boards/components/board_list_new.vue';
 import BoardCard from '~/boards/components/board_card.vue';
 import '~/boards/models/issue';
 import '~/boards/models/list';
-import { listObj, mockIssuesByListId, issues } from './mock_data';
 import defaultState from '~/boards/stores/state';
+import { listObj, mockIssuesByListId, issues } from './mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

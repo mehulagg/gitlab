@@ -1,13 +1,13 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import $ from 'jquery';
-import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import { GlModal, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import Api from '~/api';
-import EmojiMenuInModal from './emoji_menu_in_modal';
 import * as Emoji from '~/emoji';
+import EmojiMenuInModal from './emoji_menu_in_modal';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
 

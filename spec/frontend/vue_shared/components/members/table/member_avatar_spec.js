@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import { MEMBER_TYPES } from '~/vue_shared/components/members/constants';
-import { member as memberMock, group, invite, accessRequest } from '../mock_data';
 import MemberAvatar from '~/vue_shared/components/members/table/member_avatar.vue';
 import UserAvatar from '~/vue_shared/components/members/avatars/user_avatar.vue';
 import GroupAvatar from '~/vue_shared/components/members/avatars/group_avatar.vue';
 import InviteAvatar from '~/vue_shared/components/members/avatars/invite_avatar.vue';
+import { member as memberMock, group, invite, accessRequest } from '../mock_data';
 
 describe('MemberList', () => {
   let wrapper;

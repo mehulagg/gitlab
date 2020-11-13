@@ -2,11 +2,11 @@ import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { identity } from 'lodash';
 import Translate from '~/vue_shared/translate';
+import { parseBoolean } from '../lib/utils/common_utils';
+import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import ide from './components/ide.vue';
 import { createStore } from './stores';
 import { createRouter } from './ide_router';
-import { parseBoolean } from '../lib/utils/common_utils';
-import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import { DEFAULT_THEME } from './lib/themes';
 
 Vue.use(Translate);

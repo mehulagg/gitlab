@@ -2,11 +2,11 @@
 /* eslint-disable vue/no-v-html */
 import { GlButton } from '@gitlab/ui';
 import { escape } from 'lodash';
+import { __, sprintf } from '~/locale';
 import simplePoll from '../../../lib/utils/simple_poll';
 import eventHub from '../../event_hub';
 import statusIcon from '../mr_widget_status_icon.vue';
 import { deprecatedCreateFlash as Flash } from '../../../flash';
-import { __, sprintf } from '~/locale';
 
 export default {
   name: 'MRWidgetRebase',

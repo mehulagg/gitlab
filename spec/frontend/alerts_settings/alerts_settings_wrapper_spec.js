@@ -1,8 +1,8 @@
 import VueApollo from 'vue-apollo';
 import { mount, createLocalVue } from '@vue/test-utils';
+import { GlLoadingIcon } from '@gitlab/ui';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlLoadingIcon } from '@gitlab/ui';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import AlertsSettingsFormOld from '~/alerts_settings/components/alerts_settings_form_old.vue';
 import AlertsSettingsFormNew from '~/alerts_settings/components/alerts_settings_form_new.vue';

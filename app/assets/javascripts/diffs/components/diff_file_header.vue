@@ -17,10 +17,10 @@ import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { __, s__, sprintf } from '~/locale';
 import { diffViewerModes } from '~/ide/constants';
-import DiffStats from './diff_stats.vue';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { isCollapsed } from '../diff_file';
 import { DIFF_FILE_HEADER } from '../i18n';
+import DiffStats from './diff_stats.vue';
 
 export default {
   components: {

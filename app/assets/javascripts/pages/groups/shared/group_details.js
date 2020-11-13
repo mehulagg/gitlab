@@ -7,8 +7,8 @@ import notificationsDropdown from '~/notifications_dropdown';
 import NotificationsForm from '~/notifications_form';
 import ProjectsList from '~/projects_list';
 import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
-import GroupTabs from './group_tabs';
 import initInviteMembersBanner from '~/groups/init_invite_members_banner';
+import GroupTabs from './group_tabs';
 
 export default function initGroupDetails(actionName = 'show') {
   const newGroupChildWrapper = document.querySelector('.js-new-project-subgroup');

@@ -4,12 +4,12 @@ import Sortable from 'sortablejs';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import EmptyComponent from '~/vue_shared/components/empty_component';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import BoardList from './board_list.vue';
-import BoardListNew from './board_list_new.vue';
 import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
 import { getBoardSortableDefaultOptions, sortableEnd } from '../mixins/sortable_default_options';
 import { ListType } from '../constants';
+import BoardListNew from './board_list_new.vue';
+import BoardList from './board_list.vue';
 
 export default {
   components: {

@@ -5,10 +5,10 @@ import { s__, sprintf } from '~/locale';
 import createFlash from '~/flash';
 import { historyReplaceState } from '~/lib/utils/common_utils';
 import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
+import { PACKAGE_REGISTRY_TABS, DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
 import PackageFilter from './packages_filter.vue';
 import PackageList from './packages_list.vue';
 import PackageSort from './packages_sort.vue';
-import { PACKAGE_REGISTRY_TABS, DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
 import PackageTitle from './package_title.vue';
 
 export default {

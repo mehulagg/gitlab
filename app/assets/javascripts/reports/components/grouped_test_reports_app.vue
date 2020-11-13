@@ -3,15 +3,15 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { once } from 'lodash';
 import { GlButton } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
+import Tracking from '~/tracking';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import createStore from '../store';
+import { summaryTextBuilder, reportTextBuilder, statusIcon } from '../store/utils';
 import { componentNames } from './issue_body';
 import ReportSection from './report_section.vue';
 import SummaryRow from './summary_row.vue';
 import IssuesList from './issues_list.vue';
 import Modal from './modal.vue';
-import createStore from '../store';
-import Tracking from '~/tracking';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { summaryTextBuilder, reportTextBuilder, statusIcon } from '../store/utils';
 
 export default {
   name: 'GroupedTestReportsApp',

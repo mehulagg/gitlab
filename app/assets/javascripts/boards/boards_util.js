@@ -1,8 +1,8 @@
 import { sortBy } from 'lodash';
 import ListIssue from 'ee_else_ce/boards/models/issue';
-import { ListType } from './constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import boardsStore from '~/boards/stores/boards_store';
+import { ListType } from './constants';
 
 export function getMilestone() {
   return null;

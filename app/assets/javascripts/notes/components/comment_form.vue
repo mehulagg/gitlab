@@ -6,6 +6,7 @@ import Autosize from 'autosize';
 import { GlAlert, GlIntersperse, GlLink, GlSprintf, GlButton, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
+import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import { deprecatedCreateFlash as Flash } from '../../flash';
 import Autosave from '../../autosave';
 import {
@@ -14,15 +15,14 @@ import {
   splitCamelCase,
   slugifyWithUnderscore,
 } from '../../lib/utils/text_utility';
-import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
 import NoteableWarning from '../../vue_shared/components/notes/noteable_warning.vue';
 import markdownField from '../../vue_shared/components/markdown/field.vue';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
+import issuableStateMixin from '../mixins/issuable_state';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
-import issuableStateMixin from '../mixins/issuable_state';
 
 export default {
   name: 'CommentForm',

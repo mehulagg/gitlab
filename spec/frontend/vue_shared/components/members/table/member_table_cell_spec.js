@@ -1,8 +1,8 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { MEMBER_TYPES } from '~/vue_shared/components/members/constants';
-import { member as memberMock, group, invite, accessRequest } from '../mock_data';
 import MembersTableCell from '~/vue_shared/components/members/table/members_table_cell.vue';
+import { member as memberMock, group, invite, accessRequest } from '../mock_data';
 
 describe('MemberList', () => {
   const WrappedComponent = {

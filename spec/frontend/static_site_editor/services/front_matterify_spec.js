@@ -1,3 +1,4 @@
+import { frontMatterify, stringify } from '~/static_site_editor/services/front_matterify';
 import {
   sourceContentYAML as content,
   sourceContentHeaderObjYAML as yamlFrontMatterObj,
@@ -5,7 +6,6 @@ import {
   sourceContentBody as body,
 } from '../mock_data';
 
-import { frontMatterify, stringify } from '~/static_site_editor/services/front_matterify';
 
 describe('static_site_editor/services/front_matterify', () => {
   const frontMatterifiedContent = {

@@ -1,5 +1,5 @@
-import { setHTMLFixture } from './helpers/fixtures';
 import Tracking, { initUserTracking, initDefaultTrackers } from '~/tracking';
+import { setHTMLFixture } from './helpers/fixtures';
 
 describe('Tracking', () => {
   let snowplowSpy;

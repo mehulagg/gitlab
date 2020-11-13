@@ -1,4 +1,11 @@
 import testAction from 'helpers/vuex_action_helper';
+import actions, { gqlClient } from '~/boards/stores/actions';
+import * as types from '~/boards/stores/mutation_types';
+import { inactiveId } from '~/boards/constants';
+import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
+import destroyBoardListMutation from '~/boards/queries/board_list_destroy.mutation.graphql';
+import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
+import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
 import {
   mockListsWithModel,
   mockLists,
@@ -10,13 +17,6 @@ import {
   mockIssues,
   labels,
 } from '../mock_data';
-import actions, { gqlClient } from '~/boards/stores/actions';
-import * as types from '~/boards/stores/mutation_types';
-import { inactiveId } from '~/boards/constants';
-import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
-import destroyBoardListMutation from '~/boards/queries/board_list_destroy.mutation.graphql';
-import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
-import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {

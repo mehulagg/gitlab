@@ -1,9 +1,9 @@
 import $ from 'jquery';
 import { escape } from 'lodash';
+import { __ } from '~/locale';
 import axios from './lib/utils/axios_utils';
 import Api from './api';
 import { normalizeHeaders } from './lib/utils/common_utils';
-import { __ } from '~/locale';
 
 const groupsSelect = () => {
   // Needs to be accessible in rspec

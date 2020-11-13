@@ -6,10 +6,10 @@ import DropdownUtils from '~/filtered_search/dropdown_utils';
 import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
 import FilteredSearchDropdownManager from '~/filtered_search/filtered_search_dropdown_manager';
 import FilteredSearchManager from '~/filtered_search/filtered_search_manager';
-import FilteredSearchSpecHelper from '../helpers/filtered_search_spec_helper';
 import { BACKSPACE_KEY_CODE, DELETE_KEY_CODE } from '~/lib/utils/keycodes';
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as commonUtils from '~/lib/utils/common_utils';
+import FilteredSearchSpecHelper from '../helpers/filtered_search_spec_helper';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   ...jest.requireActual('~/lib/utils/url_utility'),

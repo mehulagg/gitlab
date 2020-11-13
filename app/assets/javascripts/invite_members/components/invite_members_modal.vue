@@ -9,10 +9,10 @@ import {
   GlButton,
   GlFormInput,
 } from '@gitlab/ui';
-import eventHub from '../event_hub';
 import { s__, sprintf } from '~/locale';
 import Api from '~/api';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
+import eventHub from '../event_hub';
 
 export default {
   name: 'InviteMembersModal',

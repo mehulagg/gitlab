@@ -1,8 +1,8 @@
 <script>
-import BoardCardLayout from './board_card_layout.vue';
-import eventHub from '../eventhub';
 import sidebarEventHub from '~/sidebar/event_hub';
+import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
+import BoardCardLayout from './board_card_layout.vue';
 
 export default {
   name: 'BoardsIssueCard',

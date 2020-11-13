@@ -3,9 +3,9 @@ import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { createStore } from '~/ide/stores';
 import ide from '~/ide/components/ide.vue';
+import extendStore from '~/ide/stores/extend';
 import { file } from '../helpers';
 import { projectData } from '../mock_data';
-import extendStore from '~/ide/stores/extend';
 
 let store;
 

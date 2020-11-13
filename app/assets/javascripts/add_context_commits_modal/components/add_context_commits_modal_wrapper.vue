@@ -3,8 +3,8 @@ import { mapState, mapActions } from 'vuex';
 import { GlModal, GlTabs, GlTab, GlSearchBoxByType, GlSprintf } from '@gitlab/ui';
 import ReviewTabContainer from '~/add_context_commits_modal/components/review_tab_container.vue';
 import { s__ } from '~/locale';
-import eventHub from '../event_hub';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import eventHub from '../event_hub';
 import {
   findCommitIndex,
   setCommitStatus,

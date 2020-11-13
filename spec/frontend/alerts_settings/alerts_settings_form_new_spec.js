@@ -9,8 +9,8 @@ import {
   GlButton,
 } from '@gitlab/ui';
 import AlertsSettingsForm from '~/alerts_settings/components/alerts_settings_form_new.vue';
-import { defaultAlertSettingsConfig } from './util';
 import { typeSet } from '~/alerts_settings/constants';
+import { defaultAlertSettingsConfig } from './util';
 
 describe('AlertsSettingsFormNew', () => {
   let wrapper;
