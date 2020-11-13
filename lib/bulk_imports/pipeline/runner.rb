@@ -16,19 +16,21 @@ module BulkImports
         end
 
         def run(context)
-          extractors.each do |extractor|
-            extractor.extract(context).each do |entry|
-              transformers.each do |transformer|
-                entry = transformer.transform(context, entry)
-              end
+          raw_data = extractors.map do |extractor|
+            extractor.extract(context)
+          end
 
-              loaders.each do |loader|
-                loader.load(context, entry)
-              end
+          raw_data.each do |entry|
+            transformers.each do |transformer|
+              entry = transformer.transform(context, entry)
+            end
+
+            loaders.each do |loader|
+              loader.load(context, entry)
             end
           end
 
-          after_run.call(context) if after_run.present?
+          after_run.call(context, raw_data) if after_run.present?
         end
 
         private
