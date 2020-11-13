@@ -46,7 +46,7 @@ module EE
       issue.incident? && issue.project.feature_available?(:incident_timeline_view)
     end
 
-    #OVERRIDES
+    # OVERRIDES
 
     override :issue_closed_link
     def issue_closed_link(issue, current_user, css_class: '')

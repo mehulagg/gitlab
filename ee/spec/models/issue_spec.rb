@@ -840,8 +840,8 @@ RSpec.describe Issue do
       stub_licensed_features(epics: true)
     end
 
-    let(:group) { nil }
     let_it_be(:user) { create(:user) }
+    let(:group) { nil }
 
     subject { issue.can_be_promoted_to_epic?(user) }
 
