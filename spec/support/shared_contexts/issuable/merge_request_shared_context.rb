@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
-RSpec.shared_context 'merge request show action' do
+RSpec.shared_context 'open merge request show action' do
+  include Devise::Test::ControllerHelpers
+  include ProjectForksHelper
+
+  let(:user) { create(:user) }
+  let(:project) { create(:project, :public, :repository) }
+
+  let(:open_merge_request) do
+    create(:open_merge_request, author: user)
+  end
+end
+
+RSpec.shared_context 'closed merge request show action' do
   include Devise::Test::ControllerHelpers
   include ProjectForksHelper
 

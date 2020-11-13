@@ -3,30 +3,43 @@
 require 'spec_helper'
 
 RSpec.describe 'projects/merge_requests/show.html.haml' do
-  before do
-    allow(view).to receive(:experiment_enabled?).and_return(false)
-  end
+  context 'when the merge request is open' do
+    include_context 'open request show action'
 
-  include_context 'merge request show action'
+    it 'shows the "Mark as draft" button' do
+      render
 
-  describe 'merge request assignee sidebar' do
-    context 'when assignee is allowed to merge' do
-      it 'does not show a warning icon' do
-        closed_merge_request.update!(assignee_id: user.id)
-        project.add_maintainer(user)
-        assign(:issuable_sidebar, serialize_issuable_sidebar(user, project, closed_merge_request))
-
-        render
-
-        expect(rendered).not_to have_css('.merge-icon')
-      end
+      expect(rendered).to have_css('a', visible: true, text: 'Mark as draft')
+      expect(rendered).to have_css('a', visible: false, text: 'Reopen')
+      expect(rendered).to have_css('a', visible: true, text: 'Close')
     end
   end
 
   context 'when the merge request is closed' do
+    before do
+      allow(view).to receive(:experiment_enabled?).and_return(false)
+    end
+
+    include_context 'merge request show action'
+
+    describe 'merge request assignee sidebar' do
+      context 'when assignee is allowed to merge' do
+        it 'does not show a warning icon' do
+          closed_merge_request.update!(assignee_id: user.id)
+          project.add_maintainer(user)
+          assign(:issuable_sidebar, serialize_issuable_sidebar(user, project, closed_merge_request))
+
+          render
+
+          expect(rendered).not_to have_css('.merge-icon')
+        end
+      end
+    end
+
     it 'shows the "Reopen" button' do
       render
 
+      expect(rendered).to have_css('a', visible: false, text: 'Mark as draft')
       expect(rendered).to have_css('a', visible: true, text: 'Reopen')
       expect(rendered).to have_css('a', visible: false, text: 'Close')
     end
