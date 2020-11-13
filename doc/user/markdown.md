@@ -437,6 +437,7 @@ GFM recognizes the following:
 | repository file references      | `[README](doc/README)`     |                                         |                                |
 | repository file line references | `[README](doc/README#L13)` |                                         |                                |
 | [alert](../operations/incident_management/alerts.md) | `^alert#123` | `namespace/project^alert#123`    | `project^alert#123`            |
+| vulnerability                   | `[vulnerabilities:`          | `[namespace/vulnerabilities:]`           | |
 
 For example, referencing an issue by using `#123` will format the output as a link
 to issue number 123 with text `#123`. Likewise, a link to issue number 123 will be
