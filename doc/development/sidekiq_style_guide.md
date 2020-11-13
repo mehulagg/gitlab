@@ -72,7 +72,7 @@ are not adjusted appropriately.
 
 bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate which updates config/sidekiq_queues.yml
 
-After adding a worker to an existing namespace, run 
+After adding a worker to a new namespace or adding a worker without a namespace specified, run 
 `bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
 `config/sidekiq_queues.yml` so that
 it can be picked up by 
