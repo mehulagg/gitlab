@@ -190,6 +190,7 @@ class GroupPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_group
   end
 
