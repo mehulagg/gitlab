@@ -20,6 +20,7 @@ export default () => {
         return createElement('app', {
           props: {
             storageKey: whatsNewElm.getAttribute('data-storage-key'),
+            versions: JSON.parse(whatsNewElm.getAttribute('data-versions')),
           },
         });
       },

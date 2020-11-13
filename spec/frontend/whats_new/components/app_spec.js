@@ -1,6 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlDrawer, GlInfiniteScroll } from '@gitlab/ui';
+import { GlDrawer, GlInfiniteScroll, GlTabs } from '@gitlab/ui';
 import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import App from '~/whats_new/components/app.vue';
@@ -16,12 +16,13 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('App', () => {
-  const propsData = { storageKey: 'storage-key' };
+  const propsData = { storageKey: 'storage-key', versions: ['3.11', '3.10'] };
   let wrapper;
   let store;
   let actions;
   let state;
   let trackingSpy;
+  let gitlabDotCom = true;
 
   const buildWrapper = () => {
     actions = {
@@ -49,22 +50,32 @@ describe('App', () => {
       directives: {
         GlResizeObserver: createMockDirective(),
       },
+      computed: {
+        gitlabDotCom() {
+          return gitlabDotCom;
+        },
+      },
     });
   };
 
   const findInfiniteScroll = () => wrapper.find(GlInfiniteScroll);
-  const emitBottomReached = () => findInfiniteScroll().vm.$emit('bottomReached');
 
-  beforeEach(async () => {
+  const setup = async () => {
     document.body.dataset.page = 'test-page';
     document.body.dataset.namespaceId = 'namespace-840';
 
     trackingSpy = mockTracking('_category_', null, jest.spyOn);
     buildWrapper();
 
-    wrapper.vm.$store.state.features = [{ title: 'Whats New Drawer', url: 'www.url.com' }];
+    wrapper.vm.$store.state.features = [
+      { title: 'Whats New Drawer', url: 'www.url.com', release: 3.11 },
+    ];
     wrapper.vm.$store.state.drawerBodyHeight = MOCK_DRAWER_BODY_HEIGHT;
     await wrapper.vm.$nextTick();
+  };
+
+  beforeEach(() => {
+    setup();
   });
 
   afterEach(() => {
@@ -130,6 +141,8 @@ describe('App', () => {
   });
 
   describe('bottomReached', () => {
+    const emitBottomReached = () => findInfiniteScroll().vm.$emit('bottomReached');
+
     beforeEach(() => {
       actions.fetchItems.mockClear();
     });
@@ -138,7 +151,7 @@ describe('App', () => {
       wrapper.vm.$store.state.pageInfo = { nextPage: 840 };
       emitBottomReached();
 
-      expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), 840);
+      expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), { page: 840 });
     });
 
     it('when nextPage does not exist it does not call fetchItems', () => {
@@ -160,5 +173,57 @@ describe('App', () => {
       expect.any(Object),
       MOCK_DRAWER_BODY_HEIGHT,
     );
+  });
+
+  describe('self managed', () => {
+    const findTabs = () => wrapper.find(GlTabs);
+    const waitRAF = () => new Promise(resolve => requestAnimationFrame(resolve));
+
+    beforeEach(() => {
+      wrapper.destroy();
+      gitlabDotCom = false;
+      setup();
+    });
+
+    it('renders tabs with drawer body height and content', () => {
+      const scroll = findInfiniteScroll();
+      const tabs = findTabs();
+
+      expect(scroll.exists()).toBe(false);
+      expect(tabs.attributes().style).toEqual(`height: ${MOCK_DRAWER_BODY_HEIGHT}px;`);
+      expect(wrapper.find('h5').text()).toBe('Whats New Drawer');
+    });
+
+    describe('fetchVersion', () => {
+      beforeEach(() => {
+        actions.fetchItems.mockClear();
+      });
+
+      it('when version isnt fetched, clicking a tab calls fetchItems', async () => {
+        const fetchVersionSpy = jest.spyOn(wrapper.vm, 'fetchVersion');
+        const secondTab = wrapper.findAll('.nav-link').at(1);
+
+        await secondTab.trigger('click');
+        await waitRAF();
+
+        expect(fetchVersionSpy).toHaveBeenCalledWith('3.10');
+        expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), { version: '3.10' });
+      });
+
+      it('when version has been fetched, clicking a tab calls fetchItems', async () => {
+        wrapper.vm.$store.state.features.push({ title: 'GitLab Stories', release: 3.1 });
+        await wrapper.vm.$nextTick();
+
+        const fetchVersionSpy = jest.spyOn(wrapper.vm, 'fetchVersion');
+        const secondTab = wrapper.findAll('.nav-link').at(1);
+
+        await secondTab.trigger('click');
+        await waitRAF();
+
+        expect(fetchVersionSpy).toHaveBeenCalledWith('3.10');
+        expect(actions.fetchItems).not.toHaveBeenCalled();
+        expect(wrapper.find('.tab-pane.active h5').text()).toBe('GitLab Stories');
+      });
+    });
   });
 });

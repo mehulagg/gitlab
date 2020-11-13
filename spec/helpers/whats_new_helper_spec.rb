@@ -44,4 +44,14 @@ RSpec.describe WhatsNewHelper do
       end
     end
   end
+
+  describe '#whats_new_versions' do
+    let(:versions) { [84.0] }
+
+    it 'returns ReleaseHighlight.versions' do
+      expect(ReleaseHighlight).to receive(:versions).and_return(versions)
+
+      expect(helper.whats_new_versions).to eq(versions)
+    end
+  end
 end

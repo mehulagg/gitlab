@@ -12,4 +12,8 @@ module WhatsNewHelper
 
     ['display-whats-new-notification', most_recent_version].join('-')
   end
+
+  def whats_new_versions
+    ReleaseHighlight.versions
+  end
 end

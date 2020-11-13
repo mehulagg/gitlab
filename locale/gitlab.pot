@@ -31328,6 +31328,9 @@ msgstr ""
 msgid "Your U2F device was registered!"
 msgstr ""
 
+msgid "Your Version"
+msgstr ""
+
 msgid "Your WebAuthn device did not send a valid JSON response."
 msgstr ""
 
