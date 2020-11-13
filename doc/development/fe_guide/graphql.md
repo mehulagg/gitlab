@@ -831,6 +831,8 @@ it('calls a mutation with correct parameters and reorders designs', async () => 
 If your application contains `@client` queries, most probably you will have an Apollo Client warning saying that you have a local query but no resolvers are defined. In order to fix it, you need to pass resolvers to the mocked client with a second parameter (bare minimum is an empty object):
 
 ```javascript
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
+...
 fakeApollo = createMockApollo(requestHandlers, {});
 ```
 
