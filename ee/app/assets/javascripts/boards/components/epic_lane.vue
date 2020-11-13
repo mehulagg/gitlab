@@ -85,6 +85,9 @@ export default {
     isLoading() {
       return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
     },
+    shouldDisplay() {
+      return this.issuesCount > 0 || this.isLoading;
+    },
   },
   watch: {
     filterParams: {
@@ -116,8 +119,11 @@ export default {
 </script>
 
 <template>
-  <div>
-    <div class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block">
+  <div v-if="shouldDisplay">
+    <div
+      class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block"
+      data-testid="board-epic-lane"
+    >
       <div class="gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
         <gl-button
           v-gl-tooltip.hover.right

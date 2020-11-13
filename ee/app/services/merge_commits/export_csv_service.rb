@@ -2,39 +2,44 @@
 
 module MergeCommits
   class ExportCsvService
-    TARGET_FILESIZE = 15_000_000 # file size restricted to 15MB
+    include Gitlab::Utils::StrongMemoize
+    TARGET_FILESIZE = 15.megabytes
 
-    def initialize(current_user, group)
+    def initialize(current_user, group, filter_params = {})
       @current_user = current_user
       @group = group
+      @filter_params = filter_params
     end
 
     def csv_data
-      csv_builder.render(TARGET_FILESIZE)
+      ServiceResponse.success(payload: csv_builder.render(TARGET_FILESIZE))
     end
 
     private
 
-    attr_reader :current_user, :group
+    attr_reader :current_user, :group, :filter_params
 
     def csv_builder
       @csv_builder ||= CsvBuilder.new(data, header_to_value_hash)
     end
 
     def data
-      MergeRequestsFinder
-        .new(current_user, finder_options)
-        .execute
-        .preload_author
-        .preload_approved_by_users
-        .preload_target_project
-        .preload_metrics([:merged_by])
+      strong_memoize(:merge_commits_data) do
+        MergeRequestsFinder
+          .new(current_user, finder_options)
+          .execute
+          .preload_author
+          .preload_approved_by_users
+          .preload_target_project
+          .preload_metrics([:merged_by])
+      end
     end
 
     def finder_options
       {
         group_id: group.id,
-        state: 'merged'
+        state: 'merged',
+        merge_commit_sha: filter_params[:commit_sha]
       }
     end
 

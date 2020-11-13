@@ -879,6 +879,9 @@ msgstr ""
 msgid "%{user_name} profile page"
 msgstr ""
 
+msgid "%{username} has asked for a GitLab account on your instance %{host}:"
+msgstr ""
+
 msgid "%{username}'s avatar"
 msgstr ""
 
@@ -2541,6 +2544,9 @@ msgstr ""
 msgid "AlertSettings|Delete integration"
 msgstr ""
 
+msgid "AlertSettings|Edit payload"
+msgstr ""
+
 msgid "AlertSettings|Enter integration name"
 msgstr ""
 
@@ -2554,6 +2560,9 @@ msgid "AlertSettings|HTTP Endpoint"
 msgstr ""
 
 msgid "AlertSettings|HTTP endpoint"
+msgstr ""
+
+msgid "AlertSettings|If you edit the payload, the stored mapping will be reset, and you'll need to re-map the fields."
 msgstr ""
 
 msgid "AlertSettings|In free versions of GitLab, only one integration for each type can be added. %{linkStart}Upgrade your subscription%{linkEnd} to add additional integrations."
@@ -2571,6 +2580,9 @@ msgstr ""
 msgid "AlertSettings|Opsgenie"
 msgstr ""
 
+msgid "AlertSettings|Proceed with editing"
+msgstr ""
+
 msgid "AlertSettings|Prometheus API base URL"
 msgstr ""
 
@@ -2581,6 +2593,9 @@ msgid "AlertSettings|Reset Key"
 msgstr ""
 
 msgid "AlertSettings|Reset key"
+msgstr ""
+
+msgid "AlertSettings|Reset the mapping"
 msgstr ""
 
 msgid "AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in."
@@ -2596,6 +2611,9 @@ msgid "AlertSettings|Save integration"
 msgstr ""
 
 msgid "AlertSettings|Select integration type"
+msgstr ""
+
+msgid "AlertSettings|Submit payload"
 msgstr ""
 
 msgid "AlertSettings|Test alert payload"
@@ -3027,9 +3045,6 @@ msgstr ""
 msgid "An error occurred while fetching terraform reports."
 msgstr ""
 
-msgid "An error occurred while fetching the Service Desk address."
-msgstr ""
-
 msgid "An error occurred while fetching the board lists. Please try again."
 msgstr ""
 
@@ -3073,6 +3088,9 @@ msgid "An error occurred while importing project: %{details}"
 msgstr ""
 
 msgid "An error occurred while initializing path locks"
+msgstr ""
+
+msgid "An error occurred while loading a section of this page."
 msgstr ""
 
 msgid "An error occurred while loading all the files."
@@ -3127,6 +3145,9 @@ msgid "An error occurred while loading the merge request version data."
 msgstr ""
 
 msgid "An error occurred while loading the merge request."
+msgstr ""
+
+msgid "An error occurred while loading the pipeline."
 msgstr ""
 
 msgid "An error occurred while loading the pipelines jobs."
@@ -3184,6 +3205,9 @@ msgid "An error occurred while subscribing to notifications."
 msgstr ""
 
 msgid "An error occurred while triggering the job."
+msgstr ""
+
+msgid "An error occurred while trying to generate the report. Please try again later."
 msgstr ""
 
 msgid "An error occurred while trying to run a new pipeline for this Merge Request."
@@ -5528,6 +5552,12 @@ msgid "Cleared weight."
 msgstr ""
 
 msgid "Clears weight."
+msgstr ""
+
+msgid "Click %{link_start}here%{link_end} to view the request."
+msgstr ""
+
+msgid "Click %{link_to} to view the request."
 msgstr ""
 
 msgid "Click the %{strong_open}Download%{strong_close} button and wait for downloading to complete."
@@ -8186,6 +8216,9 @@ msgstr ""
 msgid "CycleAnalyticsEvent|Merge request created"
 msgstr ""
 
+msgid "CycleAnalyticsEvent|Merge request first commit time"
+msgstr ""
+
 msgid "CycleAnalyticsEvent|Merge request first deployed to production"
 msgstr ""
 
@@ -9972,6 +10005,9 @@ msgstr ""
 msgid "Email updates (optional)"
 msgstr ""
 
+msgid "Email: %{email}"
+msgstr ""
+
 msgid "EmailError|It appears that the email is blank. Make sure your reply is at the top of the email, we can't process inline replies."
 msgstr ""
 
@@ -11186,6 +11222,11 @@ msgstr ""
 
 msgid "Failed"
 msgstr ""
+
+msgid "Failed %d time in the last 14 days"
+msgid_plural "Failed %d times in the last 14 days"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Failed Jobs"
 msgstr ""
@@ -12554,6 +12595,9 @@ msgstr ""
 msgid "GitLab API"
 msgstr ""
 
+msgid "GitLab Account Request"
+msgstr ""
+
 msgid "GitLab Billing Team."
 msgstr ""
 
@@ -13551,12 +13595,6 @@ msgid "GroupsNew|To copy a GitLab group between installations, navigate to the g
 msgstr ""
 
 msgid "GroupsTree|Are you sure you want to leave the \"%{fullName}\" group?"
-msgstr ""
-
-msgid "GroupsTree|Create a project in this group."
-msgstr ""
-
-msgid "GroupsTree|Create a subgroup in this group."
 msgstr ""
 
 msgid "GroupsTree|Edit group"
@@ -22171,6 +22209,9 @@ msgstr ""
 msgid "Redirect to SAML provider to test configuration"
 msgstr ""
 
+msgid "Redis"
+msgstr ""
+
 msgid "Reduce project visibility"
 msgstr ""
 
@@ -22671,6 +22712,15 @@ msgid "Reporting"
 msgstr ""
 
 msgid "Reports|%{combinedString} and %{resolvedString}"
+msgstr ""
+
+msgid "Reports|%{recentlyFailed} out of %{failed} failed test has failed more than once in the last 14 days"
+msgstr ""
+
+msgid "Reports|%{recentlyFailed} out of %{failed} failed tests has failed more than once in the last 14 days"
+msgstr ""
+
+msgid "Reports|%{recentlyFailed} out of %{failed} failed tests have failed more than once in the last 14 days"
 msgstr ""
 
 msgid "Reports|Accessibility scanning detected %d issue for the source branch only"
@@ -29532,6 +29582,9 @@ msgstr ""
 msgid "Username or email"
 msgstr ""
 
+msgid "Username: %{username}"
+msgstr ""
+
 msgid "Users"
 msgstr ""
 
@@ -31173,6 +31226,9 @@ msgstr ""
 msgid "Your GPG keys (%{count})"
 msgstr ""
 
+msgid "Your GitLab account request has been approved!"
+msgstr ""
+
 msgid "Your GitLab group"
 msgstr ""
 
@@ -31371,6 +31427,9 @@ msgstr ""
 msgid "Your search didn't match any commits. Try a different query."
 msgstr ""
 
+msgid "Your sign-in page is %{url}."
+msgstr ""
+
 msgid "Your subscription expired!"
 msgstr ""
 
@@ -31378,6 +31437,9 @@ msgid "Your subscription has been downgraded."
 msgstr ""
 
 msgid "Your subscription will expire in %{remaining_days}."
+msgstr ""
+
+msgid "Your username is %{username}."
 msgstr ""
 
 msgid "Zoom meeting added"
@@ -32636,6 +32698,9 @@ msgstr ""
 msgid "security Reports|There was an error creating the merge request"
 msgstr ""
 
+msgid "severity|Blocker"
+msgstr ""
+
 msgid "severity|Critical"
 msgstr ""
 
@@ -32648,7 +32713,13 @@ msgstr ""
 msgid "severity|Low"
 msgstr ""
 
+msgid "severity|Major"
+msgstr ""
+
 msgid "severity|Medium"
+msgstr ""
+
+msgid "severity|Minor"
 msgstr ""
 
 msgid "severity|None"

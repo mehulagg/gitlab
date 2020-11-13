@@ -4,6 +4,7 @@ import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_se
 import appStore from 'ee/vue_shared/security_reports/store';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
+import * as secretDetectionTypes from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutation_types';
 import { mount } from '@vue/test-utils';
 import { waitForMutation } from 'helpers/vue_test_utils_helper';
 import { trimText } from 'helpers/text_helper';
@@ -29,7 +30,7 @@ const DEPENDENCY_SCANNING_DIFF_ENDPOINT = 'dependency_scanning.json';
 const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
 const PIPELINE_JOBS_ENDPOINT = 'jobs.json';
-const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_detection.json';
+const SECRET_DETECTION_DIFF_ENDPOINT = 'secret_detection.json';
 const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
 describe('Grouped security reports app', () => {
@@ -117,7 +118,7 @@ describe('Grouped security reports app', () => {
       gl.mrWidgetData.dependency_scanning_comparison_path = DEPENDENCY_SCANNING_DIFF_ENDPOINT;
       gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
       gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_SCANNING_DIFF_ENDPOINT;
+      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
       gl.mrWidgetData.coverage_fuzzing_comparison_path = COVERAGE_FUZZING_DIFF_ENDPOINT;
     });
 
@@ -127,7 +128,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(500);
         mock.onGet(DAST_DIFF_ENDPOINT).reply(500);
         mock.onGet(SAST_DIFF_ENDPOINT).reply(500);
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(500);
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(500);
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(500);
 
         createWrapper(allReportProps);
@@ -137,7 +138,10 @@ describe('Grouped security reports app', () => {
           waitForMutation(wrapper.vm.$store, types.RECEIVE_CONTAINER_SCANNING_DIFF_ERROR),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_ERROR),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DEPENDENCY_SCANNING_DIFF_ERROR),
-          waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_ERROR),
+          waitForMutation(
+            wrapper.vm.$store,
+            `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_ERROR}`,
+          ),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR),
         ]);
       });
@@ -179,7 +183,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, {});
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, {});
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, {});
 
         createWrapper(allReportProps);
@@ -212,7 +216,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, emptyResponse);
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, emptyResponse);
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, emptyResponse);
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, emptyResponse);
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, emptyResponse);
 
         createWrapper(allReportProps);
@@ -222,7 +226,10 @@ describe('Grouped security reports app', () => {
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_CONTAINER_SCANNING_DIFF_SUCCESS),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DEPENDENCY_SCANNING_DIFF_SUCCESS),
-          waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS),
+          waitForMutation(
+            wrapper.vm.$store,
+            `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
+          ),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS),
         ]);
       });
@@ -262,7 +269,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, dependencyScanningDiffSuccessMock);
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, dastDiffSuccessMock);
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, sastDiffSuccessMock);
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
 
         createWrapper(allReportProps);
@@ -272,7 +279,10 @@ describe('Grouped security reports app', () => {
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_CONTAINER_SCANNING_DIFF_SUCCESS),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DEPENDENCY_SCANNING_DIFF_SUCCESS),
-          waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS),
+          waitForMutation(
+            wrapper.vm.$store,
+            `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
+          ),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS),
         ]);
       });
@@ -553,9 +563,9 @@ describe('Grouped security reports app', () => {
   describe('secret scanning reports', () => {
     const initSecretScan = (isEnabled = true) => {
       gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_SCANNING_DIFF_ENDPOINT;
+      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
 
-      mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
+      mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
 
       createWrapper({
         ...props,
@@ -564,7 +574,10 @@ describe('Grouped security reports app', () => {
         },
       });
 
-      return waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS);
+      return waitForMutation(
+        wrapper.vm.$store,
+        `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
+      );
     };
 
     describe('enabled', () => {
@@ -576,8 +589,10 @@ describe('Grouped security reports app', () => {
         expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(true);
       });
 
-      it('should set setSecretScanningDiffEndpoint', () => {
-        expect(wrapper.vm.secretScanning.paths.diffEndpoint).toEqual(SECRET_SCANNING_DIFF_ENDPOINT);
+      it('should set diffEndpoint', () => {
+        expect(wrapper.vm.secretDetection.paths.diffEndpoint).toEqual(
+          SECRET_DETECTION_DIFF_ENDPOINT,
+        );
       });
 
       it('should display the correct numbers of vulnerabilities', () => {

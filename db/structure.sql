@@ -9659,7 +9659,9 @@ CREATE TABLE aws_roles (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     role_arn character varying(2048),
-    role_external_id character varying(64) NOT NULL
+    role_external_id character varying(64) NOT NULL,
+    region text,
+    CONSTRAINT check_57adedab55 CHECK ((char_length(region) <= 255))
 );
 
 CREATE TABLE background_migration_jobs (
@@ -9915,6 +9917,26 @@ CREATE SEQUENCE bulk_import_entities_id_seq
     CACHE 1;
 
 ALTER SEQUENCE bulk_import_entities_id_seq OWNED BY bulk_import_entities.id;
+
+CREATE TABLE bulk_import_trackers (
+    id bigint NOT NULL,
+    bulk_import_entity_id bigint NOT NULL,
+    relation text NOT NULL,
+    next_page text,
+    has_next_page boolean DEFAULT false NOT NULL,
+    CONSTRAINT check_2d45cae629 CHECK ((char_length(relation) <= 255)),
+    CONSTRAINT check_40aeaa600b CHECK ((char_length(next_page) <= 255)),
+    CONSTRAINT check_next_page_requirement CHECK (((has_next_page IS FALSE) OR (next_page IS NOT NULL)))
+);
+
+CREATE SEQUENCE bulk_import_trackers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE bulk_import_trackers_id_seq OWNED BY bulk_import_trackers.id;
 
 CREATE TABLE bulk_imports (
     id bigint NOT NULL,
@@ -13170,6 +13192,9 @@ CREATE TABLE jira_tracker_data (
     project_key text,
     issues_enabled boolean DEFAULT false NOT NULL,
     deployment_type smallint DEFAULT 0 NOT NULL,
+    vulnerabilities_issuetype text,
+    vulnerabilities_enabled boolean DEFAULT false NOT NULL,
+    CONSTRAINT check_0bf84b76e9 CHECK ((char_length(vulnerabilities_issuetype) <= 255)),
     CONSTRAINT check_214cf6a48b CHECK ((char_length(project_key) <= 255))
 );
 
@@ -13460,6 +13485,23 @@ CREATE SEQUENCE merge_request_blocks_id_seq
     CACHE 1;
 
 ALTER SEQUENCE merge_request_blocks_id_seq OWNED BY merge_request_blocks.id;
+
+CREATE TABLE merge_request_cleanup_schedules (
+    merge_request_id bigint NOT NULL,
+    scheduled_at timestamp with time zone NOT NULL,
+    completed_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE merge_request_cleanup_schedules_merge_request_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE merge_request_cleanup_schedules_merge_request_id_seq OWNED BY merge_request_cleanup_schedules.merge_request_id;
 
 CREATE TABLE merge_request_context_commit_diff_files (
     sha bytea NOT NULL,
@@ -17602,6 +17644,8 @@ ALTER TABLE ONLY bulk_import_configurations ALTER COLUMN id SET DEFAULT nextval(
 
 ALTER TABLE ONLY bulk_import_entities ALTER COLUMN id SET DEFAULT nextval('bulk_import_entities_id_seq'::regclass);
 
+ALTER TABLE ONLY bulk_import_trackers ALTER COLUMN id SET DEFAULT nextval('bulk_import_trackers_id_seq'::regclass);
+
 ALTER TABLE ONLY bulk_imports ALTER COLUMN id SET DEFAULT nextval('bulk_imports_id_seq'::regclass);
 
 ALTER TABLE ONLY chat_names ALTER COLUMN id SET DEFAULT nextval('chat_names_id_seq'::regclass);
@@ -17931,6 +17975,8 @@ ALTER TABLE ONLY members ALTER COLUMN id SET DEFAULT nextval('members_id_seq'::r
 ALTER TABLE ONLY merge_request_assignees ALTER COLUMN id SET DEFAULT nextval('merge_request_assignees_id_seq'::regclass);
 
 ALTER TABLE ONLY merge_request_blocks ALTER COLUMN id SET DEFAULT nextval('merge_request_blocks_id_seq'::regclass);
+
+ALTER TABLE ONLY merge_request_cleanup_schedules ALTER COLUMN merge_request_id SET DEFAULT nextval('merge_request_cleanup_schedules_merge_request_id_seq'::regclass);
 
 ALTER TABLE ONLY merge_request_context_commits ALTER COLUMN id SET DEFAULT nextval('merge_request_context_commits_id_seq'::regclass);
 
@@ -18610,6 +18656,9 @@ ALTER TABLE ONLY bulk_import_configurations
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT bulk_import_entities_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY bulk_import_trackers
+    ADD CONSTRAINT bulk_import_trackers_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY bulk_imports
     ADD CONSTRAINT bulk_imports_pkey PRIMARY KEY (id);
 
@@ -19143,6 +19192,9 @@ ALTER TABLE ONLY merge_request_assignees
 
 ALTER TABLE ONLY merge_request_blocks
     ADD CONSTRAINT merge_request_blocks_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY merge_request_cleanup_schedules
+    ADD CONSTRAINT merge_request_cleanup_schedules_pkey PRIMARY KEY (merge_request_id);
 
 ALTER TABLE ONLY merge_request_context_commits
     ADD CONSTRAINT merge_request_context_commits_pkey PRIMARY KEY (id);
@@ -19890,6 +19942,8 @@ CREATE INDEX backup_labels_title_idx ON backup_labels USING btree (title);
 
 CREATE INDEX backup_labels_type_project_id_idx ON backup_labels USING btree (type, project_id);
 
+CREATE UNIQUE INDEX bulk_import_trackers_uniq_relation_by_entity ON bulk_import_trackers USING btree (bulk_import_entity_id, relation);
+
 CREATE INDEX ci_builds_gitlab_monitor_metrics ON ci_builds USING btree (status, created_at, project_id) WHERE ((type)::text = 'Ci::Build'::text);
 
 CREATE INDEX code_owner_approval_required ON protected_branches USING btree (project_id, code_owner_approval_required) WHERE (code_owner_approval_required = true);
@@ -20349,6 +20403,8 @@ CREATE INDEX index_ci_pipelines_on_project_id_and_sha ON ci_pipelines USING btre
 CREATE INDEX index_ci_pipelines_on_project_id_and_source ON ci_pipelines USING btree (project_id, source);
 
 CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_config_source ON ci_pipelines USING btree (project_id, status, config_source);
+
+CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_created_at ON ci_pipelines USING btree (project_id, status, created_at);
 
 CREATE INDEX index_ci_pipelines_on_project_id_and_status_and_updated_at ON ci_pipelines USING btree (project_id, status, updated_at);
 
@@ -21084,6 +21140,8 @@ CREATE INDEX index_merge_request_assignees_on_user_id ON merge_request_assignees
 
 CREATE INDEX index_merge_request_blocks_on_blocked_merge_request_id ON merge_request_blocks USING btree (blocked_merge_request_id);
 
+CREATE UNIQUE INDEX index_merge_request_cleanup_schedules_on_merge_request_id ON merge_request_cleanup_schedules USING btree (merge_request_id);
+
 CREATE INDEX index_merge_request_diff_commits_on_sha ON merge_request_diff_commits USING btree (sha);
 
 CREATE INDEX index_merge_request_diff_details_on_merge_request_diff_id ON merge_request_diff_details USING btree (merge_request_diff_id);
@@ -21109,8 +21167,6 @@ CREATE INDEX index_merge_request_metrics_on_merged_by_id ON merge_request_metric
 CREATE INDEX index_merge_request_metrics_on_pipeline_id ON merge_request_metrics USING btree (pipeline_id);
 
 CREATE INDEX index_merge_request_metrics_on_target_project_id ON merge_request_metrics USING btree (target_project_id);
-
-CREATE INDEX index_merge_request_metrics_on_target_project_id_merged_at ON merge_request_metrics USING btree (target_project_id, merged_at);
 
 CREATE UNIQUE INDEX index_merge_request_reviewers_on_merge_request_id_and_user_id ON merge_request_reviewers USING btree (merge_request_id, user_id);
 
@@ -21198,7 +21254,11 @@ CREATE INDEX index_mirror_data_on_next_execution_and_retry_count ON project_mirr
 
 CREATE UNIQUE INDEX index_mr_blocks_on_blocking_and_blocked_mr_ids ON merge_request_blocks USING btree (blocking_merge_request_id, blocked_merge_request_id);
 
+CREATE INDEX index_mr_cleanup_schedules_timestamps ON merge_request_cleanup_schedules USING btree (scheduled_at) WHERE (completed_at IS NULL);
+
 CREATE UNIQUE INDEX index_mr_context_commits_on_merge_request_id_and_sha ON merge_request_context_commits USING btree (merge_request_id, sha);
+
+CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_nulls_last ON merge_request_metrics USING btree (target_project_id, merged_at DESC NULLS LAST, id DESC);
 
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
 
@@ -21298,11 +21358,23 @@ CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON a
 
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
 
+CREATE INDEX index_on_namespaces_lower_name ON namespaces USING btree (lower((name)::text));
+
+CREATE INDEX index_on_namespaces_lower_path ON namespaces USING btree (lower((path)::text));
+
+CREATE INDEX index_on_projects_lower_path ON projects USING btree (lower((path)::text));
+
+CREATE INDEX index_on_routes_lower_path ON routes USING btree (lower((path)::text));
+
 CREATE UNIQUE INDEX index_on_segment_selections_group_id_segment_id ON analytics_devops_adoption_segment_selections USING btree (group_id, segment_id);
 
 CREATE UNIQUE INDEX index_on_segment_selections_project_id_segment_id ON analytics_devops_adoption_segment_selections USING btree (project_id, segment_id);
 
 CREATE INDEX index_on_segment_selections_segment_id ON analytics_devops_adoption_segment_selections USING btree (segment_id);
+
+CREATE INDEX index_on_users_lower_email ON users USING btree (lower((email)::text));
+
+CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username)::text));
 
 CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
 
@@ -22142,6 +22214,8 @@ CREATE INDEX index_vulnerability_occurrences_for_issue_links_migration ON vulner
 
 CREATE INDEX index_vulnerability_occurrences_on_primary_identifier_id ON vulnerability_occurrences USING btree (primary_identifier_id);
 
+CREATE INDEX index_vulnerability_occurrences_on_project_fingerprint ON vulnerability_occurrences USING btree (project_fingerprint);
+
 CREATE INDEX index_vulnerability_occurrences_on_scanner_id ON vulnerability_occurrences USING btree (scanner_id);
 
 CREATE UNIQUE INDEX index_vulnerability_occurrences_on_unique_keys ON vulnerability_occurrences USING btree (project_id, primary_identifier_id, location_fingerprint, scanner_id);
@@ -22219,6 +22293,8 @@ CREATE INDEX merge_request_mentions_temp_index ON merge_requests USING btree (id
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_and_note_id_index ON merge_request_user_mentions USING btree (merge_request_id, note_id);
 
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_index ON merge_request_user_mentions USING btree (merge_request_id) WHERE (note_id IS NULL);
+
+CREATE INDEX merge_requests_state_id_temp_index ON merge_requests USING btree (id) WHERE (state_id = ANY (ARRAY[2, 3]));
 
 CREATE INDEX note_mentions_temp_index ON notes USING btree (id, noteable_type) WHERE (note ~~ '%@%'::text);
 
@@ -23959,6 +24035,9 @@ ALTER TABLE ONLY project_error_tracking_settings
 ALTER TABLE ONLY list_user_preferences
     ADD CONSTRAINT fk_rails_916d72cafd FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY merge_request_cleanup_schedules
+    ADD CONSTRAINT fk_rails_92dd0e705c FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY board_labels
     ADD CONSTRAINT fk_rails_9374a16edd FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE;
 
@@ -24090,6 +24169,9 @@ ALTER TABLE ONLY analytics_cycle_analytics_group_stages
 
 ALTER TABLE ONLY metrics_dashboard_annotations
     ADD CONSTRAINT fk_rails_aeb11a7643 FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY bulk_import_trackers
+    ADD CONSTRAINT fk_rails_aed566d3f3 FOREIGN KEY (bulk_import_entity_id) REFERENCES bulk_import_entities(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY pool_repositories
     ADD CONSTRAINT fk_rails_af3f8c5d62 FOREIGN KEY (shard_id) REFERENCES shards(id) ON DELETE RESTRICT;

@@ -1,11 +1,11 @@
 import createState from 'ee/vue_shared/security_reports/store/state';
 import createSastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
+import createSecretScanningState from 'ee/vue_shared/security_reports/store/modules/secret_detection/state';
 import { groupedTextBuilder } from 'ee/vue_shared/security_reports/store/utils';
 import {
   groupedContainerScanningText,
   groupedDastText,
   groupedDependencyText,
-  groupedSecretScanningText,
   groupedCoverageFuzzingText,
   groupedSummaryText,
   allReportsHaveError,
@@ -38,11 +38,11 @@ describe('Security reports getters', () => {
   beforeEach(() => {
     state = createState();
     state.sast = createSastState();
+    state.secretDetection = createSecretScanningState();
   });
 
   describe.each`
     name                     | scanner                 | getter
-    ${'Secret scanning'}     | ${'secretScanning'}     | ${groupedSecretScanningText}
     ${'Dependency scanning'} | ${'dependencyScanning'} | ${groupedDependencyText}
     ${'Container scanning'}  | ${'containerScanning'}  | ${groupedContainerScanningText}
     ${'DAST'}                | ${'dast'}               | ${groupedDastText}
@@ -220,7 +220,7 @@ describe('Security reports getters', () => {
       state.dast.hasError = true;
       state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
-      state.secretScanning.hasError = true;
+      state.secretDetection.hasError = true;
       state.coverageFuzzing.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(true);
@@ -234,7 +234,7 @@ describe('Security reports getters', () => {
       state.dast.hasError = false;
       state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
-      state.secretScanning.hasError = true;
+      state.secretDetection.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(false);
     });

@@ -1,5 +1,7 @@
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
-import configureMediator from 'ee/vue_shared/security_reports/store/mediator';
+import configureMediator, {
+  updateIssueActionsMap,
+} from 'ee/vue_shared/security_reports/store/mediator';
 
 const mockedStore = {
   dispatch: jest.fn(),
@@ -17,18 +19,14 @@ describe('security reports mediator', () => {
   describe(types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS, () => {
     const type = types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS;
 
-    it.each`
-      action                             | category
-      ${'sast/updateVulnerability'}      | ${'sast'}
-      ${'updateDastIssue'}               | ${'dast'}
-      ${'updateDependencyScanningIssue'} | ${'dependency_scanning'}
-      ${'updateContainerScanningIssue'}  | ${'container_scanning'}
-    `(`should trigger $action on when a $category is updated`, data => {
-      const { action, category } = data;
-      const payload = { category };
-      mockedStore.commit({ type, payload });
+    it.each(Object.entries(updateIssueActionsMap).map(entry => entry.reverse()))(
+      `should trigger %s on when a %s is updated`,
+      (action, category) => {
+        const payload = { category };
+        mockedStore.commit({ type, payload });
 
-      expect(mockedStore.dispatch).toHaveBeenCalledWith(action, payload);
-    });
+        expect(mockedStore.dispatch).toHaveBeenCalledWith(action, payload);
+      },
+    );
   });
 });

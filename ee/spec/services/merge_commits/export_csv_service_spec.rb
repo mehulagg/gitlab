@@ -18,6 +18,8 @@ RSpec.describe MergeCommits::ExportCsvService do
     project.add_maintainer(user)
   end
 
+  it { expect(subject.csv_data).to be_success }
+
   it 'includes the appropriate headers' do
     expect(csv.headers).to eq(['Merge Commit', 'Author', 'Merge Request', 'Merged By', 'Pipeline', 'Group', 'Project', 'Approver(s)'])
   end
@@ -57,14 +59,34 @@ RSpec.describe MergeCommits::ExportCsvService do
   end
 
   context 'with multiple merge requests' do
-    let_it_be(:merge_request_2) { create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged) }
+    let_it_be(:merge_request_2) { create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged, merge_commit_sha: 'rurebf') }
 
-    it do
-      expect(csv.count).to eq 2
+    it { expect(csv.count).to eq 2 }
+
+    context 'by commit_sha filter' do
+      context 'when valid' do
+        subject { described_class.new(user, group, { commit_sha: merge_request_2.merge_commit_sha }) }
+
+        it { expect(subject.csv_data).to be_success }
+
+        it { expect(csv.count).to eq 1 }
+
+        it do
+          expect(csv[0]['Merge Commit']).to eq merge_request_2.merge_commit_sha
+        end
+      end
+
+      context 'when merge commit does not exist' do
+        subject { described_class.new(user, group, { commit_sha: 'inexistent' }) }
+
+        it { expect(csv.count).to eq 0 }
+      end
     end
   end
 
   def csv
-    CSV.parse(subject.csv_data, headers: true)
+    data = subject.csv_data.payload
+
+    CSV.parse(data, headers: true)
   end
 end

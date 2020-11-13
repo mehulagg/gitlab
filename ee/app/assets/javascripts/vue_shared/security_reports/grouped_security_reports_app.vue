@@ -191,7 +191,7 @@ export default {
       'dast',
       'coverageFuzzing',
       'dependencyScanning',
-      'secretScanning',
+      'secretDetection',
       'summaryCounts',
       'modal',
       'isCreatingIssue',
@@ -204,12 +204,10 @@ export default {
       'groupedContainerScanningText',
       'groupedDastText',
       'groupedDependencyText',
-      'groupedSecretScanningText',
       'groupedCoverageFuzzingText',
       'containerScanningStatusIcon',
       'dastStatusIcon',
       'dependencyScanningStatusIcon',
-      'secretScanningStatusIcon',
       'coverageFuzzingStatusIcon',
       'isBaseSecurityReportOutOfDate',
       'canCreateIssue',
@@ -217,6 +215,7 @@ export default {
       'canDismissVulnerability',
     ]),
     ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters('secretDetection', ['groupedSecretDetectionText', 'secretDetectionStatusIcon']),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
@@ -237,7 +236,7 @@ export default {
     hasSastReports() {
       return this.enabledReports.sast;
     },
-    hasSecretScanningReports() {
+    hasSecretDetectionReports() {
       return this.enabledReports.secretDetection;
     },
     isMRActive() {
@@ -258,8 +257,23 @@ export default {
     dastDownloadLink() {
       return this.dastSummary?.scannedResourcesCsvPath || '';
     },
-    coverageFuzzingShowIssues() {
-      return this.coverageFuzzing.newIssues || this.coverageFuzzing.resolvedIssues;
+    hasCoverageFuzzingIssues() {
+      return this.hasIssuesForReportType('coverageFuzzing');
+    },
+    hasSastIssues() {
+      return this.hasIssuesForReportType('sast');
+    },
+    hasDependencyScanningIssues() {
+      return this.hasIssuesForReportType('dependencyScanning');
+    },
+    hasContainerScanningIssues() {
+      return this.hasIssuesForReportType('containerScanning');
+    },
+    hasDastIssues() {
+      return this.hasIssuesForReportType('dast');
+    },
+    hasSecretDetectionIssues() {
+      return this.hasIssuesForReportType('secretDetection');
     },
   },
 
@@ -308,10 +322,10 @@ export default {
       this.fetchDependencyScanningDiff();
     }
 
-    const secretScanningDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
-    if (secretScanningDiffEndpoint && this.hasSecretScanningReports) {
-      this.setSecretScanningDiffEndpoint(secretScanningDiffEndpoint);
-      this.fetchSecretScanningDiff();
+    const secretDetectionDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
+    if (secretDetectionDiffEndpoint && this.hasSecretDetectionReports) {
+      this.setSecretDetectionDiffEndpoint(secretDetectionDiffEndpoint);
+      this.fetchSecretDetectionDiff();
     }
 
     const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
@@ -352,8 +366,6 @@ export default {
       'setDependencyScanningDiffEndpoint',
       'fetchDastDiff',
       'setDastDiffEndpoint',
-      'fetchSecretScanningDiff',
-      'setSecretScanningDiffEndpoint',
       'fetchCoverageFuzzingDiff',
       'setCoverageFuzzingDiffEndpoint',
     ]),
@@ -361,10 +373,17 @@ export default {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
     }),
+    ...mapActions('secretDetection', {
+      setSecretDetectionDiffEndpoint: 'setDiffEndpoint',
+      fetchSecretDetectionDiff: 'fetchDiff',
+    }),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
     ...mapActions('pipelineJobs', {
       setPipelineJobsId: 'setPipelineId',
     }),
+    hasIssuesForReportType(reportType) {
+      return Boolean(this[reportType]?.newIssues.length || this[reportType]?.resolvedIssues.length);
+    },
   },
   summarySlots: ['success', 'error', 'loading'],
 };
@@ -443,11 +462,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="sast.newIssues.length || sast.resolvedIssues.length"
+            v-if="hasSastIssues"
             :unresolved-issues="sast.newIssues"
             :resolved-issues="sast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="sast-issues-list"
           />
         </template>
@@ -465,11 +483,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="dependencyScanning.newIssues.length || dependencyScanning.resolvedIssues.length"
+            v-if="hasDependencyScanningIssues"
             :unresolved-issues="dependencyScanning.newIssues"
             :resolved-issues="dependencyScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="dependency-scanning-issues-list"
           />
         </template>
@@ -487,11 +504,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="containerScanning.newIssues.length || containerScanning.resolvedIssues.length"
+            v-if="hasContainerScanningIssues"
             :unresolved-issues="containerScanning.newIssues"
             :resolved-issues="containerScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="container-scanning-issues-list"
           />
         </template>
@@ -522,33 +538,31 @@ export default {
             </template>
           </summary-row>
           <grouped-issues-list
-            v-if="dast.newIssues.length || dast.resolvedIssues.length"
+            v-if="hasDastIssues"
             :unresolved-issues="dast.newIssues"
             :resolved-issues="dast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="dast-issues-list"
           />
         </template>
 
-        <template v-if="hasSecretScanningReports">
+        <template v-if="hasSecretDetectionReports">
           <summary-row
-            :status-icon="secretScanningStatusIcon"
+            :status-icon="secretDetectionStatusIcon"
             :popover-options="secretScanningPopover"
             class="js-secret-scanning"
             data-qa-selector="secret_scan_report"
           >
             <template #summary>
-              <security-summary :message="groupedSecretScanningText" />
+              <security-summary :message="groupedSecretDetectionText" />
             </template>
           </summary-row>
 
           <grouped-issues-list
-            v-if="secretScanning.newIssues.length || secretScanning.resolvedIssues.length"
-            :unresolved-issues="secretScanning.newIssues"
-            :resolved-issues="secretScanning.resolvedIssues"
+            v-if="hasSecretDetectionIssues"
+            :unresolved-issues="secretDetection.newIssues"
+            :resolved-issues="secretDetection.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="secret-scanning-issues-list"
           />
         </template>
@@ -571,11 +585,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="coverageFuzzingShowIssues"
+            v-if="hasCoverageFuzzingIssues"
             :unresolved-issues="coverageFuzzing.newIssues"
             :resolved-issues="coverageFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="coverage-fuzzing-issues-list"
           />
         </template>

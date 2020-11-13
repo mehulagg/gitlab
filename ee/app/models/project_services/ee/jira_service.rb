@@ -5,7 +5,16 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
-      validates :project_key, presence: true, if: :issues_enabled
+      validates :project_key, presence: true, if: :project_key_required?
+      validates :vulnerabilities_issuetype, presence: true, if: :vulnerabilities_enabled
+    end
+
+    def jira_vulnerabilities_integration_enabled?
+      project.jira_vulnerabilities_integration_available? && vulnerabilities_enabled
+    end
+
+    def project_key_required?
+      issues_enabled || vulnerabilities_enabled
     end
 
     def issue_types

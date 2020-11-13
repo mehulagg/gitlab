@@ -12,11 +12,12 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
-import MappingBuilder from './alert_mapping_builder.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import MappingBuilder from './alert_mapping_builder.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
+import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 import service from '../services';
 import {
   integrationTypesNew,
@@ -24,6 +25,10 @@ import {
   targetPrometheusUrlPlaceholder,
   typeSet,
 } from '../constants';
+// Mocks will be removed when integrating with BE is ready
+// data format is defined and will be the same as mocked (maybe with some minor changes)
+// feature rollout plan - https://gitlab.com/gitlab-org/gitlab/-/issues/262707#note_442529171
+import mockedCustomMapping from './mocks/parsedMapping.json';
 
 export default {
   targetPrometheusUrlPlaceholder,
@@ -56,6 +61,13 @@ export default {
           'AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with to send a test alert to the %{linkStart}alerts page%{linkEnd}. This payload can be used to test the integration using the "save and test payload" button.',
         ),
         placeholder: s__('AlertSettings|Enter test alert JSON....'),
+        resetHeader: s__('AlertSettings|Reset the mapping'),
+        resetBody: s__(
+          "AlertSettings|If you edit the payload, the stored mapping will be reset, and you'll need to re-map the fields.",
+        ),
+        resetOk: s__('AlertSettings|Proceed with editing'),
+        editPayload: s__('AlertSettings|Edit payload'),
+        submitPayload: s__('AlertSettings|Submit payload'),
       },
       step5: {
         label: s__('AlertSettings|5. Map fields (optional)'),
@@ -106,14 +118,14 @@ export default {
       type: Boolean,
       required: true,
     },
-    currentIntegration: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     canAddIntegration: {
       type: Boolean,
       required: true,
+    },
+  },
+  apollo: {
+    currentIntegration: {
+      query: getCurrentIntegrationQuery,
     },
   },
   data() {
@@ -126,6 +138,10 @@ export default {
         json: null,
         error: null,
       },
+      resetSamplePayloadConfirmed: false,
+      customMapping: null,
+      parsingPayload: false,
+      currentIntegration: null,
     };
   },
   computed: {
@@ -158,6 +174,27 @@ export default {
         token: this.integrationForm.token,
       };
     },
+    showMappingBuilder() {
+      return (
+        this.glFeatures.multipleHttpIntegrationsCustomMapping &&
+        this.selectedIntegration === typeSet.http
+      );
+    },
+    mappingBuilderFields() {
+      return this.customMapping?.samplePayload?.payloadAlerFields?.nodes || [];
+    },
+    mappingBuilderMapping() {
+      return this.customMapping?.storedMapping?.nodes || [];
+    },
+    hasSamplePayload() {
+      return Boolean(this.customMapping?.samplePayload);
+    },
+    canEditPayload() {
+      return this.hasSamplePayload && !this.resetSamplePayloadConfirmed;
+    },
+    isPayloadEditDisabled() {
+      return !this.active || this.canEditPayload;
+    },
   },
   watch: {
     currentIntegration(val) {
@@ -166,6 +203,7 @@ export default {
       }
       this.selectedIntegration = val.type;
       this.active = val.active;
+      if (val.type === typeSet.http) this.getIntegrationMapping(val.id);
       return this.integrationTypeSelect();
     },
   },
@@ -241,6 +279,31 @@ export default {
       } catch (e) {
         this.integrationTestPayload.error = JSON.stringify(e.message);
       }
+    },
+    parseMapping() {
+      // TODO: replace with real BE mutation when ready;
+      this.parsingPayload = true;
+
+      return new Promise(resolve => {
+        setTimeout(() => resolve(mockedCustomMapping), 1000);
+      })
+        .then(res => {
+          const mapping = { ...res };
+          delete mapping.storedMapping;
+          this.customMapping = res;
+          this.integrationTestPayload.json = res?.samplePayload.body;
+          this.resetSamplePayloadConfirmed = false;
+        })
+        .finally(() => {
+          this.parsingPayload = false;
+        });
+    },
+    getIntegrationMapping() {
+      // TODO: replace with real BE mutation when ready;
+      return Promise.resolve(mockedCustomMapping).then(res => {
+        this.customMapping = res;
+        this.integrationTestPayload.json = res?.samplePayload.body;
+      });
     },
   },
 };
@@ -358,9 +421,9 @@ export default {
             </template>
           </gl-form-input-group>
 
-          <gl-button v-gl-modal.authKeyModal :disabled="!integrationForm.active" class="gl-mt-3">{{
-            $options.i18n.integrationFormSteps.step3.reset
-          }}</gl-button>
+          <gl-button v-gl-modal.authKeyModal :disabled="!active" class="gl-mt-3">
+            {{ $options.i18n.integrationFormSteps.step3.reset }}
+          </gl-button>
           <gl-modal
             modal-id="authKeyModal"
             :title="$options.i18n.integrationFormSteps.step3.reset"
@@ -373,6 +436,7 @@ export default {
         </div>
       </gl-form-group>
       <gl-form-group
+        id="test-integration"
         :label="$options.i18n.integrationFormSteps.step4.label"
         label-for="test-integration"
         :invalid-feedback="integrationTestPayload.error"
@@ -383,9 +447,9 @@ export default {
         />
 
         <gl-form-textarea
-          id="test-integration"
+          id="test-payload"
           v-model.trim="integrationTestPayload.json"
-          :disabled="!active"
+          :disabled="isPayloadEditDisabled"
           :state="jsonIsValid"
           :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
           class="gl-my-4"
@@ -394,16 +458,46 @@ export default {
           max-rows="10"
           @input="validateJson"
         />
+
+        <template v-if="showMappingBuilder">
+          <gl-button
+            v-if="canEditPayload"
+            v-gl-modal.resetPayloadModal
+            :disabled="!active"
+            class="gl-mt-3"
+          >
+            {{ $options.i18n.integrationFormSteps.step4.editPayload }}
+          </gl-button>
+
+          <gl-button
+            v-else
+            :disabled="!active"
+            :loading="parsingPayload"
+            class="gl-mt-3"
+            @click="parseMapping"
+          >
+            {{ $options.i18n.integrationFormSteps.step4.submitPayload }}
+          </gl-button>
+          <gl-modal
+            modal-id="resetPayloadModal"
+            :title="$options.i18n.integrationFormSteps.step4.resetHeader"
+            :ok-title="$options.i18n.integrationFormSteps.step4.resetOk"
+            ok-variant="danger"
+            @ok="resetSamplePayloadConfirmed = true"
+          >
+            {{ $options.i18n.integrationFormSteps.step4.resetBody }}
+          </gl-modal>
+        </template>
       </gl-form-group>
 
       <gl-form-group
-        v-if="glFeatures.multipleHttpIntegrationsCustomMapping"
+        v-if="showMappingBuilder"
         id="mapping-builder"
         :label="$options.i18n.integrationFormSteps.step5.label"
         label-for="mapping-builder"
       >
         <span class="gl-text-gray-500">{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
-        <mapping-builder />
+        <mapping-builder :payload-fields="mappingBuilderFields" :mapping="mappingBuilderMapping" />
       </gl-form-group>
       <div class="gl-display-flex gl-justify-content-end">
         <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
@@ -421,8 +515,8 @@ export default {
           variant="success"
           class="js-no-auto-disable"
           data-testid="integration-form-submit"
-          >{{ s__('AlertSettings|Save integration') }}</gl-button
-        >
+          >{{ s__('AlertSettings|Save integration') }}
+        </gl-button>
       </div>
     </gl-collapse>
   </gl-form>

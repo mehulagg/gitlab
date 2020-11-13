@@ -1,0 +1,14 @@
+@import '../../../../../app/assets/stylesheets/page_bundles/dev_ops_report';
+
+.circle {
+  width: $gl-spacing-scale-3;
+  height: $gl-spacing-scale-3;
+  border: 1px solid var(--gray-300, $gray-300);
+  border-radius: $avatar-radius;
+  @include gl-display-inline-block;
+
+  &-enabled {
+    border: 1px solid var(--indigo-800, $indigo-800);
+    background-color: var(--indigo-600, $indigo-600);
+  }
+}

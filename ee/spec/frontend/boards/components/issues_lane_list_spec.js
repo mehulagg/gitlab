@@ -55,6 +55,7 @@ describe('IssuesLaneList', () => {
         list,
         issues: mockIssues,
         disabled: false,
+        canAdminList: true,
       },
     });
   };
@@ -94,6 +95,54 @@ describe('IssuesLaneList', () => {
 
     it('does not renders BoardCard components', () => {
       expect(wrapper.findAll(BoardCard)).toHaveLength(0);
+    });
+  });
+
+  describe('drag & drop issue', () => {
+    beforeEach(() => {
+      const defaultStore = createStore();
+      store = {
+        ...defaultStore,
+        state: {
+          ...defaultStore.state,
+          canAdminEpic: true,
+        },
+      };
+
+      createComponent();
+    });
+
+    describe('handleDragOnStart', () => {
+      it('adds a class `is-dragging` to document body', () => {
+        expect(document.body.classList.contains('is-dragging')).toBe(false);
+
+        wrapper.find(`[data-testid="tree-root-wrapper"]`).vm.$emit('start');
+
+        expect(document.body.classList.contains('is-dragging')).toBe(true);
+      });
+    });
+
+    describe('handleDragOnEnd', () => {
+      it('removes class `is-dragging` from document body', () => {
+        jest.spyOn(wrapper.vm, 'moveIssue').mockImplementation(() => {});
+        document.body.classList.add('is-dragging');
+
+        wrapper.find(`[data-testid="tree-root-wrapper"]`).vm.$emit('end', {
+          oldIndex: 1,
+          newIndex: 0,
+          item: {
+            dataset: {
+              issueId: mockIssues[0].id,
+              issueIid: mockIssues[0].iid,
+              issuePath: mockIssues[0].referencePath,
+            },
+          },
+          to: { children: [], dataset: { listId: 'gid://gitlab/List/1' } },
+          from: { dataset: { listId: 'gid://gitlab/List/2' } },
+        });
+
+        expect(document.body.classList.contains('is-dragging')).toBe(false);
+      });
     });
   });
 });
