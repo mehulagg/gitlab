@@ -23,6 +23,9 @@ export default {
     GlSprintf,
   },
   inject: {
+    aboutDagDocPath: {
+      default: null,
+    },
     dagDocPath: {
       default: null,
     },
@@ -224,7 +227,7 @@ export default {
                   <code>{{ content }}</code>
                 </template>
                 <template #link="{ content }">
-                  <gl-link :href="dagDocPath">{{ content }}</gl-link>
+                  <gl-link :href="aboutDagDocPath">{{ content }}</gl-link>
                 </template>
               </gl-sprintf>
             </p>
