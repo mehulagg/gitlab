@@ -581,6 +581,10 @@
 }
 
 .set-user-status-modal {
+  .modal-content {
+    top: -0px;
+  }
+
   .modal-body {
     min-height: unset;
   }

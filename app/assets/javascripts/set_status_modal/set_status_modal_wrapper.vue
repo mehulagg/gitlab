@@ -208,7 +208,7 @@ export default {
         name="user[status][emoji]"
       />
       <div ref="userStatusForm" class="form-group position-relative m-0">
-        <div class="input-group">
+        <div class="input-group gl-mb-5">
           <span class="input-group-prepend">
             <button
               ref="toggleEmojiMenuButton"
@@ -256,9 +256,9 @@ export default {
             </button>
           </span>
         </div>
-        <div v-if="canSetUserAvailability" class="form-group gl-my-2">
+        <div v-if="canSetUserAvailability" class="form-group">
           <div class="gl-display-flex">
-            <label class="form-control-inline">
+            <label class="form-control-inline gl-mb-0">
               <input
                 v-model="availability"
                 data-testid="user-availability-checkbox"
