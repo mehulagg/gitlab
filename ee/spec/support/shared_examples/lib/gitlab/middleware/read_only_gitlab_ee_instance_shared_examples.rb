@@ -44,7 +44,7 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance' do
       expect(subject).not_to disallow_request
     end
 
-    it "expects a POST request to git-receive-pack URL to be allowed" do
+    it 'expects a POST request to git-receive-pack URL to be allowed' do
       response = request.post('/root/rouge.git/git-receive-pack')
 
       expect(response).not_to be_redirect
