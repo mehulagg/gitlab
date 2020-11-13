@@ -5,15 +5,14 @@ require 'spec_helper'
 RSpec.describe IncidentManagement::OncallSchedules::CreateService do
   let_it_be(:user_with_permissions) { create(:user) }
   let_it_be(:user_without_permissions) { create(:user) }
-  let_it_be_with_reload(:project) { create(:project) }
+  let_it_be_with_refind(:project) { create(:project) }
 
   let(:current_user) { user_with_permissions }
   let(:params) { { name: 'On-call schedule', description: 'On-call schedule description', timezone: 'Europe/Berlin' } }
-
-
   let(:service) { described_class.new(project, current_user, params) }
 
   before do
+    stub_licensed_features(oncall_schedules: true)
     project.add_maintainer(user_with_permissions)
   end
 
@@ -39,8 +38,16 @@ RSpec.describe IncidentManagement::OncallSchedules::CreateService do
       it_behaves_like 'error response', 'You have insufficient permissions to create an on-call schedule for this project'
     end
 
+    context 'when feature is not available' do
+      before do
+        stub_licensed_features(oncall_schedules: false)
+      end
+
+      it_behaves_like 'error response', 'Your license does not support on-call schedules'
+    end
+
     context 'when an on-call schedule already exists' do
-      let_it_be(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project, name: 'On-call schedule') }
+      let!(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project, name: 'On-call schedule') }
 
       it_behaves_like 'error response', 'Name has already been taken'
     end
