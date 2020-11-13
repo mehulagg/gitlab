@@ -29,6 +29,8 @@ RSpec.describe Gitlab::UsageData do
       create(:ci_build, name: 'sast', pipeline: pipeline)
       create(:ci_build, name: 'secret_detection', pipeline: pipeline)
       create(:ci_build, name: 'coverage_fuzzing', pipeline: pipeline)
+      create(:ci_build, name: 'api_fuzzing', pipeline: pipeline)
+      create(:ci_build, name: 'api_fuzzing_dnd', pipeline: pipeline)
       create(:ci_pipeline, source: :ondemand_dast_scan, project: projects[0])
 
       create(:prometheus_alert, project: projects[0])
@@ -145,6 +147,8 @@ RSpec.describe Gitlab::UsageData do
       expect(count_data[:sast_jobs]).to eq(1)
       expect(count_data[:secret_detection_jobs]).to eq(1)
       expect(count_data[:coverage_fuzzing_jobs]).to eq(1)
+      expect(count_data[:api_fuzzing_jobs]).to eq(1)
+      expect(count_data[:api_fuzzing_dnd_jobs]).to eq(1)
       expect(count_data[:dast_on_demand_pipelines]).to eq(1)
     end
 
@@ -520,6 +524,8 @@ RSpec.describe Gitlab::UsageData do
 
     before do
       for_defined_days_back do
+        create(:ci_build, name: 'api_fuzzing', user: user)
+        create(:ci_build, name: 'api_fuzzing_dnd', user: user)
         create(:ci_build, name: 'container_scanning', user: user)
         create(:ci_build, name: 'coverage_fuzzing', user: user)
         create(:ci_build, name: 'dast', user: user)
@@ -534,6 +540,8 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: 3,
         user_container_scanning_jobs: 1,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 1,
         user_dependency_scanning_jobs: 1,
@@ -593,7 +601,10 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
         user_preferences_group_overview_security_dashboard: 3,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_container_scanning_jobs: 1,
+        user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 1,
         user_dependency_scanning_jobs: 1,
         user_license_management_jobs: 1,
@@ -626,6 +637,8 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: 3,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_container_scanning_jobs: 1,
         user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 3,
@@ -658,6 +671,8 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: 3,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_container_scanning_jobs: 1,
         user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 1,
@@ -690,6 +705,8 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: -1,
+        user_api_fuzzing_jobs: -1,
+        user_api_fuzzing_dnd_jobs: -1,
         user_container_scanning_jobs: -1,
         user_coverage_fuzzing_jobs: -1,
         user_dast_jobs: -1,
