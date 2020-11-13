@@ -23,7 +23,7 @@ If you are migrating from another CI/CD tool, view this documentation:
 
 ## CI/CD process overview
 
-To use GitLab CI/CD, you will:
+To use GitLab CI/CD:
 
 1. [Choose a runner to run your jobs](#choose-or-register-a-runner).
    If you don't have a runner, [install GitLab Runner](https://docs.gitlab.com/runner/install/)
