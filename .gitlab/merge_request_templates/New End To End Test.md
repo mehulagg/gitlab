@@ -15,7 +15,7 @@ Please link to the respective test case in the testcases project
 - [ ] Verify the tags to ensure it runs on the desired test environments
 
 <!-- Base labels. -->
-/label ~"Quality" ~"QA"
+/label ~"Quality" ~"QA" ~test
 
 <!-- Select label according to the feature under test, please use just one. -->
 /label ~"Quality:test-gap" ~"Quality:EE test gaps"
