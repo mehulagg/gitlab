@@ -190,7 +190,7 @@ RSpec.describe 'Dashboard Merge Requests' do
     it 'displays review requested merge requests' do
       expect(page).to have_content(review_requested_merge_request.title)
 
-      expect_tokens([reviewer_token(current_user.username)])
+      expect_tokens([reviewer_token(current_user.name)])
     end
   end
 end
