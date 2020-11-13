@@ -135,60 +135,25 @@ sudo apt-get install libkrb5-dev
 
 ### Git
 
-Make sure you have the right version of Git installed:
-
-```shell
-# Install Git
-sudo apt-get install -y git-core
-
-# Make sure Git is version 2.29.0 or higher (recommended version is 2.29.0)
-git --version
-```
-
-Starting with GitLab 12.0, Git is required to be compiled with `libpcre2`.
-Find out if that's the case:
-
-```shell
-ldd $(command -v git) | grep pcre2
-```
-
-The output should contain `libpcre2-8.so.0`.
-
-If the system packaged Git is too old or not compiled with `pcre2`, remove it:
-
-```shell
-sudo apt-get remove git-core
-```
-
-On Ubuntu, install Git from [its official PPA](https://git-scm.com/download/linux):
-
-```shell
-# run as root!
-add-apt-repository ppa:git-core/ppa
-apt update
-apt install git
-# repeat libpcre2 check as above
-```
-
-On Debian, use the following compilation instructions:
+Starting with GitLab 13.6, it is recommended to use the Git version provided by Gitaly, which may
+contain custom patches required to ensure proper operation.
 
 ```shell
 # Install dependencies
 sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential
 
-# Download and compile Git from source
-cd /tmp
-curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.29.0.tar.gz
-echo 'fa08dc8424ef80c0f9bf307877f9e2e49f1a6049e873530d6747c2be770742ff  git-2.29.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.29.0.tar.gz
-cd git-2.29.0/
-./configure --with-libpcre
-make prefix=/usr/local all
+# Clone the Gitaly repository
+git clone https://gitlab.com/gitlab-org/gitaly.git -b X-Y-stable /tmp/gitaly
 
-# Install into /usr/local/bin
-sudo make prefix=/usr/local install
-
-# When editing config/gitlab.yml later, change the git -> bin_path to /usr/local/bin/git
+# Compile and install Git
+cd /tmp/gitaly
+sudo make git GIT_PREFIX=/usr/local
 ```
+
+Make sure to replace X-Y-stable with the stable branch that matches the GitLab version you want to
+install. For example, if you want to install GitLab 13.6 you would use the branch name 13-6-stable.
+
+When editing `config/gitlab.yml` later, change the `git -> bin_path` to `/usr/local/bin/git`.
 
 ### GraphicsMagick
 
