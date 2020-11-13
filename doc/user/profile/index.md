@@ -199,6 +199,21 @@ or
 
 You can also set your current status [using the API](../../api/users.md#user-status).
 
+### User availability - busy status indicator
+
+> Introduced in GitLab 13.6.
+
+You can show when you cannot take on any more work or you need some time to focus.
+
+1. Click your avatar.
+1. Click **Set status**, or **Edit status** if you have already set a status.
+1. Check the "Busy" checkbox.
+1. Click **Set status**. Alternatively, you can click **Remove status** to remove your user status entirely.
+
+![Busy status indicator](img/busy_status_indicator_v13_6.png)
+
+Remember to uncheck the "Busy" checkbox when you become available again.
+
 ## Commit email
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21598) in GitLab 11.4.
