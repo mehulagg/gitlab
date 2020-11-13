@@ -412,11 +412,50 @@ spec:
 
 ## Example projects
 
+### Simple NGINX deployment
+
 This basic GitOps example deploys NGINX:
 
 - [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
 - [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
-- [Install GitLab Runner](https://gitlab.com/gitlab-examples/install-runner-via-k8s-agent)
+
+### Deploying GitLab Runner with the Agent
+
+These instructions assume that the agent is already set up as described above
+
+1. Check [the possible Runner chart yaml values](https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/master/values.yaml) on the Runner chart documentation and create a `runner-chart-values.yaml` file with the configuration that fits your needs. E.g.:
+
+    ```yaml
+    ## The GitLab Server URL (with protocol) that want to register the runner against
+    ## ref: https://docs.gitlab.com/runner/commands/README.html#gitlab-runner-register
+    ##
+    gitlabUrl: https://gitlab.my.domain.com/
+    
+    ## The Registration Token for adding new Runners to the GitLab Server. This must
+    ## be retrieved from your GitLab Instance.
+    ## ref: https://docs.gitlab.com/ce/ci/runners/README.html
+    ##
+    runnerRegistrationToken: "XXXXXXXXXXXXXXXXXXXXXXYYYYYYYYYYYYYYYYYYYYYZZZZZZZZZZZZZZZZZZZZZ"
+    
+    ## For RBAC support:
+    rbac:
+      create: true
+    
+    ## Run all containers with the privileged flag enabled
+    ## This will allow the docker:dind image to run if you need to run Docker
+    ## commands. Please read the docs before turning this on:
+    ## ref: https://docs.gitlab.com/runner/executors/kubernetes.html#using-dockerdind
+    runners:
+      privileged: true
+    ```  
+
+1. Create a single manifest file to install the Runner chart with your cluster agent
+
+   ```bash
+   helm template --namespace gitlab gitlab-runner -f runner-chart-values.yaml gitlab/gitlab-runner > manifest.yaml
+   ```
+
+1. Push your `manifest.yaml` to your manifest repository.
 
 ## Troubleshooting
 
