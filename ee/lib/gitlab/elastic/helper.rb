@@ -59,9 +59,11 @@ module Gitlab
       def create_migrations_index
         settings = { number_of_shards: 1 }
         mappings = {
-          properties: {
-            completed: {
-              type: 'boolean'
+          _doc: {
+            properties: {
+              completed: {
+                type: 'boolean'
+              }
             }
           }
         }
@@ -73,6 +75,10 @@ module Gitlab
             mappings: mappings.to_hash
           }
         }
+
+        if Gitlab::VersionInfo.parse(client.info['version']['number']).major == 7
+          create_index_options[:include_type_name] = true
+        end
 
         client.indices.create create_index_options
 
