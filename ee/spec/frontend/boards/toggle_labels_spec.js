@@ -1,8 +1,10 @@
 import Vuex from 'vuex';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import ToggleLabels from 'ee/boards/components/toggle_labels';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
-import Tracking from '~/tracking';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('ToggleLabels component', () => {
   let wrapper;
@@ -19,20 +21,20 @@ describe('ToggleLabels component', () => {
           setShowLabels,
         },
       }),
-      // stubs: {
-      //   LocalStorageSync,
-      // },
+      stubs: {
+        LocalStorageSync,
+      },
     });
   }
-
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-  });
 
   describe('onStorageUpdate', () => {
     beforeEach(() => {
       wrapper = createComponent();
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      wrapper = null;
     });
 
     it('parses empty value as false', async () => {

@@ -24489,6 +24489,9 @@ msgstr ""
 msgid "Show file contents"
 msgstr ""
 
+msgid "Show labels"
+msgstr ""
+
 msgid "Show latest version"
 msgstr ""
 

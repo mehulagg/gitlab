@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { GlToggle } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import Tracking from '~/tracking';
