@@ -139,7 +139,7 @@ browser's developer console while on any page within GitLab.
       action();
     ```
 
-  For example, see how we use this in [one of our helpers](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/pages/projects/graphs/charts/index.js#L11):
+  For example, see how we use this in [app/assets/javascripts/pages/projects/graphs/charts/index.js](https://gitlab.com/gitlab-org/gitlab/-/commit/5e90885d6afd4497002df55bf015b338efcfc3c5#02e81de37f5b1716a3ef3222fa7f7edf22c40969_9_8):
 
   ```javascript
   waitForCSSLoaded(() => {
