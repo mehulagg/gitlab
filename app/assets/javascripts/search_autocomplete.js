@@ -253,6 +253,10 @@ export class SearchAutocomplete {
         text: s__("SearchAutocomplete|Merge requests I've created"),
         url: `${mrPath}/?author_username=${userName}`,
       },
+      {
+        text: s__('SearchAutocomplete|Merge requests I need to review'),
+        url: `${mrPath}/?reviewer_username=${userName}`,
+      },
     ];
 
     let items;
