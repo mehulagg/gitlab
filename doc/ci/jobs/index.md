@@ -33,7 +33,7 @@ Jobs are picked up by [runners](../runners/README.md) and executed within the
 environment of the runner. What is important is that each job is run
 independently from each other.
 
-### View jobs in a pipeline
+## View jobs in a pipeline
 
 When you access a pipeline, you can see the related jobs for that pipeline.
 
@@ -43,7 +43,7 @@ Clicking an individual job shows you its job log, and allows you to:
 - Retry the job.
 - Erase the job log.
 
-### See why a job failed
+## See why a job failed
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17782) in GitLab 10.7.
 
@@ -61,7 +61,7 @@ In each place, if you hover over the failed job you can see the reason it failed
 In [GitLab 10.8](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17814) and later,
 you can also see the reason it failed on the Job detail page.
 
-### The order of jobs in a pipeline
+## The order of jobs in a pipeline
 
 The order of jobs in a pipeline depends on the type of pipeline graph.
 
@@ -85,7 +85,7 @@ For example:
 
 ![Pipeline mini graph sorting](img/pipelines_mini_graph_sorting.png)
 
-### Group jobs in a pipeline
+## Group jobs in a pipeline
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/6242) in GitLab 8.12.
 
@@ -139,7 +139,7 @@ usually want the first number to be the index and the second number to be the to
 [This regular expression](https://gitlab.com/gitlab-org/gitlab/blob/2f3dc314f42dbd79813e6251792853bc231e69dd/app/models/commit_status.rb#L99)
 evaluates the job names: `\d+[\s:\/\\]+\d+\s*`.
 
-### Specifying variables when running manual jobs
+## Specifying variables when running manual jobs
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/30485) in GitLab 12.2.
 
@@ -157,7 +157,7 @@ for a single run of the manual job.
 
 ![Manual job variables](img/manual_job_variables.png)
 
-### Delay a job
+## Delay a job
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21767) in GitLab 11.4.
 
@@ -174,7 +174,7 @@ For example, if you start rolling out new code and:
 
 ![Pipelines example](img/pipeline_incremental_rollout.png)
 
-### Expand and collapse job log sections
+## Expand and collapse job log sections
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14664) in GitLab 12.0.
 
@@ -188,7 +188,7 @@ In the following example:
 
 ![Collapsible sections](img/collapsible_log_v12_6.png)
 
-#### Custom collapsible sections
+### Custom collapsible sections
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14664) in GitLab 12.0.
 
@@ -228,7 +228,7 @@ this line should be hidden when collapsed
 section_end:1560896353:my_first_section\r\e[0K
 ```
 
-#### Pre-collapse sections
+### Pre-collapse sections
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/198413) in GitLab 13.5.
 
