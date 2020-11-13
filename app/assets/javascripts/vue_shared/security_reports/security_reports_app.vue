@@ -6,8 +6,10 @@ import { s__ } from '~/locale';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import Flash from '~/flash';
 import Api from '~/api';
+import createStore from './store';
 
 export default {
+  store: createStore(),
   components: {
     GlIcon,
     GlLink,
