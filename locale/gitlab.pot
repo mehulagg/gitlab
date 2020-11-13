@@ -900,9 +900,6 @@ msgstr ""
 msgid "&lt; 1 hour"
 msgstr ""
 
-msgid "&lt;no scopes selected&gt;"
-msgstr ""
-
 msgid "&lt;project name&gt;"
 msgstr ""
 
@@ -32542,6 +32539,9 @@ msgid "no name set"
 msgstr ""
 
 msgid "no one can merge"
+msgstr ""
+
+msgid "no scopes selected"
 msgstr ""
 
 msgid "none"
