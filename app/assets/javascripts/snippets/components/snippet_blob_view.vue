@@ -1,6 +1,8 @@
 <script>
 import GetBlobContent from 'shared_queries/snippet/snippet_blob_content.query.graphql';
 
+import { uuids } from '~/diffs/utils/uuids';
+
 import BlobHeader from '~/blob/components/blob_header.vue';
 import BlobContent from '~/blob/components/blob_content.vue';
 
@@ -50,6 +52,11 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  provide() {
+    return {
+      blobHash: uuids(this.blob.path)[0],
+    };
   },
   data() {
     return {
