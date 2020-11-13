@@ -250,27 +250,13 @@ For users without permissions to view the project's code:
 - The wiki homepage is displayed, if any.
 - The list of issues within the project is displayed.
 
-## GitLab Workflow - VS Code Extension
-
-> - Issues and merge requests support [introduced](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/53) in GitLab 13.6.
-> - Snippets support [introduced](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/129) in GitLab 13.6.
+## GitLab Workflow - VS Code extension
 
 To avoid switching from the GitLab UI and VS Code while working in GitLab repositories, you can integrate
-VS Code with GitLab through the [GitLab Workflow Extension available in the Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
+the [VS Code](https://code.visualstudio.com/) editor with GitLab through the
+[GitLab Workflow extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
 
-With the VS Code extension installed, you can:
-
-- Have issues and merge requests available directly in the code editor.
-- Add GitLab Snippets to a file that you're editing in VS Code directly from the editor.
-
-You can also perform actions, such as:
-
-- Open merge request for current branch.
-- Open current pipeline on GitLab.
-- Search project issues.
-- Validate GitLab CI config.
-
-For details about the extension see the [extension's codebase in GitLab](https://gitlab.com/gitlab-org/gitlab-vscode-extension/).
+To review or contribute to the extension's code, visit [its codebase in GitLab](https://gitlab.com/gitlab-org/gitlab-vscode-extension/).
 
 ## Redirects when changing repository paths
 
