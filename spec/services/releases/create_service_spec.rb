@@ -217,7 +217,7 @@ RSpec.describe Releases::CreateService do
       let(:released_at) { 3.weeks.ago }
 
       it 'does not execute CreateEvidenceWorker' do
-        expect { subject }.not_to change(CreateEvidenceWorker.jobs, :size)
+        expect { subject }.not_to change(Releases::CreateEvidenceWorker.jobs, :size)
       end
 
       it 'does not create an Evidence object', :sidekiq_inline do
@@ -316,7 +316,7 @@ RSpec.describe Releases::CreateService do
       end
 
       it 'queues CreateEvidenceWorker' do
-        expect { subject }.to change(CreateEvidenceWorker.jobs, :size).by(1)
+        expect { subject }.to change(Releases::CreateEvidenceWorker.jobs, :size).by(1)
       end
 
       it 'creates Evidence', :sidekiq_inline do
@@ -341,18 +341,12 @@ RSpec.describe Releases::CreateService do
     context 'upcoming release' do
       let(:released_at) { 1.day.from_now }
 
-      it 'queues CreateEvidenceWorker' do
-        expect { subject }.to change(CreateEvidenceWorker.jobs, :size).by(1)
+      it 'does not execute CreateEvidenceWorker' do
+        expect { subject }.not_to change(Releases::CreateEvidenceWorker.jobs, :size)
       end
 
-      it 'queues CreateEvidenceWorker at the released_at timestamp' do
-        subject
-
-        expect(CreateEvidenceWorker.jobs.last['at'].to_i).to eq(released_at.to_i)
-      end
-
-      it 'creates Evidence', :sidekiq_inline do
-        expect { subject }.to change(Releases::Evidence, :count).by(1)
+      it 'creates does not an Evidence object', :sidekiq_inline do
+        expect { subject }.not_to change(Releases::Evidence, :count)
       end
 
       it 'is not a historical release' do
@@ -366,8 +360,6 @@ RSpec.describe Releases::CreateService do
 
         expect(last_release.upcoming_release?).to be_truthy
       end
-
-      include_examples 'uses the right pipeline for evidence'
     end
   end
 end

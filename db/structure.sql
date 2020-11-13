@@ -21767,6 +21767,8 @@ CREATE INDEX index_releases_on_author_id ON releases USING btree (author_id);
 
 CREATE INDEX index_releases_on_project_id_and_tag ON releases USING btree (project_id, tag);
 
+CREATE INDEX index_releases_on_released_at ON releases USING btree (released_at);
+
 CREATE INDEX index_remote_mirrors_on_last_successful_update_at ON remote_mirrors USING btree (last_successful_update_at);
 
 CREATE INDEX index_remote_mirrors_on_project_id ON remote_mirrors USING btree (project_id);
