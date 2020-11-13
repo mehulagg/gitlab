@@ -25,6 +25,7 @@ export default {
       query: getGroupsQuery,
       loadingKey: 'loading',
       result() {
+        console.log('result:', this.groups);
         if (this.groups?.pageInfo?.nextPage) {
           this.fetchNextPage();
         }
@@ -36,9 +37,11 @@ export default {
   },
   computed: {
     isLoading() {
+      console.log('loading:', this.$apollo.queries.groups.loading);
       return this.$apollo.queries.groups.loading;
     },
     isEmpty() {
+      console.log('isEmpty:', this.groups?.nodes?.length === 0);
       return this.groups?.nodes?.length === 0;
     },
   },
@@ -59,7 +62,10 @@ export default {
             return { groups: { ...rest, nodes: [...previousNodes, ...nodes] } };
           },
         })
-        .catch(this.handleError);
+        .catch((error) =>{
+          console.log('error:', error);
+          this.handleError(error)
+        });
     },
   },
 };
