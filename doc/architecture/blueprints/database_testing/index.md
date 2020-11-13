@@ -51,7 +51,7 @@ Clearly, long-term plans will be determined by the buy-vs-build evaluation, at w
 
 In this scenario, different teams would work through a [working group](https://about.gitlab.com/company/team/structure/working-groups/) to build this solution, roughly along the following lines:
 
-*  The **Development Database team** would be responsible for developing a scubbing solution that meets security and compiance requirements as determined by Security. Additionally, they would provide requirements for access requirements by developers to the cloned instances (logs, metrics, etc)
+*  The **Development Database team** would be responsible for developing a scrubbing solution that meets security and compliance requirements as determined by Security. Additionally, they would provide requirements for access requirements by developers to the cloned instances (logs, metrics, etc)
 * **Infrastructure** would be tasked with the management and configuration of the underlying infrastructure, configuring the necessary database replication to the base testing host, automation of snapshot and cloning capabilities, and integration of a data anonymization implementation in the replication process.
 * **QA** would work to specify integrations requirements to enable the use of this capability within the QA framework.
 
