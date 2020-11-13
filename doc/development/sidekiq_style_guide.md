@@ -70,8 +70,6 @@ the extra jobs will take resources away from jobs from workers that were already
 there, if the resources available to the Sidekiq process handling the namespace
 are not adjusted appropriately.
 
-bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate which updates config/sidekiq_queues.yml
-
 After adding a worker to a new namespace or adding a worker without a namespace specified, run 
 `bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
 `config/sidekiq_queues.yml` so that
