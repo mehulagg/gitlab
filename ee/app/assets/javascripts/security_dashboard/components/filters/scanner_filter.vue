@@ -9,6 +9,7 @@ import groupSpecificScanners from '../../graphql/group_specific_scanners.query.g
 import instanceSpecificScanners from '../../graphql/instance_specific_scanners.query.graphql';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
+import { scannerFilterResultsKeyMap } from '../../constants';
 
 export default {
   components: {
@@ -22,7 +23,7 @@ export default {
   },
   extends: StandardFilter,
   props: {
-    queryPath: {
+    fullPath: {
       type: String,
       required: false,
       default: '',
@@ -35,10 +36,10 @@ export default {
         return this.query;
       },
       variables() {
-        return { fullPath: this.queryPath };
+        return { fullPath: this.fullPath };
       },
       update(data) {
-        let nodes = Object.values(data)[0]?.vulnerabilityScanners.nodes;
+        let nodes = data[this.scannerFilterResultsKey]?.vulnerabilityScanners.nodes;
         nodes = nodes?.map(node => ({ ...node, id: `${node.externalId}.${node.reportType}` }));
         return groupBy(nodes, 'vendor');
       },
@@ -79,6 +80,9 @@ export default {
       return assignWith(defaultGroup, this.customScanners, (original = [], updated) =>
         original.concat(updated),
       );
+    },
+    scannerFilterResultsKey() {
+      return scannerFilterResultsKeyMap[this.dashboardType];
     },
   },
   watch: {

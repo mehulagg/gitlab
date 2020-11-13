@@ -84,7 +84,7 @@ export default {
           />
         </template>
         <template #sticky>
-          <filters :query-path="projectFullPath" @filterChange="handleFilterChange" />
+          <filters :full-path="projectFullPath" @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"

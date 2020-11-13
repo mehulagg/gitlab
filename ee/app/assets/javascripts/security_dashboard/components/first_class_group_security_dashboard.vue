@@ -90,7 +90,7 @@ export default {
       <template #sticky>
         <filters
           :projects="projects"
-          :query-path="groupFullPath"
+          :full-path="groupFullPath"
           @filterChange="handleFilterChange"
         />
       </template>

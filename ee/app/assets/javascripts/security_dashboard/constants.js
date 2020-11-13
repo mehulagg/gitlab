@@ -6,3 +6,11 @@ export const vulnerabilitiesSeverityCountScopes = {
   group: 'group',
   project: 'project',
 };
+
+export const scannerFilterResultsKeyMap = {
+  instance: 'instanceSecurityDashboard',
+  project: 'project',
+  group: 'group',
+};
+
+export default () => ({});
