@@ -650,6 +650,8 @@ Some contractions, however, should be avoided:
 
 ### Emphasis
 
+While bold and italic can typically be used interchangeably, using **bold** should be the default way to provide emphasis. GitLab uses a sans serif font and italic text may not stand out as much as it would in a serif font where the characters are typically unique and slanted. For more specific details, refer to [Butterick's Practical Typography guide on bold or italic](https://practicaltypography.com/bold-or-italic.html).
+
 - Use double asterisks (`**`) to mark a word or text in bold (`**bold**`).
 - Use underscore (`_`) for text in italics (`_italic_`).
 - Use greater than (`>`) for blockquotes.
