@@ -17,21 +17,20 @@ module Gitlab
 
         file_paths = []
 
-        if true
-          Gitlab::AppLogger.warn("Jimbo")
-          stats = project.repository.find_changed_paths(commits)
-          stats.each do |diff_stat|
-            file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
+        if Feature.enabled?(:diff_check_with_paths_changed_rpc)
+          paths = project.repository.find_changed_paths(commits)
+          paths.each do |path|
+            file_paths.concat(path.path)
 
-            validate_diff(diff_stat)
+            validate_diff(path)
           end
         else
           process_commits do |commit|
             validate_once(commit) do
-              commit.diff_stats.each do |diff_stat|
-                file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
+              commit.raw_deltas.each do |diff|
+                file_paths.concat([diff.new_path, diff.old_path].compact)
 
-                validate_diff(diff_stat)
+                validate_diff(diff)
               end
             end
           end

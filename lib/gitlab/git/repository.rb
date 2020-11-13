@@ -469,14 +469,11 @@ module Gitlab
 
       def find_changed_paths(commits)
         if commits.any? { |ref| ref.blank? || Gitlab::Git.blank_ref?(ref) }
-          return empty_diff_stats
+          return []
         end
 
-        commit_shas = commits.map(&:sha)
-        commit_shas << commits.first.parent_id if commits.size == 1
-
         wrapped_gitaly_errors do
-          gitaly_commit_client.find_changed_paths(commit_shas)
+          gitaly_commit_client.find_changed_paths(commits)
         end
       rescue CommandError, TypeError
         empty_diff_stats

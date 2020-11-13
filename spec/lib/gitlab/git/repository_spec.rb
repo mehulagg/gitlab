@@ -1185,6 +1185,36 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
   end
 
+  describe '#find_changed_paths' do
+    let(:commits) { [commit_1, commit_2] }
+    let(:commit_1) { 'fa1b1e6c004a68b7d8763b86455da9e6b23e36d6' }
+    let(:commit_2) { '4b4918a572fa86f9771e5ba40fbd48e1eb03e2c6' }
+
+    it 'returns a list of paths' do
+      collection = repository.find_changed_paths(commits)
+
+      expect(collection).to be_a(Enumerable)
+      expect(collection.to_a).not_to be_empty
+    end
+
+    it 'returns no paths when SHAs are invalid' do
+      collection = repository.find_changed_paths(['invalid', commit_1])
+
+      expect(collection).to be_a(Enumerable)
+      expect(collection.to_a).to be_empty
+    end
+
+    it 'returns no Gitaly::DiffStats when there is a nil SHA' do
+      expect_any_instance_of(Gitlab::GitalyClient::CommitService)
+        .not_to receive(:find_changed_paths)
+
+      collection = repository.find_changed_paths([nil, commit_1])
+
+      expect(collection).to be_a(Enumerable)
+      expect(collection.to_a).to be_empty
+    end
+  end
+
   describe "#ls_files" do
     let(:master_file_paths) { repository.ls_files("master") }
     let(:utf8_file_paths) { repository.ls_files("ls-files-utf8") }
