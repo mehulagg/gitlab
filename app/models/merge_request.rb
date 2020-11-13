@@ -336,14 +336,15 @@ class MergeRequest < ApplicationRecord
                   .project('true')
                   .where(reviewers_table[:user_id].eq(user))
                   .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+
     where(inner_sql.exists)
   end
 
-  scope :no_review_requested_to, ->(users) do
+  scope :no_review_requested_to, ->(user) do
     reviewers_table = Arel::Table.new("#{to_ability_name}_reviewers")
     inner_sql = reviewers_table
                   .project('true')
-                  .where(reviewers_table[:user_id].in(users))
+                  .where(reviewers_table[:user_id].eq(user))
                   .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
 
     where(inner_sql.exists.not)

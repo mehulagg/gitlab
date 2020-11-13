@@ -212,8 +212,8 @@ class MergeRequestsFinder < IssuableFinder
   def by_negated_reviewer(items)
     return items unless not_params.reviewer_id? || not_params.reviewer_username?
 
-    if not_params.reviewers.present?
-      items.no_review_requested_to(not_params.reviewers)
+    if not_params.reviewer.present?
+      items.no_review_requested_to(not_params.reviewer)
     else # assignee not found
       items.none
     end

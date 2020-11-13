@@ -11,21 +11,17 @@ class MergeRequestsFinder
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def reviewers
+    def reviewer
       strong_memoize(:reviewers) do
         if reviewer_id?
-          User.where(id: params[:reviewer_id])
+          User.find_by(id: params[:reviewer_id])
         elsif reviewer_username?
-          User.where(username: params[:reviewer_username])
+          User.find_by(username: params[:reviewer_username])
         else
-          User.none
+          nil
         end
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    def reviewer
-      reviewers.first
-    end
   end
 end

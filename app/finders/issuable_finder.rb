@@ -65,7 +65,7 @@ class IssuableFinder
     end
 
     def array_params
-      @array_params ||= { label_name: [], assignee_username: [], reviewer_username: [] }
+      @array_params ||= { label_name: [], assignee_username: [] }
     end
 
     # This should not be used in controller strong params!

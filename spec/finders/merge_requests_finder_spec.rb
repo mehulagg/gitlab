@@ -376,48 +376,48 @@ RSpec.describe MergeRequestsFinder do
       end
 
       context 'reviewer filtering' do
-        subject(:issuables) { described_class.new(user, params).execute }
+        subject { described_class.new(user, params).execute }
 
-        context 'reviewer ID filter' do
+        context 'by reviewer_id' do
           let(:params) { { reviewer_id: user2.id } }
-          let(:expected_issuables) { [merge_request1, merge_request2] }
+          let(:expected_mr) { [merge_request1, merge_request2] }
 
-          it { is_expected.to contain_exactly(*expected_issuables) }
+          it { is_expected.to contain_exactly(*expected_mr) }
         end
 
-        context 'reviewer NOT ID filter' do
+        context 'by NOT reviewer_id' do
           let(:params) { { not: { reviewer_id: user2.id } } }
-          let(:expected_issuables) { [merge_request3, merge_request4, merge_request5] }
+          let(:expected_mr) { [merge_request3, merge_request4, merge_request5] }
 
-          it { is_expected.to contain_exactly(*expected_issuables) }
+          it { is_expected.to contain_exactly(*expected_mr) }
         end
 
-        context 'reviewer username filter' do
-          let(:params) { { reviewer_username: [user2.username] } }
-          let(:expected_issuables) { [merge_request1, merge_request2] }
+        context 'by reviewer_username' do
+          let(:params) { { reviewer_username: user2.username } }
+          let(:expected_mr) { [merge_request1, merge_request2] }
 
-          it { is_expected.to contain_exactly(*expected_issuables) }
+          it { is_expected.to contain_exactly(*expected_mr) }
         end
 
-        context 'reviewer NOT username filter' do
-          let(:params) { { not: { reviewer_username: [user.username, user2.username] } } }
-          let(:expected_issuables) { [merge_request4, merge_request5] }
+        context 'by NOT reviewer_username' do
+          let(:params) { { not: { reviewer_username: user2.username } } }
+          let(:expected_mr) { [merge_request3, merge_request4, merge_request5] }
 
-          it { is_expected.to contain_exactly(*expected_issuables) }
+          it { is_expected.to contain_exactly(*expected_mr) }
         end
 
-        context 'no reviewer filter' do
+        context 'by reviewer_id=None' do
           let(:params) { { reviewer_id: 'None' } }
-          let(:expected_issuables) { [merge_request4, merge_request5] }
+          let(:expected_mr) { [merge_request4, merge_request5] }
 
-          it { is_expected.to contain_exactly(*expected_issuables) }
+          it { is_expected.to contain_exactly(*expected_mr) }
         end
 
-        context 'any reviewer filter' do
+        context 'by reviewer_id=Any' do
           let(:params) { { reviewer_id: 'Any' } }
-          let(:expected_issuables) { [merge_request1, merge_request2, merge_request3] }
+          let(:expected_mr) { [merge_request1, merge_request2, merge_request3] }
 
-          it { is_expected.to contain_exactly(*expected_issuables) }
+          it { is_expected.to contain_exactly(*expected_mr) }
         end
       end
 
