@@ -1,5 +1,5 @@
 stages:
-  - code_quality_check
+  - code_quality
   - test
 
 variables:
@@ -8,7 +8,7 @@ variables:
 
 code_quality:
   image: "cirrusci/flutter:dev"
-  stage: code_quality_check
+  stage: code_quality
   before_script:
     - pub global activate dart_code_metrics
     - export PATH="$PATH":"$HOME/.pub-cache/bin"
@@ -19,13 +19,12 @@ code_quality:
       codequality: gl-code-quality-report.json
   needs: []
 
-flutter_test:
+test:
   stage: test
   image: "cirrusci/flutter:dev"
   before_script:
     - pub global activate junitreport
     - export PATH="$PATH":"$HOME/.pub-cache/bin"
-    - rm -rf test/test/
   script:
     - flutter test --machine --coverage | tojunit -o report.xml
     - lcov --summary coverage/lcov.info
