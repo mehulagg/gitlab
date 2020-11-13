@@ -31,7 +31,11 @@ module Security
     scope :by_confidence_levels, -> (confidence_levels) { where(confidence: confidence_levels) }
     scope :by_report_types, -> (report_types) { joins(:scan).merge(Scan.by_scan_types(report_types)) }
     scope :undismissed, -> do
-      where('NOT EXISTS (?)', Scan.select(1).has_dismissal_feedback.where('vulnerability_feedback.project_fingerprint = security_findings.project_fingerprint'))
+      where('NOT EXISTS (?)',
+            Scan.select(1)
+                .has_dismissal_feedback
+                .where('security_scans.id = security_findings.scan_id')
+                .where('vulnerability_feedback.project_fingerprint = security_findings.project_fingerprint'))
     end
     scope :ordered, -> { order(severity: :desc, confidence: :desc, id: :asc) }
     scope :with_build_and_artifacts, -> { includes(build: :job_artifacts) }
