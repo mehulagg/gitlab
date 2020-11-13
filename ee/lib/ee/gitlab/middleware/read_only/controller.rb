@@ -16,6 +16,11 @@ module EE
             'admin/geo/uploads' => %w{destroy}
           }.freeze
 
+          ALLOWLISTED_GIT_LFS_ROUTES = {
+            'repositories/lfs_api' => %w{batch},
+            'repositories/lfs_locks_api' => %w{verify create unlock}
+          }.freeze
+
           private
 
           override :allowlisted_routes
@@ -47,6 +52,17 @@ module EE
             ::Gitlab::Middleware::ReadOnly::API_VERSIONS.any? do |version|
               request.path.include?("/api/v#{version}/geo_replication")
             end
+          end
+
+          override :lfs_route?
+          def lfs_route?
+            # Calling route_hash may be expensive. Only do it if we think there's a possible match
+            unless request.path.end_with?('/info/lfs/objects/batch', '/info/lfs/locks', '/info/lfs/locks/verify') ||
+                %r{/info/lfs/locks/\d+/unlock\z}.match?(request.path)
+              return false
+            end
+
+            ALLOWLISTED_GIT_LFS_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
           end
         end
       end

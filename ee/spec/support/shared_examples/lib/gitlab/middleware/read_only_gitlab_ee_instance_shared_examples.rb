@@ -35,13 +35,23 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance' do
       it_behaves_like 'allowlisted request', :post, '/admin/geo/replication/projects/1/force_redownload'
 
       it_behaves_like 'allowlisted request', :delete, '/admin/geo/replication/uploads/1'
-    end
 
-    it 'expects geo replication node api requests to be allowed' do
-      response = request.post("/api/#{API::API.version}/geo_replication/designs/resync")
+      where(:description, :path) do
+        'LFS request to batch'        | '/root/rouge.git/info/lfs/objects/batch'
+        'LFS request to locks verify' | '/root/rouge.git/info/lfs/locks/verify'
+        'LFS request to locks create' | '/root/rouge.git/info/lfs/locks'
+        'LFS request to locks unlock' | '/root/rouge.git/info/lfs/locks/1/unlock'
+        'to geo replication node api' | "/api/#{API::API.version}/geo_replication/designs/resync"
+      end
 
-      expect(response).not_to be_redirect
-      expect(subject).not_to disallow_request
+      with_them do
+        it "expects a POST #{description} URL to be allowed" do
+          response = request.post(path)
+
+          expect(response).not_to be_redirect
+          expect(subject).not_to disallow_request
+        end
+      end
     end
   end
 end
