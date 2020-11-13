@@ -11,23 +11,17 @@ RSpec.describe Resolvers::IncidentManagement::OncallScheduleResolver do
 
   subject { sync(resolve_oncall_schedules) }
 
+  before do
+    stub_licensed_features(oncall_schedules: true)
+    project.add_maintainer(current_user)
+  end
+
   specify do
     expect(described_class).to have_nullable_graphql_type(Types::IncidentManagement::OncallScheduleType.connection_type)
   end
 
-  context 'user does not have permissions' do
-    it { is_expected.to eq(IncidentManagement::OncallSchedule.none) }
-  end
-
-  context 'user has permissions' do
-    before do
-      project.add_maintainer(current_user)
-    end
-
-    it { is_expected.to contain_exactly(oncall_schedule) }
-
-    # TODO: check feature flag
-    # TODO: check license "Premium"
+  it 'returns on-call schedules' do
+    is_expected.to contain_exactly(oncall_schedule)
   end
 
   private

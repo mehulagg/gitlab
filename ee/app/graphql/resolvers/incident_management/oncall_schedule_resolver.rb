@@ -8,9 +8,7 @@ module Resolvers
       type Types::IncidentManagement::OncallScheduleType.connection_type, null: true
 
       def resolve(**args)
-        return [] unless Ability.allowed?(current_user, :read_incident_management_oncall_schedule, project)
-
-        project.incident_management_oncall_schedules
+        ::IncidentManagement::OncallSchedulesFinder.new(context[:current_user], project).execute
       end
     end
   end

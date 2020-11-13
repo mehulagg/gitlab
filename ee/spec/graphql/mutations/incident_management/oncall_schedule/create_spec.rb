@@ -21,6 +21,7 @@ RSpec.describe Mutations::IncidentManagement::OncallSchedule::Create do
 
     context 'user has access to project' do
       before do
+        stub_licensed_features(oncall_schedules: true)
         project.add_maintainer(current_user)
       end
 

@@ -13,6 +13,7 @@ module IncidentManagement
       end
 
       def execute
+        return error_no_license unless available?
         return error_no_permissions unless allowed?
 
         oncall_schedule = project.incident_management_oncall_schedules.create(params)
@@ -29,6 +30,10 @@ module IncidentManagement
         user&.can?(:modify_incident_management_oncall_schedule, project)
       end
 
+      def available?
+        project.feature_available?(:oncall_schedules)
+      end
+
       def error(message)
         ServiceResponse.error(message: message)
       end
@@ -39,6 +44,10 @@ module IncidentManagement
 
       def error_no_permissions
         error(_('You have insufficient permissions to create an on-call schedule for this project'))
+      end
+
+      def error_no_license
+        error(_('Your license does not support on-call schedules'))
       end
 
       def error_in_create(oncall_schedule)

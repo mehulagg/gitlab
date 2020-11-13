@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'getting Incident Management on-call schedules' do
   include GraphqlHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:current_user) { create(:user) }
 
   let(:params) { {} }
@@ -28,6 +28,10 @@ RSpec.describe 'getting Incident Management on-call schedules' do
 
   let(:oncall_schedules) { graphql_data.dig('project', 'incidentManagementOncallSchedules', 'nodes') }
 
+  before do
+    stub_licensed_features(oncall_schedules: true)
+  end
+
   context 'without project permissions' do
     let(:user) { create(:user) }
 
@@ -43,6 +47,17 @@ RSpec.describe 'getting Incident Management on-call schedules' do
   context 'with project permissions' do
     before do
       project.add_maintainer(current_user)
+    end
+
+    context 'with unavailable feature' do
+      before do
+        stub_licensed_features(oncall_schedules: false)
+        post_graphql(query, current_user: current_user)
+      end
+
+      it_behaves_like 'a working graphql query'
+
+      it { expect(oncall_schedules).to be_empty }
     end
 
     context 'without on-call schedules' do

@@ -34,6 +34,7 @@ RSpec.describe 'Creating a new on-call schedule' do
   let(:mutation_response) { graphql_mutation_response(:oncall_schedule_create) }
 
   before do
+    stub_licensed_features(oncall_schedules: true)
     project.add_maintainer(current_user)
   end
 
