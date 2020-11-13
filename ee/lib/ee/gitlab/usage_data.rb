@@ -39,6 +39,9 @@ module EE
         },
         api_fuzzing: {
           name: :api_fuzzing_jobs
+        },
+        api_fuzzing_dnd: {
+          name: :api_fuzzing_dnd_jobs
         }
       }.freeze
 
