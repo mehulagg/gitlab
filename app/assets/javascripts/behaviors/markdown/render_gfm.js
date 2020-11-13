@@ -4,7 +4,6 @@ import renderMath from './render_math';
 import renderMermaid from './render_mermaid';
 import renderMetrics from './render_metrics';
 import highlightCurrentUser from './highlight_current_user';
-import initUserPopovers from '../../user_popovers';
 
 // Render GitLab flavoured Markdown
 //
@@ -15,7 +14,15 @@ $.fn.renderGFM = function renderGFM() {
   renderMath(this.find('.js-render-math'));
   renderMermaid(this.find('.js-render-mermaid'));
   highlightCurrentUser(this.find('.gfm-project_member').get());
-  initUserPopovers(this.find('.js-user-link').get());
+
+  const userLinks = this.find('.js-user-link').get();
+  if (userLinks.length) {
+    import(/* webpackChunkName: 'initUserPopovers' */ '../../user_popovers')
+      .then(({ default: initUserPopovers }) => {
+        initUserPopovers(this.find('.js-user-link').get());
+      })
+      .catch(() => {});
+  }
 
   const mrPopoverElements = this.find('.gfm-merge_request').get();
   if (mrPopoverElements.length) {

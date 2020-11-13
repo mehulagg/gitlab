@@ -33,7 +33,6 @@ import initFrequentItemDropdowns from './frequent_items';
 import initBreadcrumbs from './breadcrumb';
 import initUsagePingConsent from './usage_ping_consent';
 import GlFieldErrors from './gl_field_errors';
-import initUserPopovers from './user_popovers';
 import initBroadcastNotifications from './broadcast_notification';
 import initPersistentUserCallouts from './persistent_user_callouts';
 import { initUserTracking, initDefaultTrackers } from './tracking';
@@ -111,7 +110,6 @@ function deferredInitialisation() {
   initTodoToggle();
   initLogoAnimation();
   initUsagePingConsent();
-  initUserPopovers();
   initBroadcastNotifications();
   initFrequentItemDropdowns();
   initPersistentUserCallouts();
@@ -131,6 +129,15 @@ function deferredInitialisation() {
       },
       { once: true },
     );
+  }
+
+  const userLinks = document.querySelectorAll('.js-user-link');
+  if (userLinks.length) {
+    import(/* webpackChunkName: 'initUserPopovers' */ './user_popovers')
+      .then(({ default: initUserPopovers }) => {
+        initUserPopovers();
+      })
+      .catch(() => {});
   }
 
   addSelectOnFocusBehaviour('.js-select-on-focus');
