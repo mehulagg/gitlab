@@ -24743,6 +24743,9 @@ msgstr ""
 msgid "SetStatusModal|Sorry, we weren't able to set your status. Please try again later."
 msgstr ""
 
+msgid "SetStatusModal|Status updated"
+msgstr ""
+
 msgid "SetStatusModal|What's your status?"
 msgstr ""
 
@@ -25855,9 +25858,6 @@ msgid "Statistics"
 msgstr ""
 
 msgid "Status"
-msgstr ""
-
-msgid "Status updated"
 msgstr ""
 
 msgid "Status was retried."

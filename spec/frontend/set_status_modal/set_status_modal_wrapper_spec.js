@@ -1,16 +1,21 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlFormCheckbox } from '@gitlab/ui';
 import { initEmojiMock } from 'helpers/emoji';
 import Api from '~/api';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import SetStatusModalWrapper, {
   AVAILABILITY_STATUS,
 } from '~/set_status_modal/set_status_modal_wrapper.vue';
 
 jest.mock('~/api');
+jest.mock('~/flash');
 
 describe('SetStatusModalWrapper', () => {
   let wrapper;
   let mockEmoji;
+  const $toast = {
+    show: jest.fn(),
+  };
 
   const defaultEmoji = 'speech_balloon';
   const defaultMessage = "They're comin' in too fast!";
@@ -28,6 +33,9 @@ describe('SetStatusModalWrapper', () => {
         ...defaultProps,
         ...props,
       },
+      mocks: {
+        $toast,
+      },
     });
   };
 
@@ -36,22 +44,21 @@ describe('SetStatusModalWrapper', () => {
   const findClearStatusButton = () => wrapper.find('.js-clear-user-status-button');
   const findNoEmojiPlaceholder = () => wrapper.find('.js-no-emoji-placeholder');
   const findToggleEmojiButton = () => wrapper.find('.js-toggle-emoji-menu');
-  const findAvailabilityCheckbox = () => wrapper.find('[data-testid="user-availability-checkbox"]');
+  const findAvailabilityCheckbox = () => wrapper.find(GlFormCheckbox);
 
-  const initModal = () => {
+  const initModal = ({ mockOnUpdateSuccess = true, mockOnUpdateFailure = true } = {}) => {
     const modal = findModal();
     // mock internal emoji methods
     wrapper.vm.showEmojiMenu = jest.fn();
     wrapper.vm.hideEmojiMenu = jest.fn();
-    wrapper.vm.onUpdateSuccess = jest.fn();
-    wrapper.vm.onUpdateFail = jest.fn();
+    if (mockOnUpdateSuccess) wrapper.vm.onUpdateSuccess = jest.fn();
+    if (mockOnUpdateFailure) wrapper.vm.onUpdateFail = jest.fn();
 
     modal.vm.$emit('shown');
     return wrapper.vm.$nextTick();
   };
 
   beforeEach(async () => {
-    // jest.spyOn(wrapper.vm, 'showEmojiMenu');
     mockEmoji = await initEmojiMock();
     wrapper = createComponent();
     return initModal();
@@ -76,9 +83,9 @@ describe('SetStatusModalWrapper', () => {
     });
 
     it('sets the availability field to false', () => {
-      const field = findFormField('availability');
+      const field = findAvailabilityCheckbox();
       expect(field.exists()).toBe(true);
-      expect(field.element.checked).toBe(false);
+      expect(field.element.checked).toBeUndefined();
     });
 
     it('has a clear status button', () => {
@@ -159,7 +166,7 @@ describe('SetStatusModalWrapper', () => {
         await wrapper.vm.$nextTick();
 
         // set the availability status
-        findAvailabilityCheckbox().setChecked();
+        findAvailabilityCheckbox().vm.$emit('input', true);
 
         findModal().vm.$emit('ok');
         await wrapper.vm.$nextTick();
@@ -167,11 +174,11 @@ describe('SetStatusModalWrapper', () => {
         const commonParams = { emoji: defaultEmoji, message: defaultMessage };
 
         expect(Api.postUserStatus).toHaveBeenCalledTimes(2);
-        expect(Api.postUserStatus).toHaveBeenCalledWith({
+        expect(Api.postUserStatus).toHaveBeenNthCalledWith(1, {
           availability: AVAILABILITY_STATUS.NOT_SET,
           ...commonParams,
         });
-        expect(Api.postUserStatus).toHaveBeenCalledWith({
+        expect(Api.postUserStatus).toHaveBeenNthCalledWith(2, {
           availability: AVAILABILITY_STATUS.BUSY,
           ...commonParams,
         });
@@ -182,6 +189,25 @@ describe('SetStatusModalWrapper', () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.vm.onUpdateSuccess).toHaveBeenCalled();
+      });
+    });
+
+    describe('success message', () => {
+      beforeEach(async () => {
+        mockEmoji = await initEmojiMock();
+        wrapper = createComponent({ currentEmoji: '', currentMessage: '' });
+        jest.spyOn(Api, 'postUserStatus').mockResolvedValue();
+        return initModal({ mockOnUpdateSuccess: false });
+      });
+
+      it('displays a toast success message', async () => {
+        findModal().vm.$emit('ok');
+        await wrapper.vm.$nextTick();
+
+        expect($toast.show).toHaveBeenCalledWith('Status updated', {
+          position: 'top-center',
+          type: 'success',
+        });
       });
     });
 
@@ -197,6 +223,24 @@ describe('SetStatusModalWrapper', () => {
         expect(wrapper.vm.onUpdateFail).toHaveBeenCalled();
       });
     });
+
+    describe('error message', () => {
+      beforeEach(async () => {
+        mockEmoji = await initEmojiMock();
+        wrapper = createComponent({ currentEmoji: '', currentMessage: '' });
+        jest.spyOn(Api, 'postUserStatus').mockRejectedValue();
+        return initModal({ mockOnUpdateFailure: false });
+      });
+
+      it('flashes an error message', async () => {
+        findModal().vm.$emit('ok');
+        await wrapper.vm.$nextTick();
+
+        expect(createFlash).toHaveBeenCalledWith(
+          "Sorry, we weren't able to set your status. Please try again later.",
+        );
+      });
+    });
   });
 
   describe('with canSetUserAvailability=false', () => {
@@ -207,7 +251,7 @@ describe('SetStatusModalWrapper', () => {
     });
 
     it('hides the set availability checkbox', () => {
-      expect(findFormField('availability').exists()).toBe(false);
+      expect(findAvailabilityCheckbox().exists()).toBe(false);
     });
   });
 });

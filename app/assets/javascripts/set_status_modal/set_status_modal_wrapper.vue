@@ -2,7 +2,7 @@
 /* eslint-disable vue/no-v-html */
 import $ from 'jquery';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
-import { GlModal, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import Api from '~/api';
@@ -24,6 +24,7 @@ export default {
   components: {
     GlIcon,
     GlModal,
+    GlFormCheckbox,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -69,7 +70,7 @@ export default {
   },
   computed: {
     isCustomEmoji() {
-      return this?.emoji !== this.defaultEmoji;
+      return this.emoji !== this.defaultEmoji;
     },
     isDirty() {
       return Boolean(this.message.length || this.isCustomEmoji);
@@ -172,7 +173,10 @@ export default {
         .catch(this.onUpdateFail);
     },
     onUpdateSuccess() {
-      this.$toast.show(__('Status updated'), { type: 'success', position: 'top-center' });
+      this.$toast.show(s__('SetStatusModal|Status updated'), {
+        type: 'success',
+        position: 'top-center',
+      });
       this.closeModal();
       window.location.reload();
     },
@@ -258,19 +262,16 @@ export default {
         </div>
         <div v-if="canSetUserAvailability" class="form-group">
           <div class="gl-display-flex">
-            <label class="form-control-inline gl-mb-0">
-              <input
-                v-model="availability"
-                data-testid="user-availability-checkbox"
-                type="checkbox"
-                name="user[status][availability]"
-                :placeholder="s__('SetStatusModal|Busy')"
-              />
-              {{ s__('SetStatusModal|Busy') }}
-            </label>
+            <gl-form-checkbox
+              v-model="availability"
+              data-testid="user-availability-checkbox"
+              class="gl-mb-0"
+            >
+              <span class="gl-font-weight-bold">{{ s__('SetStatusModal|Busy') }}</span>
+            </gl-form-checkbox>
           </div>
           <div class="gl-display-flex">
-            <span class="gl-text-gray-600 gl-ml-4">
+            <span class="gl-text-gray-600 gl-ml-5">
               {{ s__('SetStatusModal|"Busy" will be shown next to your name') }}
             </span>
           </div>
