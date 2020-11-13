@@ -156,7 +156,7 @@ export default {
           mutation: promoteToEpicMutation,
           variables: {
             input: {
-              iid: this.iid.toString(),
+              iid: this.iid,
               projectPath: this.projectPath,
             },
           },
@@ -237,7 +237,12 @@ export default {
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
       </gl-dropdown-item>
-      <gl-dropdown-item v-if="canPromoteToEpic" :disabled="isUpdatingState" @click="promoteToEpic">
+      <gl-dropdown-item
+        v-if="canPromoteToEpic"
+        :disabled="isUpdatingState"
+        data-testid="promote-button"
+        @click="promoteToEpic"
+      >
         {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">

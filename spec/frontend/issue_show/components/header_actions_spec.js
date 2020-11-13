@@ -1,14 +1,21 @@
 import { GlButton, GlDropdown, GlDropdownItem, GlLink, GlModal } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import { IssuableType } from '~/issuable_show/constants';
 import HeaderActions from '~/issue_show/components/header_actions.vue';
 import { IssuableStatus, IssueStateEvent } from '~/issue_show/constants';
+import promoteToEpicMutation from '~/issue_show/queries/promote_to_epic.mutation.graphql';
+import * as urlUtility from '~/lib/utils/url_utility';
 import createStore from '~/notes/stores';
+
+jest.mock('~/flash');
 
 describe('HeaderActions component', () => {
   let dispatchEventSpy;
+  let mutateMock;
   let wrapper;
+  let visitUrlSpy;
 
   const localVue = createLocalVue();
   localVue.use(Vuex);
@@ -16,6 +23,7 @@ describe('HeaderActions component', () => {
 
   const defaultProps = {
     canCreateIssue: true,
+    canPromoteToEpic: true,
     canReopenIssue: true,
     canReportSpam: true,
     canUpdateIssue: true,
@@ -29,7 +37,18 @@ describe('HeaderActions component', () => {
     submitAsSpamPath: 'gitlab-org/gitlab-test/-/issues/32/submit_as_spam',
   };
 
-  const mutate = jest.fn().mockResolvedValue({ data: { updateIssue: { errors: [] } } });
+  const updateIssueMutationResponse = { data: { updateIssue: { errors: [] } } };
+
+  const promoteToEpicMutationResponse = {
+    data: {
+      promoteToEpic: {
+        errors: [],
+        epic: {
+          webPath: '/groups/gitlab-org/-/epics/1',
+        },
+      },
+    },
+  };
 
   const findToggleIssueStateButton = () => wrapper.find(GlButton);
 
@@ -50,7 +69,10 @@ describe('HeaderActions component', () => {
     props = {},
     issueState = IssuableStatus.Open,
     blockedByIssues = [],
+    mutateResponse = {},
   } = {}) => {
+    mutateMock = jest.fn().mockResolvedValue(mutateResponse);
+
     store.getters.getNoteableData.state = issueState;
     store.getters.getNoteableData.blocked_by_issues = blockedByIssues;
 
@@ -63,7 +85,7 @@ describe('HeaderActions component', () => {
       },
       mocks: {
         $apollo: {
-          mutate,
+          mutate: mutateMock,
         },
       },
     });
@@ -72,6 +94,9 @@ describe('HeaderActions component', () => {
   afterEach(() => {
     if (dispatchEventSpy) {
       dispatchEventSpy.mockRestore();
+    }
+    if (visitUrlSpy) {
+      visitUrlSpy.mockRestore();
     }
     wrapper.destroy();
   });
@@ -90,7 +115,11 @@ describe('HeaderActions component', () => {
         beforeEach(() => {
           dispatchEventSpy = jest.spyOn(document, 'dispatchEvent');
 
-          wrapper = mountComponent({ props: { issueType }, issueState });
+          wrapper = mountComponent({
+            props: { issueType },
+            issueState,
+            mutateResponse: updateIssueMutationResponse,
+          });
         });
 
         it(`has text "${buttonText}"`, () => {
@@ -100,11 +129,11 @@ describe('HeaderActions component', () => {
         it('calls apollo mutation', () => {
           findToggleIssueStateButton().vm.$emit('click');
 
-          expect(mutate).toHaveBeenCalledWith(
+          expect(mutateMock).toHaveBeenCalledWith(
             expect.objectContaining({
               variables: {
                 input: {
-                  iid: defaultProps.iid.toString(),
+                  iid: defaultProps.iid,
                   projectPath: defaultProps.projectPath,
                   stateEvent: newIssueState,
                 },
@@ -176,6 +205,45 @@ describe('HeaderActions component', () => {
     });
   });
 
+  describe('when "Promote to epic" button is clicked', () => {
+    beforeEach(() => {
+      visitUrlSpy = jest.spyOn(urlUtility, 'visitUrl').mockReturnValue({});
+
+      wrapper = mountComponent({
+        mutateResponse: promoteToEpicMutationResponse,
+      });
+
+      wrapper.find('[data-testid="promote-button"]').vm.$emit('click');
+    });
+
+    it('invokes GraphQL mutation when clicked', () => {
+      expect(mutateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mutation: promoteToEpicMutation,
+          variables: {
+            input: {
+              iid: defaultProps.iid,
+              projectPath: defaultProps.projectPath,
+            },
+          },
+        }),
+      );
+    });
+
+    it('shows a success message and tells the user they are being redirected', () => {
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'The issue was successfully promoted to an epic. Redirecting to epic...',
+        type: FLASH_TYPES.SUCCESS,
+      });
+    });
+
+    it('redirects to newly created epic path', () => {
+      expect(visitUrlSpy).toHaveBeenCalledWith(
+        promoteToEpicMutationResponse.data.promoteToEpic.epic.webPath,
+      );
+    });
+  });
+
   describe('modal', () => {
     const blockedByIssues = [
       { iid: 13, web_url: 'gitlab-org/gitlab-test/-/issues/13' },
@@ -201,7 +269,7 @@ describe('HeaderActions component', () => {
     it('calls apollo mutation when primary button is clicked', () => {
       findModal().vm.$emit('primary');
 
-      expect(mutate).toHaveBeenCalledWith(
+      expect(mutateMock).toHaveBeenCalledWith(
         expect.objectContaining({
           variables: {
             input: {
