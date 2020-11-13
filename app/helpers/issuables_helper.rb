@@ -300,7 +300,7 @@ module IssuablesHelper
       issueType: issuable.issue_type,
       zoomMeetingUrl: ZoomMeeting.canonical_meeting_url(issuable),
       sentryIssueIdentifier: SentryIssue.find_by(issue: issuable)&.sentry_issue_identifier, # rubocop:disable CodeReuse/ActiveRecord
-      design_management_enabled: @project&.design_management_enabled?,
+      designManagementEnabled: @project&.design_management_enabled?,
       issuePath: project_issue_path(@project, issuable),
       canAddRelatedIssues: can?(current_user, :admin_issue_link, issuable),
       issueLinkEndpoint: can?(current_user, :read_issue_link, @project) ? project_issue_links_path(@project, issuable) : '',

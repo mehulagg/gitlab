@@ -5,6 +5,7 @@ import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import Poll from '~/lib/utils/poll';
+import RelatedIssues from '~/related_issues/components/related_issues_root.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../event_hub';
 import Service from '../services/index';
@@ -27,7 +28,7 @@ export default {
     editedComponent,
     formComponent,
     PinnedLinks,
-    RelatedIssues: () => import('ee_component/related_issues/components/related_issues_root.vue'),
+    RelatedIssues,
     DesignManagement,
   },
   mixins: [recaptchaModalImplementor, glFeatureFlagsMixin()],
@@ -528,7 +529,7 @@ export default {
     </div>
 
     <template v-if="glFeatures.issueSingleVueApp">
-      <design-management v-if="glFeatures.designManagementMoved" />
+      <design-management />
       <related-issues
         :endpoint="issueLinkEndpoint"
         :can-admin="canAddRelatedIssues"

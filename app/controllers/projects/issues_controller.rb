@@ -45,11 +45,10 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
     push_frontend_feature_flag(:vue_issue_header, @project)
+    push_frontend_feature_flag(:issue_single_vue_app, @project)
   end
 
   before_action only: :show do
-    push_frontend_feature_flag(:issue_single_vue_app, @project)
-
     real_time_feature_flag = :real_time_issue_sidebar
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
 

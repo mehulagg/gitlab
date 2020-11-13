@@ -4,9 +4,7 @@
   -# TODO: this block is specific to issues, so should probably be moved there
   -# possibly reconsider how we are splitting issues on frontend
   - if Feature.enabled?(:issue_single_vue_app)
-    -# haml-lint:disable InlineJavaScript
-    %script#js-issuable-app-initial-data{ type: "application/json" }= issuable_initial_data(@issue).to_json
-    #js-issuable-app
+    #js-issuable-app{ data: { initial: issuable_initial_data(issuable).to_json} }
     - if @issue.sentry_issue.present?
       #js-sentry-error-stack-trace{ data: error_details_data(@project, @issue.sentry_issue.sentry_issue_identifier) }
 

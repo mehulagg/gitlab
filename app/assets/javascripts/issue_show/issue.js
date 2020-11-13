@@ -6,10 +6,31 @@ import { parseBoolean } from '~/lib/utils/common_utils';
 import IssuableApp from './components/app.vue';
 import HeaderActions from './components/header_actions.vue';
 
+import createRouter from '~/design_management/router';
+import desManApolloProvider from '~/design_management/graphql';
+
 export function initIssuableApp(issuableData, store) {
+  const router = createRouter(issuableData.issuePath);
+
+  desManApolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      activeDiscussion: {
+        __typename: 'ActiveDiscussion',
+        id: null,
+        source: null,
+      },
+    },
+  });
+
   return new Vue({
     el: document.getElementById('js-issuable-app'),
     store,
+    router,
+    apolloProvider: desManApolloProvider,
+    provide: {
+      projectPath: `${issuableData.projectNamespace}/${issuableData.projectPath}`,
+      issueIid: issuableData.iid,
+    },
     computed: {
       ...mapGetters(['getNoteableData']),
     },
