@@ -19,6 +19,10 @@ class DashboardController < Dashboard::ApplicationController
   feature_category :issue_tracking, [:issues, :issues_calendar]
   feature_category :code_review, [:merge_requests]
 
+  before_action only: [:merge_requests] do
+    push_frontend_feature_flag(:merge_request_reviewers)
+  end
+
   def activity
     respond_to do |format|
       format.html

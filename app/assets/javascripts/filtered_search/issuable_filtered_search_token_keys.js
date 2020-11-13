@@ -63,6 +63,18 @@ if (gon.current_user_id) {
   });
 }
 
+if (window.gon?.features?.mergeRequestReviewers) {
+  tokenKeys.splice(2, 0, {
+    formattedKey: __('Reviewer'),
+    key: 'reviewer',
+    type: 'string',
+    param: 'username',
+    symbol: '@',
+    icon: 'user',
+    tag: '@reviewer',
+  });
+}
+
 export const alternativeTokenKeys = [
   {
     formattedKey: __('Label'),
@@ -83,6 +95,16 @@ export const conditions = flattenDeep(
     {
       url: 'assignee_id=Any',
       tokenKey: 'assignee',
+      value: __('Any'),
+    },
+    {
+      url: 'reviewer_id=None',
+      tokenKey: 'reviewer',
+      value: __('None'),
+    },
+    {
+      url: 'reviewer_id=Any',
+      tokenKey: 'reviewer',
       value: __('Any'),
     },
     {

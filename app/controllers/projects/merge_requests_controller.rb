@@ -26,6 +26,9 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :set_issuables_index, only: [:index]
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
+  before_action only: [:index] do
+    push_frontend_feature_flag(:merge_request_reviewers, @project)
+  end
   before_action only: [:show] do
     push_frontend_feature_flag(:suggest_pipeline, default_enabled: true)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)

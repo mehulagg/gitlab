@@ -91,7 +91,7 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
     ],
   };
 
-  const tokenPosition = 2;
+  const tokenPosition = 3;
   IssuableTokenKeys.tokenKeys.splice(tokenPosition, 0, ...[approvedBy.token]);
   IssuableTokenKeys.tokenKeysWithAlternative.splice(tokenPosition, 0, ...[approvedBy.token]);
   IssuableTokenKeys.conditions.push(...approvedBy.condition);
@@ -133,34 +133,4 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
     deployedBeforeToken,
     deployedAfterToken,
   );
-
-  const reviewerToken = {
-    token: {
-      formattedKey: __('Reviewer'),
-      key: 'reviewer',
-      type: 'string',
-      param: 'username',
-      symbol: '@',
-      icon: 'user',
-      tag: '@reviewer',
-    },
-    conditions: [
-      {
-        url: 'reviewer_id=None',
-        tokenKey: 'reviewer',
-        operator: '=',
-        value: __('None'),
-      },
-      {
-        url: 'reviewer_id=Any',
-        tokenKey: 'reviewer',
-        operator: '=',
-        value: __('Any'),
-      },
-    ],
-  };
-
-  IssuableTokenKeys.tokenKeys.push(reviewerToken.token);
-  IssuableTokenKeys.tokenKeysWithAlternative.push(reviewerToken.token);
-  IssuableTokenKeys.conditions.push(...reviewerToken.conditions);
 };
