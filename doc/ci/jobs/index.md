@@ -89,7 +89,7 @@ For example:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/6242) in GitLab 8.12.
 
-If you have many similar jobs, your [pipeline graph](#visualize-pipelines) becomes long and hard
+If you have many similar jobs, your [pipeline graph](../pipelines/index.md#visualize-pipelines) becomes long and hard
 to read.
 
 You can automatically group similar jobs together. If the job names are formatted in a certain way,
