@@ -1,6 +1,6 @@
-import { s__ } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
 import * as types from './mutation_types';
 
 export const setEndpoints = ({ commit }, endpoints) => {

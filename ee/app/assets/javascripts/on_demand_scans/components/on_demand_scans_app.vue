@@ -1,6 +1,6 @@
 <script>
-import OnDemandScansForm from './on_demand_scans_form.vue';
 import OnDemandScansEmptyState from './on_demand_scans_empty_state.vue';
+import OnDemandScansForm from './on_demand_scans_form.vue';
 
 export default {
   name: 'OnDemandScansApp',

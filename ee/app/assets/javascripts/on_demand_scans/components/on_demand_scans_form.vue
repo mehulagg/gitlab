@@ -9,9 +9,10 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { redirectTo } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { redirectTo } from '~/lib/utils/url_utility';
+import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
 import {
   ERROR_RUN_SCAN,
   ERROR_FETCH_SCANNER_PROFILES,
@@ -20,7 +21,6 @@ import {
   SCANNER_PROFILES_QUERY,
   SITE_PROFILES_QUERY,
 } from '../settings';
-import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
 import OnDemandScansScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import OnDemandScansSiteProfileSelector from './profile_selector/site_profile_selector.vue';
 

@@ -1,8 +1,8 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
-import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { __ } from '~/locale';
+import CodeBlock from '~/vue_shared/components/code_block.vue';
 import DetailItem from './detail_item.vue';
 
 export default {

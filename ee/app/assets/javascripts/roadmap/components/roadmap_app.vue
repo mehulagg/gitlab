@@ -3,12 +3,12 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
+import { EXTEND_AS } from '../constants';
+import eventHub from '../event_hub';
 import EpicsListEmpty from './epics_list_empty.vue';
 import RoadmapFilters from './roadmap_filters.vue';
 import RoadmapShell from './roadmap_shell.vue';
 
-import eventHub from '../event_hub';
-import { EXTEND_AS } from '../constants';
 
 export default {
   components: {

@@ -1,7 +1,7 @@
 <script>
 import { GlButtonGroup, GlButton } from '@gitlab/ui';
-import { n__, s__ } from '~/locale';
 import { datesMatch, dateAtFirstDayOfMonth, getDateInPast } from '~/lib/utils/datetime_utility';
+import { n__, s__ } from '~/locale';
 import { CURRENT_DATE } from '../constants';
 
 const DATE_RANGE_OPTIONS = [

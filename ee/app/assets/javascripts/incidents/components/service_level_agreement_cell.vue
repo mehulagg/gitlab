@@ -1,7 +1,7 @@
 <script>
 import { GlTooltipDirective } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
 import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
+import { s__, sprintf } from '~/locale';
 
 export default {
   i18n: {

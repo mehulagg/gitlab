@@ -1,9 +1,9 @@
-import * as types from './mutation_types';
 import {
   HEADER_TOTAL_ENTRIES,
   HEADER_PAGE_NUMBER,
   HEADER_ITEMS_PER_PAGE,
 } from '../../../constants';
+import * as types from './mutation_types';
 
 export default {
   [types.SET_NAMESPACE_ID](state, payload) {

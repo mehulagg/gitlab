@@ -1,8 +1,8 @@
 <script>
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
-import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 
 export default {
   apollo: {

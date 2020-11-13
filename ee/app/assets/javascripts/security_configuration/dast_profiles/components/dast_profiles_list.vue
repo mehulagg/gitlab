@@ -1,5 +1,4 @@
 <script>
-import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -9,6 +8,7 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
 
 export default {
   components: {

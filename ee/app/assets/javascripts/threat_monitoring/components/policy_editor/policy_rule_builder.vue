@@ -14,9 +14,9 @@ import {
   PortMatchModeAny,
   PortMatchModePortProtocol,
 } from './constants';
+import PolicyRuleCIDR from './policy_rule_cidr.vue';
 import PolicyRuleEndpoint from './policy_rule_endpoint.vue';
 import PolicyRuleEntity from './policy_rule_entity.vue';
-import PolicyRuleCIDR from './policy_rule_cidr.vue';
 import PolicyRuleFQDN from './policy_rule_fqdn.vue';
 
 export default {

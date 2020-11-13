@@ -1,15 +1,15 @@
 import { deprecatedCreateFlash as flash } from '~/flash';
-import { __, s__, sprintf } from '~/locale';
 
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { __, s__, sprintf } from '~/locale';
 
-import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
 import epicDetailsQuery from '../queries/epicDetails.query.graphql';
-import updateEpic from '../queries/updateEpic.mutation.graphql';
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
+import updateEpic from '../queries/updateEpic.mutation.graphql';
+import epicUtils from '../utils/epic_utils';
 
 import * as types from './mutation_types';
 

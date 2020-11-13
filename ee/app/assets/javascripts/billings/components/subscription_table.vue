@@ -1,10 +1,10 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import SubscriptionTableRow from './subscription_table_row.vue';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from '../constants';
+import SubscriptionTableRow from './subscription_table_row.vue';
 
 export default {
   name: 'SubscriptionTable',

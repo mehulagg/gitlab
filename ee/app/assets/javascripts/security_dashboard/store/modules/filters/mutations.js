@@ -1,8 +1,8 @@
 import { mapValues } from 'lodash';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
-import * as types from './mutation_types';
-import { DISMISSAL_STATES } from './constants';
 import Tracking from '~/tracking';
+import { DISMISSAL_STATES } from './constants';
+import * as types from './mutation_types';
 
 export default {
   [types.SET_FILTER](state, filter) {

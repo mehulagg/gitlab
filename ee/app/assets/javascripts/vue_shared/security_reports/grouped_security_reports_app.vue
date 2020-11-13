@@ -1,23 +1,23 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
-import { once } from 'lodash';
-import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import { once } from 'lodash';
+import { mapActions, mapState, mapGetters } from 'vuex';
+import { componentNames } from 'ee/reports/components/issue_body';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import { fetchPolicies } from '~/lib/graphql';
+import { mrStates } from '~/mr_popover/constants';
+import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
-import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
-import IssueModal from './components/modal.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DastModal from './components/dast_modal.vue';
+import IssueModal from './components/modal.vue';
+import SecuritySummary from './components/security_summary.vue';
+import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
 import securityReportsMixin from './mixins/security_report_mixin';
 import createStore from './store';
-import { mrStates } from '~/mr_popover/constants';
-import { fetchPolicies } from '~/lib/graphql';
-import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
-import SecuritySummary from './components/security_summary.vue';
 
 export default {
   store: createStore(),

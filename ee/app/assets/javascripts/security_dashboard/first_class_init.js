@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
-import FirstClassProjectSecurityDashboard from './components/first_class_project_security_dashboard.vue';
 import FirstClassGroupSecurityDashboard from './components/first_class_group_security_dashboard.vue';
 import FirstClassInstanceSecurityDashboard from './components/first_class_instance_security_dashboard.vue';
+import FirstClassProjectSecurityDashboard from './components/first_class_project_security_dashboard.vue';
 import UnavailableState from './components/unavailable_state.vue';
-import createStore from './store';
-import createRouter from './router';
 import apolloProvider from './graphql/provider';
+import createRouter from './router';
+import createStore from './store';
 
 export default (el, dashboardType) => {
   if (!el) {

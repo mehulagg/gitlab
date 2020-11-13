@@ -1,7 +1,7 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlTable, GlAvatarLabeled, GlAvatarLink, GlPagination, GlLoadingIcon } from '@gitlab/ui';
 import { parseInt } from 'lodash';
+import { mapActions, mapState } from 'vuex';
 import { s__, sprintf } from '~/locale';
 
 const AVATAR_SIZE = 32;

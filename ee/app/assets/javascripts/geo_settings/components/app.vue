@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import GeoSettingsForm from './geo_settings_form.vue';
 
 export default {

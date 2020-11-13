@@ -3,9 +3,9 @@ import $ from 'jquery';
 import 'select2/select2';
 import { escape, debounce } from 'lodash';
 import Api from 'ee/api';
+import { renderAvatar } from '~/helpers/avatar_helper';
 import { __ } from '~/locale';
 import { TYPE_USER, TYPE_GROUP } from '../constants';
-import { renderAvatar } from '~/helpers/avatar_helper';
 
 function addType(type) {
   return items => items.map(obj => Object.assign(obj, { type }));

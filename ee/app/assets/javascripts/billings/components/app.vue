@@ -1,8 +1,8 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import SubscriptionTable from './subscription_table.vue';
-import SubscriptionSeats from './subscription_seats.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import SubscriptionSeats from './subscription_seats.vue';
+import SubscriptionTable from './subscription_table.vue';
 
 export default {
   name: 'SubscriptionApp',

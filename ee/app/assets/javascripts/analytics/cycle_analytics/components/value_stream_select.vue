@@ -11,8 +11,8 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
 

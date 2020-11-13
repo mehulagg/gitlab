@@ -1,13 +1,13 @@
-import Vue from 'vue';
 import { parseInt } from 'lodash';
+import Vue from 'vue';
 import {
   TABLE_TYPE_DEFAULT,
   TABLE_TYPE_FREE,
   TABLE_TYPE_TRIAL,
   HEADER_TOTAL_ENTRIES,
 } from 'ee/billings/constants';
-import * as types from './mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import * as types from './mutation_types';
 
 export default {
   [types.SET_NAMESPACE_ID](state, payload) {

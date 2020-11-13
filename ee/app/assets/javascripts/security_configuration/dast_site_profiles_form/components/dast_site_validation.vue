@@ -12,12 +12,12 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import { omit } from 'lodash';
+import { fetchPolicies } from '~/lib/graphql';
+import download from '~/lib/utils/downloader';
+import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import download from '~/lib/utils/downloader';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
-import { fetchPolicies } from '~/lib/graphql';
 import {
   DAST_SITE_VALIDATION_HTTP_HEADER_KEY,
   DAST_SITE_VALIDATION_METHOD_HTTP_HEADER,
@@ -26,8 +26,8 @@ import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_POLL_INTERVAL,
 } from '../constants';
-import dastSiteValidationCreateMutation from '../graphql/dast_site_validation_create.mutation.graphql';
 import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
+import dastSiteValidationCreateMutation from '../graphql/dast_site_validation_create.mutation.graphql';
 
 export default {
   name: 'DastSiteValidation',

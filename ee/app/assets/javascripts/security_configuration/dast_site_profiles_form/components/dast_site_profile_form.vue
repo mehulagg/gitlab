@@ -1,5 +1,4 @@
 <script>
-import { isEqual } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -10,20 +9,21 @@ import {
   GlModal,
   GlToggle,
 } from '@gitlab/ui';
+import { isEqual } from 'lodash';
 import { initFormField } from 'ee/security_configuration/utils';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
-import { serializeFormObject } from '~/lib/utils/forms';
 import { fetchPolicies } from '~/lib/graphql';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { serializeFormObject } from '~/lib/utils/forms';
+import { redirectTo } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import validation from '~/vue_shared/directives/validation';
-import DastSiteValidation from './dast_site_validation.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
 import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
-import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
+import DastSiteValidation from './dast_site_validation.vue';
 
 const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
 

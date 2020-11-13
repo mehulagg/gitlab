@@ -1,16 +1,16 @@
 <script>
-import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
-import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import { GlSafeHtmlDirective } from '@gitlab/ui';
+import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
+import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
+import { s__, __, sprintf } from '~/locale';
 import ReportSection from '~/reports/components/report_section.vue';
+import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
 
-import { s__, __, sprintf } from '~/locale';
-import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
-import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
+import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 
 // import ExtensionsContainer from '~/vue_merge_request_widget/components/extensions/container';
 

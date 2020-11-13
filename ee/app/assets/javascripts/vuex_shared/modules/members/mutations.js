@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import * as types from './mutation_types';
-import CEMutations from '~/vuex_shared/modules/members/mutations';
 import { s__ } from '~/locale';
+import CEMutations from '~/vuex_shared/modules/members/mutations';
 import { findMember } from '~/vuex_shared/modules/members/utils';
+import * as types from './mutation_types';
 
 export default {
   ...CEMutations,

@@ -1,8 +1,8 @@
 <script>
 import { GlFormGroup, GlFormSelect, GlFormCheckbox, GlSprintf, GlLink } from '@gitlab/ui';
+import { SELECTIVE_SYNC_MORE_INFO, OBJECT_STORAGE_MORE_INFO } from '../constants';
 import GeoNodeFormNamespaces from './geo_node_form_namespaces.vue';
 import GeoNodeFormShards from './geo_node_form_shards.vue';
-import { SELECTIVE_SYNC_MORE_INFO, OBJECT_STORAGE_MORE_INFO } from '../constants';
 
 export default {
   name: 'GeoNodeFormSelectiveSync',

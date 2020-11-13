@@ -1,8 +1,8 @@
 <script>
 import { GlButton, GlFormSelect } from '@gitlab/ui';
+import createFlash from '~/flash';
 import { s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
-import createFlash from '~/flash';
 import vulnerabilityDismiss from '../graphql/vulnerability_dismiss.mutation.graphql';
 
 const REASON_NONE = s__('SecurityReports|[No reason]');

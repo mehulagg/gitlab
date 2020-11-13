@@ -1,8 +1,8 @@
 <script>
 import { GlButton, GlSprintf } from '@gitlab/ui';
-import UsageStatisticsCard from './usage_statistics_card.vue';
 import { s__ } from '~/locale';
 import { formatUsageSize } from '../utils';
+import UsageStatisticsCard from './usage_statistics_card.vue';
 
 export default {
   components: {

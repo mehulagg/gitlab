@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Api from '~/api';
-import { sprintf, __ } from '~/locale';
 import { sanitizeItem } from '~/frequent_items/utils';
+import { sprintf, __ } from '~/locale';
 
 const formatResult = selectedItem => {
   if (selectedItem.path_with_namespace) {

@@ -1,5 +1,4 @@
 <script>
-import { isEqual } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -12,15 +11,16 @@ import {
   GlFormCheckbox,
   GlFormRadioGroup,
 } from '@gitlab/ui';
+import { isEqual } from 'lodash';
 import { initFormField } from 'ee/security_configuration/utils';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
+import { redirectTo } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
+import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
 import tooltipIcon from './tooltip_icon.vue';
-import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
 
 const SPIDER_TIMEOUT_MIN = 0;
 const SPIDER_TIMEOUT_MAX = 2880;

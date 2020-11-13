@@ -1,7 +1,7 @@
 import { s__, sprintf } from '~/locale';
-import { countVulnerabilities, groupedTextBuilder, statusIcon, groupedReportText } from './utils';
 import { LOADING, ERROR, SUCCESS } from './constants';
 import messages from './messages';
+import { countVulnerabilities, groupedTextBuilder, statusIcon, groupedReportText } from './utils';
 
 export const groupedContainerScanningText = ({ containerScanning }) =>
   groupedReportText(

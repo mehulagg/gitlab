@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import subscription from './modules/subscription/index';
 import seats from './modules/seats/index';
+import subscription from './modules/subscription/index';
 
 Vue.use(Vuex);
 

@@ -1,7 +1,7 @@
-import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import {
   REQUEST_UNSCANNED_PROJECTS,
   RECEIVE_UNSCANNED_PROJECTS_SUCCESS,
