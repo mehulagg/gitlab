@@ -435,165 +435,168 @@ export default {
         </gl-form-group>
       </div>
       <div v-else>
-          <gl-form-group
-        id="name-integration"
-        :label="$options.i18n.integrationFormSteps.step2.label"
-        label-for="name-integration"
-      >
-        <gl-form-input
-          v-model="integrationForm.name"
-          type="text"
-          :placeholder="$options.i18n.integrationFormSteps.step2.placeholder"
-        />
-      </gl-form-group>
-      <gl-form-group
-        id="integration-webhook"
-        :label="$options.i18n.integrationFormSteps.step3.label"
-        label-for="integration-webhook"
-      >
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step3.help"
-          link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
-        />
-
-        <gl-toggle
-          v-model="active"
-          :is-loading="loading"
-          :label="__('Active')"
-          class="gl-my-4 gl-font-weight-normal"
-        />
-
-        <div v-if="selectedIntegration === $options.typeSet.prometheus" class="gl-my-4">
-          <span>
-            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
-          </span>
-
+        <gl-form-group
+          id="name-integration"
+          :label="$options.i18n.integrationFormSteps.step2.label"
+          label-for="name-integration"
+        >
           <gl-form-input
-            id="integration-apiUrl"
-            v-model="integrationForm.apiUrl"
+            v-model="integrationForm.name"
             type="text"
-            :placeholder="$options.targetPrometheusUrlPlaceholder"
+            :placeholder="$options.i18n.integrationFormSteps.step2.placeholder"
+          />
+        </gl-form-group>
+        <gl-form-group
+          id="integration-webhook"
+          :label="$options.i18n.integrationFormSteps.step3.label"
+          label-for="integration-webhook"
+        >
+          <alert-settings-form-help-block
+            :message="$options.i18n.integrationFormSteps.step3.help"
+            link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
           />
 
-          <span class="gl-text-gray-400">
-            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
-          </span>
-        </div>
+          <gl-toggle
+            v-model="active"
+            :is-loading="loading"
+            :label="__('Active')"
+            class="gl-my-4 gl-font-weight-normal"
+          />
 
-        <div class="gl-my-4">
-          <span>
-            {{ s__('AlertSettings|Webhook URL') }}
-          </span>
+          <div v-if="selectedIntegration === $options.typeSet.prometheus" class="gl-my-4">
+            <span>
+              {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
+            </span>
 
-          <gl-form-input-group id="url" readonly :value="integrationForm.url">
-            <template #append>
-              <clipboard-button
-                :text="integrationForm.url || ''"
-                :title="__('Copy')"
-                class="gl-m-0!"
-              />
-            </template>
-          </gl-form-input-group>
-        </div>
+            <gl-form-input
+              id="integration-apiUrl"
+              v-model="integrationForm.apiUrl"
+              type="text"
+              :placeholder="$options.targetPrometheusUrlPlaceholder"
+            />
 
-        <div class="gl-my-4">
-          <span>
-            {{ $options.i18n.integrationFormSteps.step3.info }}
-          </span>
+            <span class="gl-text-gray-400">
+              {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
+            </span>
+          </div>
 
-          <gl-form-input-group
-            id="authorization-key"
-            class="gl-mb-2"
-            readonly
-            :value="integrationForm.token"
-          >
-            <template #append>
-              <clipboard-button
-                :text="integrationForm.token || ''"
-                :title="__('Copy')"
-                class="gl-m-0!"
-              />
-            </template>
-          </gl-form-input-group>
+          <div class="gl-my-4">
+            <span>
+              {{ s__('AlertSettings|Webhook URL') }}
+            </span>
 
-          <gl-button v-gl-modal.authKeyModal :disabled="!active" class="gl-mt-3">
-            {{ $options.i18n.integrationFormSteps.step3.reset }}
-          </gl-button>
-          <gl-modal
-            modal-id="authKeyModal"
-            :title="$options.i18n.integrationFormSteps.step3.reset"
-            :ok-title="$options.i18n.integrationFormSteps.step3.reset"
-            ok-variant="danger"
-            @ok="resetAuthKey"
-          >
-            {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
-          </gl-modal>
-        </div>
-      </gl-form-group>
-      <gl-form-group
-        id="test-integration"
-        :label="$options.i18n.integrationFormSteps.step4.label"
-        label-for="test-integration"
-        :invalid-feedback="integrationTestPayload.error"
-      >
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step4.help"
-          :link="generic.alertsUsageUrl"
-        />
+            <gl-form-input-group id="url" readonly :value="integrationForm.url">
+              <template #append>
+                <clipboard-button
+                  :text="integrationForm.url || ''"
+                  :title="__('Copy')"
+                  class="gl-m-0!"
+                />
+              </template>
+            </gl-form-input-group>
+          </div>
 
-        <gl-form-textarea
-          id="test-payload"
-          v-model.trim="integrationTestPayload.json"
-          :disabled="isPayloadEditDisabled"
-          :state="jsonIsValid"
-          :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
-          class="gl-my-4"
-          :debounce="$options.JSON_VALIDATE_DELAY"
-          rows="6"
-          max-rows="10"
-          @input="validateJson"
-        />
+          <div class="gl-my-4">
+            <span>
+              {{ $options.i18n.integrationFormSteps.step3.info }}
+            </span>
 
-        <template v-if="showMappingBuilder">
-          <gl-button
-            v-if="canEditPayload"
-            v-gl-modal.resetPayloadModal
-            :disabled="!active"
-            class="gl-mt-3"
-          >
-            {{ $options.i18n.integrationFormSteps.step4.editPayload }}
-          </gl-button>
+            <gl-form-input-group
+              id="authorization-key"
+              class="gl-mb-2"
+              readonly
+              :value="integrationForm.token"
+            >
+              <template #append>
+                <clipboard-button
+                  :text="integrationForm.token || ''"
+                  :title="__('Copy')"
+                  class="gl-m-0!"
+                />
+              </template>
+            </gl-form-input-group>
 
-          <gl-button
-            v-else
-            :disabled="!active"
-            :loading="parsingPayload"
-            class="gl-mt-3"
-            @click="parseMapping"
-          >
-            {{ $options.i18n.integrationFormSteps.step4.submitPayload }}
-          </gl-button>
-          <gl-modal
-            modal-id="resetPayloadModal"
-            :title="$options.i18n.integrationFormSteps.step4.resetHeader"
-            :ok-title="$options.i18n.integrationFormSteps.step4.resetOk"
-            ok-variant="danger"
-            @ok="resetSamplePayloadConfirmed = true"
-          >
-            {{ $options.i18n.integrationFormSteps.step4.resetBody }}
-          </gl-modal>
-        </template>
-      </gl-form-group>
+            <gl-button v-gl-modal.authKeyModal :disabled="!active" class="gl-mt-3">
+              {{ $options.i18n.integrationFormSteps.step3.reset }}
+            </gl-button>
+            <gl-modal
+              modal-id="authKeyModal"
+              :title="$options.i18n.integrationFormSteps.step3.reset"
+              :ok-title="$options.i18n.integrationFormSteps.step3.reset"
+              ok-variant="danger"
+              @ok="resetAuthKey"
+            >
+              {{ $options.i18n.integrationFormSteps.restKeyInfo.label }}
+            </gl-modal>
+          </div>
+        </gl-form-group>
+        <gl-form-group
+          id="test-integration"
+          :label="$options.i18n.integrationFormSteps.step4.label"
+          label-for="test-integration"
+          :invalid-feedback="integrationTestPayload.error"
+        >
+          <alert-settings-form-help-block
+            :message="$options.i18n.integrationFormSteps.step4.help"
+            :link="generic.alertsUsageUrl"
+          />
 
-      <gl-form-group
-        v-if="showMappingBuilder"
-        id="mapping-builder"
-        :label="$options.i18n.integrationFormSteps.step5.label"
-        label-for="mapping-builder"
-      >
-        <span class="gl-text-gray-500">{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
-        <mapping-builder :payload-fields="mappingBuilderFields" :mapping="mappingBuilderMapping" />
-      </gl-form-group>
+          <gl-form-textarea
+            id="test-payload"
+            v-model.trim="integrationTestPayload.json"
+            :disabled="isPayloadEditDisabled"
+            :state="jsonIsValid"
+            :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
+            class="gl-my-4"
+            :debounce="$options.JSON_VALIDATE_DELAY"
+            rows="6"
+            max-rows="10"
+            @input="validateJson"
+          />
+
+          <template v-if="showMappingBuilder">
+            <gl-button
+              v-if="canEditPayload"
+              v-gl-modal.resetPayloadModal
+              :disabled="!active"
+              class="gl-mt-3"
+            >
+              {{ $options.i18n.integrationFormSteps.step4.editPayload }}
+            </gl-button>
+
+            <gl-button
+              v-else
+              :disabled="!active"
+              :loading="parsingPayload"
+              class="gl-mt-3"
+              @click="parseMapping"
+            >
+              {{ $options.i18n.integrationFormSteps.step4.submitPayload }}
+            </gl-button>
+            <gl-modal
+              modal-id="resetPayloadModal"
+              :title="$options.i18n.integrationFormSteps.step4.resetHeader"
+              :ok-title="$options.i18n.integrationFormSteps.step4.resetOk"
+              ok-variant="danger"
+              @ok="resetSamplePayloadConfirmed = true"
+            >
+              {{ $options.i18n.integrationFormSteps.step4.resetBody }}
+            </gl-modal>
+          </template>
+        </gl-form-group>
+
+        <gl-form-group
+          v-if="showMappingBuilder"
+          id="mapping-builder"
+          :label="$options.i18n.integrationFormSteps.step5.label"
+          label-for="mapping-builder"
+        >
+          <span class="gl-text-gray-500">{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
+          <mapping-builder
+            :payload-fields="mappingBuilderFields"
+            :mapping="mappingBuilderMapping"
+          />
+        </gl-form-group>
       </div>
       <div class="gl-display-flex gl-justify-content-end">
         <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>

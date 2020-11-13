@@ -308,7 +308,7 @@ export default {
     </gl-alert>
     <integrations-list
       v-else
-      :integrations="glFeatures.httpIntegrationsList ? integrations.list : intergrationsOptionsOld"
+      :integrations="glFeatures.httpIntegrationsList ? integrations.list : integrationsOptionsOld"
       :loading="loading"
       @edit-integration="editIntegration"
       @delete-integration="deleteIntegration"
