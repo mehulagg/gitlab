@@ -121,14 +121,19 @@ browser's developer console while on any page within GitLab.
   Note that `waitForCSSLoaded()` methods supports receiving the action in different ways:
 
 - With a callback:
+
   ```javascript
   waitForCSSLoaded(action)
   ```
+
 - With `then()`:
+
   ```javascript
   waitForCSSLoaded().then(action);
   ```
+
 - With `await` followed by `action`:
+
   ```javascript
   await waitForCSSLoaded;
   action();
