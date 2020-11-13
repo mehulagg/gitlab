@@ -138,12 +138,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    canManageOpsgenie: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   apollo: {
     currentIntegration: {
