@@ -855,7 +855,7 @@ function createComponentWithApollo() {
 
   fakeApollo = createMockApollo(requestHandlers, {});
   fakeApollo.clients.defaultClient.cache.writeQuery({
-    query: localTestQuery,
+    query: fetchLocalUserQuery,
     data: {
       fetchLocalUser: {
         __typename: 'User',
