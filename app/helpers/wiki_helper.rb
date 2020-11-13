@@ -152,6 +152,34 @@ module WikiHelper
       current_user&.can?(:admin_project, container) &&
       !container.has_confluence?
   end
+
+  def wiki_enabled_protocol_clone_button(wiki, protocol)
+    case protocol
+    when 'ssh'
+      wiki_ssh_clone_button(wiki, append_link: false)
+    else
+      wiki_http_clone_button(wiki, append_link: false)
+    end
+  end
+
+  def wiki_ssh_clone_button(wiki, append_link: true)
+    if Gitlab::CurrentSettings.user_show_add_ssh_key_message? &&
+        current_user.try(:require_ssh_key?)
+      dropdown_description = s_("MissingSSHKeyWarningLink|You won't be able to pull or push repositories via SSH until you add an SSH key to your profile")
+    end
+
+    append_url = wiki.ssh_url_to_repo if append_link
+
+    dropdown_item_with_description('SSH', dropdown_description, href: append_url, data: { clone_type: 'ssh' })
+  end
+
+  def wiki_http_clone_button(wiki, append_link: true)
+    protocol = gitlab_config.protocol.upcase
+    dropdown_description = http_dropdown_description(protocol)
+    append_url = wiki.http_url_to_repo if append_link
+
+    dropdown_item_with_description(protocol, dropdown_description, href: append_url, data: { clone_type: 'http' })
+  end
 end
 
 WikiHelper.prepend_if_ee('EE::WikiHelper')

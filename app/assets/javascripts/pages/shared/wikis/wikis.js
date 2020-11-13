@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
@@ -65,6 +66,7 @@ export default class Wikis {
 
     Wikis.trackPageView();
     Wikis.showToasts();
+    Wikis.legacyClonePanel();
   }
 
   handleWikiTitleChange(e) {
@@ -122,5 +124,38 @@ export default class Wikis {
   static showToasts() {
     const toasts = document.querySelectorAll('.js-toast-message');
     toasts.forEach(toast => showToast(toast.dataset.message));
+  }
+
+  static legacyClonePanel() {
+    const $cloneOptions = $('ul.legacy-clone-options-dropdown');
+    if ($cloneOptions.length) {
+      const $cloneUrlField = $('#clone_url');
+      const $cloneBtnLabel = $('.js-legacy-git-clone-holder .js-legacy-clone-dropdown-label');
+
+      const selectedCloneOption = $cloneBtnLabel.text().trim();
+      if (selectedCloneOption.length > 0) {
+        $(`a:contains('${selectedCloneOption}')`, $cloneOptions).addClass('is-active');
+      }
+
+      $('a', $cloneOptions).on('click', e => {
+        e.preventDefault();
+        const $this = $(e.currentTarget);
+        const url = $this.attr('href');
+        const cloneType = $this.data('cloneType');
+
+        $('.is-active', $cloneOptions).removeClass('is-active');
+        $(`a[data-clone-type="${cloneType}"]`).each(function switchCloneType() {
+          const $el = $(this);
+          const activeText = $el.find('.dropdown-menu-inner-title').text();
+          const $container = $el.closest('.js-legacy-git-clone-holder');
+          const $label = $container.find('.js-legacy-clone-dropdown-label');
+
+          $el.toggleClass('is-active');
+          $label.text(activeText);
+        });
+
+        $cloneUrlField.val(url);
+      });
+    }
   }
 }

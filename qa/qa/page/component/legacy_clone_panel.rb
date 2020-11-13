@@ -9,10 +9,10 @@ module QA
         def self.included(base)
           super
 
-          base.view 'app/views/shared/_clone_panel.html.haml' do
+          base.view 'app/views/shared/wikis/_legacy_clone_panel.html.haml' do
             element :clone_dropdown
-            element :clone_options_dropdown, '.clone-options-dropdown' # rubocop:disable QA/ElementWithPattern
-            element :project_repository_location, 'text_field_tag :project_clone' # rubocop:disable QA/ElementWithPattern
+            element :clone_options_dropdown, '.legacy-clone-options-dropdown' # rubocop:disable QA/ElementWithPattern
+            element :clone_url, 'text_field_tag :clone_url' # rubocop:disable QA/ElementWithPattern
           end
         end
 
@@ -28,7 +28,7 @@ module QA
         end
 
         def repository_location
-          Git::Location.new(find('#project_clone').value)
+          Git::Location.new(find('#clone_url').value)
         end
 
         private
@@ -37,7 +37,7 @@ module QA
           wait_until(reload: false) do
             click_element :clone_dropdown
 
-            page.within('.clone-options-dropdown') do
+            page.within('.legacy-clone-options-dropdown') do
               click_link(kind)
             end
 

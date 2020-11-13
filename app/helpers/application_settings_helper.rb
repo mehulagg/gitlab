@@ -49,15 +49,6 @@ module ApplicationSettingsHelper
     all_protocols_enabled? || Gitlab::CurrentSettings.enabled_git_access_protocol == 'http'
   end
 
-  def enabled_project_button(project, protocol)
-    case protocol
-    when 'ssh'
-      ssh_clone_button(project, append_link: false)
-    else
-      http_clone_button(project, append_link: false)
-    end
-  end
-
   # Return a group of checkboxes that use Bootstrap's button plugin for a
   # toggle button effect.
   def restricted_level_checkboxes(help_block_id, checkbox_name, options = {})

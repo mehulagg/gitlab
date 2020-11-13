@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-RSpec.describe 'shared/_clone_panel' do
+RSpec.describe 'shared/wikis/_legacy_clone_panel' do
   include EE::GeoHelpers
 
   let_it_be(:primary) { create(:geo_node, :primary) }
   let_it_be(:secondary) { create(:geo_node) }
-  let_it_be(:project) { create(:project) }
+  let_it_be(:wiki) { create(:project_wiki) }
 
   shared_examples 'has no geo-specific instructions' do
     it 'has no geo-specific instructions' do
-      render 'shared/clone_panel', project: project
+      render 'shared/wikis/legacy_clone_panel', wiki: wiki
 
-      expect(rendered).not_to match /See Geo-specific instructions/
+      expect(rendered).not_to match(/See Geo-specific instructions/)
     end
   end
 

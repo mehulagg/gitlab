@@ -1,0 +1,21 @@
+.git-clone-holder.js-legacy-git-clone-holder.input-group
+  .input-group-prepend
+    - if allowed_protocols_present?
+      .input-group-text.clone-dropdown-btn.btn
+        %span.js-legacy-clone-dropdown-label
+          = wiki_enabled_protocol_clone_button(wiki, enabled_protocol)
+    - else
+      %a#clone-dropdown.input-group-text.btn.clone-dropdown-btn.qa-clone-dropdown{ href: '#', data: { toggle: 'dropdown' } }
+        %span.js-legacy-clone-dropdown-label
+          = default_clone_protocol.upcase
+        = icon('caret-down')
+      %ul.dropdown-menu.dropdown-menu-selectable.legacy-clone-options-dropdown
+        %li
+          = wiki_ssh_clone_button(wiki)
+        %li
+          = wiki_http_clone_button(wiki)
+        = render_if_exists 'shared/wikis/legacy_kerberos_clone_button', wiki: wiki
+
+  = text_field_tag :clone_url, default_url_to_repo(wiki), class: "js-select-on-focus form-control", readonly: true, aria: { label: _('Wiki clone URL') }
+  .input-group-append
+    = clipboard_button(target: '#clone_url', title: _("Copy URL"), class: "input-group-text btn-default btn-clipboard")
