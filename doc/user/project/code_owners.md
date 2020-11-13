@@ -48,14 +48,14 @@ You can choose to add the `CODEOWNERS` file in three places:
 - Inside the `.gitlab/` directory
 - Inside the `docs/` directory
 
-The `CODEOWNERS` file is valid to the branch where it lives. For example, if you change the code owners
-in a feature branch, they won't be valid in the main branch until it's merged.
+The `CODEOWNERS` file is valid for the branch where it lives. For example, if you change the code owners
+in a feature branch, they won't be valid in the main branch until the feature branch is merged.
 
-If you introduce new files to your repository and you want to identify the code owners to that file,
-you have to update `CODEOWNERS` accordingly. If you update the code owners at the same time (in the same
-branch) that you are using to add those files, GitLab will count the owners as soon as it is merged. If
+If you introduce new files to your repository and you want to identify the code owners for that file,
+you have to update `CODEOWNERS` accordingly. If you update the code owners when you are adding the files (in the same
+branch), GitLab will count the owners as soon as the branch is merged. If
 you don't, you can do that later, but your new files will not belong to anyone until you update your
-`CODEOWNERS` file in the main branch.
+`CODEOWNERS` file in the TARGET branch.
 
 When a file matches multiple entries in the `CODEOWNERS` file,
 the users from last pattern matching the file are displayed on the
