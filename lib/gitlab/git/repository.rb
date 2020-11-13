@@ -476,7 +476,7 @@ module Gitlab
           gitaly_commit_client.find_changed_paths(commits)
         end
       rescue CommandError, TypeError
-        empty_diff_stats
+        []
       end
 
       # Returns a RefName for a given SHA
