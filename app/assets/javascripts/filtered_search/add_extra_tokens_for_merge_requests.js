@@ -60,8 +60,7 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
       type: 'array',
       param: 'usernames[]',
       symbol: '@',
-      icon: 'approval',
-      tag: '@approved-by',
+      icon: 'approval', tag: '@approved-by',
     },
     condition: [
       {
@@ -133,4 +132,33 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
     deployedBeforeToken,
     deployedAfterToken,
   );
+
+  const reviewerToken = {
+    token: {
+      formattedKey: __('Reviewer'),
+      key: 'reviewer',
+      type: 'string',
+      param: 'username',
+      symbol: '@',
+      icon: 'user',
+      tag: '@reviewer',
+    },
+    conditions: [
+      {
+        url: 'reviewer_id=None',
+        tokenKey: 'reviewer',
+        operator: '=',
+        value: __('None'),
+      },
+      {
+        url: 'reviewer_id=Any',
+        tokenKey: 'reviewer',
+        operator: '=',
+        value: __('Any'),
+      },
+    ]
+  };
+
+  IssuableTokenKeys.tokenKeys.push(reviewerToken.token);
+  IssuableTokenKeys.conditions.push(...reviewerToken.conditions);
 };
