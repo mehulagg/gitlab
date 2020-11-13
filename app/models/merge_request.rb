@@ -319,6 +319,7 @@ class MergeRequest < ApplicationRecord
     inner_sql = reviewers_table
                   .project('true')
                   .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+
     where(inner_sql.exists)
   end
 
@@ -327,6 +328,7 @@ class MergeRequest < ApplicationRecord
     inner_sql = reviewers_table
                   .project('true')
                   .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
+
     where(inner_sql.exists.not)
   end
 
