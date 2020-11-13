@@ -355,6 +355,16 @@ mappings.
 
 #### Trigger the re-index from `primary`
 
+<div class="panel panel-info">
+**Note**
+{: .panel-heading}
+<div class="panel-body">
+
+GitLab 13.6 - Added background migrations for Elasticsearch. This reduced the need to manaully run reindexing. [Advanced Search Migration Details](https://docs.gitlab.com/ee/development/elasticsearch.html#creating-a-new-global-search-migration)
+
+</div>
+</div>
+
 To trigger the re-index from `primary` index:
 
 1. Use the Elasticsearch [Reindex API](https://www.elastic.co/guide/en/elasticsearch/reference/7.6/docs-reindex.html):
