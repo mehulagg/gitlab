@@ -48,6 +48,14 @@ module Ci
           minutes_used >= total_minutes
       end
 
+      # TODO: maps to NamespaceStatistics#extra_shared_runners_minutes
+      # TODO: write specs if this remains public method.
+      def purchased_minutes_used
+        return 0 if no_minutes_purchased? || monthly_minutes_available?
+
+        minutes_used - monthly_minutes
+      end
+
       private
 
       def monthly_minutes_used_up?
@@ -68,13 +76,6 @@ module Ci
 
       def monthly_minutes_available?
         minutes_used <= monthly_minutes
-      end
-
-      # TODO: maps to NamespaceStatistics#extra_shared_runners_minutes
-      def purchased_minutes_used
-        return 0 if no_minutes_purchased? || monthly_minutes_available?
-
-        minutes_used - monthly_minutes
       end
 
       def no_minutes_purchased?
