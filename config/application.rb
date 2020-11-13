@@ -1,6 +1,20 @@
 # frozen_string_literal: true
 require_relative 'boot'
 
+if ENV['RAISE_ON_KEYWORD_WARNING']
+  require 'warning'
+
+  keyword_regex = /: warning: (?:Using the last argument (?:for `.+' )?as keyword parameters is deprecated; maybe \*\* should be added to the call)\n\z/
+  bb = {
+    keyword_regex => proc do |warning|
+      File.open(File.expand_path('../tmp/keyword_warn.txt', __dir__), "a") do |file|
+        file.write(warning)
+      end
+    end
+  }
+  Warning.process('', bb)
+end
+
 # Based on https://github.com/rails/rails/blob/v6.0.1/railties/lib/rails/all.rb
 # Only load the railties we need instead of loading everything
 require 'rails'
