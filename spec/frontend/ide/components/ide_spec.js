@@ -14,7 +14,7 @@ describe('WebIDE', () => {
 
   let wrapper;
 
-  function createComponent({ projData = emptyProjData, state = {}, mockStubs = {} } = {}) {
+  function createComponent({ projData = emptyProjData, state = {} } = {}) {
     const store = createStore();
 
     store.state.currentProjectId = 'abcproject';
@@ -31,7 +31,6 @@ describe('WebIDE', () => {
     return shallowMount(ide, {
       store,
       localVue,
-      stubs: mockStubs,
     });
   }
 
@@ -61,9 +60,6 @@ describe('WebIDE', () => {
           state: {
             errorMessage: null,
           },
-          mockStubs: {
-            ErrorMessage,
-          },
         });
 
         expect(wrapper.find(ErrorMessage).exists()).toBe(false);
@@ -75,9 +71,6 @@ describe('WebIDE', () => {
             errorMessage: {
               text: 'error',
             },
-          },
-          mockStubs: {
-            ErrorMessage,
           },
         });
 

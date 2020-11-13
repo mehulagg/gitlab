@@ -1,5 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import {
   WEBIDE_MARK_APP_START,
@@ -11,10 +12,17 @@ import {
   WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
+import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import { modalTypes } from '../constants';
 import eventHub from '../eventhub';
 import IdeSidebar from './ide_side_bar.vue';
 import RepoEditor from './repo_editor.vue';
+import ErrorMessage from './error_message.vue';
+import CommitEditorHeader from './commit_sidebar/editor_header.vue';
+import RepoTabs from './repo_tabs.vue';
+import IdeStatusBar from './ide_status_bar.vue';
+import RightPane from './panes/right.vue';
+import NewModal from './new_dropdown/modal.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 import { measurePerformance } from '../utils';
@@ -37,15 +45,15 @@ export default {
   components: {
     IdeSidebar,
     RepoEditor,
-    'error-message': () => import('./error_message.vue'),
-    'gl-button': () => import('@gitlab/ui/src/components/base/button/button.vue'),
-    'gl-loading-icon': () => import('@gitlab/ui/src/components/base/loading_icon/loading_icon.vue'),
-    'commit-editor-header': () => import('./commit_sidebar/editor_header.vue'),
-    'repo-tabs': () => import('./repo_tabs.vue'),
-    'ide-status-bar': () => import('./ide_status_bar.vue'),
-    'find-file': () => import('~/vue_shared/components/file_finder/index.vue'),
-    'right-pane': () => import('./panes/right.vue'),
-    'new-modal': () => import('./new_dropdown/modal.vue'),
+    ErrorMessage,
+    GlButton,
+    GlLoadingIcon,
+    CommitEditorHeader,
+    RepoTabs,
+    IdeStatusBar,
+    FindFile,
+    RightPane,
+    NewModal,
   },
   mixins: [glFeatureFlagsMixin()],
   data() {
