@@ -30,7 +30,7 @@ class SyncSeatLinkRequestWorker
 
   def request_body(date, license_key, max_historical_user_count, active_users)
     Gitlab::SeatLinkData.new(
-      date: date,
+      date: Time.iso8601(date),
       key: license_key,
       max_users: max_historical_user_count,
       active_users: active_users
