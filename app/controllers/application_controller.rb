@@ -44,10 +44,6 @@ class ApplicationController < ActionController::Base
   # all other before filters that could have set the user.
   before_action :auth_user
 
-  before_action do
-    push_frontend_feature_flag(:merge_request_reviewers, @project)
-  end
-
   prepend_around_action :set_current_context
 
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
