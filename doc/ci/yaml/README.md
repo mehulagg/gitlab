@@ -445,8 +445,7 @@ or template includes.
 ##### Multiple files from a project
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26793) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/271560) on GitLab 13.6.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to disable it. **(CORE ONLY)**
