@@ -67,7 +67,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       render: ->(partial, locals) { view_to_html_string(partial, locals) }
     }
 
-    options = additional_attributes.merge(diff_view: Feature.enabled?(:unified_diff_lines, @merge_request.project, default_enabled: true) ? "inline" : diff_view)
+    options = additional_attributes.merge(diff_view: unified_diff_lines_view_type(@merge_request.project))
 
     if @merge_request.project.context_commits_enabled?
       options[:context_commits] = @merge_request.recent_context_commits
