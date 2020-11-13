@@ -174,55 +174,45 @@ RSpec.describe JenkinsService do
       stub_request(:post, jenkins_hook_url)
     end
 
-    context 'without a license key' do
+    context 'when namespace plan check is not enabled' do
       before do
-        License.destroy_all # rubocop: disable Cop/DestroyAll
+        stub_application_setting_on_object(project, should_check_namespace_plan: false)
       end
 
-      it_behaves_like 'project with disabled Jenkins service'
+      it_behaves_like 'project with enabled Jenkins service'
     end
 
-    context 'with a license key' do
-      context 'when namespace plan check is not enabled' do
-        before do
-          stub_application_setting_on_object(project, should_check_namespace_plan: false)
-        end
-
-        it_behaves_like 'project with enabled Jenkins service'
+    context 'when namespace plan check is enabled' do
+      before do
+        stub_application_setting_on_object(project, should_check_namespace_plan: true)
       end
 
-      context 'when namespace plan check is enabled' do
-        before do
-          stub_application_setting_on_object(project, should_check_namespace_plan: true)
+      context 'when namespace does not have a plan' do
+        let(:namespace) { create(:group, :private) }
+
+        it_behaves_like 'project with disabled Jenkins service'
+      end
+
+      context 'when namespace has a plan' do
+        let(:namespace) { create(:group, :private) }
+        let!(:gitlab_subscription) { create(:gitlab_subscription, :bronze, namespace: namespace) }
+
+        it 'adds default web hook headers to the request' do
+          jenkins_service.execute(push_sample_data)
+
+          expect(
+            a_request(:post, jenkins_hook_url)
+              .with(headers: { 'X-Gitlab-Event' => 'Push Hook', 'Authorization' => jenkins_authorization })
+          ).to have_been_made.once
         end
 
-        context 'when namespace does not have a plan' do
-          let(:namespace) { create(:group, :private) }
+        it 'request url contains properly serialized username and password' do
+          jenkins_service.execute(push_sample_data)
 
-          it_behaves_like 'project with disabled Jenkins service'
-        end
-
-        context 'when namespace has a plan' do
-          let(:namespace) { create(:group, :private) }
-          let!(:gitlab_subscription) { create(:gitlab_subscription, :bronze, namespace: namespace) }
-
-          it 'adds default web hook headers to the request' do
-            jenkins_service.execute(push_sample_data)
-
-            expect(
-              a_request(:post, jenkins_hook_url)
-                .with(headers: { 'X-Gitlab-Event' => 'Push Hook', 'Authorization' => jenkins_authorization })
-            ).to have_been_made.once
-          end
-
-          it 'request url contains properly serialized username and password' do
-            jenkins_service.execute(push_sample_data)
-
-            expect(
-              a_request(:post, 'http://jenkins.example.com/project/my_project')
-                .with(headers: { 'Authorization' => jenkins_authorization })
-            ).to have_been_made.once
-          end
+          expect(
+            a_request(:post, 'http://jenkins.example.com/project/my_project')
+              .with(headers: { 'Authorization' => jenkins_authorization })
+          ).to have_been_made.once
         end
       end
     end
