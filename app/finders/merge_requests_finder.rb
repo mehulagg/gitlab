@@ -196,26 +196,26 @@ class MergeRequestsFinder < IssuableFinder
   end
 
   def by_reviewer(items)
+    return items unless params.reviewer_id? || params.reviewer_username?
+
     if params.filter_by_no_reviewer?
       items.no_review_requested
     elsif params.filter_by_any_reviewer?
       items.review_requested
     elsif params.reviewer
       items.review_requested_to(params.reviewer)
-    elsif params.reviewer_id? || params.reviewer_username?
+    else # assignee not found
       items.none
-    else
-      items
     end
   end
 
   def by_negated_reviewer(items)
+    return items unless not_params.reviewer_id? || not_params.reviewer_username?
+
     if not_params.reviewers.present?
       items.no_review_requested_to(not_params.reviewers)
-    elsif not_params.reviewer_id? || not_params.reviewer_username?
+    else # assignee not found
       items.none
-    else
-      items
     end
   end
 end
