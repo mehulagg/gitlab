@@ -60,6 +60,20 @@ bundle exec rake gitlab:import:all_users_to_all_groups RAILS_ENV=production
 
 Admin users are added as owners so they can add additional users to the group.
 
+## Update all users in given group with project_limit:0 and can_create_group: false
+
+To update all users in given group with `project_limit: 0` and `can_create_group: false`, run:
+
+```shell
+# omnibus-gitlab
+sudo gitlab-rake gitlab:user_management:update_users_of_a_group\[:group_id\]
+
+# installation from source
+bundle exec rake gitlab:user_management:update_users_of_a_group\[:group_id\] RAILS_ENV=production
+```
+
+It updates all users in the given group, its subgroups and projects in this group namespace.
+
 ## Control the number of active users
 
 Enable this setting to keep new users blocked until they have been cleared by the administrator.
