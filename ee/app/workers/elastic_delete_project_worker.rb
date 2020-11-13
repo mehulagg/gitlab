@@ -36,6 +36,11 @@ class ElasticDeleteProjectWorker
                 term: {
                   _id: es_id
                 }
+              },
+              {
+                term: {
+                  project_id: project_id
+                }
               }
             ]
           }
