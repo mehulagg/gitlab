@@ -93,10 +93,7 @@ export default {
         :class="line.commentRowClasses"
         class="diff-grid-comments diff-tr notes_holder"
       >
-        <div
-          v-if="!inline || (line.left && line.left.discussions.length)"
-          class="diff-td notes-content parallel old"
-        >
+        <div v-if="!inline || line.left" class="diff-td notes-content parallel old">
           <diff-comment-cell
             v-if="line.left"
             :line="line.left"
@@ -107,7 +104,7 @@ export default {
           />
         </div>
         <div
-          v-if="!inline || (line.right && line.right.discussions.length)"
+          v-if="!inline || (line.right && !line.left)"
           class="diff-td notes-content parallel new"
         >
           <diff-comment-cell
