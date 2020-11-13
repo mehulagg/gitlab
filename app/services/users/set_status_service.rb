@@ -29,8 +29,6 @@ module Users
 
       if params[:emoji] || params[:message]
         params[:emoji] = UserStatus::DEFAULT_EMOJI if params[:emoji].blank?
-      else
-        remove_status
       end
 
       user_status.update(params)

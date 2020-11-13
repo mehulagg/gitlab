@@ -158,6 +158,17 @@ module PageLayoutHelper
     end
   end
 
+  def user_status_properties(user)
+    default_properties = { current_emoji: '', current_message: '', can_set_user_availability: Feature.enabled?(:set_user_availability_status, user), default_emoji: UserStatus::DEFAULT_EMOJI }
+    return default_properties unless user&.status
+
+    default_properties.merge({
+      current_emoji: user.status.emoji.to_s,
+      current_message: user.status.message.to_s,
+      current_availability: user.status.availability.to_s
+    })
+  end
+
   private
 
   def generic_canonical_url
@@ -182,16 +193,5 @@ module PageLayoutHelper
     # `fullpath` would return the path without the slash.
     # Therefore, we need to process `original_fullpath`
     request.original_fullpath.sub(request.path, '')[0] == '/'
-  end
-
-  def user_status_properties(user, project)
-    default_properties = { current_emoji: '', current_message: '', can_set_user_availability: Feature.enabled?(:set_user_availability_status, project), default_emoji: UserStatus::DEFAULT_EMOJI }
-    return default_properties unless user&.status
-
-    default_properties.merge({
-      current_emoji: user.status.emoji.to_s
-      current_message: user.status.message.to_s, 
-      current_availability: user.status.availability.to_s
-    })
   end
 end

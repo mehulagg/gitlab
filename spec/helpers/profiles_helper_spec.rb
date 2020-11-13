@@ -80,6 +80,23 @@ RSpec.describe ProfilesHelper do
     end
   end
 
+  describe "#show_status_emoji?" do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:message, :emoji, :result) do
+      "Some message" | UserStatus::DEFAULT_EMOJI | true
+      "Some message" | ""                        | true
+      ""             | "basketball"              | true
+      ""             | "basketball"              | true
+      ""             | UserStatus::DEFAULT_EMOJI | false
+      ""             | UserStatus::DEFAULT_EMOJI | false
+    end
+
+    with_them do
+      it { expect(helper.show_status_emoji?(OpenStruct.new("message": message, "emoji": emoji))).to eq(result) }
+    end
+  end
+
   def stub_cas_omniauth_provider
     provider = OpenStruct.new(
       'name' => 'cas3',
