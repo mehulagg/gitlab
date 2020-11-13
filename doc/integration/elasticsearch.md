@@ -360,7 +360,7 @@ mappings.
 {: .panel-heading}
 <div class="panel-body">
 
-GitLab 13.6 - Added background migrations for Elasticsearch. This reduced the need to manaully run reindexing. [Advanced Search Migration Details](https://docs.gitlab.com/ee/development/elasticsearch.html#creating-a-new-global-search-migration)
+GitLab 13.6 - Added background migrations for Elasticsearch. This reduced the need to manaully run reindexing. [Advanced Search Migration Details](doc/development/elasticsearch.md)
 
 </div>
 </div>
