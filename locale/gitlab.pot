@@ -23667,6 +23667,9 @@ msgstr ""
 msgid "SearchAutocomplete|Issues assigned to me"
 msgstr ""
 
+msgid "SearchAutocomplete|Merge requests I need to review"
+msgstr ""
+
 msgid "SearchAutocomplete|Merge requests I've created"
 msgstr ""
 
