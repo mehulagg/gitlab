@@ -60,7 +60,8 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
       type: 'array',
       param: 'usernames[]',
       symbol: '@',
-      icon: 'approval', tag: '@approved-by',
+      icon: 'approval',
+      tag: '@approved-by',
     },
     condition: [
       {
@@ -156,9 +157,10 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
         operator: '=',
         value: __('Any'),
       },
-    ]
+    ],
   };
 
   IssuableTokenKeys.tokenKeys.push(reviewerToken.token);
+  IssuableTokenKeys.tokenKeysWithAlternative.push(reviewerToken.token);
   IssuableTokenKeys.conditions.push(...reviewerToken.conditions);
 };
