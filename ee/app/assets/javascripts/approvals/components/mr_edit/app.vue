@@ -27,25 +27,29 @@ export default {
     toggleIcon() {
       return this.visible ? 'chevron-down' : 'chevron-right';
     },
+    featureFlag() {
+      return gon.features?.mergeRequestReviewers;
+    },
   },
 };
 </script>
 
 <template>
-  <!-- SAM: This need to be behind feature flag!!! -->
-  <div>
-    <div>
-      <gl-button v-collapse-toggle="collapseId" variant="link">
-        <gl-icon :name="toggleIcon" />
-        {{ __('Show approval rules') }}
-      </gl-button>
+  <div v-if="featureFlag" class="gl-mt-1">
+    <gl-button v-collapse-toggle="collapseId" variant="link">
+      <gl-icon :name="toggleIcon" />
+      {{ __('Approval rules') }}
+    </gl-button>
 
-      <gl-collapse :id="collapseId" v-model="visible" class="gl-mt-3">
-        <app>
-          <mr-rules slot="rules" />
-          <mr-rules-hidden-inputs slot="footer" />
-        </app>
-      </gl-collapse>
-    </div>
+    <gl-collapse :id="collapseId" v-model="visible" class="gl-mt-3 gl-ml-1 gl-mb-5">
+      <app>
+        <mr-rules slot="rules" />
+        <mr-rules-hidden-inputs slot="footer" />
+      </app>
+    </gl-collapse>
   </div>
+  <app v-else>
+    <mr-rules slot="rules" />
+    <mr-rules-hidden-inputs slot="footer" />
+  </app>
 </template>
