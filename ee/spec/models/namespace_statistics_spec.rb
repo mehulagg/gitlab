@@ -7,12 +7,14 @@ RSpec.describe NamespaceStatistics do
 
   it { is_expected.to validate_presence_of(:namespace) }
 
+  # TODO: remove this now!
   describe '#shared_runners_minutes' do
     let(:namespace_statistics) { build(:namespace_statistics, shared_runners_seconds: 120) }
 
     it { expect(namespace_statistics.shared_runners_minutes).to eq(2) }
   end
 
+  # TODO: remove this now!
   describe '#extra_shared_runners_minutes' do
     subject { namespace_statistics.extra_shared_runners_minutes }
 

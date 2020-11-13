@@ -56,6 +56,11 @@ module Ci
         minutes_used - monthly_minutes
       end
 
+      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
+      def minutes_used
+        @minutes_used ||= namespace.shared_runners_seconds.to_i / 60
+      end
+
       private
 
       def monthly_minutes_used_up?
@@ -84,11 +89,6 @@ module Ci
 
       def any_minutes_purchased?
         purchased_minutes > 0
-      end
-
-      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
-      def minutes_used
-        @minutes_used ||= namespace.shared_runners_seconds.to_i / 60
       end
 
       # TODO: maps to Namespace#actual_shared_runners_minuts_limit(include_extra: true)
