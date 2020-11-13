@@ -106,7 +106,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
 
 - Write the raw SQL in the MR description. Preferably formatted
   nicely with [pgFormatter](https://sqlformat.darold.net) or
-  [paste.depesz.com](https://paste.depesz.com).
+  [paste.depesz.com](https://paste.depesz.com) and using regular quotes and avoding smart quotes.
 - Include the output of `EXPLAIN (ANALYZE, BUFFERS)` of the relevant
   queries in the description. If the output is too long, wrap it in
   `<details>` blocks, paste it in a GitLab Snippet, or provide the
