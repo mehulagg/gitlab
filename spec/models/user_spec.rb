@@ -2174,7 +2174,7 @@ RSpec.describe User do
     end
 
     it 'returns users with a partially matching username' do
-     expect(search_without_secondary_emails(user.username[0..2])).to eq([user])
+      expect(search_without_secondary_emails(user.username[0..2])).to eq([user])
     end
 
     it 'returns users with a matching username regardless of the casing' do
@@ -2197,7 +2197,6 @@ RSpec.describe User do
       expect(search_without_secondary_emails(nil)).to be_empty
     end
   end
-
 
   describe '.search_with_secondary_emails' do
     delegate :search_with_secondary_emails, to: :described_class
