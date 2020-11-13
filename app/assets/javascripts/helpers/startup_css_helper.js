@@ -20,17 +20,6 @@ const handleStartupEvents = () => {
   }
 };
 
-/* Wait for.... The methods can be used:
-  - with a callback (preferred),
-    waitFor(action)
-
-  - with then (discouraged),
-    await waitFor().then(action);
-
-  - with await,
-    await waitFor;
-    action();
--*/
 export const waitForCSSLoaded = (action = () => {}) => {
   if (!gon.features.startupCss || allLinksLoaded()) {
     return new Promise(resolve => {
