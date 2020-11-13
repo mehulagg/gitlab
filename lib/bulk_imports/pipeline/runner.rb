@@ -6,34 +6,40 @@ module BulkImports
       extend ActiveSupport::Concern
 
       included do
-        attr_reader :extractors, :transformers, :loaders
+        private
 
-        def initialize
-          @extractors = self.class.extractors.map(&method(:instantiate))
-          @transformers = self.class.transformers.map(&method(:instantiate))
-          @loaders = self.class.loaders.map(&method(:instantiate))
-
-          super
+        def extractor
+          @extractor ||= self.class.attributes[:extractor]
         end
 
-        def run(context)
-          extractors.each do |extractor|
-            extractor.extract(context).each do |entry|
-              transformers.each do |transformer|
-                entry = transformer.transform(context, entry)
-              end
-
-              loaders.each do |loader|
-                loader.load(context, entry)
-              end
-            end
-          end
+        def transformers
+          @transformers ||= self.class.attributes[:transformers]
         end
 
-        def instantiate(class_config)
-          class_config[:klass].new(class_config[:options])
+        def loader
+          @loader ||= self.class.attributes[:loader]
+        end
+
+        def pipeline_name
+          @pipeline ||= self.class.name
         end
       end
+
+      def run(context)
+        raw_data = extractor.call(context)
+
+        raw_data.each do |entry|
+          transformed = transformers.reduce do |result, transformer|
+            transformer.call(context, entry)
+          end
+
+          loader.call(context, transformed)
+        end
+      end
+    end
+
+    def instantiate(class_config)
+      class_config[:klass].new(class_config[:options])
     end
   end
 end

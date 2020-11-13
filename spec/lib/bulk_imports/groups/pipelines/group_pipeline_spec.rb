@@ -76,27 +76,17 @@ RSpec.describe BulkImports::Groups::Pipelines::GroupPipeline do
     it { expect(described_class).to include_module(BulkImports::Pipeline::Runner) }
 
     it 'has extractors' do
-      expect(described_class.extractors)
-        .to contain_exactly(
-          {
-            klass: BulkImports::Common::Extractors::GraphqlExtractor,
-            options: {
-              query: BulkImports::Groups::Graphql::GetGroupQuery
-            }
-          }
-        )
-    end
+      expect(BulkImports::Common::Extractors::GraphqlExtractor)
+        .to receive(:new)
+        .with(query: BulkImports::Groups::Graphql::GetGroupQuery)
 
-    it 'has transformers' do
-      expect(described_class.transformers)
-        .to contain_exactly(
-          { klass: BulkImports::Common::Transformers::GraphqlCleanerTransformer, options: nil },
-          { klass: BulkImports::Common::Transformers::UnderscorifyKeysTransformer, options: nil },
-          { klass: BulkImports::Groups::Transformers::GroupAttributesTransformer, options: nil })
-    end
+      expect(BulkImports::Common::Transformers::GraphqlCleanerTransformer).to receive(:new)
+      expect(BulkImports::Common::Transformers::UnderscorifyKeysTransformer).to receive(:new)
+      expect(BulkImports::Groups::Transformers::GroupAttributesTransformer).to receive(:new)
 
-    it 'has loaders' do
-      expect(described_class.loaders).to contain_exactly({ klass: BulkImports::Groups::Loaders::GroupLoader, options: nil })
+      expect(BulkImports::Groups::Loaders::GroupLoader).to receive(:new)
+
+      subject
     end
   end
 end

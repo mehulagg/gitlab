@@ -6,9 +6,9 @@ module BulkImports
       class SubgroupEntitiesPipeline
         include Pipeline
 
-        extractor BulkImports::Groups::Extractors::SubgroupsExtractor
-        transformer BulkImports::Groups::Transformers::SubgroupToEntityTransformer
-        loader BulkImports::Common::Loaders::EntityLoader
+        extractor BulkImports::Groups::Extractors::SubgroupsExtractor.new
+        transformer BulkImports::Groups::Transformers::SubgroupToEntityTransformer.new
+        loader BulkImports::Common::Loaders::EntityLoader.new
       end
     end
   end

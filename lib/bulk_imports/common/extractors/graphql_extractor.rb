@@ -4,10 +4,9 @@ module BulkImports
   module Common
     module Extractors
       class GraphqlExtractor
-        def initialize(query)
-          @query = query[:query]
-          @query_string = @query.to_s
-          @variables = @query.variables
+        def initialize(query:)
+          @query_string = query.to_s
+          @variables = query.variables
         end
 
         def extract(context)

@@ -22,10 +22,6 @@ module BulkImports
         EDGES = 'edges'
         NODE = 'node'
 
-        def initialize(options = {})
-          @options = options
-        end
-
         def transform(_, data)
           return data unless data.is_a?(Hash)
 

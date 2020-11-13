@@ -7,33 +7,32 @@ module BulkImports
       include Gitlab::ClassAttributes
 
       class_methods do
-        def extractor(klass, options = nil)
-          add_attribute(:extractors, klass, options)
+        def extractor(object, &block)
+          class_attributes[:extractor] = block_given? ? block : object.method(:extract)
         end
 
-        def transformer(klass, options = nil)
-          add_attribute(:transformers, klass, options)
+        def transformer(object, &block)
+          class_attributes[:transformers] ||= []
+          class_attributes[:transformers] << block_given? ? block : object.method(:transform)
         end
 
-        def loader(klass, options = nil)
-          add_attribute(:loaders, klass, options)
+        def loader(object, &block)
+          class_attributes[:loader] = block_given? ? block : object.method(:load)
         end
 
-        def add_attribute(sym, klass, options)
+        def attributes
+          class_attributes.slice(
+            :extractor,
+            :transformers,
+            :loaders
+          )
+        end
+
+        private
+
+        def add_attribute(sym, callback)
           class_attributes[sym] ||= []
-          class_attributes[sym] << { klass: klass, options: options }
-        end
-
-        def extractors
-          class_attributes[:extractors]
-        end
-
-        def transformers
-          class_attributes[:transformers]
-        end
-
-        def loaders
-          class_attributes[:loaders]
+          class_attributes[sym] << callback
         end
       end
     end

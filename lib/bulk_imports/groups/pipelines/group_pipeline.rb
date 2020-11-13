@@ -6,13 +6,15 @@ module BulkImports
       class GroupPipeline
         include Pipeline
 
-        extractor Common::Extractors::GraphqlExtractor, query: Graphql::GetGroupQuery
+        extractor Common::Extractors::GraphqlExtractor.new(
+          query: Graphql::GetGroupQuery
+        )
 
-        transformer Common::Transformers::GraphqlCleanerTransformer
-        transformer Common::Transformers::UnderscorifyKeysTransformer
-        transformer Groups::Transformers::GroupAttributesTransformer
+        transformer Common::Transformers::GraphqlCleanerTransformer.new
+        transformer Common::Transformers::UnderscorifyKeysTransformer.new
+        transformer Groups::Transformers::GroupAttributesTransformer.new
 
-        loader Groups::Loaders::GroupLoader
+        loader Groups::Loaders::GroupLoader.new
       end
     end
   end
