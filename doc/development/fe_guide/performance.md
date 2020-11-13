@@ -119,25 +119,25 @@ browser's developer console while on any page within GitLab.
   ```
 
   Note that `waitForCSSLoaded()` methods supports receiving the action in different ways:
-
-- With a callback:
-
-  ```javascript
-  waitForCSSLoaded(action)
-  ```
-
-- With `then()`:
-
-  ```javascript
-  waitForCSSLoaded().then(action);
-  ```
-
-- With `await` followed by `action`:
-
-  ```javascript
-  await waitForCSSLoaded;
-  action();
-  ```
+    
+  - With a callback:
+  
+    ```javascript
+      waitForCSSLoaded(action)
+    ```
+    
+  - With `then()`:
+  
+    ```javascript
+      waitForCSSLoaded().then(action);
+    ```
+    
+  - With `await` followed by `action`:
+  
+    ```javascript
+      await waitForCSSLoaded;
+      action();
+    ```
 
   For example, see how we use this in [one of our helpers](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/pages/projects/graphs/charts/index.js#L11):
 
