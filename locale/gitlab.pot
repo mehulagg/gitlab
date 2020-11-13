@@ -22636,9 +22636,6 @@ msgstr ""
 msgid "Removes time estimate."
 msgstr ""
 
-msgid "Removing integrations is not supported for this project"
-msgstr ""
-
 msgid "Removing this group also removes all child projects, including archived projects, and their resources."
 msgstr ""
 
