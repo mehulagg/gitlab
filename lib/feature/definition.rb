@@ -78,9 +78,28 @@ class Feature
       attributes
     end
 
+    def can_auto_clean_up?
+      default_enabled && auto_clean_up && stale?
+    end
+
+    STALED_MIN_VERSION_DIFF = 2
+
+    def stale?
+      self.class.current_milestone > milestone.to_s + STALED_MIN_VERSION_DIFF
+    end
+
     class << self
       def paths
         @paths ||= [Rails.root.join('config', 'feature_flags', '**', '*.yml')]
+      end
+
+      def currentl_milestone
+        @current_milestone ||= read_milestone
+      end
+
+      def read_milestone
+        milestone = File.read('VERSION')
+        milestone.gsub(/^(\d+\.\d+).*$/, '\1').chomp
       end
 
       def definitions
