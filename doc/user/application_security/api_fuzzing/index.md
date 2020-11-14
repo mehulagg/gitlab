@@ -644,6 +644,8 @@ Header fuzzing is disabled by default due to the high number of false positives 
 
 Each profile in the default configuration file has an entry for `GeneralFuzzingCheck`. This is the check that performs header fuzzing. Under the `Configuration` section are `HeaderFuzzing` and `Headers`. These are the setting that you will change to enable header fuzzing.
 
+This snippet shows the `Quick-10` profile's default configuration with header fuzzing disabled.
+
 ```yaml
 - Name: Quick-10
   DefaultProfile: Empty
@@ -681,7 +683,7 @@ Each profile in the default configuration file has an entry for `GeneralFuzzingC
         Headers:
 ```
 
-`Headers` is a list of headers to fuzz. Only headers listed will be fuzzed. Lets assume you want to fuzz a custom header `X-Custom` used by your APIs. We will add an entry for it in the yaml using the syntax: `- Name: HeaderName` where `HeaderName` is substituted with the header we want to fuzz.
+`Headers` is a list of headers to fuzz. Only headers listed will be fuzzed. Lets assume you want to fuzz a custom header `X-Custom` used by your APIs. We will add an entry for it using the syntax: `- Name: HeaderName` where `HeaderName` is substituted with the header we want to fuzz.
 
 ```yaml
     - Name: GeneralFuzzingCheck
