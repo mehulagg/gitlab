@@ -77,7 +77,7 @@ test:
 
 #### Maven example
 
-The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java/Kotlin uses [Maven](https://maven.apache.org/)
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java or Kotlin uses [Maven](https://maven.apache.org/)
 to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
 generate the coverage artifact.
 You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
@@ -117,7 +117,7 @@ coverage-jdk11:
 
 #### Gradle example
 
-The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java/Kotlin uses [Gradle](https://gradle.org/)
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java or Kotlin uses [Gradle](https://gradle.org/)
 to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
 generate the coverage artifact.
 You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
