@@ -89,7 +89,7 @@ To create a `.gitlab-ci.yml` file:
 1. Go to **Project overview > Details**.
 1. Above the file list, click the plus icon to add a new file:
 
-   ![New file](new_file_v13_6.png)
+   ![New file](img/new_file_v13_6.png)
 
 1. From the **Select a template type** list, select `.gitlab-ci.yml`.
    Then select a template from the list.
