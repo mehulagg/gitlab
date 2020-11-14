@@ -239,7 +239,7 @@ Example:
   {
     "description": "'unused' is assigned a value but never used.",
     "fingerprint": "7815696ecbf1c96e6894b779456d330e",
-    "severity": "minor"
+    "severity": "minor",
     "location": {
       "path": "lib/index.js",
       "lines": {
