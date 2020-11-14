@@ -638,6 +638,76 @@ variables:
   FUZZAPI_OVERRIDES_INTERVAL: 300
 ```
 
+### Header Fuzzing
+
+Header fuzzing is disabled by default due to the high number of false positives that occur with many technology stacks. When header fuzzing is enabled a list of headers to include in fuzzing must be specified.
+
+Each profile in the default configuration file has an entry for `GeneralFuzzingCheck`. This is the check that performs header fuzzing. Under the `Configuration` section are `HeaderFuzzing` and `Headers`. These are the setting that you will change to enable header fuzzing.
+
+```yaml
+- Name: Quick-10
+  DefaultProfile: Empty
+  Routes:
+  - Route: *Route0
+    Checks:
+    - Name: FormBodyFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
+    - Name: JsonFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+    - Name: XmlFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+```
+
+`HeaderFuzzing` is a boolean turning header fuzzing on and off. The default setting is `false` for off. To turn header fuzzing on change this setting to `true`.
+
+```yaml
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: true
+        Headers:
+```
+
+`Headers` is a list of headers to fuzz. Only headers listed will be fuzzed. Lets assume you want to fuzz a custom header `X-Custom` used by your APIs. We will add an entry for it in the yaml using the syntax: `- Name: HeaderName` where `HeaderName` is substituted with the header we want to fuzz.
+
+```yaml
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: true
+        Headers:
+          - Name: X-Custom
+```
+
+We now have a configuration that will fuzz the header `X-Custom`. Additional headers can be listed using the same notation.
+
+```yaml
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: true
+        Headers:
+          - Name: X-Custom
+          - Name: X-AnotherHeader
+```
+
+The configuration is repeated for each profile as needed.
+
 ## Running your first scan
 
 When configured correctly, a CI/CD pipeline contains a `Fuzz` stage and a `apifuzzer_fuzz` job. The
