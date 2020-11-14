@@ -427,4 +427,78 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       end
     end
   end
+
+  describe 'milestone order' do
+    let(:path) { path_prefix }
+    let(:current_user) { stranger }
+    let(:today) { Time.zone.now }
+    let(:yesterday) { today - 1.day }
+    let(:two_days_ago) { today - 2.days }
+    let(:tomorrow) { today + 1.day }
+    let(:project) { create(:project, :public) }
+    let(:release) { create(:release, project: project, milestones: [milestone_2, milestone_1]) }
+
+    let(:release_fields) do
+      query_graphql_field(%{
+        milestones {
+          nodes {
+            title
+          }
+        }
+      })
+    end
+
+    before do
+      post_query
+    end
+
+    shared_examples 'correct sort order' do
+      it 'sorts milestonee_1 before milestone_2' do
+        actual_title_order = data.dig('milestones', 'nodes').map { |m| m['title'] }
+
+        expect(actual_title_order).to eq([milestone_1.title, milestone_2.title])
+      end
+    end
+
+    context 'due_date' do
+      let(:milestone_1) { create(:milestone, project: project, due_date: tomorrow, start_date: two_days_ago, title: 'z' ) }
+      let(:milestone_2) { create(:milestone, project: project, due_date: milestone_2_due_date, start_date: yesterday, title: 'a' ) }
+
+      context 'when both milestones have a due_date' do
+        let(:milestone_2_due_date) { today }
+
+        it_behaves_like 'correct sort order'
+      end
+
+      context 'when one milestone does not have a due_date' do
+        let(:milestone_2_due_date) { nil }
+
+        it_behaves_like 'correct sort order'
+      end
+    end
+
+    context 'start_date' do
+      let(:milestone_1) { create(:milestone, project: project, due_date: tomorrow, start_date: today, title: 'z' ) }
+      let(:milestone_2) { create(:milestone, project: project, due_date: tomorrow, start_date: milestone_2_start_date, title: 'a' ) }
+
+      context 'when both milestones have a start_date' do
+        let(:milestone_2_start_date) { yesterday }
+
+        it_behaves_like 'correct sort order'
+      end
+
+      context 'when one milestone does not have a start_date' do
+        let(:milestone_2_start_date) { nil }
+
+        it_behaves_like 'correct sort order'
+      end
+    end
+
+    context 'title' do
+      let(:milestone_1) { create(:milestone, project: project, due_date: tomorrow, start_date: today, title: 'a' ) }
+      let(:milestone_2) { create(:milestone, project: project, due_date: tomorrow, start_date: today, title: 'z' ) }
+
+      it_behaves_like 'correct sort order'
+    end
+  end
 end

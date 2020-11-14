@@ -15,7 +15,7 @@ class Release < ApplicationRecord
   has_many :links, class_name: 'Releases::Link'
 
   has_many :milestone_releases
-  has_many :milestones, through: :milestone_releases
+  has_many :milestones, -> { order('due_date DESC NULLS LAST', 'start_date DESC NULLS LAST', title: :asc) }, through: :milestone_releases
   has_many :evidences, inverse_of: :release, class_name: 'Releases::Evidence'
 
   accepts_nested_attributes_for :links, allow_destroy: true
@@ -28,7 +28,10 @@ class Release < ApplicationRecord
   scope :sorted, -> { order(released_at: :desc) }
   scope :preloaded, -> { includes(:evidences, :milestones, project: [:project_feature, :route, { namespace: :route }]) }
   scope :with_project_and_namespace, -> { includes(project: :namespace) }
-  scope :recent, -> { sorted.limit(MAX_NUMBER_TO_DISPLAY) }
+  scope :recent, # rubocop: disable CodeReuse/ActiveRecord
+  # rubocop: disable CodeReuse/ActiveRecord
+  -> { sorted.limit(MAX_NUMBER_TO_DISPLAY) }
+  # rubocop: enable CodeReuse/ActiveRecord
 
   # Sorting
   scope :order_created, -> { reorder('created_at ASC') }
