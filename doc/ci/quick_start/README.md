@@ -32,7 +32,7 @@ To use GitLab CI/CD:
    at the root of your repository. This file tells the runner what to do.
 1. [Push the `.gitlab-ci.yml` file](#push-gitlab-ciyml-to-gitlab) to your repository.
 
-The runner runs your jobs. The jobs [are displayed in a pipeline](#iew-the-status-of-your-pipeline-and-jobs).
+The runner runs your jobs. The jobs [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
 
 ### Choose or register a runner
 
