@@ -7,8 +7,8 @@ type: reference
 
 # Get started with GitLab CI/CD
 
-Use this document to get started with GitLab
-[continuous integration](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/).
+This document should help you get started with
+GitLab [continuous integration](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/).
 
 Before you start, make sure you have:
 
@@ -30,9 +30,9 @@ To use GitLab CI/CD:
    and [register a runner](https://docs.gitlab.com/runner/register/) for your instance, project, or group.
 1. [Create a `.gitlab-ci.yml` file](#create-a-gitlab-ciyml-file)
    at the root of your repository. This file tells the runner what to do.
-1. [Push the `.gitlab-ci.yml` file](#push-gitlab-ciyml-to-gitlab) to your repository.
 
-The runner runs your jobs. The jobs [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
+When you commit the file to your repository, the runner runs your jobs.
+The jobs [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
 
 ### Choose or register a runner
 
@@ -42,7 +42,10 @@ You may already have runners available for your project. These runners
 include [shared runners](../runners/README.md#shared-runners), which are
 available to all projects in your GitLab instance.
 
-To view runners, go to **Settings > CI/CD** and expand **Runners**.
+To view runners:
+
+- Go to **Settings > CI/CD** and expand **Runners**.
+
 You can use any of the runners that are listed there.
 
 Under each runner is a list of tags in white text on a blue background.
@@ -83,26 +86,33 @@ You do not need to use all three stages; stages with no jobs are ignored.
 
 To create a `.gitlab-ci.yml` file:
 
-- In the root of your repository, create a file called `.gitlab-ci.yml`.
-  Or, if you want to use a template from the project home page, click **Set up CI/CD**.
-  From the **Apply a template** list, select a template.
+1. Go to **Project overview > Details**.
+1. Above the file list, click the plus icon to add a new file:
 
-If you have a generic project, you can use this example:
+   ![New file](new_file_v13_6.png)
 
-```yaml
-test:
-  stage: test
-  script:
-    - echo Hello, $GITLAB_USER_LOGIN!
+1. From the **Select a template type** list, select `.gitlab-ci.yml`.
+   Then select a template from the list.
+   
+   Or, for the **File name** type `.gitlab-ci.yml` and in the larger window,
+   paste this sample code:
 
-deploy_prod:
-  stage: deploy
-  script:
-    - echo Goodbye, $GITLAB_USER_LOGIN!
-```
+   ```yaml
+   test:
+     stage: test
+     script:
+       - echo Hello, $GITLAB_USER_LOGIN!
 
-`$GITLAB_USER_LOGIN` is a [predefined variable](../variables/predefined_variables.md)
-that is populated with your GitLab username when the job runs.
+   deploy_prod:
+     stage: deploy
+     script:
+       - echo Goodbye, $GITLAB_USER_LOGIN!
+   ```
+
+   `$GITLAB_USER_LOGIN` is a [predefined variable](../variables/predefined_variables.md)
+   that is populated with your GitLab username when the job runs.
+
+1. Click **Commit changes**.
 
 If you want to use a runner that has a `tag` of `windows`, you would specify it for the job:
 
@@ -134,23 +144,11 @@ For the complete `.gitlab-ci.yml` syntax, see
 
 A [Ruby on Rails example](#ruby-on-rails-example) is also included below.
 
-### Push `.gitlab-ci.yml` to GitLab
-
-After you create a `.gitlab-ci.yml` file, add it to your Git repository
-and push it to GitLab. You can do this in the GitLab UI or from the
-command line:
-
-```shell
-git add .gitlab-ci.yml
-git commit -m "Add .gitlab-ci.yml"
-git push origin master
-```
-
 ### View the status of your pipeline and jobs
 
 To view your running pipeline, go **CI/CD > Pipelines**.
 
-If you used the earlier example, you should see a pipeline with two stages:
+If you used the earlier example, a pipeline with two stages should be displayed:
 
 ![Two stages](img/two_stages_v13_6.png)
 
