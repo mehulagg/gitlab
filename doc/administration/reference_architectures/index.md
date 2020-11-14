@@ -165,9 +165,7 @@ installed on separate machines (virtualized or bare metal), with machine hardwar
 requirements listed in the "Configuration" column and equivalent VM standard sizes listed
 in GCP/AWS/Azure columns of each [available reference architecture](#available-reference-architectures).
 
-Running components on Docker (including Compose) with the same specs should be fine, as in
-terms of support, Docker is well known, and there's been no evidence that Docker
-itself needs notable additional specs. Although note that this is
+Running components on Docker (including Compose) with the same specs should be fine, as Docker is well known in terms of support.
 still an additional layer and may still add some support complexities.
 Such as not being able to run `strace` as it generally doesn't run
 in Docker.
