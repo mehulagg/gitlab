@@ -87,7 +87,8 @@ You do not need to use all three stages; stages with no jobs are ignored.
 To create a `.gitlab-ci.yml` file:
 
 1. Go to **Project overview > Details**.
-1. Above the file list, click the plus icon to add a new file:
+1. Above the file list, select the branch you want to commit to,
+   click the plus icon, then select **New file**:
 
    ![New file](img/new_file_v13_6.png)
 
@@ -146,14 +147,15 @@ A [Ruby on Rails example](#ruby-on-rails-example) is also included below.
 
 ### View the status of your pipeline and jobs
 
-To view your running pipeline, go **CI/CD > Pipelines**.
+When you committed your changes, a pipeline started. To view your pipeline, go **CI/CD > Pipelines**.
 
-If you used the earlier example, a pipeline with two stages should be displayed:
+If you used the earlier sample code, a pipeline with two stages should be displayed:
 
 ![Two stages](img/two_stages_v13_6.png)
 
 If you hover over either stage, you can view the status. Click the name
-of the stage, for example `test`, to view the job details.
+of the stage, for example `test`, to view the job details. The output should be
+similar to this:
 
 ![Job results](img/job_results_v13_6.png)
 
@@ -179,7 +181,7 @@ For help making your new pipelines faster and more efficient, see the
 ## Ruby on Rails example
 
 If you have a Ruby on Rails project, you can use this example. The `ruby:2.7.2` image
-referred to in this example is from Docker Hub.
+in this example is on [Docker Hub](https://hub.docker.com/).
 
 ```yaml
 default:
