@@ -12,8 +12,6 @@ module Ci
     include FileStoreMounter
     extend Gitlab::Ci::Model
 
-    ignore_columns :locked, remove_after: '2020-07-22', remove_with: '13.4'
-
     TEST_REPORT_FILE_TYPES = %w[junit].freeze
     COVERAGE_REPORT_FILE_TYPES = %w[cobertura].freeze
     ACCESSIBILITY_REPORT_FILE_TYPES = %w[accessibility].freeze
