@@ -2,15 +2,13 @@
 import { mapState } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import GLTerminal from '~/terminal/terminal';
-import TerminalControls from './terminal_controls.vue';
 import { RUNNING, STOPPING } from '../../stores/modules/terminal/constants';
 import { isStartingStatus } from '../../stores/modules/terminal/utils';
 
 export default {
   components: {
     GlLoadingIcon,
-    TerminalControls,
+    'terminal-controls': () => import('./terminal_controls.vue'),
   },
   props: {
     terminalPath: {
@@ -68,10 +66,13 @@ export default {
     },
     createTerminal() {
       this.destroyTerminal();
-      this.glterminal = new GLTerminal(this.$refs.terminal);
-      this.glterminal.addScrollListener(({ canScrollUp, canScrollDown }) => {
-        this.canScrollUp = canScrollUp;
-        this.canScrollDown = canScrollDown;
+
+      return import('~/terminal/terminal').then(GLTerminal => {
+        this.glterminal = new GLTerminal(this.$refs.terminal);
+        this.glterminal.addScrollListener(({ canScrollUp, canScrollDown }) => {
+          this.canScrollUp = canScrollUp;
+          this.canScrollDown = canScrollDown;
+        });
       });
     },
     destroyTerminal() {
