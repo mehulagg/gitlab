@@ -1,0 +1,8 @@
+---
+name: use_carrierwave_aws
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.6'
+type: development
+group: group::enablement
+default_enabled: false

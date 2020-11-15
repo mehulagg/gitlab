@@ -3,11 +3,15 @@
 require 'fog/aws'
 require 'carrierwave/storage/fog'
 
+require_relative 'object_storage/s3'
+
 #
 # This concern should add object storage support
 # to the GitlabUploader class
 #
 module ObjectStorage
+  include ::ObjectStorage::S3
+
   RemoteStoreError = Class.new(StandardError)
   UnknownStoreError = Class.new(StandardError)
   ObjectStorageUnavailable = Class.new(StandardError)
@@ -399,7 +403,7 @@ module ObjectStorage
       # This should be changed to make use of `tmp/cache` mechanism
       # instead of using custom upload directory,
       # using tmp/cache makes this implementation way easier than it is today
-      CarrierWave::Storage::Fog::File.new(self, storage_for(Store::REMOTE), file_path).tap do |file|
+      remote_storage_file(file_path).tap do |file|
         raise RemoteStoreError, 'Missing file' unless file.exists?
 
         # Remote stored file, we force to store on remote storage
@@ -440,12 +444,41 @@ module ObjectStorage
       when Store::REMOTE
         raise "Object Storage is not enabled for #{self.class}" unless self.class.object_store_enabled?
 
-        CarrierWave::Storage::Fog.new(self)
+        remote_storage
       when Store::LOCAL
         CarrierWave::Storage::File.new(self)
       else
         raise UnknownStoreError
       end
+    end
+
+    def remote_storage
+      # fog-aws is much slower with copying large files than the AWS S3 SDK
+      # because it does not use threaded, multipart uploading for
+      # copying files.
+      if Feature.enabled?(:use_carrierwave_aws) && object_storage_config.aws?
+        CarrierWave::Storage::AWS.new(self)
+      else
+        CarrierWave::Storage::Fog.new(self)
+      end
+    end
+
+    def remote_storage_file(file_path)
+      storage = storage_for(Store::REMOTE)
+
+      if Feature.enabled?(:use_carrierwave_aws) && object_storage_config.aws?
+        CarrierWave::Storage::AWSFile.new(self, storage.connection, file_path)
+      else
+        CarrierWave::Storage::Fog::File.new(self, storage, file_path)
+      end
+    end
+
+    def object_storage_config
+      @object_storage_config ||= self.class.object_store_config # rubocop disable:Gitlab/ModuleWithInstanceVariables
+    end
+
+    def object_storage_credentials
+      object_storage_config.credentials
     end
 
     def with_exclusive_lease
