@@ -5,7 +5,7 @@ RSpec.describe 'sentry errors requests' do
   include GraphqlHelpers
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:project_setting) { create(:project_error_tracking_setting, project: project) }
-  let_it_be(:current_user) { project.owner }
+  let_it_be(:current_user) { project.default_owner }
 
   let(:query) do
     graphql_query_for(
