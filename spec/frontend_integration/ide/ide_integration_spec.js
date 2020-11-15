@@ -1,24 +1,9 @@
-import { TEST_HOST } from 'helpers/test_constants';
+
 import { waitForText } from 'helpers/wait_for_text';
 import waitForPromises from 'helpers/wait_for_promises';
 import { useOverclockTimers } from 'test_helpers/utils/overclock_timers';
 import { createCommitId } from 'test_helpers/factories/commit_id';
-import { initIde } from '~/ide';
-import extendStore from '~/ide/stores/extend';
-import * as ideHelper from './ide_helper';
-
-const TEST_DATASET = {
-  emptyStateSvgPath: '/test/empty_state.svg',
-  noChangesStateSvgPath: '/test/no_changes_state.svg',
-  committedStateSvgPath: '/test/committed_state.svg',
-  pipelinesEmptyStateSvgPath: '/test/pipelines_empty_state.svg',
-  promotionSvgPath: '/test/promotion.svg',
-  ciHelpPagePath: '/test/ci_help_page',
-  webIDEHelpPagePath: '/test/web_ide_help_page',
-  clientsidePreviewEnabled: 'true',
-  renderWhitespaceInCode: 'false',
-  codesandboxBundlerUrl: 'test/codesandbox_bundler',
-};
+import * as ideHelper from './helpers/ide_helper';
 
 describe('WebIDE', () => {
   useOverclockTimers();
@@ -29,10 +14,6 @@ describe('WebIDE', () => {
   beforeEach(() => {
     root = document.createElement('div');
     document.body.appendChild(root);
-
-    global.jsdom.reconfigure({
-      url: `${TEST_HOST}/-/ide/project/gitlab-test/lorem-ipsum`,
-    });
   });
 
   afterEach(() => {
@@ -41,21 +22,8 @@ describe('WebIDE', () => {
     root.remove();
   });
 
-  const createComponent = () => {
-    const el = document.createElement('div');
-    Object.assign(el.dataset, TEST_DATASET);
-    root.appendChild(el);
-    vm = initIde(el, { extendStore });
-  };
-
-  it('runs', () => {
-    createComponent();
-
-    expect(root).toMatchSnapshot();
-  });
-
   it('user commits changes', async () => {
-    createComponent();
+    vm = ideHelper.createIdeComponent(root);
 
     await ideHelper.createFile('foo/bar/test.txt', 'Lorem ipsum dolar sit');
     await ideHelper.deleteFile('foo/bar/.gitkeep');
@@ -89,7 +57,7 @@ describe('WebIDE', () => {
   });
 
   it('user adds file that starts with +', async () => {
-    createComponent();
+    vm = ideHelper.createIdeComponent(root);
 
     await ideHelper.createFile('+test', 'Hello world!');
     await ideHelper.openFile('+test');
