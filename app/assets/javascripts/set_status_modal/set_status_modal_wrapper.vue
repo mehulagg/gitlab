@@ -7,18 +7,10 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import Api from '~/api';
 import EmojiMenuInModal from './emoji_menu_in_modal';
+import { AVAILABILITY_STATUS, isUserBusy, isValidAvailibility } from './utils';
 import * as Emoji from '~/emoji';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
-export const AVAILABILITY_STATUS = {
-  BUSY: 'busy',
-  NOT_SET: 'not_set',
-};
-
-const validAvailibility = availability =>
-  availability.length ? Object.values(AVAILABILITY_STATUS).includes(availability) : true;
-
-const isBusy = status => status === AVAILABILITY_STATUS.BUSY;
 
 export default {
   components: {
@@ -46,7 +38,7 @@ export default {
     currentAvailability: {
       type: String,
       required: false,
-      validator: validAvailibility,
+      validator: isValidAvailibility,
       default: '',
     },
     canSetUserAvailability: {
@@ -65,7 +57,7 @@ export default {
       message: this.currentMessage,
       modalId: 'set-user-status-modal',
       noEmoji: true,
-      availability: isBusy(this.currentAvailability),
+      availability: isUserBusy(this.currentAvailability),
     };
   },
   computed: {
