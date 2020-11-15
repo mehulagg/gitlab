@@ -2517,7 +2517,7 @@ msgstr ""
 msgid "AlertSettings|3. Set up webhook"
 msgstr ""
 
-msgid "AlertSettings|4. Test integration(optional)"
+msgid "AlertSettings|4. Sample alert payload (optional)"
 msgstr ""
 
 msgid "AlertSettings|5. Map fields (optional)"
@@ -2580,9 +2580,6 @@ msgstr ""
 msgid "AlertSettings|Learn more about our our upcoming %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
-msgid "AlertSettings|Learn more about our upcoming %{linkStart}integrations%{linkEnd}"
-msgstr ""
-
 msgid "AlertSettings|Opsgenie"
 msgstr ""
 
@@ -2592,7 +2589,7 @@ msgstr ""
 msgid "AlertSettings|Prometheus API base URL"
 msgstr ""
 
-msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with to send a test alert to the %{linkStart}alerts page%{linkEnd}. This payload can be used to test the integration using the \"save and test payload\" button."
+msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This payload can be used to create a custom mapping (optional), or to test the integration (also optional)."
 msgstr ""
 
 msgid "AlertSettings|Reset Key"
@@ -2643,7 +2640,10 @@ msgstr ""
 msgid "AlertSettings|URL cannot be blank and must start with http or https"
 msgstr ""
 
-msgid "AlertSettings|Utilize the URL and authorization key below to authorize an external service to send Alerts to GitLab. Review your chosen services documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgid "AlertSettings|Utilize the URL and authorization key below to authorize Prometheus to send alerts to GitLab. Review the prometheus documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgstr ""
+
+msgid "AlertSettings|Utilize the URL and authorization key below to authorize an external service to send alerts to GitLab. Review your external services documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
 msgstr ""
 
 msgid "AlertSettings|Utilizing this option will link the GitLab Alerts navigation item to your exisiting Opsgenie instance. By selecting this option, you cannot recieve alerts from any other source in GitLab; it will effectivley be turing Alerts within GitLab off as a feature."
@@ -2662,6 +2662,9 @@ msgid "AlertSettings|You must provide this URL and authorization key to authoriz
 msgstr ""
 
 msgid "AlertSettings|Your integration was successfully updated."
+msgstr ""
+
+msgid "AlertSettings|{ \"events\": [{ \"application\": \"Name of application\" }] }"
 msgstr ""
 
 msgid "Alerts"

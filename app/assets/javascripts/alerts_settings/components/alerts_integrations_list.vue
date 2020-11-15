@@ -77,6 +77,8 @@ export default {
     },
     {
       key: 'actions',
+      thClass: `gl-text-center`,
+      tdClass: `gl-text-center`,
       label: __('Actions'),
     },
   ],
@@ -118,7 +120,7 @@ export default {
 </script>
 
 <template>
-  <div class="incident-management-list">
+  <div class="incident-management-list integration-list">
     <h5 class="gl-font-lg">{{ $options.i18n.title }}</h5>
     <gl-table
       :items="integrations"
@@ -176,7 +178,7 @@ export default {
     </gl-table>
     <gl-modal
       modal-id="deleteIntegration"
-      :title="__('Are you sure?')"
+      :title="s__('AlertSettings|Delete integration')"
       :ok-title="s__('AlertSettings|Delete integration')"
       ok-variant="danger"
       @ok="deleteIntegration"
