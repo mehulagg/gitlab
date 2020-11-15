@@ -260,7 +260,7 @@ export default {
           <template v-else>
 
             <gl-alert variant="info" :dismissible="false">
-              <strong data-testid="ingressCostWarning">
+              <span data-testid="ingressCostWarning">
                 <gl-sprintf
                   :message="
                     s__(
