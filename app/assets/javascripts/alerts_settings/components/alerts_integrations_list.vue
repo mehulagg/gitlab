@@ -120,9 +120,10 @@ export default {
 </script>
 
 <template>
-  <div class="incident-management-list integration-list">
+  <div class="incident-management-list">
     <h5 class="gl-font-lg">{{ $options.i18n.title }}</h5>
     <gl-table
+      class="integration-list"
       :items="integrations"
       :fields="$options.fields"
       :busy="loading"
