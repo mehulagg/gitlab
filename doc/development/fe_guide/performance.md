@@ -6,6 +6,145 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Performance
 
+## Measure, monitor and optimize performance with User Timing API
+
+[User Timing API](https://developer.mozilla.org/en-US/docs/Web/API/User_Timing_API) is a web API [available in all modern browsers](https://caniuse.com/?search=User%20timing) that allows measuring custom times and durations in your applications  automatically by placing special marks in your code.
+
+User Timing API introduces two important paradigms: `mark` and `measure`.
+
+**Mark** — is the simple timestamp on the performance timeline. For example, `performance.mark('my-component-start');` will make a browser automatically note the time this code is met. Afterwards, the information about this mark can be obtained by querying the global performance object again. For example in your DevTool’s console:
+
+```javascript
+performance.getEntriesByName('my-component-start')
+```
+
+**Measure** — is the duration between either two marks, or start of navigation and a mark, or start of navigation and the moment the measurement is taken. It takes at least one required argument that is the measurement’s name. Examples:
+
+1. Duration between the start and end marks:
+```javascript
+performance.measure('My component', 'my-component-start', 'my-component-end')
+```
+1. Duration between a mark and the moment the measurement is taken. The end mark can be omitted in this case.
+```javascript
+performance.measure('My component', 'my-component-start')
+```
+1. Duration between navigation start and the moment the measurement is taken. Both, the start and the end marks can be omitted in this case.
+```javascript
+performance.measure('My component')
+```
+1. Duration between navigation start and a mark. The start mark can not be omitted in this case but can be set to `undefined``.
+```javascript
+performance.measure('My component', undefined, 'my-component-end')
+```
+However, keep in mind that it is the same as checking the  `my-component-end` mark directly.
+
+One can also query for all marks or metrics gathered by the browser:
+
+```javascript
+performance.getEntriesByType('mark');
+performance.getEntriesByType('measure');
+```
+
+User Timing API at GitLab can be used for measuring any timings in the framework-agnostic manner no matter Rails, Vue or vanilla  JavaScript environment. For consistency and the convenience of its adoption, GitLab offers several ways of enabling custom user timing metrics in your code.
+
+### `performanceMarkAndMeasure` Utility
+
+This utility can be used anywhere in the product as it is not tied to any particular environment. Example:
+
+```javascript
+import { performanceMarkAndMeasure } from '~/performance/utils';
+...
+performanceMarkAndMeasure({
+  mark: MR_DIFFS_MARK_DIFF_FILES_END,
+  measures: [
+    {
+      name: MR_DIFFS_MEASURE_DIFF_FILES_DONE,
+      start: MR_DIFFS_MARK_DIFF_FILES_START,
+      end: MR_DIFFS_MARK_DIFF_FILES_END,
+    },
+  ],
+});
+```
+
+`performanceMarkAndMeasure` takes an object as an argument, where:
+
+* `mark`: `String` representing the name for the mark to set. Used for retrieving the mark later
+* `measures`: an `Array` of the measurements to take at this point. Every measurement entry can have:
+  *  `name`: `String` Represents the measurement's name.  Used for retrieving the measurement later.
+  *  `start`: `String` the name of a mark **from** which the measurement should be taken
+  *  `end`: `String` the name of a mark **to** which the measurement should be taken
+  
+All of the properties above are optional except for `name` in a measurement: JS will fail if you try to measure performance without specifying the name.
+
+### Vue Performance Plugin
+
+The plugin captures and measures performance of the specified Vue components automatically using User Timing API.
+
+### How to use it?
+
+1. Import the plugin:
+
+```javascript
+import PerformancePlugin from '~/performance/vue_performance_plugin';
+```
+
+2. Then… use it before initializing your Vue application :sweat_smile: 
+
+```javascript
+/* eslint-disable @gitlab/require-i18n-strings */
+Vue.use(PerformancePlugin, {
+  components: [
+    'IdeTreeList',
+    'FileTree',
+    'RepoEditor',
+  ]
+});
+/* eslint-enable @gitlab/require-i18n-strings */
+```
+
+The plugin accepts the list of `components` performance of which should be measured. The components should be specified by their `name` option.
+
+:warning: This might require the authors to explicitly set this option on the needed components as most components in the codebase don't have this option set at the moment:
+
+```javascript
+export default {
+  name: 'IdeTreeList',
+  components: {
+    ...
+  ...
+}
+```
+
+The plugin will capture and store:
+
+  * start **mark** for when the component has been initialized (in `beforeCreate()` hook)
+  * end **mark** of the component when it has been rendered (next animation frame after `nextTick` in `mounted()` hook)
+  * **measure** duration between the two marks above.
+
+### How to access the stored measurements?
+
+1. **Performance Bar**. If you have it enabled (`P` + `B` keycombo), you will see the metrics output in your DevTools' console.
+1. **"Performance" tab** of the DevTools. You can get the measurements (not the marks, though) in this tab when profiling performance
+1. **DevTools' Console**. As mentioned above, one can simply query for the entries:
+
+```javascript
+performance.getEntriesByType('mark');
+performance.getEntriesByType('measure');
+```
+
+## Naming Convention
+
+All the marks and measures should be instantiated with the constants from `app/assets/javascripts/performance/constants.js`. Once you’re ready to add a new mark’s or measurement’s label, it is advised to follow the scheme:
+
+```
+APP-*-start // for a start ‘mark’
+APP-*-end   // for an end ‘mark’
+APP-*       // for ‘measure’
+```
+
+For example, `webide-nav-tree-start`, `snippet-blob-end`, etc. This is done to be able to easily identify marks and measures coming from the different apps on the same page. Note, however, that this schema is a recommendation and not a hard rule.
+
+
 ## Best Practices
 
 ### Realtime Components
