@@ -48,7 +48,7 @@
           .cover-title{ itemprop: 'name' }
             = @user.name
             - if user_set_to_busy?(@user)
-              %span.gl-font-base.gl-text-gray-600= s_("UserProfile|(Busy)")
+              %span.gl-font-base.gl-text-gray-600.gl-vertical-align-middle= s_("UserProfile|(Busy)")
 
           - if @user.status&.emoji && show_status_emoji?(@user.status)
             .cover-status
