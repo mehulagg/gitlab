@@ -22,7 +22,7 @@
 
       &:focus,
       &.active {
-        background-color: $white;
+        background-color: var(--white, $white);
       }
 
       &.active {
@@ -33,10 +33,7 @@
   }
 
   .issue-board-dropdown-content {
-    margin: 0;
     padding: $gl-padding;
-    border-bottom: 0;
-    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
   }
 }
 
