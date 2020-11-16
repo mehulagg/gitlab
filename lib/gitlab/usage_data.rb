@@ -12,18 +12,18 @@
 #   redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] }
 module Gitlab
   class UsageData
-    CE_MEMOIZED_VALUES = %i(
-        issue_minimum_id
-        issue_maximum_id
-        project_minimum_id
-        project_maximum_id
-        user_minimum_id
-        user_maximum_id
-        unique_visit_service
-        deployment_minimum_id
-        deployment_maximum_id
+    CE_MEMOIZED_VALUES = %i[
         auth_providers
-      ).freeze
+        deployment_maximum_id
+        deployment_minimum_id
+        issue_maximum_id
+        issue_minimum_id
+        project_maximum_id
+        project_minimum_id
+        unique_visit_service
+        user_maximum_id
+        user_minimum_id
+      ].freeze
 
     class << self
       include Gitlab::Utils::UsageData
