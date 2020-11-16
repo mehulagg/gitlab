@@ -33,6 +33,9 @@ export default {
         },
       ];
     },
+    showUserDetails() {
+      return this.state.latestVersion?.createdByUser;
+    },
   },
 };
 </script>
@@ -74,7 +77,7 @@ export default {
       <p class="gl-m-0" data-testid="terraform-states-table-updated">
         <gl-sprintf :message="s__('Terraform|%{user} updated %{timeAgo}')">
           <template #user>
-            <span v-if="item.latestVersion">
+            <span v-if="showUserDetails">
               {{ item.latestVersion.createdByUser.name }}
             </span>
           </template>

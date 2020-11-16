@@ -23,7 +23,10 @@ describe('StatesTable', () => {
         lockedAt: null,
         lockedByUser: null,
         updatedAt: '2020-10-10T00:00:00Z',
-        latestVersion: null,
+        latestVersion: {
+          updatedAt: '2020-10-10T00:00:00Z',
+          createdByUser: null,
+        }
       },
       {
         name: 'state-3',
