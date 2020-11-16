@@ -1,6 +1,5 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import statusIcon from '~/vue_merge_request_widget/components/mr_widget_status_icon.vue';
 
 export default {
@@ -9,7 +8,7 @@ export default {
     statusIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     mr: {
@@ -25,13 +24,11 @@ export default {
     <div class="media-body">
       <span class="bold">{{ __('Merge requests are read-only in a secondary Geo node') }}</span>
       <a
-        v-tooltip
+        v-gl-tooltip
         :href="mr.geoSecondaryHelpPath"
         :title="__('About this feature')"
-        data-placement="bottom"
         target="_blank"
         rel="noopener noreferrer nofollow"
-        data-container="body"
       >
         <gl-icon name="question-o" />
       </a>

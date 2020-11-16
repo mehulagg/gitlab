@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DastSiteValidation < ApplicationRecord
-  HEADER = 'Gitlab-On-Demand-DAST'.freeze
+  HEADER = 'Gitlab-On-Demand-DAST'
 
   belongs_to :dast_site_token
   has_many :dast_sites
@@ -27,9 +27,9 @@ class DastSiteValidation < ApplicationRecord
     "#{url_base}/#{url_path}"
   end
 
-  INITIAL_STATE = :pending
+  INITIAL_STATE = 'pending'
 
-  state_machine :state, initial: INITIAL_STATE do
+  state_machine :state, initial: INITIAL_STATE.to_sym do
     event :start do
       transition pending: :inprogress
     end

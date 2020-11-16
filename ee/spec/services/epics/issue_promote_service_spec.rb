@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe Epics::IssuePromoteService do
+RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, group: group) }
@@ -41,8 +41,11 @@ RSpec.describe Epics::IssuePromoteService do
       end
 
       context 'when a user can promote the issue' do
+        let(:new_group) { create(:group) }
+
         before do
           group.add_developer(user)
+          new_group.add_developer(user)
         end
 
         context 'when an issue does not belong to a group' do
@@ -54,15 +57,16 @@ RSpec.describe Epics::IssuePromoteService do
           end
         end
 
-        context 'when promoting issue' do
+        context 'when promoting issue', :snowplow do
           let!(:issue_mentionable_note) { create(:note, noteable: issue, author: user, project: project, note: "note with mention #{user.to_reference}") }
           let!(:issue_note) { create(:note, noteable: issue, author: user, project: project, note: "note without mention") }
 
           before do
-            allow(Gitlab::Tracking).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             allow(ProductAnalytics::Tracker).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
 
             subject.execute(issue)
+
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
           end
 
           it 'creates a new epic with correct attributes' do
@@ -118,6 +122,19 @@ RSpec.describe Epics::IssuePromoteService do
           end
         end
 
+        context 'when promoting issue to a different group' do
+          it 'creates a new epic with correct attributes' do
+            epic = subject.execute(issue, new_group)
+
+            expect(issue.reload.promoted_to_epic_id).to eq(epic.id)
+            expect(epic.title).to eq(issue.title)
+            expect(epic.description).to eq(issue.description)
+            expect(epic.author).to eq(user)
+            expect(epic.group).to eq(new_group)
+            expect(epic.parent).to be_nil
+          end
+        end
+
         context 'when an issue belongs to an epic' do
           let(:parent_epic) { create(:epic, group: group) }
           let!(:epic_issue) { create(:epic_issue, epic: parent_epic, issue: issue) }
@@ -131,6 +148,35 @@ RSpec.describe Epics::IssuePromoteService do
             expect(epic.group).to eq(group)
             expect(epic.parent).to eq(parent_epic)
           end
+
+          context 'when promoting issue to a different group' do
+            it 'creates a new epic with correct attributes' do
+              expect { subject.execute(issue, new_group) }
+                .to raise_error(StandardError, 'Validation failed: Parent This epic cannot be added. An epic must belong to the same group or subgroup as its parent epic.')
+
+              expect(issue.reload.state).to eq("opened")
+              expect(issue.reload.promoted_to_epic_id).to be_nil
+            end
+          end
+
+          context 'when promoting issue to a different group in the hierarchy' do
+            let(:new_group) { create(:group, parent: group) }
+
+            before do
+              new_group.add_developer(user)
+            end
+
+            it 'creates a new epic with correct attributes' do
+              epic = subject.execute(issue, new_group)
+
+              expect(issue.reload.promoted_to_epic_id).to eq(epic.id)
+              expect(epic.title).to eq(issue.title)
+              expect(epic.description).to eq(issue.description)
+              expect(epic.author).to eq(user)
+              expect(epic.group).to eq(new_group)
+              expect(epic.parent).to eq(parent_epic)
+            end
+          end
         end
 
         context 'when issue was already promoted' do
@@ -143,9 +189,8 @@ RSpec.describe Epics::IssuePromoteService do
           end
         end
 
-        context 'when issue has notes' do
+        context 'when issue has notes', :snowplow do
           before do
-            allow(Gitlab::Tracking).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             allow(ProductAnalytics::Tracker).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             issue.reload
           end
@@ -157,6 +202,7 @@ RSpec.describe Epics::IssuePromoteService do
             expect(epic.notes.count).to eq(issue.notes.count)
             expect(epic.notes.where(discussion_id: discussion.discussion_id).count).to eq(0)
             expect(issue.notes.where(discussion_id: discussion.discussion_id).count).to eq(1)
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
           end
 
           it 'copies note attachments' do
@@ -165,6 +211,7 @@ RSpec.describe Epics::IssuePromoteService do
             epic = subject.execute(issue)
 
             expect(epic.notes.user.first.attachment).to be_kind_of(AttachmentUploader)
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
           end
         end
 

@@ -58,12 +58,6 @@ module EE
       }.merge(scoped_labels_fields, opts)
     end
 
-    def sidebar_label_dropdown_data(issuable_type, issuable_sidebar)
-      super.merge({
-        scoped_labels: issuable_sidebar[:scoped_labels_available].to_s
-      })
-    end
-
     def issuable_types
       return super unless @group&.feature_available?(:epics)
 

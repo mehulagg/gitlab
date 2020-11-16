@@ -1,4 +1,4 @@
-- return unless issuable.supports_issue_type? && can?(current_user, :admin_issue, @project)
+- return unless issuable.supports_issue_type? && can?(current_user, :create_issue, @project)
 
 .form-group.row.gl-mb-0
   = form.label :type, 'Type', class: 'col-form-label col-sm-2'
@@ -8,7 +8,7 @@
         %button.dropdown-menu-toggle{ type: 'button', 'data-toggle' => 'dropdown' }
           %span.dropdown-toggle-text.is-default
             = issuable.issue_type.capitalize || _("Select type")
-          = icon('chevron-down')
+          = sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
         .dropdown-menu.dropdown-menu-selectable.dropdown-select
           .dropdown-title.gl-display-flex
             %span.gl-ml-auto

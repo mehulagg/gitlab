@@ -5,6 +5,8 @@ module API
     include ::API::Helpers::VulnerabilitiesHooks
     include PaginationParams
 
+    feature_category :vulnerability_management
+
     helpers ::API::Helpers::VulnerabilitiesHelpers
 
     helpers do

@@ -85,31 +85,29 @@ describe('IterationSelect', () => {
   });
 
   describe('when a user can edit', () => {
-    it('opens the dropdown on click of the edit button', () => {
+    it('opens the dropdown on click of the edit button', async () => {
       createComponent({ props: { canEdit: true } });
 
       expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
 
       toggleDropdown();
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
-      });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
     });
 
-    it('focuses on the input', () => {
+    it('focuses on the input', async () => {
       createComponent({ props: { canEdit: true } });
 
       const spy = jest.spyOn(wrapper.vm.$refs.search, 'focusInput');
 
       toggleDropdown();
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await wrapper.vm.$nextTick();
+      expect(spy).toHaveBeenCalled();
     });
 
-    it('stops propagation of the click event to avoid opening milestone dropdown', () => {
+    it('stops propagation of the click event to avoid opening milestone dropdown', async () => {
       const spy = jest.fn();
       createComponent({ props: { canEdit: true } });
 
@@ -117,9 +115,8 @@ describe('IterationSelect', () => {
 
       toggleDropdown(spy);
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(spy).toHaveBeenCalledTimes(1);
-      });
+      await wrapper.vm.$nextTick();
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     describe('when user is editing', () => {
@@ -214,10 +211,9 @@ describe('IterationSelect', () => {
                 });
               });
 
-              it('sets the value returned from the mutation to currentIteration', () => {
-                return wrapper.vm.$nextTick().then(() => {
-                  expect(wrapper.vm.currentIteration).toBe('123');
-                });
+              it('sets the value returned from the mutation to currentIteration', async () => {
+                await wrapper.vm.$nextTick();
+                expect(wrapper.vm.currentIteration).toBe('123');
               });
             });
 
@@ -247,10 +243,9 @@ describe('IterationSelect', () => {
                     .vm.$emit('click');
                 });
 
-                it('calls createFlash with $expectedMsg', () => {
-                  return wrapper.vm.$nextTick().then(() => {
-                    expect(createFlash).toHaveBeenCalledWith(expectedMsg);
-                  });
+                it('calls createFlash with $expectedMsg', async () => {
+                  await wrapper.vm.$nextTick();
+                  expect(createFlash).toHaveBeenCalledWith(expectedMsg);
                 });
               });
             });
@@ -263,33 +258,31 @@ describe('IterationSelect', () => {
           createComponent({});
         });
 
-        it('sets the search term', () => {
+        it('sets the search term', async () => {
           wrapper.find(GlSearchBoxByType).vm.$emit('input', 'testing');
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.vm.searchTerm).toBe('testing');
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.searchTerm).toBe('testing');
         });
       });
 
       describe('when the user off clicks', () => {
         describe('when the dropdown is open', () => {
-          beforeEach(() => {
+          beforeEach(async () => {
             createComponent({});
 
             toggleDropdown();
 
-            return wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
           });
 
-          it('closes the dropdown', () => {
+          it('closes the dropdown', async () => {
             expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
 
             toggleDropdown();
 
-            return wrapper.vm.$nextTick().then(() => {
-              expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
-            });
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
           });
         });
       });

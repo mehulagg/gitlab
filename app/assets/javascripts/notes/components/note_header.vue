@@ -65,8 +65,8 @@ export default {
     };
   },
   computed: {
-    toggleChevronClass() {
-      return this.expanded ? 'fa-chevron-up' : 'fa-chevron-down';
+    toggleChevronIconName() {
+      return this.expanded ? 'chevron-up' : 'chevron-down';
     },
     noteTimestampLink() {
       return this.noteId ? `#note_${this.noteId}` : undefined;
@@ -133,7 +133,7 @@ export default {
         type="button"
         @click="handleToggle"
       >
-        <i ref="chevronIcon" :class="toggleChevronClass" class="fa" aria-hidden="true"></i>
+        <gl-icon ref="chevronIcon" :name="toggleChevronIconName" aria-hidden="true" />
         {{ __('Toggle thread') }}
       </button>
     </div>
@@ -170,7 +170,9 @@ export default {
     </template>
     <span v-else>{{ __('A deleted user') }}</span>
     <span class="note-headline-light note-headline-meta">
-      <span class="system-note-message"> <slot></slot> </span>
+      <span class="system-note-message" data-qa-selector="system_note_content">
+        <slot></slot>
+      </span>
       <template v-if="createdAt">
         <span ref="actionText" class="system-note-separator">
           <template v-if="actionText">{{ actionText }}</template>

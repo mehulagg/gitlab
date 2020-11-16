@@ -44,9 +44,7 @@ module DastSiteTokens
     end
 
     def calculate_status(dast_site_validation)
-      state = dast_site_validation&.state || DastSiteValidation::INITIAL_STATE
-
-      "#{state}_VALIDATION".upcase
+      dast_site_validation&.state || DastSiteValidation::INITIAL_STATE
     end
   end
 end

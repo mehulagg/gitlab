@@ -346,7 +346,8 @@ class Project < ApplicationRecord
   # GitLab Pages
   has_many :pages_domains
   has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
-  has_many :pages_deployments
+  # we need to clean up files, not only remove records
+  has_many :pages_deployments, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   # Can be too many records. We need to implement delete_all in batches.
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/228637
@@ -378,7 +379,7 @@ class Project < ApplicationRecord
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?,
     :merge_requests_enabled?, :forking_enabled?, :issues_enabled?,
-    :pages_enabled?, :public_pages?, :private_pages?,
+    :pages_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
     :merge_requests_access_level, :forking_access_level, :issues_access_level,
     :wiki_access_level, :snippets_access_level, :builds_access_level,
     :repository_access_level, :pages_access_level, :metrics_dashboard_access_level,
@@ -400,7 +401,7 @@ class Project < ApplicationRecord
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?,
@@ -570,6 +571,7 @@ class Project < ApplicationRecord
 
   scope :imported_from, -> (type) { where(import_type: type) }
   scope :with_tracing_enabled, -> { joins(:tracing_setting) }
+  scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
 
   enum auto_cancel_pending_pipelines: { disabled: 0, enabled: 1 }
 
@@ -600,7 +602,7 @@ class Project < ApplicationRecord
   # Returns a collection of projects that is either public or visible to the
   # logged in user.
   def self.public_or_visible_to_user(user = nil, min_access_level = nil)
-    min_access_level = nil if user&.admin?
+    min_access_level = nil if user&.can_read_all_resources?
 
     return public_to_user unless user
 
@@ -626,7 +628,7 @@ class Project < ApplicationRecord
   def self.with_feature_available_for_user(feature, user)
     visible = [ProjectFeature::ENABLED, ProjectFeature::PUBLIC]
 
-    if user&.admin?
+    if user&.can_read_all_resources?
       with_feature_enabled(feature)
     elsif user
       min_access_level = ProjectFeature.required_minimum_access_level(feature)
@@ -1193,7 +1195,6 @@ class Project < ApplicationRecord
   end
 
   def changing_shared_runners_enabled_is_allowed
-    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
     return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
     if shared_runners_enabled && group && group.shared_runners_setting == 'disabled_and_unoverridable'
@@ -1466,11 +1467,6 @@ class Project < ApplicationRecord
 
   def has_active_services?(hooks_scope = :push_hooks)
     services.public_send(hooks_scope).any? # rubocop:disable GitlabSecurity/PublicSend
-  end
-
-  # Is overridden in EE
-  def lfs_http_url_to_repo(_)
-    http_url_to_repo
   end
 
   def feature_usage
@@ -1801,6 +1797,8 @@ class Project < ApplicationRecord
 
     mark_pages_as_not_deployed unless destroyed?
 
+    DestroyPagesDeploymentsWorker.perform_async(id)
+
     # 1. We rename pages to temporary directory
     # 2. We wait 5 minutes, due to NFS caching
     # 3. We asynchronously remove pages with force
@@ -1817,7 +1815,11 @@ class Project < ApplicationRecord
   end
 
   def mark_pages_as_not_deployed
-    ensure_pages_metadatum.update!(deployed: false, artifacts_archive: nil)
+    ensure_pages_metadatum.update!(deployed: false, artifacts_archive: nil, pages_deployment: nil)
+  end
+
+  def update_pages_deployment!(deployment)
+    ensure_pages_metadatum.update!(pages_deployment: deployment)
   end
 
   def write_repository_config(gl_full_path: full_path)
@@ -2090,21 +2092,36 @@ class Project < ApplicationRecord
     (auto_devops || build_auto_devops)&.predefined_variables
   end
 
-  # Tries to set repository as read_only, checking for existing Git transfers in progress beforehand
+  RepositoryReadOnlyError = Class.new(StandardError)
+
+  # Tries to set repository as read_only, checking for existing Git transfers in
+  # progress beforehand. Setting a repository read-only will fail if it is
+  # already in that state.
   #
-  # @return [Boolean] true when set to read_only or false when an existing git transfer is in progress
+  # @return nil. Failures will raise an exception
   def set_repository_read_only!
     with_lock do
-      break false if git_transfer_in_progress?
+      raise RepositoryReadOnlyError, _('Git transfer in progress') if
+        git_transfer_in_progress?
 
-      update_column(:repository_read_only, true)
+      raise RepositoryReadOnlyError, _('Repository already read-only') if
+        self.class.where(id: id).pick(:repository_read_only)
+
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, true)
+
+      nil
     end
   end
 
-  # Set repository as writable again
+  # Set repository as writable again. Unlike setting it read-only, this will
+  # succeed if the repository is already writable.
   def set_repository_writable!
     with_lock do
-      update_column(:repository_read_only, false)
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, false)
+
+      nil
     end
   end
 

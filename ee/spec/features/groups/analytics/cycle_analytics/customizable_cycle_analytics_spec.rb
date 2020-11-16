@@ -340,7 +340,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       end
     end
 
-    context 'with a custom stage created' do
+    context 'with a custom stage created', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273045' do
       before do
         create_custom_stage
         select_group

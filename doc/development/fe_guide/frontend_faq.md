@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Frontend FAQ
 
 ## Rules of Frontend FAQ
@@ -174,10 +180,9 @@ which adds the appropriate `core-js` polyfills once for each JavaScript feature
 we're using that our target browsers don't support. You don't need to add `core-js`
 polyfills manually.
 
-NOTE: **Note:**
-GitLab still manually adds non-`core-js` polyfills for extending browser features
-(such as GitLab's SVG polyfill) that allow us reference SVGs by using `<use xlink:href>`.
-These polyfills should be added to `app/assets/javascripts/commons/polyfills.js`.
+GitLab adds non-`core-js` polyfills for extending browser features (such as
+GitLab's SVG polyfill), which allow us to reference SVGs by using `<use xlink:href>`.
+Be sure to add these polyfills to `app/assets/javascripts/commons/polyfills.js`.
 
 To see what polyfills are being used:
 

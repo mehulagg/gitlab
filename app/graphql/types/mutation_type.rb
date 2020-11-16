@@ -11,6 +11,13 @@ module Types
     mount_mutation Mutations::AlertManagement::UpdateAlertStatus
     mount_mutation Mutations::AlertManagement::Alerts::SetAssignees
     mount_mutation Mutations::AlertManagement::Alerts::Todo::Create
+    mount_mutation Mutations::AlertManagement::HttpIntegration::Create
+    mount_mutation Mutations::AlertManagement::HttpIntegration::Update
+    mount_mutation Mutations::AlertManagement::HttpIntegration::ResetToken
+    mount_mutation Mutations::AlertManagement::HttpIntegration::Destroy
+    mount_mutation Mutations::AlertManagement::PrometheusIntegration::Create
+    mount_mutation Mutations::AlertManagement::PrometheusIntegration::Update
+    mount_mutation Mutations::AlertManagement::PrometheusIntegration::ResetToken
     mount_mutation Mutations::AwardEmojis::Add
     mount_mutation Mutations::AwardEmojis::Remove
     mount_mutation Mutations::AwardEmojis::Toggle
@@ -31,6 +38,8 @@ module Types
     mount_mutation Mutations::Issues::SetSeverity
     mount_mutation Mutations::Issues::SetSubscription
     mount_mutation Mutations::Issues::Update
+    mount_mutation Mutations::Issues::Move
+    mount_mutation Mutations::Labels::Create
     mount_mutation Mutations::MergeRequests::Create
     mount_mutation Mutations::MergeRequests::Update
     mount_mutation Mutations::MergeRequests::SetLabels
@@ -52,7 +61,13 @@ module Types
                    description: 'Updates a DiffNote on an image (a `Note` where the `position.positionType` is `"image"`). ' \
                                 'If the body of the Note contains only quick actions, the Note will be ' \
                                 'destroyed during the update, and no Note will be returned'
+    mount_mutation Mutations::Notes::RepositionImageDiffNote
     mount_mutation Mutations::Notes::Destroy
+    mount_mutation Mutations::Releases::Create
+    mount_mutation Mutations::Terraform::State::Delete
+    mount_mutation Mutations::Terraform::State::Lock
+    mount_mutation Mutations::Terraform::State::Unlock
+    mount_mutation Mutations::Todos::Create
     mount_mutation Mutations::Todos::MarkDone
     mount_mutation Mutations::Todos::Restore
     mount_mutation Mutations::Todos::MarkAllDone
@@ -67,6 +82,7 @@ module Types
     mount_mutation Mutations::DesignManagement::Delete, calls_gitaly: true
     mount_mutation Mutations::DesignManagement::Move
     mount_mutation Mutations::ContainerExpirationPolicies::Update
+    mount_mutation Mutations::ContainerRepositories::Destroy
     mount_mutation Mutations::Ci::PipelineCancel
     mount_mutation Mutations::Ci::PipelineDestroy
     mount_mutation Mutations::Ci::PipelineRetry

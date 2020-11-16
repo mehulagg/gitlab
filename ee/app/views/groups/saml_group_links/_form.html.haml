@@ -1,0 +1,21 @@
+%section.saml-group-links
+  = form_for [group, SamlGroupLink.new] do |f|
+    .form-holder
+      .form-group.row
+        .col-sm-2.col-form-label
+          = f.label :saml_group_name, s_('GroupSAML|SAML Group Name')
+        .col-sm-10
+          = f.text_field :saml_group_name, class: 'form-control xxlarge input-mn-300'
+          .form-text.text-muted
+            = s_('GroupSAML|The case-sensitive group name that will be sent by the SAML identity provider.')
+
+      .form-group.row
+        .col-sm-2.col-form-label
+          = f.label :access_level, "Access Level"
+        .col-sm-10
+          = f.select :access_level, options_for_select(SamlGroupLink.access_levels.keys), {}, class: 'form-control'
+          .form-text.text-muted
+            = s_('GroupSAML|Role to assign members of this SAML group.')
+
+    .form-actions.gl-mb-5
+      = f.submit _('Save'), class: 'btn gl-button btn-success'

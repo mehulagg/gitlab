@@ -111,6 +111,8 @@ RSpec.describe 'epics swimlanes', :js do
         expect(page).to have_content('3')
       end
 
+      wait_for_all_requests
+
       page.within("[data-testid='board-lane-unassigned-issues']") do
         page.within(first('.board-card')) do
           issue = project.issues.find_by!(title: 'bug')

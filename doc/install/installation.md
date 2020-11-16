@@ -90,6 +90,8 @@ The GitLab installation consists of setting up the following components:
 
 ## 1. Packages and dependencies
 
+### sudo
+
 `sudo` is not installed on Debian by default. Make sure your system is
 up-to-date and install it.
 
@@ -110,6 +112,8 @@ sudo apt-get install -y vim
 sudo update-alternatives --set editor /usr/bin/vim.basic
 ```
 
+### Build dependencies
+
 Install the required packages (needed to compile Ruby and native extensions to Ruby gems):
 
 ```shell
@@ -129,13 +133,15 @@ If you want to use Kerberos for user authentication, install `libkrb5-dev`
 sudo apt-get install libkrb5-dev
 ```
 
+### Git
+
 Make sure you have the right version of Git installed:
 
 ```shell
 # Install Git
 sudo apt-get install -y git-core
 
-# Make sure Git is version 2.24.0 or higher (recommended version is 2.28.0)
+# Make sure Git is version 2.29.0 or higher (recommended version is 2.29.0)
 git --version
 ```
 
@@ -168,22 +174,13 @@ On Debian, use the following compilation instructions:
 
 ```shell
 # Install dependencies
-sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev build-essential
+sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential
 
-# Download and compile pcre2 from source
-curl --silent --show-error --location https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz --output pcre2.tar.gz
-tar -xzf pcre2.tar.gz
-cd pcre2-10.33
-chmod +x configure
-./configure --prefix=/usr --enable-jit
-make
-sudo make install
-
-# Download and compile from source
+# Download and compile Git from source
 cd /tmp
-curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.28.0.tar.gz
-echo 'f914c60a874d466c1e18467c864a910dd4ea22281ba6d4d58077cb0c3f115170  git-2.28.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.28.0.tar.gz
-cd git-2.28.0/
+curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.29.0.tar.gz
+echo 'fa08dc8424ef80c0f9bf307877f9e2e49f1a6049e873530d6747c2be770742ff  git-2.29.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.29.0.tar.gz
+cd git-2.29.0/
 ./configure --with-libpcre
 make prefix=/usr/local all
 
@@ -193,12 +190,16 @@ sudo make prefix=/usr/local install
 # When editing config/gitlab.yml later, change the git -> bin_path to /usr/local/bin/git
 ```
 
+### GraphicsMagick
+
 For the [Custom Favicon](../user/admin_area/appearance.md#favicon) to work, GraphicsMagick
 needs to be installed.
 
 ```shell
 sudo apt-get install -y graphicsmagick
 ```
+
+### Mail server
 
 In order to receive mail notifications, make sure to install a mail server.
 By default, Debian is shipped with `exim4` but this
@@ -211,6 +212,8 @@ sudo apt-get install -y postfix
 ```
 
 Then select 'Internet Site' and press enter to confirm the hostname.
+
+### Exiftool
 
 [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse#dependencies)
 requires `exiftool` to remove EXIF data from uploaded images.
@@ -243,9 +246,9 @@ Download Ruby and compile it:
 
 ```shell
 mkdir /tmp/ruby && cd /tmp/ruby
-curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz
-echo '2d78048e293817f38d4ede4ebc7873013e97bb0b  ruby-2.6.6.tar.gz' | shasum -c - && tar xzf ruby-2.6.6.tar.gz
-cd ruby-2.6.6
+curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz
+echo 'cb9731a17487e0ad84037490a6baf8bfa31a09e8  ruby-2.7.2.tar.gz' | shasum -c - && tar xzf ruby-2.7.2.tar.gz
+cd ruby-2.7.2
 
 ./configure --disable-install-rdoc
 make

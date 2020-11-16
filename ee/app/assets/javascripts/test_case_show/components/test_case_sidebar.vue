@@ -4,6 +4,7 @@ import Mousetrap from 'mousetrap';
 
 import { s__, __ } from '~/locale';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
+import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
 
 import TestCaseGraphQL from '../mixins/test_case_graphql';
 
@@ -13,6 +14,7 @@ export default {
     GlIcon,
     GlLoadingIcon,
     LabelsSelect,
+    ProjectSelect,
   },
   directives: {
     GlTooltip,
@@ -21,8 +23,10 @@ export default {
     'projectFullPath',
     'testCaseId',
     'canEditTestCase',
+    'canMoveTestCase',
     'labelsFetchPath',
     'labelsManagePath',
+    'projectsFetchPath',
   ],
   mixins: [TestCaseGraphQL],
   props: {
@@ -38,6 +42,11 @@ export default {
     selectedLabels: {
       type: Array,
       required: true,
+    },
+    moved: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -59,8 +68,14 @@ export default {
     todoIcon() {
       return this.isTodoPending ? 'todo-done' : 'todo-add';
     },
+    selectProjectDropdownButtonTitle() {
+      return this.testCaseMoveInProgress
+        ? s__('TestCases|Moving test case')
+        : s__('TestCases|Move test case');
+    },
   },
   mounted() {
+    this.sidebarEl = document.querySelector('aside.right-sidebar');
     Mousetrap.bind('l', this.handleLabelsCollapsedButtonClick);
   },
   beforeDestroy() {
@@ -77,26 +92,38 @@ export default {
     toggleSidebar() {
       document.querySelector('.js-toggle-right-sidebar-button').dispatchEvent(new Event('click'));
     },
-    handleLabelsDropdownClose() {
-      if (this.sidebarExpandedOnClick) {
-        this.sidebarExpandedOnClick = false;
-        this.toggleSidebar();
-      }
-    },
-    handleLabelsCollapsedButtonClick() {
+    expandSidebarAndOpenDropdown(dropdownButtonSelector) {
       // Expand the sidebar if not already expanded.
       if (!this.sidebarExpanded) {
         this.toggleSidebar();
         this.sidebarExpandedOnClick = true;
       }
 
-      // Wait for sidebar expand to complete before
-      // revealing labels dropdown.
       this.$nextTick(() => {
-        document
-          .querySelector('.js-labels-block .js-sidebar-dropdown-toggle')
-          .dispatchEvent(new Event('click', { bubbles: true, cancelable: false }));
+        // Wait for sidebar expand animation to complete
+        // before revealing the dropdown.
+        this.sidebarEl.addEventListener(
+          'transitionend',
+          () => {
+            document
+              .querySelector(dropdownButtonSelector)
+              .dispatchEvent(new Event('click', { bubbles: true, cancelable: false }));
+          },
+          { once: true },
+        );
       });
+    },
+    handleSidebarDropdownClose() {
+      if (this.sidebarExpandedOnClick) {
+        this.sidebarExpandedOnClick = false;
+        this.toggleSidebar();
+      }
+    },
+    handleLabelsCollapsedButtonClick() {
+      this.expandSidebarAndOpenDropdown('.js-labels-block .js-sidebar-dropdown-toggle');
+    },
+    handleProjectsCollapsedButtonClick() {
+      this.expandSidebarAndOpenDropdown('.js-issuable-move-block .js-sidebar-dropdown-toggle');
     },
     handleUpdateSelectedLabels(labels) {
       // Iterate over selection and check if labels which were
@@ -170,9 +197,19 @@ export default {
       variant="sidebar"
       class="block labels js-labels-block"
       @updateSelectedLabels="handleUpdateSelectedLabels"
-      @onDropdownClose="handleLabelsDropdownClose"
+      @onDropdownClose="handleSidebarDropdownClose"
       @toggleCollapse="handleLabelsCollapsedButtonClick"
       >{{ __('None') }}</labels-select
     >
+    <project-select
+      v-if="canMoveTestCase && !moved"
+      :projects-fetch-path="projectsFetchPath"
+      :dropdown-button-title="selectProjectDropdownButtonTitle"
+      :dropdown-header-title="__('Move test case')"
+      :move-in-progress="testCaseMoveInProgress"
+      @dropdown-close="handleSidebarDropdownClose"
+      @toggle-collapse="handleProjectsCollapsedButtonClick"
+      @move-issuable="moveTestCase"
+    />
   </div>
 </template>

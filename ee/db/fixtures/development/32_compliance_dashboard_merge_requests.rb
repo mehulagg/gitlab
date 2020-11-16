@@ -10,7 +10,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
   end
 
   def admin
-    @admin ||= create(:user, :admin)
+    @admin ||= FactoryBot.create(:user, :admin)
   end
 
   def seed!
@@ -66,6 +66,8 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
 
       merge_request
     end
+  rescue AccessDeniedError
+    raise AccessDeniedError.new("If you are re-creating your GitLab database, you should also delete your old repositories located at $GDK/repositories/@hashed")
   end
 
   def create_pipeline!(project, ref, commit, status)

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'helpers/test_constants';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import actions, { gqlClient } from 'ee/boards/stores/actions';
 import * as types from 'ee/boards/stores/mutation_types';
@@ -7,7 +8,7 @@ import { GroupByParamType } from 'ee/boards/constants';
 import testAction from 'helpers/vuex_action_helper';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
-import { setUrlParams, removeParams } from '~/lib/utils/url_utility';
+import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import { ListType } from '~/boards/constants';
 import { formatListIssues } from '~/boards/boards_util';
 import {
@@ -63,6 +64,23 @@ describe('setFilters', () => {
 
     const filters = { labelName: 'label', epicId: 'None' };
     const updatedFilters = { labelName: 'label', epicWildcardId: 'NONE' };
+
+    return testAction(
+      actions.setFilters,
+      filters,
+      state,
+      [{ type: types.SET_FILTERS, payload: updatedFilters }],
+      [],
+    );
+  });
+
+  it('should commit mutation SET_FILTERS, updates iterationWildcardId', () => {
+    const state = {
+      filters: {},
+    };
+
+    const filters = { labelName: 'label', iterationId: 'None' };
+    const updatedFilters = { labelName: 'label', iterationWildcardId: 'NONE' };
 
     return testAction(
       actions.setFilters,
@@ -448,6 +466,10 @@ describe('fetchIssuesForEpic', () => {
 
 describe('toggleEpicSwimlanes', () => {
   it('should commit mutation TOGGLE_EPICS_SWIMLANES', () => {
+    global.jsdom.reconfigure({
+      url: `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`,
+    });
+
     const state = {
       isShowingEpicsSwimlanes: false,
       endpoints: {
@@ -464,11 +486,16 @@ describe('toggleEpicSwimlanes', () => {
       [],
       () => {
         expect(commonUtils.historyPushState).toHaveBeenCalledWith(removeParams(['group_by']));
+        expect(global.window.location.href).toBe(`${TEST_HOST}/groups/gitlab-org/-/boards/1`);
       },
     );
   });
 
   it('should dispatch fetchEpicsSwimlanes action when isShowingEpicsSwimlanes is true', () => {
+    global.jsdom.reconfigure({
+      url: `${TEST_HOST}/groups/gitlab-org/-/boards/1`,
+    });
+
     jest.spyOn(gqlClient, 'query').mockResolvedValue({});
 
     const state = {
@@ -487,7 +514,10 @@ describe('toggleEpicSwimlanes', () => {
       [{ type: 'fetchEpicsSwimlanes', payload: {} }],
       () => {
         expect(commonUtils.historyPushState).toHaveBeenCalledWith(
-          setUrlParams({ group_by: GroupByParamType.epic }, window.location.href),
+          mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href),
+        );
+        expect(global.window.location.href).toBe(
+          `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`,
         );
       },
     );
@@ -515,7 +545,7 @@ describe('resetEpics', () => {
 });
 
 describe('setActiveIssueEpic', () => {
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const epicWithData = {
     id: 'gid://gitlab/Epic/42',
     iid: 1,
@@ -547,7 +577,7 @@ describe('setActiveIssueEpic', () => {
 
 describe('setActiveIssueWeight', () => {
   const state = { issues: { [mockIssue.id]: mockIssue } };
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const testWeight = mockIssue.weight + 1;
   const input = {
     weight: testWeight,
@@ -567,7 +597,7 @@ describe('setActiveIssueWeight', () => {
     });
 
     const payload = {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'weight',
       value: testWeight,
     };

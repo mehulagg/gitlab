@@ -32,6 +32,18 @@ RSpec.describe API::Features, stub_feature_flags: false do
         end.to change(Geo::CacheInvalidationEvent, :count).by(1)
       end
     end
+
+    context 'when licensed feature name is given' do
+      let(:feature_name) do
+        License::PLANS_BY_FEATURE.each_key.first
+      end
+
+      it 'returns bad request' do
+        post api("/features/#{feature_name}", admin), params: { value: 'true' }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
   end
 
   describe 'DELETE /feature/:name' do

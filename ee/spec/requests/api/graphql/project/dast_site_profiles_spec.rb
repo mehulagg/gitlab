@@ -106,14 +106,6 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
       end
     end
 
-    context 'when on demand scan feature flag is disabled' do
-      it 'returns an empty edges array' do
-        stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-        expect(dast_site_profiles_response['nodes']).to be_empty
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'returns an empty edges array' do
         stub_licensed_features(security_on_demand_scans: false)

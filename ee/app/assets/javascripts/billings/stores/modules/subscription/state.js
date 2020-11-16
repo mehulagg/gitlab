@@ -56,7 +56,9 @@ export default () => ({
               value: null,
               colClass: 'number',
               popover: {
-                content: s__('SubscriptionTable|Usage count is performed once a day at 12:00 PM.'),
+                content: s__(
+                  'SubscriptionTable|This is the number of seats you will be required to purchase if you update to a paid plan.',
+                ),
               },
             },
             {

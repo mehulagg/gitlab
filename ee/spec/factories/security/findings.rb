@@ -8,5 +8,6 @@ FactoryBot.define do
     severity { :critical }
     confidence { :high }
     project_fingerprint { generate(:project_fingerprint) }
+    sequence :position
   end
 end

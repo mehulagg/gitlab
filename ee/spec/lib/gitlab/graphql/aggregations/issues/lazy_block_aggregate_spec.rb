@@ -23,18 +23,36 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
   describe '#block_aggregate' do
     subject { described_class.new(query_ctx, issue_id) }
 
+    # We cannot directly stub IssueLink, otherwise we get a strange RSpec error
+    let(:issue_link) { class_double('IssueLink').as_stubbed_const }
+    let(:fake_state) do
+      { pending_ids: Set.new, loaded_objects: {} }
+    end
+
     before do
       subject.instance_variable_set(:@lazy_state, fake_state)
     end
 
+    context 'when there is a block provided' do
+      subject do
+        described_class.new(query_ctx, issue_id) do |result|
+          result.do_thing
+        end
+      end
+
+      it 'calls the block' do
+        expect(fake_state[:loaded_objects][issue_id]).to receive(:do_thing)
+
+        subject.block_aggregate
+      end
+    end
+
     context 'if the record has already been loaded' do
       let(:fake_state) do
-        { pending_ids: Set.new, loaded_objects: { issue_id => true } }
+        { pending_ids: Set.new, loaded_objects: { issue_id => double(count: 10) } }
       end
 
       it 'does not make the query again' do
-        # We cannot directly stub IssueLink, otherwise we get a strange RSpec error
-        issue_link = class_double('IssueLink').as_stubbed_const
         expect(issue_link).not_to receive(:blocked_issues_for_collection)
 
         subject.block_aggregate
@@ -55,8 +73,6 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
       end
 
       before do
-        # We cannot directly stub IssueLink, otherwise we get a strange RSpec error
-        issue_link = class_double('IssueLink').as_stubbed_const
         expect(issue_link).to receive(:blocked_issues_for_collection).and_return(fake_data)
       end
 

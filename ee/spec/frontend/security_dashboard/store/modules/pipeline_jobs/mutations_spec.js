@@ -26,6 +26,15 @@ describe('pipeline jobs module mutations', () => {
     });
   });
 
+  describe('SET_PIPELINE_ID', () => {
+    const pipelineId = 123;
+
+    it(`should set the pipelineId to ${pipelineId}`, () => {
+      mutations[types.SET_PIPELINE_ID](state, pipelineId);
+      expect(state.pipelineId).toBe(pipelineId);
+    });
+  });
+
   describe('REQUEST_PIPELINE_JOBS', () => {
     it('should set the isLoading to true', () => {
       mutations[types.REQUEST_PIPELINE_JOBS](state);

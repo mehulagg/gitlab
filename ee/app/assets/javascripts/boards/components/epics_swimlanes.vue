@@ -2,7 +2,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
-import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
+import BoardListHeader from 'ee_else_ce/boards/components/board_list_header_new.vue';
 import { DRAGGABLE_TAG } from '../constants';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import { n__ } from '~/locale';
@@ -107,7 +107,7 @@ export default {
     <component
       :is="treeRootWrapper"
       v-bind="treeRootOptions"
-      class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-bg-white gl-top-0 gl-z-index-3"
+      class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-mb-5 gl-bg-white gl-top-0 gl-z-index-3"
       data-testid="board-swimlanes-headers"
       @end="handleDragOnEnd"
     >
@@ -118,7 +118,7 @@ export default {
           'is-collapsed': !list.isExpanded,
           'is-draggable': !list.preset,
         }"
-        class="board gl-px-3 gl-vertical-align-top gl-white-space-normal"
+        class="board gl-display-inline-block gl-px-3 gl-vertical-align-top gl-white-space-normal"
         :data-list-id="list.id"
         data-testid="board-header-container"
       >
@@ -140,7 +140,7 @@ export default {
         :can-admin-list="canAdminList"
       />
       <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
-        <div class="gl-left-0 gl-py-5 gl-px-3 gl-display-flex gl-align-items-center">
+        <div class="gl-left-0 gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
           <span
             class="gl-mr-3 gl-font-weight-bold gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
           >

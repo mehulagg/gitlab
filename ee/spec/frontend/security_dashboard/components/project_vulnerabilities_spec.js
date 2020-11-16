@@ -12,10 +12,12 @@ describe('Vulnerabilities app component', () => {
 
   const createWrapper = ({ props = {}, $apollo = apolloMock } = {}, options = {}) => {
     wrapper = shallowMount(ProjectVulnerabilitiesApp, {
+      provide: {
+        projectFullPath: '#',
+      },
       propsData: {
         dashboardDocumentation: '#',
         emptyStateSvgPath: '#',
-        projectFullPath: '#',
         ...props,
       },
       mocks: {

@@ -5,10 +5,19 @@ export const endDate = new Date('2020-08-01');
 
 export const fullPath = 'gitlab-org/gitlab';
 
+// We should update our tests to use fixtures instead of hardcoded mock data.
+// https://gitlab.com/gitlab-org/gitlab/-/issues/270544
 export const throughputChartData = {
   May_2020: { count: 2, __typename: 'MergeRequestConnection' },
   Jun_2020: { count: 4, __typename: 'MergeRequestConnection' },
   Jul_2020: { count: 3, __typename: 'MergeRequestConnection' },
+  __typename: 'Project',
+};
+
+export const throughputChartNoData = {
+  May_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  Jun_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  Jul_2020: { count: 0, __typename: 'MergeRequestConnection' },
   __typename: 'Project',
 };
 
@@ -42,13 +51,43 @@ export const expectedMonthData = [
 
 export const throughputChartQuery = `query ($fullPath: ID!, $labels: [String!], $authorUsername: String, $assigneeUsername: String, $milestoneTitle: String, $sourceBranches: [String!], $targetBranches: [String!]) {
   throughputChartData: project(fullPath: $fullPath) {
-    May_2020: mergeRequests(first: 0, mergedBefore: "2020-06-01", mergedAfter: "2020-05-17", labels: $labels, authorUsername: $authorUsername, assigneeUsername: $assigneeUsername, milestoneTitle: $milestoneTitle, sourceBranches: $sourceBranches, targetBranches: $targetBranches) {
+    May_2020: mergeRequests(
+      first: 0
+      mergedBefore: "2020-06-01"
+      mergedAfter: "2020-05-17"
+      labels: $labels
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
+      milestoneTitle: $milestoneTitle
+      sourceBranches: $sourceBranches
+      targetBranches: $targetBranches
+    ) {
       count
     }
-    Jun_2020: mergeRequests(first: 0, mergedBefore: "2020-07-01", mergedAfter: "2020-06-01", labels: $labels, authorUsername: $authorUsername, assigneeUsername: $assigneeUsername, milestoneTitle: $milestoneTitle, sourceBranches: $sourceBranches, targetBranches: $targetBranches) {
+    Jun_2020: mergeRequests(
+      first: 0
+      mergedBefore: "2020-07-01"
+      mergedAfter: "2020-06-01"
+      labels: $labels
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
+      milestoneTitle: $milestoneTitle
+      sourceBranches: $sourceBranches
+      targetBranches: $targetBranches
+    ) {
       count
     }
-    Jul_2020: mergeRequests(first: 0, mergedBefore: "2020-07-17", mergedAfter: "2020-07-01", labels: $labels, authorUsername: $authorUsername, assigneeUsername: $assigneeUsername, milestoneTitle: $milestoneTitle, sourceBranches: $sourceBranches, targetBranches: $targetBranches) {
+    Jul_2020: mergeRequests(
+      first: 0
+      mergedBefore: "2020-07-17"
+      mergedAfter: "2020-07-01"
+      labels: $labels
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
+      milestoneTitle: $milestoneTitle
+      sourceBranches: $sourceBranches
+      targetBranches: $targetBranches
+    ) {
       count
     }
   }

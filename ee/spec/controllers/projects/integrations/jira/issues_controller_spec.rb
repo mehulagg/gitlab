@@ -49,7 +49,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
         expect(response).to redirect_to(project_integrations_jira_issues_path(new_project))
-        expect(response).to have_gitlab_http_status(:found)
+        expect(response).to have_gitlab_http_status(:moved_permanently)
       end
     end
 

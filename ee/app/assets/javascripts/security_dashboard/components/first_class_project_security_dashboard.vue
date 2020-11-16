@@ -34,16 +34,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    projectFullPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    hasVulnerabilities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     vulnerabilitiesExportEndpoint: {
       type: String,
       required: false,
@@ -59,11 +49,6 @@ export default {
     };
   },
   inject: ['dashboardDocumentation', 'autoFixDocumentation'],
-  computed: {
-    shouldShowPipelineStatus() {
-      return Object.values(this.pipeline).every(Boolean);
-    },
-  },
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;
@@ -78,7 +63,7 @@ export default {
 
 <template>
   <div>
-    <template v-if="hasVulnerabilities">
+    <template v-if="pipeline.id">
       <auto-fix-user-callout
         v-if="shoudShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"
@@ -90,15 +75,14 @@ export default {
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
-          <project-pipeline-status v-if="shouldShowPipelineStatus" :pipeline="pipeline" />
-          <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
+          <project-pipeline-status :pipeline="pipeline" />
+          <vulnerabilities-count-list :filters="filters" />
         </template>
         <template #sticky>
           <filters @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"
-          :project-full-path="projectFullPath"
           :filters="filters"
         />
       </security-dashboard-layout>

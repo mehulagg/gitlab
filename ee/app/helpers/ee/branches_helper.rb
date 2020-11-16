@@ -26,6 +26,8 @@ module EE
             name: level.user.name,
             avatar_url: level.user.avatar_url
           }
+        elsif level.type == :deploy_key
+          { id: level.id, type: level.type, deploy_key_id: level.deploy_key_id }
         elsif level.type == :group
           { id: level.id, type: level.type, group_id: level.group_id }
         else

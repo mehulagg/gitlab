@@ -24,7 +24,7 @@ RSpec.describe Projects::Security::VulnerabilitiesController do
     end
 
     context "when there's an attached pipeline" do
-      let_it_be(:finding) { create(:vulnerabilities_occurrence, vulnerability: vulnerability, pipelines: [pipeline]) }
+      let_it_be(:finding) { create(:vulnerabilities_finding, vulnerability: vulnerability, pipelines: [pipeline]) }
 
       it 'renders the vulnerability page' do
         show_vulnerability
@@ -42,7 +42,7 @@ RSpec.describe Projects::Security::VulnerabilitiesController do
     end
 
     context "when there's no attached pipeline" do
-      let_it_be(:finding) { create(:vulnerabilities_occurrence, vulnerability: vulnerability) }
+      let_it_be(:finding) { create(:vulnerabilities_finding, vulnerability: vulnerability) }
 
       it 'renders the vulnerability page' do
         show_vulnerability

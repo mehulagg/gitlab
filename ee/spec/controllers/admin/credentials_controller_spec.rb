@@ -164,6 +164,12 @@ RSpec.describe Admin::CredentialsController do
               expect(response).to redirect_to(admin_credentials_path)
               expect(flash[:notice]).to eql 'Revoked personal access token %{personal_access_token_name}!' % { personal_access_token_name: personal_access_token.name }
             end
+
+            it 'informs the token owner' do
+              expect(CredentialsInventoryMailer).to receive_message_chain(:personal_access_token_revoked_email, :deliver_later)
+
+              put :revoke, params: { id: personal_access_token.id }
+            end
           end
         end
       end

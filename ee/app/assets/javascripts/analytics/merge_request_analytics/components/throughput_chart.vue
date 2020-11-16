@@ -92,7 +92,7 @@ export default {
       return !this.hasError && this.$apollo.queries.throughputChartData.loading;
     },
     chartDataAvailable() {
-      return this.formattedThroughputChartData[0]?.data.length;
+      return this.formattedThroughputChartData[0]?.data?.some(entry => Boolean(entry[1]));
     },
     alertDetails() {
       return {

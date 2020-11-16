@@ -18,6 +18,8 @@ RSpec.describe Mutations::DastSiteTokens::Create do
     allow(SecureRandom).to receive(:uuid).and_return(uuid)
   end
 
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+
   describe '#resolve' do
     subject do
       mutation.resolve(
@@ -35,28 +37,6 @@ RSpec.describe Mutations::DastSiteTokens::Create do
         end
       end
 
-      context 'when the user is not associated with the project' do
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is an owner' do
-        it 'returns the dast_site_token id' do
-          group.add_owner(user)
-
-          expect(subject[:id]).to eq(dast_site_token.to_global_id)
-        end
-      end
-
-      context 'when the user is a maintainer' do
-        it 'returns the dast_site_token id' do
-          project.add_maintainer(user)
-
-          expect(subject[:id]).to eq(dast_site_token.to_global_id)
-        end
-      end
-
       context 'when the user can run a dast scan' do
         before do
           project.add_developer(user)
@@ -67,7 +47,7 @@ RSpec.describe Mutations::DastSiteTokens::Create do
         end
 
         it 'returns the dast_site_token status' do
-          expect(subject[:status]).to eq('PENDING_VALIDATION')
+          expect(subject[:status]).to eq('pending')
         end
 
         it 'returns the dast_site_token token' do
@@ -83,29 +63,13 @@ RSpec.describe Mutations::DastSiteTokens::Create do
               target_url: target_url
             )
 
-            expect(result[:status]).to eq('FAILED_VALIDATION')
-          end
-        end
-
-        context 'when on demand scan feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+            expect(result[:status]).to eq('failed')
           end
         end
 
         context 'when on demand scan site validations feature is not enabled' do
           it 'raises an exception' do
             stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
-        end
-
-        context 'when on demand scan licensed feature is not available' do
-          it 'raises an exception' do
-            stub_licensed_features(security_on_demand_scans: false)
 
             expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
           end

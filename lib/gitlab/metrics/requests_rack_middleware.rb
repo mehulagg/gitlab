@@ -18,31 +18,48 @@ module Gitlab
       FEATURE_CATEGORY_HEADER = 'X-Gitlab-Feature-Category'
       FEATURE_CATEGORY_DEFAULT = 'unknown'
 
+      # These were the top 5 categories at a point in time, chosen as a
+      # reasonable default. If we initialize every category we'll end up
+      # with an explosion in unused metric combinations, but we want the
+      # most common ones to be always present.
+      FEATURE_CATEGORIES_TO_INITIALIZE = ['authentication_and_authorization',
+                                          'code_review', 'continuous_integration',
+                                          'not_owned', 'source_code_management',
+                                          FEATURE_CATEGORY_DEFAULT].freeze
+
       def initialize(app)
         @app = app
       end
 
-      def self.http_request_total
-        @http_request_total ||= ::Gitlab::Metrics.counter(:http_requests_total, 'Request count')
+      def self.http_requests_total
+        ::Gitlab::Metrics.counter(:http_requests_total, 'Request count')
       end
 
       def self.rack_uncaught_errors_count
-        @rack_uncaught_errors_count ||= ::Gitlab::Metrics.counter(:rack_uncaught_errors_total, 'Request handling uncaught errors count')
+        ::Gitlab::Metrics.counter(:rack_uncaught_errors_total, 'Request handling uncaught errors count')
       end
 
       def self.http_request_duration_seconds
-        @http_request_duration_seconds ||= ::Gitlab::Metrics.histogram(:http_request_duration_seconds, 'Request handling execution time',
-                                                           {}, [0.05, 0.1, 0.25, 0.5, 0.7, 1, 2.5, 5, 10, 25])
+        ::Gitlab::Metrics.histogram(:http_request_duration_seconds, 'Request handling execution time',
+                                    {}, [0.05, 0.1, 0.25, 0.5, 0.7, 1, 2.5, 5, 10, 25])
       end
 
       def self.http_health_requests_total
-        @http_health_requests_total ||= ::Gitlab::Metrics.counter(:http_health_requests_total, 'Health endpoint request count')
+        ::Gitlab::Metrics.counter(:http_health_requests_total, 'Health endpoint request count')
       end
 
-      def self.initialize_http_request_duration_seconds
+      def self.initialize_metrics
+        # This initialization is done to avoid gaps in scraped metrics after
+        # restarts. It makes sure all counters/histograms are available at
+        # process start.
+        #
+        # For example `rate(http_requests_total{status="500"}[1m])` would return
+        # no data until the first 500 error would occur.
         HTTP_METHODS.each do |method, statuses|
-          statuses.each do |status|
-            http_request_duration_seconds.get({ method: method, status: status.to_s })
+          http_request_duration_seconds.get({ method: method })
+
+          statuses.product(FEATURE_CATEGORIES_TO_INITIALIZE) do |status, feature_category|
+            http_requests_total.get({ method: method, status: status, feature_category: feature_category })
           end
         end
       end
@@ -62,7 +79,7 @@ module Gitlab
           feature_category = headers&.fetch(FEATURE_CATEGORY_HEADER, nil)
 
           unless health_endpoint
-            RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method, status: status.to_s }, elapsed)
+            RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method }, elapsed)
           end
 
           [status, headers, body]
@@ -71,9 +88,13 @@ module Gitlab
           raise
         ensure
           if health_endpoint
-            RequestsRackMiddleware.http_health_requests_total.increment(status: status, method: method)
+            RequestsRackMiddleware.http_health_requests_total.increment(status: status.to_s, method: method)
           else
-            RequestsRackMiddleware.http_request_total.increment(status: status, method: method, feature_category: feature_category || FEATURE_CATEGORY_DEFAULT)
+            RequestsRackMiddleware.http_requests_total.increment(
+              status: status.to_s,
+              method: method,
+              feature_category: feature_category.presence || FEATURE_CATEGORY_DEFAULT
+            )
           end
         end
       end

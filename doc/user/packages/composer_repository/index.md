@@ -77,7 +77,7 @@ Prerequisites:
 - A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
 
   NOTE: **Note:**
-  [Deploy tokens](./../../project/deploy_tokens/index.md) are
+  [Deploy tokens](../../project/deploy_tokens/index.md) are
   [not yet supported](https://gitlab.com/gitlab-org/gitlab/-/issues/240897) for use with Composer.
 
 To publish the package:
@@ -136,11 +136,11 @@ Install a package from the Package Registry so you can use it as a dependency.
 Prerequisites:
 
 - A package in the Package Registry.
-- The group ID, which is on the group's home page. 
+- The group ID, which is on the group's home page.
 - A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to, at minimum, `read_api`.
 
   NOTE: **Note:**
-  [Deploy tokens](./../../project/deploy_tokens/index.md) are
+  [Deploy tokens](../../project/deploy_tokens/index.md) are
   [not yet supported](https://gitlab.com/gitlab-org/gitlab/-/issues/240897) for use with Composer.
 
 To install a package:
@@ -155,7 +155,7 @@ To install a package:
 
    - Set the required package version:
 
-   ```shell 
+   ```shell
    composer require <package_name>:<version>
    ```
 
@@ -223,7 +223,7 @@ To install a package:
    ```
 
    Result in the `composer.json` file:
-   
+
    ```json
    {
      ...
@@ -240,7 +240,7 @@ To install a package:
      },
      ...
    }
-   ```   
+   ```
 
    You can unset this with the command:
 

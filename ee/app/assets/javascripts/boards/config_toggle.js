@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlTooltipDirective } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 
 export default boardsStore => {
@@ -9,7 +9,7 @@ export default boardsStore => {
     gl.boardConfigToggle = new Vue({
       el: configEl,
       directives: {
-        tooltip,
+        GlTooltip: GlTooltipDirective,
       },
       data() {
         return {
@@ -32,7 +32,7 @@ export default boardsStore => {
       template: `
         <div class="gl-ml-3">
           <button
-            v-tooltip
+            v-gl-tooltip
             :title="tooltipTitle"
             class="btn btn-inverted"
             :class="{ 'dot-highlight': hasScope }"

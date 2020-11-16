@@ -4,6 +4,8 @@ module Resolvers
   class TimelogResolver < BaseResolver
     include LooksAhead
 
+    type ::Types::TimelogType.connection_type, null: false
+
     argument :start_date, Types::TimeType,
               required: false,
               description: 'List time logs within a date range where the logged date is equal to or after startDate'

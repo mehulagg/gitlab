@@ -1,5 +1,0 @@
----
-title: Disallow guest access for group repository analytics
-merge_request: 44721
-author:
-type: fixed

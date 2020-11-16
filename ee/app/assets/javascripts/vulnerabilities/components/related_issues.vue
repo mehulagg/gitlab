@@ -65,22 +65,22 @@ export default {
   },
   inject: {
     vulnerabilityId: {
-      type: Number,
+      default: 0,
     },
     projectFingerprint: {
-      type: String,
+      default: '',
     },
     createIssueUrl: {
-      type: String,
+      default: '',
     },
     reportType: {
-      type: String,
+      default: '',
     },
     issueTrackingHelpPath: {
-      type: String,
+      default: '',
     },
     permissionsHelpPath: {
-      type: String,
+      default: '',
     },
   },
   created() {
@@ -264,7 +264,7 @@ export default {
       <template #headerText>
         {{ $options.i18n.relatedIssues }}
       </template>
-      <template v-if="canCreateIssue" #headerActions>
+      <template v-if="canCreateIssue" #header-actions>
         <gl-button
           ref="createIssue"
           variant="success"

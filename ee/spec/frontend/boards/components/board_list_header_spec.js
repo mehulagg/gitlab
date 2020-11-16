@@ -45,7 +45,6 @@ describe('Board List Header Component', () => {
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
-    isSwimlanesHeader = false,
   } = {}) => {
     const boardId = '1';
 
@@ -76,7 +75,6 @@ describe('Board List Header Component', () => {
       propsData: {
         disabled: false,
         list,
-        isSwimlanesHeader,
       },
       provide: {
         boardId,
@@ -128,14 +126,6 @@ describe('Board List Header Component', () => {
 
         expect(sidebarEventHub.$emit).not.toHaveBeenCalled();
       });
-    });
-  });
-
-  describe('Swimlanes header', () => {
-    it('when collapsed, it displays info icon', () => {
-      createComponent({ isSwimlanesHeader: true, collapsed: true });
-
-      expect(wrapper.find('.board-header-collapsed-info-icon').exists()).toBe(true);
     });
   });
 });

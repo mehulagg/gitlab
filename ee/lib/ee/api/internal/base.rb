@@ -11,8 +11,8 @@ module EE
             extend ::Gitlab::Utils::Override
 
             override :lfs_authentication_url
-            def lfs_authentication_url(project)
-              project.lfs_http_url_to_repo(params[:operation])
+            def lfs_authentication_url(container)
+              container.lfs_http_url_to_repo(params[:operation])
             end
 
             override :check_allowed

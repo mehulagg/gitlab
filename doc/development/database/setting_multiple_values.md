@@ -1,9 +1,15 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Setting Multiple Values
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32921) in GitLab 13.5.
 
-Frequently, we will want to update multiple objects with new values for one
-or more columns. The obvious way to do this is using `Relation#update_all`:
+There's often a need to update multiple objects with new values for one
+or more columns. One method of doing this is using `Relation#update_all`:
 
 ```ruby
 user.issues.open.update_all(due_date: 7.days.from_now) # (1)
@@ -22,17 +28,17 @@ with updates(obj_id, new_title, new_weight) as (
   values (1 :: integer, 'Very difficult issue' :: text, 8 :: integer),
          (2, 'Very easy issue', 1)
 )
-update issues 
+update issues
   set title = new_title, weight = new_weight
   from updates
   where id = obj_id
 ```
 
-The bad news: There is no way to express this in ActiveRecord or even dropping
-down to ARel - the `UpdateManager` just does not support `update from`, so this
+The bad news: there is no way to express this in ActiveRecord or even dropping
+down to ARel. The `UpdateManager` does not support `update from`, so this
 is not expressible.
 
-The good news: We supply an abstraction to help you generate these kinds of
+The good news: we supply an abstraction to help you generate these kinds of
 updates, called `Gitlab::Database::BulkUpdate`. This constructs queries such as the
 above, and uses binding parameters to avoid SQL injection.
 
@@ -44,7 +50,7 @@ To use this, we need:
 - a mapping from object/ID to the new values to set for that object
 - a way to determine the table for each object
 
-So for example, we can express the query above as:
+For example, we can express the query above as:
 
 ```ruby
 issue_a = Issue.find(..)
@@ -87,8 +93,8 @@ objects = Foo.from_union([
     ])
 # At this point, all the objects are instances of Foo, even the ones from the
 # Bar table
-mapping = objects.to_h { |obj| [obj, bazzes[obj.id] }
-    
+mapping = objects.to_h { |obj| [obj, bazzes[obj.id]] }
+
 # Issues at most 2 queries
 ::Gitlab::Database::BulkUpdate.execute(%i[baz], mapping) do |obj|
   obj.object_type.constantize
@@ -100,4 +106,4 @@ end
 Note that this is a **very low level** tool, and operates on the raw column
 values. Enumerations and state fields must be translated into their underlying
 representations, for example, and nested associations are not supported. No
-validations or hooks will be called.
+validations or hooks are called.

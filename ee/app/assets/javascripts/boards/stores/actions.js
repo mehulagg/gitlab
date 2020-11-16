@@ -4,10 +4,10 @@ import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
 import { __ } from '~/locale';
 import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
-import { setUrlParams, removeParams } from '~/lib/utils/url_utility';
+import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
-import { EpicFilterType, GroupByParamType } from '../constants';
+import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import * as typesCE from '~/boards/stores/mutation_types';
@@ -79,6 +79,7 @@ export default {
       'epicId',
       'labelName',
       'milestoneTitle',
+      'iterationTitle',
       'releaseTag',
       'search',
       'weight',
@@ -94,6 +95,14 @@ export default {
     } else if (filterParams.epicId) {
       filterParams.epicId = fullEpicId(filterParams.epicId);
     }
+
+    if (
+      filters.iterationId === IterationFilterType.any ||
+      filters.iterationId === IterationFilterType.none
+    ) {
+      filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
+    }
+
     commit(types.SET_FILTERS, filterParams);
   },
 
@@ -307,7 +316,7 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      historyPushState(setUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
+      historyPushState(mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
       dispatch('fetchEpicsSwimlanes', {});
     } else if (!gon.features.graphqlBoardLists) {
       historyPushState(removeParams(['group_by']));
@@ -333,7 +342,7 @@ export default {
       mutation: issueSetEpic,
       variables: {
         input: {
-          iid: String(getters.getActiveIssue.iid),
+          iid: String(getters.activeIssue.iid),
           epicId: input.epicId,
           projectPath: input.projectPath,
         },
@@ -352,7 +361,7 @@ export default {
       mutation: issueSetWeight,
       variables: {
         input: {
-          iid: String(getters.getActiveIssue.iid),
+          iid: String(getters.activeIssue.iid),
           weight: input.weight,
           projectPath: input.projectPath,
         },
@@ -364,7 +373,7 @@ export default {
     }
 
     commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'weight',
       value: data.issueSetWeight.issue.weight,
     });

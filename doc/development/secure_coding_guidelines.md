@@ -219,11 +219,11 @@ the mitigations for a new feature.
 
 - [More details](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/2530/diffs)
 
-#### Feature-specific Mitigations
+#### Feature-specific mitigations
 
 For situations in which an allowlist or GitLab:HTTP cannot be used, it will be necessary to implement mitigations directly in the feature. It is best to validate the destination IP addresses themselves, not just domain names, as DNS can be controlled by the attacker. Below are a list of mitigations that should be implemented.
 
-**Important Note:** There are many tricks to bypass common SSRF validations. If feature-specific mitigations are necessary, they should be reviewed by the AppSec team, or a developer who has worked on SSRF mitigations previously.
+There are many tricks to bypass common SSRF validations. If feature-specific mitigations are necessary, they should be reviewed by the AppSec team, or a developer who has worked on SSRF mitigations previously.
 
 - Block connections to all localhost addresses
   - `127.0.0.1/8` (IPv4 - note the subnet mask)
@@ -311,6 +311,7 @@ Specifically, the following options are dangerous because they mark strings as t
 |----------------------|-------------------------------|
 | HAML templates       | `html_safe`, `raw`, `!=`      |
 | Embedded Ruby (ERB)  | `html_safe`, `raw`, `<%== %>` |
+
 In case you want to sanitize user-controlled values against XSS vulnerabilities, you can use
 [`ActionView::Helpers::SanitizeHelper`](https://api.rubyonrails.org/classes/ActionView/Helpers/SanitizeHelper.html).
 Calling `link_to` and `redirect_to` with user-controlled parameters can also lead to cross-site scripting.
@@ -328,6 +329,7 @@ References:
 
 - When updating the content of an HTML element using JavaScript, mark user-controlled values as `textContent` or `nodeValue` instead of `innerHTML`.
 - Avoid using `v-html` with user-controlled data, use [`v-safe-html`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/directives-safe-html-directive--default) instead.
+- Render unsafe or unsanitized content using [`dompurify`](fe_guide/security.md#sanitize-html-output).
 - Consider using [`gl-sprintf`](../../ee/development/i18n/externalization.md#interpolation) to interpolate translated strings securely.
 - Avoid `__()` with translations that contain user-controlled values.
 - When working with `postMessage`, ensure the `origin` of the message is allowlisted.
@@ -428,6 +430,78 @@ The Path Traversal check can also be used to forbid any absolute path:
 requires :file_path, type: String, file_path: true
 ```
 
-NOTE: **Note:**
 Absolute paths are not allowed by default. If allowing an absolute path is required, you
-need to provide an array of paths to the parameter `allowlist`.  
+need to provide an array of paths to the parameter `allowlist`.
+
+## OS command injection guidelines
+
+Command injection is an issue in which an attacker is able to execute arbitrary commands on the host
+operating system through a vulnerable application. Such attacks don't always provide feedback to a
+user, but the attacker can use simple commands like `curl` to obtain an answer.
+
+### Impact
+
+The impact of command injection greatly depends on the user context running the commands, as well as
+how data is validated and sanitized. It can vary from low impact because the user running the
+injected commands has limited rights, to critical impact if running as the root user.
+
+Potential impacts include:
+
+- Execution of arbitrary commands on the host machine.
+- Unauthorized access to sensitive data, including passwords and tokens in secrets or configuration
+  files.
+- Exposure of sensitive system files on the host machine, such as `/etc/passwd/` or `/etc/shadow`.
+- Compromise of related systems and services gained through access to the host machine.
+
+You should be aware of and take steps to prevent command injection when working with user-controlled
+data that are used to run OS commands.
+
+### Mitigation and prevention
+
+To prevent OS command injections, user-supplied data shouldn't be used within OS commands. In cases
+where you can't avoid this:
+
+- Validate user-supplied data against an allowlist.
+- Ensure that user-supplied data only contains alphanumeric characters (and no syntax or whitespace
+  characters, for example).
+- Always use `--` to separate options from arguments.
+
+### Ruby
+
+Consider using `system("command", "arg0", "arg1", ...)` whenever you can. This prevents an attacker
+from concatenating commands.
+
+For more examples on how to use shell commands securely, consult
+[Guidelines for shell commands in the GitLab codebase](shell_commands.md).
+It contains various examples on how to securely call OS commands.
+
+### Go
+
+Go has built-in protections that usually prevent an attacker from successfully injecting OS commands.
+
+Consider the following example:
+
+```golang
+package main
+
+import (
+  "fmt"
+  "os/exec"
+)
+
+func main() {
+  cmd := exec.Command("echo", "1; cat /etc/passwd")
+  out, _ := cmd.Output()
+  fmt.Printf("%s", out)
+}
+```
+
+This echoes `"1; cat /etc/passwd"`.
+
+**Do not** use `sh`, as it bypasses internal protections:
+
+```golang
+out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
+```
+
+This outputs `1` followed by the content of `/etc/passwd`.

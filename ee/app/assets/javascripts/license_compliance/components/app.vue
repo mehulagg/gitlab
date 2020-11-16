@@ -7,7 +7,7 @@ import {
   GlIcon,
   GlTab,
   GlTabs,
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlAlert,
 } from '@gitlab/ui';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
@@ -135,7 +135,7 @@ export default {
       <gl-tab data-testid="licensesTab">
         <template #title>
           <span data-testid="licensesTabTitle">{{ s__('Licenses|Detected in Project') }}</span>
-          <gl-badge pill>{{ licenseCount }}</gl-badge>
+          <gl-badge>{{ licenseCount }}</gl-badge>
         </template>
 
         <detected-licenses-table />
@@ -146,7 +146,7 @@ export default {
           <span data-qa-selector="policies_tab" data-testid="policiesTabTitle">{{
             s__('Licenses|Policies')
           }}</span>
-          <gl-badge pill>{{ policyCount }}</gl-badge>
+          <gl-badge>{{ policyCount }}</gl-badge>
         </template>
 
         <license-management />

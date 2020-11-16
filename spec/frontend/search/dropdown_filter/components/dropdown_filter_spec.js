@@ -1,12 +1,12 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { MOCK_QUERY } from 'jest/search/mock_data';
 import * as urlUtils from '~/lib/utils/url_utility';
 import initStore from '~/search/store';
 import DropdownFilter from '~/search/dropdown_filter/components/dropdown_filter.vue';
 import stateFilterData from '~/search/dropdown_filter/constants/state_filter_data';
 import confidentialFilterData from '~/search/dropdown_filter/constants/confidential_filter_data';
-import { MOCK_QUERY } from '../mock_data';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn(),
@@ -106,6 +106,7 @@ describe('DropdownFilter', () => {
         firstDropDownItem().vm.$emit('click');
 
         expect(urlUtils.setUrlParams).toHaveBeenCalledWith({
+          page: null,
           [stateFilterData.filterParam]: filter,
         });
       });
@@ -183,6 +184,7 @@ describe('DropdownFilter', () => {
       firstDropDownItem().vm.$emit('click');
 
       expect(urlUtils.setUrlParams).toHaveBeenCalledWith({
+        page: null,
         [confidentialFilterData.filterParam]: filter,
       });
     });

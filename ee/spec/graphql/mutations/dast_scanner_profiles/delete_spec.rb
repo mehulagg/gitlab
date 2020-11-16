@@ -15,6 +15,8 @@ RSpec.describe Mutations::DastScannerProfiles::Delete do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+
   describe '#resolve' do
     subject do
       mutation.resolve(
@@ -51,22 +53,6 @@ RSpec.describe Mutations::DastScannerProfiles::Delete do
 
         it 'returns an error' do
           expect(subject[:errors]).to include('Scanner profile not found for given parameters')
-        end
-      end
-
-      context 'when security_on_demand_scans_feature_flag is disabled' do
-        it 'raises an exception' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when on demand scan licensed feature is not available' do
-        it 'raises an exception' do
-          stub_licensed_features(security_on_demand_scans: false)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
 

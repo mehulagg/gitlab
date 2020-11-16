@@ -134,7 +134,9 @@ RSpec.describe ProjectsHelper do
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
-          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index'
+          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
+          project_full_path: project.full_path,
+          no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-')
         }
       end
 
@@ -155,7 +157,8 @@ RSpec.describe ProjectsHelper do
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
-          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix')
         }
       end
 
@@ -205,6 +208,7 @@ RSpec.describe ProjectsHelper do
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index
@@ -292,7 +296,6 @@ RSpec.describe ProjectsHelper do
     let(:user) { create(:user) }
 
     where(
-      ab_feature_enabled?: [true, false],
       gitlab_com?: [true, false],
        user?: [true, false],
       security_dashboard_feature_available?: [true, false],
@@ -302,13 +305,11 @@ RSpec.describe ProjectsHelper do
     with_them do
       it 'returns the expected value' do
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(user).to receive(:ab_feature_enabled?) { ab_feature_enabled? }
         allow(helper).to receive(:current_user) { user? ? user : nil }
         allow(project).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_namespace? }
 
-        expected_value = user? && gitlab_com? &&
-                         ab_feature_enabled? && !security_dashboard_feature_available? && can_admin_namespace?
+        expected_value = user? && gitlab_com? && !security_dashboard_feature_available? && can_admin_namespace?
 
         expect(helper.show_discover_project_security?(project)).to eq(expected_value)
       end

@@ -472,14 +472,14 @@ RSpec.describe 'Scoped issue boards', :js do
     button = first('.filter-dropdown-container .btn.btn-inverted')
     expect(button.text).to include(button_title)
     expect(button[:class]).to include('dot-highlight')
-    expect(button['data-original-title']).to include('This board\'s scope is reduced')
+    expect(button['title']).to include('This board\'s scope is reduced')
   end
 
   def expect_no_dot_highlight(button_title)
     button = first('.filter-dropdown-container .btn.btn-inverted')
     expect(button.text).to include(button_title)
     expect(button[:class]).not_to include('dot-highlight')
-    expect(button['data-original-title']).not_to include('This board\'s scope is reduced')
+    expect(button['title']).not_to include('This board\'s scope is reduced')
   end
 
   # Create board helper methods

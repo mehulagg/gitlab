@@ -2,6 +2,7 @@
 name: matching_merge_request_db_sync
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42435
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254488
-group: group::create
+milestone: '13.5'
 type: development
+group: group::create
 default_enabled: true

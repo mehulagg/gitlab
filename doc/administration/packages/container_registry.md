@@ -170,7 +170,7 @@ If your certificate provider provides the CA Bundle certificates, append them to
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source) for the changes to take effect.
 1. Make the relevant changes in NGINX as well (domain, port, TLS certificates path).
 
-Users should now be able to login to the Container Registry with their GitLab
+Users should now be able to sign in to the Container Registry with their GitLab
 credentials using:
 
 ```shell
@@ -180,7 +180,7 @@ docker login gitlab.example.com:5050
 ### Configure Container Registry under its own domain
 
 When the Registry is configured to use its own domain, you need a TLS
-certificate for that specific domain (for example, `registry.example.com`). You might need 
+certificate for that specific domain (for example, `registry.example.com`). You might need
 a wildcard certificate if hosted under a subdomain of your existing GitLab
 domain, for example, `registry.gitlab.example.com`.
 
@@ -234,7 +234,7 @@ registry_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/certificate.key"
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source) for the changes to take effect.
 1. Make the relevant changes in NGINX as well (domain, port, TLS certificates path).
 
-Users should now be able to login to the Container Registry using their GitLab
+Users should now be able to sign in to the Container Registry using their GitLab
 credentials:
 
 ```shell
@@ -397,6 +397,20 @@ To configure the `s3` storage driver in Omnibus:
    }
    ```
 
+   To avoid using static credentials, use an
+   [IAM role](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+   and omit `accesskey` and `secretkey`. Make sure that your IAM profile follows
+   [the permissions documented by Docker](https://docs.docker.com/registry/storage-drivers/s3/#s3-permission-scopes).
+
+   ```ruby
+   registry['storage'] = {
+     's3' => {
+       'bucket' => 'your-s3-bucket',
+       'region' => 'your-s3-region'
+     }
+   }
+   ```
+
    - `regionendpoint` is only required when configuring an S3 compatible service such as MinIO. It takes a URL such as `http://127.0.0.1:9000`.
    - `your-s3-bucket` should be the name of a bucket that exists, and can't include subdirectories.
 
@@ -412,8 +426,8 @@ when you [deployed your Docker registry](https://docs.docker.com/registry/deploy
 ```yaml
 storage:
   s3:
-    accesskey: 's3-access-key'
-    secretkey: 's3-secret-key-for-access-key'
+    accesskey: 's3-access-key'                # Not needed if IAM role used
+    secretkey: 's3-secret-key-for-access-key' # Not needed if IAM role used
     bucket: 'your-s3-bucket'
     region: 'your-s3-region'
     regionendpoint: 'your-s3-regionendpoint'
@@ -471,7 +485,7 @@ you can pull from the Container Registry, but you cannot push.
    [`--dryrun`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html)
    flag and run the command.
 
-   DANGER: **Danger:**
+   DANGER: **Warning:**
    The [`--delete`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html)
    flag deletes files that exist in the destination but not in the source.
    If you swap the source and destination, all data in the Registry is deleted.
@@ -584,7 +598,7 @@ on how to achieve that.
 ## Use an external container registry with GitLab as an auth endpoint
 
 If you use an external container registry, some features associated with the
-container registry may be unavailable or have [inherent risks](./../../user/packages/container_registry/index.md#use-with-external-container-registries).
+container registry may be unavailable or have [inherent risks](../../user/packages/container_registry/index.md#use-with-external-container-registries).
 
 **Omnibus GitLab**
 
@@ -823,7 +837,7 @@ understand the implications.
 
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/3097) in Omnibus GitLab 11.10.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 This is a destructive operation.
 
 The GitLab Container Registry follows the same default workflow as Docker Distribution:
@@ -1234,8 +1248,8 @@ This will launch the Docker daemon and proxy all connections through mitmproxy.
 
 #### Running the Docker client
 
-Now that we have mitmproxy and Docker running, we can attempt to login and push
-a container image. You may need to run as root to do this. For example:
+Now that we have mitmproxy and Docker running, we can attempt to sign in and
+push a container image. You may need to run as root to do this. For example:
 
 ```shell
 docker login s3-testing.myregistry.com:5050

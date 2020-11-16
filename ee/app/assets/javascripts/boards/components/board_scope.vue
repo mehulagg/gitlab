@@ -95,7 +95,7 @@ export default {
 <template>
   <div data-qa-selector="board_scope_modal">
     <div v-if="canAdminBoard" class="media">
-      <label class="form-section-title label-bold media-body">{{ __('Scope') }}</label>
+      <label class="label-bold gl-font-lg media-body">{{ __('Scope') }}</label>
       <button v-if="collapseScope" type="button" class="btn" @click="expanded = !expanded">
         {{ expandButtonText }}
       </button>

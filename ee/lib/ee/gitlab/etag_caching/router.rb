@@ -7,7 +7,8 @@ module EE
         EE_ROUTES = [
           ::Gitlab::EtagCaching::Router::Route.new(
             %r(^/groups/#{::Gitlab::PathRegex.full_namespace_route_regex}/-/epics/\d+/notes\z),
-            'epic_notes'
+            'epic_notes',
+            'epics'
           )
         ].freeze
 

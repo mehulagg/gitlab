@@ -1,5 +1,0 @@
----
-title: Fix N+1 cache queries for load balancing sticking
-merge_request: 43843
-author:
-type: performance

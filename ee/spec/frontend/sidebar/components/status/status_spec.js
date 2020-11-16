@@ -1,7 +1,6 @@
 import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import Vue from 'vue';
 import Status from 'ee/sidebar/components/status/status.vue';
 import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
 
@@ -46,6 +45,7 @@ describe('Status', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('shows the text "Status"', () => {
@@ -106,7 +106,7 @@ describe('Status', () => {
   });
 
   describe('remove status dropdown item', () => {
-    it('is displayed when there is a status', () => {
+    it('is displayed when there is a status', async () => {
       const props = {
         isEditable: true,
         status: healthStatus.AT_RISK,
@@ -116,9 +116,8 @@ describe('Status', () => {
 
       wrapper.vm.isDropdownShowing = true;
 
-      wrapper.vm.$nextTick(() => {
-        expect(getRemoveStatusItem(wrapper).exists()).toBe(true);
-      });
+      await wrapper.vm.$nextTick();
+      expect(getRemoveStatusItem(wrapper).exists()).toBe(true);
     });
 
     it('emits an onDropdownClick event with argument null when clicked', () => {
@@ -201,12 +200,11 @@ describe('Status', () => {
         mountStatus(props);
       });
 
-      it('shows the dropdown when the Edit button is clicked', () => {
+      it('shows the dropdown when the Edit button is clicked', async () => {
         getEditButton(wrapper).trigger('click');
 
-        return Vue.nextTick().then(() => {
-          expect(getDropdownClasses(wrapper)).toContain('show');
-        });
+        await wrapper.vm.$nextTick();
+        expect(getDropdownClasses(wrapper)).toContain('show');
       });
     });
 
@@ -231,22 +229,20 @@ describe('Status', () => {
         ).toContain(message);
       });
 
-      it('hides form when the `edit` button is clicked', () => {
+      it('hides form when the `edit` button is clicked', async () => {
         getEditButton(wrapper).trigger('click');
 
-        return Vue.nextTick().then(() => {
-          expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
-        });
+        await wrapper.vm.$nextTick();
+        expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
       });
 
-      it('hides form when a dropdown item is clicked', () => {
+      it('hides form when a dropdown item is clicked', async () => {
         const dropdownItem = wrapper.findAll(GlDropdownItem).at(1);
 
         dropdownItem.vm.$emit('click');
 
-        return wrapper.vm.$nextTick().then(() => {
-          expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
-        });
+        await wrapper.vm.$nextTick();
+        expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
       });
     });
 
@@ -285,15 +281,14 @@ describe('Status', () => {
       // Test that "onTrack", "needsAttention", and "atRisk" values are emitted when form is submitted
       it.each(getIterableArray(Object.values(healthStatus)))(
         'emits onFormSubmit event with argument "%s" when user selects the option and submits form',
-        (status, index) => {
+        async (status, index) => {
           wrapper
             .findAll(GlDropdownItem)
             .at(index + 1)
             .vm.$emit('click', { preventDefault: () => null });
 
-          return Vue.nextTick().then(() => {
-            expect(wrapper.emitted().onDropdownClick[0]).toEqual([status]);
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.emitted().onDropdownClick[0]).toEqual([status]);
         },
       );
     });

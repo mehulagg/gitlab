@@ -1,7 +1,0 @@
----
-name: security_on_demand_scans_feature_flag
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/32994
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/237796
-group: group::dynamic analysis
-type: development
-default_enabled: true

@@ -4,6 +4,8 @@ module API
   class Experiments < ::API::Base
     before { authorize_read_experiments! }
 
+    feature_category :product_analytics
+
     resource :experiments do
       desc 'Get a list of all experiments' do
         success EE::API::Entities::Experiment

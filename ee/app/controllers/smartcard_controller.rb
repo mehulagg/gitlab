@@ -64,7 +64,7 @@ class SmartcardController < ApplicationController
     end
 
     store_active_session
-    log_audit_event(user, with: certificate.auth_method)
+    log_audit_event(user, with: certificate.auth_method, ip_address: request.remote_ip)
     sign_in_and_redirect(user)
   end
 

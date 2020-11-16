@@ -2,6 +2,7 @@
 name: trial_form_phone_optional
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24449
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/224606
-group: group::conversion
+milestone: '13.0'
 type: development
+group: group::conversion
 default_enabled: false

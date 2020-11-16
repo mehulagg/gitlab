@@ -39,7 +39,25 @@ module EE
         nav_tabs << :project_insights
       end
 
+      if can?(current_user, :read_requirement, project)
+        nav_tabs << :requirements
+      end
+
       nav_tabs
+    end
+
+    override :project_permissions_settings
+    def project_permissions_settings(project)
+      super.merge(
+        requirementsAccessLevel: project.requirements_access_level
+      )
+    end
+
+    override :project_permissions_panel_data
+    def project_permissions_panel_data(project)
+      super.merge(
+        requirementsAvailable: project.feature_available?(:requirements)
+      )
     end
 
     override :default_url_to_repo
@@ -135,6 +153,7 @@ module EE
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index
@@ -193,8 +212,10 @@ module EE
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
+          project_full_path: project.full_path
+        }.merge!(security_dashboard_pipeline_data(project))
       else
         {
           has_vulnerabilities: 'true',
@@ -208,7 +229,8 @@ module EE
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
-          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix')
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
@@ -244,8 +266,7 @@ module EE
       !!current_user &&
         ::Gitlab.com? &&
         !project.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_namespace, project.root_ancestor) &&
-        current_user.ab_feature_enabled?(:discover_security)
+        can?(current_user, :admin_namespace, project.root_ancestor)
     end
 
     override :can_import_members?
@@ -254,7 +275,7 @@ module EE
     end
 
     def show_compliance_framework_badge?(project)
-      project&.compliance_framework_setting&.present?
+      project&.compliance_framework_setting&.compliance_management_framework.present?
     end
 
     def scheduled_for_deletion?(project)

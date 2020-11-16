@@ -34,6 +34,9 @@ module Vulnerabilities
       preload(:author, :comment_author, :project, :issue, :merge_request, :pipeline)
     end
 
+    after_save :touch_pipeline, if: :for_dismissal?
+    after_destroy :touch_pipeline, if: :for_dismissal?
+
     # TODO remove once filtered data has been cleaned
     def self.only_valid_feedback
       pipeline = Ci::Pipeline.arel_table
@@ -82,6 +85,18 @@ module Vulnerabilities
         category: category,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def touch_pipeline
+      pipeline&.touch
+    end
+
+    def finding
+      Finding.find_by(
+        project_id: project_id,
+        report_type: category,
+        project_fingerprint: project_fingerprint
+      )
     end
   end
 end

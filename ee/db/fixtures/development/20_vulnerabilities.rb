@@ -67,7 +67,7 @@ class Gitlab::Seeder::Vulnerabilities
   def create_occurrence(vulnerability, rank, primary_identifier)
     scanner = FactoryBot.create(:vulnerabilities_scanner, project: vulnerability.project)
     FactoryBot.create(
-      :vulnerabilities_occurrence,
+      :vulnerabilities_finding,
       project: project,
       vulnerability: vulnerability,
       scanner: scanner,

@@ -64,11 +64,11 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
     params.merge( { 'analyzers' =>
                     [
                       {
-                        'name' =>  "brakeman",
+                        'name' =>  "flawfinder",
                         'enabled' =>  true
                       },
                       {
-                        'name' =>  "flawfinder",
+                        'name' =>  "brakeman",
                         'enabled' =>  true
                       }
                     ] }
@@ -302,6 +302,20 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
       it 'generates the correct YML' do
         expect(result.first[:content]).to eq(auto_devops_with_custom_stage)
       end
+    end
+  end
+
+  describe 'Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS' do
+    subject(:variable) {Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS}
+
+    it 'is sorted alphabetically' do
+      sorted_variable = Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS
+        .split(',')
+        .map(&:strip)
+        .sort
+        .join(', ')
+
+      expect(variable).to eq(sorted_variable)
     end
   end
 

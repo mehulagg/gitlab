@@ -4,6 +4,8 @@ module API
   class AuditEvents < ::API::Base
     include ::API::PaginationParams
 
+    feature_category :audit_events
+
     before do
       authenticated_as_admin!
       forbidden! unless ::License.feature_available?(:admin_audit_log)

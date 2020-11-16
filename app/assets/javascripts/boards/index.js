@@ -1,6 +1,5 @@
 import Vue from 'vue';
-import { mapActions, mapState } from 'vuex';
-import { GlTooltip, GlButton } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
@@ -19,6 +18,7 @@ import {
 
 import VueApollo from 'vue-apollo';
 import BoardContent from '~/boards/components/board_content.vue';
+import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
@@ -86,10 +86,17 @@ export default () => {
       boardId: $boardApp.dataset.boardId,
       groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
+      currentUserId: gon.current_user_id || null,
       canUpdate: $boardApp.dataset.canUpdate,
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
+      timeTrackingLimitToHours: parseBoolean($boardApp.dataset.timeTrackingLimitToHours),
+      weightFeatureAvailable: parseBoolean($boardApp.dataset.weightFeatureAvailable),
+      boardWeight: $boardApp.dataset.boardWeight
+        ? parseInt($boardApp.dataset.boardWeight, 10)
+        : null,
+      scopedLabelsAvailable: parseBoolean($boardApp.dataset.scopedLabels),
     },
     store,
     apolloProvider,
@@ -108,6 +115,7 @@ export default () => {
     },
     computed: {
       ...mapState(['isShowingEpicsSwimlanes']),
+      ...mapGetters(['shouldUseGraphQL']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
@@ -153,7 +161,7 @@ export default () => {
 
       boardsStore.disabled = this.disabled;
 
-      if (!gon.features.graphqlBoardLists) {
+      if (!this.shouldUseGraphQL) {
         this.initialBoardLoad();
       }
     },
@@ -299,10 +307,6 @@ export default () => {
     // eslint-disable-next-line no-new
     new Vue({
       el: issueBoardsModal,
-      components: {
-        GlTooltip,
-        GlButton,
-      },
       mixins: [modalMixin],
       data() {
         return {
@@ -319,13 +323,6 @@ export default () => {
           }
           return !this.store.lists.filter(list => !list.preset).length;
         },
-        tooltipTitle() {
-          if (this.disabled) {
-            return __('Please add a list to your board first');
-          }
-
-          return '';
-        },
       },
       methods: {
         openModal() {
@@ -334,29 +331,15 @@ export default () => {
           }
         },
       },
-      template: `
-        <div class="board-extra-actions">
-          <span ref="addIssuesButtonTooltip" class="gl-ml-3">
-            <gl-button
-              type="button"
-              data-placement="bottom"
-              data-track-event="click_button"
-              data-track-label="board_add_issues"
-              :disabled="disabled"
-              :aria-disabled="disabled"
-              v-if="canAdminList"
-              @click="openModal">
-              Add issues
-            </button>
-          </span>
-          <gl-tooltip
-            v-if="disabled"
-            :target="() => $refs.addIssuesButtonTooltip"
-            placement="bottom">
-            {{tooltipTitle}}
-          </gl-tooltip>
-        </div>
-      `,
+      render(createElement) {
+        return createElement(BoardExtraActions, {
+          props: {
+            canAdminList: this.$options.el.hasAttribute('data-can-admin-list'),
+            openModal: this.openModal,
+            disabled: this.disabled,
+          },
+        });
+      },
     });
   }
 

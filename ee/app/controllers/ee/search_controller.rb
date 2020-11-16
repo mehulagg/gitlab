@@ -3,6 +3,7 @@
 module EE
   module SearchController
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       # track unique users of advanced global search
@@ -17,6 +18,15 @@ module EE
     end
 
     private
+
+    override :default_sort
+    def default_sort
+      if search_service.use_elasticsearch?
+        'relevant'
+      else
+        super
+      end
+    end
 
     def track_search_advanced?
       search_service.use_elasticsearch?

@@ -8,6 +8,7 @@ class Service < ApplicationRecord
   include ProjectServicesLoggable
   include DataFields
   include FromUnion
+  include EachBatch
 
   SERVICE_NAMES = %w[
     alerts asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker discord
@@ -273,6 +274,17 @@ class Service < ApplicationRecord
     end
   end
 
+  def self.inherited_descendants_from_self_or_ancestors_from(integration)
+    inherit_from_ids =
+      where(type: integration.type, group: integration.group.self_and_ancestors)
+        .or(where(type: integration.type, instance: true)).select(:id)
+
+    from_union([
+      where(type: integration.type, inherit_from_id: inherit_from_ids, group: integration.group.descendants),
+      where(type: integration.type, inherit_from_id: inherit_from_ids, project: Project.in_namespace(integration.group.self_and_descendants))
+    ])
+  end
+
   def activated?
     active
   end
@@ -294,7 +306,7 @@ class Service < ApplicationRecord
   end
 
   def initialize_properties
-    self.properties = {} if properties.nil?
+    self.properties = {} if has_attribute?(:properties) && properties.nil?
   end
 
   def title
@@ -410,8 +422,12 @@ class Service < ApplicationRecord
     ProjectServiceWorker.perform_async(id, data)
   end
 
-  def issue_tracker?
-    self.category == :issue_tracker
+  def external_issue_tracker?
+    category == :issue_tracker && active?
+  end
+
+  def external_wiki?
+    type == 'ExternalWikiService' && active?
   end
 
   # override if needed

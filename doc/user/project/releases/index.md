@@ -43,6 +43,13 @@ To view a list of releases:
   - On private projects, this number is visible to users with Reporter
     [permissions](../../permissions.md#project-members-permissions) or higher.
 
+### Sort Releases
+
+On the top right of the **Releases** page, you can use the sorting button to order releases by
+**Released date** or **Created date**. You can sort releases in ascending or descending order.
+
+![Sort Releases dropdown button](img/releases_sort_v13_6.png)
+
 ## Create a release
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32812) in GitLab 12.9. Releases can be created directly in the GitLab UI.
@@ -129,6 +136,8 @@ In the interface, to add release notes to an existing Git tag:
 > - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/39467) to edit milestones in the UI in GitLab 13.0.
 
 You can associate a release with one or more [project milestones](../milestones/index.md#project-milestones-and-group-milestones).
+
+[GitLab Premium](https://about.gitlab.com/pricing/) customers can specify [group milestones](../milestones/index.md#project-milestones-and-group-milestones) to associate with a release.
 
 You can do this in the user interface, or by including a `milestones` array in your request to
 the [Releases API](../../../api/releases/index.md#create-a-release).

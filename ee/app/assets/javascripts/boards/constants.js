@@ -6,6 +6,11 @@ export const EpicFilterType = {
   none: 'None',
 };
 
+export const IterationFilterType = {
+  any: 'Any',
+  none: 'None',
+};
+
 export const GroupByParamType = {
   epic: 'epic',
 };

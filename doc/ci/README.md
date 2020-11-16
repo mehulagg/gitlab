@@ -24,7 +24,7 @@ webcast to learn about continuous methods and how GitLab’s built-in CI can hel
 ## Overview
 
 Continuous Integration works by pushing small code chunks to your
-application's code base hosted in a Git repository, and to every
+application's codebase hosted in a Git repository, and to every
 push, run a pipeline of scripts to build, test, and validate the
 code changes before merging them into the main branch.
 
@@ -77,7 +77,7 @@ While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visua
 
 For a broader overview, see the [CI/CD getting started](quick_start/README.md) guide.
 
-Once you're familiar with how GitLab CI/CD works, see the
+After you're familiar with how GitLab CI/CD works, see the
 [`.gitlab-ci.yml` full reference](yaml/README.md)
 for all the attributes you can set and use.
 

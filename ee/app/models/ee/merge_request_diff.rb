@@ -24,8 +24,9 @@ module EE
       scope :has_external_diffs, -> { with_files.where(stored_externally: true) }
       scope :project_id_in, ->(ids) { where(merge_request_id: ::MergeRequest.where(target_project_id: ids)) }
 
-      scope :checksummed, -> { has_external_diffs.where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
-      scope :checksum_failed, -> { has_external_diffs.where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksum_failed) }
+      scope :checksummed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
+      scope :checksum_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksum_failed) }
+      scope :available_replicables, -> { has_external_diffs }
     end
 
     class_methods do
@@ -34,9 +35,9 @@ module EE
       def replicables_for_current_secondary(primary_key_in)
         node = ::Gitlab::Geo.current_node
 
-        has_external_diffs.primary_key_in(primary_key_in)
-                          .merge(selective_sync_scope(node))
-                          .merge(object_storage_scope(node))
+        available_replicables.primary_key_in(primary_key_in)
+                             .merge(selective_sync_scope(node))
+                             .merge(object_storage_scope(node))
       end
 
       private

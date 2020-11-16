@@ -106,20 +106,6 @@ RSpec.describe DastScannerProfiles::CreateService do
         end
       end
 
-      context 'when on demand scan feature is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'returns an error status' do
-          expect(status).to eq(:error)
-        end
-
-        it 'populates message' do
-          expect(message).to eq('Insufficient permissions')
-        end
-      end
-
       context 'when on demand scan licensed feature is not available' do
         before do
           stub_licensed_features(security_on_demand_scans: false)

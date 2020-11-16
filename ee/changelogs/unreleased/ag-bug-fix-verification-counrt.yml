@@ -1,0 +1,6 @@
+---
+title: Fix bug where primary was promoted even when replication/verification was not
+  complete
+merge_request: 46785
+author:
+type: fixed

@@ -153,10 +153,8 @@ class IssuableFinder
   end
 
   def row_count
-    fast_fail = Feature.enabled?(:soft_fail_count_by_state, params.group || params.project)
-
     Gitlab::IssuablesCountForState
-      .new(self, nil, fast_fail: fast_fail)
+      .new(self, nil, fast_fail: true)
       .for_state_or_opened(params[:state])
   end
 
@@ -341,6 +339,15 @@ class IssuableFinder
       cte << items
 
       items = klass.with(cte.to_arel).from(klass.table_name)
+    elsif Feature.enabled?(:pg_hint_plan_for_issuables, params.project)
+      items = items.optimizer_hints(<<~HINTS)
+        BitmapScan(
+          issues idx_issues_on_project_id_and_created_at_and_id_and_state_id
+            idx_issues_on_project_id_and_due_date_and_id_and_state_id
+            idx_issues_on_project_id_and_updated_at_and_id_and_state_id
+            index_issues_on_project_id_and_iid
+        )
+      HINTS
     end
 
     items.full_search(search, matched_columns: params[:in], use_minimum_char_limit: !use_cte_for_search?)
@@ -399,16 +406,12 @@ class IssuableFinder
     elsif params.filter_by_any_assignee?
       items.assigned
     elsif params.assignee
-      items_assigned_to(items, params.assignee)
+      items.assigned_to(params.assignee)
     elsif params.assignee_id? || params.assignee_username? # assignee not found
       items.none
     else
       items
     end
-  end
-
-  def items_assigned_to(items, user)
-    items.assigned_to(user)
   end
 
   def by_negated_assignee(items)

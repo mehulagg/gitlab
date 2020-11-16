@@ -73,22 +73,12 @@ module Mutations
         end
 
         def find_list_by_global_id(gid)
-          parsed_gid = GlobalID.parse(gid)
-          id = parsed_gid.model_id.to_i if list_accessible?(parsed_gid)
-          return unless id
+          return unless gid
 
-          List.find_by_id(id)
-        end
-
-        def list_accessible?(gid)
-          gid.app == GlobalID.app && list?(gid)
-        end
-
-        def list?(gid)
-          model_class = gid&.model_class
-          return unless model_class
-
-          model_class <= List
+          # TODO: remove this line when the compatibility layer is removed
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+          gid = ::Types::GlobalIDType[::List].coerce_isolated_input(gid)
+          List.find_by_id(gid.model_id)
         end
 
         def board

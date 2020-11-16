@@ -1,6 +1,0 @@
----
-title: Fix GitLab vendor name appearing accidentally in the security reports when
-  it's the only one
-merge_request: 45442
-author:
-type: fixed

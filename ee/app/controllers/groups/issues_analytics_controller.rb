@@ -16,8 +16,12 @@ class Groups::IssuesAnalyticsController < Groups::ApplicationController
       format.html
 
       format.json do
-        @chart_data =
-          IssuablesAnalytics.new(issuables: issuables_collection, months_back: params[:months_back]).data
+        @chart_data = if Feature.enabled?(:new_issues_analytics_chart_data, group)
+                        Analytics::IssuesAnalytics.new(issues: issuables_collection, months_back: params[:months_back])
+                          .monthly_counters
+                      else
+                        IssuablesAnalytics.new(issuables: issuables_collection, months_back: params[:months_back]).data
+                      end
 
         render json: @chart_data
       end

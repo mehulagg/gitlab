@@ -7,17 +7,18 @@ module Gitlab
 
       DEFAULT_PER_PAGE = Gitlab::SearchResults::DEFAULT_PER_PAGE
 
-      attr_reader :current_user, :query, :public_and_internal_projects, :sort, :filters
+      attr_reader :current_user, :query, :public_and_internal_projects, :order_by, :sort, :filters
 
       # Limit search results by passed projects
       # It allows us to search only for projects user has access to
       attr_reader :limit_project_ids
 
-      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, sort: nil, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, order_by: nil, sort: nil, filters: {})
         @current_user = current_user
         @query = query
         @limit_project_ids = limit_project_ids
         @public_and_internal_projects = public_and_internal_projects
+        @order_by = order_by
         @sort = sort
         @filters = filters
       end
@@ -130,15 +131,10 @@ module Gitlab
       alias_method :limited_merge_requests_count, :merge_requests_count
       alias_method :limited_milestones_count, :milestones_count
 
-      def single_commit_result?
-        false
-      end
-
       def self.parse_search_result(result, project)
         ref = result["_source"]["blob"]["commit_sha"]
         path = result["_source"]["blob"]["path"]
-        extname = File.extname(path)
-        basename = path.sub(/#{extname}$/, '')
+        basename = File.join(File.dirname(path), File.basename(path, '.*'))
         content = result["_source"]["blob"]["content"]
         project_id = result['_source']['project_id'].to_i
         total_lines = content.lines.size
@@ -146,10 +142,12 @@ module Gitlab
         highlight_content = result.dig('highlight', 'blob.content')&.first || ''
 
         found_line_number = 0
+        highlight_found = false
 
         highlight_content.each_line.each_with_index do |line, index|
           if line.include?(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG)
             found_line_number = index
+            highlight_found = true
             break
           end
         end
@@ -167,12 +165,15 @@ module Gitlab
              end
 
         data = content.lines[from..to]
+        # only send highlighted line number if a highlight was returned by Elasticsearch
+        highlight_line = highlight_found ? found_line_number + 1 : nil
 
         ::Gitlab::Search::FoundBlob.new(
           path: path,
           basename: basename,
           ref: ref,
           startline: from + 1,
+          highlight_line: highlight_line,
           data: data.join,
           project: project,
           project_id: project_id
@@ -202,6 +203,7 @@ module Gitlab
           current_user: current_user,
           project_ids: limit_project_ids,
           public_and_internal_projects: public_and_internal_projects,
+          order_by: order_by,
           sort: sort
         }
       end
@@ -214,7 +216,7 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          options = base_options.merge(filters.slice(:sort, :confidential, :state))
+          options = base_options.merge(filters.slice(:order_by, :sort, :confidential, :state))
 
           Issue.elastic_search(query, options: options)
         end
@@ -235,7 +237,7 @@ module Gitlab
 
       def merge_requests
         strong_memoize(:merge_requests) do
-          options = base_options.merge(filters.slice(:sort, :state))
+          options = base_options.merge(filters.slice(:order_by, :sort, :state))
 
           MergeRequest.elastic_search(query, options: options)
         end

@@ -136,6 +136,22 @@ RSpec.describe ApprovalWrappedRule do
         expect(subject.approved_approvers).to contain_exactly(approver1)
       end
     end
+
+    it 'avoids N+1 queries' do
+      rule = create(:approval_project_rule, project: merge_request.project, approvals_required: approvals_required)
+      rule.users = [approver1]
+
+      approved_approvers_for_rule_id(rule.id) # warm up the cache
+      control_count = ActiveRecord::QueryRecorder.new { approved_approvers_for_rule_id(rule.id) }.count
+
+      rule.users += [approver2, approver3]
+
+      expect { approved_approvers_for_rule_id(rule.id) }.not_to exceed_query_limit(control_count)
+    end
+
+    def approved_approvers_for_rule_id(rule_id)
+      described_class.new(merge_request, ApprovalProjectRule.find(rule_id)).approved_approvers
+    end
   end
 
   describe "#commented_approvers" do

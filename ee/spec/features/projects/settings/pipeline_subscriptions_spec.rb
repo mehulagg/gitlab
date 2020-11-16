@@ -56,4 +56,18 @@ RSpec.describe 'Project Subscriptions', :js do
 
     expect(page).to have_content('This project path either does not exist or you do not have access.')
   end
+
+  it 'subscription is removed successfully' do
+    within '#pipeline-subscriptions' do
+      within 'form' do
+        fill_in 'upstream_project_path', with: upstream_project.full_path
+
+        click_on 'Subscribe'
+      end
+    end
+
+    find('[data-testid="delete-subscription"]').click
+
+    expect(page).to have_content('Subscription successfully deleted.')
+  end
 end

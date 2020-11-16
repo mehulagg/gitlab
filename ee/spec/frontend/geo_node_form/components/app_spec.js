@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
+import { GlBadge } from '@gitlab/ui';
 import GeoNodeFormApp from 'ee/geo_node_form/components/app.vue';
 import GeoNodeForm from 'ee/geo_node_form/components/geo_node_form.vue';
 import { MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS } from '../mock_data';
@@ -34,9 +34,9 @@ describe('GeoNodeFormApp', () => {
 
     describe.each`
       formType                     | node                  | title              | pillTitle      | variant
-      ${'create a secondary node'} | ${null}               | ${'Add New Node'}  | ${'Secondary'} | ${'light'}
-      ${'update a secondary node'} | ${{ primary: false }} | ${'Edit Geo Node'} | ${'Secondary'} | ${'light'}
-      ${'update a primary node'}   | ${{ primary: true }}  | ${'Edit Geo Node'} | ${'Primary'}   | ${'primary'}
+      ${'create a secondary node'} | ${null}               | ${'Add New Node'}  | ${'Secondary'} | ${'muted'}
+      ${'update a secondary node'} | ${{ primary: false }} | ${'Edit Geo Node'} | ${'Secondary'} | ${'muted'}
+      ${'update a primary node'}   | ${{ primary: true }}  | ${'Edit Geo Node'} | ${'Primary'}   | ${'info'}
     `(`form header`, ({ formType, node, title, pillTitle, variant }) => {
       describe(`when node form is to ${formType}`, () => {
         beforeEach(() => {

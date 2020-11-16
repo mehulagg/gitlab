@@ -12,6 +12,11 @@ module Projects
     # as it shares the namespace with groups
     TMP_EXTRACT_PATH = '@pages.tmp'
 
+    # old deployment can be cached by pages daemon
+    # so we need to give pages daemon some time update cache
+    # 10 minutes is enough, but 30 feels safer
+    OLD_DEPLOYMENTS_DESTRUCTION_DELAY = 30.minutes.freeze
+
     attr_reader :build
 
     def initialize(project, build)
@@ -97,7 +102,7 @@ module Projects
       build.artifacts_file.use_file do |artifacts_path|
         SafeZip::Extract.new(artifacts_path)
           .extract(directories: [PUBLIC_DIR], to: temp_path)
-        create_pages_deployment(artifacts_path)
+        create_pages_deployment(artifacts_path, build)
       end
     rescue SafeZip::Extract::Error => e
       raise FailedToExtractError, e.message
@@ -119,15 +124,28 @@ module Projects
       FileUtils.rm_r(previous_public_path, force: true)
     end
 
-    def create_pages_deployment(artifacts_path)
+    def create_pages_deployment(artifacts_path, build)
       return unless Feature.enabled?(:zip_pages_deployments, project)
 
+      # we're using the full archive and pages daemon needs to read it
+      # so we want the total count from entries, not only "public/" directory
+      # because it better approximates work we need to do before we can serve the site
+      entries_count = build.artifacts_metadata_entry("", recursive: true).entries.count
+      sha256 = build.job_artifacts_archive.file_sha256
+
+      deployment = nil
       File.open(artifacts_path) do |file|
-        deployment = project.pages_deployments.create!(file: file)
-        project.pages_metadatum.update!(pages_deployment: deployment)
+        deployment = project.pages_deployments.create!(file: file,
+                                                       file_count: entries_count,
+                                                       file_sha256: sha256)
+        project.update_pages_deployment!(deployment)
       end
 
-      # TODO: schedule old deployment removal https://gitlab.com/gitlab-org/gitlab/-/issues/235730
+      DestroyPagesDeploymentsWorker.perform_in(
+        OLD_DEPLOYMENTS_DESTRUCTION_DELAY,
+        project.id,
+        deployment.id
+      )
     rescue => e
       # we don't want to break current pages deployment process if something goes wrong
       # TODO: remove this rescue as part of https://gitlab.com/gitlab-org/gitlab/-/issues/245308

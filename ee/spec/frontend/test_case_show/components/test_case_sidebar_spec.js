@@ -7,6 +7,7 @@ import { mockCurrentUserTodo, mockLabels } from 'jest/issuable_list/mock_data';
 import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
 
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
+import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 
@@ -41,6 +42,7 @@ describe('TestCaseSidebar', () => {
   let wrapper;
 
   beforeEach(() => {
+    setFixtures('<aside class="right-sidebar"></aside>');
     mousetrapSpy = jest.spyOn(Mousetrap, 'bind');
     wrapper = createComponent();
   });
@@ -74,6 +76,25 @@ describe('TestCaseSidebar', () => {
       `('computed prop `$propName` returns $propValue', ({ propName, propValue }) => {
         expect(wrapper.vm[propName]).toBe(propValue);
       });
+    });
+
+    describe('selectProjectDropdownButtonTitle', () => {
+      it.each`
+        testCaseMoveInProgress | returnValue
+        ${true}                | ${'Moving test case'}
+        ${false}               | ${'Move test case'}
+      `(
+        'returns $returnValue when testCaseMoveInProgress is $testCaseMoveInProgress',
+        async ({ testCaseMoveInProgress, returnValue }) => {
+          wrapper.setData({
+            testCaseMoveInProgress,
+          });
+
+          await wrapper.vm.$nextTick();
+
+          expect(wrapper.vm.selectProjectDropdownButtonTitle).toBe(returnValue);
+        },
+      );
     });
   });
 
@@ -129,23 +150,7 @@ describe('TestCaseSidebar', () => {
       });
     });
 
-    describe('handleLabelsDropdownClose', () => {
-      it('sets `sidebarExpandedOnClick` to false and calls `toggleSidebar` method when `sidebarExpandedOnClick` is true', async () => {
-        jest.spyOn(wrapper.vm, 'toggleSidebar').mockImplementation(jest.fn());
-        wrapper.setData({
-          sidebarExpandedOnClick: true,
-        });
-
-        await wrapper.vm.$nextTick();
-
-        wrapper.vm.handleLabelsDropdownClose();
-
-        expect(wrapper.vm.sidebarExpandedOnClick).toBe(false);
-        expect(wrapper.vm.toggleSidebar).toHaveBeenCalled();
-      });
-    });
-
-    describe('handleLabelsCollapsedButtonClick', () => {
+    describe('expandSidebarAndOpenDropdown', () => {
       beforeEach(() => {
         setFixtures(`
           <div class="js-labels-block">
@@ -162,7 +167,7 @@ describe('TestCaseSidebar', () => {
 
         await wrapper.vm.$nextTick();
 
-        wrapper.vm.handleLabelsCollapsedButtonClick();
+        wrapper.vm.expandSidebarAndOpenDropdown('.js-labels-block .js-sidebar-dropdown-toggle');
 
         expect(wrapper.vm.toggleSidebar).toHaveBeenCalled();
         expect(wrapper.vm.sidebarExpandedOnClick).toBe(true);
@@ -178,9 +183,11 @@ describe('TestCaseSidebar', () => {
 
         await wrapper.vm.$nextTick();
 
-        wrapper.vm.handleLabelsCollapsedButtonClick();
+        wrapper.vm.expandSidebarAndOpenDropdown('.js-labels-block .js-sidebar-dropdown-toggle');
 
         await wrapper.vm.$nextTick();
+
+        wrapper.vm.sidebarEl.dispatchEvent(new Event('transitionend'));
 
         expect(buttonEl.dispatchEvent).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -189,6 +196,22 @@ describe('TestCaseSidebar', () => {
             cancelable: false,
           }),
         );
+      });
+    });
+
+    describe('handleSidebarDropdownClose', () => {
+      it('sets `sidebarExpandedOnClick` to false and calls `toggleSidebar` method when `sidebarExpandedOnClick` is true', async () => {
+        jest.spyOn(wrapper.vm, 'toggleSidebar').mockImplementation(jest.fn());
+        wrapper.setData({
+          sidebarExpandedOnClick: true,
+        });
+
+        await wrapper.vm.$nextTick();
+
+        wrapper.vm.handleSidebarDropdownClose();
+
+        expect(wrapper.vm.sidebarExpandedOnClick).toBe(false);
+        expect(wrapper.vm.toggleSidebar).toHaveBeenCalled();
       });
     });
 
@@ -280,6 +303,20 @@ describe('TestCaseSidebar', () => {
         labelsSelectInProgress: testCaseLabelsSelectInProgress,
       });
       expect(labelSelectEl.text()).toBe('None');
+    });
+
+    it('renders project-select', async () => {
+      const { selectProjectDropdownButtonTitle, testCaseMoveInProgress } = wrapper.vm;
+      const { projectsFetchPath } = mockProvide;
+      const projectSelectEl = wrapper.find(ProjectSelect);
+
+      expect(projectSelectEl.exists()).toBe(true);
+      expect(projectSelectEl.props()).toMatchObject({
+        projectsFetchPath,
+        dropdownButtonTitle: selectProjectDropdownButtonTitle,
+        dropdownHeaderTitle: 'Move test case',
+        moveInProgress: testCaseMoveInProgress,
+      });
     });
   });
 });

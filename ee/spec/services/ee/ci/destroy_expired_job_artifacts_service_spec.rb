@@ -63,10 +63,10 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
     context 'when failed to destroy artifact' do
       before do
         stub_const('Ci::DestroyExpiredJobArtifactsService::LOOP_LIMIT', 10)
-
-        allow_next_found_instance_of(Ci::JobArtifact) do |artifact|
-          allow(artifact).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-        end
+        expect(Ci::DeletedObject)
+          .to receive(:bulk_import)
+          .once
+          .and_raise(ActiveRecord::RecordNotDestroyed)
       end
 
       it 'raises an exception and stop destroying' do

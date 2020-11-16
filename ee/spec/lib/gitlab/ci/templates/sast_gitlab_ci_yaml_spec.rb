@@ -31,12 +31,26 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
         end
       end
 
+      context 'when SAST_EXPERIMENTAL_FEATURES is disabled for iOS projects' do
+        let(:files) { { 'a.xcodeproj/x.pbxproj' => '' } }
+
+        before do
+          create(:ci_variable, project: project, key: 'SAST_EXPERIMENTAL_FEATURES', value: 'false')
+        end
+
+        it 'includes no jobs' do
+          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
+      end
+
       context 'by default' do
         describe 'language detection' do
           using RSpec::Parameterized::TableSyntax
 
           where(:case_name, :files, :variables, :include_build_names) do
             'Android'              | { 'AndroidManifest.xml' => '', 'a.java' => '' } | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
+            'Android'              | { 'app/src/main/AndroidManifest.xml' => '' }    | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
+            'Android'              | { 'a/b/AndroidManifest.xml' => '' }             | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
             'Apex'                 | { 'app.cls' => '' }                             | {}                                         | %w(pmd-apex-sast)
             'C'                    | { 'app.c' => '' }                               | {}                                         | %w(flawfinder-sast)
             'C++'                  | { 'app.cpp' => '' }                             | {}                                         | %w(flawfinder-sast)

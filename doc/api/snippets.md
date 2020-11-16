@@ -21,7 +21,7 @@ Valid values for snippet visibility levels are:
 | Visibility | Description                                         |
 |:-----------|:----------------------------------------------------|
 | `private`  | Snippet is visible only to the snippet creator.     |
-| `internal` | Snippet is visible for any logged in user.          |
+| `internal` | Snippet is visible for any logged in user except [external users](../user/permissions.md#external-users).          |
 | `public`   | Snippet can be accessed without any authentication. |
 
 ## List all snippets for a user
@@ -222,7 +222,7 @@ curl --request POST "https://gitlab.example.com/api/v4/snippets" \
 
 ```json
 {
-  "title": "This is a snippet", 
+  "title": "This is a snippet",
   "description": "Hello World snippet",
   "visibility": "internal",
   "files": [
@@ -310,10 +310,10 @@ curl --request PUT "https://gitlab.example.com/api/v4/snippets/1" \
 
 ```json
 {
-  "title": "foo", 
+  "title": "foo",
   "files": [
     {
-      "action": "move", 
+      "action": "move",
       "previous_path": "test.txt",
       "file_path": "renamed.md"
     }

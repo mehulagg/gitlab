@@ -1,6 +1,6 @@
 <script>
 import { escape, isEmpty } from 'lodash';
-import { GlTooltipDirective, GlLink, GlDeprecatedBadge as GlBadge, GlIcon } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlBadge, GlIcon } from '@gitlab/ui';
 import Alerts from 'ee/vue_shared/dashboards/components/alerts.vue';
 import TimeAgo from 'ee/vue_shared/dashboards/components/time_ago.vue';
 import { STATUS_FAILED } from 'ee/vue_shared/dashboards/constants';
@@ -147,7 +147,7 @@ export default {
             >
               {{ buildName }}
             </gl-link>
-            <gl-badge v-else v-gl-tooltip="jobTooltip" variant="primary">{{ buildName }}</gl-badge>
+            <gl-badge v-else v-gl-tooltip="jobTooltip" variant="info">{{ buildName }}</gl-badge>
           </div>
           <commit
             :tag="lastDeployment.tag"

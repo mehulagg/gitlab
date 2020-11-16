@@ -74,7 +74,14 @@ module EE
 
       scope :managed_by, ->(group) { where(managing_group: group) }
 
-      scope :excluding_guests, -> { joins(:members).merge(::Member.non_guests).distinct }
+      scope :excluding_guests, -> do
+        subquery = ::Member
+          .select(1)
+          .where(::Member.arel_table[:user_id].eq(::User.arel_table[:id]))
+          .merge(::Member.non_guests)
+
+        where('EXISTS (?)', subquery)
+      end
 
       scope :subscribed_for_admin_email, -> { where(admin_email_unsubscribed_at: nil) }
       scope :ldap, -> { joins(:identities).where('identities.provider LIKE ?', 'ldap%') }
@@ -139,6 +146,16 @@ module EE
         else
           all
         end
+      end
+
+      def billable
+        scope = active.without_bots
+
+        License.with_valid_license do |license|
+          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
+        end
+
+        scope
       end
     end
 
@@ -308,29 +325,6 @@ module EE
       super
     end
 
-    def ab_feature_enabled?(feature, percentage: nil)
-      return false unless ::Gitlab.com?
-      return false if ::Gitlab::Geo.secondary?
-
-      raise "Currently only discover_security feature is supported" unless feature == :discover_security
-
-      return false unless ::Feature.enabled?(feature)
-
-      filter = user_preference.feature_filter_type.presence || 0
-
-      # We use a 2nd feature flag for control as enabled and percentage_of_time for chatops
-      flipper_feature = ::Feature.get((feature.to_s + '_control').to_sym) # rubocop:disable Gitlab/AvoidFeatureGet
-      percentage ||= flipper_feature&.percentage_of_time_value || 0
-      return false if percentage <= 0
-
-      if filter == UserPreference::FEATURE_FILTER_UNKNOWN
-        filter = SecureRandom.rand * 100 <= percentage ? UserPreference::FEATURE_FILTER_EXPERIMENT : UserPreference::FEATURE_FILTER_CONTROL
-        user_preference.update_column :feature_filter_type, filter
-      end
-
-      filter == UserPreference::FEATURE_FILTER_EXPERIMENT
-    end
-
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
         ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
@@ -345,7 +339,7 @@ module EE
 
     def gitlab_service_user?
       strong_memoize(:gitlab_service_user) do
-        service_user? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+        service_user? && ::Gitlab::Com.gitlab_com_group_member?(id)
       end
     end
 
@@ -369,9 +363,8 @@ module EE
     def authorized_groups
       ::Group.unscoped do
         ::Group.from_union([
-          groups,
-          available_minimal_access_groups,
-          authorized_projects.joins(:namespace).select('namespaces.*')
+          super,
+          available_minimal_access_groups
         ])
       end
     end

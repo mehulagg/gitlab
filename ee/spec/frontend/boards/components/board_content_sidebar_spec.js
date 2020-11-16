@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils';
 import { GlDrawer } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
-import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
+import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { createStore } from '~/boards/stores';
 import { ISSUABLE } from '~/boards/constants';
@@ -14,13 +14,17 @@ describe('ee/BoardContentSidebar', () => {
   const createComponent = () => {
     wrapper = mount(BoardContentSidebar, {
       provide: {
+        canUpdate: true,
         rootPath: '',
       },
       store,
       stubs: {
         'board-sidebar-epic-select': '<div></div>',
+        'board-sidebar-time-tracker': '<div></div>',
         'board-sidebar-weight-input': '<div></div>',
         'board-sidebar-labels-select': '<div></div>',
+        'board-sidebar-due-date': '<div></div>',
+        'board-sidebar-subscription': '<div></div>',
       },
     });
   };
@@ -52,7 +56,7 @@ describe('ee/BoardContentSidebar', () => {
   });
 
   it('renders IssuableAssignees', () => {
-    expect(wrapper.find(IssuableAssignees).exists()).toBe(true);
+    expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

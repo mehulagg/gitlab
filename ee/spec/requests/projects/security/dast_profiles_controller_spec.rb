@@ -9,7 +9,6 @@ RSpec.describe Projects::Security::DastProfilesController, type: :request do
   describe 'GET #index' do
     context 'feature available' do
       before do
-        stub_feature_flags(security_on_demand_scans_feature_flag: true)
         stub_licensed_features(security_on_demand_scans: true)
       end
 
@@ -49,19 +48,8 @@ RSpec.describe Projects::Security::DastProfilesController, type: :request do
         login_as(user)
       end
 
-      context 'feature flag is disabled' do
-        it 'sees a 404 error' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-          stub_licensed_features(security_on_demand_scans: true)
-          get project_security_configuration_dast_profiles_path(project)
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
-
       context 'license doesnt\'t support the feature' do
         it 'sees a 404 error' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: true)
           stub_licensed_features(security_on_demand_scans: false)
           get project_security_configuration_dast_profiles_path(project)
 

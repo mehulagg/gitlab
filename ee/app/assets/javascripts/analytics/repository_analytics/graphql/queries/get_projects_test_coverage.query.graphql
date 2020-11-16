@@ -1,12 +1,16 @@
 query getProjectsTestCoverage($projectIds: [ID!]) {
   projects(ids: $projectIds) {
     nodes {
+      fullPath
       id
       name
-      codeCoverage @client {
-        average
-        count
-        lastUpdatedAt
+      repository {
+        rootRef
+      }
+      codeCoverageSummary {
+        averageCoverage
+        coverageCount
+        lastUpdatedOn
       }
     }
   }

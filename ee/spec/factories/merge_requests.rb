@@ -157,6 +157,18 @@ FactoryBot.define do
       end
     end
 
+    trait :with_api_fuzzing_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ee_ci_pipeline,
+          :success,
+          :with_api_fuzzing_report,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
     trait :with_dast_reports do
       after(:build) do |merge_request|
         merge_request.head_pipeline = build(

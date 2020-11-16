@@ -5,6 +5,9 @@
 #
 # By default it creates the hash only for the last 12 months including the current month, but it accepts
 # a parameter to get issuables for n months back.
+#
+# This class should be removed together with feature flag :new_issues_analytics_chart_data when
+# :new_issues_analytics_chart_data becomes default behavior
 class IssuablesAnalytics
   include Gitlab::Utils::StrongMemoize
 

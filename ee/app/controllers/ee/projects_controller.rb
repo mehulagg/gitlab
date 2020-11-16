@@ -47,6 +47,11 @@ module EE
       end
     end
 
+    override :project_feature_attributes
+    def project_feature_attributes
+      super + [:requirements_access_level]
+    end
+
     override :project_params_attributes
     def project_params_attributes
       super + project_params_ee
@@ -90,6 +95,10 @@ module EE
       attrs += merge_request_rules_params
 
       attrs += compliance_framework_params
+
+      if ::Gitlab::Ci::Features.auto_rollback_available?(project)
+        attrs << :auto_rollback_enabled
+      end
 
       if allow_mirror_params?
         attrs + mirror_params

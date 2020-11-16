@@ -16,7 +16,7 @@ RSpec.describe ::EE::API::Entities::Project do
       let(:project) { create(:project, :with_sox_compliance_framework) }
 
       it 'is an array containing a single compliance framework' do
-        expect(subject[:compliance_frameworks]).to contain_exactly('sox')
+        expect(subject[:compliance_frameworks]).to contain_exactly('SOX')
       end
     end
 

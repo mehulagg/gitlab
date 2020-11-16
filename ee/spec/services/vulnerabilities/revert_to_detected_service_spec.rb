@@ -18,12 +18,11 @@ RSpec.describe Vulnerabilities::RevertToDetectedService do
 
   shared_examples 'reverts vulnerability' do
     it 'reverts a vulnerability and its associated findings to detected state' do
-      Timecop.freeze do
+      freeze_time do
         revert_vulnerability_to_detected
 
         expect(vulnerability.reload).to(
           have_attributes(state: 'detected', dismissed_by: nil, dismissed_at: nil, resolved_by: nil, resolved_at: nil, confirmed_by: nil, confirmed_at: nil))
-        expect(vulnerability.findings).to all not_have_vulnerability_dismissal_feedback
       end
     end
 
@@ -34,6 +33,7 @@ RSpec.describe Vulnerabilities::RevertToDetectedService do
     end
 
     it_behaves_like 'calls vulnerability statistics utility services in order'
+    it_behaves_like 'removes dismissal feedback from associated findings'
   end
 
   context 'with an authorized user with proper permissions' do
@@ -59,23 +59,6 @@ RSpec.describe Vulnerabilities::RevertToDetectedService do
       include_examples 'reverts vulnerability'
     end
 
-    context 'when there is an error' do
-      let(:broken_finding) { vulnerability.findings.first }
-
-      let!(:dismissal_feedback) do
-        create(:vulnerability_feedback, :dismissal, project: broken_finding.project, project_fingerprint: broken_finding.project_fingerprint)
-      end
-
-      before do
-        allow(service).to receive(:destroy_feedback_for).and_return(false)
-      end
-
-      it 'responds with error' do
-        expect(revert_vulnerability_to_detected.errors.messages).to eq(
-          base: ["failed to revert associated finding(id=#{broken_finding.id}) to detected"])
-      end
-    end
-
     context 'when security dashboard feature is disabled' do
       before do
         stub_licensed_features(security_dashboard: false)
@@ -88,7 +71,12 @@ RSpec.describe Vulnerabilities::RevertToDetectedService do
   end
 
   describe 'permissions' do
-    it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:admin) }
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:admin) }
+    end
+    context 'when admin mode is disabled' do
+      it { expect { revert_vulnerability_to_detected }.to be_denied_for(:admin) }
+    end
     it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:owner).of(project) }
     it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:maintainer).of(project) }
     it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:developer).of(project) }

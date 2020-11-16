@@ -13,6 +13,7 @@ module QA
                 view 'ee/app/views/layouts/nav/sidebar/_project_security_link.html.haml' do
                   element :security_dashboard_link
                   element :dependency_list_link
+                  element :vulnerability_report_link
                 end
               end
             end
@@ -27,6 +28,14 @@ module QA
               hover_security_compliance do
                 within_submenu do
                   click_element(:dependency_list_link)
+                end
+              end
+            end
+
+            def click_on_vulnerability_report
+              hover_security_compliance do
+                within_submenu do
+                  click_element(:vulnerability_report_link)
                 end
               end
             end

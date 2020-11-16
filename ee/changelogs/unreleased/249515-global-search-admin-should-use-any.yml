@@ -1,5 +1,0 @@
----
-title: Fix poor performance with global search across entire instance
-merge_request: 42437
-author:
-type: performance

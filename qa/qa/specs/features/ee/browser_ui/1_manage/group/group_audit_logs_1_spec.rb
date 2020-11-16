@@ -85,7 +85,7 @@ module QA
         it_behaves_like 'audit event', ['Changed name']
       end
 
-      context 'Add user, change access level, remove user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/734' do
+      context 'Add user, change access level, remove user', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/734' do
         before do
           sign_in
           group.visit!

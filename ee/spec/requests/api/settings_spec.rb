@@ -67,6 +67,31 @@ RSpec.describe API::Settings, 'EE Settings' do
         expect(ElasticsearchIndexedProject.count).to eq(1)
       end
     end
+
+    context 'secret_detection_token_revocation_enabled is true' do
+      context 'secret_detection_token_revocation_url value is present' do
+        it 'updates secret_detection_token_revocation_url' do
+          put api('/application/settings', admin),
+            params: {
+              secret_detection_token_revocation_enabled: true,
+              secret_detection_token_revocation_url: 'https://example.com/secret_detection_token_revocation'
+            }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['secret_detection_token_revocation_enabled']).to be(true)
+          expect(json_response['secret_detection_token_revocation_url']).to eq('https://example.com/secret_detection_token_revocation')
+        end
+      end
+
+      context 'missing secret_detection_token_revocation_url value' do
+        it 'returns a blank parameter error message' do
+          put api('/application/settings', admin), params: { secret_detection_token_revocation_enabled: true }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['error']).to include('secret_detection_token_revocation_url is missing')
+        end
+      end
+    end
   end
 
   shared_examples 'settings for licensed features' do

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::Experiments do
   let_it_be(:user) { create(:user) }
-  let_it_be(:group) { create(:group, name: 'gitlab-com') }
+  let_it_be(:group) { create(:group, name: 'GitLab.com', path: 'gitlab-com') }
 
   describe 'GET /experiments' do
     context 'when on .com' do

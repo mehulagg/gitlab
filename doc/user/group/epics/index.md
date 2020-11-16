@@ -1,7 +1,7 @@
 ---
 type: reference, howto
 stage: Plan
-group: Portfolio Management
+group: Product Planning
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -177,7 +177,7 @@ You can also consult the [group permissions table](../../permissions.md#group-me
 
 Once you write your comment, you can either:
 
-- Click **Comment** to publish your comment. 
+- Click **Comment** to publish your comment.
 - Click **Start thread** to start a thread within that epic's discussion.
 
 ### Activity sort order

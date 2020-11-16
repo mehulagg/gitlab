@@ -6,6 +6,11 @@ import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__, n__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
+import {
+  FEEDBACK_TYPE_DISMISSAL,
+  FEEDBACK_TYPE_ISSUE,
+  FEEDBACK_TYPE_MERGE_REQUEST,
+} from '~/vue_shared/security_reports/constants';
 import * as types from './mutation_types';
 
 /**
@@ -25,42 +30,6 @@ export const setSourceBranch = ({ commit }, ref) => commit(types.SET_SOURCE_BRAN
 
 export const setVulnerabilitiesEndpoint = ({ commit }, endpoint) => {
   commit(types.SET_VULNERABILITIES_ENDPOINT, endpoint);
-};
-
-export const setVulnerabilitiesCountEndpoint = ({ commit }, endpoint) => {
-  commit(types.SET_VULNERABILITIES_COUNT_ENDPOINT, endpoint);
-};
-
-export const fetchVulnerabilitiesCount = ({ state, dispatch }, params = {}) => {
-  if (!state.vulnerabilitiesCountEndpoint) {
-    return;
-  }
-  dispatch('requestVulnerabilitiesCount');
-
-  axios({
-    method: 'GET',
-    url: state.vulnerabilitiesCountEndpoint,
-    params,
-  })
-    .then(response => {
-      const { data } = response;
-      dispatch('receiveVulnerabilitiesCountSuccess', { data });
-    })
-    .catch(() => {
-      dispatch('receiveVulnerabilitiesCountError');
-    });
-};
-
-export const requestVulnerabilitiesCount = ({ commit }) => {
-  commit(types.REQUEST_VULNERABILITIES_COUNT);
-};
-
-export const receiveVulnerabilitiesCountSuccess = ({ commit }, { data }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS, data);
-};
-
-export const receiveVulnerabilitiesCountError = ({ commit }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_ERROR);
 };
 
 export const setVulnerabilitiesPage = ({ commit }, page) => {
@@ -119,7 +88,7 @@ export const createIssue = ({ dispatch }, { vulnerability, flashError }) => {
   axios
     .post(vulnerability.create_vulnerability_feedback_issue_path, {
       vulnerability_feedback: {
-        feedback_type: 'issue',
+        feedback_type: FEEDBACK_TYPE_ISSUE,
         category: vulnerability.report_type,
         project_fingerprint: vulnerability.project_fingerprint,
         vulnerability_data: {
@@ -183,7 +152,7 @@ export const dismissSelectedVulnerabilities = ({ dispatch, state }, { comment } 
       vulnerability_feedback: {
         category: vulnerability.report_type,
         comment,
-        feedback_type: 'dismissal',
+        feedback_type: FEEDBACK_TYPE_DISMISSAL,
         project_fingerprint: vulnerability.project_fingerprint,
         vulnerability_data: {
           id: vulnerability.id,
@@ -268,7 +237,7 @@ export const dismissVulnerability = (
       vulnerability_feedback: {
         category: vulnerability.report_type,
         comment,
-        feedback_type: 'dismissal',
+        feedback_type: FEEDBACK_TYPE_DISMISSAL,
         pipeline_id: state.pipelineId,
         project_fingerprint: vulnerability.project_fingerprint,
         vulnerability_data: {
@@ -470,7 +439,7 @@ export const createMergeRequest = ({ state, dispatch }, { vulnerability, flashEr
   axios
     .post(create_vulnerability_feedback_merge_request_path, {
       vulnerability_feedback: {
-        feedback_type: 'merge_request',
+        feedback_type: FEEDBACK_TYPE_MERGE_REQUEST,
         category: report_type,
         project_fingerprint,
         vulnerability_data: {
