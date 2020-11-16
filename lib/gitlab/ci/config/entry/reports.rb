@@ -46,6 +46,7 @@ module Gitlab
               validates :accessibility, array_of_strings_or_string: true
               validates :cluster_applications, array_of_strings_or_string: true
               validates :requirements, array_of_strings_or_string: true
+              validates :codequality, array_of_strings_or_string: true
             end
           end
 
