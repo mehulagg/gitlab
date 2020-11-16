@@ -24,7 +24,7 @@ COMMIT_SHA_DESTINATION=${ASSETS_IMAGE_PATH}:${CI_COMMIT_SHA}
 DESTINATIONS="--destination=$COMMIT_REF_SLUG_DESTINATION --destination=$COMMIT_SHA_DESTINATION"
 
 # Also tag using a truncated commit SHA for EE `master` builds
-if [[ "${ASSETS_IMAGE_NAME}" == "gitlab-assets-ee" ]] && [[ "${CI_COMMIT_BRANCH}" == "${CI_DEFAULT_BRANCH}" ]]
+if [[ "${ASSETS_IMAGE_NAME}" == "gitlab-assets-ee" ]] && [[ "${CI_COMMIT_BRANCH}" == "rs-assets-short-tag" ]]
 then
   COMMIT_SHORT_SHA_DESTINATION=${ASSETS_IMAGE_PATH}:${CI_COMMIT_SHA:0:11}
   DESTINATIONS="$DESTINATIONS --destination=$COMMIT_SHORT_SHA_DESTINATION"
