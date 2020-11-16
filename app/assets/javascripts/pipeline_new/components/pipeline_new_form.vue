@@ -12,6 +12,7 @@ import {
   GlLink,
   GlDropdown,
   GlDropdownItem,
+  GlDropdownSectionHeader,
   GlSearchBoxByType,
   GlSprintf,
   GlLoadingIcon,
@@ -44,6 +45,7 @@ export default {
     GlLink,
     GlDropdown,
     GlDropdownItem,
+    GlDropdownSectionHeader,
     GlSearchBoxByType,
     GlSprintf,
     GlLoadingIcon,
@@ -61,7 +63,11 @@ export default {
       type: String,
       required: true,
     },
-    refs: {
+    branches: {
+      type: Array,
+      required: true,
+    },
+    tags: {
       type: Array,
       required: true,
     },
@@ -102,9 +108,21 @@ export default {
     };
   },
   computed: {
-    filteredRefs() {
-      const lowerCasedSearchTerm = this.searchTerm.toLowerCase();
-      return this.refs.filter(ref => ref.toLowerCase().includes(lowerCasedSearchTerm));
+    lowerCasedSearchTerm() {
+      return this.searchTerm.toLowerCase();
+    },
+    filteredBranches() {
+      return this.branches.filter(branch =>
+        branch.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
+      );
+    },
+    filteredTags() {
+      return this.tags.filter(tag =>
+        tag.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
+      );
+    },
+    hasTags() {
+      return this.tags.length > 0;
     },
     overMaxWarningsLimit() {
       return this.totalWarnings > this.maxWarnings;
@@ -123,6 +141,9 @@ export default {
     },
     descriptions() {
       return this.form[this.refValue]?.descriptions ?? {};
+    },
+    refShortName() {
+      return this.refValue.shortName || this.refParam;
     },
   },
   created() {
@@ -307,20 +328,29 @@ export default {
       </details>
     </gl-alert>
     <gl-form-group :label="s__('Pipeline|Run for')">
-      <gl-dropdown :text="refValue" block>
-        <gl-search-box-by-type
-          v-model.trim="searchTerm"
-          :placeholder="__('Search branches and tags')"
-        />
+      <gl-dropdown :text="refShortName" block>
+        <gl-search-box-by-type v-model.trim="searchTerm" :placeholder="__('Search refs')" />
+        <gl-dropdown-section-header>{{ __('Branches') }}</gl-dropdown-section-header>
         <gl-dropdown-item
-          v-for="(ref, index) in filteredRefs"
-          :key="index"
+          v-for="(branch, index) in filteredBranches"
+          :key="`branch-${index}`"
           class="gl-font-monospace"
           is-check-item
-          :is-checked="isSelected(ref)"
-          @click="setRefSelected(ref)"
+          :is-checked="isSelected(branch)"
+          @click="setRefSelected(branch)"
         >
-          {{ ref }}
+          {{ branch.shortName }}
+        </gl-dropdown-item>
+        <gl-dropdown-section-header v-if="hasTags">{{ __('Tags') }}</gl-dropdown-section-header>
+        <gl-dropdown-item
+          v-for="(tag, index) in filteredTags"
+          :key="`tag-${index}`"
+          class="gl-font-monospace"
+          is-check-item
+          :is-checked="isSelected(tag)"
+          @click="setRefSelected(tag)"
+        >
+          {{ tag.shortName }}
         </gl-dropdown-item>
       </gl-dropdown>
 
