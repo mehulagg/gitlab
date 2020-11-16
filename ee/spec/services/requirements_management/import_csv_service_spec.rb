@@ -27,7 +27,7 @@ RSpec.describe RequirementsManagement::ImportCsvService do
   context 'when user can create requirements' do
     include_examples 'issuable import csv service', 'requirement' do
       let(:issuables) { project.requirements }
-      let(:email_method) { nil }
+      let(:email_method) { :import_requirements_csv_email }
     end
   end
 

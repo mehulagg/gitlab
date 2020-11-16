@@ -1,0 +1,5 @@
+---
+title: Removed DOMContentLoaded Eventlistener from ee/app/assets/javascripts/pages/security/vulnerabilities/index/index.js
+merge_request: 47516
+author:
+type: changed

@@ -71,12 +71,12 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
       ensure_elasticsearch_index!
     end
 
-    it 'finds pages' do
+    it 'finds wiki pages' do
       submit_search('term')
       select_search_scope('Wiki')
 
-      expect(page).to have_selector('.file-content .code')
-      expect(page).to have_selector('span.line[lang="markdown"]')
+      expect(page).to have_selector('.search-result-row .description', text: '# term')
+      expect(page).to have_link('test')
     end
   end
 

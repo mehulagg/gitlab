@@ -5,12 +5,9 @@ import initVueAlerts from '~/vue_alerts';
 import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
 import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 
-document.addEventListener('DOMContentLoaded', () => {
-  leaveByUrl('group');
-
-  initGroupDetails();
-  initGroupAnalytics();
-  initVueAlerts();
-  initInviteMembersModal();
-  initInviteMembersTrigger();
-});
+leaveByUrl('group');
+initGroupDetails();
+initGroupAnalytics();
+initVueAlerts();
+initInviteMembersModal();
+initInviteMembersTrigger();

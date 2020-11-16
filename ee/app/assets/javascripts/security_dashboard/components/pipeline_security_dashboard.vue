@@ -118,7 +118,7 @@ export default {
       :loading-error-illustrations="loadingErrorIllustrations"
       :security-report-summary="securityReportSummary"
     >
-      <template #emptyState>
+      <template #empty-state>
         <gl-empty-state v-bind="emptyStateProps" />
       </template>
     </security-dashboard>

@@ -38,10 +38,6 @@ module Gitlab
         ::Feature.enabled?(:ci_disallow_to_create_merge_request_pipelines_in_target_project, target_project)
       end
 
-      def self.lint_creates_pipeline_with_dry_run?(project)
-        ::Feature.enabled?(:ci_lint_creates_pipeline_with_dry_run, project, default_enabled: true)
-      end
-
       def self.project_transactionless_destroy?(project)
         Feature.enabled?(:project_transactionless_destroy, project, default_enabled: false)
       end
@@ -68,7 +64,7 @@ module Gitlab
       end
 
       def self.seed_block_run_before_workflow_rules_enabled?(project)
-        ::Feature.enabled?(:ci_seed_block_run_before_workflow_rules, project, default_enabled: false)
+        ::Feature.enabled?(:ci_seed_block_run_before_workflow_rules, project, default_enabled: true)
       end
 
       def self.ci_pipeline_editor_page_enabled?(project)

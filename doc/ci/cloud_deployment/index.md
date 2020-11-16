@@ -239,7 +239,7 @@ pass three JSON input objects, based on existing templates:
 
    - [Template for the _Deploy to EC2_ step on AWS](https://docs.aws.amazon.com/codedeploy/latest/APIReference/API_CreateDeployment.html).
 
-1. Once you have completed these three templates based on your requirements, you
+1. After you have completed these three templates based on your requirements, you
    have two ways to pass in these JSON objects:
 
    - They can be three actual files located in your project. You must specify their path relative to
@@ -284,11 +284,14 @@ When running your project pipeline at this point:
 
 #### Custom build job for Auto DevOps
 
-To leverage [Auto DevOps](../../topics/autodevops/index.md) for your project when deploying to
-AWS EC2, you must specify a job for the `build` stage.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216008) in GitLab 13.6.
 
-To do so, you must reference the `Auto-DevOps.gitlab-ci.yml` template and include a job named
-`build_artifact` in your `.gitlab-ci.yml` file. For example:
+To leverage [Auto DevOps](../../topics/autodevops/index.md) for your project when deploying to
+AWS EC2, first you must define [your AWS credentials as environment variables](#run-aws-commands-from-gitlab-cicd).
+
+Next, define a job for the `build` stage. To do so, you must reference the
+`Auto-DevOps.gitlab-ci.yml` template and include a job named `build_artifact` in your
+`.gitlab-ci.yml` file. For example:
 
 ```yaml
 # .gitlab-ci.yml

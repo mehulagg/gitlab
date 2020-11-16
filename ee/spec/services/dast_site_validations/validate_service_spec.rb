@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe DastSiteValidations::ValidateService do
   let(:dast_site_validation) { create(:dast_site_validation) }
   let(:token) { dast_site_validation.dast_site_token.token }
+  let(:headers) { { 'Content-Type' => 'text/plain; charset=utf-8' } }
 
   subject do
     described_class.new(
@@ -36,7 +37,7 @@ RSpec.describe DastSiteValidations::ValidateService do
       before do
         stub_licensed_features(security_on_demand_scans: true)
         stub_feature_flags(security_on_demand_scans_site_validation: true)
-        stub_request(:get, dast_site_validation.validation_url).to_return(body: token)
+        stub_request(:get, dast_site_validation.validation_url).to_return(body: token, headers: headers)
       end
 
       it 'validates the url before making an http request' do
@@ -110,7 +111,7 @@ RSpec.describe DastSiteValidations::ValidateService do
 
         context 'when the token is not found' do
           let(:token) do
-            SecureRandom.hex
+            '<div>' + dast_site_validation.dast_site_token.token + '</div>'
           end
 
           it 'raises an exception' do
@@ -123,10 +124,18 @@ RSpec.describe DastSiteValidations::ValidateService do
         let(:dast_site_validation) { create(:dast_site_validation, validation_strategy: :text_file) }
 
         before do
-          stub_request(:get, dast_site_validation.validation_url).to_return(body: token)
+          stub_request(:get, dast_site_validation.validation_url).to_return(body: token, headers: headers)
         end
 
         it_behaves_like 'a validation'
+
+        context 'when content type is incorrect' do
+          let(:headers) { { 'Content-Type' => 'text/html; charset=UTF-8' } }
+
+          it 'raises an exception' do
+            expect { subject }.to raise_error(DastSiteValidations::ValidateService::TokenNotFound)
+          end
+        end
       end
 
       context 'when validation_strategy=header' do

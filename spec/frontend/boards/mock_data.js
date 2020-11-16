@@ -2,6 +2,7 @@
 /* global List */
 
 import Vue from 'vue';
+import { keyBy } from 'lodash';
 import '~/boards/models/list';
 import '~/boards/models/issue';
 import boardsStore from '~/boards/stores/boards_store';
@@ -175,6 +176,14 @@ export const mockIssue = {
   },
 };
 
+export const mockActiveIssue = {
+  ...mockIssue,
+  id: 436,
+  iid: '27',
+  subscribed: false,
+  emailsDisabled: false,
+};
+
 export const mockIssueWithModel = new ListIssue(mockIssue);
 
 export const mockIssue2 = {
@@ -290,6 +299,7 @@ export const mockLists = [
     assignee: null,
     milestone: null,
     loading: false,
+    issuesSize: 1,
   },
   {
     id: 'gid://gitlab/List/2',
@@ -307,8 +317,11 @@ export const mockLists = [
     assignee: null,
     milestone: null,
     loading: false,
+    issuesSize: 0,
   },
 ];
+
+export const mockListsById = keyBy(mockLists, 'id');
 
 export const mockListsWithModel = mockLists.map(listMock =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),

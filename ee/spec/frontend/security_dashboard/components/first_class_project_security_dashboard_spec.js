@@ -184,7 +184,7 @@ describe('First class Project Security Dashboard component', () => {
     beforeEach(() => {
       createComponent({
         props: {
-          hasVulnerabilities: false,
+          pipeline: { id: undefined },
         },
       });
     });

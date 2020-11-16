@@ -320,7 +320,7 @@ services:
      command: ["--registry-mirror", "https://registry-mirror.example.com"] # Specify the registry mirror to use.
 ```
 
-#### DinD service defined inside of GitLab Runner configuration
+##### DinD service defined inside of GitLab Runner configuration
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/27173) in GitLab Runner 13.6.
 
@@ -644,7 +644,7 @@ and [using the OverlayFS storage driver](https://docs.docker.com/engine/userguid
 
 ## Using the GitLab Container Registry
 
-Once you've built a Docker image, you can push it up to the built-in
+After you've built a Docker image, you can push it up to the built-in
 [GitLab Container Registry](../../user/packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd).
 
 ## Troubleshooting

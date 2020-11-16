@@ -233,7 +233,7 @@ export default {
       </template>
 
       <template #empty>
-        <slot name="emptyState">
+        <slot name="empty-state">
           <gl-empty-state
             ref="tableEmptyState"
             :title="s__('NetworkPolicies|No policies detected')"

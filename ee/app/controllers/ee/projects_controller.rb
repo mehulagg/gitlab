@@ -129,7 +129,7 @@ module EE
         attrs << :merge_requests_disable_committers_approval
       end
 
-      if can?(current_user, :modify_overriding_approvers_per_merge_request_setting, project)
+      if can?(current_user, :modify_approvers_rules, project)
         attrs << :disable_overriding_approvers_per_merge_request
       end
 

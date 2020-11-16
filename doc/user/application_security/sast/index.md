@@ -107,7 +107,7 @@ as shown in the following table:
 | [Configure SAST Scanners](#configuration)                                          | **{check-circle}**  | **{check-circle}** |
 | [Customize SAST Settings](#customizing-the-sast-settings)                          | **{check-circle}**  | **{check-circle}** |
 | View [JSON Report](#reports-json-format)                                           | **{check-circle}**  | **{check-circle}** |
-| [Presentation of JSON Report in Merge Request](#overview)                          | **{dotted-circle}** | **{check-circle}** |
+| Presentation of JSON Report in Merge Request                          | **{dotted-circle}** | **{check-circle}** |
 | [Interaction with Vulnerabilities](#interacting-with-the-vulnerabilities) | **{dotted-circle}** | **{check-circle}** |
 | [Access to Security Dashboard](#security-dashboard)                       | **{dotted-circle}** | **{check-circle}** |
 | [Configure SAST in the UI](#configure-sast-in-the-ui)                     | **{dotted-circle}** | **{check-circle}** |
@@ -162,7 +162,7 @@ page:
 1. Enter the custom SAST values.
 
     Custom values are stored in the `.gitlab-ci.yml` file. For variables not in the SAST Configuration page, their values are left unchanged. Default values are inherited from the GitLab SAST template.
-1. Optionally, expand the **SAST analyzers** section, select individual [SAST analyzers](./analyzers.md) and enter custom analyzer values.
+1. Optionally, expand the **SAST analyzers** section, select individual [SAST analyzers](analyzers.md) and enter custom analyzer values.
 1. Click **Create Merge Request**.
 1. Review and merge the merge request.
 

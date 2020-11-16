@@ -42,6 +42,11 @@ module Projects
       # Let's skip this if the repository hasn't changed.
       update_lfs_objects if project.repository.checksum != checksum_before
 
+      # Running git fetch in the repository creates loose objects in the same
+      # way running git push *to* the repository does, so ensure we run regular
+      # garbage collection
+      run_housekeeping
+
       success
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, UpdateError => e
       error(e.message)
@@ -147,6 +152,15 @@ module Projects
       else
         # We ignore diverged branches other than the default branch
       end
+    end
+
+    def run_housekeeping
+      service = Projects::HousekeepingService.new(project)
+
+      service.increment!
+      service.execute if service.needed?
+    rescue Projects::HousekeepingService::LeaseTaken
+      # best-effort
     end
 
     # In Git is possible to tag blob objects, and those blob objects don't point to a Git commit so those tags

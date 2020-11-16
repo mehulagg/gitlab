@@ -34,7 +34,13 @@ RSpec.describe Resolvers::TimeboxReportResolver do
       end
 
       it 'returns burnup chart data' do
-        expect(subject).to eq(burnup_time_series: [
+        expect(subject).to eq(
+          stats: {
+            complete: { count: 0, weight: 0 },
+            incomplete: { count: 2, weight: 0 },
+            total: { count: 2, weight: 0 }
+          },
+          burnup_time_series: [
           {
             date: start_date + 4.days,
             scope_count: 1,

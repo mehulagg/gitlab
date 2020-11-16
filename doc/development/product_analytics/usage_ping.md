@@ -270,7 +270,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
 ##### Adding new events
 
-1. Define events in [`known_events.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml).
+1. Define events in [`known_events`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/).
 
    Example event:
 
@@ -312,6 +312,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines how we build the Redis
      keys for data storage. For `daily` we keep a key for metric per day of the year, for `weekly` we
      keep a key for metric per week of the year.
+   - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
 
 1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
 
@@ -402,7 +403,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    | `event` | string | yes | The event name it should be tracked |
 
    Response
-w
+
    Return 200 if tracking failed for any reason.
 
    - `200` if event was tracked or any errors
@@ -412,7 +413,7 @@ w
 
 1. Track events using JavaScript/Vue API helper which calls the API above
 
-   Example usage for an existing event already defined in  [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml):
+   Example usage for an existing event already defined in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/):
 
    Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to be able to track events
 
@@ -422,20 +423,46 @@ w
    api.trackRedisHllUserEvent('my_already_defined_event_name'),
    ```
 
-1. Track event using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event(entity_id, event_name)`.
+1. Track event using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)`.
+
+   Arguments:
+
+   - `values`: One value or array of values we count. For example: user_id, visitor_id, user_ids.
+   - `event_name`: event name.
+
+1. Track event on context level using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event_in_context(entity_id, event_name, context)`.
 
    Arguments:
 
    - `entity_id`: value we count. For example: user_id, visitor_id.
    - `event_name`: event name.
+   - `context`: context value. Allowed values are `default`, `free`, `bronze`, `silver`, `gold`, `starter`, `premium`, `ultimate`
 
-1. Get event data using `Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names:, start_date:, end_date)`.
+1. Get event data using `Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names:, start_date:, end_date:, context: '')`.
 
    Arguments:
 
    - `event_names`: the list of event names.
    - `start_date`: start date of the period for which we want to get event data.
    - `end_date`: end date of the period for which we want to get event data.
+   - `context`: context of the event. Allowed values are `default`, `free`, `bronze`, `silver`, `gold`, `starter`, `premium`, `ultimate`.
+
+1. Testing tracking and getting unique events
+
+Trigger events in rails console by using `track_event` method
+
+   ```ruby
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(1, 'g_compliance_audit_events')
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(2, 'g_compliance_audit_events')
+   ```
+
+Next, get the unique events for the current week.
+
+   ```ruby
+   # Get unique events for metric for current_week
+   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events',
+   start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
+   ```
 
 Recommendations:
 
@@ -445,9 +472,23 @@ Recommendations:
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
   adding new metrics.
 
+##### Enable/Disable Redis HLL tracking
+
+Events are tracked behind [feature flags](../feature_flags/index.md) due to concerns for Redis performance and scalability.
+
+For a full list of events and coresponding feature flags see, [known_events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/) files.
+
+To enable or disable tracking for specific event within <https://gitlab.com> or <https://staging.gitlab.com>, run commands such as the following to
+[enable or disable the corresponding feature](../feature_flags/index.md).
+
+```shell
+/chatops run feature set <feature_name> true
+/chatops run feature set <feature_name> false
+```
+
 ##### Known events in usage data payload
 
-All events added in [`known_events.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml) are automatically added to usage data generation under the `redis_hll_counters` key. This column is stored in [version-app as a JSON](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/db/schema.rb#L209).
+All events added in [`known_events/common.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/common.yml) are automatically added to usage data generation under the `redis_hll_counters` key. This column is stored in [version-app as a JSON](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/db/schema.rb#L209).
 For each event we add metrics for the weekly and monthly time frames, and totals for each where applicable:
 
 - `#{event_name}_weekly`: Data for 7 days for daily [aggregation](#adding-new-events) events and data for the last complete week for weekly [aggregation](#adding-new-events) events.
@@ -493,7 +534,7 @@ Example usage:
 redis_usage_data(Gitlab::UsageDataCounters::WikiPageCounter)
 redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] }
 
-# Define events in known_events.yml https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml
+# Define events in common.yml https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/common.yml
 
 # Tracking events
 Gitlab::UsageDataCounters::HLLRedisCounter.track_event(visitor_id, 'expand_vulnerabilities')
@@ -680,6 +721,50 @@ but with the following limitations:
 with any of the other services that are running. That is not how node metrics are reported in a production setup, where `node_exporter`
 always runs as a process alongside other GitLab components on any given node. From Usage Ping's perspective none of the node data would therefore
 appear to be associated to any of the services running, since they all appear to be running on different hosts. To alleviate this problem, the `node_exporter` in GCK was arbitrarily "assigned" to the `web` service, meaning only for this service `node_*` metrics will appear in Usage Ping.
+
+## Aggregated metrics
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45979) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+
+CAUTION: **Warning:**
+This feature is intended solely for internal GitLab use.
+
+In order to add data for aggregated metrics into Usage Ping payload you should add corresponding definition into  [`aggregated_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics.yml) file. Each aggregate definition includes following parts:
+
+- name: unique name under which aggregate metric will be added to Usage Ping payload
+- operator: operator that defines how aggregated metric data will be counted. Available operators are:
+  - `ANY`: removes duplicates and counts all entries that triggered any of listed events
+- events: list of events names (from [`known_events.yml`](#known-events-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
+
+Example aggregated metric entry:
+
+```yaml
+- name: example_aggregated_metric
+  operator: ANY
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+```
+
+Aggregated metrics will be added under `aggregated_metrics` key in both `counts_weekly` and `counts_monthly` top level keys in Usage Ping payload.
+
+```ruby
+{
+  :counts_monthly => {
+    :deployments => 1003,
+    :successful_deployments => 78,
+    :failed_deployments => 275,
+    :packages => 155,
+    :personal_snippets => 2106,
+    :project_snippets => 407,
+    :promoted_issues => 719,
+    :aggregated_metrics => {
+      :example_aggregated_metric => 7
+    },
+    :snippets => 2513
+  }
+}
+```
 
 ## Example Usage Ping payload
 

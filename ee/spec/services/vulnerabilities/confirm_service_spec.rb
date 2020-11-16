@@ -51,7 +51,12 @@ RSpec.describe Vulnerabilities::ConfirmService do
   end
 
   describe 'permissions' do
-    it { expect { confirm_vulnerability }.to be_allowed_for(:admin) }
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it { expect { confirm_vulnerability }.to be_allowed_for(:admin) }
+    end
+    context 'when admin mode is disabled' do
+      it { expect { confirm_vulnerability }.to be_denied_for(:admin) }
+    end
     it { expect { confirm_vulnerability }.to be_allowed_for(:owner).of(project) }
     it { expect { confirm_vulnerability }.to be_allowed_for(:maintainer).of(project) }
     it { expect { confirm_vulnerability }.to be_allowed_for(:developer).of(project) }

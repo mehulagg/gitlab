@@ -63,7 +63,7 @@ For more details, please refer to our [full architecture documentation](https://
 The setup process involves a few steps to enable GitOps deployments:
 
 1. [Install the Agent server](#install-the-kubernetes-agent-server).
-1. [Define a configuration directory](#define-a-configuration-repository).
+1. [Define a configuration repository](#define-a-configuration-repository).
 1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
 1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
 1. [Install the Agent into the cluster](#install-the-agent-into-the-cluster).
@@ -107,6 +107,10 @@ When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
+
+To configure any additional options related to GitLab Kubernetes Agent Server,
+refer to the **Enable GitLab KAS** section of the
+[`gitlab.rb.template`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-config-template/gitlab.rb.template).
 
 #### Install with the Helm chart
 
@@ -408,8 +412,128 @@ spec:
 
 ## Example projects
 
+The following example projects can help you get started with the Kubernetes Agent.
+
+### Simple NGINX deployment
+
 This basic GitOps example deploys NGINX:
 
 - [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
 - [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
-- [Install GitLab Runner](https://gitlab.com/gitlab-examples/install-runner-via-k8s-agent)
+
+### Deploying GitLab Runner with the Agent
+
+These instructions assume that the Agent is already set up as described in the
+[Get started with GitOps](#get-started-with-gitops-and-the-gitlab-agent):
+
+1. Check the possible
+   [Runner chart YAML values](https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/master/values.yaml)
+   on the Runner chart documentation, and create a `runner-chart-values.yaml` file
+   with the configuration that fits your needs, such as:
+
+    ```yaml
+    ## The GitLab Server URL (with protocol) that want to register the runner against
+    ## ref: https://docs.gitlab.com/runner/commands/README.html#gitlab-runner-register
+    ##
+    gitlabUrl: https://gitlab.my.domain.com/
+
+    ## The Registration Token for adding new Runners to the GitLab Server. This must
+    ## be retrieved from your GitLab Instance.
+    ## ref: https://docs.gitlab.com/ce/ci/runners/README.html
+    ##
+    runnerRegistrationToken: "XXXXXXYYYYYYZZZZZZ"
+
+    ## For RBAC support:
+    rbac:
+      create: true
+
+    ## Run all containers with the privileged flag enabled
+    ## This will allow the docker:dind image to run if you need to run Docker
+    ## commands. Please read the docs before turning this on:
+    ## ref: https://docs.gitlab.com/runner/executors/kubernetes.html#using-dockerdind
+    runners:
+      privileged: true
+    ```
+
+1. Create a single manifest file to install the Runner chart with your cluster agent:
+
+   ```shell
+   helm template --namespace gitlab gitlab-runner -f runner-chart-values.yaml gitlab/gitlab-runner > manifest.yaml
+   ```
+
+1. Push your `manifest.yaml` to your manifest repository.
+
+## Troubleshooting
+
+If you face any issues while using GitLab Kubernetes Agent, you can read the
+service logs with the following commands:
+
+- KAS pod logs - Tail these logs with the
+  `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`
+  command. In Omnibus GitLab, the logs reside in `/var/log/gitlab/gitlab-kas/`.
+- Agent pod logs - Tail these logs with the
+  `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>` command.
+
+### KAS logs - GitOps: failed to get project info
+
+```plaintext
+{"level":"warn","time":"2020-10-30T08:37:26.123Z","msg":"GitOps: failed to get project info","agent_id":4,"project_id":"root/kas-manifest001","error":"error kind: 0; status: 404"}
+```
+
+This error is shown if the specified manifest project `root/kas-manifest001`
+doesn't exist, or if a project is private. To fix it, make sure the project exists
+and its visibility is [set to public](../../../public_access/public_access.md).
+
+### KAS logs - Configuration file not found
+
+```plaintext
+time="2020-10-29T04:44:14Z" level=warning msg="Config: failed to fetch" agent_id=2 error="configuration file not found: \".gitlab/agents/test-agent/config.yaml\
+```
+
+This error is shown if the path to the configuration project was specified incorrectly,
+or if the path to `config.yaml` inside the project is not valid.
+
+### Agent logs - Transport: Error while dialing failed to WebSocket dial
+
+```plaintext
+{"level":"warn","time":"2020-11-04T10:14:39.368Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://gitlab-kas:443/-/kubernetes-agent\\\": dial tcp: lookup gitlab-kas on 10.60.0.10:53: no such host\""}
+```
+
+This error is shown if there are some connectivity issues between the address
+specified as `kas-address`, and your Agent pod. To fix it, make sure that you
+specified the `kas-address` correctly.
+
+### Agent logs - ValidationError(Deployment.metadata
+
+```plaintext
+{"level":"info","time":"2020-10-30T08:56:54.329Z","msg":"Synced","project_id":"root/kas-manifest001","resource_key":"apps/Deployment/kas-test001/nginx-deployment","sync_result":"error validating data: [ValidationError(Deployment.metadata): unknown field \"replicas\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"selector\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"template\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]"}
+```
+
+This error is shown if your `manifest.yaml` file is malformed, and Kubernetes can't
+create specified objects. Make sure that your `manifest.yaml` file is valid. You
+may try using it to create objects in Kubernetes directly for more troubleshooting.
+
+### Agent logs - Error while dialing failed to WebSocket dial: failed to send handshake request
+
+```plaintext
+{"level":"warn","time":"2020-10-30T09:50:51.173Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent\\\": net/http: HTTP/1.x transport connection broken: malformed HTTP response \\\"\\\\x00\\\\x00\\\\x06\\\\x04\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x05\\\\x00\\\\x00@\\\\x00\\\"\""}
+```
+
+This error is shown if you configured `wss` as `kas-address` on the agent side,
+but KAS on the server side is not available via `wss`. To fix it, make sure the
+same schemes are configured on both sides.
+
+It's not possible to set the `grpc` scheme due to the issue
+[It is not possible to configure KAS to work with `grpc` without directly editing GitLab KAS deployment](https://gitlab.com/gitlab-org/gitlab/-/issues/276888). To use `grpc` while the
+issue is in progress, directly edit the deployment with the
+`kubectl edit deployment gitlab-kas` command, and change `--listen-websocket=true` to `--listen-websocket=false`. After running that command, you should be able to use
+`grpc://gitlab-kas.<YOUR-NAMESPACE>:5005`.
+
+#### Agent logs - Decompressor is not installed for grpc-encoding
+
+```plaintext
+{"level":"warn","time":"2020-11-05T05:25:46.916Z","msg":"GetConfiguration.Recv failed","error":"rpc error: code = Unimplemented desc = grpc: Decompressor is not installed for grpc-encoding \"gzip\""}
+```
+
+This error is shown if the version of the agent is newer that the version of KAS.
+To fix it, make sure that both `agentk` and KAS use the same versions.

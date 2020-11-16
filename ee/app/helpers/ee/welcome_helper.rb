@@ -13,7 +13,7 @@ module EE
     end
 
     def in_invitation_flow?
-      redirect_path&.starts_with?('/-/invites/')
+      redirect_path.present? && redirect_path.starts_with?('/-/invites/')
     end
 
     def in_oauth_flow?

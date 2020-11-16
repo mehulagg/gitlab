@@ -17,7 +17,6 @@ import eventHub from '../eventhub';
 import sidebarEventHub from '~/sidebar/event_hub';
 import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -32,7 +31,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagMixin()],
   props: {
     list: {
       type: Object,
@@ -121,12 +119,9 @@ export default {
     collapsedTooltipTitle() {
       return this.listTitle || this.listAssignee;
     },
-    shouldDisplaySwimlanes() {
-      return this.glFeatures.boardsWithSwimlanes && this.isSwimlanesOn;
-    },
   },
   methods: {
-    ...mapActions(['updateList', 'setActiveId']),
+    ...mapActions(['setActiveId']),
     openSidebarSettings() {
       if (this.activeId === inactiveId) {
         sidebarEventHub.$emit('sidebar.closeAll');
@@ -160,11 +155,7 @@ export default {
       }
     },
     updateListFunction() {
-      if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
-        this.updateList({ listId: this.list.id, collapsed: !this.list.isExpanded });
-      } else {
-        this.list.update();
-      }
+      this.list.update();
     },
   },
 };
@@ -254,7 +245,7 @@ export default {
         </span>
         <span
           v-if="list.type === 'assignee'"
-          class="board-title-sub-text gl-ml-2 gl-font-weight-normal"
+          class="gl-ml-2 gl-font-weight-normal gl-text-gray-500"
           :class="{ 'gl-display-none': !list.isExpanded }"
         >
           @{{ listAssignee }}

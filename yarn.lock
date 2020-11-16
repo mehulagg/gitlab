@@ -845,10 +845,10 @@
   resolved "https://registry.yarnpkg.com/@gitlab/at.js/-/at.js-1.5.5.tgz#5f6bfe6baaef360daa9b038fa78798d7a6a916b4"
   integrity sha512-282Dn3SPVsUHVDhMsXgfnv+Rzog0uxecjttxGRQvxh25es1+xvkGQFsvJfkSKJ3X1kHVkSjKf+Tt5Rra+Jhp9g==
 
-"@gitlab/eslint-plugin@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/eslint-plugin/-/eslint-plugin-4.0.0.tgz#7beba53dea74f458d92040a8b2652e4fd60a6cc7"
-  integrity sha512-Gba9HXwWOLAN+O2H8WmGNPZFQ410wiGFmhgDQ5Sx4ic/N1ymtwNen2pnsaWcw8KK/1vAB/rHNUhH4Xu/l/mfMg==
+"@gitlab/eslint-plugin@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/eslint-plugin/-/eslint-plugin-5.0.0.tgz#502eb2bccb55d65d6310ce9ef2da76035b6fc319"
+  integrity sha512-zd4pa6D2OUuhPUD2QmyhfpZh7vuXKsNHaCHJdbTb2ld+mHel5IDqdidAzAshCI9On3e6o9XieD6l7rBTpN6H/g==
   dependencies:
     babel-eslint "^10.0.3"
     eslint-config-airbnb-base "^14.0.0"
@@ -866,10 +866,10 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.175.0.tgz#734f341784af1cd1d62d160a17bcdfb61ff7b04d"
   integrity sha512-gXpc87TGSXIzfAr4QER1Qw1v3P47pBO6BXkma52blgwXVmcFNe3nhQzqsqt66wKNzrIrk3lAcB4GUyPHbPVXpg==
 
-"@gitlab/ui@23.0.0":
-  version "23.0.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-23.0.0.tgz#c6b96220c0a7f8f249e06b8ad67ddf53ded89e33"
-  integrity sha512-y5WIkDHq4VS3eFQDOkQNrfroDu8rNyWLVhTE89oZ1zxlOh228yXdql8FccNTnRaPhC1YbZLGcvDJzYsWXht58A==
+"@gitlab/ui@23.8.0":
+  version "23.8.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-23.8.0.tgz#fe1807877c191e9e38b476d2cdfc4261facbb36b"
+  integrity sha512-5CF2jU/d5EX5a1qLHzJujYOTaCze1ZvE9ovK1TbhJ7Va1O0SKB/N53XT8iPOb4MwOzj/zBWDOdsIs+xXxCeOcg==
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -5628,17 +5628,15 @@ graphlib@^2.1.7, graphlib@^2.1.8:
   dependencies:
     lodash "^4.17.15"
 
-graphql-tag@^2.10.1:
-  version "2.10.3"
-  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.10.3.tgz#ea1baba5eb8fc6339e4c4cf049dabe522b0edf03"
-  integrity sha512-4FOv3ZKfA4WdOKJeHdz6B3F/vxBLSgmBcGeAFPf4n1F64ltJUvOOerNj0rsJxONQGdhUMynQIvd6LzB+1J5oKA==
+graphql-tag@^2.11.0:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.11.0.tgz#1deb53a01c46a7eb401d6cb59dec86fa1cccbffd"
+  integrity sha512-VmsD5pJqWJnQZMUeRwrDhfgoyqcfwEkvtpANqcoUG8/tOLkwNgU9mzub/Mc78OJMhHjx7gfAMTxzdG43VGg3bA==
 
-graphql@^14.7.0:
-  version "14.7.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.7.0.tgz#7fa79a80a69be4a31c27dda824dc04dac2035a72"
-  integrity sha512-l0xWZpoPKpppFzMfvVyFmp9vLN7w/ZZJPefUicMCepfJeQ8sMcztloGYY9DfjVPo6tIUDzU5Hw3MUbIjj9AVVA==
-  dependencies:
-    iterall "^1.2.2"
+graphql@^15.4.0:
+  version "15.4.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.4.0.tgz#e459dea1150da5a106486ba7276518b5295a4347"
+  integrity sha512-EB3zgGchcabbsU9cFe1j+yxdzKQKAbGUWRb13DsrsMN1yyfmmIq+2+L5MqVWcDCE4V89R5AyUOi7sMOGxdsYtA==
 
 growly@^1.3.0:
   version "1.3.0"
@@ -6718,11 +6716,6 @@ istextorbinary@^2.2.1:
     binaryextensions "2"
     editions "^1.3.3"
     textextensions "2"
-
-iterall@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.2.2.tgz#92d70deb8028e0c39ff3164fdbf4d8b088130cd7"
-  integrity sha512-yynBb1g+RFUPY64fTrFv7nsjRrENBQJaX2UL+2Szc9REFrSNm1rpSXHGzhmAy7a9uv3vlvgBlXnf9RqmPH1/DA==
 
 jasmine-core@^2.9.0:
   version "2.9.0"

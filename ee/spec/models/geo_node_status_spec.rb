@@ -1146,101 +1146,140 @@ RSpec.describe GeoNodeStatus, :geo do
     end
   end
 
-  where(:replicator, :model_factory, :registry_factory) do
-    Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
-    Geo::PackageFileReplicator           | :package_file                | :geo_package_file_registry
-    Geo::TerraformStateVersionReplicator | :terraform_state_version     | :geo_terraform_state_version_registry
-    Geo::SnippetRepositoryReplicator     | :snippet_repository          | :geo_snippet_repository_registry
-  end
-
-  with_them do
-    let(:replicable_name) { replicator.replicable_name_plural }
-    let(:checksummed_count_method) { "#{replicable_name}_checksummed_count" }
-    let(:checksum_failed_count_method) { "#{replicable_name}_checksum_failed_count" }
-    let(:checksummed_in_percentage_method) { "#{replicable_name}_checksummed_in_percentage" }
-    let(:registry_count_method) { "#{replicable_name}_registry_count" }
-    let(:failed_count_method) { "#{replicable_name}_failed_count" }
-    let(:synced_count_method) { "#{replicable_name}_synced_count" }
-    let(:synced_in_percentage_method) { "#{replicable_name}_synced_in_percentage" }
-
-    describe '#<replicable_name>_checksummed_count' do
-      before do
-        stub_current_geo_node(primary)
-      end
-
-      it 'returns the right number of checksummed replicables' do
-        create(model_factory, :checksummed)
-        create(model_factory, :checksummed)
-        create(model_factory, :checksum_failure)
-
-        expect(subject.send(checksummed_count_method)).to eq(2)
-      end
+  context 'Replicator stats' do
+    where(:replicator, :model_factory, :registry_factory) do
+      Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
+      Geo::PackageFileReplicator           | :package_file                | :geo_package_file_registry
+      Geo::TerraformStateVersionReplicator | :terraform_state_version     | :geo_terraform_state_version_registry
+      Geo::SnippetRepositoryReplicator     | :snippet_repository          | :geo_snippet_repository_registry
     end
 
-    describe '#<replicable_name>_checksum_failed_count' do
-      before do
-        stub_current_geo_node(primary)
-      end
+    with_them do
+      let(:replicable_name) { replicator.replicable_name_plural }
 
-      it 'returns the right number of failed replicables' do
-        create(model_factory, :checksummed)
-        create(model_factory, :checksum_failure)
-        create(model_factory, :checksum_failure)
+      context 'replication' do
+        let(:registry_count_method) { "#{replicable_name}_registry_count" }
+        let(:failed_count_method) { "#{replicable_name}_failed_count" }
+        let(:synced_count_method) { "#{replicable_name}_synced_count" }
+        let(:synced_in_percentage_method) { "#{replicable_name}_synced_in_percentage" }
 
-        expect(subject.send(checksum_failed_count_method)).to eq(2)
-      end
-    end
+        describe '#<replicable_name>_[registry|synced|failed]_count' do
+          context 'when package registries available' do
+            before do
+              create(registry_factory, :failed)
+              create(registry_factory, :failed)
+              create(registry_factory, :synced)
+            end
 
-    describe '#<replicable_name>_checksummed_in_percentage' do
-      before do
-        stub_current_geo_node(primary)
-      end
+            it 'returns the right number of repos in registry' do
+              expect(subject.send(registry_count_method)).to eq(3)
+            end
 
-      it 'returns 0 when no replicables available' do
-        expect(subject.send(checksummed_in_percentage_method)).to eq(0)
-      end
+            it 'returns the right number of failed and synced repos' do
+              expect(subject.send(failed_count_method)).to eq(2)
+              expect(subject.send(synced_count_method)).to eq(1)
+            end
 
-      it 'returns the right percentage' do
-        create(model_factory, :checksummed)
-        create(model_factory, :checksummed)
-        create(model_factory, :checksummed)
-        create(model_factory, :checksum_failure)
+            it 'returns the percent of synced replicables' do
+              expect(subject.send(synced_in_percentage_method)).to be_within(0.01).of(33.33)
+            end
+          end
 
-        expect(subject.send(checksummed_in_percentage_method)).to be_within(0.0001).of(75)
-      end
-    end
+          context 'when no package registries available' do
+            it 'returns 0' do
+              expect(subject.send(registry_count_method)).to eq(0)
+              expect(subject.send(failed_count_method)).to eq(0)
+              expect(subject.send(synced_count_method)).to eq(0)
+            end
 
-    describe '#<replicable_name>_[registry|synced|failed]_count' do
-      context 'when package registries available' do
-        before do
-          create(registry_factory, :failed)
-          create(registry_factory, :failed)
-          create(registry_factory, :synced)
-        end
-
-        it 'returns the right number of repos in registry' do
-          expect(subject.send(registry_count_method)).to eq(3)
-        end
-
-        it 'returns the right number of failed and synced repos' do
-          expect(subject.send(failed_count_method)).to eq(2)
-          expect(subject.send(synced_count_method)).to eq(1)
-        end
-
-        it 'returns the percent of synced replicables' do
-          expect(subject.send(synced_in_percentage_method)).to be_within(0.01).of(33.33)
+            it 'returns 0' do
+              expect(subject.send(synced_in_percentage_method)).to eq(0)
+            end
+          end
         end
       end
 
-      context 'when no package registries available' do
-        it 'returns 0' do
-          expect(subject.send(registry_count_method)).to eq(0)
-          expect(subject.send(failed_count_method)).to eq(0)
-          expect(subject.send(synced_count_method)).to eq(0)
+      context 'verification' do
+        let(:checksummed_count_method) { "#{replicable_name}_checksummed_count" }
+        let(:checksum_failed_count_method) { "#{replicable_name}_checksum_failed_count" }
+        let(:checksummed_in_percentage_method) { "#{replicable_name}_checksummed_in_percentage" }
+
+        context 'when verification is enabled' do
+          before do
+            stub_current_geo_node(primary)
+            allow(replicator).to receive(:verification_enabled?).and_return(true)
+          end
+
+          context 'when there are replicables' do
+            before do
+              create(model_factory, :checksummed)
+              create(model_factory, :checksummed)
+              create(model_factory, :checksum_failure)
+            end
+
+            describe '#<replicable_name>_checksummed_count' do
+              it 'returns the right number of checksummed replicables' do
+                expect(subject.send(checksummed_count_method)).to eq(2)
+              end
+            end
+
+            describe '#<replicable_name>_checksum_failed_count' do
+              it 'returns the right number of failed replicables' do
+                expect(subject.send(checksum_failed_count_method)).to eq(1)
+              end
+            end
+
+            describe '#<replicable_name>_checksummed_in_percentage' do
+              it 'returns the right percentage' do
+                expect(subject.send(checksummed_in_percentage_method)).to be_within(0.01).of(66.67)
+              end
+            end
+          end
+
+          context 'when there are no replicables' do
+            describe '#<replicable_name>_checksummed_count' do
+              it 'returns 0' do
+                expect(subject.send(checksummed_count_method)).to eq(0)
+              end
+            end
+
+            describe '#<replicable_name>_checksum_failed_count' do
+              it 'returns 0' do
+                expect(subject.send(checksum_failed_count_method)).to eq(0)
+              end
+            end
+
+            describe '#<replicable_name>_checksummed_in_percentage' do
+              it 'returns 0' do
+                expect(subject.send(checksummed_in_percentage_method)).to eq(0)
+              end
+            end
+          end
         end
 
-        it 'returns 0' do
-          expect(subject.send(synced_in_percentage_method)).to eq(0)
+        context 'when verification is disabled' do
+          before do
+            stub_current_geo_node(primary)
+            allow(replicator).to receive(:verification_enabled?).and_return(false)
+          end
+
+          describe '#<replicable_name>_checksummed_count' do
+            it 'returns nil' do
+              expect(subject.send(checksummed_count_method)).to be_nil
+            end
+          end
+
+          describe '#<replicable_name>_checksum_failed_count' do
+            it 'returns nil' do
+              expect(subject.send(checksum_failed_count_method)).to be_nil
+            end
+          end
+
+          describe '#<replicable_name>_checksummed_in_percentage' do
+            it 'returns 0' do
+              expect(subject.send(checksummed_in_percentage_method)).to eq(0)
+            end
+          end
         end
       end
     end

@@ -42,7 +42,7 @@ RSpec.describe EE::WelcomeHelper do
       '/-/invites/xxx' | true
       '/invites/xxx'   | false
       '/foo'           | false
-      nil              | nil
+      nil              | false
     end
 
     with_them do

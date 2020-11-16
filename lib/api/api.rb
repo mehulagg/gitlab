@@ -162,6 +162,7 @@ module API
       mount ::API::CommitStatuses
       mount ::API::ContainerRegistryEvent
       mount ::API::ContainerRepositories
+      mount ::API::DependencyProxy
       mount ::API::DeployKeys
       mount ::API::DeployTokens
       mount ::API::Deployments
@@ -218,7 +219,8 @@ module API
       mount ::API::DebianGroupPackages
       mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
-      mount ::API::NpmPackages
+      mount ::API::NpmProjectPackages
+      mount ::API::NpmInstancePackages
       mount ::API::GenericPackages
       mount ::API::GoProxy
       mount ::API::Pages

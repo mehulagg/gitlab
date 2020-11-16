@@ -11,6 +11,8 @@ module VulnerabilitiesHelper
     result = {
       timestamp: Time.now.to_i,
       create_issue_url: create_issue_url_for(vulnerability),
+      create_jira_issue_url: create_jira_issue_url_for(vulnerability),
+      related_jira_issues_path: project_integrations_jira_issues_path(vulnerability.project, vulnerability_ids: [vulnerability.id]),
       has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_iid),
       create_mr_url: create_vulnerability_feedback_merge_request_path(vulnerability.finding.project),
       discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
@@ -30,6 +32,16 @@ module VulnerabilitiesHelper
     return unless vulnerability.project.issues_enabled?
 
     create_issue_project_security_vulnerability_path(vulnerability.project, vulnerability)
+  end
+
+  def create_jira_issue_url_for(vulnerability)
+    return unless vulnerability.project.jira_vulnerabilities_integration_enabled?
+
+    summary = _('Investigate vulnerability: %{title}') % { title: vulnerability.title }
+    description = ApplicationController.render(template: 'vulnerabilities/jira_issue_description.md.erb',
+                                               locals: { vulnerability: vulnerability.present })
+
+    vulnerability.project.jira_service.new_issue_url_with_predefined_fields(summary, description)
   end
 
   def vulnerability_pipeline_data(pipeline)

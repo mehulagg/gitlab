@@ -179,7 +179,7 @@ export default {
           </gl-link>
         </div>
       </template>
-      <div v-if="showActionButtons" slot="actionButtons" class="gl-mr-3">
+      <div v-if="showActionButtons" slot="action-buttons" class="gl-mr-3">
         <a
           v-if="licenseManagementSettingsPath"
           :class="{ 'gl-mr-3': fullReportPath }"

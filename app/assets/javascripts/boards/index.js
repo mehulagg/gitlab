@@ -86,11 +86,17 @@ export default () => {
       boardId: $boardApp.dataset.boardId,
       groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
+      currentUserId: gon.current_user_id || null,
       canUpdate: $boardApp.dataset.canUpdate,
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
       timeTrackingLimitToHours: parseBoolean($boardApp.dataset.timeTrackingLimitToHours),
+      weightFeatureAvailable: parseBoolean($boardApp.dataset.weightFeatureAvailable),
+      boardWeight: $boardApp.dataset.boardWeight
+        ? parseInt($boardApp.dataset.boardWeight, 10)
+        : null,
+      scopedLabelsAvailable: parseBoolean($boardApp.dataset.scopedLabels),
     },
     store,
     apolloProvider,

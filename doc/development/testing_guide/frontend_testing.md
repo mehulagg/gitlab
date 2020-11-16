@@ -115,6 +115,37 @@ describe('Component', () => {
 
 Remember that the performance of each test depends on the environment.
 
+### Timout error due to async components
+
+If your component is fetching some other components asynchroneously based on some conditions, it might happen so that your Jest suite for this component will become flaky timing out from time to time. 
+
+```javascript
+// ide.vue
+export default {
+  components: {
+    'error-message': () => import('./error_message.vue'),
+    'gl-button': () => import('@gitlab/ui/src/components/base/button/button.vue'),
+    ...
+};
+```
+
+To address this issue, you can "help" Jest by stubbing the async components so that Jest would not need to fetch those asynchroneously at the run-time.
+
+```javascript
+// ide_spec.js
+import { GlButton } from '@gitlab/ui';
+import ErrorMessage from '~/ide/components/error_message.vue';
+...
+return shallowMount(ide, {
+  ...
+  stubs: {
+    ErrorMessage,
+    GlButton,
+    ...
+  },
+})
+```
+
 ## What and how to test
 
 Before jumping into more gritty details about Jest-specific workflows like mocks and spies, we should briefly cover what to test with Jest.
@@ -897,6 +928,32 @@ it.each([
     expect(renderPipeline(status)).toEqual(icon)
  }
 );
+```
+
+**Note**: only use template literal block if pretty print is **not** needed for spec output. For example, empty strings, nested objects etc.
+
+For example, when testing the difference between an empty search string and a non-empty search string, the use of the array block syntax with the pretty print option would be preferred. That way the differences between an empty string e.g. `''` and a non-empty string e.g. `'search string'` would be visible in the spec output. Whereas with a template literal block, the empty string would be shown as a space, which could lead to a confusing developer experience
+
+```javascript
+// bad
+it.each`
+    searchTerm | expected
+    ${''} | ${{ issue: { users: { nodes: [] } } }}
+    ${'search term'} | ${{ issue: { other: { nested: [] } } }}
+`('when search term is $searchTerm, it returns $expected', ({ searchTerm, expected }) => {
+  expect(search(searchTerm)).toEqual(expected)
+});
+
+// good
+it.each([
+    ['', { issue: { users: { nodes: [] } } }],
+    ['search term', { issue: { other: { nested: [] } } }],
+])('when search term is %p, expect to return %p',
+ (searchTerm, expected) => {
+    expect(search(searchTerm)).toEqual(expected)
+ }
+);
+
 ```
 
 ```javascript

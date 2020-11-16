@@ -59,6 +59,8 @@ RSpec.describe VulnerabilitiesHelper do
       expect(subject).to include(
         timestamp: Time.now.to_i,
         create_issue_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/create_issue",
+        create_jira_issue_url: nil,
+        related_jira_issues_path: "/#{project.full_path}/-/integrations/jira/issues?vulnerability_ids%5B%5D=#{vulnerability.id}",
         has_mr: anything,
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",
@@ -139,6 +141,72 @@ RSpec.describe VulnerabilitiesHelper do
       it 'returns no pipeline data' do
         expect(subject[:pipeline]).to be_nil
       end
+    end
+  end
+
+  describe '#create_jira_issue_url_for' do
+    subject { helper.vulnerability_details(vulnerability, pipeline) }
+
+    let(:jira_service) { double('JiraService', new_issue_url_with_predefined_fields: 'https://jira.example.com/new') }
+
+    before do
+      allow(helper).to receive(:can?).and_return(true)
+      allow(vulnerability.project).to receive(:jira_service).and_return(jira_service)
+    end
+
+    context 'with jira vulnerabilities integration enabled' do
+      before do
+        allow(project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(true)
+      end
+
+      let(:expected_jira_issue_description) do
+        <<-JIRA.strip_heredoc
+          Issue created from vulnerability [#{vulnerability.id}|http://localhost/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}]
+
+          h3. Description:
+
+          Description of My vulnerability
+
+          * Severity: high
+          * Confidence: medium
+          * Location: [maven/src/main/java/com/gitlab/security_products/tests/App.java:29|http://localhost/#{project.full_path}/-/blob/b83d6e391c22777fca1ed3012fce84f633d7fed0/maven/src/main/java/com/gitlab/security_products/tests/App.java#L29]
+
+          ### Solution:
+
+          See vulnerability [#{vulnerability.id}|http://localhost/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}] for any Solution details.
+
+
+          h3. Links:
+
+          * [Cipher does not check for integrity first?|https://crypto.stackexchange.com/questions/31428/pbewithmd5anddes-cipher-does-not-check-for-integrity-first]
+
+
+        JIRA
+      end
+
+      it 'renders description using dedicated template' do
+        expect(ApplicationController).to receive(:render).with(template: 'vulnerabilities/jira_issue_description.md.erb', locals: { vulnerability: an_instance_of(VulnerabilityPresenter) })
+
+        subject
+      end
+
+      it 'delegates rendering URL to JiraService' do
+        expect(jira_service).to receive(:new_issue_url_with_predefined_fields).with("Investigate vulnerability: #{vulnerability.title}", expected_jira_issue_description)
+
+        subject
+      end
+
+      it 'generates url to create issue in Jira' do
+        expect(subject[:create_jira_issue_url]).to eq('https://jira.example.com/new')
+      end
+    end
+
+    context 'with jira vulnerabilities integration disabled' do
+      before do
+        allow(project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(false)
+      end
+
+      it { expect(subject[:create_jira_issue_url]).to be_nil }
     end
   end
 

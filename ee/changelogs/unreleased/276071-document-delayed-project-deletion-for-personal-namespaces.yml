@@ -1,0 +1,5 @@
+---
+title: Clarify delayed deletion is not applicable to personal projects
+merge_request: 47035
+author:
+type: fixed

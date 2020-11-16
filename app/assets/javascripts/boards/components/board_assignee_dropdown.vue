@@ -1,13 +1,22 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { GlDropdownItem, GlDropdownDivider, GlAvatarLabeled, GlAvatarLink } from '@gitlab/ui';
+import {
+  GlDropdownItem,
+  GlDropdownDivider,
+  GlAvatarLabeled,
+  GlAvatarLink,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
 import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
+import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import searchUsers from '~/boards/queries/users_search.query.graphql';
 
 export default {
+  noSearchDelay: 0,
+  searchDelay: 250,
   i18n: {
     unassigned: __('Unassigned'),
     assignee: __('Assignee'),
@@ -17,33 +26,52 @@ export default {
   components: {
     BoardEditableItem,
     IssuableAssignees,
-    AssigneesDropdown,
+    MultiSelectDropdown,
     GlDropdownItem,
     GlDropdownDivider,
     GlAvatarLabeled,
     GlAvatarLink,
+    GlSearchBoxByType,
   },
   data() {
     return {
+      search: '',
       participants: [],
-      selected: this.$store.getters.getActiveIssue.assignees,
+      selected: this.$store.getters.activeIssue.assignees,
     };
   },
   apollo: {
     participants: {
-      query: getIssueParticipants,
+      query() {
+        return this.isSearchEmpty ? getIssueParticipants : searchUsers;
+      },
       variables() {
+        if (this.isSearchEmpty) {
+          return {
+            id: `gid://gitlab/Issue/${this.activeIssue.iid}`,
+          };
+        }
+
         return {
-          id: `gid://gitlab/Issue/${this.getActiveIssue.iid}`,
+          search: this.search,
         };
       },
       update(data) {
-        return data.issue?.participants?.nodes || [];
+        if (this.isSearchEmpty) {
+          return data.issue?.participants?.nodes || [];
+        }
+
+        return data.users?.nodes || [];
+      },
+      debounce() {
+        const { noSearchDelay, searchDelay } = this.$options;
+
+        return this.isSearchEmpty ? noSearchDelay : searchDelay;
       },
     },
   },
   computed: {
-    ...mapGetters(['getActiveIssue']),
+    ...mapGetters(['activeIssue']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
@@ -57,6 +85,9 @@ export default {
     },
     selectedUserNames() {
       return this.selected.map(({ username }) => username);
+    },
+    isSearchEmpty() {
+      return this.search === '';
     },
   },
   methods: {
@@ -88,15 +119,18 @@ export default {
 <template>
   <board-editable-item :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
-      <issuable-assignees :users="getActiveIssue.assignees" />
+      <issuable-assignees :users="activeIssue.assignees" />
     </template>
 
     <template #default>
-      <assignees-dropdown
+      <multi-select-dropdown
         class="w-100"
         :text="$options.i18n.assignees"
         :header-text="$options.i18n.assignTo"
       >
+        <template #search>
+          <gl-search-box-by-type v-model.trim="search" />
+        </template>
         <template #items>
           <gl-dropdown-item
             :is-checked="selectedIsEmpty"
@@ -138,7 +172,7 @@ export default {
             </gl-avatar-link>
           </gl-dropdown-item>
         </template>
-      </assignees-dropdown>
+      </multi-select-dropdown>
     </template>
   </board-editable-item>
 </template>

@@ -1,6 +1,9 @@
 import { s__ } from '~/locale';
 
 export const DEVOPS_ADOPTION_STRINGS = {
+  app: {
+    groupsError: s__('DevopsAdoption|There was an error fetching Groups'),
+  },
   emptyState: {
     title: s__('DevopsAdoption|Add a segment to get started'),
     description: s__(
@@ -8,4 +11,17 @@ export const DEVOPS_ADOPTION_STRINGS = {
     ),
     button: s__('DevopsAdoption|Add new segment'),
   },
+};
+
+export const DEVOPS_ADOPTION_TABLE_TEST_IDS = {
+  TABLE_HEADERS: 'header',
+  SEGMENT: 'segmentCol',
+  ISSUES: 'issuesCol',
+  MRS: 'mrsCol',
+  APPROVALS: 'approvalsCol',
+  RUNNERS: 'runnersCol',
+  PIPELINES: 'pipelinesCol',
+  DEPLOYS: 'deploysCol',
+  ACTIONS: 'actionsCol',
+  SCANNING: 'scanningCol',
 };

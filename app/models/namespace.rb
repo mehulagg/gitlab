@@ -96,7 +96,8 @@ class Namespace < ApplicationRecord
         'COALESCE(SUM(ps.snippets_size), 0) AS snippets_size',
         'COALESCE(SUM(ps.lfs_objects_size), 0) AS lfs_objects_size',
         'COALESCE(SUM(ps.build_artifacts_size), 0) AS build_artifacts_size',
-        'COALESCE(SUM(ps.packages_size), 0) AS packages_size'
+        'COALESCE(SUM(ps.packages_size), 0) AS packages_size',
+        'COALESCE(SUM(ps.uploads_size), 0) AS uploads_size'
       )
   end
 
@@ -362,7 +363,7 @@ class Namespace < ApplicationRecord
 
   def pages_virtual_domain
     Pages::VirtualDomain.new(
-      all_projects_with_pages.includes(:route, :project_feature),
+      all_projects_with_pages.includes(:route, :project_feature, pages_metadatum: :pages_deployment),
       trim_prefix: full_path
     )
   end

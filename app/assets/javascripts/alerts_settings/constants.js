@@ -55,16 +55,10 @@ export const integrationTypesNew = [
 export const typeSet = {
   http: 'HTTP',
   prometheus: 'PROMETHEUS',
+  opsgenie: 'OPSGENIE',
 };
 
-export const defaultFormState = {
-  name: '',
-  active: false,
-  token: '',
-  url: '',
-  apiUrl: '',
-  integrationTestPayload: { json: null, error: null },
-};
+export const integrationToDeleteDefault = { id: null, name: '' };
 
 export const JSON_VALIDATE_DELAY = 250;
 

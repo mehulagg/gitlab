@@ -1927,6 +1927,38 @@ The returned `url` is relative to the project path. The returned `full_path` is
 the absolute path to the file. In Markdown contexts, the link is expanded when
 the format in `markdown` is used.
 
+## Upload a project avatar
+
+Uploads an avatar to the specified project.
+
+```plaintext
+PUT /projects/:id
+```
+
+| Attribute | Type           | Required               | Description |
+|-----------|----------------|------------------------|-------------|
+| `avatar`  | string         | **{check-circle}** Yes | The file to be uploaded. |
+| `id`      | integer/string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+
+To upload an avatar from your file system, use the `--form` argument. This causes
+cURL to post data using the header `Content-Type: multipart/form-data`. The
+`file=` parameter must point to an image file on your file system and be 
+preceded by `@`. For example:
+
+Example request:
+
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --form "avatar=@dk.png" "https://gitlab.example.com/api/v4/projects/5"
+```
+
+Returned object:
+
+```json
+{
+  "avatar_url": "https://gitlab.example.com/uploads/-/system/project/avatar/2/dk.png"
+}
+```
+
 ## Share project with group
 
 Allow to share project with group.
@@ -2006,6 +2038,7 @@ GET /projects/:id/hooks/:hook_id
   "pipeline_events": true,
   "wiki_page_events": true,
   "deployment_events": true,
+  "releases_events": true,
   "enable_ssl_verification": true,
   "created_at": "2012-10-12T17:04:47Z"
 }
@@ -2065,6 +2098,7 @@ PUT /projects/:id/hooks/:hook_id
 | `token`                      | string         | **{dotted-circle}** No | Secret token to validate received payloads; this isn't returned in the response. |
 | `url`                        | string         | **{check-circle}** Yes | The hook URL. |
 | `wiki_events`                | boolean        | **{dotted-circle}** No | Trigger hook on wiki events. |
+| `releases_events`            | boolean        | **{dotted-circle}** No | Trigger hook on release events. |
 
 ### Delete project hook
 

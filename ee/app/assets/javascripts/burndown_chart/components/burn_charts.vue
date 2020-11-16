@@ -64,7 +64,7 @@ export default {
         };
       },
       update(data) {
-        const sparseBurnupData = data?.[this.parent]?.burnupTimeSeries || [];
+        const sparseBurnupData = data?.[this.parent]?.report.burnupTimeSeries || [];
 
         return this.padSparseBurnupData(sparseBurnupData);
       },

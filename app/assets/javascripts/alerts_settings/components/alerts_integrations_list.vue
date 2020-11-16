@@ -4,12 +4,17 @@ import {
   GlButton,
   GlIcon,
   GlLoadingIcon,
+  GlModal,
+  GlModalDirective,
   GlTable,
   GlTooltipDirective,
+  GlSprintf,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Tracking from '~/tracking';
-import { trackAlertIntegrationsViewsOptions } from '../constants';
+import { trackAlertIntegrationsViewsOptions, integrationToDeleteDefault } from '../constants';
+import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 
 export const i18n = {
   title: s__('AlertsIntegrations|Current integrations'),
@@ -36,11 +41,15 @@ export default {
     GlButton,
     GlIcon,
     GlLoadingIcon,
+    GlModal,
     GlTable,
+    GlSprintf,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModal: GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     integrations: {
       type: Array,
@@ -71,20 +80,38 @@ export default {
       label: __('Actions'),
     },
   ],
-  computed: {
-    tbodyTrClass() {
-      return {
-        [bodyTrClass]: this.integrations.length,
-      };
+  apollo: {
+    currentIntegration: {
+      query: getCurrentIntegrationQuery,
     },
+  },
+  data() {
+    return {
+      integrationToDelete: integrationToDeleteDefault,
+      currentIntegration: null,
+    };
   },
   mounted() {
     this.trackPageViews();
   },
   methods: {
+    tbodyTrClass(item) {
+      return {
+        [bodyTrClass]: this.integrations.length,
+        'gl-bg-blue-50': (item !== null && item.id) === this.currentIntegration?.id,
+      };
+    },
     trackPageViews() {
       const { category, action } = trackAlertIntegrationsViewsOptions;
       Tracking.event(category, action);
+    },
+    setIntegrationToDelete({ name, id }) {
+      this.integrationToDelete.id = id;
+      this.integrationToDelete.name = name;
+    },
+    deleteIntegration() {
+      this.$emit('delete-integration', { id: this.integrationToDelete.id });
+      this.integrationToDelete = { ...integrationToDeleteDefault };
     },
   },
 };
@@ -125,9 +152,13 @@ export default {
       </template>
 
       <template #cell(actions)="{ item }">
-        <gl-button-group>
+        <gl-button-group v-if="glFeatures.httpIntegrationsList">
           <gl-button icon="pencil" @click="$emit('edit-integration', { id: item.id })" />
-          <gl-button icon="remove" @click="$emit('delete-integration', { id: item.id })" />
+          <gl-button
+            v-gl-modal.deleteIntegration
+            icon="remove"
+            @click="setIntegrationToDelete(item)"
+          />
         </gl-button-group>
       </template>
 
@@ -143,5 +174,22 @@ export default {
         </div>
       </template>
     </gl-table>
+    <gl-modal
+      modal-id="deleteIntegration"
+      :title="__('Are you sure?')"
+      :ok-title="s__('AlertSettings|Delete integration')"
+      ok-variant="danger"
+      @ok="deleteIntegration"
+    >
+      <gl-sprintf
+        :message="
+          s__(
+            'AlertsIntegrations|You have opted to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer receive alerts from this endpoint in your alert list, and this action cannot be undone.',
+          )
+        "
+      >
+        <template #integrationName>{{ integrationToDelete.name }}</template>
+      </gl-sprintf>
+    </gl-modal>
   </div>
 </template>

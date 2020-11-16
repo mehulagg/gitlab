@@ -66,6 +66,12 @@ module EE
       validate :validate_confidential_epic
 
       after_create :update_generic_alert_title, if: :generic_alert_with_default_title?
+
+      state_machine :state_id do
+        after_transition do |issue|
+          issue.refresh_blocking_and_blocked_issues_cache!
+        end
+      end
     end
 
     class_methods do
@@ -88,8 +94,12 @@ module EE
       blocking_issues_ids.any?
     end
 
+    def blocked_by_issues
+      self.class.where(id: blocking_issues_ids)
+    end
+
     # Used on EE::IssueEntity to expose blocking issues URLs
-    def blocked_by_issues(user)
+    def blocked_by_issues_for(user)
       return ::Issue.none unless blocked?
 
       issues =
@@ -210,6 +220,18 @@ module EE
       blocking_count = ::IssueLink.blocking_issues_count_for(self)
 
       update!(blocking_issues_count: blocking_count)
+    end
+
+    def refresh_blocking_and_blocked_issues_cache!
+      self_and_blocking_issues_ids = [self.id] + blocking_issues_ids
+      blocking_issues_count_by_id = ::IssueLink.blocking_issues_for_collection(self_and_blocking_issues_ids).to_sql
+
+      self.class.connection.execute <<~SQL
+        UPDATE issues
+        SET blocking_issues_count = grouped_counts.count
+        FROM (#{blocking_issues_count_by_id}) AS grouped_counts
+        WHERE issues.id = grouped_counts.blocking_issue_id
+      SQL
     end
 
     override :relocation_target

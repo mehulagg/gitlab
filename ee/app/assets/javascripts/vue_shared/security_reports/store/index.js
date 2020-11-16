@@ -8,6 +8,7 @@ import mutations from './mutations';
 import state from './state';
 
 import sast from './modules/sast';
+import secretDetection from './modules/secret_detection';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ export default () =>
   new Vuex.Store({
     modules: {
       sast,
+      secretDetection,
       pipelineJobs,
     },
     actions,

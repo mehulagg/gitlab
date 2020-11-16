@@ -7,25 +7,51 @@ module Geo
     include Delay
 
     class_methods do
-      def checksummed
-        model.available_replicables.checksummed
+      # If replication is disabled, then so is verification.
+      def verification_enabled?
+        enabled? && verification_feature_flag_enabled?
+      end
+
+      # Overridden by PackageFileReplicator with its own feature flag so we can
+      # release verification for PackageFileReplicator alone, at first.
+      # This feature flag name is not dynamic like the replication feature flag,
+      # because Geo is proliferating too many permanent feature flags, and if
+      # there is a serious bug with verification that needs to be shut off
+      # immediately, then the replication feature flag can be disabled until it
+      # is fixed. This feature flag is intended to be removed after it is
+      # defaulted on.
+      # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46998 for more
+      def verification_feature_flag_enabled?
+        Feature.enabled?(:geo_framework_verification)
       end
 
       def checksummed_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
         model.available_replicables.checksummed.count
       end
 
       def checksum_failed_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
         model.available_replicables.checksum_failed.count
       end
     end
 
     def after_verifiable_update
-      schedule_checksum_calculation if needs_checksum?
+      verify_async if needs_checksum?
     end
 
-    def calculate_checksum!
-      checksum = model_record.calculate_checksum!
+    def verify_async
+      Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
+    end
+
+    def verify
+      checksum = model_record.calculate_checksum
       update_verification_state!(checksum: checksum)
     rescue => e
       log_error('Error calculating the checksum', e)
@@ -41,6 +67,7 @@ module Geo
     end
 
     def needs_checksum?
+      return false unless self.class.verification_enabled?
       return true unless model_record.respond_to?(:needs_checksum?)
 
       model_record.needs_checksum?
@@ -78,10 +105,6 @@ module Geo
     def calculate_next_retry_attempt
       retry_count = model_record.verification_retry_count.to_i + 1
       [next_retry_time(retry_count), retry_count]
-    end
-
-    def schedule_checksum_calculation
-      raise NotImplementedError
     end
   end
 end

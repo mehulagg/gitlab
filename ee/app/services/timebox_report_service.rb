@@ -36,7 +36,8 @@ class TimeboxReportService
     end
 
     ServiceResponse.success(payload: {
-      burnup_time_series: chart_data
+      burnup_time_series: chart_data,
+      stats: build_stats
     })
   end
 
@@ -217,5 +218,25 @@ class TimeboxReportService
     else
       raise ArgumentError, 'Cannot handle timebox type'
     end
+  end
+
+  def build_stats
+    stats_data = chart_data.last
+    return unless stats_data
+
+    {
+      complete: {
+        count: stats_data[:completed_count],
+        weight: stats_data[:completed_weight]
+      },
+      incomplete: {
+        count: stats_data[:scope_count] - stats_data[:completed_count],
+        weight: stats_data[:scope_weight] - stats_data[:completed_weight]
+      },
+      total: {
+        count: stats_data[:scope_count],
+        weight: stats_data[:scope_weight]
+      }
+    }
   end
 end

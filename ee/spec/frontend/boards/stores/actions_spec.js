@@ -74,6 +74,23 @@ describe('setFilters', () => {
     );
   });
 
+  it('should commit mutation SET_FILTERS, updates iterationWildcardId', () => {
+    const state = {
+      filters: {},
+    };
+
+    const filters = { labelName: 'label', iterationId: 'None' };
+    const updatedFilters = { labelName: 'label', iterationWildcardId: 'NONE' };
+
+    return testAction(
+      actions.setFilters,
+      filters,
+      state,
+      [{ type: types.SET_FILTERS, payload: updatedFilters }],
+      [],
+    );
+  });
+
   it('should commit mutation SET_FILTERS, dispatches setEpicSwimlanes action if filters contain groupBy epic', () => {
     const state = {
       filters: {},
@@ -528,7 +545,7 @@ describe('resetEpics', () => {
 });
 
 describe('setActiveIssueEpic', () => {
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const epicWithData = {
     id: 'gid://gitlab/Epic/42',
     iid: 1,
@@ -560,7 +577,7 @@ describe('setActiveIssueEpic', () => {
 
 describe('setActiveIssueWeight', () => {
   const state = { issues: { [mockIssue.id]: mockIssue } };
-  const getters = { getActiveIssue: mockIssue };
+  const getters = { activeIssue: mockIssue };
   const testWeight = mockIssue.weight + 1;
   const input = {
     weight: testWeight,
@@ -580,7 +597,7 @@ describe('setActiveIssueWeight', () => {
     });
 
     const payload = {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'weight',
       value: testWeight,
     };
