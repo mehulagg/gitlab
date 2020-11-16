@@ -12,7 +12,7 @@ module Resolvers
 
     def resolve(iid:)
       BatchLoader::GraphQL.for(iid).batch(key: project) do |iids, loader, args|
-        finder = ::Ci::PipelinesFinder.new(project, context[:current_user], iids: iids)
+        finder = ::Ci::PipelinesFinder.new(project, context[:current_user], iids: iids, include_child_pipelines: true)
 
         finder.execute.each { |pl| loader.call(pl.iid.to_s, pl) }
       end

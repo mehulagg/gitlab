@@ -72,8 +72,24 @@ RSpec.describe Ci::PipelinesFinder do
         create(:ci_sources_pipeline, pipeline: child_pipeline, source_pipeline: parent_pipeline)
       end
 
-      it 'filters out child pipelines and show only the parents' do
+      it 'filters out child pipelines and shows only the parents by default' do
         is_expected.to eq([parent_pipeline])
+      end
+
+      context 'when include_child_pipelines is false' do
+        let(:params) { { include_child_pipelines: false } }
+
+        it 'filters out child pipelines and shows only the parents' do
+          is_expected.to eq([parent_pipeline])
+        end
+      end
+
+      context 'when include_child_pipelines is true' do
+        let(:params) { { include_child_pipelines: true } }
+
+        it 'shows child pipelines and parents' do
+          is_expected.to eq([child_pipeline, parent_pipeline])
+        end
       end
     end
 

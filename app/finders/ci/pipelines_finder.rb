@@ -18,7 +18,7 @@ module Ci
         return Ci::Pipeline.none
       end
 
-      items = pipelines.no_child
+      items = by_include_child_pipelines(pipelines)
       items = by_scope(items)
       items = by_status(items)
       items = by_ref(items)
@@ -51,6 +51,12 @@ module Ci
 
     def tags
       project.repository.tag_names
+    end
+
+    def by_include_child_pipelines(items)
+      return items if params[:include_child_pipelines]
+
+      items.no_child
     end
 
     def by_scope(items)
