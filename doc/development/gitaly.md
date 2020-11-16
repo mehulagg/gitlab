@@ -191,6 +191,11 @@ If you want to run tests locally against a modified version of Gitaly you
 can replace `tmp/tests/gitaly` with a symlink. This is much faster
 because if will avoid a Gitaly re-install each time you run `rspec`.
 
+Additionally, you may need to copy the `config.toml` and `praefect.config.toml` from
+`tmp/tests/gitaly` to your repo and change some paths in these files to your repo path.
+If these config files already exist in your repo, be sure to create copies
+before copying them over.
+
 ```shell
 rm -rf tmp/tests/gitaly
 ln -s /path/to/gitaly tmp/tests/gitaly
