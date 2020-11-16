@@ -25,7 +25,7 @@ export default {
   },
   watch: {
     searchQuery: debounce(function debounceSearchQuery() {
-      this.track('type_search_query', {label: 'projects_dropdown_frequent_items_search_input'});
+      this.track('type_search_query', { label: 'projects_dropdown_frequent_items_search_input' });
       this.setSearchQuery(this.searchQuery);
     }, 500),
   },
