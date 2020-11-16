@@ -62,6 +62,12 @@ module Gitlab
           properties: {
             completed: {
               type: 'boolean'
+            },
+            started_at: {
+              type: 'date',
+            },
+            completed_at: {
+              type: 'date',
             }
           }
         }
