@@ -7,7 +7,7 @@ import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
-import { EpicFilterType, GroupByParamType } from '../constants';
+import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import * as typesCE from '~/boards/stores/mutation_types';
@@ -79,6 +79,7 @@ export default {
       'epicId',
       'labelName',
       'milestoneTitle',
+      'iterationTitle',
       'releaseTag',
       'search',
       'weight',
@@ -94,6 +95,14 @@ export default {
     } else if (filterParams.epicId) {
       filterParams.epicId = fullEpicId(filterParams.epicId);
     }
+
+    if (
+      filters.iterationId === IterationFilterType.any ||
+      filters.iterationId === IterationFilterType.none
+    ) {
+      filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
+    }
+
     commit(types.SET_FILTERS, filterParams);
   },
 

@@ -1,0 +1,5 @@
+---
+title: Include squash and diff head SHA in Chain of Custody report
+merge_request: 47429
+author:
+type: changed

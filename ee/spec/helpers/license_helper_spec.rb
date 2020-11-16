@@ -8,48 +8,6 @@ RSpec.describe LicenseHelper do
     allow(Rails.application.routes).to receive(:default_url_options).and_return(url_options)
   end
 
-  describe '#current_active_user_count' do
-    let(:license) { create(:license) }
-
-    context 'when there is a license' do
-      it 'returns License#current_active_users_count' do
-        allow(License).to receive(:current).and_return(license)
-
-        expect(license).to receive(:current_active_users_count).and_return(311)
-        expect(current_active_user_count).to eq(311)
-      end
-    end
-
-    context 'when there is NOT a license' do
-      it 'returns the number of active users' do
-        allow(License).to receive(:current).and_return(nil)
-
-        expect(current_active_user_count).to eq(License.current_active_users.count)
-      end
-    end
-  end
-
-  describe '#maximum_user_count' do
-    context 'when current license is set' do
-      it 'returns the maximum_user_count for the current license' do
-        license = double
-        allow(License).to receive(:current).and_return(license)
-        count = 5
-        allow(license).to receive(:maximum_user_count).and_return(count)
-
-        expect(maximum_user_count).to eq(count)
-      end
-    end
-
-    context 'when current license is not set' do
-      it 'returns 0' do
-        allow(License).to receive(:current).and_return(nil)
-
-        expect(maximum_user_count).to eq(0)
-      end
-    end
-  end
-
   describe '#current_license_title' do
     context 'when there is a current license' do
       it 'returns the plan titleized if it has a plan associated to it' do
@@ -80,31 +38,43 @@ RSpec.describe LicenseHelper do
   describe '#seats_calculation_message' do
     subject { seats_calculation_message(license) }
 
-    context 'with a license' do
-      let(:license) { double("License", 'exclude_guests_from_active_count?' => exclude_guests) }
+    let(:license) { double('License', 'exclude_guests_from_active_count?' => exclude_guests) }
 
-      context 'and guest are excluded from the active count' do
-        let(:exclude_guests) { true }
+    context 'and guest are excluded from the active count' do
+      let(:exclude_guests) { true }
 
-        it 'returns the message' do
-          expect(subject).to eq("Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license.")
-        end
-      end
-
-      context 'and guest are NOT excluded from the active count' do
-        let(:exclude_guests) { false }
-
-        it 'returns nil' do
-          expect(subject).to be_blank
-        end
+      it 'returns the message' do
+        expect(subject).to eq("Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license.")
       end
     end
 
-    context 'when the license is blank' do
-      let(:license) { nil }
+    context 'and guest are NOT excluded from the active count' do
+      let(:exclude_guests) { false }
 
       it 'returns nil' do
         expect(subject).to be_blank
+      end
+    end
+  end
+
+  describe '#licensed_users' do
+    context 'with a restricted license count' do
+      let(:license) do
+        double('License', restricted?: { active_user_count: true }, restrictions: { active_user_count: 5 })
+      end
+
+      it 'returns a number as string' do
+        license = double('License', restricted?: true, restrictions: { active_user_count: 5 })
+
+        expect(licensed_users(license)).to eq '5'
+      end
+    end
+
+    context 'without a restricted license count' do
+      let(:license) { double('License', restricted?: false) }
+
+      it 'returns Unlimited' do
+        expect(licensed_users(license)).to eq 'Unlimited'
       end
     end
   end

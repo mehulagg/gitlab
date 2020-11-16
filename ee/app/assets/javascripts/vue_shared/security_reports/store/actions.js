@@ -6,6 +6,11 @@ import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import toast from '~/vue_shared/plugins/global_toast';
 import { fetchDiffData } from '~/vue_shared/security_reports/store/utils';
+import {
+  FEEDBACK_TYPE_DISMISSAL,
+  FEEDBACK_TYPE_ISSUE,
+  FEEDBACK_TYPE_MERGE_REQUEST,
+} from '~/vue_shared/security_reports/constants';
 import * as types from './mutation_types';
 
 /**
@@ -173,36 +178,6 @@ export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
 export const updateCoverageFuzzingIssue = ({ commit }, issue) =>
   commit(types.UPDATE_COVERAGE_FUZZING_ISSUE, issue);
 
-/**
- * SECRET SCANNING
- */
-
-export const setSecretScanningDiffEndpoint = ({ commit }, path) =>
-  commit(types.SET_SECRET_SCANNING_DIFF_ENDPOINT, path);
-
-export const requestSecretScanningDiff = ({ commit }) => commit(types.REQUEST_SECRET_SCANNING_DIFF);
-
-export const receiveSecretScanningDiffSuccess = ({ commit }, response) =>
-  commit(types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS, response);
-
-export const receiveSecretScanningDiffError = ({ commit }) =>
-  commit(types.RECEIVE_SECRET_SCANNING_DIFF_ERROR);
-
-export const fetchSecretScanningDiff = ({ state, dispatch }) => {
-  dispatch('requestSecretScanningDiff');
-
-  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_detection')
-    .then(data => {
-      dispatch('receiveSecretScanningDiffSuccess', data);
-    })
-    .catch(() => {
-      dispatch('receiveSecretScanningDiffError');
-    });
-};
-
-export const updateSecretScanningIssue = ({ commit }, issue) =>
-  commit(types.UPDATE_SECRET_SCANNING_ISSUE, issue);
-
 export const openModal = ({ dispatch }, payload) => {
   dispatch('setModalData', payload);
 
@@ -229,7 +204,7 @@ export const dismissVulnerability = ({ state, dispatch }, comment) => {
       vulnerability_feedback: {
         category: state.modal.vulnerability.category,
         comment,
-        feedback_type: 'dismissal',
+        feedback_type: FEEDBACK_TYPE_DISMISSAL,
         pipeline_id: state.pipelineId,
         project_fingerprint: state.modal.vulnerability.project_fingerprint,
         vulnerability_data: state.modal.vulnerability,
@@ -392,7 +367,7 @@ export const createNewIssue = ({ state, dispatch }) => {
   axios
     .post(state.createVulnerabilityFeedbackIssuePath, {
       vulnerability_feedback: {
-        feedback_type: 'issue',
+        feedback_type: FEEDBACK_TYPE_ISSUE,
         category: state.modal.vulnerability.category,
         project_fingerprint: state.modal.vulnerability.project_fingerprint,
         pipeline_id: state.pipelineId,
@@ -423,7 +398,7 @@ export const createMergeRequest = ({ state, dispatch }) => {
   axios
     .post(state.createVulnerabilityFeedbackMergeRequestPath, {
       vulnerability_feedback: {
-        feedback_type: 'merge_request',
+        feedback_type: FEEDBACK_TYPE_MERGE_REQUEST,
         category,
         project_fingerprint,
         vulnerability_data: vulnerability,

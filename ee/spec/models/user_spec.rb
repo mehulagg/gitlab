@@ -580,6 +580,71 @@ RSpec.describe User do
     end
   end
 
+  describe '.billable' do
+    let_it_be(:bot_user) { create(:user, :bot) }
+    let_it_be(:regular_user) { create(:user) }
+    let_it_be(:project_reporter_user) { create(:project_member, :reporter).user }
+    let_it_be(:project_guest_user) { create(:project_member, :guest).user }
+
+    subject(:users) { described_class.billable }
+
+    context 'with guests' do
+      it 'validates the sql matches the specific index we have' do
+        expected_sql = <<~SQL
+          SELECT "users".* FROM "users"
+          WHERE ("users"."state" IN ('active'))
+          AND
+          ("users"."user_type" IS NULL OR "users"."user_type" IN (NULL, 6, 4))
+          AND
+          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8))
+        SQL
+
+        expect(users.to_sql.squish).to eq expected_sql.squish
+      end
+
+      it 'returns users' do
+        expect(users).to include(project_reporter_user)
+        expect(users).to include(project_guest_user)
+        expect(users).to include(regular_user)
+
+        expect(users).not_to include(bot_user)
+      end
+    end
+
+    context 'without guests' do
+      before do
+        license = double('License', exclude_guests_from_active_count?: true, trial?: false)
+        allow(License).to receive(:current) { license }
+      end
+
+      it 'validates the sql matches the specific index we have' do
+        expected_sql = <<~SQL
+          SELECT "users".* FROM "users"
+          WHERE ("users"."state" IN ('active'))
+          AND
+          ("users"."user_type" IS NULL OR "users"."user_type" IN (NULL, 6, 4))
+          AND
+          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8))
+          AND
+          (EXISTS (SELECT 1 FROM "members"
+            WHERE "members"."user_id" = "users"."id"
+            AND
+            (members.access_level > 10)))
+        SQL
+
+        expect(users.to_sql.squish).to eq expected_sql.squish
+      end
+
+      it 'returns users' do
+        expect(users).to include(project_reporter_user)
+
+        expect(users).not_to include(regular_user)
+        expect(users).not_to include(project_guest_user)
+        expect(users).not_to include(bot_user)
+      end
+    end
+  end
+
   describe '#group_managed_account?' do
     subject { user.group_managed_account? }
 

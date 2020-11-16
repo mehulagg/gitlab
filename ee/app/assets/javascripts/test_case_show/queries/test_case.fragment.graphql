@@ -16,6 +16,10 @@ fragment TestCase on Issue {
   webUrl
   blocked
   confidential
+  moved
+  movedTo {
+    webUrl
+  }
   author {
     ...Author
   }

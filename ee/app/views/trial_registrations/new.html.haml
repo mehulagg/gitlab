@@ -1,22 +1,9 @@
 - page_title _('Start a Free Gold Trial')
+- add_page_specific_style 'page_bundles/signup'
 
-%h2.center.py-6
+%h2.center.pt-6.pb-4.gl-mb-0
   = _('Start a Free Gold Trial')
 
-%div
-  - if any_form_based_providers_enabled?
-    = render 'devise/shared/tabs_ldap'
-  - else
-    = render 'devise/shared/tabs_normal'
-  .tab-content
-    - if password_authentication_enabled_for_web? || ldap_sign_in_enabled? || crowd_enabled?
-      = render 'signin_box'
-
-    -# Signup only makes sense if you can also sign-in
-    - if allow_signup?
-      = render 'signup_box', user: resource
-
-  -# Show a message if none of the mechanisms above are enabled
-  - if !password_authentication_enabled_for_web? && !ldap_sign_in_enabled? && !(omniauth_enabled? && devise_mapping.omniauthable?)
-    %div
-      = _('No authentication methods configured.')
+.signup-page
+  = render 'devise/shared/signup_box', url: trial_registrations_path, button_text: _('Continue'), show_omniauth_providers: false
+  = render 'devise/shared/sign_in_link'

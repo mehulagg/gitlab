@@ -18,6 +18,7 @@ export const REPORT_TYPES = {
   sast: s__('ciReport|SAST'),
   secret_detection: s__('ciReport|Secret Detection'),
   coverage_fuzzing: s__('ciReport|Coverage Fuzzing'),
+  api_fuzzing: s__('ciReport|API Fuzzing'),
 };
 
 export const DASHBOARD_TYPES = {

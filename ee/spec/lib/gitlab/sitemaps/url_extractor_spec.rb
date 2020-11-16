@@ -55,8 +55,6 @@ RSpec.describe Gitlab::Sitemaps::UrlExtractor do
     subject { described_class.extract_from_group(group) }
 
     it 'returns several group urls' do
-      stub_licensed_features(epics: true)
-
       expected_urls = [
         group_url(group),
         issues_group_url(group),
@@ -66,14 +64,6 @@ RSpec.describe Gitlab::Sitemaps::UrlExtractor do
       ]
 
       expect(subject).to match_array(expected_urls)
-    end
-
-    context 'when epics are not enabled' do
-      it 'does nor include epics url' do
-        stub_licensed_features(epics: false)
-
-        expect(subject).not_to include(group_epics_url(group))
-      end
     end
   end
 

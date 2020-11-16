@@ -34,11 +34,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    hasVulnerabilities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     vulnerabilitiesExportEndpoint: {
       type: String,
       required: false,
@@ -68,7 +63,7 @@ export default {
 
 <template>
   <div>
-    <template v-if="hasVulnerabilities">
+    <template v-if="pipeline.id">
       <auto-fix-user-callout
         v-if="shoudShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"

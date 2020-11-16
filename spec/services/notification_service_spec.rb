@@ -867,23 +867,6 @@ RSpec.describe NotificationService, :mailer do
           should_not_email(non_member_and_mentioned)
           should_not_email(note.author)
         end
-
-        context 'when the feature flag is disabled' do
-          before do
-            stub_feature_flags(design_management_design_notification_participants: false)
-          end
-
-          it 'sends a new note notification only to the mentioned member', :aggregate_failures do
-            notification.new_note(note)
-
-            should_email(member_and_mentioned)
-            should_not_email(design.authors.first)
-            should_not_email(member_and_author_of_second_note)
-            should_not_email(member_and_not_mentioned)
-            should_not_email(non_member_and_mentioned)
-            should_not_email(note.author)
-          end
-        end
       end
 
       context 'design management is disabled' do
@@ -2322,6 +2305,26 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
+  describe '#new_instance_access_request', :deliver_mails_inline do
+    let_it_be(:user) { create(:user, :blocked_pending_approval) }
+    let_it_be(:admins) { create_list(:admin, 12, :with_sign_ins) }
+
+    subject { notification.new_instance_access_request(user) }
+
+    before do
+      reset_delivered_emails!
+      stub_application_setting(require_admin_approval_after_user_signup: true)
+    end
+
+    it 'sends notification only to a maximum of ten most recently active instance admins' do
+      ten_most_recently_active_instance_admins = User.admins.active.sort_by(&:current_sign_in_at).last(10)
+
+      subject
+
+      should_only_email(*ten_most_recently_active_instance_admins)
+    end
+  end
+
   describe 'GroupMember', :deliver_mails_inline do
     let(:added_user) { create(:user) }
 
@@ -3099,12 +3102,26 @@ RSpec.describe NotificationService, :mailer do
         subject.new_issue(issue, member)
       end
 
-      it 'still delivers email to admins' do
-        member.update!(admin: true)
+      context 'with admin user' do
+        before do
+          member.update!(admin: true)
+        end
 
-        expect(Notify).to receive(:new_issue_email).at_least(:once).with(member.id, issue.id, nil).and_call_original
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'still delivers email to admins' do
+            expect(Notify).to receive(:new_issue_email).at_least(:once).with(member.id, issue.id, nil).and_call_original
 
-        subject.new_issue(issue, member)
+            subject.new_issue(issue, member)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'does not send an email' do
+            expect(Notify).not_to receive(:new_issue_email)
+
+            subject.new_issue(issue, member)
+          end
+        end
       end
     end
   end

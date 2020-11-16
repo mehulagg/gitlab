@@ -18,7 +18,7 @@ RSpec.describe Mutations::Boards::Lists::UpdateLimitMetrics do
     group.add_guest(guest)
   end
 
-  subject { mutation.resolve(list_id: list.to_global_id.to_s, **list_update_params) }
+  subject { mutation.resolve(list_id: list.to_global_id, **list_update_params) }
 
   describe '#ready?' do
     it 'raises an error if required arguments are missing' do

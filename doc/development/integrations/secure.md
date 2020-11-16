@@ -46,12 +46,12 @@ Because the `script` entry can't be left empty, it must be set to the command th
 It is not possible to rely on the predefined `ENTRYPOINT` and `CMD` of the Docker image
 to perform the scan automatically, without passing any command.
 
-The [`before_script`](../../ci/yaml/README.md#before_script-and-after_script)
+The [`before_script`](../../ci/yaml/README.md#before_script)
 should not be used in the job definition because users may rely on this to prepare their projects before performing the scan.
 For instance, it is common practice to use `before_script` to install system libraries
 a particular project needs before performing SAST or Dependency Scanning.
 
-Similarly, [`after_script`](../../ci/yaml/README.md#before_script-and-after_script)
+Similarly, [`after_script`](../../ci/yaml/README.md#after_script)
 should not be used in the job definition, because it may be overridden by users.
 
 ### Stage
@@ -181,7 +181,9 @@ SAST and Dependency Scanning scanners must scan the files in the project directo
 
 In order to be consistent with the official Container Scanning for GitLab,
 scanners must scan the Docker image whose name and tag are given by
-`CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG`, respectively.
+`CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG`, respectively. If the `DOCKER_IMAGE`
+variable is provided, then the `CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG` variables
+are ignored, and the image specified in the `DOCKER_IMAGE` variable is scanned instead.
 
 If not provided, `CI_APPLICATION_REPOSITORY` should default to
 `$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG`, which is a combination of predefined CI variables.
@@ -289,8 +291,7 @@ You can find the schemas for these scanners here:
 
 ### Version
 
-This field specifies the version of the report schema you are using. Please reference individual scanner
-pages for the specific versions to use.
+This field specifies the version of the [Security Report Schemas](https://gitlab.com/gitlab-org/security-products/security-report-schemas) you are using. Please refer to the [releases](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/releases) of the schemas for the specific versions to use.
 
 ### Vulnerabilities
 

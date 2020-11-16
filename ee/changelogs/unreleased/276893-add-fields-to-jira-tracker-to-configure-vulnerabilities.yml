@@ -1,0 +1,5 @@
+---
+title: Add new fields for creating issues from vulnerabilities in Jira
+merge_request: 46982
+author:
+type: added

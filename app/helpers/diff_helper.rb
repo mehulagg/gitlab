@@ -64,13 +64,15 @@ module DiffHelper
     else
       # `sub` and substring-ing would destroy HTML-safeness of `line`
       if line.start_with?('+', '-', ' ')
-        line.dup.tap do |line|
-          line[0] = ''
-        end
+        line[1, line.length]
       else
         line
       end
     end
+  end
+
+  def diff_link_number(line_type, match, text)
+    line_type == match ? " " : text
   end
 
   def parallel_diff_discussions(left, right, diff_file)
@@ -249,5 +251,19 @@ module DiffHelper
     return path unless path.size > max && max > 3
 
     "...#{path[-(max - 3)..-1]}"
+  end
+
+  def code_navigation_path(diffs)
+    Gitlab::CodeNavigationPath.new(merge_request.project, diffs.diff_refs&.head_sha)
+  end
+
+  def conflicts
+    return unless options[:merge_ref_head_diff]
+
+    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request) # rubocop:disable CodeReuse/ServiceClass
+
+    return unless conflicts_service.can_be_resolved_in_ui?
+
+    conflicts_service.conflicts.files.index_by(&:our_path)
   end
 end

@@ -189,6 +189,7 @@ module EE
       delegate :merge_trains_enabled?, to: :ci_cd_settings
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
+      delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
 
@@ -341,6 +342,10 @@ module EE
 
     def jira_issues_integration_available?
       feature_available?(:jira_issues_integration)
+    end
+
+    def jira_vulnerabilities_integration_available?
+      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
     end
 
     def multiple_approval_rules_available?
@@ -651,7 +656,7 @@ module EE
     end
 
     override :lfs_http_url_to_repo
-    def lfs_http_url_to_repo(operation)
+    def lfs_http_url_to_repo(operation = nil)
       return super unless ::Gitlab::Geo.secondary_with_primary?
       return super if operation == GIT_LFS_DOWNLOAD_OPERATION # download always comes from secondary
 

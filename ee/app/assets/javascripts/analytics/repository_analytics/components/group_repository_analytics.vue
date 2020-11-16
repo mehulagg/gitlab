@@ -20,9 +20,6 @@ export default {
     shouldShowCoverageSummary() {
       return this.glFeatures.groupCoverageDataReportGraph;
     },
-    shouldShowCoverageReport() {
-      return this.glFeatures.groupCoverageDataReport;
-    },
   },
 };
 </script>
@@ -33,7 +30,7 @@ export default {
       {{ $options.text.codeCoverageHeader }}
     </h4>
     <test-coverage-summary v-if="shouldShowCoverageSummary" />
-    <test-coverage-table v-if="shouldShowCoverageReport" class="gl-mb-5" />
+    <test-coverage-table class="gl-mb-5" />
     <download-test-coverage />
   </div>
 </template>

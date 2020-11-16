@@ -10,7 +10,7 @@ describe('ExpandableSection component', () => {
 
   const findButton = () => wrapper.find('button');
   const findHeading = () => wrapper.find('[data-testid="heading"]');
-  const findSubHeading = () => wrapper.find('[data-testid="subheading"]');
+  const findSubHeading = () => wrapper.find('[data-testid="sub-heading"]');
   const findContent = () => wrapper.find('[data-testid="content"]');
 
   afterEach(() => {
@@ -50,7 +50,7 @@ describe('ExpandableSection component', () => {
   describe('subheading slot', () => {
     beforeEach(() => {
       createComponent({
-        slots: { subheading: 'some subheading' },
+        slots: { 'sub-heading': 'some subheading' },
       });
     });
 

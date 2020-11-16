@@ -99,6 +99,7 @@ From there, you can see the following actions:
 - Number of required approvals was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Added or removed users and groups from project approval groups ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213603) in GitLab 13.2)
 - Project CI/CD variable added, removed, or protected status changed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.4)
+- User was approved via Admin Area ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276250) in GitLab 13.6)
 
 Project events can also be accessed via the [Project Audit Events API](../api/audit_events.md#project-audit-events).
 
@@ -178,6 +179,12 @@ the steps bellow.
    ```ruby
    Feature.enable(:repository_push_audit_event)
    ```
+
+## Retention policy
+
+On GitLab.com, Audit Event records become subject to deletion after 400 days, or when your license is downgraded to a tier that does not include access to Audit Events. Data that is subject to deletion will be deleted at GitLab's discretion, possibly without additional notice.
+
+If you require a longer retention period, you should independently archive your Audit Event data, which you can retrieve through the [Audit Events API](../api/audit_events.md).
 
 ## Export to CSV **(PREMIUM ONLY)**
 

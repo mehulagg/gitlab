@@ -4754,6 +4754,42 @@
               "deprecationReason": null
             },
             {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "userNotesCount",
+              "description": "Number of user notes of the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "userPermissions",
               "description": "Permissions for the current user on the resource",
               "args": [
@@ -5076,6 +5112,16 @@
               "defaultValue": null
             },
             {
+              "name": "iterationTitle",
+              "description": "Filter by iteration title",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "weight",
               "description": "Filter by weight",
               "type": {
@@ -5111,6 +5157,16 @@
               "type": {
                 "kind": "ENUM",
                 "name": "EpicWildcardId",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iterationWildcardId",
+              "description": "Filter by iteration ID wildcard",
+              "type": {
+                "kind": "ENUM",
+                "name": "IterationWildcardId",
                 "ofType": null
               },
               "defaultValue": null
@@ -6236,6 +6292,24 @@
                 "kind": "OBJECT",
                 "name": "CiJobConnection",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipeline",
+              "description": "Pipeline the job belongs to",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Pipeline",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -8114,7 +8188,7 @@
             },
             {
               "name": "branch",
-              "description": "Name of the branch",
+              "description": "Name of the branch to commit into, it can be a new branch",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -8123,6 +8197,16 @@
                   "name": "String",
                   "ofType": null
                 }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "startBranch",
+              "description": "If on a new branch, name of the original branch",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -12186,6 +12270,24 @@
             },
             {
               "name": "globalId",
+              "description": "ID of the DAST scanner profile. Deprecated in 13.6: Use `id`",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DastScannerProfileID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": true,
+              "deprecationReason": "Use `id`. Deprecated in 13.6"
+            },
+            {
+              "name": "id",
               "description": "ID of the DAST scanner profile",
               "args": [
 
@@ -12201,24 +12303,6 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "id",
-              "description": "ID of the DAST scanner profile. Deprecated in 13.4: Use `global_id`",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": true,
-              "deprecationReason": "Use `global_id`. Deprecated in 13.4"
             },
             {
               "name": "profileName",
@@ -12533,6 +12617,20 @@
             },
             {
               "name": "globalId",
+              "description": "ID of the scanner profile.. Deprecated in 13.6: Use `id`",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DastScannerProfileID",
+                "ofType": null
+              },
+              "isDeprecated": true,
+              "deprecationReason": "Use `id`. Deprecated in 13.6"
+            },
+            {
+              "name": "id",
               "description": "ID of the scanner profile.",
               "args": [
 
@@ -12544,20 +12642,6 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "id",
-              "description": "ID of the scanner profile.. Deprecated in 13.4: Use `global_id`",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": true,
-              "deprecationReason": "Use `global_id`. Deprecated in 13.4"
             }
           ],
           "inputFields": null,
@@ -16721,6 +16805,112 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "DestroyContainerRepositoryInput",
+          "description": "Autogenerated input type of DestroyContainerRepository",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the container repository.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ContainerRepositoryID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DestroyContainerRepositoryPayload",
+          "description": "Autogenerated return type of DestroyContainerRepository",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containerRepository",
+              "description": "The container repository policy after scheduling the deletion.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ContainerRepository",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "DestroyNoteInput",
           "description": "Autogenerated input type of DestroyNote",
           "fields": null,
@@ -20046,6 +20236,42 @@
               "deprecationReason": null
             },
             {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "userNotesCount",
+              "description": "Number of user notes of the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "userPermissions",
               "description": "Permissions for the current user on the resource",
               "args": [
@@ -21163,6 +21389,34 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Milestone",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "moved",
+              "description": "Indicates if issue got moved from other project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "movedTo",
+              "description": "Updated Issue after it got moved to another project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Issue",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -27822,6 +28076,34 @@
               "deprecationReason": null
             },
             {
+              "name": "moved",
+              "description": "Indicates if issue got moved from other project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "movedTo",
+              "description": "Updated Issue after it got moved to another project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Issue",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "notes",
               "description": "All notes on this noteable",
               "args": [
@@ -30435,28 +30717,6 @@
           "description": "Represents an iteration object",
           "fields": [
             {
-              "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "BurnupChartDailyTotals",
-                    "ofType": null
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "createdAt",
               "description": "Timestamp of iteration creation",
               "args": [
@@ -30867,6 +31127,29 @@
             {
               "name": "all",
               "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "IterationWildcardId",
+          "description": "Iteration ID wildcard values",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "NONE",
+              "description": "No iteration is assigned",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ANY",
+              "description": "An iteration is assigned",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -36372,28 +36655,6 @@
           "description": "Represents a milestone",
           "fields": [
             {
-              "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "BurnupChartDailyTotals",
-                    "ofType": null
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "createdAt",
               "description": "Timestamp of milestone creation",
               "args": [
@@ -38034,6 +38295,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "DestroyBoardListPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "destroyContainerRepository",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DestroyContainerRepositoryInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DestroyContainerRepositoryPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -40823,6 +41111,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iterationTitle",
+              "description": "Filter by iteration title",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               },
               "defaultValue": null
@@ -43851,7 +44149,7 @@
             },
             {
               "name": "codeCoverageSummary",
-              "description": "Code coverages summary associated with the project. Available only when feature flag `group_coverage_data_report` is enabled",
+              "description": "Code coverage summary associated with the project",
               "args": [
 
               ],
@@ -59963,6 +60261,20 @@
               "deprecationReason": null
             },
             {
+              "name": "job",
+              "description": "The job that created this version",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiJob",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "updatedAt",
               "description": "Timestamp the version was updated",
               "args": [
@@ -60461,6 +60773,110 @@
         },
         {
           "kind": "OBJECT",
+          "name": "TimeReportStats",
+          "description": "Represents the time report stats for timeboxes",
+          "fields": [
+            {
+              "name": "complete",
+              "description": "Completed issues metrics",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeboxMetrics",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "incomplete",
+              "description": "Incomplete issues metrics",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeboxMetrics",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "total",
+              "description": "Total issues metrics",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeboxMetrics",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "TimeboxMetrics",
+          "description": "Represents measured stats metrics for timeboxes",
+          "fields": [
+            {
+              "name": "count",
+              "description": "The count metric",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "weight",
+              "description": "The weight metric",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
           "name": "TimeboxReport",
           "description": "Represents a historically accurate report about the timebox",
           "fields": [
@@ -60485,6 +60901,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "stats",
+              "description": "Represents the time report stats for the timebox",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeReportStats",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -60499,28 +60929,6 @@
           "name": "TimeboxReportInterface",
           "description": null,
           "fields": [
-            {
-              "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "BurnupChartDailyTotals",
-                    "ofType": null
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
             {
               "name": "report",
               "description": "Historically accurate report about the timebox",

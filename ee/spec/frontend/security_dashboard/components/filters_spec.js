@@ -38,7 +38,7 @@ describe('Filter component', () => {
     });
 
     it('should display all filters', () => {
-      expect(wrapper.findAll('.js-filter')).toHaveLength(3);
+      expect(wrapper.findAll('.js-filter')).toHaveLength(2);
     });
 
     it('should display "Hide dismissed vulnerabilities" toggle', () => {

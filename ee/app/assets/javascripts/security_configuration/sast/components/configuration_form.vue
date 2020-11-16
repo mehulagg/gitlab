@@ -147,7 +147,7 @@ export default {
         </gl-link>
       </template>
 
-      <template #subheading>
+      <template #sub-heading>
         {{ $options.i18n.analyzersSubHeading }}
       </template>
 

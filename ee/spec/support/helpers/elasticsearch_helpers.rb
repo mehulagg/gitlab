@@ -35,6 +35,11 @@ module ElasticsearchHelpers
   end
 
   def refresh_index!
-    ::Gitlab::Elastic::Helper.default.refresh_index
+    es_helper.refresh_index
+    es_helper.refresh_index(index_name: @migrations_index_name) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  end
+
+  def es_helper
+    Gitlab::Elastic::Helper.default
   end
 end

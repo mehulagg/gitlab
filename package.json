@@ -44,7 +44,7 @@
     "@babel/preset-env": "^7.10.1",
     "@gitlab/at.js": "1.5.5",
     "@gitlab/svgs": "1.175.0",
-    "@gitlab/ui": "23.4.0",
+    "@gitlab/ui": "23.8.0",
     "@gitlab/visual-review-tools": "1.6.1",
     "@rails/actioncable": "^6.0.3-3",
     "@rails/ujs": "^6.0.3-2",
@@ -162,7 +162,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.1",
-    "@gitlab/eslint-plugin": "4.0.0",
+    "@gitlab/eslint-plugin": "5.0.0",
     "@testing-library/dom": "^7.16.2",
     "@vue/test-utils": "1.0.0-beta.30",
     "acorn": "^6.3.0",

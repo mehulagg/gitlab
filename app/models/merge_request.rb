@@ -56,6 +56,7 @@ class MergeRequest < ApplicationRecord
 
   has_one :merge_request_diff,
     -> { order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
+  has_one :cleanup_schedule, inverse_of: :merge_request
 
   belongs_to :latest_merge_request_diff, class_name: 'MergeRequestDiff'
   manual_inverse_association :latest_merge_request_diff, :merge_request
@@ -310,6 +311,8 @@ class MergeRequest < ApplicationRecord
   scope :including_metrics, -> do
     includes(:metrics)
   end
+
+  scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
 
   after_save :keep_around_commit, unless: :importing?
 

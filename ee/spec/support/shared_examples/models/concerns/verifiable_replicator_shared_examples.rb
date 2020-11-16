@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# This is included by BlobReplicatorStrategy and RepositoryReplicatorStrategy.
+# This should be included on any Replicator which implements verification.
 #
 RSpec.shared_examples 'a verifiable replicator' do
   include EE::GeoHelpers
@@ -40,34 +40,34 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#after_verifiable_update' do
-    it 'schedules the checksum calculation if needed' do
-      expect(replicator).to receive(:schedule_checksum_calculation)
+    it 'calls verify_async if needed' do
+      expect(replicator).to receive(:verify_async)
       expect(replicator).to receive(:needs_checksum?).and_return(true)
 
       replicator.after_verifiable_update
     end
   end
 
-  describe '#calculate_checksum!' do
+  describe '#verify' do
     before do
       model_record.save!
     end
 
     it 'calculates the checksum' do
-      expect(model_record).to receive(:calculate_checksum!).and_return('abc123')
+      expect(model_record).to receive(:calculate_checksum).and_return('abc123')
 
-      replicator.calculate_checksum!
+      replicator.verify
 
       expect(model_record.reload.verification_checksum).to eq('abc123')
       expect(model_record.verified_at).not_to be_nil
     end
 
     it 'saves the error message and increments retry counter' do
-      allow(model_record).to receive(:calculate_checksum!) do
+      allow(model_record).to receive(:calculate_checksum) do
         raise StandardError.new('Failure to calculate checksum')
       end
 
-      replicator.calculate_checksum!
+      replicator.verify
 
       expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
       expect(model_record.verification_retry_count).to be 1

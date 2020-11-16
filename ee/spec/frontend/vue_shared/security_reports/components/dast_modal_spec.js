@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import Component from 'ee/vue_shared/security_reports/components/dast_modal.vue';
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlSprintf } from '@gitlab/ui';
 
 describe('DAST Modal', () => {
   let wrapper;
@@ -11,7 +11,7 @@ describe('DAST Modal', () => {
     downloadLink: 'https://gitlab.com',
   };
 
-  const findDownloadButton = () => wrapper.find('[data-testid="download-button"]');
+  const findDownloadLink = () => wrapper.find('[data-testid="download-link"]');
 
   const createWrapper = propsData => {
     wrapper = shallowMount(Component, {
@@ -21,6 +21,7 @@ describe('DAST Modal', () => {
       },
       stubs: {
         GlModal,
+        GlSprintf,
       },
     });
   };
@@ -34,9 +35,12 @@ describe('DAST Modal', () => {
   });
 
   it('has the download button with required attrs', () => {
-    expect(findDownloadButton().exists()).toBe(true);
-    expect(findDownloadButton().attributes('href')).toBe(defaultProps.downloadLink);
-    expect(findDownloadButton().attributes('download')).toBeDefined();
+    const downloadLink = findDownloadLink();
+
+    expect(downloadLink.attributes()).toMatchObject({
+      href: defaultProps.downloadLink,
+      download: expect.anything(),
+    });
   });
 
   it('should contain the dynamic title', () => {
@@ -46,7 +50,7 @@ describe('DAST Modal', () => {
 
   it('should not show download button when link is not present', () => {
     createWrapper({ downloadLink: '' });
-    expect(findDownloadButton().exists()).toBe(false);
+    expect(findDownloadLink().exists()).toBe(false);
   });
 
   it('scanned urls should be limited to 15', () => {

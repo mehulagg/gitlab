@@ -14,7 +14,7 @@ module EE
           if result
             deployments = read_deployments(environment.deployment_namespace)
 
-            ingresses = if ::Feature.enabled?(:canary_ingress_weight_control, environment.project)
+            ingresses = if ::Feature.enabled?(:canary_ingress_weight_control, environment.project, default_enabled: true)
                           read_ingresses(environment.deployment_namespace)
                         else
                           []

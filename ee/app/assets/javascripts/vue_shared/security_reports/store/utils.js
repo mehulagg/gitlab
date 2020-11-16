@@ -9,15 +9,38 @@ import { __, n__, sprintf } from '~/locale';
 export const findIssueIndex = (issues, issue) =>
   issues.findIndex(el => el.project_fingerprint === issue.project_fingerprint);
 
+const createCountMessage = ({ critical, high, other, total }) => {
+  const otherMessage = n__('%d Other', '%d Others', other);
+  const countMessage = __(
+    '%{criticalStart}%{critical} Critical%{criticalEnd} %{highStart}%{high} High%{highEnd} and %{otherStart}%{otherMessage}%{otherEnd}',
+  );
+  return total ? sprintf(countMessage, { critical, high, otherMessage }) : '';
+};
+
+const createStatusMessage = ({ reportType, status, total }) => {
+  const vulnMessage = n__('vulnerability', 'vulnerabilities', total);
+  let message;
+  if (status) {
+    message = __('%{reportType} %{status}');
+  } else if (!total) {
+    message = __('%{reportType} detected %{totalStart}no%{totalEnd} vulnerabilities.');
+  } else {
+    message = __(
+      '%{reportType} detected %{totalStart}%{total}%{totalEnd} potential %{vulnMessage}',
+    );
+  }
+  return sprintf(message, { reportType, status, total, vulnMessage });
+};
+
 /**
- * Takes an object of options and returns an externalized string representing
+ * Takes an object of options and returns the object with an externalized string representing
  * the critical, high, and other severity vulnerabilities for a given report.
  *
  * The resulting string _may_ still contain sprintf-style placeholders. These
  * are left in place so they can be replaced with markup, via the
  * SecuritySummary component.
  * @param {{reportType: string, status: string, critical: number, high: number, other: number}} options
- * @returns {string}
+ * @returns {Object} the parameters with an externalized string
  */
 export const groupedTextBuilder = ({
   reportType = '',
@@ -26,92 +49,17 @@ export const groupedTextBuilder = ({
   high = 0,
   other = 0,
 } = {}) => {
-  // This approach uses bitwise (ish) flags to determine which vulnerabilities
-  // we have, without the need for too many nested levels of if/else statements.
-  //
-  // Here's a video explaining how it works
-  // https://youtu.be/qZzKNC7TPbA
-  //
-  // Here's a link to a similar approach on MDN:
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators#Examples
+  const total = critical + high + other;
 
-  let options = 0;
-  const HAS_CRITICAL = 1;
-  const HAS_HIGH = 2;
-  const HAS_OTHER = 4;
-  let message;
-
-  if (critical) {
-    options += HAS_CRITICAL;
-  }
-  if (high) {
-    options += HAS_HIGH;
-  }
-  if (other) {
-    options += HAS_OTHER;
-  }
-
-  switch (options) {
-    case HAS_CRITICAL:
-      message = n__(
-        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerability.',
-        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerabilities.',
-        critical,
-      );
-      break;
-
-    case HAS_HIGH:
-      message = n__(
-        '%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerability.',
-        '%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerabilities.',
-        high,
-      );
-      break;
-
-    case HAS_OTHER:
-      message = n__(
-        '%{reportType} %{status} detected %{other} vulnerability.',
-        '%{reportType} %{status} detected %{other} vulnerabilities.',
-        other,
-      );
-      break;
-
-    case HAS_CRITICAL + HAS_HIGH:
-      message = __(
-        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities.',
-      );
-      break;
-
-    case HAS_CRITICAL + HAS_OTHER:
-      message = __(
-        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerabilities out of %{total}.',
-      );
-      break;
-
-    case HAS_HIGH + HAS_OTHER:
-      message = __(
-        '%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}.',
-      );
-      break;
-
-    case HAS_CRITICAL + HAS_HIGH + HAS_OTHER:
-      message = __(
-        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}.',
-      );
-      break;
-
-    default:
-      message = __('%{reportType} %{status} detected no vulnerabilities.');
-  }
-
-  return sprintf(message, {
-    reportType,
-    status,
+  return {
+    countMessage: createCountMessage({ critical, high, other, total }),
+    message: createStatusMessage({ reportType, status, total }),
     critical,
     high,
     other,
-    total: critical + high + other,
-  }).replace(/\s\s+/g, ' ');
+    status,
+    total,
+  };
 };
 
 export const statusIcon = (loading = false, failed = false, newIssues = 0, neutralIssues = 0) => {
@@ -156,11 +104,11 @@ export const countVulnerabilities = (vulnerabilities = []) => {
  */
 export const groupedReportText = (report, reportType, errorMessage, loadingMessage) => {
   if (report.hasError) {
-    return errorMessage;
+    return { message: errorMessage };
   }
 
   if (report.isLoading) {
-    return loadingMessage;
+    return { message: loadingMessage };
   }
 
   return groupedTextBuilder({

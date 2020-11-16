@@ -10,7 +10,7 @@ export default {
     dast: false,
     dependency_scanning: false,
     license_management: false,
-    secret_scanning: false,
+    secret_detection: false,
   },
 };
 
@@ -123,6 +123,7 @@ export const codequalityParsedIssues = [
     path: 'Gemfile.lock',
     line: 12,
     urlPath: 'foo/Gemfile.lock',
+    severity: 'minor',
   },
 ];
 

@@ -7,14 +7,14 @@ module Mutations
 
       graphql_name 'DastScannerProfileCreate'
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, ::Types::GlobalIDType[::DastScannerProfile],
             null: true,
-            description: 'ID of the scanner profile.',
-            deprecated: { reason: 'Use `global_id`', milestone: '13.4' }
+            description: 'ID of the scanner profile.'
 
       field :global_id, ::Types::GlobalIDType[::DastScannerProfile],
             null: true,
-            description: 'ID of the scanner profile.'
+            description: 'ID of the scanner profile.',
+            deprecated: { reason: 'Use `id`', milestone: '13.6' }
 
       argument :full_path, GraphQL::ID_TYPE,
                required: true,

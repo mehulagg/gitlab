@@ -59,6 +59,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: cronjob:elastic_migration
+  :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: cronjob:elastic_remove_expired_namespace_subscriptions_from_index_cron
   :feature_category: :global_search
   :has_external_dependencies:
@@ -290,14 +298,6 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
-- :name: dependency_proxy:purge_dependency_proxy_cache
-  :feature_category: :dependency_proxy
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
   :tags: []
 - :name: epics:epics_update_epics_dates
   :feature_category: :epics

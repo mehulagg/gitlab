@@ -61,12 +61,13 @@ describe('GeoNodeFormCapacities', () => {
   const findGeoNodeFormReverificationIntervalField = () =>
     wrapper.find('#node-reverification-interval-field');
   const findErrorMessage = () => wrapper.find('.invalid-feedback');
+  const findFieldLabel = id => wrapper.vm.formGroups.find(el => el.id === id).label;
 
   describe('template', () => {
     describe.each`
-      primaryNode | description                                                                                                     | link
-      ${true}     | ${'Set the synchronization and verification capacity for the secondary node.'}                                  | ${REVERIFICATION_MORE_INFO}
-      ${false}    | ${'Set the number of concurrent requests this secondary node will make to the primary node while backfilling.'} | ${BACKFILL_MORE_INFO}
+      primaryNode | description                                                                                   | link
+      ${true}     | ${'Set verification limit and frequency.'}                                                    | ${REVERIFICATION_MORE_INFO}
+      ${false}    | ${'Limit the number of concurrent operations this secondary node can run in the background.'} | ${BACKFILL_MORE_INFO}
     `(`section description`, ({ primaryNode, description, link }) => {
       describe(`when node is ${primaryNode ? 'primary' : 'secondary'}`, () => {
         beforeEach(() => {
@@ -168,7 +169,9 @@ describe('GeoNodeFormCapacities', () => {
               showError,
             );
             if (showError) {
-              expect(findErrorMessage().text()).toBe(`Verification capacity ${errorMessage}`);
+              expect(findErrorMessage().text()).toBe(
+                `${findFieldLabel('node-verification-capacity-field')} ${errorMessage}`,
+              );
             }
           });
         });
@@ -183,7 +186,9 @@ describe('GeoNodeFormCapacities', () => {
               showError,
             );
             if (showError) {
-              expect(findErrorMessage().text()).toBe(`Re-verification interval ${errorMessage}`);
+              expect(findErrorMessage().text()).toBe(
+                `${findFieldLabel('node-reverification-interval-field')} ${errorMessage}`,
+              );
             }
           });
         });
@@ -202,7 +207,9 @@ describe('GeoNodeFormCapacities', () => {
           it(`${showError ? 'shows' : 'hides'} error when data is ${data}`, () => {
             expect(findGeoNodeFormRepositoryCapacityField().classes('is-invalid')).toBe(showError);
             if (showError) {
-              expect(findErrorMessage().text()).toBe(`Repository sync capacity ${errorMessage}`);
+              expect(findErrorMessage().text()).toBe(
+                `${findFieldLabel('node-repository-capacity-field')} ${errorMessage}`,
+              );
             }
           });
         });
@@ -215,7 +222,9 @@ describe('GeoNodeFormCapacities', () => {
           it(`${showError ? 'shows' : 'hides'} error when data is ${data}`, () => {
             expect(findGeoNodeFormFileCapacityField().classes('is-invalid')).toBe(showError);
             if (showError) {
-              expect(findErrorMessage().text()).toBe(`File sync capacity ${errorMessage}`);
+              expect(findErrorMessage().text()).toBe(
+                `${findFieldLabel('node-file-capacity-field')} ${errorMessage}`,
+              );
             }
           });
         });
@@ -231,7 +240,7 @@ describe('GeoNodeFormCapacities', () => {
             );
             if (showError) {
               expect(findErrorMessage().text()).toBe(
-                `Container repositories sync capacity ${errorMessage}`,
+                `${findFieldLabel('node-container-repository-capacity-field')} ${errorMessage}`,
               );
             }
           });
@@ -247,7 +256,9 @@ describe('GeoNodeFormCapacities', () => {
               showError,
             );
             if (showError) {
-              expect(findErrorMessage().text()).toBe(`Verification capacity ${errorMessage}`);
+              expect(findErrorMessage().text()).toBe(
+                `${findFieldLabel('node-verification-capacity-field')} ${errorMessage}`,
+              );
             }
           });
         });

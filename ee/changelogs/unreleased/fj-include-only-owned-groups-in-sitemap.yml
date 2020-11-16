@@ -1,0 +1,5 @@
+---
+title: Include only Gitlab-org owned groups in sitemap
+merge_request: 47608
+author:
+type: changed

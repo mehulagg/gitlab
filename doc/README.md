@@ -260,16 +260,16 @@ The following documentation relates to the DevOps **Verify** stage:
 
 ### Package
 
-GitLab Packages allows organizations to utilize GitLab as a private repository
+GitLab Packages allows organizations to use GitLab as a private repository
 for a variety of common package managers. Users are able to build and publish
-packages, which can be easily consumed as a dependency in downstream projects.
+packages, which can be consumed as a dependency in downstream projects.
 
 The following documentation relates to the DevOps **Package** stage:
 
 | Package topics                                                  | Description                                            |
 |:----------------------------------------------------------------|:-------------------------------------------------------|
 | [Container Registry](user/packages/container_registry/index.md)   | The GitLab Container Registry enables every project in GitLab to have its own space to store [Docker](https://www.docker.com/) images. |
-| [Dependency Proxy](user/packages/dependency_proxy/index.md) **(PREMIUM)** | The GitLab Dependency Proxy sets up a local proxy for frequently used upstream images/packages. |
+| [Dependency Proxy](user/packages/dependency_proxy/index.md) | The GitLab Dependency Proxy sets up a local proxy for frequently used upstream images/packages. |
 | [Package Registry](user/packages/package_registry/index.md) | Use GitLab as a private or public registry for a variety of common package managers, including [NPM](user/packages/npm_registry/index.md), [Maven](user/packages/maven_repository/index.md), [PyPI](user/packages/pypi_repository/index.md), and others. You can also store generic files. |
 
 <div align="right">

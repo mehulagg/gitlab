@@ -22,7 +22,7 @@
             %span= _('Security Dashboard')
 
         = nav_link(path: 'projects/security/vulnerability_report#index') do
-          = link_to project_security_vulnerability_report_index_path(@project), title: _('Vulnerability Report') do
+          = link_to project_security_vulnerability_report_index_path(@project), title: _('Vulnerability Report'), data: { qa_selector: 'vulnerability_report_link' } do
             %span= _('Vulnerability Report')
 
       - if project_nav_tab?(:on_demand_scans)

@@ -74,7 +74,14 @@ module EE
 
       scope :managed_by, ->(group) { where(managing_group: group) }
 
-      scope :excluding_guests, -> { joins(:members).merge(::Member.non_guests).distinct }
+      scope :excluding_guests, -> do
+        subquery = ::Member
+          .select(1)
+          .where(::Member.arel_table[:user_id].eq(::User.arel_table[:id]))
+          .merge(::Member.non_guests)
+
+        where('EXISTS (?)', subquery)
+      end
 
       scope :subscribed_for_admin_email, -> { where(admin_email_unsubscribed_at: nil) }
       scope :ldap, -> { joins(:identities).where('identities.provider LIKE ?', 'ldap%') }
@@ -139,6 +146,16 @@ module EE
         else
           all
         end
+      end
+
+      def billable
+        scope = active.without_bots
+
+        License.with_valid_license do |license|
+          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
+        end
+
+        scope
       end
     end
 

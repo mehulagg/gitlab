@@ -118,7 +118,7 @@ describe('Security Dashboard Table', () => {
         localVue,
         store,
         slots: {
-          emptyState: '<div class="customEmptyState">Hello World</div>',
+          'empty-state': '<div class="customEmptyState">Hello World</div>',
         },
       });
 

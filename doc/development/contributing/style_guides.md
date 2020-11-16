@@ -23,13 +23,24 @@ for static analysis offenses before pushing your changes.
 To install `lefthook`, run the following in your GitLab source directory:
 
 ```shell
-# Make sure to uninstall Overcommit first
+# 1. Make sure to uninstall Overcommit first
 overcommit --uninstall
 
 # If using rbenv, at this point you may need to do: rbenv rehash
 
-# Install lefthook
-gem install lefthook && lefthook install -f
+# 2. Install lefthook...
+
+## With Homebrew (macOS)
+brew install Arkweid/lefthook/lefthook
+
+## Or with Go
+go get github.com/Arkweid/lefthook
+
+## Or with Rubygems
+gem install lefthook
+
+# 3. Install the Git hooks
+lefthook install -f
 ```
 
 Before you push your changes, Lefthook then automatically run Danger checks, and other checks
@@ -37,14 +48,16 @@ for changed files. This saves you time as you don't have to wait for the same er
 by CI/CD.
 
 Lefthook relies on a pre-push hook to prevent commits that violate its ruleset.
-If you wish to override this behavior, pass the environment variable `LEFTHOOK=0`.
-That is, `LEFTHOOK=0 git push`.
+To override this behavior, pass the environment variable `LEFTHOOK=0`. That is,
+`LEFTHOOK=0 git push`.
 
 You can also:
 
 - Define [local configuration](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#local-config).
-- Skip [checks per tag on the fly](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#skip-some-tags-on-the-fly), e.g. `LEFTHOOK_EXCLUDE=frontend git push origin`.
-- Run [hooks manually](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#run-githook-group-directly), e.g. `lefthook run pre-push`.
+- Skip [checks per tag on the fly](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#skip-some-tags-on-the-fly).
+  For example, `LEFTHOOK_EXCLUDE=frontend git push origin`.
+- Run [hooks manually](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#run-githook-group-directly).
+  For example, `lefthook run pre-push`.
 
 ## Ruby, Rails, RSpec
 
@@ -111,7 +124,7 @@ We're following [Ciro Santilli's Markdown Style Guide](https://cirosantilli.com/
 
 ## Documentation
 
-See the dedicated [Documentation Style Guide](../documentation/styleguide.md).
+See the dedicated [Documentation Style Guide](../documentation/styleguide/index.md).
 
 ## Python
 
