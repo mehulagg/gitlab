@@ -2,6 +2,7 @@ import $ from 'jquery';
 import '~/lib/utils/jquery_at_who';
 import { escape, template } from 'lodash';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
+import { isUserBusy } from '~/set_status_modal/utils';
 import glRegexp from './lib/utils/regexp';
 import AjaxCache from './lib/utils/ajax_cache';
 import { spriteIcon } from './lib/utils/common_utils';
@@ -39,6 +40,7 @@ export function membersBeforeSave(members) {
       title: sanitize(title),
       search: sanitize(`${member.username} ${member.name}`),
       icon: avatarIcon,
+      availability: member.availability,
     };
   });
 }
@@ -253,13 +255,16 @@ class GfmAutoComplete {
       alias: 'users',
       displayTpl(value) {
         let tmpl = GfmAutoComplete.Loading.template;
-        const { avatarTag, username, title, icon } = value;
+        const { avatarTag, username, title, icon, availability } = value;
         if (username != null) {
           tmpl = GfmAutoComplete.Members.templateFunction({
             avatarTag,
             username,
             title,
             icon,
+            availabilityStatus: isUserBusy(availability)
+              ? `<span class="gl-text-gray-600"> (Busy)</span>`
+              : '',
           });
         }
         return tmpl;
@@ -775,8 +780,10 @@ GfmAutoComplete.Emoji = {
 };
 // Team Members
 GfmAutoComplete.Members = {
-  templateFunction({ avatarTag, username, title, icon }) {
-    return `<li>${avatarTag} ${username} <small>${escape(title)}</small> ${icon}</li>`;
+  templateFunction({ avatarTag, username, title, icon, availabilityStatus }) {
+    return `<li>${avatarTag} ${username} <small>${escape(
+      title,
+    )}${availabilityStatus}</small> ${icon}</li>`;
   },
 };
 GfmAutoComplete.Labels = {
