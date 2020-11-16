@@ -24,7 +24,6 @@ assigning the `:quarantine` metadata with the issue URL.
 it 'should succeed', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345' do
   expect(response).to have_gitlab_http_status(:ok)
 end
-
 ```
 
 This means it will be skipped unless run with `--tag quarantine`:
