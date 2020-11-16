@@ -74,6 +74,9 @@ export default {
         ? sprintf(__('Reopen %{issueType}'), { issueType: this.issueType })
         : sprintf(__('Close %{issueType}'), { issueType: this.issueType });
     },
+    qaSelector() {
+      return this.isClosed ? 'reopen_issue_button' : 'close_issue_button';
+    }
     buttonVariant() {
       return this.isClosed ? 'default' : 'warning';
     },
@@ -169,6 +172,7 @@ export default {
       v-if="showToggleIssueStateButton"
       class="gl-display-none gl-display-sm-inline-flex!"
       category="secondary"
+      :data-qa-selector="qaSelectorText"
       :loading="isUpdatingState"
       :variant="buttonVariant"
       @click="toggleIssueState"
