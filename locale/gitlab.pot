@@ -26587,6 +26587,9 @@ msgstr ""
 msgid "Terraform|The Terraform report %{name} was generated in your pipelines."
 msgstr ""
 
+msgid "Terraform|Unknown User"
+msgstr ""
+
 msgid "Test"
 msgstr ""
 
