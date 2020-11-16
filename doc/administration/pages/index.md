@@ -434,6 +434,21 @@ Authority (CA) in the system certificate store.
 
 For Omnibus, this is fixed by [installing a custom CA in Omnibus GitLab](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
+### Tunning zip serving configuration
+
+> [Introduced] in GitLab 13.6
+
+DANGER: **Warning:**
+These are advanced settings for serving GitLab Pages from zip archives.
+The recommended default values are set inside GitLab Pages and should be changed only if absolutely needed.
+
+| Setting | Description |
+| :---: | :---: |
+| `zip_cache_expiration` | Allows changing the cache expiration interval of zip archives. Must be greater than 0 to avoid serving stale content. Default is 60s. |
+| `zip_cache_cleanup` | The interval at which archives are cleaned from memory if they have already expired. Default is 30s. |
+| `zip_cache_refresh` | The interval window where an archive will be extended in memory if accessed within this time. For example, if an archive is going to expire in 20s and the refresh interval is higher than than, the archive will be extended and set to expire in `zip_cache_expiration`. Default is 30s.|
+| `zip_open_timeout` | The maximum time allowed to open a zip archive from disk or object storage. Only increase this time for big archives or slow network connections; doing so may affect latency of serving Pages. Default is 30s. |
+
 ## Activate verbose logging for daemon
 
 Verbose logging was [introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2533) in
