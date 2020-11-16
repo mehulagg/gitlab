@@ -266,8 +266,8 @@ Alternatively, users can be removed from the SCIM app which will delink all remo
 
 Changing the SAML or SCIM configuration or provider can cause the following cases:
 
-1. GitLab SAML and GitLab SCIM identity mismatch which should be the same
-1. SCIM identity mismatch betwen GitLab.com and the new SCIM app identity
+1. SAML and SCIM identity mismatch which normally are the same on GitLab.com
+1. SCIM identity mismatch between GitLab and the Identify Provider SCIM app
 
 For the first case where SAML and SCIM identity mismatch, you can first [verify user's SAML NameId matches the SCIM externalId](#how-do-i-verify-users-saml-nameid-matches-the-scim-externalid) and then [update or fix the mismatched SCIM externalId and SAML NameId](#update-or-fix-mismatched-scim-externalid-and-saml-nameid).
 
