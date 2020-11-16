@@ -57,13 +57,13 @@ update automatically in response to various actions and content updates.
 
 ### Issue actions
 
-In an issue, you can close an open issue by clicking on the **Close issue** button.
-The issue will not be deleted.
+In an open issue, you can close it by selecting the **Close issue** button.
+The issue is marked as closed but is not deleted.
 
-A closed issue can be reopened by clicking on the **Reopen issue** button.
-A reopened issue is no different from any other issue.
+To reopen a closed issue, select the **Reopen issue** button.
+A reopened issue is no different from any other open issue.
 
-You can access additional actions by selecting the vertical ellipsis
+To access additional actions, select the vertical ellipsis
 (**{ellipsis_v}**) button:
 
 - To create a new issue in the same project, select **New issue** in the dropdown menu.
