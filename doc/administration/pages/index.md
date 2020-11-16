@@ -242,6 +242,10 @@ control over how the Pages daemon runs and serves content in your environment.
 | `pages_nginx[]` | |
 | `enable` | Include a virtual host `server{}` block for Pages inside NGINX. Needed for NGINX to proxy traffic back to the Pages daemon. Set to `false` if the Pages daemon should directly receive all requests, for example, when using [custom domains](index.md#custom-domains).
 | `FF_ENABLE_REDIRECTS` | Feature flag to disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#disable-redirects) for more info. |
+| `zip_cache_expiration` | Zip serving cache expiration interval (default: "60s"). |
+| `zip_cache_cleanup` | Zip serving cache cleanup interval (default: "30s"). |
+| `zip_cache_refresh` | Zip serving cache refresh interval (default: "30s"). |
+| `zip_open_timeout` | Zip serving open timeout (default: "30s"). |
 
 ---
 
