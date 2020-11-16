@@ -100,6 +100,8 @@ With the output from the *mark* phase in hand, the registry starts the *sweep* p
 
 Doing this for a huge registry may require multiple hours/days to complete, during which the registry must remain in read-only mode. This is not feasible for platforms with tight availability requirements, such as GitLab.com.
 
+This limitation is also described in the upstream [Docker Distribution documentation](https://github.com/docker/distribution/blob/749f6afb4572201e3c37325d0ffedb6f32be8950/ROADMAP.md#deletes).
+
 #### Performance
 
 Due to the current architecture and its reliance on the (possibly remote) storage backend to store repository and image metadata, even the most basic operations, such as listing repositories or tags, can become prohibitively slow, and it only gets worse as the registry grows in size.
