@@ -48,6 +48,7 @@ export default {
         {
           key: 'actions',
           thClass: 'gl-display-none',
+          tdClass: 'gl-w-10',
         },
       ];
     },
@@ -111,7 +112,7 @@ export default {
     </template>
 
     <template #cell(actions)="{ item }">
-      <gl-dropdown icon="ellipsis_v">
+      <gl-dropdown icon="ellipsis_v" right>
         <gl-dropdown-section-header>
           {{ s__('Terraform|Actions') }}
         </gl-dropdown-section-header>
