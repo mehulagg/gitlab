@@ -181,6 +181,9 @@ RSpec.describe VulnerabilitiesHelper do
           * [Cipher does not check for integrity first?|https://crypto.stackexchange.com/questions/31428/pbewithmd5anddes-cipher-does-not-check-for-integrity-first]
 
 
+          h3. Scanner:
+
+          * Name: Find Security Bugs
         JIRA
       end
 
