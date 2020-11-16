@@ -164,6 +164,7 @@ class Project < ApplicationRecord
   has_one :bamboo_service
   has_one :teamcity_service
   has_one :pushover_service
+  has_one :jenkins_service
   has_one :jira_service
   has_one :redmine_service
   has_one :youtrack_service
