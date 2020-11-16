@@ -10,6 +10,7 @@
       - rspec_flaky/
       - rspec_profiling/
       - crystalball/packed-mapping.json.gz
+      - warnings/
 
 retrieve-tests-metadata:
   extends:

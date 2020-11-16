@@ -38,6 +38,7 @@
       - tmp/memory_test/
       - tmp/feature_flags/
       - log/*.log
+      - warnings/
     reports:
       junit: junit_rspec.xml
 
