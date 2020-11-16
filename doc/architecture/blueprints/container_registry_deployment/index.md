@@ -144,7 +144,11 @@ The design and development of the registry database adhere to the GitLab [databa
 
 Running *online* migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md). Apart from online migrations, [*post deployment* migrations](/development/post_deployment_migrations.html) are also a requirement to be implemented as outlined in [container-registry#220](https://gitlab.com/gitlab-org/container-registry/-/issues/220).
 
+#### Partitioning
+
 The registry database will be partitioned from start to achieve greater performance (by limiting the amount of data to act upon and enable parallel execution), easier maintenance (by splitting tables and indexes into smaller units), and high availability (with partition independence). By partitioning the database from start we can also facilitate a sharding implementation later on if necessary.
+
+Although blobs are shared across repositories, manifest and tag metadata are scoped by repository. This is also visible at the API level, where all write and read requests (except [listing repositories](https://gitlab.com/gitlab-org/container-registry/-/blob/a113d0f0ab29b49cf88e173ee871893a9fc56a90/docs/spec/api.md#listing-repositories)) are scoped by repository, with its namespace being part of the request URI. For this reason, after [identifying access patterns](https://gitlab.com/gitlab-org/gitlab/-/issues/234255), we decided to partition manifests and tags by repository and blobs by digest, ensuring that lookups are always performed by partition key for optimal performance.
 
 #### GitLab.com
 
