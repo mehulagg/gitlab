@@ -17,10 +17,6 @@ RSpec.describe Environments::CanaryIngress::UpdateService, :clean_gitlab_redis_c
     project.add_reporter(reporter)
   end
 
-  before do
-    stub_licensed_features(deploy_board: true)
-  end
-
   shared_examples_for 'failed request' do
     it 'returns an error' do
       expect(subject[:status]).to eq(:error)
@@ -50,16 +46,6 @@ RSpec.describe Environments::CanaryIngress::UpdateService, :clean_gitlab_redis_c
 
       it_behaves_like 'failed request' do
         let(:message) { "You do not have permission to update the environment." }
-      end
-    end
-
-    context 'when project does not have an sufficient license' do
-      before do
-        stub_licensed_features(deploy_board: false)
-      end
-
-      it_behaves_like 'failed request' do
-        let(:message) { 'The license for Deploy Board is required to use this feature.' }
       end
     end
 

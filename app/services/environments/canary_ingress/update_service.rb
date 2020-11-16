@@ -41,10 +41,6 @@ module Environments
           return error(_('You do not have permission to update the environment.'))
         end
 
-        unless environment.project.feature_available?(:deploy_board)
-          return error(_('The license for Deploy Board is required to use this feature.'))
-        end
-
         unless params[:weight].is_a?(Integer) && (0..100).cover?(params[:weight])
           return error(_('Canary weight must be specified and valid range (0..100).'))
         end

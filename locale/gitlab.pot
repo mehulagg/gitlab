@@ -27080,9 +27080,6 @@ msgstr ""
 msgid "The issue was successfully promoted to an epic. Redirecting to epic..."
 msgstr ""
 
-msgid "The license for Deploy Board is required to use this feature."
-msgstr ""
-
 msgid "The license key is invalid. Make sure it is exactly as you received it from GitLab Inc."
 msgstr ""
 
