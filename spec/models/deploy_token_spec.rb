@@ -129,6 +129,7 @@ RSpec.describe DeployToken do
     context "when it has been revoked" do
       it 'returns true' do
         deploy_token.revoke!
+
         expect(deploy_token.deactivated?).to be_truthy
       end
     end
@@ -142,6 +143,7 @@ RSpec.describe DeployToken do
     context "when it hasn't been revoked and is expired" do
       it 'returns false' do
         deploy_token.update_attribute(:expires_at, Date.today - 5.days)
+
         expect(deploy_token.deactivated?).to be_truthy
       end
     end
