@@ -32,7 +32,7 @@ module MicrosoftTeams
 
       result['title'] = options[:title]
       result['summary'] = options[:summary]
-      result['sections'] << MicrosoftTeams::Activity.new(options[:activity]).prepare
+      result['sections'] << MicrosoftTeams::Activity.new(**options[:activity]).prepare
 
       attachments = options[:attachments]
       unless attachments.blank?
