@@ -4,7 +4,7 @@
   %li.current-user
     .user-name.gl-font-weight-bold
       = current_user.name
-      - if user_set_to_busy?(current_user)
+      - if current_user&.status && user_status_set_to_busy?(current_user.status)
         %span.gl-font-weight-normal.gl-text-gray-600= s_("UserProfile|(Busy)")
     = current_user.to_reference
     - if current_user.status

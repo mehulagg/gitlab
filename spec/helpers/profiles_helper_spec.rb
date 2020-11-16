@@ -80,6 +80,21 @@ RSpec.describe ProfilesHelper do
     end
   end
 
+  describe "#user_status_set_to_busy?" do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:availability, :result) do
+      "busy"    | true
+      "not_set" | false
+      ""        | false
+      nil       | false
+    end
+
+    with_them do
+      it { expect(helper.user_status_set_to_busy?(OpenStruct.new(availability: availability))).to eq(result) }
+    end
+  end
+
   def stub_cas_omniauth_provider
     provider = OpenStruct.new(
       'name' => 'cas3',

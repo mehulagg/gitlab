@@ -34,8 +34,8 @@ module ProfilesHelper
     Types::AvailabilityEnum.enum
   end
 
-  def user_set_to_busy?(user)
-    user && user.status && user.status.availability == availability_values[:busy]
+  def user_status_set_to_busy?(status)
+    status&.availability == availability_values[:busy]
   end
 
   def default_emoji
