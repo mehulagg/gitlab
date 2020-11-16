@@ -16838,9 +16838,9 @@ CREATE TABLE user_permission_uploads (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     user_id bigint NOT NULL,
-    status character varying(255) NOT NULL,
-    file character varying(255),
-    file_store integer
+    file_store integer,
+    status smallint DEFAULT 0 NOT NULL,
+    file character varying(255)
 );
 
 CREATE SEQUENCE user_permission_uploads_id_seq

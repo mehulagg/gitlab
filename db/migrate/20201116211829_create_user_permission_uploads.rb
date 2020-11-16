@@ -11,9 +11,9 @@ class CreateUserPermissionUploads < ActiveRecord::Migration[6.0]
         create_table :user_permission_uploads do |t|
           t.timestamps_with_timezone null: false
           t.references :user, foreign_key: { on_delete: :cascade }, index: true, null: false
-          t.string :status, limit: 255, null: false
-          t.string :file, limit: 255
           t.integer :file_store
+          t.integer :status, limit: 2, null: false, default: 0
+          t.string :file, limit: 255
         end
       end
     end

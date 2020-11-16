@@ -23,9 +23,9 @@ class UserPermissionUpload < ApplicationRecord
       transition [:created, :running] => :failed
     end
 
-    state :created
-    state :running
-    state :finished
-    state :failed
+    state :created, value: 0
+    state :running, value: 1
+    state :finished, value: 2
+    state :failed, value: 3
   end
 end
