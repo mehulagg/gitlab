@@ -24375,6 +24375,9 @@ ALTER TABLE ONLY vulnerability_issue_links
 ALTER TABLE ONLY alert_management_alert_assignees
     ADD CONSTRAINT fk_rails_d47570ac62 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY web_hooks
+    ADD CONSTRAINT fk_rails_d47999a98a FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_hashed_storage_attachments_events
     ADD CONSTRAINT fk_rails_d496b088e9 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
