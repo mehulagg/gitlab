@@ -14,7 +14,7 @@ RSpec.describe Mutations::IncidentManagement::OncallSchedule::Create do
     }
   end
 
-  specify { expect(described_class).to require_graphql_authorizations(:modify_incident_management_oncall_schedule) }
+  specify { expect(described_class).to require_graphql_authorizations(:admin_incident_management_oncall_schedule) }
 
   describe '#resolve' do
     subject(:resolve) { mutation_for(project, current_user).resolve(args) }
