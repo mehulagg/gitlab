@@ -1,5 +1,6 @@
 <script>
 import { __, sprintf } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
 import AssigneeAvatarLink from './assignee_avatar_link.vue';
 
 const DEFAULT_RENDER_COUNT = 5;
@@ -50,6 +51,13 @@ export default {
     username() {
       return `@${this.firstUser.username}`;
     },
+    userBusy() {
+      if (!this.hasOneUser) {
+        return false;
+      }
+      const { status } = this.firstUser;
+      return status?.availability && isUserBusy(status.availability);
+    },
   },
   methods: {
     toggleShowLess() {
@@ -68,7 +76,8 @@ export default {
     :issuable-type="issuableType"
   >
     <div class="ml-2 gl-line-height-normal">
-      <div>{{ firstUser.name }}</div>
+      <div v-if="userBusy">{{ firstUser.name }} {{ s__('UserAvailability|(Busy)') }}</div>
+      <div v-else>{{ firstUser.name }}</div>
       <div>{{ username }}</div>
     </div>
   </assignee-avatar-link>
