@@ -16833,6 +16833,25 @@ CREATE TABLE user_interacted_projects (
     project_id integer NOT NULL
 );
 
+CREATE TABLE user_permission_uploads (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    user_id bigint NOT NULL,
+    status character varying(255) NOT NULL,
+    file character varying(255),
+    file_store integer
+);
+
+CREATE SEQUENCE user_permission_uploads_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE user_permission_uploads_id_seq OWNED BY user_permission_uploads.id;
+
 CREATE TABLE user_preferences (
     id integer NOT NULL,
     user_id integer NOT NULL,
@@ -18260,6 +18279,8 @@ ALTER TABLE ONLY user_canonical_emails ALTER COLUMN id SET DEFAULT nextval('user
 ALTER TABLE ONLY user_custom_attributes ALTER COLUMN id SET DEFAULT nextval('user_custom_attributes_id_seq'::regclass);
 
 ALTER TABLE ONLY user_details ALTER COLUMN user_id SET DEFAULT nextval('user_details_user_id_seq'::regclass);
+
+ALTER TABLE ONLY user_permission_uploads ALTER COLUMN id SET DEFAULT nextval('user_permission_uploads_id_seq'::regclass);
 
 ALTER TABLE ONLY user_preferences ALTER COLUMN id SET DEFAULT nextval('user_preferences_id_seq'::regclass);
 
@@ -19698,6 +19719,9 @@ ALTER TABLE ONLY user_highest_roles
 
 ALTER TABLE ONLY user_interacted_projects
     ADD CONSTRAINT user_interacted_projects_pkey PRIMARY KEY (project_id, user_id);
+
+ALTER TABLE ONLY user_permission_uploads
+    ADD CONSTRAINT user_permission_uploads_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY user_preferences
     ADD CONSTRAINT user_preferences_pkey PRIMARY KEY (id);
@@ -22095,6 +22119,8 @@ CREATE INDEX index_user_highest_roles_on_user_id_and_highest_access_level ON use
 
 CREATE INDEX index_user_interacted_projects_on_user_id ON user_interacted_projects USING btree (user_id);
 
+CREATE INDEX index_user_permission_uploads_on_user_id ON user_permission_uploads USING btree (user_id);
+
 CREATE INDEX index_user_preferences_on_gitpod_enabled ON user_preferences USING btree (gitpod_enabled);
 
 CREATE UNIQUE INDEX index_user_preferences_on_user_id ON user_preferences USING btree (user_id);
@@ -23921,6 +23947,9 @@ ALTER TABLE ONLY pages_domain_acme_orders
 
 ALTER TABLE ONLY boards_epic_user_preferences
     ADD CONSTRAINT fk_rails_76c4e9732d FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_permission_uploads
+    ADD CONSTRAINT fk_rails_76e14f2036 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_subscriptions_projects
     ADD CONSTRAINT fk_rails_7871f9a97b FOREIGN KEY (upstream_project_id) REFERENCES projects(id) ON DELETE CASCADE;
