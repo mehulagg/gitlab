@@ -162,7 +162,15 @@ The diagram below illustrates the architecture of the database cluster:
 
 By default, for self-managed instances, the registry will have a separate logical database in the same PostgreSQL instance/cluster as the GitLab database. However, it will be possible to configure the registry to use a separate instance/cluster if needed.
 
-#### PostgreSQL 12
+#### PostgreSQL
+
+During the discussion of the [initial database schema](https://gitlab.com/gitlab-org/gitlab/-/issues/207147), we have decided to opt for PostgreSQL over other database engines mainly because:
+
+- It offers all the features we need, including the ACID guarantees of an RDBMS, and partitioning;
+- It is already used for GitLab, thus we have the required experience and tools in place to manage it;
+- We want to offer self-managed customers the possibility of hosting the registry database within the same PostgreSQL instance that they already have for GitLab.
+
+##### Version 12
 
 PostgreSQL introduced significant improvements for partitioning in [version 12](https://www.postgresql.org/docs/12/release-12.html#id-1.11.6.9.5), among which we highlight:
 
