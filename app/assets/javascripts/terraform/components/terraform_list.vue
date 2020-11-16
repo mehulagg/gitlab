@@ -15,13 +15,7 @@ export default {
           ...this.cursor,
         };
       },
-      update: data => {
-        return {
-          count: data?.project?.terraformStates?.count,
-          list: data?.project?.terraformStates?.nodes,
-          pageInfo: data?.project?.terraformStates?.pageInfo,
-        };
-      },
+      update: data => data,
       error() {
         this.states = null;
       },
@@ -62,16 +56,16 @@ export default {
       return this.$apollo.queries.states.loading;
     },
     pageInfo() {
-      return this.states?.pageInfo || {};
+      return this.states?.project?.terraformStates?.pageInfo || {};
     },
     showPagination() {
       return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
     },
     statesCount() {
-      return this.states?.count;
+      return this.states?.project?.terraformStates?.count;
     },
     statesList() {
-      return this.states?.list;
+      return this.states?.project?.terraformStates?.nodes;
     },
   },
   methods: {
