@@ -75,7 +75,7 @@ The single entrypoint for the registry is the [HTTP API](https://gitlab.com/gitl
 | Operation                                                    | UI                 | Background               | Observations                                                 |
 | ------------------------------------------------------------ | ------------------ | ------------------------ | ------------------------------------------------------------ |
 | [API version check](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#api-version-check) | :heavy_check_mark: | :heavy_check_mark:       | Used globally to ensure that the registry supports the Docker Distribution V2 API, as well as for identifying whether GitLab Rails is talking to the GitLab Container Registry or a third-party one (used to toggle features only available in the former). |
-| [Listing image tags](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#listing-image-tags) | :heavy_check_mark: | :heavy_check_mark:       | Used to list and show tags in the UI. Used to list tags in the background for [cleanup policies](https://docs.gitlab.com/ee/user/packages/container_registry/#cleanup-policy) and [Geo replication](https://docs.gitlab.com/ee/administration/geo/replication/docker_registry.html). |
+| [Listing image tags](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#listing-image-tags) | :heavy_check_mark: | :heavy_check_mark:       | Used to list and show tags in the UI. Used to list tags in the background for [cleanup policies](../../../user/packages/container_registry/#cleanup-policy) and [Geo replication](../../../administration/geo/replication/docker_registry.md). |
 | [Pulling an image manifest](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#pulling-an-image-manifest) | :heavy_check_mark: | :heavy_multiplication_x: | Used to show the image size and the manifest digest in the tag details UI. |
 | [Pulling an image configuration](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#pulling-a-layer) | :heavy_check_mark: | :heavy_multiplication_x: | Used to show the configuration digest and the creation date in the tag details UI. |
 | [Deleting a tag](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#deleting-a-tag) | :heavy_check_mark: | :heavy_check_mark:       | Used to delete a tag from the UI and in background (cleanup policies). |
@@ -138,11 +138,11 @@ The interaction between the registry and its clients, including GitLab Rails and
 
 ### Database
 
-Following the GitLab [Go standards and style guidelines](https://docs.gitlab.com/ee/development/go_guide), no ORM is used to manage the database, only the [`database/sql`](https://golang.org/pkg/database/sql/) package from the Go standard library, a PostgreSQL driver ([`lib/pq`](https://pkg.go.dev/github.com/lib/pq?tab=doc)) and raw SQL queries, over a TCP connection pool.
+Following the GitLab [Go standards and style guidelines](../../../development/go_guide), no ORM is used to manage the database, only the [`database/sql`](https://golang.org/pkg/database/sql/) package from the Go standard library, a PostgreSQL driver ([`lib/pq`](https://pkg.go.dev/github.com/lib/pq?tab=doc)) and raw SQL queries, over a TCP connection pool.
 
-The design and development of the registry database adhere to the GitLab [database guidelines](https://docs.gitlab.com/ee/development/database/). Being a Go application, the required tooling to support the database will have to be developed, such as for running database migrations.
+The design and development of the registry database adhere to the GitLab [database guidelines](../../../development/database/). Being a Go application, the required tooling to support the database will have to be developed, such as for running database migrations.
 
-Running *online* and [*post deployment* migrations](/development/post_deployment_migrations.html) migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md).
+Running *online* and [*post deployment* migrations](../../../development/post_deployment_migrations.md) migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md).
 
 #### Partitioning
 
