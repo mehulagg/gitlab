@@ -29,7 +29,7 @@ RSpec.describe Ci::RunDastScanService do
 
       aggregate_failures do
         expect(rules.size).to eq(1)
-        expect(rules).to include('if' => '"0" == "0"')
+        expect(rules).to include('when' => 'always')
       end
     end
   end

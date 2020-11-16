@@ -23,7 +23,7 @@ module Ci
         - dast
         dast:
           rules:
-            - if: '"0" == "0"'
+            - when: always
       YAML
     end
 
