@@ -4,9 +4,9 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Ajax
+# Ajax plugin
 
-`Ajax` is a droplab plugin that allows for retrieving and rendering list data from a server.
+`Ajax` is a DropLab plugin that allows for retrieving and rendering list data from a server.
 
 ## Usage
 

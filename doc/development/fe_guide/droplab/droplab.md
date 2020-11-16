@@ -22,7 +22,7 @@ The value is irrelevant.
 
 The DropLab class has no side effects, so you must always call `.init` when
 the DOM is ready. `DropLab.prototype.init` takes the same arguments as `DropLab.prototype.addHook`.
-If you do not provide any arguments, it will globally query and instantiate all droplab compatible dropdowns.
+If you do not provide any arguments, it will globally query and instantiate all DropLab compatible dropdowns.
 
 ```html
 <a href="#" data-dropdown-trigger="#list">Toggle</a>
@@ -216,7 +216,7 @@ These custom events add a `detail` object to the vanilla `Event` object that pro
 
 ## Plugins
 
-Plugins are objects that are registered to be executed when a hook is added (when a droplab trigger and dropdown are instantiated).
+Plugins are objects that are registered to be executed when a hook is added (when a DropLab trigger and dropdown are instantiated).
 
 If no modules API is detected, the library will fall back as it does with `window.DropLab` and will add `window.DropLab.plugins.PluginName`.
 
@@ -246,13 +246,11 @@ droplab.init(trigger, list, [droplabAjax], {
 
 ### Documentation
 
-- [Ajax plugin](plugins/ajax.md)
-- [Filter plugin](plugins/filter.md)
-- [InputSetter plugin](plugins/input_setter.md)
+A list of DropLab plugins is [available](./plugins/index.md).
 
 ### Development
 
-When plugins are initialised for a droplab trigger+dropdown, DropLab will
+When plugins are initialised for a DropLab trigger+dropdown, DropLab will
 call the plugins `init` function, so this must be implemented in the plugin.
 
 ```javascript

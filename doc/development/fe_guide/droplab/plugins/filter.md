@@ -4,9 +4,9 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Filter
+# Filter plugin
 
-`Filter` is a plugin that allows for filtering data that has been added
+`Filter` is a DropLab plugin that allows for filtering data that has been added
 to the dropdown using a simple fuzzy string search of an input value.
 
 ## Usage
