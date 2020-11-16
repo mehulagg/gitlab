@@ -105,7 +105,10 @@ module EE
           return {} unless ::License.feature_available?(:requirements)
 
           {
-            requirements_created: count(RequirementsManagement::Requirement)
+            requirements_created: count(RequirementsManagement::Requirement),
+            requirement_test_reports_manual: count(RequirementsManagement::TestReport.without_build),
+            requirement_test_reports_ci: count(RequirementsManagement::TestReport.without_build),
+            requirements_with_test_report: distinct_count(RequirementsManagement::TestReport, requirement_id)
           }
         end
 
