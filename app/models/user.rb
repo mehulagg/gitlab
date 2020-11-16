@@ -187,6 +187,8 @@ class User < ApplicationRecord
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
 
+  has_many :user_permission_uploads, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+
   #
   # Validations
   #
