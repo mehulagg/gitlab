@@ -28,7 +28,7 @@ There are many ways to get to the New Issue form from within a project:
 
   ![New issue from the issue list view](img/new_issue_from_tracker_list.png)
 
-- From an **opened issue** in your project, click the vertical ellipsis (**{ellipsis_v}**) button
+- From an **open issue** in your project, click the vertical ellipsis (**{ellipsis_v}**) button
   to open a dropdown menu, and then click **New Issue** to create a new issue in the same project:
 
   ![New issue from an open issue](img/new_issue_from_open_issue_v13_6.png)
