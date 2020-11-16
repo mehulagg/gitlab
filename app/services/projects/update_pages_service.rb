@@ -125,7 +125,7 @@ module Projects
     end
 
     def create_pages_deployment(artifacts_path, build)
-      return unless Feature.enabled?(:zip_pages_deployments, project)
+      return unless Feature.enabled?(:zip_pages_deployments, project, default_enabled: true)
 
       # we're using the full archive and pages daemon needs to read it
       # so we want the total count from entries, not only "public/" directory
