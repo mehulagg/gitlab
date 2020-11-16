@@ -153,7 +153,14 @@ export default {
           >
             {{ s__('mrWidget|Check out branch') }}
           </gl-button>
-          <mr-widget-how-to-merge-modal :is-fork="isFork" :can-merge="mr.canMerge" :source-branch="mr.sourceBranch" :source-project="mr.sourceProject" :source-project-path="mr.sourceProjectFullPath" :target-branch="mr.targetBranch" />
+          <mr-widget-how-to-merge-modal
+            :is-fork="isFork"
+            :can-merge="mr.canMerge"
+            :source-branch="mr.sourceBranch"
+            :source-project="mr.sourceProject"
+            :source-project-path="mr.sourceProjectFullPath"
+            :target-branch="mr.targetBranch"
+          />
         </template>
         <gl-dropdown
           v-gl-tooltip
