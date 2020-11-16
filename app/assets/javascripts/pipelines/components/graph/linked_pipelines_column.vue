@@ -1,7 +1,6 @@
 <script>
-import { __ } from '~/locale';
 import LinkedPipeline from './linked_pipeline.vue';
-import { UPSTREAM, DOWNSTREAM } from './constants';
+import { UPSTREAM } from './constants';
 
 export default {
   components: {
