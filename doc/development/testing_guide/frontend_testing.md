@@ -129,7 +129,7 @@ export default {
 };
 ```
 
-To address this issue, you can "help" Jest by stubbing the async components so that Jest wouldn't need to fetch those asynchroneously at the run-time.
+To address this issue, you can "help" Jest by stubbing the async components so that Jest would not need to fetch those asynchroneously at the run-time.
 
 ```javascript
 // ide_spec.js

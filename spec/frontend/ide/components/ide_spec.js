@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { createStore } from '~/ide/stores';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { createStore } from '~/ide/stores';
 import ErrorMessage from '~/ide/components/error_message.vue';
 import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import CommitEditorHeader from '~/ide/components/commit_sidebar/editor_header.vue';
