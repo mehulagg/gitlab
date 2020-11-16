@@ -447,6 +447,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       count_data = subject[:counts]
 
       expect(count_data[:projects]).to eq(4)
+      expect(count_data[:projects_jira_active_users]).to eq(5)
       expect(count_data[:projects_asana_active]).to eq(0)
       expect(count_data[:projects_prometheus_active]).to eq(1)
       expect(count_data[:projects_jira_active]).to eq(4)

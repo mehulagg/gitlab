@@ -9,6 +9,7 @@ FactoryBot.define do
       projects << create(:project, :repository)
       group = create(:group)
       create(:board, project: projects[0])
+      create(:user, developer_projects: [projects[0]])
       create(:jira_service, project: projects[0])
       create(:jira_service, :without_properties_callback, project: projects[1])
       create(:jira_service, :jira_cloud_service, project: projects[2])
