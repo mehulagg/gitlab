@@ -297,6 +297,43 @@ RSpec.describe Projects::IssuesController do
         end
       end
     end
+
+    context 'vulnerabilities' do
+        let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
+
+        before do
+        allow(Gitlab).to receive(:ee?).and_return(false)
+
+        sign_in(user)
+        project.add_developer(user)
+      end
+
+      context 'when no vulnerability ID is passed' do
+        let(:vulnerability) { create(:vulnerability, :with_finding, project: project) }
+
+        it 'does not set vulnerability_id' do
+          get :new, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).not_to include(vulnerability_field)
+        end
+      end
+
+      context 'when a vulnerability_id is provided' do
+        render_views
+
+        let(:pipeline) { create(:ci_pipeline, project: project) }
+        let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+        let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+
+        it 'set vulnerability_id' do
+          get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).not_to include(vulnerability_field)
+        end
+      end
+    end
   end
 
   describe '#related_branches' do

@@ -60,6 +60,23 @@ RSpec.describe Projects::IssuesController do
         end
       end
 
+      describe '#new' do
+        render_views
+
+        context 'when a vulnerability_id is provided' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+          let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
+
+          it 'set vulnerability_id' do
+            get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+
+            expect(response.body).to include(vulnerability_field)
+          end
+        end
+      end
+
       describe '#create' do
         it 'sets issue weight and epic' do
           perform :post, :create, issue: new_issue.attributes.merge(epic_id: epic.id)
@@ -70,6 +87,42 @@ RSpec.describe Projects::IssuesController do
           issue = Issue.first
           expect(issue.weight).to eq(new_issue.weight)
           expect(issue.epic).to eq(epic)
+        end
+
+        context 'when created from a vulnerability' do
+          let(:vulnerability) { create(:vulnerability, :with_findings, project: project) }
+
+          before do
+            stub_licensed_features(security_dashboard: true)
+          end
+
+          it 'links the issue to the vulnerability' do
+            send_request
+
+            expect(project.issues.last.vulnerability_links.first.vulnerability).to eq(vulnerability)
+          end
+
+          context 'when vulnerability already has a linked issue' do
+            let!(:vulnerabilities_issue_link) { create(:vulnerabilities_issue_link, :created, vulnerability: vulnerability) }
+
+            it 'shows an error message' do
+              send_request
+
+              expect(flash[:alert]).to eq 'Unable to create link to vulnerability'
+              expect(vulnerability.issue_links.map(&:issue)).to eq([vulnerabilities_issue_link.issue])
+            end
+          end
+
+          private
+
+          def send_request
+            post :create, params: {
+              namespace_id: project.namespace.to_param,
+              project_id: project,
+              issue: { title: 'Title', description: 'Description' },
+              vulnerability_id: vulnerability.id
+            }
+          end
         end
       end
     end

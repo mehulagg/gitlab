@@ -74,6 +74,8 @@ class Projects::IssuesController < Projects::ApplicationController
   feature_category :service_desk, [:service_desk]
   feature_category :importers, [:import_csv, :export_csv]
 
+  attr_reader :vulnerability_id
+
   def index
     @issues = @issuables
 
@@ -102,7 +104,7 @@ class Projects::IssuesController < Projects::ApplicationController
       discussion_to_resolve: params[:discussion_to_resolve],
       confidential: !!Gitlab::Utils.to_boolean(params[:issue][:confidential])
     )
-    service = ::Issues::BuildService.new(project, current_user, build_params)
+    service = build_issue(build_params)
 
     @issue = @noteable = service.execute
 
@@ -124,6 +126,8 @@ class Projects::IssuesController < Projects::ApplicationController
 
     service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
+
+    create_vulnerability_issue_link(issue)
 
     if service.discussions_to_resolve.count(&:resolved?) > 0
       flash[:notice] = if service.discussion_to_resolve_id
@@ -384,6 +388,16 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def service_desk?
     action_name == 'service_desk'
+  end
+
+  def build_issue(build_params)
+    ::Issues::BuildService.new(project, current_user, build_params)
+  end
+
+  def create_vulnerability_issue_link(issue); end
+
+  def populate_vulnerability
+    @vulnerability_id ||= params[:vulnerability_id]
   end
 end
 
