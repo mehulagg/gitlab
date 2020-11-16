@@ -6,7 +6,6 @@ module EE
 
     EE_SERVICE_NAMES = %w[
       github
-      jenkins
     ].freeze
 
     EE_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
