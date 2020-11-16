@@ -46,7 +46,9 @@ To change the location where the uploads are stored locally, follow the steps
 below.
 
 NOTE: **Note:**
-For historical reasons, instance level uploads are stored into a base directory, which by default is `uploads/-/system`. It is strongly discouraged to change base directory on an existing GitLab installation.
+For historical reasons, instance level uploads are stored into a base directory,
+which by default is `uploads/-/system`. It is strongly discouraged to change base
+directory on an existing GitLab installation.
 
 **In Omnibus GitLab installations:**
 
