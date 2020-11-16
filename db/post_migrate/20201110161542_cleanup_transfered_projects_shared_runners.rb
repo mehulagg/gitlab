@@ -16,6 +16,8 @@ class CleanupTransferedProjectsSharedRunners < ActiveRecord::Migration[6.0]
   end
 
   def up
+    Project.reset_column_information
+
     Namespace.each_batch(of: 25_000) do |relation|
       ids = relation.where(shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: false).select(:id)
 
