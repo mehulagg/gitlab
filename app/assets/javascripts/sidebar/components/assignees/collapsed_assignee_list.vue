@@ -1,6 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
 import CollapsedAssignee from './collapsed_assignee.vue';
 
 const DEFAULT_MAX_COUNTER = 99;
@@ -74,7 +75,9 @@ export default {
     tooltipTitle() {
       const maxRender = Math.min(DEFAULT_RENDER_COUNT, this.users.length);
       const renderUsers = this.users.slice(0, maxRender);
-      const names = renderUsers.map(u => u.name);
+      const names = renderUsers.map(({ name, status = null }) =>
+        [name, isUserBusy(status?.availability) ? s__('UserAvailability|(Busy)') : ''].join(' '),
+      );
 
       if (!this.users.length) {
         return __('Assignee(s)');

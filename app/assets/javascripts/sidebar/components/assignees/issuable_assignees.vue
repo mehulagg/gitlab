@@ -21,6 +21,9 @@ export default {
       return this.users.length === 0;
     },
   },
+  mounted() {
+    console.log('IssuableAssignees::mounted', this.users);
+  },
 };
 </script>
 
