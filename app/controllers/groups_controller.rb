@@ -8,6 +8,8 @@ class GroupsController < Groups::ApplicationController
   include RecordUserLastActivity
   include SendFileUpload
   include FiltersEvents
+  include SortingHelper
+  include SortingPreference
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -37,6 +39,8 @@ class GroupsController < Groups::ApplicationController
   end
 
   before_action :export_rate_limit, only: [:export, :download_export]
+
+  before_action :set_sorting, only: [:show]
 
   skip_cross_project_access_check :index, :new, :create, :edit, :update,
                                   :destroy, :projects
@@ -328,6 +332,18 @@ class GroupsController < Groups::ApplicationController
   override :markdown_service_params
   def markdown_service_params
     params.merge(group: group)
+  end
+
+  def set_sorting
+    params[:sort] = set_sort_order
+  end
+
+  def default_sort_order
+    sort_value_latest_activity
+  end
+
+  def sorting_field
+    Project::SORTING_PREFERENCE_FIELD
   end
 end
 
