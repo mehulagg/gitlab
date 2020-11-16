@@ -49,7 +49,7 @@ sequenceDiagram
   participant R as GitLab Container Registry
   participant G as GitLab Rails
 
-	C->>R: docker login gitlab.example.com
+  C->>R: docker login gitlab.example.com
   R->>C: 401 Unauthorized
   Note left of R: The response includes the realm (e.g., https://gitlab.example.com/jwt/auth)<br> from where a token should be obtained
   C->>G: Obtain Bearer token
