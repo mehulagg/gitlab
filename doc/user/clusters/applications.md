@@ -761,7 +761,7 @@ certManager:
 You can customize the installation of cert-manager by defining a
 `.gitlab/managed-apps/cert-manager/values.yaml` file in your cluster
 management project. Refer to the
-[chart](https://artifacthub.io/charts/jetstack/cert-manager) for the
+[chart](https://github.com/jetstack/cert-manager) for the
 available configuration options.
 
 Support for installing the Cert Manager managed application is provided by the
