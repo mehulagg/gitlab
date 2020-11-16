@@ -91,7 +91,7 @@ export default {
           <div class="gl-mb-3">
             <h5 class="gl-m-0">
               {{ user.name }}
-              <user-availability-status :status="user.status" />
+              <user-availability-status v-if="user.status" :status="user.status" />
             </h5>
             <span class="gl-text-gray-500">@{{ user.username }}</span>
           </div>

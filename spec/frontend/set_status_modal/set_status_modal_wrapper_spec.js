@@ -3,9 +3,8 @@ import { GlModal, GlFormCheckbox } from '@gitlab/ui';
 import { initEmojiMock } from 'helpers/emoji';
 import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import SetStatusModalWrapper, {
-  AVAILABILITY_STATUS,
-} from '~/set_status_modal/set_status_modal_wrapper.vue';
+import SetStatusModalWrapper from '~/set_status_modal/set_status_modal_wrapper.vue';
+import { AVAILABILITY_STATUS } from '~/set_status_modal/utils';
 
 jest.mock('~/api');
 jest.mock('~/flash');
