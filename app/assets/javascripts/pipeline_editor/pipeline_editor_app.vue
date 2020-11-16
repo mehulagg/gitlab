@@ -6,7 +6,7 @@ import { redirectTo, mergeUrlParams, refreshCurrentPage } from '~/lib/utils/url_
 import TextEditor from './components/text_editor.vue';
 import CommitForm from './components/commit/commit_form.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
-import commitCIFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
+import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
 
 import getBlobContent from './graphql/queries/blob_content.graphql';
 
@@ -78,7 +78,7 @@ export default {
     },
   },
   computed: {
-    loading() {
+    isLoading() {
       return this.$apollo.queries.content.loading;
     },
     defaultCommitMessage() {
@@ -130,7 +130,7 @@ export default {
             commitCreate: { errors },
           },
         } = await this.$apollo.mutate({
-          mutation: commitCIFileMutation,
+          mutation: commitCiFileMutation,
           variables: {
             projectPath: this.projectPath,
             branch,
@@ -175,7 +175,7 @@ export default {
       {{ errorMessage }}
     </gl-alert>
     <div class="gl-mt-4">
-      <gl-loading-icon v-if="loading" size="lg" class="gl-m-3" />
+      <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
       <div v-else class="file-editor gl-mb-3">
         <gl-tabs>
           <!-- editor should be mounted when its tab is visible, so the container has a size -->

@@ -44,8 +44,11 @@ export default {
     };
   },
   computed: {
+    isDefaultBranch() {
+      return this.branch === this.defaultBranch;
+    },
     submitDisabled() {
-      return !this.message || !this.branch;
+      return !(this.message && this.branch);
     },
   },
   methods: {
@@ -100,11 +103,7 @@ export default {
           class="gl-font-monospace!"
           required
         />
-        <gl-form-checkbox
-          v-if="branch !== defaultBranch"
-          v-model="openMergeRequest"
-          class="gl-mt-3"
-        >
+        <gl-form-checkbox v-if="!isDefaultBranch" v-model="openMergeRequest" class="gl-mt-3">
           <gl-sprintf :message="$options.i18n.startMergeRequest">
             <template #new_merge_request>
               <strong>{{ $options.i18n.newMergeRequest }}</strong>

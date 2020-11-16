@@ -1,6 +1,6 @@
 import { nextTick } from 'vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
+import { GlButton, GlAlert, GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 
 import { redirectTo, refreshCurrentPage, objectToQuery } from '~/lib/utils/url_utility';
@@ -59,6 +59,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       },
       stubs: {
         GlTabs,
+        GlButton,
         TextEditor,
         CommitForm,
       },
@@ -80,11 +81,10 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   const findTabAt = i => wrapper.findAll(GlTab).at(i);
   const findEditorLite = () => wrapper.find(EditorLite);
   const findCommitForm = () => wrapper.find(CommitForm);
+  const findCommitBtnLoadingIcon = () => wrapper.find('[type="submit"]').find(GlLoadingIcon);
 
-  beforeEach(async () => {
+  beforeEach(() => {
     createComponent();
-
-    // await waitForPromises();
   });
 
   afterEach(() => {
@@ -224,7 +224,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
         });
 
         it('shows no saving state', () => {
-          expect(wrapper.find('[type="submit"]').props('loading')).toBe(false);
+          expect(findCommitBtnLoadingIcon().exists()).toBe(true);
         });
       });
 
@@ -275,7 +275,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       describe('when the commit is ocurring', () => {
         it('shows a saving state', async () => {
           await mockMutate.mockImplementationOnce(() => {
-            expect(findCommitForm().props('saving')).toBe(true);
+            expect(findCommitBtnLoadingIcon().exists()).toBe(true);
             return Promise.resolve();
           });
 

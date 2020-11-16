@@ -36,7 +36,7 @@ describe('~/pipeline_editor/components/text_editor.vue', () => {
     expect(findEditor().props('fileName')).toBe('*.yml');
   });
 
-  it('bubble up of events', () => {
+  it('bubbles up events', () => {
     findEditor().vm.$emit('editor-ready');
 
     expect(editorReadyListener).toHaveBeenCalled();
