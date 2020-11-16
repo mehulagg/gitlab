@@ -55,6 +55,12 @@ module EE
               ::Types::TimeType,
               null: true,
               description: 'Date until the temporary storage increase is active'
+
+        field :compliance_frameworks,
+              ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
+              null: true,
+              method: :compliance_management_frameworks,
+              description: 'Compliance frameworks available to projects in this namespace'
       end
     end
   end
