@@ -640,11 +640,15 @@ variables:
 
 ### Header Fuzzing
 
-Header fuzzing is disabled by default due to the high number of false positives that occur with many technology stacks. When header fuzzing is enabled a list of headers to include in fuzzing must be specified.
+Header fuzzing is disabled by default due to the high number of false positives that occur with many
+technology stacks. When header fuzzing is enabled, you must specify a list of headers to include in
+fuzzing.
 
-Each profile in the default configuration file has an entry for `GeneralFuzzingCheck`. This is the check that performs header fuzzing. Under the `Configuration` section are `HeaderFuzzing` and `Headers`. These are the setting that you will change to enable header fuzzing.
+Each profile in the default configuration file has an entry for `GeneralFuzzingCheck`. This check
+performs header fuzzing. Under the `Configuration` section, you must change the `HeaderFuzzing` and
+`Headers` settings to enable header fuzzing.
 
-This snippet shows the `Quick-10` profile's default configuration with header fuzzing disabled.
+This snippet shows the `Quick-10` profile's default configuration with header fuzzing disabled:
 
 ```yaml
 - Name: Quick-10
@@ -672,7 +676,8 @@ This snippet shows the `Quick-10` profile's default configuration with header fu
         UnicodeFuzzing: true
 ```
 
-`HeaderFuzzing` is a boolean turning header fuzzing on and off. The default setting is `false` for off. To turn header fuzzing on change this setting to `true`.
+`HeaderFuzzing` is a boolean that turns header fuzzing on and off. The default setting is `false`
+for off. To turn header fuzzing on, change this setting to `true`:
 
 ```yaml
     - Name: GeneralFuzzingCheck
@@ -683,7 +688,9 @@ This snippet shows the `Quick-10` profile's default configuration with header fu
         Headers:
 ```
 
-`Headers` is a list of headers to fuzz. Only headers listed will be fuzzed. Lets assume you want to fuzz a custom header `X-Custom` used by your APIs. We will add an entry for it using the syntax: `- Name: HeaderName` where `HeaderName` is substituted with the header we want to fuzz.
+`Headers` is a list of headers to fuzz. Only headers listed are fuzzed. For example, to fuzz a
+custom header `X-Custom` used by your APIs, add an entry for it using the syntax
+`- Name: HeaderName`, substituting `HeaderName` with the header to fuzz:
 
 ```yaml
     - Name: GeneralFuzzingCheck
@@ -695,7 +702,8 @@ This snippet shows the `Quick-10` profile's default configuration with header fu
           - Name: X-Custom
 ```
 
-We now have a configuration that will fuzz the header `X-Custom`. Additional headers can be listed using the same notation.
+You now have a configuration to fuzz the header `X-Custom`. Use the same notation to list additional
+headers:
 
 ```yaml
     - Name: GeneralFuzzingCheck
@@ -708,7 +716,7 @@ We now have a configuration that will fuzz the header `X-Custom`. Additional hea
           - Name: X-AnotherHeader
 ```
 
-The configuration is repeated for each profile as needed.
+Repeat this configuration for each profile as needed.
 
 ## Running your first scan
 
