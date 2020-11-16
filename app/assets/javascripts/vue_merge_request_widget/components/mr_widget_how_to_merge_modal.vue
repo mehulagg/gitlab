@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable @gitlab/require-i18n-strings */
 import { GlModal, GlMarkdown, GlLink, GlSprintf } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { __ } from '~/locale';
@@ -43,13 +44,17 @@ export default {
   },
   computed: {
     mergeInfo1() {
-      return `git fetch @merge_request.source_project @merge_request.source_branch git checkout -b @merge_request.source_project_path @merge_request.source_branch FETCH_HEAD`;
+      return this.isFork ? 
+        `git fetch "${this.sourceProject}" ${this.sourceBranch}\ngit checkout -b "${this.sourceProjectPath}-${this.sourceBranch}" FETCH_HEAD` : 
+        `git fetch origin\ngit checkout -b "${this.sourceBranch}" "origin/${this.sourceBranch}"`;
     },
     mergeInfo2() {
-        return `git fetch @merge_request.source_project @merge_request.source_branch git checkout -b @merge_request.source_project_path @merge_request.source_branch FETCH_HEAD`;
+        return this.isFork ? `git fetch @merge_request.source_project @merge_request.source_branch git checkout -b @merge_request.source_project_path @merge_request.source_branch FETCH_HEAD` : "";
     },
     mergeInfo3() {
-        return this.canMerge ? `git push origin "#{h @merge_request.target_branch}"` : __('Note that pushing to GitLab requires write access to this repository.')
+        return this.canMerge ? 
+        `git push origin ${this.targetBranch}` : 
+        __('Note that pushing to GitLab requires write access to this repository.');
     },
   },
 };
@@ -61,45 +66,63 @@ export default {
     modal-id="modal_merge_info"
     :title="__('Check out, review, and merge locally')"
     no-fade
-    :action-primary="{}"
-    :action-secondary="{}"
-    :action-cancel="{}"
   >
-    <p>
+    <div class="gl-display-block">
+            <p>
       <strong>
         {{ __('Step 1.') }}
       </strong>
       {{ __('Fetch and check out the branch for this merge request') }}
-      <clipboard-button :text="mergeInfo1" :title="__('Copy commands')" />
-      <gl-markdown>
-        <pre v-if="isFork">
-                {{ mergeInfo1 }}
-            </pre
-        >
-        <pre v-else>
-                {{ mergeInfo1 }}
-            </pre
-        >
+            </p>
+    </div>
+    <div class="gl-display-flex">
+      <gl-markdown class="gl-overflow-scroll w-100">
+        <pre>{{ mergeInfo1 }}</pre>
       </gl-markdown>
-    </p>
+      <clipboard-button :text="mergeInfo1" :title="__('Copy commands')" />
+    </div>
+
+<div class="gl-display-block">
     <p>
       <strong>
         {{ __('Step 2.') }}
       </strong>
       {{ __('Review the changes locally') }}
     </p>
+</div>
+<div class="gl-display-block">
     <p>
       <strong>
         {{ __('Step 3.') }}
       </strong>
       {{ __('Merge the branch and fix any conflicts that come up') }}
     </p>
+</div>
+<div class="gl-display-flex">
+      <gl-markdown class="gl-overflow-scroll w-100">
+      <pre>
+                {{ mergeInfo2 }}
+            </pre>
+      </gl-markdown>
+            <clipboard-button :text="mergeInfo2" :title="__('Copy commands')" />
+</div>
+<div class="gl-display-block">
     <p>
       <strong>
         {{ __('Step 4.') }}
       </strong>
       {{ __('Push the result of the merge to GitLab') }}
     </p>
+</div>
+<div class="gl-display-flex">
+      <gl-markdown class="gl-overflow-scroll w-100">
+      <pre>
+                {{ mergeInfo3 }}
+            </pre>
+      </gl-markdown>
+    <clipboard-button :text="mergeInfo3" :title="__('Copy commands')" />
+    </div>
+    <div class="gl-display-block">
     <p>
       <strong>
         {{ __('Tip') }}
@@ -121,5 +144,6 @@ export default {
         </template>
       </gl-sprintf>
     </p>
+    </div>
   </gl-modal>
 </template>
