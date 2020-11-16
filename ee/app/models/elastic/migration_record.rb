@@ -46,11 +46,11 @@ module Elastic
     def timestamps(completed:)
       {}.tap do |data|
         existing_data = load_from_index
-        if started_at = existing_data&.dig('_source', 'started_at')
-          data[:started_at] = started_at
-        else
-          data[:started_at] = Time.current
-        end
+        data[:started_at] = if started_at = existing_data&.dig('_source', 'started_at')
+                              started_at
+                            else
+                              Time.current
+                            end
 
         data[:completed_at] = Time.current if completed
       end

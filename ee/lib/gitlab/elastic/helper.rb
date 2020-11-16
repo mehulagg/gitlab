@@ -64,10 +64,10 @@ module Gitlab
               type: 'boolean'
             },
             started_at: {
-              type: 'date',
+              type: 'date'
             },
             completed_at: {
-              type: 'date',
+              type: 'date'
             }
           }
         }
