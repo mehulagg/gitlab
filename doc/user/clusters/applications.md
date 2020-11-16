@@ -998,15 +998,15 @@ CAUTION: **Caution:**
 Installation and removal of the Cilium requires a **manual**
 [restart](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-gke/#restart-unmanaged-pods)
 of all affected pods in all namespaces to ensure that they are
-[managed](https://docs.cilium.io/en/stable/operations/troubleshooting/#ensure-managed-pod)
+[managed](https://docs.cilium.io/en/v1.8/operations/troubleshooting/#ensure-managed-pod)
 by the correct networking plugin.
 
 NOTE: **Note:**
 Major upgrades might require additional setup steps. For more information, see
-the official [upgrade guide](https://docs.cilium.io/en/stable/operations/upgrade/).
+the official [upgrade guide](https://docs.cilium.io/en/v1.8/operations/upgrade/).
 
 By default, Cilium's
-[audit mode](https://docs.cilium.io/en/stable/gettingstarted/policy-creation/#enable-policy-audit-mode)
+[audit mode](https://docs.cilium.io/en/v1.8/gettingstarted/policy-creation/#enable-policy-audit-mode)
 is enabled. In audit mode, Cilium doesn't drop disallowed packets. You
 can use `policy-verdict` log to observe policy-related decisions. You
 can disable audit mode by adding the following to
