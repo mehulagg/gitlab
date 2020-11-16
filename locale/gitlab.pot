@@ -29474,6 +29474,9 @@ msgstr ""
 msgid "User was successfully updated."
 msgstr ""
 
+msgid "UserAvailability|(Busy)"
+msgstr ""
+
 msgid "UserLists|Add"
 msgstr ""
 
@@ -29529,6 +29532,9 @@ msgid "UserList|Delete %{name}?"
 msgstr ""
 
 msgid "UserList|created %{timeago}"
+msgstr ""
+
+msgid "UserProfile|(Busy)"
 msgstr ""
 
 msgid "UserProfile|Activity"
