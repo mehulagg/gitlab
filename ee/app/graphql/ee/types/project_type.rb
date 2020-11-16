@@ -70,7 +70,7 @@ module EE
 
         field :compliance_frameworks, ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               description: 'Compliance frameworks associated with the project',
-              resolver: ::Resolvers::ComplianceFrameworksResolver,
+              resolve: -> (obj, _, _) { obj.compliance_framework_setting&.framework },
               null: true
 
         field :security_dashboard_path, GraphQL::STRING_TYPE,
