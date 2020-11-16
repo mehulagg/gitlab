@@ -123,12 +123,10 @@ const initPerformanceBar = el => {
   });
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  const jsPeek = document.querySelector('#js-peek');
-  if (jsPeek) {
-    initPerformanceBar(jsPeek);
-  }
-});
+const jsPeek = document.querySelector('#js-peek');
+if (jsPeek) {
+  initPerformanceBar(jsPeek);
+}
 
 initPerformanceBarLog();
 
