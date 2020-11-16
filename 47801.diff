@@ -1,0 +1,109 @@
+diff --git a/app/assets/javascripts/pages/projects/new/index.js b/app/assets/javascripts/pages/projects/new/index.js
+index 477a1ab887b2024b16f352032f064756b6dce3c5..445d40a30f540cab8b0e3c61e8c3ca2e4122b373 100644
+--- a/app/assets/javascripts/pages/projects/new/index.js
++++ b/app/assets/javascripts/pages/projects/new/index.js
+@@ -10,38 +10,24 @@ document.addEventListener('DOMContentLoaded', () => {
+   initProjectNew.bindEvents();
+ 
+   const { category, property } = gon.tracking_data ?? { category: 'projects:new' };
+-  const hasNewCreateProjectUi = isExperimentEnabled('newCreateProjectUi');
+ 
+-  if (!hasNewCreateProjectUi) {
+-    // Setting additional tracking for HAML template
++  import(
++    /* webpackChunkName: 'experiment_new_project_creation' */ '../../../projects/experiment_new_project_creation'
++  )
++    .then(m => {
++      const el = document.querySelector('.js-experiment-new-project-creation');
+ 
+-    Array.from(
+-      document.querySelectorAll('.project-edit-container [data-experiment-track-label]'),
+-    ).forEach(node =>
+-      node.addEventListener('click', event => {
+-        const { experimentTrackLabel: label } = event.currentTarget.dataset;
+-        Tracking.event(category, 'click_tab', { property, label });
+-      }),
+-    );
+-  } else {
+-    import(
+-      /* webpackChunkName: 'experiment_new_project_creation' */ '../../../projects/experiment_new_project_creation'
+-    )
+-      .then(m => {
+-        const el = document.querySelector('.js-experiment-new-project-creation');
++      if (!el) {
++        return;
++      }
+ 
+-        if (!el) {
+-          return;
+-        }
+-
+-        const config = {
+-          hasErrors: 'hasErrors' in el.dataset,
+-          isCiCdAvailable: 'isCiCdAvailable' in el.dataset,
+-        };
+-        m.default(el, config);
+-      })
+-      .catch(() => {
+-        createFlash(__('An error occurred while loading project creation UI'));
+-      });
+-  }
++      const config = {
++        hasErrors: 'hasErrors' in el.dataset,
++        isCiCdAvailable: 'isCiCdAvailable' in el.dataset,
++      };
++      m.default(el, config);
++    })
++    .catch(() => {
++      createFlash(__('An error occurred while loading project creation UI'));
++    });
+ });
+diff --git a/app/controllers/projects_controller.rb b/app/controllers/projects_controller.rb
+index c03a820b384dfbc975b8ccb516545ccbfe2d5f94..8666b0f9576aedc01701702ab5d493778c28e3b5 100644
+--- a/app/controllers/projects_controller.rb
++++ b/app/controllers/projects_controller.rb
+@@ -34,12 +34,6 @@ class ProjectsController < Projects::ApplicationController
+   # Project Export Rate Limit
+   before_action :export_rate_limit, only: [:export, :download_export, :generate_new_export]
+ 
+-  # Experiments
+-  before_action only: [:new, :create] do
+-    frontend_experimentation_tracking_data(:new_create_project_ui, 'click_tab')
+-    push_frontend_experiment(:new_create_project_ui)
+-  end
+-
+   before_action only: [:edit] do
+     push_frontend_feature_flag(:service_desk_custom_address, @project)
+     push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
+diff --git a/app/views/projects/new.html.haml b/app/views/projects/new.html.haml
+index f2972a9617b3f6416b337316414b3ad95d8ede07..cad24d134892f4696ad0ecc7a943de652964811f 100644
+--- a/app/views/projects/new.html.haml
++++ b/app/views/projects/new.html.haml
+@@ -8,10 +8,9 @@
+   .project-edit-errors
+     = render 'projects/errors'
+ 
+-  - if experiment_enabled?(:new_create_project_ui)
+-    .js-experiment-new-project-creation{ data: { is_ci_cd_available: ci_cd_projects_available?, has_errors: @project.errors.any? } }
++  .js-experiment-new-project-creation{ data: { is_ci_cd_available: ci_cd_projects_available?, has_errors: @project.errors.any? } }
+ 
+-  .row{ 'v-cloak': experiment_enabled?(:new_create_project_ui) }
++  .row{ 'v-cloak': true }
+     .col-lg-3.profile-settings-sidebar
+       %h4.gl-mt-0
+         = _('New project')
+diff --git a/lib/gitlab/experimentation.rb b/lib/gitlab/experimentation.rb
+index 6e39776bbd474eb50298ee2dd686ec536c2f99d9..77c47cc35139abfc4bc84f97abff9f906e612dda 100644
+--- a/lib/gitlab/experimentation.rb
++++ b/lib/gitlab/experimentation.rb
+@@ -55,10 +55,6 @@ module Experimentation
+         tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyGroupVersionA',
+         use_backwards_compatible_subject_index: true
+       },
+-      new_create_project_ui: {
+-        tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi',
+-        use_backwards_compatible_subject_index: true
+-      },
+       contact_sales_btn_in_app: {
+         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
+         use_backwards_compatible_subject_index: true
