@@ -32,7 +32,9 @@ module QA
 
         def enabled?(key, **scopes)
           feature = JSON.parse(get_features).find { |flag| flag['name'] == key.to_s }
-          feature && feature['state'] == 'on' || feature['state'] == 'conditional' && scopes.present? && enabled_scope?(feature['gates'], scopes)
+          state = feature && (feature['state'] == 'on' || feature['state'] == 'conditional')
+
+          scopes.present? ? state && enabled_scope?(feature['gates'], scopes) : state
         end
 
         private
