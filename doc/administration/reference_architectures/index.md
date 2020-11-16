@@ -160,15 +160,13 @@ issues might lie. This includes both environmental makeup as well as installatio
 method.
 
 The reference architectures use the official GitLab Linux packages (Omnibus
-GitLab) to install and configure the various components. The components are
+GitLab) to install and configure the various components (with one notable exception being the suggested select Cloud Native installation method described below). The components are
 installed on separate machines (virtualized or bare metal), with machine hardware
 requirements listed in the "Configuration" column and equivalent VM standard sizes listed
 in GCP/AWS/Azure columns of each [available reference architecture](#available-reference-architectures).
 
 Running components on Docker (including Compose) with the same specs should be fine, as Docker is well known in terms of support.
-still an additional layer and may still add some support complexities.
-Such as not being able to run `strace` as it generally doesn't run
-in Docker.
+However, it is still an additional layer and may still add some support complexities, such as not being able to run `strace` easily in containers.
 
 Other technologies, like [Docker swarm](https://docs.docker.com/engine/swarm/)
 are not officially supported, but can be implemented at your own risk. In that
