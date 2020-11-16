@@ -9,7 +9,7 @@ module Mutations
               null: true,
               description: 'The on-call schedule'
 
-        authorize :modify_incident_management_oncall_schedule
+        authorize :admin_incident_management_oncall_schedule
 
         private
 

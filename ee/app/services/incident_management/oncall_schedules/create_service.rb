@@ -27,7 +27,7 @@ module IncidentManagement
       attr_reader :project, :user, :params
 
       def allowed?
-        user&.can?(:modify_incident_management_oncall_schedule, project)
+        user&.can?(:admin_incident_management_oncall_schedule, project)
       end
 
       def available?
