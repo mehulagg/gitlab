@@ -64,9 +64,6 @@ the analyzer outputs an
 [exit code](../../../development/integrations/secure.md#exit-code).
 
 You can filter the vulnerabilities list by selecting from the **Severity** and **Scanner** dropdowns.
-In the **Scanner** dropdown, select individual scanners or scanner groups to toggle those scanners.
-The **Scanner** dropdown includes both GitLab scanners, and in GitLab 13.6 and later, custom
-scanners.
 
 ## Project Security Dashboard
 
