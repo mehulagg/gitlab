@@ -19,7 +19,8 @@ module IncidentManagement
     attr_reader :current_user, :project, :params
 
     def available?
-      project.feature_available?(:oncall_schedules)
+      Feature.enabled?(:oncall_schedules_mvc, project) &&
+        project.feature_available?(:oncall_schedules)
     end
 
     def allowed?
