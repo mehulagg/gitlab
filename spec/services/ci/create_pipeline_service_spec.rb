@@ -458,6 +458,25 @@ RSpec.describe Ci::CreatePipelineService do
         end
       end
 
+      context 'experiment', :snowplow do
+        before do
+          stub_experiment(pipelines_empty_state: true)
+          allow(Gitlab::Experimentation).to receive(:enabled_for_attribute?).with(:pipelines_empty_state, user.id.to_s).and_return(true)
+        end
+
+        it 'tracks an event when pipeline got created' do
+          pipeline
+
+          expect_snowplow_event(
+            category: 'Growth::Activation::Experiment::PipelinesEmptyState',
+            action: 'created',
+            label: Digest::MD5.hexdigest(user.to_global_id.to_s),
+            value: project.namespace.id,
+            property: 'experimental_group'
+          )
+        end
+      end
+
       def previous_commit_sha_from_ref(ref)
         project.commit(ref).parent.sha
       end

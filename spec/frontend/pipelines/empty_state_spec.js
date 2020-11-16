@@ -1,58 +1,147 @@
-import Vue from 'vue';
-import emptyStateComp from '~/pipelines/components/pipelines_list/empty_state.vue';
-import mountComponent from '../helpers/vue_mount_component_helper';
+import { withGonExperiment } from 'helpers/experimentation_helper';
+import { shallowMount } from '@vue/test-utils';
+import EmptyState from '~/pipelines/components/pipelines_list/empty_state.vue';
+import Tracking from '~/tracking';
 
 describe('Pipelines Empty State', () => {
-  let component;
-  let EmptyStateComponent;
+  let wrapper;
 
-  beforeEach(() => {
-    EmptyStateComponent = Vue.extend(emptyStateComp);
+  const findGetStartedButton = () => wrapper.find('[data-testid="get-started-pipelines"]');
+  const findInfoText = () => wrapper.find('[data-testid="info-text"]').text();
+  const createWrapper = () => {
+    wrapper = shallowMount(EmptyState, {
+      propsData: {
+        helpPagePath: 'foo',
+        emptyStateSvgPath: 'foo',
+        canSetCi: true,
+      },
+    });
+  };
 
-    component = mountComponent(EmptyStateComponent, {
-      helpPagePath: 'foo',
-      emptyStateSvgPath: 'foo',
-      canSetCi: true,
+  describe('renders', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    });
+
+    it('should render empty state SVG', () => {
+      expect(wrapper.find('img').attributes().src).toEqual('foo');
+    });
+
+    it('should render empty state header', () => {
+      expect(wrapper.find('[data-testid="header-text"]').text()).toEqual('Build with confidence');
+    });
+
+    it('should render a link with provided help path', () => {
+      expect(findGetStartedButton().attributes().href).toEqual('foo');
+    });
+
+    describe('when in control group', () => {
+      it('should render empty state information', () => {
+        expect(findInfoText()).toContain(
+          'Continuous Integration can help catch bugs by running your tests automatically',
+          'while Continuous Deployment can help you deliver code to your product environment',
+        );
+      });
+
+      it('should render button text', () => {
+        expect(findGetStartedButton().text()).toEqual('Get started with Pipelines');
+      });
+    });
+
+    describe('when in experiment group', () => {
+      withGonExperiment('pipelinesEmptyState');
+
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('should render empty state information', () => {
+        expect(findInfoText()).toContain(
+          'GitLab CI/CD can automatically build, test, and deploy your code. Let GitLab take care of time',
+          'consuming tasks, so you can spend more time creating',
+        );
+      });
+
+      it('should render button text', () => {
+        expect(findGetStartedButton().text()).toEqual('Get started with CI/CD');
+      });
     });
   });
 
-  afterEach(() => {
-    component.$destroy();
-  });
+  describe('tracking', () => {
+    let origGon;
 
-  it('should render empty state SVG', () => {
-    expect(component.$el.querySelector('.svg-content svg')).toBeDefined();
-  });
+    describe('when data is set', () => {
+      beforeEach(() => {
+        jest.spyOn(Tracking, 'event').mockImplementation(() => {});
+        origGon = window.gon;
 
-  it('should render empty state information', () => {
-    expect(component.$el.querySelector('h4').textContent).toContain('Build with confidence');
+        window.gon = {
+          tracking_data: {
+            category: 'Growth::Activation::Experiment::PipelinesEmptyState',
+            value: 'value',
+            property: 'experimental_group',
+          },
+          hashed_user_id: 'hashed_user_id',
+        };
+        createWrapper();
+      });
 
-    expect(
-      component.$el
-        .querySelector('p')
-        .innerHTML.trim()
-        .replace(/\n+\s+/m, ' ')
-        .replace(/\s\s+/g, ' '),
-    ).toContain('Continuous Integration can help catch bugs by running your tests automatically,');
+      afterEach(() => {
+        wrapper.destroy();
+        window.gon = origGon;
+      });
 
-    expect(
-      component.$el
-        .querySelector('p')
-        .innerHTML.trim()
-        .replace(/\n+\s+/m, ' ')
-        .replace(/\s\s+/g, ' '),
-    ).toContain(
-      'while Continuous Deployment can help you deliver code to your product environment',
-    );
-  });
+      it('tracks when mounted', () => {
+        expect(Tracking.event).toHaveBeenCalledWith(
+          'Growth::Activation::Experiment::PipelinesEmptyState',
+          'viewed',
+          {
+            value: 'value',
+            label: 'hashed_user_id',
+            property: 'experimental_group',
+          },
+        );
+      });
 
-  it('should render a link with provided help path', () => {
-    expect(component.$el.querySelector('.js-get-started-pipelines').getAttribute('href')).toEqual(
-      'foo',
-    );
+      it('tracks when button is clicked', () => {
+        findGetStartedButton().vm.$emit('click');
 
-    expect(component.$el.querySelector('.js-get-started-pipelines').textContent).toContain(
-      'Get started with Pipelines',
-    );
+        expect(Tracking.event).toHaveBeenCalledWith(
+          'Growth::Activation::Experiment::PipelinesEmptyState',
+          'documentation_clicked',
+          {
+            value: 'value',
+            label: 'hashed_user_id',
+            property: 'experimental_group',
+          },
+        );
+      });
+    });
+
+    describe('when no data is defined', () => {
+      beforeEach(() => {
+        jest.spyOn(Tracking, 'event').mockImplementation(() => {});
+
+        createWrapper();
+      });
+
+      afterEach(() => {
+        wrapper.destroy();
+      });
+
+      it('does not track on view', () => {
+        expect(Tracking.event).not.toHaveBeenCalled();
+      });
+
+      it('does not track when button is clicked', () => {
+        findGetStartedButton().vm.$emit('click');
+        expect(Tracking.event).not.toHaveBeenCalled();
+      });
+    });
   });
 });

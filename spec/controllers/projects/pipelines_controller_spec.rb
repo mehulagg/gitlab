@@ -272,6 +272,29 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
+  describe 'GET #index' do
+    context 'experiment' do
+      before do
+        stub_experiment(pipelines_empty_state: true)
+        allow(Gitlab::Experimentation).to receive(:enabled_for_attribute?).with(:pipelines_empty_state, user.id.to_s).and_return(true)
+      end
+
+      it 'pushes to data to gon' do
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+
+        expect(Gon.experiments[:pipelinesEmptyState]).to eq(true)
+        expect(Gon.tracking_data).to eq(
+          {
+            category: 'Growth::Activation::Experiment::PipelinesEmptyState',
+            value: project.namespace.id,
+            label: Digest::MD5.hexdigest(user.to_global_id.to_s),
+            property: 'experimental_group'
+          }
+        )
+      end
+    end
+  end
+
   describe 'GET show.json' do
     let(:pipeline) { create(:ci_pipeline, project: project) }
 

@@ -85,6 +85,8 @@ module Ci
       # If pipeline is not persisted, try to recover IID
       pipeline.reset_project_iid unless pipeline.persisted?
 
+      track_pipeline_created if pipeline.persisted?
+
       pipeline
     end
     # rubocop: enable Metrics/ParameterLists
@@ -115,6 +117,20 @@ module Ci
 
     def extra_options(content: nil, dry_run: false)
       { content: content, dry_run: dry_run }
+    end
+
+    def track_pipeline_created
+      return unless Gitlab::Experimentation.enabled?(:pipelines_empty_state)
+
+      property = Gitlab::Experimentation.enabled_for_attribute?(:pipelines_empty_state, current_user.id.to_s) ? 'experimental_group' : 'control_group'
+
+      Gitlab::Tracking.event(
+        Gitlab::Experimentation.experiment(:pipelines_empty_state).tracking_category,
+        'created',
+        property: property,
+        label: Digest::MD5.hexdigest(current_user.to_global_id.to_s),
+        value: project.namespace_id
+      )
     end
   end
 end
