@@ -264,7 +264,7 @@ Alternatively, users can be removed from the SCIM app which will delink all remo
 
 ### The SCIM app is throwing `"User has already been taken","status":409` error message
 
-Moving to a new SAML and SCIM proivider would cause the following cases:
+Changing the SAML or SCIM configuration or provider can cause the following cases:
 
 1. SAML and SCIM identity mismatch which normally are the same on GitLab.com
 1. SCIM identity mismatch betwen GitLab.com and the new SCIM app identity
