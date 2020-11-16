@@ -84,5 +84,15 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
       get edit_path
       expect(assigns(:scanner_profile)).to eq(dast_scanner_profile)
     end
+
+    context 'record does not exist' do
+      let(:dast_scanner_profile) { 0 }
+
+      it 'sees a 404 error' do
+        get edit_path
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
   end
 end

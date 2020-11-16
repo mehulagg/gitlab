@@ -1,5 +1,5 @@
 - page_title s_("UsageQuota|Usage")
-- url_to_purchase_storage = purchase_storage_url if can_purchase_storage_for_namespace?(@group)
+- url_to_purchase_storage = purchase_storage_url if purchase_storage_link_enabled?(@group)
 
 %h3.page-title
   = s_('UsageQuota|Usage Quotas')
@@ -22,4 +22,3 @@
       locals: { namespace: @group, projects: @projects }
   .tab-pane#storage-quota-tab
     #js-storage-counter-app{ data: { namespace_path: @group.full_path, help_page_path: help_page_path('user/group/index.md', anchor: 'storage-usage-quota'), purchase_storage_url: url_to_purchase_storage, is_temporary_storage_increase_visible: temporary_storage_increase_visible?(@group).to_s } }
-

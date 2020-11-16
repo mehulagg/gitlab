@@ -751,13 +751,13 @@ RSpec.describe Issue do
         project.add_developer(user)
         other_project_blocking_issue.project.add_developer(user)
 
-        expect(issue.blocked_by_issues(user)).to match_array([blocking_issue, blocked_by_issue, other_project_blocking_issue, confidential_blocked_by_issue])
+        expect(issue.blocked_by_issues_for(user)).to match_array([blocking_issue, blocked_by_issue, other_project_blocking_issue, confidential_blocked_by_issue])
       end
     end
 
     context 'when user cannot read issues' do
       it 'returns empty array' do
-        expect(issue.blocked_by_issues(user)).to be_empty
+        expect(issue.blocked_by_issues_for(user)).to be_empty
       end
     end
 
@@ -766,7 +766,7 @@ RSpec.describe Issue do
         guest = create(:user)
         project.add_guest(guest)
 
-        expect(issue.blocked_by_issues(guest)).to match_array([blocking_issue, blocked_by_issue])
+        expect(issue.blocked_by_issues_for(guest)).to match_array([blocking_issue, blocked_by_issue])
       end
     end
   end
@@ -831,6 +831,51 @@ RSpec.describe Issue do
 
         expect { issue.update_blocking_issues_count! }
           .to change { issue.blocking_issues_count }.from(0).to(3)
+      end
+    end
+  end
+
+  context 'when changing state of blocking issues' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:blocking_issue1) { create(:issue, project: project) }
+    let_it_be(:blocking_issue2) { create(:issue, project: project) }
+    let_it_be(:blocked_issue) { create(:issue, project: project) }
+    let_it_be(:blocked_by_blocked_issue) { create(:issue, project: project) }
+
+    before_all do
+      create(:issue_link, source: blocking_issue1, target: blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: blocking_issue2, target: blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: blocked_issue, target: blocked_by_blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+    end
+
+    before do
+      blocked_issue.update(blocking_issues_count: 0)
+    end
+
+    context 'when blocked issue is closed' do
+      it 'updates blocking and blocked issues cache' do
+        blocked_issue.close
+
+        expect(blocking_issue1.reload.blocking_issues_count).to eq(0)
+        expect(blocking_issue2.reload.blocking_issues_count).to eq(0)
+        expect(blocked_issue.reload.blocking_issues_count).to eq(1)
+      end
+    end
+
+    context 'when blocked issue is reopened' do
+      before do
+        blocked_issue.close
+        blocked_issue.update(blocking_issues_count: 0)
+        blocking_issue1.update(blocking_issues_count: 0)
+        blocking_issue2.update(blocking_issues_count: 0)
+      end
+
+      it 'updates blocking and blocked issues cache' do
+        blocked_issue.reopen
+
+        expect(blocking_issue1.reload.blocking_issues_count).to eq(1)
+        expect(blocking_issue2.reload.blocking_issues_count).to eq(1)
+        expect(blocked_issue.reload.blocking_issues_count).to eq(1)
       end
     end
   end

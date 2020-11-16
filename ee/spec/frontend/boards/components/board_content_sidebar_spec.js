@@ -24,6 +24,7 @@ describe('ee/BoardContentSidebar', () => {
         'board-sidebar-weight-input': '<div></div>',
         'board-sidebar-labels-select': '<div></div>',
         'board-sidebar-due-date': '<div></div>',
+        'board-sidebar-subscription': '<div></div>',
       },
     });
   };

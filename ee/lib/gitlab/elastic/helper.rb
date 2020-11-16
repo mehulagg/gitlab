@@ -59,9 +59,11 @@ module Gitlab
       def create_migrations_index
         settings = { number_of_shards: 1 }
         mappings = {
-          properties: {
-            completed: {
-              type: 'boolean'
+          _doc: {
+            properties: {
+              completed: {
+                type: 'boolean'
+              }
             }
           }
         }
@@ -72,7 +74,7 @@ module Gitlab
             settings: settings.to_hash,
             mappings: mappings.to_hash
           }
-        }
+        }.merge(additional_index_options)
 
         client.indices.create create_index_options
 
@@ -98,17 +100,7 @@ module Gitlab
             settings: settings.to_hash,
             mappings: mappings.to_hash
           }
-        }
-
-        # include_type_name defaults to false in ES7. This will ensure ES7
-        # behaves like ES6 when creating mappings. See
-        # https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
-        # for more information. We also can't set this for any versions before
-        # 6.8 as this parameter was not supported. Since it defaults to true in
-        # all 6.x it's safe to only set it for 7.x.
-        if Gitlab::VersionInfo.parse(client.info['version']['number']).major == 7
-          create_index_options[:include_type_name] = true
-        end
+        }.merge(additional_index_options)
 
         client.indices.create create_index_options
         client.indices.put_alias(name: target_name, index: new_index_name) if with_alias
@@ -206,6 +198,20 @@ module Gitlab
           client.indices.get_alias(name: target_name).each_key.first
         else
           target_name
+        end
+      end
+
+      private
+
+      def additional_index_options
+        {}.tap do |options|
+          # include_type_name defaults to false in ES7. This will ensure ES7
+          # behaves like ES6 when creating mappings. See
+          # https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
+          # for more information. We also can't set this for any versions before
+          # 6.8 as this parameter was not supported. Since it defaults to true in
+          # all 6.x it's safe to only set it for 7.x.
+          options[:include_type_name] = true if Gitlab::VersionInfo.parse(client.info['version']['number']).major == 7
         end
       end
     end

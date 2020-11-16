@@ -356,6 +356,9 @@ msgstr ""
 msgid "%{address} is an invalid IP address range"
 msgstr ""
 
+msgid "%{anchorOpen}Learn more%{anchorClose} about how you can customize / disable registration on your instance."
+msgstr ""
+
 msgid "%{author_link} wrote:"
 msgstr ""
 
@@ -2508,6 +2511,9 @@ msgstr ""
 msgid "AlertSettings|1. Select integration type"
 msgstr ""
 
+msgid "AlertSettings|2. Add link to your Opsgenie alert list"
+msgstr ""
+
 msgid "AlertSettings|2. Name integration"
 msgstr ""
 
@@ -2641,6 +2647,12 @@ msgid "AlertSettings|URL cannot be blank and must start with http or https"
 msgstr ""
 
 msgid "AlertSettings|Utilize the URL and authorization key below to authorize an external service to send Alerts to GitLab. Review your chosen services documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgstr ""
+
+msgid "AlertSettings|Utilizing this option will link the GitLab Alerts navigation item to your exisiting Opsgenie instance. By selecting this option, you cannot recieve alerts from any other source in GitLab; it will effectivley be turing Alerts within GitLab off as a feature."
+msgstr ""
+
+msgid "AlertSettings|We will soon be introducing the ability to create multiple unique HTTP endpoints. When this functionality is live,  you will be able to configure an integration with Opsgenie to surface Opsgenie alerts in GitLab. This will replace the current Opsgenie integration which will be deprecated. %{linkStart}More Information%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|Webhook URL"
@@ -5713,6 +5725,9 @@ msgstr ""
 msgid "ClusterIntegration|%{appList} was successfully installed on your Kubernetes cluster"
 msgstr ""
 
+msgid "ClusterIntegration|%{boldStart}Note:%{boldEnd} Requires Ingress to be installed."
+msgstr ""
+
 msgid "ClusterIntegration|%{externalIp}.nip.io"
 msgstr ""
 
@@ -8341,9 +8356,6 @@ msgstr ""
 msgid "CycleAnalytics|stage dropdown"
 msgstr ""
 
-msgid "DAG"
-msgstr ""
-
 msgid "DAG visualization requires at least 3 dependent jobs."
 msgstr ""
 
@@ -8401,9 +8413,6 @@ msgstr ""
 msgid "DastProfiles|Copy HTTP header to clipboard"
 msgstr ""
 
-msgid "DastProfiles|Could not create site validation token. Please refresh the page, or try again later."
-msgstr ""
-
 msgid "DastProfiles|Could not create the scanner profile. Please try again."
 msgstr ""
 
@@ -8426,9 +8435,6 @@ msgid "DastProfiles|Could not fetch scanner profiles. Please refresh the page, o
 msgstr ""
 
 msgid "DastProfiles|Could not fetch site profiles. Please refresh the page, or try again later."
-msgstr ""
-
-msgid "DastProfiles|Could not retrieve site validation status. Please refresh the page, or try again later."
 msgstr ""
 
 msgid "DastProfiles|Could not update the scanner profile. Please try again."
@@ -8545,9 +8551,6 @@ msgstr ""
 msgid "DastProfiles|Site is not validated yet, please follow the steps."
 msgstr ""
 
-msgid "DastProfiles|Site must be validated to run an active scan."
-msgstr ""
-
 msgid "DastProfiles|Spider timeout"
 msgstr ""
 
@@ -8593,25 +8596,10 @@ msgstr ""
 msgid "DastProfiles|Validate"
 msgstr ""
 
-msgid "DastProfiles|Validate target site"
-msgstr ""
-
 msgid "DastProfiles|Validating..."
 msgstr ""
 
 msgid "DastProfiles|Validation failed, please make sure that you follow the steps above with the chosen method."
-msgstr ""
-
-msgid "DastProfiles|Validation failed. Please try again."
-msgstr ""
-
-msgid "DastProfiles|Validation is in progress..."
-msgstr ""
-
-msgid "DastProfiles|Validation must be turned off to change the target URL"
-msgstr ""
-
-msgid "DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site."
 msgstr ""
 
 msgid "Data is still calculating..."
@@ -11182,6 +11170,9 @@ msgid "Export"
 msgstr ""
 
 msgid "Export as CSV"
+msgstr ""
+
+msgid "Export commit custody report"
 msgstr ""
 
 msgid "Export group"
@@ -13991,6 +13982,9 @@ msgstr ""
 msgid "If using GitHub, you’ll see pipeline statuses on GitHub for your commits and pull requests. %{more_info_link}"
 msgstr ""
 
+msgid "If you add %{codeStart}needs%{codeEnd} to jobs in your pipeline you'll be able to view the %{codeStart}needs%{codeEnd} relationships between jobs in this tab as a %{linkStart}Directed Acyclic Graph (DAG)%{linkEnd}."
+msgstr ""
+
 msgid "If you did not recently sign in, you should immediately %{password_link_start}change your password%{password_link_end}."
 msgstr ""
 
@@ -14633,6 +14627,9 @@ msgstr ""
 msgid "Integrations|All details"
 msgstr ""
 
+msgid "Integrations|All projects inheriting these settings will also be reset."
+msgstr ""
+
 msgid "Integrations|Comment detail:"
 msgstr ""
 
@@ -14666,7 +14663,16 @@ msgstr ""
 msgid "Integrations|Issues created in Jira are shown here once you have created the issues in project setup in Jira."
 msgstr ""
 
+msgid "Integrations|Projects using custom settings will not be affected."
+msgstr ""
+
 msgid "Integrations|Projects using custom settings will not be impacted unless the project owner chooses to use parent level defaults."
+msgstr ""
+
+msgid "Integrations|Reset integration?"
+msgstr ""
+
+msgid "Integrations|Resetting this integration will clear the settings and deactivate this integration."
 msgstr ""
 
 msgid "Integrations|Return to GitLab for Jira"
@@ -14778,6 +14784,9 @@ msgid "Invalid file format with specified file type"
 msgstr ""
 
 msgid "Invalid file."
+msgstr ""
+
+msgid "Invalid hash"
 msgstr ""
 
 msgid "Invalid import params"
@@ -15087,6 +15096,9 @@ msgid "IssueAnalytics|Status"
 msgstr ""
 
 msgid "IssueAnalytics|Weight"
+msgstr ""
+
+msgid "IssueBoards|An error occurred while setting notifications status."
 msgstr ""
 
 msgid "IssueBoards|Board"
@@ -15817,6 +15829,9 @@ msgstr ""
 msgid "Learn more about License-Check"
 msgstr ""
 
+msgid "Learn more about Needs relationships"
+msgstr ""
+
 msgid "Learn more about Vulnerability-Check"
 msgstr ""
 
@@ -15842,9 +15857,6 @@ msgid "Learn more about deploying to a cluster"
 msgstr ""
 
 msgid "Learn more about group-level project templates"
-msgstr ""
-
-msgid "Learn more about job dependencies"
 msgstr ""
 
 msgid "Learn more about signing commits"
@@ -16545,6 +16557,9 @@ msgstr ""
 msgid "MattermostService|This service allows users to perform common operations on this project by entering slash commands in Mattermost."
 msgstr ""
 
+msgid "Max 100,000 events"
+msgstr ""
+
 msgid "Max Group Export Download requests per minute per user"
 msgstr ""
 
@@ -16567,9 +16582,6 @@ msgid "Max access level"
 msgstr ""
 
 msgid "Max role"
-msgstr ""
-
-msgid "Max size 15 MB"
 msgstr ""
 
 msgid "MaxBuilds"
@@ -16849,6 +16861,9 @@ msgid "Merge Requests merged"
 msgstr ""
 
 msgid "Merge automatically (%{strategy})"
+msgstr ""
+
+msgid "Merge commit SHA"
 msgstr ""
 
 msgid "Merge commit message"
@@ -17913,6 +17928,9 @@ msgid "Nav|Sign out and sign in with a different account"
 msgstr ""
 
 msgid "Need help?"
+msgstr ""
+
+msgid "Needs"
 msgstr ""
 
 msgid "Needs attention"
@@ -19057,6 +19075,9 @@ msgid "Open issues"
 msgstr ""
 
 msgid "Open raw"
+msgstr ""
+
+msgid "Open registration is enabled on your instance."
 msgstr ""
 
 msgid "Open sidebar"
@@ -22645,9 +22666,6 @@ msgstr ""
 msgid "Removes time estimate."
 msgstr ""
 
-msgid "Removing integrations is not supported for this project"
-msgstr ""
-
 msgid "Removing this group also removes all child projects, including archived projects, and their resources."
 msgstr ""
 
@@ -23066,6 +23084,9 @@ msgid "Resend invite"
 msgstr ""
 
 msgid "Resend it"
+msgstr ""
+
+msgid "Reset"
 msgstr ""
 
 msgid "Reset authorization key"
@@ -25623,6 +25644,9 @@ msgstr ""
 msgid "Specify the following URL during the Runner setup:"
 msgstr ""
 
+msgid "Speed up your pipelines with Needs relationships"
+msgstr ""
+
 msgid "Squash commit message"
 msgstr ""
 
@@ -25738,9 +25762,6 @@ msgid "Start thread & close %{noteable_name}"
 msgstr ""
 
 msgid "Start thread & reopen %{noteable_name}"
-msgstr ""
-
-msgid "Start using Directed Acyclic Graphs (DAG)"
 msgstr ""
 
 msgid "Start your Free Gold Trial"
@@ -27805,9 +27826,6 @@ msgstr ""
 msgid "This page sends a payload. Go back to the events page to see a newly created event."
 msgstr ""
 
-msgid "This pipeline does not use the %{codeStart}needs%{codeEnd} keyword and can't be represented as a directed acyclic graph."
-msgstr ""
-
 msgid "This pipeline makes use of a predefined CI/CD configuration enabled by %{b_open}Auto DevOps.%{b_close}"
 msgstr ""
 
@@ -29561,6 +29579,9 @@ msgstr ""
 msgid "UserProfile|Report abuse"
 msgstr ""
 
+msgid "UserProfile|Retry"
+msgstr ""
+
 msgid "UserProfile|Snippets"
 msgstr ""
 
@@ -29672,13 +29693,13 @@ msgstr ""
 msgid "UsersSelect|Unassigned"
 msgstr ""
 
-msgid "Using %{codeStart}needs%{codeEnd} allows jobs to run before their stage is reached, as soon as their individual dependencies are met, which speeds up your pipelines."
-msgstr ""
-
 msgid "Using %{code_start}::%{code_end} denotes a %{link_start}scoped label set%{link_end}"
 msgstr ""
 
 msgid "Using required encryption strategy when encrypted field is missing!"
+msgstr ""
+
+msgid "Using the %{codeStart}needs%{codeEnd} keyword makes jobs run before their stage is reached. Jobs run as soon as their %{codeStart}needs%{codeEnd} relationships are met, which speeds up your pipelines."
 msgstr ""
 
 msgid "Valid from"
@@ -29884,6 +29905,9 @@ msgid "View project labels"
 msgstr ""
 
 msgid "View replaced file @ "
+msgstr ""
+
+msgid "View setting"
 msgstr ""
 
 msgid "View supported languages and frameworks"
