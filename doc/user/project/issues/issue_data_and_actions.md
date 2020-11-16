@@ -57,18 +57,19 @@ update automatically in response to various actions and content updates.
 
 ### Issue actions
 
-On an issue, you can create a new issue in the same project by clicking on the vertical ellipsis
-(**{ellipsis_v}**) button then clicking on **New issue** in the dropdown menu.
-
-You can close an open issue by clicking on the **Close issue** button.
+In an issue, you can close an open issue by clicking on the **Close issue** button.
 The issue will not be deleted.
 
 A closed issue can be reopened by clicking on the **Reopen issue** button.
 A reopened issue is no different from any other issue.
 
-If you are not the issue author, you can [submit an abuse report](../../abuse_reports.md) by
-clicking on the vertical ellipsis (**{ellipsis_v}**) button then clicking on **Report abuse**
-in the dropdown menu.
+You can access additional actions by selecting the vertical ellipsis
+(**{ellipsis_v}**) button:
+
+- To create a new issue in the same project, select **New issue** in the dropdown menu.
+
+- If you are not the issue author, you can [submit an abuse report](../../abuse_reports.md).
+  Select **Report abuse** in the dropdown menu.
 
 ### To Do
 
