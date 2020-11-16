@@ -17,7 +17,7 @@ RSpec.describe QA::Runtime::Feature do
     shared_examples 'enables a feature flag' do
       it 'enables a feature flag for a scope' do
         allow(described_class).to receive(:get)
-          .and_return(Struct.new(:code, :body).new(200, '[{ "name": "a_flag", "state": "on" }]'))
+          .and_return(Struct.new(:code, :body).new(200, %Q([{ "name": "a_flag", "state": "conditional", "gates": #{gates} }])))
 
         expect(QA::Runtime::API::Request).to receive(:new)
           .with(api_client, "/features/a_flag").and_return(request)
@@ -85,7 +85,8 @@ RSpec.describe QA::Runtime::Feature do
         it_behaves_like 'enables a feature flag' do
           let(:scope) { :project }
           let(:actor_name) { 'group-name/project-name' }
-          let(:actor) { Struct.new(:full_path).new(actor_name) }
+          let(:actor) { Struct.new(:full_path, :id).new(actor_name, 270) }
+          let(:gates) { %q([{"key": "actors", "value": ["Project:270"]}]) }
         end
       end
 
@@ -93,7 +94,8 @@ RSpec.describe QA::Runtime::Feature do
         it_behaves_like 'enables a feature flag' do
           let(:scope) { :group }
           let(:actor_name) { 'group-name' }
-          let(:actor) { Struct.new(:full_path).new(actor_name) }
+          let(:actor) { Struct.new(:full_path, :id).new(actor_name, 33) }
+          let(:gates) { %q([{"key": "actors", "value": ["Group:33"]}]) }
         end
       end
 
@@ -101,7 +103,8 @@ RSpec.describe QA::Runtime::Feature do
         it_behaves_like 'enables a feature flag' do
           let(:scope) { :user }
           let(:actor_name) { 'user-name' }
-          let(:actor) { Struct.new(:username).new(actor_name) }
+          let(:actor) { Struct.new(:username, :id).new(actor_name, 13) }
+          let(:gates) { %q([{"key": "actors", "value": ["User:13"]}]) }
         end
       end
 
@@ -110,6 +113,7 @@ RSpec.describe QA::Runtime::Feature do
           let(:scope) { :feature_group }
           let(:actor_name) { 'foo' }
           let(:actor) { "foo" }
+          let(:gates) { %q([{"key": "groups", "value": ["foo"]}]) }
         end
       end
     end
@@ -133,7 +137,8 @@ RSpec.describe QA::Runtime::Feature do
         it_behaves_like 'disables a feature flag' do
           let(:scope) { :project }
           let(:actor_name) { 'group-name/project-name' }
-          let(:actor) { Struct.new(:full_path).new(actor_name) }
+          let(:actor) { Struct.new(:full_path, :id).new(actor_name, 270) }
+          let(:gates) { %q([{"key": "actors", "value": ["Project:270"]}]) }
         end
       end
 
@@ -141,7 +146,8 @@ RSpec.describe QA::Runtime::Feature do
         it_behaves_like 'disables a feature flag' do
           let(:scope) { :group }
           let(:actor_name) { 'group-name' }
-          let(:actor) { Struct.new(:full_path).new(actor_name) }
+          let(:actor) { Struct.new(:full_path, :id).new(actor_name, 33) }
+          let(:gates) { %q([{"key": "actors", "value": ["Group:33"]}]) }
         end
       end
 
@@ -149,7 +155,8 @@ RSpec.describe QA::Runtime::Feature do
         it_behaves_like 'disables a feature flag' do
           let(:scope) { :user }
           let(:actor_name) { 'user-name' }
-          let(:actor) { Struct.new(:username).new(actor_name) }
+          let(:actor) { Struct.new(:username, :id).new(actor_name, 13) }
+          let(:gates) { %q([{"key": "actors", "value": ["User:13"]}]) }
         end
       end
 
@@ -158,6 +165,7 @@ RSpec.describe QA::Runtime::Feature do
           let(:scope) { :feature_group }
           let(:actor_name) { 'foo' }
           let(:actor) { "foo" }
+          let(:gates) { %q([{"key": "groups", "value": ["foo"]}]) }
         end
       end
     end
