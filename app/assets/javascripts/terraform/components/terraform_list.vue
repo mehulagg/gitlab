@@ -75,22 +75,21 @@ export default {
     },
   },
   methods: {
-    updatePagination(item) {
-      if (item === this.pageInfo.endCursor) {
-        this.cursor = {
-          first: MAX_LIST_COUNT,
-          after: item,
-          last: null,
-          before: null,
-        };
-      } else {
-        this.cursor = {
-          first: null,
-          after: null,
-          last: MAX_LIST_COUNT,
-          before: item,
-        };
-      }
+    nextPage(item) {
+      this.cursor = {
+        first: MAX_LIST_COUNT,
+        after: item,
+        last: null,
+        before: null,
+      };
+    },
+    prevPage(item) {
+      this.cursor = {
+        first: null,
+        after: null,
+        last: MAX_LIST_COUNT,
+        before: item,
+      };
     },
   },
 };
@@ -114,11 +113,7 @@ export default {
             <states-table :states="statesList" />
 
             <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
-              <gl-keyset-pagination
-                v-bind="pageInfo"
-                @prev="updatePagination"
-                @next="updatePagination"
-              />
+              <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
             </div>
           </div>
 
