@@ -11,6 +11,28 @@ RSpec.describe API::ProjectApprovalRules do
   let_it_be(:approver) { create(:user) }
   let_it_be(:other_approver) { create(:user) }
 
+  describe 'GET /projects/:id/approval_rules/:approval_rule_id' do
+    let!(:approval_rule) { create(:approval_project_rule, project: project) }
+    let(:url) { "/projects/#{project.id}/approval_rules/#{approval_rule.id}" }
+
+    context 'when the request is correct' do
+      let(:developer) { project.creator }
+
+      it 'matches the response schema', :aggregate_failures do
+        get api(url, developer)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/project_approval_rule', dir: 'ee')
+
+        rule = json_response
+
+        expect(rule['approvals_required']).to eq(approval_rule.approvals_required)
+        expect(rule['id']).to eq(approval_rule.id)
+        expect(rule['name']).to eq(approval_rule.name)
+      end
+    end
+  end
+
   describe 'GET /projects/:id/approval_rules' do
     let(:url) { "/projects/#{project.id}/approval_rules" }
 
