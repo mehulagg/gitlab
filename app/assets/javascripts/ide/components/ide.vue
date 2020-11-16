@@ -43,7 +43,7 @@ export default {
     'commit-editor-header': () => import('./commit_sidebar/editor_header.vue'),
     'repo-tabs': () => import('./repo_tabs.vue'),
     'ide-status-bar': () => import('./ide_status_bar.vue'),
-    'find-file': () => import('~/vue_shared/components/file_finder/index.vue'),
+    'find-file': () => import('~/vue_shared/components/file_finder/bogus.vue'),
     'right-pane': () => import('./panes/right.vue'),
     'new-modal': () => import('./new_dropdown/modal.vue'),
   },
