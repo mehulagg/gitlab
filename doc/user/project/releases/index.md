@@ -465,7 +465,7 @@ GitLab's CI/CD configuration file, `.gitlab-ci.yml`.
 With it, you can create, update, modify, and delete releases right through the
 terminal.
 
-Read the [Release CLI documentation](https://gitlab.com/gitlab-org/release-cli/-/blob/7a8377df1306fcf0e9a88d58be7fd0dfc9f33ab3/docs/index.md)
+Read the [Release CLI documentation](https://gitlab.com/gitlab-org/release-cli/-/blob/master/docs/index.md)
 for details.
 
 <!-- ## Troubleshooting
