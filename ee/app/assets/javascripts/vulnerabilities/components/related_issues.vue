@@ -264,7 +264,7 @@ export default {
       <template #headerText>
         {{ $options.i18n.relatedIssues }}
       </template>
-      <template v-if="canCreateIssue" #headerActions>
+      <template v-if="canCreateIssue" #header-actions>
         <gl-button
           ref="createIssue"
           variant="success"

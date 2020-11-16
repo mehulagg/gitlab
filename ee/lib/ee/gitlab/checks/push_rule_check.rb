@@ -7,7 +7,7 @@ module EE
         def validate!
           return unless push_rule
 
-          if ::Feature.enabled?(:parallel_push_checks, project, type: :ops)
+          if ::Feature.enabled?(:parallel_push_checks, project, type: :ops, default_enabled: true)
             run_checks_in_parallel!
           else
             run_checks_in_sequence!

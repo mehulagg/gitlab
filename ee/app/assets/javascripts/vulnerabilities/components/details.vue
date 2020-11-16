@@ -1,5 +1,6 @@
 <script>
-import { GlLink, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlSprintf, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { __ } from '~/locale';
@@ -7,7 +8,10 @@ import DetailItem from './detail_item.vue';
 
 export default {
   name: 'VulnerabilityDetails',
-  components: { CodeBlock, GlLink, SeverityBadge, DetailItem, GlSprintf },
+  components: { CodeBlock, GlLink, SeverityBadge, DetailItem, GlSprintf, GlIcon },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   props: {
     vulnerability: {
       type: Object,
@@ -53,25 +57,32 @@ export default {
         properties: {},
       };
     },
+    assertion() {
+      return this.vulnerability.evidence_source?.name;
+    },
+    recordedMessage() {
+      return this.vulnerability?.supporting_messages?.find(
+        msg => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
+      )?.response;
+    },
+    constructedRequest() {
+      return this.constructRequest(this.vulnerability.request);
+    },
+    constructedResponse() {
+      return this.constructResponse(this.vulnerability.response);
+    },
+    constructedRecordedResponse() {
+      return this.constructResponse(this.recordedMessage);
+    },
     requestData() {
       if (!this.vulnerability.request) {
         return [];
       }
 
-      const { method, url, headers = [] } = this.vulnerability.request;
-
       return [
         {
-          label: __('%{labelStart}Method:%{labelEnd} %{method}'),
-          content: method,
-        },
-        {
-          label: __('%{labelStart}URL:%{labelEnd} %{url}'),
-          content: url,
-        },
-        {
-          label: __('%{labelStart}Headers:%{labelEnd} %{headers}'),
-          content: this.getHeadersAsCodeBlockLines(headers),
+          label: __('%{labelStart}Sent request:%{labelEnd} %{headers}'),
+          content: this.constructedRequest,
           isCode: true,
         },
       ].filter(x => x.content);
@@ -81,20 +92,23 @@ export default {
         return [];
       }
 
-      const {
-        status_code: statusCode,
-        reason_phrase: reasonPhrase,
-        headers = [],
-      } = this.vulnerability.response;
+      return [
+        {
+          label: __('%{labelStart}Actual response:%{labelEnd} %{headers}'),
+          content: this.constructedResponse,
+          isCode: true,
+        },
+      ].filter(x => x.content);
+    },
+    recordedResponseData() {
+      if (!this.recordedMessage) {
+        return [];
+      }
 
       return [
         {
-          label: __('%{labelStart}Status:%{labelEnd} %{status}'),
-          content: statusCode && reasonPhrase ? `${statusCode} ${reasonPhrase}` : '',
-        },
-        {
-          label: __('%{labelStart}Headers:%{labelEnd} %{headers}'),
-          content: this.getHeadersAsCodeBlockLines(headers),
+          label: __('%{labelStart}Unmodified response:%{labelEnd} %{headers}'),
+          content: this.constructedRecordedResponse,
           isCode: true,
         },
       ].filter(x => x.content);
@@ -109,11 +123,39 @@ export default {
         this.location.operating_system
       );
     },
+    hasRequest() {
+      return Boolean(this.requestData.length);
+    },
+    hasResponse() {
+      return Boolean(this.responseData.length);
+    },
+    hasRecordedResponse() {
+      return Boolean(this.recordedResponseData.length);
+    },
+    hasResponses() {
+      return Boolean(this.hasResponse || this.hasRecordedResponse);
+    },
   },
   methods: {
     getHeadersAsCodeBlockLines(headers) {
       return Array.isArray(headers)
         ? headers.map(({ name, value }) => `${name}: ${value}`).join('\n')
+        : '';
+    },
+    constructResponse(response) {
+      const { body, status_code: statusCode, reason_phrase: reasonPhrase, headers = [] } = response;
+      const headerLines = this.getHeadersAsCodeBlockLines(headers);
+
+      return statusCode && reasonPhrase && headerLines
+        ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', body].join('')
+        : '';
+    },
+    constructRequest(request) {
+      const { body, method, url, headers = [] } = request;
+      const headerLines = this.getHeadersAsCodeBlockLines(headers);
+
+      return method && url && headerLines
+        ? [`${method} ${url}\n`, headerLines, '\n\n', body].join('')
         : '';
     },
   },
@@ -247,15 +289,15 @@ export default {
       </ul>
     </template>
 
-    <section v-if="requestData.length" data-testid="request">
-      <h3>{{ s__('Vulnerability|Request') }}</h3>
+    <section v-if="hasRequest" data-testid="request">
+      <h3>{{ s__('Vulnerability|Request/Response') }}</h3>
       <ul>
         <detail-item
           v-for="({ label, isCode, content }, index) in requestData"
           :key="`${index}:${label}`"
           :sprintf-message="label"
         >
-          <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />
+          <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
           <template v-else>
             {{ content }}
           </template>
@@ -263,20 +305,73 @@ export default {
       </ul>
     </section>
 
-    <section v-if="responseData.length" data-testid="response">
-      <h3>{{ s__('Vulnerability|Response') }}</h3>
+    <div v-if="hasResponses" class="row">
+      <section
+        v-if="hasRecordedResponse"
+        :class="hasResponse ? 'col-6' : 'col'"
+        data-testid="recorded-response"
+      >
+        <ul>
+          <detail-item
+            v-for="({ label, isCode, content }, index) in recordedResponseData"
+            :key="`${index}:${label}`"
+            :sprintf-message="label"
+          >
+            <gl-icon
+              v-gl-tooltip
+              name="information-o"
+              class="gl-hover-cursor-pointer gl-mr-3"
+              :title="
+                s__(
+                  'Vulnerability|The unmodified response is the original response that had no mutations done to the request',
+                )
+              "
+            />
+            <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
+            <template v-else>
+              {{ content }}
+            </template>
+          </detail-item>
+        </ul>
+      </section>
+
+      <section
+        v-if="hasResponse"
+        :class="hasRecordedResponse ? 'col-6' : 'col'"
+        data-testid="response"
+      >
+        <ul>
+          <detail-item
+            v-for="({ label, isCode, content }, index) in responseData"
+            :key="`${index}:${label}`"
+            :sprintf-message="label"
+          >
+            <gl-icon
+              v-gl-tooltip
+              name="information-o"
+              class="gl-hover-cursor-pointer gl-mr-3"
+              :title="
+                s__(
+                  'Vulnerability|Actual received response is the one received when this fault was detected',
+                )
+              "
+            />
+            <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
+            <template v-else>
+              {{ content }}
+            </template>
+          </detail-item>
+        </ul>
+      </section>
+    </div>
+
+    <template v-if="assertion">
+      <h3>{{ s__('Vulnerability|Additional Info') }}</h3>
       <ul>
-        <detail-item
-          v-for="({ label, isCode, content }, index) in responseData"
-          :key="`${index}:${label}`"
-          :sprintf-message="label"
-        >
-          <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />
-          <template v-else>
-            {{ content }}
-          </template>
+        <detail-item :sprintf-message="__('%{labelStart}Assert:%{labelEnd} %{assertion}')">
+          {{ assertion }}
         </detail-item>
       </ul>
-    </section>
+    </template>
   </div>
 </template>

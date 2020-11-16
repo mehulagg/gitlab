@@ -1,0 +1,5 @@
+---
+title: Deprecate globalId and undeprecate id for DastScannerProfile
+merge_request: 47559
+author:
+type: deprecated

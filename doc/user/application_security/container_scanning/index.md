@@ -148,8 +148,8 @@ variables:
 Version `3` of the `container_scanning` Docker image uses [`centos:centos8`](https://hub.docker.com/_/centos)
 as the new base. It also removes the use of the [start.sh](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/merge_requests/77)
 script and instead executes the analyzer by default. Any customizations made to the
-`container_scanning` job's [`before_script`](../../../ci/yaml/README.md#before_script-and-after_script)
-and [`after_script`](../../../ci/yaml/README.md#before_script-and-after_script)
+`container_scanning` job's [`before_script`](../../../ci/yaml/README.md#before_script)
+and [`after_script`](../../../ci/yaml/README.md#after_script)
 blocks may not work with the new version. To roll back to the previous [`alpine:3.11.3`](https://hub.docker.com/_/alpine)-based
 Docker image, you can specify the major version through the [`CS_MAJOR_VERSION`](#available-variables)
 variable.
@@ -186,6 +186,7 @@ scanning by using the following environment variables:
 | `CI_APPLICATION_REPOSITORY`    | `$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG` | Docker repository URL for the image to be scanned. |
 | `CI_APPLICATION_TAG`           | `$CI_COMMIT_SHA` | Docker repository tag for the image to be scanned. |
 | `CS_MAJOR_VERSION`             | `3` | The major version of the Docker image tag. |
+| `DOCKER_IMAGE`                 | `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` | The Docker image to be scanned. If set, this variable overrides the `$CI_APPLICATION_REPOSITORY` and `$CI_APPLICATION_TAG` variables. |
 | `DOCKER_INSECURE`              | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access secure Docker registries using HTTPS with bad (or self-signed) SSL certificates. |
 | `DOCKER_PASSWORD`              | `$CI_REGISTRY_PASSWORD` | Password for accessing a Docker registry requiring authentication. |
 | `DOCKER_USER`                  | `$CI_REGISTRY_USER` | Username for accessing a Docker registry requiring authentication. |

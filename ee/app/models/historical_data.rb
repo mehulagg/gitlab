@@ -12,7 +12,7 @@ class HistoricalData < ApplicationRecord
     def track!
       create!(
         recorded_at:        Time.current,
-        active_user_count:  License.load_license&.current_active_users_count
+        active_user_count:  License.load_license&.daily_billable_users_count
       )
     end
 

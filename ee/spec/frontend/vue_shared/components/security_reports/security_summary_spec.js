@@ -1,20 +1,17 @@
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import { GlSprintf } from '@gitlab/ui';
+import { groupedTextBuilder } from 'ee/vue_shared/security_reports/store/utils';
 import SecuritySummary from 'ee/vue_shared/security_reports/components/security_summary.vue';
 
 describe('Severity Summary', () => {
   let wrapper;
 
   const createWrapper = message => {
-    wrapper = mount({
-      components: {
-        SecuritySummary,
+    wrapper = shallowMount(SecuritySummary, {
+      propsData: { message },
+      stubs: {
+        GlSprintf,
       },
-      data() {
-        return {
-          message,
-        };
-      },
-      template: `<div><security-summary :message="message" /></div>`,
     });
   };
 
@@ -24,11 +21,11 @@ describe('Severity Summary', () => {
   });
 
   describe.each([
-    '',
-    'foo',
-    '%{criticalStart}1 critical%{criticalEnd}',
-    '%{highStart}1 high%{highEnd}',
-    '%{criticalStart}1 critical%{criticalEnd} and %{highStart}2 high%{highEnd}',
+    { message: '' },
+    { message: 'foo' },
+    groupedTextBuilder({ reportType: 'Security scanning', critical: 1, high: 0, total: 1 }),
+    groupedTextBuilder({ reportType: 'Security scanning', critical: 0, high: 1, total: 1 }),
+    groupedTextBuilder({ reportType: 'Security scanning', critical: 1, high: 2, total: 3 }),
   ])('given the message %p', message => {
     beforeEach(() => {
       createWrapper(message);

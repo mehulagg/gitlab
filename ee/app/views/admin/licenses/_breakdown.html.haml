@@ -1,16 +1,3 @@
-- if @license.restricted?(:active_user_count)
-  - restricted = @license.restrictions[:active_user_count]
-  - licensed_users = number_with_delimiter(restricted)
-- else
-  - licensed_users = _('Unlimited')
-
-- max_user_count = maximum_user_count
-
-- if license_is_over_capacity?
-  - users_over_license = current_license_overage
-- else
-  - users_over_license = 0
-
 - true_up_url = 'https://about.gitlab.com/license-faq/'
 - true_up_link_start = '<a href="%{url}">'.html_safe % { url: true_up_url }
 - billable_users_url = help_page_path('subscriptions/self_managed/index', anchor: 'billable-users')
@@ -23,7 +10,7 @@
       .well-segment.well-centered
         %h3.center
           = _('Users in License:')
-          = licensed_users
+          = licensed_users(@license)
         %hr
         - if @license.will_expire?
           = _('Your license is valid from')
@@ -37,7 +24,7 @@
       .well-segment.well-centered
         %h3.center
           = _('Billable Users:')
-          = number_with_delimiter current_active_user_count
+          = number_with_delimiter @license.daily_billable_users_count
         %hr
           %p
           = _('This is the number of %{billable_users_link_start}billable users%{link_end} on your installation, and this is the minimum number you need to purchase when you renew your license.').html_safe % { billable_users_link_start: billable_users_link_start, link_end: link_end }
@@ -47,7 +34,7 @@
       .well-segment.well-centered
         %h3.center
           = _('Maximum Users:')
-          = number_with_delimiter max_user_count
+          = number_with_delimiter @license.maximum_user_count
         %hr
           = _('This is the highest peak of users on your installation since the license started.')
   .col-sm-6.d-flex.pr-0
@@ -57,9 +44,9 @@
           = _('Users over License:')
           = number_with_delimiter users_over_license
         %hr
-          - if license_is_over_capacity?
+          - if users_over_license > 0
             .gl-alert.gl-alert-info.gl-mb-3{ role: 'alert' }
               = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
               .gl-alert-body
                 = s_('Your instance has exceeded your subscription\'s licensed user count.')
-          = _('You\'ll be charged for %{true_up_link_start}users over license%{link_end} on a quartely or annual basis, depending on the terms of your agreement.').html_safe % { true_up_link_start: true_up_link_start, link_end: link_end }
+          = _('You\'ll be charged for %{true_up_link_start}users over license%{link_end} on a quarterly or annual basis, depending on the terms of your agreement.').html_safe % { true_up_link_start: true_up_link_start, link_end: link_end }

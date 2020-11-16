@@ -56,15 +56,21 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:resource_state_event, issue: issues[3], state: :closed, created_at: timebox_start_date - 6.days)
 
       expect(response.success?).to eq(true)
+      expect(response.payload[:stats]).to eq({
+        complete: { count: 2, weight: 7 },
+        incomplete: { count: 2, weight: 3 },
+        total: { count: 4, weight: 10 }
+      })
+
       expect(response.payload[:burnup_time_series]).to eq([
-                                       {
-                                         date: timebox_start_date,
-                                         scope_count: 4,
-                                         scope_weight: 10,
-                                         completed_count: 2,
-                                         completed_weight: 7
-                                       }
-                                     ])
+        {
+          date: timebox_start_date,
+          scope_count: 4,
+          scope_weight: 10,
+          completed_count: 2,
+          completed_weight: 7
+        }
+      ])
     end
 
     it 'updates counts and weight when the milestone is added or removed' do
@@ -98,36 +104,41 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:"resource_#{timebox_type}_event", issue: issues[0], "#{timebox_type}" => timebox, action: :remove, created_at: timebox_start_date + 21.days)
 
       expect(response.success?).to eq(true)
+      expect(response.payload[:stats]).to eq({
+        complete: { count: 0, weight: 0 },
+        incomplete: { count: 1, weight: 0 },
+        total: { count: 1, weight: 0 }
+      })
       expect(response.payload[:burnup_time_series]).to eq([
-                                       {
-                                         date: timebox_start_date + 4.days,
-                                         scope_count: 2,
-                                         scope_weight: 2,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 5.days,
-                                         scope_count: 3,
-                                         scope_weight: 5,
-                                         completed_count: 1,
-                                         completed_weight: 3
-                                       },
-                                       {
-                                         date: timebox_start_date + 6.days,
-                                         scope_count: 2,
-                                         scope_weight: 3,
-                                         completed_count: 1,
-                                         completed_weight: 3
-                                       },
-                                       {
-                                         date: timebox_start_date + 7.days,
-                                         scope_count: 1,
-                                         scope_weight: 0,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       }
-                                     ])
+        {
+          date: timebox_start_date + 4.days,
+          scope_count: 2,
+          scope_weight: 2,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 5.days,
+          scope_count: 3,
+          scope_weight: 5,
+          completed_count: 1,
+          completed_weight: 3
+        },
+        {
+          date: timebox_start_date + 6.days,
+          scope_count: 2,
+          scope_weight: 3,
+          completed_count: 1,
+          completed_weight: 3
+        },
+        {
+          date: timebox_start_date + 7.days,
+          scope_count: 1,
+          scope_weight: 0,
+          completed_count: 0,
+          completed_weight: 0
+        }
+      ])
     end
 
     it 'updates the completed counts when issue state is changed' do
@@ -159,57 +170,62 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:resource_state_event, issue: issues[1], state: :closed, created_at: timebox_start_date + 9.days)
 
       expect(response.success?).to eq(true)
+      expect(response.payload[:stats]).to eq({
+        complete: { count: 0, weight: 0 },
+        incomplete: { count: 1, weight: 2 },
+        total: { count: 1, weight: 2 }
+      })
       expect(response.payload[:burnup_time_series]).to eq([
-                                       {
-                                         date: timebox_start_date,
-                                         scope_count: 1,
-                                         scope_weight: 2,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 1.day,
-                                         scope_count: 1,
-                                         scope_weight: 2,
-                                         completed_count: 1,
-                                         completed_weight: 2
-                                       },
-                                       {
-                                         date: timebox_start_date + 3.days,
-                                         scope_count: 1,
-                                         scope_weight: 2,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 4.days,
-                                         scope_count: 2,
-                                         scope_weight: 5,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 5.days,
-                                         scope_count: 2,
-                                         scope_weight: 5,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 7.days,
-                                         scope_count: 2,
-                                         scope_weight: 5,
-                                         completed_count: 1,
-                                         completed_weight: 3
-                                       },
-                                       {
-                                         date: timebox_start_date + 8.days,
-                                         scope_count: 1,
-                                         scope_weight: 2,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       }
-                                     ])
+        {
+          date: timebox_start_date,
+          scope_count: 1,
+          scope_weight: 2,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 1.day,
+          scope_count: 1,
+          scope_weight: 2,
+          completed_count: 1,
+          completed_weight: 2
+        },
+        {
+          date: timebox_start_date + 3.days,
+          scope_count: 1,
+          scope_weight: 2,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 4.days,
+          scope_count: 2,
+          scope_weight: 5,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 5.days,
+          scope_count: 2,
+          scope_weight: 5,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 7.days,
+          scope_count: 2,
+          scope_weight: 5,
+          completed_count: 1,
+          completed_weight: 3
+        },
+        {
+          date: timebox_start_date + 8.days,
+          scope_count: 1,
+          scope_weight: 2,
+          completed_count: 0,
+          completed_weight: 0
+        }
+      ])
     end
 
     it 'updates the weight totals when issue weight is changed' do
@@ -230,43 +246,48 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:resource_weight_event, issue: issues[0], weight: 10, created_at: timebox_start_date + 5.days)
 
       expect(response.success?).to eq(true)
+      expect(response.payload[:stats]).to eq({
+        complete: { count: 1, weight: 1 },
+        incomplete: { count: 0, weight: 0 },
+        total: { count: 1, weight: 1 }
+      })
       expect(response.payload[:burnup_time_series]).to eq([
-                                       {
-                                         date: timebox_start_date,
-                                         scope_count: 1,
-                                         scope_weight: 0,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 1.day,
-                                         scope_count: 1,
-                                         scope_weight: 2,
-                                         completed_count: 0,
-                                         completed_weight: 0
-                                       },
-                                       {
-                                         date: timebox_start_date + 2.days,
-                                         scope_count: 2,
-                                         scope_weight: 7,
-                                         completed_count: 1,
-                                         completed_weight: 5
-                                       },
-                                       {
-                                         date: timebox_start_date + 3.days,
-                                         scope_count: 2,
-                                         scope_weight: 3,
-                                         completed_count: 1,
-                                         completed_weight: 1
-                                       },
-                                       {
-                                         date: timebox_start_date + 4.days,
-                                         scope_count: 1,
-                                         scope_weight: 1,
-                                         completed_count: 1,
-                                         completed_weight: 1
-                                       }
-                                     ])
+        {
+          date: timebox_start_date,
+          scope_count: 1,
+          scope_weight: 0,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 1.day,
+          scope_count: 1,
+          scope_weight: 2,
+          completed_count: 0,
+          completed_weight: 0
+        },
+        {
+          date: timebox_start_date + 2.days,
+          scope_count: 2,
+          scope_weight: 7,
+          completed_count: 1,
+          completed_weight: 5
+        },
+        {
+          date: timebox_start_date + 3.days,
+          scope_count: 2,
+          scope_weight: 3,
+          completed_count: 1,
+          completed_weight: 1
+        },
+        {
+          date: timebox_start_date + 4.days,
+          scope_count: 1,
+          scope_weight: 1,
+          completed_count: 1,
+          completed_weight: 1
+        }
+      ])
     end
   end
 end

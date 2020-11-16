@@ -25,10 +25,6 @@ module Geo
         Feature.enabled?(:geo_framework_verification)
       end
 
-      def checksummed
-        model.available_replicables.checksummed
-      end
-
       def checksummed_count
         # When verification is disabled, this returns nil.
         # Bonus: This causes the progress bar to be hidden.
@@ -47,11 +43,15 @@ module Geo
     end
 
     def after_verifiable_update
-      schedule_checksum_calculation if needs_checksum?
+      verify_async if needs_checksum?
     end
 
-    def calculate_checksum!
-      checksum = model_record.calculate_checksum!
+    def verify_async
+      Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
+    end
+
+    def verify
+      checksum = model_record.calculate_checksum
       update_verification_state!(checksum: checksum)
     rescue => e
       log_error('Error calculating the checksum', e)
@@ -105,10 +105,6 @@ module Geo
     def calculate_next_retry_attempt
       retry_count = model_record.verification_retry_count.to_i + 1
       [next_retry_time(retry_count), retry_count]
-    end
-
-    def schedule_checksum_calculation
-      raise NotImplementedError
     end
   end
 end

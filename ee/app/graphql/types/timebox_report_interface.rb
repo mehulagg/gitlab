@@ -8,10 +8,5 @@ module Types
           resolver: ::Resolvers::TimeboxReportResolver,
           description: 'Historically accurate report about the timebox',
           complexity: 175
-
-    field :burnup_time_series, [::Types::BurnupChartDailyTotalsType], null: true,
-          resolver: ::Resolvers::TimeboxBurnupTimeSeriesResolver,
-          description: 'Daily scope and completed totals for burnup charts',
-          complexity: 175
   end
 end

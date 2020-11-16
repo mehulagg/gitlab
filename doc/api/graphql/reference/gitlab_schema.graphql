@@ -1803,6 +1803,16 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   upvotes: Int!
 
   """
+  Number of user discussions in the epic
+  """
+  userDiscussionsCount: Int!
+
+  """
+  Number of user notes of the epic
+  """
+  userNotesCount: Int!
+
+  """
   Permissions for the current user on the resource
   """
   userPermissions: EpicPermissions!
@@ -1893,6 +1903,16 @@ input BoardIssueInput {
   Filter by epic ID wildcard. Incompatible with epicId
   """
   epicWildcardId: EpicWildcardId
+
+  """
+  Filter by iteration title
+  """
+  iterationTitle: String
+
+  """
+  Filter by iteration ID wildcard
+  """
+  iterationWildcardId: IterationWildcardId
 
   """
   Filter by label name
@@ -2324,6 +2344,11 @@ type CiJob {
     """
     last: Int
   ): CiJobConnection
+
+  """
+  Pipeline the job belongs to
+  """
+  pipeline: Pipeline!
 
   """
   Schedule for the build
@@ -2996,7 +3021,7 @@ input CommitCreateInput {
   actions: [CommitAction!]!
 
   """
-  Name of the branch
+  Name of the branch to commit into, it can be a new branch
   """
   branch: String!
 
@@ -3014,6 +3039,11 @@ input CommitCreateInput {
   Project full path the branch is associated with
   """
   projectPath: ID!
+
+  """
+  If on a new branch, name of the original branch
+  """
+  startBranch: String
 }
 
 """
@@ -3345,6 +3375,86 @@ type ContainerRepositoryConnection {
 }
 
 """
+Details of a container repository
+"""
+type ContainerRepositoryDetails {
+  """
+  Can the current user delete the container repository.
+  """
+  canDelete: Boolean!
+
+  """
+  Timestamp when the container repository was created.
+  """
+  createdAt: Time!
+
+  """
+  Timestamp when the cleanup done by the expiration policy was started on the container repository.
+  """
+  expirationPolicyStartedAt: Time
+
+  """
+  ID of the container repository.
+  """
+  id: ID!
+
+  """
+  URL of the container repository.
+  """
+  location: String!
+
+  """
+  Name of the container repository.
+  """
+  name: String!
+
+  """
+  Path of the container repository.
+  """
+  path: String!
+
+  """
+  Status of the container repository.
+  """
+  status: ContainerRepositoryStatus
+
+  """
+  Tags of the container repository
+  """
+  tags(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): ContainerRepositoryTagConnection
+
+  """
+  Number of tags associated with this image.
+  """
+  tagsCount: Int!
+
+  """
+  Timestamp when the container repository was updated.
+  """
+  updatedAt: Time!
+}
+
+"""
 An edge in a connection.
 """
 type ContainerRepositoryEdge {
@@ -3360,6 +3470,11 @@ type ContainerRepositoryEdge {
 }
 
 """
+Identifier of ContainerRepository
+"""
+scalar ContainerRepositoryID
+
+"""
 Status of a container repository
 """
 enum ContainerRepositoryStatus {
@@ -3372,6 +3487,91 @@ enum ContainerRepositoryStatus {
   Delete Scheduled status.
   """
   DELETE_SCHEDULED
+}
+
+"""
+A tag from a container repository
+"""
+type ContainerRepositoryTag {
+  """
+  Can the current user delete this tag.
+  """
+  canDelete: Boolean!
+
+  """
+  Timestamp when the tag was created.
+  """
+  createdAt: Time!
+
+  """
+  Digest of the tag.
+  """
+  digest: String!
+
+  """
+  URL of the tag.
+  """
+  location: String!
+
+  """
+  Name of the tag.
+  """
+  name: String!
+
+  """
+  Path of the tag.
+  """
+  path: String!
+
+  """
+  Revision of the tag.
+  """
+  revision: String!
+
+  """
+  Short revision of the tag.
+  """
+  shortRevision: String!
+
+  """
+  The size of the tag.
+  """
+  totalSize: Int!
+}
+
+"""
+The connection type for ContainerRepositoryTag.
+"""
+type ContainerRepositoryTagConnection {
+  """
+  A list of edges.
+  """
+  edges: [ContainerRepositoryTagEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [ContainerRepositoryTag]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type ContainerRepositoryTagEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: ContainerRepositoryTag
 }
 
 """
@@ -4298,14 +4498,14 @@ type DastScannerProfile {
   editPath: String
 
   """
-  ID of the DAST scanner profile
+  ID of the DAST scanner profile. Deprecated in 13.6: Use `id`
   """
-  globalId: DastScannerProfileID!
+  globalId: DastScannerProfileID! @deprecated(reason: "Use `id`. Deprecated in 13.6")
 
   """
-  ID of the DAST scanner profile. Deprecated in 13.4: Use `global_id`
+  ID of the DAST scanner profile
   """
-  id: ID! @deprecated(reason: "Use `global_id`. Deprecated in 13.4")
+  id: DastScannerProfileID!
 
   """
   Name of the DAST scanner profile
@@ -4422,14 +4622,14 @@ type DastScannerProfileCreatePayload {
   errors: [String!]!
 
   """
-  ID of the scanner profile.
+  ID of the scanner profile.. Deprecated in 13.6: Use `id`
   """
-  globalId: DastScannerProfileID
+  globalId: DastScannerProfileID @deprecated(reason: "Use `id`. Deprecated in 13.6")
 
   """
-  ID of the scanner profile.. Deprecated in 13.4: Use `global_id`
+  ID of the scanner profile.
   """
-  id: ID @deprecated(reason: "Use `global_id`. Deprecated in 13.4")
+  id: DastScannerProfileID
 }
 
 """
@@ -5909,6 +6109,41 @@ type DestroyBoardPayload {
 }
 
 """
+Autogenerated input type of DestroyContainerRepository
+"""
+input DestroyContainerRepositoryInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  ID of the container repository.
+  """
+  id: ContainerRepositoryID!
+}
+
+"""
+Autogenerated return type of DestroyContainerRepository
+"""
+type DestroyContainerRepositoryPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The container repository policy after scheduling the deletion.
+  """
+  containerRepository: ContainerRepository!
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
+"""
 Autogenerated input type of DestroyNote
 """
 input DestroyNoteInput {
@@ -7076,6 +7311,16 @@ type Epic implements CurrentUserTodos & Noteable {
   upvotes: Int!
 
   """
+  Number of user discussions in the epic
+  """
+  userDiscussionsCount: Int!
+
+  """
+  Number of user notes of the epic
+  """
+  userNotesCount: Int!
+
+  """
   Permissions for the current user on the resource
   """
   userPermissions: EpicPermissions!
@@ -7474,6 +7719,16 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   Milestone of the issue
   """
   milestone: Milestone
+
+  """
+  Indicates if issue got moved from other project
+  """
+  moved: Boolean
+
+  """
+  Updated Issue after it got moved to another project
+  """
+  movedTo: Issue
 
   """
   All notes on this noteable
@@ -8096,6 +8351,11 @@ type GeoNode {
   """
   verificationMaxCapacity: Int
 }
+
+"""
+Identifier of Gitlab::ErrorTracking::DetailedError
+"""
+scalar GitlabErrorTrackingDetailedErrorID
 
 type GrafanaIntegration {
   """
@@ -9995,6 +10255,16 @@ type Issue implements CurrentUserTodos & Noteable {
   milestone: Milestone
 
   """
+  Indicates if issue got moved from other project
+  """
+  moved: Boolean
+
+  """
+  Updated Issue after it got moved to another project
+  """
+  movedTo: Issue
+
+  """
   All notes on this noteable
   """
   notes(
@@ -10980,11 +11250,6 @@ Represents an iteration object
 """
 type Iteration implements TimeboxReportInterface {
   """
-  Daily scope and completed totals for burnup charts
-  """
-  burnupTimeSeries: [BurnupChartDailyTotals!]
-
-  """
   Timestamp of iteration creation
   """
   createdAt: Time!
@@ -11109,6 +11374,21 @@ enum IterationState {
   opened
   started
   upcoming
+}
+
+"""
+Iteration ID wildcard values
+"""
+enum IterationWildcardId {
+  """
+  An iteration is assigned
+  """
+  ANY
+
+  """
+  No iteration is assigned
+  """
+  NONE
 }
 
 """
@@ -13055,11 +13335,6 @@ Represents a milestone
 """
 type Milestone implements TimeboxReportInterface {
   """
-  Daily scope and completed totals for burnup charts
-  """
-  burnupTimeSeries: [BurnupChartDailyTotals!]
-
-  """
   Timestamp of milestone creation
   """
   createdAt: Time!
@@ -13250,6 +13525,7 @@ type Mutation {
   designManagementUpload(input: DesignManagementUploadInput!): DesignManagementUploadPayload
   destroyBoard(input: DestroyBoardInput!): DestroyBoardPayload
   destroyBoardList(input: DestroyBoardListInput!): DestroyBoardListPayload
+  destroyContainerRepository(input: DestroyContainerRepositoryInput!): DestroyContainerRepositoryPayload
   destroyNote(input: DestroyNoteInput!): DestroyNotePayload
   destroySnippet(input: DestroySnippetInput!): DestroySnippetPayload
 
@@ -13300,6 +13576,8 @@ type Mutation {
   prometheusIntegrationCreate(input: PrometheusIntegrationCreateInput!): PrometheusIntegrationCreatePayload
   prometheusIntegrationResetToken(input: PrometheusIntegrationResetTokenInput!): PrometheusIntegrationResetTokenPayload
   prometheusIntegrationUpdate(input: PrometheusIntegrationUpdateInput!): PrometheusIntegrationUpdatePayload
+  promoteToEpic(input: PromoteToEpicInput!): PromoteToEpicPayload
+  releaseCreate(input: ReleaseCreateInput!): ReleaseCreatePayload
   removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2")
   removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
 
@@ -13619,6 +13897,11 @@ input NegatedBoardIssueInput {
   Filter by epic ID. Incompatible with epicWildcardId
   """
   epicId: EpicID
+
+  """
+  Filter by iteration title
+  """
+  iterationTitle: String
 
   """
   Filter by label name
@@ -14684,8 +14967,7 @@ type Project {
   ): ClusterAgentConnection
 
   """
-  Code coverages summary associated with the project. Available only when
-  feature flag `group_coverage_data_report` is enabled
+  Code coverage summary associated with the project
   """
   codeCoverageSummary: CodeCoverageSummary
 
@@ -15910,7 +16192,7 @@ type Project {
     """
     ID of the Sentry issue
     """
-    id: ID!
+    id: GitlabErrorTrackingDetailedErrorID!
   ): SentryDetailedError
 
   """
@@ -16758,7 +17040,67 @@ Identifier of PrometheusService
 """
 scalar PrometheusServiceID
 
+"""
+Autogenerated input type of PromoteToEpic
+"""
+input PromoteToEpicInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The group the promoted epic will belong to
+  """
+  groupPath: ID
+
+  """
+  The IID of the issue to mutate
+  """
+  iid: String!
+
+  """
+  The project the issue to mutate is in
+  """
+  projectPath: ID!
+}
+
+"""
+Autogenerated return type of PromoteToEpic
+"""
+type PromoteToEpicPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The epic after issue promotion
+  """
+  epic: Epic
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The issue after mutation
+  """
+  issue: Issue
+}
+
 type Query {
+  """
+  Find a container repository
+  """
+  containerRepository(
+    """
+    The global ID of the container repository
+    """
+    id: ContainerRepositoryID!
+  ): ContainerRepositoryDetails
+
   """
   Get information about current user
   """
@@ -17498,7 +17840,32 @@ type ReleaseAssetLinkEdge {
 }
 
 """
-Type of the link: `other`, `runbook`, `image`, `package`; defaults to `other`
+Fields that are available when modifying a release asset link
+"""
+input ReleaseAssetLinkInput {
+  """
+  Relative path for a direct asset link
+  """
+  directAssetPath: String
+
+  """
+  The type of the asset link
+  """
+  linkType: ReleaseAssetLinkType = OTHER
+
+  """
+  Name of the asset link
+  """
+  name: String!
+
+  """
+  URL of the asset link
+  """
+  url: String!
+}
+
+"""
+Type of the link: `other`, `runbook`, `image`, `package`
 """
 enum ReleaseAssetLinkType {
   """
@@ -17583,6 +17950,16 @@ type ReleaseAssets {
 }
 
 """
+Fields that are available when modifying release assets
+"""
+input ReleaseAssetsInput {
+  """
+  A list of asset links to associate to the release
+  """
+  links: [ReleaseAssetLinkInput!]
+}
+
+"""
 The connection type for Release.
 """
 type ReleaseConnection {
@@ -17605,6 +17982,76 @@ type ReleaseConnection {
   Information to aid in pagination.
   """
   pageInfo: PageInfo!
+}
+
+"""
+Autogenerated input type of ReleaseCreate
+"""
+input ReleaseCreateInput {
+  """
+  Assets associated to the release
+  """
+  assets: ReleaseAssetsInput
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Description (also known as "release notes") of the release
+  """
+  description: String
+
+  """
+  The title of each milestone the release is associated with. GitLab Premium customers can specify group milestones.
+  """
+  milestones: [String!]
+
+  """
+  Name of the release
+  """
+  name: String
+
+  """
+  Full path of the project the release is associated with
+  """
+  projectPath: ID!
+
+  """
+  The commit SHA or branch name to use if creating a new tag
+  """
+  ref: String
+
+  """
+  The date when the release will be/was ready. Defaults to the current time.
+  """
+  releasedAt: Time
+
+  """
+  Name of the tag to associate with the release
+  """
+  tagName: String!
+}
+
+"""
+Autogenerated return type of ReleaseCreate
+"""
+type ReleaseCreatePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The release after mutation
+  """
+  release: Release
 }
 
 """
@@ -19249,7 +19696,7 @@ type SentryErrorCollection {
     """
     ID of the Sentry issue
     """
-    id: ID!
+    id: GitlabErrorTrackingDetailedErrorID!
   ): SentryDetailedError
 
   """
@@ -19259,7 +19706,7 @@ type SentryErrorCollection {
     """
     ID of the Sentry issue
     """
-    id: ID!
+    id: GitlabErrorTrackingDetailedErrorID!
   ): SentryErrorStackTrace
 
   """
@@ -20306,6 +20753,11 @@ type TerraformStateVersion {
   id: ID!
 
   """
+  The job that created this version
+  """
+  job: CiJob
+
+  """
   Timestamp the version was updated
   """
   updatedAt: Time!
@@ -20465,6 +20917,41 @@ Time represented in ISO 8601
 scalar Time
 
 """
+Represents the time report stats for timeboxes
+"""
+type TimeReportStats {
+  """
+  Completed issues metrics
+  """
+  complete: TimeboxMetrics
+
+  """
+  Incomplete issues metrics
+  """
+  incomplete: TimeboxMetrics
+
+  """
+  Total issues metrics
+  """
+  total: TimeboxMetrics
+}
+
+"""
+Represents measured stats metrics for timeboxes
+"""
+type TimeboxMetrics {
+  """
+  The count metric
+  """
+  count: Int!
+
+  """
+  The weight metric
+  """
+  weight: Int!
+}
+
+"""
 Represents a historically accurate report about the timebox
 """
 type TimeboxReport {
@@ -20472,14 +20959,14 @@ type TimeboxReport {
   Daily scope and completed totals for burnup charts
   """
   burnupTimeSeries: [BurnupChartDailyTotals!]
+
+  """
+  Represents the time report stats for the timebox
+  """
+  stats: TimeReportStats
 }
 
 interface TimeboxReportInterface {
-  """
-  Daily scope and completed totals for burnup charts
-  """
-  burnupTimeSeries: [BurnupChartDailyTotals!]
-
   """
   Historically accurate report about the timebox
   """
@@ -20790,7 +21277,7 @@ type TodoRestoreManyPayload {
   """
   The ids of the updated todo items. Deprecated in 13.2: Use todos
   """
-  updatedIds: [ID!]! @deprecated(reason: "Use todos. Deprecated in 13.2")
+  updatedIds: [TodoID!]! @deprecated(reason: "Use todos. Deprecated in 13.2")
 }
 
 """
@@ -20887,7 +21374,7 @@ type TodosMarkAllDonePayload {
   """
   Ids of the updated todos. Deprecated in 13.2: Use todos
   """
-  updatedIds: [ID!]! @deprecated(reason: "Use todos. Deprecated in 13.2")
+  updatedIds: [TodoID!]! @deprecated(reason: "Use todos. Deprecated in 13.2")
 }
 
 """

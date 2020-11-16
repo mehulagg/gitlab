@@ -11,6 +11,14 @@ RSpec.describe DesignManagement::Design do
   let_it_be(:design3) { create(:design, :with_versions, issue: issue, versions_count: 1) }
   let_it_be(:deleted_design) { create(:design, :with_versions, deleted: true) }
 
+  it_behaves_like 'AtomicInternalId', validate_presence: true do
+    let(:internal_id_attribute) { :iid }
+    let(:instance) { build(:design, issue: issue) }
+    let(:scope) { :project }
+    let(:scope_attrs) { { project: instance.project } }
+    let(:usage) { :design_management_designs }
+  end
+
   it_behaves_like 'a class that supports relative positioning' do
     let_it_be(:relative_parent) { create(:issue) }
 
@@ -367,14 +375,6 @@ RSpec.describe DesignManagement::Design do
       end
 
       it { is_expected.to contain_exactly(version_author, note_author, mentioned_user) }
-
-      context 'when the feature flag is disabled' do
-        before do
-          stub_feature_flags(design_management_design_notification_participants: false)
-        end
-
-        it { is_expected.to be_empty }
-      end
     end
   end
 

@@ -32,10 +32,7 @@ module EE
     end
 
     def enforce_limit?
-      return false unless ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
-      return false unless root_namespace.additional_repo_storage_by_namespace_enabled?
-
-      true
+      root_namespace.additional_repo_storage_by_namespace_enabled?
     end
 
     private

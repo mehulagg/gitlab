@@ -145,9 +145,8 @@ module EE
         field :code_coverage_summary,
               ::Types::Ci::CodeCoverageSummaryType,
               null: true,
-              description: 'Code coverages summary associated with the project',
-              resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver,
-              feature_flag: :group_coverage_data_report
+              description: 'Code coverage summary associated with the project',
+              resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver
 
         def self.sast_ci_configuration(project)
           ::Security::CiConfiguration::SastParserService.new(project).configuration

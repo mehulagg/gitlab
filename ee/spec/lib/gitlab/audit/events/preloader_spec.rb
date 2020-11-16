@@ -3,7 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Audit::Events::Preloader do
-  let_it_be(:audit_events) { create_list(:audit_event, 2) }
+  let_it_be(:audit_events) do
+    [
+      create(:audit_event, created_at: 2.days.ago),
+      create(:audit_event, created_at: 1.day.ago)
+    ]
+  end
   let(:audit_events_relation) { AuditEvent.where(id: audit_events.map(&:id)) }
 
   describe '.preload!' do

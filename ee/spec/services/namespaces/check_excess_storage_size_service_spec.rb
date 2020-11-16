@@ -8,43 +8,24 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
   let(:service) { described_class.new(namespace, user) }
   let(:total_repository_size_excess) { 150.megabytes }
   let(:additional_purchased_storage_size) { 100 }
-  let(:namespace_storage_limit_enabled) { false }
-  let(:storage_allocation_enabled) { true }
+  let(:additional_repo_storage_by_namespace_enabled) { true }
   let(:actual_size_limit) { 10.gigabytes }
   let(:locked_project_count) { 1 }
 
   subject(:response) { service.execute }
 
   before do
-    stub_feature_flags(namespace_storage_limit: namespace_storage_limit_enabled)
-    allow(Gitlab::CurrentSettings).to receive(:automatic_purchased_storage_allocation?) { storage_allocation_enabled }
-
+    allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?).and_return(additional_repo_storage_by_namespace_enabled)
     allow(namespace).to receive(:root_ancestor).and_return(namespace)
     allow(namespace).to receive(:total_repository_size_excess).and_return(total_repository_size_excess)
     allow(namespace).to receive(:actual_size_limit).and_return(actual_size_limit)
     allow(namespace).to receive(:repository_size_excess_project_count).and_return(locked_project_count)
   end
 
-  context 'without limit enforcement' do
-    context 'with application setting disabled' do
-      let(:storage_allocation_enabled) { false }
+  context 'when additional_repo_storage_by_namespace_enabled is false' do
+    let(:additional_repo_storage_by_namespace_enabled) { false }
 
-      it { is_expected.to be_success }
-    end
-
-    context 'with feature flag :additional_repo_storage_by_namespace disabled' do
-      before do
-        stub_feature_flags(additional_repo_storage_by_namespace: false)
-      end
-
-      it { is_expected.to be_success }
-    end
-
-    context 'with feature flag :namespace_storage_limit enabled' do
-      let(:namespace_storage_limit_enabled) { true }
-
-      it { is_expected.to be_success }
-    end
+    it { is_expected.to be_success }
   end
 
   context 'when additional_purchased_storage_size is set to 0' do
@@ -77,14 +58,7 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
   end
 
   context 'when not admin of the namespace' do
-    let(:other_namespace) { build(:namespace, additional_purchased_storage_size: additional_purchased_storage_size) }
-
-    subject(:response) { described_class.new(other_namespace, user).execute }
-
-    before do
-      allow(other_namespace).to receive(:root_ancestor).and_return(other_namespace)
-      allow(other_namespace).to receive(:total_repository_size_excess).and_return(total_repository_size_excess)
-    end
+    let(:user) { build(:user) }
 
     it 'errors and has no payload' do
       expect(response).to be_error

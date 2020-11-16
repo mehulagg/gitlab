@@ -15,7 +15,7 @@ module API
       def filter_params(params)
         params
           .then { |params| filter_forbidden_param(params, :modify_merge_request_committer_setting, :merge_requests_disable_committers_approval) }
-          .then { |params| filter_forbidden_param(params, :modify_overriding_approvers_per_merge_request_setting, :disable_overriding_approvers_per_merge_request) }
+          .then { |params| filter_forbidden_param(params, :modify_approvers_rules, :disable_overriding_approvers_per_merge_request) }
           .then { |params| filter_forbidden_param(params, :modify_merge_request_author_setting, :merge_requests_author_approval) }
       end
     end

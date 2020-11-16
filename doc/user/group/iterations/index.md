@@ -50,7 +50,7 @@ To create an iteration:
 
 ## Edit an iteration
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218277) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218277) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.2.
 
 NOTE: **Note:**
 You need Developer [permissions](../../permissions.md) or higher to edit an iteration.
@@ -73,17 +73,17 @@ An iteration report displays a list of all the issues assigned to an iteration a
 
 To view an iteration report, go to the iterations list page and click an iteration's title.
 
-### Iteration burndown and burnup charts **(STARTER)**
+### Iteration burndown and burnup charts **(STARTER ONLY)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222750) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
 > - It was deployed behind a feature flag, disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) on GitLab 13.2.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45492) on GitLab 13.6.
 > - It's enabled on GitLab.com.
 > - It's able to be enabled or disabled per-group.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#disable-iteration-charts). **(STARTER ONLY)**
 
-The iteration report includes [burndown and burnup chart](../../project/milestones/burndown_and_burnup_charts.md).
+The iteration report includes [burndown and burnup charts](../../project/milestones/burndown_and_burnup_charts.md).
 
 ## Disable Iterations **(STARTER ONLY)**
 

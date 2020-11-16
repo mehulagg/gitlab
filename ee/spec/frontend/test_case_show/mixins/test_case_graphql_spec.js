@@ -5,13 +5,16 @@ import { mockCurrentUserTodo } from 'jest/issuable_list/mock_data';
 import TestCaseShowRoot from 'ee/test_case_show/components/test_case_show_root.vue';
 import updateTestCase from 'ee/test_case_show/queries/update_test_case.mutation.graphql';
 import markTestCaseTodoDone from 'ee/test_case_show/queries/mark_test_case_todo_done.mutation.graphql';
+import moveTestCase from 'ee/test_case_show/queries/move_test_case.mutation.graphql';
 
 import createFlash from '~/flash';
 import Api from '~/api';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 
 jest.mock('~/flash');
+jest.mock('~/lib/utils/url_utility');
 
 const createComponent = ({ testCase, testCaseQueryLoading = false } = {}) =>
   shallowMount(TestCaseShowRoot, {
@@ -212,6 +215,69 @@ describe('TestCaseGraphQL Mixin', () => {
       return wrapper.vm.markTestCaseTodoDone().finally(() => {
         expect(wrapper.vm.testCaseTodoUpdateInProgress).toBe(false);
       });
+    });
+  });
+
+  describe('moveTestCase', () => {
+    const mockTargetProject = {
+      full_path: 'gitlab-org/gitlab-shell',
+    };
+    const moveResolvedMutation = {
+      data: {
+        issueMove: {
+          errors: [],
+          issue: {
+            webUrl: mockTestCase.webUrl,
+          },
+        },
+      },
+    };
+
+    it('sets `testCaseMoveInProgress` to true', () => {
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(moveResolvedMutation);
+
+      wrapper.vm.moveTestCase(mockTargetProject);
+
+      expect(wrapper.vm.testCaseMoveInProgress).toBe(true);
+    });
+
+    it('calls `$apollo.mutate` with moveTestCase mutation and moveTestCaseInput variables', () => {
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(moveResolvedMutation);
+
+      wrapper.vm.moveTestCase(mockTargetProject);
+
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: moveTestCase,
+        variables: {
+          moveTestCaseInput: {
+            projectPath: mockProvide.projectFullPath,
+            iid: mockProvide.testCaseId,
+            targetProjectPath: mockTargetProject.full_path,
+          },
+        },
+      });
+    });
+
+    it('calls `visitUrl` with updated test case URL on mutation promise resolve', async () => {
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(moveResolvedMutation);
+
+      await wrapper.vm.moveTestCase(mockTargetProject);
+
+      expect(wrapper.vm.testCaseMoveInProgress).toBe(true);
+      expect(visitUrl).toHaveBeenCalledWith(moveResolvedMutation.data.issueMove.issue.webUrl);
+    });
+
+    it('calls `createFlash` with errorMessage on mutation promise reject', async () => {
+      jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue({});
+
+      await wrapper.vm.moveTestCase(mockTargetProject);
+
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong while moving test case.',
+        captureError: true,
+        error: expect.any(Object),
+      });
+      expect(wrapper.vm.testCaseMoveInProgress).toBe(false);
     });
   });
 });

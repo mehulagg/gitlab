@@ -1,5 +1,13 @@
 <script>
-import { GlLoadingIcon, GlDropdown, GlDropdownDivider, GlDropdownItem, GlButton } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlButton,
+  GlSprintf,
+  GlLink,
+} from '@gitlab/ui';
 
 import { s__, __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -21,6 +29,8 @@ export default {
     GlDropdownDivider,
     GlDropdownItem,
     GlButton,
+    GlSprintf,
+    GlLink,
     IssuableShow,
     TestCaseSidebar,
   },
@@ -136,7 +146,17 @@ export default {
       @edit-issuable="handleEditTestCase"
     >
       <template #status-badge>
-        {{ statusBadgeText }}
+        <gl-sprintf
+          v-if="testCase.moved"
+          :message="__('Archived (%{movedToStart}moved%{movedToEnd})')"
+        >
+          <template #movedTo="{ content }">
+            <gl-link :href="testCase.movedTo.webUrl" class="text-white text-underline">{{
+              content
+            }}</gl-link>
+          </template>
+        </gl-sprintf>
+        <span v-else>{{ statusBadgeText }}</span>
       </template>
       <template #header-actions>
         <gl-dropdown
@@ -194,6 +214,7 @@ export default {
           :sidebar-expanded="sidebarExpanded"
           :selected-labels="selectedLabels"
           :todo="todo"
+          :moved="testCase.moved"
           @test-case-updated="handleTestCaseUpdated"
         />
       </template>

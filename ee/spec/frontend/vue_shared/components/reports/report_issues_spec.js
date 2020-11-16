@@ -37,7 +37,7 @@ describe('Report issues', () => {
       it('should render "Fixed" keyword', () => {
         expect(vm.$el.textContent).toContain('Fixed');
         expect(vm.$el.textContent.replace(/\s+/g, ' ').trim()).toEqual(
-          'Fixed: Insecure Dependency in Gemfile.lock:12',
+          'Fixed: Minor - Insecure Dependency in Gemfile.lock:12',
         );
       });
     });

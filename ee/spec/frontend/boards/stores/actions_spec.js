@@ -74,6 +74,23 @@ describe('setFilters', () => {
     );
   });
 
+  it('should commit mutation SET_FILTERS, updates iterationWildcardId', () => {
+    const state = {
+      filters: {},
+    };
+
+    const filters = { labelName: 'label', iterationId: 'None' };
+    const updatedFilters = { labelName: 'label', iterationWildcardId: 'NONE' };
+
+    return testAction(
+      actions.setFilters,
+      filters,
+      state,
+      [{ type: types.SET_FILTERS, payload: updatedFilters }],
+      [],
+    );
+  });
+
   it('should commit mutation SET_FILTERS, dispatches setEpicSwimlanes action if filters contain groupBy epic', () => {
     const state = {
       filters: {},

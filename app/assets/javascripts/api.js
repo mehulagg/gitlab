@@ -6,6 +6,7 @@ import { __ } from '~/locale';
 const DEFAULT_PER_PAGE = 20;
 
 const Api = {
+  DEFAULT_PER_PAGE,
   groupsPath: '/api/:version/groups.json',
   groupPath: '/api/:version/groups/:id',
   groupMembersPath: '/api/:version/groups/:id/members',
@@ -22,6 +23,7 @@ const Api = {
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
   projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
   projectMergeRequestChangesPath: '/api/:version/projects/:id/merge_requests/:mrid/changes',
@@ -34,6 +36,7 @@ const Api = {
   mergeRequestsPath: '/api/:version/merge_requests',
   groupLabelsPath: '/groups/:namespace_path/-/labels',
   issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
+  issuableTemplatesPath: '/:namespace_path/:project_path/templates/:type',
   projectTemplatePath: '/api/:version/projects/:id/templates/:type/:key',
   projectTemplatesPath: '/api/:version/projects/:id/templates/:type',
   userCountsPath: '/api/:version/user_counts',
@@ -211,6 +214,12 @@ const Api = {
         },
       })
       .then(({ data }) => data);
+  },
+
+  inviteProjectMembers(id, data) {
+    const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
   },
 
   // Return single project
@@ -460,15 +469,36 @@ const Api = {
   },
 
   issueTemplate(namespacePath, projectPath, key, type, callback) {
-    const url = Api.buildUrl(Api.issuableTemplatePath)
-      .replace(':key', encodeURIComponent(key))
-      .replace(':type', type)
-      .replace(':project_path', projectPath)
-      .replace(':namespace_path', namespacePath);
+    const url = this.buildIssueTemplateUrl(
+      Api.issuableTemplatePath,
+      type,
+      projectPath,
+      namespacePath,
+    ).replace(':key', encodeURIComponent(key));
     return axios
       .get(url)
       .then(({ data }) => callback(null, data))
       .catch(callback);
+  },
+
+  issueTemplates(namespacePath, projectPath, type, callback) {
+    const url = this.buildIssueTemplateUrl(
+      Api.issuableTemplatesPath,
+      type,
+      projectPath,
+      namespacePath,
+    );
+    return axios
+      .get(url)
+      .then(({ data }) => callback(null, data))
+      .catch(callback);
+  },
+
+  buildIssueTemplateUrl(path, type, projectPath, namespacePath) {
+    return Api.buildUrl(path)
+      .replace(':type', type)
+      .replace(':project_path', projectPath)
+      .replace(':namespace_path', namespacePath);
   },
 
   users(query, options) {

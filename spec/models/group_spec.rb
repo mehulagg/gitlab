@@ -28,6 +28,8 @@ RSpec.describe Group do
     it { is_expected.to have_many(:iterations) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:services) }
+    it { is_expected.to have_one(:dependency_proxy_setting) }
+    it { is_expected.to have_many(:dependency_proxy_blobs) }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
@@ -1661,6 +1663,49 @@ RSpec.describe Group do
 
         expect(subgroup.parent_allows_two_factor_authentication?).to eq(false)
       end
+    end
+  end
+
+  describe 'has_project_with_service_desk_enabled?' do
+    let_it_be(:group) { create(:group, :private) }
+
+    subject { group.has_project_with_service_desk_enabled? }
+
+    before do
+      allow(Gitlab::ServiceDesk).to receive(:supported?).and_return(true)
+    end
+
+    context 'when service desk is enabled' do
+      context 'for top level group' do
+        let_it_be(:project) { create(:project, group: group, service_desk_enabled: true) }
+
+        it { is_expected.to eq(true) }
+
+        context 'when service desk is not supported' do
+          before do
+            allow(Gitlab::ServiceDesk).to receive(:supported?).and_return(false)
+          end
+
+          it { is_expected.to eq(false) }
+        end
+      end
+
+      context 'for subgroup project' do
+        let_it_be(:subgroup) { create(:group, :private, parent: group)}
+        let_it_be(:project) { create(:project, group: subgroup, service_desk_enabled: true) }
+
+        it { is_expected.to eq(true) }
+      end
+    end
+
+    context 'when none of group child projects has service desk enabled' do
+      let_it_be(:project) { create(:project, group: group, service_desk_enabled: false) }
+
+      before do
+        project.update(service_desk_enabled: false)
+      end
+
+      it { is_expected.to eq(false) }
     end
   end
 end

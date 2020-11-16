@@ -153,6 +153,7 @@ module EE
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index
@@ -211,8 +212,10 @@ module EE
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
+          project_full_path: project.full_path
+        }.merge!(security_dashboard_pipeline_data(project))
       else
         {
           has_vulnerabilities: 'true',

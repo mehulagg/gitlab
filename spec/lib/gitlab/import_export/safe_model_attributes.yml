@@ -774,6 +774,7 @@ ExternalPullRequest:
 - target_sha
 DesignManagement::Design:
 - id
+- iid
 - project_id
 - filename
 - relative_position
@@ -877,3 +878,9 @@ PushRule:
   - reject_unsigned_commits
   - commit_committer_check
   - regexp_uses_re2
+MergeRequest::CleanupSchedule:
+- id
+- scheduled_at
+- completed_at
+- created_at
+- updated_at

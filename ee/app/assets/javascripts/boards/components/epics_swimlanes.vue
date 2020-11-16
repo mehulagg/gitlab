@@ -107,7 +107,7 @@ export default {
     <component
       :is="treeRootWrapper"
       v-bind="treeRootOptions"
-      class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-bg-white gl-top-0 gl-z-index-3"
+      class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-mb-5 gl-bg-white gl-top-0 gl-z-index-3"
       data-testid="board-swimlanes-headers"
       @end="handleDragOnEnd"
     >
@@ -140,7 +140,7 @@ export default {
         :can-admin-list="canAdminList"
       />
       <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
-        <div class="gl-left-0 gl-py-5 gl-px-3 gl-display-flex gl-align-items-center">
+        <div class="gl-left-0 gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
           <span
             class="gl-mr-3 gl-font-weight-bold gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
           >

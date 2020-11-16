@@ -26,10 +26,10 @@ The following table lists available keywords for jobs:
 | Keyword                                            | Description                                                                                                                                                                         |
 |:---------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [`script`](#script)                                | Shell script that is executed by a runner.                                                                                                                                           |
-| [`after_script`](#before_script-and-after_script)  | Override a set of commands that are executed after job.                                                                                                                             |
+| [`after_script`](#after_script)                    | Override a set of commands that are executed after job.                                                                                                                             |
 | [`allow_failure`](#allow_failure)                  | Allow job to fail. Failed job does not contribute to commit status.                                                                                                                 |
 | [`artifacts`](#artifacts)                          | List of files and directories to attach to a job on success. Also available: `artifacts:paths`, `artifacts:exclude`, `artifacts:expose_as`, `artifacts:name`, `artifacts:untracked`, `artifacts:when`, `artifacts:expire_in`, and `artifacts:reports`. |
-| [`before_script`](#before_script-and-after_script) | Override a set of commands that are executed before job.                                                                                                                            |
+| [`before_script`](#before_script)                  | Override a set of commands that are executed before job.                                                                                                                            |
 | [`cache`](#cache)                                  | List of files that should be cached between subsequent runs. Also available: `cache:paths`, `cache:key`, `cache:untracked`, `cache:when`, and `cache:policy`.                                     |
 | [`coverage`](#coverage)                            | Code coverage settings for a given job.                                                                                                                                             |
 | [`dependencies`](#dependencies)                    | Restrict which artifacts are passed to a specific job by providing a list of jobs to fetch artifacts from.                                                                          |
@@ -90,8 +90,8 @@ The following job keywords can be defined inside a `default:` block:
 
 - [`image`](#image)
 - [`services`](#services)
-- [`before_script`](#before_script-and-after_script)
-- [`after_script`](#before_script-and-after_script)
+- [`before_script`](#before_script)
+- [`after_script`](#after_script)
 - [`tags`](#tags)
 - [`cache`](#cache)
 - [`artifacts`](#artifacts)
@@ -244,7 +244,7 @@ a preconfigured `workflow: rules` entry.
 `workflow: rules` accepts these keywords:
 
 - [`if`](#rulesif): Check this rule to determine when to run a pipeline.
-- [`when`](#when): Specify what to do when the `if` rule evaluates to true. 
+- [`when`](#when): Specify what to do when the `if` rule evaluates to true.
   - To run a pipeline, set to `always`.
   - To prevent pipelines from running, set to `never`.
 
@@ -421,7 +421,7 @@ include:
     file: '/templates/.gitlab-ci-template.yml'
 ```
 
-You can also specify `ref`, with the default being the `HEAD` of the project:
+You can also specify a `ref`. If not specified, it defaults to the `HEAD` of the project:
 
 ```yaml
 include:
@@ -481,8 +481,8 @@ Feature.disable(:ci_include_multiple_files_from_project)
 #### `include:remote`
 
 `include:remote` can be used to include a file from a different location,
-using HTTP/HTTPS, referenced by using the full URL. The remote file must be
-publicly accessible through a simple GET request as authentication schemas
+using HTTP/HTTPS, referenced by the full URL. The remote file must be
+publicly accessible by a GET request, because authentication schemas
 in the remote URL are not supported. For example:
 
 ```yaml
@@ -528,7 +528,7 @@ Nested includes allow you to compose a set of includes.
 A total of 100 includes is allowed, but duplicate includes are considered a configuration error.
 
 In [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/issues/28212) and later, the time limit
-for resolving all files is 30 seconds.
+to resolve all files is 30 seconds.
 
 #### Additional `includes` examples
 
@@ -544,7 +544,7 @@ Used to specify [a Docker image](../docker/using_docker_images.md#what-is-an-ima
 
 For:
 
-- Simple definition examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
+- Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
 - Detailed usage information, refer to [Docker integration](../docker/README.md) documentation.
 
 #### `image:name`
@@ -565,7 +565,7 @@ Used to specify a [service Docker image](../docker/using_docker_images.md#what-i
 
 For:
 
-- Simple definition examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
+- Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
 - Detailed usage information, refer to [Docker integration](../docker/README.md) documentation.
 - For example services, see [GitLab CI/CD Services](../services/README.md).
 
@@ -603,9 +603,9 @@ job:
   script: "bundle exec rspec"
 ```
 
-[YAML anchors for scripts](#yaml-anchors-for-script) are available.
+You can use [YAML anchors with `script`](#yaml-anchors-for-scripts).
 
-This keyword can also contain several commands using an array:
+This keyword can also contain several commands in an array:
 
 ```yaml
 job:
@@ -621,8 +621,8 @@ a "key: value" pair. Be careful when using special characters:
 `:`, `{`, `}`, `[`, `]`, `,`, `&`, `*`, `#`, `?`, `|`, `-`, `<`, `>`, `=`, `!`, `%`, `@`, `` ` ``.
 
 If any of the script commands return an exit code other than zero, the job
-fails and further commands are not executed. You can avoid this behavior by
-storing the exit code in a variable:
+fails and further commands are not executed. Store the exit code in a variable to
+avoid this behavior:
 
 ```yaml
 job:
@@ -631,21 +631,45 @@ job:
     - if [ $exit_code -ne 0 ]; then echo "Previous command failed"; fi;
 ```
 
-#### `before_script` and `after_script`
+#### `before_script`
 
 > Introduced in GitLab 8.7 and requires GitLab Runner v1.2.
 
-`before_script` is used to define commands that should be run before each
-job, including deploy jobs, but after the restoration of any [artifacts](#artifacts).
-This must be an array.
+`before_script` is used to define commands that should run before each job, including
+deploy jobs, but after the restoration of any [artifacts](#artifacts). This must be an array.
 
 Scripts specified in `before_script` are concatenated with any scripts specified
 in the main [`script`](#script), and executed together in a single shell.
 
-`after_script` is used to define commands that run after each
-job, including failed jobs. This must be an array. If a job times out or is cancelled,
-the `after_script` commands are not executed. Support for executing `after_script`
-commands for timed-out or cancelled jobs
+It's possible to overwrite a globally defined `before_script` if you define it in a job:
+
+```yaml
+default:
+  before_script:
+    - echo "Execute this in all jobs that don't already have a before_script section."
+
+job1:
+  script:
+    - echo "This executes after the global before_script."
+
+job:
+  before_script:
+    - echo "Execute this instead of the global before_script."
+  script:
+    - echo "This executes after the job's `before_script`"
+```
+
+You can use [YAML anchors with `before_script`](#yaml-anchors-for-scripts).
+
+#### `after_script`
+
+Introduced in GitLab 8.7 and requires GitLab Runner v1.2.
+
+`after_script` is used to define commands that run after each job, including failed
+jobs. This must be an array.
+
+If a job times out or is cancelled, the `after_script` commands are not executed.
+Support for executing `after_script` commands for timed-out or cancelled jobs
 [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/15603).
 
 Scripts specified in `after_script` are executed in a new shell, separate from any
@@ -656,166 +680,37 @@ Scripts specified in `after_script` are executed in a new shell, separate from a
   - Command aliases and variables exported in `script` scripts.
   - Changes outside of the working tree (depending on the runner executor), like
     software installed by a `before_script` or `script` script.
-- Have a separate timeout, which is hard coded to 5 minutes. See
+- Have a separate timeout, which is hard coded to 5 minutes. See the
   [related issue](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2716) for details.
 - Don't affect the job's exit code. If the `script` section succeeds and the
   `after_script` times out or fails, the job exits with code `0` (`Job Succeeded`).
 
-It's possible to overwrite a globally defined `before_script` or `after_script`
-if you set it per-job:
-
 ```yaml
 default:
-  before_script:
-    - global before script
-
-job:
-  before_script:
-    - execute this instead of global before script
-  script:
-    - my command
   after_script:
-    - execute this after my script
-```
+    - echo "Execute this in all jobs that don't already have an after_script section."
 
-[YAML anchors for `before_script` and `after_script`](#yaml-anchors-for-before_script-and-after_script) are available.
+job1:
+  script:
+    - echo "This executes first. When it completes, the global after_script executes."
 
-#### Coloring script output
-
-Script output can be colored using [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code#Colors),
-or by running commands or programs that output ANSI escape codes.
-
-For example, using [Bash with color codes](https://misc.flogisoft.com/bash/tip_colors_and_formatting):
-
-```yaml
 job:
   script:
-    - echo -e "\e[31mThis text is red,\e[0m but this text isn't\e[31m however this text is red again."
+    - echo "This executes first. When it completes, the job's `after_script` executes."
+  after_script:
+    - echo "Execute this instead of the global after_script."
 ```
 
-You can define the color codes in Shell variables, or even [custom environment variables](../variables/README.md#custom-environment-variables),
-which makes the commands easier to read and reusable.
+You can use [YAML anchors with `after_script`](#yaml-anchors-for-scripts).
 
-For example, using the same example as above and variables defined in a `before_script`:
+#### Script syntax
 
-```yaml
-job:
-  before_script:
-    - TXT_RED="\e[31m" && TXT_CLEAR="\e[0m"
-  script:
-    - echo -e "${TXT_RED}This text is red,${TXT_CLEAR} but this part isn't${TXT_RED} however this part is again."
-    - echo "This text is not colored"
-```
+You can use special syntax in [`script`](README.md#script) sections to:
 
-Or with [PowerShell color codes](https://superuser.com/a/1259916):
-
-```yaml
-job:
-  before_script:
-    - $esc="$([char]27)"; $TXT_RED="$esc[31m"; $TXT_CLEAR="$esc[0m"
-  script:
-    - Write-Host $TXT_RED"This text is red,"$TXT_CLEAR" but this text isn't"$TXT_RED" however this text is red again."
-    - Write-Host "This text is not colored"
-```
-
-#### Multi-line commands
-
-You can split long commands into multi-line commands to improve readability
-using [`|` (literal) and `>` (folded) YAML multi-line block scalar indicators](https://yaml-multiline.info/).
-
-CAUTION: **Warning:**
-If multiple commands are combined into one command string, only the last command's
-failure or success is reported.
-[Failures from earlier commands are ignored due to a bug](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/25394).
-To work around this,
-run each command as a separate `script:` item, or add an `exit 1` command
-to each command string.
-
-You can use the `|` (literal) YAML multiline block scalar indicator to write
-commands over multiple lines in the `script` section of a job description.
-Each line is treated as a separate command.
-Only the first command is repeated in the job log, but additional
-commands are still executed:
-
-```yaml
-job:
-  script:
-    - |
-      echo "First command line."
-      echo "Second command line."
-      echo "Third command line."
-```
-
-The example above renders in the job log as:
-
-```shell
-$ echo First command line # collapsed multi-line command
-First command line
-Second command line.
-Third command line.
-```
-
-The `>` (folded) YAML multiline block scalar indicator treats empty lines between
-sections as the start of a new command:
-
-```yaml
-job:
-  script:
-    - >
-      echo "First command line
-      is split over two lines."
-
-      echo "Second command line."
-```
-
-This behaves similarly to writing multiline commands without the `>` or `|` block
-scalar indicators:
-
-```yaml
-job:
-  script:
-    - echo "First command line
-      is split over two lines."
-
-      echo "Second command line."
-```
-
-Both examples above render in the job log as:
-
-```shell
-$ echo First command line is split over two lines. # collapsed multi-line command
-First command line is split over two lines.
-Second command line.
-```
-
-When you omit the `>` or `|` block scalar indicators, GitLab forms the command
-by concatenating non-empty lines. Make sure the lines can run when concatenated.
-
-Shell [here documents](https://en.wikipedia.org/wiki/Here_document) work with the
-`|` and `>` operators as well. The example below transliterates the lower case letters
-to upper case:
-
-```yaml
-job:
-  script:
-    - |
-      tr a-z A-Z << END_TEXT
-        one two three
-        four five six
-      END_TEXT
-```
-
-Results in:
-
-```shell
-$ tr a-z A-Z << END_TEXT # collapsed multi-line command
-  ONE TWO THREE
-  FOUR FIVE SIX
-```
-
-#### Custom collapsible sections
-
-See [custom collapsible sections](../pipelines/index.md#custom-collapsible-sections).
+- [Split long commands](script.md#split-long-commands) into multiline commands.
+- [Use color codes](script.md#add-color-codes-to-script-output) to make job logs easier to review.
+- [Create custom collapsible sections](../pipelines/index.md#custom-collapsible-sections)
+  to simplify job log output.
 
 ### `stage`
 
@@ -954,7 +849,7 @@ rspec:
       - $RSPEC
 ```
 
-If you do want to include the `rake test`, see [`before_script` and `after_script`](#before_script-and-after_script).
+If you do want to include the `rake test`, see [`before_script`](#before_script) or [`after_script`](#after_script).
 
 `.tests` in this example is a [hidden job](#hide-jobs), but it's
 possible to inherit from regular jobs as well.
@@ -1451,6 +1346,53 @@ because `rules: changes` always evaluates to true when there is no Git `push` ev
 Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
 associated with them. A `rules: changes` job is **always** added to those pipeline
 if there is no `if:` statement that limits the job to branch or merge request pipelines.
+
+##### Variables in `rules:changes`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34272) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-variables-support-in-ruleschanges). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Environment variables can be used in `rules:changes` expressions to determine when
+to add jobs to a pipeline:
+
+```yaml
+docker build:
+  variables:
+    DOCKERFILES_DIR: 'path/to/files/'
+  script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
+  rules:
+    - changes:
+        - $DOCKERFILES_DIR/*
+```
+
+The `$` character can be used for both variables and paths. For example, if the
+`$DOCKERFILES_DIR` variable exists, its value is used. If it does not exist, the
+`$` is interpreted as being part of a path.
+
+###### Enable or disable variables support in `rules:changes` **(CORE ONLY)**
+
+Variables support in `rules:changes` is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_variable_expansion_in_rules_changes)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_variable_expansion_in_rules_changes)
+```
 
 #### `rules:exists`
 
@@ -2616,7 +2558,7 @@ In the example above, if the configuration is not identical:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20956) in GitLab 12.8.
 
-The `auto_stop_in` keyword is for specifying life period of the environment,
+The `auto_stop_in` keyword is for specifying the lifetime of the environment,
 that when expired, GitLab automatically stops them.
 
 For example,
@@ -2629,8 +2571,8 @@ review_app:
     auto_stop_in: 1 day
 ```
 
-When `review_app` job is executed and a review app is created, a life period of
-the environment is set to `1 day`.
+When the environment for `review_app` is created, the environment's lifetime is set to `1 day`.
+Every time the review app is deployed, that lifetime is also reset to `1 day`.
 
 For more information, see
 [the environments auto-stop documentation](../environments/index.md#environments-auto-stop)
@@ -3536,7 +3478,7 @@ exceed the runner-specific timeout.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21480) in GitLab 11.5.
 
 Use `parallel` to configure how many instances of a job to run in
-parallel. This value has to be greater than or equal to two (2) and less than or equal to 50.
+parallel. This value can be from 2 to 50.
 
 This creates N instances of the same job that run in parallel. They are named
 sequentially from `job_name 1/N` to `job_name N/N`.
@@ -3635,8 +3577,8 @@ Use `trigger` to define a downstream pipeline trigger. When GitLab starts a job 
 with a `trigger` definition, a downstream pipeline is created.
 
 Jobs with `trigger` can only use a [limited set of keywords](../multi_project_pipelines.md#limitations).
-For example, you can't run commands with [`script`](#script), [`before_script`](#before_script-and-after_script),
-or [`after_script`](#before_script-and-after_script).
+For example, you can't run commands with [`script`](#script), [`before_script`](#before_script),
+or [`after_script`](#after_script).
 
 You can use this keyword to create two different types of downstream pipelines:
 
@@ -3895,8 +3837,8 @@ For more information, see [Deployments Safety](../environments/deployment_safety
 These methods are supported:
 
 - [`tag_name`](#releasetag_name)
+- [`description`](#releasedescription)
 - [`name`](#releasename) (optional)
-- [`description`](#releasedescription) (optional)
 - [`ref`](#releaseref) (optional)
 - [`milestones`](#releasemilestones) (optional)
 - [`released_at`](#releasereleased_at) (optional)
@@ -4384,50 +4326,30 @@ test:mysql:
 You can see that the hidden jobs are conveniently used as templates, and
 `tags: [dev]` has been overwritten by `tags: [postgres]`.
 
-#### YAML anchors for `before_script` and `after_script`
+#### YAML anchors for scripts
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23005) in GitLab 12.5.
 
-You can use [YAML anchors](#anchors) with `before_script` and `after_script`,
-which makes it possible to include a predefined list of commands in multiple
-jobs.
-
-Example:
+You can use [YAML anchors](#anchors) with [script](#script), [`before_script`](#before_script),
+and [`after_script`](#after_script) to use predefined commands in multiple jobs:
 
 ```yaml
-.something_before: &something_before
-  - echo 'something before'
+.some-script: &some-script
+  - echo "Execute this in `before_script` sections"
 
-.something_after: &something_after
-  - echo 'something after'
-  - echo 'another thing after'
+.some-script-before: &some-script-before
+  - echo "Execute this in `script` sections"
+
+.some-script-after: &some-script-after
+  - echo "Execute this in `after_script` sections"
 
 job_name:
   before_script:
-    - *something_before
+    - *some-script-before
   script:
-    - echo 'this is the script'
-  after_script:
-    - *something_after
-```
-
-#### YAML anchors for `script`
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23005) in GitLab 12.5.
-
-You can use [YAML anchors](#anchors) with scripts, which makes it possible to
-include a predefined list of commands in multiple jobs.
-
-For example:
-
-```yaml
-.something: &something
-  - echo 'something'
-
-job_name:
-  script:
-    - *something
-    - echo 'this is the script'
+    - *some-script
+  before_script:
+    - *some-script-after
 ```
 
 #### YAML anchors for variables
@@ -4503,13 +4425,13 @@ The following keywords are deprecated.
 
 ### Globally-defined `types`
 
-CAUTION: **Deprecated:**
+DANGER: **Deprecated:**
 `types` is deprecated, and could be removed in a future release.
 Use [`stages`](#stages) instead.
 
 ### Job-defined `type`
 
-CAUTION: **Deprecated:**
+DANGER: **Deprecated:**
 `type` is deprecated, and could be removed in one of the future releases.
 Use [`stage`](#stage) instead.
 

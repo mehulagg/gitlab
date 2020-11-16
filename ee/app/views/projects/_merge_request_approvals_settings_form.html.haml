@@ -1,4 +1,3 @@
-- can_modify_overriding_approvers_per_merge_request_settings = can?(current_user, :modify_overriding_approvers_per_merge_request_setting, @project)
 - can_modify_merge_request_author_settings = can?(current_user, :modify_merge_request_author_setting, @project)
 - can_modify_merge_request_committer_settings = can?(current_user, :modify_merge_request_committer_setting, @project)
 
@@ -22,7 +21,7 @@
 
 .form-group
   .form-check
-    = form.check_box :disable_overriding_approvers_per_merge_request, { class: 'form-check-input', disabled: !can_modify_overriding_approvers_per_merge_request_settings }, false, true
+    = form.check_box(:disable_overriding_approvers_per_merge_request, { class: 'form-check-input', disabled: !can_modify_approvers }, false, true)
     = form.label :disable_overriding_approvers_per_merge_request, class: 'form-check-label' do
       %span= _('Can override approvers and approvals required per merge request')
       = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'prevent-overriding-default-approvals'), target: '_blank'
