@@ -24,6 +24,14 @@ RSpec.describe IncidentManagement::OncallSchedulesFinder do
         it 'returns project on-call schedules' do
           is_expected.to contain_exactly(oncall_schedule)
         end
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to eq(IncidentManagement::OncallSchedule.none) }
+        end
       end
 
       context 'when user has no permissions' do
