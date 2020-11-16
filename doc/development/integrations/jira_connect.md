@@ -8,18 +8,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 The following are required to install and test the app:
 
-1. A Jira Cloud instance
+- A Jira Cloud instance. Atlassian provides [free instances for development and testing](https://developer.atlassian.com/platform/marketplace/getting-started/#free-developer-instances-to-build-and-test-your-app).
+- A GitLab instance available over the internet. For the app to work, Jira Cloud should
+  be able to connect to the GitLab instance through the internet. To easily expose your
+  local development environment, you can use tools like:
+  - [serveo](https://medium.com/automationmaster/how-to-forward-my-local-port-to-public-using-serveo-4979f352a3bf)
+  - [ngrok](https://ngrok.com).
 
-   Atlassian provides free instances for development and testing. [Click here to sign up](https://developer.atlassian.com/platform/marketplace/getting-started/#free-developer-instances-to-build-and-test-your-app).
-
-1. A GitLab instance available over the internet
-
-   For the app to work, Jira Cloud should be able to connect to the GitLab instance through the internet.
-
-   To easily expose your local development environment, you can use tools like
-   [serveo](https://medium.com/automationmaster/how-to-forward-my-local-port-to-public-using-serveo-4979f352a3bf)
-   or [ngrok](https://ngrok.com). These also take care of SSL for you because Jira
-   requires all connections to the app host to be over SSL.
+  These also take care of SSL for you because Jira requires all connections to the app
+  host to be over SSL.
 
 ## Install the app in Jira
 
