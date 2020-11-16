@@ -44,11 +44,6 @@ export default {
     };
   },
   apollo: {
-    $query() {
-      return {
-        loadingKey: 'loadingParticipants',
-      };
-    },
     participants: {
       query() {
         return this.isSearchEmpty ? getIssueParticipants : searchUsers;
@@ -140,7 +135,7 @@ export default {
           <gl-search-box-by-type v-model.trim="search" />
         </template>
         <template #items>
-          <gl-loading-icon v-if="$apollo.queries.participants.loadingParticipants" size="lg" />
+          <gl-loading-icon v-if="$apollo.queries.participants.loading" size="lg" />
           <template v-else>
             <gl-dropdown-item
               :is-checked="selectedIsEmpty"
