@@ -23,6 +23,13 @@ RSpec.describe ObjectStorage do
   let(:object) { build_stubbed(:user) }
   let(:uploader) { uploader_class.new(object, :file) }
 
+  def stub_carrierwave_aws_responses
+    if Feature.enabled?(:use_carrierwave_aws)
+      aws_credentials = uploader.aws_credentials.merge({ stub_responses: true } )
+      allow(uploader).to receive(:aws_credentials).and_return(aws_credentials)
+    end
+  end
+
   describe '#object_store=' do
     before do
       allow(uploader_class).to receive(:object_store_enabled?).and_return(true)
@@ -140,25 +147,44 @@ RSpec.describe ObjectStorage do
         stub_uploads_object_storage(uploader: AvatarUploader)
       end
 
-      subject { uploader.migrate!(new_store) }
+      shared_examples 'object store migration' do
+        subject { uploader.migrate!(new_store) }
 
-      it 'persist @object_store to the recorded upload' do
-        subject
+        it 'persist @object_store to the recorded upload' do
+          subject
 
-        expect(uploader.upload.store).to eq(new_store)
+          expect(uploader.upload.store).to eq(new_store)
+        end
+
+        describe 'fails' do
+          it 'is handled gracefully' do
+            store = uploader.object_store
+            expect_next_instance_of(Upload) do |instance|
+              expect(instance).to receive(:save!).and_raise("An error")
+            end
+
+            expect { subject }.to raise_error("An error")
+            expect(uploader.exists?).to be_truthy
+            expect(uploader.upload.store).to eq(store)
+          end
+        end
       end
 
-      describe 'fails' do
-        it 'is handled gracefully' do
-          store = uploader.object_store
-          expect_next_instance_of(Upload) do |instance|
-            expect(instance).to receive(:save!).and_raise("An error")
-          end
-
-          expect { subject }.to raise_error("An error")
-          expect(uploader.exists?).to be_truthy
-          expect(uploader.upload.store).to eq(store)
+      context 'with CarrierWave::Fog and fog-aws' do
+        before do
+          stub_feature_flags(use_carrierwave_aws: false)
         end
+
+        it_behaves_like 'object store migration'
+      end
+
+      context 'with CarrierWave::AWS' do
+        before do
+          stub_feature_flags(use_carrierwave_aws: true)
+          stub_carrierwave_aws_responses
+        end
+
+        it_behaves_like 'object store migration'
       end
     end
   end
@@ -167,6 +193,10 @@ RSpec.describe ObjectStorage do
   # and do not delegate the object_store persistence to the `Upload` model.
   #
   context 'persist_object_store? is true' do
+    before do
+      stub_feature_flags(use_carrierwave_aws: false)
+    end
+
     context 'when using JobArtifactsUploader' do
       let(:store) { described_class::Store::LOCAL }
       let(:object) { create(:ci_job_artifact, :archive, file_store: store) }
@@ -692,6 +722,7 @@ RSpec.describe ObjectStorage do
           context 'when object storage and direct upload is specified' do
             before do
               stub_uploads_object_storage(uploader_class, enabled: true, direct_upload: true)
+              stub_feature_flags(use_carrierwave_aws: false)
             end
 
             context 'when file is stored' do
@@ -767,6 +798,10 @@ RSpec.describe ObjectStorage do
         end
 
         context 'when non existing file is specified' do
+          before do
+            stub_feature_flags(use_carrierwave_aws: false)
+          end
+
           let(:uploaded_file) do
             UploadedFile.new(temp_file.path, remote_id: "test/123123")
           end
@@ -790,6 +825,10 @@ RSpec.describe ObjectStorage do
         end
 
         context 'when valid file is specified' do
+          before do
+            stub_feature_flags(use_carrierwave_aws: false)
+          end
+
           let(:uploaded_file) do
             UploadedFile.new(temp_file.path, filename: "my_file.txt", remote_id: "test/123123")
           end
