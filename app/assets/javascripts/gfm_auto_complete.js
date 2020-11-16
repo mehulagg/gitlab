@@ -262,9 +262,10 @@ class GfmAutoComplete {
             username,
             title,
             icon,
-            availabilityStatus: isUserBusy(availability)
-              ? `<span class="gl-text-gray-600"> (Busy)</span>`
-              : '',
+            availabilityStatus:
+              availability && isUserBusy(availability)
+                ? `<span class="gl-text-gray-600"> (Busy)</span>`
+                : '',
           });
         }
         return tmpl;
