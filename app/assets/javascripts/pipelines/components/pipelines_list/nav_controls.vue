@@ -38,7 +38,7 @@ export default {
   },
 };
 </script>
-<template>
+<template #tabs-end>
   <div class="nav-controls">
     <gl-button
       v-if="newPipelinePath"

@@ -1,5 +1,6 @@
 <script>
 import $ from 'jquery';
+import { GlBadge, GlTabs, GlTab } from '@gitlab/ui';
 
 /**
  * Given an array of tabs, renders non linked bootstrap tabs.
@@ -47,27 +48,25 @@ export default {
       this.$emit('onChangeTab', tab.scope);
     },
   },
+  components: {
+    GlBadge,
+    GlTabs,
+    GlTab,
+  },
 };
 </script>
 <template>
-  <ul class="nav-links scrolling-tabs separator">
-    <li
+  <gl-tabs class="gl-align-items-center gl-w-full">
+    <gl-tab
       v-for="(tab, i) in tabs"
       :key="i"
-      :class="{
-        active: tab.isActive,
-      }"
+      :active="tab.isActive"
+      @click="onTabClick(tab)"
     >
-      <a
-        :class="`js-${scope}-tab-${tab.scope}`"
-        :data-testid="`${scope}-tab-${tab.scope}`"
-        role="button"
-        @click="onTabClick(tab)"
-      >
-        {{ tab.name }}
-
-        <span v-if="shouldRenderBadge(tab.count)" class="badge badge-pill"> {{ tab.count }} </span>
-      </a>
-    </li>
-  </ul>
+      <template #title>
+        <span data-testid="`${scope}-tab-${tab.scope}`" class="`js-${scope}-tab-${tab.scope}`">{{ tab.name }}</span>
+        <gl-badge v-if="shouldRenderBadge(tab.count)" size="sm" class="gl-tab-counter-badge">{{ tab.count }}</gl-badge>
+      </template>
+    </gl-tab>
+  </gl-tabs>
 </template>
