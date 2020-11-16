@@ -21,7 +21,9 @@ The following are required to install and test the app:
    or [ngrok](https://ngrok.com). These also take care of SSL for you because Jira
    requires all connections to the app host to be over SSL.
 
-## Installing the app in Jira
+## Install the app in Jira
+
+To install the app in Jira:
 
 1. Enable Jira development mode to install apps that are not from the Atlassian
    Marketplace:
