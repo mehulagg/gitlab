@@ -61,11 +61,11 @@
 <% end %>
 <% end %>
 
-<% if vulnerability.finding_scanner_name.present? || vulnerability.scan.present? %>
+<% if vulnerability.scanner.present? || vulnerability.scan.present? %>
 ### <%= _("Scanner") %>:
 
-<% if vulnerability.finding_scanner_name.present? %>
-* <%= _("Name") %>: <%= vulnerability.finding_scanner_name %>
+<% if vulnerability.scanner.present? %>
+* <%= _("Name") %>: <%= vulnerability.scanner[:name] %>
 <% end %>
 <% if vulnerability.scan[:type].present? %>
 * <%= _("Type") %>: <%= vulnerability.scan[:type] %>
