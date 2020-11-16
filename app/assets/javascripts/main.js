@@ -173,151 +173,149 @@ function deferredInitialisation() {
   setTimeout(() => $body.addClass('page-initialised'), 1000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const $body = $('body');
-  const $document = $(document);
-  const bootstrapBreakpoint = bp.getBreakpointSize();
+const $body = $('body');
+const $document = $(document);
+const bootstrapBreakpoint = bp.getBreakpointSize();
 
-  initUserTracking();
-  initLayoutNav();
-  initAlertHandler();
+initUserTracking();
+initLayoutNav();
+initAlertHandler();
 
-  // Set the default path for all cookies to GitLab's root directory
-  Cookies.defaults.path = gon.relative_url_root || '/';
+// Set the default path for all cookies to GitLab's root directory
+Cookies.defaults.path = gon.relative_url_root || '/';
 
-  // `hashchange` is not triggered when link target is already in window.location
-  $body.on('click', 'a[href^="#"]', function clickHashLinkCallback() {
-    const href = this.getAttribute('href');
-    if (href.substr(1) === getLocationHash()) {
-      setTimeout(handleLocationHash, 1);
-    }
-  });
-
-  /**
-   * TODO: Apparently we are collapsing the right sidebar on certain screensizes per default
-   * except on issue board pages. Why can't we do it with CSS?
-   *
-   * Proposal: Expose a global sidebar API, which we could import wherever we are manipulating
-   * the visibility of the sidebar.
-   *
-   * Quick fix: Get rid of jQuery for this implementation
-   */
-  const isBoardsPage = /(projects|groups):boards:show/.test(document.body.dataset.page);
-  if (!isBoardsPage && (bootstrapBreakpoint === 'sm' || bootstrapBreakpoint === 'xs')) {
-    const $rightSidebar = $('aside.right-sidebar');
-    const $layoutPage = $('.layout-page');
-
-    if ($rightSidebar.length > 0) {
-      $rightSidebar.removeClass('right-sidebar-expanded').addClass('right-sidebar-collapsed');
-      $layoutPage.removeClass('right-sidebar-expanded').addClass('right-sidebar-collapsed');
-    } else {
-      $layoutPage.removeClass('right-sidebar-expanded right-sidebar-collapsed');
-    }
+// `hashchange` is not triggered when link target is already in window.location
+$body.on('click', 'a[href^="#"]', function clickHashLinkCallback() {
+  const href = this.getAttribute('href');
+  if (href.substr(1) === getLocationHash()) {
+    setTimeout(handleLocationHash, 1);
   }
-
-  // prevent default action for disabled buttons
-  $('.btn').click(function clickDisabledButtonCallback(e) {
-    if ($(this).hasClass('disabled')) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return false;
-    }
-
-    return true;
-  });
-
-  localTimeAgo($('abbr.timeago, .js-timeago'), true);
-
-  /**
-   * This disables form buttons while a form is submitting
-   * We do not difinitively know all of the places where this is used
-   *
-   * TODO: Defer execution, migrate to behaviors, and add sentry logging
-   */
-  $body.on('ajax:complete, ajax:beforeSend, submit', 'form', function ajaxCompleteCallback(e) {
-    const $buttons = $('[type="submit"], .js-disable-on-submit', this).not('.js-no-auto-disable');
-    switch (e.type) {
-      case 'ajax:beforeSend':
-      case 'submit':
-        return $buttons.disable();
-      default:
-        return $buttons.enable();
-    }
-  });
-
-  // eslint-disable-next-line no-jquery/no-ajax-events
-  $(document).ajaxError((e, xhrObj) => {
-    const ref = xhrObj.status;
-
-    if (ref === 401) {
-      Flash(__('You need to be logged in.'));
-    } else if (ref === 404 || ref === 500) {
-      Flash(__('Something went wrong on our end.'));
-    }
-  });
-
-  $('.navbar-toggler').on('click', () => {
-    $('.header-content').toggleClass('menu-expanded');
-  });
-
-  /**
-   * Show suppressed commit diff
-   *
-   * TODO: Move to commit diff pages
-   */
-  $document.on('click', '.diff-content .js-show-suppressed-diff', function showDiffCallback() {
-    const $container = $(this).parent();
-    $container.next('table').show();
-    $container.remove();
-  });
-
-  // Show/hide comments on diff
-  $body.on('click', '.js-toggle-diff-comments', function toggleDiffCommentsCallback(e) {
-    const $this = $(this);
-    const notesHolders = $this.closest('.diff-file').find('.notes_holder');
-
-    e.preventDefault();
-
-    $this.toggleClass('active');
-
-    if ($this.hasClass('active')) {
-      notesHolders
-        .show()
-        .find('.hide, .content')
-        .show();
-    } else {
-      notesHolders
-        .hide()
-        .find('.content')
-        .hide();
-    }
-
-    $(document).trigger('toggle.comments');
-  });
-
-  $('form.filter-form').on('submit', function filterFormSubmitCallback(event) {
-    const link = document.createElement('a');
-    link.href = this.action;
-
-    const action = `${this.action}${link.search === '' ? '?' : '&'}`;
-
-    event.preventDefault();
-    // eslint-disable-next-line no-jquery/no-serialize
-    visitUrl(`${action}${$(this).serialize()}`);
-  });
-
-  const flashContainer = document.querySelector('.flash-container');
-
-  if (flashContainer && flashContainer.children.length) {
-    flashContainer
-      .querySelectorAll('.flash-alert, .flash-notice, .flash-success')
-      .forEach(flashEl => {
-        removeFlashClickListener(flashEl);
-      });
-  }
-
-  // initialize field errors
-  $('.gl-show-field-errors').each((i, form) => new GlFieldErrors(form));
-
-  requestIdleCallback(deferredInitialisation);
 });
+
+/**
+ * TODO: Apparently we are collapsing the right sidebar on certain screensizes per default
+ * except on issue board pages. Why can't we do it with CSS?
+ *
+ * Proposal: Expose a global sidebar API, which we could import wherever we are manipulating
+ * the visibility of the sidebar.
+ *
+ * Quick fix: Get rid of jQuery for this implementation
+ */
+const isBoardsPage = /(projects|groups):boards:show/.test(document.body.dataset.page);
+if (!isBoardsPage && (bootstrapBreakpoint === 'sm' || bootstrapBreakpoint === 'xs')) {
+  const $rightSidebar = $('aside.right-sidebar');
+  const $layoutPage = $('.layout-page');
+
+  if ($rightSidebar.length > 0) {
+    $rightSidebar.removeClass('right-sidebar-expanded').addClass('right-sidebar-collapsed');
+    $layoutPage.removeClass('right-sidebar-expanded').addClass('right-sidebar-collapsed');
+  } else {
+    $layoutPage.removeClass('right-sidebar-expanded right-sidebar-collapsed');
+  }
+}
+
+// prevent default action for disabled buttons
+$('.btn').click(function clickDisabledButtonCallback(e) {
+  if ($(this).hasClass('disabled')) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+
+  return true;
+});
+
+localTimeAgo($('abbr.timeago, .js-timeago'), true);
+
+/**
+ * This disables form buttons while a form is submitting
+ * We do not difinitively know all of the places where this is used
+ *
+ * TODO: Defer execution, migrate to behaviors, and add sentry logging
+ */
+$body.on('ajax:complete, ajax:beforeSend, submit', 'form', function ajaxCompleteCallback(e) {
+  const $buttons = $('[type="submit"], .js-disable-on-submit', this).not('.js-no-auto-disable');
+  switch (e.type) {
+    case 'ajax:beforeSend':
+    case 'submit':
+      return $buttons.disable();
+    default:
+      return $buttons.enable();
+  }
+});
+
+// eslint-disable-next-line no-jquery/no-ajax-events
+$(document).ajaxError((e, xhrObj) => {
+  const ref = xhrObj.status;
+
+  if (ref === 401) {
+    Flash(__('You need to be logged in.'));
+  } else if (ref === 404 || ref === 500) {
+    Flash(__('Something went wrong on our end.'));
+  }
+});
+
+$('.navbar-toggler').on('click', () => {
+  $('.header-content').toggleClass('menu-expanded');
+});
+
+/**
+ * Show suppressed commit diff
+ *
+ * TODO: Move to commit diff pages
+ */
+$document.on('click', '.diff-content .js-show-suppressed-diff', function showDiffCallback() {
+  const $container = $(this).parent();
+  $container.next('table').show();
+  $container.remove();
+});
+
+// Show/hide comments on diff
+$body.on('click', '.js-toggle-diff-comments', function toggleDiffCommentsCallback(e) {
+  const $this = $(this);
+  const notesHolders = $this.closest('.diff-file').find('.notes_holder');
+
+  e.preventDefault();
+
+  $this.toggleClass('active');
+
+  if ($this.hasClass('active')) {
+    notesHolders
+      .show()
+      .find('.hide, .content')
+      .show();
+  } else {
+    notesHolders
+      .hide()
+      .find('.content')
+      .hide();
+  }
+
+  $(document).trigger('toggle.comments');
+});
+
+$('form.filter-form').on('submit', function filterFormSubmitCallback(event) {
+  const link = document.createElement('a');
+  link.href = this.action;
+
+  const action = `${this.action}${link.search === '' ? '?' : '&'}`;
+
+  event.preventDefault();
+  // eslint-disable-next-line no-jquery/no-serialize
+  visitUrl(`${action}${$(this).serialize()}`);
+});
+
+const flashContainer = document.querySelector('.flash-container');
+
+if (flashContainer && flashContainer.children.length) {
+  flashContainer
+    .querySelectorAll('.flash-alert, .flash-notice, .flash-success')
+    .forEach(flashEl => {
+      removeFlashClickListener(flashEl);
+    });
+}
+
+// initialize field errors
+$('.gl-show-field-errors').each((i, form) => new GlFieldErrors(form));
+
+requestIdleCallback(deferredInitialisation);
