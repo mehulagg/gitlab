@@ -345,7 +345,7 @@ RSpec.describe Releases::CreateService do
         expect { subject }.not_to change(Releases::CreateEvidenceWorker.jobs, :size)
       end
 
-      it 'creates does not an Evidence object', :sidekiq_inline do
+      it 'does not create an Evidence object', :sidekiq_inline do
         expect { subject }.not_to change(Releases::Evidence, :count)
       end
 
