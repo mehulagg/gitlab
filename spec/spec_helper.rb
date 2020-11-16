@@ -8,6 +8,20 @@ if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
   abort 'Aborting...'
 end
 
+# Enable deprecation warnings on non-CI environment and make them more visibile
+# to developers to ease upgrading to newer Ruby versions.
+unless ENV['CI']
+  Warning[:deprecated] = true
+
+  require 'warning'
+
+  # Ignore deprecation warnings (only kwargs related) for code we don't own
+  # (e.g. gems) to reduce the noise
+  Gem.path.each do |path|
+    Warning.ignore(:keyword_separation, path)
+  end
+end
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
 
