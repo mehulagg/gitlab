@@ -12,6 +12,7 @@ import {
   GlLink,
   GlDropdown,
   GlDropdownItem,
+  GlDropdownSectionHeader,
   GlSearchBoxByType,
   GlSprintf,
   GlLoadingIcon,
@@ -44,6 +45,7 @@ export default {
     GlLink,
     GlDropdown,
     GlDropdownItem,
+    GlDropdownSectionHeader,
     GlSearchBoxByType,
     GlSprintf,
     GlLoadingIcon,
@@ -61,7 +63,11 @@ export default {
       type: String,
       required: true,
     },
-    refs: {
+    branches: {
+      type: Array,
+      required: true,
+    },
+    tags: {
       type: Array,
       required: true,
     },
@@ -92,7 +98,9 @@ export default {
   data() {
     return {
       searchTerm: '',
-      refValue: this.refParam,
+      refValue: {
+        shortName: this.refParam,
+      },
       form: {},
       error: null,
       warnings: [],
@@ -102,9 +110,21 @@ export default {
     };
   },
   computed: {
-    filteredRefs() {
-      const lowerCasedSearchTerm = this.searchTerm.toLowerCase();
-      return this.refs.filter(ref => ref.toLowerCase().includes(lowerCasedSearchTerm));
+    lowerCasedSearchTerm() {
+      return this.searchTerm.toLowerCase();
+    },
+    filteredBranches() {
+      return this.branches.filter(branch =>
+        branch.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
+      );
+    },
+    filteredTags() {
+      return this.tags.filter(tag =>
+        tag.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
+      );
+    },
+    hasTags() {
+      return this.tags.length > 0;
     },
     overMaxWarningsLimit() {
       return this.totalWarnings > this.maxWarnings;
@@ -118,11 +138,14 @@ export default {
     shouldShowWarning() {
       return this.warnings.length > 0 && !this.isWarningDismissed;
     },
+    refShortName() {
+      return this.refValue.shortName;
+    },
     variables() {
-      return this.form[this.refValue]?.variables ?? [];
+      return this.form[this.refShortName]?.variables ?? [];
     },
     descriptions() {
-      return this.form[this.refValue]?.descriptions ?? {};
+      return this.form[this.refShortName]?.descriptions ?? {};
     },
   },
   created() {
@@ -168,19 +191,19 @@ export default {
     setRefSelected(refValue) {
       this.refValue = refValue;
 
-      if (!this.form[refValue]) {
-        this.fetchConfigVariables(refValue)
+      if (!this.form[this.refShortName]) {
+        this.fetchConfigVariables(this.refShortName)
           .then(({ descriptions, params }) => {
-            Vue.set(this.form, refValue, {
+            Vue.set(this.form, this.refShortName, {
               variables: [],
               descriptions,
             });
 
             // Add default variables from yml
-            this.setVariableParams(refValue, VARIABLE_TYPE, params);
+            this.setVariableParams(this.refShortName, VARIABLE_TYPE, params);
           })
           .catch(() => {
-            Vue.set(this.form, refValue, {
+            Vue.set(this.form, this.refShortName, {
               variables: [],
               descriptions: {},
             });
@@ -188,14 +211,14 @@ export default {
           .finally(() => {
             // Add/update variables, e.g. from query string
             if (this.variableParams) {
-              this.setVariableParams(refValue, VARIABLE_TYPE, this.variableParams);
+              this.setVariableParams(this.refShortName, VARIABLE_TYPE, this.variableParams);
             }
             if (this.fileParams) {
-              this.setVariableParams(refValue, FILE_TYPE, this.fileParams);
+              this.setVariableParams(this.refShortName, FILE_TYPE, this.fileParams);
             }
 
             // Adds empty var at the end of the form
-            this.addEmptyVariable(refValue);
+            this.addEmptyVariable(this.refShortName);
           });
       }
     },
@@ -249,7 +272,8 @@ export default {
 
       return axios
         .post(this.pipelinesPath, {
-          ref: this.refValue,
+          // send shortName as fall back for query params
+          ref: this.refValue.fullName || this.refShortName,
           variables_attributes: filteredVariables,
         })
         .then(({ data }) => {
@@ -307,20 +331,29 @@ export default {
       </details>
     </gl-alert>
     <gl-form-group :label="s__('Pipeline|Run for')">
-      <gl-dropdown :text="refValue" block>
-        <gl-search-box-by-type
-          v-model.trim="searchTerm"
-          :placeholder="__('Search branches and tags')"
-        />
+      <gl-dropdown :text="refShortName" block>
+        <gl-search-box-by-type v-model.trim="searchTerm" :placeholder="__('Search refs')" />
+        <gl-dropdown-section-header>{{ __('Branches') }}</gl-dropdown-section-header>
         <gl-dropdown-item
-          v-for="(ref, index) in filteredRefs"
-          :key="index"
+          v-for="(branch, index) in filteredBranches"
+          :key="`branch-${index}`"
           class="gl-font-monospace"
           is-check-item
-          :is-checked="isSelected(ref)"
-          @click="setRefSelected(ref)"
+          :is-checked="isSelected(branch)"
+          @click="setRefSelected(branch)"
         >
-          {{ ref }}
+          {{ branch.shortName }}
+        </gl-dropdown-item>
+        <gl-dropdown-section-header v-if="hasTags">{{ __('Tags') }}</gl-dropdown-section-header>
+        <gl-dropdown-item
+          v-for="(tag, index) in filteredTags"
+          :key="`tag-${index}`"
+          class="gl-font-monospace"
+          is-check-item
+          :is-checked="isSelected(tag)"
+          @click="setRefSelected(tag)"
+        >
+          {{ tag.shortName }}
         </gl-dropdown-item>
       </gl-dropdown>
 
@@ -353,7 +386,7 @@ export default {
             :placeholder="s__('CiVariables|Input variable key')"
             :class="$options.formElementClasses"
             data-testid="pipeline-form-ci-variable-key"
-            @change="addEmptyVariable(refValue)"
+            @change="addEmptyVariable(refShortName)"
           />
           <gl-form-input
             v-model="variable.value"
