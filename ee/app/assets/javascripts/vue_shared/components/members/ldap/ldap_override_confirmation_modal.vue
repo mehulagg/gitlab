@@ -9,7 +9,7 @@ export default {
   i18n: {
     editPermissions: s__('Members|Edit permissions'),
     modalBody: s__(
-      'Members|%{userName} is currently a LDAP user. Editing their permissions will override the settings from the LDAP group sync.',
+      'Members|%{userName} is currently an LDAP user. Editing their permissions will override the settings from the LDAP group sync.',
     ),
     toastMessage: s__('Members|LDAP override enabled.'),
   },

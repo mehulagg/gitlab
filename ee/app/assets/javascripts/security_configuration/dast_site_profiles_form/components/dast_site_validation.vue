@@ -11,11 +11,16 @@ import {
   GlInputGroupText,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import { omit } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import download from '~/lib/utils/downloader';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import { fetchPolicies } from '~/lib/graphql';
 import {
+  DAST_SITE_VALIDATION_HTTP_HEADER_KEY,
+  DAST_SITE_VALIDATION_METHOD_HTTP_HEADER,
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
   DAST_SITE_VALIDATION_METHODS,
   DAST_SITE_VALIDATION_STATUS,
@@ -27,6 +32,7 @@ import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graph
 export default {
   name: 'DastSiteValidation',
   components: {
+    ClipboardButton,
     GlAlert,
     GlButton,
     GlCard,
@@ -38,6 +44,7 @@ export default {
     GlInputGroupText,
     GlLoadingIcon,
   },
+  mixins: [glFeatureFlagsMixin()],
   apollo: {
     dastSiteValidation: {
       query: dastSiteValidationQuery,
@@ -103,6 +110,16 @@ export default {
     };
   },
   computed: {
+    validationMethodOptions() {
+      const isHttpHeaderValidationEnabled = this.glFeatures
+        .securityOnDemandScansHttpHeaderValidation;
+
+      const enabledValidationMethods = omit(DAST_SITE_VALIDATION_METHODS, [
+        !isHttpHeaderValidationEnabled ? DAST_SITE_VALIDATION_METHOD_HTTP_HEADER : '',
+      ]);
+
+      return Object.values(enabledValidationMethods);
+    },
     urlObject() {
       try {
         return new URL(this.targetUrl);
@@ -119,11 +136,17 @@ export default {
     isTextFileValidation() {
       return this.validationMethod === DAST_SITE_VALIDATION_METHOD_TEXT_FILE;
     },
+    isHttpHeaderValidation() {
+      return this.validationMethod === DAST_SITE_VALIDATION_METHOD_HTTP_HEADER;
+    },
     textFileName() {
       return `GitLab-DAST-Site-Validation-${this.token}.txt`;
     },
     locationStepLabel() {
       return DAST_SITE_VALIDATION_METHODS[this.validationMethod].i18n.locationStepLabel;
+    },
+    httpHeader() {
+      return `${DAST_SITE_VALIDATION_HTTP_HEADER_KEY}: uuid-code-${this.token}`;
     },
   },
   watch: {
@@ -132,13 +155,22 @@ export default {
     },
   },
   created() {
-    this.unsubscribe = this.$watch(() => this.token, this.updateValidationPath, {
-      immediate: true,
-    });
+    this.unsubscribe = this.$watch(
+      () => [this.token, this.validationMethod],
+      this.updateValidationPath,
+      {
+        immediate: true,
+      },
+    );
   },
   methods: {
     updateValidationPath() {
-      this.validationPath = joinPaths(stripPathTail(this.path), this.textFileName);
+      this.validationPath = this.isTextFileValidation
+        ? this.getTextFileValidationPath()
+        : this.path;
+    },
+    getTextFileValidationPath() {
+      return joinPaths(stripPathTail(this.path), this.textFileName);
     },
     onValidationPathInput() {
       this.unsubscribe();
@@ -189,7 +221,6 @@ export default {
       this.hasValidationError = true;
     },
   },
-  validationMethodOptions: Object.values(DAST_SITE_VALIDATION_METHODS),
 };
 </script>
 
@@ -199,7 +230,7 @@ export default {
       {{ s__('DastProfiles|Site is not validated yet, please follow the steps.') }}
     </gl-alert>
     <gl-form-group :label="s__('DastProfiles|Step 1 - Choose site validation method')">
-      <gl-form-radio-group v-model="validationMethod" :options="$options.validationMethodOptions" />
+      <gl-form-radio-group v-model="validationMethod" :options="validationMethodOptions" />
     </gl-form-group>
     <gl-form-group
       v-if="isTextFileValidation"
@@ -216,6 +247,16 @@ export default {
       >
         {{ textFileName }}
       </gl-button>
+    </gl-form-group>
+    <gl-form-group
+      v-else-if="isHttpHeaderValidation"
+      :label="s__('DastProfiles|Step 2 - Add following HTTP header to your site')"
+    >
+      <code class="gl-p-3 gl-bg-black gl-text-white">{{ httpHeader }}</code>
+      <clipboard-button
+        :text="httpHeader"
+        :title="s__('DastProfiles|Copy HTTP header to clipboard')"
+      />
     </gl-form-group>
     <gl-form-group :label="locationStepLabel" class="mw-460">
       <gl-form-input-group>
@@ -255,7 +296,7 @@ export default {
         <gl-icon name="status_failed" />
         {{
           s__(
-            'DastProfiles|Validation failed, please make sure that you follow the steps above with the choosen method.',
+            'DastProfiles|Validation failed, please make sure that you follow the steps above with the chosen method.',
           )
         }}
       </template>

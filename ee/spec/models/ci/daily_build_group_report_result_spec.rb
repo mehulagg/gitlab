@@ -36,12 +36,12 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
             project.id => {
               average_coverage: 71.5,
               coverage_count: 2,
-              last_updated_at: recent_build_group_report_result.date
+              last_updated_on: recent_build_group_report_result.date
             },
             project_2.id => {
               average_coverage: 78.0,
               coverage_count: 1,
-              last_updated_at: build_group_report_result_2.date
+              last_updated_on: build_group_report_result_2.date
             }
           }
 

@@ -16,7 +16,7 @@ module EE
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
-      condition(:requirements_available) { @subject.feature_available?(:requirements) }
+      condition(:requirements_available) { @subject.feature_available?(:requirements) & feature_available?(:requirements) }
 
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 

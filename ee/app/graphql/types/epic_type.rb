@@ -6,7 +6,7 @@ module Types
 
     graphql_name 'Epic'
     description 'Represents an epic'
-
+    accepts ::Epic
     authorize :read_epic
 
     expose_permissions Types::PermissionTypes::Epic

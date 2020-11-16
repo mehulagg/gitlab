@@ -10,6 +10,7 @@ module Gitlab
           attr_reader :compare_key
           attr_reader :confidence
           attr_reader :identifiers
+          attr_reader :links
           attr_reader :location
           attr_reader :metadata_version
           attr_reader :name
@@ -24,10 +25,11 @@ module Gitlab
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
+          def initialize(compare_key:, identifiers:, links: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
             @compare_key = compare_key
             @confidence = confidence
             @identifiers = identifiers
+            @links = links
             @location = location
             @metadata_version = metadata_version
             @name = name
@@ -46,6 +48,7 @@ module Gitlab
               compare_key
               confidence
               identifiers
+              links
               location
               metadata_version
               name
@@ -93,8 +96,6 @@ module Gitlab
               FindingKey.new(location_fingerprint: location&.fingerprint, identifier_fingerprint: identifier.fingerprint)
             end
           end
-
-          protected
 
           def primary_fingerprint
             primary_identifier&.fingerprint

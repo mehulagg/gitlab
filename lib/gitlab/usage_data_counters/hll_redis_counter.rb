@@ -15,9 +15,9 @@ module Gitlab
       CategoryMismatch = Class.new(EventError)
       UnknownAggregationOperator = Class.new(EventError)
 
-      KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events.yml'
+      KNOWN_EVENTS_PATH = File.expand_path('known_events/*.yml', __dir__)
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
-      AGGREGATED_METRICS_PATH = 'lib/gitlab/usage_data_counters/aggregated_metrics.yml'
+      AGGREGATED_METRICS_PATH = File.expand_path('aggregated_metrics/*.yml', __dir__)
       ALLOWED_METRICS_AGGREGATIONS = %w[ANY].freeze
 
       # Track event on entity_id
@@ -90,18 +90,32 @@ module Gitlab
           event_for(event_name).present?
         end
 
-        def aggregated_metrics_data
+        def aggregated_metrics_monthly_data
           aggregated_metrics.to_h do |aggregation|
-            [aggregation[:name], calculate_count_for_aggregation(aggregation)]
+            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 4.weeks.ago.to_date, end_date: Date.current)]
           end
+        end
+
+        def aggregated_metrics_weekly_data
+          aggregated_metrics.to_h do |aggregation|
+            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 7.days.ago.to_date, end_date: Date.current)]
+          end
+        end
+
+        def known_events
+          @known_events ||= load_events(KNOWN_EVENTS_PATH)
+        end
+
+        def aggregated_metrics
+          @aggregated_metrics ||= load_events(AGGREGATED_METRICS_PATH)
         end
 
         private
 
-        def calculate_count_for_aggregation(aggregation)
+        def calculate_count_for_aggregation(aggregation, start_date:, end_date:)
           validate_aggregation_operator!(aggregation[:operator])
 
-          count_unique_events(event_names: aggregation[:events], start_date: 4.weeks.ago.to_date, end_date: Date.current) do |events|
+          count_unique_events(event_names: aggregation[:events], start_date: start_date, end_date: end_date) do |events|
             raise SlotMismatch, events unless events_in_same_slot?(events)
             raise AggregationMismatch, events unless events_same_aggregation?(events)
           end
@@ -135,16 +149,14 @@ module Gitlab
           end
         end
 
-        def known_events
-          @known_events ||= load_yaml_from_path(KNOWN_EVENTS_PATH)
-        end
-
-        def aggregated_metrics
-          @aggregated_metrics ||= (load_yaml_from_path(AGGREGATED_METRICS_PATH) || [])
+        def load_events(wildcard)
+          Dir[wildcard].each_with_object([]) do |path, events|
+            events.push(*load_yaml_from_path(path))
+          end
         end
 
         def load_yaml_from_path(path)
-          YAML.safe_load(File.read(Rails.root.join(path)))&.map(&:with_indifferent_access)
+          YAML.safe_load(File.read(path))&.map(&:with_indifferent_access)
         end
 
         def known_events_names

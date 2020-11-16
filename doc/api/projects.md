@@ -1081,6 +1081,7 @@ POST /projects
 | `only_allow_merge_if_pipeline_succeeds`                     | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged with successful jobs. |
 | `packages_enabled`                                          | boolean | **{dotted-circle}** No | Enable or disable packages repository feature. |
 | `pages_access_level`                                        | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled`, or `public`. |
+| `requirements_access_level`                                 | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled` or `public` |
 | `path`                                                      | string  | **{check-circle}** Yes (if name isn't provided) | Repository name for new project. Generated based on name if not provided (generated as lowercase with dashes). |
 | `printing_merge_request_link_enabled`                       | boolean | **{dotted-circle}** No | Show link to create/view merge request when pushing from the command line. |
 | `public_builds`                                             | boolean | **{dotted-circle}** No | If `true`, jobs can be viewed by non-project members. |
@@ -1150,6 +1151,7 @@ POST /projects/user/:user_id
 | `only_allow_merge_if_pipeline_succeeds`                     | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged with successful jobs. |
 | `packages_enabled`                                          | boolean | **{dotted-circle}** No | Enable or disable packages repository feature. |
 | `pages_access_level`                                        | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled`, or `public`. |
+| `requirements_access_level`                                 | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled` or `public` |
 | `path`                                                      | string  | **{dotted-circle}** No | Custom repository name for new project. By default generated based on name. |
 | `printing_merge_request_link_enabled`                       | boolean | **{dotted-circle}** No | Show link to create/view merge request when pushing from the command line. |
 | `public_builds`                                             | boolean | **{dotted-circle}** No | If `true`, jobs can be viewed by non-project-members. |
@@ -1225,6 +1227,7 @@ PUT /projects/:id
 | `only_mirror_protected_branches` **(STARTER)**              | boolean        | **{dotted-circle}** No | Only mirror protected branches. |
 | `packages_enabled`                                          | boolean        | **{dotted-circle}** No | Enable or disable packages repository feature. |
 | `pages_access_level`                                        | string         | **{dotted-circle}** No | One of `disabled`, `private`, `enabled`, or `public`. |
+| `requirements_access_level`                                 | string         | **{dotted-circle}** No | One of `disabled`, `private`, `enabled` or `public` |
 | `path`                                                      | string         | **{dotted-circle}** No | Custom repository name for the project. By default generated based on name. |
 | `public_builds`                                             | boolean        | **{dotted-circle}** No | If `true`, jobs can be viewed by non-project members. |
 | `remove_source_branch_after_merge`                          | boolean        | **{dotted-circle}** No | Enable `Delete source branch` option by default for all new merge requests. |
@@ -2003,6 +2006,7 @@ GET /projects/:id/hooks/:hook_id
   "pipeline_events": true,
   "wiki_page_events": true,
   "deployment_events": true,
+  "releases_events": true,
   "enable_ssl_verification": true,
   "created_at": "2012-10-12T17:04:47Z"
 }
@@ -2062,6 +2066,7 @@ PUT /projects/:id/hooks/:hook_id
 | `token`                      | string         | **{dotted-circle}** No | Secret token to validate received payloads; this isn't returned in the response. |
 | `url`                        | string         | **{check-circle}** Yes | The hook URL. |
 | `wiki_events`                | boolean        | **{dotted-circle}** No | Trigger hook on wiki events. |
+| `releases_events`            | boolean        | **{dotted-circle}** No | Trigger hook on release events. |
 
 ### Delete project hook
 

@@ -20,7 +20,7 @@ export default {
   inject: ['groupId'],
   computed: {
     ...mapState(['epics']),
-    ...mapGetters({ getEpicById: 'getEpicById', issue: 'getActiveIssue' }),
+    ...mapGetters({ getEpicById: 'getEpicById', issue: 'activeIssue' }),
     storedEpic() {
       const storedEpic = this.getEpicById(this.issue.epic?.id);
       const epicId = getIdFromGraphQLId(storedEpic?.id);

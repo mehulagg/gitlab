@@ -30,7 +30,7 @@ module EE
             result[project_id] = {
               average_coverage: average_coverage,
               coverage_count: coverage_count,
-              last_updated_at: date
+              last_updated_on: date
             }
           end
         end

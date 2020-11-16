@@ -132,6 +132,7 @@ RSpec.describe 'Issue Sidebar' do
   context 'Iterations', :js do
     context 'when iterations feature available' do
       let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now, title: 'Iteration 1') }
+      let_it_be(:iteration2) { create(:iteration, group: group, start_date: 2.days.ago, due_date: 1.day.ago, title: 'Iteration 2', state: 'closed', skip_future_date_validation: true) }
 
       before do
         iteration
@@ -156,6 +157,14 @@ RSpec.describe 'Issue Sidebar' do
         select_iteration('No iteration')
 
         expect(page.find('[data-testid="select-iteration"]')).to have_content('No iteration')
+      end
+
+      it 'does not show closed iterations' do
+        find_and_click_edit_iteration
+
+        page.within '.milestone' do
+          expect(page).not_to have_content iteration2.title
+        end
       end
     end
 

@@ -237,7 +237,7 @@ describe('DastSiteProfileForm', () => {
         await waitForPromises();
 
         expect(requestHandlers.dastSiteTokenCreate).toHaveBeenCalledWith({
-          projectFullPath: fullPath,
+          fullPath,
           targetUrl,
         });
 

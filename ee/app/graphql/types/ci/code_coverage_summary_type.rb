@@ -13,7 +13,7 @@ module Types
       field :coverage_count, GraphQL::INT_TYPE, null: true,
             description: 'Number of different code coverage results available.'
 
-      field :last_updated_at, Types::TimeType, null: true,
+      field :last_updated_on, Types::DateType, null: true,
             description: 'Latest date when the code coverage was created for the project.'
     end
   end

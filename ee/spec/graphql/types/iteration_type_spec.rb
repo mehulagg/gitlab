@@ -10,7 +10,7 @@ RSpec.describe GitlabSchema.types['Iteration'] do
   it 'has the expected fields' do
     expected_fields = %w[
       id id title description state web_path web_url scoped_path scoped_url
-      due_date start_date created_at updated_at burnup_time_series
+      due_date start_date created_at updated_at report burnup_time_series
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields).at_least

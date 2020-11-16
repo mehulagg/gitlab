@@ -133,6 +133,7 @@ from:
 - [Approval Rules](approval_rules.md)
 - [Feature categorization](feature_categorization/index.md)
 - [Wikis development guide](wikis.md)
+- [Newlines style guide](newlines_styleguide.md)
 
 ## Performance guides
 
@@ -214,9 +215,9 @@ See [database guidelines](database/index.md).
 ## Other Development guides
 
 - [Defining relations between files using projections](projections.md)
-- [Reference processing](./reference_processing.md)
+- [Reference processing](reference_processing.md)
 - [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
-- [Features inside `.gitlab/`](./features_inside_dot_gitlab.md)
+- [Features inside `.gitlab/`](features_inside_dot_gitlab.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

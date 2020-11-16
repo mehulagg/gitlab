@@ -27,7 +27,7 @@ module SubscriptionsHelper
   def new_user?
     return false unless request.referer.present?
 
-    URI.parse(request.referer).path.in?([users_sign_up_welcome_path, users_sign_up_update_registration_path])
+    URI.parse(request.referer).path == users_sign_up_welcome_path
   end
 
   def plan_data

@@ -34,8 +34,7 @@ currently being deployed or has been deployed on your servers.
 It's important to know that:
 
 - Environments are like tags for your CI jobs, describing where code gets deployed.
-- Deployments are created when [jobs](../yaml/README.md#introduction) deploy versions of code to environments,
-  so every environment can have one or more deployments.
+- Deployments are created when [GitLab CI/CD](../yaml/README.md) is used to deploy versions of code to environments.
 
 GitLab:
 
@@ -443,7 +442,7 @@ The configuration in this section provides a full development workflow where you
 - Tested.
 - Built.
 - Deployed as a Review App.
-- Deployed to a staging server once the merge request is merged.
+- Deployed to a staging server after the merge request is merged.
 - Finally, able to be manually deployed to the production server.
 
 The following combines the previous configuration examples, including:

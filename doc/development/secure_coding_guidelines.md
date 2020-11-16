@@ -219,11 +219,11 @@ the mitigations for a new feature.
 
 - [More details](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/2530/diffs)
 
-#### Feature-specific Mitigations
+#### Feature-specific mitigations
 
 For situations in which an allowlist or GitLab:HTTP cannot be used, it will be necessary to implement mitigations directly in the feature. It is best to validate the destination IP addresses themselves, not just domain names, as DNS can be controlled by the attacker. Below are a list of mitigations that should be implemented.
 
-**Important Note:** There are many tricks to bypass common SSRF validations. If feature-specific mitigations are necessary, they should be reviewed by the AppSec team, or a developer who has worked on SSRF mitigations previously.
+There are many tricks to bypass common SSRF validations. If feature-specific mitigations are necessary, they should be reviewed by the AppSec team, or a developer who has worked on SSRF mitigations previously.
 
 - Block connections to all localhost addresses
   - `127.0.0.1/8` (IPv4 - note the subnet mask)
@@ -329,6 +329,7 @@ References:
 
 - When updating the content of an HTML element using JavaScript, mark user-controlled values as `textContent` or `nodeValue` instead of `innerHTML`.
 - Avoid using `v-html` with user-controlled data, use [`v-safe-html`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/directives-safe-html-directive--default) instead.
+- Render unsafe or unsanitized content using [`dompurify`](fe_guide/security.md#sanitize-html-output).
 - Consider using [`gl-sprintf`](../../ee/development/i18n/externalization.md#interpolation) to interpolate translated strings securely.
 - Avoid `__()` with translations that contain user-controlled values.
 - When working with `postMessage`, ensure the `origin` of the message is allowlisted.
@@ -429,9 +430,8 @@ The Path Traversal check can also be used to forbid any absolute path:
 requires :file_path, type: String, file_path: true
 ```
 
-NOTE: **Note:**
 Absolute paths are not allowed by default. If allowing an absolute path is required, you
-need to provide an array of paths to the parameter `allowlist`.  
+need to provide an array of paths to the parameter `allowlist`.
 
 ## OS command injection guidelines
 

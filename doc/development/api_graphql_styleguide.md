@@ -132,8 +132,23 @@ Non-nullable fields should only be used when a field is required, very unlikely
 to become optional in the future, and very easy to calculate. An example would
 be `id` fields.
 
+A non-nullable GraphQL schema field is an object type followed by the exclamation point (bang) `!`. Here's an example from the `gitlab_schema.graphql` file:
+
+```graphql
+  id: ProjectID!
+```
+
+Here's an example of a non-nullable GraphQL array:
+
+```graphql
+
+  errors: [String!]!
+```
+
 Further reading:
 
+- [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability).
+- GraphQL documentation on [Object types and fields](https://graphql.org/learn/schema/#object-types-and-fields).
 - [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability)
 - [Using nullability in GraphQL](https://www.apollographql.com/blog/using-nullability-in-graphql-2254f84c4ed7)
 
@@ -689,7 +704,7 @@ end
 ```
 
 Fields can also be authorized against multiple abilities, in which case
-all of ability checks must pass. **Note:** This requires explicitly
+all of ability checks must pass. This requires explicitly
 passing a block to `field`:
 
 ```ruby
@@ -702,7 +717,6 @@ module Types
 end
 ```
 
-NOTE: **Note:**
 If the field's type already [has a particular
 authorization](#type-authorization) then there is no need to add that
 same authorization to the field.

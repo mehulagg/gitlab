@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.5.3 (2020-11-03)
+
+- No changes.
+
 ## 13.5.2 (2020-11-02)
 
 ### Security (4 changes)
@@ -228,6 +232,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Text wrap the license name in Dependency List. !45242
 - Convert bootstrap alert to gl for project size limit. !45312
 - Remove bootstrap class in licensed user count. !45443
+
+
+## 13.4.6 (2020-11-03)
+
+### Fixed (1 change)
+
+- Handle 500 error for GraphQL mutation. !43936
 
 
 ## 13.4.5 (2020-11-02)

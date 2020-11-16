@@ -15,6 +15,7 @@ module EE
           params[:search],
           project: project,
           repository_ref: repository_ref,
+          order_by: params[:order_by],
           sort: params[:sort],
           filters: { confidential: params[:confidential], state: params[:state] }
         )

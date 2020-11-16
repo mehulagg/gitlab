@@ -132,7 +132,7 @@ module Elastic
           index_options: 'positions'
         indexes :description, type: :text,
           index_options: 'positions'
-        indexes :state, type: :text
+        indexes :state, type: :keyword
         indexes :project_id, type: :integer
         indexes :author_id, type: :integer
 
@@ -150,11 +150,9 @@ module Elastic
         indexes :assignee_id, type: :integer
 
         ### MERGE REQUESTS
-        indexes :target_branch, type: :text,
-          index_options: 'docs'
-        indexes :source_branch, type: :text,
-          index_options: 'docs'
-        indexes :merge_status, type: :text
+        indexes :target_branch, type: :keyword
+        indexes :source_branch, type: :keyword
+        indexes :merge_status, type: :keyword
         indexes :source_project_id, type: :integer
         indexes :target_project_id, type: :integer
 
@@ -234,13 +232,13 @@ module Elastic
 
           indexes :author do
             indexes :name, type: :text, index_options: 'positions'
-            indexes :email, type: :text, index_options: 'positions'
+            indexes :email, type: :keyword
             indexes :time, type: :date, format: :basic_date_time_no_millis
           end
 
           indexes :committer do
             indexes :name, type: :text, index_options: 'positions'
-            indexes :email, type: :text, index_options: 'positions'
+            indexes :email, type: :keyword
             indexes :time, type: :date, format: :basic_date_time_no_millis
           end
 

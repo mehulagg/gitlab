@@ -2,6 +2,7 @@
 name: ldap_settings_unlock_groups_by_owners
 introduced_by_url: 
 rollout_issue_url: 
-group: 
+milestone: 
 type: development
+group: 
 default_enabled: false

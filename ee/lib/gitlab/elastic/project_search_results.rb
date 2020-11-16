@@ -8,11 +8,11 @@ module Gitlab
     class ProjectSearchResults < Gitlab::Elastic::SearchResults
       attr_reader :project, :repository_ref, :filters
 
-      def initialize(current_user, query, project:, repository_ref: nil, sort: nil, filters: {})
+      def initialize(current_user, query, project:, repository_ref: nil, order_by: nil, sort: nil, filters: {})
         @project = project
         @repository_ref = repository_ref.presence || project.default_branch
 
-        super(current_user, query, [project.id], public_and_internal_projects: false, sort: sort, filters: filters)
+        super(current_user, query, [project.id], public_and_internal_projects: false, order_by: order_by, sort: sort, filters: filters)
       end
 
       private

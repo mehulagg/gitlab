@@ -7,7 +7,7 @@ RSpec.describe Resolvers::IssuesResolver do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, namespace: group) }
+  let_it_be(:project) { create(:project, namespace: group, skip_disk_validation: true) }
 
   context "with a project" do
     describe '#resolve' do
@@ -70,6 +70,26 @@ RSpec.describe Resolvers::IssuesResolver do
 
         it 'returns issues with iteration' do
           expect(resolve_issues(iteration_id: iteration1.id)).to eq [issue_with_iteration]
+        end
+      end
+
+      describe 'filter by epic' do
+        let_it_be(:epic) { create :epic, group: group }
+        let_it_be(:epic2) { create :epic, group: group }
+        let_it_be(:issue1) { create :issue, project: project, epic: epic }
+        let_it_be(:issue2) { create :issue, project: project, epic: epic2 }
+        let_it_be(:issue3) { create :issue, project: project }
+
+        it 'returns issues without epic when epic_id is "none"' do
+          expect(resolve_issues(epic_id: 'none')).to match_array([issue3])
+        end
+
+        it 'returns issues with any epic when epic_id is "any"' do
+          expect(resolve_issues(epic_id: 'any')).to match_array([issue1, issue2])
+        end
+
+        it 'returns issues with any epic when epic_id is specific' do
+          expect(resolve_issues(epic_id: epic.id)).to match_array([issue1])
         end
       end
     end

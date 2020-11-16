@@ -10,6 +10,9 @@ fragment TestCase on Issue {
   state
   createdAt
   updatedAt
+  updatedBy {
+    ...Author
+  }
   webUrl
   blocked
   confidential

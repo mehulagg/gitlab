@@ -9,6 +9,7 @@ const initStaticSiteEditor = el => {
     isSupportedContent,
     path: sourcePath,
     baseUrl,
+    branch,
     namespace,
     project,
     mergeRequestsIllustrationPath,
@@ -16,7 +17,6 @@ const initStaticSiteEditor = el => {
     //       so we are adding them here as a convenience for future use.
     // eslint-disable-next-line no-unused-vars
     staticSiteGenerator,
-    // eslint-disable-next-line no-unused-vars
     imageUploadPath,
     mounts,
   } = el.dataset;
@@ -28,9 +28,12 @@ const initStaticSiteEditor = el => {
     hasSubmittedChanges: false,
     project: `${namespace}/${project}`,
     mounts: JSON.parse(mounts), // NOTE that the object in 'mounts' is a JSON string from the data attribute, so it must be parsed into an object.
+    branch,
+    baseUrl,
     returnUrl,
     sourcePath,
     username,
+    imageUploadPath,
   });
 
   return new Vue({

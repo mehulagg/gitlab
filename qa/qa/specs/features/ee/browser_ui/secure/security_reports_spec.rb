@@ -51,8 +51,7 @@ module QA
       end
 
       it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+        Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|
           pipeline.click_on_security

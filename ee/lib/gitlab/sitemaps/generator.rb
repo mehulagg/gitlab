@@ -10,19 +10,22 @@ module Gitlab
 
         def execute
           unless Gitlab.com?
-            return "The sitemap can only be generated for Gitlab.com"
+            return 'The sitemap can only be generated for Gitlab.com'
           end
 
           file = Sitemaps::SitemapFile.new
 
-          if gitlab_org_group
-            file.add_elements(generic_urls)
-            file.add_elements(gitlab_org_group)
-            file.add_elements(gitlab_org_subgroups)
-            file.add_elements(gitlab_org_projects)
-            file.save
+          return "The group '#{GITLAB_ORG_NAMESPACE}' was not found" unless gitlab_org_group
+
+          file.add_elements(generic_urls)
+          file.add_elements(gitlab_org_group)
+          file.add_elements(gitlab_org_subgroups)
+          file.add_elements(gitlab_org_projects)
+
+          if file.empty?
+            'No urls found to generate the sitemap'
           else
-            "The group '#{GITLAB_ORG_NAMESPACE}' was not found"
+            file
           end
         end
 
@@ -37,7 +40,7 @@ module Gitlab
         end
 
         def gitlab_org_group
-          @gitlab_org_group ||= GroupFinder.new(nil).execute(path: 'gitlab-org', parent_id: nil, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+          @gitlab_org_group ||= GroupFinder.new(nil).execute(path: GITLAB_ORG_NAMESPACE, parent_id: nil, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
         end
 
         def gitlab_org_subgroups

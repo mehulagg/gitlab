@@ -1,7 +1,8 @@
 ---
 name: group_managed_accounts
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9625
-rollout_issue_url:
-group: group::manage access
+rollout_issue_url: 
+milestone: '11.9'
 type: development
+group: group::manage access
 default_enabled: false

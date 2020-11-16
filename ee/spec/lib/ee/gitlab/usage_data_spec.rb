@@ -374,6 +374,22 @@ RSpec.describe Gitlab::UsageData do
     end
   end
 
+  describe 'usage_data_by_stage_enablement' do
+    it 'returns empty hash if geo is not enabled' do
+      expect(described_class.usage_activity_by_stage_enablement({})).to eq({})
+    end
+
+    it 'excludes data outside of the date range' do
+      create_list(:geo_node, 2).each do |node|
+        for_defined_days_back do
+          create(:oauth_access_grant, application: node.oauth_application)
+        end
+      end
+
+      expect(described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)).to eq(geo_secondary_web_oauth_users: 2)
+    end
+  end
+
   describe 'usage_activity_by_stage_manage' do
     it 'includes accurate usage_activity_by_stage data' do
       stub_config(

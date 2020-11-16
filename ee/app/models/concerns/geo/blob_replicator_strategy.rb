@@ -67,7 +67,7 @@ module Geo
     end
 
     def schedule_checksum_calculation
-      Geo::BlobVerificationPrimaryWorker.perform_async(replicable_name, model_record.id)
+      Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
     end
   end
 end

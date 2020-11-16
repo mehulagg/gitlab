@@ -53,9 +53,7 @@ module QA
 
           project.visit!
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-
-          Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+          Flow::Pipeline.visit_latest_pipeline
 
           Page::Project::Pipeline::Show.perform do |show|
             expect(show).to have_build('jenkins', status: :success, wait: 15)

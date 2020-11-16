@@ -3,11 +3,13 @@ import { GlSearchBoxByType } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Project from './project.vue';
 import ProjectWithExcessStorage from './project_with_excess_storage.vue';
+import ProjectsSkeletonLoader from './projects_skeleton_loader.vue';
 import { SEARCH_DEBOUNCE_MS } from '~/ref/constants';
 
 export default {
   components: {
     Project,
+    ProjectsSkeletonLoader,
     ProjectWithExcessStorage,
     GlSearchBoxByType,
   },
@@ -20,6 +22,11 @@ export default {
     additionalPurchasedStorageSize: {
       type: Number,
       required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -44,7 +51,7 @@ export default {
       role="row"
     >
       <template v-if="isAdditionalStorageFlagEnabled">
-        <div class="table-section section-50 gl-font-weight-bold  gl-pl-5" role="columnheader">
+        <div class="table-section section-50 gl-font-weight-bold gl-pl-5" role="columnheader">
           {{ __('Project') }}
         </div>
         <div class="table-section section-15 gl-font-weight-bold" role="columnheader">
@@ -70,13 +77,15 @@ export default {
         </div>
       </template>
     </div>
-
-    <component
-      :is="projectRowComponent"
-      v-for="project in projects"
-      :key="project.id"
-      :project="project"
-      :additional-purchased-storage-size="additionalPurchasedStorageSize"
-    />
+    <projects-skeleton-loader v-if="isAdditionalStorageFlagEnabled && isLoading" />
+    <template v-else>
+      <component
+        :is="projectRowComponent"
+        v-for="project in projects"
+        :key="project.id"
+        :project="project"
+        :additional-purchased-storage-size="additionalPurchasedStorageSize"
+      />
+    </template>
   </div>
 </template>

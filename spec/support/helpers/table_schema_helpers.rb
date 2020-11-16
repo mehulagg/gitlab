@@ -16,6 +16,22 @@ module TableSchemaHelpers
     expect(table_oid(replacement_table)).to be_nil
   end
 
+  def expect_index_to_exist(name, schema: nil)
+    expect(index_exists_by_name(name, schema: schema)).to eq(true)
+  end
+
+  def expect_index_not_to_exist(name, schema: nil)
+    expect(index_exists_by_name(name, schema: schema)).to be_nil
+  end
+
+  def expect_primary_keys_after_tables(tables, schema: nil)
+    tables.each do |table|
+      primary_key = primary_key_constraint_name(table, schema: schema)
+
+      expect(primary_key).to eq("#{table}_pkey")
+    end
+  end
+
   def table_oid(name)
     connection.select_value(<<~SQL)
       SELECT oid
@@ -67,13 +83,30 @@ module TableSchemaHelpers
     SQL
   end
 
-  def primary_key_constraint_name(table_name)
+  def primary_key_constraint_name(table_name, schema: nil)
+    table_name = schema ? "#{schema}.#{table_name}" : table_name
+
     connection.select_value(<<~SQL)
       SELECT
         conname AS constraint_name
       FROM pg_catalog.pg_constraint
-      WHERE conrelid = '#{table_name}'::regclass
-        AND contype = 'p'
+      WHERE pg_constraint.conrelid = '#{table_name}'::regclass
+        AND pg_constraint.contype = 'p'
+    SQL
+  end
+
+  def index_exists_by_name(index, schema: nil)
+    schema = schema ? "'#{schema}'" : 'current_schema'
+
+    connection.select_value(<<~SQL)
+      SELECT true
+      FROM pg_catalog.pg_index i
+      INNER JOIN pg_catalog.pg_class c
+        ON c.oid = i.indexrelid
+      INNER JOIN pg_catalog.pg_namespace n
+        ON c.relnamespace = n.oid
+      WHERE c.relname = '#{index}'
+        AND n.nspname = #{schema}
     SQL
   end
 end

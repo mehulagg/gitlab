@@ -1,7 +1,7 @@
 import merge from 'lodash/merge';
 import VueApollo from 'vue-apollo';
 import { within } from '@testing-library/dom';
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
+import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { createMockClient } from 'mock-apollo-client';
 import { GlLoadingIcon } from '@gitlab/ui';
 import waitForPromises from 'jest/helpers/wait_for_promises';
@@ -11,6 +11,7 @@ import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profile
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_profiles_form/constants';
 import download from '~/lib/utils/downloader';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 jest.mock('~/lib/utils/downloader');
 
@@ -21,6 +22,8 @@ const fullPath = 'group/project';
 const targetUrl = 'https://example.com/';
 const tokenId = '1';
 const token = 'validation-token-123';
+
+const validationMethods = ['text file', 'header'];
 
 const defaultProps = {
   fullPath,
@@ -72,6 +75,9 @@ describe('DastSiteValidation', () => {
         {},
         {
           propsData: defaultProps,
+          provide: {
+            glFeatures: { securityOnDemandScansHttpHeaderValidation: true },
+          },
         },
         options,
         {
@@ -93,8 +99,14 @@ describe('DastSiteValidation', () => {
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findErrorMessage = () =>
     withinComponent().queryByText(
-      /validation failed, please make sure that you follow the steps above with the choosen method./i,
+      /validation failed, please make sure that you follow the steps above with the chosen method./i,
     );
+  const findRadioInputForValidationMethod = validationMethod =>
+    withinComponent().queryByRole('radio', {
+      name: new RegExp(`${validationMethod} validation`, 'i'),
+    });
+  const enableValidationMethod = validationMethod =>
+    createWrapper(findRadioInputForValidationMethod(validationMethod)).trigger('click');
 
   afterEach(() => {
     wrapper.destroy();
@@ -105,15 +117,15 @@ describe('DastSiteValidation', () => {
       createFullComponent();
     });
 
-    it('renders properly', () => {
-      expect(wrapper.html()).not.toBe('');
-    });
-
     it('renders a download button containing the token', () => {
       const downloadButton = withinComponent().getByRole('button', {
         name: 'Download validation text file',
       });
       expect(downloadButton).not.toBeNull();
+    });
+
+    it.each(validationMethods)('renders a radio input for "%s" validation', validationMethod => {
+      expect(findRadioInputForValidationMethod(validationMethod)).not.toBe(null);
     });
 
     it('renders an input group with the target URL prepended', () => {
@@ -125,77 +137,147 @@ describe('DastSiteValidation', () => {
     });
   });
 
-  describe('text file validation', () => {
-    it('clicking on the download button triggers a download of a text file containing the token', () => {
-      createComponent();
-      findDownloadButton().vm.$emit('click');
+  describe('validation methods', () => {
+    describe.each(validationMethods)('common behaviour', validationMethod => {
+      const expectedFileName = `GitLab-DAST-Site-Validation-${token}.txt`;
 
-      expect(download).toHaveBeenCalledWith({
-        fileName: `GitLab-DAST-Site-Validation-${token}.txt`,
-        fileData: btoa(token),
+      describe.each`
+        targetUrl                               | expectedPrefix                 | expectedPath        | expectedTextFilePath
+        ${'https://example.com'}                | ${'https://example.com/'}      | ${''}               | ${`${expectedFileName}`}
+        ${'https://example.com/'}               | ${'https://example.com/'}      | ${''}               | ${`${expectedFileName}`}
+        ${'https://example.com/foo/bar'}        | ${'https://example.com/'}      | ${'foo/bar'}        | ${`foo/${expectedFileName}`}
+        ${'https://example.com/foo/bar/'}       | ${'https://example.com/'}      | ${'foo/bar/'}       | ${`foo/bar/${expectedFileName}`}
+        ${'https://sub.example.com/foo/bar'}    | ${'https://sub.example.com/'}  | ${'foo/bar'}        | ${`foo/${expectedFileName}`}
+        ${'https://example.com/foo/index.html'} | ${'https://example.com/'}      | ${'foo/index.html'} | ${`foo/${expectedFileName}`}
+        ${'https://example.com/foo/?bar="baz"'} | ${'https://example.com/'}      | ${'foo/'}           | ${`foo/${expectedFileName}`}
+        ${'https://example.com:3000'}           | ${'https://example.com:3000/'} | ${''}               | ${`${expectedFileName}`}
+        ${''}                                   | ${''}                          | ${''}               | ${`${expectedFileName}`}
+      `(
+        `validation path input when validationMethod is "${validationMethod}" and target URL is "$targetUrl"`,
+        ({ targetUrl: url, expectedPrefix, expectedPath, expectedTextFilePath }) => {
+          beforeEach(async () => {
+            createFullComponent({
+              propsData: {
+                targetUrl: url,
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            enableValidationMethod(validationMethod);
+          });
+
+          const expectedValue =
+            validationMethod === 'text file' ? expectedTextFilePath : expectedPath;
+
+          it(`prefix is set to "${expectedPrefix}"`, () => {
+            expect(findValidationPathPrefix().text()).toBe(expectedPrefix);
+          });
+
+          it(`input value defaults to "${expectedValue}"`, () => {
+            expect(findValidationPathInput().element.value).toBe(expectedValue);
+          });
+        },
+      );
+
+      it("input value isn't automatically updated if it has been changed manually", async () => {
+        createFullComponent();
+        const customValidationPath = 'custom/validation/path.txt';
+        findValidationPathInput().setValue(customValidationPath);
+        await wrapper.setProps({
+          token: 'a-completely-new-token',
+        });
+
+        expect(findValidationPathInput().element.value).toBe(customValidationPath);
       });
     });
 
-    describe.each`
-      targetUrl                               | expectedPrefix                 | expectedValue
-      ${'https://example.com'}                | ${'https://example.com/'}      | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com/'}               | ${'https://example.com/'}      | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com/foo/bar'}        | ${'https://example.com/'}      | ${'foo/GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com/foo/bar/'}       | ${'https://example.com/'}      | ${'foo/bar/GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://sub.example.com/foo/bar'}    | ${'https://sub.example.com/'}  | ${'foo/GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com/foo/index.html'} | ${'https://example.com/'}      | ${'foo/GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com/foo/?bar="baz"'} | ${'https://example.com/'}      | ${'foo/GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com:3000'}           | ${'https://example.com:3000/'} | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${''}                                   | ${''}                          | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
-    `(
-      'validation path input when target URL is $targetUrl',
-      ({ targetUrl: url, expectedPrefix, expectedValue }) => {
-        beforeEach(() => {
-          createFullComponent({
-            propsData: {
-              targetUrl: url,
-            },
-          });
-        });
+    describe('text file validation', () => {
+      it('clicking on the download button triggers a download of a text file containing the token', () => {
+        createComponent();
+        findDownloadButton().vm.$emit('click');
 
-        it(`prefix is set to ${expectedPrefix}`, () => {
-          expect(findValidationPathPrefix().text()).toBe(expectedPrefix);
+        expect(download).toHaveBeenCalledWith({
+          fileName: `GitLab-DAST-Site-Validation-${token}.txt`,
+          fileData: btoa(token),
         });
+      });
+    });
 
-        it(`input value defaults to ${expectedValue}`, () => {
-          expect(findValidationPathInput().element.value).toBe(expectedValue);
-        });
-      },
-    );
+    describe('header validation', () => {
+      beforeEach(async () => {
+        createFullComponent();
 
-    it("input value isn't automatically updated if it has been changed manually", async () => {
-      createFullComponent();
-      const customValidationPath = 'custom/validation/path.txt';
-      findValidationPathInput().setValue(customValidationPath);
-      await wrapper.setProps({
-        token: 'a-completely-new-token',
+        await wrapper.vm.$nextTick();
+
+        enableValidationMethod('header');
       });
 
-      expect(findValidationPathInput().element.value).toBe(customValidationPath);
+      it.each([
+        /step 2 - add following http header to your site/i,
+        /step 3 - confirm header location and validate/i,
+      ])('shows the correct descriptions', descriptionText => {
+        expect(withinComponent().getByText(descriptionText)).not.toBe(null);
+      });
+
+      it('shows a code block containing the http-header key with the given token', () => {
+        expect(
+          withinComponent().getByText(`Gitlab-On-Demand-DAST: uuid-code-${token}`, {
+            selector: 'code',
+          }),
+        ).not.toBe(null);
+      });
+
+      it('shows a button that copies the http-header to the clipboard', () => {
+        const clipboardButton = wrapper.find(ClipboardButton);
+
+        expect(clipboardButton.exists()).toBe(true);
+        expect(clipboardButton.props()).toMatchObject({
+          text: `Gitlab-On-Demand-DAST: uuid-code-${token}`,
+          title: 'Copy HTTP header to clipboard',
+        });
+      });
     });
   });
 
-  describe('validation', () => {
+  describe('with the "securityOnDemandScansHttpHeaderValidation" feature flag disabled', () => {
     beforeEach(() => {
-      createComponent();
+      createFullComponent({
+        provide: {
+          glFeatures: {
+            securityOnDemandScansHttpHeaderValidation: false,
+          },
+        },
+      });
+    });
+
+    it('does not render the http-header validation method', () => {
+      expect(findRadioInputForValidationMethod('header')).toBe(null);
+    });
+  });
+
+  describe.each(validationMethods)('"%s" validation submission', validationMethod => {
+    beforeEach(() => {
+      createFullComponent();
     });
 
     describe('passed', () => {
       beforeEach(() => {
-        findValidateButton().vm.$emit('click');
+        enableValidationMethod(validationMethod);
       });
 
-      it('while validating, shows a loading state', () => {
+      it('while validating, shows a loading state', async () => {
+        findValidateButton().trigger('click');
+
+        await wrapper.vm.$nextTick();
+
         expect(findLoadingIcon().exists()).toBe(true);
         expect(wrapper.text()).toContain('Validating...');
       });
 
       it('triggers the dastSiteValidationCreate GraphQL mutation', () => {
+        findValidateButton().trigger('click');
+
         expect(requestHandlers.dastSiteValidationCreate).toHaveBeenCalledWith({
           projectFullPath: fullPath,
           dastSiteTokenId: tokenId,
@@ -205,6 +287,14 @@ describe('DastSiteValidation', () => {
       });
 
       it('on success, emits success event', async () => {
+        respondWith({
+          dastSiteValidation: jest
+            .fn()
+            .mockResolvedValue(responses.dastSiteValidation('PASSED_VALIDATION')),
+        });
+
+        findValidateButton().trigger('click');
+
         await waitForPromises();
 
         expect(wrapper.emitted('success')).toHaveLength(1);

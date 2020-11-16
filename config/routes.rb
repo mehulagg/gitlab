@@ -45,8 +45,7 @@ Rails.application.routes.draw do
 
   # Sign up
   scope path: '/users/sign_up', module: :registrations, as: :users_sign_up do
-    get :welcome
-    patch :update_registration
+    resource :welcome, only: [:show, :update], controller: 'welcome'
     resource :experience_level, only: [:show, :update]
 
     Gitlab.ee do
@@ -273,6 +272,10 @@ Rails.application.routes.draw do
   scope as: 'deprecated' do
     draw :snippets
     draw :profile
+  end
+
+  Gitlab.ee do
+    get '/sitemap' => 'sitemap#show', format: :xml
   end
 
   root to: "root#index"

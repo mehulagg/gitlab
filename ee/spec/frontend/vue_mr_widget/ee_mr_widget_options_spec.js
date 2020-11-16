@@ -19,6 +19,7 @@ import mockData, {
   headBrowserPerformance,
   baseLoadPerformance,
   headLoadPerformance,
+  pipelineJobs,
 } from './mock_data';
 
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
@@ -74,7 +75,8 @@ describe('ee merge request widget options', () => {
 
   const findBrowserPerformanceWidget = () => vm.$el.querySelector('.js-browser-performance-widget');
   const findLoadPerformanceWidget = () => vm.$el.querySelector('.js-load-performance-widget');
-  const findSecurityWidget = () => vm.$el.querySelector('.js-security-widget');
+  const findExtendedSecurityWidget = () => vm.$el.querySelector('.js-security-widget');
+  const findBaseSecurityWidget = () => vm.$el.querySelector('[data-testid="security-mr-widget"]');
 
   const setBrowserPerformance = (data = {}) => {
     const browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE, ...data };
@@ -105,15 +107,18 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, sastDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
         vm.loading = false;
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          findSecurityWidget()
+          findExtendedSecurityWidget()
             .querySelector(SAST_SELECTOR)
             .textContent.trim(),
         ).toContain('SAST is loading');
@@ -131,7 +136,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
@@ -153,7 +158,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ).trim(),
@@ -173,9 +178,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', done => {
         setImmediate(() => {
-          expect(trimText(findSecurityWidget().querySelector(SAST_SELECTOR).textContent)).toContain(
-            'SAST: Loading resulted in an error',
-          );
+          expect(
+            trimText(findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent),
+          ).toContain('SAST: Loading resulted in an error');
           done();
         });
       });
@@ -197,14 +202,19 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(DEPENDENCY_SCANNING_ENDPOINT).reply(200, dependencyScanningDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          trimText(findSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent),
+          trimText(
+            findExtendedSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent,
+          ),
         ).toContain('Dependency scanning is loading');
       });
     });
@@ -221,7 +231,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
@@ -247,7 +257,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
@@ -269,7 +279,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
@@ -289,7 +299,9 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            trimText(findSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent),
+            trimText(
+              findExtendedSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent,
+            ),
           ).toContain('Dependency scanning: Loading resulted in an error');
           done();
         });
@@ -615,14 +627,19 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(CONTAINER_SCANNING_ENDPOINT).reply(200, containerScanningDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          trimText(findSecurityWidget().querySelector(CONTAINER_SCANNING_SELECTOR).textContent),
+          trimText(
+            findExtendedSecurityWidget().querySelector(CONTAINER_SCANNING_SELECTOR).textContent,
+          ),
         ).toContain('Container scanning is loading');
       });
     });
@@ -639,7 +656,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${CONTAINER_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
@@ -660,7 +677,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(CONTAINER_SCANNING_SELECTOR)
               .textContent.trim(),
           ).toContain('Container scanning: Loading resulted in an error');
@@ -685,14 +702,17 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios, { delayResponse: 1 });
         mock.onGet(DAST_ENDPOINT).reply(200, dastDiffSuccessMock);
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
 
+      it('should render loading indicator', () => {
         expect(
-          findSecurityWidget()
+          findExtendedSecurityWidget()
             .querySelector(DAST_SELECTOR)
             .textContent.trim(),
         ).toContain('DAST is loading');
@@ -710,7 +730,7 @@ describe('ee merge request widget options', () => {
       it('should render provided data', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(`${DAST_SELECTOR} .report-block-list-issue-description`)
               .textContent.trim(),
           ).toEqual('DAST detected 1 critical severity vulnerability.');
@@ -730,7 +750,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(DAST_SELECTOR)
               .textContent.trim(),
           ).toContain('DAST: Loading resulted in an error');
@@ -769,7 +789,7 @@ describe('ee merge request widget options', () => {
         vm = mountWithFeatureFlag();
 
         expect(
-          findSecurityWidget()
+          findExtendedSecurityWidget()
             .querySelector(COVERAGE_FUZZING_SELECTOR)
             .textContent.trim(),
         ).toContain('Coverage fuzzing is loading');
@@ -786,7 +806,7 @@ describe('ee merge request widget options', () => {
       it('should render provided data', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(`${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`)
               .textContent.trim(),
           ).toEqual('Coverage fuzzing detected 1 critical and 1 high severity vulnerabilities.');
@@ -805,7 +825,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(COVERAGE_FUZZING_SELECTOR)
               .textContent.trim(),
           ).toContain('Coverage fuzzing: Loading resulted in an error');
@@ -841,7 +861,9 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
         expect(
-          trimText(findSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent),
+          trimText(
+            findExtendedSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent,
+          ),
         ).toContain('Secret scanning is loading');
       });
     });
@@ -858,7 +880,7 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findSecurityWidget().querySelector(
+              findExtendedSecurityWidget().querySelector(
                 `${SECRET_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
@@ -879,7 +901,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findSecurityWidget()
+            findExtendedSecurityWidget()
               .querySelector(SECRET_SCANNING_SELECTOR)
               .textContent.trim(),
           ).toContain('Secret scanning: Loading resulted in an error');
@@ -918,6 +940,37 @@ describe('ee merge request widget options', () => {
       vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
       expect(vm.$el.querySelector('.license-report-widget')).toBeNull();
+    });
+  });
+
+  describe('CE security report', () => {
+    const PIPELINE_JOBS_ENDPOINT = `/api/undefined/projects/${mockData.target_project_id}/pipelines/${mockData.pipeline.id}/jobs`;
+
+    describe.each`
+      context                               | canReadVulnerabilities | hasPipeline | featureFlag | shouldRender
+      ${'user cannot read vulnerabilities'} | ${false}               | ${true}     | ${true}     | ${true}
+      ${'user can read vulnerabilities'}    | ${true}                | ${true}     | ${true}     | ${false}
+      ${'no pipeline'}                      | ${false}               | ${false}    | ${true}     | ${false}
+      ${'the feature flag is disabled'}     | ${false}               | ${true}     | ${false}    | ${false}
+    `('given $context', ({ canReadVulnerabilities, hasPipeline, featureFlag, shouldRender }) => {
+      beforeEach(() => {
+        gl.mrWidgetData = {
+          ...mockData,
+          can_read_vulnerabilities: canReadVulnerabilities,
+          pipeline: hasPipeline ? mockData.pipeline : undefined,
+        };
+
+        gon.features = { coreSecurityMrWidget: featureFlag };
+
+        mock.onGet(PIPELINE_JOBS_ENDPOINT).replyOnce(200, pipelineJobs);
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        return waitForPromises();
+      });
+
+      it(`${shouldRender ? 'renders' : 'does not render'} the CE security report`, () => {
+        expect(findBaseSecurityWidget()).toEqual(shouldRender ? expect.any(HTMLElement) : null);
+      });
     });
   });
 
@@ -1097,8 +1150,26 @@ describe('ee merge request widget options', () => {
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        expect(findSecurityWidget()).toBe(null);
+        expect(findExtendedSecurityWidget()).toBe(null);
       });
+    });
+  });
+
+  describe('given the user cannot read vulnerabilites', () => {
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        can_read_vulnerabilities: false,
+        enabled_reports: {
+          sast: true,
+        },
+      };
+
+      vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+    });
+
+    it('does not render the EE security report', () => {
+      expect(findExtendedSecurityWidget()).toBe(null);
     });
   });
 });

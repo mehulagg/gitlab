@@ -75,20 +75,15 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
   describe '#can_purchase_storage?' do
     subject { helper.can_purchase_storage? }
 
-    where(:is_dot_com, :enforcement_setting_enabled, :feature_enabled, :result) do
-      false | false | false | false
-      false | false | true  | false
-      false | true  | false | false
-      true  | false | false | false
-      false | true  | true  | false
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | true  | true  | true
+    where(:enforcement_setting_enabled, :feature_enabled, :result) do
+      false | false | false
+      false | true  | false
+      true  | false | false
+      true  | true  | true
     end
 
     with_them do
       before do
-        allow(::Gitlab).to receive(:com?).and_return(is_dot_com)
         stub_application_setting(enforce_namespace_storage_limit: enforcement_setting_enabled)
         stub_feature_flags(buy_storage_link: feature_enabled)
       end
@@ -209,7 +204,6 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     let_it_be(:namespace) { build(:namespace) }
 
     where(
-      is_dev_or_com: [true, false],
       auto_storage_allocation_enabled: [true, false],
       buy_storage_link_enabled: [true, false],
       namespace_storage_limit_enabled: [true, false],
@@ -218,15 +212,13 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
 
     with_them do
       let(:result) do
-        is_dev_or_com &&
-          auto_storage_allocation_enabled &&
+        auto_storage_allocation_enabled &&
           buy_storage_link_enabled &&
           !namespace_storage_limit_enabled &&
           additional_storage_enabled
       end
 
       before do
-        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(is_dev_or_com)
         stub_application_setting(automatic_purchased_storage_allocation: auto_storage_allocation_enabled)
         stub_feature_flags(
           namespace_storage_limit: namespace_storage_limit_enabled,
