@@ -55,10 +55,10 @@ export default {
       return this.childPipeline ? __('child-pipeline') : this.pipeline.project.name;
     },
     parentPipeline() {
-      return this.type === UPSTREAM;
+      return this.isUpstream && this.isSameProject;
     },
     childPipeline() {
-      return this.isDownstream && this.projectId === this.pipeline.project.id;
+      return this.isDownstream && this.isSameProject;
     },
     label() {
       if (this.parentPipeline) {
@@ -71,19 +71,25 @@ export default {
     isDownstream() {
       return this.type === DOWNSTREAM;
     },
+    isUpstream() {
+      return this.type === UPSTREAM;
+    },
+    isSameProject() {
+      return this.projectId === this.pipeline.project.id;
+    },
     sourceJobInfo() {
       return this.isDownstream
         ? sprintf(__('Created by %{job}'), { job: this.pipeline.source_job.name })
         : '';
     },
     expandedIcon() {
-      if (this.parentPipeline) {
+      if (this.isUpstream) {
         return this.expanded ? 'angle-right' : 'angle-left';
       }
       return this.expanded ? 'angle-left' : 'angle-right';
     },
     expandButtonPosition() {
-      return this.parentPipeline ? 'gl-left-0 gl-border-r-1!' : 'gl-right-0 gl-border-l-1!';
+      return this.isUpstream ? 'gl-left-0 gl-border-r-1!' : 'gl-right-0 gl-border-l-1!';
     },
   },
   methods: {
@@ -119,7 +125,7 @@ export default {
   >
     <div
       class="gl-relative gl-bg-white gl-p-3 gl-border-solid gl-border-gray-100 gl-border-1"
-      :class="{ 'gl-pl-9': parentPipeline }"
+      :class="{ 'gl-pl-9': isUpstream }"
     >
       <div class="gl-display-flex">
         <ci-status
