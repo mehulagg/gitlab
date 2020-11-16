@@ -1,6 +1,7 @@
 <script>
 import { GlTooltipDirective, GlLink } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
 import AssigneeAvatar from './assignee_avatar.vue';
 
 export default {
@@ -37,12 +38,18 @@ export default {
       return this.issuableType === 'merge_request' && !this.user.can_merge;
     },
     tooltipTitle() {
+      const { status } = this.user;
+      const isBusy = status?.availability && isUserBusy(status.availability);
+      const userName = [this.user.name, isBusy ? __('(Busy)') : ''].join(' ');
+
       if (this.cannotMerge && this.tooltipHasName) {
-        return sprintf(__('%{userName} (cannot merge)'), { userName: this.user.name });
+        return sprintf(__('%{userName} (cannot merge)'), {
+          userName,
+        });
       } else if (this.cannotMerge) {
         return __('Cannot merge');
       } else if (this.tooltipHasName) {
-        return this.user.name;
+        return userName;
       }
 
       return '';
