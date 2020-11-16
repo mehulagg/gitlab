@@ -3,7 +3,7 @@ import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
-import { DEVOPS_ADOPTION_STRINGS } from '../constants';
+import { DEVOPS_ADOPTION_STRINGS, MAX_NO_REQEUSTS } from '../constants';
 
 export default {
   name: 'DevopsAdoptionApp',
@@ -17,6 +17,7 @@ export default {
   },
   data() {
     return {
+      maxFetches: MAX_NO_REQEUSTS,
       loadingError: false,
     };
   },
@@ -25,7 +26,9 @@ export default {
       query: getGroupsQuery,
       loadingKey: 'loading',
       result() {
-        if (this.groups?.pageInfo?.nextPage) {
+        this.maxFetches -= 1;
+
+        if (this.maxFetches > 0 && this.groups?.pageInfo?.nextPage) {
           this.fetchNextPage();
         }
       },
@@ -55,7 +58,8 @@ export default {
           },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const { nodes, ...rest } = fetchMoreResult.groups;
-            const previousNodes = previousResult.groups.nodes;
+            const { nodes: previousNodes } = previousResult.groups;
+
             return { groups: { ...rest, nodes: [...previousNodes, ...nodes] } };
           },
         })
@@ -65,9 +69,9 @@ export default {
 };
 </script>
 <template>
-  <gl-loading-icon v-if="isLoading" size="md" class="gl-my-5" />
-  <gl-alert v-else-if="loadingError" variant="danger" :dismissible="false" class="gl-mt-3">
+  <gl-alert v-if="loadingError" variant="danger" :dismissible="false" class="gl-mt-3">
     {{ $options.i18n.groupsError }}
   </gl-alert>
+  <gl-loading-icon v-else-if="isLoading" size="md" class="gl-my-5" />
   <devops-adoption-empty-state v-else-if="isEmpty" />
 </template>
