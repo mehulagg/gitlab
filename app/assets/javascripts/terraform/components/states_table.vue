@@ -1,5 +1,15 @@
 <script>
-import { GlBadge, GlIcon, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
+import {
+  GlBadge,
+  GlIcon,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlDropdownSectionHeader,
+  GlSprintf,
+  GlTable,
+  GlTooltip,
+} from '@gitlab/ui';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -7,6 +17,10 @@ export default {
   components: {
     GlBadge,
     GlIcon,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
+    GlDropdownSectionHeader,
     GlSprintf,
     GlTable,
     GlTooltip,
@@ -30,6 +44,10 @@ export default {
           key: 'updated',
           thClass: 'gl-display-none',
           tdClass: 'gl-text-right',
+        },
+        {
+          key: 'actions',
+          thClass: 'gl-display-none',
         },
       ];
     },
@@ -90,6 +108,32 @@ export default {
           </template>
         </gl-sprintf>
       </p>
+    </template>
+
+    <template #cell(actions)="{ item }">
+      <gl-dropdown icon="ellipsis_v">
+        <gl-dropdown-section-header>
+          {{ s__('Terraform|Actions') }}
+        </gl-dropdown-section-header>
+
+        <gl-dropdown-item icon-name="download">
+          {{ s__('Terraform|Download latest (JSON)') }}
+        </gl-dropdown-item>
+
+        <gl-dropdown-item v-if="item.lockedAt" icon-name="lock-open">
+          {{ s__('Terraform|UnLock') }}
+        </gl-dropdown-item>
+
+        <gl-dropdown-item v-else icon-name="lock">
+          {{ s__('Terraform|Lock') }}
+        </gl-dropdown-item>
+
+        <gl-dropdown-divider />
+
+        <gl-dropdown-item icon-name="remove-all">
+          {{ s__('Terraform|Remove state file and versions') }}
+        </gl-dropdown-item>
+      </gl-dropdown>
     </template>
   </gl-table>
 </template>
