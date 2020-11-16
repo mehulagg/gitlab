@@ -29,7 +29,7 @@ To install the app in Jira:
    1. Scroll to the bottom of the **Manage apps** page and click **Settings**.
    1. Select **Enable development mode** and click **Apply**.
 
-1. Install the app
+1. Install the app:
 
    1. Navigate to Jira, then choose **Jira settings > Apps > Manage apps**.
    1. Click **Upload app**.
