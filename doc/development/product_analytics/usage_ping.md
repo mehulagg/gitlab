@@ -848,44 +848,6 @@ The following is example content of the Usage Ping payload.
     "version": "9.6.15",
     "pg_system_id": 6842684531675334351
   },
-  "avg_cycle_analytics": {
-    "issue": {
-      "average": 999,
-      "sd": 999,
-      "missing": 999
-    },
-    "plan": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "code": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "test": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "review": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "staging": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "production": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "total": 999
-  },
   "analytics_unique_visits": {
     "g_analytics_contribution": 999,
     ...
