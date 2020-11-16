@@ -83,7 +83,8 @@ To view an iteration report, go to the iterations list page and click an iterati
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#disable-iteration-charts). **(STARTER ONLY)**
 
-The iteration report includes [burndown and burnup charts](../../project/milestones/burndown_and_burnup_charts.md).
+The iteration report includes [burndown and burnup charts](../../project/milestones/burndown_and_burnup_charts.md),
+similar to how they appear when viewing a [milestone](../../project/milestones/index.md)
 
 ## Disable Iterations **(STARTER ONLY)**
 
