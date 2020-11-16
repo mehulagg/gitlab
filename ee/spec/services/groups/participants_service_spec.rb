@@ -68,9 +68,6 @@ RSpec.describe Groups::ParticipantsService do
       expected_users = (group.self_and_hierarchy.flat_map(&:users) + subproject.users)
                        .map(&method(:user_to_autocompletable))
 
-      pp expected_users
-      pp result
-
       expect(expected_users.count).to eq(5)
       expect(result).to match_array(expected_users)
     end

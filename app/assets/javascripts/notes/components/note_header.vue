@@ -2,6 +2,8 @@
 /* eslint-disable vue/no-v-html */
 import { mapActions } from 'vuex';
 import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { __ } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
 import timeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
@@ -85,8 +87,15 @@ export default {
     authorStatus() {
       return this.author.status_tooltip_html;
     },
+    authorIsBusy() {
+      const { status } = this.author;
+      return status?.availability && isUserBusy(status.availability);
+    },
     emojiElement() {
       return this.$refs?.authorStatus?.querySelector('gl-emoji');
+    },
+    authorName() {
+      return this.authorIsBusy ? __(`${this.author.name} (Busy)`) : this.author.name;
     },
   },
   mounted() {
@@ -146,7 +155,7 @@ export default {
         :data-username="author.username"
       >
         <slot name="note-header-info"></slot>
-        <span class="note-header-author-name bold">{{ author.name }}</span>
+        <span class="note-header-author-name bold">{{ authorName }}</span>
       </a>
       <span
         v-if="authorStatus"
