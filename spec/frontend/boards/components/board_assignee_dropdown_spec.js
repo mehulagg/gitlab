@@ -49,7 +49,7 @@ describe('BoardCardAssigneeDropdown', () => {
         $apollo: {
           queries: {
             participants: {
-              loading,
+              loadingParticipants: loading,
             },
           },
         },
