@@ -58,7 +58,7 @@ describe('DiffView', () => {
     ${'inline'}   | ${'left'}  | ${'.old'} | ${{ left: { lineDraft: {} }, right: { lineDraft: {} } }} | ${1}
   `(
     'renders a $type comment row with comment cell on $side',
-    ({ type, sides, container, total }) => {
+    ({ type, container, sides, total }) => {
       const wrapper = createWrapper({
         diffLines: [{ renderCommentRow: true, ...sides }],
         inline: type === 'inline',
