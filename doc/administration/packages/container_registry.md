@@ -943,7 +943,7 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # Run every Sunday at 04:05am
-5 4 * * 0  root gitlab-ctl registry-garbage-collect
+5 4 * * 0  root gitlab-ctl registry-garbage-collect -m
 ```
 
 ## Troubleshooting
