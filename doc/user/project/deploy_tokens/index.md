@@ -36,7 +36,7 @@ project. Alternatively, you can also create [group-scoped deploy tokens](#group-
 1. Save the deploy token somewhere safe. After you leave or refresh
    the page, **you won't be able to access it again**.
 
-![Personal access tokens page](img/deploy_tokens.png)
+![Personal access tokens page](img/deploy_tokens_ui.png)
 
 ## Deploy token expiration
 
@@ -60,6 +60,9 @@ following table along with GitLab version it was introduced in:
 | `write_registry`         | Allows write-access (push) to [container registry](../../packages/container_registry/index.md). | 12.10 |
 | `read_package_registry`  | Allows read access to the package registry. | 13.0 |
 | `write_package_registry` | Allows write access to the package registry. | 13.0 |
+
+NOTE:Note
+You cannot use a deploy token to download your job's artifacts](./pipelines/job_artifacts.md#downloading-the-latest-artifacts). The issue [gitlab-#282535](https://gitlab.com/gitlab-org/gitlab/-/issues/282535) will grant read and write access for artifacts. 
 
 ## Deploy token custom username
 
