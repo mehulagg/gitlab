@@ -132,6 +132,9 @@ export default {
     // Once the job log is loaded,
     // fetch the stages for the dropdown on the sidebar
     job(newVal, oldVal) {
+      if (newVal.status.text === 'passed') {
+        this.stopPolling();
+      }
       if (isEmpty(oldVal) && !isEmpty(newVal.pipeline)) {
         const stages = this.job.pipeline.details.stages || [];
 

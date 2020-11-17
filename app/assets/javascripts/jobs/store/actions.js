@@ -95,7 +95,13 @@ export const receiveJobSuccess = ({ commit }, data = {}) => {
   } else {
     resetFavicon();
   }
+
+  const statuses = ['passed', 'canceled', 'failed'];
+  if (statuses.includes(data.status.text)) {
+    stopPolling();
+  }
 };
+
 export const receiveJobError = ({ commit }) => {
   commit(types.RECEIVE_JOB_ERROR);
   flash(__('An error occurred while fetching the job.'));
