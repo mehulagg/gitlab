@@ -180,6 +180,7 @@ describe('EE - DastProfiles', () => {
         profilesPerPage: expect.any(Number),
         profiles: [],
         fields: expect.any(Array),
+        fullPath: '/namespace/project',
       });
     });
 
