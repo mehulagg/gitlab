@@ -841,8 +841,8 @@ DANGER: **Warning:**
 This is a destructive operation.
 
 The GitLab Container Registry follows the same default workflow as Docker Distribution:
-retain untagged manifests and all layers, even ones that are unreferenced directly to allow all content
-to be accessed using context addressable identifiers.
+retain untagged manifests and all layers, even ones that are not referenced directly. All content
+can be accessed by using context addressable identifiers.
 
 However, in most workflows, you don't care about untagged manifests and old layers if they are not directly
 referenced by a tagged manifest. The `registry-garbage-collect` command supports the
@@ -853,7 +853,7 @@ not directly accessible via `tag`:
 sudo gitlab-ctl registry-garbage-collect -m
 ```
 
-Without the `-m` flag the registry will only remove layers that are not referenced by any manifest, tagged or not.
+Without the `-m` flag, the Container Registry only removes layers that are not referenced by any manifest, tagged or not.
 
 Since this is a way more destructive operation, this behavior is disabled by default.
 You are likely expecting this way of operation, but before doing that, ensure
