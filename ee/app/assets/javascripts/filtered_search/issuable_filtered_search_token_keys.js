@@ -101,6 +101,12 @@ export const iterationConditions = [
     tokenKey: 'iteration',
     value: __('Any'),
   },
+  {
+    url: 'iteration_id=Current',
+    operator: '=',
+    tokenKey: 'iteration',
+    value: __('Current'),
+  },
 ];
 
 /**

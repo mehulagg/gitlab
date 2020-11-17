@@ -7,6 +7,7 @@ class IssuableFinder
     # This is used as a common filter for None / Any
     FILTER_NONE = 'none'
     FILTER_ANY = 'any'
+    FILTER_CURRENT = 'current'
 
     # This is used in unassigning users
     NONE = '0'

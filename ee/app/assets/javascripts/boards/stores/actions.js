@@ -98,7 +98,8 @@ export default {
 
     if (
       filters.iterationId === IterationFilterType.any ||
-      filters.iterationId === IterationFilterType.none
+      filters.iterationId === IterationFilterType.none ||
+      filters.iterationId === IterationFilterType.current
     ) {
       filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
     }

@@ -8,6 +8,7 @@ module Types
 
       value 'NONE', 'No iteration is assigned'
       value 'ANY', 'An iteration is assigned'
+      value 'CURRENT', 'Current iteration based on current date UTC'
     end
   end
 end

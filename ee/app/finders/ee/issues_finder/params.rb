@@ -63,6 +63,10 @@ module EE
         params[:iteration_id].to_s.downcase == ::IssuableFinder::Params::FILTER_ANY
       end
 
+      def filter_by_current_iteration?
+        params[:iteration_id].to_s.downcase == ::IssuableFinder::Params::FILTER_CURRENT
+      end
+
       def filter_by_iteration_title?
         params[:iteration_title].present?
       end

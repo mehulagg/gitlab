@@ -75,6 +75,8 @@ module EE
         items.no_iteration
       elsif params.filter_by_any_iteration?
         items.any_iteration
+      elsif params.filter_by_current_iteration?
+        items.with_iteration_title(get_current_iteration)
       elsif params.filter_by_iteration_title?
         items.with_iteration_title(params[:iteration_title])
       else
@@ -100,6 +102,10 @@ module EE
       return items unless not_params[:iteration_title].present?
 
       items.without_iteration_title(not_params[:iteration_title])
+    end
+
+    def get_current_iteration
+
     end
   end
 end

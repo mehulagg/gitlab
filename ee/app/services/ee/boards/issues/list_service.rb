@@ -20,6 +20,8 @@ module EE
             with_assignee(super)
           when 'milestone'
             with_milestone(super)
+          when 'iteration'
+            with_iteration(super)
           else
             super
           end
@@ -94,6 +96,10 @@ module EE
           issues.where(milestone_id: list.milestone_id)
         end
         # rubocop: enable CodeReuse/ActiveRecord
+
+        def with_iteration(issues)
+          issues # this will get filtered when we introduce iteration lists
+        end
 
         # Prevent filtering by milestone stubs
         # like Milestone::Upcoming, Milestone::Started etc
