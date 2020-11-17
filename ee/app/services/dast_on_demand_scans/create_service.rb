@@ -49,7 +49,8 @@ module DastOnDemandScans
       {
         environment_scope: dast_site_profile.environment_scope,
         branch: container.default_branch,
-        target_url: dast_site.url
+        target_url: dast_site.url,
+        dast_site_profile: dast_site_profile
       }
     end
 
