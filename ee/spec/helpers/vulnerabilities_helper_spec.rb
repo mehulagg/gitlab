@@ -202,6 +202,20 @@ RSpec.describe VulnerabilitiesHelper do
       it 'generates url to create issue in Jira' do
         expect(subject[:create_jira_issue_url]).to eq('https://jira.example.com/new')
       end
+
+      context 'when scan property is empty' do
+        before do
+          allow_next_instance_of(VulnerabilityPresenter) do |presenter|
+            allow(presenter).to receive(:scan).and_return(nil)
+          end
+        end
+
+        it 'renders description using dedicated template' do
+          expect(ApplicationController).to receive(:render).with(template: 'vulnerabilities/jira_issue_description.md.erb', locals: { vulnerability: an_instance_of(VulnerabilityPresenter) })
+
+          subject
+        end
+      end
     end
 
     context 'with jira vulnerabilities integration disabled' do
