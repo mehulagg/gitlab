@@ -45,7 +45,7 @@ module EE
             end
 
             def seeds_size
-              @command.stage_seeds.sum(&:size)
+              @command.pipeline_seed.size
             end
           end
         end
