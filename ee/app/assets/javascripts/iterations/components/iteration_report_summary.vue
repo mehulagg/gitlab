@@ -5,7 +5,7 @@ import { fetchPolicies } from '~/lib/graphql';
 import query from '../queries/iteration_issues_summary.query.graphql';
 
 export default {
-  cardBodyClass: 'gl-text-center gl-py-3',
+  cardBodyClass: 'gl-text-center gl-py-3 gl-font-size-h2',
   cardClass: 'gl-bg-gray-10 gl-border-0',
   components: {
     GlCard,
@@ -53,10 +53,6 @@ export default {
     showCards() {
       return !this.$apollo.queries.issues.loading && Object.values(this.issues).every(a => a >= 0);
     },
-    unstarted() {
-      const started = this.issues.complete + this.issues.incomplete;
-      return this.issues.total - started;
-    },
     columns() {
       return [
         {
@@ -66,10 +62,6 @@ export default {
         {
           title: __('Incomplete'),
           value: this.issues.incomplete,
-        },
-        {
-          title: __('Unstarted'),
-          value: this.unstarted,
         },
       ];
     },
@@ -87,9 +79,7 @@ export default {
   <div v-if="showCards" class="row gl-mt-6">
     <div v-for="(column, index) in columns" :key="index" class="col-sm-4">
       <gl-card :class="$options.cardClass" :body-class="$options.cardBodyClass" class="gl-mb-5">
-        <span
-          class="gl-font-size-h2 gl-border-1 gl-border-r-solid gl-border-gray-100 gl-pr-3 gl-mr-2"
-        >
+        <span class="gl-border-1 gl-border-r-solid gl-border-gray-100 gl-pr-3 gl-mr-2">
           <span>{{ column.title }}</span>
           <span class="gl-font-weight-bold"
             >{{ percent(column.value) }}<small class="gl-text-gray-500">%</small></span
@@ -97,10 +87,10 @@ export default {
         </span>
         <gl-sprintf :message="__('%{count} of %{total}')">
           <template #count>
-            <span class="gl-font-size-h2 gl-font-weight-bold">{{ column.value }}</span>
+            <span class="gl-font-weight-bold">{{ column.value }}</span>
           </template>
           <template #total>
-            <span class="gl-font-size-h2 gl-font-weight-bold">{{ issues.total }}</span>
+            <span class="gl-font-weight-bold">{{ issues.total }}</span>
           </template>
         </gl-sprintf>
         <gl-icon v-if="column.icon" name="issues" :size="12" class="gl-text-gray-500" />
