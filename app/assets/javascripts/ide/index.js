@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { identity } from 'lodash';
 import Translate from '~/vue_shared/translate';
+import PerformancePlugin from '~/performance/vue_performance_plugin';
 import ide from './components/ide.vue';
 import { createStore } from './stores';
 import { createRouter } from './ide_router';
@@ -10,6 +11,12 @@ import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import { DEFAULT_THEME } from './lib/themes';
 
 Vue.use(Translate);
+
+/* eslint-disable @gitlab/require-i18n-strings */
+Vue.use(PerformancePlugin, {
+  components: ['FileTree'],
+});
+/* eslint-enable @gitlab/require-i18n-strings */
 
 /**
  * Function that receives the default store and returns an extended one.
