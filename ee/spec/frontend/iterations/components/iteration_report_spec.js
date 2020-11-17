@@ -137,11 +137,7 @@ describe('Iterations report', () => {
         });
 
         it('passes correct props to IterationReportSummary', () => {
-          const iterationReportSummary = wrapper.find(IterationReportSummary);
-
-          expect(iterationReportSummary.props('fullPath')).toBe(defaultProps.fullPath);
-          expect(iterationReportSummary.props('iterationId')).toBe(iteration.id);
-          expect(iterationReportSummary.props('namespaceType')).toBe(Namespace.Group);
+          expect(wrapper.find(IterationReportSummary).props('iterationId')).toBe(iteration.id);
         });
 
         it('passes correct props to IterationReportTabs', () => {
