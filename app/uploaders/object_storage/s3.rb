@@ -17,6 +17,13 @@ module ObjectStorage
       }.compact
     end
 
+    def aws_attributes
+      {
+        server_side_encryption: object_storage_config.server_side_encryption,
+        ssekms_key_id: object_storage_config.server_side_encryption_kms_key_id
+      }.compact
+    end
+
     def aws_acl
       nil
     end
