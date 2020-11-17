@@ -134,7 +134,7 @@ Upon detection of a secret, GitLab supports post processing hooks. These can be 
 
 GitLab currently supports post-processing for following service providers:
 
-- AWS
+- Amazon Web Services (AWS)
 
 Third party cloud and SaaS providers can [express integration interest by filling out this form](https://forms.gle/wWpvrtLRK21Q2WJL9). Learn more about the [techincal details of post-processing secrets](https://gitlab.com/groups/gitlab-org/-/epics/4639). 
 
