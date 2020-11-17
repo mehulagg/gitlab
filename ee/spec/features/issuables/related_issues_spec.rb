@@ -16,6 +16,8 @@ RSpec.describe 'Related issues', :js do
 
   context 'when user has permission to manage related issues' do
     before do
+      stub_feature_flags(vue_issue_header: false)
+
       project.add_maintainer(user)
       project_b.add_maintainer(user)
       gitlab_sign_in(user)

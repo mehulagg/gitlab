@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectExport < Grape::API::Instance
+  class ProjectExport < ::API::Base
     helpers Helpers::RateLimiter
+
+    feature_category :importers
 
     before do
       not_found! unless Gitlab::CurrentSettings.project_export_enabled?

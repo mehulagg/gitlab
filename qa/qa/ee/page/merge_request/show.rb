@@ -189,19 +189,19 @@ module QA
           end
 
           def has_sast_vulnerability_count_of?(expected)
-            find_element(:sast_scan_report).has_content?(/SAST detected #{expected}( new)? vulnerabilit/)
+            find_element(:sast_scan_report).has_content?(/SAST detected #{expected}( new)?( potential)? vulnerabilit/)
           end
 
           def has_dependency_vulnerability_count_of?(expected)
-            find_element(:dependency_scan_report).has_content?(/Dependency scanning detected #{expected}( new)? vulnerabilit|Dependency scanning detected .* vulnerabilities out of #{expected}/)
+            find_element(:dependency_scan_report).has_content?(/Dependency scanning detected #{expected}( new)?( potential)? vulnerabilit|Dependency scanning detected .* vulnerabilities out of #{expected}/)
           end
 
           def has_container_vulnerability_count_of?(expected)
-            find_element(:container_scan_report).has_content?(/Container scanning detected #{expected}( new)? vulnerabilit|Container scanning detected .* vulnerabilities out of #{expected}/)
+            find_element(:container_scan_report).has_content?(/Container scanning detected #{expected}( new)?( potential)? vulnerabilit|Container scanning detected .* vulnerabilities out of #{expected}/)
           end
 
           def has_dast_vulnerability_count?
-            find_element(:dast_scan_report).has_content?(/DAST detected \d*( new)? vulnerabilit/)
+            find_element(:dast_scan_report).has_content?(/DAST detected \d*( new)?( potential)? vulnerabilit/)
           end
 
           def has_opened_dismissed_vulnerability?(reason = nil)

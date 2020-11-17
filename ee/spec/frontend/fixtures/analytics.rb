@@ -98,7 +98,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
     issue = create(:issue, project: project, created_at: 20.days.ago, author: user)
 
-    Timecop.travel(5.days.ago) do
+    travel_to(5.days.ago) do
       Issues::UpdateService.new(
         project,
         user,
@@ -106,7 +106,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
       ).execute(issue)
     end
 
-    Timecop.travel(2.days.ago) do
+    travel_to(2.days.ago) do
       Issues::UpdateService.new(
         project,
         user,

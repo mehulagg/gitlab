@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -118,8 +121,15 @@ To list users matching a specific criteria, click on one of the following tabs o
 - **[Deactivated](activating_deactivating_users.md)**
 - **Without projects**
 
-For each user, their username, email address, are listed, also the date their account was
-created and the date of last activity. To edit a user, click the **Edit** button in that user's
+For each user, the following are listed:
+
+1. Username
+1. Email address
+1. Project membership count
+1. Date of account creation
+1. Date of last activity
+
+To edit a user, click the **Edit** button in that user's
 row. To delete the user, or delete the user and their contributions, click the cog dropdown in
 that user's row, and select the desired option.
 
@@ -136,22 +146,16 @@ you must provide the complete email address.
 
 #### Users statistics
 
-The **Users statistics** page provides an overview of user accounts by role, such as _Users with
-highest role Maintainer_.
+The **Users statistics** page provides an overview of user accounts by role. These statistics are
+calculated daily, so user changes made since the last update are not reflected.
 
 The following totals are also included:
 
-- Active users
+- Billable users
 - Blocked users
 - Total users
 
-GitLab billing is based on the number of **Active users**, calculated as **Total users** -
-**Blocked users**. For details of active users, see
-[Choosing the number of users](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
-
-NOTE: **Note:**
-Users statistics are calculated daily, so user changes made since the last update won't be
-reflected in the statistics.
+GitLab billing is based on the number of [**Billable users**](../../subscriptions/self_managed/index.md#billable-users).
 
 ### Administering Groups
 

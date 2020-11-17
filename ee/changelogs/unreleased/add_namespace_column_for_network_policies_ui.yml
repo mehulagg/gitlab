@@ -1,6 +1,0 @@
----
-title: Add namespace column into the network policies UI. Only visible when All Environment
-  option is set.
-merge_request: 42125
-author:
-type: changed

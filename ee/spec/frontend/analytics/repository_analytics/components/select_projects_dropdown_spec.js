@@ -59,8 +59,10 @@ describe('Select projects dropdown component', () => {
   });
 
   describe('when selecting all project', () => {
+    const initialData = { groupProjects: [{ id: 1, name: '1', isSelected: true }] };
+
     beforeEach(() => {
-      createComponent({ data: { groupProjects: [{ id: 1, name: '1', isSelected: true }] } });
+      createComponent({ data: initialData });
     });
 
     it('should reset all selected projects', () => {
@@ -68,7 +70,7 @@ describe('Select projects dropdown component', () => {
 
       return wrapper.vm.$nextTick().then(() => {
         expect(
-          findProjectById(1)
+          findProjectById(initialData.groupProjects[0].id)
             .find(GlIcon)
             .classes(),
         ).toContain('gl-visibility-hidden');
@@ -79,23 +81,31 @@ describe('Select projects dropdown component', () => {
       jest.spyOn(wrapper.vm, '$emit');
       selectAllProjects();
 
-      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-all-projects');
+      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-all-projects', [
+        { ...initialData.groupProjects[0], isSelected: false },
+      ]);
     });
   });
 
   describe('when selecting a project', () => {
+    const initialData = {
+      groupProjects: [{ id: 1, name: '1', isSelected: false }],
+      selectAllProjects: true,
+    };
+
     beforeEach(() => {
       createComponent({
-        data: { groupProjects: [{ id: 1, name: '1', isSelected: false }], selectAllProjects: true },
+        data: initialData,
       });
     });
 
     it('should check selected project', () => {
-      selectProjectById(1);
+      const project = initialData.groupProjects[0];
+      selectProjectById(project.id);
 
       return wrapper.vm.$nextTick().then(() => {
         expect(
-          findProjectById(1)
+          findProjectById(project.id)
             .find(GlIcon)
             .classes(),
         ).not.toContain('gl-visibility-hidden');
@@ -103,7 +113,7 @@ describe('Select projects dropdown component', () => {
     });
 
     it('should uncheck select all projects', () => {
-      selectProjectById(1);
+      selectProjectById(initialData.groupProjects[0].id);
 
       return wrapper.vm.$nextTick().then(() => {
         expect(
@@ -115,10 +125,14 @@ describe('Select projects dropdown component', () => {
     });
 
     it('should emit select-project event', () => {
+      const project = initialData.groupProjects[0];
       jest.spyOn(wrapper.vm, '$emit');
-      selectProjectById(1);
+      selectProjectById(project.id);
 
-      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-project', 1);
+      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-project', {
+        ...project,
+        isSelected: true,
+      });
     });
   });
 

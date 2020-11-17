@@ -61,7 +61,7 @@ RSpec.describe API::Vulnerabilities do
   describe 'GET /vulnerabilities/:id' do
     let_it_be(:project) { create(:project, :with_vulnerabilities) }
     let_it_be(:vulnerability) { project.vulnerabilities.first }
-    let_it_be(:finding) { create(:vulnerabilities_occurrence, vulnerability: vulnerability) }
+    let_it_be(:finding) { create(:vulnerabilities_finding, vulnerability: vulnerability) }
     let(:vulnerability_id) { vulnerability.id }
 
     subject(:get_vulnerability) { get api("/vulnerabilities/#{vulnerability_id}", user) }
@@ -106,7 +106,7 @@ RSpec.describe API::Vulnerabilities do
 
   describe 'POST /projects/:id/vulnerabilities' do
     let_it_be(:project) { create(:project) }
-    let(:finding) { create(:vulnerabilities_occurrence, project: project) }
+    let(:finding) { create(:vulnerabilities_finding, project: project) }
     let(:finding_id) { finding.id }
     let(:expected_error_messages) { { 'base' => ['finding is not found or is already attached to a vulnerability'] } }
 
@@ -177,7 +177,7 @@ RSpec.describe API::Vulnerabilities do
 
   describe 'POST /vulnerabilities:id/dismiss' do
     before do
-      create_list(:vulnerabilities_occurrence, 2, vulnerability: vulnerability, project: vulnerability.project)
+      create_list(:vulnerabilities_finding, 2, vulnerability: vulnerability, project: vulnerability.project)
     end
 
     let_it_be(:project) { create(:project, :with_vulnerabilities) }
@@ -192,7 +192,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'dismisses a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           expect(response).to have_gitlab_http_status(:created)
@@ -279,7 +279,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'resolves a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           resolve_vulnerability
 
           expect(response).to have_gitlab_http_status(:created)
@@ -336,7 +336,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'confirms a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           confirm_vulnerability
 
           expect(response).to have_gitlab_http_status(:created)
@@ -378,7 +378,7 @@ RSpec.describe API::Vulnerabilities do
 
   describe 'POST /vulnerabilities:id/revert' do
     before do
-      create_list(:vulnerabilities_occurrence, 2, vulnerability: vulnerability, project: vulnerability.project)
+      create_list(:vulnerabilities_finding, 2, vulnerability: vulnerability, project: vulnerability.project)
     end
 
     let_it_be(:project) { create(:project) }
@@ -394,7 +394,7 @@ RSpec.describe API::Vulnerabilities do
       end
 
       it 'reverts a vulnerability and its associated findings to detected state' do
-        Timecop.freeze do
+        freeze_time do
           revert_vulnerability_to_detected
 
           expect(response).to have_gitlab_http_status(:created)

@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 description: 'Internal usage of Feature Flags for GitLab development'
 ---
@@ -120,6 +123,8 @@ describes a meta reasons for making these changes.
 
 Proposal:
 
+<!-- vale gitlab.Spelling = NO -->
+
 | Role                         | Who
 |------------------------------|-------------------------|
 | Author                       | Kamil Trzciński         |
@@ -134,3 +139,5 @@ DRIs:
 | Product                      | Kenny Johnston         |
 | Leadership                   | Craig Gomes            |
 | Engineering                  | Kamil Trzciński        |
+
+<!-- vale gitlab.Spelling = YES -->

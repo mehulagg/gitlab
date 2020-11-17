@@ -51,20 +51,22 @@ module QA
           it 'comments on epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/525' do
             comment = 'My Epic Comment'
             EE::Page::Group::Epic::Show.perform do |show|
-              show.add_comment_to_epic(comment)
-            end
+              show.comment(comment)
 
-            expect(page).to have_content(comment)
+              expect(show).to have_comment(comment)
+            end
           end
 
           it 'closes and reopens an epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/524' do
-            EE::Page::Group::Epic::Show.perform(&:close_reopen_epic)
+            EE::Page::Group::Epic::Show.perform do |show|
+              show.close_reopen_epic
 
-            expect(page).to have_content('Closed')
+              expect(show).to have_system_note('closed')
 
-            EE::Page::Group::Epic::Show.perform(&:close_reopen_epic)
+              show.close_reopen_epic
 
-            expect(page).to have_content('Open')
+              expect(show).to have_system_note('opened')
+            end
           end
         end
 
@@ -79,8 +81,10 @@ module QA
 
           epic.visit!
 
-          expect(page).to have_content('added issue')
-          expect(page).to have_content('removed issue')
+          EE::Page::Group::Epic::Show.perform do |show|
+            expect(show).to have_system_note('added issue')
+            expect(show).to have_system_note('removed issue')
+          end
         end
 
         def create_issue_resource

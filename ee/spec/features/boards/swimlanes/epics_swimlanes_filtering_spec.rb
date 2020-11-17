@@ -34,7 +34,7 @@ RSpec.describe 'epics swimlanes filtering', :js do
       project.add_maintainer(user)
       project.add_maintainer(user2)
 
-      stub_licensed_features(epics: true)
+      stub_licensed_features(epics: true, swimlanes: true)
       sign_in(user)
       visit_board_page
 
@@ -61,7 +61,7 @@ RSpec.describe 'epics swimlanes filtering', :js do
       wait_for_empty_boards((3..4))
     end
 
-    it 'filters by assignee' do
+    it 'filters by assignee', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/266990' do
       wait_for_all_requests
 
       set_filter("assignee", user.username)

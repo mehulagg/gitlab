@@ -33,13 +33,35 @@ module Elastic
 
       private
 
+      # Builds an elasticsearch query that will select documents from a
+      # set of projects for Group and Project searches, taking user access
+      # rules for issues into account. Relies upon super for Global searches
+      def project_ids_filter(query_hash, options)
+        return super if options[:public_and_internal_projects]
+
+        current_user = options[:current_user]
+        scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        return super if scoped_project_ids == :any
+
+        context.name(:project) do
+          query_hash[:query][:bool][:filter] ||= []
+          query_hash[:query][:bool][:filter] << {
+            terms: {
+              _name: context.name,
+              project_id: filter_ids_by_feature(scoped_project_ids, current_user, 'issues')
+            }
+          }
+        end
+
+        query_hash
+      end
+
       def confidentiality_filter(query_hash, options)
         current_user = options[:current_user]
         project_ids = options[:project_ids]
-        confidential_filter = options[:confidential]
 
-        if Feature.enabled?(:search_filter_by_confidential) && confidential_filter.present? && %w(yes no).include?(confidential_filter)
-          query_hash[:query][:bool][:filter] << { term: { confidential: confidential_filter == 'yes' } }
+        if [true, false].include?(options[:confidential])
+          query_hash[:query][:bool][:filter] << { term: { confidential: options[:confidential] } }
         end
 
         return query_hash if current_user&.can_read_all_resources?

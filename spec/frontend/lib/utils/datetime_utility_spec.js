@@ -643,16 +643,15 @@ describe('localTimeAgo', () => {
   });
 
   it.each`
-    timeagoArg | title          | dataOriginalTitle
-    ${false}   | ${'some time'} | ${null}
-    ${true}    | ${''}          | ${'Feb 18, 2020 10:22pm GMT+0000'}
-  `('converts $seconds seconds to $approximation', ({ timeagoArg, title, dataOriginalTitle }) => {
+    timeagoArg | title
+    ${false}   | ${'some time'}
+    ${true}    | ${'Feb 18, 2020 10:22pm GMT+0000'}
+  `('converts $seconds seconds to $approximation', ({ timeagoArg, title }) => {
     const element = document.querySelector('time');
     datetimeUtility.localTimeAgo($(element), timeagoArg);
 
     jest.runAllTimers();
 
-    expect(element.getAttribute('data-original-title')).toBe(dataOriginalTitle);
     expect(element.getAttribute('title')).toBe(title);
   });
 });
@@ -679,6 +678,20 @@ describe('differenceInSeconds', () => {
     ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime}                        | ${-86400}
   `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
     expect(datetimeUtility.differenceInSeconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMonths', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${startDateTime}                        | ${0}
+    ${startDateTime}                        | ${new Date('2019-12-17T12:00:00.000Z')} | ${5}
+    ${startDateTime}                        | ${new Date('2021-02-18T00:00:00.000Z')} | ${19}
+    ${new Date('2021-02-18T00:00:00.000Z')} | ${startDateTime}                        | ${-19}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMonths(startDate, endDate)).toBe(expected);
   });
 });
 

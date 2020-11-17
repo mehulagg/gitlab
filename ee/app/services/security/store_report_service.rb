@@ -47,16 +47,21 @@ module Security
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan)
+      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
+      vulnerability_params[:uuid] = calculate_uuid_v5(finding)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
 
-      finding.identifiers.map do |identifier|
+      # The maximum number of identifiers is not used in validation
+      # we just want to ignore the rest if a finding has more than that.
+      finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
         create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       end
+
+      create_or_update_vulnerability_links(finding, vulnerability_finding)
 
       create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
@@ -72,15 +77,35 @@ module Security
       }
 
       begin
-        project
+        vulnerability_finding = project
           .vulnerability_findings
           .create_with(create_params)
-          .find_or_create_by!(find_params)
+          .find_or_initialize_by(find_params)
+
+        vulnerability_finding.save!
+        vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
         project.vulnerability_findings.find_by!(find_params)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
+    end
+
+    def calculate_uuid_v5(vulnerability_finding)
+      uuid_v5_name_components = {
+        report_type: vulnerability_finding.report_type,
+        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
+        location_fingerprint: vulnerability_finding.location.fingerprint,
+        project_id: project.id
+      }
+
+      if uuid_v5_name_components.values.any?(&:nil?)
+        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
+      end
+
+      name = uuid_v5_name_components.values.join('-')
+
+      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 
     def update_vulnerability_scanner(finding)
@@ -96,6 +121,15 @@ module Security
       identifier_object = identifiers_objects[identifier.key]
       vulnerability_finding.finding_identifiers.find_or_create_by!(identifier: identifier_object)
       identifier_object.update!(identifier.to_hash)
+    rescue ActiveRecord::RecordNotUnique
+    end
+
+    def create_or_update_vulnerability_links(finding, vulnerability_finding)
+      return if finding.links.blank?
+
+      finding.links.each do |link|
+        vulnerability_finding.finding_links.safe_find_or_create_by!(link.to_hash)
+      end
     rescue ActiveRecord::RecordNotUnique
     end
 

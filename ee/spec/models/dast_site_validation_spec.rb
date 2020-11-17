@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe DastSiteValidation, type: :model do
   subject { create(:dast_site_validation) }
 
+  let_it_be(:another_dast_site_validation) { create(:dast_site_validation) }
+
   describe 'associations' do
     it { is_expected.to belong_to(:dast_site_token) }
     it { is_expected.to have_many(:dast_sites) }
@@ -36,8 +38,6 @@ RSpec.describe DastSiteValidation, type: :model do
 
   describe 'scopes' do
     describe 'by_project_id' do
-      let(:another_dast_site_validation) { create(:dast_site_validation) }
-
       it 'includes the correct records' do
         result = described_class.by_project_id(subject.dast_site_token.project_id)
 
@@ -45,6 +45,18 @@ RSpec.describe DastSiteValidation, type: :model do
           expect(result).to include(subject)
           expect(result).not_to include(another_dast_site_validation)
         end
+      end
+    end
+
+    describe 'by_url_base' do
+      let(:more_dast_site_validations) do
+        create_list(:dast_site_validation, 5, dast_site_token: subject.dast_site_token).prepend(subject)
+      end
+
+      it 'includes the correct records' do
+        result = described_class.by_url_base(subject.url_base)
+
+        expect(result).not_to include(another_dast_site_validation)
       end
     end
   end

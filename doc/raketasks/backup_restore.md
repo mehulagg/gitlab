@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Back up and restore GitLab **(CORE ONLY)**
 
 GitLab provides Rake tasks for backing up and restoring GitLab instances.
@@ -939,12 +945,8 @@ installed version of GitLab, the restore command aborts with an error
 message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
 and then try again.
 
-There is a [known issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3470)
-for restore not working with `pgbouncer`. To work around the issue, the Rails
-node must bypass `pgbouncer` and connect directly to the primary
-database node. You can do this by setting `gitlab_rails['db_host']` and
-`gitlab_rails['port']` to connect to the primary database node and
-[reconfiguring GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
+NOTE: **Note:**
+There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
 
 ### Restore for Docker image and GitLab Helm chart installations
 
@@ -1038,6 +1040,63 @@ If you're running GitLab on a virtualized server, you can possibly also create
 VM snapshots of the entire GitLab server. It's not uncommon however for a VM
 snapshot to require you to power down the server, which limits this solution's
 practical use.
+
+## Backup and restore for installations using PgBouncer
+
+Do NOT backup or restore GitLab through a PgBouncer connection. These
+tasks must [bypass PgBouncer and connect directly to the PostgreSQL primary database node](#bypassing-pgbouncer),
+or they will cause a GitLab outage.
+
+When the GitLab backup or restore task is used with PgBouncer, the
+following error message is shown:
+
+```ruby
+ActiveRecord::StatementInvalid: PG::UndefinedTable
+```
+
+This happens because the task uses `pg_dump`, which [sets a null search
+path and explicitly includes the schema in every SQL query](https://gitlab.com/gitlab-org/gitlab/-/issues/23211)
+to address [CVE-2018-1058](https://www.postgresql.org/about/news/postgresql-103-968-9512-9417-and-9322-released-1834/).
+
+Since connections are reused with PgBouncer in transaction pooling mode,
+PostgreSQL fails to search the default `public` schema. As a result,
+this clearing of the search path causes tables and columns to appear
+missing.
+
+### Bypassing PgBouncer
+
+There are two ways to fix this:
+
+1. [Use environment variables to override the database settings](#environment-variable-overrides) for the backup task.
+1. Reconfigure a node to [connect directly to the PostgreSQL primary database node](../administration/postgresql/pgbouncer.md#procedure-for-bypassing-pgbouncer).
+
+#### Environment variable overrides
+
+By default, GitLab uses the database configuration stored in a
+configuration file (`database.yml`). However, you can override the database settings
+for the backup and restore task by setting environment
+variables that are prefixed with `GITLAB_BACKUP_`:
+
+- `GITLAB_BACKUP_PGHOST`
+- `GITLAB_BACKUP_PGUSER`
+- `GITLAB_BACKUP_PGPORT`
+- `GITLAB_BACKUP_PGPASSWORD`
+- `GITLAB_BACKUP_PGSSLMODE`
+- `GITLAB_BACKUP_PGSSLKEY`
+- `GITLAB_BACKUP_PGSSLCERT`
+- `GITLAB_BACKUP_PGSSLROOTCERT`
+- `GITLAB_BACKUP_PGSSLCRL`
+- `GITLAB_BACKUP_PGSSLCOMPRESSION`
+
+For example, to override the database host and port to use 192.168.1.10
+and port 5432 with the Omnibus package:
+
+```shell
+sudo GITLAB_BACKUP_PGHOST=192.168.1.10 GITLAB_BACKUP_PGPORT=5432 /opt/gitlab/bin/gitlab-backup create
+```
+
+See the [PostgreSQL documentation](https://www.postgresql.org/docs/12/libpq-envars.html)
+for more details on what these parameters do.
 
 ## Additional notes
 

@@ -14,7 +14,7 @@ RSpec.describe ElasticDeleteProjectWorker, :elastic do
     stub_ee_application_setting(elasticsearch_indexing: true)
   end
 
-  it 'deletes a project with all nested objects' do
+  it 'deletes a project with all nested objects', :aggregate_failures do
     project = create :project, :repository
     issue = create :issue, project: project
     milestone = create :milestone, project: project
@@ -38,5 +38,12 @@ RSpec.describe ElasticDeleteProjectWorker, :elastic do
     expect(Milestone.elastic_search('*', **search_options).total_count).to be(0)
     expect(Note.elastic_search('*', **search_options).total_count).to be(0)
     expect(MergeRequest.elastic_search('*', **search_options).total_count).to be(0)
+
+    # verify that entire index is empty
+    # searches use joins on the parent record (project)
+    # and the previous queries will not find data left in the index
+    helper = Gitlab::Elastic::Helper.default
+
+    expect(helper.documents_count).to be(0)
   end
 end

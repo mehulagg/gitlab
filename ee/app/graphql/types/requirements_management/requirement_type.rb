@@ -27,14 +27,13 @@ module Types
       field :state, RequirementsManagement::RequirementStateEnum, null: false,
             description: 'State of the requirement'
 
-      field :last_test_report_state, RequirementsManagement::TestReportStateEnum, null: true, complexity: 5,
+      field :last_test_report_state, RequirementsManagement::TestReportStateEnum, null: true,
             description: 'Latest requirement test report state'
 
       field :last_test_report_manually_created,
             GraphQL::BOOLEAN_TYPE,
             method: :last_test_report_manually_created?,
             null: true,
-            complexity: 5,
             description: 'Indicates if latest test report was created by user'
 
       field :project, ProjectType, null: false,

@@ -38,8 +38,6 @@ import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_co
 import { createStore, monitoringDashboard } from '~/monitoring/stores';
 import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
 
-global.URL.createObjectURL = jest.fn();
-
 const mocks = {
   $toast: {
     show: jest.fn(),
@@ -94,6 +92,8 @@ describe('Dashboard Panel', () => {
     state = store.state.monitoringDashboard;
 
     axiosMock = new AxiosMockAdapter(axios);
+
+    jest.spyOn(URL, 'createObjectURL');
   });
 
   afterEach(() => {
@@ -106,7 +106,7 @@ describe('Dashboard Panel', () => {
         {},
         {
           slots: {
-            topLeft: `<div class="top-left-content">OK</div>`,
+            'top-left': `<div class="top-left-content">OK</div>`,
           },
         },
       );

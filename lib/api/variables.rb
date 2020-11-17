@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class Variables < Grape::API::Instance
+  class Variables < ::API::Base
     include PaginationParams
 
     before { authenticate! }
     before { authorize! :admin_build, user_project }
+
+    feature_category :continuous_integration
 
     helpers do
       def filter_variable_parameters(params)

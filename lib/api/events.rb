@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class Events < Grape::API::Instance
+  class Events < ::API::Base
     include PaginationParams
     include APIGuard
     helpers ::API::Helpers::EventsHelpers
 
     allow_access_with_scope :read_user, if: -> (request) { request.get? }
+
+    feature_category :users
 
     resource :events do
       desc "List currently authenticated user's events" do

@@ -22,7 +22,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :autocomplete_sources, only: [] do
           collection do
             get 'epics'
-            get 'vulnerabilities'
           end
         end
 
@@ -56,6 +55,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
 
           resources :dashboard, only: [:index], controller: :dashboard
+          resources :vulnerability_report, only: [:index], controller: :vulnerability_report
 
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection

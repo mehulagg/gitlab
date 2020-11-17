@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 module API
-  class MavenPackages < Grape::API::Instance
+  class MavenPackages < ::API::Base
     MAVEN_ENDPOINT_REQUIREMENTS = {
       file_name: API::NO_SLASH_URL_PART_REGEX
     }.freeze
+
+    feature_category :package_registry
 
     content_type :md5, 'text/plain'
     content_type :sha1, 'text/plain'
@@ -32,10 +34,10 @@ module API
       end
 
       def verify_package_file(package_file, uploaded_file)
-        stored_sha1 = Digest::SHA256.hexdigest(package_file.file_sha1)
-        expected_sha1 = uploaded_file.sha256
+        stored_sha256 = Digest::SHA256.hexdigest(package_file.file_sha1)
+        expected_sha256 = uploaded_file.sha256
 
-        if stored_sha1 == expected_sha1
+        if stored_sha256 == expected_sha256
           no_content!
         else
           conflict!
@@ -231,7 +233,7 @@ module API
 
           verify_package_file(package_file, params[:file])
         when 'md5'
-          nil
+          ''
         else
           track_package_event('push_package', :maven) if jar_file?(format)
 
@@ -244,7 +246,7 @@ module API
             file_md5:  params['file.md5']
           }
 
-          ::Packages::CreatePackageFileService.new(package, file_params).execute
+          ::Packages::CreatePackageFileService.new(package, file_params.merge(build: current_authenticated_job)).execute
         end
       end
     end

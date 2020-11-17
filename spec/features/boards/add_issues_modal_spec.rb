@@ -87,11 +87,12 @@ RSpec.describe 'Issue Boards add issue modal', :js do
       end
     end
 
-    it 'shows selected issues' do
+    it 'shows selected issues tab and empty state message' do
       page.within('.add-issues-modal') do
         click_link 'Selected issues'
 
         expect(page).not_to have_selector('.board-card')
+        expect(page).to have_content("Go back to Open issues and select some issues to add to your board.")
       end
     end
 
@@ -103,7 +104,13 @@ RSpec.describe 'Issue Boards add issue modal', :js do
           click_button 'Cancel'
         end
 
-        accept_confirm { first('.board-delete').click }
+        page.within(find('.board:nth-child(2)')) do
+          find('button[title="List settings"]').click
+        end
+
+        page.within(find('.js-board-settings-sidebar')) do
+          accept_confirm { find('[data-testid="remove-list"]').click }
+        end
 
         click_button('Add issues')
 
@@ -141,7 +148,7 @@ RSpec.describe 'Issue Boards add issue modal', :js do
       end
     end
 
-    context 'selecing issues' do
+    context 'selecting issues' do
       it 'selects single issue' do
         page.within('.add-issues-modal') do
           first('.board-card .board-card-number').click
@@ -200,7 +207,7 @@ RSpec.describe 'Issue Boards add issue modal', :js do
         end
       end
 
-      it 'selects all that arent already selected' do
+      it "selects all that aren't already selected" do
         page.within('.add-issues-modal') do
           first('.board-card .board-card-number').click
 

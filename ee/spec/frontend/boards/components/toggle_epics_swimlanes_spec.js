@@ -41,7 +41,7 @@ describe('ToggleEpicsSwimlanes', () => {
     });
 
     it('renders "Group by" label', () => {
-      expect(wrapper.find('[data-testid="toggle-swimlanes-label"]').text()).toEqual('Group by:');
+      expect(wrapper.find('[data-testid="toggle-swimlanes-label"]').text()).toEqual('Group by');
     });
 
     it('renders dropdown with 2 options', () => {

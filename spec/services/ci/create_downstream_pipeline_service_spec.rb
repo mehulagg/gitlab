@@ -325,20 +325,6 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
 
             expect(bridge.reload).to be_success
           end
-
-          context 'when FF ci_child_of_child_pipeline is disabled' do
-            before do
-              stub_feature_flags(ci_child_of_child_pipeline: false)
-            end
-
-            it 'does not create a further child pipeline' do
-              expect { service.execute(bridge) }
-                .not_to change { Ci::Pipeline.count }
-
-              expect(bridge.reload).to be_failed
-              expect(bridge.failure_reason).to eq 'bridge_pipeline_is_child_pipeline'
-            end
-          end
         end
 
         context 'when upstream pipeline has a parent pipeline, which has a parent pipeline' do
@@ -593,6 +579,41 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
         expect(bridge.options[:downstream_errors]).to eq(
           ['test job: chosen stage does not exist; available stages are .pre, build, test, deploy, .post']
         )
+      end
+    end
+
+    context 'when downstream pipeline has workflow rule' do
+      before do
+        stub_ci_pipeline_yaml_file(config)
+      end
+
+      let(:config) do
+        <<-EOY
+          workflow:
+            rules:
+              - if: $my_var
+
+          regular-job:
+            script: 'echo Hello, World!'
+        EOY
+      end
+
+      context 'when passing the required variable' do
+        before do
+          bridge.yaml_variables = [{ key: 'my_var', value: 'var', public: true }]
+        end
+
+        it 'creates the pipeline' do
+          expect { service.execute(bridge) }.to change(downstream_project.ci_pipelines, :count).by(1)
+
+          expect(bridge.reload).to be_success
+        end
+      end
+
+      context 'when not passing the required variable' do
+        it 'does not create the pipeline' do
+          expect { service.execute(bridge) }.not_to change(downstream_project.ci_pipelines, :count)
+        end
       end
     end
   end

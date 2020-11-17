@@ -7,6 +7,7 @@ RSpec.describe 'Pipeline', :js do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
+    stub_feature_flags(graphql_pipeline_details: false)
     sign_in(user)
 
     project.add_developer(user)

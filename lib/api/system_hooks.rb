@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class SystemHooks < Grape::API::Instance
+  class SystemHooks < ::API::Base
     include PaginationParams
+
+    feature_category :integrations
 
     before do
       authenticate!

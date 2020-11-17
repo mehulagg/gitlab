@@ -12,6 +12,12 @@
       %span
         = _('SAML SSO')
 
+- if show_saml_group_links_in_sidebar?(@group)
+  = nav_link(path: 'saml_group_links#index') do
+    = link_to group_saml_group_links_path(@group), title: s_('GroupSAML|SAML Group Links') do
+      %span
+        = s_('GroupSAML|SAML Group Links')
+
 - if @group.feature_available?(:group_webhooks) || show_promotions?
   = nav_link(path: 'hooks#index') do
     = link_to group_hooks_path(@group), title: 'Webhooks' do

@@ -24,6 +24,7 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
         $apollo,
         fetchNextPage: () => {},
       },
+      provide: { hasVulnerabilities: true },
     });
   };
 

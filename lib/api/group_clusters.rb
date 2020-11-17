@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class GroupClusters < Grape::API::Instance
+  class GroupClusters < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :kubernetes_management
 
     params do
       requires :id, type: String, desc: 'The ID of the group'

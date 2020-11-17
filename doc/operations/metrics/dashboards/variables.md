@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -49,6 +49,8 @@ For example, if the dashboard time range is set to 8 hours, the value of
 ## User-defined variables
 
 [Variables can be defined](../../../operations/metrics/dashboards/yaml.md#templating-templating-properties) in a custom dashboard YAML file.
+
+Variable names are case-sensitive.
 
 ## Query variables from URL
 

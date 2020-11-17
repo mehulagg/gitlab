@@ -42,7 +42,7 @@ const stageEndpoint = ({ stageId }) =>
 
 jest.mock('~/flash');
 
-describe('Cycle analytics actions', () => {
+describe('Value Stream Analytics actions', () => {
   let state;
   let mock;
 
@@ -755,9 +755,19 @@ describe('Cycle analytics actions', () => {
     let mockCommit;
     let store;
 
+    const selectedAuthor = 'Noam Chomsky';
+    const selectedMilestone = '13.6';
+    const selectedAssigneeList = ['nchom'];
+    const selectedLabelList = ['label 1', 'label 2'];
     const initialData = {
       group: currentGroup,
       projectIds: [1, 2],
+      milestonesPath,
+      labelsPath,
+      selectedAuthor,
+      selectedMilestone,
+      selectedAssigneeList,
+      selectedLabelList,
     };
 
     beforeEach(() => {
@@ -784,6 +794,17 @@ describe('Cycle analytics actions', () => {
     });
 
     describe('with initialData', () => {
+      it.each`
+        action                        | args
+        ${'setPaths'}                 | ${{ milestonesPath, labelsPath, groupPath: currentGroup.fullPath }}
+        ${'filters/initialize'}       | ${{ selectedAuthor, selectedMilestone, selectedAssigneeList, selectedLabelList }}
+        ${'durationChart/setLoading'} | ${true}
+        ${'typeOfWork/setLoading'}    | ${true}
+      `('dispatches $action', async ({ action, args }) => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockDispatch).toHaveBeenCalledWith(action, args);
+      });
+
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
         expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
@@ -884,6 +905,7 @@ describe('Cycle analytics actions', () => {
 
   describe('createValueStream', () => {
     const payload = { name: 'cool value stream' };
+    const createResp = { id: 'new value stream', is_custom: true, ...payload };
 
     beforeEach(() => {
       state = { currentGroup };
@@ -891,7 +913,7 @@ describe('Cycle analytics actions', () => {
 
     describe('with no errors', () => {
       beforeEach(() => {
-        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, {});
+        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, createResp);
       });
 
       it(`commits the ${types.REQUEST_CREATE_VALUE_STREAM} and ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} actions`, () => {
@@ -904,7 +926,7 @@ describe('Cycle analytics actions', () => {
               type: types.REQUEST_CREATE_VALUE_STREAM,
             },
           ],
-          [{ type: 'receiveCreateValueStreamSuccess' }],
+          [{ type: 'receiveCreateValueStreamSuccess', payload: createResp }],
         );
       });
     });

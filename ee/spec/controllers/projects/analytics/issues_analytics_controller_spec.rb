@@ -8,7 +8,7 @@ RSpec.describe Projects::Analytics::IssuesAnalyticsController do
     let_it_be(:group) { create(:group) }
     let_it_be(:project1) { create(:project, :empty_repo, namespace: group) }
     let_it_be(:issue1) { create(:issue, project: project1, confidential: true) }
-    let_it_be(:issue2) { create(:issue, project: project1, state: :closed) }
+    let_it_be(:issue2) { create(:issue, :closed, project: project1) }
 
     before do
       group.add_owner(user)

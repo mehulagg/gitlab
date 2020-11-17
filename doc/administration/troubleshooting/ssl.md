@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -23,7 +26,7 @@ After configuring a GitLab instance with an internal CA certificate, you might n
   More details here: https://curl.haxx.se/docs/sslcerts.html
   ```
 
-- Testing via the [rails console](debug.md#starting-a-rails-console-session) also fails:
+- Testing via the [rails console](../operations/rails_console.md#starting-a-rails-console-session) also fails:
 
   ```ruby
   uri = URI.parse("https://gitlab.domain.tld")

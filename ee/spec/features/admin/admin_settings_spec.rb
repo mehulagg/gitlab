@@ -272,6 +272,75 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
+  context 'sign up settings' do
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
+      it 'does not render user cap form group' do
+        visit general_admin_application_settings_path
+
+        expect(page).not_to have_field('User cap')
+      end
+    end
+
+    context 'when feature flag is enabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: true)
+      end
+
+      context 'when license has active user count' do
+        let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
+
+        before do
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'disallows entering user cap greater then license allows', :js do
+          visit general_admin_application_settings_path
+
+          page.within('#js-signup-settings') do
+            fill_in 'User cap', with: 5
+
+            click_button 'Save changes'
+
+            message =
+              page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
+
+            expect(message).to eq('Value must be less than or equal to 1.')
+          end
+        end
+      end
+
+      it 'changes the user cap from unlimited to 5' do
+        visit general_admin_application_settings_path
+
+        expect(current_settings.new_user_signups_cap).to be_nil
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: 5
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to eq(5)
+        end
+      end
+
+      it 'changes the user cap to unlimited' do
+        visit general_admin_application_settings_path
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: nil
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to be_nil
+        end
+      end
+    end
+  end
+
   def current_settings
     ApplicationSetting.current_without_cache
   end

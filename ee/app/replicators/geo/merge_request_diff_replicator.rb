@@ -8,10 +8,6 @@ module Geo
       ::MergeRequestDiff
     end
 
-    def self.replication_enabled_by_default?
-      false
-    end
-
     def self.primary_total_count
       model.has_external_diffs.count
     end

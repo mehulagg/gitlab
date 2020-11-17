@@ -61,6 +61,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       >
         <span
           class="system-note-message"
+          data-qa-selector="system_note_content"
         >
           ·
         </span>

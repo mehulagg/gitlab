@@ -1,5 +1,0 @@
----
-title: Fix LDAP group settings heading being shown when feature disabled
-merge_request: 43901
-author:
-type: fixed

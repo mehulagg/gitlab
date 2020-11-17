@@ -10,6 +10,10 @@ RSpec.describe API::Boards do
 
   it_behaves_like 'multiple and scoped issue boards', "/projects/:id/boards"
 
+  before do
+    stub_licensed_features(swimlanes: true)
+  end
+
   describe 'POST /projects/:id/boards/:board_id/lists' do
     let(:url) { "/projects/#{board_parent.id}/boards/#{board.id}/lists" }
 

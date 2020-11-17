@@ -100,7 +100,7 @@ export default {
 <template>
   <div v-if="showCards" class="row gl-mt-6">
     <div v-for="(column, index) in columns" :key="index" class="col-sm-3">
-      <gl-card :class="$options.cardClass" :body-class="$options.cardBodyClass">
+      <gl-card :class="$options.cardClass" :body-class="$options.cardBodyClass" class="gl-mb-5">
         <span>{{ column.title }}</span>
         <span class="gl-font-size-h2 gl-font-weight-bold">{{ column.value }}</span>
         <gl-icon v-if="column.icon" name="issues" :size="12" class="gl-text-gray-500" />

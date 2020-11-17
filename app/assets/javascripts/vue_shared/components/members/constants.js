@@ -51,6 +51,7 @@ export const FIELDS = [
     key: 'actions',
     thClass: 'col-actions',
     tdClass: 'col-actions',
+    showFunction: 'showActionsField',
   },
 ];
 
@@ -66,3 +67,5 @@ export const MEMBER_TYPES = {
 export const DAYS_TO_EXPIRE_SOON = 7;
 
 export const LEAVE_MODAL_ID = 'member-leave-modal';
+
+export const REMOVE_GROUP_LINK_MODAL_ID = 'remove-group-link-modal-id';

@@ -7,11 +7,16 @@ fragment IssueNode on Issue {
   referencePath: reference(full: true)
   dueDate
   timeEstimate
+  totalTimeSpent
+  humanTimeEstimate
+  humanTotalTimeSpent
+  emailsDisabled
   weight
   confidential
   webUrl
   subscribed
   blocked
+  blockedByCount
   relativePosition
   epic {
     id

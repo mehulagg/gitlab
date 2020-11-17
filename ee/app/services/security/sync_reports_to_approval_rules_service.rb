@@ -42,7 +42,7 @@ module Security
       # If we don't have reports, then we should wait until pipeline stops.
       return if reports.empty? && !pipeline.complete?
 
-      remove_required_approvals_for(ApprovalMergeRequestRule.security_report, sync_required_merge_requests)
+      remove_required_approvals_for(ApprovalMergeRequestRule.vulnerability_report, sync_required_merge_requests)
     end
 
     def reports

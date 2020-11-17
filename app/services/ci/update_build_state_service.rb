@@ -75,6 +75,7 @@ module Ci
 
       unless live_chunks_pending?
         metrics.increment_trace_operation(operation: :finalized)
+        metrics.observe_migration_duration(pending_state_seconds)
       end
 
       ::Gitlab::Ci::Trace::Checksum.new(build).then do |checksum|
@@ -130,7 +131,15 @@ module Ci
     end
 
     def pending_state_outdated?
-      Time.current - pending_state.created_at > ACCEPT_TIMEOUT
+      pending_state_duration > ACCEPT_TIMEOUT
+    end
+
+    def pending_state_duration
+      Time.current - pending_state.created_at
+    end
+
+    def pending_state_seconds
+      pending_state_duration.seconds
     end
 
     def build_state
@@ -154,16 +163,18 @@ module Ci
     end
 
     def ensure_pending_state
-      Ci::BuildPendingState.create_or_find_by!(
+      build_state = Ci::BuildPendingState.safe_find_or_create_by(
         build_id: build.id,
         state: params.fetch(:state),
         trace_checksum: params.fetch(:checksum),
         failure_reason: params.dig(:failure_reason)
       )
-    rescue ActiveRecord::RecordNotFound
-      metrics.increment_trace_operation(operation: :conflict)
 
-      build.pending_state
+      unless build_state.present?
+        metrics.increment_trace_operation(operation: :conflict)
+      end
+
+      build_state || build.pending_state
     end
 
     ##

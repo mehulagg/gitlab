@@ -156,7 +156,7 @@ The best approach is to capture the dynamic URL in a [`.env` file](https://docs.
 as a job artifact to be shared, then use a custom environment variable we've provided named `K6_DOCKER_OPTIONS`
 to configure the k6 Docker container to use the file. With this, k6 can then use any
 environment variables from the `.env` file in scripts using standard JavaScript,
-such as: ``http.get(`${__ENV.ENVIRONMENT_URL`})``.
+such as: ``http.get(`${__ENV.ENVIRONMENT_URL}`)``.
 
 For example:
 
@@ -164,8 +164,8 @@ For example:
    1. Capture the dynamic URL and save it into a `.env` file, e.g. `echo "ENVIRONMENT_URL=$CI_ENVIRONMENT_URL" >> review.env`.
    1. Set the `.env` file to be a [job artifact](../../../ci/pipelines/job_artifacts.md#job-artifacts).
 1. In the `load_performance` job:
-   1. Set it to depend on the review job, so it inherits the env file.
-   1. Set the `K6_DOCKER_OPTIONS` variable with the [Docker cli option for env files](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file), for example `--env-file review.env`.
+   1. Set it to depend on the review job, so it inherits the environment file.
+   1. Set the `K6_DOCKER_OPTIONS` variable with the [Docker CLI option for environment files](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file), for example `--env-file review.env`.
 1. Configure the k6 test script to use the environment variable in it's steps.
 
 Your `.gitlab-ci.yml` file might be similar to:

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class Vulnerabilities < Grape::API::Instance
+  class Vulnerabilities < ::API::Base
     include ::API::Helpers::VulnerabilitiesHooks
     include PaginationParams
+
+    feature_category :vulnerability_management
 
     helpers ::API::Helpers::VulnerabilitiesHelpers
 

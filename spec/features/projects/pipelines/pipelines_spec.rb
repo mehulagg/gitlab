@@ -12,6 +12,7 @@ RSpec.describe 'Pipelines', :js do
 
     before do
       sign_in(user)
+      stub_feature_flags(graphql_pipeline_details: false)
       project.add_developer(user)
       project.update!(auto_devops_attributes: { enabled: false })
     end
@@ -118,7 +119,7 @@ RSpec.describe 'Pipelines', :js do
         context 'when canceling' do
           before do
             find('.js-pipelines-cancel-button').click
-            find('.js-modal-primary-action').click
+            click_button 'Stop pipeline'
             wait_for_requests
           end
 
@@ -407,7 +408,7 @@ RSpec.describe 'Pipelines', :js do
           context 'when canceling' do
             before do
               find('.js-pipelines-cancel-button').click
-              find('.js-modal-primary-action').click
+              click_button 'Stop pipeline'
             end
 
             it 'indicates that pipeline was canceled', :sidekiq_might_not_need_inline do

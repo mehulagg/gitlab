@@ -9,7 +9,7 @@
   .settings-header
     %h4
       = _('Advanced Search')
-    %button.btn.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
       = _('Advanced Search with Elasticsearch')
@@ -102,7 +102,7 @@
 
         .sub-section
           %h4= _('Elasticsearch zero-downtime reindexing')
-          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
+          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'gl-button btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
           .form-text.text-muted
             = _('This feature should be used with an index that was created after 13.0')
           - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
@@ -149,6 +149,41 @@
               = f.text_field :elasticsearch_project_ids, class: 'js-elasticsearch-projects', value: elasticsearch_project_ids, data: { selected: elasticsearch_objects_options(@application_setting.elasticsearch_limited_projects(true)).to_json }
 
         .sub-section
+          %h4= _('Custom analyzers: language support')
+          %h5
+            = _('Chinese language support using')
+            %a{ href: 'https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html' }
+              = _('smartcn custom analyzer')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-input'
+              = f.label :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-label' do
+                = _('Enable smartcn custom analyzer: Indexing')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_search, class: 'form-check-input', disabled: !Gitlab::CurrentSettings.elasticsearch_analyzers_smartcn_enabled?
+              = f.label :elasticsearch_analyzers_smartcn_search, class: 'form-check-label' do
+                = _('Enable smartcn custom analyzer: Search')
+              .form-text.gl-text-gray-600
+                = _('Please only enable search after installing the plugin, enabling indexing and recreating the index')
+          %h5
+            = _('Japanese language support using')
+            %a{ href: 'https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html' }
+              = _('kuromoji custom analyzer')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_kuromoji_enabled, class: 'form-check-input'
+              = f.label :elasticsearch_analyzers_kuromoji_enabled, class: 'form-check-label' do
+                = _('Enable kuromoji custom analyzer: Indexing')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_kuromoji_search, class: 'form-check-input', disabled: !Gitlab::CurrentSettings.elasticsearch_analyzers_kuromoji_enabled?
+              = f.label :elasticsearch_analyzers_kuromoji_search, class: 'form-check-label' do
+                = _('Enable kuromoji custom analyzer: Search')
+              .form-text.gl-text-gray-600
+                = _('Please only enable search after installing the plugin, enabling indexing and recreating the index')
+
+        .sub-section
           %h4= _('Elasticsearch AWS IAM credentials')
           .form-group
             .form-check
@@ -174,4 +209,4 @@
             .form-text.text-muted
               = _('AWS Secret Access Key.  Only required if not using role instance credentials')
 
-      = f.submit _('Save changes'), class: "btn btn-success", data: { qa_selector: 'submit_button' }
+      = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'submit_button' }

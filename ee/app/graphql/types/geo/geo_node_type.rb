@@ -25,12 +25,16 @@ module Types
       field :merge_request_diff_registries, ::Types::Geo::MergeRequestDiffRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::MergeRequestDiffRegistriesResolver,
-            description: 'Find merge request diff registries on this Geo node',
-            feature_flag: :geo_merge_request_diff_replication
+            description: 'Find merge request diff registries on this Geo node'
       field :package_file_registries, ::Types::Geo::PackageFileRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::PackageFileRegistriesResolver,
             description: 'Package file registries of the GeoNode'
+      field :snippet_repository_registries, ::Types::Geo::SnippetRepositoryRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::SnippetRepositoryRegistriesResolver,
+            description: 'Find snippet repository registries on this Geo node',
+            feature_flag: :geo_snippet_repository_replication
       field :terraform_state_version_registries, ::Types::Geo::TerraformStateVersionRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::TerraformStateVersionRegistriesResolver,

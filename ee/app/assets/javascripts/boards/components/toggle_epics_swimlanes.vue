@@ -50,19 +50,19 @@ export default {
 
 <template>
   <div
-    class="board-swimlanes-toggle-wrapper gl-display-flex gl-align-items-center gl-ml-3"
+    class="board-swimlanes-toggle-wrapper gl-display-md-flex gl-align-items-center gl-ml-3"
     data-testid="toggle-swimlanes"
   >
     <span
-      class="board-swimlanes-toggle-text gl-white-space-nowrap"
+      class="board-swimlanes-toggle-text gl-white-space-nowrap gl-font-weight-bold"
       data-testid="toggle-swimlanes-label"
     >
-      {{ __('Group by:') }}
+      {{ __('Group by') }}
     </span>
     <gl-dropdown
       right
       :text="dropdownLabel"
-      toggle-class="gl-ml-2 gl-border-none gl-inset-border-1-gray-200! border-radius-default"
+      toggle-class="gl-ml-3 gl-border-none gl-inset-border-1-gray-200! border-radius-default"
     >
       <gl-dropdown-item
         :is-check-item="true"

@@ -6,9 +6,11 @@
 # called by the NuGet package manager client when users run commands
 # like `nuget install` or `nuget push`.
 module API
-  class NugetPackages < Grape::API::Instance
+  class NugetPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
     helpers ::API::Helpers::Packages::BasicAuthHelpers
+
+    feature_category :package_registry
 
     POSITIVE_INTEGER_REGEX = %r{\A[1-9]\d*\z}.freeze
     NON_NEGATIVE_INTEGER_REGEX = %r{\A0|[1-9]\d*\z}.freeze

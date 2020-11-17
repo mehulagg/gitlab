@@ -17,7 +17,7 @@ RSpec.describe LicenseMailer do
     subject { described_class.approaching_active_user_count_limit(recipients) }
 
     before do
-      allow(license).to receive(:current_active_users_count).and_return(active_user_count)
+      allow(license).to receive(:daily_billable_users_count).and_return(active_user_count)
       allow(License).to receive(:current).and_return(license)
     end
 

@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# GitLab Status Page **(ULTIMATE)**
+# Status Page
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2479) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
 
@@ -12,11 +12,11 @@ With a GitLab Status Page, you can create and deploy a static website to communi
 efficiently to users during an incident. The Status Page landing page displays an
 overview of recent incidents:
 
-![Status Page landing page](./img/status_page_incidents_v12_10.png)
+![Status Page landing page](img/status_page_incidents_v12_10.png)
 
 Clicking an incident displays a detail page with more information about a particular incident:
 
-![Status Page detail](./img/status_page_detail_v12_10.png)
+![Status Page detail](img/status_page_detail_v12_10.png)
 
 - Status on the incident, including when the incident was last updated.
 - The incident title, including any emojis.
@@ -25,7 +25,7 @@ Clicking an incident displays a detail page with more information about a partic
   valid image extension. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/205166) in GitLab 13.1.
 - A chronological ordered list of updates to the incident.
 
-## Set up a GitLab Status Page
+## Set up a Status Page
 
 To configure a GitLab Status Page you must:
 
@@ -138,7 +138,7 @@ you provided during setup. As part of publication, GitLab will:
 After publication, you can access the incident's details page by clicking the
 **Published on status page** button displayed under the Incident's title.
 
-![Status Page detail link](./img/status_page_detail_link_v13_1.png)
+![Status Page detail link](img/status_page_detail_link_v13_1.png)
 
 ### Update an incident
 

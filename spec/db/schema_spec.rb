@@ -11,7 +11,7 @@ RSpec.describe 'Database schema' do
   let(:columns_name_with_jsonb) { retrieve_columns_name_with_jsonb }
 
   # List of columns historically missing a FK, don't add more columns
-  # See: https://docs.gitlab.com/ce/development/foreign_keys.html#naming-foreign-keys
+  # See: https://docs.gitlab.com/ee/development/foreign_keys.html#naming-foreign-keys
   IGNORED_FK_COLUMNS = {
     abuse_reports: %w[reporter_id user_id],
     application_settings: %w[performance_bar_allowed_group_id slack_app_id snowplow_app_id eks_account_id eks_access_key_id],
@@ -235,6 +235,26 @@ RSpec.describe 'Database schema' do
 
     it 'we do not have unexpected schemas' do
       expect(get_schemas.size).to eq(Gitlab::Database::EXTRA_SCHEMAS.size + 1)
+    end
+  end
+
+  context 'primary keys' do
+    let(:exceptions) do
+      %i(
+        elasticsearch_indexed_namespaces
+        elasticsearch_indexed_projects
+        merge_request_context_commit_diff_files
+      )
+    end
+
+    it 'expects every table to have a primary key defined' do
+      connection = ActiveRecord::Base.connection
+
+      problematic_tables = connection.tables.select do |table|
+        !connection.primary_key(table).present?
+      end.map(&:to_sym)
+
+      expect(problematic_tables - exceptions).to be_empty
     end
   end
 

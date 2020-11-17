@@ -19,6 +19,8 @@ module Security
     end
 
     def execute
+      return security_scan unless Feature.enabled?(:store_security_findings, project)
+
       StoreFindingsMetadataService.execute(security_scan, security_report)
       deduplicate_findings? ? update_deduplicated_findings : register_finding_keys
 
@@ -43,21 +45,19 @@ module Security
         security_scan.findings.update_all(deduplicated: false)
 
         security_scan.findings
-                     .by_project_fingerprint(deduplicated_project_fingerprints)
+                     .by_position(register_finding_keys)
                      .update_all(deduplicated: true)
       end
     end
 
-    def deduplicated_project_fingerprints
-      register_finding_keys.map(&:project_fingerprint)
-    end
-
+    # This method registers all finding keys and
+    # returns the positions of unique findings
     def register_finding_keys
-      @register_finding_keys ||= security_report.findings.select { |finding| register_keys(finding.keys) }
+      @register_finding_keys ||= security_report.findings.map.with_index { |finding, index| register_keys(finding.keys) && index }.compact
     end
 
     def register_keys(keys)
-      keys.map { |key| known_keys.add?(key) }.all?
+      keys.all? { |key| known_keys.add?(key) }
     end
   end
 end

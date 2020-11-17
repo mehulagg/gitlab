@@ -12,7 +12,7 @@ import {
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
-import { iterationSelectTextMap } from '../constants';
+import { iterationSelectTextMap, iterationDisplayState } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
@@ -71,6 +71,7 @@ export default {
         return {
           fullPath: this.groupPath,
           title: search,
+          state: iterationDisplayState,
         };
       },
       update(data) {
@@ -198,7 +199,7 @@ export default {
       <gl-dropdown-section-header class="d-flex justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>
-      <gl-search-box-by-type ref="search" v-model="searchTerm" class="gl-m-3" />
+      <gl-search-box-by-type ref="search" v-model="searchTerm" />
       <gl-dropdown-item
         v-for="iterationItem in iterations"
         :key="iterationItem.id"

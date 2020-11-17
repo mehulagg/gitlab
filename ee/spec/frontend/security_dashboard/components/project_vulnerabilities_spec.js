@@ -12,10 +12,12 @@ describe('Vulnerabilities app component', () => {
 
   const createWrapper = ({ props = {}, $apollo = apolloMock } = {}, options = {}) => {
     wrapper = shallowMount(ProjectVulnerabilitiesApp, {
+      provide: {
+        projectFullPath: '#',
+      },
       propsData: {
         dashboardDocumentation: '#',
         emptyStateSvgPath: '#',
-        projectFullPath: '#',
         ...props,
       },
       mocks: {
@@ -150,7 +152,10 @@ describe('Vulnerabilities app component', () => {
     });
 
     it('should pass the security scanners to the vulnerability list', () => {
-      const securityScanners = { enabled: ['SAST', 'DAST'], pipelineRun: ['SAST', 'DAST'] };
+      const securityScanners = {
+        enabled: ['SAST', 'DAST', 'API_FUZZING', 'COVERAGE_FUZZING'],
+        pipelineRun: ['SAST', 'DAST', 'API_FUZZING', 'COVERAGE_FUZZING'],
+      };
 
       wrapper.setData({ securityScanners });
 

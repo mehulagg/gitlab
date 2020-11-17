@@ -38,7 +38,7 @@ RSpec.describe Gitlab::GitAccess do
     let(:primary_repo_url) { geo_primary_http_url_to_repo(project) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project) }
 
-    it_behaves_like 'a read-only GitLab instance'
+    it_behaves_like 'git access for a read-only GitLab instance'
   end
 
   describe "push_rule_check" do

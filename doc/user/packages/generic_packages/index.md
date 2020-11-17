@@ -7,11 +7,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # GitLab Generic Packages Repository **(CORE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4209) in GitLab 13.5.
-> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
+> - It's [deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
 > - It's able to be enabled or disabled per-project.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-generic-packages-in-the-package-registry).
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-generic-packages-in-the-package-registry).
 
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
@@ -49,7 +49,7 @@ Example request:
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
      --upload-file path/to/file.txt \
-     https://gitlab.example.com/api/v4/projects/24/generic/my_package/0.0.1/file.txt
+     https://gitlab.example.com/api/v4/projects/24/packages/generic/my_package/0.0.1/file.txt
 ```
 
 Example response:
@@ -85,12 +85,12 @@ Example request that uses a personal access token:
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
-     https://gitlab.example.com/api/v4/projects/24/generic/my_package/0.0.1/file.txt
+     https://gitlab.example.com/api/v4/projects/24/packages/generic/my_package/0.0.1/file.txt
 ```
 
 ## Publish a generic package by using CI/CD
 
-To work with generic packages in [GitLab CI/CD](./../../../ci/README.md), you can use
+To work with generic packages in [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token in your commands.
 
 For example:
@@ -115,10 +115,10 @@ download:
 
 ### Enable or disable generic packages in the Package Registry
 
-Support for generic packages is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+Support for generic packages is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -137,3 +137,9 @@ Feature.disable(:generic_packages)
 # For a single project
 Feature.disable(:generic_packages, Project.find(<project id>))
 ```
+
+### Generic package sample project
+
+The [Write CI-CD Variables in Pipeline](https://gitlab.com/guided-explorations/cfg-data/write-ci-cd-variables-in-pipeline) project contains a working example you can use to create, upload, and download generic packages in GitLab CI/CD.
+
+It also demonstrates how to manage a semantic version for the generic package: storing it in a CI/CD variable, retrieving it, incrementing it, and writing it back to the CI/CD variable when tests for the download work correctly.

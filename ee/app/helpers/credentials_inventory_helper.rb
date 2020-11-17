@@ -25,6 +25,10 @@ module CredentialsInventoryHelper
     raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end
 
+  def ssh_key_delete_path(key)
+    raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+  end
+
   def user_detail_path(user)
     raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end

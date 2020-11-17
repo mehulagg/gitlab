@@ -5,12 +5,17 @@ require 'spec_helper'
 RSpec.describe NamespaceLimit do
   let(:namespace_limit) { build(:namespace_limit) }
   let(:usage_ratio) { 0.5 }
+  let(:namespace_storage_limit_enabled) { true }
 
   subject { namespace_limit }
 
   before do
-    allow_next_instance_of(EE::Namespace::RootStorageSize, namespace_limit.namespace) do |root_storage|
-      allow(root_storage).to receive(:usage_ratio).and_return(usage_ratio)
+    stub_feature_flags(namespace_storage_limit: namespace_storage_limit_enabled)
+
+    [EE::Namespace::RootStorageSize, EE::Namespace::RootExcessStorageSize].each do |class_name|
+      allow_next_instance_of(class_name, namespace_limit.namespace) do |root_storage|
+        allow(root_storage).to receive(:usage_ratio).and_return(usage_ratio)
+      end
     end
   end
 
@@ -54,21 +59,39 @@ RSpec.describe NamespaceLimit do
     context 'when usage ratio is above the threshold' do
       let(:usage_ratio) { 0.5 }
 
-      it { is_expected.to be_truthy }
+      it { is_expected.to eq(true) }
 
-      context 'when feature is disabled' do
+      context 'when feature flag :temporary_storage_increase disabled' do
         before do
           stub_feature_flags(temporary_storage_increase: false)
         end
 
+        context 'when feature flag :namespace_storage_limit disabled' do
+          let(:namespace_storage_limit_enabled) { false }
+
+          it { is_expected.to eq(false) }
+        end
+
         it { is_expected.to eq(false) }
+      end
+
+      context 'when feature flag :namespace_storage_limit disabled' do
+        let(:namespace_storage_limit_enabled) { false }
+
+        it { is_expected.to eq(true) }
       end
     end
 
     context 'when usage ratio is below the threshold' do
       let(:usage_ratio) { 0.49 }
 
-      it { is_expected.to be_falsey }
+      context 'when feature flag :namespace_storage_limit disabled' do
+        let(:namespace_storage_limit_enabled) { false }
+
+        it { is_expected.to eq(false) }
+      end
+
+      it { is_expected.to eq(false) }
     end
   end
 
@@ -126,6 +149,12 @@ RSpec.describe NamespaceLimit do
         let(:usage_ratio) { 0.5 }
 
         it { is_expected.to be_valid }
+
+        context 'when feature flag :namespace_storage_limit disabled' do
+          let(:namespace_storage_limit_enabled) { false }
+
+          it { is_expected.to be_valid }
+        end
       end
 
       context 'when storage usage is below threshold' do
@@ -134,6 +163,15 @@ RSpec.describe NamespaceLimit do
         it 'is invalid' do
           expect(namespace_limit).to be_invalid
           expect(namespace_limit.errors[:temporary_storage_increase_ends_on]).to include("can only be set with more than 50% usage")
+        end
+
+        context 'when feature flag :namespace_storage_limit disabled' do
+          let(:namespace_storage_limit_enabled) { false }
+
+          it 'is invalid' do
+            expect(namespace_limit).to be_invalid
+            expect(namespace_limit.errors[:temporary_storage_increase_ends_on]).to include("can only be set with more than 50% usage")
+          end
         end
       end
     end

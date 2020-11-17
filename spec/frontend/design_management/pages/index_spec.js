@@ -4,10 +4,13 @@ import VueDraggable from 'vuedraggable';
 import VueRouter from 'vue-router';
 import { GlEmptyState } from '@gitlab/ui';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import getDesignListQuery from 'shared_queries/design_management/get_design_list.query.graphql';
+import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
 import Index from '~/design_management/pages/index.vue';
 import uploadDesignQuery from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
 import DesignDestroyer from '~/design_management/components/design_destroyer.vue';
-import DesignDropzone from '~/design_management/components/upload/design_dropzone.vue';
+import DesignDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import DeleteButton from '~/design_management/components/delete_button.vue';
 import Design from '~/design_management/components/list/item.vue';
 import { DESIGNS_ROUTE_NAME } from '~/design_management/router/constants';
@@ -15,20 +18,20 @@ import {
   EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE,
   EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE,
 } from '~/design_management/utils/error_messages';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import createRouter from '~/design_management/router';
 import * as utils from '~/design_management/utils/design_management_utils';
-import { DESIGN_DETAIL_LAYOUT_CLASSLIST } from '~/design_management/constants';
 import {
   designListQueryResponse,
+  designUploadMutationCreatedResponse,
+  designUploadMutationUpdatedResponse,
   permissionsQueryResponse,
   moveDesignMutationResponse,
   reorderedDesigns,
   moveDesignMutationResponseWithErrors,
 } from '../mock_data/apollo_mock';
-import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
-import permissionsQuery from '~/design_management/graphql/queries/design_permissions.query.graphql';
 import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
+import { DESIGN_TRACKING_PAGE_NAME } from '~/design_management/utils/tracking';
 
 jest.mock('~/flash.js');
 const mockPageEl = {
@@ -102,6 +105,8 @@ describe('Design management index page', () => {
   const findDesignsWrapper = () => wrapper.find('[data-testid="designs-root"]');
   const findDesigns = () => wrapper.findAll(Design);
   const draggableAttributes = () => wrapper.find(VueDraggable).vm.$attrs;
+  const findDesignUploadButton = () => wrapper.find('[data-testid="design-upload-button"]');
+  const findDesignToolbarWrapper = () => wrapper.find('[data-testid="design-toolbar-wrapper"]');
 
   async function moveDesigns(localWrapper) {
     await jest.runOnlyPendingTimers();
@@ -211,13 +216,17 @@ describe('Design management index page', () => {
     it('renders designs list and header with upload button', () => {
       createComponent({ allVersions: [mockVersion] });
 
-      expect(wrapper.element).toMatchSnapshot();
+      expect(findDesignsWrapper().exists()).toBe(true);
+      expect(findDesigns().length).toBe(3);
+      expect(findDesignToolbarWrapper().exists()).toBe(true);
+      expect(findDesignUploadButton().exists()).toBe(true);
     });
 
     it('does not render toolbar when there is no permission', () => {
       createComponent({ designs: mockDesigns, allVersions: [mockVersion], createDesign: false });
 
-      expect(wrapper.element).toMatchSnapshot();
+      expect(findDesignToolbarWrapper().exists()).toBe(false);
+      expect(findDesignUploadButton().exists()).toBe(false);
     });
 
     it('has correct classes applied to design dropzone', () => {
@@ -244,7 +253,7 @@ describe('Design management index page', () => {
 
     it('renders design dropzone', () =>
       wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.element).toMatchSnapshot();
+        expect(findDropzone().exists()).toBe(true);
       }));
 
     it('has correct classes applied to design dropzone', () => {
@@ -370,7 +379,7 @@ describe('Design management index page', () => {
       createComponent({ stubs: { GlEmptyState } });
       wrapper.setData({ filesToBeSaved: [{ name: 'test' }] });
 
-      wrapper.vm.onUploadDesignDone();
+      wrapper.vm.onUploadDesignDone(designUploadMutationCreatedResponse);
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.vm.filesToBeSaved).toEqual([]);
         expect(wrapper.vm.isSaving).toBeFalsy();
@@ -440,10 +449,10 @@ describe('Design management index page', () => {
 
       return uploadDesign.then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Upload skipped. test.jpg did not change.',
-          'warning',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Upload skipped. test.jpg did not change.',
+          types: 'warning',
+        });
       });
     });
 
@@ -479,7 +488,35 @@ describe('Design management index page', () => {
         designDropzone.vm.$emit('change', eventPayload);
 
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(message);
+        expect(createFlash).toHaveBeenCalledWith({ message });
+      });
+    });
+
+    describe('tracking', () => {
+      let trackingSpy;
+
+      beforeEach(() => {
+        trackingSpy = mockTracking('_category_', undefined, jest.spyOn);
+
+        createComponent({ stubs: { GlEmptyState } });
+      });
+
+      afterEach(() => {
+        unmockTracking();
+      });
+
+      it('tracks design creation', () => {
+        wrapper.vm.onUploadDesignDone(designUploadMutationCreatedResponse);
+
+        expect(trackingSpy).toHaveBeenCalledTimes(1);
+        expect(trackingSpy).toHaveBeenCalledWith(DESIGN_TRACKING_PAGE_NAME, 'create_design');
+      });
+
+      it('tracks design modification', () => {
+        wrapper.vm.onUploadDesignDone(designUploadMutationUpdatedResponse);
+
+        expect(trackingSpy).toHaveBeenCalledTimes(1);
+        expect(trackingSpy).toHaveBeenCalledWith(DESIGN_TRACKING_PAGE_NAME, 'update_design');
       });
     });
   });
@@ -650,13 +687,6 @@ describe('Design management index page', () => {
   });
 
   describe('when navigating', () => {
-    it('ensures fullscreen layout is not applied', () => {
-      createComponent({ loading: true });
-
-      expect(mockPageEl.classList.remove).toHaveBeenCalledTimes(1);
-      expect(mockPageEl.classList.remove).toHaveBeenCalledWith(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
-    });
-
     it('should trigger a scrollIntoView method if designs route is detected', () => {
       router.replace({
         path: '/designs',
@@ -723,7 +753,7 @@ describe('Design management index page', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(createFlash).toHaveBeenCalledWith('Houston, we have a problem');
+      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
     });
 
     it('displays flash if mutation had a non-recoverable error', async () => {
@@ -737,9 +767,9 @@ describe('Design management index page', () => {
       await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
       await wrapper.vm.$nextTick(); // kick off the DOM update for flash
 
-      expect(createFlash).toHaveBeenCalledWith(
-        'Something went wrong when reordering designs. Please try again',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong when reordering designs. Please try again',
+      });
     });
   });
 });

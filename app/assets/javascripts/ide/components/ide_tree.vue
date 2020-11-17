@@ -51,10 +51,10 @@ export default {
 </script>
 
 <template>
-  <ide-tree-list>
+  <ide-tree-list @tree-ready="$emit('tree-ready')">
     <template #header>
       {{ __('Edit') }}
-      <div class="ide-tree-actions ml-auto d-flex">
+      <div class="ide-tree-actions ml-auto d-flex" data-testid="ide-root-actions">
         <new-entry-button
           :label="__('New file')"
           :show-label="false"

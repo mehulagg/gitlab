@@ -64,8 +64,8 @@ The Advanced Search Syntax also supports the use of filters. The available filte
 - extension: Filters by extension in the filename. Please write the extension without a leading dot. Exact match only.
 - blob: Filters by Git `object ID`. Exact match only.
 
-To use them, simply add them to your query in the format `<filter_name>:<value>` without
- any spaces between the colon (`:`) and the value.
+To use them, add them to your keyword in the format `<filter_name>:<value>` without
+any spaces between the colon (`:`) and the value. A keyword or an asterisk (`*`) is required for filter searches and has to be added in front of the filter separated by a space.
 
 Examples:
 
@@ -80,7 +80,7 @@ Examples:
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31684) in GitLab Starter 13.3.
 
-Filters can be inversed to **filter out** results from the result set, by prefixing the filter name with a `-` (hyphen) character, such as:
+Filters can be inverted to **filter out** results from the result set, by prefixing the filter name with a `-` (hyphen) character, such as:
 
 - `-filename`
 - `-path`

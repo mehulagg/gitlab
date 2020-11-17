@@ -83,7 +83,7 @@ describe('TypeOfWorkCharts', () => {
     beforeEach(() => {
       wrapper = createComponent({
         initialGetters: {
-          tasksByTypeChartData: () => ({ groupBy: [], data: [], seriesNames: [] }),
+          tasksByTypeChartData: () => ({ groupBy: [], data: [] }),
         },
       });
     });

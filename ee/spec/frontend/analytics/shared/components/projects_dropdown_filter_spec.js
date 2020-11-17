@@ -69,6 +69,11 @@ describe('ProjectsDropdownFilter component', () => {
   const findDropdownButtonIdentIconAtIndex = index =>
     findDropdownAtIndex(index).find('div.gl-avatar-identicon');
 
+  const findDropdownNameAtIndex = index =>
+    findDropdownAtIndex(index).find('[data-testid="project-name"');
+  const findDropdownFullPathAtIndex = index =>
+    findDropdownAtIndex(index).find('[data-testid="project-full-path"]');
+
   const selectDropdownItemAtIndex = index =>
     findDropdownAtIndex(index)
       .find('button')
@@ -137,9 +142,22 @@ describe('ProjectsDropdownFilter component', () => {
         expect(findDropdownButtonAvatarAtIndex(0).exists()).toBe(true);
         expect(findDropdownButtonIdentIconAtIndex(0).exists()).toBe(false);
       });
+
       it("renders an identicon when the project doesn't have an avatarUrl", () => {
         expect(findDropdownButtonAvatarAtIndex(1).exists()).toBe(false);
         expect(findDropdownButtonIdentIconAtIndex(1).exists()).toBe(true);
+      });
+
+      it('renders the project name', () => {
+        projects.forEach((project, index) => {
+          expect(findDropdownNameAtIndex(index).text()).toBe(project.name);
+        });
+      });
+
+      it('renders the project fullPath', () => {
+        projects.forEach((project, index) => {
+          expect(findDropdownFullPathAtIndex(index).text()).toBe(project.fullPath);
+        });
       });
     });
 
@@ -201,6 +219,18 @@ describe('ProjectsDropdownFilter component', () => {
       it("renders an identicon when the project doesn't have an avatarUrl", () => {
         expect(findDropdownButtonAvatarAtIndex(1).exists()).toBe(false);
         expect(findDropdownButtonIdentIconAtIndex(1).exists()).toBe(true);
+      });
+
+      it('renders the project name', () => {
+        projects.forEach((project, index) => {
+          expect(findDropdownNameAtIndex(index).text()).toBe(project.name);
+        });
+      });
+
+      it('renders the project fullPath', () => {
+        projects.forEach((project, index) => {
+          expect(findDropdownFullPathAtIndex(index).text()).toBe(project.fullPath);
+        });
       });
     });
 

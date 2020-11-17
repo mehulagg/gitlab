@@ -7,63 +7,35 @@ module EE
 
       prepended do
         helpers do
-          def create_board
-            forbidden! unless board_parent.multiple_issue_boards_available?
-
-            response =
-              ::Boards::CreateService.new(board_parent, current_user, { name: params[:name] }).execute
-
-            present response.payload, with: ::API::Entities::Board
-          end
-
-          def update_board
-            service = ::Boards::UpdateService.new(board_parent, current_user, declared_params(include_missing: false))
-            service.execute(board)
-
-            if board.valid?
-              present board, with: ::API::Entities::Board
-            else
-              bad_request!("Failed to save board #{board.errors.messages}")
-            end
-          end
-
-          def delete_board
-            forbidden! unless board_parent.multiple_issue_boards_available?
-
-            destroy_conditionally!(board) do |board|
-              service = ::Boards::DestroyService.new(board_parent, current_user)
-              service.execute(board)
-            end
-          end
-
+          # Overrides API::BoardsResponses create_list_params
           def create_list_params
             params.slice(:label_id, :milestone_id, :assignee_id)
           end
 
           # Overrides API::BoardsResponses authorize_list_type_resource!
-          # rubocop: disable CodeReuse/ActiveRecord
           def authorize_list_type_resource!
+            # rubocop: disable CodeReuse/ActiveRecord
             if params[:label_id] && !available_labels_for(board_parent).exists?(params[:label_id])
               render_api_error!({ error: 'Label not found!' }, 400)
             end
+            # rubocop: enable CodeReuse/ActiveRecord
 
-            if milestone_id = params[:milestone_id]
+            if params[:milestone_id]
               milestones = ::Boards::MilestonesFinder.new(board, current_user).execute
 
-              unless milestones.find_by(id: milestone_id)
+              unless milestones.id_in(params[:milestone_id]).exists?
                 render_api_error!({ error: 'Milestone not found!' }, 400)
               end
             end
 
-            if assignee_id = params[:assignee_id]
+            if params[:assignee_id]
               users = ::Boards::UsersFinder.new(board, current_user).execute
 
-              unless users.find_by(user_id: assignee_id)
+              unless users.with_user(params[:assignee_id]).exists?
                 render_api_error!({ error: 'User not found!' }, 400)
               end
             end
           end
-          # rubocop: enable CodeReuse/ActiveRecord
 
           # Overrides API::BoardsResponses list_creation_params
           params :list_creation_params do
@@ -73,6 +45,7 @@ module EE
             exactly_one_of :label_id, :milestone_id, :assignee_id
           end
 
+          # Overrides API::BoardsResponses update_params
           params :update_params do
             optional :name, type: String, desc: 'The board name'
             optional :assignee_id, type: Integer, desc: 'The ID of a user to associate with board'

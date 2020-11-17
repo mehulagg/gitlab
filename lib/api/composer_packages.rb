@@ -2,12 +2,14 @@
 
 # PHP composer support (https://getcomposer.org/)
 module API
-  class ComposerPackages < Grape::API::Instance
+  class ComposerPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
     helpers ::API::Helpers::RelatedResourcesHelpers
     helpers ::API::Helpers::Packages::BasicAuthHelpers
     include ::API::Helpers::Packages::BasicAuthHelpers::Constants
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :package_registry
 
     content_type :json, 'application/json'
     default_format :json

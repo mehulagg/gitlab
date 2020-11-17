@@ -28,6 +28,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/basic_health_check')
     require_dependency Rails.root.join('lib/gitlab/middleware/same_site_cookies')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
+    require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
     require_dependency Rails.root.join('lib/gitlab/runtime')
 
     # Settings in config/environments/* take precedence over those specified here.
@@ -173,26 +174,37 @@ module Gitlab
     config.assets.precompile << "notify.css"
     config.assets.precompile << "mailers/*.css"
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
+    config.assets.precompile << "page_bundles/alert_management_details.css"
     config.assets.precompile << "page_bundles/boards.css"
+    config.assets.precompile << "page_bundles/build.css"
+    config.assets.precompile << "page_bundles/ci_status.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
     config.assets.precompile << "page_bundles/dev_ops_report.css"
     config.assets.precompile << "page_bundles/environments.css"
+    config.assets.precompile << "page_bundles/epics.css"
     config.assets.precompile << "page_bundles/error_tracking_details.css"
     config.assets.precompile << "page_bundles/error_tracking_index.css"
+    config.assets.precompile << "page_bundles/signup.css"
     config.assets.precompile << "page_bundles/ide.css"
     config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
+    config.assets.precompile << "page_bundles/jira_connect_users.css"
     config.assets.precompile << "page_bundles/merge_conflicts.css"
     config.assets.precompile << "page_bundles/merge_requests.css"
     config.assets.precompile << "page_bundles/milestone.css"
     config.assets.precompile << "page_bundles/pipeline.css"
     config.assets.precompile << "page_bundles/pipelines.css"
+    config.assets.precompile << "page_bundles/pipeline_schedules.css"
+    config.assets.precompile << "page_bundles/productivity_analytics.css"
+    config.assets.precompile << "page_bundles/terminal.css"
     config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/reports.css"
+    config.assets.precompile << "page_bundles/wiki.css"
     config.assets.precompile << "page_bundles/xterm.css"
+    config.assets.precompile << "page_bundles/alert_management_settings.css"
     config.assets.precompile << "lazy_bundles/cropper.css"
+    config.assets.precompile << "lazy_bundles/select2.css"
     config.assets.precompile << "performance_bar.css"
-    config.assets.precompile << "lib/ace.js"
     config.assets.precompile << "disable_animations.css"
     config.assets.precompile << "snippets.css"
     config.assets.precompile << "locale/**/app.js"
@@ -247,6 +259,8 @@ module Gitlab
     config.middleware.insert_before ActionDispatch::Cookies, ::Gitlab::Middleware::SameSiteCookies
 
     config.middleware.insert_before ActionDispatch::RemoteIp, ::Gitlab::Middleware::HandleIpSpoofAttackError
+
+    config.middleware.insert_after ActionDispatch::ActionableExceptions, ::Gitlab::Middleware::HandleMalformedStrings
 
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do

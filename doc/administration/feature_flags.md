@@ -36,8 +36,8 @@ error, it's very important that you [**provide feedback**](https://gitlab.com/gi
 as possible so we can improve or fix it while behind a flag. When you upgrade
 GitLab to an earlier version, the feature flag status may change.
 
-NOTE: **Note:**
-Mind that features deployed behind feature flags may not be ready for
+CAUTION: **Caution:**
+Features deployed behind feature flags may not be ready for
 production use. However, disabling features behind flags that were deployed
 enabled by default may also present a risk. If they're enabled, we recommend
 you leave them as-is.
@@ -65,7 +65,7 @@ For installations from the source:
 sudo -u git -H bundle exec rails console -e production
 ```
 
-For details, see [starting a Rails console session](troubleshooting/debug.md#starting-a-rails-console-session).
+For details, see [starting a Rails console session](operations/rails_console.md#starting-a-rails-console-session).
 
 ### Enable or disable the feature
 

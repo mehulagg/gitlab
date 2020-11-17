@@ -27,11 +27,12 @@ RSpec.describe Clusters::Platforms::Kubernetes do
   describe '#rollout_status' do
     let(:deployments) { [] }
     let(:pods) { [] }
+    let(:ingresses) { [] }
     let(:service) { create(:cluster_platform_kubernetes, :configured) }
     let!(:cluster) { create(:cluster, :project, enabled: true, platform_kubernetes: service) }
     let(:project) { cluster.project }
     let(:environment) { build(:environment, project: project, name: "env", slug: "env-000000") }
-    let(:cache_data) { Hash(deployments: deployments, pods: pods) }
+    let(:cache_data) { Hash(deployments: deployments, pods: pods, ingresses: ingresses) }
 
     subject(:rollout_status) { service.rollout_status(environment, cache_data) }
 
@@ -128,6 +129,15 @@ RSpec.describe Clusters::Platforms::Kubernetes do
                                                  status: "pending",
                                                  tooltip: "Not provided (Pending)",
                                                  track: "stable" }])
+      end
+
+      context 'with canary ingress' do
+        let(:ingresses) { [kube_ingress(track: :canary)] }
+
+        it 'has canary ingress' do
+          expect(rollout_status).to be_canary_ingress_exists
+          expect(rollout_status.canary_ingress.canary_weight).to eq(50)
+        end
       end
     end
 
@@ -304,7 +314,7 @@ RSpec.describe Clusters::Platforms::Kubernetes do
     let(:cluster) { create(:cluster, :project, platform_kubernetes: service) }
     let(:service) { create(:cluster_platform_kubernetes, :configured) }
     let(:namespace) { 'project-namespace' }
-    let(:environment) { instance_double(Environment, deployment_namespace: namespace) }
+    let(:environment) { instance_double(Environment, deployment_namespace: namespace, project: cluster.project) }
     let(:expected_pod_cached_data) do
       kube_pod.tap { |kp| kp['metadata'].delete('namespace') }
     end
@@ -315,10 +325,11 @@ RSpec.describe Clusters::Platforms::Kubernetes do
       before do
         stub_kubeclient_pods(namespace)
         stub_kubeclient_deployments(namespace)
+        stub_kubeclient_ingresses(namespace)
       end
 
       shared_examples 'successful deployment request' do
-        it { is_expected.to include(pods: [expected_pod_cached_data], deployments: [kube_deployment]) }
+        it { is_expected.to include(pods: [expected_pod_cached_data], deployments: [kube_deployment], ingresses: [kube_ingress]) }
       end
 
       context 'on a project level cluster' do
@@ -338,6 +349,16 @@ RSpec.describe Clusters::Platforms::Kubernetes do
 
         include_examples 'successful deployment request'
       end
+
+      context 'when canary_ingress_weight_control feature flag is disabled' do
+        before do
+          stub_feature_flags(canary_ingress_weight_control: false)
+        end
+
+        it 'does not fetch ingress data from kubernetes' do
+          expect(subject[:ingresses]).to be_empty
+        end
+      end
     end
 
     context 'when kubernetes responds with 500s' do
@@ -353,9 +374,68 @@ RSpec.describe Clusters::Platforms::Kubernetes do
       before do
         stub_kubeclient_pods(namespace)
         stub_kubeclient_deployments(namespace, status: 404)
+        stub_kubeclient_ingresses(namespace, status: 404)
       end
 
-      it { is_expected.to include(deployments: []) }
+      it { is_expected.to include(deployments: [], ingresses: []) }
+    end
+  end
+
+  describe '#ingresses' do
+    subject { service.ingresses(namespace) }
+
+    let(:service) { create(:cluster_platform_kubernetes, :configured) }
+    let(:namespace) { 'project-namespace' }
+
+    context 'when there is an ingress in the namespace' do
+      before do
+        stub_kubeclient_ingresses(namespace)
+      end
+
+      it 'returns an ingress' do
+        expect(subject.count).to eq(1)
+        expect(subject.first).to be_kind_of(::Gitlab::Kubernetes::Ingress)
+        expect(subject.first.name).to eq('production-auto-deploy')
+      end
+    end
+
+    context 'when there are no ingresss in the namespace' do
+      before do
+        allow(service.kubeclient).to receive(:get_ingresses) { raise Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil) }
+      end
+
+      it 'returns nothing' do
+        is_expected.to be_empty
+      end
+    end
+  end
+
+  describe '#patch_ingress' do
+    subject { service.patch_ingress(namespace, ingress, data) }
+
+    let(:service) { create(:cluster_platform_kubernetes, :configured) }
+    let(:namespace) { 'project-namespace' }
+    let(:ingress) { Gitlab::Kubernetes::Ingress.new(kube_ingress) }
+    let(:data) { { metadata: { annotations: { name: 'test' } } } }
+
+    context 'when there is an ingress in the namespace' do
+      before do
+        stub_kubeclient_ingresses(namespace, method: :patch, resource_path: "/#{ingress.name}")
+      end
+
+      it 'returns an ingress' do
+        expect(subject[:items][0][:metadata][:name]).to eq('production-auto-deploy')
+      end
+    end
+
+    context 'when there are no ingresss in the namespace' do
+      before do
+        allow(service.kubeclient).to receive(:patch_ingress) { raise Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil) }
+      end
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(Kubeclient::ResourceNotFoundError)
+      end
     end
   end
 end

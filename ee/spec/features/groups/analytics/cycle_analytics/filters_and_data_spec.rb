@@ -284,7 +284,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     let_it_be(:issue) { create(:issue, project: project, created_at: 5.days.ago) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     before do

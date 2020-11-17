@@ -31,4 +31,8 @@ class EpicPolicy < BasePolicy
     prevent :award_emoji
     prevent :read_note
   end
+
+  rule { ~anonymous & can?(:read_epic) }.policy do
+    enable :create_todo
+  end
 end

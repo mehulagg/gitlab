@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -22,6 +22,8 @@ Using the GitLab project Kubernetes integration, you can:
 - Use [Web terminals](#web-terminals).
 - Use [Deploy Boards](#deploy-boards). **(PREMIUM)**
 - Use [Canary Deployments](#canary-deployments). **(PREMIUM)**
+- Use [deployment variables](#deployment-variables).
+- Use [role-based or attribute-based access controls](add_remove_clusters.md#access-controls).
 - View [Logs](#viewing-pod-logs).
 - Run serverless workloads on [Kubernetes with Knative](serverless/index.md).
 
@@ -40,19 +42,20 @@ of memory and CPU usage.
 
 GitLab is committed to support at least two production-ready Kubernetes minor
 versions at any given time. We regularly review the versions we support, and
-provide a four-month deprecation period before we remove support of a specific
+provide a three-month deprecation period before we remove support of a specific
 version. The range of supported versions is based on the evaluation of:
 
 - Our own needs.
 - The versions supported by major managed Kubernetes providers.
 - The versions [supported by the Kubernetes community](https://kubernetes.io/docs/setup/release/version-skew-policy/#supported-versions).
 
-Currently, GitLab supports the following Kubernetes versions:
+GitLab supports the following Kubernetes versions, and you can upgrade your
+Kubernetes version to any supported version at any time:
 
 - 1.17
 - 1.16
 - 1.15
-- 1.14
+- 1.14 (deprecated, support ends on December 22, 2020)
 - 1.13 (deprecated, support ends on November 22, 2020)
 
 Some GitLab features may support versions outside the range provided here.
@@ -241,9 +244,18 @@ A Kubernetes cluster can be the destination for a deployment job. If
 
 ### Deployment variables
 
+Deployment variables require a valid [Deploy Token](../deploy_tokens/index.md) named
+[`gitlab-deploy-token`](../deploy_tokens/index.md#gitlab-deploy-token), and the
+following command in your deployment job script, for Kubernetes to access the registry:
+
+```plaintext
+kubectl create secret docker-registry gitlab-registry --docker-server="$CI_REGISTRY" --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run | kubectl apply -f -
+```
+
 The Kubernetes cluster integration exposes the following
 [deployment variables](../../../ci/variables/README.md#deployment-environment-variables) in the
-GitLab CI/CD build environment.
+GitLab CI/CD build environment to deployment jobs, which are jobs that have
+[defined a target environment](../../../ci/environments/index.md#defining-environments).
 
 | Variable | Description |
 | -------- | ----------- |
@@ -252,7 +264,7 @@ GitLab CI/CD build environment.
 | `KUBE_NAMESPACE` | The namespace associated with the project's deployment service account. In the format `<project_name>-<project_id>-<environment>`. For GitLab-managed clusters, a matching namespace is automatically created by GitLab in the cluster. If your cluster was created before GitLab 12.2, the default `KUBE_NAMESPACE` is set to `<project_name>-<project_id>`. |
 | `KUBE_CA_PEM_FILE` | Path to a file containing PEM data. Only present if a custom CA bundle was specified. |
 | `KUBE_CA_PEM` | (**deprecated**) Raw PEM data. Only if a custom CA bundle was specified. |
-| `KUBECONFIG` | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This config also embeds the same token defined in `KUBE_TOKEN` so you likely will only need this variable. This variable name is also automatically picked up by `kubectl` so you won't actually need to reference it explicitly if using `kubectl`. |
+| `KUBECONFIG` | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This configuration also embeds the same token defined in `KUBE_TOKEN` so you likely will only need this variable. This variable name is also automatically picked up by `kubectl` so you won't actually need to reference it explicitly if using `kubectl`. |
 | `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](#base-domain) for more information. |
 
 ### Custom namespace

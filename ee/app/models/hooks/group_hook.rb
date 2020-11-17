@@ -19,7 +19,8 @@ class GroupHook < WebHook
     :job_hooks,
     :pipeline_hooks,
     :wiki_page_hooks,
-    :deployment_hooks
+    :deployment_hooks,
+    :release_hooks
   ]
 
   belongs_to :group

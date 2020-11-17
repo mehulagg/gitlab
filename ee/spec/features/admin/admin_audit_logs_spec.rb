@@ -112,6 +112,73 @@ RSpec.describe 'Admin::AuditLogs', :js do
       it_behaves_like 'audit events date filter'
     end
 
+    describe 'personal access token events' do
+      shared_examples 'personal access token audit event' do
+        it 'show personal access token event details' do
+          visit admin_audit_logs_path
+
+          expect(page).to have_content(message)
+        end
+      end
+
+      context 'create personal access token' do
+        let(:personal_access_token_params) { { name: 'Test token', impersonation: false, scopes: [:api], expires_at: Date.today + 1.month } }
+        let(:personal_access_token) do
+          PersonalAccessTokens::CreateService.new(
+            current_user: admin, target_user: user, params: personal_access_token_params
+          ).execute.payload[:personal_access_token]
+        end
+
+        context 'when creation succeeds' do
+          before do
+            personal_access_token
+          end
+
+          let(:message) { "Created personal access token with id #{personal_access_token.id}" }
+
+          it_behaves_like 'personal access token audit event'
+        end
+
+        context 'when creation fails' do
+          before do
+            allow_any_instance_of(ServiceResponse).to receive(:success?).and_return(false)
+            allow_any_instance_of(ServiceResponse).to receive(:message).and_return('error')
+            personal_access_token
+          end
+
+          let(:message) { "Attempted to create personal access token but failed with message: error" }
+
+          it_behaves_like 'personal access token audit event'
+        end
+      end
+
+      context 'revoke personal access token' do
+        let(:personal_access_token) { create(:personal_access_token, user: user) }
+
+        context 'when revocation succeeds' do
+          before do
+            PersonalAccessTokens::RevokeService.new(admin, token: personal_access_token).execute
+          end
+
+          let(:message) { "Revoked personal access token with id #{personal_access_token.id}" }
+
+          it_behaves_like 'personal access token audit event'
+        end
+
+        context 'when revocation fails' do
+          let(:message) { "Attempted to revoke personal access token with id #{personal_access_token.id} but failed with message: error" }
+
+          before do
+            allow_any_instance_of(ServiceResponse).to receive(:success?).and_return(false)
+            allow_any_instance_of(ServiceResponse).to receive(:message).and_return('error')
+            PersonalAccessTokens::RevokeService.new(admin, token: personal_access_token).execute
+          end
+
+          it_behaves_like 'personal access token audit event'
+        end
+      end
+    end
+
     describe 'impersonated events' do
       it 'show impersonation details' do
         visit admin_user_path(user)

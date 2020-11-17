@@ -30,6 +30,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     it { is_expected.to have_many(:resource_state_events) }
     it { is_expected.to have_many(:draft_notes) }
     it { is_expected.to have_many(:reviews).inverse_of(:merge_request) }
+    it { is_expected.to have_one(:cleanup_schedule).inverse_of(:merge_request) }
 
     context 'for forks' do
       let!(:project) { create(:project) }
@@ -77,6 +78,18 @@ RSpec.describe MergeRequest, factory_default: :keep do
     it 'returns MRs ordered by merged_at descending' do
       expect(described_class.order_merged_at_desc).to eq([newer_mr, older_mr])
     end
+  end
+
+  describe '.with_jira_issue_keys' do
+    let_it_be(:mr_with_jira_title) { create(:merge_request, :unique_branches, title: 'Fix TEST-123') }
+    let_it_be(:mr_with_jira_description) { create(:merge_request, :unique_branches, description: 'this closes TEST-321') }
+    let_it_be(:mr_without_jira_reference) { create(:merge_request, :unique_branches) }
+
+    subject { described_class.with_jira_issue_keys }
+
+    it { is_expected.to contain_exactly(mr_with_jira_title, mr_with_jira_description) }
+
+    it { is_expected.not_to include(mr_without_jira_reference) }
   end
 
   describe '#squash_in_progress?' do
@@ -3520,6 +3533,25 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '#merge_base_pipeline' do
+    let(:merge_request) do
+      create(:merge_request, :with_merge_request_pipeline)
+    end
+
+    let(:merge_base_pipeline) do
+      create(:ci_pipeline, ref: merge_request.target_branch, sha: merge_request.target_branch_sha)
+    end
+
+    before do
+      merge_base_pipeline
+      merge_request.update_head_pipeline
+    end
+
+    it 'returns a pipeline pointing to a commit on the target ref' do
+      expect(merge_request.merge_base_pipeline).to eq(merge_base_pipeline)
+    end
+  end
+
   describe '#has_commits?' do
     it 'returns true when merge request diff has commits' do
       allow(subject.merge_request_diff).to receive(:commits_count)
@@ -4209,14 +4241,26 @@ RSpec.describe MergeRequest, factory_default: :keep do
         it 'returns true' do
           expect(subject.diffable_merge_ref?).to eq(true)
         end
-      end
-    end
 
-    context 'merge request cannot be merged' do
-      it 'returns false' do
-        subject.mark_as_unchecked!
+        context 'merge request cannot be merged' do
+          before do
+            subject.mark_as_unchecked!
+          end
 
-        expect(subject.diffable_merge_ref?).to eq(false)
+          it 'returns false' do
+            expect(subject.diffable_merge_ref?).to eq(true)
+          end
+
+          context 'display_merge_conflicts_in_diff is disabled' do
+            before do
+              stub_feature_flags(display_merge_conflicts_in_diff: false)
+            end
+
+            it 'returns false' do
+              expect(subject.diffable_merge_ref?).to eq(false)
+            end
+          end
+        end
       end
     end
   end

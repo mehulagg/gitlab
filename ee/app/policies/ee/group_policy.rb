@@ -61,16 +61,24 @@ module EE
         !::Gitlab::IpRestriction::Enforcer.new(subject).allows_current_ip?
       end
 
-      condition(:dependency_proxy_available) do
-        @subject.feature_available?(:dependency_proxy)
-      end
-
       condition(:cluster_deployments_available) do
         @subject.feature_available?(:cluster_deployments)
       end
 
-      condition(:group_saml_enabled) do
-        @subject.saml_provider&.enabled?
+      condition(:group_saml_config_enabled, scope: :global) do
+        ::Gitlab::Auth::GroupSaml::Config.enabled?
+      end
+
+      condition(:group_saml_available, scope: :subject) do
+        !@subject.subgroup? && @subject.feature_available?(:group_saml)
+      end
+
+      condition(:group_saml_enabled, scope: :subject) do
+        @subject.saml_enabled?
+      end
+
+      condition(:group_saml_group_sync_available, scope: :subject) do
+        @subject.feature_available?(:group_saml_group_sync)
       end
 
       condition(:group_timelogs_available) do
@@ -140,7 +148,7 @@ module EE
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
 
-      rule { has_access & group_repository_analytics_available }
+      rule { reporter & group_repository_analytics_available }
         .enable :read_group_repository_analytics
 
       rule { reporter & group_merge_request_analytics_available }
@@ -153,12 +161,6 @@ module EE
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
         enable :change_prevent_group_forking
       end
-
-      rule { can?(:read_group) & dependency_proxy_available }
-        .enable :read_dependency_proxy
-
-      rule { developer & dependency_proxy_available }
-        .enable :admin_dependency_proxy
 
       rule { can?(:read_group) & epics_available }.enable :read_epic
 
@@ -198,7 +200,11 @@ module EE
         enable :read_group_security_dashboard
       end
 
-      rule { admin | owner }.enable :admin_group_saml
+      rule { group_saml_config_enabled & group_saml_available & (admin | owner) }.enable :admin_group_saml
+
+      rule { group_saml_group_sync_available & group_saml_enabled & can?(:admin_group_saml) }.policy do
+        enable :admin_saml_group_links
+      end
 
       rule { admin | (can_owners_manage_ldap & owner) }.policy do
         enable :admin_ldap_group_links
@@ -230,6 +236,7 @@ module EE
       rule { admin | owner }.policy do
         enable :read_group_compliance_dashboard
         enable :read_group_credentials_inventory
+        enable :admin_group_credentials_inventory
       end
 
       rule { needs_new_sso_session }.policy do
@@ -250,10 +257,8 @@ module EE
         prevent :update_default_branch_protection
       end
 
-      # TODO: Switch to `feature_enabled?` when we enable the feature flag by default
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/207888
       desc "Group has wiki disabled"
-      condition(:wiki_disabled, score: 32) { !@subject.beta_feature_available?(:group_wikis) }
+      condition(:wiki_disabled, score: 32) { !@subject.feature_available?(:group_wikis) }
 
       rule { wiki_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:wiki))
@@ -330,7 +335,8 @@ module EE
     def resource_access_token_available?
       return true unless ::Gitlab.com?
 
-      group.feature_available_non_trial?(:resource_access_token)
+      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
+        group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

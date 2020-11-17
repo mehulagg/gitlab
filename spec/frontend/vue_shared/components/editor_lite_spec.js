@@ -10,6 +10,7 @@ describe('Editor Lite component', () => {
   const onDidChangeModelContent = jest.fn();
   const updateModelLanguage = jest.fn();
   const getValue = jest.fn();
+  const setValue = jest.fn();
   const value = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
   const fileName = 'lorem.txt';
   const fileGlobalId = 'snippet_777';
@@ -17,6 +18,7 @@ describe('Editor Lite component', () => {
     onDidChangeModelContent,
     updateModelLanguage,
     getValue,
+    setValue,
     dispose: jest.fn(),
   }));
   Editor.mockImplementation(() => {
@@ -68,7 +70,7 @@ describe('Editor Lite component', () => {
       createComponent({ value: undefined });
 
       expect(spy).not.toHaveBeenCalled();
-      expect(wrapper.find('#editor').exists()).toBe(true);
+      expect(wrapper.find('[id^="editor-lite-"]').exists()).toBe(true);
     });
 
     it('initialises Editor Lite instance', () => {
@@ -113,6 +115,30 @@ describe('Editor Lite component', () => {
       await el.dispatchEvent(new Event('editor-ready'));
 
       expect(wrapper.emitted()['editor-ready']).toBeDefined();
+    });
+
+    describe('reaction to the value update', () => {
+      it('reacts to the changes in the passed value', async () => {
+        const newValue = 'New Value';
+
+        wrapper.setProps({
+          value: newValue,
+        });
+
+        await nextTick();
+        expect(setValue).toHaveBeenCalledWith(newValue);
+      });
+
+      it("does not update value if the passed one is exactly the same as the editor's content", async () => {
+        const newValue = `${value}`; // to make sure we're creating a new String with the same content and not just a reference
+
+        wrapper.setProps({
+          value: newValue,
+        });
+
+        await nextTick();
+        expect(setValue).not.toHaveBeenCalled();
+      });
     });
   });
 });

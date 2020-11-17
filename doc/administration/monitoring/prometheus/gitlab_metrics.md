@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -13,7 +13,6 @@ To enable the GitLab Prometheus metrics:
 1. Find the **Metrics - Prometheus** section, and click **Enable Prometheus Metrics**.
 1. [Restart GitLab](../../restart_gitlab.md#omnibus-gitlab-restart) for the changes to take effect.
 
-NOTE: **Note:**
 For installations from source you must configure it yourself.
 
 ## Collecting the metrics
@@ -91,8 +90,8 @@ The following metrics are available:
 | `gitlab_transaction_rails_queue_duration_total`                | Counter   |                    9.4 | Measures latency between GitLab Workhorse forwarding a request to Rails                             | `controller`, `action`                              |
 | `gitlab_transaction_view_duration_total`                       | Counter   |                    9.4 | Duration for views                                                                                  | `controller`, `action`, `view`                      |
 | `gitlab_view_rendering_duration_seconds`                       | Histogram |                   10.2 | Duration for views (histogram)                                                                      | `controller`, `action`, `view`                      |
-| `http_requests_total`                                          | Counter   |                    9.4 | Rack request count                                                                                  | `method`                                            |
-| `http_request_duration_seconds`                                | Histogram |                    9.4 | HTTP response time from rack middleware                                                             | `method`, `status`                                  |
+| `http_requests_total`                                          | Counter   |                    9.4 | Rack request count                                                                                  | `method`, `status`                                  |
+| `http_request_duration_seconds`                                | Histogram |                    9.4 | HTTP response time from rack middleware                                                             | `method`                                            |
 | `gitlab_transaction_db_count_total`                            | Counter   |                   13.1 | Counter for total number of SQL calls                                                               | `controller`, `action`                              |
 | `gitlab_transaction_db_write_count_total`                      | Counter   |                   13.1 | Counter for total number of write SQL calls                                                         | `controller`, `action`                              |
 | `gitlab_transaction_db_cached_count_total`                     | Counter   |                   13.1 | Counter for total number of cached SQL calls                                                        | `controller`, `action`                              |
@@ -113,6 +112,8 @@ The following metrics are available:
 | `action_cable_pool_largest_size`                               | Gauge     |                   13.4 | Largest number of worker threads observed so far in ActionCable thread pool | `server_mode` |
 | `action_cable_pool_pending_tasks`                              | Gauge     |                   13.4 | Number of tasks waiting to be executed in ActionCable thread pool | `server_mode` |
 | `action_cable_pool_tasks_total`                                | Gauge     |                   13.4 | Total number of tasks executed in ActionCable thread pool | `server_mode` |
+| `gitlab_issuable_fast_count_by_state_total`                    | Counter   |                   13.5 | Total number of row count operations on issue/merge request list pages | |
+| `gitlab_issuable_fast_count_by_state_failures_total`           | Counter   |                   13.5 | Number of soft-failed row count operations on issue/merge request list pages | |
 
 ## Metrics controlled by a feature flag
 
@@ -207,6 +208,7 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `limited_capacity_worker_running_jobs`         | Gauge   | 13.5  | Number of running jobs | `worker` |
 | `limited_capacity_worker_max_running_jobs`     | Gauge   | 13.5  | Maximum number of running jobs | `worker` |
 | `limited_capacity_worker_remaining_work_count` | Gauge   | 13.5  | Number of jobs waiting to be enqueued | `worker` |
+| `destroyed_job_artifacts_count_total`          | Counter | 13.6  | Number of destroyed expired job artifacts | |
 
 ## Database load balancing metrics **(PREMIUM ONLY)**
 

@@ -12,4 +12,8 @@ class DastScannerProfile < ApplicationRecord
     passive: 1,
     active: 2
   }
+
+  def full_scan_enabled?
+    scan_type == 'active'
+  end
 end

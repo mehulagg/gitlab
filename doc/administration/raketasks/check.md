@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Integrity check Rake task **(CORE ONLY)**
 
 GitLab provides Rake tasks to check the integrity of various components.
@@ -148,7 +154,7 @@ above.
 for the affected project(s).
 
 If the issue persists, try triggering `gc` via the
-[Rails Console](../troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session):
+[Rails Console](../operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 p = Project.find_by_path("project-name")
@@ -171,7 +177,7 @@ Checking integrity of Uploads
 Done!
 ```
 
-To delete these references to remote uploads that were deleted externally, open the [GitLab Rails Console](../troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session) and run:
+To delete these references to remote uploads that were deleted externally, open the [GitLab Rails Console](../operations/rails_console.md#starting-a-rails-console-session) and run:
 
 ```ruby
 uploads_deleted=0

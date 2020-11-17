@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
   include Impersonation
   include Gitlab::Logging::CloudflareHelper
   include Gitlab::Utils::StrongMemoize
-  include ControllerWithFeatureCategory
+  include ::Gitlab::WithFeatureCategory
 
   before_action :authenticate_user!, except: [:route_not_found]
   before_action :enforce_terms!, if: :should_enforce_terms?
@@ -121,7 +121,7 @@ class ApplicationController < ActionController::Base
   end
 
   def route_not_found
-    if current_user
+    if current_user || browser.bot.search_engine?
       not_found
     else
       store_location_for(:user, request.fullpath) unless request.xhr?
@@ -266,11 +266,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def stream_headers
+    headers['Content-Length'] = nil
+    headers['X-Accel-Buffering'] = 'no' # Disable buffering on Nginx
+    headers['Last-Modified'] = '0' # Prevent buffering via Rack::ETag middleware
+  end
+
   def default_headers
     headers['X-Frame-Options'] = 'DENY'
     headers['X-XSS-Protection'] = '1; mode=block'
     headers['X-UA-Compatible'] = 'IE=edge'
     headers['X-Content-Type-Options'] = 'nosniff'
+    headers[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
   end
 
   def default_cache_headers
@@ -465,7 +472,8 @@ class ApplicationController < ActionController::Base
       user: -> { auth_user if strong_memoized?(:auth_user) },
       project: -> { @project if @project&.persisted? },
       namespace: -> { @group if @group&.persisted? },
-      caller_id: full_action_name) do
+      caller_id: caller_id,
+      feature_category: feature_category) do
       yield
     ensure
       @current_context = Labkit::Context.current.to_h
@@ -547,8 +555,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def full_action_name
+  def caller_id
     "#{self.class.name}##{action_name}"
+  end
+
+  def feature_category
+    self.class.feature_category_for_action(action_name).to_s
   end
 
   def required_signup_info

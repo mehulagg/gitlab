@@ -151,7 +151,7 @@ RSpec.describe API::Projects do
           end
 
           it 'exposes framework names as array of strings' do
-            expect(json_response['compliance_frameworks']).to contain_exactly('sox')
+            expect(json_response['compliance_frameworks']).to contain_exactly(project.compliance_framework_setting.compliance_management_framework.name)
           end
         end
 

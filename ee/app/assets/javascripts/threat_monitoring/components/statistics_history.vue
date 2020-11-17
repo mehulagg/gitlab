@@ -105,11 +105,11 @@ export default {
     :format-tooltip-text="formatTooltipText"
     @created="onChartCreated"
   >
-    <template #tooltipTitle>
+    <template #tooltip-title>
       <div>{{ tooltipTitle }} ({{ chartOptions.xAxis.name }})</div>
     </template>
 
-    <template #tooltipContent>
+    <template #tooltip-content>
       <div v-for="series in tooltipSeriesData" :key="series.seriesName" class="d-flex">
         <div class="flex-grow-1 mr-5">{{ series.seriesName }}</div>
         <div class="font-weight-bold">{{ series.value[1] }}</div>

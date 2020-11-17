@@ -6,11 +6,12 @@ import {
   fetchReleasesGraphQl,
   fetchReleasesRest,
   receiveReleasesError,
+  setSorting,
 } from '~/releases/stores/modules/list/actions';
 import createState from '~/releases/stores/modules/list/state';
 import * as types from '~/releases/stores/modules/list/mutation_types';
 import api from '~/api';
-import { gqClient, convertGraphQLResponse } from '~/releases/util';
+import { gqClient, convertAllReleasesGraphQLResponse } from '~/releases/util';
 import {
   normalizeHeaders,
   parseIntPagination,
@@ -114,7 +115,7 @@ describe('Releases State actions', () => {
         it('makes a GraphQl query with a first variable', () => {
           expect(gqClient.query).toHaveBeenCalledWith({
             query: allReleasesQuery,
-            variables: { fullPath: projectPath, first: PAGE_SIZE },
+            variables: { fullPath: projectPath, first: PAGE_SIZE, sort: 'RELEASED_AT_DESC' },
           });
         });
       });
@@ -127,7 +128,7 @@ describe('Releases State actions', () => {
         it('makes a GraphQl query with last and before variables', () => {
           expect(gqClient.query).toHaveBeenCalledWith({
             query: allReleasesQuery,
-            variables: { fullPath: projectPath, last: PAGE_SIZE, before },
+            variables: { fullPath: projectPath, last: PAGE_SIZE, before, sort: 'RELEASED_AT_DESC' },
           });
         });
       });
@@ -140,7 +141,7 @@ describe('Releases State actions', () => {
         it('makes a GraphQl query with first and after variables', () => {
           expect(gqClient.query).toHaveBeenCalledWith({
             query: allReleasesQuery,
-            variables: { fullPath: projectPath, first: PAGE_SIZE, after },
+            variables: { fullPath: projectPath, first: PAGE_SIZE, after, sort: 'RELEASED_AT_DESC' },
           });
         });
       });
@@ -156,6 +157,29 @@ describe('Releases State actions', () => {
           );
         });
       });
+
+      describe('when the sort parameters are provided', () => {
+        it.each`
+          sort      | orderBy          | ReleaseSort
+          ${'asc'}  | ${'released_at'} | ${'RELEASED_AT_ASC'}
+          ${'desc'} | ${'released_at'} | ${'RELEASED_AT_DESC'}
+          ${'asc'}  | ${'created_at'}  | ${'CREATED_ASC'}
+          ${'desc'} | ${'created_at'}  | ${'CREATED_DESC'}
+        `(
+          'correctly sets $ReleaseSort based on $sort and $orderBy',
+          ({ sort, orderBy, ReleaseSort }) => {
+            mockedState.sorting.sort = sort;
+            mockedState.sorting.orderBy = orderBy;
+
+            fetchReleasesGraphQl(vuexParams, { before: undefined, after: undefined });
+
+            expect(gqClient.query).toHaveBeenCalledWith({
+              query: allReleasesQuery,
+              variables: { fullPath: projectPath, first: PAGE_SIZE, sort: ReleaseSort },
+            });
+          },
+        );
+      });
     });
 
     describe('when the request is successful', () => {
@@ -164,7 +188,7 @@ describe('Releases State actions', () => {
       });
 
       it(`commits ${types.REQUEST_RELEASES} and ${types.RECEIVE_RELEASES_SUCCESS}`, () => {
-        const convertedResponse = convertGraphQLResponse(graphqlReleasesResponse);
+        const convertedResponse = convertAllReleasesGraphQLResponse(graphqlReleasesResponse);
 
         return testAction(
           fetchReleasesGraphQl,
@@ -230,7 +254,11 @@ describe('Releases State actions', () => {
         });
 
         it('makes a REST query with a page query parameter', () => {
-          expect(api.releases).toHaveBeenCalledWith(projectId, { page });
+          expect(api.releases).toHaveBeenCalledWith(projectId, {
+            page,
+            order_by: 'released_at',
+            sort: 'desc',
+          });
         });
       });
     });
@@ -298,6 +326,18 @@ describe('Releases State actions', () => {
         null,
         mockedState,
         [{ type: types.RECEIVE_RELEASES_ERROR }],
+        [],
+      );
+    });
+  });
+
+  describe('setSorting', () => {
+    it('should commit SET_SORTING', () => {
+      return testAction(
+        setSorting,
+        { orderBy: 'released_at', sort: 'asc' },
+        null,
+        [{ type: types.SET_SORTING, payload: { orderBy: 'released_at', sort: 'asc' } }],
         [],
       );
     });

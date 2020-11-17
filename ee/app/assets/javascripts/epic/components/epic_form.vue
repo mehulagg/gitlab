@@ -118,7 +118,7 @@ export default {
     <h3 class="page-title gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-pb-5 gl-mb-6">
       {{ __('New Epic') }}
     </h3>
-    <gl-form class="common-note-form new-epic-form" @submit="save">
+    <gl-form class="common-note-form new-epic-form" @submit.prevent="save">
       <gl-form-group :label="__('Title')" label-for="epic-title">
         <gl-form-input
           id="epic-title"

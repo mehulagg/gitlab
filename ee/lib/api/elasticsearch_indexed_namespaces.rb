@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ElasticsearchIndexedNamespaces < Grape::API::Instance
+  class ElasticsearchIndexedNamespaces < ::API::Base
     before { authenticated_as_admin! }
+
+    feature_category :global_search
 
     resource :elasticsearch_indexed_namespaces do
       desc 'Rollout namespaces to be indexed up to n%' do

@@ -63,7 +63,7 @@ export default {
 
     <!-- We need to put an extra span to avoid separator between link & popover -->
     <span v-if="showMoreLink">
-      <gl-link ref="moreLink">{{ nMoreMessage }}</gl-link>
+      <gl-link ref="moreLink" class="gl-white-space-nowrap">{{ nMoreMessage }}</gl-link>
 
       <gl-popover
         :target="() => $refs.moreLink.$el"

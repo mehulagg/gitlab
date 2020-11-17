@@ -16,11 +16,8 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
+  inject: ['projectFullPath'],
   props: {
-    projectFullPath: {
-      type: String,
-      required: true,
-    },
     filters: {
       type: Object,
       required: false,
@@ -113,6 +110,7 @@ export default {
     },
   },
   i18n: {
+    API_FUZZING: __('API Fuzzing'),
     CONTAINER_SCANNING: __('Container Scanning'),
     COVERAGE_FUZZING: __('Coverage Fuzzing'),
     SECRET_DETECTION: __('Secret Detection'),

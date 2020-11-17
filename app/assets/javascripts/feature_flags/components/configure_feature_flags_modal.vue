@@ -2,6 +2,7 @@
 import {
   GlFormGroup,
   GlFormInput,
+  GlFormInputGroup,
   GlModal,
   GlTooltipDirective,
   GlLoadingIcon,
@@ -14,20 +15,10 @@ import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 import Callout from '~/vue_shared/components/callout.vue';
 
 export default {
-  cancelActionLabel: __('Close'),
-  modalTitle: s__('FeatureFlags|Configure feature flags'),
-  apiUrlLabelText: s__('FeatureFlags|API URL'),
-  apiUrlCopyText: __('Copy URL'),
-  instanceIdLabelText: s__('FeatureFlags|Instance ID'),
-  instanceIdCopyText: __('Copy ID'),
-  instanceIdRegenerateError: __('Unable to generate new instance ID'),
-  instanceIdRegenerateText: __(
-    'Regenerating the instance ID can break integration depending on the client you are using.',
-  ),
-  instanceIdRegenerateActionLabel: __('Regenerate instance ID'),
   components: {
     GlFormGroup,
     GlFormInput,
+    GlFormInputGroup,
     GlModal,
     ModalCopyButton,
     GlIcon,
@@ -42,18 +33,6 @@ export default {
   },
 
   props: {
-    helpClientLibrariesPath: {
-      type: String,
-      required: true,
-    },
-    helpClientExamplePath: {
-      type: String,
-      required: true,
-    },
-    apiUrl: {
-      type: String,
-      required: true,
-    },
     instanceId: {
       type: String,
       required: true,
@@ -76,7 +55,26 @@ export default {
       required: true,
     },
   },
-  inject: ['projectName', 'featureFlagsHelpPagePath'],
+  inject: [
+    'projectName',
+    'featureFlagsHelpPagePath',
+    'unleashApiUrl',
+    'featureFlagsClientExampleHelpPagePath',
+    'featureFlagsClientLibrariesHelpPagePath',
+  ],
+  translations: {
+    cancelActionLabel: __('Close'),
+    modalTitle: s__('FeatureFlags|Configure feature flags'),
+    apiUrlLabelText: s__('FeatureFlags|API URL'),
+    apiUrlCopyText: __('Copy URL'),
+    instanceIdLabelText: s__('FeatureFlags|Instance ID'),
+    instanceIdCopyText: __('Copy ID'),
+    instanceIdRegenerateError: __('Unable to generate new instance ID'),
+    instanceIdRegenerateText: __(
+      'Regenerating the instance ID can break integration depending on the client you are using.',
+    ),
+    instanceIdRegenerateActionLabel: __('Regenerate instance ID'),
+  },
   data() {
     return {
       enteredProjectName: '',
@@ -85,7 +83,7 @@ export default {
   computed: {
     cancelActionProps() {
       return {
-        text: this.$options.cancelActionLabel,
+        text: this.$options.translations.cancelActionLabel,
       };
     },
     canRegenerateInstanceId() {
@@ -94,7 +92,7 @@ export default {
     regenerateInstanceIdActionProps() {
       return this.canUserRotateToken
         ? {
-            text: this.$options.instanceIdRegenerateActionLabel,
+            text: this.$options.translations.instanceIdRegenerateActionLabel,
             attributes: [
               {
                 category: 'secondary',
@@ -129,7 +127,7 @@ export default {
     @primary.prevent="rotateToken"
   >
     <template #modal-title>
-      {{ $options.modalTitle }}
+      {{ $options.translations.modalTitle }}
     </template>
     <p>
       <gl-sprintf
@@ -140,7 +138,11 @@ export default {
         "
       >
         <template #docsLinkAnchored="{ content }">
-          <gl-link :href="helpClientLibrariesPath" target="_blank" data-testid="help-client-link">
+          <gl-link
+            :href="featureFlagsClientLibrariesHelpPagePath"
+            target="_blank"
+            data-testid="help-client-link"
+          >
             {{ content }}
           </gl-link>
         </template>
@@ -161,71 +163,59 @@ export default {
         "
       >
         <template #link="{ content }">
-          <gl-link :href="helpClientExamplePath" target="_blank">{{ content }}</gl-link>
+          <gl-link :href="featureFlagsClientExampleHelpPagePath" target="_blank">{{
+            content
+          }}</gl-link>
         </template>
       </gl-sprintf>
     </callout>
-    <div class="form-group">
-      <label for="api_url" class="label-bold">{{ $options.apiUrlLabelText }}</label>
-      <div class="input-group">
-        <input
-          id="api_url"
-          :value="apiUrl"
-          readonly
-          class="form-control"
-          type="text"
-          name="api_url"
-        />
-        <span class="input-group-append">
+    <gl-form-group :label="$options.translations.apiUrlLabelText" label-for="api-url">
+      <gl-form-input-group id="api-url" :value="unleashApiUrl" readonly type="text" name="api-url">
+        <template #append>
           <modal-copy-button
-            :text="apiUrl"
-            :title="$options.apiUrlCopyText"
+            :text="unleashApiUrl"
+            :title="$options.translations.apiUrlCopyText"
             :modal-id="modalId"
-            class="input-group-text"
           />
-        </span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="instance_id" class="label-bold">{{ $options.instanceIdLabelText }}</label>
-      <div class="input-group">
-        <input
+        </template>
+      </gl-form-input-group>
+    </gl-form-group>
+    <gl-form-group :label="$options.translations.instanceIdLabelText" label-for="instance_id">
+      <gl-form-input-group>
+        <gl-form-input
           id="instance_id"
           :value="instanceId"
-          class="form-control"
           type="text"
           name="instance_id"
           readonly
           :disabled="isRotating"
         />
-
         <gl-loading-icon
           v-if="isRotating"
-          class="position-absolute align-self-center instance-id-loading-icon"
+          class="gl-absolute gl-align-self-center gl-right-5 gl-mr-7"
         />
 
-        <div class="input-group-append">
+        <template #append>
           <modal-copy-button
             :text="instanceId"
-            :title="$options.instanceIdCopyText"
+            :title="$options.translations.instanceIdCopyText"
             :modal-id="modalId"
             :disabled="isRotating"
-            class="input-group-text"
           />
-        </div>
-      </div>
-    </div>
+        </template>
+      </gl-form-input-group>
+    </gl-form-group>
     <div
       v-if="hasRotateError"
-      class="text-danger d-flex align-items-center font-weight-normal mb-2"
+      class="gl-text-red-500 gl-display-flex gl-align-items-center gl-font-weight-normal gl-mb-3"
     >
-      <gl-icon name="warning" class="mr-1" />
-      <span>{{ $options.instanceIdRegenerateError }}</span>
+      <gl-icon name="warning" class="gl-mr-2" />
+      <span>{{ $options.translations.instanceIdRegenerateError }}</span>
     </div>
     <callout
       v-if="canUserRotateToken"
       category="danger"
-      :message="$options.instanceIdRegenerateText"
+      :message="$options.translations.instanceIdRegenerateText"
     />
     <p v-if="canUserRotateToken" data-testid="prevent-accident-text">
       <gl-sprintf

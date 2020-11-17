@@ -32,8 +32,8 @@ The results are sorted by the priority of the vulnerability:
 1. Everything else
 
 A pipeline consists of multiple jobs, including SAST and DAST scanning. If any job fails to finish
-for any reason, the security dashboard doesn't show SAST scanner output. For example, if the SAST
-job finishes but the DAST job fails, the security dashboard doesn't show SAST results. On failure,
+for any reason, the security dashboard does not show SAST scanner output. For example, if the SAST
+job finishes but the DAST job fails, the security dashboard does not show SAST results. On failure,
 the analyzer outputs an [exit code](../../../development/integrations/secure.md#exit-code).
 
 ## Use cases
@@ -71,17 +71,21 @@ You can also [view our language roadmap](https://about.gitlab.com/direction/secu
 | C/C++                                                                                                                                            | [Flawfinder](https://github.com/david-a-wheeler/flawfinder)                                                   | 10.7                                          |
 | Elixir (Phoenix)                                                                                                                                 | [Sobelow](https://github.com/nccgroup/sobelow)                                                                | 11.1                                         |
 | Go                                                                                                                                               | [Gosec](https://github.com/securego/gosec)                                                                    | 10.7                                          |
-| Groovy ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) and [SBT](https://www.scala-sbt.org/)) | [SpotBugs](https://spotbugs.github.io/) with the     [find-sec-bugs](https://find-sec-bugs.github.io/) plugin | 11.3 (Gradle) & 11.9 (Ant, Maven, SBT)        |
+| Groovy ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/)) | [SpotBugs](https://spotbugs.github.io/) with the     [find-sec-bugs](https://find-sec-bugs.github.io/) plugin | 11.3 (Gradle) & 11.9 (Ant, Maven, SBT)        |
 | Helm Charts                                                                                                                                      | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 13.1                                          |
-| Java ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) and [SBT](https://www.scala-sbt.org/))   | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 10.6 (Maven), 10.8 (Gradle) & 11.9 (Ant, SBT) |
+| Java ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/))   | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 10.6 (Maven), 10.8 (Gradle) & 11.9 (Ant, SBT) |
+| Java (Android)                                                                                                                                   | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
 | JavaScript                                                                                                                                       | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.8                                          |
+| Kotlin (Android)                                                                                                                                 | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
 | Kubernetes manifests                                                                                                                             | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 12.6                                          |
 | Node.js                                                                                                                                          | [NodeJsScan](https://github.com/ajinabraham/NodeJsScan)                                                       | 11.1                                          |
+| Objective-C (iOS)                                                                                                                                | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
 | PHP                                                                                                                                              | [phpcs-security-audit](https://github.com/FloeDesignTechnologies/phpcs-security-audit)                        | 10.8                                          |
 | Python ([pip](https://pip.pypa.io/en/stable/))                                                                                                   | [bandit](https://github.com/PyCQA/bandit)                                                                     | 10.3                                          |
 | React                                                                                                                                            | [ESLint react plugin](https://github.com/yannickcr/eslint-plugin-react)                                       | 12.5                                          |
 | Ruby on Rails                                                                                                                                    | [brakeman](https://brakemanscanner.org)                                                                       | 10.3                                          |
-| Scala ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) and [SBT](https://www.scala-sbt.org/))  | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 11.0 (SBT) & 11.9 (Ant, Gradle, Maven)        |
+| Scala ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/), and [SBT](https://www.scala-sbt.org/))  | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 11.0 (SBT) & 11.9 (Ant, Gradle, Maven)        |
+| Swift (iOS)                                                                                                                                      | [MobSF (beta)](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                      | 13.5                                          |
 | TypeScript                                                                                                                                       | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.9, [merged](https://gitlab.com/gitlab-org/gitlab/-/issues/36059) with ESLint in 13.2                                                                               |
 
 Note that the Java analyzers can also be used for variants like the
@@ -103,7 +107,7 @@ as shown in the following table:
 | [Configure SAST Scanners](#configuration)                                          | **{check-circle}**  | **{check-circle}** |
 | [Customize SAST Settings](#customizing-the-sast-settings)                          | **{check-circle}**  | **{check-circle}** |
 | View [JSON Report](#reports-json-format)                                           | **{check-circle}**  | **{check-circle}** |
-| [Presentation of JSON Report in Merge Request](#overview)                          | **{dotted-circle}** | **{check-circle}** |
+| Presentation of JSON Report in Merge Request                          | **{dotted-circle}** | **{check-circle}** |
 | [Interaction with Vulnerabilities](#interacting-with-the-vulnerabilities) | **{dotted-circle}** | **{check-circle}** |
 | [Access to Security Dashboard](#security-dashboard)                       | **{dotted-circle}** | **{check-circle}** |
 | [Configure SAST in the UI](#configure-sast-in-the-ui)                     | **{dotted-circle}** | **{check-circle}** |
@@ -154,11 +158,11 @@ page:
 
 1. From the project's home page, go to **Security & Compliance** > **Configuration** in the
    left sidebar.
-1. If the project does not have a `gitlab-ci.yml` file, click **Enable** in the Static Application Security Testing (SAST) row, otherwise click **Configure**.
+1. If the project does not have a `.gitlab-ci.yml` file, click **Enable** in the Static Application Security Testing (SAST) row, otherwise click **Configure**.
 1. Enter the custom SAST values.
 
     Custom values are stored in the `.gitlab-ci.yml` file. For variables not in the SAST Configuration page, their values are left unchanged. Default values are inherited from the GitLab SAST template.
-1. Optionally, expand the **SAST analyzers** section, select individual [SAST analyzers](./analyzers.md) and enter custom analyzer values.
+1. Optionally, expand the **SAST analyzers** section, select individual [SAST analyzers](analyzers.md) and enter custom analyzer values.
 1. Click **Create Merge Request**.
 1. Review and merge the merge request.
 
@@ -201,6 +205,71 @@ spotbugs-sast:
     FAIL_NEVER: 1
 ```
 
+### Custom rulesets **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235382) in GitLab 13.5.
+
+You can customize the default scanning rules provided with SAST's NodeJS-Scan and Gosec analyzers.
+Customization allows you to exclude rules and modify the behavior of existing rules.
+
+To customize the default scanning rules, create a file containing custom rules. These rules
+are passed through to the analyzer's underlying scanner tool.
+
+To create a custom ruleset:
+
+1. Create a `.gitlab` directory at the root of your project, if one doesn't already exist.
+1. Create a custom ruleset file named `sast-ruleset.toml` in the `.gitlab` directory.
+1. In the `sast-ruleset.toml` file, do one of the following:
+
+   - Define a custom analyzer configuration. In this example, customized rules are defined for the
+     `nodejs-scan` scanner:
+
+     ```toml
+     [nodejs-scan]
+       description = 'custom ruleset for nodejs-scan'
+
+       [[nodejs-scan.passthrough]]
+         type  = "raw"
+         value = '''
+     - nodejs-extensions:
+       - .js
+
+       template-extensions:
+       - .new
+       - .hbs
+       - ''
+
+       ignore-filenames:
+     - skip.js
+
+       ignore-paths:
+       - __MACOSX
+       - skip_dir
+       - node_modules
+
+       ignore-extensions:
+       - .hbs
+
+       ignore-rules:
+       - regex_injection_dos
+       - pug_jade_template
+       - express_xss
+
+     '''
+     ```
+
+   - Provide the name of the file containing a custom analyzer configuration. In this example,
+     customized rules for the `gosec` scanner are contained in the file `gosec-config.json`:
+
+     ```toml
+     [gosec]
+       description = 'custom ruleset for gosec'
+
+       [[gosec.passthrough]]
+         type  = "file"
+         value = "gosec-config.json"
+     ```
+
 ### Using environment variables to pass credentials for private repositories
 
 Some analyzers require downloading the project's dependencies in order to
@@ -216,7 +285,7 @@ you can use the `MAVEN_CLI_OPTS` environment variable.
 
 Read more on [how to use private Maven repositories](../index.md#using-private-maven-repos).
 
-#### Enabling Kubesec analyzer
+### Enabling Kubesec analyzer
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12752) in GitLab Ultimate 12.6.
 
@@ -231,7 +300,7 @@ variables:
   SCAN_KUBERNETES_MANIFESTS: "true"
 ```
 
-#### Pre-compilation
+### Pre-compilation
 
 If your project requires custom build configurations, it can be preferable to avoid
 compilation during your SAST execution and instead pass all job artifacts from an
@@ -329,7 +398,7 @@ Some analyzers can be customized with environment variables.
 | Environment variable                  | Analyzer             | Description                                                                                                                                                                                                                                |
 |---------------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `SCAN_KUBERNETES_MANIFESTS`           | Kubesec              | Set to `"true"` to scan Kubernetes manifests.                                                                                                                                                                                              |
-| `KUBESEC_HELM_CHARTS_PATH`            | Kubesec              | Optional path to Helm charts that `helm` will use to generate a Kubernetes manifest that `kubesec` will scan. If dependencies are defined, `helm dependency build` should be ran in a `before_script` to fetch the necessary dependencies. |
+| `KUBESEC_HELM_CHARTS_PATH`            | Kubesec              | Optional path to Helm charts that `helm` uses to generate a Kubernetes manifest that `kubesec` will scan. If dependencies are defined, `helm dependency build` should be ran in a `before_script` to fetch the necessary dependencies. |
 | `KUBESEC_HELM_OPTIONS`                | Kubesec              | Additional arguments for the `helm` executable.                                                                                                                                                                                            |
 | `COMPILE`                             | SpotBugs             | Set to `false` to disable project compilation and dependency fetching. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195252) in GitLab 13.1.                                                                                  |
 | `ANT_HOME`                            | SpotBugs             | The `ANT_HOME` environment variable.                                                                                                                                                                                                       |
@@ -357,16 +426,32 @@ to the underlying SAST analyzer images if
 [the SAST vendored template](#configuration) is used.
 
 CAUTION: **Caution:**
-Variables having names starting with these prefixes will **not** be propagated to the SAST Docker container and/or
+Variables having names starting with these prefixes are **not** propagated to the SAST Docker container and/or
 analyzer containers: `DOCKER_`, `CI`, `GITLAB_`, `FF_`, `HOME`, `PWD`, `OLDPWD`, `PATH`, `SHLVL`, `HOSTNAME`.
+
+### Experimental features
+
+Receive early access to experimental features.
+
+Currently, this will enable scanning of iOS and Android apps via the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
+
+To enable experimental features, add the following to your `.gitlab-ci.yml` file:
+
+```yaml
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+variables:
+  SAST_EXPERIMENTAL_FEATURES: "true"
+```
 
 ## Reports JSON format
 
 The SAST tool emits a JSON report file. For more information, see the
 [schema for this report](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json).
 
-The JSON report file can be downloaded from the CI pipelines page, for more
-information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
+The JSON report file can be downloaded from the CI pipelines page, or the
+pipelines tab on merge requests. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
 
 Here's an example SAST report:
 
@@ -557,7 +642,7 @@ security reports without requiring internet access.
 ### Configure certificate checking of packages
 
 If a SAST job invokes a package manager, you must configure its certificate verification. In an
-offline environment, certificate verification with an external source isn't possible. Either use a
+offline environment, certificate verification with an external source is not possible. Either use a
 self-signed certificate or disable certificate verification. Refer to the package manager's
 documentation for instructions.
 

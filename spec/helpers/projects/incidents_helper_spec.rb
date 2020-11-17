@@ -21,7 +21,7 @@ RSpec.describe Projects::IncidentsHelper do
     subject(:data) { helper.incidents_data(project, params) }
 
     it 'returns frontend configuration' do
-      expect(data).to match(
+      expect(data).to include(
         'project-path' => project_path,
         'new-issue-path' => new_issue_path,
         'incident-template-name' => 'incident',
@@ -29,8 +29,8 @@ RSpec.describe Projects::IncidentsHelper do
         'issue-path' => issue_path,
         'empty-list-svg-path' => match_asset_path('/assets/illustrations/incident-empty-state.svg'),
         'text-query': 'search text',
-        'author-usernames-query': 'root',
-        'assignee-usernames-query': 'max.power'
+        'author-username-query': 'root',
+        'assignee-username-query': 'max.power'
       )
     end
   end

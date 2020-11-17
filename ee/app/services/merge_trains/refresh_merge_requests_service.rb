@@ -19,7 +19,7 @@ module MergeTrains
       result = queue.safe_execute([merge_request.id], lock_timeout: 15.minutes) do |items|
         logging("Successfuly obtained the exclusive lock. Found merge requests to be refreshed", merge_request_ids: items.map(&:to_i))
 
-        first_merge_request = MergeTrain.first_in_train_from(items)
+        first_merge_request = get_first_in_train(items)
         unsafe_refresh(first_merge_request)
       end
 
@@ -30,7 +30,7 @@ module MergeTrains
       if result[:status] == :finished && result[:new_items].present?
         logging("Found more merge requests to be refreshed", merge_request_ids: result[:new_items].map(&:to_i))
 
-        MergeTrain.first_in_train_from(result[:new_items]).try do |first_merge_request|
+        get_first_in_train(result[:new_items]).try do |first_merge_request|
           logging("Rescheduled to refresh the merge train from", merge_request_ids: [first_merge_request.id])
 
           AutoMergeProcessWorker.perform_async(first_merge_request.id)
@@ -41,6 +41,15 @@ module MergeTrains
     private
 
     attr_reader :merge_request
+
+    # TODO:
+    # As we changed the process flow to refresh merge requests from the begnning always,
+    # we don't use the `items` argument anymore.
+    # We should refactor the current logic to make this class more readable.
+    # See https://gitlab.com/gitlab-org/gitlab/-/issues/281065
+    def get_first_in_train(items)
+      MergeTrain.first_in_train(merge_request.target_project, merge_request.target_branch)
+    end
 
     def unsafe_refresh(first_merge_request)
       require_next_recreate = false

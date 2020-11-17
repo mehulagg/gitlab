@@ -1,11 +1,6 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import {
-  GlSearchBoxByType,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlButton,
-} from '@gitlab/ui';
+import { GlSearchBoxByType, GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import { DEFAULT_SEARCH_DELAY, ACTION_TYPES, FILTER_STATES } from '../constants';
 
@@ -13,8 +8,8 @@ export default {
   name: 'GeoReplicableFilterBar',
   components: {
     GlSearchBoxByType,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlButton,
   },
   computed: {
@@ -53,8 +48,8 @@ export default {
     <div class="row d-flex flex-column flex-sm-row">
       <div class="col">
         <div class="d-sm-flex mx-n1">
-          <gl-deprecated-dropdown :text="__('Filter by status')" class="px-1 my-1 my-sm-0 w-100">
-            <gl-deprecated-dropdown-item
+          <gl-dropdown :text="__('Filter by status')" class="px-1 my-1 my-sm-0 w-100">
+            <gl-dropdown-item
               v-for="(filter, index) in filterOptions"
               :key="index"
               :class="{ 'bg-secondary-100': index === currentFilterIndex }"
@@ -64,8 +59,8 @@ export default {
                 >{{ filter.label }} {{ replicableTypeName }}</span
               >
               <span v-else>{{ filter.label }}</span>
-            </gl-deprecated-dropdown-item>
-          </gl-deprecated-dropdown>
+            </gl-dropdown-item>
+          </gl-dropdown>
           <gl-search-box-by-type
             v-model="search"
             :debounce="$options.debounce"

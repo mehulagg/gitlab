@@ -219,28 +219,10 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           stub_licensed_features(iterations: true)
         end
 
-        context 'with project_iterations feature flag enabled' do
-          before do
-            stub_feature_flags(project_iterations: true)
-          end
+        it 'is visible' do
+          render
 
-          it 'is visible' do
-            render
-
-            expect(rendered).to have_text 'Iterations'
-          end
-        end
-
-        context 'with project_iterations feature flag disabled' do
-          before do
-            stub_feature_flags(project_iterations: false)
-          end
-
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
+          expect(rendered).to have_text 'Iterations'
         end
       end
 
@@ -263,28 +245,10 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           stub_licensed_features(iterations: true)
         end
 
-        context 'with project_iterations feature flag enabled' do
-          before do
-            stub_feature_flags(project_iterations: true)
-          end
+        it 'is not visible' do
+          render
 
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
-        end
-
-        context 'with project_iterations feature flag disabled' do
-          before do
-            stub_feature_flags(project_iterations: false)
-          end
-
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
+          expect(rendered).not_to have_text 'Iterations'
         end
       end
 

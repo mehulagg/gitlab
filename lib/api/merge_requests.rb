@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class MergeRequests < Grape::API::Instance
+  class MergeRequests < ::API::Base
     include PaginationParams
 
     CONTEXT_COMMITS_POST_LIMIT = 20
 
     before { authenticate_non_get! }
+
+    feature_category :code_review
 
     helpers Helpers::MergeRequestsHelpers
 
@@ -350,7 +352,11 @@ module API
       get ':id/merge_requests/:merge_request_iid/changes' do
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
-        present merge_request, with: Entities::MergeRequestChanges, current_user: current_user, project: user_project
+        present merge_request,
+          with: Entities::MergeRequestChanges,
+          current_user: current_user,
+          project: user_project,
+          access_raw_diffs: params.fetch(:access_raw_diffs, false)
       end
 
       desc 'Get the merge request pipelines' do

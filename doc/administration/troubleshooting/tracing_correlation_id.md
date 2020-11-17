@@ -1,10 +1,13 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
 # Finding relevant log entries with a correlation ID
 
-Since GitLab 11.6, a unique request tracking ID, known as the "correlation ID" has been
+In GitLab 11.6 and later, a unique request tracking ID, known as the "correlation ID" has been
 logged by the GitLab instance for most requests. Each individual request to GitLab gets
 its own correlation ID, which then gets logged in each GitLab component's logs for that
 request. This makes it easier to trace behavior in a

@@ -30,7 +30,6 @@ export default {
   },
   inject: {
     groupAnalyticsCoverageReportsPath: {
-      type: String,
       default: '',
     },
   },
@@ -100,22 +99,21 @@ export default {
       this.allProjectsSelected = true;
       this.selectedProjectIds = [];
     },
-    selectProject(id) {
+    selectProject({ parsedId }) {
       this.allProjectsSelected = false;
-      const index = this.selectedProjectIds.indexOf(id);
+      const index = this.selectedProjectIds.indexOf(parsedId);
       if (index < 0) {
-        this.selectedProjectIds.push(id);
+        this.selectedProjectIds.push(parsedId);
         return;
       }
       this.selectedProjectIds.splice(index, 1);
     },
   },
   text: {
-    downloadTestCoverageHeader: s__('RepositoriesAnalytics|Download Historic Test Coverage Data'),
+    downloadTestCoverageHeader: s__('RepositoriesAnalytics|Download historic test coverage data'),
     downloadCSVButton: s__('RepositoriesAnalytics|Download historic test coverage data (.csv)'),
     dateRangeHeader: __('Date range'),
     downloadCSVModalButton: s__('RepositoriesAnalytics|Download test coverage data (.csv)'),
-    downloadCSVModalTitle: s__('RepositoriesAnalytics|Download Historic Test Coverage Data'),
     downloadCSVModalDescription: s__(
       'RepositoriesAnalytics|Historic Test Coverage Data is available in raw format (.csv) for further analysis.',
     ),
@@ -149,7 +147,7 @@ export default {
 
     <gl-modal
       modal-id="download-csv-modal"
-      :title="$options.text.downloadCSVModalTitle"
+      :title="$options.text.downloadTestCoverageHeader"
       no-fade
       :action-primary="downloadCSVModalButton"
       :action-cancel="cancelModalButton"

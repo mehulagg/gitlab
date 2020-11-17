@@ -96,7 +96,8 @@ class Namespace < ApplicationRecord
         'COALESCE(SUM(ps.snippets_size), 0) AS snippets_size',
         'COALESCE(SUM(ps.lfs_objects_size), 0) AS lfs_objects_size',
         'COALESCE(SUM(ps.build_artifacts_size), 0) AS build_artifacts_size',
-        'COALESCE(SUM(ps.packages_size), 0) AS packages_size'
+        'COALESCE(SUM(ps.packages_size), 0) AS packages_size',
+        'COALESCE(SUM(ps.uploads_size), 0) AS uploads_size'
       )
   end
 
@@ -117,8 +118,12 @@ class Namespace < ApplicationRecord
     # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
-    def search(query)
-      fuzzy_search(query, [:name, :path])
+    def search(query, include_parents: false)
+      if include_parents
+        where(id: Route.for_routable_type(Namespace.name).fuzzy_search(query, [Route.arel_table[:path], Route.arel_table[:name]]).select(:source_id))
+      else
+        fuzzy_search(query, [:path, :name])
+      end
     end
 
     def clean_path(path)
@@ -283,7 +288,12 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    Project.inside_path(full_path)
+    if Feature.enabled?(:recursive_approach_for_all_projects)
+      namespace = user? ? self : self_and_descendants
+      Project.where(namespace: namespace)
+    else
+      Project.inside_path(full_path)
+    end
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
@@ -353,7 +363,7 @@ class Namespace < ApplicationRecord
 
   def pages_virtual_domain
     Pages::VirtualDomain.new(
-      all_projects_with_pages.includes(:route, :project_feature),
+      all_projects_with_pages.includes(:route, :project_feature, pages_metadatum: :pages_deployment),
       trim_prefix: full_path
     )
   end
@@ -384,7 +394,6 @@ class Namespace < ApplicationRecord
   end
 
   def changing_shared_runners_enabled_is_allowed
-    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
     return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
     if shared_runners_enabled && has_parent? && parent.shared_runners_setting == 'disabled_and_unoverridable'
@@ -393,7 +402,6 @@ class Namespace < ApplicationRecord
   end
 
   def changing_allow_descendants_override_disabled_shared_runners_is_allowed
-    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
     return unless new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
 
     if shared_runners_enabled && !new_record?

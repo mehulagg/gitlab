@@ -1,4 +1,5 @@
 import { masks } from 'dateformat';
+import { get } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 
 const { isoDate } = masks;
@@ -38,3 +39,30 @@ export function getAverageByMonth(items = [], options = {}) {
     return [month, avg];
   });
 }
+
+/**
+ * Takes an array of instance counts and returns the last item in the list
+ * @param  {Array} arr array of instance counts in the form { count: Number, recordedAt: date String }
+ * @return {String} the 'recordedAt' value of the earliest item
+ */
+export const getEarliestDate = (arr = []) => {
+  const len = arr.length;
+  return get(arr, `[${len - 1}].recordedAt`, null);
+};
+
+/**
+ * Takes an array of queries and produces an object with the query identifier as key
+ * and a supplied defaultValue as its value
+ * @param  {Array} queries array of chart query configs,
+ *                 see ./analytics/instance_statistics/components/charts_config.js
+ * @param  {any}   defaultValue value to set each identifier to
+ * @return {Object} key value pair of the form { queryIdentifier: defaultValue }
+ */
+export const generateDataKeys = (queries, defaultValue) =>
+  queries.reduce(
+    (acc, { identifier }) => ({
+      ...acc,
+      [identifier]: defaultValue,
+    }),
+    {},
+  );

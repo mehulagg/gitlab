@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 description: 'Making GitLab Pages a Cloud Native application - architecture blueprint.'
 ---
@@ -103,6 +106,8 @@ epic with detailed roadmap is also available.
 
 Proposal:
 
+<!-- vale gitlab.Spelling = NO -->
+
 | Role                         | Who
 |------------------------------|-------------------------|
 | Author                       |    Grzegorz Bizon       |
@@ -129,3 +134,5 @@ Domain Experts:
 | Domain Expert                |    Vladimir Shushlin   |
 | Domain Expert                |    Jaime Martinez      |
 | Domain Expert                |    Krasimir Angelov    |
+
+<!-- vale gitlab.Spelling = YES -->

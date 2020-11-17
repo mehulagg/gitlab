@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Search < Grape::API::Instance
+  class Search < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :global_search
 
     helpers do
       SCOPE_ENTITY = {
@@ -33,9 +35,13 @@ module API
           scope: params[:scope],
           search: params[:search],
           state: params[:state],
+          confidential: params[:confidential],
           snippets: snippets?,
+          basic_search: params[:basic_search],
           page: params[:page],
-          per_page: params[:per_page]
+          per_page: params[:per_page],
+          order_by: params[:order_by],
+          sort: params[:sort]
         }.merge(additional_params)
 
         results = SearchService.new(current_user, search_params).search_objects(preload_method)
@@ -75,6 +81,7 @@ module API
           desc: 'The scope of the search',
           values: Helpers::SearchHelpers.global_search_scopes
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
+        optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
         use :pagination
       end
       get do
@@ -96,6 +103,7 @@ module API
           desc: 'The scope of the search',
           values: Helpers::SearchHelpers.group_search_scopes
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
+        optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
         use :pagination
       end
       get ':id/(-/)search' do
@@ -118,6 +126,7 @@ module API
           values: Helpers::SearchHelpers.project_search_scopes
         optional :ref, type: String, desc: 'The name of a repository branch or tag. If not given, the default branch is used'
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
+        optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
         use :pagination
       end
       get ':id/(-/)search' do

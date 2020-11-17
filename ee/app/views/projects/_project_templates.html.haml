@@ -17,16 +17,22 @@
           = _('Group')
           %span.badge.badge-pill.qa-group-template-tab-badge
             = group_project_templates_count(group_id)
+      %li.sample-data-templates-tab
+        %a.nav-link{ href: "#sample-data-templates", data: { toggle: 'tab'} }
+          = _('Sample Data')
+          %span.badge.badge-pill= Gitlab::SampleDataTemplate.all.count
 
   .tab-content
     .project-templates-buttons.import-buttons.tab-pane.active#built-in
-      = render 'projects/project_templates/built_in_templates'
+      = render partial: 'projects/project_templates/template', collection: Gitlab::ProjectTemplate.all
     .project-templates-buttons.import-buttons.tab-pane.js-custom-instance-project-templates-tab-content#custom-instance-project-templates{ data: {initial_templates: user_available_project_templates_path(current_user)} }
       .text-center.m-4
-        = icon("spin spinner 2x")
+        .spinner.spinner-md
     .project-templates-buttons.import-buttons.tab-pane.js-custom-group-project-templates-tab-content#custom-group-project-templates{ data: {initial_templates: user_available_group_templates_path(current_user, group_id: group_id)} }
       .text-center.m-4
-        = icon("spin spinner 2x")
+        .spinner.spinner-md
+    .project-templates-buttons.import-buttons.tab-pane#sample-data-templates
+      = render partial: 'projects/project_templates/template', collection: Gitlab::SampleDataTemplate.all
 
   .project-fields-form
     = render 'projects/project_templates/project_fields_form'

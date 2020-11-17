@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectImport < Grape::API::Instance
+  class ProjectImport < ::API::Base
     include PaginationParams
 
     helpers Helpers::ProjectsHelpers
     helpers Helpers::FileUploadHelpers
     helpers Helpers::RateLimiter
+
+    feature_category :importers
 
     helpers do
       def import_params

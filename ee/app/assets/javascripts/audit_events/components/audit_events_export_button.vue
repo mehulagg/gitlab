@@ -17,7 +17,7 @@ export default {
   },
   strings: {
     buttonText: __('Export as CSV'),
-    tooltipText: __('Max size 15 MB'),
+    tooltipText: __('Max 100,000 events'),
   },
 };
 </script>

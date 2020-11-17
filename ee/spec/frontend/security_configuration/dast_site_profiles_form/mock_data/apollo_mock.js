@@ -14,7 +14,7 @@ export const dastSiteValidation = (status = DAST_SITE_VALIDATION_STATUS.PENDING)
 
 export const dastSiteValidationCreate = (errors = []) => ({
   data: {
-    dastSiteValidationCreate: { status: DAST_SITE_VALIDATION_STATUS.PASSED, id: '1', errors },
+    dastSiteValidationCreate: { status: DAST_SITE_VALIDATION_STATUS.PENDING, id: '1', errors },
   },
 });
 

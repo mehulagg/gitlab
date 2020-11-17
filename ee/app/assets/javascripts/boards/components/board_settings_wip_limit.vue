@@ -1,5 +1,5 @@
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlFormInput } from '@gitlab/ui';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import { deprecatedCreateFlash as flash } from '~/flash';
@@ -37,6 +37,7 @@ export default {
   },
   computed: {
     ...mapState(['activeId']),
+    ...mapGetters(['shouldUseGraphQL']),
     wipLimitTypeText() {
       return n__('%d issue', '%d issues', this.maxIssueCount);
     },
@@ -75,9 +76,11 @@ export default {
         const wipLimit = this.currentWipLimit;
         const id = this.activeId;
 
-        this.updateListWipLimit({ maxIssueCount: this.currentWipLimit, id })
+        this.updateListWipLimit({ maxIssueCount: wipLimit, listId: id })
           .then(() => {
-            boardsStoreEE.setMaxIssueCountOnList(id, wipLimit);
+            if (!this.shouldUseGraphQL) {
+              boardsStoreEE.setMaxIssueCountOnList(id, wipLimit);
+            }
           })
           .catch(() => {
             this.unsetActiveId();
@@ -91,9 +94,11 @@ export default {
       }
     },
     clearWipLimit() {
-      this.updateListWipLimit({ maxIssueCount: 0, id: this.activeId })
+      this.updateListWipLimit({ maxIssueCount: 0, listId: this.activeId })
         .then(() => {
-          boardsStoreEE.setMaxIssueCountOnList(this.activeId, inactiveId);
+          if (!this.shouldUseGraphQL) {
+            boardsStoreEE.setMaxIssueCountOnList(this.activeId, inactiveId);
+          }
         })
         .catch(() => {
           this.unsetActiveId();

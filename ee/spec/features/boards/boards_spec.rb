@@ -77,7 +77,8 @@ RSpec.describe 'issue boards', :js do
   context 'swimlanes dropdown' do
     context 'feature flag on' do
       before do
-        stub_feature_flags(boards_with_swimlanes: true)
+        stub_licensed_features(swimlanes: true)
+        stub_feature_flags(boards_with_swimlanes: true, swimlanes: true)
       end
 
       it 'does not show Group by dropdown when user is not logged in' do
@@ -97,7 +98,7 @@ RSpec.describe 'issue boards', :js do
 
     context 'feature flag off' do
       before do
-        stub_feature_flags(boards_with_swimlanes: false)
+        stub_feature_flags(boards_with_swimlanes: false, swimlanes: false)
       end
 
       it 'does not show Group by dropdown when user is not logged in' do

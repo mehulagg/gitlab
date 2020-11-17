@@ -114,16 +114,8 @@ RSpec.describe Deployment do
         deployment.run!
       end
 
-      it 'does not execute Deployments::ExecuteHooksWorker when feature is disabled' do
-        stub_feature_flags(ci_send_deployment_hook_when_start: false)
-        expect(Deployments::ExecuteHooksWorker)
-            .not_to receive(:perform_async).with(deployment.id)
-
-        deployment.run!
-      end
-
-      it 'executes Deployments::ForwardDeploymentWorker asynchronously' do
-        expect(Deployments::ForwardDeploymentWorker)
+      it 'executes Deployments::DropOlderDeploymentsWorker asynchronously' do
+        expect(Deployments::DropOlderDeploymentsWorker)
             .to receive(:perform_async).once.with(deployment.id)
 
         deployment.run!

@@ -3,7 +3,7 @@
   .settings-header
     %h4
       = _('Third party offers')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
       = _('Control the display of third party offers.')
@@ -17,4 +17,4 @@
             = f.check_box :hide_third_party_offers, class: 'form-check-input'
             = f.label :hide_third_party_offers, _('Do not display offers from third parties within GitLab'), class: 'form-check-label'
 
-      = f.submit _('Save changes'), class: "btn btn-success"
+      = f.submit _('Save changes'), class: "gl-button btn btn-success"

@@ -82,7 +82,6 @@ To make the Unit test report output files browsable, include them with the
 To upload the report even if the job fails (for example if the tests do not pass), use the [`artifacts:when:always`](yaml/README.md#artifactswhen)
 keyword.
 
-NOTE: **Note:**
 You cannot have multiple tests with the same name and class in your JUnit report format XML file.
 
 ### Ruby example
@@ -144,8 +143,8 @@ java:
       junit: build/test-results/test/**/TEST-*.xml
 ```
 
-NOTE: **Note:**
-Support for `**` was added in [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620).
+In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620)
+and later, you can use `**`.
 
 #### Maven
 
@@ -243,6 +242,27 @@ Test:
     reports:
       junit:
         - ./**/*test-result.xml
+```
+
+### JavaScript example
+
+There are a few tools that can produce JUnit report format XML files in JavaScript.
+
+#### Jest
+
+The [jest-junit](https://github.com/jest-community/jest-junit) npm package can generate test reports for JavaScript applications.
+In the following `.gitlab-ci.yml` example, the `javascript` job uses Jest to generate the test reports:
+
+```yaml
+javascript:
+  stage: test
+  script:
+    - 'jest --ci --reporters=default --reporters=jest-junit'
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
 ```
 
 ## Viewing Unit test reports on GitLab

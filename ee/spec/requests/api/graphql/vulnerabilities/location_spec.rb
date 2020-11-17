@@ -90,7 +90,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
 
     let_it_be(:finding) do
       create(
-        :vulnerabilities_occurrence,
+        :vulnerabilities_finding,
         vulnerability: vulnerability,
         raw_metadata: metadata.to_json
       )
@@ -128,7 +128,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
 
     let_it_be(:finding) do
       create(
-        :vulnerabilities_occurrence,
+        :vulnerabilities_finding,
         vulnerability: vulnerability,
         raw_metadata: metadata.to_json
       )
@@ -163,7 +163,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
 
     let_it_be(:finding) do
       create(
-        :vulnerabilities_occurrence,
+        :vulnerabilities_finding,
         vulnerability: vulnerability,
         raw_metadata: metadata.to_json
       )
@@ -200,7 +200,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
 
     let_it_be(:finding) do
       create(
-        :vulnerabilities_occurrence,
+        :vulnerabilities_finding,
         vulnerability: vulnerability,
         raw_metadata: metadata.to_json
       )
@@ -236,7 +236,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
 
     let_it_be(:finding) do
       create(
-        :vulnerabilities_occurrence,
+        :vulnerabilities_finding,
         vulnerability: vulnerability,
         raw_metadata: metadata.to_json
       )

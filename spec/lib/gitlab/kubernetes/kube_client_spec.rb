@@ -19,7 +19,7 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
     case method_name
     when /\A(get_|delete_)/
       client.public_send(method_name)
-    when /\A(create_|update_)/
+    when /\A(create_|update_|patch_)/
       client.public_send(method_name, {})
     else
       raise "Unknown method name #{method_name}"
@@ -302,6 +302,8 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
       :create_role,
       :get_role,
       :update_role,
+      :delete_role_binding,
+      :update_role_binding,
       :update_cluster_role_binding
     ].each do |method|
       describe "##{method}" do
@@ -343,6 +345,62 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
         expect(apps_client).to receive(:get_deployments)
 
         client.get_deployments
+      end
+    end
+  end
+
+  describe '#get_ingresses' do
+    let(:extensions_client) { client.extensions_client }
+    let(:networking_client) { client.networking_client }
+
+    include_examples 'redirection not allowed', 'get_ingresses'
+    include_examples 'dns rebinding not allowed', 'get_ingresses'
+
+    it 'delegates to the extensions client' do
+      expect(extensions_client).to receive(:get_ingresses)
+
+      client.get_ingresses
+    end
+
+    context 'extensions does not have deployments for Kubernetes 1.22+ clusters' do
+      before do
+        WebMock
+          .stub_request(:get, api_url + '/apis/extensions/v1beta1')
+          .to_return(kube_response(kube_1_22_extensions_v1beta1_discovery_body))
+      end
+
+      it 'delegates to the apps client' do
+        expect(networking_client).to receive(:get_ingresses)
+
+        client.get_ingresses
+      end
+    end
+  end
+
+  describe '#patch_ingress' do
+    let(:extensions_client) { client.extensions_client }
+    let(:networking_client) { client.networking_client }
+
+    include_examples 'redirection not allowed', 'patch_ingress'
+    include_examples 'dns rebinding not allowed', 'patch_ingress'
+
+    it 'delegates to the extensions client' do
+      expect(extensions_client).to receive(:patch_ingress)
+
+      client.patch_ingress
+    end
+
+    context 'extensions does not have ingress for Kubernetes 1.22+ clusters' do
+      before do
+        WebMock
+          .stub_request(:get, api_url + '/apis/extensions/v1beta1')
+          .to_return(kube_response(kube_1_22_extensions_v1beta1_discovery_body))
+      end
+
+      it 'delegates to the apps client' do
+        expect(networking_client).to receive(:patch_ingress)
+
+        client.patch_ingress
       end
     end
   end

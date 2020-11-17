@@ -5,6 +5,7 @@ import FirstClassProjectSecurityDashboard from 'ee/security_dashboard/components
 import AutoFixUserCallout from 'ee/security_dashboard/components/auto_fix_user_callout.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from 'ee/security_dashboard/components/project_vulnerabilities.vue';
 import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
@@ -13,12 +14,17 @@ import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.
 const props = {
   notEnabledScannersHelpPath: '/help/docs/',
   noPipelineRunScannersHelpPath: '/new/pipeline',
-  projectFullPath: '/group/project',
+  pipeline: {
+    createdAt: '2020-10-06T20:08:07Z',
+    id: '214',
+    path: '/mixed-vulnerabilities/dependency-list-test-01/-/pipelines/214',
+  },
   securityDashboardHelpPath: '/security/dashboard/help-path',
   vulnerabilitiesExportEndpoint: '/vulnerabilities/exports',
 };
 
 const provide = {
+  projectFullPath: '/group/project',
   dashboardDocumentation: '/help/docs',
   autoFixDocumentation: '/auto/fix/documentation',
   emptyStateSvgPath: '/svgs/empty/svg',
@@ -33,6 +39,7 @@ describe('First class Project Security Dashboard component', () => {
   let wrapper;
 
   const findFilters = () => wrapper.find(Filters);
+  const findProjectPipelineStatus = () => wrapper.find(ProjectPipelineStatus);
   const findVulnerabilities = () => wrapper.find(ProjectVulnerabilitiesApp);
   const findVulnerabilityCountList = () => wrapper.find(VulnerabilityCountList);
   const findUnconfiguredState = () => wrapper.find(ReportsNotConfigured);
@@ -94,6 +101,10 @@ describe('First class Project Security Dashboard component', () => {
       expect(findCsvExportButton().props('vulnerabilitiesExportEndpoint')).toEqual(
         props.vulnerabilitiesExportEndpoint,
       );
+    });
+
+    it('should display the project pipeline status', () => {
+      expect(findProjectPipelineStatus()).toExist();
     });
   });
 
@@ -173,7 +184,7 @@ describe('First class Project Security Dashboard component', () => {
     beforeEach(() => {
       createComponent({
         props: {
-          hasVulnerabilities: false,
+          pipeline: { id: undefined },
         },
       });
     });

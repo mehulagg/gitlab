@@ -44,18 +44,17 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:vue_issuable_sidebar, project.group)
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
-    push_frontend_feature_flag(:vue_sidebar_labels, @project)
+    push_frontend_feature_flag(:vue_issue_header, @project, default_enabled: true)
   end
 
   before_action only: :show do
     real_time_feature_flag = :real_time_issue_sidebar
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
 
-    gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
-  end
+    push_to_gon_features(real_time_feature_flag, real_time_enabled)
 
-  before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
+    record_experiment_user(:invite_members_version_a)
+    record_experiment_user(:invite_members_version_b)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
@@ -214,7 +213,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def export_csv
-    ExportCsvWorker.perform_async(current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
+    IssuableExportCsvWorker.perform_async(:issue, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
 
     index_path = project_issues_path(project)
     message = _('Your CSV export has started. It will be emailed to %{email} when complete.') % { email: current_user.notification_email }
@@ -323,7 +322,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def store_uri
-    if request.get? && !request.xhr?
+    if request.get? && request.format.html?
       store_location_for :user, request.fullpath
     end
   end

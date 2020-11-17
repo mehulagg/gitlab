@@ -3,8 +3,10 @@
 require 'mime/types'
 
 module API
-  class Commits < Grape::API::Instance
+  class Commits < ::API::Base
     include PaginationParams
+
+    feature_category :source_code_management
 
     before do
       require_repository_enabled!

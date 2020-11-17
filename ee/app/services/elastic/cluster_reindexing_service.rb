@@ -100,6 +100,10 @@ module Elastic
       end
 
       true
+    rescue Elasticsearch::Transport::Transport::Error
+      abort_reindexing!("Couldn't load task status")
+
+      false
     end
 
     def compare_documents_count

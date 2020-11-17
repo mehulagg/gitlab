@@ -3,13 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe 'Groups > Audit Events', :js do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create(:user) }
   let(:alex) { create(:user, name: 'Alex') }
   let(:group) { create(:group) }
 
   before do
-    stub_feature_flags(vue_group_members_list: false)
-
     group.add_owner(user)
     group.add_developer(alex)
     sign_in(user)
@@ -47,11 +47,9 @@ RSpec.describe 'Groups > Audit Events', :js do
 
       wait_for_requests
 
-      group_member = group.members.find_by(user_id: alex)
-
-      page.within "#group_member_#{group_member.id}" do
+      page.within first_row do
         click_button 'Developer'
-        click_link 'Maintainer'
+        click_button 'Maintainer'
       end
 
       find(:link, text: 'Settings').click

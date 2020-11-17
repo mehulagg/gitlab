@@ -32,7 +32,7 @@ This also applies when using the `pipelines` or `triggers` keywords with the leg
 
 A unique trigger token can be obtained when [adding a new trigger](#adding-a-new-trigger).
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Passing plain text tokens in public projects is a security issue. Potential
 attackers can impersonate the user that exposed their trigger token publicly in
 their `.gitlab-ci.yml` file. Use [variables](../variables/README.md#gitlab-cicd-environment-variables)
@@ -50,7 +50,7 @@ with the [GitLab Container Registry](../../user/packages/container_registry/inde
 
 This way of triggering can only be used when invoked inside `.gitlab-ci.yml`,
 and it creates a dependent pipeline relation visible on the
-[pipeline graph](../multi_project_pipelines.md#overview). For example:
+[pipeline graph](../multi_project_pipelines.md). For example:
 
 ```yaml
 build_docs:
@@ -252,10 +252,6 @@ of all types of variables.
 
 ## Using cron to trigger nightly pipelines
 
-NOTE: **Note:**
-The following behavior can also be achieved through GitLab's UI with
-[pipeline schedules](../pipelines/schedules.md).
-
 Whether you craft a script or just run cURL directly, you can trigger jobs
 in conjunction with cron. The example below triggers a job on the `master`
 branch of project with ID `9` every night at `00:30`:
@@ -263,6 +259,9 @@ branch of project with ID `9` every night at `00:30`:
 ```shell
 30 0 * * * curl --request POST --form token=TOKEN --form ref=master https://gitlab.example.com/api/v4/projects/9/trigger/pipeline
 ```
+
+This behavior can also be achieved through GitLab's UI with
+[pipeline schedules](../pipelines/schedules.md).
 
 ## Legacy triggers
 

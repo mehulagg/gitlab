@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module TreeHelper
+  include BlobHelper
+  include WebIdeButtonHelper
+
   FILE_LIMIT = 1_000
 
   # Sorts a repository's tree so that folders are before files and renders
@@ -72,9 +75,25 @@ module TreeHelper
     if user_access(project).can_push_to_branch?(ref)
       ref
     else
-      project = tree_edit_project(project)
-      project.repository.next_branch('patch')
+      patch_branch_name(ref)
     end
+  end
+
+  # Generate a patch branch name that should look like:
+  # `username-branchname-patch-epoch`
+  # where `epoch` is the last 5 digits of the time since epoch (in
+  # milliseconds)
+  #
+  # Note: this correlates with how the WebIDE formats the branch name
+  # and if this implementation changes, so should the `placeholderBranchName`
+  # definition in app/assets/javascripts/ide/stores/modules/commit/getters.js
+  def patch_branch_name(ref)
+    return unless current_user
+
+    username = current_user.username
+    epoch = time_in_milliseconds.to_s.last(5)
+
+    "#{username}-#{ref}-patch-#{epoch}"
   end
 
   def tree_edit_project(project = @project)
@@ -199,36 +218,24 @@ module TreeHelper
     }
   end
 
-  def web_ide_url_data(project)
-    can_push_code = current_user&.can?(:push_code, project)
-    fork_path = current_user&.fork_of(project)&.full_path
-
-    if fork_path && !can_push_code
-      { path: fork_path, is_fork: true }
-    else
-      { path: project.full_path, is_fork: false }
-    end
-  end
-
-  def vue_ide_link_data(project, ref)
-    can_collaborate = can_collaborate_with_project?(project)
-    can_create_mr_from_fork = can?(current_user, :fork_project, project) && can?(current_user, :create_merge_request_in, project)
-    show_web_ide_button = (can_collaborate || current_user&.already_forked?(project) || can_create_mr_from_fork)
-
+  def web_ide_button_data(options = {})
     {
-      web_ide_url_data: web_ide_url_data(project),
-      needs_to_fork: !can_collaborate && !current_user&.already_forked?(project),
-      show_web_ide_button: show_web_ide_button,
-      show_gitpod_button: show_web_ide_button && Gitlab::Gitpod.feature_and_settings_enabled?(project),
-      gitpod_url: full_gitpod_url(project, ref),
-      gitpod_enabled: current_user&.gitpod_enabled
+      project_path: project_to_use.full_path,
+      ref: ActionDispatch::Journey::Router::Utils.escape_path(@ref),
+
+      is_fork: fork?,
+      needs_to_fork: needs_to_fork?,
+      gitpod_enabled: !current_user.nil? && current_user.gitpod_enabled,
+      is_blob: !options[:blob].nil?,
+
+      show_edit_button: show_edit_button?,
+      show_web_ide_button: show_web_ide_button?,
+      show_gitpod_button: show_gitpod_button?,
+
+      web_ide_url: web_ide_url,
+      edit_url: edit_url,
+      gitpod_url: gitpod_url
     }
-  end
-
-  def full_gitpod_url(project, ref)
-    return "" unless Gitlab::Gitpod.feature_and_settings_enabled?(project)
-
-    "#{Gitlab::CurrentSettings.gitpod_url}##{project_tree_url(project, tree_join(ref, @path || ''))}"
   end
 
   def directory_download_links(project, ref, archive_prefix)

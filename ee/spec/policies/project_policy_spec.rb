@@ -1195,13 +1195,13 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  shared_examples 'merge request rules' do
+  shared_examples 'merge request approval settings' do
     let(:project) { private_project }
 
     using RSpec::Parameterized::TableSyntax
 
     context 'with merge request approvers rules available in license' do
-      where(:role, :regulated_setting, :admin_mode, :allowed) do
+      where(:role, :setting, :admin_mode, :allowed) do
         :guest      | true  | nil    | false
         :reporter   | true  | nil    | false
         :developer  | true  | nil    | false
@@ -1220,7 +1220,7 @@ RSpec.describe ProjectPolicy do
 
         before do
           stub_licensed_features(admin_merge_request_approvers_rules: true)
-          allow(project).to receive(:has_regulated_settings?).and_return(regulated_setting)
+          stub_application_setting(app_setting => setting)
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1229,7 +1229,7 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'with merge request approvers rules not available in license' do
-      where(:role, :regulated_setting, :admin_mode, :allowed) do
+      where(:role, :setting, :admin_mode, :allowed) do
         :guest      | true  | nil    | false
         :reporter   | true  | nil    | false
         :developer  | true  | nil    | false
@@ -1248,7 +1248,7 @@ RSpec.describe ProjectPolicy do
 
         before do
           stub_licensed_features(admin_merge_request_approvers_rules: false)
-          allow(project).to receive(:has_regulated_settings?).and_return(regulated_setting)
+          stub_application_setting(app_setting => setting)
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1258,19 +1258,22 @@ RSpec.describe ProjectPolicy do
   end
 
   describe ':modify_approvers_rules' do
-    it_behaves_like 'merge request rules' do
+    it_behaves_like 'merge request approval settings' do
+      let(:app_setting) { :disable_overriding_approvers_per_merge_request }
       let(:policy) { :modify_approvers_rules }
     end
   end
 
   describe ':modify_merge_request_author_setting' do
-    it_behaves_like 'merge request rules' do
+    it_behaves_like 'merge request approval settings' do
+      let(:app_setting) { :prevent_merge_requests_author_approval }
       let(:policy) { :modify_merge_request_author_setting }
     end
   end
 
   describe ':modify_merge_request_committer_setting' do
-    it_behaves_like 'merge request rules' do
+    it_behaves_like 'merge request approval settings' do
+      let(:app_setting) { :prevent_merge_requests_committers_approval }
       let(:policy) { :modify_merge_request_committer_setting }
     end
   end

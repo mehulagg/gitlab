@@ -21,6 +21,9 @@ query BoardEE(
         edges {
           node {
             ...BoardEpicNode
+            userPreferences {
+              collapsed
+            }
           }
         }
         pageInfo {
@@ -41,6 +44,9 @@ query BoardEE(
         edges {
           node {
             ...BoardEpicNode
+            userPreferences {
+              collapsed
+            }
           }
         }
         pageInfo {

@@ -1,7 +1,8 @@
 ---
 name: ci_new_artifact_file_reader
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40268
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/249588
-group: group::pipeline authoring
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46552
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/273755
+milestone: '13.6'
 type: development
-default_enabled: true
+group: group::pipeline authoring
+default_enabled: false

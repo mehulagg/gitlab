@@ -31,21 +31,22 @@ module Security
     end
 
     def store_findings
-      report_findings.each { |report_finding| store_finding!(report_finding) }
+      report_findings.each_with_index { |report_finding, position| store_finding!(report_finding, position) }
     end
 
-    def store_finding!(report_finding)
+    def store_finding!(report_finding, position)
       return if report_finding.scanner.blank?
 
-      security_scan.findings.create!(finding_data(report_finding))
+      security_scan.findings.create!(finding_data(report_finding, position))
     end
 
-    def finding_data(report_finding)
+    def finding_data(report_finding, position)
       {
         severity: report_finding.severity,
         confidence: report_finding.confidence,
         project_fingerprint: report_finding.project_fingerprint,
-        scanner: persisted_scanner_for(report_finding.scanner)
+        scanner: persisted_scanner_for(report_finding.scanner),
+        position: position
       }
     end
 

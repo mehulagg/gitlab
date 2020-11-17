@@ -44,6 +44,8 @@
   - 3
 - - background_migration
   - 1
+- - bulk_import
+  - 1
 - - chaos
   - 2
 - - chat_notification
@@ -84,7 +86,13 @@
   - 1
 - - design_management_new_version
   - 1
+- - destroy_pages_deployments
+  - 1
 - - detect_repository_languages
+  - 1
+- - disallow_two_factor_for_group
+  - 1
+- - disallow_two_factor_for_subgroups
   - 1
 - - elastic_commit_indexer
   - 1
@@ -104,6 +112,8 @@
   - 2
 - - emails_on_push
   - 2
+- - environments_canary_ingress_update
+  - 1
 - - epics
   - 2
 - - error_tracking_issue_link
@@ -136,15 +146,21 @@
   - 1
 - - group_import
   - 1
+- - group_saml_group_sync
+  - 1
 - - hashed_storage
   - 1
 - - import_issues_csv
   - 2
 - - incident_management
   - 2
+- - incident_management_apply_incident_sla_exceeded_label
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
+  - 1
+- - issuable_export_csv
   - 1
 - - issue_placement
   - 2
@@ -243,6 +259,8 @@
 - - propagate_integration_group
   - 1
 - - propagate_integration_inherit
+  - 1
+- - propagate_integration_inherit_descendant
   - 1
 - - propagate_integration_project
   - 1

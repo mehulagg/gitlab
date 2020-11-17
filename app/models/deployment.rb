@@ -21,9 +21,7 @@ class Deployment < ApplicationRecord
 
   has_one :deployment_cluster
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) do
-    Deployment.where(project: s.project).maximum(:iid) if s&.project
-  end
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
 
   validates :sha, presence: true
   validates :ref, presence: true
@@ -70,17 +68,15 @@ class Deployment < ApplicationRecord
     end
 
     after_transition any => :running do |deployment|
-      next unless deployment.project.forward_deployment_enabled?
+      next unless deployment.project.ci_forward_deployment_enabled?
 
       deployment.run_after_commit do
-        Deployments::ForwardDeploymentWorker.perform_async(id)
+        Deployments::DropOlderDeploymentsWorker.perform_async(id)
       end
     end
 
     after_transition any => :running do |deployment|
       deployment.run_after_commit do
-        next unless Feature.enabled?(:ci_send_deployment_hook_when_start, deployment.project)
-
         Deployments::ExecuteHooksWorker.perform_async(id)
       end
     end

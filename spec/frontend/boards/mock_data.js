@@ -2,6 +2,7 @@
 /* global List */
 
 import Vue from 'vue';
+import { keyBy } from 'lodash';
 import '~/boards/models/list';
 import '~/boards/models/issue';
 import boardsStore from '~/boards/stores/boards_store';
@@ -108,11 +109,17 @@ const assignees = [
   },
 ];
 
-const labels = [
+export const labels = [
   {
     id: 'gid://gitlab/GroupLabel/5',
     title: 'Cosync',
     color: '#34ebec',
+    description: null,
+  },
+  {
+    id: 'gid://gitlab/GroupLabel/6',
+    title: 'Brock',
+    color: '#e082b6',
     description: null,
   },
 ];
@@ -167,6 +174,14 @@ export const mockIssue = {
   epic: {
     id: 'gid://gitlab/Epic/41',
   },
+};
+
+export const mockActiveIssue = {
+  ...mockIssue,
+  id: 436,
+  iid: '27',
+  subscribed: false,
+  emailsDisabled: false,
 };
 
 export const mockIssueWithModel = new ListIssue(mockIssue);
@@ -284,6 +299,7 @@ export const mockLists = [
     assignee: null,
     milestone: null,
     loading: false,
+    issuesSize: 1,
   },
   {
     id: 'gid://gitlab/List/2',
@@ -301,8 +317,11 @@ export const mockLists = [
     assignee: null,
     milestone: null,
     loading: false,
+    issuesSize: 0,
   },
 ];
+
+export const mockListsById = keyBy(mockLists, 'id');
 
 export const mockListsWithModel = mockLists.map(listMock =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
@@ -312,6 +331,23 @@ export const mockIssuesByListId = {
   'gid://gitlab/List/1': [mockIssue.id, mockIssue3.id, mockIssue4.id],
   'gid://gitlab/List/2': mockIssues.map(({ id }) => id),
 };
+
+export const participants = [
+  {
+    id: '1',
+    username: 'test',
+    name: 'test',
+    avatar: '',
+    avatarUrl: '',
+  },
+  {
+    id: '2',
+    username: 'hello',
+    name: 'hello',
+    avatar: '',
+    avatarUrl: '',
+  },
+];
 
 export const issues = {
   [mockIssue.id]: mockIssue,

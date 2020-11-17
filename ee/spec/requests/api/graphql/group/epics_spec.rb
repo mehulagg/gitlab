@@ -206,6 +206,47 @@ RSpec.describe 'Epics through GroupQuery' do
     end
   end
 
+  describe 'N+1 query checks' do
+    let(:epic_a) { create(:epic, group: group) }
+    let(:epic_b) { create(:epic, group: group) }
+    let(:epics) { [epic_a, epic_b] }
+    let(:extra_iid_for_second_query) { epic_b.iid.to_s }
+    let(:search_params) { { iids: [epic_a.iid.to_s] } }
+
+    def execute_query
+      query = graphql_query_for(
+        :group,
+        { full_path: group.full_path },
+        query_graphql_field(:epics, search_params, [
+          query_graphql_field(:nodes, nil, requested_fields)
+        ])
+      )
+      post_graphql(query, current_user: user)
+    end
+
+    context 'when requesting `user_notes_count`' do
+      let(:requested_fields) { [:user_notes_count] }
+
+      before do
+        create_list(:note_on_epic, 2, noteable: epic_a)
+        create(:note_on_epic, noteable: epic_b)
+      end
+
+      include_examples 'N+1 query check'
+    end
+
+    context 'when requesting `user_discussions_count`' do
+      let(:requested_fields) { [:user_discussions_count] }
+
+      before do
+        create_list(:note_on_epic, 2, noteable: epic_a)
+        create(:note_on_epic, noteable: epic_b)
+      end
+
+      include_examples 'N+1 query check'
+    end
+  end
+
   def expect_array_response(items)
     expect(response).to have_gitlab_http_status(:success)
     expect(epics_data).to be_an Array

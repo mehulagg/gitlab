@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 module API
-  class Releases < Grape::API::Instance
+  class Releases < ::API::Base
     include PaginationParams
 
     RELEASE_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS
       .merge(tag_name: API::NO_SLASH_URL_PART_REGEX)
 
     before { authorize_read_releases! }
+
+    feature_category :release_orchestration
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -89,7 +91,7 @@ module API
         optional :name,        type: String, desc: 'The name of the release'
         optional :description, type: String, desc: 'Release notes with markdown support'
         optional :released_at, type: DateTime, desc: 'The date when the release will be/was ready.'
-        optional :milestones,  type: Array, desc: 'The titles of the related milestones'
+        optional :milestones,  type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'The titles of the related milestones'
       end
       put ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
         authorize_update_release!

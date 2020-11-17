@@ -28,7 +28,7 @@ const milestoneValues = getFilterValues(filterMilestones);
 const labelValues = getFilterValues(filterLabels);
 const userValues = getFilterValues(filterUsers, { prop: 'name' });
 
-describe('Cycle analytics getters', () => {
+describe('Value Stream Analytics getters', () => {
   describe('hasNoAccessError', () => {
     beforeEach(() => {
       state = {

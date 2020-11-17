@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectContainerRepositories < Grape::API::Instance
+  class ProjectContainerRepositories < ::API::Base
     include PaginationParams
     helpers ::API::Helpers::PackagesHelpers
 
@@ -9,6 +9,8 @@ module API
       tag_name: API::NO_SLASH_URL_PART_REGEX)
 
     before { authorize_read_container_images! }
+
+    feature_category :package_registry
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

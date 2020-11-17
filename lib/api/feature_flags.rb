@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class FeatureFlags < Grape::API::Instance
+  class FeatureFlags < ::API::Base
     include PaginationParams
 
     FEATURE_FLAG_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS
         .merge(name: API::NO_SLASH_URL_PART_REGEX)
+
+    feature_category :feature_flags
 
     before do
       authorize_read_feature_flags!

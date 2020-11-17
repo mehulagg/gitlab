@@ -1,30 +1,47 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlFormInput, GlFormTextarea } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlFormInput, GlFormTextarea } from '@gitlab/ui';
 
 import EditMetaControls from '~/static_site_editor/components/edit_meta_controls.vue';
 
-import { mergeRequestMeta } from '../mock_data';
+import { mergeRequestMeta, mergeRequestTemplates } from '../mock_data';
 
-describe('~/static_site_editor/components/edit_meta_modal.vue', () => {
+describe('~/static_site_editor/components/edit_meta_controls.vue', () => {
   let wrapper;
+  let mockSelect;
+  let mockGlFormInputTitleInstance;
   const { title, description } = mergeRequestMeta;
+  const newTitle = 'New title';
+  const newDescription = 'New description';
 
   const buildWrapper = (propsData = {}) => {
     wrapper = shallowMount(EditMetaControls, {
       propsData: {
         title,
         description,
+        templates: mergeRequestTemplates,
+        currentTemplate: null,
         ...propsData,
       },
     });
   };
 
+  const buildMocks = () => {
+    mockSelect = jest.fn();
+    mockGlFormInputTitleInstance = { $el: { select: mockSelect } };
+    wrapper.vm.$refs.title = mockGlFormInputTitleInstance;
+  };
+
   const findGlFormInputTitle = () => wrapper.find(GlFormInput);
+  const findGlDropdownDescriptionTemplate = () => wrapper.find(GlDropdown);
+  const findAllDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownItemByIndex = index => findAllDropdownItems().at(index);
+
   const findGlFormTextAreaDescription = () => wrapper.find(GlFormTextarea);
 
   beforeEach(() => {
     buildWrapper();
+    buildMocks();
 
     return wrapper.vm.$nextTick();
   });
@@ -36,6 +53,10 @@ describe('~/static_site_editor/components/edit_meta_modal.vue', () => {
 
   it('renders the title input', () => {
     expect(findGlFormInputTitle().exists()).toBe(true);
+  });
+
+  it('renders the description template dropdown', () => {
+    expect(findGlDropdownDescriptionTemplate().exists()).toBe(true);
   });
 
   it('renders the description input', () => {
@@ -50,23 +71,45 @@ describe('~/static_site_editor/components/edit_meta_modal.vue', () => {
     expect(findGlFormTextAreaDescription().attributes().value).toBe(description);
   });
 
-  it('emits updated settings when title input updates', () => {
-    const newTitle = 'New title';
-
-    findGlFormInputTitle().vm.$emit('input', newTitle);
-
-    const newSettings = { description, title: newTitle };
-
-    expect(wrapper.emitted('updateSettings')[0][0]).toMatchObject(newSettings);
+  it('calls select on the title input when mounted', () => {
+    expect(mockGlFormInputTitleInstance.$el.select).toHaveBeenCalled();
   });
 
-  it('emits updated settings when description textarea updates', () => {
-    const newDescription = 'New description';
+  it('renders a GlDropdownItem per template plus one (for the starting none option)', () => {
+    expect(findDropdownItemByIndex(0).text()).toBe('None');
+    expect(findAllDropdownItems().length).toBe(mergeRequestTemplates.length + 1);
+  });
 
-    findGlFormTextAreaDescription().vm.$emit('input', newDescription);
+  describe('when inputs change', () => {
+    const storageKey = 'sse-merge-request-meta-local-storage-editable';
 
-    const newSettings = { description: newDescription, title };
+    afterEach(() => {
+      localStorage.removeItem(storageKey);
+    });
 
-    expect(wrapper.emitted('updateSettings')[0][0]).toMatchObject(newSettings);
+    it.each`
+      findFn                           | key              | value
+      ${findGlFormInputTitle}          | ${'title'}       | ${newTitle}
+      ${findGlFormTextAreaDescription} | ${'description'} | ${newDescription}
+    `('emits updated settings when $findFn input updates', ({ key, value, findFn }) => {
+      findFn().vm.$emit('input', value);
+
+      const newSettings = { ...mergeRequestMeta, [key]: value };
+
+      expect(wrapper.emitted('updateSettings')[0][0]).toMatchObject(newSettings);
+    });
+  });
+
+  describe('when templates change', () => {
+    it.each`
+      index | value
+      ${0}  | ${null}
+      ${1}  | ${mergeRequestTemplates[0]}
+      ${2}  | ${mergeRequestTemplates[1]}
+    `('emits a change template event when $index is clicked', ({ index, value }) => {
+      findDropdownItemByIndex(index).vm.$emit('click');
+
+      expect(wrapper.emitted('changeTemplate')[0][0]).toBe(value);
+    });
   });
 });

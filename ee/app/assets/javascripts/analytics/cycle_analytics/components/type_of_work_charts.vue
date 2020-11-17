@@ -87,7 +87,6 @@ export default {
         v-if="hasData"
         :data="tasksByTypeChartData.data"
         :group-by="tasksByTypeChartData.groupBy"
-        :series-names="tasksByTypeChartData.seriesNames"
       />
       <gl-alert v-else variant="info" :dismissible="false" class="gl-mt-3">
         {{ error }}

@@ -1,5 +1,0 @@
----
-title: Remove code for non-versioned terraform state replication
-merge_request: 43341
-author:
-type: changed

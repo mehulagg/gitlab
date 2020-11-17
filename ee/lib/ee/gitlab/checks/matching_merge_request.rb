@@ -11,7 +11,7 @@ module EE
 
         override :match?
         def match?
-          return super unless ::Feature.enabled?(:matching_merge_request_db_sync)
+          return super unless ::Feature.enabled?(:matching_merge_request_db_sync, default_enabled: true)
           return super unless ::Gitlab::Database::LoadBalancing.enable?
 
           # When a user merges a merge request, the following sequence happens:

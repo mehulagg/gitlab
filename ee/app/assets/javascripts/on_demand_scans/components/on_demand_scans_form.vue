@@ -21,7 +21,6 @@ import {
   SITE_PROFILES_QUERY,
 } from '../settings';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
-import DismissibleFeedbackAlert from '~/vue_shared/components/dismissible_feedback_alert.vue';
 import OnDemandScansScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import OnDemandScansSiteProfileSelector from './profile_selector/site_profile_selector.vue';
 
@@ -53,7 +52,6 @@ export default {
     GlLink,
     GlSkeletonLoader,
     GlSprintf,
-    DismissibleFeedbackAlert,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -162,15 +160,6 @@ export default {
 
 <template>
   <gl-form @submit.prevent="onSubmit">
-    <!--
-      This is a temporary change to solicit feedback from users
-      and shall be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/255889
-    -->
-    <dismissible-feedback-alert
-      feature-name="on-demand DAST scans"
-      feedback-link="https://gitlab.com/gitlab-org/gitlab/-/issues/249684"
-    />
-
     <header class="gl-mb-6">
       <h2>{{ s__('OnDemandScans|New on-demand DAST scan') }}</h2>
       <p>
@@ -205,7 +194,7 @@ export default {
     </gl-alert>
 
     <template v-if="isLoadingProfiles">
-      <gl-card v-for="i in 2" :key="i">
+      <gl-card v-for="i in 2" :key="i" class="gl-mb-5">
         <template #header>
           <gl-skeleton-loader :width="1248" :height="15">
             <rect x="0" y="0" width="300" height="15" rx="4" />
@@ -222,6 +211,7 @@ export default {
     <template v-else-if="!failedToLoadProfiles">
       <on-demand-scans-scanner-profile-selector
         v-model="form.dastScannerProfileId"
+        class="gl-mb-5"
         :profiles="scannerProfiles"
       />
       <on-demand-scans-site-profile-selector

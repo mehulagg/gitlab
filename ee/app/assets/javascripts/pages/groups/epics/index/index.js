@@ -5,17 +5,15 @@ import issuableInitBulkUpdateSidebar from '~/issuable_init_bulk_update_sidebar';
 
 const EPIC_BULK_UPDATE_PREFIX = 'epic_';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initFilteredSearch({
-    page: 'epics',
-    isGroup: true,
-    isGroupDecendent: true,
-    useDefaultState: true,
-    filteredSearchTokenKeys: FilteredSearchTokenKeysEpics,
-    stateFiltersSelector: '.epics-state-filters',
-  });
-
-  initEpicCreateApp(true);
-
-  issuableInitBulkUpdateSidebar.init(EPIC_BULK_UPDATE_PREFIX);
+initFilteredSearch({
+  page: 'epics',
+  isGroup: true,
+  isGroupDecendent: true,
+  useDefaultState: true,
+  filteredSearchTokenKeys: FilteredSearchTokenKeysEpics,
+  stateFiltersSelector: '.epics-state-filters',
 });
+
+initEpicCreateApp(true);
+
+issuableInitBulkUpdateSidebar.init(EPIC_BULK_UPDATE_PREFIX);

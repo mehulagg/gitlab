@@ -103,6 +103,10 @@ module Ci
       )
     end
 
+    scope :in_pipelines, ->(pipelines) do
+      where(pipeline: pipelines)
+    end
+
     scope :with_existing_job_artifacts, ->(query) do
       where('EXISTS (?)', ::Ci::JobArtifact.select(1).where('ci_builds.id = ci_job_artifacts.job_id').merge(query))
     end
@@ -571,14 +575,6 @@ module Ci
       end
     end
 
-    def dependency_variables
-      return [] if all_dependencies.empty?
-
-      Gitlab::Ci::Variables::Collection.new.concat(
-        Ci::JobVariable.where(job: all_dependencies).dotenv_source
-      )
-    end
-
     def features
       { trace_sections: true }
     end
@@ -828,10 +824,6 @@ module Ci
       Gitlab::Ci::Build::Credentials::Factory.new(self).create!
     end
 
-    def all_dependencies
-      dependencies.all
-    end
-
     def has_valid_build_dependencies?
       dependencies.valid?
     end
@@ -898,7 +890,11 @@ module Ci
     def collect_test_reports!(test_reports)
       test_reports.get_suite(group_name).tap do |test_suite|
         each_report(Ci::JobArtifact::TEST_REPORT_FILE_TYPES) do |file_type, blob|
-          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, test_suite, job: self)
+          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+            blob,
+            test_suite,
+            job: self
+          )
         end
       end
     end
@@ -964,6 +960,12 @@ module Ci
       status_commit_hooks.push(block)
     end
 
+    def max_test_cases_per_report
+      # NOTE: This is temporary and will be replaced later by a value
+      # that would come from an actual application limit.
+      ::Gitlab.com? ? 500_000 : 0
+    end
+
     protected
 
     def run_status_commit_hooks!
@@ -981,12 +983,6 @@ module Ci
     def auto_retry
       strong_memoize(:auto_retry) do
         Gitlab::Ci::Build::AutoRetry.new(self)
-      end
-    end
-
-    def dependencies
-      strong_memoize(:dependencies) do
-        Ci::BuildDependencies.new(self)
       end
     end
 
@@ -1049,7 +1045,7 @@ module Ci
 
         jwt = Gitlab::Ci::Jwt.for_build(self)
         variables.append(key: 'CI_JOB_JWT', value: jwt, public: false, masked: true)
-      rescue OpenSSL::PKey::RSAError => e
+      rescue OpenSSL::PKey::RSAError, Gitlab::Ci::Jwt::NoSigningKeyError => e
         Gitlab::ErrorTracking.track_exception(e)
       end
     end

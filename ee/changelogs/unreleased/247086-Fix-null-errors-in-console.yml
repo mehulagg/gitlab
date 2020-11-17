@@ -1,5 +1,0 @@
----
-title: Fix console null errors in security dashboard
-merge_request: 44076
-author: Kev @KevSlashNull
-type: fixed

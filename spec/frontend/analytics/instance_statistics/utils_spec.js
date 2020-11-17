@@ -1,4 +1,8 @@
-import { getAverageByMonth } from '~/analytics/instance_statistics/utils';
+import {
+  getAverageByMonth,
+  getEarliestDate,
+  generateDataKeys,
+} from '~/analytics/instance_statistics/utils';
 import {
   mockCountsData1,
   mockCountsData2,
@@ -37,5 +41,41 @@ describe('getAverageByMonth', () => {
       expect(getAverageByMonth(mockCountsData1, options)).toStrictEqual(roundedData1);
       expect(getAverageByMonth(mockCountsData2, options)).toStrictEqual(roundedData2);
     });
+  });
+});
+
+describe('getEarliestDate', () => {
+  it('returns the date of the final item in the array', () => {
+    expect(getEarliestDate(mockCountsData1)).toBe('2020-06-12');
+  });
+
+  it('returns null for an empty array', () => {
+    expect(getEarliestDate([])).toBeNull();
+  });
+
+  it("returns null if the array has data but `recordedAt` isn't defined", () => {
+    expect(
+      getEarliestDate(mockCountsData1.map(({ recordedAt: date, ...rest }) => ({ date, ...rest }))),
+    ).toBeNull();
+  });
+});
+
+describe('generateDataKeys', () => {
+  const fakeQueries = [
+    { identifier: 'from' },
+    { identifier: 'first' },
+    { identifier: 'to' },
+    { identifier: 'last' },
+  ];
+
+  const defaultValue = 'default value';
+  const res = generateDataKeys(fakeQueries, defaultValue);
+
+  it('extracts each query identifier and sets them as object keys', () => {
+    expect(Object.keys(res)).toEqual(['from', 'first', 'to', 'last']);
+  });
+
+  it('sets every value to the `defaultValue` provided', () => {
+    expect(Object.values(res)).toEqual(Array(fakeQueries.length).fill(defaultValue));
   });
 });

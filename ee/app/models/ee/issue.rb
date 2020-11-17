@@ -23,12 +23,17 @@ module EE
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
       scope :order_status_page_published_first, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS LAST') }
       scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
+      scope :order_sla_due_at_asc, -> { includes(:issuable_sla).order('issuable_slas.due_at ASC NULLS LAST') }
+      scope :order_sla_due_at_desc, -> { includes(:issuable_sla).order('issuable_slas.due_at DESC NULLS LAST') }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
+      scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
+      scope :with_iteration_title, ->(iteration_title) { joins(:iteration).where(sprints: { title: iteration_title }) }
+      scope :without_iteration_title, ->(iteration_title) { left_outer_joins(:iteration).where('sprints.title != ? OR sprints.id IS NULL', iteration_title) }
       scope :on_status_page, -> do
         joins(project: :status_page_setting)
         .where(status_page_settings: { enabled: true })
@@ -61,6 +66,12 @@ module EE
       validate :validate_confidential_epic
 
       after_create :update_generic_alert_title, if: :generic_alert_with_default_title?
+
+      state_machine :state_id do
+        after_transition do |issue|
+          issue.refresh_blocking_and_blocked_issues_cache!
+        end
+      end
     end
 
     class_methods do
@@ -83,8 +94,12 @@ module EE
       blocking_issues_ids.any?
     end
 
+    def blocked_by_issues
+      self.class.where(id: blocking_issues_ids)
+    end
+
     # Used on EE::IssueEntity to expose blocking issues URLs
-    def blocked_by_issues(user)
+    def blocked_by_issues_for(user)
       return ::Issue.none unless blocked?
 
       issues =
@@ -148,6 +163,16 @@ module EE
       user&.can?(:admin_epic, project.group)
     end
 
+    def can_be_promoted_to_epic?(user, group = nil)
+      group ||= project.group
+
+      return false unless user
+      return false unless group
+
+      persisted? && supports_epic? && !promoted? &&
+        user.can?(:admin_issue, project) && user.can?(:create_epic, group)
+    end
+
     # Issue position on boards list should be relative to all group projects
     def parent_ids
       return super unless has_group_boards?
@@ -189,6 +214,8 @@ module EE
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
         when 'published_asc'        then order_status_page_published_last.with_order_id_desc
         when 'published_desc'       then order_status_page_published_first.with_order_id_desc
+        when 'sla_due_at_asc'       then with_feature(:sla).order_sla_due_at_asc.with_order_id_desc
+        when 'sla_due_at_desc'      then with_feature(:sla).order_sla_due_at_desc.with_order_id_desc
         else
           super
         end
@@ -203,6 +230,18 @@ module EE
       blocking_count = ::IssueLink.blocking_issues_count_for(self)
 
       update!(blocking_issues_count: blocking_count)
+    end
+
+    def refresh_blocking_and_blocked_issues_cache!
+      self_and_blocking_issues_ids = [self.id] + blocking_issues_ids
+      blocking_issues_count_by_id = ::IssueLink.blocking_issues_for_collection(self_and_blocking_issues_ids).to_sql
+
+      self.class.connection.execute <<~SQL
+        UPDATE issues
+        SET blocking_issues_count = grouped_counts.count
+        FROM (#{blocking_issues_count_by_id}) AS grouped_counts
+        WHERE issues.id = grouped_counts.blocking_issue_id
+      SQL
     end
 
     override :relocation_target

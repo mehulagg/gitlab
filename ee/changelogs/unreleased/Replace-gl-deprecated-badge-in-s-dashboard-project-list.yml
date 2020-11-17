@@ -1,0 +1,5 @@
+---
+title: Replaced GlDeprecatedBadge with GlBadge for Security Dashboard Project List
+merge_request: 45917
+author:
+type: changed

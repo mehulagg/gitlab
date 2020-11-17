@@ -102,7 +102,7 @@ class IssuableFinder
     items = filter_items(items)
 
     # Let's see if we have to negate anything
-    items = filter_negated_items(items)
+    items = filter_negated_items(items) if should_filter_negated_args?
 
     # This has to be last as we use a CTE as an optimization fence
     # for counts by passing the force_cte param and passing the
@@ -134,13 +134,15 @@ class IssuableFinder
     by_my_reaction_emoji(items)
   end
 
-  # Negates all params found in `negatable_params`
-  def filter_negated_items(items)
-    return items unless Feature.enabled?(:not_issuable_queries, params.group || params.project, default_enabled: true)
+  def should_filter_negated_args?
+    return false unless Feature.enabled?(:not_issuable_queries, params.group || params.project, default_enabled: true)
 
     # API endpoints send in `nil` values so we test if there are any non-nil
-    return items unless not_params.present? && not_params.values.any?
+    not_params.present? && not_params.values.any?
+  end
 
+  # Negates all params found in `negatable_params`
+  def filter_negated_items(items)
     items = by_negated_author(items)
     items = by_negated_assignee(items)
     items = by_negated_label(items)
@@ -151,7 +153,9 @@ class IssuableFinder
   end
 
   def row_count
-    Gitlab::IssuablesCountForState.new(self).for_state_or_opened(params[:state])
+    Gitlab::IssuablesCountForState
+      .new(self, nil, fast_fail: true)
+      .for_state_or_opened(params[:state])
   end
 
   # We often get counts for each state by running a query per state, and
@@ -335,6 +339,15 @@ class IssuableFinder
       cte << items
 
       items = klass.with(cte.to_arel).from(klass.table_name)
+    elsif Feature.enabled?(:pg_hint_plan_for_issuables, params.project)
+      items = items.optimizer_hints(<<~HINTS)
+        BitmapScan(
+          issues idx_issues_on_project_id_and_created_at_and_id_and_state_id
+            idx_issues_on_project_id_and_due_date_and_id_and_state_id
+            idx_issues_on_project_id_and_updated_at_and_id_and_state_id
+            index_issues_on_project_id_and_iid
+        )
+      HINTS
     end
 
     items.full_search(search, matched_columns: params[:in], use_minimum_char_limit: !use_cte_for_search?)

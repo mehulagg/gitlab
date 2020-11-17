@@ -21,6 +21,11 @@ export default {
       type: Object,
       required: true,
     },
+    usageTotal: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     cssClass: {
       type: String,
       required: false,
@@ -40,12 +45,26 @@ export default {
           <span class="gl-font-lg gl-font-weight-bold">{{ usage.unit }}</span>
         </template>
       </gl-sprintf>
+      <template v-if="usageTotal">
+        <span class="gl-font-size-h-display gl-font-weight-bold">/</span>
+        <gl-sprintf :message="__('%{size} %{unit}')">
+          <template #size>
+            <span class="gl-font-size-h-display gl-font-weight-bold">{{ usageTotal.value }}</span>
+          </template>
+          <template #unit>
+            <span class="gl-font-lg gl-font-weight-bold">{{ usageTotal.unit }}</span>
+          </template>
+        </gl-sprintf>
+      </template>
     </p>
     <p class="gl-border-b-2 gl-border-b-solid gl-border-b-gray-100 gl-font-weight-bold gl-pb-3">
       {{ description }}
     </p>
-    <p class="gl-mb-0">
-      <slot v-bind="{ link }" name="link">
+    <p
+      class="gl-mb-0 gl-text-gray-900 gl-font-sm gl-white-space-normal"
+      data-testid="statisticsCardFooter"
+    >
+      <slot v-bind="{ link }" name="footer">
         <gl-link target="_blank" :href="link.url">
           <span class="text-truncate">{{ link.text }}</span>
           <gl-icon name="external-link" class="gl-ml-2 gl-flex-shrink-0 gl-text-black-normal" />

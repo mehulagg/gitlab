@@ -121,6 +121,14 @@ RSpec.describe IssuesFinder do
             expect(issues).to contain_exactly(issue_1, issue_2, issue_subepic)
           end
         end
+
+        context 'filter issues not in the epic' do
+          let(:params) { { not: { epic_id: epic_1.id } } }
+
+          it 'returns issues not assigned to the epic' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue_2, issue_subepic)
+          end
+        end
       end
 
       context 'filter by iteration' do
@@ -159,6 +167,22 @@ RSpec.describe IssuesFinder do
 
           it 'returns all issues with the iteration' do
             expect(issues).to contain_exactly(iteration_1_issue, iteration_2_issue)
+          end
+        end
+
+        context 'filter issue by iteration title' do
+          let(:params) { { iteration_title: iteration_1.title } }
+
+          it 'returns all issues with the iteration title' do
+            expect(issues).to contain_exactly(iteration_1_issue)
+          end
+        end
+
+        context 'filter issue by negated iteration title' do
+          let(:params) { { not: { iteration_title: iteration_1.title } } }
+
+          it 'returns all issues that do not match the iteration title' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, iteration_2_issue)
           end
         end
 

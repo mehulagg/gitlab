@@ -33,7 +33,7 @@ RSpec.describe 'getting a compliance frameworks list for a project' do
     it 'includes its name' do
       post_graphql(query, current_user: current_user)
 
-      expect(compliance_frameworks).to contain_exactly('name' => 'sox')
+      expect(compliance_frameworks).to contain_exactly('name' => 'SOX')
     end
   end
 end

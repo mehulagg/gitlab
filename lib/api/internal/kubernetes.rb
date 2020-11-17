@@ -3,7 +3,9 @@
 module API
   # Kubernetes Internal API
   module Internal
-    class Kubernetes < Grape::API::Instance
+    class Kubernetes < ::API::Base
+      feature_category :kubernetes_management
+
       before do
         check_feature_enabled
         authenticate_gitlab_kas_request!
@@ -85,7 +87,7 @@ module API
 
             # TODO sort out authorization for real
             # https://gitlab.com/gitlab-org/gitlab/-/issues/220912
-            if !project || !project.public?
+            unless Ability.allowed?(nil, :download_code, project)
               not_found!
             end
 

@@ -1,5 +1,5 @@
-- if ::Feature.enabled?(:whats_new_dropdown)
-  - if ::Feature.enabled?(:whats_new_drawer)
+- if ::Feature.enabled?(:whats_new_dropdown, current_user)
+  - if ::Feature.enabled?(:whats_new_drawer, current_user)
     %li
       %button.js-whats-new-trigger{ type: 'button', data: { storage_key: whats_new_storage_key } }
         = _("See what's new at GitLab")

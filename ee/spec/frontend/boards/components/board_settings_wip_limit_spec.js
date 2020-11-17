@@ -49,6 +49,7 @@ describe('BoardSettingsWipLimit', () => {
     const store = new Vuex.Store({
       state: vuexState,
       actions: storeActions,
+      getters: { shouldUseGraphQL: () => false },
     });
 
     wrapper = shallowMount(BoardSettingsWipLimit, {

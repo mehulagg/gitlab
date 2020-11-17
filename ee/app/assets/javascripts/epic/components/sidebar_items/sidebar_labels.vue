@@ -128,7 +128,7 @@ export default {
 
 <template>
   <labels-select-vue
-    :allow-label-remove="true"
+    :allow-label-remove="canUpdate"
     :allow-label-edit="canUpdate"
     :allow-label-create="true"
     :allow-multiselect="true"

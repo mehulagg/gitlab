@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Jobs < Grape::API::Instance
+  class Jobs < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_integration
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

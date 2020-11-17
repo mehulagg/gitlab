@@ -102,6 +102,49 @@ RSpec.describe Admin::UsersController do
     end
   end
 
+  describe 'PUT #approve' do
+    let(:user) { create(:user, :blocked_pending_approval) }
+
+    subject { put :approve, params: { id: user.username } }
+
+    context 'when successful' do
+      it 'activates the user' do
+        subject
+
+        user.reload
+
+        expect(user).to be_active
+        expect(flash[:notice]).to eq('Successfully approved')
+      end
+
+      it 'emails the user on approval' do
+        expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
+        expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+      end
+    end
+
+    context 'when unsuccessful' do
+      let(:user) { create(:user, :blocked) }
+
+      it 'displays the error' do
+        subject
+
+        expect(flash[:alert]).to eq('The user you are trying to approve is not pending an approval')
+      end
+
+      it 'does not activate the user' do
+        subject
+
+        user.reload
+        expect(user).not_to be_active
+      end
+
+      it 'does not email the pending user' do
+        expect { subject }.not_to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+      end
+    end
+  end
+
   describe 'PUT #activate' do
     shared_examples 'a request that activates the user' do
       it 'activates the user' do
@@ -188,6 +231,17 @@ RSpec.describe Admin::UsersController do
         user.reload
         expect(user.deactivated?).to be_falsey
         expect(flash[:notice]).to eq('Error occurred. A blocked user cannot be deactivated')
+      end
+    end
+
+    context 'for an internal user' do
+      it 'does not deactivate the user' do
+        internal_user = User.alert_bot
+
+        put :deactivate, params: { id: internal_user.username }
+
+        expect(internal_user.reload.deactivated?).to be_falsey
+        expect(flash[:notice]).to eq('Internal users cannot be deactivated')
       end
     end
   end

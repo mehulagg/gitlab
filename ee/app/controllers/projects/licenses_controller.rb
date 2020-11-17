@@ -19,7 +19,8 @@ module Projects
           license_compliance = project.license_compliance
           render json: serializer.represent(
             pageable(matching_policies_from(license_compliance)),
-            build: license_compliance.latest_build_for_default_branch
+            build: license_compliance.latest_build_for_default_branch,
+            project: project
           )
         end
       end

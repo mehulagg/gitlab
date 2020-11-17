@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovals < ::Grape::API::Instance
+  class ProjectApprovals < ::API::Base
+    feature_category :code_review
+
     before { authenticate! }
     before { authorize! :update_approvers, user_project }
 

@@ -26,23 +26,22 @@ There are two options. Using:
 
 - `git clone`, which is slower since it clones the repository from scratch
   for every job, ensuring that the local working copy is always pristine.
-- `git fetch`, which is faster as it re-uses the local working copy (falling
+- `git fetch`, which is GitLab's default and faster as it re-uses the local working copy (falling
   back to clone if it doesn't exist).
+  This is recommended, especially for [large repositories](../large_repositories/index.md#git-strategy).
 
-The default Git strategy can be overridden by the [GIT_STRATEGY variable](../yaml/README.md#git-strategy)
+The configured Git strategy can be overridden by the [`GIT_STRATEGY` variable](../runners/README.md#git-strategy)
 in `.gitlab-ci.yml`.
 
 ## Git shallow clone
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/28919) in GitLab 12.0.
 
-NOTE: **Note:**
-As of GitLab 12.0, newly created projects automatically have a default
-`git depth` value of `50`.
-
 It is possible to limit the number of changes that GitLab CI/CD fetches when cloning
-a repository. Setting a limit to `git depth` can speed up Pipelines execution. Maximum
-allowed value is `1000`.
+a repository. Setting a limit to `git depth` can speed up Pipelines execution.
+
+In GitLab 12.0 and later, newly created projects automatically have a default
+`git depth` value of `50`. The maximum allowed value is `1000`.
 
 To disable shallow clone and make GitLab CI/CD fetch all branches and tags each time,
 keep the value empty or set to `0`.
@@ -180,13 +179,12 @@ This also determines the visibility of these related features:
 - Job artifacts
 - The [pipeline security dashboard](../../user/application_security/security_dashboard/index.md#pipeline-security) **(ULTIMATE)**
 
-NOTE: **Note:**
-Currently, job logs and artifacts are [not yet visible for guest users and non-project members](https://gitlab.com/gitlab-org/gitlab/-/issues/25649).
+Job logs and artifacts are [not visible for guest users and non-project members](https://gitlab.com/gitlab-org/gitlab/-/issues/25649).
 
 If **Public pipelines** is enabled (default):
 
 - For **public** projects, anyone can view the pipelines and related features.
-- For **internal** projects, any logged in user can view the pipelines
+- For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines
   and related features.
 - For **private** projects, any project member (guest or higher) can view the pipelines
   and related features.
@@ -195,7 +193,7 @@ If **Public pipelines** is disabled:
 
 - For **public** projects, anyone can view the pipelines, but only members
   (reporter or higher) can access the related features.
-- For **internal** projects, any logged in user can view the pipelines.
+- For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines.
   However, only members (reporter or higher) can access the job related features.
 - For **private** projects, only project members (reporter or higher)
   can view the pipelines or access the related features.
@@ -231,6 +229,16 @@ To avoid this scenario:
 1. Click **Save changes**.
 
 When enabled, any older deployments job are skipped when a new deployment starts.
+
+For more information, see [Deployment safety](../environments/deployment_safety.md).
+
+## Retry outdated jobs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211339) in GitLab 13.6.
+
+A deployment job can fail because a newer one has run. If you retry the failed deployment job, the
+environment could be overwritten with older source code. If you click **Retry**, a modal warns you
+about this and asks for confirmation.
 
 For more information, see [Deployment safety](../environments/deployment_safety.md).
 
@@ -322,10 +330,10 @@ https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?st
 The text for a badge can be customized. This can be useful to differentiate between multiple coverage jobs that run in the same pipeline. Customize the badge text and width by adding the `key_text=custom_text` and `key_width=custom_key_width` parameters to the URL:
 
 ```plaintext
-https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=100
+https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130
 ```
 
-![Badge with custom text and width](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=100)
+![Badge with custom text and width](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130)
 
 ## Environment Variables
 

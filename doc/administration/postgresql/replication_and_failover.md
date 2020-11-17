@@ -425,7 +425,7 @@ Check the [Troubleshooting section](#troubleshooting) before proceeding.
 
 1. Make sure you collect [`CONSUL_SERVER_NODES`](#consul-information), [`CONSUL_PASSWORD_HASH`](#consul-information), and [`PGBOUNCER_PASSWORD_HASH`](#pgbouncer-information) before executing the next step.
 
-1. One each node, edit the `/etc/gitlab/gitlab.rb` config file and replace values noted in the `# START user configuration` section as below:
+1. One each node, edit the `/etc/gitlab/gitlab.rb` configuration file and replace values noted in the `# START user configuration` section as below:
 
    ```ruby
    # Disable all components except PgBouncer and Consul agent
@@ -579,18 +579,19 @@ in the Troubleshooting section before proceeding.
 
 ### Ensure GitLab is running
 
-At this point, your GitLab instance should be up and running. Verify you are
-able to login, and create issues and merge requests. If you have troubles check
+At this point, your GitLab instance should be up and running. Verify you're able
+to sign in, and create issues and merge requests. If you encounter issues, see
 the [Troubleshooting section](#troubleshooting).
 
 ## Example configuration
 
-Here we'll show you some fully expanded example configurations.
+This section describes several fully expanded example configurations.
 
 ### Example recommended setup
 
-This example uses 3 Consul servers, 3 PgBouncer servers (with associated internal load balancer),
-3 PostgreSQL servers, and 1 application node.
+This example uses three Consul servers, three PgBouncer servers (with an
+associated internal load balancer), three PostgreSQL servers, and one
+application node.
 
 We start with all servers on the same 10.6.0.0/16 private network range, they
 can connect to each freely other on those addresses.
@@ -1445,7 +1446,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    sudo gitlab-ctl pg-upgrade -V 12
    ```
 
-CAUTION: **Warning:**
+NOTE: **Note:**
 Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
-`gitlab-ctl pg-upgrade`. It can be complicated and may involve deletion of the data directory.
-If you need to do that, please contact GitLab support.
+`gitlab-ctl pg-upgrade`. You should follow the same procedure by first stopping the replicas,
+then reverting the leader, and finally reverting the replicas.

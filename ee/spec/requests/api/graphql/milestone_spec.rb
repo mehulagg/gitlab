@@ -22,12 +22,14 @@ RSpec.describe 'Querying a Milestone' do
   context 'burnupTimeSeries' do
     let(:fields) do
       <<~FIELDS
-      burnupTimeSeries {
-        date
-        scopeCount
-        scopeWeight
-        completedCount
-        completedWeight
+      report {
+        burnupTimeSeries {
+          date
+          scopeCount
+          scopeWeight
+          completedCount
+          completedWeight
+        }
       }
       FIELDS
     end
@@ -64,15 +66,17 @@ RSpec.describe 'Querying a Milestone' do
           post_graphql(query, current_user: current_user)
 
           expect(subject).to eq({
-            'burnupTimeSeries' => [
-              {
-                'date' => '2020-01-05',
-                'scopeCount' => 1,
-                'scopeWeight' => 0,
-                'completedCount' => 0,
-                'completedWeight' => 0
-              }
-            ]
+            'report' => {
+              'burnupTimeSeries' => [
+                {
+                  'date' => '2020-01-05',
+                  'scopeCount' => 1,
+                  'scopeWeight' => 0,
+                  'completedCount' => 0,
+                  'completedWeight' => 0
+                }
+              ]
+            }
           })
         end
       end
@@ -87,7 +91,7 @@ RSpec.describe 'Querying a Milestone' do
       it 'returns empty results' do
         post_graphql(query, current_user: current_user)
 
-        expect(subject).to eq({ 'burnupTimeSeries' => [] })
+        expect(subject).to eq({ 'report' => { 'burnupTimeSeries' => nil } })
       end
     end
   end

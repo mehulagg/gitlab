@@ -1,0 +1,5 @@
+---
+title: Run PushRuleCheck in parallel
+merge_request: 45668
+author:
+type: performance

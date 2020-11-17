@@ -67,7 +67,12 @@ module QA
         end
       end
 
-      context 'instance level', :requires_admin, quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/228624' } do
+      # This was originally quarantined only on staging
+      # against the issue https://gitlab.com/gitlab-org/gitlab/-/issues/228624
+      # Now quarantining against a new issue due to failures on master
+      # If dequarantining, the original staging quarantine should be reverted
+      # if still applicable.
+      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/247874', type: :bug } do
         before do
           Flow::Login.sign_in_as_admin
 

@@ -31,8 +31,8 @@ describe('Remediated badge component', () => {
     });
 
     it('links the badge and the popover', () => {
-      const { popover } = wrapper.vm.$refs;
-      expect(popover.$attrs.target()).toEqual(findIcon().element.parentNode);
+      const popover = wrapper.find({ ref: 'popover' });
+      expect(popover.props('target')()).toEqual(findIcon().element.parentNode);
     });
 
     it('displays the issues', () => {

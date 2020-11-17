@@ -213,10 +213,9 @@ In this scenario, the `UPSTREAM_BRANCH` variable with a value related to the
 upstream pipeline will be passed to the `downstream-job` job, and will be available
 within the context of all downstream builds.
 
-NOTE: **Tip:**
 Upstream pipelines take precedence over downstream ones. If there are two
 variables with the same name defined in both upstream and downstream projects,
-the ones defined in the upstream project will take precedence.
+the ones defined in the upstream project take precedence.
 
 #### With variable inheritance
 
@@ -226,7 +225,7 @@ In the upstream pipeline:
 
 1. Save the variables in a `.env` file.
 1. Save the `.env` file as a `dotenv` report.
-1. Trigger the downstream pipeline. 
+1. Trigger the downstream pipeline.
 
 ```yaml
 build_vars:
@@ -306,7 +305,7 @@ Some features are not implemented yet. For example, support for environments.
 - `when` (only with `on_success`, `on_failure`, and `always` values)
 - `extends`
 
-## Trigger a pipeline when an upstream project is rebuilt
+## Trigger a pipeline when an upstream project is rebuilt **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9045) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
 
@@ -322,6 +321,9 @@ Any pipelines that complete successfully for new tags in the subscribed project
 will now trigger a pipeline on the current project's default branch. The maximum
 number of upstream pipeline subscriptions is 2 by default, for both the upstream and
 downstream projects. This [application limit](../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) can be changed on self-managed instances by a GitLab administrator.
+
+The upstream project needs to be [public](../public_access/public_access.md) for
+pipeline subscription to work.
 
 ## Downstream private projects confidentiality concern
 

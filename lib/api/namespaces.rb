@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Namespaces < Grape::API::Instance
+  class Namespaces < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :subgroups
 
     helpers do
       params :optional_list_params_ee do

@@ -17,6 +17,7 @@ namespace :admin do
       put :activate
       put :unlock
       put :confirm
+      put :approve
       post :impersonate
       patch :disable_two_factor
       delete 'remove/:email_id', action: 'remove_email', as: 'remove_email'
@@ -147,8 +148,8 @@ namespace :admin do
 
   resources :runners, only: [:index, :show, :update, :destroy] do
     member do
-      get :resume
-      get :pause
+      post :resume
+      post :pause
     end
 
     collection do

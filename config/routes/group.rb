@@ -17,6 +17,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       put :transfer, as: :transfer_group # rubocop:disable Cop/PutGroupRoutesUnderScope
       post :export, as: :export_group # rubocop:disable Cop/PutGroupRoutesUnderScope
       get :download_export, as: :download_export_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :unfoldered_environment_names, as: :unfoldered_environment_names_group # rubocop:disable Cop/PutGroupRoutesUnderScope
 
       # TODO: Remove as part of refactor in https://gitlab.com/gitlab-org/gitlab-foss/issues/49693
       get 'shared', action: :show, as: :group_shared # rubocop:disable Cop/PutGroupRoutesUnderScope
@@ -106,6 +107,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     end
 
     resources :container_registries, only: [:index, :show], controller: 'registry/repositories'
+    resource :dependency_proxy, only: [:show, :update]
   end
 
   scope(path: '*id',
@@ -116,5 +118,16 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     patch '/', action: :update
     put '/', action: :update
     delete '/', action: :destroy
+  end
+end
+
+# Dependency proxy for containers
+# Because docker adds v2 prefix to URI this need to be outside of usual group routes
+scope format: false do
+  get 'v2', to: proc { [200, {}, ['']] } # rubocop:disable Cop/PutGroupRoutesUnderScope
+
+  constraints image: Gitlab::PathRegex.container_image_regex, sha: Gitlab::PathRegex.container_image_blob_sha_regex do
+    get 'v2/*group_id/dependency_proxy/containers/*image/manifests/*tag' => 'groups/dependency_proxy_for_containers#manifest' # rubocop:todo Cop/PutGroupRoutesUnderScope
+    get 'v2/*group_id/dependency_proxy/containers/*image/blobs/:sha' => 'groups/dependency_proxy_for_containers#blob' # rubocop:todo Cop/PutGroupRoutesUnderScope
   end
 end

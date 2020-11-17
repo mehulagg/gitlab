@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 description: 'Next iteration of build logs architecture at GitLab'
 ---
@@ -120,6 +123,8 @@ available](https://gitlab.com/groups/gitlab-org/-/epics/3791) for everyone.
 
 Proposal:
 
+<!-- vale gitlab.Spelling = NO -->
+
 | Role                         | Who
 |------------------------------|-------------------------|
 | Author                       |     Grzegorz Bizon      |
@@ -135,3 +140,5 @@ DRIs:
 | Product                      |     Jason Yavorska     |
 | Leadership                   |       Darby Frey       |
 | Engineering                  |     Grzegorz Bizon     |
+
+<!-- vale gitlab.Spelling = YES -->

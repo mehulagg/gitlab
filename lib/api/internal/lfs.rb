@@ -2,10 +2,12 @@
 
 module API
   module Internal
-    class Lfs < Grape::API::Instance
+    class Lfs < ::API::Base
       use Rack::Sendfile
 
       before { authenticate_by_gitlab_shell_token! }
+
+      feature_category :source_code_management
 
       helpers do
         def find_lfs_object(lfs_oid)

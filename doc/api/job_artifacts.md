@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Job Artifacts API
 
 ## Get job artifacts
@@ -64,7 +70,7 @@ is the same as [getting the job's artifacts](#get-job-artifacts), but by
 defining the job's name instead of its ID.
 
 NOTE: **Note:**
-If a pipeline is [parent of other child pipelines](../ci/parent_child_pipelines.md), artifacts 
+If a pipeline is [parent of other child pipelines](../ci/parent_child_pipelines.md), artifacts
 are searched in hierarchical order from parent to child. For example, if both parent and
 child pipelines have a job with the same name, the artifact from the parent pipeline will be returned.
 

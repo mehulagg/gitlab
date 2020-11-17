@@ -42,7 +42,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
       end
 
       it 'is valid' do
-        Timecop.travel '2019-03-01' do
+        travel_to '2019-03-01' do
           expect(subject).to be_valid
         end
       end

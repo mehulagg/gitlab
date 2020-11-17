@@ -83,9 +83,10 @@ module EE
       end
 
       # @param primary_key_in [Range, Ci::JobArtifact] arg to pass to primary_key_in scope
-      # @param node [GeoNode] defaults to ::Gitlab::Geo.current_node
       # @return [ActiveRecord::Relation<Ci::JobArtifact>] everything that should be synced to this node, restricted by primary key
-      def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+      def replicables_for_current_secondary(primary_key_in)
+        node = ::Gitlab::Geo.current_node
+
         not_expired
           .primary_key_in(primary_key_in)
           .merge(selective_sync_scope(node))
@@ -117,11 +118,14 @@ module EE
       strong_memoize(:security_report) do
         next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
 
-        ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
+        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
           each_blob do |blob|
             ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
           end
         end
+
+        # This will remove the duplicated findings within the artifact itself
+        ::Security::MergeReportsService.new(report).execute
       end
     end
 

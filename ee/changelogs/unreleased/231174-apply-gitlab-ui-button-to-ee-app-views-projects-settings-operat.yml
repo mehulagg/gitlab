@@ -1,5 +1,0 @@
----
-title: adds the `.gl-button` class to ee/app/views/projects/settings/operations/_tracing.html.haml
-merge_request: 43347
-author: Justin Zeng @jzeng88
-type: other

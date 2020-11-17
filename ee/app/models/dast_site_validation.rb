@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DastSiteValidation < ApplicationRecord
-  HEADER = 'Gitlab-On-Demand-DAST'.freeze
+  HEADER = 'Gitlab-On-Demand-DAST'
 
   belongs_to :dast_site_token
   has_many :dast_sites
@@ -11,6 +11,10 @@ class DastSiteValidation < ApplicationRecord
 
   scope :by_project_id, -> (project_id) do
     joins(:dast_site_token).where(dast_site_tokens: { project_id: project_id })
+  end
+
+  scope :by_url_base, -> (url_base) do
+    where(url_base: url_base)
   end
 
   before_create :set_normalized_url_base
@@ -23,9 +27,9 @@ class DastSiteValidation < ApplicationRecord
     "#{url_base}/#{url_path}"
   end
 
-  INITIAL_STATE = :pending
+  INITIAL_STATE = 'pending'
 
-  state_machine :state, initial: INITIAL_STATE do
+  state_machine :state, initial: INITIAL_STATE.to_sym do
     event :start do
       transition pending: :inprogress
     end
@@ -59,11 +63,15 @@ class DastSiteValidation < ApplicationRecord
     end
   end
 
+  def self.get_normalized_url_base(url)
+    uri = URI(url)
+
+    "%{scheme}://%{host}:%{port}" % { scheme: uri.scheme, host: uri.host, port: uri.port }
+  end
+
   private
 
   def set_normalized_url_base
-    uri = URI(dast_site_token.url)
-
-    self.url_base = "%{scheme}://%{host}:%{port}" % { scheme: uri.scheme, host: uri.host, port: uri.port }
+    self.url_base = self.class.get_normalized_url_base(dast_site_token.url)
   end
 end

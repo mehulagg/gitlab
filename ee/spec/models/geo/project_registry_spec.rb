@@ -550,7 +550,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
 
   describe '#start_sync!' do
     around do |example|
-      Timecop.freeze do
+      freeze_time do
         example.run
       end
     end
@@ -609,7 +609,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
       end
 
       it 'sets last_repository_successful_sync_at to now' do
-        Timecop.freeze do
+        freeze_time do
           subject.finish_sync!(type)
 
           expect(subject.reload.last_repository_successful_sync_at).to be_within(1).of(Time.current)
@@ -704,7 +704,7 @@ RSpec.describe Geo::ProjectRegistry, :geo do
       end
 
       it 'sets last_wiki_successful_sync_at to now' do
-        Timecop.freeze do
+        freeze_time do
           subject.finish_sync!(type)
 
           expect(subject.reload.last_wiki_successful_sync_at).to be_within(1).of(Time.current)

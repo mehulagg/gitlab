@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Wikis < Grape::API::Instance
+  class Wikis < ::API::Base
     helpers ::API::Helpers::WikisHelpers
+
+    feature_category :wiki
 
     helpers do
       attr_reader :container

@@ -6,12 +6,27 @@
  * lifted this component could replace and be used mainstream.
  */
 import { GlLink, GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, sprintf } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
+import { ALERT_THRESHOLD, ERROR_THRESHOLD, WARNING_THRESHOLD } from '../constants';
 
 export default {
+  i18n: {
+    warningWithNoPurchasedStorageText: s__(
+      'UsageQuota|This project is near the free %{actualRepositorySizeLimit} limit and at risk of being locked.',
+    ),
+    lockedWithNoPurchasedStorageText: s__(
+      'UsageQuota|This project is locked because it is using %{actualRepositorySizeLimit} of free storage and there is no purchased storage available.',
+    ),
+    warningWithPurchasedStorageText: s__(
+      'UsageQuota|This project is at risk of being locked because purchased storage is running low.',
+    ),
+    lockedWithPurchasedStorageText: s__(
+      'UsageQuota|This project is locked because it used %{actualRepositorySizeLimit} of free storage and all the purchased storage.',
+    ),
+  },
   components: {
     GlIcon,
     GlLink,
@@ -24,6 +39,10 @@ export default {
     project: {
       required: true,
       type: Object,
+    },
+    additionalPurchasedStorageSize: {
+      type: Number,
+      required: true,
     },
   },
   computed: {
@@ -39,34 +58,48 @@ export default {
     name() {
       return this.project.nameWithNamespace;
     },
+    hasPurchasedStorage() {
+      return this.additionalPurchasedStorageSize > 0;
+    },
     storageSize() {
-      return numberToHumanSize(this.project.statistics.storageSize);
+      return formatUsageSize(this.project.totalCalculatedUsedStorage);
     },
     excessStorageSize() {
-      return numberToHumanSize(this.project.statistics?.excessStorageSize ?? 0);
+      return formatUsageSize(this.project.repositorySizeExcess);
+    },
+    excessStorageRatio() {
+      return this.project.totalCalculatedUsedStorage / this.project.totalCalculatedStorageLimit;
+    },
+    thresholdLevel() {
+      return usageRatioToThresholdLevel(this.excessStorageRatio);
     },
     status() {
-      // The project default limit will be sent by backend.
-      // This is being added here just for testing purposes.
-      // This entire component is rendered behind the
-      // additional_repo_storage_by_namespace feature flag. This
-      // piece will be removed along with the flag and the logic
-      // will be mostly on the backend.
-      const PROJECT_DEFAULT_LIMIT = 10000000000;
-      const PROJECT_DEFAULT_WARNING_LIMIT = 9000000000;
+      const i18nTextOpts = {
+        actualRepositorySizeLimit: formatUsageSize(this.project.actualRepositorySizeLimit),
+      };
+      if (this.thresholdLevel === ERROR_THRESHOLD) {
+        const tooltipText = this.hasPurchasedStorage
+          ? this.$options.i18n.lockedWithPurchasedStorageText
+          : this.$options.i18n.lockedWithNoPurchasedStorageText;
 
-      if (this.project.statistics.storageSize > PROJECT_DEFAULT_LIMIT) {
         return {
           bgColor: { 'gl-bg-red-50': true },
           iconClass: { 'gl-text-red-500': true },
           linkClass: 'gl-text-red-500!',
-          tooltipText: s__('UsageQuota|This project is locked.'),
+          tooltipText: sprintf(tooltipText, i18nTextOpts),
         };
-      } else if (this.project.statistics.storageSize > PROJECT_DEFAULT_WARNING_LIMIT) {
+      } else if (
+        this.thresholdLevel === WARNING_THRESHOLD ||
+        this.thresholdLevel === ALERT_THRESHOLD
+      ) {
+        const tooltipText = this.hasPurchasedStorage
+          ? this.$options.i18n.warningWithPurchasedStorageText
+          : this.$options.i18n.warningWithNoPurchasedStorageText;
+
         return {
           bgColor: { 'gl-bg-orange-50': true },
           iconClass: 'gl-text-orange-500',
-          tooltipText: s__('UsageQuota|This project is at risk of being locked.'),
+          tooltipText: sprintf(tooltipText, i18nTextOpts),
         };
       }
 
@@ -83,7 +116,7 @@ export default {
     data-testid="projectTableRow"
   >
     <div
-      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-50 gl-text-truncate"
+      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-50 gl-text-truncate gl-pr-5"
       role="gridcell"
     >
       <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
@@ -113,7 +146,7 @@ export default {
       </div>
     </div>
     <div
-      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-25 gl-text-truncate"
+      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-15 gl-text-truncate"
       role="gridcell"
     >
       <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
@@ -122,7 +155,7 @@ export default {
       <div class="table-mobile-content gl-text-gray-900">{{ storageSize }}</div>
     </div>
     <div
-      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-25 gl-text-truncate"
+      class="table-section gl-white-space-normal! gl-flex-sm-wrap section-15 gl-text-truncate"
       role="gridcell"
     >
       <div class="table-mobile-header gl-font-weight-bold" role="rowheader">

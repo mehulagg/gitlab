@@ -29,71 +29,67 @@ describe('SidebarItemEpicsSelect', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('methods', () => {
     describe('getInitialEpicLoading', () => {
-      it('should return `false` when `initialEpic` prop is provided', () => {
+      it('should return `false` when `initialEpic` prop is provided', async () => {
         wrapper.setProps({
           initialEpic: mockEpic1,
         });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.getInitialEpicLoading()).toBe(false);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.getInitialEpicLoading()).toBe(false);
       });
 
-      it('should return value of `sidebarStore.isFetching.epic` when `initialEpic` prop is null and `isFetching` is available', () => {
+      it('should return value of `sidebarStore.isFetching.epic` when `initialEpic` prop is null and `isFetching` is available', async () => {
         wrapper.setProps({
           sidebarStore: { isFetching: { epic: true } },
         });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.getInitialEpicLoading()).toBe(true);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.getInitialEpicLoading()).toBe(true);
       });
 
-      it('should return `false` when both `initialEpic` and `sidebarStore.isFetching` are unavailable', () => {
+      it('should return `false` when both `initialEpic` and `sidebarStore.isFetching` are unavailable', async () => {
         wrapper.setProps({
           initialEpic: null,
           sidebarStore: { isFetching: null },
         });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.getInitialEpicLoading()).toBe(false);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.getInitialEpicLoading()).toBe(false);
       });
     });
 
     describe('getEpic', () => {
-      it('should return value of `initialEpic` as it is when it is available', () => {
+      it('should return value of `initialEpic` as it is when it is available', async () => {
         wrapper.setProps({
           initialEpic: mockEpic1,
         });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.getEpic()).toBe(mockEpic1);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.getEpic()).toBe(mockEpic1);
       });
 
       it('should return value of `sidebarStore.epic` as it is when it is available', () => {
         expect(wrapper.vm.getEpic()).toBe(mockEpic1);
       });
 
-      it('should return No Epic object as it is when both `initialEpic` & `sidebarStore.epic` are unavailable', () => {
+      it('should return No Epic object as it is when both `initialEpic` & `sidebarStore.epic` are unavailable', async () => {
         wrapper.setProps({
           initialEpic: null,
           sidebarStore: { epic: null },
         });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.getEpic()).toEqual(
-            expect.objectContaining({
-              id: 0,
-              title: 'No Epic',
-            }),
-          );
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.getEpic()).toEqual(
+          expect.objectContaining({
+            id: 0,
+            title: 'No Epic',
+          }),
+        );
       });
     });
   });

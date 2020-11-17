@@ -3,7 +3,7 @@
 module Security
   module CiConfiguration
     class SastBuildActions
-      SAST_DEFAULT_ANALYZERS = 'bandit, brakeman, gosec, spotbugs, flawfinder, phpcs-security-audit, security-code-scan, nodejs-scan, eslint, sobelow, pmd-apex, kubesec'
+      SAST_DEFAULT_ANALYZERS = 'bandit, brakeman, eslint, flawfinder, gosec, kubesec, nodejs-scan, phpcs-security-audit, pmd-apex, security-code-scan, sobelow, spotbugs'
 
       def initialize(auto_devops_enabled, params, existing_gitlab_ci_content)
         @auto_devops_enabled = auto_devops_enabled
@@ -55,6 +55,7 @@ module Security
                                                          config['analyzers']
                                                            &.select {|a| a['enabled'] }
                                                            &.collect {|a| a['name'] }
+                                                           &.sort
                                                            &.join(', ')
                                                        else
                                                          SAST_DEFAULT_ANALYZERS

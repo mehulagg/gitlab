@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlDeprecatedBadge as GlBadge, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlBadge, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import ProjectList from 'ee/security_dashboard/components/first_class_project_manager/project_list.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 

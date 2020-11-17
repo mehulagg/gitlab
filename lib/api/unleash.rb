@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Unleash < Grape::API::Instance
+  class Unleash < ::API::Base
     include PaginationParams
+
+    feature_category :feature_flags
 
     namespace :feature_flags do
       resource :unleash, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do

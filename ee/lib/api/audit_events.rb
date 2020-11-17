@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class AuditEvents < ::Grape::API::Instance
+  class AuditEvents < ::API::Base
     include ::API::PaginationParams
+
+    feature_category :audit_events
 
     before do
       authenticated_as_admin!

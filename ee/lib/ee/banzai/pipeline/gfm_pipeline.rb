@@ -24,8 +24,7 @@ module EE
 
           def filters
             [
-              *super,
-              ::Banzai::Filter::VulnerabilityReferenceFilter
+              *super
             ]
           end
         end

@@ -13,6 +13,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.coverageFuzzingHelp = data.coverage_fuzzing_help_path;
     this.secretScanningHelp = data.secret_scanning_help_path;
     this.dependencyScanningHelp = data.dependency_scanning_help_path;
+    this.canReadVulnerabilities = data.can_read_vulnerabilities;
     this.vulnerabilityFeedbackPath = data.vulnerability_feedback_path;
     this.canReadVulnerabilityFeedback = data.can_read_vulnerability_feedback;
     this.vulnerabilityFeedbackHelpPath = data.vulnerability_feedback_help_path;

@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :ci_reports_security_report, class: '::Gitlab::Ci::Reports::Security::Report' do
     type { :sast }
-    pipeline { build(:ci_pipeline) }
+    pipeline { association(:ci_pipeline) }
     created_at { 2.weeks.ago }
     scanned_resources { [] }
 

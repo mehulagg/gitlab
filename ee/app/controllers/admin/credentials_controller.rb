@@ -5,9 +5,9 @@ class Admin::CredentialsController < Admin::ApplicationController
   include CredentialsInventoryActions
   include Analytics::UniqueVisitsHelper
 
-  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?
+  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?, :ssh_key_delete_path
 
-  before_action :check_license_credentials_inventory_available!, only: [:index, :revoke]
+  before_action :check_license_credentials_inventory_available!, only: [:index, :revoke, :destroy]
 
   track_unique_visits :index, target_id: 'i_compliance_credential_inventory'
 
@@ -29,6 +29,11 @@ class Admin::CredentialsController < Admin::ApplicationController
     admin_user_path(user)
   end
 
+  override :ssh_key_delete_path
+  def ssh_key_delete_path(key)
+    admin_credential_path(key)
+  end
+
   override :personal_access_token_revoke_path
   def personal_access_token_revoke_path(token)
     revoke_admin_credential_path(token)
@@ -41,6 +46,11 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   override :users
   def users
+    nil
+  end
+
+  override :revocable
+  def revocable
     nil
   end
 end

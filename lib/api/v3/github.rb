@@ -7,7 +7,7 @@
 #
 module API
   module V3
-    class Github < Grape::API::Instance
+    class Github < ::API::Base
       NO_SLASH_URL_PART_REGEX = %r{[^/]+}.freeze
       ENDPOINT_REQUIREMENTS = {
         namespace: NO_SLASH_URL_PART_REGEX,
@@ -21,6 +21,8 @@ module API
       JIRA_DVCS_CLOUD_USER_AGENT = 'Jira DVCS Connector Vertigo'.freeze
 
       include PaginationParams
+
+      feature_category :integrations
 
       before do
         authorize_jira_user_agent!(request)

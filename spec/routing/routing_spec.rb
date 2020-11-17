@@ -133,6 +133,10 @@ RSpec.describe ProfilesController, "routing" do
   it "to #show" do
     expect(get("/profile")).to route_to('profiles#show')
   end
+
+  it 'to #show from scope routing' do
+    expect(get("/-/profile")).to route_to('profiles#show')
+  end
 end
 
 # profile_preferences GET      /profile/preferences(.:format) profiles/preferences#show
@@ -363,5 +367,12 @@ end
 RSpec.describe RunnerSetupController, 'routing' do
   it 'to #platforms' do
     expect(get("/-/runner_setup/platforms")).to route_to('runner_setup#platforms')
+  end
+end
+
+# jwks  GET /-/jwks(.:format)  jwks#index
+RSpec.describe JwksController, "routing" do
+  it "to #index" do
+    expect(get('/-/jwks')).to route_to('jwks#index')
   end
 end

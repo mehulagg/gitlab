@@ -45,7 +45,7 @@ module Gitlab
       end
 
       def read_zip_file!(file_path)
-        if ::Gitlab::Ci::Features.new_artifact_file_reader_enabled?(job.project)
+        if ::Feature.enabled?(:ci_new_artifact_file_reader, job.project, default_enabled: false)
           read_with_new_artifact_file_reader(file_path)
         else
           read_with_legacy_artifact_file_reader(file_path)

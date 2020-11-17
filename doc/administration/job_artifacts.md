@@ -103,7 +103,7 @@ If you configure GitLab to store artifacts on object storage, you may also want 
 [eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage).
 In both cases, job logs are archived and moved to object storage when the job completes.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 In a multi-server setup you must use one of the options to
 [eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage), or job logs could be lost.
 
@@ -374,7 +374,7 @@ default artifacts expiration setting, which you can find in the [CI/CD Admin set
 
 > Introduced in GitLab 10.3.
 
-To disable [the dependencies validation](../ci/yaml/README.md#when-a-dependent-job-will-fail),
+To disable [the dependencies validation](../ci/yaml/README.md#when-a-dependent-job-fails),
 you can enable the `ci_disable_validates_dependencies` feature flag from a Rails console.
 
 **In Omnibus installations:**

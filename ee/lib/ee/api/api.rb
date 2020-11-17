@@ -8,24 +8,22 @@ module EE
       prepended do
         use ::Gitlab::Middleware::IpRestrictor
 
-        mount ::EE::API::Boards
         mount ::EE::API::GroupBoards
 
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
         mount ::API::ProjectApprovalSettings
-        mount ::API::DependencyProxy
         mount ::API::EpicIssues
         mount ::API::EpicLinks
         mount ::API::Epics
         mount ::API::ElasticsearchIndexedNamespaces
+        mount ::API::Experiments
         mount ::API::Geo
         mount ::API::GeoReplication
         mount ::API::GeoNodes
         mount ::API::Ldap
         mount ::API::LdapGroupLinks
         mount ::API::License
-        mount ::API::PersonalAccessTokens
         mount ::API::ProjectMirror
         mount ::API::ProjectPushRule
         mount ::API::GroupPushRule
@@ -47,6 +45,7 @@ module EE
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents
         mount ::API::ResourceIterationEvents
+        mount ::API::Iterations
       end
     end
   end

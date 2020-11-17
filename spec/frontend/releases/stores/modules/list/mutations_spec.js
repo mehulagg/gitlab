@@ -4,7 +4,7 @@ import mutations from '~/releases/stores/modules/list/mutations';
 import * as types from '~/releases/stores/modules/list/mutation_types';
 import { parseIntPagination, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { pageInfoHeadersWithoutPagination } from '../../../mock_data';
-import { convertGraphQLResponse } from '~/releases/util';
+import { convertAllReleasesGraphQLResponse } from '~/releases/util';
 
 const originalRelease = getJSONFixture('api/releases/release.json');
 const originalReleases = [originalRelease];
@@ -22,7 +22,7 @@ describe('Releases Store Mutations', () => {
   beforeEach(() => {
     stateCopy = createState({});
     restPageInfo = parseIntPagination(pageInfoHeadersWithoutPagination);
-    graphQlPageInfo = convertGraphQLResponse(graphqlReleasesResponse).paginationInfo;
+    graphQlPageInfo = convertAllReleasesGraphQLResponse(graphqlReleasesResponse).paginationInfo;
     releases = convertObjectPropsToCamelCase(originalReleases, { deep: true });
   });
 
@@ -78,6 +78,18 @@ describe('Releases Store Mutations', () => {
       expect(stateCopy.releases).toEqual([]);
       expect(stateCopy.restPageInfo).toEqual({});
       expect(stateCopy.graphQlPageInfo).toEqual({});
+    });
+  });
+
+  describe('SET_SORTING', () => {
+    it('should merge the sorting object with sort value', () => {
+      mutations[types.SET_SORTING](stateCopy, { sort: 'asc' });
+      expect(stateCopy.sorting).toEqual({ ...stateCopy.sorting, sort: 'asc' });
+    });
+
+    it('should merge the sorting object with order_by value', () => {
+      mutations[types.SET_SORTING](stateCopy, { orderBy: 'created_at' });
+      expect(stateCopy.sorting).toEqual({ ...stateCopy.sorting, orderBy: 'created_at' });
     });
   });
 });

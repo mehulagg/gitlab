@@ -14,6 +14,7 @@ module EE
       # This is pushing a licensed Feature to the frontend.
       push_frontend_feature_flag(:wip_limits, type: :licensed, default_enabled: true) if parent.feature_available?(:wip_limits)
       push_frontend_feature_flag(:swimlanes, type: :licensed, default_enabled: true) if parent.feature_available?(:swimlanes)
+      push_frontend_feature_flag(:issue_weights, type: :licensed, default_enabled: true) if parent.feature_available?(:issue_weights)
     end
   end
 end

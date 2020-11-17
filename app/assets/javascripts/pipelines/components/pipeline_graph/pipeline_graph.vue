@@ -97,6 +97,24 @@ export default {
         this.reportFailure(DRAW_FAILURE);
       }
     },
+    getStageBackgroundClasses(index) {
+      const { length } = this.pipelineData.stages;
+      // It's possible for a graph to have only one stage, in which
+      // case we concatenate both the left and right rounding classes
+      if (length === 1) {
+        return 'gl-rounded-bottom-left-6 gl-rounded-top-left-6 gl-rounded-bottom-right-6 gl-rounded-top-right-6';
+      }
+
+      if (index === 0) {
+        return 'gl-rounded-bottom-left-6 gl-rounded-top-left-6';
+      }
+
+      if (index === length - 1) {
+        return 'gl-rounded-bottom-right-6 gl-rounded-top-right-6';
+      }
+
+      return '';
+    },
     highlightNeeds(uniqueJobId) {
       // The first time we hover, we create the object where
       // we store all the data to properly highlight the needs.
@@ -149,7 +167,11 @@ export default {
       {{ failure.text }}
     </gl-alert>
     <gl-alert v-if="isPipelineDataEmpty" variant="tip" :dismissible="false">
-      {{ __('No content to show') }}
+      {{
+        __(
+          'The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax.',
+        )
+      }}
     </gl-alert>
     <div
       v-else
@@ -177,10 +199,8 @@ export default {
       >
         <div
           class="gl-display-flex gl-align-items-center gl-bg-white gl-w-full gl-px-8 gl-py-4 gl-mb-5"
-          :class="{
-            'stage-left-rounded': index === 0,
-            'stage-right-rounded': index === pipelineData.stages.length - 1,
-          }"
+          :class="getStageBackgroundClasses(index)"
+          data-testid="stage-background"
         >
           <stage-pill :stage-name="stage.name" :is-empty="stage.groups.length === 0" />
         </div>

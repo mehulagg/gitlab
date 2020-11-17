@@ -128,6 +128,15 @@ RSpec.describe Groups::AuditEventsController do
               expect(serializer).to have_received(:represent).with(kind_of(Kaminari::PaginatableWithoutCount))
             end
           end
+
+          it 'tracks search event', :snowplow do
+            request
+
+            expect_snowplow_event(
+              category: 'Groups::AuditEventsController',
+              action: 'search_audit_event'
+            )
+          end
         end
       end
 

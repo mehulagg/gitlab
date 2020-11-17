@@ -32,6 +32,15 @@ RSpec.describe Admin::AuditLogsController do
         let(:request_params) { { 'entity_type': 'User' } }
         let(:target_id) { 'i_compliance_audit_events' }
       end
+
+      it 'tracks search event', :snowplow do
+        get :index
+
+        expect_snowplow_event(
+          category: 'Admin::AuditLogsController',
+          action: 'search_audit_event'
+        )
+      end
     end
   end
 end

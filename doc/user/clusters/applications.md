@@ -63,21 +63,35 @@ supported by GitLab before installing any of the applications.
 
 > - Introduced in GitLab 10.2 for project-level clusters.
 > - Introduced in GitLab 11.6 for group-level clusters.
-> - [Uses a local Tiller](https://gitlab.com/gitlab-org/gitlab/-/issues/209736) since GitLab 13.2.
+> - [Uses a local Tiller](https://gitlab.com/gitlab-org/gitlab/-/issues/209736) in GitLab 13.2 and later.
+> - [Uses Helm 3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46267) for clusters created with GitLab 13.6 and later.
 
 [Helm](https://helm.sh/docs/) is a package manager for Kubernetes and is
 used to install the GitLab-managed apps. GitLab runs each `helm` command
 in a pod within the `gitlab-managed-apps` namespace inside the cluster.
 
-GitLab's integration uses Helm 2 with a local
-[Tiller](https://v2.helm.sh/docs/glossary/#tiller) server for managing
-applications. Prior to [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/209736),
-GitLab used an in-cluster Tiller server in the `gitlab-managed-apps`
-namespace. This server can now be safely removed.
+- For clusters created on GitLab 13.6 and newer, GitLab uses Helm 3 to manage
+  applications.
+- For clusters created on versions of GitLab prior to 13.6, GitLab uses
+  Helm 2 with a local [Tiller](https://v2.helm.sh/docs/glossary/#tiller) server.
+  Prior to [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/209736),
+  GitLab used an in-cluster Tiller server in the `gitlab-managed-apps`
+  namespace. You can safely remove this server after upgrading to GitLab 13.2
+  or newer.
 
 GitLab's Helm integration does not support installing applications behind a proxy,
 but a [workaround](../../topics/autodevops/index.md#install-applications-behind-a-proxy)
 is available.
+
+#### Upgrade a cluster to Helm 3
+
+GitLab does not currently offer a way to migrate existing application management
+on existing clusters from Helm 2 to Helm 3. To migrate a cluster to Helm 3:
+
+1. Uninstall all applications on your cluster.
+1. [Remove the cluster integration](../project/clusters/add_remove_clusters.md#removing-integration).
+1. [Re-add the cluster](../project/clusters/add_remove_clusters.md#existing-kubernetes-cluster) as
+   an existing cluster.
 
 ### cert-manager
 
@@ -625,9 +639,12 @@ To install applications using GitLab CI/CD:
      - template: Managed-Cluster-Applications.gitlab-ci.yml
    ```
 
-   The job provided by this template connects to the cluster using tools provided
+   The job provided by this template connects to the `*` (default) cluster using tools provided
    in a custom Docker image. It requires that you have a runner registered with the Docker,
    Kubernetes, or Docker Machine executor.
+
+   To install to a specific cluster, read
+   [Use the template with a custom environment](#use-the-template-with-a-custom-environment).
 
 1. Add a `.gitlab/managed-apps/config.yaml` file to define which
   applications you would like to install. Define the `installed` key as
@@ -646,6 +663,47 @@ A GitLab CI/CD pipeline runs on the `master` branch to install the
 applications you have configured. In case of pipeline failure, the
 output of the [Helm Tiller](https://v2.helm.sh/docs/install/#running-tiller-locally) binary
 is saved as a [CI job artifact](../../ci/pipelines/job_artifacts.md).
+
+For GitLab versions 13.5 and below, the Ingress, Fluentd, Prometheus,
+and Sentry apps are fetched from the central Helm [stable
+repository](https://kubernetes-charts.storage.googleapis.com/), which
+will be [deleted](https://github.com/helm/charts#deprecation-timeline)
+on November 13, 2020. This will cause the installation CI/CD pipeline to
+fail. Upgrade to GitLab 13.6, or alternatively, you can
+use the following `.gitlab-ci.yml`, which has been tested on GitLab
+13.5:
+
+```yaml
+include:
+  - template: Managed-Cluster-Applications.gitlab-ci.yml
+
+apply:
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/cluster-applications:v0.34.1"
+```
+
+### Use the template with a custom environment
+
+If you only want apps to be installed on a specific cluster, or if your cluster's
+scope does not match `production`, you can override the environment name in your `.gitlab-ci.yml`
+file:
+
+```yaml
+include:
+  - template: Managed-Cluster-Applications.gitlab-ci.yml
+
+apply:
+  except:
+    variables:
+      - '$CI_JOB_NAME == "apply"'
+
+.managed-apps:
+  extends: apply
+
+example-install:
+  extends: .managed-apps
+  environment:
+    name: example/production
+```
 
 ### Important notes
 

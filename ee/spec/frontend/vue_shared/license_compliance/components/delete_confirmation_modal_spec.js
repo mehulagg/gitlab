@@ -1,130 +1,112 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
-
-import DeleteConfirmationModal from 'ee/vue_shared/license_compliance/components/delete_confirmation_modal.vue';
-import { trimText } from 'helpers/text_helper';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlModal, GlSprintf } from '@gitlab/ui';
+import Component from 'ee/vue_shared/license_compliance/components/delete_confirmation_modal.vue';
 import { approvedLicense } from '../mock_data';
 
-Vue.use(Vuex);
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('DeleteConfirmationModal', () => {
-  const Component = Vue.extend(DeleteConfirmationModal);
-  let vm;
   let store;
-  let actions;
+  let wrapper;
 
-  beforeEach(() => {
-    actions = {
-      resetLicenseInModal: jest.fn(),
-      deleteLicense: jest.fn(),
-    };
+  const mockEvent = { preventDefault: jest.fn() };
+  const actions = {
+    resetLicenseInModal: jest.fn(),
+    deleteLicense: jest.fn(),
+  };
 
-    store = new Vuex.Store({
+  const createStore = (initialState = {}) => {
+    return new Vuex.Store({
       modules: {
         licenseManagement: {
           namespaced: true,
           state: {
             currentLicenseInModal: approvedLicense,
+            ...initialState,
           },
           actions,
         },
       },
     });
+  };
 
-    vm = mountComponentWithStore(Component, { store });
+  const createComponent = initialState => {
+    store = createStore(initialState);
+
+    wrapper = shallowMount(Component, {
+      localVue,
+      store,
+      stubs: {
+        GlModal,
+        GlSprintf,
+      },
+    });
+  };
+
+  const findModal = () => wrapper.find(GlModal);
+
+  beforeEach(() => {
+    createComponent();
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
   });
 
-  describe('computed', () => {
-    describe('confirmationText', () => {
-      it('returns information text with current license name in bold', () => {
-        expect(vm.confirmationText).toBe(
-          `You are about to remove the license, <strong>${approvedLicense.name}</strong>, from this project.`,
-        );
+  describe('modal', () => {
+    it('should be loaded', () => {
+      expect(findModal().exists()).toBe(true);
+    });
+
+    it('should have Primary and Cancel actions', () => {
+      expect(findModal().props()).toMatchObject({
+        actionPrimary: {
+          text: 'Remove license',
+        },
+        actionCancel: {
+          text: 'Cancel',
+        },
+      });
+    });
+
+    it('should have the confirmation text', () => {
+      expect(findModal().html()).toContain(
+        `You are about to remove the license, <strong>${approvedLicense.name}</strong>, from this project.`,
+      );
+    });
+
+    it('should escape the confirmation text', () => {
+      const name = '<a href="#">BAD</a>';
+      const nameEscaped = '&lt;a href="#"&gt;BAD&lt;/a&gt;';
+
+      const currentLicenseInModal = {
+        ...approvedLicense,
+        name,
+      };
+
+      createComponent({
+        currentLicenseInModal,
       });
 
-      it('escapes the license name', done => {
-        const name = '<a href="#">BAD</a>';
-        const nameEscaped = '&lt;a href=&quot;#&quot;&gt;BAD&lt;/a&gt;';
-
-        store.replaceState({
-          ...store.state,
-          licenseManagement: {
-            currentLicenseInModal: {
-              ...approvedLicense,
-              name,
-            },
-          },
-        });
-
-        Vue.nextTick()
-          .then(() => {
-            expect(vm.confirmationText).toBe(
-              `You are about to remove the license, <strong>${nameEscaped}</strong>, from this project.`,
-            );
-          })
-          .then(done)
-          .catch(done.fail);
-      });
+      expect(findModal().html()).toContain(
+        `You are about to remove the license, <strong>${nameEscaped}</strong>, from this project`,
+      );
     });
   });
 
   describe('interaction', () => {
-    describe('triggering resetLicenseInModal on canceling', () => {
-      it('by clicking the cancel button', () => {
-        const linkEl = vm.$el.querySelector('.js-modal-cancel-action');
-        linkEl.click();
-
-        expect(actions.resetLicenseInModal).toHaveBeenCalled();
-      });
-
-      it('by clicking the X button', () => {
-        const linkEl = vm.$el.querySelector('.js-modal-close-action');
-        linkEl.click();
-
-        expect(actions.resetLicenseInModal).toHaveBeenCalled();
-      });
+    it('triggering resetLicenseInModal on cancel', async () => {
+      findModal().vm.$emit('cancel', mockEvent);
+      await wrapper.vm.$nextTick();
+      expect(actions.resetLicenseInModal).toHaveBeenCalled();
     });
 
-    describe('triggering deleteLicense on canceling', () => {
-      it('by clicking the confirmation button', () => {
-        const linkEl = vm.$el.querySelector('.js-modal-primary-action');
-        linkEl.click();
-
-        expect(actions.deleteLicense).toHaveBeenCalledWith(
-          expect.any(Object),
-          store.state.licenseManagement.currentLicenseInModal,
-        );
-      });
-    });
-  });
-
-  describe('template', () => {
-    it('renders modal title', () => {
-      const headerEl = vm.$el.querySelector('.modal-title');
-
-      expect(headerEl).not.toBeNull();
-      expect(headerEl.innerText.trim()).toBe('Remove license?');
-    });
-
-    it('renders button in modal footer', () => {
-      const footerButton = vm.$el.querySelector('.js-modal-primary-action');
-
-      expect(footerButton).not.toBeNull();
-      expect(footerButton.innerText.trim()).toBe('Remove license');
-    });
-
-    it('renders modal body', () => {
-      const modalBody = vm.$el.querySelector('.modal-body');
-
-      expect(modalBody).not.toBeNull();
-      expect(trimText(modalBody.innerText)).toBe(
-        `You are about to remove the license, ${approvedLicense.name}, from this project.`,
-      );
+    it('triggering deleteLicense on cancel', async () => {
+      findModal().vm.$emit('primary', mockEvent);
+      await wrapper.vm.$nextTick();
+      expect(actions.deleteLicense).toHaveBeenCalled();
     });
   });
 });

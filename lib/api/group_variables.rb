@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class GroupVariables < Grape::API::Instance
+  class GroupVariables < ::API::Base
     include PaginationParams
 
     before { authenticate! }
     before { authorize! :admin_build, user_group }
+
+    feature_category :continuous_integration
 
     params do
       requires :id, type: String, desc: 'The ID of a group'

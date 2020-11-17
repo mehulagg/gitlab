@@ -73,7 +73,7 @@ module BillingPlansHelper
 
   def seats_data_last_update_info
     last_enqueue_time = UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker.last_enqueue_time&.utc
-    return _("Seats usage data as of %{last_enqueue_time}" % { last_enqueue_time: last_enqueue_time }) if last_enqueue_time
+    return _("Seats usage data as of %{last_enqueue_time} (Updated daily)" % { last_enqueue_time: last_enqueue_time }) if last_enqueue_time
 
     _('Seats usage data is updated every day at 12:00pm UTC')
   end

@@ -1,5 +1,0 @@
----
-title: Load license scanning data in MR widget as soon as the data is available
-merge_request: 44835
-author:
-type: fixed

@@ -1,28 +1,40 @@
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlDrawer } from '@gitlab/ui';
+import { GlDrawer, GlInfiniteScroll } from '@gitlab/ui';
 import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import App from '~/whats_new/components/app.vue';
+import { getDrawerBodyHeight } from '~/whats_new/utils/get_drawer_body_height';
+
+const MOCK_DRAWER_BODY_HEIGHT = 42;
+
+jest.mock('~/whats_new/utils/get_drawer_body_height', () => ({
+  getDrawerBodyHeight: jest.fn().mockImplementation(() => MOCK_DRAWER_BODY_HEIGHT),
+}));
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('App', () => {
+  const propsData = { storageKey: 'storage-key' };
   let wrapper;
   let store;
   let actions;
   let state;
-  let propsData = { features: '[ {"title":"Whats New Drawer"} ]', storageKey: 'storage-key' };
   let trackingSpy;
 
   const buildWrapper = () => {
     actions = {
       openDrawer: jest.fn(),
       closeDrawer: jest.fn(),
+      fetchItems: jest.fn(),
+      setDrawerBodyHeight: jest.fn(),
     };
 
     state = {
       open: true,
+      features: [],
+      drawerBodyHeight: null,
     };
 
     store = new Vuex.Store({
@@ -34,15 +46,25 @@ describe('App', () => {
       localVue,
       store,
       propsData,
+      directives: {
+        GlResizeObserver: createMockDirective(),
+      },
     });
   };
 
-  beforeEach(() => {
+  const findInfiniteScroll = () => wrapper.find(GlInfiniteScroll);
+  const emitBottomReached = () => findInfiniteScroll().vm.$emit('bottomReached');
+
+  beforeEach(async () => {
     document.body.dataset.page = 'test-page';
     document.body.dataset.namespaceId = 'namespace-840';
 
     trackingSpy = mockTracking('_category_', null, jest.spyOn);
     buildWrapper();
+
+    wrapper.vm.$store.state.features = [{ title: 'Whats New Drawer', url: 'www.url.com' }];
+    wrapper.vm.$store.state.drawerBodyHeight = MOCK_DRAWER_BODY_HEIGHT;
+    await wrapper.vm.$nextTick();
   });
 
   afterEach(() => {
@@ -56,7 +78,7 @@ describe('App', () => {
     expect(getDrawer().exists()).toBe(true);
   });
 
-  it('dispatches openDrawer when mounted', () => {
+  it('dispatches openDrawer and tracking calls when mounted', () => {
     expect(actions.openDrawer).toHaveBeenCalledWith(expect.any(Object), 'storage-key');
     expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_whats_new_drawer', {
       label: 'namespace_id',
@@ -77,29 +99,18 @@ describe('App', () => {
     expect(getDrawer().props('open')).toBe(openState);
   });
 
-  it('renders features when provided as props', () => {
+  it('renders features when provided via ajax', () => {
+    expect(actions.fetchItems).toHaveBeenCalled();
     expect(wrapper.find('h5').text()).toBe('Whats New Drawer');
   });
 
-  it('handles bad json argument gracefully', () => {
-    propsData = { features: 'this is not json', storageKey: 'storage-key' };
-    buildWrapper();
-
-    expect(getDrawer().exists()).toBe(true);
-  });
-
   it('send an event when feature item is clicked', () => {
-    propsData = {
-      features: '[ {"title":"Whats New Drawer", "url": "www.url.com"} ]',
-      storageKey: 'storage-key',
-    };
-    buildWrapper();
     trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
 
-    const link = wrapper.find('[data-testid="whats-new-title-link"]');
+    const link = wrapper.find('.whats-new-item-title-link');
     triggerEvent(link.element);
 
-    expect(trackingSpy.mock.calls[2]).toMatchObject([
+    expect(trackingSpy.mock.calls[1]).toMatchObject([
       '_category_',
       'click_whats_new_item',
       {
@@ -107,5 +118,47 @@ describe('App', () => {
         property: 'www.url.com',
       },
     ]);
+  });
+
+  it('renders infinite scroll', () => {
+    const scroll = findInfiniteScroll();
+
+    expect(scroll.props()).toMatchObject({
+      fetchedItems: wrapper.vm.$store.state.features.length,
+      maxListHeight: MOCK_DRAWER_BODY_HEIGHT,
+    });
+  });
+
+  describe('bottomReached', () => {
+    beforeEach(() => {
+      actions.fetchItems.mockClear();
+    });
+
+    it('when nextPage exists it calls fetchItems', () => {
+      wrapper.vm.$store.state.pageInfo = { nextPage: 840 };
+      emitBottomReached();
+
+      expect(actions.fetchItems).toHaveBeenCalledWith(expect.anything(), 840);
+    });
+
+    it('when nextPage does not exist it does not call fetchItems', () => {
+      wrapper.vm.$store.state.pageInfo = { nextPage: null };
+      emitBottomReached();
+
+      expect(actions.fetchItems).not.toHaveBeenCalled();
+    });
+  });
+
+  it('calls getDrawerBodyHeight and setDrawerBodyHeight when resize directive is triggered', () => {
+    const { value } = getBinding(getDrawer().element, 'gl-resize-observer');
+
+    value();
+
+    expect(getDrawerBodyHeight).toHaveBeenCalledWith(wrapper.find(GlDrawer).element);
+
+    expect(actions.setDrawerBodyHeight).toHaveBeenCalledWith(
+      expect.any(Object),
+      MOCK_DRAWER_BODY_HEIGHT,
+    );
   });
 });

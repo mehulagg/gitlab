@@ -59,7 +59,7 @@ export const setFileActive = ({ commit, state, getters, dispatch }, path) => {
 
 export const getFileData = (
   { state, commit, dispatch, getters },
-  { path, makeFileActive = true, openFile = makeFileActive },
+  { path, makeFileActive = true, openFile = makeFileActive, toggleLoading = true },
 ) => {
   const file = state.entries[path];
   const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
@@ -99,7 +99,7 @@ export const getFileData = (
       });
     })
     .finally(() => {
-      commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
+      if (toggleLoading) commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
     });
 };
 
@@ -162,26 +162,6 @@ export const changeFileContent = ({ commit, state, getters }, { path, content })
   } else if (!file.changed && !file.tempFile && indexOfChangedFile !== -1) {
     commit(types.REMOVE_FILE_FROM_CHANGED, path);
   }
-};
-
-export const setFileLanguage = ({ getters, commit }, { fileLanguage }) => {
-  if (getters.activeFile) {
-    commit(types.SET_FILE_LANGUAGE, { file: getters.activeFile, fileLanguage });
-  }
-};
-
-export const setEditorPosition = ({ getters, commit }, { editorRow, editorColumn }) => {
-  if (getters.activeFile) {
-    commit(types.SET_FILE_POSITION, {
-      file: getters.activeFile,
-      editorRow,
-      editorColumn,
-    });
-  }
-};
-
-export const setFileViewMode = ({ commit }, { file, viewMode }) => {
-  commit(types.SET_FILE_VIEWMODE, { file, viewMode });
 };
 
 export const restoreOriginalFile = ({ dispatch, state, commit }, path) => {
@@ -289,7 +269,7 @@ export const removePendingTab = ({ commit }, file) => {
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
 };
 
-export const triggerFilesChange = () => {
+export const triggerFilesChange = (ctx, payload = {}) => {
   // Used in EE for file mirroring
-  eventHub.$emit('ide.files.change');
+  eventHub.$emit('ide.files.change', payload);
 };

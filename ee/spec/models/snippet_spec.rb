@@ -14,21 +14,14 @@ RSpec.describe Snippet do
     context 'when snippet belongs to a project' do
       subject { build(:project_snippet, project: project) }
 
-      let(:namespace) { build(:namespace, additional_purchased_storage_size: 50) }
+      let(:namespace) { build(:namespace) }
       let(:project) { build(:project, namespace: namespace) }
-      let(:total_repository_size_excess) { 100 }
-      let(:additional_purchased_storage) { 50.megabytes }
-
-      before do
-        allow(namespace).to receive(:total_repository_size_excess).and_return(total_repository_size_excess)
-      end
 
       include_examples 'size checker for snippet'
     end
 
     context 'when snippet without a project' do
-      let(:total_repository_size_excess) { 0 }
-      let(:additional_purchased_storage) { 0 }
+      let(:namespace) { nil }
 
       include_examples 'size checker for snippet'
     end

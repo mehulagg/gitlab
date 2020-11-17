@@ -16,32 +16,22 @@ RSpec.describe 'Iterations list', :js do
       visit project_iterations_path(project)
     end
 
-    it 'shows iterations on each tab' do
-      expect(page).to have_link(started_iteration.title)
-      expect(page).to have_link(upcoming_iteration.title)
+    it 'shows iterations on each tab', :aggregate_failures do
+      expect(page).to have_link(started_iteration.title, href: project_iterations_inherited_path(project, started_iteration.id))
+      expect(page).to have_link(upcoming_iteration.title, href: project_iterations_inherited_path(project, upcoming_iteration.id))
       expect(page).not_to have_link(closed_iteration.title)
 
       click_link('Closed')
 
-      expect(page).to have_link(closed_iteration.title)
+      expect(page).to have_link(closed_iteration.title, href: project_iterations_inherited_path(project, closed_iteration.id))
       expect(page).not_to have_link(started_iteration.title)
       expect(page).not_to have_link(upcoming_iteration.title)
 
       click_link('All')
 
-      expect(page).to have_link(started_iteration.title)
-      expect(page).to have_link(upcoming_iteration.title)
-      expect(page).to have_link(closed_iteration.title)
-    end
-
-    context 'when an iteration is clicked' do
-      it 'redirects to an iteration report within the project context' do
-        click_link('Started iteration')
-
-        wait_for_requests
-
-        expect(page).to have_current_path(project_iterations_inherited_path(project, started_iteration.id))
-      end
+      expect(page).to have_link(started_iteration.title, href: project_iterations_inherited_path(project, started_iteration.id))
+      expect(page).to have_link(upcoming_iteration.title, href: project_iterations_inherited_path(project, upcoming_iteration.id))
+      expect(page).to have_link(closed_iteration.title, href: project_iterations_inherited_path(project, closed_iteration.id))
     end
   end
 

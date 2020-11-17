@@ -100,15 +100,15 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     subject { described_class.all_stores }
 
     it 'returns a correctly ordered array' do
-      is_expected.to eq(%w[redis database fog])
+      is_expected.to eq(%i[redis database fog])
     end
 
     it 'returns redis store as the lowest precedence' do
-      expect(subject.first).to eq('redis')
+      expect(subject.first).to eq(:redis)
     end
 
     it 'returns fog store as the highest precedence' do
-      expect(subject.last).to eq('fog')
+      expect(subject.last).to eq(:fog)
     end
   end
 
@@ -140,6 +140,34 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
       end
 
       it { is_expected.to eq('Sample data in fog') }
+
+      it 'returns a new Fog store' do
+        expect(described_class.get_store_class(data_store)).to be_a(Ci::BuildTraceChunks::Fog)
+      end
+    end
+  end
+
+  describe '#get_store_class' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:data_store, :expected_store) do
+      :redis | Ci::BuildTraceChunks::Redis
+      :database | Ci::BuildTraceChunks::Database
+      :fog | Ci::BuildTraceChunks::Fog
+    end
+
+    with_them do
+      context "with store" do
+        it 'returns an instance of the right class' do
+          expect(expected_store).to receive(:new).twice.and_call_original
+          expect(described_class.get_store_class(data_store.to_s)).to be_a(expected_store)
+          expect(described_class.get_store_class(data_store.to_sym)).to be_a(expected_store)
+        end
+      end
+    end
+
+    it 'raises an error' do
+      expect { described_class.get_store_class('unknown') }.to raise_error('Unknown store type: unknown')
     end
   end
 
@@ -508,20 +536,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
 
     subject { build_trace_chunk.persist_data! }
 
-    shared_examples_for 'Atomic operation' do
-      context 'when the other process is persisting' do
-        let(:lease_key) { "trace_write:#{build_trace_chunk.build.id}:chunks:#{build_trace_chunk.chunk_index}" }
-
-        before do
-          stub_exclusive_lease_taken(lease_key)
-        end
-
-        it 'raise an error' do
-          expect { subject }.to raise_error('Failed to obtain a lock')
-        end
-      end
-    end
-
     context 'when data_store is redis' do
       let(:data_store) { :redis }
 
@@ -552,8 +566,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
 
             expect(build_trace_chunk.reload.checksum).to eq '3398914352'
           end
-
-          it_behaves_like 'Atomic operation'
         end
 
         context 'when data size has not reached CHUNK_SIZE' do
@@ -606,6 +618,31 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
                                 /Modifed build trace chunk detected/)
             end
           end
+
+          context 'when the chunk is being locked by a different worker' do
+            let(:metrics) { spy('metrics') }
+
+            it 'increments stalled chunk trace metric' do
+              allow(build_trace_chunk)
+                .to receive(:metrics)
+                .and_return(metrics)
+
+              expect do
+                subject
+
+                expect(metrics)
+                  .to have_received(:increment_trace_operation)
+                    .with(operation: :stalled)
+                    .once
+              end.to raise_error(described_class::FailedToPersistDataError)
+            end
+
+            def lock_chunk(&block)
+              "trace_write:#{build.id}:chunks:#{chunk_index}".then do |key|
+                build_trace_chunk.in_lock(key, &block)
+              end
+            end
+          end
         end
       end
 
@@ -640,8 +677,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to eq(data)
           end
-
-          it_behaves_like 'Atomic operation'
         end
 
         context 'when data size has not reached CHUNK_SIZE' do
@@ -701,8 +736,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to eq(data)
           end
-
-          it_behaves_like 'Atomic operation'
         end
 
         context 'when data size has not reached CHUNK_SIZE' do

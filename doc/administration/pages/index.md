@@ -462,6 +462,34 @@ are stored.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
+Alternatively, if you have existing Pages deployed you can follow
+the below steps to do a no downtime transfer to a new storage location.
+
+1. Pause Pages deployments by setting the following in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   sidekiq['experimental_queue_selector'] = true
+   sidekiq['queue_groups'] = [
+     "feature_category!=pages"
+   ]
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. `rsync` contents from the current storage location to the new storage location: `sudo rsync -avzh --progress /var/opt/gitlab/gitlab-rails/shared/pages/ /mnt/storage/pages`
+1. Set the new storage location in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_rails['pages_path'] = "/mnt/storage/pages"
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Verify Pages are still being served up as expected.
+1. Unpause Pages deployments by removing from `/etc/gitlab/gitlab.rb` the `sidekiq` setting set above.
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Trigger a new Pages deployment and verify it's working as expected.
+1. Remove the old Pages storage location: `sudo rm -rf /var/opt/gitlab/gitlab-rails/shared/pages`
+1. Verify Pages are still being served up as expected.
+
 ## Configure listener for reverse proxy requests
 
 Follow the steps below to configure the proxy listener of GitLab Pages. [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2533) in
@@ -514,7 +542,7 @@ your main application server.
 
 To configure GitLab Pages on a separate server:
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
@@ -597,7 +625,7 @@ database encryption. Proceed with caution.
    ```ruby
    pages_external_url "http://<pages_server_URL>"
    gitlab_pages['enable'] = false
-   gitlab_rails['pages_enabled']=false
+   pages_nginx['enable'] = false
    gitlab_rails['pages_path'] = "/mnt/pages"
    ```
 
@@ -781,3 +809,16 @@ For example, if there is a connection timeout:
 ```plaintext
 error="failed to connect to internal Pages API: Get \"https://gitlab.example.com:3000/api/v4/internal/pages/status\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"
 ```
+
+### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
+
+This problem most likely results from an [out-dated operating system](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html).
+The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [crypto/rand in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
+This requires the `getrandom` syscall or `/dev/urandom` to be available on the host OS.
+Upgrading to an [officially supported operating system](https://about.gitlab.com/install/) is recommended.
+
+### The requested scope is invalid, malformed, or unknown
+
+This problem comes from the permissions of the GitLab Pages OAuth application. To fix it, go to
+**Admin > Applications > GitLab Pages** and edit the application. Under **Scopes**, ensure that the
+`api` scope is selected and save your changes.

@@ -82,7 +82,7 @@ We flag any significant differences between Redcarpet and CommonMark Markdown in
 
 If you have a large volume of Markdown files, it can be tedious to determine
 if they display correctly or not. You can use the
-[diff_redcarpet_cmark](https://gitlab.com/digitalmoksha/diff_redcarpet_cmark)
+[`diff_redcarpet_cmark`](https://gitlab.com/digitalmoksha/diff_redcarpet_cmark)
 tool (not an officially supported product) to generate a list of files and the
 differences between how RedCarpet and CommonMark render the files. It gives
 an indication if anything needs to be changed - often nothing needs
@@ -425,7 +425,6 @@ GFM recognizes the following:
 | merge request                   | `!123`                     | `namespace/project!123`                 | `project!123`                  |
 | snippet                         | `$123`                     | `namespace/project$123`                 | `project$123`                  |
 | epic **(ULTIMATE)**             | `&123`                     | `group1/subgroup&123`                   |                                |
-| vulnerability **(ULTIMATE)**    | `+123`                     | `namespace/project+123`                 | `project+123`                  |
 | label by ID                     | `~123`                     | `namespace/project~123`                 | `project~123`                  |
 | one-word label by name          | `~bug`                     | `namespace/project~bug`                 | `project~bug`                  |
 | multi-word label by name        | `~"feature request"`       | `namespace/project~"feature request"`   | `project~"feature request"`    |
@@ -533,7 +532,7 @@ If this snippet was placed on a page at `<your_wiki>/documentation/main`,
 it would link to `<your_wiki>/documentation/related`:
 
 ```markdown
-[Link to Related Page](./related)
+[Link to Related Page](related)
 ```
 
 If this snippet was placed on a page at `<your_wiki>/documentation/related/content`,
@@ -547,7 +546,7 @@ If this snippet was placed on a page at `<your_wiki>/documentation/main`,
 it would link to `<your_wiki>/documentation/related.md`:
 
 ```markdown
-[Link to Related Page](./related.md)
+[Link to Related Page](related.md)
 ```
 
 If this snippet was placed on a page at `<your_wiki>/documentation/related/content`,

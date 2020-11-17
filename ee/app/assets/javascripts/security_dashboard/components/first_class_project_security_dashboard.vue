@@ -2,6 +2,7 @@
 import Cookies from 'js-cookie';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AutoFixUserCallout from './auto_fix_user_callout.vue';
+import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
 import ReportsNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
@@ -9,11 +10,10 @@ import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 import Filters from './first_class_vulnerability_filters.vue';
 import CsvExportButton from './csv_export_button.vue';
 
-export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
-
 export default {
   components: {
     AutoFixUserCallout,
+    ProjectPipelineStatus,
     ProjectVulnerabilitiesApp,
     ReportsNotConfigured,
     SecurityDashboardLayout,
@@ -27,15 +27,10 @@ export default {
       type: String,
       required: true,
     },
-    projectFullPath: {
-      type: String,
+    pipeline: {
+      type: Object,
       required: false,
-      default: '',
-    },
-    hasVulnerabilities: {
-      type: Boolean,
-      required: false,
-      default: false,
+      default: () => ({}),
     },
     vulnerabilitiesExportEndpoint: {
       type: String,
@@ -44,21 +39,21 @@ export default {
     },
   },
   data() {
-    const shoudShowAutoFixUserCallout =
+    const shouldShowAutoFixUserCallout =
       this.glFeatures.securityAutoFix && !Cookies.get('auto_fix_user_callout_dismissed');
     return {
       filters: {},
-      shoudShowAutoFixUserCallout,
+      shouldShowAutoFixUserCallout,
     };
   },
-  inject: ['dashboardDocumentation', 'autoFixDocumentation'],
+  inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;
     },
     handleAutoFixUserCalloutClose() {
       Cookies.set('auto_fix_user_callout_dismissed', 'true');
-      this.shoudShowAutoFixUserCallout = false;
+      this.shouldShowAutoFixUserCallout = false;
     },
   },
 };
@@ -66,9 +61,9 @@ export default {
 
 <template>
   <div>
-    <template v-if="hasVulnerabilities">
+    <template v-if="pipeline.id">
       <auto-fix-user-callout
-        v-if="shoudShowAutoFixUserCallout"
+        v-if="shouldShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"
         @close="handleAutoFixUserCalloutClose"
       />
@@ -78,14 +73,14 @@ export default {
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
-          <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
+          <project-pipeline-status :pipeline="pipeline" />
+          <vulnerabilities-count-list :filters="filters" />
         </template>
         <template #sticky>
-          <filters @filterChange="handleFilterChange" />
+          <filters :full-path="projectFullPath" @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"
-          :project-full-path="projectFullPath"
           :filters="filters"
         />
       </security-dashboard-layout>

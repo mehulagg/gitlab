@@ -14,6 +14,7 @@ module Gitlab
 
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :checksum_failed, -> { where.not(verification_failure: nil) }
+        scope :available_replicables, -> { all }
 
         sha_attribute :verification_checksum
       end
@@ -45,13 +46,13 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      # Clear model verification checksum and force recalculation
-      def calculate_checksum!
-        self.verification_checksum = nil
+      # Returns a checksum of the file (assumed to be a "blob" type)
+      #
+      # @return [String] SHA256 hash of the carrierwave file
+      def calculate_checksum
+        return unless checksummable?
 
-        return unless needs_checksum?
-
-        self.verification_checksum = self.class.hexdigest(replicator.carrierwave_uploader.path)
+        self.class.hexdigest(replicator.carrierwave_uploader.path)
       end
 
       # Checks whether model needs checksum to be performed
@@ -83,8 +84,8 @@ module Gitlab
         end
       end
 
-      def in_replicables_for_geo_node?
-        self.class.replicables_for_geo_node(self).exists?
+      def in_replicables_for_current_secondary?
+        self.class.replicables_for_current_secondary(self).exists?
       end
     end
   end

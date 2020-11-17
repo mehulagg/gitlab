@@ -10,6 +10,10 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
   let_it_be(:third_user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
+  specify do
+    expect(described_class).to have_nullable_graphql_type(::Types::RequirementsManagement::RequirementType.connection_type)
+  end
+
   context 'with a project' do
     let_it_be(:requirement1) { create(:requirement, project: project, state: :opened, created_at: 5.hours.ago, title: 'it needs to do the thing', author: current_user) }
     let_it_be(:requirement2) { create(:requirement, project: project, state: :archived, created_at: 3.hours.ago, title: 'it needs to not break', author: other_user) }

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Templates < Grape::API::Instance
+  class Templates < ::API::Base
     include PaginationParams
+
+    feature_category :templates
 
     GLOBAL_TEMPLATE_TYPES = {
       gitignores: {

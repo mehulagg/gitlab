@@ -312,7 +312,7 @@ We need a security group for our database that will allow inbound traffic from t
 
 ### Create the database
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Avoid using burstable instances (t class instances) for the database as this could lead to performance issues due to CPU credits running out during sustained periods of high load.
 
 Now, it's time to create the database:
@@ -348,6 +348,10 @@ Now that the database is created, let's move on to setting up Redis with ElastiC
 
 ElastiCache is an in-memory hosted caching solution. Redis maintains its own
 persistence and is used to store session data, temporary cache information, and background job queues for the GitLab application.
+
+DANGER: **Warning:**
+GitLab recommends you use ElastiCache Redis version 5.0.x, because version 6.x contains
+a bug that [prevents Sidekiq from processing jobs](https://gitlab.com/gitlab-org/gitlab/-/issues/281683).
 
 ### Create a Redis Security Group
 
@@ -466,7 +470,7 @@ Connect to your GitLab instance via **Bastion Host A** using [SSH Agent Forwardi
 
 #### Disable Let's Encrypt
 
-Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain since GitLab 10.7, so we need to explicitly disable it:
+Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
 
 1. Open `/etc/gitlab/gitlab.rb` and disable it:
 

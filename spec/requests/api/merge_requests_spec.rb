@@ -856,6 +856,55 @@ RSpec.describe API::MergeRequests do
       expect(json_response.first['id']).to eq merge_request_closed.id
     end
 
+    context 'when filtering by deployments' do
+      let_it_be(:mr) do
+        create(:merge_request, :merged, source_project: project, target_project: project)
+      end
+
+      before do
+        env = create(:environment, project: project, name: 'staging')
+        deploy = create(:deployment, :success, environment: env, deployable: nil)
+
+        deploy.link_merge_requests(MergeRequest.where(id: mr.id))
+      end
+
+      it 'supports getting merge requests deployed to an environment' do
+        get api(endpoint_path, user), params: { environment: 'staging' }
+
+        expect(json_response.first['id']).to eq mr.id
+      end
+
+      it 'does not return merge requests for an environment without deployments' do
+        get api(endpoint_path, user), params: { environment: 'bla' }
+
+        expect_empty_array_response
+      end
+
+      it 'supports getting merge requests deployed after a date' do
+        get api(endpoint_path, user), params: { deployed_after: '1990-01-01' }
+
+        expect(json_response.first['id']).to eq mr.id
+      end
+
+      it 'does not return merge requests not deployed after a given date' do
+        get api(endpoint_path, user), params: { deployed_after: '2100-01-01' }
+
+        expect_empty_array_response
+      end
+
+      it 'supports getting merge requests deployed before a date' do
+        get api(endpoint_path, user), params: { deployed_before: '2100-01-01' }
+
+        expect(json_response.first['id']).to eq mr.id
+      end
+
+      it 'does not return merge requests not deployed before a given date' do
+        get api(endpoint_path, user), params: { deployed_before: '1990-01-01' }
+
+        expect_empty_array_response
+      end
+    end
+
     context 'a project which enforces all discussions to be resolved' do
       let_it_be(:project) { create(:project, :repository, only_allow_merge_if_all_discussions_are_resolved: true) }
 
@@ -1263,13 +1312,44 @@ RSpec.describe API::MergeRequests do
   end
 
   describe 'GET /projects/:id/merge_requests/:merge_request_iid/changes' do
-    let_it_be(:merge_request) { create(:merge_request, :simple, author: user, assignees: [user], source_project: project, target_project: project, source_branch: 'markdown', title: "Test", created_at: base_time) }
+    let_it_be(:merge_request) do
+      create(
+        :merge_request,
+        :simple,
+        author: user,
+        assignees: [user],
+        source_project: project,
+        target_project: project,
+        source_branch: 'markdown',
+        title: "Test",
+        created_at: base_time
+      )
+    end
 
-    it 'returns the change information of the merge_request' do
-      get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+    shared_examples 'find an existing merge request' do
+      it 'returns the change information of the merge_request' do
+        get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
 
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response['changes'].size).to eq(merge_request.diffs.size)
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['changes'].size).to eq(merge_request.diffs.size)
+        expect(json_response['overflow']).to be_falsy
+      end
+    end
+
+    shared_examples 'accesses diffs via raw_diffs' do
+      let(:params) { {} }
+
+      it 'as expected' do
+        expect_any_instance_of(MergeRequest) do |merge_request|
+          expect(merge_request).to receive(:raw_diffs).and_call_original
+        end
+
+        expect_any_instance_of(MergeRequest) do |merge_request|
+          expect(merge_request).not_to receive(:diffs)
+        end
+
+        get(api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user), params: params)
+      end
     end
 
     it 'returns a 404 when merge_request_iid not found' do
@@ -1281,6 +1361,53 @@ RSpec.describe API::MergeRequests do
       get api("/projects/#{project.id}/merge_requests/#{merge_request.id}/changes", user)
 
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    it_behaves_like 'find an existing merge request'
+    it_behaves_like 'accesses diffs via raw_diffs'
+
+    it 'returns the overflow status as false' do
+      get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['overflow']).to be_falsy
+    end
+
+    context 'when using DB-backed diffs via feature flag' do
+      before do
+        stub_feature_flags(mrc_api_use_raw_diffs_from_gitaly: false)
+      end
+
+      it_behaves_like 'find an existing merge request'
+
+      it 'accesses diffs via DB-backed diffs.diffs' do
+        expect_any_instance_of(MergeRequest) do |merge_request|
+          expect(merge_request).to receive(:diffs).and_call_original
+        end
+
+        get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+      end
+
+      context 'when the diff_collection has overflowed its size limits' do
+        before do
+          expect_next_instance_of(Gitlab::Git::DiffCollection) do |diff_collection|
+            expect(diff_collection).to receive(:overflow?).and_return(true)
+          end
+        end
+
+        it 'returns the overflow status as true' do
+          get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['overflow']).to be_truthy
+        end
+      end
+
+      context 'when access_raw_diffs is passed as an option' do
+        it_behaves_like 'accesses diffs via raw_diffs' do
+          let(:params) { { access_raw_diffs: true } }
+        end
+      end
     end
   end
 

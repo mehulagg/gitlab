@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class GenericPackages < Grape::API::Instance
+  class GenericPackages < ::API::Base
     GENERIC_PACKAGES_REQUIREMENTS = {
       package_name: API::NO_SLASH_URL_PART_REGEX,
       file_name: API::NO_SLASH_URL_PART_REGEX
     }.freeze
+
+    feature_category :package_registry
 
     before do
       require_packages_enabled!
@@ -101,7 +103,7 @@ module API
       include ::API::Helpers::Packages::BasicAuthHelpers
 
       def require_generic_packages_available!
-        not_found! unless Feature.enabled?(:generic_packages, project)
+        not_found! unless Feature.enabled?(:generic_packages, project, default_enabled: true)
       end
 
       def project

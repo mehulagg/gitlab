@@ -206,10 +206,6 @@ export const localTimeAgo = ($timeagoEls, setTimeago = true) => {
     $timeagoEls.each((i, el) => {
       // Recreate with custom template
       el.setAttribute('title', formatDate(el.dateTime));
-      $(el).tooltip({
-        template:
-          '<div class="tooltip local-timeago" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>',
-      });
     });
   }
 
@@ -658,6 +654,24 @@ export const secondsToMilliseconds = seconds => seconds * 1000;
 export const secondsToDays = seconds => Math.round(seconds / 86400);
 
 /**
+ * Converts a numeric utc offset in seconds to +/- hours
+ * ie -32400 => -9 hours
+ * ie -12600 => -3.5 hours
+ *
+ * @param {Number} offset UTC offset in seconds as a integer
+ *
+ * @return {String} the + or - offset in hours
+ */
+export const secondsToHours = offset => {
+  const parsed = parseInt(offset, 10);
+  if (Number.isNaN(parsed) || parsed === 0) {
+    return `0`;
+  }
+  const num = offset / 3600;
+  return parseInt(num, 10) !== num ? num.toFixed(1) : num;
+};
+
+/**
  * Returns the date n days after the date provided
  *
  * @param {Date} date the initial date
@@ -742,6 +756,21 @@ export const dateFromParams = (year, month, day) => {
  */
 export const differenceInSeconds = (startDate, endDate) => {
   return (endDate.getTime() - startDate.getTime()) / 1000;
+};
+
+/**
+ * A utility function which computes the difference in months
+ * between 2 dates.
+ *
+ * @param {Date} startDate the start date
+ * @param {Date} endDate the end date
+ *
+ * @return {Int} the difference in months
+ */
+export const differenceInMonths = (startDate, endDate) => {
+  const yearDiff = endDate.getYear() - startDate.getYear();
+  const monthDiff = endDate.getMonth() - startDate.getMonth();
+  return monthDiff + 12 * yearDiff;
 };
 
 /**

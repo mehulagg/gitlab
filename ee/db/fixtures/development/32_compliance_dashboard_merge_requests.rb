@@ -9,6 +9,10 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
     @project = project
   end
 
+  def admin
+    @admin ||= FactoryBot.create(:user, :admin)
+  end
+
   def seed!
     used_statuses = []
 
@@ -54,16 +58,16 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
       state: :opened
     }
 
-    maintainer = @project.team.maintainers.sample || User.admins.first
-
     Sidekiq::Worker.skipping_transaction_check do
-      merge_request = MergeRequests::CreateService.new(@project, maintainer, opts).execute
+      merge_request = MergeRequests::CreateService.new(@project, admin, opts).execute
       merge_request.save!
       merge_request.approvals.create(approvals)
       merge_request.state = :merged
 
       merge_request
     end
+  rescue AccessDeniedError
+    raise AccessDeniedError.new("If you are re-creating your GitLab database, you should also delete your old repositories located at $GDK/repositories/@hashed")
   end
 
   def create_pipeline!(project, ref, commit, status)

@@ -1,7 +1,7 @@
 - display_issuable_type = issuable_display_type(issuable)
 - button_action = issuable.closed? ? 'reopen' : 'close'
 - display_button_action = button_action.capitalize
-- button_responsive_class = 'd-none d-sm-none d-md-block'
+- button_responsive_class = 'd-none d-md-block'
 - button_class = "#{button_responsive_class} btn btn-grouped js-issuable-close-button js-btn-issue-action issuable-close-button"
 - toggle_class = "#{button_responsive_class} btn btn-nr dropdown-toggle js-issuable-close-toggle"
 - add_blocked_class = false
@@ -21,7 +21,7 @@
                     data: { text: _("Close %{display_issuable_type}") % { display_issuable_type: display_issuable_type }, url: close_issuable_path(issuable),
                     button_class: "#{button_class} btn-close", toggle_class: "#{toggle_class} btn-close-color" } }
       %button.btn.btn-transparent
-        = icon('check', class: 'icon')
+        = sprite_icon('check', css_class: 'icon')
         .description
           %strong.title
             = _('Close')
@@ -31,7 +31,7 @@
                      data: { text: _("Reopen %{display_issuable_type}") % { display_issuable_type: display_issuable_type }, url: reopen_issuable_path(issuable),
                      button_class: "#{button_class} btn-reopen", toggle_class: "#{toggle_class} btn-reopen-color" } }
       %button.btn.btn-transparent
-        = icon('check', class: 'icon')
+        = sprite_icon('check', css_class: 'icon')
         .description
           %strong.title
             = _('Reopen')

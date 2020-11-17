@@ -2,17 +2,22 @@ import testAction from 'helpers/vuex_action_helper';
 import {
   mockListsWithModel,
   mockLists,
+  mockListsById,
   mockIssue,
   mockIssueWithModel,
   mockIssue2WithModel,
   rawIssue,
   mockIssues,
+  labels,
+  mockActiveIssue,
 } from '../mock_data';
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
-import { inactiveId, ListType } from '~/boards/constants';
+import { inactiveId } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
-import { fullBoardId, formatListIssues } from '~/boards/boards_util';
+import destroyBoardListMutation from '~/boards/queries/board_list_destroy.mutation.graphql';
+import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
+import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -77,8 +82,83 @@ describe('setActiveId', () => {
   });
 });
 
-describe('showWelcomeList', () => {
-  it('should dispatch addList action', done => {
+describe('fetchLists', () => {
+  const state = {
+    endpoints: {
+      fullPath: 'gitlab-org',
+      boardId: 1,
+    },
+    filterParams: {},
+    boardType: 'group',
+  };
+
+  let queryResponse = {
+    data: {
+      group: {
+        board: {
+          hideBacklogList: true,
+          lists: {
+            nodes: [mockLists[1]],
+          },
+        },
+      },
+    },
+  };
+
+  const formattedLists = formatBoardLists(queryResponse.data.group.board.lists);
+
+  it('should commit mutations RECEIVE_BOARD_LISTS_SUCCESS on success', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchLists,
+      {},
+      state,
+      [
+        {
+          type: types.RECEIVE_BOARD_LISTS_SUCCESS,
+          payload: formattedLists,
+        },
+      ],
+      [{ type: 'generateDefaultLists' }],
+      done,
+    );
+  });
+
+  it('dispatch createList action when backlog list does not exist and is not hidden', done => {
+    queryResponse = {
+      data: {
+        group: {
+          board: {
+            hideBacklogList: false,
+            lists: {
+              nodes: [mockLists[1]],
+            },
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchLists,
+      {},
+      state,
+      [
+        {
+          type: types.RECEIVE_BOARD_LISTS_SUCCESS,
+          payload: formattedLists,
+        },
+      ],
+      [{ type: 'createList', payload: { backlog: true } }, { type: 'generateDefaultLists' }],
+      done,
+    );
+  });
+});
+
+describe('generateDefaultLists', () => {
+  let store;
+  beforeEach(() => {
     const state = {
       endpoints: { fullPath: 'gitlab-org', boardId: '1' },
       boardType: 'group',
@@ -86,26 +166,19 @@ describe('showWelcomeList', () => {
       boardLists: [{ type: 'backlog' }, { type: 'closed' }],
     };
 
-    const blankList = {
-      id: 'blank',
-      listType: ListType.blank,
-      title: 'Welcome to your issue board!',
-      position: 0,
-    };
-
-    testAction(
-      actions.showWelcomeList,
-      {},
+    store = {
+      commit: jest.fn(),
+      dispatch: jest.fn(() => Promise.resolve()),
       state,
-      [],
-      [{ type: 'addList', payload: blankList }],
-      done,
-    );
+    };
   });
-});
 
-describe('generateDefaultLists', () => {
-  expectNotImplemented(actions.generateDefaultLists);
+  it('should dispatch fetchLabels', () => {
+    return actions.generateDefaultLists(store).then(() => {
+      expect(store.dispatch.mock.calls[0]).toEqual(['fetchLabels', 'to do']);
+      expect(store.dispatch.mock.calls[1]).toEqual(['fetchLabels', 'doing']);
+    });
+  });
 });
 
 describe('createList', () => {
@@ -177,16 +250,26 @@ describe('createList', () => {
 
 describe('moveList', () => {
   it('should commit MOVE_LIST mutation and dispatch updateList action', done => {
+    const initialBoardListsState = {
+      'gid://gitlab/List/1': mockListsWithModel[0],
+      'gid://gitlab/List/2': mockListsWithModel[1],
+    };
+
     const state = {
       endpoints: { fullPath: 'gitlab-org', boardId: '1' },
       boardType: 'group',
       disabled: false,
-      boardLists: mockListsWithModel,
+      boardLists: initialBoardListsState,
     };
 
     testAction(
       actions.moveList,
-      { listId: 'gid://gitlab/List/1', newIndex: 1, adjustmentValue: 1 },
+      {
+        listId: 'gid://gitlab/List/1',
+        replacedListId: 'gid://gitlab/List/2',
+        newIndex: 1,
+        adjustmentValue: 1,
+      },
       state,
       [
         {
@@ -197,7 +280,11 @@ describe('moveList', () => {
       [
         {
           type: 'updateList',
-          payload: { listId: 'gid://gitlab/List/1', position: 0, backupList: mockListsWithModel },
+          payload: {
+            listId: 'gid://gitlab/List/1',
+            position: 0,
+            backupList: initialBoardListsState,
+          },
         },
       ],
       done,
@@ -234,8 +321,82 @@ describe('updateList', () => {
   });
 });
 
-describe('deleteList', () => {
-  expectNotImplemented(actions.deleteList);
+describe('removeList', () => {
+  let state;
+  const list = mockLists[0];
+  const listId = list.id;
+  const mutationVariables = {
+    mutation: destroyBoardListMutation,
+    variables: {
+      listId,
+    },
+  };
+
+  beforeEach(() => {
+    state = {
+      boardLists: mockListsById,
+    };
+  });
+
+  afterEach(() => {
+    state = null;
+  });
+
+  it('optimistically deletes the list', () => {
+    const commit = jest.fn();
+
+    actions.removeList({ commit, state }, listId);
+
+    expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
+  });
+
+  it('keeps the updated list if remove succeeds', async () => {
+    const commit = jest.fn();
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        destroyBoardList: {
+          errors: [],
+        },
+      },
+    });
+
+    await actions.removeList({ commit, state }, listId);
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
+    expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
+  });
+
+  it('restores the list if update fails', async () => {
+    const commit = jest.fn();
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue(Promise.reject());
+
+    await actions.removeList({ commit, state }, listId);
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
+    expect(commit.mock.calls).toEqual([
+      [types.REMOVE_LIST, listId],
+      [types.REMOVE_LIST_FAILURE, mockListsById],
+    ]);
+  });
+
+  it('restores the list if update response has errors', async () => {
+    const commit = jest.fn();
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        destroyBoardList: {
+          errors: ['update failed, ID invalid'],
+        },
+      },
+    });
+
+    await actions.removeList({ commit, state }, listId);
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
+    expect(commit.mock.calls).toEqual([
+      [types.REMOVE_LIST, listId],
+      [types.REMOVE_LIST_FAILURE, mockListsById],
+    ]);
+  });
 });
 
 describe('fetchIssuesForList', () => {
@@ -471,12 +632,95 @@ describe('moveIssue', () => {
   });
 });
 
+describe('setAssignees', () => {
+  const node = { username: 'name' };
+  const name = 'username';
+  const projectPath = 'h/h';
+  const refPath = `${projectPath}#3`;
+  const iid = '1';
+
+  beforeEach(() => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: { issueSetAssignees: { issue: { assignees: { nodes: [{ ...node }] } } } },
+    });
+  });
+
+  it('calls mutate with the correct values', async () => {
+    await actions.setAssignees(
+      { commit: () => {}, getters: { activeIssue: { iid, referencePath: refPath } } },
+      [name],
+    );
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: updateAssignees,
+      variables: { iid, assigneeUsernames: [name], projectPath },
+    });
+  });
+
+  it('calls the correct mutation with the correct values', done => {
+    testAction(
+      actions.setAssignees,
+      {},
+      { activeIssue: { iid, referencePath: refPath }, commit: () => {} },
+      [
+        {
+          type: 'UPDATE_ISSUE_BY_ID',
+          payload: { prop: 'assignees', issueId: undefined, value: [node] },
+        },
+      ],
+      [],
+      done,
+    );
+  });
+});
+
 describe('createNewIssue', () => {
-  expectNotImplemented(actions.createNewIssue);
+  const state = {
+    boardType: 'group',
+    endpoints: {
+      fullPath: 'gitlab-org/gitlab',
+    },
+  };
+
+  it('should return issue from API on success', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue: mockIssue,
+          errors: [],
+        },
+      },
+    });
+
+    const result = await actions.createNewIssue({ state }, mockIssue);
+    expect(result).toEqual(mockIssue);
+  });
+
+  it('should commit CREATE_ISSUE_FAILURE mutation when API returns an error', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue: {},
+          errors: [{ foo: 'bar' }],
+        },
+      },
+    });
+
+    const payload = mockIssue;
+
+    testAction(
+      actions.createNewIssue,
+      payload,
+      state,
+      [{ type: types.CREATE_ISSUE_FAILURE }],
+      [],
+      done,
+    );
+  });
 });
 
 describe('addListIssue', () => {
-  it('should commit UPDATE_LIST_FAILURE mutation when API returns an error', done => {
+  it('should commit ADD_ISSUE_TO_LIST mutation', done => {
     const payload = {
       list: mockLists[0],
       issue: mockIssue,
@@ -494,21 +738,150 @@ describe('addListIssue', () => {
   });
 });
 
-describe('addListIssueFailure', () => {
-  it('should commit UPDATE_LIST_FAILURE mutation when API returns an error', done => {
+describe('setActiveIssueLabels', () => {
+  const state = { issues: { [mockIssue.id]: mockIssue } };
+  const getters = { activeIssue: mockIssue };
+  const testLabelIds = labels.map(label => label.id);
+  const input = {
+    addLabelIds: testLabelIds,
+    removeLabelIds: [],
+    projectPath: 'h/b',
+  };
+
+  it('should assign labels on success', done => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { issue: { labels: { nodes: labels } } } } });
+
     const payload = {
-      list: mockLists[0],
-      issue: mockIssue,
+      issueId: getters.activeIssue.id,
+      prop: 'labels',
+      value: labels,
     };
 
     testAction(
-      actions.addListIssueFailure,
-      payload,
-      {},
-      [{ type: types.ADD_ISSUE_TO_LIST_FAILURE, payload }],
+      actions.setActiveIssueLabels,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
       [],
       done,
     );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueLabels({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
+describe('setActiveIssueDueDate', () => {
+  const state = { issues: { [mockIssue.id]: mockIssue } };
+  const getters = { activeIssue: mockIssue };
+  const testDueDate = '2020-02-20';
+  const input = {
+    dueDate: testDueDate,
+    projectPath: 'h/b',
+  };
+
+  it('should commit due date after setting the issue', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        updateIssue: {
+          issue: {
+            dueDate: testDueDate,
+          },
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      issueId: getters.activeIssue.id,
+      prop: 'dueDate',
+      value: testDueDate,
+    };
+
+    testAction(
+      actions.setActiveIssueDueDate,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueDueDate({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
+describe('setActiveIssueSubscribed', () => {
+  const state = { issues: { [mockActiveIssue.id]: mockActiveIssue } };
+  const getters = { activeIssue: mockActiveIssue };
+  const subscribedState = true;
+  const input = {
+    subscribedState,
+    projectPath: 'gitlab-org/gitlab-test',
+  };
+
+  it('should commit subscribed status', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        issueSetSubscription: {
+          issue: {
+            subscribed: subscribedState,
+          },
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      issueId: getters.activeIssue.id,
+      prop: 'subscribed',
+      value: subscribedState,
+    };
+
+    testAction(
+      actions.setActiveIssueSubscribed,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { issueSetSubscription: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueSubscribed({ getters }, input)).rejects.toThrow(Error);
   });
 });
 
