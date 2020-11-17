@@ -47,7 +47,6 @@ describe('OnDemandScansForm', () => {
   const findByTestId = testId => subject.find(`[data-testid="${testId}"]`);
   const findAlert = () => findByTestId('on-demand-scan-error');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
-  const findCancelButton = () => findByTestId('on-demand-scan-cancel-button');
 
   const setFormData = () => {
     subject.find(OnDemandScansScannerProfileSelector).vm.$emit('input', scannerProfiles[0].id);
@@ -225,16 +224,6 @@ describe('OnDemandScansForm', () => {
           expect(alert.text()).toContain(error);
         });
       });
-    });
-  });
-
-  describe('cancel', () => {
-    it('emits cancel event on click', () => {
-      mountShallowSubject();
-      jest.spyOn(subject.vm, '$emit');
-      findCancelButton().vm.$emit('click');
-
-      expect(subject.vm.$emit).toHaveBeenCalledWith('cancel');
     });
   });
 });
