@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/billings/stores';
 import SubscriptionApp from 'ee/billings/components/app.vue';
-import SubscriptionTable from 'ee/billings/components/subscription_table.vue';
 import SubscriptionSeats from 'ee/billings/components/subscription_seats.vue';
+import SubscriptionTable from 'ee/billings/components/subscription_table.vue';
+import createStore from 'ee/billings/stores';
 import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
 import { mockDataSeats } from '../mock_data';
 

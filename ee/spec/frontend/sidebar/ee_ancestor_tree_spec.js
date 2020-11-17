@@ -1,6 +1,6 @@
+import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { escape } from 'lodash';
-import { GlLoadingIcon } from '@gitlab/ui';
 import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
 
 describe('AncestorsTreeContainer', () => {

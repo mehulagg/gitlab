@@ -1,20 +1,20 @@
-import Vuex from 'vuex';
+import { GlDropdownItem, GlSegmentedControl } from '@gitlab/ui';
+import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
-import { GlDropdownItem, GlSegmentedControl } from '@gitlab/ui';
-import TasksByTypeFilters from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_filters.vue';
+import Vuex from 'vuex';
 import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
+import TasksByTypeFilters from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_filters.vue';
 import {
   TASKS_BY_TYPE_SUBJECT_ISSUE,
   TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST,
   TASKS_BY_TYPE_FILTERS,
 } from 'ee/analytics/cycle_analytics/constants';
-import waitForPromises from 'helpers/wait_for_promises';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
-import { groupLabels } from '../../mock_data';
+import waitForPromises from 'helpers/wait_for_promises';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { groupLabels } from '../../mock_data';
 
 const selectedLabelIds = [groupLabels[0].id];
 

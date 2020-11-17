@@ -1,5 +1,5 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlFormInput, GlForm, GlFormGroup } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 
 import MergeCommitsExportButton from 'ee/compliance_dashboard/components/merge_requests/merge_commits_export_button.vue';
 import { INPUT_DEBOUNCE, CUSTODY_REPORT_PARAMETER } from 'ee/compliance_dashboard/constants';

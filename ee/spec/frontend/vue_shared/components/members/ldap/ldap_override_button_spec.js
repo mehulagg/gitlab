@@ -1,9 +1,9 @@
+import { GlButton } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton } from '@gitlab/ui';
+import LdapOverrideButton from 'ee/vue_shared/components/members/ldap/ldap_override_button.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { member } from 'jest/vue_shared/components/members/mock_data';
-import LdapOverrideButton from 'ee/vue_shared/components/members/ldap/ldap_override_button.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

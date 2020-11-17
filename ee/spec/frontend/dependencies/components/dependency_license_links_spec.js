@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlLink, GlIntersperse } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DependenciesLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';
 

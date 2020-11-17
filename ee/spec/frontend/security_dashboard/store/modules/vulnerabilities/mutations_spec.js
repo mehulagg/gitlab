@@ -1,9 +1,9 @@
-import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
+import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 import mutations from 'ee/security_dashboard/store/modules/vulnerabilities/mutations';
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
-import mockData from './data/mock_data_vulnerabilities';
+import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import { visitUrl } from '~/lib/utils/url_utility';
+import mockData from './data/mock_data_vulnerabilities';
 
 jest.mock('~/lib/utils/url_utility');
 

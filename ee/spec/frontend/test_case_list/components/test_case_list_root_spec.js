@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 
+import TestCaseListRoot from 'ee/test_case_list/components/test_case_list_root.vue';
+import { TestCaseTabs, AvailableSortOptions } from 'ee/test_case_list/constants';
 import { TEST_HOST } from 'helpers/test_constants';
 import { mockIssuable } from 'jest/issuable_list/mock_data';
 
-import TestCaseListRoot from 'ee/test_case_list/components/test_case_list_root.vue';
-import { TestCaseTabs, AvailableSortOptions } from 'ee/test_case_list/constants';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 
 jest.mock('~/flash');

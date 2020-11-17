@@ -1,7 +1,7 @@
-import mutations from 'ee/epic/store/mutations';
-import * as types from 'ee/epic/store/mutation_types';
-
 import { dateTypes } from 'ee/epic/constants';
+import * as types from 'ee/epic/store/mutation_types';
+import mutations from 'ee/epic/store/mutations';
+
 
 import { mockEpicMeta, mockEpicData } from '../mock_data';
 

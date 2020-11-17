@@ -1,11 +1,11 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import Agents from 'ee/clusters_list/components/agents.vue';
 import AgentEmptyState from 'ee/clusters_list/components/agent_empty_state.vue';
 import AgentTable from 'ee/clusters_list/components/agent_table.vue';
+import Agents from 'ee/clusters_list/components/agents.vue';
 import getAgentsQuery from 'ee/clusters_list/graphql/queries/get_agents.query.graphql';
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);

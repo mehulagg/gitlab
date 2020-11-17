@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlDatepicker } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import { member } from 'jest/vue_shared/components/members/mock_data';
 import ExpirationDatepicker from '~/vue_shared/components/members/table/expiration_datepicker.vue';
 

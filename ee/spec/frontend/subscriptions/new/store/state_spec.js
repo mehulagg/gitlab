@@ -1,5 +1,5 @@
-import createState from 'ee/subscriptions/new/store/state';
 import * as constants from 'ee/subscriptions/new/constants';
+import createState from 'ee/subscriptions/new/store/state';
 
 constants.STEPS = ['firstStep', 'secondStep'];
 constants.TAX_RATE = 0;

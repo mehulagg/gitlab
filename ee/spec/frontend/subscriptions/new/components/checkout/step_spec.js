@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlDeprecatedButton } from '@gitlab/ui';
-import createStore from 'ee/subscriptions/new/store';
-import * as constants from 'ee/subscriptions/new/constants';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import Component from 'ee/subscriptions/new/components/checkout/step.vue';
 import StepSummary from 'ee/subscriptions/new/components/checkout/step_summary.vue';
+import * as constants from 'ee/subscriptions/new/constants';
+import createStore from 'ee/subscriptions/new/store';
 
 describe('Step', () => {
   const localVue = createLocalVue();

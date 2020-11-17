@@ -1,6 +1,6 @@
-import { members, member } from 'jest/vue_shared/components/members/mock_data';
-import mutations from 'ee/vuex_shared/modules/members/mutations';
 import * as types from 'ee/vuex_shared/modules/members/mutation_types';
+import mutations from 'ee/vuex_shared/modules/members/mutations';
+import { members, member } from 'jest/vue_shared/components/members/mock_data';
 
 describe('Vuex members mutations', () => {
   describe(types.RECEIVE_LDAP_OVERRIDE_SUCCESS, () => {

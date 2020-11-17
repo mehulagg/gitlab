@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import state from 'ee/billings/stores/modules/seats/state';
-import * as types from 'ee/billings/stores/modules/seats/mutation_types';
 import * as actions from 'ee/billings/stores/modules/seats/actions';
-import axios from '~/lib/utils/axios_utils';
+import * as types from 'ee/billings/stores/modules/seats/mutation_types';
+import state from 'ee/billings/stores/modules/seats/state';
+import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { mockDataSeats } from '../../../mock_data';
 
 jest.mock('~/flash');

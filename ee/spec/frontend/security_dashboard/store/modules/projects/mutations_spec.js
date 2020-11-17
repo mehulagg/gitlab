@@ -1,6 +1,6 @@
-import createState from 'ee/security_dashboard/store/modules/projects/state';
 import * as types from 'ee/security_dashboard/store/modules/projects/mutation_types';
 import mutations from 'ee/security_dashboard/store/modules/projects/mutations';
+import createState from 'ee/security_dashboard/store/modules/projects/state';
 import mockData from './data/mock_data.json';
 
 describe('projects module mutations', () => {

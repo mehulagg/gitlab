@@ -1,13 +1,13 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import VueApollo from 'vue-apollo';
 import { createMockClient } from 'mock-apollo-client';
-import { resolvers as devOpsResolvers } from 'ee/admin/dev_ops_report/graphql';
-import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
+import VueApollo from 'vue-apollo';
 import DevopsAdoptionApp from 'ee/admin/dev_ops_report/components/devops_adoption_app.vue';
 import DevopsAdoptionEmptyState from 'ee/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
 import { DEVOPS_ADOPTION_STRINGS } from 'ee/admin/dev_ops_report/constants';
+import { resolvers as devOpsResolvers } from 'ee/admin/dev_ops_report/graphql';
+import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
 import axios from '~/lib/utils/axios_utils';
 import * as Sentry from '~/sentry/wrapper';
 import { groupNodes, groupPageInfo } from '../mock_data';

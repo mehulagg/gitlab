@@ -1,10 +1,10 @@
-import createState from 'ee/security_dashboard/store/modules/filters/state';
+import { severityFilter } from 'ee/security_dashboard/helpers';
 import {
   SET_FILTER,
   TOGGLE_HIDE_DISMISSED,
 } from 'ee/security_dashboard/store/modules/filters/mutation_types';
 import mutations from 'ee/security_dashboard/store/modules/filters/mutations';
-import { severityFilter } from 'ee/security_dashboard/helpers';
+import createState from 'ee/security_dashboard/store/modules/filters/state';
 
 const criticalOption = severityFilter.options.find(x => x.id === 'CRITICAL');
 const highOption = severityFilter.options.find(x => x.id === 'HIGH');

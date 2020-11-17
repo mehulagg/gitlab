@@ -1,14 +1,14 @@
 import '~/boards/models/list';
-import MockAdapter from 'axios-mock-adapter';
-import axios from 'axios';
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings_wip_limit.vue';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import BoardSettingsListTypes from 'ee_component/boards/components/board_settings_list_types.vue';
+import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings_wip_limit.vue';
 import BoardSettingsSidebar from '~/boards/components/board_settings_sidebar.vue';
+import { LIST } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
 import getters from '~/boards/stores/getters';
-import { LIST } from '~/boards/constants';
 
 const localVue = createLocalVue();
 

@@ -1,9 +1,9 @@
+import { GlButton, GlIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton, GlIcon } from '@gitlab/ui';
-import MREditModule from 'ee/approvals/stores/modules/mr_edit';
-import { createStoreOptions } from 'ee/approvals/stores';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
+import { createStoreOptions } from 'ee/approvals/stores';
+import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

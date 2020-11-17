@@ -1,6 +1,6 @@
-import createState from 'ee/billings/stores/modules/seats/state';
 import * as types from 'ee/billings/stores/modules/seats/mutation_types';
 import mutations from 'ee/billings/stores/modules/seats/mutations';
+import createState from 'ee/billings/stores/modules/seats/state';
 import { mockDataSeats } from '../../../mock_data';
 
 describe('EE billings seats module mutations', () => {

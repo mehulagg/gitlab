@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
-import createStore from '~/notes/stores';
 import CommentForm from '~/notes/components/comment_form.vue';
+import createStore from '~/notes/stores';
 import {
   notesDataMock,
   userDataMock,

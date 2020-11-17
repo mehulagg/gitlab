@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
-import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 
 jest.mock('ee_else_ce/gfm_auto_complete', () => {
   return function gfmAutoComplete() {

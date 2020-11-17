@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButtonGroup, GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DateRangeButtons from 'ee/audit_events/components/date_range_buttons.vue';
 import { CURRENT_DATE } from 'ee/audit_events/constants';

@@ -1,6 +1,6 @@
-import state from 'ee/vue_shared/dashboards/store/state';
-import mutations from 'ee/vue_shared/dashboards/store/mutations';
 import * as types from 'ee/vue_shared/dashboards/store/mutation_types';
+import mutations from 'ee/vue_shared/dashboards/store/mutations';
+import state from 'ee/vue_shared/dashboards/store/state';
 import { mockProjectData } from 'ee_jest/vue_shared/dashboards/mock_data';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import { deprecatedCreateFlash as createFlash } from '~/flash';

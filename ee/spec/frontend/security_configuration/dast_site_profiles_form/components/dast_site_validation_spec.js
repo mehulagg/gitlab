@@ -1,15 +1,15 @@
-import merge from 'lodash/merge';
-import VueApollo from 'vue-apollo';
+import { GlLoadingIcon } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-utils';
+import merge from 'lodash/merge';
 import { createMockClient } from 'mock-apollo-client';
-import { GlLoadingIcon } from '@gitlab/ui';
-import waitForPromises from 'jest/helpers/wait_for_promises';
+import VueApollo from 'vue-apollo';
 import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_validation.vue';
-import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
-import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
-import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_profiles_form/constants';
+import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
+import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
+import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
+import waitForPromises from 'jest/helpers/wait_for_promises';
 import download from '~/lib/utils/downloader';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 

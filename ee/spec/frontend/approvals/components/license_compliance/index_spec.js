@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import LicenseComplianceApprovals from 'ee/approvals/components/license_compliance/index.vue';
 import approvalsLicenceComplianceModule, {
   APPROVALS,

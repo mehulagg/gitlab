@@ -1,7 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import RuleForm from 'ee/approvals/components/rule_form.vue';
 import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
+import RuleForm from 'ee/approvals/components/rule_form.vue';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 const TEST_MODAL_ID = 'test-modal-create-id';

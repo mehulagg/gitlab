@@ -1,10 +1,10 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import {
   SEVERITY_CLASS_NAME_MAP,
   SEVERITY_TOOLTIP_TITLE_MAP,
 } from 'ee/vue_shared/security_reports/components/constants';
-import { GlIcon } from '@gitlab/ui';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 describe('Severity Badge', () => {

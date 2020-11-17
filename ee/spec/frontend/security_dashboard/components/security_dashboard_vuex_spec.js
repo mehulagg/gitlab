@@ -1,16 +1,16 @@
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'helpers/test_constants';
 
-import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
 import Filters from 'ee/security_dashboard/components/filters.vue';
-import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
-import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
-import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_chart.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
+import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
+import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_chart.vue';
 
 import createStore from 'ee/security_dashboard/store';
+import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
 
 const pipelineId = 123;

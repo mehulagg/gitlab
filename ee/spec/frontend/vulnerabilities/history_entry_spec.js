@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
+import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 
 describe('History Entry', () => {
   let wrapper;

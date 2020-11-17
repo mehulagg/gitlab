@@ -1,9 +1,9 @@
-import { mount, shallowMount } from '@vue/test-utils';
-import { within } from '@testing-library/dom';
-import { merge } from 'lodash';
 import { GlDropdown, GlTabs } from '@gitlab/ui';
-import setWindowLocation from 'helpers/set_window_location_helper';
+import { within } from '@testing-library/dom';
+import { mount, shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import DastProfiles from 'ee/security_configuration/dast_profiles/components/dast_profiles.vue';
+import setWindowLocation from 'helpers/set_window_location_helper';
 
 const TEST_NEW_DAST_SCANNER_PROFILE_PATH = '/-/on_demand_scans/scanner_profiles/new';
 const TEST_NEW_DAST_SITE_PROFILE_PATH = '/-/on_demand_scans/site_profiles/new';

@@ -1,6 +1,6 @@
+import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlEmptyState } from '@gitlab/ui';
 
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 

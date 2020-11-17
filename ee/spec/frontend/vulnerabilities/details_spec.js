@@ -1,9 +1,9 @@
-import { mount } from '@vue/test-utils';
-import { getAllByRole, getByTestId } from '@testing-library/dom';
 import { GlLink } from '@gitlab/ui';
-import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
+import { getAllByRole, getByTestId } from '@testing-library/dom';
+import { mount } from '@vue/test-utils';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import VulnerabilityDetails from 'ee/vulnerabilities/components/details.vue';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 
 describe('Vulnerability Details', () => {
   let wrapper;

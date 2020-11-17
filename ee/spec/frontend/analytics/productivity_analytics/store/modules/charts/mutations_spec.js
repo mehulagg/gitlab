@@ -1,7 +1,7 @@
+import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import * as types from 'ee/analytics/productivity_analytics/store/modules/charts/mutation_types';
 import mutations from 'ee/analytics/productivity_analytics/store/modules/charts/mutations';
 import getInitialState from 'ee/analytics/productivity_analytics/store/modules/charts/state';
-import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import { mockHistogramData, mockScatterplotData } from '../../../mock_data';
 
 describe('Productivity analytics chart mutations', () => {

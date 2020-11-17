@@ -1,15 +1,15 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import AxiosMockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 
+import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
 import RelatedItemsTreeApp from 'ee/related_items_tree/components/related_items_tree_app.vue';
 import RelatedItemsTreeHeader from 'ee/related_items_tree/components/related_items_tree_header.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
-import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
-import AxiosMockAdapter from 'axios-mock-adapter';
 import { getJSONFixture } from 'helpers/fixtures';
-import { issuableTypesMap } from '~/related_issues/constants';
 import axios from '~/lib/utils/axios_utils';
+import { issuableTypesMap } from '~/related_issues/constants';
 
 import { mockInitialConfig, mockParentItem, mockEpics, mockIssues } from '../mock_data';
 

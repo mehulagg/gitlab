@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState, GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import DevopsAdoptionEmptyState from 'ee/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
 import { DEVOPS_ADOPTION_STRINGS } from 'ee/admin/dev_ops_report/constants';
 

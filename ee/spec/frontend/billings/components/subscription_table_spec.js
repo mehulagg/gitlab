@@ -1,10 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
-import createStore from 'ee/billings/stores';
-import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
+import { shallowMount } from '@vue/test-utils';
 import SubscriptionTable from 'ee/billings/components/subscription_table.vue';
 import SubscriptionTableRow from 'ee/billings/components/subscription_table_row.vue';
+import createStore from 'ee/billings/stores';
+import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
+import { TEST_HOST } from 'helpers/test_constants';
 import { mockDataSubscription } from '../mock_data';
 
 const TEST_NAMESPACE_NAME = 'GitLab.com';

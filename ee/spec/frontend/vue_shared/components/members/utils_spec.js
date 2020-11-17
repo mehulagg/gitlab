@@ -1,5 +1,5 @@
-import { member as memberMock } from 'jest/vue_shared/components/members/mock_data';
 import { generateBadges, canOverride } from 'ee/vue_shared/components/members/utils';
+import { member as memberMock } from 'jest/vue_shared/components/members/mock_data';
 
 describe('Members Utils', () => {
   describe('generateBadges', () => {

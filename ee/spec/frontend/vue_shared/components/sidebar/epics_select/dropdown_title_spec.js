@@ -1,6 +1,6 @@
+import { GlLoadingIcon, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlLoadingIcon, GlLink } from '@gitlab/ui';
 
 import DropdownTitle from 'ee/vue_shared/components/sidebar/epics_select/dropdown_title.vue';
 

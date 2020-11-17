@@ -1,12 +1,12 @@
-import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
-import { nextTick } from 'vue';
 import { within } from '@testing-library/dom';
+import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import Vuex from 'vuex';
-import waitForPromises from 'helpers/wait_for_promises';
-import { member } from 'jest/vue_shared/components/members/mock_data';
 import { LDAP_OVERRIDE_CONFIRMATION_MODAL_ID } from 'ee/vue_shared/components/members/constants';
 import LdapOverrideConfirmationModal from 'ee/vue_shared/components/members/ldap/ldap_override_confirmation_modal.vue';
+import waitForPromises from 'helpers/wait_for_promises';
+import { member } from 'jest/vue_shared/components/members/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

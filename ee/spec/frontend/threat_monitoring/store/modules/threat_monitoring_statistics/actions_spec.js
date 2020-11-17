@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 
 import * as actions from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/actions';
 import * as types from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/state';
+import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import httpStatus from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
 
 import { mockWafStatisticsResponse } from '../../../mock_data';
 
