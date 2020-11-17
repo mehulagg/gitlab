@@ -103,34 +103,6 @@ RSpec.describe 'Promotions', :js do
     end
   end
 
-  describe 'for issue boards ', :js do
-    before do
-      stub_application_setting(check_namespace_plan: true)
-      allow(Gitlab).to receive(:com?) { true }
-
-      project.add_maintainer(user)
-      sign_in(user)
-    end
-
-    it 'appears in issue boards page' do
-      visit project_boards_path(project)
-
-      expect(find('.board-promotion-state')).to have_content "Upgrade your plan to improve Issue boards"
-    end
-
-    it 'does not show when cookie is set' do
-      visit project_boards_path(project)
-
-      within('.board-promotion-state') do
-        find('#hide-btn').click
-      end
-
-      visit project_boards_path(project, milestone)
-
-      expect(page).not_to have_selector('.board-promotion-state')
-    end
-  end
-
   describe 'for epics in issues sidebar', :js do
     shared_examples 'Epics promotion' do
       it 'appears on the page' do
