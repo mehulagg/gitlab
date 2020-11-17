@@ -8,7 +8,8 @@ module Ci
       target_url: 'DAST_WEBSITE',
       use_ajax_spider: 'DAST_USE_AJAX_SPIDER',
       show_debug_messages: 'DAST_DEBUG',
-      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
+      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED',
+      dast_site_profile_id: 'DAST_SITE_PROFILE_ID'
     }.freeze
 
     def self.ci_template_raw
@@ -47,11 +48,6 @@ module Ci
 
         hash[ENV_MAPPING[key]] = !!val == val ? val.to_s : val
         hash
-      end
-
-      if args[:dast_site_profile].secret_key
-        variables['DAST_SITE_PROFILE_SECRET_KEY'] = args[:dast_site_profile].secret_key
-        variables['DAST_SITE_PROFILE_SECRET_KEY_IV'] = args[:dast_site_profile].secret_key_iv
       end
 
       hash = self.class.ci_template.deep_merge(
