@@ -8596,10 +8596,28 @@ msgstr ""
 msgid "DastSiteValidation|Text file validation"
 msgstr ""
 
+msgid "DastSiteValidation|The validation has failed. Please try again"
+msgstr ""
+
+msgid "DastSiteValidation|The validation is in progress. Please wait..."
+msgstr ""
+
 msgid "DastSiteValidation|Validate"
 msgstr ""
 
 msgid "DastSiteValidation|Validate target site"
+msgstr ""
+
+msgid "DastSiteValidation|Validated"
+msgstr ""
+
+msgid "DastSiteValidation|Validating..."
+msgstr ""
+
+msgid "DastSiteValidation|Validation failed"
+msgstr ""
+
+msgid "DastSiteValidation|Validation succeeded. Both active and passive scans can be run against the target site"
 msgstr ""
 
 msgid "Data is still calculating..."
