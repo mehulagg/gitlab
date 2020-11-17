@@ -33,7 +33,7 @@ module Mutations
           response = {
                         status: 'valid',
                         errors: [],
-                        stages: stages
+                        stages: stages.select { |stage| !stage.groups.empty? }
                       }
         else
           response = { status: 'invalid', errors: [result.errors.first] }
