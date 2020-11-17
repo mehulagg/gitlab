@@ -9,6 +9,7 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { DAST_SITE_VALIDATION_STATUS as VALIDATION_STATUS } from 'ee/security_configuration/dast_site_profiles_form/constants';
 
 export default {
   components: {
@@ -61,6 +62,7 @@ export default {
       toBeDeletedProfileId: null,
     };
   },
+  VALIDATION_STATUS,
   computed: {
     hasError() {
       return this.errorMessage !== '';
@@ -98,6 +100,9 @@ export default {
     },
     handleCancel() {
       this.toBeDeletedProfileId = null;
+    },
+    setCurrentProfile(item) {
+      // set here
     },
   },
 };
@@ -146,6 +151,19 @@ export default {
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
             <gl-button
+              v-if="
+                item.validationStatus === $options.VALIDATION_STATUS.PENDING ||
+                  item.validationStatus === $options.VALIDATION_STATUS.FAILED
+              "
+              @click="setCurrentProfile(item)"
+              >{{ s__('DastProfiles|Validate target site') }}</gl-button
+            >
+
+            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5">{{
+              __('Edit')
+            }}</gl-button>
+
+            <gl-button
               v-gl-tooltip.hover.focus
               icon="remove"
               variant="danger"
@@ -154,7 +172,6 @@ export default {
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />
-            <gl-button v-if="item.editPath" :href="item.editPath">{{ __('Edit') }}</gl-button>
           </div>
         </template>
 
