@@ -1,0 +1,6 @@
+---
+title: Modify seat link API to send latest historical data instead of previous day's
+  data
+merge_request: 47614
+author:
+type: changed

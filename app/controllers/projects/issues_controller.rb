@@ -44,7 +44,7 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:vue_issuable_sidebar, project.group)
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
-    push_frontend_feature_flag(:vue_issue_header, @project)
+    push_frontend_feature_flag(:vue_issue_header, @project, default_enabled: true)
   end
 
   before_action only: :show do
@@ -55,10 +55,6 @@ class Projects::IssuesController < Projects::ApplicationController
 
     record_experiment_user(:invite_members_version_a)
     record_experiment_user(:invite_members_version_b)
-  end
-
-  before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import MainApp from 'ee/vulnerabilities/components/vulnerability.vue';
 
-function createMainApp() {
+(function createMainApp() {
   const el = document.getElementById('js-vulnerability-main');
   const vulnerability = JSON.parse(el.dataset.vulnerability);
 
@@ -22,8 +22,4 @@ function createMainApp() {
         props: { vulnerability },
       }),
   });
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  createMainApp();
-});
+})();

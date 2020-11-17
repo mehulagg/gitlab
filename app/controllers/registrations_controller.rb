@@ -3,7 +3,7 @@
 class RegistrationsController < Devise::RegistrationsController
   include Recaptcha::Verify
   include AcceptsPendingInvitations
-  include RecaptchaExperimentHelper
+  include RecaptchaHelper
   include InvisibleCaptchaOnSignup
 
   BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
@@ -28,6 +28,11 @@ class RegistrationsController < Devise::RegistrationsController
     super do |new_user|
       persist_accepted_terms_if_required(new_user)
       set_role_required(new_user)
+
+      if pending_approval?
+        NotificationService.new.new_instance_access_request(new_user)
+      end
+
       yield new_user if block_given?
     end
 
@@ -131,6 +136,12 @@ class RegistrationsController < Devise::RegistrationsController
     render action: 'new'
   end
 
+  def pending_approval?
+    return false unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+
+    resource.persisted? && resource.blocked_pending_approval?
+  end
+
   def sign_up_params
     params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
   end
@@ -165,5 +176,3 @@ class RegistrationsController < Devise::RegistrationsController
     @invite_email = ActionController::Base.helpers.sanitize(params[:invite_email])
   end
 end
-
-RegistrationsController.prepend_if_ee('EE::RegistrationsController')

@@ -35,12 +35,12 @@ GitLab displays identified secrets visibly in a few places:
 
 Secret Detection detects a variety of common secrets by default. You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets).
 
-The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types: 
+The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types:
 
 - Cloud services:
   - Amazon Web Services (AWS)
-  - Google Cloud Platform (GCP) 
-Encryption keys:  
+  - Google Cloud Platform (GCP)
+Encryption keys:
   - PKCS8
   - RSA
   - SSH
@@ -48,7 +48,7 @@ Encryption keys:
 - Social media platforms:
   - Facebook API
   - Twitter API
-- Cloud SaaS vendors: 
+- Cloud SaaS vendors:
   - GitHub API
   - Slack Token
   - Stripe API
@@ -83,7 +83,7 @@ as shown in the following table:
 | [Configure Secret Detection Scanners](#configuration)                                 | **{check-circle}**  | **{check-circle}** |
 | [Customize Secret Detection Settings](#customizing-settings)                 | **{check-circle}**  | **{check-circle}** |
 | View [JSON Report](../sast/index.md#reports-json-format)                                  | **{check-circle}**  | **{check-circle}** |
-| [Presentation of JSON Report in Merge Request](#overview)                 | **{dotted-circle}** | **{check-circle}** |
+| Presentation of JSON Report in Merge Request                 | **{dotted-circle}** | **{check-circle}** |
 | [Interaction with Vulnerabilities](../vulnerabilities/index.md) | **{dotted-circle}** | **{check-circle}** |
 | [Access to Security Dashboard](../security_dashboard/index.md)                       | **{dotted-circle}** | **{check-circle}** |
 
@@ -125,6 +125,18 @@ The results are saved as a
 [Secret Detection report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportssecret_detection)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest Secret Detection artifact available.
+
+### Post-processing
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/46390) in GitLab 13.6.
+
+Upon detection of a secret, GitLab supports post processing hooks. These can be used to take actions like notifying the cloud service who issued the secret. The cloud provider can confirm the credentials and take remediation actions like revoking or reissuing a new secret and notifying the creator of the secret. Post-processing workflows vary by supported cloud providers. 
+
+GitLab currently supports post-processing for following service providers:
+
+- Amazon Web Services (AWS)
+
+Third party cloud and SaaS providers can [express integration interest by filling out this form](https://forms.gle/wWpvrtLRK21Q2WJL9). Learn more about the [techincal details of post-processing secrets](https://gitlab.com/groups/gitlab-org/-/epics/4639). 
 
 ### Customizing settings
 

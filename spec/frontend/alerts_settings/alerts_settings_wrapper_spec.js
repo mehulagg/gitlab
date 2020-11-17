@@ -2,7 +2,8 @@ import VueApollo from 'vue-apollo';
 import { mount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import AlertsSettingsFormOld from '~/alerts_settings/components/alerts_settings_form_old.vue';
 import AlertsSettingsFormNew from '~/alerts_settings/components/alerts_settings_form_new.vue';
@@ -21,6 +22,7 @@ import {
   RESET_INTEGRATION_TOKEN_ERROR,
   UPDATE_INTEGRATION_ERROR,
   INTEGRATION_PAYLOAD_TEST_ERROR,
+  DELETE_INTEGRATION_ERROR,
 } from '~/alerts_settings/utils/error_messages';
 import createFlash from '~/flash';
 import { defaultAlertSettingsConfig } from './util';
@@ -46,6 +48,7 @@ describe('AlertsSettingsWrapper', () => {
   let wrapper;
   let fakeApollo;
   let destroyIntegrationHandler;
+  useMockIntersectionObserver();
 
   const findLoader = () => wrapper.find(IntegrationsList).find(GlLoadingIcon);
   const findIntegrations = () => wrapper.find(IntegrationsList).findAll('table tbody tr');
@@ -57,6 +60,12 @@ describe('AlertsSettingsWrapper', () => {
     localWrapper
       .find(IntegrationsList)
       .vm.$emit('delete-integration', { id: integrationToDestroy.id });
+  }
+
+  async function awaitApolloDomMock() {
+    await wrapper.vm.$nextTick(); // kick off the DOM update
+    await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
+    await wrapper.vm.$nextTick(); // kick off the DOM update for flash
   }
 
   const createComponent = ({ data = {}, provide = {}, loading = false } = {}) => {
@@ -372,12 +381,35 @@ describe('AlertsSettingsWrapper', () => {
       });
 
       await destroyHttpIntegration(wrapper);
-
-      await wrapper.vm.$nextTick(); // kick off the DOM update
-      await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-      await wrapper.vm.$nextTick(); // kick off the DOM update for flash
+      await awaitApolloDomMock();
 
       expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
+    });
+
+    it('displays flash if mutation had a non-recoverable error', async () => {
+      createComponentWithApollo({
+        destroyHandler: jest.fn().mockRejectedValue('Error'),
+      });
+
+      await destroyHttpIntegration(wrapper);
+      await awaitApolloDomMock();
+
+      expect(createFlash).toHaveBeenCalledWith({
+        message: DELETE_INTEGRATION_ERROR,
+      });
+    });
+  });
+
+  // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+  describe('Opsgenie integration', () => {
+    it.each([true, false])('it shows/hides the alert when opsgenie is %s', active => {
+      createComponent({
+        data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
+        provide: { glFeatures: { httpIntegrationsList: true }, opsgenie: { active } },
+        loading: false,
+      });
+
+      expect(wrapper.find(GlAlert).exists()).toBe(active);
     });
   });
 });

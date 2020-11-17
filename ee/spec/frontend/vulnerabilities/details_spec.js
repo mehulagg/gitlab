@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { getAllByRole, getByTestId } from '@testing-library/dom';
 import { GlLink } from '@gitlab/ui';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import VulnerabilityDetails from 'ee/vulnerabilities/components/details.vue';
 
@@ -173,10 +174,21 @@ describe('Vulnerability Details', () => {
 
   describe('http data', () => {
     const TEST_HEADERS = [{ name: 'Name1', value: 'Value1' }, { name: 'Name2', value: 'Value2' }];
-    const TEST_URL = 'http://foo.bar/test';
-    const EXPECT_HEADERS = {
-      label: 'Headers:',
-      content: 'Name1: Value1\nName2: Value2',
+    const EXPECT_REQUEST = {
+      label: 'Sent request:',
+      content: 'GET http://www.gitlab.com\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
+    const EXPECT_RESPONSE = {
+      label: 'Actual response:',
+      content: '500 INTERNAL SERVER ERROR\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
+    const EXPECT_RECORDED_RESPONSE = {
+      label: 'Unmodified response:',
+      content: '200 OK\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
       isCode: true,
     };
 
@@ -198,30 +210,46 @@ describe('Vulnerability Details', () => {
     };
 
     it.each`
-      request                                                    | expectedData
-      ${null}                                                    | ${null}
-      ${{}}                                                      | ${null}
-      ${{ headers: TEST_HEADERS }}                               | ${[EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, method: 'GET' }}                | ${[{ label: 'Method:', content: 'GET' }, EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, method: 'GET', url: TEST_URL }} | ${[{ label: 'Method:', content: 'GET' }, { label: 'URL:', content: TEST_URL }, EXPECT_HEADERS]}
-      ${{ url: TEST_URL }}                                       | ${[{ label: 'URL:', content: TEST_URL }]}
-      ${{ method: 'GET' }}                                       | ${[{ label: 'Method:', content: 'GET' }]}
+      request                                                                                             | expectedData
+      ${null}                                                                                             | ${null}
+      ${{}}                                                                                               | ${null}
+      ${{ headers: TEST_HEADERS }}                                                                        | ${null}
+      ${{ method: 'GET' }}                                                                                | ${null}
+      ${{ method: 'GET', url: 'http://www.gitlab.com' }}                                                  | ${null}
+      ${{ method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }}                        | ${null}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }} | ${[EXPECT_REQUEST]}
     `('shows request data for $request', ({ request, expectedData }) => {
       createWrapper({ request });
       expect(getSectionData('request')).toEqual(expectedData);
     });
 
     it.each`
-      response                                                            | expectedData
-      ${null}                                                             | ${null}
-      ${{}}                                                               | ${null}
-      ${{ headers: TEST_HEADERS }}                                        | ${[EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, status_code: 200 }}                      | ${[EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, status_code: 200, reason_phrase: 'OK' }} | ${[{ label: 'Status:', content: '200 OK' }, EXPECT_HEADERS]}
-      ${{ status_code: 400, reason_phrase: 'Something bad' }}             | ${[{ label: 'Status:', content: '400 Something bad' }]}
+      response                                                                                                           | expectedData
+      ${null}                                                                                                            | ${null}
+      ${{}}                                                                                                              | ${null}
+      ${{ headers: TEST_HEADERS }}                                                                                       | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                             | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '500' }}                                         | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '500', reason_phrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
     `('shows response data for $response', ({ response, expectedData }) => {
       createWrapper({ response });
       expect(getSectionData('response')).toEqual(expectedData);
+    });
+
+    it.each`
+      supporting_messages                                                                                                                                          | expectedData
+      ${null}                                                                                                                                                      | ${null}
+      ${[]}                                                                                                                                                        | ${null}
+      ${[{}]}                                                                                                                                                      | ${null}
+      ${[{}, { response: {} }]}                                                                                                                                    | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS } }]}                                                                                                             | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]' } }]}                                                                                   | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                               | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                          | ${null}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
+    `('shows response data for $supporting_messages', ({ supporting_messages, expectedData }) => {
+      createWrapper({ supporting_messages });
+      expect(getSectionData('recorded-response')).toEqual(expectedData);
     });
   });
 });

@@ -1342,8 +1342,7 @@ class Project < ApplicationRecord
   end
 
   def find_or_initialize_services
-    available_services_names =
-      Service.available_services_names + Service.project_specific_services_names - disabled_services
+    available_services_names = Service.available_services_names - disabled_services
 
     available_services_names.map do |service_name|
       find_or_initialize_service(service_name)
@@ -1468,11 +1467,6 @@ class Project < ApplicationRecord
 
   def has_active_services?(hooks_scope = :push_hooks)
     services.public_send(hooks_scope).any? # rubocop:disable GitlabSecurity/PublicSend
-  end
-
-  # Is overridden in EE
-  def lfs_http_url_to_repo(_)
-    http_url_to_repo
   end
 
   def feature_usage

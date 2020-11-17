@@ -11,6 +11,7 @@ import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -23,6 +24,7 @@ export default {
     BoardSidebarWeightInput,
     BoardSidebarLabelsSelect,
     BoardSidebarDueDate,
+    BoardSidebarSubscription,
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
@@ -56,6 +58,7 @@ export default {
       <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
       <board-sidebar-labels-select />
       <board-sidebar-due-date />
+      <board-sidebar-subscription />
     </template>
   </gl-drawer>
 </template>

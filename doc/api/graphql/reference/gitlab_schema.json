@@ -4754,6 +4754,42 @@
               "deprecationReason": null
             },
             {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "userNotesCount",
+              "description": "Number of user notes of the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "userPermissions",
               "description": "Permissions for the current user on the resource",
               "args": [
@@ -5076,6 +5112,16 @@
               "defaultValue": null
             },
             {
+              "name": "iterationTitle",
+              "description": "Filter by iteration title",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "weight",
               "description": "Filter by weight",
               "type": {
@@ -5111,6 +5157,16 @@
               "type": {
                 "kind": "ENUM",
                 "name": "EpicWildcardId",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iterationWildcardId",
+              "description": "Filter by iteration ID wildcard",
+              "type": {
+                "kind": "ENUM",
+                "name": "IterationWildcardId",
                 "ofType": null
               },
               "defaultValue": null
@@ -6236,6 +6292,24 @@
                 "kind": "OBJECT",
                 "name": "CiJobConnection",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipeline",
+              "description": "Pipeline the job belongs to",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Pipeline",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -8114,7 +8188,7 @@
             },
             {
               "name": "branch",
-              "description": "Name of the branch",
+              "description": "Name of the branch to commit into, it can be a new branch",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -8123,6 +8197,16 @@
                   "name": "String",
                   "ofType": null
                 }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "startBranch",
+              "description": "If on a new branch, name of the original branch",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -8864,6 +8948,20 @@
               "deprecationReason": null
             },
             {
+              "name": "expirationPolicyCleanupStatus",
+              "description": "The tags cleanup status for the container repository.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "ContainerRepositoryCleanupStatus",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "expirationPolicyStartedAt",
               "description": "Timestamp when the cleanup done by the expiration policy was started on the container repository.",
               "args": [
@@ -9008,6 +9106,41 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "ContainerRepositoryCleanupStatus",
+          "description": "Status of the tags cleanup of a container repository",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "UNSCHEDULED",
+              "description": "The tags cleanup is not scheduled. This is the default state.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SCHEDULED",
+              "description": "The tags cleanup is scheduled and is going to be executed shortly.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "UNFINISHED",
+              "description": "The tags cleanup has been partially executed. There are still remaining tags to delete.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ONGOING",
+              "description": "The tags cleanup is ongoing.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "ContainerRepositoryConnection",
           "description": "The connection type for ContainerRepository.",
@@ -9111,6 +9244,20 @@
                   "name": "Time",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "expirationPolicyCleanupStatus",
+              "description": "The tags cleanup status for the container repository.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "ContainerRepositoryCleanupStatus",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -10354,6 +10501,136 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "ClusterAgent",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "CreateCustomEmojiInput",
+          "description": "Autogenerated input type of CreateCustomEmoji",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "groupPath",
+              "description": "Namespace full path the emoji is associated with",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the emoji",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "url",
+              "description": "Location of the emoji file",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CreateCustomEmojiPayload",
+          "description": "Autogenerated return type of CreateCustomEmoji",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "customEmoji",
+              "description": "The new custom emoji",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CustomEmoji",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -12017,6 +12294,213 @@
           ]
         },
         {
+          "kind": "OBJECT",
+          "name": "CustomEmoji",
+          "description": "A custom emoji uploaded by user",
+          "fields": [
+            {
+              "name": "external",
+              "description": "Whether the emoji is an external link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "The ID of the emoji",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "CustomEmojiID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the emoji",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "url",
+              "description": "The link to file of the emoji",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CustomEmojiConnection",
+          "description": "The connection type for CustomEmoji.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "CustomEmojiEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "CustomEmoji",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CustomEmojiEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CustomEmoji",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "CustomEmojiID",
+          "description": "Identifier of CustomEmoji",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "DastOnDemandScanCreateInput",
           "description": "Autogenerated input type of DastOnDemandScanCreate",
@@ -12186,6 +12670,24 @@
             },
             {
               "name": "globalId",
+              "description": "ID of the DAST scanner profile. Deprecated in 13.6: Use `id`",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DastScannerProfileID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": true,
+              "deprecationReason": "Use `id`. Deprecated in 13.6"
+            },
+            {
+              "name": "id",
               "description": "ID of the DAST scanner profile",
               "args": [
 
@@ -12201,24 +12703,6 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "id",
-              "description": "ID of the DAST scanner profile. Deprecated in 13.4: Use `global_id`",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": true,
-              "deprecationReason": "Use `global_id`. Deprecated in 13.4"
             },
             {
               "name": "profileName",
@@ -12533,6 +13017,20 @@
             },
             {
               "name": "globalId",
+              "description": "ID of the scanner profile.. Deprecated in 13.6: Use `id`",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DastScannerProfileID",
+                "ofType": null
+              },
+              "isDeprecated": true,
+              "deprecationReason": "Use `id`. Deprecated in 13.6"
+            },
+            {
+              "name": "id",
               "description": "ID of the scanner profile.",
               "args": [
 
@@ -12544,20 +13042,6 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "id",
-              "description": "ID of the scanner profile.. Deprecated in 13.4: Use `global_id`",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": true,
-              "deprecationReason": "Use `global_id`. Deprecated in 13.4"
             }
           ],
           "inputFields": null,
@@ -13983,7 +14467,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "MetricsDashboardAnnotationID",
                   "ofType": null
                 }
               },
@@ -16681,6 +17165,112 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "DestroyContainerRepositoryInput",
+          "description": "Autogenerated input type of DestroyContainerRepository",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the container repository.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ContainerRepositoryID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DestroyContainerRepositoryPayload",
+          "description": "Autogenerated return type of DestroyContainerRepository",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containerRepository",
+              "description": "The container repository policy after scheduling the deletion.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ContainerRepository",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -20046,6 +20636,42 @@
               "deprecationReason": null
             },
             {
+              "name": "userDiscussionsCount",
+              "description": "Number of user discussions in the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "userNotesCount",
+              "description": "Number of user notes of the epic",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "userPermissions",
               "description": "Permissions for the current user on the resource",
               "args": [
@@ -20965,7 +21591,7 @@
             },
             {
               "name": "emailsDisabled",
-              "description": "Indicates if a project has email notifications disabled",
+              "description": "Indicates if a project has email notifications disabled: `true` if email notifications are disabled",
               "args": [
 
               ],
@@ -22799,6 +23425,77 @@
               "deprecationReason": null
             },
             {
+              "name": "snippetRepositoryRegistries",
+              "description": "Find snippet repository registries on this Geo node. Available only when feature flag `geo_snippet_repository_replication` is enabled",
+              "args": [
+                {
+                  "name": "ids",
+                  "description": "Filters registries by their ID",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "ID",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "SnippetRepositoryRegistryConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "syncObjectStorage",
               "description": "Indicates if this secondary node will replicate blobs in Object Storage",
               "args": [
@@ -23345,6 +24042,59 @@
                   "name": "Boolean",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "customEmoji",
+              "description": "Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CustomEmojiConnection",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -25054,6 +25804,20 @@
               "deprecationReason": null
             },
             {
+              "name": "stats",
+              "description": "Group statistics",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "GroupStats",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "storageSizeLimit",
               "description": "Total storage limit of the root namespace in bytes",
               "args": [
@@ -26226,6 +26990,74 @@
                   "name": "Boolean",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "GroupReleaseStats",
+          "description": "Contains release-related statistics about a group",
+          "fields": [
+            {
+              "name": "releasesCount",
+              "description": "Total number of releases in all descendant projects of the group. Will always return `null` if `group_level_release_statistics` feature flag is disabled",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "releasesPercentage",
+              "description": "Percentage of the group's descendant projects that have at least one release. Will always return `null` if `group_level_release_statistics` feature flag is disabled",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "GroupStats",
+          "description": "Contains statistics about a group",
+          "fields": [
+            {
+              "name": "releaseStats",
+              "description": "Statistics related to releases within the group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "GroupReleaseStats",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -27660,7 +28492,7 @@
             },
             {
               "name": "emailsDisabled",
-              "description": "Indicates if a project has email notifications disabled",
+              "description": "Indicates if a project has email notifications disabled: `true` if email notifications are disabled",
               "args": [
 
               ],
@@ -30491,28 +31323,6 @@
           "description": "Represents an iteration object",
           "fields": [
             {
-              "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "BurnupChartDailyTotals",
-                    "ofType": null
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "createdAt",
               "description": "Timestamp of iteration creation",
               "args": [
@@ -30923,6 +31733,29 @@
             {
               "name": "all",
               "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "IterationWildcardId",
+          "description": "Iteration ID wildcard values",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "NONE",
+              "description": "No iteration is assigned",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ANY",
+              "description": "An iteration is assigned",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -36423,32 +37256,20 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "MetricsDashboardAnnotationID",
+          "description": "Identifier of Metrics::Dashboard::Annotation",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Milestone",
           "description": "Represents a milestone",
           "fields": [
-            {
-              "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "BurnupChartDailyTotals",
-                    "ofType": null
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
             {
               "name": "createdAt",
               "description": "Timestamp of milestone creation",
@@ -37448,6 +38269,33 @@
               "deprecationReason": null
             },
             {
+              "name": "createCustomEmoji",
+              "description": ". Available only when feature flag `custom_emoji` is enabled",
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CreateCustomEmojiInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CreateCustomEmojiPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "createDiffNote",
               "description": null,
               "args": [
@@ -38090,6 +38938,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "DestroyBoardListPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "destroyContainerRepository",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DestroyContainerRepositoryInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DestroyContainerRepositoryPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -40879,6 +41754,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iterationTitle",
+              "description": "Filter by iteration title",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               },
               "defaultValue": null
@@ -43907,7 +44792,7 @@
             },
             {
               "name": "codeCoverageSummary",
-              "description": "Code coverages summary associated with the project. Available only when feature flag `group_coverage_data_report` is enabled",
+              "description": "Code coverage summary associated with the project",
               "args": [
 
               ],
@@ -48812,7 +49697,7 @@
           "fields": [
             {
               "name": "buildArtifactsSize",
-              "description": "Build artifacts size of the project",
+              "description": "Build artifacts size of the project in bytes",
               "args": [
 
               ],
@@ -48848,7 +49733,7 @@
             },
             {
               "name": "lfsObjectsSize",
-              "description": "Large File Storage (LFS) object size of the project",
+              "description": "Large File Storage (LFS) object size of the project in bytes",
               "args": [
 
               ],
@@ -48866,7 +49751,7 @@
             },
             {
               "name": "packagesSize",
-              "description": "Packages size of the project",
+              "description": "Packages size of the project in bytes",
               "args": [
 
               ],
@@ -48884,7 +49769,7 @@
             },
             {
               "name": "repositorySize",
-              "description": "Repository size of the project",
+              "description": "Repository size of the project in bytes",
               "args": [
 
               ],
@@ -48902,7 +49787,7 @@
             },
             {
               "name": "snippetsSize",
-              "description": "Snippets size of the project",
+              "description": "Snippets size of the project in bytes",
               "args": [
 
               ],
@@ -48916,7 +49801,7 @@
             },
             {
               "name": "storageSize",
-              "description": "Storage size of the project",
+              "description": "Storage size of the project in bytes",
               "args": [
 
               ],
@@ -48933,8 +49818,22 @@
               "deprecationReason": null
             },
             {
+              "name": "uploadsSize",
+              "description": "Uploads size of the project in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "wikiSize",
-              "description": "Wiki size of the project",
+              "description": "Wiki size of the project in bytes",
               "args": [
 
               ],
@@ -53731,6 +54630,24 @@
               "deprecationReason": null
             },
             {
+              "name": "uploadsSize",
+              "description": "The uploads size in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "wikiSize",
               "description": "The wiki size in bytes",
               "args": [
@@ -57591,6 +58508,12 @@
               "deprecationReason": null
             },
             {
+              "name": "GITHUB_SERVICE",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "HANGOUTS_CHAT_SERVICE",
               "description": null,
               "isDeprecated": false,
@@ -57604,6 +58527,12 @@
             },
             {
               "name": "IRKER_SERVICE",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "JENKINS_SERVICE",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -57700,18 +58629,6 @@
             },
             {
               "name": "YOUTRACK_SERVICE",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "GITHUB_SERVICE",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "JENKINS_SERVICE",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -58967,6 +59884,251 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "SnippetRepositoryRegistry",
+          "description": "Represents the Geo sync and verification state of a snippet repository",
+          "fields": [
+            {
+              "name": "createdAt",
+              "description": "Timestamp when the SnippetRepositoryRegistry was created",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "ID of the SnippetRepositoryRegistry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lastSyncFailure",
+              "description": "Error message during sync of the SnippetRepositoryRegistry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lastSyncedAt",
+              "description": "Timestamp of the most recent successful sync of the SnippetRepositoryRegistry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "retryAt",
+              "description": "Timestamp after which the SnippetRepositoryRegistry should be resynced",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "retryCount",
+              "description": "Number of consecutive failed sync attempts of the SnippetRepositoryRegistry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "snippetRepositoryId",
+              "description": "ID of the Snippet Repository",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "state",
+              "description": "Sync state of the SnippetRepositoryRegistry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "RegistryState",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "SnippetRepositoryRegistryConnection",
+          "description": "The connection type for SnippetRepositoryRegistry.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "SnippetRepositoryRegistryEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "SnippetRepositoryRegistry",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "SnippetRepositoryRegistryEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "SnippetRepositoryRegistry",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "ENUM",
           "name": "Sort",
           "description": "Common sort values",
@@ -60019,6 +61181,20 @@
               "deprecationReason": null
             },
             {
+              "name": "job",
+              "description": "The job that created this version",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiJob",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "updatedAt",
               "description": "Timestamp the version was updated",
               "args": [
@@ -60673,28 +61849,6 @@
           "name": "TimeboxReportInterface",
           "description": null,
           "fields": [
-            {
-              "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "BurnupChartDailyTotals",
-                    "ofType": null
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
             {
               "name": "report",
               "description": "Historically accurate report about the timebox",

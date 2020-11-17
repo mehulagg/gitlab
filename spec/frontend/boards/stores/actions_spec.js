@@ -9,6 +9,7 @@ import {
   rawIssue,
   mockIssues,
   labels,
+  mockActiveIssue,
 } from '../mock_data';
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
@@ -674,11 +675,52 @@ describe('setAssignees', () => {
 });
 
 describe('createNewIssue', () => {
-  expectNotImplemented(actions.createNewIssue);
+  const state = {
+    boardType: 'group',
+    endpoints: {
+      fullPath: 'gitlab-org/gitlab',
+    },
+  };
+
+  it('should return issue from API on success', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue: mockIssue,
+          errors: [],
+        },
+      },
+    });
+
+    const result = await actions.createNewIssue({ state }, mockIssue);
+    expect(result).toEqual(mockIssue);
+  });
+
+  it('should commit CREATE_ISSUE_FAILURE mutation when API returns an error', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue: {},
+          errors: [{ foo: 'bar' }],
+        },
+      },
+    });
+
+    const payload = mockIssue;
+
+    testAction(
+      actions.createNewIssue,
+      payload,
+      state,
+      [{ type: types.CREATE_ISSUE_FAILURE }],
+      [],
+      done,
+    );
+  });
 });
 
 describe('addListIssue', () => {
-  it('should commit UPDATE_LIST_FAILURE mutation when API returns an error', done => {
+  it('should commit ADD_ISSUE_TO_LIST mutation', done => {
     const payload = {
       list: mockLists[0],
       issue: mockIssue,
@@ -690,24 +732,6 @@ describe('addListIssue', () => {
       payload,
       {},
       [{ type: types.ADD_ISSUE_TO_LIST, payload }],
-      [],
-      done,
-    );
-  });
-});
-
-describe('addListIssueFailure', () => {
-  it('should commit UPDATE_LIST_FAILURE mutation when API returns an error', done => {
-    const payload = {
-      list: mockLists[0],
-      issue: mockIssue,
-    };
-
-    testAction(
-      actions.addListIssueFailure,
-      payload,
-      {},
-      [{ type: types.ADD_ISSUE_TO_LIST_FAILURE, payload }],
       [],
       done,
     );
@@ -807,6 +831,57 @@ describe('setActiveIssueDueDate', () => {
       .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
 
     await expect(actions.setActiveIssueDueDate({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
+describe('setActiveIssueSubscribed', () => {
+  const state = { issues: { [mockActiveIssue.id]: mockActiveIssue } };
+  const getters = { activeIssue: mockActiveIssue };
+  const subscribedState = true;
+  const input = {
+    subscribedState,
+    projectPath: 'gitlab-org/gitlab-test',
+  };
+
+  it('should commit subscribed status', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        issueSetSubscription: {
+          issue: {
+            subscribed: subscribedState,
+          },
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      issueId: getters.activeIssue.id,
+      prop: 'subscribed',
+      value: subscribedState,
+    };
+
+    testAction(
+      actions.setActiveIssueSubscribed,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { issueSetSubscription: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueSubscribed({ getters }, input)).rejects.toThrow(Error);
   });
 });
 

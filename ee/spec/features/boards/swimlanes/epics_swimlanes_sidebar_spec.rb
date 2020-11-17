@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'epics swimlanes sidebar', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
-  let_it_be(:project) { create(:project, :public, group: group) }
+  let_it_be(:project, reload: true) { create(:project, :public, group: group) }
 
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:list) { create(:list, board: board, position: 0) }
@@ -29,6 +29,47 @@ RSpec.describe 'epics swimlanes sidebar', :js do
     end
 
     wait_for_all_requests
+  end
+
+  context 'notifications subscription' do
+    it 'displays notifications toggle' do
+      click_first_issue_card
+
+      page.within('[data-testid="sidebar-notifications"]') do
+        expect(page).to have_selector('[data-testid="notification-subscribe-toggle"]')
+        expect(page).to have_content('Notifications')
+        expect(page).not_to have_content('Notifications have been disabled by the project or group owner')
+      end
+    end
+
+    it 'shows toggle as on then as off as user toggles to subscribe and unsubscribe' do
+      click_first_issue_card
+
+      toggle = find('[data-testid="notification-subscribe-toggle"]')
+
+      toggle.click
+
+      expect(toggle).to have_css("button.is-checked")
+
+      toggle.click
+
+      expect(toggle).not_to have_css("button.is-checked")
+    end
+
+    context 'when notifications have been disabled' do
+      before do
+        project.update_attribute(:emails_disabled, true)
+      end
+
+      it 'displays a message that notifications have been disabled' do
+        click_first_issue_card
+
+        page.within('[data-testid="sidebar-notifications"]') do
+          expect(page).not_to have_selector('[data-testid="notification-subscribe-toggle"]')
+          expect(page).to have_content('Notifications have been disabled by the project or group owner')
+        end
+      end
+    end
   end
 
   context 'time tracking' do

@@ -30,9 +30,6 @@ module EE
       has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
 
-      has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
-      has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
-
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
       # We cannot simply set `has_many :audit_events, as: :entity, dependent: :destroy`
@@ -316,10 +313,6 @@ module EE
       end
     end
 
-    def dependency_proxy_feature_available?
-      ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
-    end
-
     override :supports_events?
     def supports_events?
       feature_available?(:epics)
@@ -433,6 +426,23 @@ module EE
       return all_group_members.count unless minimal_access_role_allowed?
 
       members.count
+    end
+
+    def releases_count
+      ::Release.by_namespace_id(self_and_descendants.select(:id)).count
+    end
+
+    def releases_percentage
+      calculate_sql = <<~SQL
+      (
+        COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM releases WHERE releases.project_id = projects.id)) * 100.0 / GREATEST(COUNT(*), 1)
+      )::integer AS releases_percentage
+      SQL
+
+      self.class.count_by_sql(
+        ::Project.select(calculate_sql)
+        .where(namespace_id: self_and_descendants.select(:id)).to_sql
+      )
     end
 
     private

@@ -1,9 +1,11 @@
 <script>
+import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { fetchPolicies } from '~/lib/graphql';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import getIntegrationsQuery from '../graphql/queries/get_integrations.query.graphql';
+import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 import createHttpIntegrationMutation from '../graphql/mutations/create_http_integration.mutation.graphql';
 import createPrometheusIntegrationMutation from '../graphql/mutations/create_prometheus_integration.mutation.graphql';
 import updateHttpIntegrationMutation from '../graphql/mutations/update_http_integration.mutation.graphql';
@@ -11,6 +13,7 @@ import updatePrometheusIntegrationMutation from '../graphql/mutations/update_pro
 import destroyHttpIntegrationMutation from '../graphql/mutations/destroy_http_integration.mutation.graphql';
 import resetHttpTokenMutation from '../graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '../graphql/mutations/reset_prometheus_token.mutation.graphql';
+import updateCurrentIntergrationMutation from '../graphql/mutations/update_current_intergration.mutation.graphql';
 import IntegrationsList from './alerts_integrations_list.vue';
 import SettingsFormOld from './alerts_settings_form_old.vue';
 import SettingsFormNew from './alerts_settings_form_new.vue';
@@ -36,6 +39,10 @@ export default {
     integrationRemoved: s__('AlertsIntegrations|The integration has been successfully removed.'),
   },
   components: {
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    GlAlert,
+    GlLink,
+    GlSprintf,
     IntegrationsList,
     SettingsFormOld,
     SettingsFormNew,
@@ -46,6 +53,10 @@ export default {
       default: {},
     },
     prometheus: {
+      default: {},
+    },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    opsgenie: {
       default: {},
     },
     projectPath: {
@@ -75,6 +86,9 @@ export default {
         createFlash({ message: err });
       },
     },
+    currentIntegration: {
+      query: getCurrentIntegrationQuery,
+    },
   },
   data() {
     return {
@@ -87,7 +101,7 @@ export default {
     loading() {
       return this.$apollo.queries.integrations.loading;
     },
-    intergrationsOptionsOld() {
+    integrationsOptionsOld() {
       return [
         {
           name: s__('AlertSettings|HTTP endpoint'),
@@ -103,6 +117,12 @@ export default {
     },
     canAddIntegration() {
       return this.multiIntegrations || this.integrations?.list?.length < 2;
+    },
+    canManageOpsgenie() {
+      return (
+        this.integrations?.list?.every(({ active }) => active === false) ||
+        this.integrations?.list?.length === 0
+      );
     },
   },
   methods: {
@@ -208,7 +228,19 @@ export default {
         });
     },
     editIntegration({ id }) {
-      this.currentIntegration = this.integrations.list.find(integration => integration.id === id);
+      const currentIntegration = this.integrations.list.find(integration => integration.id === id);
+      this.$apollo.mutate({
+        mutation: updateCurrentIntergrationMutation,
+        variables: {
+          id: currentIntegration.id,
+          name: currentIntegration.name,
+          active: currentIntegration.active,
+          token: currentIntegration.token,
+          type: currentIntegration.type,
+          url: currentIntegration.url,
+          apiUrl: currentIntegration.apiUrl,
+        },
+      });
     },
     deleteIntegration({ id }) {
       const { projectPath } = this;
@@ -229,7 +261,7 @@ export default {
           if (error) {
             return createFlash({ message: error });
           }
-          this.currentIntegration = null;
+          this.clearCurrentIntegration();
           return createFlash({
             message: this.$options.i18n.integrationRemoved,
             type: FLASH_TYPES.SUCCESS,
@@ -243,7 +275,10 @@ export default {
         });
     },
     clearCurrentIntegration() {
-      this.currentIntegration = null;
+      this.$apollo.mutate({
+        mutation: updateCurrentIntergrationMutation,
+        variables: {},
+      });
     },
     testPayloadFailure() {
       createFlash({ message: INTEGRATION_PAYLOAD_TEST_ERROR });
@@ -254,18 +289,37 @@ export default {
 
 <template>
   <div>
+    <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
+    <gl-alert v-if="opsgenie.active" :dismissible="false" variant="tip">
+      <gl-sprintf
+        :message="
+          s__(
+            'AlertSettings|We will soon be introducing the ability to create multiple unique HTTP endpoints. When this functionality is live,  you will be able to configure an integration with Opsgenie to surface Opsgenie alerts in GitLab. This will replace the current Opsgenie integration which will be deprecated. %{linkStart}More Information%{linkEnd}',
+          )
+        "
+      >
+        <template #link="{ content }">
+          <gl-link
+            class="gl-display-inline-block"
+            href="https://gitlab.com/gitlab-org/gitlab/-/issues/273657"
+            target="_blank"
+            >{{ content }}</gl-link
+          >
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <integrations-list
-      :integrations="glFeatures.httpIntegrationsList ? integrations.list : intergrationsOptionsOld"
+      v-else
+      :integrations="glFeatures.httpIntegrationsList ? integrations.list : integrationsOptionsOld"
       :loading="loading"
-      :current-integration="currentIntegration"
       @edit-integration="editIntegration"
       @delete-integration="deleteIntegration"
     />
     <settings-form-new
       v-if="glFeatures.httpIntegrationsList"
       :loading="isUpdating"
-      :current-integration="currentIntegration"
       :can-add-integration="canAddIntegration"
+      :can-manage-opsgenie="canManageOpsgenie"
       @create-new-integration="createNewIntegration"
       @update-integration="updateIntegration"
       @reset-token="resetToken"

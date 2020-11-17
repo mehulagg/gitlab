@@ -46,6 +46,10 @@ class GroupPolicy < BasePolicy
     group_projects_for(user: @user, group: @subject, only_owned: false).any? { |p| p.design_management_enabled? }
   end
 
+  condition(:dependency_proxy_available) do
+    @subject.dependency_proxy_feature_available?
+  end
+
   desc "Deploy token with read_package_registry scope"
   condition(:read_package_registry_deploy_token) do
     @user.is_a?(DeployToken) && @user.groups.include?(@subject) && @user.read_package_registry
@@ -97,6 +101,7 @@ class GroupPolicy < BasePolicy
     enable :read_label
     enable :read_board
     enable :read_group_member
+    enable :read_custom_emoji
   end
 
   rule { ~can?(:read_group) }.policy do
@@ -110,6 +115,7 @@ class GroupPolicy < BasePolicy
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation
+    enable :create_custom_emoji
   end
 
   rule { reporter }.policy do
@@ -190,8 +196,15 @@ class GroupPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_group
   end
+
+  rule { can?(:read_group) & dependency_proxy_available }
+    .enable :read_dependency_proxy
+
+  rule { developer & dependency_proxy_available }
+    .enable :admin_dependency_proxy
 
   rule { resource_access_token_available & can?(:admin_group) }.policy do
     enable :admin_resource_access_tokens

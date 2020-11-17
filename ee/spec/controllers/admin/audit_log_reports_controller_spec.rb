@@ -54,7 +54,11 @@ RSpec.describe Admin::AuditLogReportsController do
             subject
 
             expect(response).to have_gitlab_http_status(:ok)
-            expect(response.headers['Content-Type']).to eq('text/csv; charset=utf-8')
+            expect(response.headers["Content-Length"]).to be_nil
+            expect(response.headers["Cache-Control"]).to eq('no-cache, no-store')
+            expect(response.headers['Content-Type']).to eq('text/csv; charset=utf-8; header=present')
+            expect(response.headers['X-Accel-Buffering']).to eq('no')
+            expect(response.headers['Last-Modified']).to eq('0')
             expect(response.headers['Content-Disposition'])
               .to include("filename=\"audit-events-#{Time.current.to_i}.csv\"")
           end

@@ -29,7 +29,6 @@ import {
   updateDependencyScanningIssue,
   updateContainerScanningIssue,
   updateDastIssue,
-  updateSecretScanningIssue,
   updateCoverageFuzzingIssue,
   addDismissalComment,
   receiveAddDismissalCommentError,
@@ -53,10 +52,6 @@ import {
   receiveDastDiffSuccess,
   receiveDastDiffError,
   fetchDastDiff,
-  setSecretScanningDiffEndpoint,
-  receiveSecretScanningDiffSuccess,
-  receiveSecretScanningDiffError,
-  fetchSecretScanningDiff,
   setCoverageFuzzingDiffEndpoint,
   receiveCoverageFuzzingDiffSuccess,
   receiveCoverageFuzzingDiffError,
@@ -70,7 +65,6 @@ import {
   dastFeedbacks,
   containerScanningFeedbacks,
   dependencyScanningFeedbacks,
-  secretScanningFeedbacks,
   coverageFuzzingFeedbacks,
 } from '../mock_data';
 import toasted from '~/vue_shared/plugins/global_toast';
@@ -1087,26 +1081,6 @@ describe('security reports actions', () => {
     });
   });
 
-  describe('updateSecretScanningIssue', () => {
-    it('commits update secret scanning issue', done => {
-      const payload = { foo: 'bar' };
-
-      testAction(
-        updateSecretScanningIssue,
-        payload,
-        mockedState,
-        [
-          {
-            type: types.UPDATE_SECRET_SCANNING_ISSUE,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
   describe('updateDastIssue', () => {
     it('commits update dast issue', done => {
       const payload = { foo: 'bar' };
@@ -1701,194 +1675,6 @@ describe('security reports actions', () => {
             },
             {
               type: 'receiveDastDiffError',
-            },
-          ],
-          done,
-        );
-      });
-    });
-  });
-
-  describe('setSecretScanningDiffEndpoint', () => {
-    it('should pass down the endpoint to the mutation', done => {
-      const payload = '/secret_scanning_endpoint.json';
-
-      testAction(
-        setSecretScanningDiffEndpoint,
-        payload,
-        mockedState,
-        [
-          {
-            type: types.SET_SECRET_SCANNING_DIFF_ENDPOINT,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveSecretScanningDiffSuccess', () => {
-    it('should pass down the response to the mutation', done => {
-      const payload = { data: 'Effort yields its own rewards.' };
-
-      testAction(
-        receiveSecretScanningDiffSuccess,
-        payload,
-        mockedState,
-        [
-          {
-            type: types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveSecretScanningDiffError', () => {
-    it('should commit secret diff error mutation', done => {
-      testAction(
-        receiveSecretScanningDiffError,
-        undefined,
-        mockedState,
-        [
-          {
-            type: types.RECEIVE_SECRET_SCANNING_DIFF_ERROR,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('fetchSecretScanningDiff', () => {
-    const diff = { vulnerabilities: [] };
-    const endpoint = 'secret_scanning_diff.json';
-
-    beforeEach(() => {
-      mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
-      mockedState.canReadVulnerabilityFeedback = true;
-      mockedState.secretScanning.paths.diffEndpoint = endpoint;
-    });
-
-    describe('on success', () => {
-      it('should dispatch `receiveSecretScanningDiffSuccess`', done => {
-        mock.onGet(endpoint).reply(200, diff);
-        mock
-          .onGet('vulnerabilities_feedback', {
-            params: {
-              category: 'secret_detection',
-            },
-          })
-          .reply(200, secretScanningFeedbacks);
-
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffSuccess',
-              payload: {
-                diff,
-                enrichData: secretScanningFeedbacks,
-              },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
-      beforeEach(() => {
-        mockedState.canReadVulnerabilityFeedback = false;
-        mock.onGet(endpoint).reply(200, diff);
-      });
-
-      it('should dispatch `secret_scanning`', done => {
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffSuccess',
-              payload: {
-                diff,
-                enrichData: [],
-              },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('when vulnerabilities path errors', () => {
-      it('should dispatch `receiveSecretScanningError`', done => {
-        mock.onGet(endpoint).reply(500);
-        mock
-          .onGet('vulnerabilities_feedback', {
-            params: {
-              category: 'secret_scanning',
-            },
-          })
-          .reply(200, secretScanningFeedbacks);
-
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffError',
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('when feedback path errors', () => {
-      it('should dispatch `receiveSecretScanningError`', done => {
-        mock.onGet(endpoint).reply(200, diff);
-        mock
-          .onGet('vulnerabilities_feedback', {
-            params: {
-              category: 'secret_scanning',
-            },
-          })
-          .reply(500);
-
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffError',
             },
           ],
           done,

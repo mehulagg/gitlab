@@ -1,8 +1,0 @@
----
-name: experiment_growth_recaptcha
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/14019
-rollout_issue_url: 
-milestone: '12.1'
-type: development
-group: group::acquisition
-default_enabled: true

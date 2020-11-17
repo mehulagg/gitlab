@@ -26,9 +26,29 @@ class Projects::Quality::TestCasesController < Projects::ApplicationController
     end
   end
 
+  def show
+    @test_case = test_cases_finder
+                  .execute
+                  .iid_in(params[:id])
+                  .without_order
+                  .first
+
+    serializer = IssueSerializer.new(current_user: current_user, project: project)
+
+    @issuable_sidebar = serializer.represent(@test_case, serializer: 'sidebar')
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
   private
 
   def verify_test_cases_flag!
     render_404 unless Feature.enabled?(:quality_test_cases, project)
+  end
+
+  def test_cases_finder
+    IssuesFinder.new(current_user, project_id: project.id, issue_types: :test_case)
   end
 end

@@ -34,6 +34,12 @@ RSpec.describe EE::PersonalAccessTokens::RevokeService do
         let_it_be(:token) { create(:personal_access_token, user: managed_user) }
 
         it_behaves_like 'a successfully revoked token'
+
+        context 'and an empty token is given' do
+          let_it_be(:token) { nil }
+
+          it { expect(subject.success?).to be false }
+        end
       end
 
       context 'when feature flag is disabled' do

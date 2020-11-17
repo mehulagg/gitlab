@@ -89,8 +89,8 @@ export default {
     :x-axis-title="xAxisTitle"
     :format-tooltip-text="renderTooltip"
   >
-    <div slot="tooltipTitle">{{ tooltipTitle }} ({{ xAxisTitle }})</div>
-    <div slot="tooltipContent" class="d-flex">
+    <div slot="tooltip-title">{{ tooltipTitle }} ({{ xAxisTitle }})</div>
+    <div slot="tooltip-content" class="d-flex">
       <div class="flex-grow-1">{{ yAxisTitle }}:&nbsp;</div>
       <div class="font-weight-bold">{{ tooltipContent }}</div>
     </div>

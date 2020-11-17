@@ -52,7 +52,7 @@ RSpec.describe 'Display approaching user count limit banner', :js do
         context 'when banner was dismissed' do
           before do
             visit admin_root_path
-            find('.gl-alert-dismiss').click
+            find('[data-testid="gitlab-ee-license-banner-dismiss"]').click
           end
 
           it_behaves_like 'a hidden banner'

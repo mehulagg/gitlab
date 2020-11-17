@@ -1,5 +1,6 @@
 import { GlTable, GlIcon, GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import Tracking from '~/tracking';
 import AlertIntegrationsList, {
   i18n,
@@ -23,12 +24,19 @@ const mockIntegrations = [
 
 describe('AlertIntegrationsList', () => {
   let wrapper;
+  const { trigger: triggerIntersection } = useMockIntersectionObserver();
 
-  function mountComponent(propsData = {}) {
+  function mountComponent({ data = {}, props = {} } = {}) {
     wrapper = mount(AlertIntegrationsList, {
+      data() {
+        return { ...data };
+      },
       propsData: {
         integrations: mockIntegrations,
-        ...propsData,
+        ...props,
+      },
+      provide: {
+        glFeatures: { httpIntegrationsList: true },
       },
       stubs: {
         GlIcon: true,
@@ -57,7 +65,7 @@ describe('AlertIntegrationsList', () => {
   });
 
   it('renders an empty state when no integrations provided', () => {
-    mountComponent({ integrations: [] });
+    mountComponent({ props: { integrations: [] } });
     expect(findTableComponent().text()).toContain(i18n.emptyState);
   });
 
@@ -66,7 +74,7 @@ describe('AlertIntegrationsList', () => {
   });
 
   it('renders an highlighted row when a current integration is selected to edit', () => {
-    mountComponent({ currentIntegration: { id: '1' } });
+    mountComponent({ data: { currentIntegration: { id: '1' } } });
     expect(
       findTableComponentRows()
         .at(0)
@@ -94,12 +102,23 @@ describe('AlertIntegrationsList', () => {
 
   describe('Snowplow tracking', () => {
     beforeEach(() => {
-      jest.spyOn(Tracking, 'event');
       mountComponent();
+      jest.spyOn(Tracking, 'event');
     });
 
-    it('should track alert list page views', () => {
+    it('should NOT track alert list page views when list is collapsed', () => {
+      triggerIntersection(wrapper.vm.$el, { entry: { isIntersecting: false } });
+
+      expect(Tracking.event).not.toHaveBeenCalled();
+    });
+
+    it('should track alert list page views only once when list is expanded', () => {
+      triggerIntersection(wrapper.vm.$el, { entry: { isIntersecting: true } });
+      triggerIntersection(wrapper.vm.$el, { entry: { isIntersecting: true } });
+      triggerIntersection(wrapper.vm.$el, { entry: { isIntersecting: true } });
+
       const { category, action } = trackAlertIntegrationsViewsOptions;
+      expect(Tracking.event).toHaveBeenCalledTimes(1);
       expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });

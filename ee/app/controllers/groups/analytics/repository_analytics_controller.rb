@@ -6,7 +6,6 @@ class Groups::Analytics::RepositoryAnalyticsController < Groups::Analytics::Appl
   before_action :load_group
   before_action -> { check_feature_availability!(:group_repository_analytics) }
   before_action -> { authorize_view_by_action!(:read_group_repository_analytics) }
-  before_action -> { push_frontend_feature_flag(:group_coverage_data_report, @group, default_enabled: false) }
   before_action -> { push_frontend_feature_flag(:group_coverage_data_report_graph, @group, default_enabled: false) }
 
   def show

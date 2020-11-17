@@ -257,7 +257,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'loads seat link payload on click', :js do
       page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
+        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
 
         expect(page).not_to have_content expected_payload_content
 

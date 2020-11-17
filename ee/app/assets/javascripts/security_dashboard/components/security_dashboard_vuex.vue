@@ -1,5 +1,4 @@
 <script>
-import { isUndefined } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import Filters from './filters.vue';
@@ -29,12 +28,6 @@ export default {
       required: false,
       default: '',
     },
-    lockToProject: {
-      type: Object,
-      required: false,
-      default: null,
-      validator: project => !isUndefined(project.id),
-    },
     pipelineId: {
       type: Number,
       required: false,
@@ -56,7 +49,7 @@ export default {
       'isCreatingMergeRequest',
     ]),
     ...mapState('pipelineJobs', ['projectId']),
-    ...mapGetters('filters', ['activeFilters']),
+    ...mapState('filters', ['filters']),
     ...mapGetters('vulnerabilities', ['loadingVulnerabilitiesFailedWithRecognizedErrorCode']),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     canCreateIssue() {
@@ -74,9 +67,6 @@ export default {
     vulnerability() {
       return this.modal.vulnerability;
     },
-    isLockedToProject() {
-      return this.lockToProject !== null;
-    },
     shouldShowAside() {
       return this.shouldShowChart;
     },
@@ -85,18 +75,11 @@ export default {
     },
   },
   created() {
-    if (this.isLockedToProject) {
-      this.lockFilter({
-        filterId: 'project_id',
-        optionId: this.lockToProject.id,
-      });
-    }
     this.setPipelineId(this.pipelineId);
-    this.setHideDismissedToggleInitialState();
     this.setVulnerabilitiesEndpoint(this.vulnerabilitiesEndpoint);
     this.setVulnerabilitiesHistoryEndpoint(this.vulnerabilitiesHistoryEndpoint);
-    this.fetchVulnerabilities({ ...this.activeFilters, page: this.pageInfo.page });
-    this.fetchVulnerabilitiesHistory(this.activeFilters);
+    this.fetchVulnerabilities({ ...this.filters, page: this.pageInfo.page });
+    this.fetchVulnerabilitiesHistory(this.filters);
     this.fetchPipelineJobs();
   },
   methods: {
@@ -146,8 +129,8 @@ export default {
         </template>
 
         <security-dashboard-table>
-          <template #emptyState>
-            <slot name="emptyState"></slot>
+          <template #empty-state>
+            <slot name="empty-state"></slot>
           </template>
         </security-dashboard-table>
 

@@ -5,6 +5,10 @@ export const STATE = {
   DETECTED: 'DETECTED',
   CONFIRMED: 'CONFIRMED',
 };
+export const DISMISSAL_STATES = {
+  DISMISSED: 'dismissed',
+  ALL: 'all',
+};
 
 export const BASE_FILTERS = {
   state: {

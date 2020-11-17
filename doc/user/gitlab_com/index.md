@@ -113,7 +113,7 @@ or over the repository size limit, you can [reduce your repository size with Git
 
 | Setting                       | GitLab.com  | Default       |
 | -----------                   | ----------- | ------------- |
-| Repository size including LFS | 10 GB       | Unlimited     |
+| [Repository size including LFS](../admin_area/settings/account_and_limit_settings.md) | 10 GB       | Unlimited     |
 | Maximum import size           | 5 GB        | 50 MB         |
 
 NOTE: **Note:**
@@ -152,7 +152,7 @@ Shared runners provided by GitLab are **not** configurable. Consider [installing
 Linux shared runners on GitLab.com run in [autoscale mode](https://docs.gitlab.com/runner/configuration/autoscale.html) and are powered by Google Cloud Platform.
 Autoscaling means reduced waiting times to spin up CI/CD jobs, and isolated VMs for each project,
 thus maximizing security. They're free to use for public open source projects and limited
-to 2000 CI minutes per month per group for private projects. More minutes
+to 400 CI minutes per month per group for private projects. More minutes
 [can be purchased](../../subscriptions/gitlab_com/index.md#purchase-additional-ci-minutes), if
 needed. Read about all [GitLab.com plans](https://about.gitlab.com/pricing/).
 
@@ -432,7 +432,7 @@ and the following environment variables:
 | `SIDEKIQ_MEMORY_KILLER_CHECK_INTERVAL`     | -          | `3`       |
 | `SIDEKIQ_MEMORY_KILLER_GRACE_TIME`         | -          | `900`     |
 | `SIDEKIQ_MEMORY_KILLER_SHUTDOWN_WAIT`      | -          | `30`      |
-| `SIDEKIQ_LOG_ARGUMENTS`                    | `1`        | -         |
+| `SIDEKIQ_LOG_ARGUMENTS`                    | `1`        | `1`       |
 
 NOTE: **Note:**
 The `SIDEKIQ_MEMORY_KILLER_MAX_RSS` setting is `16000000` on Sidekiq import
@@ -635,7 +635,7 @@ You can view more information in our runbooks such as:
 By default, GitLab does not expire job logs. Job logs are retained indefinitely,
 and can't be configured on GitLab.com to expire. You can erase job logs
 [manually with the Jobs API](../../api/jobs.md#erase-a-job) or by
-[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline). 
+[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline).
 
 ## GitLab.com at scale
 

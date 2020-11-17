@@ -9,11 +9,11 @@ RSpec.describe MergeTrains::CreatePipelineService do
   let(:previous_ref) { 'refs/heads/master' }
 
   before do
+    project.add_maintainer(maintainer)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
-    project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true)
   end
 
   describe '#execute' do
@@ -35,9 +35,19 @@ RSpec.describe MergeTrains::CreatePipelineService do
       end
     end
 
-    context 'when merge trains option is disabled' do
+    context 'when merge trains flag is disabled' do
       before do
         stub_feature_flags(disable_merge_trains: true)
+      end
+
+      it_behaves_like 'returns an error' do
+        let(:expected_reason) { 'merge trains is disabled' }
+      end
+    end
+
+    context 'when merge trains setting is disabled' do
+      before do
+        project.update!(merge_trains_enabled: false)
       end
 
       it_behaves_like 'returns an error' do

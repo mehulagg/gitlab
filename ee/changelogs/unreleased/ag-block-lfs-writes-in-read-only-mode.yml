@@ -1,0 +1,5 @@
+---
+title: Block LFS writes when database is read-only but allow on Geo secondaries
+merge_request: 47684
+author:
+type: changed

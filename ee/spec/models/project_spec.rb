@@ -564,14 +564,14 @@ RSpec.describe Project do
 
   context 'merge requests related settings' do
     shared_examples 'setting modified by application setting' do
-      where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
+      where(:feature_enabled, :app_setting, :project_setting, :final_setting) do
         true  | true  | true  | true
-        false | true  | true  | false
         true  | false | true  | true
-        false | false | true  | false
         true  | true  | false | true
-        false | true  | false | true
         true  | false | false | false
+        false | true  | true  | true
+        false | false | true  | true
+        false | true  | false | false
         false | false | false | false
       end
 
@@ -579,9 +579,8 @@ RSpec.describe Project do
         let(:project) { create(:project) }
 
         before do
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
+          stub_licensed_features(admin_merge_request_approvers_rules: feature_enabled)
 
-          allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
           stub_application_setting(application_setting => app_setting)
           project.update(setting => project_setting)
         end
@@ -595,7 +594,6 @@ RSpec.describe Project do
 
     describe '#disable_overriding_approvers_per_merge_request' do
       it_behaves_like 'setting modified by application setting' do
-        let(:feature) { :admin_merge_request_approvers_rules }
         let(:setting) { :disable_overriding_approvers_per_merge_request }
         let(:application_setting) { :disable_overriding_approvers_per_merge_request }
       end
@@ -603,26 +601,23 @@ RSpec.describe Project do
 
     describe '#merge_requests_disable_committers_approval' do
       it_behaves_like 'setting modified by application setting' do
-        let(:feature) { :admin_merge_request_approvers_rules }
         let(:setting) { :merge_requests_disable_committers_approval }
         let(:application_setting) { :prevent_merge_requests_committers_approval }
       end
     end
 
     describe '#merge_requests_author_approval' do
-      let(:project) { create(:project) }
-      let(:feature) { :admin_merge_request_approvers_rules }
       let(:setting) { :merge_requests_author_approval }
       let(:application_setting) { :prevent_merge_requests_author_approval }
 
-      where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
+      where(:feature_enabled, :app_setting, :project_setting, :final_setting) do
         true  | true  | true  | false
-        false | true  | true  | true
-        true  | false | true  | false
-        false | false | true  | true
-        true  | true  | false | true
-        false | true  | false | true
+        true  | false | true  | true
+        true  | true  | false | false
         true  | false | false | false
+        false | true  | true  | true
+        false | false | true  | true
+        false | true  | false | false
         false | false | false | false
       end
 
@@ -630,9 +625,8 @@ RSpec.describe Project do
         let(:project) { create(:project) }
 
         before do
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
+          stub_licensed_features(admin_merge_request_approvers_rules: feature_enabled)
 
-          allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
           stub_application_setting(application_setting => app_setting)
           project.update(setting => project_setting)
         end
@@ -642,36 +636,6 @@ RSpec.describe Project do
           expect(project.send("#{setting}?")).to eq(final_setting)
         end
       end
-    end
-  end
-
-  describe '#has_regulated_settings?' do
-    let(:gdpr_framework_definition) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:gdpr] }
-    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, :gdpr) }
-    let(:project) { build(:project, compliance_framework_setting: compliance_framework_setting) }
-
-    subject { project.has_regulated_settings? }
-
-    context 'framework is regulated' do
-      before do
-        stub_application_setting(compliance_frameworks: [gdpr_framework_definition.id])
-      end
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'framework is not regulated' do
-      before do
-        stub_application_setting(compliance_frameworks: [])
-      end
-
-      it { is_expected.to be_falsey }
-    end
-
-    context 'project does not have compliance framework' do
-      let(:project) { build(:project) }
-
-      it { is_expected.to be_falsey }
     end
   end
 

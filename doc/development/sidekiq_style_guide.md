@@ -27,7 +27,10 @@ After adding a new queue, run `bin/rake
 gitlab:sidekiq:all_queues_yml:generate` to regenerate
 `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
 it can be picked up by
-[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md). 
+Additionally, run
+`bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
+`config/sidekiq_queues.yml`.
 
 ## Queue Namespaces
 
@@ -696,8 +699,8 @@ blocks:
 
 ## Arguments logging
 
-When [`SIDEKIQ_LOG_ARGUMENTS`](../administration/troubleshooting/sidekiq.md#log-arguments-to-sidekiq-jobs)
-is enabled, Sidekiq job arguments will be logged.
+As of GitLab 13.6, Sidekiq job arguments will be logged by default, unless [`SIDEKIQ_LOG_ARGUMENTS`](../administration/troubleshooting/sidekiq.md#log-arguments-to-sidekiq-jobs)
+is disabled.
 
 By default, the only arguments logged are numeric arguments, because
 arguments of other types could contain sensitive information. To

@@ -23,6 +23,9 @@ export default {
     };
   },
   computed: {
+    options() {
+      return this.filter.options;
+    },
     selectedSet() {
       return new Set(this.selectedOptions);
     },
@@ -41,16 +44,16 @@ export default {
       return { [this.filter.id]: this.selectedOptions.map(x => x.id) };
     },
     filteredOptions() {
-      return this.filter.options.filter(option =>
+      return this.options.filter(option =>
         option.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
       );
     },
     routeQueryIds() {
-      const ids = this.$route.query[this.filter.id] || [];
+      const ids = this.$route?.query[this.filter.id] || [];
       return Array.isArray(ids) ? ids : [ids];
     },
     routeQueryOptions() {
-      const options = this.filter.options.filter(x => this.routeQueryIds.includes(x.id));
+      const options = this.options.filter(x => this.routeQueryIds.includes(x.id));
       const hasAllId = this.routeQueryIds.includes(this.filter.allOption.id);
 
       if (options.length && !hasAllId) {
@@ -83,9 +86,9 @@ export default {
       this.updateRouteQuery();
     },
     updateRouteQuery() {
-      const query = { query: { ...this.$route.query, ...this.queryObject } };
+      const query = { query: { ...this.$route?.query, ...this.queryObject } };
       // To avoid a console error, don't update the querystring if it's the same as the current one.
-      if (!isEqual(this.routeQueryIds, this.queryObject[this.filter.id])) {
+      if (this.$router && !isEqual(this.routeQueryIds, this.queryObject[this.filter.id])) {
         this.$router.push(query);
       }
     },

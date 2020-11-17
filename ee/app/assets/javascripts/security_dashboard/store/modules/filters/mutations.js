@@ -1,40 +1,30 @@
+import { mapValues } from 'lodash';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import * as types from './mutation_types';
-import { ALL } from './constants';
-import { setFilter } from './utils';
+import { DISMISSAL_STATES } from './constants';
+import Tracking from '~/tracking';
 
 export default {
-  [types.SET_ALL_FILTERS](state, payload = {}) {
-    state.filters = state.filters.map(filter => {
-      // If the payload is empty, we fall back to an empty selection
-      const selectedOptions = (payload && payload[filter.id]) || [];
+  [types.SET_FILTER](state, filter) {
+    // Convert the filter key to snake case and the selected option IDs to lower case. The API
+    // endpoint needs them to be in this format.
+    const convertedFilter = mapValues(convertObjectPropsToSnakeCase(filter), array =>
+      array.map(element => element.toLowerCase()),
+    );
 
-      const selection = Array.isArray(selectedOptions)
-        ? new Set(selectedOptions)
-        : new Set([selectedOptions]);
+    state.filters = { ...state.filters, ...convertedFilter };
 
-      // This prevents us from selecting nothing at all
-      if (selection.size === 0) {
-        selection.add(ALL);
-      }
+    const [label, value] = Object.values(filter);
+    Tracking.event(document.body.dataset.page, 'set_filter', { label, value });
+  },
+  [types.TOGGLE_HIDE_DISMISSED](state) {
+    const scope =
+      state.filters.scope === DISMISSAL_STATES.DISMISSED
+        ? DISMISSAL_STATES.ALL
+        : DISMISSAL_STATES.DISMISSED;
 
-      return { ...filter, selection };
-    });
-    state.hideDismissed = payload.scope !== 'all';
-  },
-  [types.SET_FILTER](state, payload) {
-    state.filters = setFilter(state.filters, payload);
-  },
-  [types.SET_FILTER_OPTIONS](state, payload) {
-    const { filterId, options } = payload;
-    state.filters.find(filter => filter.id === filterId).options = options;
-  },
-  [types.HIDE_FILTER](state, { filterId }) {
-    const hiddenFilter = state.filters.find(({ id }) => id === filterId);
-    if (hiddenFilter) {
-      hiddenFilter.hidden = true;
-    }
-  },
-  [types.SET_TOGGLE_VALUE](state, { key, value }) {
-    state[key] = value;
+    state.filters = { ...state.filters, scope };
+
+    Tracking.event(document.body.dataset.page, 'set_toggle', { label: 'scope', value: scope });
   },
 };

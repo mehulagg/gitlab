@@ -255,7 +255,7 @@ to the name.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5656) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.7.
 
 Some vulnerabilities can be fixed by applying the solution that GitLab
-automatically generates. The following scanners are supported:
+automatically generates. Although the feature name is Automatic Remediation, this feature is also commonly called Auto-Remediation, Auto Remediation, or Suggested Solutions. The following scanners are supported:
 
 - [Dependency Scanning](dependency_scanning/index.md):
   Automatic Patch creation is only available for Node.js projects managed with
@@ -608,8 +608,8 @@ Instructions are available in the [legacy template project](https://gitlab.com/g
 #### Vulnerabilities are found, but the job succeeds. How can I have a pipeline fail instead?
 
 This is the current default behavior, because the job's status indicates success or failure of the analyzer itself.
-Analyzer results are displayed in the [job logs](../../ci/pipelines/#expand-and-collapse-job-log-sections),
-[Merge Request widget](sast/index.md#overview)
+Analyzer results are displayed in the [job logs](../../ci/jobs/index.md#expand-and-collapse-job-log-sections),
+[Merge Request widget](sast/index.md)
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
 

@@ -235,7 +235,7 @@ There are two different ways to add a new project to a group:
 
 - Select a group, and then click **New project**. You can then continue [creating your project](../../gitlab-basics/create-project.md).
 
-  ![New project](img/create_new_project_from_group.png)
+  ![New project](img/create_new_project_from_group_v13_6.png)
 
 - While you are creating a project, select a group namespace
   you've already created from the dropdown menu.
@@ -745,6 +745,7 @@ To enable prevent project forking:
 - **Audit Events**: View [Audit Events](../../administration/audit_events.md)
   for the group. **(STARTER ONLY)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
+- **Integrations**: Configure [integrations](../admin_area/settings/project_integration_management.md) for your group.
 
 #### Storage usage quota **(STARTER)**
 
@@ -797,7 +798,7 @@ With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar char
 
 With [GitLab Repositories Analytics](repositories_analytics/index.md), you can download a CSV of the latest coverage data for all the projects in your group.
 
-## Dependency Proxy **(PREMIUM)**
+## Dependency Proxy
 
 Use GitLab as a [dependency proxy](../packages/dependency_proxy/index.md) for upstream Docker images.
 

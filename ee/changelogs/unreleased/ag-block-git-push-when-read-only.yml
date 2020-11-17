@@ -1,0 +1,5 @@
+---
+title: Block git push over HTTP when database is read-only
+merge_request: 47673
+author:
+type: changed

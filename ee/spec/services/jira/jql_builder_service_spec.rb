@@ -111,7 +111,7 @@ RSpec.describe Jira::JqlBuilderService do
     end
 
     context 'with vulnerability_ids params' do
-      let(:params) { { vulnerability_ids: [1, 25] } }
+      let(:params) { { vulnerability_ids: %w[1 25] } }
 
       it 'builds jql' do
         expect(subject).to eq('project = PROJECT_KEY AND (description ~ "/-/security/vulnerabilities/1" OR description ~ "/-/security/vulnerabilities/25") order by created DESC')

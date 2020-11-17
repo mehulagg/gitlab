@@ -172,6 +172,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         omniauth:
           { providers: omniauth_providers }
       )
+      allow(Devise).to receive(:omniauth_providers).and_return(%w(ldapmain ldapsecondary group_saml))
 
       for_defined_days_back do
         user = create(:user)
@@ -190,14 +191,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         groups: 2,
         users_created: 6,
         omniauth_providers: ['google_oauth2'],
-        user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4 }
+        user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4, 'standard' => 0, 'two-factor' => 0, 'two-factor-via-u2f-device' => 0, "two-factor-via-webauthn-device" => 0 }
       )
       expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
         events: 1,
         groups: 1,
         users_created: 3,
         omniauth_providers: ['google_oauth2'],
-        user_auth_by_provider: { 'group_saml' => 1, 'ldap' => 2 }
+        user_auth_by_provider: { 'group_saml' => 1, 'ldap' => 2, 'standard' => 0, 'two-factor' => 0, 'two-factor-via-u2f-device' => 0, "two-factor-via-webauthn-device" => 0 }
       )
     end
 
@@ -1085,6 +1086,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     let(:user1) { build(:user, id: 1) }
     let(:user2) { build(:user, id: 2) }
     let(:user3) { build(:user, id: 3) }
+    let(:user4) { build(:user, id: 4) }
 
     before do
       counter = Gitlab::UsageDataCounters::TrackUniqueEvents
@@ -1099,6 +1101,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       counter.track_event(event_action: :pushed, event_target: project, author_id: 4, time: time - 3.days)
       counter.track_event(event_action: :created, event_target: wiki, author_id: 3)
       counter.track_event(event_action: :created, event_target: design, author_id: 3)
+      counter.track_event(event_action: :created, event_target: design, author_id: 4)
 
       counter = Gitlab::UsageDataCounters::EditorUniqueCounter
 
@@ -1118,9 +1121,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     it 'returns the distinct count of user actions within the specified time period' do
       expect(described_class.action_monthly_active_users(time_period)).to eq(
         {
-          action_monthly_active_users_design_management: 1,
+          action_monthly_active_users_design_management: 2,
           action_monthly_active_users_project_repo: 3,
           action_monthly_active_users_wiki_repo: 1,
+          action_monthly_active_users_git_write: 4,
           action_monthly_active_users_web_ide_edit: 2,
           action_monthly_active_users_sfe_edit: 2,
           action_monthly_active_users_snippet_editor_edit: 2,

@@ -69,12 +69,6 @@
   white-space: nowrap;
 }
 
-.board-type-assignee {
-  .board-title-sub-text {
-    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
-  }
-}
-
 .boards-selector-wrapper > .show.dropdown .dropdown-menu {
   // we cannot use d-flex from Bootstrap because of !important
   // see https://gitlab.com/gitlab-org/gitlab-ui/issues/38

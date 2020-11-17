@@ -1,0 +1,5 @@
+---
+title: Add releasesCount and releasesPercentage to Group GraphQL type
+merge_request: 47245
+author:
+type: added

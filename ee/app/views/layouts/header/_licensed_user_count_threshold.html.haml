@@ -2,7 +2,7 @@
 .container-fluid.container-limited.pt-3
   .gl-alert.gl-alert-info.gitlab-ee-license-banner.js-admin-licensed-user-count-threshold{ role: 'alert', data: { feature_id: UserCalloutsHelper::ACTIVE_USER_COUNT_THRESHOLD, dismiss_endpoint: user_callouts_path } }
     = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon')
-    %button.js-close.gl-alert-dismiss{ type: 'button', 'aria-label' => _('Dismiss') }
+    %button.js-close.gl-alert-dismiss{ type: 'button', 'aria-label' => _('Dismiss'), data: { testid: 'gitlab-ee-license-banner-dismiss' } }
       = sprite_icon('close', css_class: 'gl-icon')
     .gl-alert-body
       %h4.gl-alert-title= _('Your instance is approaching its licensed user count')

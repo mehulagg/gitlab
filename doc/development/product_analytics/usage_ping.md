@@ -312,6 +312,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines how we build the Redis
      keys for data storage. For `daily` we keep a key for metric per day of the year, for `weekly` we
      keep a key for metric per week of the year.
+   - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
 
 1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
 
@@ -402,7 +403,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    | `event` | string | yes | The event name it should be tracked |
 
    Response
-w
+
    Return 200 if tracking failed for any reason.
 
    - `200` if event was tracked or any errors
@@ -429,13 +430,39 @@ w
    - `values`: One value or array of values we count. For example: user_id, visitor_id, user_ids.
    - `event_name`: event name.
 
-1. Get event data using `Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names:, start_date:, end_date)`.
+1. Track event on context level using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event_in_context(entity_id, event_name, context)`.
+
+   Arguments:
+
+   - `entity_id`: value we count. For example: user_id, visitor_id.
+   - `event_name`: event name.
+   - `context`: context value. Allowed values are `default`, `free`, `bronze`, `silver`, `gold`, `starter`, `premium`, `ultimate`
+
+1. Get event data using `Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names:, start_date:, end_date:, context: '')`.
 
    Arguments:
 
    - `event_names`: the list of event names.
    - `start_date`: start date of the period for which we want to get event data.
    - `end_date`: end date of the period for which we want to get event data.
+   - `context`: context of the event. Allowed values are `default`, `free`, `bronze`, `silver`, `gold`, `starter`, `premium`, `ultimate`.
+
+1. Testing tracking and getting unique events
+
+Trigger events in rails console by using `track_event` method
+
+   ```ruby
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(1, 'g_compliance_audit_events')
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(2, 'g_compliance_audit_events')
+   ```
+
+Next, get the unique events for the current week.
+
+   ```ruby
+   # Get unique events for metric for current_week
+   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events',
+   start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
+   ```
 
 Recommendations:
 
@@ -444,6 +471,20 @@ Recommendations:
   metric's name and week of the year, `2020-33-{metric_name}`.
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
   adding new metrics.
+
+##### Enable/Disable Redis HLL tracking
+
+Events are tracked behind [feature flags](../feature_flags/index.md) due to concerns for Redis performance and scalability.
+
+For a full list of events and coresponding feature flags see, [known_events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/) files.
+
+To enable or disable tracking for specific event within <https://gitlab.com> or <https://staging.gitlab.com>, run commands such as the following to
+[enable or disable the corresponding feature](../feature_flags/index.md).
+
+```shell
+/chatops run feature set <feature_name> true
+/chatops run feature set <feature_name> false
+```
 
 ##### Known events in usage data payload
 
@@ -694,15 +735,23 @@ In order to add data for aggregated metrics into Usage Ping payload you should a
 
 - name: unique name under which aggregate metric will be added to Usage Ping payload
 - operator: operator that defines how aggregated metric data will be counted. Available operators are:
-  - `ANY`: removes duplicates and counts all entries that triggered any of listed events
+  - `OR`: removes duplicates and counts all entries that triggered any of listed events
+  - `AND`: removes duplicates and counts all elements that were observed triggering all of following events
 - events: list of events names (from [`known_events.yml`](#known-events-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
+- feature_flag: name of [development feature flag](../feature_flags/development.md#development-type) that will be checked before
+metrics aggregation is performed. Corresponding feature flag should have `default_enabled` attribute set to `false`. 
+`feature_flag` attribute is **OPTIONAL**  and can be omitted, when `feature_flag` is missing no feature flag will be checked.
 
-Example aggregated metric entry:
+Example aggregated metric entries:
 
 ```yaml
-- name: example_aggregated_metric
-  operator: ANY
+- name: product_analytics_test_metrics_union
+  operator: OR
   events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+- name: product_analytics_test_metrics_intersection_with_feautre_flag
+  operator: AND
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+  feature_flag: example_aggregated_metric
 ```
 
 Aggregated metrics will be added under `aggregated_metrics` key in both `counts_weekly` and `counts_monthly` top level keys in Usage Ping payload.
@@ -718,7 +767,8 @@ Aggregated metrics will be added under `aggregated_metrics` key in both `counts_
     :project_snippets => 407,
     :promoted_issues => 719,
     :aggregated_metrics => {
-      :example_aggregated_metric => 7
+      :product_analytics_test_metrics_union => 7,
+      :product_analytics_test_metrics_intersection_with_feautre_flag => 2
     },
     :snippets => 2513
   }

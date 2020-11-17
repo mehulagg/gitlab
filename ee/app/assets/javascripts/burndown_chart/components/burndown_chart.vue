@@ -141,8 +141,8 @@ export default {
         :format-tooltip-text="formatTooltipText"
         :include-legend-avg-max="false"
       >
-        <template slot="tooltipTitle">{{ tooltip.title }}</template>
-        <template slot="tooltipContent">{{ tooltip.content }}</template>
+        <template slot="tooltip-title">{{ tooltip.title }}</template>
+        <template slot="tooltip-content">{{ tooltip.content }}</template>
       </gl-line-chart>
     </resizable-chart-container>
   </div>

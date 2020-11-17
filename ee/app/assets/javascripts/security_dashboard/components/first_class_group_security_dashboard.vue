@@ -77,7 +77,11 @@ export default {
         </header>
       </template>
       <template #sticky>
-        <filters :projects="projects" @filterChange="handleFilterChange" />
+        <filters
+          :projects="projects"
+          :full-path="groupFullPath"
+          @filterChange="handleFilterChange"
+        />
       </template>
       <group-security-vulnerabilities :group-full-path="groupFullPath" :filters="filters" />
     </security-dashboard-layout>

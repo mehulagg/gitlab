@@ -43,19 +43,29 @@ RSpec.describe 'epics swimlanes', :js do
       wait_for_board_cards_in_first_epic(0, 1)
       wait_for_board_cards_in_second_epic(1, 1)
 
+      epic_lanes = page.all(:css, '.board-epic-lane')
+      expect(epic_lanes.length).to eq(2)
+
       drag(list_from_index: 4, list_to_index: 1)
 
+      epic_lanes = page.all(:css, '.board-epic-lane')
+      expect(epic_lanes.length).to eq(1)
+
       wait_for_board_cards_in_first_epic(1, 1)
-      wait_for_board_cards_in_second_epic(1, 0)
     end
 
     it 'from epic to unassigned issues lane' do
       wait_for_board_cards(1, 2)
       wait_for_board_cards_in_second_epic(1, 1)
 
+      epic_lanes = page.all(:css, '.board-epic-lane')
+      expect(epic_lanes.length).to eq(2)
+
       drag(list_from_index: 4, list_to_index: 7)
 
-      wait_for_board_cards_in_second_epic(1, 0)
+      epic_lanes = page.all(:css, '.board-epic-lane')
+      expect(epic_lanes.length).to eq(1)
+
       wait_for_board_cards_in_unassigned_lane(1, 1)
     end
 

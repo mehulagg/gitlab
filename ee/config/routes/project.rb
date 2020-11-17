@@ -16,12 +16,13 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
 
         namespace :quality do
-          resources :test_cases, only: [:index, :new]
+          resources :test_cases, only: [:index, :new, :show]
         end
 
         resources :autocomplete_sources, only: [] do
           collection do
             get 'epics'
+            get 'vulnerabilities'
           end
         end
 

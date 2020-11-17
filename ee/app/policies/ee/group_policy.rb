@@ -61,10 +61,6 @@ module EE
         !::Gitlab::IpRestriction::Enforcer.new(subject).allows_current_ip?
       end
 
-      condition(:dependency_proxy_available) do
-        @subject.feature_available?(:dependency_proxy)
-      end
-
       condition(:cluster_deployments_available) do
         @subject.feature_available?(:cluster_deployments)
       end
@@ -118,7 +114,10 @@ module EE
         enable :download_wiki_code
       end
 
-      rule { guest }.enable :read_wiki
+      rule { guest }.policy do
+        enable :read_wiki
+        enable :read_group_release_stats
+      end
 
       rule { reporter }.policy do
         enable :admin_list
@@ -165,12 +164,6 @@ module EE
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
         enable :change_prevent_group_forking
       end
-
-      rule { can?(:read_group) & dependency_proxy_available }
-        .enable :read_dependency_proxy
-
-      rule { developer & dependency_proxy_available }
-        .enable :admin_dependency_proxy
 
       rule { can?(:read_group) & epics_available }.enable :read_epic
 

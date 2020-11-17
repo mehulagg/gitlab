@@ -6,7 +6,7 @@ RSpec.describe ProjectsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
 
-  let(:project) { create(:project) }
+  let_it_be(:project, reload: true) { create(:project) }
 
   let_it_be(:public_project) { create(:project, :public, :repository, namespace: group) }
 
@@ -311,6 +311,48 @@ RSpec.describe ProjectsController do
       end
     end
 
+    context 'when merge_trains_enabled param is specified' do
+      let(:params) { { merge_trains_enabled: true } }
+
+      let(:request) do
+        put :update, params: { namespace_id: project.namespace, id: project, project: params }
+      end
+
+      before do
+        stub_licensed_features(merge_pipelines: true, merge_trains: true)
+      end
+
+      it 'updates the attribute' do
+        request
+
+        expect(project.merge_trains_enabled).to be_truthy
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(merge_trains: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.merge_trains_enabled).to be_falsy
+        end
+      end
+
+      context 'when license is not sufficient' do
+        before do
+          stub_licensed_features(merge_trains: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.merge_trains_enabled).to be_falsy
+        end
+      end
+    end
+
     context 'when auto_rollback_enabled param is specified' do
       let(:params) { { auto_rollback_enabled: true } }
 
@@ -424,21 +466,17 @@ RSpec.describe ProjectsController do
       shared_examples 'merge request approvers rules' do
         using RSpec::Parameterized::TableSyntax
 
-        where(:license_value, :setting_value, :param_value, :final_value) do
-          false | false | false | false
-          false | true  | false | false
-          false | false | true  | true
-          false | true  | true  | true
-          true  | false | false | false
-          true  | true  | false | false
-          true  | false | true  | true
-          true  | true  | true  | true
+        where(:can_modify, :param_value, :final_value) do
+          true  | true  | true
+          true  | false | false
+          false | true  | nil
+          false | false | nil
         end
 
         with_them do
           before do
-            stub_licensed_features(admin_merge_request_approvers_rules: license_value)
-            stub_application_setting(app_setting => setting_value)
+            allow(controller).to receive(:can?).and_call_original
+            allow(controller).to receive(:can?).with(user, rule_name, project).and_return(can_modify)
           end
 
           it 'updates project if needed' do
@@ -458,21 +496,21 @@ RSpec.describe ProjectsController do
 
       describe ':disable_overriding_approvers_per_merge_request' do
         it_behaves_like 'merge request approvers rules' do
-          let(:app_setting) { :disable_overriding_approvers_per_merge_request }
+          let(:rule_name) { :modify_approvers_rules }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
         end
       end
 
       describe ':merge_requests_author_approval' do
         it_behaves_like 'merge request approvers rules' do
-          let(:app_setting) { :prevent_merge_requests_author_approval }
+          let(:rule_name) { :modify_merge_request_author_setting }
           let(:setting) { :merge_requests_author_approval }
         end
       end
 
       describe ':merge_requests_disable_committers_approval' do
         it_behaves_like 'merge request approvers rules' do
-          let(:app_setting) { :prevent_merge_requests_committers_approval }
+          let(:rule_name) { :modify_merge_request_committer_setting }
           let(:setting) { :merge_requests_disable_committers_approval }
         end
       end

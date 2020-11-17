@@ -88,7 +88,6 @@ describe('Pipeline Security Dashboard component', () => {
       const dashboard = wrapper.find(SecurityDashboard);
       expect(dashboard.exists()).toBe(true);
       expect(dashboard.props()).toMatchObject({
-        lockToProject: { id: projectId },
         pipelineId,
         vulnerabilitiesEndpoint,
       });
@@ -99,7 +98,7 @@ describe('Pipeline Security Dashboard component', () => {
     beforeEach(() => {
       factory({
         stubs: {
-          'security-dashboard': { template: '<div><slot name="emptyState"></slot></div>' },
+          'security-dashboard': { template: '<div><slot name="empty-state"></slot></div>' },
         },
       });
     });

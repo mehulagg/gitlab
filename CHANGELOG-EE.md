@@ -1,5 +1,16 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.5.4 (2020-11-13)
+
+### Fixed (1 change)
+
+- Fix vsa filter paths. !47058
+
+### Changed (1 change)
+
+- Disallow editing of project-level MR approval settings when enabled at the instance level. !46637
+
+
 ## 13.5.3 (2020-11-03)
 
 - No changes.

@@ -1242,4 +1242,40 @@ RSpec.describe GroupPolicy do
       end
     end
   end
+
+  describe ':read_group_release_stats' do
+    shared_examples 'read_group_release_stats permissions' do
+      context 'when user is logged out' do
+        let(:current_user) { nil }
+
+        it { is_expected.to be_disallowed(:read_group_release_stats) }
+      end
+
+      context 'when user is not a member of the group' do
+        let(:current_user) { create(:user) }
+
+        it { is_expected.to be_disallowed(:read_group_release_stats) }
+      end
+
+      context 'when user is guest' do
+        let(:current_user) { guest }
+
+        it { is_expected.to be_allowed(:read_group_release_stats) }
+      end
+    end
+
+    context 'when group is private' do
+      it_behaves_like 'read_group_release_stats permissions'
+    end
+
+    context 'when group is public' do
+      let(:group) { create(:group, :public) }
+
+      before do
+        group.add_guest(guest)
+      end
+
+      it_behaves_like 'read_group_release_stats permissions'
+    end
+  end
 end

@@ -1,0 +1,5 @@
+---
+title: Remove DOMContentLoaded Eventlistener
+merge_request: 47619
+author:
+type: performance

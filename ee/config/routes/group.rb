@@ -86,6 +86,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get 'merge_requests'
         get 'labels'
         get 'epics'
+        get 'vulnerabilities'
         get 'commands'
         get 'milestones'
       end
@@ -139,7 +140,11 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       resources :vulnerabilities, only: [:index]
       resource :compliance_dashboard, only: [:show]
       resource :discover, only: [:show], controller: :discover
-      resources :credentials, only: [:index, :destroy]
+      resources :credentials, only: [:index, :destroy] do
+        member do
+          put :revoke
+        end
+      end
       resources :merge_commit_reports, only: [:index], constraints: { format: :csv }
     end
 
@@ -160,19 +165,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
     resource :roadmap, only: [:show], controller: 'roadmap'
 
-    resource :dependency_proxy, only: [:show, :update]
-
     post '/restore' => '/groups#restore', as: :restore
-  end
-end
-
-# Dependency proxy for containers
-# Because docker adds v2 prefix to URI this need to be outside of usual group routes
-scope format: false do
-  get 'v2', to: proc { [200, {}, ['']] } # rubocop:disable Cop/PutGroupRoutesUnderScope
-
-  constraints image: Gitlab::PathRegex.container_image_regex, sha: Gitlab::PathRegex.container_image_blob_sha_regex do
-    get 'v2/*group_id/dependency_proxy/containers/*image/manifests/*tag' => 'groups/dependency_proxy_for_containers#manifest' # rubocop:todo Cop/PutGroupRoutesUnderScope
-    get 'v2/*group_id/dependency_proxy/containers/*image/blobs/:sha' => 'groups/dependency_proxy_for_containers#blob' # rubocop:todo Cop/PutGroupRoutesUnderScope
   end
 end

@@ -9,6 +9,8 @@ class License < ApplicationRecord
   ULTIMATE_PLAN = 'ultimate'.freeze
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
 
+  EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
+
   EES_FEATURES = %i[
     audit_events
     blocked_issues
@@ -69,7 +71,6 @@ class License < ApplicationRecord
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
-    dependency_proxy
     deploy_board
     disable_name_update_for_users
     email_additional_text
@@ -95,6 +96,7 @@ class License < ApplicationRecord
     ide_schema_config
     issues_analytics
     jira_issues_integration
+    jira_vulnerabilities_integration
     ldap_group_sync_filter
     merge_pipelines
     merge_request_performance_metrics
@@ -255,6 +257,10 @@ class License < ApplicationRecord
       else
         load_license
       end
+    end
+
+    def all_plans
+      EE_ALL_PLANS
     end
 
     delegate :block_changes?, :feature_available?, to: :current, allow_nil: true

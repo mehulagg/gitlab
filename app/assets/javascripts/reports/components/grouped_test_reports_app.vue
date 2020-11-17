@@ -11,7 +11,12 @@ import Modal from './modal.vue';
 import createStore from '../store';
 import Tracking from '~/tracking';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { summaryTextBuilder, reportTextBuilder, statusIcon } from '../store/utils';
+import {
+  summaryTextBuilder,
+  reportTextBuilder,
+  statusIcon,
+  recentFailuresTextBuilder,
+} from '../store/utils';
 
 export default {
   name: 'GroupedTestReportsApp',
@@ -86,6 +91,12 @@ export default {
 
       return reportTextBuilder(name, summary);
     },
+    hasRecentFailures(summary) {
+      return this.glFeatures.testFailureHistory && summary?.recentlyFailed > 0;
+    },
+    recentFailuresText(summary) {
+      return recentFailuresTextBuilder(summary);
+    },
     getReportIcon(report) {
       return statusIcon(report.status);
     },
@@ -123,7 +134,7 @@ export default {
     class="mr-widget-section grouped-security-reports mr-report"
     @toggleEvent="handleToggleEvent"
   >
-    <template v-if="showViewFullReport" #actionButtons>
+    <template v-if="showViewFullReport" #action-buttons>
       <gl-button
         :href="testTabURL"
         target="_blank"
@@ -134,14 +145,22 @@ export default {
         {{ s__('ciReport|View full report') }}
       </gl-button>
     </template>
+    <template v-if="hasRecentFailures(summary)" #sub-heading>
+      {{ recentFailuresText(summary) }}
+    </template>
     <template #body>
       <div class="mr-widget-grouped-section report-block">
         <template v-for="(report, i) in reports">
-          <summary-row
-            :key="`summary-row-${i}`"
-            :summary="reportText(report)"
-            :status-icon="getReportIcon(report)"
-          />
+          <summary-row :key="`summary-row-${i}`" :status-icon="getReportIcon(report)">
+            <template #summary>
+              <div class="gl-display-inline-flex gl-flex-direction-column">
+                <div>{{ reportText(report) }}</div>
+                <div v-if="hasRecentFailures(report.summary)">
+                  {{ recentFailuresText(report.summary) }}
+                </div>
+              </div>
+            </template>
+          </summary-row>
           <issues-list
             v-if="shouldRenderIssuesList(report)"
             :key="`issues-list-${i}`"

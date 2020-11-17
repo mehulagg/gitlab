@@ -160,33 +160,6 @@ export default {
     Vue.set(state.dependencyScanning, 'hasError', true);
   },
 
-  // SECRET SCANNING
-  [types.SET_SECRET_SCANNING_DIFF_ENDPOINT](state, path) {
-    Vue.set(state.secretScanning.paths, 'diffEndpoint', path);
-  },
-
-  [types.REQUEST_SECRET_SCANNING_DIFF](state) {
-    Vue.set(state.secretScanning, 'isLoading', true);
-  },
-
-  [types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS](state, { diff, enrichData }) {
-    const { added, fixed, existing } = parseDiff(diff, enrichData);
-    const baseReportOutofDate = diff.base_report_out_of_date || false;
-    const hasBaseReport = Boolean(diff.base_report_created_at);
-
-    Vue.set(state.secretScanning, 'isLoading', false);
-    Vue.set(state.secretScanning, 'newIssues', added);
-    Vue.set(state.secretScanning, 'resolvedIssues', fixed);
-    Vue.set(state.secretScanning, 'allIssues', existing);
-    Vue.set(state.secretScanning, 'baseReportOutofDate', baseReportOutofDate);
-    Vue.set(state.secretScanning, 'hasBaseReport', hasBaseReport);
-  },
-
-  [types.RECEIVE_SECRET_SCANNING_DIFF_ERROR](state) {
-    Vue.set(state.secretScanning, 'isLoading', false);
-    Vue.set(state.secretScanning, 'hasError', true);
-  },
-
   [types.SET_ISSUE_MODAL_DATA](state, payload) {
     const { issue, status } = payload;
 
@@ -295,26 +268,6 @@ export default {
     const resolvedIssuesIndex = findIssueIndex(state.dast.resolvedIssues, issue);
     if (resolvedIssuesIndex !== -1) {
       state.dast.resolvedIssues.splice(resolvedIssuesIndex, 1, issue);
-    }
-  },
-
-  [types.UPDATE_SECRET_SCANNING_ISSUE](state, issue) {
-    // Find issue in the correct list and update it
-
-    const newIssuesIndex = findIssueIndex(state.secretScanning.newIssues, issue);
-    if (newIssuesIndex !== -1) {
-      state.secretScanning.newIssues.splice(newIssuesIndex, 1, issue);
-      return;
-    }
-
-    const resolvedIssuesIndex = findIssueIndex(state.secretScanning.resolvedIssues, issue);
-    if (resolvedIssuesIndex !== -1) {
-      state.secretScanning.resolvedIssues.splice(resolvedIssuesIndex, 1, issue);
-    }
-
-    const allIssuesIndex = findIssueIndex(state.secretScanning.allIssues, issue);
-    if (allIssuesIndex !== -1) {
-      state.secretScanning.allIssues.splice(allIssuesIndex, 1, issue);
     }
   },
 

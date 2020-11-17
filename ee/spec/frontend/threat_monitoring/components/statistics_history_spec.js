@@ -133,8 +133,8 @@ describe('StatisticsHistory component', () => {
               },
               template: `
                 <div>
-                  <slot name="tooltipTitle"></slot>
-                  <slot name="tooltipContent"></slot>
+                  <slot name="tooltip-title"></slot>
+                  <slot name="tooltip-content"></slot>
                 </div>`,
             },
           },
