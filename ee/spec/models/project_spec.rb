@@ -1336,7 +1336,6 @@ RSpec.describe Project do
     subject { project.disabled_services }
 
     where(:license_feature, :disabled_services) do
-      :jenkins_integration                | %w(jenkins)
       :github_project_service_integration | %w(github)
     end
 
