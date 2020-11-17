@@ -205,15 +205,12 @@ RSpec.describe VulnerabilitiesHelper do
 
       context 'when scan property is empty' do
         before do
-          allow_next_instance_of(VulnerabilityPresenter) do |presenter|
-            allow(presenter).to receive(:scan).and_return(nil)
-          end
+          vulnerability.finding.scan = nil
         end
 
-        it 'renders description using dedicated template' do
+        it 'renders description using dedicated template without raising error' do
           expect(ApplicationController).to receive(:render).with(template: 'vulnerabilities/jira_issue_description.md.erb', locals: { vulnerability: an_instance_of(VulnerabilityPresenter) })
-
-          subject
+          expect {subject}.not_to raise_error
         end
       end
     end
