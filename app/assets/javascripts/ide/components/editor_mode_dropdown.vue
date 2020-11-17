@@ -36,28 +36,28 @@ export default {
 </script>
 
 <template>
-    <gl-dropdown :text="__('Edit')">
-      <gl-dropdown-item
-        href="#"
-        :is-check-item="true"
-        :is-checked="viewer === $options.viewerTypes.mr"
-        @click.prevent="changeMode($options.viewerTypes.mr)"
-      >
-        <strong class="dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
-        <span class="dropdown-menu-inner-content">
-          {{ __('Compare changes with the merge request target branch') }}
-        </span>
-      </gl-dropdown-item>
-      <gl-dropdown-item
-        href="#"
-        :is-check-item="true"
-        :is-checked="viewer === $options.viewerTypes.mr"
-        @click.prevent="changeMode($options.viewerTypes.diff)"
-      >
-        <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
-        <span class="dropdown-menu-inner-content">
-          {{ __('Compare changes with the last commit') }}
-        </span>
-      </gl-dropdown-item>
-    </gl-dropdown>
+  <gl-dropdown :text="__('Edit')">
+    <gl-dropdown-item
+      href="#"
+      :is-check-item="true"
+      :is-checked="viewer === $options.viewerTypes.mr"
+      @click.prevent="changeMode($options.viewerTypes.mr)"
+    >
+      <strong class="dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
+      <span class="dropdown-menu-inner-content">
+        {{ __('Compare changes with the merge request target branch') }}
+      </span>
+    </gl-dropdown-item>
+    <gl-dropdown-item
+      href="#"
+      :is-check-item="true"
+      :is-checked="viewer === $options.viewerTypes.mr"
+      @click.prevent="changeMode($options.viewerTypes.diff)"
+    >
+      <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
+      <span class="dropdown-menu-inner-content">
+        {{ __('Compare changes with the last commit') }}
+      </span>
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>
