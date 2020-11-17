@@ -15,6 +15,7 @@ import DropdownButton from './dropdown_button.vue';
 import DropdownContents from './dropdown_contents.vue';
 
 import { DropdownVariant } from './constants';
+import { toggleDropdownContents } from './store/actions';
 
 Vue.use(Vuex);
 
@@ -105,6 +106,11 @@ export default {
       required: false,
       default: __('Manage group labels'),
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -130,6 +136,11 @@ export default {
     },
     showDropdownContents(showDropdownContents) {
       this.setContentIsOnViewport(showDropdownContents);
+    },
+    isEditing(newVal) {
+      if (newVal) {
+        this.toggleDropdownContents();
+      }
     },
   },
   mounted() {
