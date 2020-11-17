@@ -9,6 +9,7 @@ import {
   GlInputGroupText,
   GlModal,
   GlSkeletonLoader,
+  GlTruncate,
 } from '@gitlab/ui';
 import { omit } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
@@ -40,6 +41,7 @@ export default {
     GlInputGroupText,
     GlModal,
     GlSkeletonLoader,
+    GlTruncate,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -231,11 +233,12 @@ export default {
           category="secondary"
           size="small"
           icon="download"
+          class="gl-display-inline-flex gl-max-w-full"
           data-testid="download-dast-text-file-validation-button"
           :aria-label="s__('DastSiteValidation|Download validation text file')"
           @click="downloadTextFile()"
         >
-          {{ textFileName }}
+          <gl-truncate :text="textFileName" position="middle" />
         </gl-button>
       </gl-form-group>
       <gl-form-group
