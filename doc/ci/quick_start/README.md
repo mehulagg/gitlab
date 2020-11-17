@@ -7,7 +7,7 @@ type: reference
 
 # Get started with GitLab CI/CD
 
-Use this document should to get started with
+Use this document to get started with
 GitLab [continuous integration](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/).
 
 Before you start, make sure you have:
