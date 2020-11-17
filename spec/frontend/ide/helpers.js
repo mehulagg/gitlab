@@ -43,3 +43,9 @@ export const createTriggerRenamePayload = (path, newPath) => ({
 
 export const createTriggerRenameAction = (path, newPath) =>
   createTriggerChangeAction(createTriggerRenamePayload(path, newPath));
+
+export const mockAsyncImports = paths => {
+  paths.forEach(path => {
+    jest.mock(path, () => () => Promise.resolve());
+  });
+};
