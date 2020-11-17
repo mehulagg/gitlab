@@ -28,11 +28,6 @@ export default {
       required: false,
       default: '',
     },
-    sourceBranch: {
-      type: String,
-      required: false,
-      default: '',
-    },
     sourceProjectPath: {
       type: String,
       required: false,
@@ -45,15 +40,18 @@ export default {
     },
   },
   computed: {
+    defaultProjectUrl() {
+      return window?.gl?.mrWidgetData?.merge_request_cached_default_url;
+    },
     mergeInfo1() {
       return this.isFork
-        ? `git fetch "${this.sourceProject}" ${this.sourceBranch}\ngit checkout -b "${this.sourceProjectPath}-${this.sourceBranch}" FETCH_HEAD`
+        ? `git fetch "${this.defaultProjectUrl}" ${this.sourceBranch}\ngit checkout -b "${this.sourceProjectPath}-${this.sourceBranch}" FETCH_HEAD`
         : `git fetch origin\ngit checkout -b "${this.sourceBranch}" "origin/${this.sourceBranch}"`;
     },
     mergeInfo2() {
       return this.isFork
-        ? `git fetch @merge_request.source_project @merge_request.source_branch git checkout -b @merge_request.source_project_path @merge_request.source_branch FETCH_HEAD`
-        : '';
+        ? `git fetch origin\ngit checkout "${this.targetBranch}"\ngit merge --no-ff "${this.sourceProjectPath}-${this.sourceBranch}"`
+        : `git fetch origin\ngit checkout "${this.targetBranch}"\ngit merge --no-ff " ${this.sourceBranch}"`;
     },
     mergeInfo3() {
       return this.canMerge
@@ -70,6 +68,7 @@ export default {
     modal-id="modal_merge_info"
     :title="__('Check out, review, and merge locally')"
     no-fade
+    hide-footer
   >
     <div class="gl-display-block">
       <p>
@@ -83,7 +82,11 @@ export default {
       <gl-markdown class="gl-overflow-scroll w-100">
         <pre>{{ mergeInfo1 }}</pre>
       </gl-markdown>
-      <clipboard-button :text="mergeInfo1" :title="__('Copy commands')" />
+      <clipboard-button
+        :text="mergeInfo1"
+        :title="__('Copy commands')"
+        class="gl-shadow-none! gl-bg-transparent!"
+      />
     </div>
 
     <div class="gl-display-block">
@@ -104,12 +107,13 @@ export default {
     </div>
     <div class="gl-display-flex">
       <gl-markdown class="gl-overflow-scroll w-100">
-        <pre>
-                {{ mergeInfo2 }}
-            </pre
-        >
+        <pre>{{ mergeInfo2 }}</pre>
       </gl-markdown>
-      <clipboard-button :text="mergeInfo2" :title="__('Copy commands')" />
+      <clipboard-button
+        :text="mergeInfo2"
+        :title="__('Copy commands')"
+        class="gl-shadow-none! gl-bg-transparent!"
+      />
     </div>
     <div class="gl-display-block">
       <p>
@@ -121,12 +125,13 @@ export default {
     </div>
     <div class="gl-display-flex">
       <gl-markdown class="gl-overflow-scroll w-100">
-        <pre>
-                {{ mergeInfo3 }}
-            </pre
-        >
+        <pre>{{ mergeInfo3 }}</pre>
       </gl-markdown>
-      <clipboard-button :text="mergeInfo3" :title="__('Copy commands')" />
+      <clipboard-button
+        :text="mergeInfo3"
+        :title="__('Copy commands')"
+        class="gl-shadow-none! gl-bg-transparent!"
+      />
     </div>
     <div class="gl-display-block">
       <p>

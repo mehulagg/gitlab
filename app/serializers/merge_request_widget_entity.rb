@@ -40,6 +40,10 @@ class MergeRequestWidgetEntity < Grape::Entity
     cached_widget_project_json_merge_request_path(merge_request.target_project, merge_request, format: :json)
   end
 
+  expose :merge_request_cached_default_url do |merge_request|
+    default_url_to_repo(merge_request.source_project)
+  end
+
   expose :commit_change_content_path do |merge_request|
     commit_change_content_project_merge_request_path(merge_request.project, merge_request)
   end

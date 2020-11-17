@@ -2,7 +2,7 @@ import { GlModal, GlMarkdown, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MrWidgetHowToMergeModal from '~/vue_merge_request_widget/components/mr_widget_how_to_merge_modal.vue';
 
-describe('AlertIntegrationsList', () => {
+describe('MRWidgetHowToMerge', () => {
   let wrapper;
 
   function mountComponent({ data = {}, props = {} } = {}) {
