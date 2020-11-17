@@ -372,6 +372,7 @@ rspec:coverage:
     expire_in: 31d
     paths:
       - coverage/index.html
+      - coverage/coverage.xml
       - coverage/assets/
       - tmp/memory_test/
     reports:
