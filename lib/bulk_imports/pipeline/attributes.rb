@@ -6,6 +6,30 @@ module BulkImports
       extend ActiveSupport::Concern
       include Gitlab::ClassAttributes
 
+      included do
+        private
+
+        def extractors
+          @extractors ||= self.class.extractors.map(&method(:instantiate))
+        end
+
+        def transformers
+          @transformers ||= self.class.transformers.map(&method(:instantiate))
+        end
+
+        def loaders
+          @loaders ||= self.class.loaders.map(&method(:instantiate))
+        end
+
+        def pipeline_name
+          @pipeline ||= self.class.name
+        end
+
+        def instantiate(class_config)
+          class_config[:klass].new(class_config[:options])
+        end
+      end
+
       class_methods do
         def extractor(klass, options = nil)
           add_attribute(:extractors, klass, options)
