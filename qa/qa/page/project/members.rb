@@ -40,9 +40,15 @@ module QA
           click_element :invite_group_button
         end
 
-        def add_member(username)
+        def add_member(username, access_level = false)
           click_element :member_select_field
           search_and_select username
+
+          if access_level
+            find('#access_level').click
+            find("option[value='40']").click
+          end
+
           click_element :invite_member_button
         end
 

@@ -107,7 +107,7 @@ export default {
         <gl-icon name="question-o" css-classes="link-highlight" />
       </a>
     </div>
-    <div v-if="isApplied" class="badge badge-success">{{ __('Applied') }}</div>
+    <div v-if="isApplied" class="badge badge-success" data-qa-selector="success_badge">{{ __('Applied') }}</div>
     <div v-else-if="isApplying" class="d-flex align-items-center text-secondary">
       <gl-loading-icon class="d-flex-center mr-2" />
       <span>{{ applyingSuggestionsMessage }}</span>
@@ -146,6 +146,7 @@ export default {
         <gl-button
           v-if="isLoggedIn"
           class="btn-inverted js-apply-btn btn-grouped"
+          data-qa-selector="apply_suggestion_button"
           :disabled="isDisableButton"
           variant="success"
           @click="applySuggestion"

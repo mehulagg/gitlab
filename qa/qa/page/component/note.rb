@@ -93,6 +93,10 @@ module QA
           click_element :reply_comment_button
         end
 
+        def insert_comment(text)
+          find_element(:reply_field).send_keys(text)
+        end
+
         def expand_replies
           click_element :expand_replies_button
         end

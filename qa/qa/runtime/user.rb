@@ -18,7 +18,8 @@ module QA
       end
 
       def default_password
-        '5iveL!fe'
+        # '5iveL!fe'
+        'F!veL!fe'
       end
 
       def username

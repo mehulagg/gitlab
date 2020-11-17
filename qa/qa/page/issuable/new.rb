@@ -52,6 +52,19 @@ module QA
         def assign_to_me
           click_element :assign_to_me_link
         end
+
+        def assign_to_user(assignee)
+          find('button[data-dropdown-header="Assignee"]').click
+          wait_for_dropdown_to_open
+
+          find("a", text: assignee, exact: true).click
+        end
+
+        def wait_for_dropdown_to_open
+          Support::WaitForRequests.wait_for_requests
+
+          has_css?('.dropdown-menu', wait: 2)
+        end
       end
     end
   end

@@ -303,6 +303,7 @@ export default {
               size="medium"
               category="primary"
               class="qa-merge-button accept-merge-request"
+              data-qa-selector="accept_merge_request_button"
               :variant="mergeButtonVariant"
               :disabled="isMergeButtonDisabled"
               :loading="isMakingRequest"

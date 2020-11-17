@@ -76,6 +76,10 @@ module QA
           element :download_source_code_button
         end
 
+        view 'app/views/projects/commits/_commit.html.haml' do
+          element :commit_content
+        end
+
         def wait_for_viewers_to_load
           has_no_element?(:spinner, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
         end

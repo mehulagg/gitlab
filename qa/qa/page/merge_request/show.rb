@@ -64,6 +64,10 @@ module QA
           element :new_diff_line
         end
 
+        view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
+          element :diff_comment
+        end
+
         view 'app/views/projects/merge_requests/_mr_title.html.haml' do
           element :edit_button
         end
@@ -76,6 +80,18 @@ module QA
           element :review_bar
         end
 
+        view 'app/assets/javascripts/vue_shared/components/markdown/header.vue' do
+          element :insert_suggestion_button
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/markdown/suggestion_diff_header.vue' do
+          element :apply_suggestion_button
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/markdown/suggestion_diff_header.vue' do
+          element :success_badge
+        end
+
         view 'app/assets/javascripts/notes/components/note_form.vue' do
           element :unresolve_review_discussion_checkbox
           element :resolve_review_discussion_checkbox
@@ -85,6 +101,10 @@ module QA
 
         view 'app/assets/javascripts/batch_comments/components/preview_dropdown.vue' do
           element :review_preview_toggle
+        end
+
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/ready_to_merge.vue' do
+          element :accept_merge_request_button
         end
 
         def start_review
@@ -105,6 +125,37 @@ module QA
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
           has_no_element?(:comment_now_button)
+        end
+
+        def click_line_to_comment(text)
+          find('.line_content', text: text).click
+        end
+
+        def comment_on_line
+          click_element(:diff_comment)
+        end
+
+        def click_insert_suggestion_button
+          click_element(:insert_suggestion_button)
+        end
+
+        def insert_suggestion(text)
+          insert_comment(text)
+        end
+
+        def click_apply_suggestion_button
+          click_element(:apply_suggestion_button)
+        end
+
+        def has_success_badge?
+          has_element?(:success_badge)
+        end
+
+        def accept_merge_request
+          click_element(:accept_merge_request_button)
+
+          # After clicking wait for the element to disappear
+          has_no_element?(:accept_merge_request_button)
         end
 
         def version_dropdown_content

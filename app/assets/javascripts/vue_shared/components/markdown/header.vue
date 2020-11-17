@@ -173,6 +173,7 @@ export default {
               :tag-content="lineContent"
               icon="doc-code"
               class="js-suggestion-btn"
+              data-qa-selector="insert_suggestion_button"
               @click="handleSuggestDismissed"
             />
             <gl-popover

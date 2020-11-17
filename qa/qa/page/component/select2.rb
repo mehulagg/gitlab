@@ -23,6 +23,7 @@ module QA
         end
 
         def search_item(item_text)
+          has_css?('.select2-active', wait: 5)
           find('.select2-input').set(item_text)
 
           wait_for_search_to_complete
