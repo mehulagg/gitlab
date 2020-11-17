@@ -4,8 +4,10 @@ module SortingPreference
   include SortingHelper
   include CookiesHelper
 
-  def set_sort_order
-    set_sort_order_from_user_preference || set_sort_order_from_cookie || params[:sort] || default_sort_order
+  def set_sort_order(field = nil, default_order = nil)
+    @sorting_field = field || sorting_field
+    @default_sort_order = default_order || default_sort_order
+    set_sort_order_from_user_preference || set_sort_order_from_cookie || params[:sort] || @default_sort_order
   end
 
   # Implement sorting_field method on controllers
@@ -31,17 +33,17 @@ module SortingPreference
 
   def set_sort_order_from_user_preference
     return unless current_user
-    return unless sorting_field
+    return unless @sorting_field
 
     user_preference = current_user.user_preference
 
     sort_param = params[:sort]
-    sort_param ||= user_preference[sorting_field]
+    sort_param ||= user_preference[@sorting_field]
 
     return sort_param if Gitlab::Database.read_only?
 
-    if user_preference[sorting_field] != sort_param
-      user_preference.update(sorting_field => sort_param)
+    if user_preference[@sorting_field] != sort_param
+      user_preference.update(@sorting_field => sort_param)
     end
 
     sort_param
@@ -64,7 +66,7 @@ module SortingPreference
   # :merge_requests_sort => 'mergerequest_sort'
   # :issues_sort => 'issue_sort'
   def remember_sorting_key
-    @remember_sorting_key ||= sorting_field
+    @remember_sorting_key ||= @sorting_field
       .to_s
       .split('_')[0..-2]
       .map(&:singularize)

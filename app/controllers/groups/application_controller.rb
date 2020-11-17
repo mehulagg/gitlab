@@ -3,6 +3,8 @@
 class Groups::ApplicationController < ApplicationController
   include RoutableActions
   include ControllerWithCrossProjectAccessCheck
+  include SortingHelper
+  include SortingPreference
 
   layout 'group'
 
@@ -13,6 +15,7 @@ class Groups::ApplicationController < ApplicationController
   private
 
   def group
+    @group_projects_sort = set_sort_order(Project::SORTING_PREFERENCE_FIELD, sort_value_name)
     @group ||= find_routable!(Group, params[:group_id] || params[:id])
   end
 
