@@ -8,6 +8,7 @@ module Groups
     feature_category :subgroups
 
     def index
+      params[:sort] ||= @group_projects_sort
       parent = if params[:parent_id].present?
                  GroupFinder.new(current_user).execute(id: params[:parent_id])
                else
