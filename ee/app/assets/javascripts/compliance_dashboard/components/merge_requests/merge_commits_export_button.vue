@@ -76,7 +76,7 @@ export default {
         </gl-button>
       </template>
       <gl-dropdown-form>
-        <gl-form :action="mergeCommitsCsvExportPath" method="GET">
+        <gl-form :action="mergeCommitsCsvExportPath" class="gl-px-3" method="GET">
           <gl-form-group
             :label="$options.strings.mergeCommitInputLabel"
             :invalid-feedback="$options.strings.mergeCommitInvalidMessage"
