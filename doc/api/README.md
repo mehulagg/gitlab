@@ -72,9 +72,11 @@ Only API version v4 is available. Version v3 was removed in
 
 API requests should be prefixed with both `api` and the API version. The API
 version is defined in [`lib/api.rb`](https://gitlab.com/gitlab-org/gitlab/tree/master/lib/api/api.rb).
-For example, the root of the v4 API is at `/api/v4`.
+For example, the root of the v4 API is at `/api/v4`. The following sections illustrate different uses:
 
-Example of a valid API request using cURL:
+### Valid API request
+
+If you have a GitLab instance at `gitlab.example.com`:
 
 ```shell
 curl "https://gitlab.example.com/api/v4/projects"
@@ -83,7 +85,9 @@ curl "https://gitlab.example.com/api/v4/projects"
 The API uses JSON to serialize data. You don't need to specify `.json` at the
 end of an API URL.
 
-Example with option `--include` using cURL to expose the HTTP response headers:
+### API request to expose HTTP response headers
+
+If you want to expose HTTP response headers, use the `--include` option:
 
 ```shell
 curl --include "https://gitlab.example.com/api/v4/projects"
@@ -91,16 +95,18 @@ HTTP/2 200
 ...
 ```
 
-Useful when investigating an unexpected response.
+This can help you investigate an unexpected response.
 
-Example with option `--fail` using cURL to impact the command exit code:
+### API Request that includes the exit code
+
+If you want to expose the HTTP exit code, include the `--fail` option:
 
 ```shell script
 curl --fail "https://gitlab.example.com/api/v4/does-not-exist"
 curl: (22) The requested URL returned error: 404
 ```
 
-Useful when using the exit code to determine success or failure.
+The HTTP exit code can help you diagnose the success or failure of your REST call.
   
 ## Authentication
 
