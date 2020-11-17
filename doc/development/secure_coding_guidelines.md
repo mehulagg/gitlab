@@ -269,7 +269,7 @@ When user submitted data is included in responses to end users, which is just ab
 
 ### Mitigation
 
-In most situations, a two-step solution can be utilized: input validation and output encoding in the appropriate context.
+In most situations, a two-step solution can be used: input validation and output encoding in the appropriate context.
 
 #### Input validation
 
