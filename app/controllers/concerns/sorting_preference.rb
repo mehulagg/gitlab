@@ -5,9 +5,12 @@ module SortingPreference
   include CookiesHelper
 
   def set_sort_order(field = nil, default_order = nil)
-    @sorting_field = field || sorting_field
-    @default_sort_order = default_order || default_sort_order
-    set_sort_order_from_user_preference || set_sort_order_from_cookie || params[:sort] || @default_sort_order
+    sort_field = field || sorting_field
+    set_sort_order_from_user_preference(sort_field) ||
+      set_sort_order_from_cookie(sort_field) ||
+      params[:sort] ||
+      default_order ||
+      default_sort_order
   end
 
   # Implement sorting_field method on controllers
@@ -31,25 +34,25 @@ module SortingPreference
 
   private
 
-  def set_sort_order_from_user_preference
+  def set_sort_order_from_user_preference(sort_field)
     return unless current_user
-    return unless @sorting_field
+    return unless sort_field
 
     user_preference = current_user.user_preference
 
     sort_param = params[:sort]
-    sort_param ||= user_preference[@sorting_field]
+    sort_param ||= user_preference[sort_field]
 
     return sort_param if Gitlab::Database.read_only?
 
-    if user_preference[@sorting_field] != sort_param
-      user_preference.update(@sorting_field => sort_param)
+    if user_preference[sort_field] != sort_param
+      user_preference.update(sort_field => sort_param)
     end
 
     sort_param
   end
 
-  def set_sort_order_from_cookie
+  def set_sort_order_from_cookie(sort_field)
     return unless legacy_sort_cookie_name
 
     sort_param = params[:sort] if params[:sort].present?
@@ -58,15 +61,15 @@ module SortingPreference
     sort_param ||= cookies[remember_sorting_key]
 
     sort_value = update_cookie_value(sort_param)
-    set_secure_cookie(remember_sorting_key, sort_value)
+    set_secure_cookie(remember_sorting_key(sort_field), sort_value)
     sort_value
   end
 
   # Convert sorting_field to legacy cookie name for backwards compatibility
   # :merge_requests_sort => 'mergerequest_sort'
   # :issues_sort => 'issue_sort'
-  def remember_sorting_key
-    @remember_sorting_key ||= @sorting_field
+  def remember_sorting_key(sort_field)
+    @remember_sorting_key ||= sort_field
       .to_s
       .split('_')[0..-2]
       .map(&:singularize)

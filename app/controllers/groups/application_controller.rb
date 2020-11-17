@@ -15,7 +15,10 @@ class Groups::ApplicationController < ApplicationController
   private
 
   def group
-    @group_projects_sort = set_sort_order(Project::SORTING_PREFERENCE_FIELD, sort_value_name)
+    if action_name == "details" || action_name == "show"
+      @group_projects_sort = set_sort_order(Project::SORTING_PREFERENCE_FIELD, sort_value_name)
+    end
+
     @group ||= find_routable!(Group, params[:group_id] || params[:id])
   end
 
