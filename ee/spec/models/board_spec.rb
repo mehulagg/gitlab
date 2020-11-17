@@ -9,6 +9,7 @@ RSpec.describe Board do
 
   describe 'relationships' do
     it { is_expected.to belong_to(:milestone) }
+    it { is_expected.to belong_to(:iteration) }
     it { is_expected.to have_one(:board_assignee) }
     it { is_expected.to have_one(:assignee).through(:board_assignee) }
     it { is_expected.to have_many(:board_labels) }
@@ -75,6 +76,55 @@ RSpec.describe Board do
       board.milestone_id = milestone.id
 
       expect(board.milestone).to be_nil
+    end
+  end
+
+  describe 'iteration' do
+    let_it_be(:group) { create(:group) }
+
+    it 'returns nil when the feature is not available' do
+      stub_licensed_features(scoped_issue_board: false)
+      iteration = create(:iteration, group: group)
+      board.iteration_id = iteration.id
+
+      expect(board.iteration).to be_nil
+    end
+
+    context 'when the feature is available' do
+      before do
+        stub_licensed_features(scoped_issue_board: true)
+      end
+
+      it 'returns Iteratio::None, when iteration_id is None.id' do
+        board.iteration_id = Iteration::None.id
+
+        expect(board.iteration).to eq Iteration::None
+      end
+
+      it 'returns Iteration::Any, when iteration_id is Any.id' do
+        board.iteration_id = Iteration::Any.id
+
+        expect(board.iteration).to eq Iteration::Any
+      end
+
+      it 'returns Iteration::Current, when iteration_id is Current.id' do
+        board.iteration_id = Iteration::Current.id
+
+        expect(board.iteration).to eq Iteration::Current
+      end
+
+      it 'returns iteration for valid iteration id' do
+        iteration = create(:iteration)
+        board.iteration_id = iteration.id
+
+        expect(board.iteration).to eq iteration
+      end
+
+      it 'returns nil for invalid milestone id' do
+        board.iteration_id = -2
+
+        expect(board.iteration).to be_nil
+      end
     end
   end
 

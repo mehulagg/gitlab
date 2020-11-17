@@ -4203,6 +4203,7 @@ Iteration ID wildcard values.
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | An iteration is assigned |
+| `CURRENT` | Current iteration |
 | `NONE` | No iteration is assigned |
 
 ### JobArtifactFileType
