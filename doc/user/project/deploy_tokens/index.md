@@ -62,7 +62,7 @@ following table along with GitLab version it was introduced in:
 | `write_package_registry` | Allows write access to the package registry. | 13.0 |
 
 NOTE:Note
-You cannot use a deploy token to download your job's artifacts](./pipelines/job_artifacts.md#downloading-the-latest-artifacts). The issue [gitlab-#282535](https://gitlab.com/gitlab-org/gitlab/-/issues/282535) will grant read and write access for artifacts. 
+You cannot use a deploy token to download your job's artifacts](./pipelines/job_artifacts.md#downloading-the-latest-artifacts). Issue [#282535](https://gitlab.com/gitlab-org/gitlab/-/issues/282535) will grant read and write access for artifacts. 
 
 ## Deploy token custom username
 
