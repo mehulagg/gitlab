@@ -12,7 +12,8 @@ module ObjectStorage
         secret_access_key: object_storage_credentials[:aws_secret_access_key],
         region: object_storage_credentials[:region],
         force_path_style: object_storage_credentials[:path_style],
-        endpoint: object_storage_credentials[:endpoint]
+        endpoint: object_storage_credentials[:endpoint],
+        stub_responses: Rails.env.test?
       }.compact
     end
 
