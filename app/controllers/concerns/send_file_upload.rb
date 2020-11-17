@@ -7,11 +7,8 @@ module SendFileUpload
     if attachment
       response_disposition = ActionDispatch::Http::ContentDisposition.format(disposition: disposition, filename: attachment)
 
-      # Response-Content-Type will not override an existing Content-Type in
-      # Google Cloud Storage, so the metadata needs to be cleared on GCS for
-      # this to work. However, this override works with AWS.
-      redirect_params[:query] = { "response-content-disposition" => response_disposition,
-                                  "response-content-type" => content_type }
+      redirect_params = content_type_params(file_upload, response_disposition, content_type)
+
       # By default, Rails will send uploads with an extension of .js with a
       # content-type of text/javascript, which will trigger Rails'
       # cross-origin JavaScript protection.
@@ -51,6 +48,20 @@ module SendFileUpload
   end
 
   private
+
+  # Response-Content-Type will not override an existing Content-Type in
+  # Google Cloud Storage, so the metadata needs to be cleared on GCS for
+  # this to work. However, this override works with AWS.
+  def content_type_params(file_upload, response_disposition, content_type)
+    params = {
+      "response-content-disposition" => response_disposition,
+      "response-content-type" => content_type
+    }
+
+    return { query: params } unless file_upload&.file.is_a?(CarrierWave::Storage::AWSFile)
+
+    params.transform_keys { |header| header.tr('-', '_').to_sym }
+  end
 
   def image_scaling_request?(file_upload)
     avatar_safe_for_scaling?(file_upload) &&
