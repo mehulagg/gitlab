@@ -1,6 +1,7 @@
 <script>
 import { GlCard, GlIcon, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { fetchPolicies } from '~/lib/graphql';
 import query from '../queries/iteration_issues_summary.query.graphql';
 
 export default {
@@ -13,6 +14,7 @@ export default {
   },
   apollo: {
     issues: {
+      fetchPolicy: fetchPolicies.NO_CACHE,
       query,
       variables() {
         return this.queryVariables;
@@ -74,7 +76,7 @@ export default {
   },
   methods: {
     percent(val) {
-      if (this.issues.total === 0) return 0;
+      if (!this.issues.total) return 0;
       return ((val / this.issues.total) * 100).toFixed(0);
     },
   },
