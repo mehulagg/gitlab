@@ -7,7 +7,7 @@ type: reference
 
 # Get started with GitLab CI/CD
 
-This document should help you get started with
+Use this document should to get started with
 GitLab [continuous integration](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/).
 
 Before you start, make sure you have:
@@ -25,16 +25,16 @@ If you are migrating from another CI/CD tool, view this documentation:
 
 To use GitLab CI/CD:
 
-1. [Choose a runner to run your jobs](#choose-or-register-a-runner).
+1. [Ensure you have runners available](#ensure-you-have-runners-available) to run your jobs.
    If you don't have a runner, [install GitLab Runner](https://docs.gitlab.com/runner/install/)
    and [register a runner](https://docs.gitlab.com/runner/register/) for your instance, project, or group.
 1. [Create a `.gitlab-ci.yml` file](#create-a-gitlab-ciyml-file)
    at the root of your repository. This file tells the runner what to do.
 
 When you commit the file to your repository, the runner runs your jobs.
-The jobs [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
+The job results [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
 
-### Choose or register a runner
+### Ensure you have runners available
 
 In GitLab, runners are agents that run your CI/CD jobs.
 
@@ -46,19 +46,15 @@ To view runners:
 
 - Go to **Settings > CI/CD** and expand **Runners**.
 
-You can use any of the runners that are listed there.
-
-Under each runner is a list of tags in white text on a blue background.
-When you configure CI/CD, you can use these tags to specify that a specific runner should run your job.
-
-![Runner tags](img/runner_tags_v13_6.png)
-
-These tags are not the same as tags on Docker images. Instead, if you have
-a Windows runner and a macOS runner, for example, you can run specific jobs on each.
+As long as you have at least one runner that's active, with a green circle next to it,
+you have a runner available to process your job.
 
 If no runners are listed on the **Runners** page in the UI, you or an administrator
 must [install GitLab Runner](https://docs.gitlab.com/runner/install/) and
 [register individual runners](https://docs.gitlab.com/runner/register/).
+
+If you are testing CI/CD, you can install GitLab Runner and register runners on your local machine.
+When your CI/CD jobs run, they will run on your local machine.
 
 ### Create a `.gitlab-ci.yml` file
 
@@ -75,14 +71,6 @@ any branch except `master`. Then, when you check in to `master`, you want
 to run the same suite, but also publish your application.
 
 All of this is defined in the `.gitlab-ci.yml` file.
-
-A `.gitlab-ci.yml` file commonly has three [stages](../yaml/README.md#stages):
-
-- `build`
-- `test`
-- `deploy`
-
-You do not need to use all three stages; stages with no jobs are ignored.
 
 To create a `.gitlab-ci.yml` file:
 
@@ -115,39 +103,34 @@ To create a `.gitlab-ci.yml` file:
 
 1. Click **Commit changes**.
 
-If you want to use a runner that has a `tag` of `windows`, you would specify it for the job:
+The pipeline starts when the commit is successful.
 
-```yaml
-test:
-  stage: test
-  tags:
-    - windows
-  script:
-    - echo Hello, $GITLAB_USER_LOGIN!
-```
+#### `.gitlab-ci.yml` tips
 
-If you want the runner to use a Docker image to run the jobs, edit the `.gitlab-ci.yml` file to include:
+- If you want the runner to use a Docker image to run the jobs, edit the `.gitlab-ci.yml` file to include:
 
-```yaml
-image: ruby:2.7.2
-```
+  ```yaml
+  image: ruby:2.7.2
+  ```
 
-This command tells the runner to use a Ruby image from Docker Hub.
+  This command tells the runner to use a Ruby image from Docker Hub.
 
-To validate your `.gitlab-ci.yml` file, use the
-[CI Lint tool](../lint.md), which is available in every project.
+- To validate your `.gitlab-ci.yml` file, use the
+  [CI Lint tool](../lint.md), which is available in every project.
 
-You can also use [CI/CD configuration visualization](../yaml/visualization.md) to
-view a graphical representation of your `.gitlab-ci.yml` file.
+- You can also use [CI/CD configuration visualization](../yaml/visualization.md) to
+  view a graphical representation of your `.gitlab-ci.yml` file.
 
-For the complete `.gitlab-ci.yml` syntax, see
-[the `.gitlab-ci.yml` reference topic](../yaml/README.md).
+- For the complete `.gitlab-ci.yml` syntax, see
+  [the `.gitlab-ci.yml` reference topic](../yaml/README.md).
 
-A [Ruby on Rails example](#ruby-on-rails-example) is also included below.
+- A [Ruby on Rails example](#ruby-on-rails-example) is also included below.
 
 ### View the status of your pipeline and jobs
 
-When you committed your changes, a pipeline started. To view your pipeline, go **CI/CD > Pipelines**.
+When you committed your changes, a pipeline started. To view your pipeline:
+
+- Go **CI/CD > Pipelines**.
 
 If you used the earlier sample code, a pipeline with two stages should be displayed:
 
@@ -169,14 +152,6 @@ You can also view the pipeline by going to **Repository > Commits**.
 Or view each individual job by going to **CI/CD > Jobs**.
 
 If the job status is `stuck`, a runner is probably not configured for the project.
-
-## Additional resources
-
-View a list of [examples](../examples/README.md) that show how to use
-various languages with GitLab CI/CD.
-
-For help making your new pipelines faster and more efficient, see the
-[pipeline efficiency documentation](../pipelines/pipeline_efficiency.md).
 
 ## Ruby on Rails example
 
