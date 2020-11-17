@@ -214,7 +214,7 @@ describe('User Popover Component', () => {
 
       expect(findAvailabilityStatus().exists()).toBe(true);
       expect(wrapper.text()).toContain(user.name);
-      expect(wrapper.html()).toContain('(Busy)');
+      expect(wrapper.text()).toContain('(Busy)');
     });
 
     it('should hide the busy status for any other status', () => {
@@ -225,7 +225,7 @@ describe('User Popover Component', () => {
 
       createWrapper({ user });
 
-      expect(findAvailabilityStatus().exists()).toBe(false);
+      expect(wrapper.text()).not.toContain('(Busy)');
     });
   });
 
