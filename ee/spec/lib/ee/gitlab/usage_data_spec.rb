@@ -29,8 +29,8 @@ RSpec.describe Gitlab::UsageData do
       create(:ci_build, name: 'sast', pipeline: pipeline)
       create(:ci_build, name: 'secret_detection', pipeline: pipeline)
       create(:ci_build, name: 'coverage_fuzzing', pipeline: pipeline)
-      create(:ci_build, name: 'api_fuzzing', pipeline: pipeline)
-      create(:ci_build, name: 'api_fuzzing_dnd', pipeline: pipeline)
+      create(:ci_build, name: 'apifuzzer_fuzz', pipeline: pipeline)
+      create(:ci_build, name: 'apifuzzer_fuzz_dnd', pipeline: pipeline)
       create(:ci_pipeline, source: :ondemand_dast_scan, project: projects[0])
 
       create(:prometheus_alert, project: projects[0])
@@ -524,8 +524,8 @@ RSpec.describe Gitlab::UsageData do
 
     before do
       for_defined_days_back do
-        create(:ci_build, name: 'api_fuzzing', user: user)
-        create(:ci_build, name: 'api_fuzzing_dnd', user: user)
+        create(:ci_build, name: 'apifuzzer_fuzz', user: user)
+        create(:ci_build, name: 'apifuzzer_fuzz_dnd', user: user)
         create(:ci_build, name: 'container_scanning', user: user)
         create(:ci_build, name: 'coverage_fuzzing', user: user)
         create(:ci_build, name: 'dast', user: user)

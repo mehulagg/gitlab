@@ -37,10 +37,10 @@ module EE
         coverage_fuzzing: {
           name: :coverage_fuzzing_jobs
         },
-        api_fuzzing: {
+        apifuzzer_fuzz: {
           name: :api_fuzzing_jobs
         },
-        api_fuzzing_dnd: {
+        apifuzzer_fuzz_dnd: {
           name: :api_fuzzing_dnd_jobs
         }
       }.freeze
