@@ -756,7 +756,9 @@ module Gitlab
         date_range = { date_from: time_period[:created_at].first, date_to: time_period[:created_at].last }
 
         event_monthly_active_users(date_range)
-          .merge!(ide_monthly_active_users(date_range))
+          .merge!(ide_monthly_active_users(date_range)).tap do |active_monthly|
+            active_monthly[:action_monthly_active_users_snippets_show] = redis_usage_data { Gitlab::UsageDataCounters::TrackUniqueEvents.count_unique_events(event_action: 'i_snippets_show', **date_range) }
+          end
       end
 
       private

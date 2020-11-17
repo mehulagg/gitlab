@@ -22,6 +22,7 @@ module RedisTracking
       conditions = [:trackable_request?, *custom_conditions]
 
       after_action only: controller_actions, if: conditions do
+        binding.pry
         track_unique_redis_hll_event(name, feature, feature_default_enabled)
       end
     end
@@ -30,6 +31,7 @@ module RedisTracking
   private
 
   def track_unique_redis_hll_event(event_name, feature, feature_default_enabled)
+    binding.pry
     return unless metric_feature_enabled?(feature, feature_default_enabled)
     return unless visitor_id
 

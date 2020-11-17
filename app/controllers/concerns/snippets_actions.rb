@@ -9,10 +9,13 @@ module SnippetsActions
   include Gitlab::NoteableMetadata
   include Snippets::SendBlob
   include SnippetsSort
+  include RedisTracking
 
   included do
     skip_before_action :verify_authenticity_token,
       if: -> { action_name == 'show' && js_request? }
+
+    track_redis_hll_event :show, name: 'i_snippets_show', feature: :track_editor_snippets_show, feature_default_enabled: true
 
     respond_to :html
   end
@@ -47,6 +50,7 @@ module SnippetsActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def show
+    # binding.pry
     respond_to do |format|
       format.html do
         @note = Note.new(noteable: @snippet, project: @snippet.project)
