@@ -6,6 +6,9 @@ module RuboCop
       class LastKeywordArgument < Cop
         MSG = 'Using the last argument as keyword parameters is deprecated'.freeze
 
+        DEPRECATIONS_GLOB = File.expand_path('../../../deprecations/**/*.yml', __dir__)
+        KEYWORD_DEPRECATION_STR = 'maybe ** should be added to the call'
+
         def on_send(node)
           arg = node.arguments.last
           return unless arg
@@ -46,9 +49,11 @@ module RuboCop
         end
 
         def keywords_list
-          return [] unless File.exist?(keywords_file_path)
+          hash = Dir.glob(DEPRECATIONS_GLOB).each_with_object({}) do |file, hash|
+            hash.merge!(YAML.safe_load(File.read(file)))
+          end
 
-          File.read(keywords_file_path).split("----\n")
+          hash.values.flatten.select { |str| str.include?(KEYWORD_DEPRECATION_STR) }
         end
 
         def keywords_file_path

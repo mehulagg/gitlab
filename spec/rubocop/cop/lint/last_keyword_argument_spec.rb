@@ -9,8 +9,9 @@ RSpec.describe RuboCop::Cop::Lint::LastKeywordArgument, type: :rubocop do
 
   subject(:cop) { described_class.new }
 
-  context 'file does not exist' do
+  context 'deprecation files does not exist' do
     before do
+      allow(Dir).to receive(:glob).and_return([])
       allow(File).to receive(:exist?).and_return(false)
     end
 
@@ -21,18 +22,37 @@ RSpec.describe RuboCop::Cop::Lint::LastKeywordArgument, type: :rubocop do
     end
   end
 
-  context 'file does exist' do
-    before do
-      allow(File).to receive(:exist?).and_return(true)
+  context 'deprecation files does exist' do
+    let(:create_spec_yaml) do
+      <<~YAML
+      ---
+      test_mutations/boards/lists/create#resolve_with_proper_permissions_backlog_list_creates_one_and_only_one_backlog:
+      - |
+        DEPRECATION WARNING: /Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/batch-loader-1.4.0/lib/batch_loader/graphql.rb:38: warning: Using the last argument as keyword parameters is deprecated; maybe ** should be added to the call
+        /Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/batch-loader-1.4.0/lib/batch_loader.rb:26: warning: The called method `batch' is defined here
+      test_mutations/boards/lists/create#ready?_raises_an_error_if_required_arguments_are_missing:
+      - |
+        DEPRECATION WARNING: /Users/tkuah/code/ee-gdk/gitlab/create_service.rb:1: warning: Using the last argument as keyword parameters is deprecated; maybe ** should be added to the call
+        /Users/tkuah/code/ee-gdk/gitlab/user.rb:17: warning: The called method `call' is defined here
+      YAML
+    end
 
-      allow(File).to receive(:read).and_return(<<~DATA)
-----
-create_service.rb:1: warning: Using the last argument as keyword parameters is deprecated; maybe ** should be added to the call
-user.rb:17: warning: The called method `call' is defined here
-----
-/Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/batch-loader-1.4.0/lib/batch_loader/graphql.rb:38: warning: Using the last argument as keyword parameters is deprecated; maybe ** should be added to the call
-/Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/batch-loader-1.4.0/lib/batch_loader.rb:26: warning: The called method `batch' is defined here
-      DATA
+    let(:projects_spec_yaml) do
+      <<~YAML
+      ---
+      test_api/projects_get_/projects_when_unauthenticated_behaves_like_projects_response_returns_an_array_of_projects:
+      - |
+        DEPRECATION WARNING: /Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/state_machines-activerecord-0.6.0/lib/state_machines/integrations/active_record.rb:511: warning: Using the last argument as keyword parameters is deprecated; maybe ** should be added to the call
+        /Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/activerecord-6.0.3.3/lib/active_record/suppressor.rb:43: warning: The called method `save' is defined here
+      - |
+        DEPRECATION WARNING: /Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/rack-2.2.3/lib/rack/builder.rb:158: warning: Using the last argument as keyword parameters is deprecated; maybe ** should be added to the call
+        /Users/tkuah/.rbenv/versions/2.7.2/lib/ruby/gems/2.7.0/gems/grape-1.4.0/lib/grape/middleware/error.rb:30: warning: The called method `initialize' is defined here
+      YAML
+    end
+
+    before do
+      allow(Dir).to receive(:glob).and_return(['deprecations/service/create_spec.yml', 'deprecations/api/projects_spec.yml'])
+      allow(File).to receive(:read).and_return(create_spec_yaml, projects_spec_yaml)
     end
 
     it 'registers an offense' do

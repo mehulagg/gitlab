@@ -351,7 +351,7 @@ group :development do
 end
 
 group :development, :test do
-  gem 'warning', '~> 1.1', require: false
+  gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.0'
   gem 'pry-byebug', '~> 3.9.0', platform: :mri
   gem 'pry-rails', '~> 0.3.9'
