@@ -83,30 +83,44 @@ To create a `.gitlab-ci.yml` file:
    paste this sample code:
 
    ```yaml
-   test:
+   build-job:
+     stage: build
+     script:
+       - echo "Hello, $GITLAB_USER_LOGIN!"
+
+   test-job1:
      stage: test
      script:
-       - echo Hello, $GITLAB_USER_LOGIN!
+       - echo "This job might test something"
 
-   deploy_prod:
+   test-job2:
+     stage: test
+     script:
+       - echo "This job takes 20 seconds longer to test something"
+       - sleep 20
+
+   deploy-prod:
      stage: deploy
      script:
-       - echo Goodbye, $GITLAB_USER_LOGIN!
+       - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
    ```
 
-   `$GITLAB_USER_LOGIN` is a [predefined variable](../variables/predefined_variables.md)
-   that is populated with your GitLab username when the job runs.
+   `$GITLAB_USER_LOGIN` and `$CI_COMMIT_BRANCH` are
+   [predefined variables](../variables/predefined_variables.md)
+   that populate when the job runs.
 
 1. Click **Commit changes**.
 
-The pipeline starts when the commit is successful.
+The pipeline starts when the commit is committed.
 
 #### `.gitlab-ci.yml` tips
 
-- If you want the runner to use a Docker image to run the jobs, edit the `.gitlab-ci.yml` file to include:
+- If you want the runner to use a Docker image to run the jobs, edit the `.gitlab-ci.yml` file
+  to include your image name:
 
   ```yaml
-  image: ruby:2.7.2
+  default:
+    image: ruby:2.7.2
   ```
 
   This command tells the runner to use a Ruby image from Docker Hub.
@@ -117,63 +131,25 @@ The pipeline starts when the commit is successful.
   view a graphical representation of your `.gitlab-ci.yml` file.
 - For the complete `.gitlab-ci.yml` syntax, see
   [the `.gitlab-ci.yml` reference topic](../yaml/README.md).
-- A [Ruby on Rails example](#ruby-on-rails-example) is also included below.
 
 ### View the status of your pipeline and jobs
 
-When you committed your changes, a pipeline started. To view your pipeline:
+When you committed your changes, a pipeline started.
+
+To view your pipeline:
 
 - Go **CI/CD > Pipelines**.
 
-If you used the earlier sample code, a pipeline with two stages should be displayed:
+  A pipeline with three stages should be displayed:
 
-![Two stages](img/two_stages_v13_6.png)
+  ![Three stages](img/three_stages_v13_6.png)
 
-If you hover over either stage, you can view the status. Click the name
-of the stage, for example `test`, to view the job details. The output should be
-similar to this:
+- To view a visual representation of your pipeline, click the pipeline ID.
 
-![Job results](img/job_results_v13_6.png)
+  ![Pipeline graph](img/pipeline_graph_v13_6.png)
 
-NOTE: **Note:**
-If your instance of GitLab pulls from a [mirrored repository](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
-you may need to enable pipeline triggering. Go to your project's
-**Settings > Repository > Pull from a remote repository** and select **Trigger pipelines for mirror updates**.
+- To view details of a job, click the job name, for example, `deploy-prod`.
 
-You can also view the pipeline by going to **Repository > Commits**.
+  ![Job details](img/job_details_v13_6.png)
 
-Or view each individual job by going to **CI/CD > Jobs**.
-
-If the job status is `stuck`, a runner is probably not configured for the project.
-
-## Ruby on Rails example
-
-If you have a Ruby on Rails project, you can use this example. The `ruby:2.7.2` image
-in this example is on [Docker Hub](https://hub.docker.com/).
-
-```yaml
-default:
-  image: ruby:2.7.2
-  before_script:
-    - apt-get update
-    - apt-get install -y sqlite3 libsqlite3-dev nodejs
-    - ruby -v
-    - which ruby
-    - gem install bundler --no-document
-    - bundle install --jobs $(nproc) "${FLAGS[@]}"
-
-rspec:
-  script:
-    - bundle exec rspec
-
-rubocop:
-  script:
-    - bundle exec rubocop
-```
-
-This configuration works for most Ruby applications.
-
-- Two jobs are defined: `rspec` and `rubocop`. The names are arbitrary.
-- Each job has different commands to be executed.
-- Before each job, the commands defined by `before_script` are executed.
-- The runner runs each job independently.
+If the job status is `stuck`, check to ensure a runner is probably configured for the project.
