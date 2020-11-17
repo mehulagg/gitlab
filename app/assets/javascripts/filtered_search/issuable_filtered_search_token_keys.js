@@ -22,6 +22,15 @@ export const tokenKeys = [
     tag: '@assignee',
   },
   {
+    formattedKey: __('Reviewer'),
+    key: 'reviewer',
+    type: 'string',
+    param: 'username',
+    symbol: '@',
+    icon: 'user',
+    tag: '@reviewer',
+  },
+  {
     formattedKey: __('Milestone'),
     key: 'milestone',
     type: 'string',
@@ -60,18 +69,6 @@ if (gon.current_user_id) {
     symbol: '',
     icon: 'thumb-up',
     tag: 'emoji',
-  });
-}
-
-if (window.gon?.features?.mergeRequestReviewers) {
-  tokenKeys.splice(2, 0, {
-    formattedKey: __('Reviewer'),
-    key: 'reviewer',
-    type: 'string',
-    param: 'username',
-    symbol: '@',
-    icon: 'user',
-    tag: '@reviewer',
   });
 }
 
