@@ -2,6 +2,8 @@ import { nextTick } from 'vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlButton, GlAlert, GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
+import VueApollo from 'vue-apollo';
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
 
 import { redirectTo, refreshCurrentPage, objectToQuery } from '~/lib/utils/url_utility';
 import {
@@ -19,8 +21,10 @@ import EditorLite from '~/vue_shared/components/editor_lite.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
+import getBlobContent from '~/pipeline_editor/graphql/queries/blob_content.graphql';
 
 const localVue = createLocalVue();
+localVue.use(VueApollo);
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
@@ -36,6 +40,41 @@ jest.mock('~/api', () => ({
 describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   let wrapper;
   let mockMutate;
+  let fakeApollo;
+
+  const createComponentWithApollo = ({ props = {} } = {}, mountFn = shallowMount) => {
+    fakeApollo = createMockApollo(); // only local resolvers
+
+    // setup local resolver with writeQuery
+    fakeApollo.clients.defaultClient.cache.writeQuery({
+      query: getBlobContent,
+      data: {
+        mockGetBlobContent: {
+          __typename: 'BlobContent',
+          rawData: mockCiYml,
+        },
+      },
+    });
+
+    wrapper = mountFn(PipelineEditorApp, {
+      localVue,
+      propsData: {
+        projectPath: mockProjectPath,
+        defaultBranch: mockDefaultBranch,
+        ciConfigPath: mockCiConfigPath,
+        newMergeRequestPath: mockNewMergeRequestPath,
+        commitId: mockCommitId,
+        ...props,
+      },
+      stubs: {
+        GlTabs,
+        GlButton,
+        TextEditor,
+        CommitForm,
+      },
+      apolloProvider: fakeApollo,
+    });
+  };
 
   const createComponent = ({ props = {}, loading = false } = {}, mountFn = shallowMount) => {
     mockMutate = jest.fn().mockResolvedValue({
@@ -48,7 +87,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
     });
 
     wrapper = mountFn(PipelineEditorApp, {
-      localVue,
+      // localVue,
       propsData: {
         projectPath: mockProjectPath,
         defaultBranch: mockDefaultBranch,
@@ -115,8 +154,15 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       }
     }
 
-    it('sets a general error message', async () => {
-      wrapper.vm.handleBlobContentError(new MockError('An error'));
+    it.only('sets a general error message', async () => {
+      // TODO Setup error conditions to run content -> error(error)
+      // Simulating 3 possible error states:
+      // - unknown error
+      // - ref is missing
+      // - file not found
+
+      createComponentWithApollo();
+
       await nextTick();
 
       expect(findAlert().text()).toMatch('CI file could not be loaded: An error');
