@@ -38,10 +38,9 @@ export default {
 <template>
     <gl-dropdown :text="__('Edit')">
       <gl-dropdown-item
-        :class="{
-          'is-active': viewer === $options.viewerTypes.mr,
-        }"
         href="#"
+        :is-check-item="true"
+        :is-checked="viewer === $options.viewerTypes.mr"
         @click.prevent="changeMode($options.viewerTypes.mr)"
       >
         <strong class="dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
@@ -50,10 +49,9 @@ export default {
         </span>
       </gl-dropdown-item>
       <gl-dropdown-item
-        :class="{
-          'is-active': viewer === $options.viewerTypes.diff,
-        }"
         href="#"
+        :is-check-item="true"
+        :is-checked="viewer === $options.viewerTypes.mr"
         @click.prevent="changeMode($options.viewerTypes.diff)"
       >
         <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
