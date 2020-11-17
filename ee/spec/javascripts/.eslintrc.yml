@@ -35,6 +35,25 @@ rules:
   import/no-extraneous-dependencies:
     - error
     - devDependencies:
-      - ee/spec/**/*.js
+        - ee/spec/**/*.js
   # Temporarily disabled to facilitate an upgrade to eslint-plugin-jasmine
   jasmine/prefer-toHaveBeenCalledWith: off
+  # Temporarily enabled to gracefully enable this rule globally later
+  # See https://gitlab.com/gitlab-org/frontend/eslint-plugin/-/issues/18
+  import/order:
+    - error
+    - groups:
+        - builtin
+        - external
+        - internal
+        - parent
+        - sibling
+        - index
+      pathGroups:
+        - pattern: '~/**'
+          group: 'internal'
+        - pattern: 'ee*(_)*(components|empty_states|icons|images|spec|jest|else_ce)/**'
+          group: 'internal'
+      alphabetize:
+        order: asc
+        caseInsensitive: true
