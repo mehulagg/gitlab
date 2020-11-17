@@ -9,6 +9,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/60562) in GitLab 12.0.
 
+CAUTION: **Caution:**
+This [Closed Beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#sts=Closed%20Beta) feature is being re-evaluated in favor of a different
+[solution](https://gitlab.com/gitlab-org/gitlab/-/issues/284406) that
+enables the Phabricator importer by default. The current importer is
+**not** complete. It imports issues only with titles and descriptions.
+The GitLab project created during the import process contains only
+issues, and the associated repository is disabled.
+
 GitLab allows you to import all tasks from a Phabricator instance into
 GitLab issues. The import creates a single project with the
 repository disabled.
