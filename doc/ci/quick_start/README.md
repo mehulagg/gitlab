@@ -46,7 +46,7 @@ To view runners:
 - Go to **Settings > CI/CD** and expand **Runners**.
 
 As long as you have at least one runner that's active, with a green circle next to it,
-you have a runner available to process your job.
+you have a runner available to process your jobs.
 
 If no runners are listed on the **Runners** page in the UI, you or an administrator
 must [install GitLab Runner](https://docs.gitlab.com/runner/install/) and
