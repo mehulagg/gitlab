@@ -1,9 +1,7 @@
 <script>
-import { GlCard, GlIcon } from '@gitlab/ui';
+import { GlCard, GlIcon, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import query from '../queries/iteration_issues_summary.query.graphql';
-import { Namespace } from '../constants';
 
 export default {
   cardBodyClass: 'gl-text-center gl-py-3',
@@ -11,6 +9,7 @@ export default {
   components: {
     GlCard,
     GlIcon,
+    GlSprintf,
   },
   apollo: {
     issues: {
@@ -19,10 +18,12 @@ export default {
         return this.queryVariables;
       },
       update(data) {
+        const stats = data.iteration?.report?.stats || {};
+
         return {
-          open: data[this.namespaceType]?.openIssues?.count || 0,
-          assigned: data[this.namespaceType]?.assignedIssues?.count || 0,
-          closed: data[this.namespaceType]?.closedIssues?.count || 0,
+          complete: stats.complete?.count || 0,
+          incomplete: stats.incomplete?.count || 0,
+          total: stats.total?.count || 0,
         };
       },
       error() {
@@ -31,19 +32,9 @@ export default {
     },
   },
   props: {
-    fullPath: {
-      type: String,
-      required: true,
-    },
     iterationId: {
       type: String,
       required: true,
-    },
-    namespaceType: {
-      type: String,
-      required: false,
-      default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
     },
   },
   data() {
@@ -54,44 +45,37 @@ export default {
   computed: {
     queryVariables() {
       return {
-        fullPath: this.fullPath,
-        id: getIdFromGraphQLId(this.iterationId),
-        isGroup: this.namespaceType === Namespace.Group,
+        id: this.iterationId,
       };
-    },
-    completedPercent() {
-      const open = this.issues.open + this.issues.assigned;
-      const { closed } = this.issues;
-      if (closed <= 0) {
-        return 0;
-      }
-      return ((closed / (open + closed)) * 100).toFixed(0);
     },
     showCards() {
       return !this.$apollo.queries.issues.loading && Object.values(this.issues).every(a => a >= 0);
     },
+    unstarted() {
+      const started = this.issues.complete + this.issues.incomplete;
+      return this.issues.total - started;
+    },
     columns() {
       return [
         {
-          title: __('Complete'),
-          value: `${this.completedPercent}%`,
-        },
-        {
-          title: __('Open'),
-          value: this.issues.open,
-          icon: true,
-        },
-        {
-          title: __('In progress'),
-          value: this.issues.assigned,
-          icon: true,
-        },
-        {
           title: __('Completed'),
-          value: this.issues.closed,
-          icon: true,
+          value: this.issues.complete,
+        },
+        {
+          title: __('Incomplete'),
+          value: this.issues.incomplete,
+        },
+        {
+          title: __('Unstarted'),
+          value: this.unstarted,
         },
       ];
+    },
+  },
+  methods: {
+    percent(val) {
+      if (this.issues.total === 0) return 0;
+      return ((val / this.issues.total) * 100).toFixed(0);
     },
   },
 };
@@ -99,10 +83,24 @@ export default {
 
 <template>
   <div v-if="showCards" class="row gl-mt-6">
-    <div v-for="(column, index) in columns" :key="index" class="col-sm-3">
+    <div v-for="(column, index) in columns" :key="index" class="col-sm-4">
       <gl-card :class="$options.cardClass" :body-class="$options.cardBodyClass" class="gl-mb-5">
-        <span>{{ column.title }}</span>
-        <span class="gl-font-size-h2 gl-font-weight-bold">{{ column.value }}</span>
+        <span
+          class="gl-font-size-h2 gl-border-1 gl-border-r-solid gl-border-gray-100 gl-pr-3 gl-mr-2"
+        >
+          <span>{{ column.title }}</span>
+          <span class="gl-font-weight-bold"
+            >{{ percent(column.value) }}<small class="gl-text-gray-500">%</small></span
+          >
+        </span>
+        <gl-sprintf :message="__('%{count} of %{total}')">
+          <template #count>
+            <span class="gl-font-size-h2 gl-font-weight-bold">{{ column.value }}</span>
+          </template>
+          <template #total>
+            <span class="gl-font-size-h2 gl-font-weight-bold">{{ issues.total }}</span>
+          </template>
+        </gl-sprintf>
         <gl-icon v-if="column.icon" name="issues" :size="12" class="gl-text-gray-500" />
       </gl-card>
     </div>

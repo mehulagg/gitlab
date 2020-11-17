@@ -214,11 +214,7 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-      <iteration-report-summary
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      />
+      <iteration-report-summary :iteration-id="iteration.id" />
       <burn-charts
         v-if="glFeatures.iterationCharts && glFeatures.burnupCharts"
         :start-date="iteration.startDate"

@@ -14415,6 +14415,9 @@ msgstr ""
 msgid "Incompatible project"
 msgstr ""
 
+msgid "Incomplete"
+msgstr ""
+
 msgid "Indent"
 msgstr ""
 
@@ -29016,6 +29019,9 @@ msgid "Unschedule job"
 msgstr ""
 
 msgid "Unstar"
+msgstr ""
+
+msgid "Unstarted"
 msgstr ""
 
 msgid "Unsubscribe"
