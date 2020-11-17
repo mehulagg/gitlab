@@ -3,6 +3,7 @@
 module Packages
   module Nuget
     class SearchService < BaseService
+      include ::Packages::FinderHelper
       include Gitlab::Utils::StrongMemoize
       include ActiveRecord::ConnectionAdapters::Quoting
 
@@ -16,8 +17,9 @@ module Packages
         padding: 0
       }.freeze
 
-      def initialize(project, search_term, options = {})
-        @project = project
+      def initialize(current_user, project_or_group, search_term, options = {})
+        @current_user = current_user
+        @project_or_group = project_or_group
         @search_term = search_term
         @options = DEFAULT_OPTIONS.merge(options)
 
@@ -33,6 +35,28 @@ module Packages
       end
 
       private
+
+      def base
+        base = if project?
+                 @project_or_group.packages
+               elsif group?
+                 packages_visible_to_user(@current_user, within_group: @project_or_group)
+               else
+                 ::Packages::Package.none
+               end
+
+        base.nuget
+            .has_version
+            .without_nuget_temporary_name
+      end
+
+      def project?
+        @project_or_group.is_a?(::Project)
+      end
+
+      def group?
+        @project_or_group.is_a?(::Group)
+      end
 
       def search_packages
         # custom query to get package names and versions as expected from the nuget search api
@@ -61,22 +85,14 @@ module Packages
         created_at_column = "#{table_name}.#{quote_column_name('created_at')}"
         select_sql = "ROW_NUMBER() OVER (PARTITION BY #{name_column} ORDER BY #{created_at_column} DESC) AS row_number, #{table_name}.*"
 
-        @project.packages
-                .select(select_sql)
-                .nuget
-                .has_version
-                .without_nuget_temporary_name
-                .with_name(package_names)
+        base.select(select_sql)
+            .with_name(package_names)
       end
 
       def package_names
         strong_memoize(:package_names) do
-          pkgs = @project.packages
-                         .nuget
-                         .has_version
-                         .without_nuget_temporary_name
-                         .order_name
-                         .select_distinct_name
+          pkgs = base.order_name
+                     .select_distinct_name
           pkgs = pkgs.without_version_like(PRE_RELEASE_VERSION_MATCHING_TERM) unless include_prerelease_versions?
           pkgs = pkgs.search_by_name(@search_term) if @search_term.present?
           pkgs.page(0) # we're using a padding
