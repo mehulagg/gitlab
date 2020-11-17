@@ -34,7 +34,7 @@ module SortingPreference
 
   private
 
-  def set_sort_order_from_user_preference(sort_field)
+  def set_sort_order_from_user_preference(sort_field = sorting_field)
     return unless current_user
     return unless sort_field
 
@@ -52,7 +52,7 @@ module SortingPreference
     sort_param
   end
 
-  def set_sort_order_from_cookie(sort_field)
+  def set_sort_order_from_cookie(sort_field = sorting_field)
     return unless legacy_sort_cookie_name
 
     sort_param = params[:sort] if params[:sort].present?
@@ -68,7 +68,7 @@ module SortingPreference
   # Convert sorting_field to legacy cookie name for backwards compatibility
   # :merge_requests_sort => 'mergerequest_sort'
   # :issues_sort => 'issue_sort'
-  def remember_sorting_key(sort_field)
+  def remember_sorting_key(sort_field = sorting_field)
     @remember_sorting_key ||= sort_field
       .to_s
       .split('_')[0..-2]
