@@ -75,22 +75,6 @@ RSpec.describe Ci::PipelinesFinder do
       it 'filters out child pipelines and shows only the parents by default' do
         is_expected.to eq([parent_pipeline])
       end
-
-      context 'when include_child_pipelines is false' do
-        let(:params) { { include_child_pipelines: false } }
-
-        it 'filters out child pipelines and shows only the parents' do
-          is_expected.to eq([parent_pipeline])
-        end
-      end
-
-      context 'when include_child_pipelines is true' do
-        let(:params) { { include_child_pipelines: true } }
-
-        it 'shows child pipelines and parents' do
-          is_expected.to eq([child_pipeline, parent_pipeline])
-        end
-      end
     end
 
     Ci::HasStatus::AVAILABLE_STATUSES.each do |target|
@@ -215,10 +199,14 @@ RSpec.describe Ci::PipelinesFinder do
       let(:params) { { iids: [pipeline1.iid, pipeline3.iid] } }
       let!(:pipeline1) { create(:ci_pipeline, project: project) }
       let!(:pipeline2) { create(:ci_pipeline, project: project) }
-      let!(:pipeline3) { create(:ci_pipeline, project: project) }
+      let!(:pipeline3) { create(:ci_pipeline, project: project, source: :parent_pipeline) }
 
       it 'returns matches pipelines' do
         is_expected.to match_array([pipeline1, pipeline3])
+      end
+
+      it 'does not fitler out child pipelines' do
+        is_expected.to include(pipeline3)
       end
     end
 

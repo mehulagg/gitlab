@@ -18,7 +18,7 @@ module Ci
         return Ci::Pipeline.none
       end
 
-      items = by_include_child_pipelines(pipelines)
+      items = by_iids(pipelines)
       items = by_scope(items)
       items = by_status(items)
       items = by_ref(items)
@@ -27,7 +27,6 @@ module Ci
       items = by_username(items)
       items = by_yaml_errors(items)
       items = by_updated_at(items)
-      items = by_iids(items)
       sort_items(items)
     end
 
@@ -53,10 +52,12 @@ module Ci
       project.repository.tag_names
     end
 
-    def by_include_child_pipelines(items)
-      return items if params[:include_child_pipelines]
-
-      items.no_child
+    def by_iids(items)
+      if params[:iids].present?
+        items.for_iid(params[:iids])
+      else
+        items.no_child
+      end
     end
 
     def by_scope(items)
@@ -142,14 +143,6 @@ module Ci
       items = items.updated_after(params[:updated_after]) if params[:updated_after].present?
 
       items
-    end
-
-    def by_iids(items)
-      if params[:iids].present?
-        items.for_iid(params[:iids])
-      else
-        items
-      end
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

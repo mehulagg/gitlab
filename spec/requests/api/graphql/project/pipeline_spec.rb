@@ -5,12 +5,12 @@ require 'spec_helper'
 RSpec.describe 'getting pipeline information nested in a project' do
   include GraphqlHelpers
 
-  let(:project) { create(:project, :repository, :public) }
-  let(:pipeline) { create(:ci_pipeline, project: project) }
-  let(:current_user) { create(:user) }
+  let!(:project) { create(:project, :repository, :public) }
+  let!(:pipeline) { create(:ci_pipeline, project: project) }
+  let!(:current_user) { create(:user) }
   let(:pipeline_graphql_data) { graphql_data['project']['pipeline'] }
 
-  let(:query) do
+  let!(:query) do
     graphql_query_for(
       'project',
       { 'fullPath' => project.full_path },
@@ -37,10 +37,10 @@ RSpec.describe 'getting pipeline information nested in a project' do
   end
 
   context 'batching' do
-    let(:pipeline2) { create(:ci_pipeline, project: project) }
-    let(:pipeline3) { create(:ci_pipeline, project: project) }
+    let!(:pipeline2) { create(:ci_pipeline, project: project) }
+    let!(:pipeline3) { create(:ci_pipeline, project: project) }
 
-    let(:query) do
+    let!(:query) do
       graphql_query_for(
         'project',
         { 'fullPath' => project.full_path },
@@ -54,12 +54,18 @@ RSpec.describe 'getting pipeline information nested in a project' do
 
     it 'executes the finder once' do
       mock = double(Ci::PipelinesFinder)
-      opts = { iids: [pipeline.iid, pipeline2.iid, pipeline3.iid].map(&:to_s), include_child_pipelines: true }
+      opts = { iids: [pipeline.iid, pipeline2.iid, pipeline3.iid].map(&:to_s) }
 
       expect(Ci::PipelinesFinder).to receive(:new).once.with(project, current_user, opts).and_return(mock)
       expect(mock).to receive(:execute).once.and_return(Ci::Pipeline.none)
 
       post_graphql(query, current_user: current_user)
+    end
+
+    it 'keeps the queries under the threshold' do
+      control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
+
+      expect(control.count).to be <= 23
     end
   end
 end

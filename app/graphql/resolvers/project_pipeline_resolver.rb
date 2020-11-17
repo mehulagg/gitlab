@@ -2,6 +2,8 @@
 
 module Resolvers
   class ProjectPipelineResolver < BaseResolver
+    include LooksAhead
+
     type ::Types::Ci::PipelineType, null: true
 
     alias_method :project, :object
@@ -10,12 +12,18 @@ module Resolvers
              required: true,
              description: 'IID of the Pipeline, e.g., "1"'
 
-    def resolve(iid:)
+    def resolve_with_lookahead(iid:)
       BatchLoader::GraphQL.for(iid).batch(key: project) do |iids, loader, args|
-        finder = ::Ci::PipelinesFinder.new(project, context[:current_user], iids: iids, include_child_pipelines: true)
+        relation = ::Ci::PipelinesFinder.new(project, context[:current_user], iids: iids).execute
 
-        finder.execute.each { |pl| loader.call(pl.iid.to_s, pl) }
+        apply_lookahead(relation).each { |pipeline| loader.call(pipeline.iid.to_s, pipeline) }
       end
+    end
+
+    private
+
+    def preloads
+      { user: [:users] }
     end
   end
 end

@@ -25,6 +25,19 @@ RSpec.describe LooksAhead do
         { labels: [:labels] }
       end
     end
+    user_resolver = Class.new(Resolvers::BaseResolver) do
+      include LooksAhead
+
+      def resolve_with_lookahead(**args)
+        relation = UsersFinder.new(current_user, id: args[:id]).execute
+
+        apply_lookahead(relation).first
+      end
+
+      def preloads
+        { status: [:status] }
+      end
+    end
 
     label = Class.new(GraphQL::Schema::Object) do
       graphql_name 'Label'
@@ -35,6 +48,10 @@ RSpec.describe LooksAhead do
       field :title, String, null: true
       field :labels, label.connection_type, null: true
     end
+    user_status = Class.new(GraphQL::Schema::Object) do
+      graphql_name 'UserStatus'
+      field :id, Integer, null: false
+    end
     user = Class.new(GraphQL::Schema::Object) do
       graphql_name 'User'
       field :name, String, null: true
@@ -44,17 +61,15 @@ RSpec.describe LooksAhead do
         extras: [:lookahead],
         resolver: issues_resolver,
         null: true
+      field :status, user_status,
+        null: true
     end
 
     Class.new(GraphQL::Schema) do
       query(Class.new(GraphQL::Schema::Object) do
         graphql_name 'Query'
-        field :find_user, user, null: true do
-          argument :username, String, required: true
-        end
-
-        def find_user(username:)
-          context[:user_db].find { |u| u.username == username }
+        field :find_user, user, resolver: user_resolver, null: true do
+          argument :id, Integer, required: true
         end
       end)
     end
@@ -63,14 +78,14 @@ RSpec.describe LooksAhead do
   def query(doc = document)
     GraphQL::Query.new(schema,
                        document: doc,
-                       context: { user_db: [the_user] },
-                       variables: { username: the_user.username })
+                       context: { current_user: the_user },
+                       variables: { id: the_user.id })
   end
 
   let(:document) do
     GraphQL.parse <<-GRAPHQL
-    query($username: String!){
-      findUser(username: $username) {
+    query($id: Int!){
+      findUser(id: $id) {
         name
         issues {
           nodes {
@@ -84,6 +99,7 @@ RSpec.describe LooksAhead do
             labels { nodes { id } }
           }
         }
+        status { id }
       }
     }
     GRAPHQL
@@ -112,7 +128,21 @@ RSpec.describe LooksAhead do
   it_behaves_like 'a working query on the test schema'
 
   it 'preloads labels on issues' do
-    expect(the_user.issues).to receive(:preload).with(:labels)
+    mock = Issue.none
+
+    expect_any_instance_of(User).to receive(:issues).twice.and_return(mock)
+    expect(mock).to receive(:preload).once.with(:labels)
+
+    query.result
+  end
+
+  it 'preloads status on user' do
+    mock = double(UserFinder)
+    none = User.none
+
+    expect(UsersFinder).to receive(:new).and_return(mock)
+    expect(mock).to receive(:execute).and_return(none)
+    expect(none).to receive(:preload).with(:status).and_call_original
 
     query.result
   end
@@ -120,8 +150,8 @@ RSpec.describe LooksAhead do
   it 'issues fewer queries than the naive approach' do
     the_user.reload # ensure no attributes are loaded before we begin
     naive = <<-GQL
-    query($username: String!){
-      findUser(username: $username) {
+    query($id: Int!){
+      findUser(id: $id) {
         name
         issues {
           nodes {
@@ -132,8 +162,8 @@ RSpec.describe LooksAhead do
     }
     GQL
     with_lookahead = <<-GQL
-    query($username: String!){
-      findUser(username: $username) {
+    query($id: Int!){
+      findUser(id: $id) {
         name
         issuesWithLookahead {
           nodes {

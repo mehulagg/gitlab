@@ -196,6 +196,7 @@ module Types
           Types::Ci::PipelineType,
           null: true,
           description: 'Build pipeline of the project',
+          extras: [:lookahead],
           resolver: Resolvers::ProjectPipelineResolver
 
     field :sentry_detailed_error,

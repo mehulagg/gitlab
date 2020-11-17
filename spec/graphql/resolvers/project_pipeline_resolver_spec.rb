@@ -30,6 +30,14 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
     expect(result).to eq(pipeline)
   end
 
+  it 'keeps the queries under the threshold' do
+    control = ActiveRecord::QueryRecorder.new do
+      batch_sync { resolve_pipeline(project, { iid: '1234' }) }
+    end
+
+    expect(control.count).to eq(2)
+  end
+
   it 'does not resolve a pipeline outside the project' do
     result = batch_sync do
       resolve_pipeline(other_pipeline.project, { iid: '1234' })
