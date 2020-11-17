@@ -58,7 +58,7 @@ module SortingPreference
     sort_param = params[:sort] if params[:sort].present?
     # fallback to legacy cookie value for backward compatibility
     sort_param ||= cookies[legacy_sort_cookie_name]
-    sort_param ||= cookies[remember_sorting_key]
+    sort_param ||= cookies[remember_sorting_key(sort_field)]
 
     sort_value = update_cookie_value(sort_param)
     set_secure_cookie(remember_sorting_key(sort_field), sort_value)
