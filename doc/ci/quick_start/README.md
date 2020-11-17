@@ -12,7 +12,6 @@ GitLab [continuous integration](https://about.gitlab.com/stages-devops-lifecycle
 
 Before you start, make sure you have:
 
-- GitLab 8.0 or later, or access to [GitLab.com](https://gitlab.com).
 - A project in GitLab that you would like to use CI/CD for.
 - Maintainer or owner access for the project.
 
