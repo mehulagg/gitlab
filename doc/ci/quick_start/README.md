@@ -116,13 +116,10 @@ The pipeline starts when the commit is successful.
 
 - To validate your `.gitlab-ci.yml` file, use the
   [CI Lint tool](../lint.md), which is available in every project.
-
 - You can also use [CI/CD configuration visualization](../yaml/visualization.md) to
   view a graphical representation of your `.gitlab-ci.yml` file.
-
 - For the complete `.gitlab-ci.yml` syntax, see
   [the `.gitlab-ci.yml` reference topic](../yaml/README.md).
-
 - A [Ruby on Rails example](#ruby-on-rails-example) is also included below.
 
 ### View the status of your pipeline and jobs
