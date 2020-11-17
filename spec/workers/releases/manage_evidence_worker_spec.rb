@@ -35,7 +35,7 @@ RSpec.describe Releases::ManageEvidenceWorker do
     end
   end
 
-  context 'when `released_at` in outside the window' do
+  context 'when `released_at` is outside the window' do
     let(:release) { create(:release, project: project, released_at: 300.minutes.since) }
 
     it_behaves_like 'does not create a new Evidence record'
