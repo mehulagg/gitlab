@@ -13,6 +13,7 @@ Please link to the respective test case in the testcases project
 - [ ] (If applicable) Create a follow-up issue to document [the special setup](https://docs.gitlab.com/ee/development/testing_guide/end_to_end/running_tests_that_require_special_setup.html) necessary to run the test: ISSUE_LINK 
 - [ ] Ensure that a created resource is cleaned after test execution
 - [ ] Verify the tags to ensure it runs on the desired test environments
+- [ ] If this MR has a dependency on another MR, such as a GitLab QA MR, specify the order in which the MRs should be merged.
 
 <!-- Base labels. -->
 /label ~"Quality" ~"QA" ~test
