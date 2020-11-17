@@ -1,8 +1,5 @@
 import ScannerFilter from 'ee/security_dashboard/components/filters/scanner_filter.vue';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import projectSpecificScanners from 'ee/security_dashboard/graphql/project_specific_scanners.query.graphql';
-import groupSpecificScanners from 'ee/security_dashboard/graphql/group_specific_scanners.query.graphql';
-import instanceSpecificScanners from 'ee/security_dashboard/graphql/instance_specific_scanners.query.graphql';
 import VueRouter from 'vue-router';
 import { uniq, sampleSize, difference } from 'lodash';
 import { GlLoadingIcon } from '@gitlab/ui';
@@ -72,26 +69,8 @@ describe('Scanner Filter component', () => {
   };
 
   afterEach(() => {
-    // Clear out the querystring if one exists. It persists between tests.
-    if (!wrapper.vm.$route.fullPath === '/') {
-      wrapper.vm.$router.push('/');
-    }
     wrapper.destroy();
   });
-
-  it.each`
-    dashboardType | expectedQuery
-    ${'project'}  | ${projectSpecificScanners}
-    ${'group'}    | ${groupSpecificScanners}
-    ${'instance'} | ${instanceSpecificScanners}
-  `(
-    'returns the correct query for dashboard type "$dashboardType"',
-    ({ dashboardType, expectedQuery }) => {
-      createWrapper({ provide: { dashboardType } });
-
-      expect(wrapper.vm.query).toBe(expectedQuery);
-    },
-  );
 
   it('has the default and custom option items', () => {
     createWrapper();

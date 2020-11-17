@@ -4,12 +4,9 @@ import { assignWith, groupBy, union, uniq, without } from 'lodash';
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
 import StandardFilter from './standard_filter.vue';
-import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
-import groupSpecificScanners from '../../graphql/group_specific_scanners.query.graphql';
-import instanceSpecificScanners from '../../graphql/instance_specific_scanners.query.graphql';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
-import { scannerFilterResultsKeyMap } from '../../constants';
+import { scannerFilterResultsKeyMap, dashboardTypeQuery } from '../../constants';
 
 export default {
   components: {
@@ -33,7 +30,7 @@ export default {
   apollo: {
     customScanners: {
       query() {
-        return this.query;
+        return dashboardTypeQuery[this.dashboardType];
       },
       variables() {
         return { fullPath: this.fullPath };
@@ -67,12 +64,6 @@ export default {
       const scanner = uniq(this.selectedOptions.map(x => x.externalId));
 
       return { reportType, scanner };
-    },
-    query() {
-      const { dashboardType } = this;
-      if (dashboardType === 'project') return projectSpecificScanners;
-      if (dashboardType === 'group') return groupSpecificScanners;
-      return instanceSpecificScanners;
     },
     groups() {
       const defaultGroup = { GitLab: this.filter.options };
