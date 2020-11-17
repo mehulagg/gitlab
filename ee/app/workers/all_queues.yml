@@ -750,6 +750,14 @@
   :idempotent: true
   :tags:
   - :requires_disk_io
+- :name: set_user_status_based_on_user_cap_setting
+  :feature_category: :license_compliance
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: status_page_publish
   :feature_category: :incident_management
   :has_external_dependencies: true
