@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class BroadcastMessages < Grape::API
+  class BroadcastMessages < ::API::Base
     include PaginationParams
+
+    feature_category :navigation
 
     resource :broadcast_messages do
       helpers do

@@ -2,9 +2,10 @@
 
 class Projects::WikisController < Projects::ApplicationController
   include WikiActions
-  include PreviewMarkdown
 
   alias_method :container, :project
+
+  feature_category :wiki
 
   def git_access
   end

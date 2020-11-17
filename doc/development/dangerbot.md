@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Danger bot
 
 The GitLab CI/CD pipeline includes a `danger-review` job that uses [Danger](https://github.com/danger/danger)
@@ -128,10 +134,18 @@ Here is a (non-exhaustive) list of the kinds of things Danger has been used for
 at GitLab so far:
 
 - Coding style
-- Database review workflow
-- Documentation review workflow
+- Database review
+- Documentation review
 - Merge request metrics
-- Reviewer roulette workflow
+- Reviewer roulette. Reviewers and maintainers are chosen based on:
+  - Their roles (backend, frontend, database, etc).
+  - Their availability:
+    - No "OOO"/"PTO"/"Parental Leave" in their GitLab or Slack status.
+    - No `:red_circle:`/`:palm_tree:`/`:beach:`/`:beach_umbrella:`/`:beach_with_umbrella:` emojis in GitLab or Slack status.
+  - (Experimental) Their timezone: people for which the local hour is between
+    6 AM and 2 PM are eligible to be picked. This is to ensure they have a good
+    chance to get to perform a review during their current work day. The experimentation is tracked in
+    [this issue](https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/563)
 - Single codebase effort
 
 ## Limitations

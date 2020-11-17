@@ -39,7 +39,7 @@ module EE
 
               true
             rescue ::Gitlab::Auth::Ldap::LdapConnectionError
-              Rails.logger.warn("Error syncing #{attribute} users for provider '#{provider}'. LDAP connection Error") # rubocop:disable Gitlab/RailsLogger
+              ::Gitlab::AppLogger.warn("Error syncing #{attribute} users for provider '#{provider}'. LDAP connection Error")
 
               false
             end
@@ -64,13 +64,13 @@ module EE
 
                 user
               else
-                Rails.logger.debug do # rubocop:disable Gitlab/RailsLogger
+                ::Gitlab::AppLogger.debug(
                   <<-MSG.strip_heredoc.tr("\n", ' ')
                     #{self.class.name}: User with DN `#{member_dn}` should be marked as
                     #{attribute} but there is no user in GitLab with that identity.
                     Membership will be updated once the user signs in for the first time.
                   MSG
-                end
+                )
 
                 nil
               end

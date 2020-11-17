@@ -1,11 +1,11 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { setHTMLFixture } from 'helpers/fixtures';
 import * as utils from '~/lib/utils/common_utils';
 import discussionNavigation from '~/notes/mixins/discussion_navigation';
 import eventHub from '~/notes/event_hub';
 import createEventHub from '~/helpers/event_hub_factory';
 import notesModule from '~/notes/stores/modules';
-import { setHTMLFixture } from 'helpers/fixtures';
 
 const discussion = (id, index) => ({
   id,
@@ -66,6 +66,35 @@ describe('Discussion navigation mixin', () => {
   const findDiscussion = (selector, id) =>
     document.querySelector(`${selector}[data-discussion-id="${id}"]`);
 
+  describe('jumpToFirstUnresolvedDiscussion method', () => {
+    let vm;
+
+    beforeEach(() => {
+      createComponent();
+
+      ({ vm } = wrapper);
+
+      jest.spyOn(store, 'dispatch');
+      jest.spyOn(vm, 'jumpToNextDiscussion');
+    });
+
+    it('triggers the setCurrentDiscussionId action with null as the value', () => {
+      vm.jumpToFirstUnresolvedDiscussion();
+
+      expect(store.dispatch).toHaveBeenCalledWith('setCurrentDiscussionId', null);
+    });
+
+    it('triggers the jumpToNextDiscussion action when the previous store action succeeds', () => {
+      store.dispatch.mockResolvedValue();
+
+      vm.jumpToFirstUnresolvedDiscussion();
+
+      return vm.$nextTick().then(() => {
+        expect(vm.jumpToNextDiscussion).toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('cycle through discussions', () => {
     beforeEach(() => {
       window.mrTabs = { eventHub: createEventHub(), tabShown: jest.fn() };
@@ -91,6 +120,8 @@ describe('Discussion navigation mixin', () => {
         beforeEach(() => {
           window.mrTabs.currentAction = 'show';
           wrapper.vm[fn](...args);
+
+          return wrapper.vm.$nextTick();
         });
 
         it('sets current discussion', () => {
@@ -112,6 +143,8 @@ describe('Discussion navigation mixin', () => {
         beforeEach(() => {
           window.mrTabs.currentAction = 'diffs';
           wrapper.vm[fn](...args);
+
+          return wrapper.vm.$nextTick();
         });
 
         it('sets current discussion', () => {
@@ -137,6 +170,8 @@ describe('Discussion navigation mixin', () => {
         beforeEach(() => {
           window.mrTabs.currentAction = 'other';
           wrapper.vm[fn](...args);
+
+          return wrapper.vm.$nextTick();
         });
 
         it('sets current discussion', () => {
@@ -159,13 +194,9 @@ describe('Discussion navigation mixin', () => {
           });
 
           it('expands discussion', () => {
-            expect(expandDiscussion).toHaveBeenCalledWith(
-              expect.anything(),
-              {
-                discussionId: expected,
-              },
-              undefined,
-            );
+            expect(expandDiscussion).toHaveBeenCalledWith(expect.anything(), {
+              discussionId: expected,
+            });
           });
 
           it('scrolls to discussion', () => {

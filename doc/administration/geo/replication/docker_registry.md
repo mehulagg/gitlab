@@ -18,7 +18,7 @@ Registry on the **primary** node, you can use the same storage for a **secondary
 Docker Registry as well. For more information, read the
 [Load balancing considerations](https://docs.docker.com/registry/deploying/#load-balancing-considerations)
 when deploying the Registry, and how to set up the storage driver for GitLab's
-integrated [Container Registry](../../packages/container_registry.md#container-registry-storage-driver).
+integrated [Container Registry](../../packages/container_registry.md#use-object-storage).
 
 ## Replicating Docker Registry
 
@@ -122,7 +122,7 @@ generate a short-lived JWT that is pull-only-capable to access the
 
 ### Verify replication
 
-To verify Container Registry replication is working, go to **{admin}** **Admin Area >** **{location-dot}** **Geo**
+To verify Container Registry replication is working, go to **Admin Area > Geo**
 (`/admin/geo/nodes`) on the **secondary** node.
 The initial replication, or "backfill", will probably still be in progress.
 You can monitor the synchronization process on each Geo node from the **primary** node's **Geo Nodes** dashboard in your browser.

@@ -6,12 +6,12 @@
 // stylelint-disable color-hex-length
 
 $mailer-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-$mailer-text-color: #333333;
+$mailer-text-color: #333;
 $mailer-bg-color: #fafafa;
 $mailer-link-color: #3777b0;
-$mailer-link-muted-color: #333333;
+$mailer-link-muted-color: #333;
 $mailer-line-cell-bg-color: #6b4fbb;
-$mailer-wrapper-cell-bg-color: #ffffff;
+$mailer-wrapper-cell-bg-color: #fff;
 $mailer-wrapper-cell-border-color: #ededed;
 $mailer-header-footer-text-color: #5c5c5c;
 
@@ -46,6 +46,35 @@ a {
 
 .highlight {
   font-weight: 500;
+}
+
+.invite-header {
+  margin-top: 0;
+}
+
+.invite-body {
+  width: 360px;
+}
+
+.invite-actions {
+  margin-top: 24px;
+}
+
+.invite-btn-join {
+  border-radius: $border-radius-default;
+  padding: $gl-btn-vert-padding $gl-btn-horz-padding;
+  cursor: pointer;
+  background-color: $purple;
+  color: $white;
+}
+
+.invite-btn-decline {
+  border-radius: $border-radius-default;
+  border: 1px solid $purple;
+  padding: $gl-btn-vert-padding $gl-btn-horz-padding;
+  cursor: pointer;
+  color: $purple;
+  margin-left: 4px;
 }
 
 tr td {
@@ -113,5 +142,22 @@ tr.footer td {
   .help-link {
     color: $mailer-link-color;
     text-decoration: none;
+  }
+
+  .gitlab-info {
+    padding: $gl-padding-24 0;
+  }
+
+  .gitlab-info-text {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    color: $gray-400;
+    font-size: $gl-font-size-small;
+  }
+
+  .footer-logo {
+    width: 90px;
+    height: 33px;
   }
 }

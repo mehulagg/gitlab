@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Query.project(fullPath).issue(iid).designCollection.version(sha)' do
+RSpec.describe 'Query.project(fullPath).issue(iid).designCollection.version(sha)' do
   include GraphqlHelpers
   include DesignManagementTestHelpers
 
@@ -14,6 +14,7 @@ describe 'Query.project(fullPath).issue(iid).designCollection.version(sha)' do
     create(:design_version, issue: issue,
            created_designs: create_list(:design, 3, issue: issue))
   end
+
   let_it_be(:version) do
     create(:design_version, issue: issue,
            modified_designs: old_version.designs,

@@ -1,6 +1,13 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Jenkins CI (deprecated) service
 
->**Note:** In GitLab 8.3, Jenkins integration using the
+NOTE: **Note:**
+In GitLab 8.3, Jenkins integration using the
 [GitLab Hook Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+Hook+Plugin)
 was deprecated in favor of the
 [GitLab Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+Plugin).

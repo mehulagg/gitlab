@@ -3,7 +3,8 @@
     = dropdown_tag('Select',
                    options: { toggle_class: 'js-allowed-to-create js-multiselect wide',
                    dropdown_class: 'dropdown-menu-user dropdown-menu-selectable capitalize-header', filter: true,
-                   data: { input_id: 'create_access_levels_attributes', default_label: 'Select' } })
+                   dropdown_qa_selector: 'access_levels_content',
+                   data: { input_id: 'create_access_levels_attributes', default_label: 'Select', qa_selector: 'access_levels_dropdown' } })
   .form-text.text-muted
     Only groups that
     = link_to 'have this project shared', help_page_path('user/project/members/share_project_with_groups')

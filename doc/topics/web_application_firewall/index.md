@@ -1,3 +1,10 @@
+---
+stage: Protect
+group: Container Security
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
+
 # Web Application Firewall - ModSecurity
 
 A web application firewall (or WAF) filters, monitors, and blocks HTTP traffic to
@@ -8,19 +15,14 @@ much more.
 
 ## Overview
 
-GitLab provides a WAF out of the box after Ingress is deployed.
-All you need to do is deploy your application along with a service
-and Ingress resource.
+GitLab provides a WAF out of the box after Ingress is deployed. All you need to do is deploy your
+application along with a service and Ingress resource. In GitLab's [Ingress](../../user/clusters/applications.md#ingress)
+deployment, the [ModSecurity](https://modsecurity.org/)
+module is loaded into Ingress-NGINX by default and monitors the traffic going to the applications
+which have an Ingress. The ModSecurity module runs with the [OWASP Core Rule Set (CRS)](https://coreruleset.org/)
+by default. The OWASP CRS detects and logs a wide range of common attacks.
 
-In GitLab's [Ingress](../../user/clusters/applications.md#ingress) deployment, the [ModSecurity](https://modsecurity.org/) module is loaded
-into Ingress-NGINX by default and monitors the traffic going to the
-applications which have an Ingress.
-
-The ModSecurity module runs with the [OWASP Core Rule Set (CRS)](https://coreruleset.org/) by default. The OWASP CRS will detect and log a wide range of common attacks.
-
-NOTE: **Note**
-The WAF is deployed in "Detection-only mode" by default and will only log attack
-attempts.
+By default, the WAF is deployed in Detection-only mode and only logs attack attempts.
 
 ## Requirements
 
@@ -53,7 +55,7 @@ If you are using a self-managed instance of GitLab, you need to configure the
 [Google OAuth2 OmniAuth Provider](../../integration/google.md) before
 you can configure a cluster on GKE. Once this is set up, you can follow the steps on the [quick start guide](quick_start_guide.md) to get started.
 
-NOTE: **Note**
+NOTE: **Note:**
 This guide shows how the WAF can be deployed using Auto DevOps. The WAF
 is available by default to all applications no matter how they are deployed,
 as long as they are using Ingress.
@@ -91,5 +93,5 @@ It is good to have a basic knowledge of the following:
 
 ## Roadmap
 
-More information on the direction of the WAF can be
-found in [Product Vision - Defend](https://about.gitlab.com/direction/defend/#waf)
+You can find more information on the product direction of the WAF in
+[Category Direction - Web Application Firewall](https://about.gitlab.com/direction/protect/web_application_firewall/).

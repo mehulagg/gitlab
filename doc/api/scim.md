@@ -1,19 +1,23 @@
-# SCIM API **(SILVER ONLY)**
+---
+type: reference, howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in [GitLab Silver](https://about.gitlab.com/pricing/) 11.10.
+# SCIM API (SYSTEM ONLY) **(SILVER ONLY)**
 
-The SCIM API implements the [the RFC7644 protocol](https://tools.ietf.org/html/rfc7644).
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in [GitLab.com Silver](https://about.gitlab.com/pricing/) 11.10.
 
-CAUTION: **Caution:**
-This API is for internal system use for connecting with a SCIM provider. While it can be used directly, it is subject to change without notice.
+The SCIM API implements the [RFC7644 protocol](https://tools.ietf.org/html/rfc7644). As this API is for
+**system** use for SCIM provider integration, it is subject to change without notice.
 
-NOTE: **Note:**
-[Group SSO](../user/group/saml_sso/index.md) must be enabled for the group. For more information, see [SCIM setup documentation](../user/group/saml_sso/scim_setup.md#requirements).
+To use this API, [Group SSO](../user/group/saml_sso/index.md) must be enabled for the group.
+This API is only in use where [SCIM for Group SSO](../user/group/saml_sso/scim_setup.md) is enabled. It's a prerequisite to the creation of SCIM identities.
 
 ## Get a list of SAML users
 
-NOTE: **Note:**
-This endpoint is used as part of the SCIM syncing mechanism and it only returns
+This endpoint is used as part of the SCIM syncing mechanism. It only returns
 a single user based on a unique ID which should match the `extern_uid` of the user.
 
 ```plaintext
@@ -35,7 +39,7 @@ Pagination follows the [SCIM spec](https://tools.ietf.org/html/rfc7644#section-3
 Example request:
 
 ```shell
-curl 'https://example.gitlab.com/api/scim/v2/groups/test_group/Users?filter=id%20eq%20"0b1d561c-21ff-4092-beab-8154b17f82f2"' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
+curl 'https://gitlab.example.com/api/scim/v2/groups/test_group/Users?filter=id%20eq%20"0b1d561c-21ff-4092-beab-8154b17f82f2"' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
 ```
 
 Example response:
@@ -86,7 +90,7 @@ Parameters:
 Example request:
 
 ```shell
-curl "https://example.gitlab.com/api/scim/v2/groups/test_group/Users/f0b1d561c-21ff-4092-beab-8154b17f82f2" --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
+curl "https://gitlab.example.com/api/scim/v2/groups/test_group/Users/f0b1d561c-21ff-4092-beab-8154b17f82f2" --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
 ```
 
 Example response:
@@ -130,7 +134,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --verbose --request POST "https://example.gitlab.com/api/scim/v2/groups/test_group/Users" --data '{"externalId":"test_uid","active":null,"userName":"username","emails":[{"primary":true,"type":"work","value":"name@example.com"}],"name":{"formatted":"Test User","familyName":"User","givenName":"Test"},"schemas":["urn:ietf:params:scim:schemas:core:2.0:User"],"meta":{"resourceType":"User"}}' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
+curl --verbose --request POST "https://gitlab.example.com/api/scim/v2/groups/test_group/Users" --data '{"externalId":"test_uid","active":null,"userName":"username","emails":[{"primary":true,"type":"work","value":"name@example.com"}],"name":{"formatted":"Test User","familyName":"User","givenName":"Test"},"schemas":["urn:ietf:params:scim:schemas:core:2.0:User"],"meta":{"resourceType":"User"}}' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
 ```
 
 Example response:
@@ -184,7 +188,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --verbose --request PATCH "https://example.gitlab.com/api/scim/v2/groups/test_group/Users/f0b1d561c-21ff-4092-beab-8154b17f82f2" --data '{ "Operations": [{"op":"Add","path":"name.formatted","value":"New Name"}] }' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
+curl --verbose --request PATCH "https://gitlab.example.com/api/scim/v2/groups/test_group/Users/f0b1d561c-21ff-4092-beab-8154b17f82f2" --data '{ "Operations": [{"op":"Add","path":"name.formatted","value":"New Name"}] }' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
 ```
 
 Returns an empty response with a `204` status code if successful.
@@ -207,7 +211,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --verbose --request DELETE "https://example.gitlab.com/api/scim/v2/groups/test_group/Users/f0b1d561c-21ff-4092-beab-8154b17f82f2" --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
+curl --verbose --request DELETE "https://gitlab.example.com/api/scim/v2/groups/test_group/Users/f0b1d561c-21ff-4092-beab-8154b17f82f2" --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
 ```
 
 Returns an empty response with a `204` status code if successful.

@@ -1,9 +1,8 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
-
 import AuditFilterToken from 'ee/audit_events/components/tokens/shared/audit_filter_token.vue';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -33,7 +32,7 @@ describe('AuditFilterToken', () => {
       propsData: {
         value: {},
         config: {
-          type: 'Foo',
+          type: 'foo',
         },
         active: false,
         ...tokenMethods,
@@ -108,13 +107,14 @@ describe('AuditFilterToken', () => {
   describe('when fetching suggestions', () => {
     let resolveSuggestions;
     let rejectSuggestions;
+    const fetchSuggestions = () =>
+      new Promise((resolve, reject) => {
+        resolveSuggestions = resolve;
+        rejectSuggestions = reject;
+      });
+
     beforeEach(() => {
       const value = { data: '' };
-      const fetchSuggestions = () =>
-        new Promise((resolve, reject) => {
-          resolveSuggestions = resolve;
-          rejectSuggestions = reject;
-        });
       initComponent({ value, fetchSuggestions });
     });
 
@@ -141,6 +141,19 @@ describe('AuditFilterToken', () => {
       it('shows a flash error message', () => {
         expect(createFlash).toHaveBeenCalledWith(
           'Failed to find foo. Please search for another foo.',
+        );
+      });
+    });
+
+    describe('and the fetch fails with a multi-word type', () => {
+      beforeEach(() => {
+        initComponent({ config: { type: 'foo_bar' }, fetchSuggestions });
+        rejectSuggestions({ response: { status: httpStatusCodes.NOT_FOUND } });
+      });
+
+      it('shows a flash error message', () => {
+        expect(createFlash).toHaveBeenCalledWith(
+          'Failed to find foo bar. Please search for another foo bar.',
         );
       });
     });

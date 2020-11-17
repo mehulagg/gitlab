@@ -34,6 +34,13 @@ module QA
             def has_license_count_of?(count)
               find_element(:licenses_counter).has_content?(count)
             end
+
+            def wait_for_pipeline_job_replication(name)
+              QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_pipeline_job_replication])
+              wait_until(max_duration: Runtime::Geo.max_file_replication_time) do
+                has_job?(name)
+              end
+            end
           end
         end
       end

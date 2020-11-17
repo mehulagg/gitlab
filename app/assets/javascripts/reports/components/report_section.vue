@@ -91,6 +91,11 @@ export default {
       required: false,
       default: undefined,
     },
+    shouldEmitToggleEvent: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
 
   data() {
@@ -157,6 +162,9 @@ export default {
   },
   methods: {
     toggleCollapsed() {
+      if (this.shouldEmitToggleEvent) {
+        this.$emit('toggleEvent');
+      }
       this.isCollapsed = !this.isCollapsed;
     },
   },
@@ -171,16 +179,17 @@ export default {
           <div>
             {{ headerText }}
             <slot :name="slotName"></slot>
-            <popover v-if="hasPopover" :options="popoverOptions" class="prepend-left-5" />
+            <popover v-if="hasPopover" :options="popoverOptions" class="gl-ml-2" />
           </div>
-          <slot name="subHeading"></slot>
+          <slot name="sub-heading"></slot>
         </div>
 
-        <slot name="actionButtons"></slot>
+        <slot name="action-buttons"></slot>
 
         <button
           v-if="isCollapsible"
           type="button"
+          data-testid="report-section-expand-button"
           class="js-collapse-btn btn float-right btn-sm align-self-center qa-expand-report-button"
           @click="toggleCollapsed"
         >

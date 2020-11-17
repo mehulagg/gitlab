@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe ObjectStorage::DirectUpload do
+RSpec.describe ObjectStorage::DirectUpload do
   let(:region) { 'us-east-1' }
   let(:path_style) { false }
   let(:use_iam_profile) { false }
+  let(:consolidated_settings) { false }
   let(:credentials) do
     {
       provider: 'AWS',
@@ -17,13 +18,25 @@ describe ObjectStorage::DirectUpload do
     }
   end
 
+  let(:storage_options) { {} }
+  let(:raw_config) do
+    {
+      enabled: true,
+      connection: credentials,
+      remote_directory: bucket_name,
+      storage_options: storage_options,
+      consolidated_settings: consolidated_settings
+    }
+  end
+
+  let(:config) { ObjectStorage::Config.new(raw_config) }
   let(:storage_url) { 'https://uploads.s3.amazonaws.com/' }
 
   let(:bucket_name) { 'uploads' }
   let(:object_name) { 'tmp/uploads/my-file' }
   let(:maximum_size) { 1.gigabyte }
 
-  let(:direct_upload) { described_class.new(credentials, bucket_name, object_name, has_length: has_length, maximum_size: maximum_size) }
+  let(:direct_upload) { described_class.new(config, object_name, has_length: has_length, maximum_size: maximum_size) }
 
   before do
     Fog.unmock!
@@ -60,7 +73,39 @@ describe ObjectStorage::DirectUpload do
     end
   end
 
-  describe '#to_hash' do
+  describe '#get_url' do
+    subject { described_class.new(config, object_name, has_length: true) }
+
+    context 'when AWS is used' do
+      it 'calls the proper method' do
+        expect_next_instance_of(::Fog::Storage, credentials) do |connection|
+          expect(connection).to receive(:get_object_url).once
+        end
+
+        subject.get_url
+      end
+    end
+
+    context 'when Google is used' do
+      let(:credentials) do
+        {
+          provider: 'Google',
+          google_storage_access_key_id: 'GOOGLE_ACCESS_KEY_ID',
+          google_storage_secret_access_key: 'GOOGLE_SECRET_ACCESS_KEY'
+        }
+      end
+
+      it 'calls the proper method' do
+        expect_next_instance_of(::Fog::Storage, credentials) do |connection|
+          expect(connection).to receive(:get_object_https_url).once
+        end
+
+        subject.get_url
+      end
+    end
+  end
+
+  describe '#to_hash', :aggregate_failures do
     subject { direct_upload.to_hash }
 
     shared_examples 'a valid S3 upload' do
@@ -78,6 +123,7 @@ describe ObjectStorage::DirectUpload do
         expect(s3_config[:Region]).to eq(region)
         expect(s3_config[:PathStyle]).to eq(path_style)
         expect(s3_config[:UseIamProfile]).to eq(use_iam_profile)
+        expect(s3_config.keys).not_to include(%i(ServerSideEncryption SSEKMSKeyID))
       end
 
       context 'when feature flag is disabled' do
@@ -109,6 +155,41 @@ describe ObjectStorage::DirectUpload do
           expect(subject[:UseWorkhorseClient]).to eq(use_iam_profile)
         end
       end
+
+      context 'when consolidated settings are used' do
+        let(:consolidated_settings) { true }
+
+        it 'enables the Workhorse client' do
+          expect(subject[:UseWorkhorseClient]).to be true
+        end
+      end
+
+      context 'when only server side encryption is used' do
+        let(:storage_options) { { server_side_encryption: 'AES256' } }
+
+        it 'sends server side encryption settings' do
+          s3_config = subject[:ObjectStorage][:S3Config]
+
+          expect(s3_config[:ServerSideEncryption]).to eq('AES256')
+          expect(s3_config.keys).not_to include(:SSEKMSKeyID)
+        end
+      end
+
+      context 'when SSE-KMS is used' do
+        let(:storage_options) do
+          {
+            server_side_encryption: 'AES256',
+            server_side_encryption_kms_key_id: 'arn:aws:12345'
+          }
+        end
+
+        it 'sends server side encryption settings' do
+          s3_config = subject[:ObjectStorage][:S3Config]
+
+          expect(s3_config[:ServerSideEncryption]).to eq('AES256')
+          expect(s3_config[:SSEKMSKeyID]).to eq('arn:aws:12345')
+        end
+      end
     end
 
     shared_examples 'a valid Google upload' do
@@ -116,6 +197,21 @@ describe ObjectStorage::DirectUpload do
 
       it 'does not set Workhorse client data' do
         expect(subject.keys).not_to include(:UseWorkhorseClient, :RemoteTempObjectID, :ObjectStorage)
+      end
+    end
+
+    shared_examples 'a valid AzureRM upload' do
+      before do
+        require 'fog/azurerm'
+      end
+
+      it_behaves_like 'a valid upload'
+
+      it 'enables the Workhorse client' do
+        expect(subject[:UseWorkhorseClient]).to be true
+        expect(subject[:RemoteTempObjectID]).to eq(object_name)
+        expect(subject[:ObjectStorage][:Provider]).to eq('AzureRM')
+        expect(subject[:ObjectStorage][:GoCloudConfig]).to eq({ URL: gocloud_url })
       end
     end
 
@@ -287,6 +383,36 @@ describe ObjectStorage::DirectUpload do
 
         it_behaves_like 'a valid Google upload'
         it_behaves_like 'a valid upload without multipart data'
+      end
+    end
+
+    context 'when AzureRM is used' do
+      let(:credentials) do
+        {
+          provider: 'AzureRM',
+          azure_storage_account_name: 'azuretest',
+          azure_storage_access_key: 'ABCD1234'
+        }
+      end
+
+      let(:has_length) { false }
+      let(:storage_domain) { nil }
+      let(:storage_url) { 'https://azuretest.blob.core.windows.net' }
+      let(:gocloud_url) { "azblob://#{bucket_name}" }
+
+      it_behaves_like 'a valid AzureRM upload'
+      it_behaves_like 'a valid upload without multipart data'
+
+      context 'when a custom storage domain is used' do
+        let(:storage_domain) { 'blob.core.chinacloudapi.cn' }
+        let(:storage_url) { "https://azuretest.#{storage_domain}" }
+        let(:gocloud_url) { "azblob://#{bucket_name}?domain=#{storage_domain}" }
+
+        before do
+          credentials[:azure_storage_domain] = storage_domain
+        end
+
+        it_behaves_like 'a valid AzureRM upload'
       end
     end
   end

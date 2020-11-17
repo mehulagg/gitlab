@@ -17,99 +17,6 @@ RSpec.describe 'Promotions', :js do
                        promotion_issue_weight_session_dismiss: false
   end
 
-  describe 'if you have a license' do
-    before do
-      project.add_maintainer(user)
-    end
-
-    it 'shows no promotion at all' do
-      sign_in(user)
-      visit edit_project_path(project)
-
-      expect(page).not_to have_selector('#promote_service_desk')
-    end
-  end
-
-  describe 'for project features in general on premise' do
-    context 'no license installed' do
-      before do
-        allow(License).to receive(:current).and_return(nil)
-        stub_application_setting(check_namespace_plan: false)
-        project.add_maintainer(user)
-      end
-
-      it 'has the contact admin line' do
-        sign_in(user)
-        visit edit_project_path(project)
-
-        expect(find('#promote_service_desk')).to have_content 'Contact your Administrator to upgrade your license.'
-      end
-
-      it 'has the start trial button' do
-        sign_in(admin)
-        visit edit_project_path(project)
-
-        expect(find('#promote_service_desk')).to have_content 'Start GitLab Ultimate trial'
-      end
-    end
-  end
-
-  describe 'for project features in general', :js do
-    context 'for .com' do
-      before do
-        project.add_maintainer(user)
-        otherproject.add_maintainer(user)
-
-        stub_application_setting(check_namespace_plan: true)
-        allow(Gitlab).to receive(:com?) { true }
-
-        sign_in(user)
-      end
-
-      it "has the 'Upgrade your plan' button" do
-        visit edit_project_path(project)
-
-        expect(find('#promote_service_desk')).to have_content 'Upgrade your plan'
-      end
-
-      it 'has the contact owner line' do
-        visit edit_project_path(otherproject)
-
-        expect(find('#promote_service_desk')).to have_content 'Contact owner'
-      end
-    end
-  end
-
-  describe 'for service desk', :js do
-    before do
-      allow(License).to receive(:current).and_return(nil)
-      stub_application_setting(check_namespace_plan: false)
-
-      project.add_maintainer(user)
-      sign_in(user)
-    end
-
-    it 'appears in project edit page' do
-      visit edit_project_path(project)
-
-      expect(find('#promote_service_desk')).to have_content 'Improve customer support with GitLab Service Desk.'
-    end
-
-    it 'does not show when cookie is set' do
-      visit edit_project_path(project)
-
-      within('#promote_service_desk') do
-        find('.close').click
-      end
-
-      wait_for_requests
-
-      visit edit_project_path(project)
-
-      expect(page).not_to have_selector('#promote_service_desk')
-    end
-  end
-
   describe 'for merge request improve', :js do
     before do
       allow(License).to receive(:current).and_return(nil)
@@ -311,7 +218,7 @@ RSpec.describe 'Promotions', :js do
       expect(find('.promotion-issue-weight-sidebar-message')).to have_content 'Improve issues management with Issue weight and GitLab Enterprise Edition'
     end
 
-    it 'is removed after dismissal' do
+    it 'is removed after dismissal', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222518' do
       visit project_issue_path(project, issue)
       wait_for_requests
 
@@ -461,7 +368,7 @@ RSpec.describe 'Promotions', :js do
 
       submit_search('chosen')
 
-      expect(find('#promote_advanced_search')).to have_content 'Improve search with Advanced Global Search and GitLab Enterprise Edition.'
+      expect(find('#promote_advanced_search')).to have_content 'Improve search with Advanced Search and GitLab Enterprise Edition.'
     end
 
     it 'does not show when cookie is set' do

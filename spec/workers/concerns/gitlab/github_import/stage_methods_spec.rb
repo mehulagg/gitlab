@@ -2,13 +2,15 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::StageMethods do
+RSpec.describe Gitlab::GithubImport::StageMethods do
   let(:project) { create(:project) }
   let(:worker) do
     Class.new { include(Gitlab::GithubImport::StageMethods) }.new
   end
 
   describe '#perform' do
+    let(:project) { create(:project, import_url: 'https://t0ken@github.com/repo/repo.git') }
+
     it 'returns if no project could be found' do
       expect(worker).not_to receive(:try_import)
 

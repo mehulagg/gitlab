@@ -2,17 +2,18 @@
 
 require 'spec_helper'
 
-RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
+RSpec.describe GeoNodeStatus, :geo do
   include ::EE::GeoHelpers
+  using RSpec::Parameterized::TableSyntax
 
   let!(:primary) { create(:geo_node, :primary) }
   let!(:secondary) { create(:geo_node) }
 
-  let!(:group)     { create(:group) }
-  let!(:project_1) { create(:project, group: group) }
-  let!(:project_2) { create(:project, group: group) }
-  let!(:project_3) { create(:project) }
-  let!(:project_4) { create(:project) }
+  let_it_be(:group)     { create(:group) }
+  let_it_be(:project_1) { create(:project, group: group) }
+  let_it_be(:project_2) { create(:project, group: group) }
+  let_it_be(:project_3) { create(:project) }
+  let_it_be(:project_4) { create(:project) }
 
   subject(:status) { described_class.current_node_status }
 
@@ -117,15 +118,26 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
   end
 
   describe '#projects_count' do
-    it 'counts the number of projects' do
+    it 'counts the number of projects on a primary node' do
+      stub_current_geo_node(primary)
+
       expect(subject.projects_count).to eq 4
+    end
+
+    it 'counts the number of projects on a secondary node' do
+      stub_current_geo_node(secondary)
+
+      create(:geo_project_registry, :synced, project: project_1)
+      create(:geo_project_registry, project: project_3)
+
+      expect(subject.projects_count).to eq 2
     end
   end
 
   describe '#attachments_synced_count' do
     it 'only counts successful syncs' do
       create_list(:user, 3, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'))
-      uploads = Upload.all.pluck(:id)
+      uploads = Upload.pluck(:id)
 
       create(:geo_upload_registry, :avatar, file_id: uploads[0])
       create(:geo_upload_registry, :avatar, file_id: uploads[1])
@@ -133,42 +145,12 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
 
       expect(subject.attachments_synced_count).to eq(2)
     end
-
-    it 'does not count synced files that were replaced' do
-      user = create(:user, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'))
-
-      expect(subject.attachments_count).to eq(1)
-      expect(subject.attachments_synced_count).to eq(0)
-
-      upload = Upload.find_by(model: user, uploader: 'AvatarUploader')
-      create(:geo_upload_registry, :avatar, file_id: upload.id)
-
-      subject = described_class.current_node_status
-
-      expect(subject.attachments_count).to eq(1)
-      expect(subject.attachments_synced_count).to eq(1)
-
-      user.update(avatar: fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpeg'))
-
-      subject = described_class.current_node_status
-
-      expect(subject.attachments_count).to eq(1)
-      expect(subject.attachments_synced_count).to eq(0)
-
-      upload = Upload.find_by(model: user, uploader: 'AvatarUploader')
-      create(:geo_upload_registry, :avatar, file_id: upload.id)
-
-      subject = described_class.current_node_status
-
-      expect(subject.attachments_count).to eq(1)
-      expect(subject.attachments_synced_count).to eq(1)
-    end
   end
 
   describe '#attachments_synced_missing_on_primary_count' do
     it 'only counts successful syncs' do
       create_list(:user, 3, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'))
-      uploads = Upload.all.pluck(:id)
+      uploads = Upload.pluck(:id)
 
       create(:geo_upload_registry, :avatar, file_id: uploads[0], missing_on_primary: true)
       create(:geo_upload_registry, :avatar, file_id: uploads[1])
@@ -194,32 +176,20 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
   end
 
   describe '#attachments_synced_in_percentage' do
-    let(:avatar) { fixture_file_upload('spec/fixtures/dk.png') }
-    let(:upload_1) { create(:upload, model: group, path: avatar) }
-    let(:upload_2) { create(:upload, model: project_1, path: avatar) }
-
-    before do
-      create(:upload, model: create(:group), path: avatar)
-      create(:upload, model: project_3, path: avatar)
-    end
-
-    it 'returns 0 when no objects are available' do
+    it 'returns 0 when no registries are available' do
       expect(subject.attachments_synced_in_percentage).to eq(0)
     end
 
-    it 'returns the right percentage with no group restrictions' do
-      create(:geo_upload_registry, :avatar, file_id: upload_1.id)
-      create(:geo_upload_registry, :avatar, file_id: upload_2.id)
+    it 'returns the right percentage' do
+      create_list(:user, 4, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'))
+      uploads = Upload.pluck(:id)
+
+      create(:geo_upload_registry, :avatar, file_id: uploads[0])
+      create(:geo_upload_registry, :avatar, file_id: uploads[1])
+      create(:geo_upload_registry, :avatar, :failed, file_id: uploads[2])
+      create(:geo_upload_registry, :avatar, :never_synced, file_id: uploads[3])
 
       expect(subject.attachments_synced_in_percentage).to be_within(0.0001).of(50)
-    end
-
-    it 'returns the right percentage with group restrictions' do
-      secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-      create(:geo_upload_registry, :avatar, file_id: upload_1.id)
-      create(:geo_upload_registry, :avatar, file_id: upload_2.id)
-
-      expect(subject.attachments_synced_in_percentage).to be_within(0.0001).of(100)
     end
   end
 
@@ -321,40 +291,16 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
   end
 
   describe '#job_artifacts_failed_count' do
-    context 'when geo_job_artifact_registry_ssot_sync is disabled' do
-      before do
-        stub_feature_flags(geo_job_artifact_registry_ssot_sync: false)
-      end
+    it 'counts failed job artifacts' do
+      # These should be ignored
+      create(:geo_upload_registry, :failed)
+      create(:geo_upload_registry, :avatar, :failed)
+      create(:geo_upload_registry, :attachment, :failed)
+      create(:geo_job_artifact_registry, :with_artifact, success: true)
 
-      it 'counts failed job artifacts' do
-        # These should be ignored
-        create(:geo_upload_registry, :failed)
-        create(:geo_upload_registry, :avatar, :failed)
-        create(:geo_upload_registry, :attachment, :failed)
-        create(:geo_job_artifact_registry, :with_artifact, success: true)
+      create(:geo_job_artifact_registry, :with_artifact, :failed)
 
-        create(:geo_job_artifact_registry, :with_artifact, success: false)
-
-        expect(subject.job_artifacts_failed_count).to eq(1)
-      end
-    end
-
-    context 'when geo_job_artifact_registry_ssot_sync is enabled' do
-      before do
-        stub_feature_flags(geo_job_artifact_registry_ssot_sync: true)
-      end
-
-      it 'counts failed job artifacts' do
-        # These should be ignored
-        create(:geo_upload_registry, :failed)
-        create(:geo_upload_registry, :avatar, :failed)
-        create(:geo_upload_registry, :attachment, :failed)
-        create(:geo_job_artifact_registry, :with_artifact, success: true)
-
-        create(:geo_job_artifact_registry, :with_artifact, :failed)
-
-        expect(subject.job_artifacts_failed_count).to eq(1)
-      end
+      expect(subject.job_artifacts_failed_count).to eq(1)
     end
   end
 
@@ -385,41 +331,47 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
     end
   end
 
+  describe '#repositories_synced_count' do
+    it 'returns the right number of synced registries' do
+      create(:geo_project_registry, :synced, project: project_1)
+      create(:geo_project_registry, :synced, project: project_3)
+      create(:geo_project_registry, :repository_syncing, project: project_4)
+      create(:geo_project_registry, :wiki_syncing)
+
+      expect(subject.repositories_synced_count).to eq(3)
+    end
+  end
+
+  describe '#wikis_synced_count' do
+    it 'returns the right number of synced registries' do
+      create(:geo_project_registry, :synced, project: project_1)
+      create(:geo_project_registry, :synced, project: project_3)
+      create(:geo_project_registry, :repository_syncing, project: project_4)
+      create(:geo_project_registry, :wiki_syncing)
+
+      expect(subject.wikis_synced_count).to eq(3)
+    end
+  end
+
   describe '#repositories_failed_count' do
-    before do
+    it 'returns the right number of failed registries' do
       create(:geo_project_registry, :sync_failed, project: project_1)
       create(:geo_project_registry, :sync_failed, project: project_3)
       create(:geo_project_registry, :repository_syncing, project: project_4)
       create(:geo_project_registry, :wiki_syncing)
-    end
 
-    it 'returns the right number of failed repos with no group restrictions' do
       expect(subject.repositories_failed_count).to eq(2)
-    end
-
-    it 'returns the right number of failed repos with group restrictions' do
-      secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-
-      expect(subject.repositories_failed_count).to eq(1)
     end
   end
 
   describe '#wikis_failed_count' do
-    before do
+    it 'returns the right number of failed registries' do
       create(:geo_project_registry, :sync_failed, project: project_1)
       create(:geo_project_registry, :sync_failed, project: project_3)
       create(:geo_project_registry, :repository_syncing, project: project_4)
       create(:geo_project_registry, :wiki_syncing)
-    end
 
-    it 'returns the right number of failed repos with no group restrictions' do
       expect(subject.wikis_failed_count).to eq(2)
-    end
-
-    it 'returns the right number of failed repos with group restrictions' do
-      secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-
-      expect(subject.wikis_failed_count).to eq(1)
     end
   end
 
@@ -434,17 +386,13 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       expect(subject.repositories_synced_in_percentage).to eq(0)
     end
 
-    it 'returns the right percentage with no group restrictions' do
+    it 'returns the right percentage' do
       create(:geo_project_registry, :synced, project: project_1)
+      create(:geo_project_registry, project: project_2)
+      create(:geo_project_registry, project: project_3)
+      create(:geo_project_registry, project: project_4)
 
       expect(subject.repositories_synced_in_percentage).to be_within(0.0001).of(25)
-    end
-
-    it 'returns the right percentage with group restrictions' do
-      secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-      create(:geo_project_registry, :synced, project: project_1)
-
-      expect(subject.repositories_synced_in_percentage).to be_within(0.0001).of(50)
     end
   end
 
@@ -459,17 +407,13 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       expect(subject.wikis_synced_in_percentage).to eq(0)
     end
 
-    it 'returns the right percentage with no group restrictions' do
+    it 'returns the right percentage' do
       create(:geo_project_registry, :synced, project: project_1)
+      create(:geo_project_registry, project: project_2)
+      create(:geo_project_registry, project: project_3)
+      create(:geo_project_registry, project: project_4)
 
       expect(subject.wikis_synced_in_percentage).to be_within(0.0001).of(25)
-    end
-
-    it 'returns the right percentage with group restrictions' do
-      secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-      create(:geo_project_registry, :synced, project: project_1)
-
-      expect(subject.wikis_synced_in_percentage).to be_within(0.0001).of(50)
     end
   end
 
@@ -643,16 +587,18 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
   end
 
   describe '#container_repositories_count' do
-    let!(:container_1) { create(:container_repository) }
-    let!(:container_2) { create(:container_repository) }
+    let!(:container_1) { create(:container_repository_registry, :synced) }
+    let!(:container_2) { create(:container_repository_registry, :sync_failed) }
+    let!(:container_3) { create(:container_repository_registry, :sync_failed) }
+    let!(:container_4) { create(:container_repository) }
 
     context 'when container repositories replication is active' do
       before do
         stub_geo_setting(registry_replication: { enabled: true })
       end
 
-      it 'counts all the repositories' do
-        expect(subject.container_repositories_count).to eq(2)
+      it 'counts number of registries for repositories' do
+        expect(subject.container_repositories_count).to eq(3)
       end
     end
 
@@ -747,10 +693,6 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
   end
 
   describe '#container_repositories_synced_in_percentage' do
-    let!(:container_repository_1) { create(:container_repository, project: project_1) }
-    let!(:container_repository_2) { create(:container_repository, project: project_1) }
-    let!(:container_list) { create_list(:container_repository, 2, project: project_3) }
-
     context 'when container repositories replication is active' do
       before do
         stub_geo_setting(registry_replication: { enabled: true })
@@ -760,34 +702,32 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
         expect(subject.container_repositories_synced_in_percentage).to eq(0)
       end
 
-      it 'returns the right percentage with no group restrictions' do
-        create(:container_repository_registry, :synced, container_repository: container_repository_1)
+      it 'returns the right percentage' do
+        create(:container_repository_registry, :synced)
+        create(:container_repository_registry)
+        create(:container_repository_registry)
+        create(:container_repository_registry)
 
         expect(subject.container_repositories_synced_in_percentage).to be_within(0.0001).of(25)
-      end
-
-      it 'returns the right percentage with group restrictions' do
-        secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-        create(:container_repository_registry, :synced, container_repository: container_repository_1)
-
-        expect(subject.container_repositories_synced_in_percentage).to be_within(0.0001).of(50)
       end
     end
 
     it 'when container repositories replication is inactive returns 0' do
       stub_geo_setting(registry_replication: { enabled: false })
-      create(:container_repository_registry, :synced, container_repository: container_repository_1)
+
+      create(:container_repository_registry, :synced)
 
       expect(subject.container_repositories_synced_in_percentage).to eq(0)
     end
   end
 
   describe '#design_repositories_count' do
-    it 'counts all the designs' do
-      create(:design)
-      create(:design)
+    it 'counts number of registries for repositories' do
+      create(:geo_design_registry, :sync_failed)
+      create(:geo_design_registry)
+      create(:geo_design_registry, :synced)
 
-      expect(subject.design_repositories_count).to eq(2)
+      expect(subject.design_repositories_count).to eq(3)
     end
   end
 
@@ -824,20 +764,9 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       expect(subject.design_repositories_synced_in_percentage).to eq(0)
     end
 
-    it 'returns the right percentage with no group restrictions' do
+    it 'returns the right percentage' do
       create(:geo_design_registry, :synced)
       create(:geo_design_registry, :sync_failed)
-
-      expect(subject.design_repositories_synced_in_percentage).to be_within(0.0001).of(50)
-    end
-
-    it 'returns the right percentage with group restrictions' do
-      secondary.update!(selective_sync_type: 'namespaces', namespaces: [group])
-
-      create(:geo_design_registry, :synced, project: project_1)
-      create(:geo_design_registry, :sync_failed, project: project_2)
-      create(:geo_design_registry, :sync_failed, project: project_3)
-      create(:geo_design_registry, :sync_failed, project: project_4)
 
       expect(subject.design_repositories_synced_in_percentage).to be_within(0.0001).of(50)
     end
@@ -848,9 +777,11 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of verified repositories' do
-      create(:geo_project_registry, :repository_verified)
-      create(:geo_project_registry, :repository_verified)
+    it 'returns the right number of verified registries' do
+      create(:geo_project_registry, :repository_verified, project: project_1)
+      create(:geo_project_registry, :repository_verified, :repository_checksum_mismatch, project: project_3)
+      create(:geo_project_registry, :repository_verification_failed)
+      create(:geo_project_registry, :wiki_verified, project: project_4)
 
       expect(subject.repositories_verified_count).to eq(2)
     end
@@ -868,12 +799,13 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of repositories that checksum mismatch' do
-      create(:geo_project_registry, :repository_checksum_mismatch)
-      create(:geo_project_registry, :repository_verification_failed)
+    it 'returns the right number of registries that checksum mismatch' do
+      create(:geo_project_registry, :repository_checksum_mismatch, project: project_1)
+      create(:geo_project_registry, :repository_checksum_mismatch, project: project_3)
       create(:geo_project_registry, :repository_verified)
+      create(:geo_project_registry, :wiki_checksum_mismatch, project: project_4)
 
-      expect(subject.repositories_checksum_mismatch_count).to eq(1)
+      expect(subject.repositories_checksum_mismatch_count).to eq(2)
     end
 
     it 'returns existing value when feature flag if off' do
@@ -889,9 +821,11 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of failed repositories' do
-      create(:geo_project_registry, :repository_verification_failed)
-      create(:geo_project_registry, :repository_verification_failed)
+    it 'returns the right number of registries that verification failed' do
+      create(:geo_project_registry, :repository_verification_failed, project: project_1)
+      create(:geo_project_registry, :repository_verification_failed, project: project_3)
+      create(:geo_project_registry, :repository_verified)
+      create(:geo_project_registry, :wiki_verification_failed, project: project_4)
 
       expect(subject.repositories_verification_failed_count).to eq(2)
     end
@@ -909,12 +843,13 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of repositories retrying verification' do
-      create(:geo_project_registry, :repository_verification_failed, repository_verification_retry_count: 1)
-      create(:geo_project_registry, :repository_verification_failed, repository_verification_retry_count: nil)
+    it 'returns the right number of registries retrying verification' do
+      create(:geo_project_registry, :repository_verification_failed, repository_verification_retry_count: 1, project: project_1)
+      create(:geo_project_registry, :repository_verification_failed, repository_verification_retry_count: nil, project: project_3)
       create(:geo_project_registry, :repository_verified)
+      create(:geo_project_registry, :repository_verification_failed, repository_verification_retry_count: 1, project: project_4)
 
-      expect(subject.repositories_retrying_verification_count).to eq(1)
+      expect(subject.repositories_retrying_verification_count).to eq(2)
     end
 
     it 'returns existing value when feature flag if off' do
@@ -930,9 +865,11 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of verified wikis' do
-      create(:geo_project_registry, :wiki_verified)
-      create(:geo_project_registry, :wiki_verified)
+    it 'returns the right number of verified registries' do
+      create(:geo_project_registry, :wiki_verified, project: project_1)
+      create(:geo_project_registry, :wiki_verified, :wiki_checksum_mismatch, project: project_3)
+      create(:geo_project_registry, :wiki_verification_failed)
+      create(:geo_project_registry, :repository_verified, project: project_4)
 
       expect(subject.wikis_verified_count).to eq(2)
     end
@@ -950,12 +887,13 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of wikis that checksum mismatch' do
-      create(:geo_project_registry, :wiki_checksum_mismatch)
-      create(:geo_project_registry, :wiki_verification_failed)
+    it 'returns the right number of registries that checksum mismatch' do
+      create(:geo_project_registry, :wiki_checksum_mismatch, project: project_1)
+      create(:geo_project_registry, :wiki_checksum_mismatch, project: project_3)
       create(:geo_project_registry, :wiki_verified)
+      create(:geo_project_registry, :repository_checksum_mismatch, project: project_4)
 
-      expect(subject.wikis_checksum_mismatch_count).to eq(1)
+      expect(subject.wikis_checksum_mismatch_count).to eq(2)
     end
 
     it 'returns existing value when feature flag if off' do
@@ -971,9 +909,11 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of failed wikis' do
-      create(:geo_project_registry, :wiki_verification_failed)
-      create(:geo_project_registry, :wiki_verification_failed)
+    it 'returns the right number of registries that verification failed' do
+      create(:geo_project_registry, :wiki_verification_failed, project: project_1)
+      create(:geo_project_registry, :wiki_verification_failed, project: project_3)
+      create(:geo_project_registry, :wiki_verified)
+      create(:geo_project_registry, :repository_verification_failed, project: project_4)
 
       expect(subject.wikis_verification_failed_count).to eq(2)
     end
@@ -991,12 +931,13 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
       stub_current_geo_node(secondary)
     end
 
-    it 'returns the right number of wikis retrying verification' do
-      create(:geo_project_registry, :wiki_verification_failed, wiki_verification_retry_count: 1)
-      create(:geo_project_registry, :wiki_verification_failed, wiki_verification_retry_count: nil)
+    it 'returns the right number of registries retrying verification' do
+      create(:geo_project_registry, :wiki_verification_failed, wiki_verification_retry_count: 1, project: project_1)
+      create(:geo_project_registry, :wiki_verification_failed, wiki_verification_retry_count: nil, project: project_3)
       create(:geo_project_registry, :wiki_verified)
+      create(:geo_project_registry, :wiki_verification_failed, wiki_verification_retry_count: 1, project: project_4)
 
-      expect(subject.wikis_retrying_verification_count).to eq(1)
+      expect(subject.wikis_retrying_verification_count).to eq(2)
     end
 
     it 'returns existing value when feature flag if off' do
@@ -1054,7 +995,9 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
 
   describe '#[]' do
     it 'returns values for each attribute' do
-      expect(subject[:projects_count]).to eq(4)
+      create(:geo_project_registry, project: project_1)
+
+      expect(subject[:projects_count]).to eq(1)
       expect(subject[:repositories_synced_count]).to eq(0)
     end
 
@@ -1203,79 +1146,141 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
     end
   end
 
-  describe '#package_files_checksummed_count' do
-    before do
-      stub_current_geo_node(primary)
+  context 'Replicator stats' do
+    where(:replicator, :model_factory, :registry_factory) do
+      Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
+      Geo::PackageFileReplicator           | :package_file                | :geo_package_file_registry
+      Geo::TerraformStateVersionReplicator | :terraform_state_version     | :geo_terraform_state_version_registry
+      Geo::SnippetRepositoryReplicator     | :snippet_repository          | :geo_snippet_repository_registry
     end
 
-    it 'returns the right number of checksummed package files' do
-      create(:package_file, :jar, :checksummed)
-      create(:package_file, :jar, :checksummed)
-      create(:package_file, :jar, :checksum_failure)
+    with_them do
+      let(:replicable_name) { replicator.replicable_name_plural }
 
-      expect(subject.package_files_checksummed_count).to eq(2)
-    end
-  end
+      context 'replication' do
+        let(:registry_count_method) { "#{replicable_name}_registry_count" }
+        let(:failed_count_method) { "#{replicable_name}_failed_count" }
+        let(:synced_count_method) { "#{replicable_name}_synced_count" }
+        let(:synced_in_percentage_method) { "#{replicable_name}_synced_in_percentage" }
 
-  describe '#package_files_checksum_failed_count' do
-    before do
-      stub_current_geo_node(primary)
-    end
+        describe '#<replicable_name>_[registry|synced|failed]_count' do
+          context 'when package registries available' do
+            before do
+              create(registry_factory, :failed)
+              create(registry_factory, :failed)
+              create(registry_factory, :synced)
+            end
 
-    it 'returns the right number of failed package files' do
-      create(:package_file, :jar, :checksummed)
-      create(:package_file, :jar, :checksum_failure)
-      create(:package_file, :jar, :checksum_failure)
+            it 'returns the right number of repos in registry' do
+              expect(subject.send(registry_count_method)).to eq(3)
+            end
 
-      expect(subject.package_files_checksum_failed_count).to eq(2)
-    end
-  end
+            it 'returns the right number of failed and synced repos' do
+              expect(subject.send(failed_count_method)).to eq(2)
+              expect(subject.send(synced_count_method)).to eq(1)
+            end
 
-  describe '#package_files_checksummed_in_percentage' do
-    before do
-      stub_current_geo_node(primary)
-    end
+            it 'returns the percent of synced replicables' do
+              expect(subject.send(synced_in_percentage_method)).to be_within(0.01).of(33.33)
+            end
+          end
 
-    it 'returns 0 when no package files available' do
-      expect(subject.package_files_checksummed_in_percentage).to eq(0)
-    end
+          context 'when no package registries available' do
+            it 'returns 0' do
+              expect(subject.send(registry_count_method)).to eq(0)
+              expect(subject.send(failed_count_method)).to eq(0)
+              expect(subject.send(synced_count_method)).to eq(0)
+            end
 
-    it 'returns the right percentage' do
-      create(:package_file, :jar, :checksummed)
-      create(:package_file, :jar, :checksummed)
-      create(:package_file, :jar, :checksummed)
-      create(:package_file, :jar, :checksum_failure)
-
-      expect(subject.package_files_checksummed_in_percentage).to be_within(0.0001).of(75)
-    end
-  end
-
-  describe 'package files secondary counters' do
-    context 'when package registries available' do
-      before do
-        create(:geo_package_file_registry, :failed)
-        create(:geo_package_file_registry, :failed)
-        create(:geo_package_file_registry, :synced)
+            it 'returns 0' do
+              expect(subject.send(synced_in_percentage_method)).to eq(0)
+            end
+          end
+        end
       end
 
-      it 'returns the right number of failed and synced repos' do
-        expect(subject.package_files_failed_count).to eq(2)
-        expect(subject.package_files_synced_count).to eq(1)
-      end
+      context 'verification' do
+        let(:checksummed_count_method) { "#{replicable_name}_checksummed_count" }
+        let(:checksum_failed_count_method) { "#{replicable_name}_checksum_failed_count" }
+        let(:checksummed_in_percentage_method) { "#{replicable_name}_checksummed_in_percentage" }
 
-      it 'returns the percent of synced package files' do
-        expect(subject.package_files_synced_in_percentage).to be_within(0.01).of(33.33)
-      end
-    end
+        context 'when verification is enabled' do
+          before do
+            stub_current_geo_node(primary)
+            allow(replicator).to receive(:verification_enabled?).and_return(true)
+          end
 
-    context 'when no package registries available' do
-      it 'returns 0' do
-        expect(subject.package_files_failed_count).to eq(0)
-        expect(subject.package_files_synced_count).to eq(0)
-      end
+          context 'when there are replicables' do
+            before do
+              create(model_factory, :checksummed)
+              create(model_factory, :checksummed)
+              create(model_factory, :checksum_failure)
+            end
 
-      it 'returns 0' do
-        expect(subject.package_files_synced_in_percentage).to eq(0)
+            describe '#<replicable_name>_checksummed_count' do
+              it 'returns the right number of checksummed replicables' do
+                expect(subject.send(checksummed_count_method)).to eq(2)
+              end
+            end
+
+            describe '#<replicable_name>_checksum_failed_count' do
+              it 'returns the right number of failed replicables' do
+                expect(subject.send(checksum_failed_count_method)).to eq(1)
+              end
+            end
+
+            describe '#<replicable_name>_checksummed_in_percentage' do
+              it 'returns the right percentage' do
+                expect(subject.send(checksummed_in_percentage_method)).to be_within(0.01).of(66.67)
+              end
+            end
+          end
+
+          context 'when there are no replicables' do
+            describe '#<replicable_name>_checksummed_count' do
+              it 'returns 0' do
+                expect(subject.send(checksummed_count_method)).to eq(0)
+              end
+            end
+
+            describe '#<replicable_name>_checksum_failed_count' do
+              it 'returns 0' do
+                expect(subject.send(checksum_failed_count_method)).to eq(0)
+              end
+            end
+
+            describe '#<replicable_name>_checksummed_in_percentage' do
+              it 'returns 0' do
+                expect(subject.send(checksummed_in_percentage_method)).to eq(0)
+              end
+            end
+          end
+        end
+
+        context 'when verification is disabled' do
+          before do
+            stub_current_geo_node(primary)
+            allow(replicator).to receive(:verification_enabled?).and_return(false)
+          end
+
+          describe '#<replicable_name>_checksummed_count' do
+            it 'returns nil' do
+              expect(subject.send(checksummed_count_method)).to be_nil
+            end
+          end
+
+          describe '#<replicable_name>_checksum_failed_count' do
+            it 'returns nil' do
+              expect(subject.send(checksum_failed_count_method)).to be_nil
+            end
+          end
+
+          describe '#<replicable_name>_checksummed_in_percentage' do
+            it 'returns 0' do
+              expect(subject.send(checksummed_in_percentage_method)).to eq(0)
+            end
+          end
+        end
       end
     end
   end
@@ -1286,40 +1291,40 @@ RSpec.describe GeoNodeStatus, :geo, :geo_fdw do
         stub_current_geo_node(primary)
       end
 
-      it 'does not call LfsObjectRegistryFinder#count_syncable' do
-        expect_any_instance_of(Geo::LfsObjectRegistryFinder).not_to receive(:count_syncable)
+      it 'does not call LfsObjectRegistryFinder#registry_count' do
+        expect_any_instance_of(Geo::LfsObjectRegistryFinder).not_to receive(:registry_count)
 
         subject
       end
 
-      it 'does not call AttachmentRegistryFinder#count_syncable' do
-        expect_any_instance_of(Geo::AttachmentRegistryFinder).not_to receive(:count_syncable)
+      it 'does not call AttachmentRegistryFinder#registry_count' do
+        expect_any_instance_of(Geo::AttachmentRegistryFinder).not_to receive(:registry_count)
 
         subject
       end
 
-      it 'does not call JobArtifactRegistryFinder#count_syncable' do
-        expect_any_instance_of(Geo::JobArtifactRegistryFinder).not_to receive(:count_syncable)
+      it 'does not call JobArtifactRegistryFinder#registry_count' do
+        expect_any_instance_of(Geo::JobArtifactRegistryFinder).not_to receive(:registry_count)
 
         subject
       end
     end
 
     context 'on the secondary' do
-      it 'calls LfsObjectRegistryFinder#count_syncable' do
-        expect_any_instance_of(Geo::LfsObjectRegistryFinder).to receive(:count_syncable)
+      it 'calls LfsObjectRegistryFinder#registry_count' do
+        expect_any_instance_of(Geo::LfsObjectRegistryFinder).to receive(:registry_count).twice
 
         subject
       end
 
-      it 'calls AttachmentRegistryFinder#count_syncable' do
-        expect_any_instance_of(Geo::AttachmentRegistryFinder).to receive(:count_syncable)
+      it 'calls AttachmentRegistryFinder#registry_count' do
+        expect_any_instance_of(Geo::AttachmentRegistryFinder).to receive(:registry_count).twice
 
         subject
       end
 
-      it 'calls JobArtifactRegistryFinder#count_syncable' do
-        expect_any_instance_of(Geo::JobArtifactRegistryFinder).to receive(:count_syncable)
+      it 'calls JobArtifactRegistryFinder#registry_count' do
+        expect_any_instance_of(Geo::JobArtifactRegistryFinder).to receive(:registry_count).twice
 
         subject
       end

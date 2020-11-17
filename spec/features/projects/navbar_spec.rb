@@ -12,7 +12,7 @@ RSpec.describe 'Project navbar' do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
-    stub_licensed_features(service_desk: false)
+    insert_package_nav(_('Operations'))
 
     project.add_maintainer(user)
     sign_in(user)
@@ -60,16 +60,30 @@ RSpec.describe 'Project navbar' do
     before do
       stub_config(registry: { enabled: true })
 
-      insert_after_nav_item(
-        _('Operations'),
-        new_nav_item: {
-          nav_item: _('Packages & Registries'),
-          nav_sub_items: [_('Container Registry')]
-        }
-      )
+      insert_container_nav(_('Operations'))
+
       visit project_path(project)
     end
 
     it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when invite team members is not available' do
+    it 'does not display the js-invite-members-trigger' do
+      visit project_path(project)
+
+      expect(page).not_to have_selector('.js-invite-members-trigger')
+    end
+  end
+
+  context 'when invite team members is available' do
+    it 'includes the div for js-invite-members-trigger' do
+      stub_feature_flags(invite_members_group_modal: true)
+      allow_any_instance_of(InviteMembersHelper).to receive(:invite_members_allowed?).and_return(true)
+
+      visit project_path(project)
+
+      expect(page).to have_selector('.js-invite-members-trigger')
+    end
   end
 end

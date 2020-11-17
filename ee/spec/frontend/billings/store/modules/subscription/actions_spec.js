@@ -6,7 +6,7 @@ import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
 import * as actions from 'ee/billings/stores/modules/subscription/actions';
 import axios from '~/lib/utils/axios_utils';
 
-import mockDataSubscription from '../../../mock_data';
+import { mockDataSubscription } from '../../../mock_data';
 
 describe('subscription actions', () => {
   let mockedState;

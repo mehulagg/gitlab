@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Spam::SpamActionService do
+RSpec.describe Spam::SpamActionService do
   include_context 'includes Spam constants'
 
   let(:fake_ip) { '1.2.3.4' }
@@ -13,6 +13,7 @@ describe Spam::SpamActionService do
       'HTTP_USER_AGENT' => fake_user_agent,
       'HTTP_REFERRER' => fake_referrer }
   end
+
   let(:request) { double(:request, env: env) }
 
   let_it_be(:project) { create(:project, :public) }

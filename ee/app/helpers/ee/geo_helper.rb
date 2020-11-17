@@ -31,7 +31,8 @@ module EE
         primary_revision: revision.to_s,
         node_actions_allowed: ::Gitlab::Database.db_read_write?.to_s,
         node_edit_allowed: ::Gitlab::Geo.license_allows?.to_s,
-        geo_troubleshooting_help_path: help_page_path('administration/geo/replication/troubleshooting.md')
+        geo_troubleshooting_help_path: help_page_path('administration/geo/replication/troubleshooting.md'),
+        replicable_types: replicable_types.to_json
       }
     end
 
@@ -162,6 +163,76 @@ module EE
 
     def reverify_all_button
       button_to(s_("Geo|Reverify all"), { controller: controller_name, action: :reverify_all }, class: "btn btn-default btn-md")
+    end
+
+    def replicable_types
+      # Hard Coded Legacy Types, we will want to remove these when they are added to SSF
+      replicable_types = [
+        {
+          title: _('Repository'),
+          title_plural: _('Repositories'),
+          name: 'repository',
+          name_plural: 'repositories',
+          secondary_view: true
+        },
+        {
+          title: _('Wiki'),
+          title_plural: _('Wikis'),
+          name: 'wiki',
+          name_plural: 'wikis'
+        },
+        {
+          title: _('LFS object'),
+          title_plural: _('LFS objects'),
+          name: 'lfs_object',
+          name_plural: 'lfs_objects'
+        },
+        {
+          title: _('Attachment'),
+          title_plural: _('Attachments'),
+          name: 'attachment',
+          name_plural: 'attachments',
+          secondary_view: true
+        },
+        {
+          title: _('Job artifact'),
+          title_plural: _('Job artifacts'),
+          name: 'job_artifact',
+          name_plural: 'job_artifacts'
+        },
+        {
+          title: _('Container repository'),
+          title_plural: _('Container repositories'),
+          name: 'container_repository',
+          name_plural: 'container_repositories'
+        },
+        {
+          title: _('Design repository'),
+          title_plural: _('Design repositories'),
+          name: 'design_repository',
+          name_plural: 'design_repositories',
+          secondary_view: true
+        }
+      ]
+
+      # Adds all the SSF Data Types automatically
+      enabled_replicator_classes.each do |replicator_class|
+        replicable_types.push(
+          {
+            title: replicator_class.replicable_title,
+            title_plural: replicator_class.replicable_title_plural,
+            name: replicator_class.replicable_name,
+            name_plural: replicator_class.replicable_name_plural,
+            secondary_view: true
+          }
+        )
+      end
+
+      replicable_types
+    end
+
+    def enabled_replicator_classes
+      ::Gitlab::Geo.enabled_replicator_classes
     end
   end
 end

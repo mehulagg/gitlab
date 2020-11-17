@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::TestReports do
+RSpec.describe Gitlab::Ci::Reports::TestReports do
   include TestReportsHelper
 
   let(:test_reports) { described_class.new }
@@ -110,7 +110,7 @@ describe Gitlab::Ci::Reports::TestReports do
   end
 
   describe '#with_attachment' do
-    let(:test_case) { build(:test_case, :failed) }
+    let(:test_case) { build(:report_test_case, :failed) }
 
     subject { test_reports.with_attachment! }
 
@@ -126,8 +126,8 @@ describe Gitlab::Ci::Reports::TestReports do
     end
 
     context 'when test suites contain an attachment' do
-      let(:test_case_succes) { build(:test_case) }
-      let(:test_case_with_attachment) { build(:test_case, :failed_with_attachment) }
+      let(:test_case_succes) { build(:report_test_case) }
+      let(:test_case_with_attachment) { build(:report_test_case, :failed_with_attachment) }
 
       before do
         test_reports.get_suite('rspec').add_test_case(test_case_succes)

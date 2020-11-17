@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/migration/safer_boolean_column'
 
-describe RuboCop::Cop::Migration::SaferBooleanColumn do
+RSpec.describe RuboCop::Cop::Migration::SaferBooleanColumn, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -17,7 +14,7 @@ describe RuboCop::Cop::Migration::SaferBooleanColumn do
       allow(cop).to receive(:in_migration?).and_return(true)
     end
 
-    described_class::WHITELISTED_TABLES.each do |table|
+    described_class::SMALL_TABLES.each do |table|
       context "for the #{table} table" do
         sources_and_offense = [
           ["add_column :#{table}, :column, :boolean, default: true", 'should disallow nulls'],
@@ -62,14 +59,14 @@ describe RuboCop::Cop::Migration::SaferBooleanColumn do
       end
     end
 
-    it 'registers no offense for tables not listed in WHITELISTED_TABLES' do
+    it 'registers no offense for tables not listed in SMALL_TABLES' do
       inspect_source("add_column :large_table, :column, :boolean")
 
       expect(cop.offenses).to be_empty
     end
 
     it 'registers no offense for non-boolean columns' do
-      table = described_class::WHITELISTED_TABLES.sample
+      table = described_class::SMALL_TABLES.sample
       inspect_source("add_column :#{table}, :column, :string")
 
       expect(cop.offenses).to be_empty
@@ -78,7 +75,7 @@ describe RuboCop::Cop::Migration::SaferBooleanColumn do
 
   context 'outside of migration' do
     it 'registers no offense' do
-      table = described_class::WHITELISTED_TABLES.sample
+      table = described_class::SMALL_TABLES.sample
       inspect_source("add_column :#{table}, :column, :boolean")
 
       expect(cop.offenses).to be_empty

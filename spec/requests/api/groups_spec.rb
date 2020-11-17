@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Groups do
+RSpec.describe API::Groups do
   include GroupAPIHelpers
   include UploadHelpers
 
@@ -15,6 +15,7 @@ describe API::Groups do
   let_it_be(:project1) { create(:project, namespace: group1) }
   let_it_be(:project2) { create(:project, namespace: group2) }
   let_it_be(:project3) { create(:project, namespace: group1, path: 'test', visibility_level: Gitlab::VisibilityLevel::PRIVATE) }
+  let_it_be(:archived_project) { create(:project, namespace: group1, archived: true) }
 
   before do
     group1.add_owner(user1)
@@ -184,11 +185,12 @@ describe API::Groups do
 
       it "includes statistics if requested" do
         attributes = {
-          storage_size: 1158,
+          storage_size: 2392,
           repository_size: 123,
           wiki_size: 456,
           lfs_objects_size: 234,
-          build_artifacts_size: 345
+          build_artifacts_size: 345,
+          snippets_size: 1234
         }.stringify_keys
         exposed_attributes = attributes.dup
         exposed_attributes['job_artifacts_size'] = exposed_attributes.delete('build_artifacts_size')
@@ -470,7 +472,7 @@ describe API::Groups do
         expect(json_response['shared_with_groups'][0]['group_access_level']).to eq(link.group_access)
         expect(json_response['shared_with_groups'][0]).to have_key('expires_at')
         expect(json_response['projects']).to be_an Array
-        expect(json_response['projects'].length).to eq(2)
+        expect(json_response['projects'].length).to eq(3)
         expect(json_response['shared_projects']).to be_an Array
         expect(json_response['shared_projects'].length).to eq(1)
         expect(json_response['shared_projects'][0]['id']).to eq(project.id)
@@ -695,7 +697,7 @@ describe API::Groups do
         expect(json_response['parent_id']).to eq(nil)
         expect(json_response['created_at']).to be_present
         expect(json_response['projects']).to be_an Array
-        expect(json_response['projects'].length).to eq(2)
+        expect(json_response['projects'].length).to eq(3)
         expect(json_response['shared_projects']).to be_an Array
         expect(json_response['shared_projects'].length).to eq(0)
         expect(json_response['default_branch_protection']).to eq(::Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
@@ -821,10 +823,101 @@ describe API::Groups do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(2)
+        expect(json_response.length).to eq(3)
         project_names = json_response.map { |proj| proj['name'] }
-        expect(project_names).to match_array([project1.name, project3.name])
+        expect(project_names).to match_array([project1.name, project3.name, archived_project.name])
         expect(json_response.first['visibility']).to be_present
+      end
+
+      context 'and using archived' do
+        it "returns the group's archived projects" do
+          get api("/groups/#{group1.id}/projects?archived=true", user1)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.length).to eq(Project.public_or_visible_to_user(user1).where(archived: true).size)
+          expect(json_response.map { |project| project['id'] }).to include(archived_project.id)
+        end
+
+        it "returns the group's non-archived projects" do
+          get api("/groups/#{group1.id}/projects?archived=false", user1)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.length).to eq(Project.public_or_visible_to_user(user1).where(archived: false).size)
+          expect(json_response.map { |project| project['id'] }).not_to include(archived_project.id)
+        end
+
+        it "returns all of the group's projects" do
+          get api("/groups/#{group1.id}/projects", user1)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.map { |project| project['id'] }).to contain_exactly(*Project.public_or_visible_to_user(user1).pluck(:id))
+        end
+      end
+
+      context 'with similarity ordering' do
+        let_it_be(:group_with_projects) { create(:group) }
+        let_it_be(:project_1) { create(:project, name: 'Project', path: 'project', group: group_with_projects) }
+        let_it_be(:project_2) { create(:project, name: 'Test Project', path: 'test-project', group: group_with_projects) }
+        let_it_be(:project_3) { create(:project, name: 'Test', path: 'test', group: group_with_projects) }
+
+        let(:params) { { order_by: 'similarity', search: 'test' } }
+
+        subject { get api("/groups/#{group_with_projects.id}/projects", user1), params: params }
+
+        before do
+          group_with_projects.add_owner(user1)
+        end
+
+        it 'returns items based ordered by similarity' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response.length).to eq(2)
+
+          project_names = json_response.map { |proj| proj['name'] }
+          expect(project_names).to eq(['Test', 'Test Project'])
+        end
+
+        context 'when `search` parameter is not given' do
+          before do
+            params.delete(:search)
+          end
+
+          it 'returns items ordered by name' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to include_pagination_headers
+            expect(json_response.length).to eq(3)
+
+            project_names = json_response.map { |proj| proj['name'] }
+            expect(project_names).to eq(['Project', 'Test', 'Test Project'])
+          end
+        end
+
+        context 'when `similarity_search` feature flag is off' do
+          before do
+            stub_feature_flags(similarity_search: false)
+          end
+
+          it 'returns items ordered by name' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to include_pagination_headers
+            expect(json_response.length).to eq(2)
+
+            project_names = json_response.map { |proj| proj['name'] }
+            expect(project_names).to eq(['Test', 'Test Project'])
+          end
+        end
       end
 
       it "returns the group's projects with simple representation" do
@@ -832,9 +925,9 @@ describe API::Groups do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(2)
+        expect(json_response.length).to eq(3)
         project_names = json_response.map { |proj| proj['name'] }
-        expect(project_names).to match_array([project1.name, project3.name])
+        expect(project_names).to match_array([project1.name, project3.name, archived_project.name])
         expect(json_response.first['visibility']).not_to be_present
       end
 
@@ -860,7 +953,7 @@ describe API::Groups do
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an(Array)
-        expect(json_response.length).to eq(2)
+        expect(json_response.length).to eq(3)
       end
 
       it "returns projects including those in subgroups" do
@@ -873,7 +966,7 @@ describe API::Groups do
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an(Array)
-        expect(json_response.length).to eq(4)
+        expect(json_response.length).to eq(5)
       end
 
       it "does not return a non existing group" do
@@ -958,7 +1051,7 @@ describe API::Groups do
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         project_names = json_response.map { |proj| proj['name'] }
-        expect(project_names).to match_array([project1.name, project3.name])
+        expect(project_names).to match_array([project1.name, project3.name, archived_project.name])
       end
 
       it 'does not return a non existing group' do
@@ -979,6 +1072,7 @@ describe API::Groups do
     let!(:project4) do
       create(:project, namespace: group2, path: 'test_project', visibility_level: Gitlab::VisibilityLevel::PRIVATE)
     end
+
     let(:path) { "/groups/#{group1.id}/projects/shared" }
 
     before do
@@ -1289,6 +1383,139 @@ describe API::Groups do
 
       it 'includes statistics if requested' do
         get api("/groups/#{group1.id}/subgroups", admin), params: { statistics: true }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(json_response.first).to include('statistics')
+      end
+    end
+  end
+
+  describe 'GET /groups/:id/descendant_groups' do
+    let_it_be(:child_group1) { create(:group, parent: group1) }
+    let_it_be(:private_child_group1) { create(:group, :private, parent: group1) }
+    let_it_be(:sub_child_group1) { create(:group, parent: child_group1) }
+    let_it_be(:child_group2) { create(:group, :private, parent: group2) }
+    let_it_be(:sub_child_group2) { create(:group, :private, parent: child_group2) }
+    let(:response_groups) { json_response.map { |group| group['name'] } }
+
+    context 'when unauthenticated' do
+      it 'returns only public descendants' do
+        get api("/groups/#{group1.id}/descendant_groups")
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(2)
+        expect(response_groups).to contain_exactly(child_group1.name, sub_child_group1.name)
+      end
+
+      it 'returns 404 for a private group' do
+        get api("/groups/#{group2.id}/descendant_groups")
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when authenticated as user' do
+      context 'when user is not member of a public group' do
+        it 'returns no descendants for the public group' do
+          get api("/groups/#{group1.id}/descendant_groups", user2)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_an Array
+          expect(json_response.length).to eq(0)
+        end
+
+        context 'when using all_available in request' do
+          it 'returns public descendants' do
+            get api("/groups/#{group1.id}/descendant_groups", user2), params: { all_available: true }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_an Array
+            expect(json_response.length).to eq(2)
+            expect(response_groups).to contain_exactly(child_group1.name, sub_child_group1.name)
+          end
+        end
+      end
+
+      context 'when user is not member of a private group' do
+        it 'returns 404 for the private group' do
+          get api("/groups/#{group2.id}/descendant_groups", user1)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'when user is member of public group' do
+        before do
+          group1.add_guest(user2)
+        end
+
+        it 'returns private descendants' do
+          get api("/groups/#{group1.id}/descendant_groups", user2)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.length).to eq(3)
+          expect(response_groups).to contain_exactly(child_group1.name, sub_child_group1.name, private_child_group1.name)
+        end
+
+        context 'when using statistics in request' do
+          it 'does not include statistics' do
+            get api("/groups/#{group1.id}/descendant_groups", user2), params: { statistics: true }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_an Array
+            expect(json_response.first).not_to include 'statistics'
+          end
+        end
+      end
+
+      context 'when user is member of private group' do
+        before do
+          group2.add_guest(user1)
+        end
+
+        it 'returns descendants' do
+          get api("/groups/#{group2.id}/descendant_groups", user1)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_an Array
+          expect(json_response.length).to eq(2)
+          expect(response_groups).to contain_exactly(child_group2.name, sub_child_group2.name)
+        end
+      end
+    end
+
+    context 'when authenticated as admin' do
+      it 'returns private descendants of a public group' do
+        get api("/groups/#{group1.id}/descendant_groups", admin)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(3)
+      end
+
+      it 'returns descendants of a private group' do
+        get api("/groups/#{group2.id}/descendant_groups", admin)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(json_response.length).to eq(2)
+      end
+
+      it 'does not include statistics by default' do
+        get api("/groups/#{group1.id}/descendant_groups", admin)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(json_response.first).not_to include('statistics')
+      end
+
+      it 'includes statistics if requested' do
+        get api("/groups/#{group1.id}/descendant_groups", admin), params: { statistics: true }
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_an Array

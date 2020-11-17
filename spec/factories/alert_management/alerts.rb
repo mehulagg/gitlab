@@ -16,12 +16,14 @@ FactoryBot.define do
     end
 
     trait :with_issue do
-      issue
+      after(:create) do |alert|
+        create(:issue, alert_management_alert: alert, project: alert.project)
+      end
     end
 
     trait :with_assignee do |alert|
       after(:create) do |alert|
-        alert.alert_assignees.create(assignee: create(:user))
+        alert.alert_assignees.create!(assignee: create(:user))
       end
     end
 
@@ -54,31 +56,61 @@ FactoryBot.define do
     end
 
     trait :triggered do
-      status { AlertManagement::Alert::STATUSES[:triggered] }
+      status { AlertManagement::Alert.status_value(:triggered) }
       without_ended_at
     end
 
     trait :acknowledged do
-      status { AlertManagement::Alert::STATUSES[:acknowledged] }
+      status { AlertManagement::Alert.status_value(:acknowledged) }
       without_ended_at
     end
 
     trait :resolved do
-      status { AlertManagement::Alert::STATUSES[:resolved] }
+      status { AlertManagement::Alert.status_value(:resolved) }
       with_ended_at
     end
 
     trait :ignored do
-      status { AlertManagement::Alert::STATUSES[:ignored] }
+      status { AlertManagement::Alert.status_value(:ignored) }
       without_ended_at
     end
 
-    trait :low_severity do
+    trait :critical do
+      severity { 'critical' }
+    end
+
+    trait :high do
+      severity { 'high' }
+    end
+
+    trait :medium do
+      severity { 'medium' }
+    end
+
+    trait :low do
       severity { 'low' }
     end
 
+    trait :info do
+      severity { 'info' }
+    end
+
+    trait :unknown do
+      severity { 'unknown' }
+    end
+
     trait :prometheus do
-      monitoring_tool { Gitlab::AlertManagement::AlertParams::MONITORING_TOOLS[:prometheus] }
+      monitoring_tool { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus] }
+      payload do
+        {
+          annotations: {
+            title: 'This is a prometheus error',
+            summary: 'Summary of the error',
+            description: 'Description of the error'
+          },
+          startsAt: started_at
+        }.with_indifferent_access
+      end
     end
 
     trait :all_fields do
@@ -89,7 +121,19 @@ FactoryBot.define do
       with_monitoring_tool
       with_host
       with_description
-      low_severity
+      low
+    end
+
+    trait :from_payload do
+      after(:build) do |alert|
+        alert_params = ::Gitlab::AlertManagement::Payload.parse(
+          alert.project,
+          alert.payload,
+          monitoring_tool: alert.monitoring_tool
+        ).alert_params
+
+        alert.assign_attributes(alert_params)
+      end
     end
   end
 end

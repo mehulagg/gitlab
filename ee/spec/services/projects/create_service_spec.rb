@@ -268,23 +268,6 @@ RSpec.describe Projects::CreateService, '#execute' do
           )
           expect(project.project_setting.push_rule_id).to eq(project_push_rule.id)
         end
-
-        context 'when feature flag is switched off' do
-          let!(:sample) { create(:push_rule_sample) }
-
-          before do
-            stub_feature_flags(group_push_rules: false)
-          end
-
-          it 'creates push rule from sample' do
-            expect(create_project(user, opts).push_rule).to have_attributes(
-              force_push_regex: sample.force_push_regex,
-              deny_delete_tag: sample.deny_delete_tag,
-              delete_branch_regex: sample.delete_branch_regex,
-              commit_message_regex: sample.commit_message_regex
-            )
-          end
-        end
       end
 
       context 'when group does not have push rule defined' do
@@ -356,6 +339,7 @@ RSpec.describe Projects::CreateService, '#execute' do
       let(:fail_condition!) do
         allow(Gitlab::VisibilityLevel).to receive(:allowed_for?).and_return(false)
       end
+
       let(:attributes) do
         {
            author_id: user.id,
@@ -364,7 +348,7 @@ RSpec.describe Projects::CreateService, '#execute' do
            details: {
              add: 'project',
              author_name: user.name,
-             target_id: @resource.full_path,
+             target_id: @resource.id,
              target_type: 'Project',
              target_details: @resource.full_path
            }

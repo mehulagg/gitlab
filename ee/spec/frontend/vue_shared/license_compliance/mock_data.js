@@ -67,5 +67,3 @@ export const generateReportGroup = ({ status = 'some-status', numberOfLicenses =
     status,
   })),
 });
-
-export default () => {};

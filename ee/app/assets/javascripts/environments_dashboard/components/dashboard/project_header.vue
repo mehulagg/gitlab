@@ -1,15 +1,14 @@
 <script>
-import { GlTooltipDirective, GlLink, GlDeprecatedButton } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlButton, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ProjectAvatar,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -54,13 +53,13 @@ export default {
         data-toggle="dropdown"
         :title="$options.moreActionsText"
       >
-        <icon name="ellipsis_v" class="text-secondary" />
+        <gl-icon name="ellipsis_v" class="text-secondary" />
       </button>
       <ul class="dropdown-menu dropdown-menu-right">
         <li>
-          <gl-deprecated-button class="js-remove-button" @click="onRemove()">
+          <gl-button class="js-remove-button" variant="link" @click="onRemove()">
             <span class="text-danger"> {{ $options.removeProjectText }} </span>
-          </gl-deprecated-button>
+          </gl-button>
         </li>
       </ul>
     </div>

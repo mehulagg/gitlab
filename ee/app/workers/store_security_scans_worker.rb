@@ -4,12 +4,14 @@ class StoreSecurityScansWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include SecurityScansQueue
 
-  # rubocop: disable CodeReuse/ActiveRecord
-  def perform(build_id)
-    ::Ci::Build.find_by(id: build_id).try do |build|
-      break if build.job_artifacts.security_reports.empty?
+  tags :requires_disk_io
 
-      Security::StoreScansService.new(build).execute
-    end
+  # rubocop: disable CodeReuse/ActiveRecord
+  def perform(*)
+    # no-op
+    # This worker has been deprecated and will be removed with next release.
+    # New worker to do the same job is, `Security::StoreScansWorker`,
+    # We will save all the security scans and findings here
+    # as well as solve the deduplication thingy.
   end
 end

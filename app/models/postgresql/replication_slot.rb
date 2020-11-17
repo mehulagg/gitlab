@@ -22,8 +22,8 @@ module Postgresql
     def self.lag_too_great?(max = 100.megabytes)
       return false unless in_use?
 
-      lag_function = "#{Gitlab::Database.pg_wal_lsn_diff}" \
-        "(#{Gitlab::Database.pg_current_wal_insert_lsn}(), restart_lsn)::bigint"
+      lag_function = "pg_wal_lsn_diff" \
+        "(pg_current_wal_insert_lsn(), restart_lsn)::bigint"
 
       # We force the use of a transaction here so the query always goes to the
       # primary, even when using the EE DB load balancer.
@@ -33,7 +33,7 @@ module Postgresql
       # If too many replicas are falling behind too much, the availability of a
       # GitLab instance might suffer. To prevent this from happening we require
       # at least 1 replica to have data recent enough.
-      if sizes.any? && too_great.positive?
+      if sizes.any? && too_great > 0
         (sizes.length - too_great) <= 1
       else
         false

@@ -6,7 +6,7 @@ RSpec.describe Gitlab::UserAccess do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }
-  let(:access) { described_class.new(user, project: project) }
+  let(:access) { described_class.new(user, container: project) }
 
   describe '#can_push_to_branch?' do
     describe 'push to empty project' do

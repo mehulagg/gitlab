@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Deployments::FinishedWorker do
+RSpec.describe Deployments::FinishedWorker do
   let(:worker) { described_class.new }
 
   describe '#perform' do
@@ -48,6 +48,18 @@ describe Deployments::FinishedWorker do
       worker.perform(0)
 
       expect(ProjectServiceWorker).not_to have_received(:perform_async)
+    end
+
+    it 'execute webhooks' do
+      deployment = create(:deployment)
+      project = deployment.project
+      web_hook = create(:project_hook, deployment_events: true, project: project)
+
+      expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "deployment_hooks") do |service|
+        expect(service).to receive(:async_execute)
+      end
+
+      worker.perform(deployment.id)
     end
   end
 end

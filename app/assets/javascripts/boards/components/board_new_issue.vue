@@ -1,29 +1,28 @@
 <script>
-import $ from 'jquery';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
 import ListIssue from 'ee_else_ce/boards/models/issue';
 import eventHub from '../eventhub';
 import ProjectSelect from './project_select.vue';
 import boardsStore from '../stores/boards_store';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
+// This component is being replaced in favor of './board_new_issue_new.vue' for GraphQL boards
 
 export default {
   name: 'BoardNewIssue',
   components: {
     ProjectSelect,
-    GlDeprecatedButton,
+    GlButton,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     list: {
       type: Object,
       required: true,
     },
   },
+  inject: ['groupId'],
   data() {
     return {
       title: '',
@@ -73,17 +72,10 @@ export default {
       return this.list
         .newIssue(issue)
         .then(() => {
-          // Need this because our jQuery very kindly disables buttons on ALL form submissions
-          $(this.$refs.submitButton).enable();
-
           boardsStore.setIssueDetail(issue);
           boardsStore.setListDetail(this.list);
         })
         .catch(() => {
-          // Need this because our jQuery very kindly disables buttons on ALL form submissions
-          $(this.$refs.submitButton).enable();
-
-          // Remove the issue
           this.list.removeIssue(issue);
 
           // Show error message
@@ -119,21 +111,23 @@ export default {
           autocomplete="off"
         />
         <project-select v-if="groupId" :group-id="groupId" :list="list" />
-        <div class="clearfix prepend-top-10">
-          <gl-deprecated-button
-            ref="submit-button"
+        <div class="clearfix gl-mt-3">
+          <gl-button
+            ref="submitButton"
             :disabled="disabled"
-            class="float-left"
+            class="float-left js-no-auto-disable"
             variant="success"
+            category="primary"
             type="submit"
-            >{{ __('Submit issue') }}</gl-deprecated-button
+            >{{ __('Submit issue') }}</gl-button
           >
-          <gl-deprecated-button
+          <gl-button
+            ref="cancelButton"
             class="float-right"
             type="button"
             variant="default"
             @click="cancel"
-            >{{ __('Cancel') }}</gl-deprecated-button
+            >{{ __('Cancel') }}</gl-button
           >
         </div>
       </form>

@@ -23,6 +23,7 @@ module EE
         data[:epicLinksEndpoint] = group_epic_links_path(parent, issuable)
         data[:fullPath] = parent.full_path
         data[:projectsEndpoint] = expose_path(api_v4_groups_projects_path(id: parent.id))
+        data[:confidential] = issuable.confidential
       end
 
       data
@@ -33,7 +34,8 @@ module EE
       return {} unless issuable.is_a?(Issue)
 
       super.merge(
-        publishedIncidentUrl: StatusPage::Storage.details_url(issuable)
+        publishedIncidentUrl: ::Gitlab::StatusPage::Storage.details_url(issuable),
+        slaFeatureAvailable: issuable.sla_available?.to_s
       )
     end
 

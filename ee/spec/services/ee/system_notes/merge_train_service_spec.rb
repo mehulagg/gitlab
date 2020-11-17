@@ -6,6 +6,16 @@ RSpec.describe EE::SystemNotes::MergeTrainService do
   let_it_be(:author) { create(:user) }
   let_it_be(:project) { create(:project) }
 
+  shared_examples 'creates a removed merge train TODO' do
+    it 'creates Todo of MERGE_TRAIN_REMOVED' do
+      expect { subject }.to change { Todo.count }.to(1)
+
+      todo = Todo.last
+      expect(todo.target).to eq(noteable)
+      expect(todo.action).to eq(Todo::MERGE_TRAIN_REMOVED)
+    end
+  end
+
   describe '#enqueue' do
     subject { described_class.new(noteable: noteable, project: project, author: author).enqueue(noteable.merge_train) }
 
@@ -56,6 +66,8 @@ RSpec.describe EE::SystemNotes::MergeTrainService do
     it "posts the 'merge train' system note" do
       expect(subject.note).to eq('removed this merge request from the merge train because source branch was updated')
     end
+
+    it_behaves_like 'creates a removed merge train TODO'
   end
 
   describe '#add_when_pipeline_succeeds' do
@@ -106,5 +118,7 @@ RSpec.describe EE::SystemNotes::MergeTrainService do
     it "posts the 'add to merge train when pipeline succeeds' system note" do
       expect(subject.note).to eq 'aborted automatic add to merge train because target branch was changed'
     end
+
+    it_behaves_like 'creates a removed merge train TODO'
   end
 end

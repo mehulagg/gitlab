@@ -3,7 +3,7 @@
 require 'digest/sha1'
 
 module QA
-  context 'Release', :docker, :runner do
+  RSpec.describe 'Release', :runner do
     describe 'Git clone using a deploy key' do
       before do
         Flow::Login.sign_in
@@ -20,7 +20,7 @@ module QA
           resource.project = @project
           resource.name = @runner_name
           resource.tags = %w[qa docker]
-          resource.image = 'gitlab/gitlab-runner:ubuntu'
+          resource.image = 'gitlab/gitlab-runner:alpine'
         end
       end
 
@@ -51,6 +51,7 @@ module QA
           gitlab_ci = <<~YAML
           cat-config:
             script:
+              - apk add --update --no-cache openssh-client
               - mkdir -p ~/.ssh
               - ssh-keyscan -p #{@repository_location.port} #{@repository_location.host} >> ~/.ssh/known_hosts
               - eval $(ssh-agent -s)
@@ -76,8 +77,7 @@ module QA
 
           sha1sum = Digest::SHA1.hexdigest(gitlab_ci)
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-          Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+          Flow::Pipeline.visit_latest_pipeline
           Page::Project::Pipeline::Show.perform(&:click_on_first_job)
 
           Page::Project::Job::Show.perform do |job|

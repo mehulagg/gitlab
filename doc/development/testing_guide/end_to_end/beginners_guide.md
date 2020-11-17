@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Beginner's guide to writing end-to-end tests
 
 In this tutorial, you will learn about the creation of end-to-end (_e2e_) tests
@@ -52,7 +58,6 @@ Check both [GitLab Community Edition](https://gitlab-org.gitlab.io/gitlab-foss/c
 for previously-written tests for this feature. For analyzing the code coverage,
 you must understand which application files implement specific features.
 
-NOTE: **Note:**
 In this tutorial we're writing a login end-to-end test, even though it has been
 sufficiently covered by lower-level testing, because it's the first step for most
 end-to-end flows, and is easiest to understand.
@@ -62,13 +67,12 @@ end-to-end flows, and is easiest to understand.
 The GitLab QA end-to-end tests are organized by the different
 [stages in the DevOps lifecycle](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/qa/qa/specs/features/browser_ui).
 Determine where the test should be placed by
-[stage](https://about.gitlab.com/handbook/product/categories/#devops-stages),
+[stage](https://about.gitlab.com/handbook/product/product-categories/#devops-stages),
 determine which feature the test will belong to, and then place it in a subdirectory
 under the stage.
 
 ![DevOps lifecycle by stages](img/gl-devops-lifecycle-by-stage-numbers_V12_10.png)
 
-NOTE: **Note:**
 If the test is Enterprise Edition only, the test will be created in the `features/ee`
 directory, but follow the same DevOps lifecycle format.
 
@@ -80,13 +84,21 @@ file `basic_login_spec.rb`.
 
 ### The outer `context` block
 
-Specs have an outer `context` indicating the DevOps stage.
+See the [`RSpec.describe` outer block](#the-outer-rspecdescribe-block)
+
+CAUTION: **Deprecation notice:**
+The outer `context` [was deprecated](https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/550) in `13.2`
+in adherence to RSpec 4.0 specifications. Use `RSpec.describe` instead.
+
+### The outer `RSpec.describe` block
+
+Specs have an outer `RSpec.describe` indicating the DevOps stage.
 
 ```ruby
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
 
   end
 end
@@ -94,13 +106,13 @@ end
 
 ### The `describe` block
 
-Inside of our outer `context`, describe the feature to test. In this case, `Login`.
+Inside of our outer `RSpec.describe`, describe the feature to test. In this case, `Login`.
 
 ```ruby
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Login' do
 
     end
@@ -115,7 +127,7 @@ writing end-to-end tests is to write test case descriptions as `it` blocks:
 
 ```ruby
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Login' do
       it 'can login' do
 
@@ -139,7 +151,7 @@ Begin by logging in.
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Login' do
       it 'can login' do
         Flow::Login.sign_in
@@ -162,7 +174,7 @@ should answer the question "What do we test?"
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Login' do
       it 'can login' do
         Flow::Login.sign_in
@@ -188,15 +200,14 @@ end
 
 **What do we test?**
 
-1. Can we log in?
-1. Can we log out?
+1. Can we sign in?
+1. Can we sign out?
 
 **How do we test?**
 
 1. Check if the user avatar appears in the top navigation.
 1. Check if the user avatar *does not* appear in the top navigation.
 
-NOTE: **Note:**
 Behind the scenes, `be_signed_in` is a
 [predicate matcher](https://relishapp.com/rspec/rspec-expectations/v/3-8/docs/built-in-matchers/predicate-matchers)
 that [implements checking the user avatar](https://gitlab.com/gitlab-org/gitlab/-/blob/master/qa/qa/page/main/menu.rb#L74).
@@ -210,7 +221,7 @@ a call to `sign_in`.
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Login' do
       before do
         Flow::Login.sign_in
@@ -247,7 +258,7 @@ stage, so [create a file](#identify-the-devops-stage) in
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan' do
     describe 'Issues' do
       let(:issue) do
         Resource::Issue.fabricate_via_api! do |issue|
@@ -279,7 +290,7 @@ Note the following important points:
 - Our test fabricates only what it needs, when it needs it.
 - The issue is fabricated through the API to save time.
 - GitLab prefers `let()` over instance variables. See
-  [best practices](../best_practices.md#let-variables).
+  [best practices](../best_practices.md#subject-and-let-variables).
 - `be_closed` is not implemented in `page/project/issue/show.rb` yet, but will be
   implemented in the next step.
 

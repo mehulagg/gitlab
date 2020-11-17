@@ -1,0 +1,9 @@
+query securityScanners($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    securityScanners {
+      available
+      enabled
+      pipelineRun
+    }
+  }
+}

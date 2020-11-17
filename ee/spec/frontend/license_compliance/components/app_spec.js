@@ -2,14 +2,7 @@ import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import {
-  GlEmptyState,
-  GlLoadingIcon,
-  GlTab,
-  GlTabs,
-  GlAlert,
-  GlDeprecatedBadge as GlBadge,
-} from '@gitlab/ui';
+import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import setWindowLocation from 'helpers/set_window_location_helper';
 
@@ -40,6 +33,13 @@ const emptyStateSvgPath = '/';
 const documentationPath = '/';
 
 const noop = () => {};
+
+const transitionStub = () => ({
+  render() {
+    // eslint-disable-next-line no-underscore-dangle
+    return this.$options._renderChildren;
+  },
+});
 
 const createComponent = ({ state, props, options }) => {
   const fakeStore = new Vuex.Store({
@@ -88,6 +88,7 @@ const createComponent = ({ state, props, options }) => {
     },
     ...options,
     store: fakeStore,
+    stubs: { transition: transitionStub() },
   });
 };
 
@@ -164,7 +165,7 @@ describe('Project Licenses', () => {
     });
   });
 
-  describe('when licensePolicyList feature flag is enabled', () => {
+  describe('when page is shown', () => {
     beforeEach(() => {
       createComponent({
         state: {
@@ -173,11 +174,6 @@ describe('Project Licenses', () => {
             jobPath: '/',
             generatedAt: '',
             status: REPORT_STATUS.ok,
-          },
-        },
-        options: {
-          provide: {
-            glFeatures: { licensePolicyList: true },
           },
         },
       });
@@ -231,9 +227,6 @@ describe('Project Licenses', () => {
               pageInfo: 1,
             },
             options: {
-              provide: {
-                glFeatures: { licensePolicyList: true },
-              },
               mount: true,
             },
           });
@@ -274,9 +267,6 @@ describe('Project Licenses', () => {
             pageInfo,
           },
           options: {
-            provide: {
-              glFeatures: { licensePolicyList: true },
-            },
             mount: true,
           },
         });
@@ -332,45 +322,6 @@ describe('Project Licenses', () => {
           "Detected licenses that are out-of-compliance with the project's assigned policies",
         );
       });
-    });
-  });
-
-  describe('when licensePolicyList feature flag is disabled', () => {
-    beforeEach(() => {
-      createComponent({
-        state: {
-          initialized: true,
-          reportInfo: {
-            jobPath: '/',
-            generatedAt: '',
-            status: REPORT_STATUS.ok,
-          },
-        },
-        options: {
-          provide: {
-            glFeatures: { licensePolicyList: false },
-          },
-        },
-      });
-    });
-
-    it('only renders the "Detected in project" table', () => {
-      expect(wrapper.find(DetectedLicensesTable).exists()).toBe(true);
-      expect(wrapper.find(LicenseManagement).exists()).toBe(false);
-    });
-
-    it('renders no "Policies" table', () => {
-      expect(wrapper.find(GlTabs).exists()).toBe(false);
-      expect(wrapper.find(GlTab).exists()).toBe(false);
-    });
-
-    it('renders the pipeline info', () => {
-      expect(wrapper.find(PipelineInfo).exists()).toBe(true);
-    });
-
-    it('renders no tabs', () => {
-      expect(wrapper.find(GlTabs).exists()).toBe(false);
-      expect(wrapper.find(GlTab).exists()).toBe(false);
     });
   });
 });

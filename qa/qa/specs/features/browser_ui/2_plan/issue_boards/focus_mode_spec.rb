@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Issue board focus mode' do
       let(:project) do
         QA::Resource::Project.fabricate_via_api! do |project|
@@ -13,7 +13,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'focuses on issue board' do
+      it 'focuses on issue board', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/820' do
         project.visit!
 
         Page::Project::Menu.perform(&:go_to_boards)

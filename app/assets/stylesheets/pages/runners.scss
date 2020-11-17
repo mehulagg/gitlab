@@ -44,11 +44,6 @@
   .btn-default {
     color: $gl-text-color-secondary;
   }
-
-  .fa-pause,
-  .fa-play {
-    font-size: 11px;
-  }
 }
 
 @include media-breakpoint-down(md) {

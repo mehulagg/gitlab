@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::Projects::SnippetsResolver do
+RSpec.describe Resolvers::Projects::SnippetsResolver do
   include GraphqlHelpers
 
   describe '#resolve' do
@@ -55,12 +55,6 @@ describe Resolvers::Projects::SnippetsResolver do
         snippets = resolve_snippets(args: args)
 
         expect(snippets).to contain_exactly(project_snippet, other_project_snippet)
-      end
-
-      it 'returns an error if the gid is invalid' do
-        expect do
-          resolve_snippets(args: { ids: 'foo' })
-        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
       end
     end
 

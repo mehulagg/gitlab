@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::API::Entities::Snippet do
+RSpec.describe ::API::Entities::Snippet do
   let_it_be(:user) { create(:user) }
   let_it_be(:personal_snippet) { create(:personal_snippet, :repository, author: user ) }
   let_it_be(:project_snippet) { create(:project_snippet, :repository, author: user) }
@@ -62,6 +62,49 @@ describe ::API::Entities::Snippet do
         end
       end
     end
+
+    describe 'files' do
+      let(:blob)   { snippet.blobs.first }
+      let(:ref)    { blob.repository.root_ref }
+
+      shared_examples 'snippet files' do
+        let(:file) { subject[:files].first }
+
+        it 'returns all snippet files' do
+          expect(subject[:files].count).to eq snippet.blobs.count
+        end
+
+        it 'has the file path' do
+          expect(file[:path]).to eq blob.path
+        end
+
+        it 'has the raw url' do
+          expect(file[:raw_url]).to match(raw_url)
+        end
+
+        context 'when repository does not exist' do
+          it 'returns empty array' do
+            allow(snippet.repository).to receive(:empty?).and_return(true)
+
+            expect(subject[:files]).to be_empty
+          end
+        end
+      end
+
+      context 'with PersonalSnippet' do
+        it_behaves_like 'snippet files' do
+          let(:snippet) { personal_snippet }
+          let(:raw_url) { "/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}" }
+        end
+      end
+
+      context 'with ProjectSnippet' do
+        it_behaves_like 'snippet files' do
+          let(:snippet) { project_snippet }
+          let(:raw_url) { "#{snippet.project.full_path}/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}" }
+        end
+      end
+    end
   end
 
   context 'with PersonalSnippet' do
@@ -70,11 +113,11 @@ describe ::API::Entities::Snippet do
     it_behaves_like 'common attributes'
 
     it 'returns snippet web_url attribute' do
-      expect(subject[:web_url]).to match("/snippets/#{snippet.id}")
+      expect(subject[:web_url]).to match("/-/snippets/#{snippet.id}")
     end
 
     it 'returns snippet raw_url attribute' do
-      expect(subject[:raw_url]).to match("/snippets/#{snippet.id}/raw")
+      expect(subject[:raw_url]).to match("/-/snippets/#{snippet.id}/raw")
     end
   end
 
@@ -84,11 +127,11 @@ describe ::API::Entities::Snippet do
     it_behaves_like 'common attributes'
 
     it 'returns snippet web_url attribute' do
-      expect(subject[:web_url]).to match("#{snippet.project.full_path}/snippets/#{snippet.id}")
+      expect(subject[:web_url]).to match("#{snippet.project.full_path}/-/snippets/#{snippet.id}")
     end
 
     it 'returns snippet raw_url attribute' do
-      expect(subject[:raw_url]).to match("#{snippet.project.full_path}/snippets/#{snippet.id}/raw")
+      expect(subject[:raw_url]).to match("#{snippet.project.full_path}/-/snippets/#{snippet.id}/raw")
     end
   end
 end

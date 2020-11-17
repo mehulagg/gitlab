@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Backup::Manager do
+RSpec.describe Backup::Manager do
   include StubENV
 
   let(:progress) { StringIO.new }
@@ -414,6 +414,29 @@ describe Backup::Manager do
           .and_return(true)
 
         subject.upload
+      end
+    end
+
+    context 'with AzureRM provider' do
+      before do
+        stub_backup_setting(
+          upload: {
+            connection: {
+              provider: 'AzureRM',
+              azure_storage_account_name: 'test-access-id',
+              azure_storage_access_key: 'secret'
+            },
+            remote_directory: 'directory',
+            multipart_chunk_size: nil,
+            encryption: nil,
+            encryption_key: nil,
+            storage_class: nil
+          }
+        )
+      end
+
+      it 'loads the provider' do
+        expect { subject.upload }.not_to raise_error
       end
     end
   end

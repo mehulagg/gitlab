@@ -13,7 +13,10 @@ RSpec.describe GroupWiki do
 
     describe '#create_wiki_repository' do
       before do
-        # Don't actually create the repository, because we're using storage shards that don't exist.
+        # Use a custom storage shard value, to make sure we're not falling back to the default.
+        allow(subject).to receive(:repository_storage).and_return('foo')
+
+        # Don't actually create the repository, because the storage shard doesn't exist.
         allow(subject.repository).to receive(:create_if_not_exists)
         allow(subject).to receive(:repository_exists?).and_return(true)
       end
@@ -27,8 +30,6 @@ RSpec.describe GroupWiki do
         end
 
         it 'tracks the storage location' do
-          expect(subject).to receive(:repository_storage).and_return('foo')
-
           subject.create_wiki_repository
 
           expect(wiki_container.group_wiki_repository).to have_attributes(
@@ -44,7 +45,6 @@ RSpec.describe GroupWiki do
         end
 
         it 'updates the storage location' do
-          expect(subject).to receive(:repository_storage).and_return('foo')
           expect(subject.storage).to receive(:disk_path).and_return('fancy/new/path')
 
           subject.create_wiki_repository
@@ -69,6 +69,21 @@ RSpec.describe GroupWiki do
 
         it 'returns the default shard' do
           expect(subject.repository_storage).to eq('default')
+        end
+
+        context 'when multiple shards are configured' do
+          let(:shards) { (1..).each }
+
+          before do
+            # Force pick_repository_storage to always return a different value
+            allow(Gitlab::CurrentSettings).to receive(:pick_repository_storage) { "storage-#{shards.next}" }
+          end
+
+          it 'always returns the same shard when called repeatedly' do
+            shard = subject.repository_storage
+
+            expect(subject.repository_storage).to eq(shard)
+          end
         end
       end
 

@@ -1,10 +1,10 @@
 import Vue from 'vue';
-import { shallowMount, createLocalVue, createWrapper } from '@vue/test-utils';
+import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import { TEST_HOST } from 'spec/test_constants';
+import AxiosMockAdapter from 'axios-mock-adapter';
 import createStore from '~/notes/stores';
 import noteActions from '~/notes/components/note_actions.vue';
 import { userDataMock } from '../mock_data';
-import AxiosMockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
 
 describe('noteActions', () => {
@@ -14,9 +14,9 @@ describe('noteActions', () => {
   let actions;
   let axiosMock;
 
-  const shallowMountNoteActions = (propsData, computed) => {
+  const mountNoteActions = (propsData, computed) => {
     const localVue = createLocalVue();
-    return shallowMount(localVue.extend(noteActions), {
+    return mount(localVue.extend(noteActions), {
       store,
       propsData,
       localVue,
@@ -35,8 +35,12 @@ describe('noteActions', () => {
       canEdit: true,
       canAwardEmoji: true,
       canReportAsAbuse: true,
+      isAuthor: true,
+      isContributor: false,
+      noteableType: 'MergeRequest',
       noteId: '539',
       noteUrl: `${TEST_HOST}/group/project/-/merge_requests/1#note_1`,
+      projectName: 'project',
       reportAbusePath: `${TEST_HOST}/abuse_reports/new?ref_url=http%3A%2F%2Flocalhost%3A3000%2Fgitlab-org%2Fgitlab-ce%2Fissues%2F7%23note_539&user_id=26`,
       showReply: false,
     };
@@ -57,16 +61,44 @@ describe('noteActions', () => {
     beforeEach(() => {
       store.dispatch('setUserData', userDataMock);
 
-      wrapper = shallowMountNoteActions(props);
+      wrapper = mountNoteActions(props);
+    });
+
+    it('should render noteable author badge', () => {
+      expect(
+        wrapper
+          .findAll('.note-role')
+          .at(0)
+          .text()
+          .trim(),
+      ).toEqual('Author');
     });
 
     it('should render access level badge', () => {
       expect(
         wrapper
-          .find('.note-role')
+          .findAll('.note-role')
+          .at(1)
           .text()
           .trim(),
       ).toEqual(props.accessLevel);
+    });
+
+    it('should render contributor badge', () => {
+      wrapper.setProps({
+        accessLevel: null,
+        isContributor: true,
+      });
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(
+          wrapper
+            .findAll('.note-role')
+            .at(1)
+            .text()
+            .trim(),
+        ).toBe('Contributor');
+      });
     });
 
     it('should render emoji link', () => {
@@ -127,20 +159,6 @@ describe('noteActions', () => {
           .catch(done.fail);
       });
 
-      it('should be possible to assign or unassign the comment author', () => {
-        wrapper = shallowMountNoteActions(props, {
-          targetType: () => 'issue',
-        });
-
-        const assignUserButton = wrapper.find('[data-testid="assign-user"]');
-        expect(assignUserButton.exists()).toBe(true);
-
-        assignUserButton.trigger('click');
-        axiosMock.onPut(`${TEST_HOST}/api/v4/projects/group/project/issues/1`).reply(() => {
-          expect(actions.updateAssignees).toHaveBeenCalled();
-        });
-      });
-
       it('should not be possible to assign or unassign the comment author in a merge request', () => {
         const assignUserButton = wrapper.find('[data-testid="assign-user"]');
         expect(assignUserButton.exists()).toBe(false);
@@ -148,10 +166,62 @@ describe('noteActions', () => {
     });
   });
 
+  describe('when a user has access to edit an issue', () => {
+    const testButtonClickTriggersAction = () => {
+      axiosMock.onPut(`${TEST_HOST}/api/v4/projects/group/project/issues/1`).reply(() => {
+        expect(actions.updateAssignees).toHaveBeenCalled();
+      });
+
+      const assignUserButton = wrapper.find('[data-testid="assign-user"]');
+      expect(assignUserButton.exists()).toBe(true);
+      assignUserButton.trigger('click');
+    };
+
+    beforeEach(() => {
+      wrapper = mountNoteActions(props, {
+        targetType: () => 'issue',
+      });
+      store.state.noteableData = {
+        current_user: {
+          can_update: true,
+        },
+      };
+      store.state.userData = userDataMock;
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      axiosMock.restore();
+    });
+
+    it('should be possible to assign the comment author', testButtonClickTriggersAction);
+    it('should be possible to unassign the comment author', testButtonClickTriggersAction);
+  });
+
+  describe('when a user does not have access to edit an issue', () => {
+    const testButtonDoesNotRender = () => {
+      const assignUserButton = wrapper.find('[data-testid="assign-user"]');
+      expect(assignUserButton.exists()).toBe(false);
+    };
+
+    beforeEach(() => {
+      wrapper = mountNoteActions(props, {
+        targetType: () => 'issue',
+      });
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    });
+
+    it('should not be possible to assign the comment author', testButtonDoesNotRender);
+    it('should not be possible to unassign the comment author', testButtonDoesNotRender);
+  });
+
   describe('user is not logged in', () => {
     beforeEach(() => {
       store.dispatch('setUserData', {});
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         canDelete: false,
         canEdit: false,
@@ -171,7 +241,7 @@ describe('noteActions', () => {
 
   describe('for showReply = true', () => {
     beforeEach(() => {
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         showReply: true,
       });
@@ -186,7 +256,7 @@ describe('noteActions', () => {
 
   describe('for showReply = false', () => {
     beforeEach(() => {
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         showReply: false,
       });
@@ -203,7 +273,7 @@ describe('noteActions', () => {
     beforeEach(() => {
       store.dispatch('setUserData', userDataMock);
 
-      wrapper = shallowMountNoteActions({ ...props, canResolve: true, isDraft: true });
+      wrapper = mountNoteActions({ ...props, canResolve: true, isDraft: true });
     });
 
     it('should render the right resolve button title', () => {

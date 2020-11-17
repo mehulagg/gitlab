@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto, reference
 ---
 
@@ -22,7 +25,9 @@ at their primary email address.
    ![admin users](email1.png)
 
 1. Compose an email and choose where it will be sent (all users or users of a
-   chosen group or project):
+   chosen group or project). The email body only supports plain text messages.
+   HTML, Markdown, and other rich text formats are not supported, and will be
+   sent as plain text to users.
 
    ![compose an email](email2.png)
 

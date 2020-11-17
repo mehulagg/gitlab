@@ -1,54 +1,45 @@
+import { frontMatterify, stringify } from './front_matterify';
+
 const parseSourceFile = raw => {
-  const frontMatterRegex = /(^---$[\s\S]*?^---$)/m;
-  const preGroupedRegex = /([\s\S]*?)(^---$[\s\S]*?^---$)(\s*)([\s\S]*)/m; // preFrontMatter, frontMatter, spacing, and content
-  let initial;
   let editable;
 
-  const hasFrontMatter = source => frontMatterRegex.test(source);
-
-  const buildPayload = (source, header, spacing, body) => {
-    return { raw: source, header, spacing, body };
-  };
-
-  const parse = source => {
-    if (hasFrontMatter(source)) {
-      const match = source.match(preGroupedRegex);
-      const [, preFrontMatter, frontMatter, spacing, content] = match;
-      const header = preFrontMatter + frontMatter;
-
-      return buildPayload(source, header, spacing, content);
+  const syncContent = (newVal, isBody) => {
+    if (isBody) {
+      editable.content = newVal;
+    } else {
+      try {
+        editable = frontMatterify(newVal);
+        editable.isMatterValid = true;
+      } catch (e) {
+        editable.isMatterValid = false;
+      }
     }
-
-    return buildPayload(source, '', '', source);
   };
 
-  const computedRaw = () => `${editable.header}${editable.spacing}${editable.body}`;
+  const content = (isBody = false) => (isBody ? editable.content : stringify(editable));
 
-  const syncRawToBody = () => {
-    /*
-    We re-parse as markdown editing could have added non-body changes (preFrontMatter, frontMatter, or spacing).
-    Re-parsing additionally gets us the desired body that was extracted from the mutated editable.raw
-    Additionally we intentionally mutate the existing editable's key values as opposed to reassigning the object itself so consumers of the potentially reactive property stay in sync.
-    */
-    Object.assign(editable, parse(editable.raw));
+  const matter = () => editable.matter;
+
+  const syncMatter = settings => {
+    editable.matter = settings;
   };
 
-  const syncBodyToRaw = () => {
-    editable.raw = computedRaw();
-  };
+  const isModified = () => stringify(editable) !== raw;
 
-  const isModifiedRaw = () => initial.raw !== editable.raw;
-  const isModifiedBody = () => initial.raw !== computedRaw();
+  const hasMatter = () => editable.hasMatter;
 
-  initial = parse(raw);
-  editable = parse(raw);
+  const isMatterValid = () => editable.isMatterValid;
+
+  syncContent(raw);
 
   return {
-    editable,
-    isModifiedRaw,
-    isModifiedBody,
-    syncBodyToRaw,
-    syncRawToBody,
+    matter,
+    isMatterValid,
+    syncMatter,
+    content,
+    syncContent,
+    isModified,
+    hasMatter,
   };
 };
 

@@ -1,20 +1,27 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import MRWidgetService from '../../services/mr_widget_service';
 import DeploymentActionButton from './deployment_action_button.vue';
 import DeploymentViewButton from './deployment_view_button.vue';
-import { MANUAL_DEPLOY, FAILED, SUCCESS, STOPPING, DEPLOYING, REDEPLOYING } from './constants';
+import {
+  MANUAL_DEPLOY,
+  FAILED,
+  SUCCESS,
+  STOPPING,
+  DEPLOYING,
+  REDEPLOYING,
+  ACT_BUTTON_ICONS,
+} from './constants';
 
 export default {
   name: 'DeploymentActions',
+  btnIcons: ACT_BUTTON_ICONS,
   components: {
     DeploymentActionButton,
     DeploymentViewButton,
-    GlIcon,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -66,9 +73,6 @@ export default {
     },
     canBeManuallyRedeployed() {
       return this.computedDeploymentStatus === FAILED && Boolean(this.redeployPath);
-    },
-    shouldShowManualButtons() {
-      return this.glFeatures.deployFromFooter;
     },
     hasExternalUrls() {
       return Boolean(this.deployment.external_url && this.deployment.external_url_formatted);
@@ -147,25 +151,25 @@ export default {
 <template>
   <div>
     <deployment-action-button
-      v-if="shouldShowManualButtons && canBeManuallyDeployed"
+      v-if="canBeManuallyDeployed"
       :action-in-progress="actionInProgress"
       :actions-configuration="$options.actionsConfiguration[constants.DEPLOYING]"
       :computed-deployment-status="computedDeploymentStatus"
+      :icon="$options.btnIcons.play"
       container-classes="js-manual-deploy-action"
       @click="deployManually"
     >
-      <gl-icon name="play" />
       <span>{{ $options.actionsConfiguration[constants.DEPLOYING].buttonText }}</span>
     </deployment-action-button>
     <deployment-action-button
-      v-if="shouldShowManualButtons && canBeManuallyRedeployed"
+      v-if="canBeManuallyRedeployed"
       :action-in-progress="actionInProgress"
       :actions-configuration="$options.actionsConfiguration[constants.REDEPLOYING]"
       :computed-deployment-status="computedDeploymentStatus"
+      :icon="$options.btnIcons.repeat"
       container-classes="js-manual-redeploy-action"
       @click="redeploy"
     >
-      <gl-icon name="repeat" />
       <span>{{ $options.actionsConfiguration[constants.REDEPLOYING].buttonText }}</span>
     </deployment-action-button>
     <deployment-view-button
@@ -181,10 +185,9 @@ export default {
       :computed-deployment-status="computedDeploymentStatus"
       :actions-configuration="$options.actionsConfiguration[constants.STOPPING]"
       :button-title="$options.actionsConfiguration[constants.STOPPING].buttonText"
+      :icon="$options.btnIcons.stop"
       container-classes="js-stop-env"
       @click="stopEnvironment"
-    >
-      <gl-icon name="stop" />
-    </deployment-action-button>
+    />
   </div>
 </template>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Cleanup::ProjectNamespaceService do
+RSpec.describe Clusters::Cleanup::ProjectNamespaceService do
   describe '#execute' do
     subject { service.execute }
 
@@ -16,6 +16,7 @@ describe Clusters::Cleanup::ProjectNamespaceService do
         execution_count: 0
       }
     end
+
     let(:kubeclient_instance_double) do
       instance_double(Gitlab::Kubernetes::KubeClient, delete_namespace: nil, delete_service_account: nil)
     end

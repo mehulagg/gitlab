@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 type: reference
 ---
@@ -186,7 +189,7 @@ git push origin squash_some_bugs
 - When you want feedback create a merge request.
 - Target is the ‘default’ branch (usually master).
 - Assign or mention the person you would like to review.
-- Add 'WIP' to the title if it's a work in progress.
+- Add `[Draft]` to the title if it's a work in progress.
 - When accepting, always delete the branch.
 - Anyone can comment, not just the assignee.
 - Push corrections to the same branch.

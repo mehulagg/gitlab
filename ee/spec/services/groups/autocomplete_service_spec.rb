@@ -16,7 +16,7 @@ RSpec.describe Groups::AutocompleteService do
 
   def expect_labels_to_equal(labels, expected_labels)
     extract_title = lambda { |label| label['title'] }
-    expect(labels.map(&extract_title)).to eq(expected_labels.map(&extract_title))
+    expect(labels.map(&extract_title)).to match_array(expected_labels.map(&extract_title))
   end
 
   describe '#labels_as_hash' do
@@ -61,11 +61,20 @@ RSpec.describe Groups::AutocompleteService do
     let(:sub_group_project) { create(:project, group: sub_group) }
 
     let!(:project_issue) { create(:issue, project: project) }
-    let!(:sub_group_project_issue) { create(:issue, project: sub_group_project) }
+    let!(:sub_group_project_issue) { create(:issue, confidential: true, project: sub_group_project) }
 
     it 'returns issues in group and subgroups' do
-      expect(subject.issues.map(&:iid)).to contain_exactly(project_issue.iid, sub_group_project_issue.iid)
-      expect(subject.issues.map(&:title)).to contain_exactly(project_issue.title, sub_group_project_issue.title)
+      issues = subject.issues
+
+      expect(issues.map(&:iid)).to contain_exactly(project_issue.iid, sub_group_project_issue.iid)
+      expect(issues.map(&:title)).to contain_exactly(project_issue.title, sub_group_project_issue.title)
+    end
+
+    it 'returns only confidential issues if confidential_only is true' do
+      issues = subject.issues(confidential_only: true)
+
+      expect(issues.map(&:iid)).to contain_exactly(sub_group_project_issue.iid)
+      expect(issues.map(&:title)).to contain_exactly(sub_group_project_issue.title)
     end
   end
 
@@ -97,6 +106,15 @@ RSpec.describe Groups::AutocompleteService do
 
     it 'returns epics from group' do
       expect(subject.epics.map(&:iid)).to contain_exactly(epic.iid)
+    end
+
+    it 'returns only confidential epics if confidential_only is true' do
+      confidential_epic = create(:epic, :confidential, group: group)
+
+      epics = subject.epics(confidential_only: true)
+
+      expect(epics.map(&:iid)).to contain_exactly(confidential_epic.iid)
+      expect(epics.map(&:title)).to contain_exactly(confidential_epic.title)
     end
   end
 

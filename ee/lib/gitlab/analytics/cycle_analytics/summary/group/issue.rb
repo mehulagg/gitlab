@@ -28,7 +28,8 @@ module Gitlab
             def issues_count
               issues = IssuesFinder.new(current_user, finder_params).execute
               issues = issues.where(projects: { id: options[:projects] }) if options[:projects].present?
-              issues.count
+
+              ::Issue.where(id: issues.select(:id)).count
             end
             # rubocop: enable CodeReuse/ActiveRecord
 

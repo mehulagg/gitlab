@@ -13,6 +13,7 @@ RSpec.describe 'Epic aggregates (count and weight)' do
   let(:query) do
     graphql_query_for('group', { fullPath: target_epic.group.full_path }, query_graphql_field('epics', { iid: target_epic.iid }, epic_aggregates_query))
   end
+
   let(:epic_aggregates_query) do
     <<~QUERY
       nodes {

@@ -1,5 +1,0 @@
----
-title: Ensure users can unlink Group SAML when the group has SAML disabled
-merge_request: 32655
-author:
-type: fixed

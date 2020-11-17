@@ -52,6 +52,7 @@ RSpec.describe Dashboard::Operations::ListService do
       let(:production_deployment) do
         create(:deployment, :success, project: project, environment: production, ref: 'master')
       end
+
       let(:staging_deployment) do
         create(:deployment, :success, project: project, environment: staging, ref: 'wip')
       end
@@ -94,15 +95,15 @@ RSpec.describe Dashboard::Operations::ListService do
 
           let!(:alert_events) do
             [
-              create(:prometheus_alert_event, prometheus_alert: alert_prd1),
-              create(:prometheus_alert_event, prometheus_alert: alert_prd2),
+              create(:alert_management_alert, prometheus_alert: alert_prd1, environment: production, project: project),
+              create(:alert_management_alert, prometheus_alert: alert_prd2, environment: production, project: project),
               last_firing_event,
-              create(:prometheus_alert_event, prometheus_alert: alert_stg),
-              create(:prometheus_alert_event, :resolved, prometheus_alert: alert_prd2)
+              create(:alert_management_alert, prometheus_alert: alert_stg, environment: staging, project: project),
+              create(:alert_management_alert, :resolved, prometheus_alert: alert_prd2, environment: production, project: project)
             ]
           end
 
-          let(:last_firing_event) { create(:prometheus_alert_event, prometheus_alert: alert_prd1) }
+          let(:last_firing_event) { create(:alert_management_alert, prometheus_alert: alert_prd1, environment: production, project: project) }
 
           it_behaves_like 'avoiding N+1 queries'
 
@@ -116,7 +117,7 @@ RSpec.describe Dashboard::Operations::ListService do
               project2 = create(:project)
               production2 = create(:environment, name: 'production', project: project2)
               alert2_prd = create(:prometheus_alert, project: project2, environment: production2)
-              create(:prometheus_alert_event, prometheus_alert: alert2_prd)
+              create(:alert_management_alert, prometheus_alert: alert2_prd, environment: production2, project: project2)
 
               user.ops_dashboard_projects << project2
 

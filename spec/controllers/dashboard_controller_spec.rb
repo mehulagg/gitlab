@@ -15,6 +15,16 @@ RSpec.describe DashboardController do
     describe 'GET issues' do
       it_behaves_like 'issuables list meta-data', :issue, :issues
       it_behaves_like 'issuables requiring filter', :issues
+
+      it 'lists only incidents and issues' do
+        issue = create(:incident, project: project, author: user)
+        incident = create(:incident, project: project, author: user)
+        create(:quality_test_case, project: project, author: user)
+
+        get :issues, params: { author_id: user.id }
+
+        expect(assigns(:issues)).to match_array([issue, incident])
+      end
     end
 
     describe 'GET merge requests' do
@@ -24,15 +34,20 @@ RSpec.describe DashboardController do
   end
 
   describe "GET activity as JSON" do
+    include DesignManagementTestHelpers
     render_views
 
     let(:user) { create(:user) }
     let(:project) { create(:project, :public, issues_access_level: ProjectFeature::PRIVATE) }
+    let(:other_project) { create(:project, :public) }
 
     before do
+      enable_design_management
       create(:event, :created, project: project, target: create(:issue))
       create(:wiki_page_event, :created, project: project)
       create(:wiki_page_event, :updated, project: project)
+      create(:design_event, project: project)
+      create(:design_event, author: user, project: other_project)
 
       sign_in(user)
 
@@ -42,12 +57,13 @@ RSpec.describe DashboardController do
     context 'when user has permission to see the event' do
       before do
         project.add_developer(user)
+        other_project.add_developer(user)
       end
 
       it 'returns count' do
         get :activity, params: { format: :json }
 
-        expect(json_response['count']).to eq(3)
+        expect(json_response['count']).to eq(6)
       end
     end
 

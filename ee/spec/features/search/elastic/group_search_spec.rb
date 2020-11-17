@@ -8,11 +8,11 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
   let(:project) { create(:project, :repository, :wiki_repo, namespace: group) }
 
   def choose_group(group)
-    find('.js-search-group-dropdown').click
+    find('[data-testid="group-filter"]').click
     wait_for_requests
 
-    page.within '.js-search-form' do
-      click_link group.name
+    page.within '[data-testid="group-filter"]' do
+      click_button group.name
     end
   end
 
@@ -25,6 +25,9 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
     sign_in(user)
 
     visit(search_path)
+
+    wait_for_requests
+
     choose_group(group)
   end
 
@@ -68,12 +71,12 @@ RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_in
       ensure_elasticsearch_index!
     end
 
-    it 'finds pages' do
+    it 'finds wiki pages' do
       submit_search('term')
       select_search_scope('Wiki')
 
-      expect(page).to have_selector('.file-content .code')
-      expect(page).to have_selector('span.line[lang="markdown"]')
+      expect(page).to have_selector('.search-result-row .description', text: '# term')
+      expect(page).to have_link('test')
     end
   end
 

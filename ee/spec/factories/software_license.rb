@@ -13,5 +13,9 @@ FactoryBot.define do
       spdx_identifier { 'Apache-2.0' }
       name { 'Apache 2.0 License' }
     end
+
+    trait :user_entered do
+      spdx_identifier { nil }
+    end
   end
 end

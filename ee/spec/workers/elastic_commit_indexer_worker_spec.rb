@@ -34,5 +34,14 @@ RSpec.describe ElasticCommitIndexerWorker do
 
       subject.perform(project.id, nil, nil, true)
     end
+
+    it 'does not run index when it is locked' do
+      expect(subject).to receive(:in_lock) # Mock and don't yield
+        .with("ElasticCommitIndexerWorker/#{project.id}/false", ttl: 1.hour, retries: 0)
+
+      expect(Gitlab::Elastic::Indexer).not_to receive(:new)
+
+      subject.perform(project.id)
+    end
   end
 end

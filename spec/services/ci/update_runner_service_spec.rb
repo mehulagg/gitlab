@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::UpdateRunnerService do
+RSpec.describe Ci::UpdateRunnerService do
   let(:runner) { create(:ci_runner) }
 
   describe '#update' do
@@ -50,7 +50,7 @@ describe Ci::UpdateRunnerService do
     end
 
     def update
-      described_class.new(runner).update(params)
+      described_class.new(runner).update(params) # rubocop: disable Rails/SaveBang
     end
   end
 end

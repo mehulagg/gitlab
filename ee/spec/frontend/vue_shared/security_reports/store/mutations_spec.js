@@ -8,7 +8,9 @@ jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
 }));
 
-describe('security reports mutations', () => {
+// See also the corresponding CE specs in
+// spec/frontend/vue_shared/security_reports/store/modules/sast/mutations_spec.js
+describe('EE sast reports mutations', () => {
   let stateCopy;
 
   beforeEach(() => {
@@ -28,6 +30,14 @@ describe('security reports mutations', () => {
       mutations[types.SET_BASE_BLOB_PATH](stateCopy, 'base_blob_path');
 
       expect(stateCopy.blobPath.base).toEqual('base_blob_path');
+    });
+  });
+
+  describe('SET_CAN_READ_VULNERABILITY_FEEDBACK', () => {
+    it('should set the vulnerabilities endpoint', () => {
+      mutations[types.SET_CAN_READ_VULNERABILITY_FEEDBACK](stateCopy, false);
+
+      expect(stateCopy.canReadVulnerabilityFeedback).toEqual(false);
     });
   });
 
@@ -76,14 +86,6 @@ describe('security reports mutations', () => {
       mutations[types.REQUEST_DEPENDENCY_SCANNING_DIFF](stateCopy);
 
       expect(stateCopy.dependencyScanning.isLoading).toEqual(true);
-    });
-  });
-
-  describe('REQUEST_SECRET_SCANNING_DIFF', () => {
-    it('should set secret scanning loading flag to true', () => {
-      mutations[types.REQUEST_SECRET_SCANNING_DIFF](stateCopy);
-
-      expect(stateCopy.secretScanning.isLoading).toEqual(true);
     });
   });
 
@@ -476,34 +478,6 @@ describe('security reports mutations', () => {
     });
   });
 
-  describe('UPDATE_SECRET_SCANNING_ISSUE', () => {
-    it('updates issue in the new issues list', () => {
-      stateCopy.secretScanning.newIssues = mockFindings;
-      stateCopy.secretScanning.resolvedIssues = [];
-      const updatedIssue = {
-        ...mockFindings[0],
-        foo: 'bar',
-      };
-
-      mutations[types.UPDATE_SECRET_SCANNING_ISSUE](stateCopy, updatedIssue);
-
-      expect(stateCopy.secretScanning.newIssues[0]).toEqual(updatedIssue);
-    });
-
-    it('updates issue in the resolved issues list', () => {
-      stateCopy.secretScanning.newIssues = [];
-      stateCopy.secretScanning.resolvedIssues = mockFindings;
-      const updatedIssue = {
-        ...mockFindings[0],
-        foo: 'bar',
-      };
-
-      mutations[types.UPDATE_SECRET_SCANNING_ISSUE](stateCopy, updatedIssue);
-
-      expect(stateCopy.secretScanning.resolvedIssues[0]).toEqual(updatedIssue);
-    });
-  });
-
   describe('SET_CONTAINER_SCANNING_DIFF_ENDPOINT', () => {
     const endpoint = 'container_scanning_diff_endpoint.json';
 
@@ -733,69 +707,90 @@ describe('security reports mutations', () => {
     });
   });
 
-  describe('SET_SECRET_SCANNING_DIFF_ENDPOINT', () => {
-    const endpoint = 'secret_scanning_diff_endpoint.json';
+  describe('SET_COVERAGE_FUZZING_DIFF_ENDPOINT', () => {
+    const endpoint = 'coverage_fuzzing_diff_endpoint.json';
 
     beforeEach(() => {
-      mutations[types.SET_SECRET_SCANNING_DIFF_ENDPOINT](stateCopy, endpoint);
+      mutations[types.SET_COVERAGE_FUZZING_DIFF_ENDPOINT](stateCopy, endpoint);
     });
 
     it('should set the correct endpoint', () => {
-      expect(stateCopy.secretScanning.paths.diffEndpoint).toEqual(endpoint);
+      expect(stateCopy.coverageFuzzing.paths.diffEndpoint).toEqual(endpoint);
     });
   });
 
-  describe('RECEIVE_SECRET_SCANNING_DIFF_SUCCESS', () => {
-    const reports = {
-      diff: {
-        added: [
-          { name: 'added vuln 1', report_type: 'secret_scanning' },
-          { name: 'added vuln 2', report_type: 'secret_scanning' },
-        ],
-        fixed: [{ name: 'fixed vuln 1', report_type: 'secret_scanning' }],
-        base_report_out_of_date: true,
+  describe('RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS', () => {
+    let reports = {};
+    const scans = [
+      {
+        scanned_resources_count: 123,
+        job_path: '/group/project/-/jobs/123546789',
       },
-    };
+      {
+        scanned_resources_count: 321,
+        job_path: '/group/project/-/jobs/987654321',
+      },
+    ];
 
     beforeEach(() => {
-      mutations[types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS](stateCopy, reports);
+      reports = {
+        diff: {
+          added: [
+            { name: 'added vuln 1', report_type: 'coverage_fuzzing' },
+            { name: 'added vuln 2', report_type: 'coverage_fuzzing' },
+          ],
+          fixed: [{ name: 'fixed vuln 1', report_type: 'coverage_fuzzing' }],
+          existing: [{ name: 'existing vuln 1', report_type: 'coverage_fuzzing' }],
+          base_report_out_of_date: true,
+          scans,
+        },
+      };
+      mutations[types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS](stateCopy, reports);
     });
 
     it('should set isLoading to false', () => {
-      expect(stateCopy.secretScanning.isLoading).toBe(false);
+      expect(stateCopy.coverageFuzzing.isLoading).toBe(false);
+    });
+
+    it('should set scans', () => {
+      expect(stateCopy.coverageFuzzing.scans).toEqual(scans);
     });
 
     it('should set baseReportOutofDate to true', () => {
-      expect(stateCopy.secretScanning.baseReportOutofDate).toBe(true);
+      expect(stateCopy.coverageFuzzing.baseReportOutofDate).toBe(true);
     });
 
     it('should parse and set the added vulnerabilities', () => {
       reports.diff.added.forEach((vuln, i) => {
-        expect(stateCopy.secretScanning.newIssues[i]).toMatchObject({
-          name: vuln.name,
-          title: vuln.name,
-          category: vuln.report_type,
-        });
+        expect(stateCopy.coverageFuzzing.newIssues[i]).toEqual(
+          expect.objectContaining({
+            name: vuln.name,
+            title: vuln.name,
+            category: vuln.report_type,
+          }),
+        );
       });
     });
 
     it('should parse and set the fixed vulnerabilities', () => {
       reports.diff.fixed.forEach((vuln, i) => {
-        expect(stateCopy.secretScanning.resolvedIssues[i]).toMatchObject({
-          name: vuln.name,
-          title: vuln.name,
-          category: vuln.report_type,
-        });
+        expect(stateCopy.coverageFuzzing.resolvedIssues[i]).toEqual(
+          expect.objectContaining({
+            name: vuln.name,
+            title: vuln.name,
+            category: vuln.report_type,
+          }),
+        );
       });
     });
   });
 
-  describe('RECEIVE_SECRET_SCANNING_DIFF_ERROR', () => {
-    it('should set secret scanning loading flag to false and error flag to true', () => {
-      mutations[types.RECEIVE_SECRET_SCANNING_DIFF_ERROR](stateCopy);
+  describe('RECEIVE_COVERAGE_FUZZING_DIFF_ERROR', () => {
+    it('should set coverage fuzzing loading flag to false and error flag to true', () => {
+      mutations[types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR](stateCopy);
 
-      expect(stateCopy.secretScanning.isLoading).toEqual(false);
-      expect(stateCopy.secretScanning.hasError).toEqual(true);
+      expect(stateCopy.coverageFuzzing.isLoading).toEqual(false);
+      expect(stateCopy.coverageFuzzing.hasError).toEqual(true);
     });
   });
 });

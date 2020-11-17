@@ -3,7 +3,7 @@ import recentSearchesStorageKeys from 'ee_else_ce/filtered_search/recent_searche
 import { getParameterByName, getUrlParamsArray } from '~/lib/utils/common_utils';
 import IssuableFilteredSearchTokenKeys from '~/filtered_search/issuable_filtered_search_token_keys';
 import { visitUrl } from '../lib/utils/url_utility';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import FilteredSearchContainer from './container';
 import RecentSearchesRoot from './recent_searches_root';
 import RecentSearchesStore from './stores/recent_searches_store';
@@ -29,13 +29,16 @@ export default class FilteredSearchManager {
     isGroup = false,
     isGroupAncestor = true,
     isGroupDecendent = false,
+    useDefaultState = false,
     filteredSearchTokenKeys = IssuableFilteredSearchTokenKeys,
     stateFiltersSelector = '.issues-state-filters',
     placeholder = __('Search or filter results...'),
+    anchor = null,
   }) {
     this.isGroup = isGroup;
     this.isGroupAncestor = isGroupAncestor;
     this.isGroupDecendent = isGroupDecendent;
+    this.useDefaultState = useDefaultState;
     this.states = ['opened', 'closed', 'merged', 'all'];
 
     this.page = page;
@@ -47,15 +50,24 @@ export default class FilteredSearchManager {
     this.filteredSearchTokenKeys = filteredSearchTokenKeys;
     this.stateFiltersSelector = stateFiltersSelector;
     this.placeholder = placeholder;
+    this.anchor = anchor;
 
-    const { multipleAssignees } = this.filteredSearchInput.dataset;
+    const {
+      multipleAssignees,
+      epicsEndpoint,
+      iterationsEndpoint,
+    } = this.filteredSearchInput.dataset;
+
     if (multipleAssignees && this.filteredSearchTokenKeys.enableMultipleAssignees) {
       this.filteredSearchTokenKeys.enableMultipleAssignees();
     }
 
-    const { epicsEndpoint } = this.filteredSearchInput.dataset;
     if (!epicsEndpoint && this.filteredSearchTokenKeys.removeEpicToken) {
       this.filteredSearchTokenKeys.removeEpicToken();
+    }
+
+    if (!iterationsEndpoint && this.filteredSearchTokenKeys.removeIterationToken) {
+      this.filteredSearchTokenKeys.removeIterationToken();
     }
 
     this.recentSearchesStore = new RecentSearchesStore({
@@ -106,7 +118,9 @@ export default class FilteredSearchManager {
         labelsEndpoint = '',
         milestonesEndpoint = '',
         releasesEndpoint = '',
+        environmentsEndpoint = '',
         epicsEndpoint = '',
+        iterationsEndpoint = '',
       } = this.filteredSearchInput.dataset;
 
       this.dropdownManager = new FilteredSearchDropdownManager({
@@ -114,7 +128,9 @@ export default class FilteredSearchManager {
         labelsEndpoint,
         milestonesEndpoint,
         releasesEndpoint,
+        environmentsEndpoint,
         epicsEndpoint,
+        iterationsEndpoint,
         tokenizer: this.tokenizer,
         page: this.page,
         isGroup: this.isGroup,
@@ -722,8 +738,13 @@ export default class FilteredSearchManager {
   search(state = null) {
     const paths = [];
     const { tokens, searchToken } = this.getSearchTokens();
-    const currentState = state || getParameterByName('state') || 'opened';
-    paths.push(`state=${currentState}`);
+    let currentState = state || getParameterByName('state');
+    if (!currentState && this.useDefaultState) {
+      currentState = 'opened';
+    }
+    if (this.states.includes(currentState)) {
+      paths.push(`state=${currentState}`);
+    }
 
     tokens.forEach(token => {
       const condition = this.filteredSearchTokenKeys.searchByConditionKeyValue(
@@ -741,7 +762,7 @@ export default class FilteredSearchManager {
       let tokenPath = '';
 
       if (condition) {
-        tokenPath = condition.url;
+        tokenPath = condition.replacementUrl || condition.url;
       } else {
         let tokenValue = token.value;
 
@@ -779,7 +800,11 @@ export default class FilteredSearchManager {
       paths.push(`search=${sanitized}`);
     }
 
-    const parameterizedUrl = `?scope=all&utf8=%E2%9C%93&${paths.join('&')}`;
+    let parameterizedUrl = `?scope=all&utf8=%E2%9C%93&${paths.join('&')}`;
+
+    if (this.anchor) {
+      parameterizedUrl += `#${this.anchor}`;
+    }
 
     if (this.updateObject) {
       this.updateObject(parameterizedUrl);

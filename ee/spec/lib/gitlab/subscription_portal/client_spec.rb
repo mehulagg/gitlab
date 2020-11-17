@@ -7,6 +7,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
   let(:httparty_response) do
     double(code: http_response.code, response: http_response, body: {}, parsed_response: {})
   end
+
   let(:http_method) { :post }
 
   shared_examples 'when response is successful' do

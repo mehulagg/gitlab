@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::FogbugzImport::Importer do
+RSpec.describe Gitlab::FogbugzImport::Importer do
   let(:project) { create(:project_empty_repo) }
   let(:importer) { described_class.new(project) }
   let(:repo) do
@@ -11,6 +11,7 @@ describe Gitlab::FogbugzImport::Importer do
       path: 'vim',
       raw_data: '')
   end
+
   let(:import_data) { { 'repo' => repo } }
   let(:credentials) do
     {

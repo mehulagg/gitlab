@@ -129,6 +129,42 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
       end
     end
 
+    shared_examples 'removes package file' do
+      subject(:service) { described_class.new('package_file', registry.package_file_id) }
+
+      before do
+        stub_exclusive_lease("file_registry_removal_service:package_file:#{registry.package_file_id}",
+          timeout: Geo::FileRegistryRemovalService::LEASE_TIMEOUT)
+      end
+
+      it 'file from disk' do
+        expect do
+          service.execute
+        end.to change { File.exist?(file_path) }.from(true).to(false)
+      end
+
+      it 'deletes registry entry' do
+        expect do
+          service.execute
+        end.to change(Geo::PackageFileRegistry, :count).by(-1)
+      end
+    end
+
+    shared_examples 'removes package file registry' do
+      subject(:service) { described_class.new('package_file', registry.package_file_id) }
+
+      before do
+        stub_exclusive_lease("file_registry_removal_service:package_file:#{registry.package_file_id}",
+          timeout: Geo::FileRegistryRemovalService::LEASE_TIMEOUT)
+      end
+
+      it 'deletes registry entry' do
+        expect do
+          service.execute
+        end.to change(Geo::PackageFileRegistry, :count).by(-1)
+      end
+    end
+
     context 'with LFS object' do
       let!(:lfs_object) { create(:lfs_object, :with_file) }
       let!(:registry) { create(:geo_lfs_object_registry, lfs_object_id: lfs_object.id) }
@@ -326,6 +362,7 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
         PersonalFileUploader.new(snippet).store!(file)
         Upload.find_by(model: snippet, uploader: PersonalFileUploader.name)
       end
+
       let!(:registry) { create(:geo_upload_registry, :personal_file, file_id: upload.id) }
       let!(:file_path) { upload.retrieve_uploader.file.path }
 
@@ -356,6 +393,7 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
         FaviconUploader.new(appearance).store!(file)
         Upload.find_by(model: appearance, uploader: FaviconUploader.name)
       end
+
       let!(:registry) { create(:geo_upload_registry, :favicon, file_id: upload.id) }
       let!(:file_path) { upload.retrieve_uploader.file.path }
 
@@ -377,6 +415,40 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
           end
 
           it_behaves_like 'removes registry entry'
+        end
+      end
+    end
+
+    context 'with package file' do
+      let(:package_file) { create(:package_file_with_file) }
+      let!(:registry) { create(:geo_package_file_registry, package_file: package_file) }
+      let(:file_path) { Tempfile.new.path }
+
+      before do
+        allow_next_instance_of(Geo::PackageFileReplicator) do |replicator|
+          allow(replicator).to receive(:blob_path).and_return(file_path)
+        end
+      end
+
+      it_behaves_like 'removes package file'
+
+      context 'no package file record' do
+        before do
+          package_file.delete
+        end
+
+        it_behaves_like 'removes package file' do
+          subject(:service) { described_class.new('package_file', registry.package_file_id, file_path) }
+        end
+      end
+
+      context 'with orphaned registry' do
+        before do
+          package_file.delete
+        end
+
+        it_behaves_like 'removes package file registry' do
+          subject(:service) { described_class.new('package_file', registry.package_file_id) }
         end
       end
     end

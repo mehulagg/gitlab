@@ -142,6 +142,37 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
     end
   end
 
+  describe 'job with secrets' do
+    before do
+      stub_ci_pipeline_yaml_file <<~YAML
+        deploy:
+          script:
+            - echo
+          secrets:
+            DATABASE_PASSWORD:
+              vault: production/db/password
+      YAML
+    end
+
+    it 'persists secrets as job metadata' do
+      pipeline = create_pipeline!
+
+      expect(pipeline).to be_persisted
+
+      build = Ci::Build.find(pipeline.builds.first.id)
+
+      expect(build.metadata.secrets).to eq({
+        'DATABASE_PASSWORD' => {
+          'vault' => {
+            'engine' => { 'name' => 'kv-v2', 'path' => 'kv-v2' },
+            'path' => 'production/db',
+            'field' => 'password'
+          }
+        }
+      })
+    end
+  end
+
   def create_pipeline!
     service.execute(:push)
   end

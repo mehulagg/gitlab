@@ -1,8 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import createFlash from '~/flash';
 import TimeMetricsCard from 'ee/analytics/cycle_analytics/components/time_metrics_card.vue';
-import { group, timeMetricsData } from '../mock_data';
+import { OVERVIEW_METRICS } from 'ee/analytics/cycle_analytics/constants';
 import Api from 'ee/api';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { group, timeMetricsData, recentActivityData } from '../mock_data';
 
 jest.mock('~/flash');
 
@@ -10,62 +11,78 @@ describe('TimeMetricsCard', () => {
   const { full_path: groupPath } = group;
   let wrapper;
 
-  const createComponent = ({ additionalParams = {} } = {}) => {
+  const template = `
+    <div slot-scope="{ metrics }">
+      <span v-for="metric in metrics">{{metric.value}} {{metric.unit}}</span>
+    </div>`;
+
+  const createComponent = ({ additionalParams = {}, requestType } = {}) => {
     return shallowMount(TimeMetricsCard, {
       propsData: {
         groupPath,
         additionalParams,
+        requestType,
       },
-      slots: {
-        default: 'mockMetricCard',
+      scopedSlots: {
+        default: template,
       },
     });
   };
 
-  beforeEach(() => {
-    jest.spyOn(Api, 'cycleAnalyticsTimeSummaryData').mockResolvedValue({ data: timeMetricsData });
-
-    wrapper = createComponent();
-  });
-
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-  });
-  it('fetches the time metrics data', () => {
-    expect(Api.cycleAnalyticsTimeSummaryData).toHaveBeenCalledWith(groupPath, {});
-  });
-
-  describe('with a failing request', () => {
+  describe.each`
+    metric               | requestType                         | request                            | data
+    ${'Recent activity'} | ${OVERVIEW_METRICS.RECENT_ACTIVITY} | ${'cycleAnalyticsSummaryData'}     | ${recentActivityData}
+    ${'Time summary'}    | ${OVERVIEW_METRICS.TIME_SUMMARY}    | ${'cycleAnalyticsTimeSummaryData'} | ${timeMetricsData}
+  `('$metric', ({ requestType, request, data, metric }) => {
     beforeEach(() => {
-      jest.spyOn(Api, 'cycleAnalyticsTimeSummaryData').mockRejectedValue();
-
-      wrapper = createComponent();
+      jest.spyOn(Api, request).mockResolvedValue({ data });
+      wrapper = createComponent({ requestType });
     });
 
-    it('should render an error message', () => {
-      expect(createFlash).toHaveBeenCalledWith(
-        'There was an error while fetching value stream analytics time summary data.',
-      );
+    afterEach(() => {
+      wrapper.destroy();
+      wrapper = null;
     });
-  });
 
-  describe('with additional params', () => {
-    beforeEach(() => {
-      wrapper = createComponent({
-        additionalParams: {
-          'project_ids[]': [1],
-          created_after: '2020-01-01',
-          created_before: '2020-02-01',
-        },
+    it(`renders the ${metric} metric`, () => {
+      expect(wrapper.html()).toMatchSnapshot();
+    });
+
+    it('fetches the metric data', () => {
+      expect(Api[request]).toHaveBeenCalledWith(groupPath, {});
+    });
+
+    describe('with a failing request', () => {
+      beforeEach(() => {
+        jest.spyOn(Api, request).mockRejectedValue();
+        wrapper = createComponent({ requestType });
+      });
+
+      it('should render an error message', () => {
+        expect(createFlash).toHaveBeenCalledWith(
+          `There was an error while fetching value stream analytics ${metric.toLowerCase()} data.`,
+        );
       });
     });
 
-    it('sends additional parameters as query paremeters', () => {
-      expect(Api.cycleAnalyticsTimeSummaryData).toHaveBeenCalledWith(groupPath, {
-        'project_ids[]': [1],
-        created_after: '2020-01-01',
-        created_before: '2020-02-01',
+    describe('with additional params', () => {
+      beforeEach(() => {
+        wrapper = createComponent({
+          requestType,
+          additionalParams: {
+            'project_ids[]': [1],
+            created_after: '2020-01-01',
+            created_before: '2020-02-01',
+          },
+        });
+      });
+
+      it('sends additional parameters as query paremeters', () => {
+        expect(Api[request]).toHaveBeenCalledWith(groupPath, {
+          'project_ids[]': [1],
+          created_after: '2020-01-01',
+          created_before: '2020-02-01',
+        });
       });
     });
   });

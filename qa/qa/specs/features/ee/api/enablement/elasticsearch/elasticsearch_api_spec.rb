@@ -4,7 +4,7 @@ require 'airborne'
 require 'securerandom'
 
 module QA
-  context 'Enablement:Search' do
+  RSpec.describe 'Enablement:Search' do
     describe 'When using elasticsearch API to search for a known blob', :orchestrated, :elasticsearch, :requires_admin do
       let(:project_file_content) { "elasticsearch: #{SecureRandom.hex(8)}" }
       let(:non_member_user) { Resource::User.fabricate_or_use('non_member_user', 'non_member_user_password') }
@@ -22,7 +22,7 @@ module QA
       before do
         unless elasticsearch_original_state_on?
           QA::EE::Resource::Settings::Elasticsearch.fabricate_via_api!
-          sleep(60)
+          sleep(90)
           # wait for the change to propagate before inserting records or else
           # Gitlab::CurrentSettings.elasticsearch_indexing and
           # Elastic::ApplicationVersionedSearch::searchable? will be false
@@ -44,7 +44,7 @@ module QA
         end
       end
 
-      it 'searches public project and finds a blob as an non-member user' do
+      it 'searches public project and finds a blob as an non-member user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/744' do
         successful_search(non_member_api_client)
       end
 
@@ -53,12 +53,12 @@ module QA
           project.set_visibility(:private)
         end
 
-        it 'finds a blob as an authorized user' do
+        it 'finds a blob as an authorized user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/745' do
           successful_search(api_client)
         end
 
-        it 'does not find a blob as an non-member user' do
-          QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 3) do
+        it 'does not find a blob as an non-member user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/746' do
+          QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 12) do
             get Runtime::Search.create_search_request(non_member_api_client, 'blobs', project_file_content).url
             expect_status(QA::Support::Api::HTTP_STATUS_OK)
             expect(json_body).to be_empty
@@ -69,7 +69,7 @@ module QA
       private
 
       def successful_search(api_client)
-        QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 3) do
+        QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 12) do
           get Runtime::Search.create_search_request(api_client, 'blobs', project_file_content).url
           expect_status(QA::Support::Api::HTTP_STATUS_OK)
 

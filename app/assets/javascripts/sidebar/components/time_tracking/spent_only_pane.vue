@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { sprintf, s__ } from '~/locale';
 
 export default {
@@ -14,7 +15,7 @@ export default {
       return sprintf(
         s__('TimeTracking|%{startTag}Spent: %{endTag}%{timeSpentHumanReadable}'),
         {
-          startTag: '<span class="bold">',
+          startTag: '<span class="gl-font-weight-bold">',
           endTag: '</span>',
           timeSpentHumanReadable: this.timeSpentHumanReadable,
         },
@@ -26,5 +27,5 @@ export default {
 </script>
 
 <template>
-  <div class="time-tracking-spend-only-pane" v-html="timeSpent"></div>
+  <div data-testid="spentOnlyPane" v-html="timeSpent"></div>
 </template>

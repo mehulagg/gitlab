@@ -9,6 +9,7 @@ import eventHub from '~/ide/eventhub';
 import consts from '~/ide/stores/modules/commit/constants';
 import * as mutationTypes from '~/ide/stores/modules/commit/mutation_types';
 import * as actions from '~/ide/stores/modules/commit/actions';
+import { createUnexpectedCommitError } from '~/ide/lib/errors';
 import { commitActionTypes, PERMISSION_CREATE_MR } from '~/ide/constants';
 import testAction from '../../../../helpers/vuex_action_helper';
 
@@ -75,59 +76,38 @@ describe('IDE commit module actions', () => {
         .then(done)
         .catch(done.fail);
     });
-
-    it('sets shouldCreateMR to true if "Create new MR" option is visible', done => {
-      Object.assign(store.state, {
-        shouldHideNewMrOption: false,
-      });
-
-      testAction(
-        actions.updateCommitAction,
-        {},
-        store.state,
-        [
-          {
-            type: mutationTypes.UPDATE_COMMIT_ACTION,
-            payload: { commitAction: expect.anything() },
-          },
-          { type: mutationTypes.TOGGLE_SHOULD_CREATE_MR, payload: true },
-        ],
-        [],
-        done,
-      );
-    });
-
-    it('sets shouldCreateMR to false if "Create new MR" option is hidden', done => {
-      Object.assign(store.state, {
-        shouldHideNewMrOption: true,
-      });
-
-      testAction(
-        actions.updateCommitAction,
-        {},
-        store.state,
-        [
-          {
-            type: mutationTypes.UPDATE_COMMIT_ACTION,
-            payload: { commitAction: expect.anything() },
-          },
-          { type: mutationTypes.TOGGLE_SHOULD_CREATE_MR, payload: false },
-        ],
-        [],
-        done,
-      );
-    });
   });
 
   describe('updateBranchName', () => {
-    it('updates store with new branch name', done => {
-      store
-        .dispatch('commit/updateBranchName', 'branch-name')
-        .then(() => {
-          expect(store.state.commit.newBranchName).toBe('branch-name');
-        })
-        .then(done)
-        .catch(done.fail);
+    let originalGon;
+
+    beforeEach(() => {
+      originalGon = window.gon;
+      window.gon = { current_username: 'johndoe' };
+
+      store.state.currentBranchId = 'master';
+    });
+
+    afterEach(() => {
+      window.gon = originalGon;
+    });
+
+    it('updates store with new branch name', async () => {
+      await store.dispatch('commit/updateBranchName', 'branch-name');
+
+      expect(store.state.commit.newBranchName).toBe('branch-name');
+    });
+  });
+
+  describe('addSuffixToBranchName', () => {
+    it('adds suffix to branchName', async () => {
+      jest.spyOn(Math, 'random').mockReturnValue(0.391352525);
+
+      store.state.commit.newBranchName = 'branch-name';
+
+      await store.dispatch('commit/addSuffixToBranchName');
+
+      expect(store.state.commit.newBranchName).toBe('branch-name-39135');
     });
   });
 
@@ -317,13 +297,16 @@ describe('IDE commit module actions', () => {
         currentBranchId: 'master',
         projects: {
           abcproject: {
+            default_branch: 'master',
             web_url: 'webUrl',
             branches: {
               master: {
+                name: 'master',
                 workingReference: '1',
                 commit: {
                   id: TEST_COMMIT_SHA,
                 },
+                can_push: true,
               },
             },
             userPermissions: {
@@ -498,6 +481,16 @@ describe('IDE commit module actions', () => {
             .catch(done.fail);
         });
 
+        it('does not redirect to merge request page if shouldCreateMR is checked, but branch is the default branch', async () => {
+          jest.spyOn(eventHub, '$on').mockImplementation();
+
+          store.state.commit.commitAction = consts.COMMIT_TO_CURRENT_BRANCH;
+          store.state.commit.shouldCreateMR = true;
+
+          await store.dispatch('commit/commitChanges');
+          expect(visitUrl).not.toHaveBeenCalled();
+        });
+
         it('resets changed files before redirecting', () => {
           jest.spyOn(eventHub, '$on').mockImplementation();
 
@@ -510,7 +503,7 @@ describe('IDE commit module actions', () => {
       });
     });
 
-    describe('failed', () => {
+    describe('success response with failed message', () => {
       beforeEach(() => {
         jest.spyOn(service, 'commit').mockResolvedValue({
           data: {
@@ -530,6 +523,25 @@ describe('IDE commit module actions', () => {
             done();
           })
           .catch(done.fail);
+      });
+    });
+
+    describe('failed response', () => {
+      beforeEach(() => {
+        jest.spyOn(service, 'commit').mockRejectedValue({});
+      });
+
+      it('commits error updates', async () => {
+        jest.spyOn(store, 'commit');
+
+        await store.dispatch('commit/commitChanges').catch(() => {});
+
+        expect(store.commit.mock.calls).toEqual([
+          ['commit/CLEAR_ERROR', undefined, undefined],
+          ['commit/UPDATE_LOADING', true, undefined],
+          ['commit/UPDATE_LOADING', false, undefined],
+          ['commit/SET_ERROR', createUnexpectedCommitError(), undefined],
+        ]);
       });
     });
 

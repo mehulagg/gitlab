@@ -4,6 +4,7 @@ class Import::BaseController < ApplicationController
   include ActionView::Helpers::SanitizeHelper
 
   before_action :import_rate_limit, only: [:create]
+  feature_category :importers
 
   def status
     respond_to do |format|
@@ -30,7 +31,7 @@ class Import::BaseController < ApplicationController
   end
 
   def incompatible_repos
-    []
+    raise NotImplementedError
   end
 
   def provider_name
@@ -41,28 +42,28 @@ class Import::BaseController < ApplicationController
     raise NotImplementedError
   end
 
-  private
-
-  def filter_attribute
-    :name
+  def extra_representation_opts
+    {}
   end
 
+  private
+
   def sanitized_filter_param
-    @filter ||= sanitize(params[:filter])
+    @filter ||= sanitize(params[:filter])&.downcase
   end
 
   def filtered(collection)
     return collection unless sanitized_filter_param
 
-    collection.select { |item| item[filter_attribute].include?(sanitized_filter_param) }
+    collection.select { |item| item[:name].to_s.downcase.include?(sanitized_filter_param) }
   end
 
   def serialized_provider_repos
-    Import::ProviderRepoSerializer.new(current_user: current_user).represent(importable_repos, provider: provider_name, provider_url: provider_url)
+    Import::ProviderRepoSerializer.new(current_user: current_user).represent(importable_repos, provider: provider_name, provider_url: provider_url, **extra_representation_opts)
   end
 
   def serialized_incompatible_repos
-    Import::ProviderRepoSerializer.new(current_user: current_user).represent(incompatible_repos, provider: provider_name, provider_url: provider_url)
+    Import::ProviderRepoSerializer.new(current_user: current_user).represent(incompatible_repos, provider: provider_name, provider_url: provider_url, **extra_representation_opts)
   end
 
   def serialized_imported_projects
@@ -84,15 +85,6 @@ class Import::BaseController < ApplicationController
   # rubocop: disable CodeReuse/ActiveRecord
   def find_already_added_projects(import_type)
     current_user.created_projects.where(import_type: import_type).with_import_state
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
-
-  # rubocop: disable CodeReuse/ActiveRecord
-  def find_jobs(import_type)
-    current_user.created_projects
-      .with_import_state
-      .where(import_type: import_type)
-      .to_json(only: [:id], methods: [:import_status])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

@@ -1,5 +1,6 @@
 <script>
 import { escape } from 'lodash';
+import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -7,6 +8,9 @@ export default {
   name: 'PipelineInfo',
   components: {
     TimeAgoTooltip,
+  },
+  directives: {
+    SafeHtml,
   },
   props: {
     path: {
@@ -41,10 +45,10 @@ export default {
 
 <template>
   <span v-if="hasFullPipelineText">
-    <span v-html="pipelineText"></span>
+    <span v-safe-html="pipelineText"></span>
     <span>•</span>
     <time-ago-tooltip :time="timestamp" />
   </span>
 
-  <span v-else v-html="pipelineText"></span>
+  <span v-else v-safe-html="pipelineText"></span>
 </template>

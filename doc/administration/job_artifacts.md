@@ -99,12 +99,22 @@ artifacts, you can use an object storage like AWS S3 instead.
 This configuration relies on valid AWS credentials to be configured already.
 Use an object storage option like AWS S3 to store job artifacts.
 
-DANGER: **Danger:**
-If you configure GitLab to store CI logs and artifacts on object storage, you must also enable [incremental logging](job_logs.md#new-incremental-logging-architecture). Otherwise, job logs will disappear or not be saved.
+If you configure GitLab to store artifacts on object storage, you may also want to
+[eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage).
+In both cases, job logs are archived and moved to object storage when the job completes.
+
+DANGER: **Warning:**
+In a multi-server setup you must use one of the options to
+[eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage), or job logs could be lost.
 
 [Read more about using object storage with GitLab](object_storage.md).
 
 #### Object Storage Settings
+
+NOTE: **Note:**
+In GitLab 13.2 and later, we recommend using the
+[consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration).
+This section describes the earlier configuration format.
 
 For source installations the following settings are nested under `artifacts:` and then `object_store:`. On Omnibus GitLab installs they are prefixed by `artifacts_object_store_`.
 
@@ -112,27 +122,14 @@ For source installations the following settings are nested under `artifacts:` an
 |---------|-------------|---------|
 | `enabled` | Enable/disable object storage | `false` |
 | `remote_directory` | The bucket name where Artifacts will be stored| |
-| `direct_upload` | Set to true to enable direct upload of Artifacts without the need of local shared storage. Option may be removed once we decide to support only single storage for all files. | `false` |
-| `background_upload` | Set to false to disable automatic upload. Option may be removed once upload is direct to S3 | `true` |
-| `proxy_download` | Set to true to enable proxying all files served. Option allows to reduce egress traffic as this allows clients to download directly from remote storage instead of proxying all data | `false` |
+| `direct_upload` | Set to `true` to enable direct upload of Artifacts without the need of local shared storage. Option may be removed once we decide to support only single storage for all files. | `false` |
+| `background_upload` | Set to `false` to disable automatic upload. Option may be removed once upload is direct to S3 | `true` |
+| `proxy_download` | Set to `true` to enable proxying all files served. Option allows to reduce egress traffic as this allows clients to download directly from remote storage instead of proxying all data | `false` |
 | `connection` | Various connection options described below | |
 
-##### S3 compatible connection settings
+#### Connection settings
 
-The connection settings match those provided by [Fog](https://github.com/fog), and are as follows:
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `provider` | Always `AWS` for compatible hosts | AWS |
-| `aws_access_key_id` | AWS credentials, or compatible | |
-| `aws_secret_access_key` | AWS credentials, or compatible | |
-| `aws_signature_version` | AWS signature version to use. 2 or 4 are valid options. Digital Ocean Spaces and other providers may need 2. | 4 |
-| `enable_signature_v4_streaming` | Set to true to enable HTTP chunked transfers with [AWS v4 signatures](https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html). Oracle Cloud S3 needs this to be false | true |
-| `region` | AWS region | us-east-1 |
-| `host` | S3 compatible host for when not using AWS, for example `localhost` or `storage.example.com` | s3.amazonaws.com |
-| `endpoint` | Can be used when configuring an S3 compatible service such as [MinIO](https://min.io), by entering a URL such as `http://127.0.0.1:9000` | (optional) |
-| `path_style` | Set to true to use `host/bucket_name/object` style paths instead of `bucket_name.host/object`. Leave as false for AWS S3 | false |
-| `use_iam_profile` | Set to true to use IAM profile instead of access keys | false
+See [the available connection settings for different providers](object_storage.md#connection-settings).
 
 **In Omnibus installations:**
 
@@ -172,9 +169,30 @@ _The artifacts are stored by default in
    gitlab-rake gitlab:artifacts:migrate
    ```
 
-CAUTION: **CAUTION:**
+1. Optional: Verify all files migrated properly.
+   From [PostgreSQL console](https://docs.gitlab.com/omnibus/settings/database.html#connecting-to-the-bundled-postgresql-database)
+   (`sudo gitlab-psql -d gitlabhq_production`) verify `objectstg` below (where `file_store=2`) has count of all artifacts:
+
+   ```shell
+   gitlabhq_production=# SELECT count(*) AS total, sum(case when file_store = '1' then 1 else 0 end) AS filesystem, sum(case when file_store = '2' then 1 else 0 end) AS objectstg FROM ci_job_artifacts;
+
+   total | filesystem | objectstg
+   ------+------------+-----------
+    2409 |          0 |      2409
+   ```
+
+   Verify no files on disk in `artifacts` folder:
+
+   ```shell
+   sudo find /var/opt/gitlab/gitlab-rails/shared/artifacts -type f | grep -v tmp/cache | wc -l
+   ```
+
+   In some cases, you may need to run the [orphan artifact file cleanup Rake task](../raketasks/cleanup.md#remove-orphan-artifact-files)
+   to clean up orphaned artifacts.
+
+CAUTION: **Caution:**
 JUnit test report artifact (`junit.xml.gz`) migration
-[is not supported](https://gitlab.com/gitlab-org/gitlab/-/issues/27698)
+[was not supported until GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/27698#note_317190991)
 by the `gitlab:artifacts:migrate` script.
 
 **In installations from source:**
@@ -190,9 +208,9 @@ _The artifacts are stored by default in
      enabled: true
      object_store:
        enabled: true
-       remote_directory: "artifacts" # The bucket name
+       remote_directory: "artifacts"  # The bucket name
        connection:
-         provider: AWS # Only AWS supported at the moment
+         provider: AWS  # Only AWS supported at the moment
          aws_access_key_id: AWS_ACCESS_KEY_ID
          aws_secret_access_key: AWS_SECRET_ACCESS_KEY
          region: eu-central-1
@@ -205,24 +223,34 @@ _The artifacts are stored by default in
    sudo -u git -H bundle exec rake gitlab:artifacts:migrate RAILS_ENV=production
    ```
 
-CAUTION: **CAUTION:**
+1. Optional: Verify all files migrated properly.
+   From PostgreSQL console (`sudo -u git -H psql -d gitlabhq_production`) verify `objectstg` below (where `file_store=2`) has count of all artifacts:
+
+   ```shell
+   gitlabhq_production=# SELECT count(*) AS total, sum(case when file_store = '1' then 1 else 0 end) AS filesystem, sum(case when file_store = '2' then 1 else 0 end) AS objectstg FROM ci_job_artifacts;
+
+   total | filesystem | objectstg
+   ------+------------+-----------
+    2409 |          0 |      2409
+   ```
+
+   Verify no files on disk in `artifacts` folder:
+
+   ```shell
+   sudo find /var/opt/gitlab/gitlab-rails/shared/artifacts -type f | grep -v tmp/cache | wc -l
+   ```
+
+   In some cases, you may need to run the [orphan artifact file cleanup Rake task](../raketasks/cleanup.md#remove-orphan-artifact-files)
+   to clean up orphaned artifacts.
+
+CAUTION: **Caution:**
 JUnit test report artifact (`junit.xml.gz`) migration
-[is not supported](https://gitlab.com/gitlab-org/gitlab/-/issues/27698)
+[was not supported until GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/27698#note_317190991)
 by the `gitlab:artifacts:migrate` script.
 
-### OpenStack compatible connection settings
+### OpenStack example
 
-The connection settings match those provided by [Fog](https://github.com/fog), and are as follows:
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `provider` | Always `OpenStack` for compatible hosts | OpenStack |
-| `openstack_username` | OpenStack username | |
-| `openstack_api_key` | OpenStack API key  | |
-| `openstack_temp_url_key` | OpenStack key for generating temporary URLs | |
-| `openstack_auth_url` | OpenStack authentication endpoint | |
-| `openstack_region` | OpenStack region | |
-| `openstack_tenant_id` | OpenStack tenant ID |
+See [the available connection settings for OpenStack](object_storage.md#openstack-compatible-connection-settings).
 
 **In Omnibus installations:**
 
@@ -293,9 +321,9 @@ _The uploads are stored by default in
 
 **In Omnibus installations:**
 
-In order to migrate back to local storage:
+To migrate back to local storage:
 
-1. Set both `direct_upload` and `background_upload` to false in `gitlab.rb`, under the artifacts object storage settings.
+1. Set both `direct_upload` and `background_upload` to `false` in `gitlab.rb`, under the artifacts object storage settings.
 1. [Reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Run `gitlab-rake gitlab:artifacts:migrate_to_local`.
 1. Disable object_storage for artifacts in `gitlab.rb`:
@@ -346,7 +374,7 @@ default artifacts expiration setting, which you can find in the [CI/CD Admin set
 
 > Introduced in GitLab 10.3.
 
-To disable [the dependencies validation](../ci/yaml/README.md#when-a-dependent-job-will-fail),
+To disable [the dependencies validation](../ci/yaml/README.md#when-a-dependent-job-fails),
 you can enable the `ci_disable_validates_dependencies` feature flag from a Rails console.
 
 **In Omnibus installations:**
@@ -381,7 +409,7 @@ you can enable the `ci_disable_validates_dependencies` feature flag from a Rails
 ## Set the maximum file size of the artifacts
 
 If artifacts are enabled, you can change the maximum file size of the
-artifacts through the [Admin Area settings](../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size-core-only).
+artifacts through the [Admin Area settings](../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size).
 
 ## Storage statistics
 
@@ -396,10 +424,10 @@ generated by [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse).
 that are located in the artifacts archive itself.
 The metadata file is in a binary format, with additional Gzip compression.
 
-GitLab does not extract the artifacts archive in order to save space, memory
-and disk I/O. It instead inspects the metadata file which contains all the
-relevant information. This is especially important when there is a lot of
-artifacts, or an archive is a very large file.
+GitLab doesn't extract the artifacts archive to save space, memory, and disk
+I/O. It instead inspects the metadata file which contains all the relevant
+information. This is especially important when there is a lot of artifacts, or
+an archive is a very large file.
 
 When clicking on a specific file, [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) extracts it
 from the archive and the download begins. This implementation saves space,
@@ -453,7 +481,7 @@ the number you want.
 
 #### Delete job artifacts from jobs completed before a specific date
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 These commands remove data permanently from the database and from disk. We
 highly recommend running them only under the guidance of a Support Engineer, or
 running them in a test environment with a backup of the instance ready to be
@@ -479,7 +507,7 @@ If you need to manually remove job artifacts associated with multiple jobs while
 
 1. Delete job artifacts older than a specific date:
 
-   NOTE: **NOTE:**
+   NOTE: **Note:**
    This step will also erase artifacts that users have chosen to
    ["keep"](../ci/pipelines/job_artifacts.md#browsing-artifacts).
 
@@ -500,7 +528,7 @@ If you need to manually remove job artifacts associated with multiple jobs while
 
 #### Delete job artifacts and logs from jobs completed before a specific date
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 These commands remove data permanently from the database and from disk. We
 highly recommend running them only under the guidance of a Support Engineer, or
 running them in a test environment with a backup of the instance ready to be

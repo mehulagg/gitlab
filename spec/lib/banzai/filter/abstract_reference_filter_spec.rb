@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::AbstractReferenceFilter do
+RSpec.describe Banzai::Filter::AbstractReferenceFilter do
   let_it_be(:project) { create(:project) }
 
   let(:doc) { Nokogiri::HTML.fragment('') }
@@ -17,6 +17,18 @@ describe Banzai::Filter::AbstractReferenceFilter do
       refs = filter.references_per_parent
 
       expect(refs).to match(a_hash_including(project.full_path => contain_exactly(1, 2)))
+    end
+  end
+
+  describe '#data_attributes_for' do
+    let_it_be(:issue) { create(:issue, project: project) }
+
+    it 'is not an XSS vector' do
+      allow(described_class).to receive(:object_class).and_return(Issue)
+
+      data_attributes = filter.data_attributes_for('xss &lt;img onerror=alert(1) src=x&gt;', project, issue, link_content: true)
+
+      expect(data_attributes[:original]).to eq('xss &amp;lt;img onerror=alert(1) src=x&amp;gt;')
     end
   end
 

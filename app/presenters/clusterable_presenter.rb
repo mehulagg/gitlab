@@ -8,13 +8,12 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
     attributes_with_presenter_class = attributes.merge(presenter_class: presenter_class)
 
     Gitlab::View::Presenter::Factory
-      .new(clusterable, attributes_with_presenter_class)
+      .new(clusterable, **attributes_with_presenter_class)
       .fabricate!
   end
 
   def can_add_cluster?
-    can?(current_user, :add_cluster, clusterable) &&
-      (has_no_clusters? || multiple_clusters_available?)
+    can?(current_user, :add_cluster, clusterable)
   end
 
   def can_create_cluster?
@@ -65,7 +64,11 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
     raise NotImplementedError
   end
 
-  # Will be overidden in EE
+  def metrics_dashboard_path(cluster)
+    raise NotImplementedError
+  end
+
+  # Will be overridden in EE
   def environments_cluster_path(cluster)
     nil
   end
@@ -80,17 +83,6 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
 
   def learn_more_link
     raise NotImplementedError
-  end
-
-  private
-
-  # Overridden on EE module
-  def multiple_clusters_available?
-    false
-  end
-
-  def has_no_clusters?
-    clusterable.clusters.empty?
   end
 end
 

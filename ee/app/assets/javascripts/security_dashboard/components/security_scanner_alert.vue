@@ -1,0 +1,81 @@
+<script>
+import { GlAlert, GlIntersperse, GlLink, GlSprintf } from '@gitlab/ui';
+import { n__ } from '~/locale';
+
+export default {
+  components: {
+    GlAlert,
+    GlIntersperse,
+    GlLink,
+    GlSprintf,
+  },
+  props: {
+    notEnabledScanners: {
+      type: Array,
+      required: true,
+    },
+    noPipelineRunScanners: {
+      type: Array,
+      required: true,
+    },
+  },
+  inject: ['notEnabledScannersHelpPath', 'noPipelineRunScannersHelpPath'],
+  computed: {
+    alertMessages() {
+      return [
+        {
+          key: 'notEnabled',
+          documentation: this.notEnabledScannersHelpPath,
+          content: this.notEnabledAlertMessage,
+          scanners: this.notEnabledScanners,
+        },
+        {
+          key: 'noPipelineRun',
+          documentation: this.noPipelineRunScannersHelpPath,
+          content: this.noPipelineRunAlertMessage,
+          scanners: this.noPipelineRunScanners,
+        },
+      ].filter(({ scanners }) => scanners.length > 0);
+    },
+    notEnabledAlertMessage() {
+      return n__(
+        '%{securityScanner} is not enabled for this project. %{linkStart}More information%{linkEnd}',
+        '%{securityScanner} are not enabled for this project. %{linkStart}More information%{linkEnd}',
+        this.notEnabledScanners.length,
+      );
+    },
+    noPipelineRunAlertMessage() {
+      return n__(
+        '%{securityScanner} result is not available because a pipeline has not been run since it was enabled. %{linkStart}Run a pipeline%{linkEnd}',
+        '%{securityScanner} results are not available because a pipeline has not been run since it was enabled. %{linkStart}Run a pipeline%{linkEnd}',
+        this.noPipelineRunScanners.length,
+      );
+    },
+  },
+};
+</script>
+
+<template>
+  <section>
+    <gl-alert v-if="alertMessages.length > 0" variant="warning" @dismiss="$emit('dismiss')">
+      <ul class="gl-list-style-none gl-mb-0 gl-pl-0">
+        <li
+          v-for="alertMessage in alertMessages"
+          :key="alertMessage.key"
+          :data-testid="alertMessage.key"
+        >
+          <gl-sprintf :message="alertMessage.content">
+            <template #securityScanner>
+              <gl-intersperse>
+                <span v-for="scanner in alertMessage.scanners" :key="scanner">{{ scanner }}</span>
+              </gl-intersperse>
+            </template>
+            <template #link="{ content }">
+              <gl-link :href="alertMessage.documentation" target="_blank">{{ content }}</gl-link>
+            </template>
+          </gl-sprintf>
+        </li>
+      </ul>
+    </gl-alert>
+  </section>
+</template>

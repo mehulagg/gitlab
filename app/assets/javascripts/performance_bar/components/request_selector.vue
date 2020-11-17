@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { GlPopover } from '@gitlab/ui';
 import { glEmojiTag } from '~/emoji';
 import { n__ } from '~/locale';
@@ -45,7 +46,7 @@ export default {
 };
 </script>
 <template>
-  <div id="peek-request-selector" data-qa-selector="request_dropdown">
+  <div id="peek-request-selector" data-qa-selector="request_dropdown" class="view">
     <select v-model="currentRequestId">
       <option
         v-for="request in requests"

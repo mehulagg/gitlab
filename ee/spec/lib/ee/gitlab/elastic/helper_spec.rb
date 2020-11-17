@@ -7,18 +7,18 @@ RSpec.describe Gitlab::Elastic::Helper do
 
   shared_context 'with a legacy index' do
     before do
-      helper.create_empty_index(with_alias: false)
+      @index_name = helper.create_empty_index(with_alias: false, options: { index_name: helper.target_name })
     end
   end
 
   shared_context 'with an existing index and alias' do
     before do
-      helper.create_empty_index(with_alias: true)
+      @index_name = helper.create_empty_index(with_alias: true)
     end
   end
 
   after do
-    helper.delete_index
+    helper.delete_index(index_name: @index_name)
   end
 
   describe '.new' do
@@ -39,20 +39,59 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#create_empty_index' do
-    context 'with an empty cluster' do
-      it 'creates index and alias' do
-        helper.create_empty_index
+  describe '#default_mappings' do
+    context 'custom analyzers' do
+      let(:custom_analyzers_mappings) { { doc: { properties: { title: { fields: { custom: true } } } } } }
 
-        expect(helper.index_exists?).to eq(true)
-        expect(helper.alias_exists?).to eq(true)
+      before do
+        allow(::Elastic::Latest::CustomLanguageAnalyzers).to receive(:custom_analyzers_mappings).and_return(custom_analyzers_mappings)
       end
 
-      it 'creates the index only' do
-        helper.create_empty_index(with_alias: false)
+      it 'merges custom language analyzers mappings' do
+        expect(helper.default_mappings[:doc][:properties][:title]).to include(custom_analyzers_mappings[:doc][:properties][:title])
+      end
+    end
+  end
 
-        expect(helper.index_exists?).to eq(true)
-        expect(helper.alias_exists?).to eq(false)
+  describe '#create_migrations_index' do
+    after do
+      helper.delete_index(index_name: helper.migrations_index_name)
+    end
+
+    it 'creates the index' do
+      expect { helper.create_migrations_index }
+             .to change { helper.index_exists?(index_name: helper.migrations_index_name) }
+             .from(false).to(true)
+    end
+  end
+
+  describe '#create_empty_index' do
+    context 'with an empty cluster' do
+      context 'with alias and index' do
+        include_context 'with an existing index and alias'
+
+        it 'creates index and alias' do
+          expect(helper.index_exists?).to eq(true)
+          expect(helper.alias_exists?).to eq(true)
+        end
+      end
+
+      context 'when there is a legacy index' do
+        include_context 'with a legacy index'
+
+        it 'creates the index only' do
+          expect(helper.index_exists?).to eq(true)
+          expect(helper.alias_exists?).to eq(false)
+        end
+      end
+
+      it 'creates an index with a custom name' do
+        @index_name = 'test-custom-index-name'
+
+        helper.create_empty_index(with_alias: false, options: { index_name: @index_name })
+
+        expect(helper.index_exists?(index_name: @index_name)).to eq(true)
+        expect(helper.index_exists?).to eq(false)
       end
     end
 
@@ -132,6 +171,27 @@ RSpec.describe Gitlab::Elastic::Helper do
       include_context 'with an existing index and alias'
 
       it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '#cluster_free_size' do
+    it 'returns valid cluster size' do
+      expect(helper.cluster_free_size_bytes).to be_positive
+    end
+  end
+
+  describe '#switch_alias' do
+    include_context 'with an existing index and alias'
+
+    let(:new_index_name) { 'test-switch-alias' }
+
+    it 'switches the alias' do
+      helper.create_empty_index(with_alias: false, options: { index_name: new_index_name })
+
+      expect { helper.switch_alias(to: new_index_name) }
+      .to change { helper.target_index_name }.to(new_index_name)
+
+      helper.delete_index(index_name: new_index_name)
     end
   end
 end

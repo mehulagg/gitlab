@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::RepositorySyncService do
+RSpec.describe Geo::RepositorySyncService, :geo do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
@@ -149,6 +149,20 @@ RSpec.describe Geo::RepositorySyncService do
           repository_retry_count: 1
         )
       end
+    end
+
+    it 'marks primary_repository_checksummed as true when repository has been verified on primary' do
+      create(:repository_state, :repository_verified, project: project)
+      registry = create(:geo_project_registry, project: project, primary_repository_checksummed: false)
+
+      expect { subject.execute }.to change { registry.reload.primary_repository_checksummed}.from(false).to(true)
+    end
+
+    it 'marks primary_repository_checksummed as false when repository has not been verified on primary' do
+      create(:repository_state, :repository_failed, project: project)
+      registry = create(:geo_project_registry, project: project, primary_repository_checksummed: true)
+
+      expect { subject.execute }.to change { registry.reload.primary_repository_checksummed}.from(true).to(false)
     end
 
     context 'tracking database' do
@@ -393,7 +407,7 @@ RSpec.describe Geo::RepositorySyncService do
             force_to_redownload_repository: true
           )
 
-          expect(project.repository).to receive(:expire_exists_cache).twice.and_call_original
+          expect(project.repository).to receive(:expire_exists_cache).exactly(3).times.and_call_original
           expect(subject).not_to receive(:fail_registry_sync!)
 
           subject.execute

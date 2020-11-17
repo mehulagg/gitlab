@@ -18,6 +18,7 @@
         "api_approve_path": { "type": ["string", "null"] },
         "api_unapprove_path": { "type": ["string", "null"] },
         "vulnerability_feedback_path": { "type": "string" },
+        "can_read_vulnerability_feedback": { "type": "boolean" },
         "create_vulnerability_feedback_issue_path": { "type": ["string", "null"] },
         "create_vulnerability_feedback_merge_request_path": { "type": ["string", "null"] },
         "create_vulnerability_feedback_dismissal_path": { "type": ["string", "null"] }

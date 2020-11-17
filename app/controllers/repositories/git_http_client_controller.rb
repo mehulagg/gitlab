@@ -6,7 +6,7 @@ module Repositories
     include KerberosSpnegoHelper
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :authentication_result, :redirected_path, :container
+    attr_reader :authentication_result, :redirected_path
 
     delegate :actor, :authentication_abilities, to: :authentication_result, allow_nil: true
     delegate :type, to: :authentication_result, allow_nil: true, prefix: :auth_result
@@ -18,8 +18,9 @@ module Repositories
     skip_around_action :set_session_storage
     skip_before_action :verify_authenticity_token
 
-    before_action :parse_repo_path
-    before_action :authenticate_user
+    prepend_before_action :authenticate_user, :parse_repo_path
+
+    feature_category :source_code_management
 
     private
 
@@ -72,6 +73,12 @@ module Repositories
       challenges << 'Basic realm="GitLab"' if allow_basic_auth?
       challenges << spnego_challenge if allow_kerberos_spnego_auth?
       headers['Www-Authenticate'] = challenges.join("\n") if challenges.any?
+    end
+
+    def container
+      parse_repo_path unless defined?(@container)
+
+      @container
     end
 
     def project

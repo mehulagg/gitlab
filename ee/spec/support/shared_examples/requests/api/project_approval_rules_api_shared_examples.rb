@@ -38,7 +38,7 @@ RSpec.shared_examples 'an API endpoint for creating project approval rule' do
 
       project.reset_approvals_on_push = false
       project.disable_overriding_approvers_per_merge_request = true
-      project.save
+      project.save!
 
       post api(url, current_user), params: params
 
@@ -79,6 +79,7 @@ RSpec.shared_examples 'an API endpoint for updating project approval rule' do
   shared_examples 'a user with access' do
     before do
       project.add_developer(approver)
+      project.add_developer(other_approver)
     end
 
     context 'when protected_branch_ids param is present' do
@@ -117,10 +118,10 @@ RSpec.shared_examples 'an API endpoint for updating project approval rule' do
 
     it 'sets approvers' do
       expect do
-        put api(url, current_user), params: { users: [approver.id] }
-      end.to change { approval_rule.users.count }.from(0).to(1)
+        put api(url, current_user), params: { users: "#{approver.id},#{other_approver.id}" }
+      end.to change { approval_rule.users.count }.from(0).to(2)
 
-      expect(approval_rule.users).to contain_exactly(approver)
+      expect(approval_rule.users).to contain_exactly(approver, other_approver)
       expect(approval_rule.groups).to be_empty
 
       expect(response).to have_gitlab_http_status(:ok)
@@ -143,7 +144,7 @@ RSpec.shared_examples 'an API endpoint for updating project approval rule' do
 
   context 'as a random user' do
     it 'returns 403' do
-      project.approvers.create(user: approver)
+      project.approvers.create!(user: approver)
 
       expect do
         put api(url, user2), params: { users: [], groups: [] }.to_json, headers: { CONTENT_TYPE: 'application/json' }

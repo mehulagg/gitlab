@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Namespaces API
 
 Usernames and groupnames fall under a special category called namespaces.
@@ -31,7 +37,14 @@ Example response:
     "name": "user1",
     "path": "user1",
     "kind": "user",
-    "full_path": "user1"
+    "full_path": "user1",
+    "parent_id": null,
+    "avatar_url": "https://secure.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/user1",
+    "billable_members_count": 1,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   },
   {
     "id": 2,
@@ -40,7 +53,13 @@ Example response:
     "kind": "group",
     "full_path": "group1",
     "parent_id": null,
-    "members_count_with_descendants": 2
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/groups/group1",
+    "members_count_with_descendants": 2,
+    "billable_members_count": 2,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   },
   {
     "id": 3,
@@ -49,7 +68,13 @@ Example response:
     "kind": "group",
     "full_path": "foo/bar",
     "parent_id": 9,
-    "members_count_with_descendants": 5
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/groups/foo/bar",
+    "members_count_with_descendants": 5,
+    "billable_members_count": 5,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   }
 ]
 ```
@@ -68,7 +93,28 @@ the `plan` parameter associated with a namespace:
 ]
 ```
 
-NOTE: **Note:** Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
+Users on GitLab.com will also see `max_seats_used` and `seats_in_use` parameters.
+`max_seats_used` is the highest number of users the group had. `seats_in_use` is
+the number of license seats currently being used. Both values are updated
+once a day.
+
+`max_seats_used` and `seats_in_use` will be non-zero only for namespaces on paid plans.
+
+```json
+[
+  {
+    "id": 1,
+    "name": "user1",
+    "billable_members_count": 2,
+    "max_seats_used": 3,
+    "seats_in_use": 2,
+    ...
+  }
+]
+```
+
+NOTE: **Note:**
+Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
 
 ## Search for namespace
 
@@ -99,7 +145,15 @@ Example response:
     "kind": "group",
     "full_path": "twitter",
     "parent_id": null,
-    "members_count_with_descendants": 2
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/groups/twitter",
+    "members_count_with_descendants": 2,
+    "billable_members_count": 2,
+    "max_seats_used": 0,
+    "seats_in_use": 0,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   }
 ]
 ```
@@ -132,7 +186,15 @@ Example response:
   "kind": "group",
   "full_path": "group1",
   "parent_id": null,
-  "members_count_with_descendants": 2
+  "avatar_url": null,
+  "web_url": "https://gitlab.example.com/groups/group1",
+  "members_count_with_descendants": 2,
+  "billable_members_count": 2,
+  "max_seats_used": 0,
+  "seats_in_use": 0,
+  "plan": "default",
+  "trial_ends_on": null,
+  "trial": false
 }
 ```
 
@@ -152,6 +214,14 @@ Example response:
   "kind": "group",
   "full_path": "group1",
   "parent_id": null,
-  "members_count_with_descendants": 2
+  "avatar_url": null,
+  "web_url": "https://gitlab.example.com/groups/group1",
+  "members_count_with_descendants": 2,
+  "billable_members_count": 2,
+  "max_seats_used": 0,
+  "seats_in_use": 0,
+  "plan": "default",
+  "trial_ends_on": null,
+  "trial": false
 }
 ```

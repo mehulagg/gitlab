@@ -3,7 +3,7 @@
 #
 # Checks for unexpanded acronyms.
 #
-# For a list of all options, see https://errata-ai.github.io/vale/styles/
+# For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: conditional
 message: '"%s" has no definition.'
 link: https://about.gitlab.com/handbook/marketing/growth-marketing/content/editorial-team/#acronyms
@@ -14,18 +14,32 @@ first: '\b([A-Z]{3,5})\b'
 second: '(?:\b[A-Z][a-z]+ )+\(([A-Z]{3,5})\)'
 # ... with the exception of these:
 exceptions:
+  - ANSI
   - API
+  - ARM
   - ARN
   - ASCII
   - AWS
+  - BSD
+  - CLI
   - CNAME
+  - CORE
   - CPU
   - CSS
   - CSV
+  - DAG
+  - DAST
+  - DHCP
   - DNS
+  - DVCS
   - EKS
+  - EOL
+  - FAQ
+  - FOSS
+  - GCP
   - GDK
   - GET
+  - GKE
   - GNU
   - GPG
   - GPL
@@ -33,39 +47,73 @@ exceptions:
   - HTTP
   - HTTPS
   - IAM
+  - IANA
+  - IBM
   - IDE
+  - IID
+  - IMAP
+  - IRC
+  - ISO
   - JSON
+  - LAN
   - LDAP
   - LDAPS
   - LESS
   - LFS
+  - LRU
+  - LTS
+  - MIME
+  - MIT
+  - MVC
+  - NAT
   - NFS
   - NGINX
   - NOTE
+  - NPM
   - ONLY
+  - PDF
   - PGP
   - PHP
   - POST
   - PUT
+  - RAM
+  - REST
+  - RHEL
   - RPC
+  - RPM
   - RSA
   - RSS
+  - RVM
   - SAML
+  - SAST
+  - SCIM
   - SCP
   - SCSS
+  - SDK
   - SHA
+  - SLA
+  - SMTP
   - SQL
+  - SSD
   - SSH
   - SSL
   - SSO
+  - SVG
+  - SVN
+  - TCP
   - TIP
+  - TLD
   - TLS
   - TODO
   - TOML
   - UNIX
   - URI
   - URL
+  - USB
+  - UTC
+  - UUID
   - VPC
   - WIP
+  - WSL
   - XML
   - YAML

@@ -2,16 +2,17 @@
 
 class Projects::InsightsController < Projects::ApplicationController
   include InsightsActions
+  include Analytics::UniqueVisitsHelper
 
   helper_method :project_insights_config
 
   before_action :authorize_read_project!
 
-  private
+  track_unique_visits :show, target_id: 'p_analytics_insights'
 
-  def authorize_read_project!
-    render_404 unless can?(current_user, :read_project, project)
-  end
+  feature_category :insights
+
+  private
 
   def insights_entity
     project

@@ -78,7 +78,7 @@ describe('Issue', () => {
       setImmediate(() => {
         expect($alert).not.toHaveClass('hidden');
 
-        const $cancelbtn = $('.js-close-blocked-issue-warning .btn-secondary');
+        const $cancelbtn = $('.js-close-blocked-issue-warning .js-cancel-blocked-issue-warning');
         $cancelbtn.trigger('click');
 
         expect($alert).toHaveClass('hidden');
@@ -98,7 +98,7 @@ describe('Issue', () => {
 
       testContext.$triggeredButton = $btn;
 
-      mockCloseButtonResponseSuccess(testContext.$triggeredButton.attr('href'), {
+      mockCloseButtonResponseSuccess(testContext.$triggeredButton.data('endpoint'), {
         id: 34,
       });
 

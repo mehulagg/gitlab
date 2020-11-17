@@ -1,10 +1,11 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto
 ---
 
 # Rack Attack initializer
-
-## Overview
 
 [Rack Attack](https://github.com/kickstarter/rack-attack), also known as Rack::Attack, is a Ruby gem
 that is meant to protect GitLab with the ability to customize throttling and
@@ -18,11 +19,13 @@ tracking.
 
 For more information on how to use these options see the [Rack Attack README](https://github.com/kickstarter/rack-attack/blob/master/README.md).
 
-NOTE: **Note:** See
+NOTE: **Note:**
+See
 [User and IP rate limits](../user/admin_area/settings/user_and_ip_rate_limits.md)
 for simpler limits that are configured in the UI.
 
-NOTE: **Note:** Starting with GitLab 11.2, Rack Attack is disabled by default. If your
+NOTE: **Note:**
+Starting with GitLab 11.2, Rack Attack is disabled by default. If your
 instance is not exposed to the public internet, it is recommended that you leave
 Rack Attack disabled.
 

@@ -99,7 +99,7 @@ RSpec.describe Projects::EnvironmentsController do
 
       context 'when user has access to it' do
         before do
-          protected_environment.deploy_access_levels.create(user: user)
+          protected_environment.deploy_access_levels.create!(user: user)
 
           get :terminal, params: environment_params
         end

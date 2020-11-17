@@ -1,10 +1,22 @@
 <script>
+import { mapActions, mapState } from 'vuex';
+import { GlLoadingIcon } from '@gitlab/ui';
 import GeoSettingsForm from './geo_settings_form.vue';
 
 export default {
   name: 'GeoSettingsApp',
   components: {
+    GlLoadingIcon,
     GeoSettingsForm,
+  },
+  computed: {
+    ...mapState(['isLoading']),
+  },
+  created() {
+    this.fetchGeoSettings();
+  },
+  methods: {
+    ...mapActions(['fetchGeoSettings']),
   },
 };
 </script>
@@ -19,6 +31,7 @@ export default {
         )
       }}
     </p>
-    <geo-settings-form />
+    <gl-loading-icon v-if="isLoading" size="xl" />
+    <geo-settings-form v-else />
   </article>
 </template>

@@ -2,11 +2,15 @@
 
 require 'spec_helper'
 
-describe CommitPresenter do
+RSpec.describe CommitPresenter do
   let(:project) { create(:project, :repository) }
   let(:commit) { project.commit }
   let(:user) { create(:user) }
   let(:presenter) { described_class.new(commit, current_user: user) }
+
+  describe '#web_path' do
+    it { expect(presenter.web_path).to eq("/#{project.full_path}/-/commit/#{commit.sha}") }
+  end
 
   describe '#status_for' do
     subject { presenter.status_for('ref') }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Wikis::CreateAttachmentService do
+RSpec.describe Wikis::CreateAttachmentService do
   let(:container) { create(:project, :wiki_repo) }
   let(:user) { create(:user) }
   let(:file_name) { 'filename.txt' }
@@ -13,6 +13,7 @@ describe Wikis::CreateAttachmentService do
       file_content: 'Content of attachment'
     }
   end
+
   let(:opts) { file_opts }
 
   subject(:service) { described_class.new(container: container, current_user: user, params: opts) }

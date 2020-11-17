@@ -46,7 +46,7 @@ module Geo
     end
 
     def from_legacy_storage?
-      old_storage_version.nil? || old_storage_version.zero?
+      old_storage_version.nil? || old_storage_version == 0
     end
 
     def move_repository

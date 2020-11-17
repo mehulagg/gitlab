@@ -2,6 +2,7 @@
  * Note Form
  */
 .diff-file .diff-content {
+  .diff-tr.line_holder:hover > .diff-td .line_note_link,
   tr.line_holder:hover > td .line_note_link {
     opacity: 1;
     filter: alpha(opacity = 100);
@@ -62,7 +63,8 @@
     background-color: $white;
 
     &.is-focused {
-      @extend .form-control:focus;
+      border-color: $input-focus-border-color;
+      box-shadow: $input-focus-box-shadow;
 
       .comment-toolbar,
       .nav-links {
@@ -96,7 +98,7 @@
 
 .issuable-note-warning {
   color: $orange-600;
-  background-color: $orange-100;
+  background-color: $orange-50;
   border-radius: $border-radius-default $border-radius-default 0 0;
   border: 1px solid $border-gray-normal;
   border-bottom: 0;
@@ -151,7 +153,7 @@
   }
 
   .sidebar-item-value & {
-    fill: $gray-700;
+    fill: $gray-500;
   }
 }
 
@@ -225,10 +227,6 @@ table {
   display: none;
 }
 
-.parallel-comment {
-  padding: 6px;
-}
-
 .error-alert > .alert {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -281,7 +279,7 @@ table {
     display: table;
 
     svg {
-      fill: $gray-700;
+      fill: $gray-500;
     }
 
     .btn-group {
@@ -310,29 +308,10 @@ table {
   }
 }
 
-.discussion-notes-count {
-  font-size: 16px;
-}
-
-.edit_note {
-  .markdown-area {
-    min-height: 140px;
-    max-height: 500px;
-  }
-
-  .note-form-actions {
-    background: transparent;
-  }
-}
-
 .comment-toolbar {
   padding-top: $gl-padding-top;
   color: $gl-text-color-secondary;
   border-top: 1px solid $border-color;
-}
-
-.md-helper {
-  padding-top: 10px;
 }
 
 .toolbar-button {
@@ -357,14 +336,6 @@ table {
       margin-right: 0;
     }
   }
-}
-
-.toolbar-button-icon {
-  position: relative;
-  top: 1px;
-  margin-right: $gl-padding-4;
-  color: inherit;
-  font-size: 16px;
 }
 
 .toolbar-text {
@@ -478,26 +449,6 @@ table {
 
 .uploading-progress {
   margin-right: 5px;
-}
-
-.attach-new-file,
-.button-attach-file,
-.retry-uploading-link {
-  color: $blue-600;
-  padding: 0;
-  background: none;
-  border: 0;
-  font-size: 14px;
-  line-height: 16px;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-
-    .text-attach-file {
-      text-decoration: underline;
-    }
-  }
 }
 
 .markdown-selector {

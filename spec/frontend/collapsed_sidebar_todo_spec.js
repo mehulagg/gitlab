@@ -1,10 +1,10 @@
 /* eslint-disable no-new */
 import { clone } from 'lodash';
 import MockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import Sidebar from '~/right_sidebar';
 import waitForPromises from './helpers/wait_for_promises';
-import { TEST_HOST } from 'spec/test_constants';
 
 describe('Issuable right sidebar collapsed todo toggle', () => {
   const fixtureName = 'issues/open-issue.html';
@@ -47,9 +47,9 @@ describe('Issuable right sidebar collapsed todo toggle', () => {
 
     expect(
       document
-        .querySelector('.js-issuable-todo.sidebar-collapsed-icon svg use')
-        .getAttribute('xlink:href'),
-    ).toContain('todo-add');
+        .querySelector('.js-issuable-todo.sidebar-collapsed-icon svg')
+        .getAttribute('data-testid'),
+    ).toBe('todo-add-icon');
 
     expect(
       document.querySelector('.js-issuable-todo.sidebar-collapsed-icon .todo-undone'),
@@ -59,7 +59,7 @@ describe('Issuable right sidebar collapsed todo toggle', () => {
   it('sets default tooltip title', () => {
     expect(
       document.querySelector('.js-issuable-todo.sidebar-collapsed-icon').getAttribute('title'),
-    ).toBe('Add a To Do');
+    ).toBe('Add a to do');
   });
 
   it('toggle todo state', done => {
@@ -72,9 +72,9 @@ describe('Issuable right sidebar collapsed todo toggle', () => {
 
       expect(
         document
-          .querySelector('.js-issuable-todo.sidebar-collapsed-icon svg.todo-undone use')
-          .getAttribute('xlink:href'),
-      ).toContain('todo-done');
+          .querySelector('.js-issuable-todo.sidebar-collapsed-icon svg.todo-undone')
+          .getAttribute('data-testid'),
+      ).toBe('todo-done-icon');
 
       done();
     });
@@ -125,7 +125,7 @@ describe('Issuable right sidebar collapsed todo toggle', () => {
 
         expect(
           document.querySelector('.issuable-sidebar-header .js-issuable-todo').textContent.trim(),
-        ).toBe('Add a To Do');
+        ).toBe('Add a to do');
       })
       .then(done)
       .catch(done.fail);
@@ -164,7 +164,7 @@ describe('Issuable right sidebar collapsed todo toggle', () => {
           document
             .querySelector('.js-issuable-todo.sidebar-collapsed-icon')
             .getAttribute('aria-label'),
-        ).toBe('Add a To Do');
+        ).toBe('Add a to do');
       })
       .then(done)
       .catch(done.fail);

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200110121314_schedule_update_existing_subgroup_to_match_visibility_level_of_parent.rb')
 
-describe ScheduleUpdateExistingSubgroupToMatchVisibilityLevelOfParent do
+RSpec.describe ScheduleUpdateExistingSubgroupToMatchVisibilityLevelOfParent do
   include MigrationHelpers::NamespacesHelpers
   let(:migration_class) { described_class::MIGRATION }
   let(:migration_name)  { migration_class.to_s.demodulize }
@@ -14,7 +14,7 @@ describe ScheduleUpdateExistingSubgroupToMatchVisibilityLevelOfParent do
       create_namespace('child', Gitlab::VisibilityLevel::PUBLIC, parent_id: parent.id)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(BackgroundMigrationWorker.jobs.size).to eq(1)
@@ -30,7 +30,7 @@ describe ScheduleUpdateExistingSubgroupToMatchVisibilityLevelOfParent do
       create_namespace('child', Gitlab::VisibilityLevel::PUBLIC, parent_id: middle_group.id)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(BackgroundMigrationWorker.jobs.size).to eq(1)
@@ -47,7 +47,7 @@ describe ScheduleUpdateExistingSubgroupToMatchVisibilityLevelOfParent do
       create_namespace('child', Gitlab::VisibilityLevel::PUBLIC, parent_id: middle_group.id)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(BackgroundMigrationWorker.jobs.size).to eq(1)
@@ -66,7 +66,7 @@ describe ScheduleUpdateExistingSubgroupToMatchVisibilityLevelOfParent do
       create_namespace('child', Gitlab::VisibilityLevel::PUBLIC, parent_id: middle_group.id)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(BackgroundMigrationWorker.jobs.size).to eq(2)

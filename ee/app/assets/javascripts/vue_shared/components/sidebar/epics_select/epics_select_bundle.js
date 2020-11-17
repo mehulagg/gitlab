@@ -1,7 +1,7 @@
 import Vue from 'vue';
 
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
-import { noneEpic } from 'ee/vue_shared/constants';
+import { placeholderEpic } from 'ee/vue_shared/constants';
 import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select/constants';
 
 export default () => {
@@ -19,7 +19,7 @@ export default () => {
     },
     data() {
       return {
-        selectedEpic: noneEpic,
+        selectedEpic: placeholderEpic,
       };
     },
     methods: {
@@ -38,6 +38,7 @@ export default () => {
           initialEpic: this.selectedEpic,
           initialEpicLoading: false,
           variant: DropdownVariant.Standalone,
+          showHeader: Boolean(el.dataset.showHeader),
         },
         on: {
           onEpicSelect: this.handleEpicSelect.bind(this),

@@ -1,6 +1,5 @@
 <script>
-/* eslint-disable @gitlab/vue-require-i18n-strings */
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import MilestoneSelect from '~/milestone_select';
 
 const ANY_MILESTONE = 'Any milestone';
@@ -9,15 +8,22 @@ const NO_MILESTONE = 'No milestone';
 export default {
   components: {
     GlLoadingIcon,
+    GlIcon,
   },
   props: {
     board: {
       type: Object,
       required: true,
     },
-    milestonePath: {
-      type: String,
-      required: true,
+    groupId: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    projectId: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     canEdit: {
       type: Boolean,
@@ -71,8 +77,8 @@ export default {
 
 <template>
   <div class="block milestone">
-    <div class="title append-bottom-10">
-      Milestone
+    <div class="title gl-mb-3">
+      {{ __('Milestone') }}
       <button v-if="canEdit" type="button" class="edit-link btn btn-blank float-right">
         {{ __('Edit') }}
       </button>
@@ -84,7 +90,8 @@ export default {
         <button
           ref="dropdownButton"
           :data-selected="selected"
-          :data-milestones="milestonePath"
+          :data-project-id="projectId"
+          :data-group-id="groupId"
           :data-show-no="true"
           :data-show-any="true"
           :data-show-started="true"
@@ -94,7 +101,12 @@ export default {
           data-toggle="dropdown"
           type="button"
         >
-          Milestone <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"> </i>
+          {{ __('Milestone') }}
+          <gl-icon
+            name="chevron-down"
+            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+            :size="16"
+          />
         </button>
         <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
           <div class="dropdown-input">
@@ -104,15 +116,14 @@ export default {
               :placeholder="__('Search milestones')"
               autocomplete="off"
             />
-            <i aria-hidden="true" data-hidden="true" class="fa fa-search dropdown-input-search">
-            </i>
-            <i
-              role="button"
-              aria-hidden="true"
-              data-hidden="true"
-              class="fa fa-times dropdown-input-clear js-dropdown-input-clear"
-            >
-            </i>
+            <gl-icon
+              name="search"
+              class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-300 gl-pointer-events-none"
+            />
+            <gl-icon
+              name="close"
+              class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-500"
+            />
           </div>
           <div class="dropdown-content"></div>
           <div class="dropdown-loading"><gl-loading-icon /></div>

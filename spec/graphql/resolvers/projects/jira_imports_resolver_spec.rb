@@ -2,8 +2,12 @@
 
 require 'spec_helper'
 
-describe Resolvers::Projects::JiraImportsResolver do
+RSpec.describe Resolvers::Projects::JiraImportsResolver do
   include GraphqlHelpers
+
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::JiraImportType.connection_type)
+  end
 
   describe '#resolve' do
     let_it_be(:user) { create(:user) }

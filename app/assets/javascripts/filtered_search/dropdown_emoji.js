@@ -1,4 +1,4 @@
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Ajax from '../droplab/plugins/ajax';
 import Filter from '../droplab/plugins/filter';
 import FilteredSearchDropdown from './filtered_search_dropdown';
@@ -10,7 +10,7 @@ export default class DropdownEmoji extends FilteredSearchDropdown {
     super(options);
     this.config = {
       Ajax: {
-        endpoint: `${gon.relative_url_root || ''}/autocomplete/award_emojis`,
+        endpoint: `${gon.relative_url_root || ''}/-/autocomplete/award_emojis`,
         method: 'setData',
         loadingTemplate: this.loadingTemplate,
         onError() {

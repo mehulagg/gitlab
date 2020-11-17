@@ -13,14 +13,15 @@ RSpec.describe Group do
     # the presence check works, but since this is a private method that
     # method can't be called with a public_send.
     it { is_expected.to belong_to(:file_template_project).class_name('Project').without_validating_presence }
-    it { is_expected.to have_many(:dependency_proxy_blobs) }
     it { is_expected.to have_many(:cycle_analytics_stages) }
+    it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:ip_restrictions) }
     it { is_expected.to have_many(:allowed_email_domains) }
-    it { is_expected.to have_one(:dependency_proxy_setting) }
+    it { is_expected.to have_many(:compliance_management_frameworks) }
     it { is_expected.to have_one(:deletion_schedule) }
     it { is_expected.to have_one(:group_wiki_repository) }
     it { is_expected.to belong_to(:push_rule) }
+    it { is_expected.to have_many(:saml_group_links) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -313,6 +314,42 @@ RSpec.describe Group do
 
     it 'returns vulnerabilities for all non-archived, non-deleted projects in the group and its subgroups' do
       is_expected.to contain_exactly(group_vulnerability, subgroup_vulnerability)
+    end
+  end
+
+  describe '#vulnerability_scanners' do
+    subject { group.vulnerability_scanners }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_scanner) { create(:vulnerabilities_scanner, project: group_project) }
+    let!(:subgroup_vulnerability_scanner) { create(:vulnerabilities_scanner, project: subgroup_project) }
+    let!(:archived_vulnerability_scanner) { create(:vulnerabilities_scanner, project: archived_project) }
+    let!(:deleted_vulnerability_scanner) { create(:vulnerabilities_scanner, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_scanner, subgroup_vulnerability_scanner)
+    end
+  end
+
+  describe '#vulnerability_historical_statistics' do
+    subject { group.vulnerability_historical_statistics }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: group_project) }
+    let!(:subgroup_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: subgroup_project) }
+    let!(:archived_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: archived_project) }
+    let!(:deleted_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_historical_statistic, subgroup_vulnerability_historical_statistic)
     end
   end
 
@@ -624,8 +661,73 @@ RSpec.describe Group do
           stub_licensed_features(group_project_templates: false)
         end
 
-        it 'returns false unlicensed instance' do
+        it 'returns false for unlicensed instance' do
           is_expected.to be false
+        end
+      end
+    end
+  end
+
+  describe '#minimal_access_role_allowed?' do
+    subject { group.minimal_access_role_allowed? }
+
+    context 'licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      it 'returns true for licensed instance' do
+        is_expected.to be true
+      end
+
+      it 'returns false for subgroup in licensed instance' do
+        expect(create(:group, parent: group).minimal_access_role_allowed?).to be false
+      end
+    end
+
+    context 'unlicensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+      end
+
+      it 'returns false unlicensed instance' do
+        is_expected.to be false
+      end
+    end
+  end
+
+  describe '#member?' do
+    subject { group.member?(user) }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      context 'when group is a subgroup' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when group is a top-level group' do
+        it { is_expected.to be_truthy }
+
+        it 'accepts higher level as argument' do
+          expect(group.member?(user, ::Gitlab::Access::DEVELOPER)).to be_falsey
         end
       end
     end
@@ -664,9 +766,71 @@ RSpec.describe Group do
     end
   end
 
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { group }
+  describe '#saml_enabled?' do
+    subject { group.saml_enabled? }
+
+    context 'when a SAML provider does not exist' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when a SAML provider exists and is persisted' do
+      before do
+        create(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when a SAML provider is not persisted' do
+      before do
+        build(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#saml_group_sync_available?' do
+    subject { group.saml_group_sync_available? }
+
+    context 'when saml_group_links is not enabled' do
+      before do
+        stub_feature_flags(saml_group_links: false)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when saml_group_links is enabled' do
+      before do
+        stub_feature_flags(saml_group_links: true)
+      end
+
+      it { is_expected.to eq(false) }
+
+      context 'with group_saml_group_sync feature licensed' do
+        before do
+          stub_licensed_features(group_saml_group_sync: true)
+        end
+
+        it { is_expected.to eq(false) }
+
+        context 'with saml enabled' do
+          before do
+            create(:saml_provider, group: group, enabled: true)
+          end
+
+          it { is_expected.to eq(true) }
+
+          context 'when the group is a subgroup' do
+            let(:subgroup) { create(:group, :private, parent: group) }
+
+            subject { subgroup.saml_group_sync_available? }
+
+            it { is_expected.to eq(true) }
+          end
+        end
+      end
     end
   end
 
@@ -731,7 +895,7 @@ RSpec.describe Group do
   end
 
   describe '#self_or_ancestor_marked_for_deletion' do
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
         create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
@@ -742,7 +906,7 @@ RSpec.describe Group do
       end
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
@@ -790,12 +954,12 @@ RSpec.describe Group do
   describe '#marked_for_deletion?' do
     subject { group.marked_for_deletion? }
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when the group is marked for adjourned deletion' do
+      context 'when the group is marked for delayed deletion' do
         before do
           create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
         end
@@ -803,17 +967,17 @@ RSpec.describe Group do
         it { is_expected.to be_truthy }
       end
 
-      context 'when the group is not marked for adjourned deletion' do
+      context 'when the group is not marked for delayed deletion' do
         it { is_expected.to be_falsey }
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when the group is marked for adjourned deletion' do
+      context 'when the group is marked for delayed deletion' do
         before do
           create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
         end
@@ -821,7 +985,7 @@ RSpec.describe Group do
         it { is_expected.to be_falsey }
       end
 
-      context 'when the group is not marked for adjourned deletion' do
+      context 'when the group is not marked for delayed deletion' do
         it { is_expected.to be_falsey }
       end
     end
@@ -838,12 +1002,12 @@ RSpec.describe Group do
       it { is_expected.to be_truthy }
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when adjourned deletion period is set to more than 0' do
+      context 'when delayed deletion period is set to more than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
@@ -851,7 +1015,7 @@ RSpec.describe Group do
         it_behaves_like 'returns true'
       end
 
-      context 'when adjourned deletion period is set to 0' do
+      context 'when delayed deletion period is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end
@@ -860,12 +1024,12 @@ RSpec.describe Group do
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when adjourned deletion period is set to more than 0' do
+      context 'when delayed deletion period is set to more than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
@@ -873,7 +1037,7 @@ RSpec.describe Group do
         it_behaves_like 'returns false'
       end
 
-      context 'when adjourned deletion period is set to 0' do
+      context 'when delayed deletion period is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end
@@ -1009,5 +1173,50 @@ RSpec.describe Group do
     subject { group.owners_emails }
 
     it { is_expected.to match([user.email]) }
+  end
+
+  describe 'Releases Stats' do
+    context 'when there are no releases' do
+      describe '#releases_count' do
+        it 'returns 0' do
+          expect(group.releases_count).to eq(0)
+        end
+      end
+
+      describe '#releases_percentage' do
+        it 'returns 0 and does not attempt to divide by 0' do
+          expect(group.releases_percentage).to eq(0)
+        end
+      end
+    end
+
+    context 'when there are some releases' do
+      before do
+        subgroup_1 = create(:group, parent: group)
+        subgroup_2 = create(:group, parent: subgroup_1)
+
+        project_in_group = create(:project, group: group)
+        _project_in_subgroup_1 = create(:project, group: subgroup_1)
+        project_in_subgroup_2 = create(:project, group: subgroup_2)
+        project_in_unrelated_group = create(:project)
+
+        create(:release, project: project_in_group)
+        create(:release, project: project_in_subgroup_2)
+        create(:release, project: project_in_unrelated_group)
+      end
+
+      describe '#releases_count' do
+        it 'counts all releases for group and descendants' do
+          expect(group.releases_count).to eq(2)
+        end
+      end
+
+      describe '#releases_percentage' do
+        it 'calculates projects with releases percentage for group and descendants' do
+          # 2 out of 3 projects have releases
+          expect(group.releases_percentage).to eq(67)
+        end
+      end
+    end
   end
 end

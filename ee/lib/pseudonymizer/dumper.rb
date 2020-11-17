@@ -59,7 +59,7 @@ module Pseudonymizer
                            pseudonymity_columns)
       )
     rescue => e
-      Rails.logger.error("Failed to export #{table}: #{e}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("Failed to export #{table}: #{e}")
       raise e
     end
 
@@ -115,7 +115,7 @@ module Pseudonymizer
       file_path = output_filename(table)
       headers = contents.peek.keys
 
-      Rails.logger.info "#{self.class.name} writing #{table} to #{file_path}." # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.info "#{self.class.name} writing #{table} to #{file_path}."
       Zlib::GzipWriter.open(file_path) do |io|
         csv = CSV.new(io, headers: headers, write_headers: true)
         contents.each { |row| csv << row.values }
@@ -123,7 +123,7 @@ module Pseudonymizer
 
       file_path
     rescue StopIteration
-      Rails.logger.info "#{self.class.name} table #{table} is empty." # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.info "#{self.class.name} table #{table} is empty."
       nil
     end
   end

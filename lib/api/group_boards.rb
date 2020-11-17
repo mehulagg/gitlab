@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class GroupBoards < Grape::API
+  class GroupBoards < ::API::Base
     include BoardsResponses
     include PaginationParams
 
     prepend_if_ee('EE::API::BoardsResponses') # rubocop: disable Cop/InjectEnterpriseEditionModule
+
+    feature_category :boards
 
     before do
       authenticate!

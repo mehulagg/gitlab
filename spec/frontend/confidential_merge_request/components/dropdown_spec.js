@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import Dropdown from '~/confidential_merge_request/components/dropdown.vue';
 
 let vm;
@@ -33,24 +33,15 @@ describe('Confidential merge request project dropdown component', () => {
     expect(vm.findAll(GlDropdownItem).length).toBe(2);
   });
 
-  it('renders selected project icon', () => {
-    factory([
-      {
-        id: 1,
-        name: 'test',
-      },
-      {
-        id: 2,
-        name: 'test 2',
-      },
-    ]);
+  it('shows lock icon', () => {
+    factory();
 
-    expect(vm.find('.js-active-project-check').classes()).not.toContain('icon');
-    expect(
-      vm
-        .findAll('.js-active-project-check')
-        .at(1)
-        .classes(),
-    ).toContain('icon');
+    expect(vm.find(GlDropdown).props('icon')).toBe('lock');
+  });
+
+  it('has dropdown text', () => {
+    factory();
+
+    expect(vm.find(GlDropdown).props('text')).toBe('Select private project');
   });
 });

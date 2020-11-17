@@ -1,19 +1,20 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
-import { GlModal, GlTooltipDirective } from '@gitlab/ui';
-import createFlash from '~/flash';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlModal, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import Api from '~/api';
-import eventHub from './event_hub';
 import EmojiMenuInModal from './emoji_menu_in_modal';
+import { isUserBusy, isValidAvailibility } from './utils';
+import * as Emoji from '~/emoji';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlModal,
   },
   directives: {
@@ -28,6 +29,17 @@ export default {
       type: String,
       required: true,
     },
+    currentAvailability: {
+      type: String,
+      required: false,
+      validator: isValidAvailibility,
+      default: '',
+    },
+    canSetUserAvailability: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -39,6 +51,7 @@ export default {
       message: this.currentMessage,
       modalId: 'set-user-status-modal',
       noEmoji: true,
+      availability: isUserBusy(this.currentAvailability),
     };
   },
   computed: {
@@ -47,15 +60,12 @@ export default {
     },
   },
   mounted() {
-    eventHub.$on('openModal', this.openModal);
+    this.$root.$emit('bv::show::modal', this.modalId);
   },
   beforeDestroy() {
     this.emojiMenu.destroy();
   },
   methods: {
-    openModal() {
-      this.$root.$emit('bv::show::modal', this.modalId);
-    },
     closeModal() {
       this.$root.$emit('bv::hide::modal', this.modalId);
     },
@@ -64,8 +74,8 @@ export default {
       const emojiAutocomplete = new GfmAutoComplete();
       emojiAutocomplete.setup($(this.$refs.statusMessageField), { emojis: true });
 
-      import(/* webpackChunkName: 'emoji' */ '~/emoji')
-        .then(Emoji => {
+      Emoji.initEmojiMap()
+        .then(() => {
           if (this.emoji) {
             this.emojiTag = Emoji.glEmojiTag(this.emoji);
           }
@@ -182,7 +192,7 @@ export default {
           <span class="input-group-prepend">
             <button
               ref="toggleEmojiMenuButton"
-              v-gl-tooltip.bottom
+              v-gl-tooltip.bottom.hover
               :title="s__('SetStatusModal|Add status emoji')"
               :aria-label="s__('SetStatusModal|Add status emoji')"
               name="button"
@@ -195,9 +205,9 @@ export default {
                 v-show="noEmoji"
                 class="js-no-emoji-placeholder no-emoji-placeholder position-relative"
               >
-                <icon name="slight-smile" class="award-control-icon-neutral" />
-                <icon name="smiley" class="award-control-icon-positive" />
-                <icon name="smile" class="award-control-icon-super-positive" />
+                <gl-icon name="slight-smile" class="award-control-icon-neutral" />
+                <gl-icon name="smiley" class="award-control-icon-positive" />
+                <gl-icon name="smile" class="award-control-icon-super-positive" />
               </span>
             </button>
           </span>
@@ -222,7 +232,7 @@ export default {
               class="js-clear-user-status-button clear-user-status btn"
               @click="clearStatusInputs()"
             >
-              <icon name="close" />
+              <gl-icon name="close" />
             </button>
           </span>
         </div>

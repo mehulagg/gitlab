@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::MigrateUsersBioToUserDetails, :migration, schema: 20200323074147 do
+RSpec.describe Gitlab::BackgroundMigration::MigrateUsersBioToUserDetails, :migration, schema: 20200323074147 do
   let(:users) { table(:users) }
 
   let(:user_details) do
@@ -81,22 +81,5 @@ describe Gitlab::BackgroundMigration::MigrateUsersBioToUserDetails, :migration, 
     user_detail = user_details.find_by(user_id: user_also_needs_no_migration.id)
 
     expect(user_detail).to be_nil
-  end
-
-  context 'when `migrate_bio_to_user_details` feature flag is off' do
-    before do
-      stub_feature_flags(migrate_bio_to_user_details: false)
-    end
-
-    it 'does nothing' do
-      already_existing_user_details = user_details.where(user_id: [
-        user_has_different_details.id,
-        user_already_has_details.id
-      ])
-
-      subject
-
-      expect(user_details.all).to match_array(already_existing_user_details)
-    end
   end
 end

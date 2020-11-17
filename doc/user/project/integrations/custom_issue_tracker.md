@@ -1,8 +1,14 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Custom Issue Tracker service
 
 To enable the Custom Issue Tracker integration in a project:
 
-1. Go to **{settings}** **Settings > Integrations**.
+1. Go to **Settings > Integrations**.
 1. Click **Custom Issue Tracker**
 1. Fill in the tracker's details, such as title, description, and URLs.
    You will be able to edit these fields later as well.
@@ -11,8 +17,6 @@ To enable the Custom Issue Tracker integration in a project:
 
    | Field           | Description |
    | --------------- | ----------- |
-   | **Title**         | A title for the issue tracker (for example, to differentiate between instances). |
-   | **Description**   | A name for the issue tracker (for example, to differentiate between instances). |
    | **Project URL**   | The URL to the project in the custom issue tracker. |
    | **Issues URL**    | The URL to the issue in the issue tracker project that is linked to this GitLab project. Note that the `issues_url` requires `:id` in the URL. This ID is used by GitLab as a placeholder to replace the issue number. For example, `https://customissuetracker.com/project-name/:id`. |
    | **New issue URL** | Currently unused. Will be changed in a future release. |

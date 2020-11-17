@@ -6,6 +6,8 @@ const INTERVALS = {
   day: 'day',
 };
 
+export const FILE_SYMLINK_MODE = '120000';
+
 export const timeRanges = [
   {
     label: __('30 minutes'),
@@ -39,13 +41,13 @@ export const timeRanges = [
     interval: INTERVALS.hour,
   },
   {
-    label: __('1 week'),
+    label: __('7 days'),
     duration: { seconds: 60 * 60 * 24 * 7 * 1 },
     name: 'oneWeek',
     interval: INTERVALS.day,
   },
   {
-    label: __('1 month'),
+    label: __('30 days'),
     duration: { seconds: 60 * 60 * 24 * 30 },
     name: 'oneMonth',
     interval: INTERVALS.day,

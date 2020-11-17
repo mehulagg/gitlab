@@ -3,8 +3,10 @@ import { GlPagination } from '@gitlab/ui';
 import Tracking from '~/tracking';
 import component from '~/registry/explorer/pages/details.vue';
 import DeleteAlert from '~/registry/explorer/components/details_page/delete_alert.vue';
+import PartialCleanupAlert from '~/registry/explorer/components/details_page/partial_cleanup_alert.vue';
 import DetailsHeader from '~/registry/explorer/components/details_page/details_header.vue';
 import TagsLoader from '~/registry/explorer/components/details_page/tags_loader.vue';
+import TagsList from '~/registry/explorer/components/details_page/tags_list.vue';
 import EmptyTagsState from '~/registry/explorer/components/details_page/empty_tags_state.vue';
 import { createStore } from '~/registry/explorer/stores/';
 import {
@@ -12,10 +14,11 @@ import {
   SET_TAGS_LIST_SUCCESS,
   SET_TAGS_PAGINATION,
   SET_INITIAL_STATE,
-} from '~/registry/explorer/stores/mutation_types/';
+  SET_IMAGE_DETAILS,
+} from '~/registry/explorer/stores/mutation_types';
 
-import { tagsListResponse } from '../mock_data';
-import { TagsTable, DeleteModal } from '../stubs';
+import { tagsListResponse, imageDetailsMock } from '../mock_data';
+import { DeleteModal } from '../stubs';
 
 describe('Details Page', () => {
   let wrapper;
@@ -25,18 +28,24 @@ describe('Details Page', () => {
   const findDeleteModal = () => wrapper.find(DeleteModal);
   const findPagination = () => wrapper.find(GlPagination);
   const findTagsLoader = () => wrapper.find(TagsLoader);
-  const findTagsTable = () => wrapper.find(TagsTable);
+  const findTagsList = () => wrapper.find(TagsList);
   const findDeleteAlert = () => wrapper.find(DeleteAlert);
   const findDetailsHeader = () => wrapper.find(DetailsHeader);
   const findEmptyTagsState = () => wrapper.find(EmptyTagsState);
+  const findPartialCleanupAlert = () => wrapper.find(PartialCleanupAlert);
 
-  const routeId = window.btoa(JSON.stringify({ name: 'foo', tags_path: 'bar' }));
+  const routeId = 1;
 
-  const mountComponent = options => {
+  const tagsArrayToSelectedTags = tags =>
+    tags.reduce((acc, c) => {
+      acc[c.name] = true;
+      return acc;
+    }, {});
+
+  const mountComponent = ({ options } = {}) => {
     wrapper = shallowMount(component, {
       store,
       stubs: {
-        TagsTable,
         DeleteModal,
       },
       mocks: {
@@ -56,6 +65,7 @@ describe('Details Page', () => {
     dispatchSpy.mockResolvedValue();
     store.commit(SET_TAGS_LIST_SUCCESS, tagsListResponse.data);
     store.commit(SET_TAGS_PAGINATION, tagsListResponse.headers);
+    store.commit(SET_IMAGE_DETAILS, imageDetailsMock);
     jest.spyOn(Tracking, 'event');
   });
 
@@ -64,17 +74,27 @@ describe('Details Page', () => {
     wrapper = null;
   });
 
+  describe('lifecycle events', () => {
+    it('calls the appropriate action on mount', () => {
+      mountComponent();
+      expect(dispatchSpy).toHaveBeenCalledWith('requestImageDetailsAndTagsList', routeId);
+    });
+  });
+
   describe('when isLoading is true', () => {
     beforeEach(() => {
-      mountComponent();
       store.commit(SET_MAIN_LOADING, true);
-      return wrapper.vm.$nextTick();
+      mountComponent();
     });
 
     afterEach(() => store.commit(SET_MAIN_LOADING, false));
 
-    it('binds isLoading to tags-table', () => {
-      expect(findTagsTable().props('isLoading')).toBe(true);
+    it('shows the loader', () => {
+      expect(findTagsLoader().exists()).toBe(true);
+    });
+
+    it('does not show the list', () => {
+      expect(findTagsList().exists()).toBe(false);
     });
 
     it('does not show pagination', () => {
@@ -82,8 +102,9 @@ describe('Details Page', () => {
     });
   });
 
-  describe('table slots', () => {
+  describe('when the list of tags is empty', () => {
     beforeEach(() => {
+      store.commit(SET_TAGS_LIST_SUCCESS, []);
       mountComponent();
     });
 
@@ -91,32 +112,37 @@ describe('Details Page', () => {
       expect(findEmptyTagsState().exists()).toBe(true);
     });
 
-    it('has a skeleton loader', () => {
-      expect(findTagsLoader().exists()).toBe(true);
+    it('does not show the loader', () => {
+      expect(findTagsLoader().exists()).toBe(false);
+    });
+
+    it('does not show the list', () => {
+      expect(findTagsList().exists()).toBe(false);
     });
   });
 
-  describe('table', () => {
+  describe('list', () => {
     beforeEach(() => {
       mountComponent();
     });
 
     it('exists', () => {
-      expect(findTagsTable().exists()).toBe(true);
+      expect(findTagsList().exists()).toBe(true);
     });
 
     it('has the correct props bound', () => {
-      expect(findTagsTable().props()).toMatchObject({
-        isDesktop: true,
-        isLoading: false,
+      expect(findTagsList().props()).toMatchObject({
+        isMobile: false,
         tags: store.state.tags,
       });
     });
 
     describe('deleteEvent', () => {
       describe('single item', () => {
+        let tagToBeDeleted;
         beforeEach(() => {
-          findTagsTable().vm.$emit('delete', [store.state.tags[0].name]);
+          [tagToBeDeleted] = store.state.tags;
+          findTagsList().vm.$emit('delete', { [tagToBeDeleted.name]: true });
         });
 
         it('open the modal', () => {
@@ -124,7 +150,7 @@ describe('Details Page', () => {
         });
 
         it('maps the selection to itemToBeDeleted', () => {
-          expect(wrapper.vm.itemsToBeDeleted).toEqual([store.state.tags[0]]);
+          expect(wrapper.vm.itemsToBeDeleted).toEqual([tagToBeDeleted]);
         });
 
         it('tracks a single delete event', () => {
@@ -136,7 +162,7 @@ describe('Details Page', () => {
 
       describe('multiple items', () => {
         beforeEach(() => {
-          findTagsTable().vm.$emit('delete', store.state.tags.map(t => t.name));
+          findTagsList().vm.$emit('delete', tagsArrayToSelectedTags(store.state.tags));
         });
 
         it('open the modal', () => {
@@ -176,8 +202,7 @@ describe('Details Page', () => {
       dispatchSpy.mockResolvedValue();
       findPagination().vm.$emit(GlPagination.model.event, 2);
       expect(store.dispatch).toHaveBeenCalledWith('requestTagsList', {
-        params: wrapper.vm.$route.params.id,
-        pagination: { page: 2 },
+        page: 2,
       });
     });
   });
@@ -202,14 +227,13 @@ describe('Details Page', () => {
       describe('when one item is selected to be deleted', () => {
         beforeEach(() => {
           mountComponent();
-          findTagsTable().vm.$emit('delete', [store.state.tags[0].name]);
+          findTagsList().vm.$emit('delete', { [store.state.tags[0].name]: true });
         });
 
         it('dispatch requestDeleteTag with the right parameters', () => {
           findDeleteModal().vm.$emit('confirmDelete');
           expect(dispatchSpy).toHaveBeenCalledWith('requestDeleteTag', {
             tag: store.state.tags[0],
-            params: routeId,
           });
         });
       });
@@ -217,14 +241,13 @@ describe('Details Page', () => {
       describe('when more than one item is selected to be deleted', () => {
         beforeEach(() => {
           mountComponent();
-          findTagsTable().vm.$emit('delete', store.state.tags.map(t => t.name));
+          findTagsList().vm.$emit('delete', tagsArrayToSelectedTags(store.state.tags));
         });
 
         it('dispatch requestDeleteTags with the right parameters', () => {
           findDeleteModal().vm.$emit('confirmDelete');
           expect(dispatchSpy).toHaveBeenCalledWith('requestDeleteTags', {
             ids: store.state.tags.map(t => t.name),
-            params: routeId,
           });
         });
       });
@@ -239,7 +262,7 @@ describe('Details Page', () => {
 
     it('has the correct props', () => {
       mountComponent();
-      expect(findDetailsHeader().props()).toEqual({ imageName: 'foo' });
+      expect(findDetailsHeader().props()).toEqual({ imageName: imageDetailsMock.name });
     });
   });
 
@@ -258,11 +281,61 @@ describe('Details Page', () => {
     it('has the correct props', () => {
       store.commit(SET_INITIAL_STATE, { ...config });
       mountComponent({
-        data: () => ({
-          deleteAlertType,
-        }),
+        options: {
+          data: () => ({
+            deleteAlertType,
+          }),
+        },
       });
       expect(findDeleteAlert().props()).toEqual({ ...config, deleteAlertType });
+    });
+  });
+
+  describe('Partial Cleanup Alert', () => {
+    const config = {
+      runCleanupPoliciesHelpPagePath: 'foo',
+      cleanupPoliciesHelpPagePath: 'bar',
+    };
+
+    describe('when expiration_policy_started is not null', () => {
+      beforeEach(() => {
+        store.commit(SET_IMAGE_DETAILS, {
+          ...imageDetailsMock,
+          cleanup_policy_started_at: Date.now().toString(),
+        });
+      });
+      it('exists', () => {
+        mountComponent();
+
+        expect(findPartialCleanupAlert().exists()).toBe(true);
+      });
+
+      it('has the correct props', () => {
+        store.commit(SET_INITIAL_STATE, { ...config });
+
+        mountComponent();
+
+        expect(findPartialCleanupAlert().props()).toEqual({ ...config });
+      });
+
+      it('dismiss hides the component', async () => {
+        mountComponent();
+
+        expect(findPartialCleanupAlert().exists()).toBe(true);
+        findPartialCleanupAlert().vm.$emit('dismiss');
+
+        await wrapper.vm.$nextTick();
+
+        expect(findPartialCleanupAlert().exists()).toBe(false);
+      });
+    });
+
+    describe('when expiration_policy_started is null', () => {
+      it('the component is hidden', () => {
+        mountComponent();
+
+        expect(findPartialCleanupAlert().exists()).toBe(false);
+      });
     });
   });
 });

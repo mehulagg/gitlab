@@ -1,4 +1,4 @@
-fragment BaseEpic on Epic {
+fragment RelatedTreeBaseEpic on Epic {
   id
   iid
   title
@@ -22,7 +22,7 @@ fragment BaseEpic on Epic {
 }
 
 fragment EpicNode on Epic {
-  ...BaseEpic
+  ...RelatedTreeBaseEpic
   state
   reference(full: true)
   relationPath

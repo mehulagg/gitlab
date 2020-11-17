@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Security::IngressModsecurityUsageService do
+RSpec.describe EE::Security::IngressModsecurityUsageService do
   describe '#execute' do
     let(:environment) { create(:environment) }
     let(:ingress_mode) { :modsecurity_blocking }

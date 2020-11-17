@@ -1,9 +1,17 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import ContentViewer from '~/vue_shared/components/content_viewer/content_viewer.vue';
 import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
+import {
+  WEBIDE_MARK_FILE_CLICKED,
+  WEBIDE_MARK_FILE_START,
+  WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+  WEBIDE_MEASURE_FILE_FROM_REQUEST,
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
+import eventHub from '../eventhub';
 import {
   leftSidebarViews,
   viewerTypes,
@@ -14,7 +22,8 @@ import Editor from '../lib/editor';
 import FileTemplatesBar from './file_templates/bar.vue';
 import { __ } from '~/locale';
 import { extractMarkdownImagesFromEntries } from '../stores/utils';
-import { getPathParent, readFileAsDataURL } from '../utils';
+import { getFileEditorOrDefault } from '../stores/modules/editor/utils';
+import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
 
@@ -41,6 +50,7 @@ export default {
     ...mapState('rightPane', {
       rightPaneIsOpen: 'isOpen',
     }),
+    ...mapState('editor', ['fileEditors']),
     ...mapState([
       'viewer',
       'panelResizing',
@@ -48,6 +58,7 @@ export default {
       'renderWhitespaceInCode',
       'editorTheme',
       'entries',
+      'currentProjectId',
     ]),
     ...mapGetters([
       'currentMergeRequest',
@@ -55,10 +66,14 @@ export default {
       'isEditModeActive',
       'isCommitModeActive',
       'currentBranch',
+      'getJsonSchemaForPath',
     ]),
     ...mapGetters('fileTemplates', ['showFileTemplatesBar']),
+    fileEditor() {
+      return getFileEditorOrDefault(this.fileEditors, this.file.path);
+    },
     shouldHideEditor() {
-      return this.file && this.file.binary;
+      return this.file && !this.file.loading && !isTextFile(this.file);
     },
     showContentViewer() {
       return (
@@ -70,10 +85,10 @@ export default {
       return this.shouldHideEditor && this.file.mrChange && this.viewer === viewerTypes.mr;
     },
     isEditorViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_EDITOR;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_EDITOR;
     },
     isPreviewViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_PREVIEW;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_PREVIEW;
     },
     editTabCSS() {
       return {
@@ -115,8 +130,7 @@ export default {
         this.initEditor();
 
         if (this.currentActivityView !== leftSidebarViews.edit.name) {
-          this.setFileViewMode({
-            file: this.file,
+          this.updateEditor({
             viewMode: FILE_VIEW_MODE_EDITOR,
           });
         }
@@ -124,8 +138,7 @@ export default {
     },
     currentActivityView() {
       if (this.currentActivityView !== leftSidebarViews.edit.name) {
-        this.setFileViewMode({
-          file: this.file,
+        this.updateEditor({
           viewMode: FILE_VIEW_MODE_EDITOR,
         });
       }
@@ -162,12 +175,15 @@ export default {
       }
     },
   },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: WEBIDE_MARK_FILE_START });
+  },
   beforeDestroy() {
     this.editor.dispose();
   },
   mounted() {
     if (!this.editor) {
-      this.editor = Editor.create(this.editorOptions);
+      this.editor = Editor.create(this.$store, this.editorOptions);
     }
     this.initEditor();
 
@@ -182,20 +198,19 @@ export default {
       'getFileData',
       'getRawFileData',
       'changeFileContent',
-      'setFileLanguage',
-      'setEditorPosition',
-      'setFileViewMode',
-      'updateViewer',
       'removePendingTab',
       'triggerFilesChange',
       'addTempImage',
     ]),
+    ...mapActions('editor', ['updateFileEditor']),
     initEditor() {
       if (this.shouldHideEditor && (this.file.content || this.file.raw)) {
         return;
       }
 
       this.editor.clearEditor();
+
+      this.registerSchemaForFile();
 
       Promise.all([this.fetchFileData(), this.fetchEditorconfigRules()])
         .then(() => {
@@ -221,6 +236,7 @@ export default {
       return this.getFileData({
         path: this.file.path,
         makeFileActive: false,
+        toggleLoading: false,
       }).then(() =>
         this.getRawFileData({
           path: this.file.path,
@@ -241,7 +257,7 @@ export default {
       });
     },
     setupEditor() {
-      if (!this.file || !this.editor.instance) return;
+      if (!this.file || !this.editor.instance || this.file.loading) return;
 
       const head = this.getStagedFile(this.file.path);
 
@@ -269,23 +285,28 @@ export default {
 
       // Handle Cursor Position
       this.editor.onPositionChange((instance, e) => {
-        this.setEditorPosition({
+        this.updateEditor({
           editorRow: e.position.lineNumber,
           editorColumn: e.position.column,
         });
       });
 
       this.editor.setPosition({
-        lineNumber: this.file.editorRow,
-        column: this.file.editorColumn,
+        lineNumber: this.fileEditor.editorRow,
+        column: this.fileEditor.editorColumn,
       });
 
       // Handle File Language
-      this.setFileLanguage({
+      this.updateEditor({
         fileLanguage: this.model.language,
       });
 
       this.$emit('editorSetup');
+      if (performance.getEntriesByName(WEBIDE_MARK_FILE_CLICKED).length) {
+        eventHub.$emit(WEBIDE_MEASURE_FILE_AFTER_INTERACTION);
+      } else {
+        eventHub.$emit(WEBIDE_MEASURE_FILE_FROM_REQUEST);
+      }
     },
     refreshEditorDimensions() {
       if (this.showEditor) {
@@ -330,6 +351,20 @@ export default {
       // do nothing if no image is found in the clipboard
       return Promise.resolve();
     },
+    registerSchemaForFile() {
+      const schema = this.getJsonSchemaForPath(this.file.path);
+      registerSchema(schema);
+    },
+    updateEditor(data) {
+      // Looks like our model wrapper `.dispose` causes the monaco editor to emit some position changes after
+      // when disposing. We want to ignore these by only capturing editor changes that happen to the currently active
+      // file.
+      if (!this.file.active) {
+        return;
+      }
+
+      this.updateFileEditor({ path: this.file.path, data });
+    },
   },
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
@@ -345,7 +380,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_EDITOR })"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_EDITOR })"
           >
             {{ __('Edit') }}
           </a>
@@ -354,7 +389,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
             >{{ previewMode.previewTitle }}</a
           >
         </li>
@@ -380,7 +415,7 @@ export default {
       :path="file.rawPath || file.path"
       :file-path="file.path"
       :file-size="file.size"
-      :project-path="file.projectId"
+      :project-path="currentProjectId"
       :commit-sha="currentBranchCommit"
       :type="fileType"
     />
@@ -391,7 +426,7 @@ export default {
       :new-sha="currentMergeRequest.sha"
       :old-path="file.mrChange.old_path"
       :old-sha="currentMergeRequest.baseCommitSha"
-      :project-path="file.projectId"
+      :project-path="currentProjectId"
     />
   </div>
 </template>

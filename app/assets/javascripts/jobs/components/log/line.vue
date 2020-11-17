@@ -1,10 +1,10 @@
 <script>
+import { linkRegex } from '../../utils';
+
 import LineNumber from './line_number.vue';
 
 export default {
-  components: {
-    LineNumber,
-  },
+  functional: true,
   props: {
     line: {
       type: Object,
@@ -15,18 +15,59 @@ export default {
       required: true,
     },
   },
+  render(h, { props }) {
+    const { line, path } = props;
+
+    let chars;
+    if (gon?.features?.ciJobLineLinks) {
+      chars = line.content.map(content => {
+        return h(
+          'span',
+          {
+            class: ['gl-white-space-pre-wrap', content.style],
+          },
+          // Simple "tokenization": Split text in chunks of text
+          // which alternate between text and urls.
+          content.text.split(linkRegex).map(chunk => {
+            // Return normal string for non-links
+            if (!chunk.match(linkRegex)) {
+              return chunk;
+            }
+            return h(
+              'a',
+              {
+                attrs: {
+                  href: chunk,
+                  class: 'gl-reset-color! gl-text-decoration-underline',
+                  rel: 'nofollow noopener noreferrer', // eslint-disable-line @gitlab/require-i18n-strings
+                },
+              },
+              chunk,
+            );
+          }),
+        );
+      });
+    } else {
+      chars = line.content.map(content => {
+        return h(
+          'span',
+          {
+            class: ['gl-white-space-pre-wrap', content.style],
+          },
+          content.text,
+        );
+      });
+    }
+
+    return h('div', { class: 'js-line log-line' }, [
+      h(LineNumber, {
+        props: {
+          lineNumber: line.lineNumber,
+          path,
+        },
+      }),
+      ...chars,
+    ]);
+  },
 };
 </script>
-
-<template>
-  <div class="js-line log-line">
-    <line-number :line-number="line.lineNumber" :path="path" />
-    <span
-      v-for="(content, i) in line.content"
-      :key="i"
-      :class="content.style"
-      class="ws-pre-wrap"
-      >{{ content.text }}</span
-    >
-  </div>
-</template>

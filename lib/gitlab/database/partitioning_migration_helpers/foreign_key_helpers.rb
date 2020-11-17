@@ -31,7 +31,7 @@ module Gitlab
 
               current_keys << specified_key
             else
-              Rails.logger.warn "foreign key not added because it already exists: #{specified_key}" # rubocop:disable Gitlab/RailsLogger
+              Gitlab::AppLogger.warn "foreign key not added because it already exists: #{specified_key}"
               current_keys
             end
           end
@@ -56,7 +56,7 @@ module Gitlab
               existing_key.delete
               current_keys.delete(existing_key)
             else
-              Rails.logger.warn "foreign key not removed because it doesn't exist: #{specified_key}" # rubocop:disable Gitlab/RailsLogger
+              Gitlab::AppLogger.warn "foreign key not removed because it doesn't exist: #{specified_key}"
             end
 
             current_keys
@@ -99,7 +99,7 @@ module Gitlab
               drop_function(fn_name, if_exists: true)
             else
               create_or_replace_fk_function(fn_name, final_keys)
-              create_trigger(trigger_name, fn_name, fires: "AFTER DELETE ON #{to_table}")
+              create_trigger(to_table, trigger_name, fn_name, fires: 'AFTER DELETE')
             end
           end
         end

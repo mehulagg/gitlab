@@ -59,7 +59,7 @@ export default {
 
 <template>
   <div>
-    <div class="card-text prepend-top-default">
+    <div class="card-text gl-mt-3">
       <b>{{ __('Evidence collection') }}</b>
     </div>
     <div v-for="(evidence, index) in evidences" :key="evidenceTitle(index)" class="mb-2">
@@ -80,16 +80,10 @@ export default {
             <span class="js-short monospace">{{ shortSha(index) }}</span>
           </template>
           <template #expanded>
-            <span class="js-expanded monospace gl-pl-1-deprecated-no-really-do-not-use-me">{{
-              sha(index)
-            }}</span>
+            <span class="js-expanded monospace gl-pl-2">{{ sha(index) }}</span>
           </template>
         </expand-button>
-        <clipboard-button
-          :title="__('Copy evidence SHA')"
-          :text="sha(index)"
-          css-class="btn-default btn-transparent btn-clipboard"
-        />
+        <clipboard-button :title="__('Copy evidence SHA')" :text="sha(index)" category="tertiary" />
       </div>
 
       <div class="d-flex align-items-center text-muted">

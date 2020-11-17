@@ -20,17 +20,11 @@ module EE
         ).create!
       end
 
-      override :transfer
-      def transfer(project)
-        if project.feature_available?(:packages) && project.has_packages?(:npm) && !new_namespace_has_same_root?(project)
-          raise ::Projects::TransferService::TransferError.new(s_("TransferProject|Root namespace can't be updated if project has NPM packages"))
-        end
-
+      override :transfer_missing_group_resources
+      def transfer_missing_group_resources(group)
         super
-      end
 
-      def new_namespace_has_same_root?(project)
-        new_namespace.root_ancestor == project.namespace.root_ancestor
+        ::Epics::TransferService.new(current_user, group, project).execute
       end
     end
   end

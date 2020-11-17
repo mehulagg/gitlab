@@ -16,8 +16,10 @@ RSpec.shared_examples 'WikiPages::CreateService#execute' do |container_type|
   subject(:service) { described_class.new(container: container, current_user: user, params: opts) }
 
   it 'creates wiki page with valid attributes' do
-    page = service.execute
+    response = service.execute
+    page = response.payload[:page]
 
+    expect(response).to be_success
     expect(page).to be_valid
     expect(page).to be_persisted
     expect(page.title).to eq(opts[:title])
@@ -63,16 +65,6 @@ RSpec.shared_examples 'WikiPages::CreateService#execute' do |container_type|
     include_examples 'correct event created'
   end
 
-  context 'the feature is disabled' do
-    before do
-      stub_feature_flags(wiki_events: false)
-    end
-
-    it 'does not record the activity' do
-      expect { service.execute }.not_to change(Event, :count)
-    end
-  end
-
   context 'when the options are bad' do
     let(:page_title) { '' }
 
@@ -87,7 +79,12 @@ RSpec.shared_examples 'WikiPages::CreateService#execute' do |container_type|
     end
 
     it 'reports the error' do
-      expect(service.execute).to be_invalid
+      response = service.execute
+      page = response.payload[:page]
+
+      expect(response).to be_error
+
+      expect(page).to be_invalid
         .and have_attributes(errors: be_present)
     end
   end

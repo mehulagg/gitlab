@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'gitlab:gitaly namespace rake task' do
+RSpec.describe 'gitlab:gitaly namespace rake task' do
   before :all do
     Rake.application.rake_require 'tasks/gitlab/gitaly'
   end
@@ -89,7 +89,7 @@ describe 'gitlab:gitaly namespace rake task' do
           let(:command) do
             %W[make
                BUNDLE_FLAGS=--no-deployment
-               BUNDLE_PATH=#{Bundler.bundle_path}]
+               GEM_HOME=#{Bundler.bundle_path}]
           end
 
           before do

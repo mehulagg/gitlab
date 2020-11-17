@@ -1,5 +1,0 @@
----
-title: Clear hard failure when updating mirror via UI
-merge_request: 34614
-author:
-type: fixed

@@ -13,9 +13,70 @@ RSpec.describe EE::ServicesHelper do
     end
   end
 
-  let_it_be(:project) { create(:project) }
+  let_it_be_with_refind(:project) { create(:project) }
 
   subject { controller_class.new }
+
+  describe '#integration_form_data' do
+    subject { helper.integration_form_data(integration) }
+
+    before do
+      assign(:project, project)
+    end
+
+    context 'Slack service' do
+      let(:integration) { build(:slack_service) }
+
+      it 'does not include Jira specific fields' do
+        is_expected.not_to include(:show_jira_issues_integration, :show_jira_vulnerabilities_integration, :enable_jira_issues, :project_key, :gitlab_issues_enabled, :edit_project_path)
+      end
+    end
+
+    context 'Jira service' do
+      let_it_be_with_refind(:integration) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
+
+      context 'when there is no license for jira_vulnerabilities_integration' do
+        before do
+          stub_feature_flags(jira_for_vulnerabilities: true)
+        end
+
+        it 'includes Jira specific fields' do
+          is_expected.to include(show_jira_vulnerabilities_integration: 'false')
+        end
+      end
+
+      context 'when flag is disabled for jira_for_vulnerabilities' do
+        before do
+          stub_licensed_features(jira_issues_integration: true, jira_vulnerabilities_integration: true)
+          stub_feature_flags(jira_for_vulnerabilities: false)
+        end
+
+        it 'includes Jira specific fields' do
+          is_expected.to include(show_jira_vulnerabilities_integration: 'false')
+        end
+      end
+
+      context 'when all flags are enabled' do
+        before do
+          stub_licensed_features(jira_issues_integration: true, jira_vulnerabilities_integration: true)
+          stub_feature_flags(jira_for_vulnerabilities: true)
+        end
+
+        it 'includes Jira specific fields' do
+          is_expected.to include(
+            show_jira_issues_integration: 'true',
+            show_jira_vulnerabilities_integration: 'true',
+            enable_jira_issues: 'true',
+            enable_jira_vulnerabilities: 'true',
+            project_key: 'FE',
+            vulnerabilities_issuetype: '10001',
+            gitlab_issues_enabled: 'true',
+            edit_project_path: edit_project_path(project, anchor: 'js-shared-permissions')
+          )
+        end
+      end
+    end
+  end
 
   describe '#add_to_slack_link' do
     it 'encodes a masked CSRF token' do

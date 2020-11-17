@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'getting a tree in a project' do
+RSpec.describe 'getting a tree in a project' do
   include GraphqlHelpers
 
   let(:project) { create(:project, :repository) }
@@ -15,6 +15,7 @@ describe 'getting a tree in a project' do
       }
     QUERY
   end
+
   let(:query) do
     graphql_query_for(
       'project',

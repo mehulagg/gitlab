@@ -9,8 +9,6 @@ type: concepts, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6303) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
 
-## Overview
-
 [Environments](../environments/index.md) can be used for different reasons:
 
 - Some of them are just for testing.
@@ -22,7 +20,7 @@ specific environments are "protected" to prevent unauthorized people from affect
 By default, a protected environment does one thing: it ensures that only people
 with the right privileges can deploy to it, thus keeping it safe.
 
-NOTE: **Note**:
+NOTE: **Note:**
 A GitLab admin is always allowed to use environments, even if they are protected.
 
 To protect, update, or unprotect an environment, you need to have at least
@@ -47,6 +45,91 @@ To protect an environment:
 
 The protected environment will now appear in the list of protected environments.
 
+### Use the API to protect an environment
+
+Alternatively, you can use the API to protect an environment:
+
+1. Use a project with a CI that creates an environment. For example:
+
+   ```yaml
+   stages:
+     - test
+     - deploy
+
+   test:
+     stage: test
+     script:
+       - 'echo "Testing Application: ${CI_PROJECT_NAME}"'
+
+   production:
+     stage: deploy
+     when: manual
+     script:
+       - 'echo "Deploying to ${CI_ENVIRONMENT_NAME}"'
+   environment:
+     name: ${CI_JOB_NAME}
+   ```
+
+1. Use the UI to [create a new group](../../user/group/index.md#create-a-new-group).
+   For example, this group is called `protected-access-group` and has the group ID `9899826`. Note
+   that the rest of the examples in these steps use this group.
+
+   ![Group Access](img/protected_access_group_v13_6.png)
+
+1. Use the API to add a user to the group as a reporter:
+
+   ```shell
+   $ curl --request POST --header "PRIVATE-TOKEN: xxxxxxxxxxxx" --data "user_id=3222377&access_level=20" "https://gitlab.com/api/v4/groups/9899826/members"
+
+   {"id":3222377,"name":"Sean Carroll","username":"sfcarroll","state":"active","avatar_url":"https://assets.gitlab-static.net/uploads/-/system/user/avatar/3222377/avatar.png","web_url":"https://gitlab.com/sfcarroll","access_level":20,"created_at":"2020-10-26T17:37:50.309Z","expires_at":null}
+   ```
+
+1. Use the API to add the group to the project as a reporter:
+
+   ```shell
+   $ curl --request POST --header "PRIVATE-TOKEN: xxxxxxxxxxxx" --request POST "https://gitlab.com/api/v4/projects/22034114/share?group_id=9899826&group_access=20"
+
+   {"id":1233335,"project_id":22034114,"group_id":9899826,"group_access":20,"expires_at":null}
+   ```
+
+1. Use the API to add the group with protected environment access:
+
+   ```shell
+   curl --header 'Content-Type: application/json' --request POST --data '{"name": "production", "deploy_access_levels": [{"group_id": 9899826}]}' --header "PRIVATE-TOKEN: xxxxxxxxxxx" "https://gitlab.com/api/v4/projects/22034114/protected_environments"
+   ```
+
+The group now has access and can be seen in the UI.
+
+## Environment access by group membership
+
+A user may be granted access to protected environments as part of
+[group membership](../../user/group/index.md). Users with
+[Reporter permissions](../../user/permissions.md), can only be granted access to
+protected environments with this method.
+
+## Deployment branch access
+
+Users with [Developer permissions](../../user/permissions.md) can be granted
+access to a protected environment through any of these methods:
+
+- As an individual contributor, through a role.
+- Through a group membership.
+
+If the user also has push or merge access to the branch deployed on production,
+they have the following privileges:
+
+- [Stopping an environment](index.md#stopping-an-environment).
+- [Delete a stopped environment](index.md#delete-a-stopped-environment).
+- [Create an environment terminal](index.md#web-terminals).
+
+## Deployment-only access to protected environments
+
+Users granted access to a protected environment, but not push or merge access
+to the branch deployed to it, are only granted access to deploy the environment.
+
+Note that deployment-only access is the only possible access level for users with
+[Reporter permissions](../../user/permissions.md).
+
 ## Modifying and unprotecting environments
 
 Maintainers can:
@@ -54,6 +137,9 @@ Maintainers can:
 - Update existing protected environments at any time by changing the access in the
   **Allowed to Deploy** dropdown menu.
 - Unprotect a protected environment by clicking the **Unprotect** button for that environment.
+
+After an environment is unprotected, all access entries are deleted and must
+be re-entered if the environment is re-protected.
 
 For more information, see [Deployment safety](deployment_safety.md).
 

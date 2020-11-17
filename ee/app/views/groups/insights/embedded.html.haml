@@ -1,0 +1,3 @@
+- @no_container = true
+
+= render('shared/insights', endpoint: group_insights_path(@group, format: :json), query_endpoint: query_group_insights_path(@group))

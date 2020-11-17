@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Branches::DeleteService do
+RSpec.describe Branches::DeleteService do
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
   let(:user) { create(:user) }
@@ -10,6 +10,10 @@ describe Branches::DeleteService do
   subject(:service) { described_class.new(project, user) }
 
   shared_examples 'a deleted branch' do |branch_name|
+    before do
+      allow(Ci::RefDeleteUnlockArtifactsWorker).to receive(:perform_async)
+    end
+
     it 'removes the branch' do
       expect(branch_exists?(branch_name)).to be true
 
@@ -17,6 +21,12 @@ describe Branches::DeleteService do
 
       expect(result.status).to eq :success
       expect(branch_exists?(branch_name)).to be false
+    end
+
+    it 'calls the RefDeleteUnlockArtifactsWorker' do
+      expect(Ci::RefDeleteUnlockArtifactsWorker).to receive(:perform_async).with(project.id, user.id, "refs/heads/#{branch_name}")
+
+      service.execute(branch_name)
     end
   end
 
@@ -27,6 +37,21 @@ describe Branches::DeleteService do
       end
 
       it_behaves_like 'a deleted branch', 'feature'
+
+      context 'when Gitlab::Git::CommandError is raised' do
+        before do
+          allow(repository).to receive(:rm_branch) do
+            raise Gitlab::Git::CommandError.new('Could not update patch')
+          end
+        end
+
+        it 'handles and returns error' do
+          result = service.execute('feature')
+
+          expect(result.status).to eq(:error)
+          expect(result.message).to eq('Could not update patch')
+        end
+      end
     end
 
     context 'when user does not have access to push to repository' do

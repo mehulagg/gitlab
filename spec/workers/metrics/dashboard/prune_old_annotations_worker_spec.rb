@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::PruneOldAnnotationsWorker do
+RSpec.describe Metrics::Dashboard::PruneOldAnnotationsWorker do
   let_it_be(:now) { DateTime.parse('2020-06-02T00:12:00Z') }
   let_it_be(:two_weeks_old_annotation) { create(:metrics_dashboard_annotation, starting_at: now.advance(weeks: -2)) }
   let_it_be(:one_day_old_annotation) { create(:metrics_dashboard_annotation, starting_at: now.advance(days: -1)) }
@@ -17,7 +17,7 @@ describe Metrics::Dashboard::PruneOldAnnotationsWorker do
 
         # is idempotent in the scope of 24h
         expect { described_class.new.perform }.not_to change { Metrics::Dashboard::Annotation.all.to_a }
-        Timecop.travel(24.hours.from_now) do
+        travel_to(24.hours.from_now) do
           described_class.new.perform
           expect(Metrics::Dashboard::Annotation.all).to match_array([one_day_old_annotation])
         end

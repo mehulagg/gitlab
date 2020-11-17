@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::MergeToRefService do
+RSpec.describe MergeRequests::MergeToRefService do
   shared_examples_for 'MergeService for target ref' do
     it 'target_ref has the same state of target branch' do
       repo = merge_request.target_project.repository
@@ -250,6 +250,17 @@ describe MergeRequests::MergeToRefService do
             let(:target_ref) { 'refs/merge-requests/2/train' }
           end
         end
+      end
+    end
+
+    context 'allow conflicts to be merged in diff' do
+      let(:params) { { allow_conflicts: true } }
+
+      it 'calls merge_to_ref with allow_conflicts param' do
+        expect(project.repository).to receive(:merge_to_ref)
+          .with(anything, anything, anything, anything, anything, anything, true)
+
+        service.execute(merge_request)
       end
     end
   end

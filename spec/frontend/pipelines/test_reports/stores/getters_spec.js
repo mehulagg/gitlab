@@ -1,6 +1,6 @@
 import { getJSONFixture } from 'helpers/fixtures';
 import * as getters from '~/pipelines/stores/test_reports/getters';
-import { iconForTestStatus } from '~/pipelines/stores/test_reports/utils';
+import { iconForTestStatus, formattedTime } from '~/pipelines/stores/test_reports/utils';
 
 describe('Getters TestReports Store', () => {
   let state;
@@ -9,12 +9,12 @@ describe('Getters TestReports Store', () => {
 
   const defaultState = {
     testReports,
-    selectedSuite: testReports.test_suites[0],
+    selectedSuiteIndex: 0,
   };
 
   const emptyState = {
     testReports: {},
-    selectedSuite: {},
+    selectedSuite: null,
   };
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe('Getters TestReports Store', () => {
       const suites = getters.getTestSuites(state);
       const expected = testReports.test_suites.map(x => ({
         ...x,
-        formattedTime: '00:00:00',
+        formattedTime: formattedTime(x.total_time),
       }));
 
       expect(suites).toEqual(expected);
@@ -47,6 +47,17 @@ describe('Getters TestReports Store', () => {
     });
   });
 
+  describe('getSelectedSuite', () => {
+    it('should return the selected suite', () => {
+      setupState();
+
+      const selectedSuite = getters.getSelectedSuite(state);
+      const expected = testReports.test_suites[state.selectedSuiteIndex];
+
+      expect(selectedSuite).toEqual(expected);
+    });
+  });
+
   describe('getSuiteTests', () => {
     it('should return the test cases inside the suite', () => {
       setupState();
@@ -54,7 +65,7 @@ describe('Getters TestReports Store', () => {
       const cases = getters.getSuiteTests(state);
       const expected = testReports.test_suites[0].test_cases.map(x => ({
         ...x,
-        formattedTime: '00:00:00',
+        formattedTime: formattedTime(x.execution_time),
         icon: iconForTestStatus(x.status),
       }));
 

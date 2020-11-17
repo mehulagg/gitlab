@@ -6,6 +6,8 @@ class Groups::LdapSettingsController < Groups::ApplicationController
   before_action :authorize_admin_group!
   before_action :authorize_manage_ldap_settings!
 
+  feature_category :authentication_and_authorization
+
   def update
     if @group.update(ldap_settings_params)
       redirect_back_or_default(default: group_ldap_group_links_path(@group), options: { notice: _('LDAP settings updated') })

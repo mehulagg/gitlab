@@ -5,11 +5,14 @@ import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/
 describe('reports not configured empty state', () => {
   let wrapper;
   const helpPath = '/help';
-  const svgPath = '/placeholder.svg';
+  const emptyStateSvgPath = '/placeholder.svg';
 
   const createComponent = () => {
     wrapper = shallowMount(ReportsNotConfigured, {
-      propsData: { helpPath, svgPath },
+      provide: {
+        emptyStateSvgPath,
+      },
+      propsData: { helpPath },
     });
   };
   const findEmptyState = () => wrapper.find(GlEmptyState);
@@ -21,7 +24,7 @@ describe('reports not configured empty state', () => {
   it.each`
     prop                   | data
     ${'title'}             | ${'Monitor vulnerabilities in your code'}
-    ${'svgPath'}           | ${svgPath}
+    ${'svgPath'}           | ${emptyStateSvgPath}
     ${'description'}       | ${'The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.'}
     ${'primaryButtonLink'} | ${helpPath}
     ${'primaryButtonText'} | ${'Learn more'}

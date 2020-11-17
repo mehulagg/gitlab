@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Sentry::Client::Issue do
+RSpec.describe Sentry::Client::Issue do
   include SentryClientHelpers
 
   let(:token) { 'test-token' }
@@ -65,6 +65,7 @@ describe Sentry::Client::Issue do
           link: '<https://sentrytest.gitlab.com>; rel="previous"; results="true"; cursor="1573556671000:0:1", <https://sentrytest.gitlab.com>; rel="next"; results="true"; cursor="1572959139000:0:0"'
         }
       end
+
       let!(:sentry_api_request) { stub_sentry_request(sentry_request_url, body: sentry_api_response, headers: headers) }
 
       it 'parses the pagination' do
@@ -114,6 +115,7 @@ describe Sentry::Client::Issue do
         'https://sentrytest.gitlab.com/api/0/projects/sentry-org/sentry-project/' \
           'issues/?limit=20&query=is:unresolved&sort=freq'
       end
+
       let!(:sentry_api_request) { stub_sentry_request(sentry_request_url, body: sentry_api_response) }
 
       subject { client.list_issues(issue_status: issue_status, limit: limit, sort: 'frequency') }
@@ -234,6 +236,7 @@ describe Sentry::Client::Issue do
         :first_release_short_version | [:firstRelease, :shortVersion]
         :last_release_short_version  | [:lastRelease, :shortVersion]
         :first_release_version       | [:firstRelease, :version]
+        :last_release_version        | [:lastRelease, :version]
       end
 
       with_them do

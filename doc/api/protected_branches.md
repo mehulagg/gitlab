@@ -1,6 +1,13 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Protected branches API
 
->**Note:** This feature was introduced in GitLab 9.5
+> Introduced in GitLab 9.5.
 
 **Valid access levels**
 
@@ -248,7 +255,7 @@ Example response:
 ### Example with user / group level access **(STARTER)**
 
 Elements in the `allowed_to_push` / `allowed_to_merge` / `allowed_to_unprotect` array should take the
-form `{user_id: integer}`, `{group_id: integer}` or `{access_level: integer}`. Each user must have access to the project and each group must [have this project shared](../user/project/members/share_project_with_groups.md). These access levels allow [more granular control over protected branch access](../user/project/protected_branches.md#restricting-push-and-merge-access-to-certain-users-starter) and were [added to the API in](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3516) in GitLab 10.3 EE.
+form `{user_id: integer}`, `{group_id: integer}` or `{access_level: integer}`. Each user must have access to the project and each group must [have this project shared](../user/project/members/share_project_with_groups.md). These access levels allow [more granular control over protected branch access](../user/project/protected_branches.md#restricting-push-and-merge-access-to-certain-users) and were [added to the API](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3516) in GitLab 10.3 EE.
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_branches?name=*-stable&allowed_to_push%5B%5D%5Buser_id%5D=1"
@@ -285,6 +292,67 @@ Example response:
     }
   ],
   "code_owner_approval_required": "false"
+}
+```
+
+### Example with allow to push and allow to merge access **(STARTER)**
+
+Example request:
+
+```shell
+curl --request POST \
+     --header "PRIVATE-TOKEN: <your_access_token>" \
+     --header "Content-Type: application/json" \
+     --data '{
+      "id": 5,
+      "name": "master",
+      "allowed_to_push": [{"access_level": 30}],
+      "allowed_to_merge": [{
+          "access_level": 30
+        },{
+          "access_level": 40
+        }
+      ]}'
+     "https://gitlab.example.com/api/v4/projects/5/protected_branches"
+```
+
+Example response:
+
+```json
+{
+    "id": 5,
+    "name": "master",
+    "push_access_levels": [
+        {
+            "access_level": 30,
+            "access_level_description": "Developers + Maintainers",
+            "user_id": null,
+            "group_id": null
+        }
+    ],
+    "merge_access_levels": [
+        {
+            "access_level": 30,
+            "access_level_description": "Developers + Maintainers",
+            "user_id": null,
+            "group_id": null
+        },
+        {
+            "access_level": 40,
+            "access_level_description": "Maintainers",
+            "user_id": null,
+            "group_id": null
+        }
+    ],
+    "unprotect_access_levels": [
+        {
+            "access_level": 40,
+            "access_level_description": "Maintainers",
+            "user_id": null,
+            "group_id": null
+        }
+    ],
+    "code_owner_approval_required": false
 }
 ```
 

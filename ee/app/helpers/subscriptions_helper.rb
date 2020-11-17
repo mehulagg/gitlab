@@ -11,7 +11,6 @@ module SubscriptionsHelper
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
-      onboarding_issues_experiment_enabled: experiment_enabled?(:onboarding_issues).to_s,
       group_data: group_data.to_json
     }
   end
@@ -28,7 +27,7 @@ module SubscriptionsHelper
   def new_user?
     return false unless request.referer.present?
 
-    URI.parse(request.referer).path.in?([users_sign_up_welcome_path, users_sign_up_update_registration_path])
+    URI.parse(request.referer).path == users_sign_up_welcome_path
   end
 
   def plan_data
@@ -39,7 +38,7 @@ module SubscriptionsHelper
   end
 
   def group_data
-    current_user.managed_free_namespaces.with_counts(archived: false).map do |namespace|
+    current_user.manageable_groups_eligible_for_subscription.with_counts(archived: false).map do |namespace|
       {
         id: namespace.id,
         name: namespace.name,

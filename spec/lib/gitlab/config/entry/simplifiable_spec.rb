@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Config::Entry::Simplifiable do
+RSpec.describe Gitlab::Config::Entry::Simplifiable do
   describe '.strategy' do
     let(:entry) do
       Class.new(described_class) do
@@ -38,7 +38,7 @@ describe Gitlab::Config::Entry::Simplifiable do
       end
 
       it 'attemps to load a first strategy' do
-        expect(first).to receive(:new).with('something', anything)
+        expect(first).to receive(:new).with('something')
 
         entry.new('something')
       end
@@ -53,7 +53,7 @@ describe Gitlab::Config::Entry::Simplifiable do
       end
 
       it 'attemps to load a second strategy' do
-        expect(second).to receive(:new).with('test', anything)
+        expect(second).to receive(:new).with('test')
 
         entry.new('test')
       end
@@ -68,7 +68,7 @@ describe Gitlab::Config::Entry::Simplifiable do
       end
 
       it 'instantiates an unknown strategy' do
-        expect(unknown).to receive(:new).with('test', anything)
+        expect(unknown).to receive(:new).with('test')
 
         entry.new('test')
       end

@@ -6,6 +6,8 @@ module API
       extend ActiveSupport::Concern
       extend Grape::API::Helpers
 
+      STATISTICS_SORT_PARAMS = %w[storage_size repository_size wiki_size].freeze
+
       params :optional_project_params_ce do
         optional :description, type: String, desc: 'The description of the project'
         optional :build_git_strategy, type: String, values: %w(fetch clone), desc: 'The Git strategy. Defaults to `fetch`'
@@ -13,6 +15,7 @@ module API
         optional :auto_cancel_pending_pipelines, type: String, values: %w(disabled enabled), desc: 'Auto-cancel pending pipelines'
         optional :build_coverage_regex, type: String, desc: 'Test coverage parsing'
         optional :ci_config_path, type: String, desc: 'The path to CI config file. Defaults to `.gitlab-ci.yml`'
+        optional :service_desk_enabled, type: Boolean, desc: 'Disable or enable the service desk'
 
         # TODO: remove in API v5, replaced by *_access_level
         optional :issues_enabled, type: Boolean, desc: 'Flag indication if the issue tracker is enabled'
@@ -46,7 +49,7 @@ module API
         optional :only_allow_merge_if_pipeline_succeeds, type: Boolean, desc: 'Only allow to merge if builds succeed'
         optional :allow_merge_on_skipped_pipeline, type: Boolean, desc: 'Allow to merge if pipeline is skipped'
         optional :only_allow_merge_if_all_discussions_are_resolved, type: Boolean, desc: 'Only allow to merge if all discussions are resolved'
-        optional :tag_list, type: Array[String], desc: 'The list of tags for a project'
+        optional :tag_list, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'The list of tags for a project'
         # TODO: remove rubocop disable - https://gitlab.com/gitlab-org/gitlab/issues/14960
         optional :avatar, type: File, desc: 'Avatar image for project' # rubocop:disable Scalability/FileUploads
         optional :printing_merge_request_link_enabled, type: Boolean, desc: 'Show link to create/view merge request when pushing from the command line'
@@ -58,6 +61,7 @@ module API
         optional :auto_devops_deploy_strategy, type: String, values: %w(continuous manual timed_incremental), desc: 'Auto Deploy strategy'
         optional :autoclose_referenced_issues, type: Boolean, desc: 'Flag indication if referenced issues auto-closing is enabled'
         optional :repository_storage, type: String, desc: 'Which storage shard the repository is on. Available only to admins'
+        optional :packages_enabled, type: Boolean, desc: 'Enable project packages feature'
       end
 
       params :optional_project_params_ee do
@@ -79,7 +83,16 @@ module API
       params :optional_filter_params_ee do
       end
 
+      params :optional_update_params_ce do
+        optional :ci_forward_deployment_enabled, type: Boolean, desc: 'Skip older deployment jobs that are still pending'
+      end
+
       params :optional_update_params_ee do
+      end
+
+      params :optional_update_params do
+        use :optional_update_params_ce
+        use :optional_update_params_ee
       end
 
       params :optional_container_expiration_policy_params do
@@ -104,6 +117,7 @@ module API
           :builds_access_level,
           :ci_config_path,
           :ci_default_git_depth,
+          :ci_forward_deployment_enabled,
           :container_registry_enabled,
           :container_expiration_policy_attributes,
           :default_branch,
@@ -134,6 +148,8 @@ module API
           :suggestion_commit_message,
           :repository_storage,
           :compliance_framework_setting,
+          :packages_enabled,
+          :service_desk_enabled,
 
           # TODO: remove in API v5, replaced by *_access_level
           :issues_enabled,

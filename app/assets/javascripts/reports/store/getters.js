@@ -11,6 +11,3 @@ export const summaryStatus = state => {
 
   return SUCCESS;
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

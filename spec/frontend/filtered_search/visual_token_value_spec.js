@@ -1,4 +1,5 @@
 import { escape } from 'lodash';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import VisualTokenValue from '~/filtered_search/visual_token_value';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import UsersCache from '~/lib/utils/users_cache';
@@ -106,7 +107,7 @@ describe('Filtered Search Visual Tokens', () => {
     it('escapes user name when creating token', done => {
       const dummyUser = {
         name: '<script>',
-        avatar_url: `${gl.TEST_HOST}/mypics/avatar.png`,
+        avatar_url: `${TEST_HOST}/mypics/avatar.png`,
       };
       const { subject, tokenValueContainer, tokenValueElement } = findElements(authorToken);
       const tokenValue = tokenValueElement.innerText;

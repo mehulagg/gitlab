@@ -26,7 +26,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: 'elastic-stack',
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
@@ -34,18 +34,16 @@ module Clusters
           repository: repository,
           files: files,
           preinstall: migrate_to_3_script,
-          postinstall: post_install_script,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          postinstall: post_install_script
         )
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        helm_command_module::DeleteCommand.new(
           name: 'elastic-stack',
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,
-          postdelete: post_delete_script,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          postdelete: post_delete_script
         )
       end
 
@@ -98,7 +96,7 @@ module Clusters
 
       def post_install_script
         [
-          "timeout -t60 sh /data/helm/elastic-stack/config/wait-for-elasticsearch.sh http://elastic-stack-elasticsearch-master:9200"
+          "timeout 60 sh /data/helm/elastic-stack/config/wait-for-elasticsearch.sh http://elastic-stack-elasticsearch-master:9200"
         ]
       end
 
@@ -118,11 +116,10 @@ module Clusters
         # Chart version 3.0.0 moves to our own chart at https://gitlab.com/gitlab-org/charts/elastic-stack
         # and is not compatible with pre-existing resources. We first remove them.
         [
-          Gitlab::Kubernetes::Helm::DeleteCommand.new(
+          helm_command_module::DeleteCommand.new(
             name: 'elastic-stack',
             rbac: cluster.platform_kubernetes_rbac?,
-            files: files,
-            local_tiller_enabled: cluster.local_tiller_enabled?
+            files: files
           ).delete_command,
           Gitlab::Kubernetes::KubectlCmd.delete("pvc", "--selector", "release=elastic-stack", "--namespace", Gitlab::Kubernetes::Helm::NAMESPACE)
         ]

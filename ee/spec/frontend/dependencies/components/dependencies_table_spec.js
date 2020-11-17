@@ -1,6 +1,6 @@
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { GlBadge, GlButton, GlLink, GlSkeletonLoading } from '@gitlab/ui';
+import { GlBadge, GlButton, GlLink, GlSkeletonLoader } from '@gitlab/ui';
 import stubChildren from 'helpers/stub_children';
 import DependenciesTable from 'ee/dependencies/components/dependencies_table.vue';
 import DependencyLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';
@@ -14,7 +14,7 @@ describe('DependenciesTable component', () => {
     wrapper = mount(DependenciesTable, {
       ...options,
       propsData: { ...propsData },
-      stubs: { ...stubChildren(DependenciesTable), GlTable: false },
+      stubs: { ...stubChildren(DependenciesTable), GlTable: false, DependencyLocation: false },
     });
   };
 
@@ -54,7 +54,7 @@ describe('DependenciesTable component', () => {
     });
 
     const isVulnerableCellText = normalizeWhitespace(isVulnerableCell.text());
-    if (dependency.vulnerabilities.length) {
+    if (dependency?.vulnerabilities?.length) {
       expect(isVulnerableCellText).toContain(`${dependency.vulnerabilities.length} vuln`);
     } else {
       expect(isVulnerableCellText).toBe('');
@@ -75,7 +75,7 @@ describe('DependenciesTable component', () => {
     });
 
     it('renders the loading skeleton', () => {
-      expect(wrapper.contains(GlSkeletonLoading)).toBe(true);
+      expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
     });
 
     it('does not render any dependencies', () => {
@@ -105,13 +105,17 @@ describe('DependenciesTable component', () => {
     });
   });
 
-  describe('given dependencies with no vulnerabilities', () => {
+  describe.each`
+    description                                                             | vulnerabilitiesPayload
+    ${'given dependencies with no vulnerabilities'}                         | ${{ vulnerabilities: [] }}
+    ${'given dependencies when user is not allowed to see vulnerabilities'} | ${{}}
+  `('$description', ({ vulnerabilitiesPayload }) => {
     let dependencies;
 
     beforeEach(() => {
       dependencies = [
-        makeDependency({ vulnerabilities: [] }),
-        makeDependency({ name: 'foo', vulnerabilities: [] }),
+        makeDependency({ ...vulnerabilitiesPayload }),
+        makeDependency({ name: 'foo', ...vulnerabilitiesPayload }),
       ];
 
       createComponent({

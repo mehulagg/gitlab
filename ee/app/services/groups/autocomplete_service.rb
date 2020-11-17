@@ -5,8 +5,12 @@ module Groups
     include LabelsAsHash
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def issues
-      IssuesFinder.new(current_user, group_id: group.id, include_subgroups: true, state: 'opened')
+    def issues(confidential_only: false, issue_types: nil)
+      finder_params = { group_id: group.id, include_subgroups: true, state: 'opened' }
+      finder_params[:confidential] = true if confidential_only.present?
+      finder_params[:issue_types] = issue_types if issue_types.present?
+
+      IssuesFinder.new(current_user, finder_params)
         .execute
         .preload(project: :namespace)
         .select(:iid, :title, :project_id)
@@ -22,10 +26,13 @@ module Groups
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    def epics
+    def epics(confidential_only: false)
+      finder_params = { group_id: group.id }
+      finder_params[:confidential] = true if confidential_only.present?
+
       # TODO: use include_descendant_groups: true optional parameter once frontend supports epics from external groups.
       # See https://gitlab.com/gitlab-org/gitlab/issues/6837
-      EpicsFinder.new(current_user, group_id: group.id)
+      EpicsFinder.new(current_user, finder_params)
         .execute
         .select(:iid, :title)
     end

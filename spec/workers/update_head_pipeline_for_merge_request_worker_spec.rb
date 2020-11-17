@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UpdateHeadPipelineForMergeRequestWorker do
+RSpec.describe UpdateHeadPipelineForMergeRequestWorker do
   describe '#perform' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project, :repository) }
@@ -29,7 +29,7 @@ describe UpdateHeadPipelineForMergeRequestWorker do
 
       context 'when merge request sha does not equal pipeline sha' do
         before do
-          merge_request.merge_request_diff.update(head_commit_sha: Digest::SHA1.hexdigest(SecureRandom.hex))
+          merge_request.merge_request_diff.update!(head_commit_sha: Digest::SHA1.hexdigest(SecureRandom.hex))
         end
 
         it 'does not update head pipeline' do

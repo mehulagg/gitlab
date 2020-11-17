@@ -15,7 +15,11 @@ RSpec.describe 'User reopens a merge requests', :js do
   end
 
   it 'reopens a merge request' do
+    find('.js-issuable-close-dropdown .dropdown-toggle').click
+
     click_link('Reopen merge request', match: :first)
+
+    wait_for_requests
 
     page.within('.status-box') do
       expect(page).to have_content('Open')

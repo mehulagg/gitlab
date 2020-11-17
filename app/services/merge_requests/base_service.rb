@@ -2,6 +2,7 @@
 
 module MergeRequests
   class BaseService < ::IssuableBaseService
+    extend ::Gitlab::Utils::Override
     include MergeRequests::AssignsMergeParams
 
     def create_note(merge_request, state = merge_request.state)
@@ -22,11 +23,18 @@ module MergeRequests
       merge_data = hook_data(merge_request, action, old_rev: old_rev, old_associations: old_associations)
       merge_request.project.execute_hooks(merge_data, :merge_request_hooks)
       merge_request.project.execute_services(merge_data, :merge_request_hooks)
+
+      enqueue_jira_connect_messages_for(merge_request)
     end
 
     def cleanup_environments(merge_request)
       Ci::StopEnvironmentsService.new(merge_request.source_project, current_user)
                                  .execute_for_merge_request(merge_request)
+    end
+
+    def cancel_review_app_jobs!(merge_request)
+      environments = merge_request.environments.in_review_folder.available
+      environments.each { |environment| environment.cancel_deployment_jobs! }
     end
 
     def source_project
@@ -46,6 +54,14 @@ module MergeRequests
 
     private
 
+    def enqueue_jira_connect_messages_for(merge_request)
+      return unless project.jira_subscription_exists?
+
+      if Atlassian::JiraIssueKeyExtractor.has_keys?(merge_request.title, merge_request.description)
+        JiraConnect::SyncMergeRequestWorker.perform_async(merge_request.id)
+      end
+    end
+
     def create(merge_request)
       self.params = assign_allowed_merge_params(merge_request, params)
 
@@ -56,6 +72,12 @@ module MergeRequests
       self.params = assign_allowed_merge_params(merge_request, params)
 
       super
+    end
+
+    override :handle_quick_actions
+    def handle_quick_actions(merge_request)
+      super
+      handle_wip_event(merge_request)
     end
 
     def handle_wip_event(merge_request)
@@ -75,6 +97,32 @@ module MergeRequests
       unless merge_request.can_allow_collaboration?(current_user)
         params.delete(:allow_collaboration)
       end
+
+      filter_reviewer(merge_request)
+    end
+
+    def filter_reviewer(merge_request)
+      return if params[:reviewer_ids].blank?
+
+      unless can_admin_issuable?(merge_request) && merge_request.allows_reviewers?
+        params.delete(:reviewer_ids)
+
+        return
+      end
+
+      unless merge_request.allows_multiple_reviewers?
+        params[:reviewer_ids] = params[:reviewer_ids].first(1)
+      end
+
+      reviewer_ids = params[:reviewer_ids].select { |reviewer_id| user_can_read?(merge_request, reviewer_id) }
+
+      if params[:reviewer_ids].map(&:to_s) == [IssuableFinder::Params::NONE]
+        params[:reviewer_ids] = []
+      elsif reviewer_ids.any?
+        params[:reviewer_ids] = reviewer_ids
+      else
+        params.delete(:reviewer_ids)
+      end
     end
 
     def merge_request_metrics_service(merge_request)
@@ -86,12 +134,13 @@ module MergeRequests
         merge_request, merge_request.project, current_user, old_assignees)
     end
 
-    def create_pipeline_for(merge_request, user)
-      MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
+    def create_reviewer_note(merge_request, old_reviewers)
+      SystemNoteService.change_issuable_reviewers(
+        merge_request, merge_request.project, current_user, old_reviewers)
     end
 
-    def can_use_merge_request_ref?(merge_request)
-      !merge_request.for_fork?
+    def create_pipeline_for(merge_request, user)
+      MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
     end
 
     def abort_auto_merge(merge_request, reason)

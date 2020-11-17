@@ -1,5 +1,5 @@
-import { REPORT_STATUS } from './constants';
 import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import { REPORT_STATUS } from './constants';
 
 export const isJobSetUp = state => state.reportInfo.status !== REPORT_STATUS.jobNotSetUp;
 export const isJobFailed = state =>

@@ -22,8 +22,11 @@ RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_n
     end
 
     it 'returns the correct page of results' do
-      expect(results.objects('snippet_titles', page: 1, per_page: 1)).to eq([snippet2])
-      expect(results.objects('snippet_titles', page: 2, per_page: 1)).to eq([snippet])
+      # `snippet` is more relevant than `snippet2` (hence first in order) due
+      # to having a shorter title that exactly matches the query and also due
+      # to having a description that matches the query.
+      expect(results.objects('snippet_titles', page: 1, per_page: 1)).to eq([snippet])
+      expect(results.objects('snippet_titles', page: 2, per_page: 1)).to eq([snippet2])
     end
 
     it 'returns the correct number of results for one page' do
@@ -34,6 +37,13 @@ RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_n
   describe '#snippet_titles_count' do
     it 'returns the amount of matched snippet titles' do
       expect(results.snippet_titles_count).to eq(1)
+    end
+  end
+
+  describe '#highlight_map' do
+    it 'returns the expected highlight map' do
+      expect(results).to receive(:snippet_titles).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }])
+      expect(results.highlight_map('snippet_titles')).to eq({ 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' })
     end
   end
 

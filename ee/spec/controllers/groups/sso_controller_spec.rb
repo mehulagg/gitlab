@@ -92,7 +92,7 @@ RSpec.describe Groups::SsoController do
     end
 
     context 'when group has moved' do
-      let(:redirect_route) { group.redirect_routes.create(path: 'old-path') }
+      let(:redirect_route) { group.redirect_routes.create!(path: 'old-path') }
 
       it 'redirects to new location' do
         get :saml, params: { group_id: redirect_route.path }
@@ -193,7 +193,7 @@ RSpec.describe Groups::SsoController do
 
       context 'and group managed accounts enforcing is disabled' do
         before do
-          saml_provider.update(enforced_group_managed_accounts: false)
+          saml_provider.update!(enforced_group_managed_accounts: false)
         end
 
         it 'renders 404' do

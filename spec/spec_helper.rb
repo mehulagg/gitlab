@@ -1,7 +1,18 @@
 # frozen_string_literal: true
 
+#  $" is $LOADED_FEATURES, but RuboCop didn't like it
+if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
+  warn 'Detected fast_spec_helper is loaded first than spec_helper.'
+  warn 'If running test files using both spec_helper and fast_spec_helper,'
+  warn 'make sure test file with spec_helper is loaded first.'
+  abort 'Aborting...'
+end
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
+
+require './spec/crystalball_env'
+CrystalballEnv.start!
 
 ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
@@ -15,6 +26,7 @@ require 'rspec/retry'
 require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
+require 'test_prof/factory_default'
 
 rspec_profiling_is_configured =
   ENV['RSPEC_PROFILING_POSTGRES_URL'].present? ||
@@ -44,12 +56,13 @@ require_relative('../ee/spec/spec_helper') if Gitlab.ee?
 
 # Load these first since they may be required by other helpers
 require Rails.root.join("spec/support/helpers/git_helpers.rb")
+require Rails.root.join("spec/support/helpers/stub_requests.rb")
 
 # Then the rest
-Dir[Rails.root.join("spec/support/helpers/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/shared_examples/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+Dir[Rails.root.join("spec/support/helpers/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
 quality_level = Quality::TestLevel.new
 
@@ -65,7 +78,11 @@ RSpec.configure do |config|
   config.display_try_failure_messages = true
 
   config.infer_spec_type_from_file_location!
-  config.full_backtrace = !!ENV['CI']
+
+  # Add :full_backtrace tag to an example if full_backtrace output is desired
+  config.before(:each, full_backtrace: true) do |example|
+    config.full_backtrace = true
+  end
 
   unless ENV['CI']
     # Re-run failures locally with `--only-failures`
@@ -99,19 +116,22 @@ RSpec.configure do |config|
     metadata[:enable_admin_mode] = true if location =~ %r{(ee)?/spec/controllers/admin/}
   end
 
+  config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_docs\.rb\z}) do |metadata|
+    metadata[:type] = :feature
+  end
+
   config.include LicenseHelpers
   config.include ActiveJob::TestHelper
   config.include ActiveSupport::Testing::TimeHelpers
   config.include CycleAnalyticsHelpers
-  config.include ExpectOffense
   config.include FactoryBot::Syntax::Methods
   config.include FixtureHelpers
   config.include NonExistingRecordsHelpers
   config.include GitlabRoutingHelper
-  config.include StubFeatureFlags
   config.include StubExperiments
   config.include StubGitlabCalls
   config.include StubGitlabData
+  config.include NextFoundInstanceOf
   config.include NextInstanceOf
   config.include TestEnv
   config.include Devise::Test::ControllerHelpers, type: :controller
@@ -119,6 +139,7 @@ RSpec.configure do |config|
   config.include LoginHelpers, type: :feature
   config.include SearchHelpers, type: :feature
   config.include WaitHelpers, type: :feature
+  config.include WaitForRequests, type: :feature
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
   config.include Gitlab::Routing, type: :routing
@@ -128,7 +149,6 @@ RSpec.configure do |config|
   config.include InputHelper, :js
   config.include SelectionHelper, :js
   config.include InspectRequests, :js
-  config.include WaitForRequests, :js
   config.include LiveDebugger, :js
   config.include MigrationsHelpers, :migration
   config.include RedisHelpers
@@ -140,6 +160,8 @@ RSpec.configure do |config|
   config.include RailsHelpers
   config.include SidekiqMiddleware
   config.include StubActionCableConnection, type: :channel
+
+  include StubFeatureFlags
 
   if ENV['CI'] || ENV['RETRIES']
     # This includes the first try, i.e. tests will be run 4 times before failing.
@@ -156,6 +178,13 @@ RSpec.configure do |config|
   config.before(:suite) do
     Timecop.safe_mode = true
     TestEnv.init
+
+    # Reload all feature flags definitions
+    Feature.register_definitions
+
+    # Enable all features by default for testing
+    # Reset any changes in after hook.
+    stub_all_feature_flags
   end
 
   config.after(:all) do
@@ -174,9 +203,6 @@ RSpec.configure do |config|
 
   config.before do |example|
     if example.metadata.fetch(:stub_feature_flags, true)
-      # Enable all features by default for testing
-      stub_all_feature_flags
-
       # The following can be removed when we remove the staged rollout strategy
       # and we can just enable it using instance wide settings
       # (ie. ApplicationSetting#auto_devops_enabled)
@@ -188,6 +214,18 @@ RSpec.configure do |config|
       # See https://gitlab.com/groups/gitlab-org/-/epics/1863
       stub_feature_flags(vue_issuable_sidebar: false)
       stub_feature_flags(vue_issuable_epic_sidebar: false)
+
+      # The following can be removed once we are confident the
+      # unified diff lines works as expected
+      stub_feature_flags(unified_diff_lines: false)
+
+      # Merge request widget GraphQL requests are disabled in the tests
+      # for now whilst we migrate as much as we can over the GraphQL
+      stub_feature_flags(merge_request_widget_graphql: false)
+
+      # Using FortiAuthenticator as OTP provider is disabled by default in
+      # tests, until we introduce it in user settings
+      stub_feature_flags(forti_authenticator: false)
 
       enable_rugged = example.metadata[:enable_rugged].present?
 
@@ -201,16 +239,24 @@ RSpec.configure do |config|
       stub_feature_flags(file_identifier_hash: false)
 
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
+    else
+      unstub_all_feature_flags
     end
 
     # Enable Marginalia feature for all specs in the test suite.
-    allow(Gitlab::Marginalia).to receive(:cached_feature_enabled?).and_return(true)
+    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:
     #
     # expect(Gitlab::Git::KeepAround).to receive(:execute).and_call_original
     allow(Gitlab::Git::KeepAround).to receive(:execute)
+
+    # Stub these calls due to being expensive operations
+    # It can be reenabled for specific tests via:
+    #
+    # expect(Gitlab::JobWaiter).to receive(:wait).and_call_original
+    allow_any_instance_of(Gitlab::JobWaiter).to receive(:wait)
 
     Gitlab::ProcessMemoryCache.cache_backend.clear
 
@@ -238,12 +284,10 @@ RSpec.configure do |config|
       ./ee/spec/lib
       ./ee/spec/requests/admin
       ./ee/spec/serializers
-      ./ee/spec/services
       ./ee/spec/support/protected_tags
       ./ee/spec/support/shared_examples/features
       ./ee/spec/support/shared_examples/finders/geo
       ./ee/spec/support/shared_examples/graphql/geo
-      ./ee/spec/support/shared_examples/services
       ./spec/features
       ./spec/finders
       ./spec/frontend
@@ -251,10 +295,10 @@ RSpec.configure do |config|
       ./spec/lib
       ./spec/requests
       ./spec/serializers
-      ./spec/services
       ./spec/support/protected_tags
       ./spec/support/shared_examples/features
       ./spec/support/shared_examples/requests
+      ./spec/support/shared_examples/lib/gitlab
       ./spec/views
       ./spec/workers
     )
@@ -312,6 +356,9 @@ RSpec.configure do |config|
   config.after do
     Fog.unmock! if Fog.mock?
     Gitlab::CurrentSettings.clear_in_memory_application_settings!
+
+    # Reset all feature flag stubs to default for testing
+    stub_all_feature_flags
   end
 
   config.before(:example, :mailer) do
@@ -319,7 +366,7 @@ RSpec.configure do |config|
   end
 
   config.before(:example, :prometheus) do
-    matching_files = File.join(::Prometheus::Client.configuration.multiprocess_files_dir, "*.db")
+    matching_files = File.join(::Prometheus::Client.configuration.multiprocess_files_dir, "**/*.db")
     Dir[matching_files].map { |filename| File.delete(filename) if File.file?(filename) }
 
     Gitlab::Metrics.reset_registry!
@@ -332,6 +379,8 @@ RSpec.configure do |config|
       Ability.allowed?(*args)
     end
   end
+
+  config.disable_monkey_patching!
 end
 
 ActiveRecord::Migration.maintain_test_schema!
@@ -348,3 +397,6 @@ Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
 
 # Disable timestamp checks for invisible_captcha
 InvisibleCaptcha.timestamp_enabled = false
+
+# Initialize FactoryDefault to use create_default helper
+TestProf::FactoryDefault.init

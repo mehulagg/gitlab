@@ -38,7 +38,11 @@ module Elastic
       end
 
       def clear_tracking!
-        with_redis { |redis| redis.del(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY) }
+        with_redis do |redis|
+          Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
+            redis.unlink(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
+          end
+        end
       end
 
       def logger

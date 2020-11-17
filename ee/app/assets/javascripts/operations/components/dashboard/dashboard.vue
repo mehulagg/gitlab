@@ -118,6 +118,7 @@ export default {
       :ok-title="s__('OperationsDashboard|Add projects')"
       :ok-disabled="okDisabled"
       ok-variant="success"
+      data-qa-selector="add_projects_modal"
       @cancel="onCancel"
       @ok="onOk"
     >
@@ -146,16 +147,17 @@ export default {
         variant="success"
         category="primary"
         data-testid="add-projects-button"
+        data-qa-selector="add_projects_button"
       >
         {{ s__('OperationsDashboard|Add projects') }}
       </gl-button>
     </div>
-    <div class="prepend-top-default">
+    <div class="gl-mt-3">
       <vue-draggable
         v-if="projects.length"
         v-model="projects"
         group="dashboard-projects"
-        class="row prepend-top-default dashboard-cards"
+        class="row gl-mt-3 dashboard-cards"
       >
         <div v-for="project in projects" :key="project.id" class="col-12 col-md-6 col-xl-4 px-2">
           <dashboard-project :project="project" />
@@ -185,6 +187,7 @@ export default {
             v-gl-modal="$options.modalId"
             variant="success"
             data-testid="add-projects-button"
+            data-qa-selector="add_projects_button"
           >
             {{ s__('OperationsDashboard|Add projects') }}
           </gl-button>

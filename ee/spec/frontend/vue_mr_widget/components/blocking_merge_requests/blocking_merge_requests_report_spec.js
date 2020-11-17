@@ -48,7 +48,7 @@ describe('BlockingMergeRequestsReport', () => {
     props.mr.blockingMergeRequests.visible_merge_requests = {};
     createComponent(props);
 
-    expect(wrapper.isEmpty()).toBe(true);
+    expect(wrapper.html()).toBe('');
   });
 
   it('passes merged MRs as resolved issues and anything else as unresolved ', () => {
@@ -103,7 +103,7 @@ describe('BlockingMergeRequestsReport', () => {
       createComponent();
 
       expect(wrapper.vm.blockedByText).toEqual(
-        'Depends on <strong>1 closed</strong> merge request.',
+        'Depends on %{strongStart}1 closed%{strongEnd} merge request.',
       );
     });
   });

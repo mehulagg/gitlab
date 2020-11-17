@@ -11,12 +11,12 @@ function createCommitData(data = {}) {
     title: 'Commit title',
     titleHtml: 'Commit title',
     message: 'Commit message',
-    webUrl: 'https://test.com/commit/123',
+    webPath: '/commit/123',
     authoredDate: '2019-01-01',
     author: {
       name: 'Test',
       avatarUrl: 'https://test.com',
-      webUrl: 'https://test.com/test',
+      webPath: '/test',
     },
     pipeline: {
       detailedStatus: {
@@ -78,7 +78,7 @@ describe('Repository last commit component', () => {
     factory();
 
     return vm.vm.$nextTick(() => {
-      expect(vm.find('.label-monospace').text()).toEqual('12345678');
+      expect(vm.find('[data-testid="last-commit-id-label"]').text()).toEqual('12345678');
     });
   });
 
@@ -108,7 +108,7 @@ describe('Repository last commit component', () => {
   });
 
   it('does not render description expander when description is null', () => {
-    factory(createCommitData({ description: null }));
+    factory(createCommitData({ descriptionHtml: null }));
 
     return vm.vm.$nextTick(() => {
       expect(vm.find('.text-expander').exists()).toBe(false);
@@ -117,7 +117,7 @@ describe('Repository last commit component', () => {
   });
 
   it('expands commit description when clicking expander', () => {
-    factory(createCommitData({ description: 'Test description' }));
+    factory(createCommitData({ descriptionHtml: 'Test description' }));
 
     return vm.vm
       .$nextTick()

@@ -18,10 +18,11 @@ FactoryBot.define do
     trait(:destroyed) { action { :destroyed } }
     trait(:expired)   { action { :expired } }
     trait(:archived)  { action { :archived } }
+    trait(:approved)  { action { :approved } }
 
     factory :closed_issue_event do
       action { :closed }
-      target factory: :closed_issue
+      target { association(:closed_issue, project: project) }
     end
 
     factory :wiki_page_event do
@@ -54,6 +55,16 @@ FactoryBot.define do
     factory :design_event, traits: [:has_design] do
       action { :created }
       target { design }
+    end
+
+    factory :project_created_event do
+      project factory: :project
+      action { :created }
+    end
+
+    factory :project_imported_event do
+      project factory: [:project, :with_import_url]
+      action { :created }
     end
   end
 

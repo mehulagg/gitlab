@@ -2,7 +2,12 @@
 
 require 'spec_helper'
 
-describe Milestone do
+RSpec.describe Milestone do
+  let(:user) { create(:user) }
+  let(:issue) { create(:issue, project: project) }
+  let(:milestone) { create(:milestone, project: project) }
+  let(:project) { create(:project, :public) }
+
   it_behaves_like 'a timebox', :milestone
 
   describe 'MilestoneStruct#serializable_hash' do
@@ -46,11 +51,6 @@ describe Milestone do
     it { is_expected.to have_many(:releases) }
     it { is_expected.to have_many(:milestone_releases) }
   end
-
-  let(:project) { create(:project, :public) }
-  let(:milestone) { create(:milestone, project: project) }
-  let(:issue) { create(:issue, project: project) }
-  let(:user) { create(:user) }
 
   describe '.predefined_id?' do
     it 'returns true for a predefined Milestone ID' do

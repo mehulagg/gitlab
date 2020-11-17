@@ -192,13 +192,24 @@ RSpec.describe ApprovalRules::UpdateService do
     end
 
     describe 'audit events' do
-      subject(:operation) do
-        described_class.new(
-          approval_rule,
-          user,
-          name: 'developers',
-          approvals_required: 1
-        ).execute
+      let_it_be(:approver) { create(:user, name: 'Batman') }
+      let_it_be(:group) { create(:group, name: 'Justice League') }
+      let_it_be(:new_approver) { create(:user, name: 'Spiderman') }
+      let_it_be(:new_group) { create(:group, name: 'Avengers') }
+
+      let(:approval_rule) do
+        create(:approval_project_rule,
+          name: 'Gotham',
+          project: target,
+          approvals_required: 2,
+          users: [approver],
+          groups: [group]
+        )
+      end
+
+      before do
+        project.add_reporter approver
+        project.add_reporter new_approver
       end
 
       context 'when licensed' do
@@ -206,16 +217,50 @@ RSpec.describe ApprovalRules::UpdateService do
           stub_licensed_features(audit_events: true)
         end
 
-        context 'when rule update operation succeeds' do
+        context 'when rule update operation succeeds', :request_store do
           it 'logs an audit event' do
-            expect { operation }.to change { AuditEvent.count }.by(1)
+            expect do
+              described_class.new(approval_rule, user, approvals_required: 1).execute
+            end.to change { AuditEvent.count }.by(1)
           end
 
-          it 'logs the audit event info' do
-            operation
+          it 'audits the number of required approvals change' do
+            described_class.new(approval_rule, user, approvals_required: 1).execute
 
             expect(AuditEvent.last).to have_attributes(
               details: hash_including(change: 'number of required approvals', from: 2, to: 1)
+            )
+          end
+
+          it 'audits the group addition to approval group' do
+            described_class.new(approval_rule, user, group_ids: [group.id, new_group.id]).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Added Group Avengers to approval group on Gotham rule"
+            )
+          end
+
+          it 'audits the group removal from approval group' do
+            described_class.new(approval_rule, user, group_ids: []).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Removed Group Justice League from approval group on Gotham rule"
+            )
+          end
+
+          it 'audits the user addition to approval group' do
+            described_class.new(approval_rule, user, user_ids: [approver.id, new_approver.id]).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Added User Spiderman to approval group on Gotham rule"
+            )
+          end
+
+          it 'audits the user removal from approval group' do
+            described_class.new(approval_rule, user, user_ids: []).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Removed User Batman from approval group on Gotham rule"
             )
           end
         end
@@ -226,7 +271,9 @@ RSpec.describe ApprovalRules::UpdateService do
           end
 
           it 'does not log any audit event' do
-            expect { operation }.not_to change { AuditEvent.count }
+            expect do
+              described_class.new(approval_rule, user, approvals_required: 1).execute
+            end.not_to change { AuditEvent.count }
           end
         end
       end
@@ -241,7 +288,9 @@ RSpec.describe ApprovalRules::UpdateService do
         end
 
         it 'does not log any audit event' do
-          expect { operation }.not_to change { AuditEvent.count }
+          expect do
+            described_class.new(approval_rule, user, approvals_required: 1).execute
+          end.not_to change { AuditEvent.count }
         end
       end
     end

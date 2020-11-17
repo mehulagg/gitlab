@@ -1,8 +1,7 @@
 <script>
 import { head, tail } from 'lodash';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 import actionBtn from './action_btn.vue';
@@ -10,10 +9,10 @@ import actionBtn from './action_btn.vue';
 export default {
   components: {
     actionBtn,
-    icon,
+    GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [timeagoMixin],
   props: {
@@ -125,16 +124,16 @@ export default {
       <div class="table-mobile-content deploy-project-list">
         <template v-if="projects.length > 0">
           <a
-            v-tooltip
+            v-gl-tooltip
             :title="projectTooltipTitle(firstProject)"
             class="label deploy-project-label"
           >
             <span> {{ firstProject.project.full_name }} </span>
-            <icon :name="firstProject.can_push ? 'lock-open' : 'lock'" />
+            <gl-icon :name="firstProject.can_push ? 'lock-open' : 'lock'" />
           </a>
           <a
             v-if="isExpandable"
-            v-tooltip
+            v-gl-tooltip
             :title="restProjectsTooltip"
             class="label deploy-project-label"
             @click="toggleExpanded"
@@ -145,13 +144,13 @@ export default {
             v-for="deployKeysProject in restProjects"
             v-else-if="isExpanded"
             :key="deployKeysProject.project.full_path"
-            v-tooltip
+            v-gl-tooltip
             :href="deployKeysProject.project.full_path"
             :title="projectTooltipTitle(deployKeysProject)"
             class="label deploy-project-label"
           >
             <span> {{ deployKeysProject.project.full_name }} </span>
-            <icon :name="deployKeysProject.can_push ? 'lock-open' : 'lock'" />
+            <gl-icon :name="deployKeysProject.can_push ? 'lock-open' : 'lock'" />
           </a>
         </template>
         <span v-else class="text-secondary">{{ __('None') }}</span>
@@ -160,8 +159,8 @@ export default {
     <div class="table-section section-15 text-right">
       <div role="rowheader" class="table-mobile-header">{{ __('Created') }}</div>
       <div class="table-mobile-content text-secondary key-created-at">
-        <span v-tooltip :title="tooltipTitle(deployKey.created_at)">
-          <icon name="calendar" /> <span>{{ timeFormatted(deployKey.created_at) }}</span>
+        <span v-gl-tooltip :title="tooltipTitle(deployKey.created_at)">
+          <gl-icon name="calendar" /> <span>{{ timeFormatted(deployKey.created_at) }}</span>
         </span>
       </div>
     </div>
@@ -172,35 +171,35 @@ export default {
         </action-btn>
         <a
           v-if="deployKey.can_edit"
-          v-tooltip
+          v-gl-tooltip
           :href="editDeployKeyPath"
           :title="__('Edit')"
           class="btn btn-default text-secondary"
           data-container="body"
         >
-          <icon name="pencil" />
+          <gl-icon name="pencil" />
         </a>
         <action-btn
           v-if="isRemovable"
-          v-tooltip
+          v-gl-tooltip
           :deploy-key="deployKey"
           :title="__('Remove')"
           btn-css-class="btn-danger"
           type="remove"
           data-container="body"
         >
-          <icon name="remove" />
+          <gl-icon name="remove" />
         </action-btn>
         <action-btn
           v-else-if="isEnabled"
-          v-tooltip
+          v-gl-tooltip
           :deploy-key="deployKey"
           :title="__('Disable')"
           btn-css-class="btn-warning"
           type="disable"
           data-container="body"
         >
-          <icon name="cancel" />
+          <gl-icon name="cancel" />
         </action-btn>
       </div>
     </div>

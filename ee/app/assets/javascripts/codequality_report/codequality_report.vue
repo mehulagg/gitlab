@@ -74,7 +74,7 @@ export default {
     <pagination-links
       :change="setPage"
       :page-info="pageInfo"
-      class="d-flex justify-content-center prepend-top-default"
+      class="d-flex justify-content-center gl-mt-3"
     />
   </div>
 </template>

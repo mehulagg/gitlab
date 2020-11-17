@@ -1,0 +1,8 @@
+.compliance-dashboard {
+  // Remove this restriction when working on https://gitlab.com/gitlab-org/gitlab/-/issues/218826
+  min-width: 550px;
+
+  .dashboard-grid {
+    grid-template-columns: 1fr auto auto 35%;
+  }
+}

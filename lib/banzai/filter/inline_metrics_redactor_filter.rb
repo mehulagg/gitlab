@@ -77,6 +77,14 @@ module Banzai
           Route.new(
             ::Gitlab::Metrics::Dashboard::Url.grafana_regex,
             :read_project
+          ),
+          Route.new(
+            ::Gitlab::Metrics::Dashboard::Url.clusters_regex,
+            :read_cluster
+          ),
+          Route.new(
+            ::Gitlab::Metrics::Dashboard::Url.alert_regex,
+            :read_prometheus_alerts
           )
         ]
       end
@@ -143,5 +151,3 @@ module Banzai
     end
   end
 end
-
-Banzai::Filter::InlineMetricsRedactorFilter.prepend_if_ee('EE::Banzai::Filter::InlineMetricsRedactorFilter')

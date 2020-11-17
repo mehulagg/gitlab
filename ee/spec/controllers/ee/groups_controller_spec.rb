@@ -11,6 +11,14 @@ RSpec.describe GroupsController do
   let_it_be(:subgroup) { create(:group, :private, parent: group) }
   let_it_be(:subgroup2) { create(:group, :private, parent: subgroup) }
 
+  describe 'GET #show' do
+    let(:namespace) { group }
+
+    subject { get :show, params: { id: group.to_param } }
+
+    it_behaves_like 'namespace storage limit alert'
+  end
+
   describe 'GET #activity' do
     render_views
 
@@ -86,7 +94,7 @@ RSpec.describe GroupsController do
         sign_in(user)
       end
 
-      context 'adjourned deletion feature is available' do
+      context 'delayed deletion feature is available' do
         before do
           stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
         end
@@ -122,7 +130,7 @@ RSpec.describe GroupsController do
         end
       end
 
-      context 'adjourned deletion feature is not available' do
+      context 'delayed deletion feature is not available' do
         before do
           stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
         end
@@ -160,13 +168,13 @@ RSpec.describe GroupsController do
         sign_in(user)
       end
 
-      context 'adjourned deletion feature is available' do
+      context 'delayed deletion feature is available' do
         before do
           stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
         end
 
         context 'success' do
-          it 'marks the group for adjourned deletion' do
+          it 'marks the group for delayed deletion' do
             expect { subject }.to change { group.reload.marked_for_deletion? }.from(false).to(true)
           end
 
@@ -176,7 +184,7 @@ RSpec.describe GroupsController do
             end
           end
 
-          it 'redirects to group path with notice about adjourned deletion' do
+          it 'redirects to group path with notice about delayed deletion' do
             subject
 
             expect(response).to redirect_to(group_path(group))
@@ -202,7 +210,7 @@ RSpec.describe GroupsController do
         end
       end
 
-      context 'adjourned deletion feature is not available' do
+      context 'delayed deletion feature is not available' do
         before do
           stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
         end
@@ -489,6 +497,82 @@ RSpec.describe GroupsController do
           end
 
           it_behaves_like 'updates the attribute'
+        end
+      end
+    end
+
+    context 'when delayed_project_removal param is specified' do
+      let_it_be(:params) { { delayed_project_removal: true } }
+      let_it_be(:user) { create(:user) }
+
+      subject do
+        put :update, params: { id: group.to_param, group: params }
+      end
+
+      before do
+        group.add_owner(user)
+        sign_in(user)
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: available)
+      end
+
+      context 'when feature is available' do
+        let(:available) { true }
+
+        it 'allows storing of setting' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:found)
+          expect(group.reload.delayed_project_removal).to eq(params[:delayed_project_removal])
+        end
+      end
+
+      context 'when feature is not available' do
+        let(:available) { false }
+
+        it 'does not allow storing of setting' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:found)
+          expect(group.reload.delayed_project_removal).not_to eq(params[:delayed_project_removal])
+        end
+      end
+    end
+
+    context 'when `prevent_forking_outside_group` is specified' do
+      using RSpec::Parameterized::TableSyntax
+
+      subject { put :update, params: params }
+
+      shared_examples_for 'updates the attribute if needed' do
+        it 'updates the attribute' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:found)
+          expect(group.reload.prevent_forking_outside_group?).to eq(result)
+        end
+      end
+
+      context 'authenticated as group owner' do
+        where(:feature_enabled, :prevent_forking_outside_group, :result) do
+          false | false | nil
+          false | true  | nil
+          true  | false | false
+          true  | true  | true
+        end
+
+        with_them do
+          let(:params) do
+            { id: group.to_param, group: { prevent_forking_outside_group: prevent_forking_outside_group } }
+          end
+
+          before do
+            group.add_owner(user)
+            sign_in(user)
+
+            stub_licensed_features(group_forking_protection: feature_enabled)
+          end
+
+          it_behaves_like 'updates the attribute if needed'
         end
       end
     end

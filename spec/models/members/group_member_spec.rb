@@ -2,52 +2,21 @@
 
 require 'spec_helper'
 
-describe GroupMember do
+RSpec.describe GroupMember do
   context 'scopes' do
-    shared_examples '.count_users_by_group_id' do
-      it 'counts users by group ID' do
-        user_1 = create(:user)
-        user_2 = create(:user)
-        group_1 = create(:group)
-        group_2 = create(:group)
+    let_it_be(:user_1) { create(:user) }
+    let_it_be(:user_2) { create(:user) }
 
-        group_1.add_owner(user_1)
-        group_1.add_owner(user_2)
-        group_2.add_owner(user_1)
+    it 'counts users by group ID' do
+      group_1 = create(:group)
+      group_2 = create(:group)
 
-        expect(described_class.count_users_by_group_id).to eq(group_1.id => 2,
-                                                              group_2.id => 1)
-      end
-    end
+      group_1.add_owner(user_1)
+      group_1.add_owner(user_2)
+      group_2.add_owner(user_1)
 
-    describe '.count_users_by_group_id with optimized_count_users_by_group_id feature flag on' do
-      before do
-        stub_feature_flags(optimized_count_users_by_group_id: true)
-      end
-
-      it_behaves_like '.count_users_by_group_id'
-
-      it 'does not JOIN users' do
-        scope = described_class.all
-        expect(scope).not_to receive(:joins).with(:user)
-
-        scope.count_users_by_group_id
-      end
-    end
-
-    describe '.count_users_by_group_id with optimized_count_users_by_group_id feature flag off' do
-      before do
-        stub_feature_flags(optimized_count_users_by_group_id: false)
-      end
-
-      it_behaves_like '.count_users_by_group_id'
-
-      it 'does JOIN users' do
-        scope = described_class.all
-        expect(scope).to receive(:joins).with(:user).and_call_original
-
-        scope.count_users_by_group_id
-      end
+      expect(described_class.count_users_by_group_id).to eq(group_1.id => 2,
+                                                            group_2.id => 1)
     end
 
     describe '.of_ldap_type' do
@@ -55,6 +24,15 @@ describe GroupMember do
         group_member = create(:group_member, :ldap)
 
         expect(described_class.of_ldap_type).to eq([group_member])
+      end
+    end
+
+    describe '.with_user' do
+      it 'returns requested user' do
+        group_member = create(:group_member, user: user_2)
+        create(:group_member, user: user_1)
+
+        expect(described_class.with_user(user_2)).to eq([group_member])
       end
     end
   end

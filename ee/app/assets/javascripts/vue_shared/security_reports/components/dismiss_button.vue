@@ -1,15 +1,11 @@
 <script>
-import { GlDeprecatedButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 export default {
   name: 'DismissButton',
   components: {
-    GlDeprecatedButton,
-    Icon,
-    LoadingButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -51,25 +47,28 @@ export default {
 
 <template>
   <div class="btn-group" role="group">
-    <loading-button
+    <gl-button
       :loading="isDismissing"
       :disabled="isDismissing || disabled"
-      :label="buttonText"
-      container-class="js-dismiss-btn btn btn-close"
+      variant="warning"
+      category="secondary"
+      class="js-dismiss-btn"
       @click="handleDismissClick"
-    />
-    <gl-deprecated-button
+    >
+      {{ __(buttonText) }}
+    </gl-button>
+    <gl-button
       v-if="!isDismissed"
-      v-gl-tooltip.hover
-      v-gl-tooltip.focus
+      v-gl-tooltip
       :disabled="disabled"
-      :title="s__('vulnerability|Add comment & dismiss')"
-      variant="close"
+      :title="s__('vulnerability|Add comment and dismiss')"
+      variant="warning"
+      category="secondary"
       data-qa-selector="dismiss_with_comment_button"
       class="js-dismiss-with-comment "
+      :aria-label="s__('vulnerability|Add comment and dismiss')"
+      icon="comment"
       @click="$emit('openDismissalCommentBox')"
-    >
-      <icon name="comment" />
-    </gl-deprecated-button>
+    />
   </div>
 </template>

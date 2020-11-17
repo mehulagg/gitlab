@@ -57,12 +57,14 @@ module NotesHelper
   def add_diff_note_button(line_code, position, line_type)
     return if @diff_notes_disabled
 
-    button_tag '',
-      class: 'add-diff-note js-add-diff-note-button',
-      type: 'submit', name: 'button',
-      data: diff_view_line_data(line_code, position, line_type),
-      title: _('Add a comment to this line') do
-      sprite_icon('comment', size: 12)
+    content_tag(:span, class: 'add-diff-note tooltip-wrapper') do
+      button_tag '',
+        class: 'note-button add-diff-note js-add-diff-note-button',
+        type: 'submit', name: 'button',
+        data: diff_view_line_data(line_code, position, line_type),
+        title: _('Add a comment to this line') do
+          sprite_icon('comment', size: 12)
+        end
     end
   end
 
@@ -81,6 +83,10 @@ module NotesHelper
 
   def note_max_access_for_user(note)
     note.project.team.max_member_access(note.author_id)
+  end
+
+  def note_human_max_access(note)
+    note.project.team.human_max_access(note.author_id)
   end
 
   def discussion_path(discussion)
@@ -126,7 +132,7 @@ module NotesHelper
     if @snippet.is_a?(PersonalSnippet)
       [@note]
     else
-      [@project.namespace.becomes(Namespace), @project, @note]
+      [@project, @note]
     end
   end
 
@@ -179,7 +185,7 @@ module NotesHelper
       reopenPath: reopen_issuable_path(issuable),
       notesPath: notes_url,
       prerenderedNotesCount: issuable.capped_notes_count(MAX_PRERENDERED_NOTES),
-      lastFetchedAt: Time.now.to_i
+      lastFetchedAt: Time.now.to_i * ::Gitlab::UpdatedNotesPaginator::MICROSECOND
     }
 
     if issuable.is_a?(MergeRequest)

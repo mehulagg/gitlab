@@ -47,3 +47,5 @@ export const ACTION_TYPES = {
 export const PREV = 'prev';
 
 export const NEXT = 'next';
+
+export const DEFAULT_PAGE_SIZE = 20;

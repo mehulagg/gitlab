@@ -1,8 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlLink, GlDeprecatedButton, GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import { GlLink, GlButton } from '@gitlab/ui';
 import RequirementItem from 'ee/requirements/components/requirement_item.vue';
-import RequirementForm from 'ee/requirements/components/requirement_form.vue';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';
 
 import {
@@ -33,76 +32,7 @@ describe('RequirementItem', () => {
     wrapperArchived.destroy();
   });
 
-  describe('computed', () => {
-    describe('reference', () => {
-      it('returns string containing `requirement.iid` prefixed with "REQ-"', () => {
-        expect(wrapper.vm.reference).toBe(`REQ-${requirement1.iid}`);
-      });
-    });
-
-    describe('canUpdate', () => {
-      it('returns value of `requirement.userPermissions.updateRequirement`', () => {
-        expect(wrapper.vm.canUpdate).toBe(requirement1.userPermissions.updateRequirement);
-      });
-    });
-
-    describe('canArchive', () => {
-      it('returns value of `requirement.userPermissions.updateRequirement`', () => {
-        expect(wrapper.vm.canArchive).toBe(requirement1.userPermissions.adminRequirement);
-      });
-    });
-
-    describe('createdAt', () => {
-      it('returns timeago-style string representing `requirement.createdAt`', () => {
-        // We don't have to be accurate here as it is already covered in rspecs
-        expect(wrapper.vm.createdAt).toContain('created');
-        expect(wrapper.vm.createdAt).toContain('ago');
-      });
-    });
-
-    describe('updatedAt', () => {
-      it('returns timeago-style string representing `requirement.updatedAt`', () => {
-        // We don't have to be accurate here as it is already covered in rspecs
-        expect(wrapper.vm.updatedAt).toContain('updated');
-        expect(wrapper.vm.updatedAt).toContain('ago');
-      });
-    });
-
-    describe('isArchived', () => {
-      it('returns `true` when current requirement is archived', () => {
-        expect(wrapperArchived.vm.isArchived).toBe(true);
-      });
-
-      it('returns `false` when current requirement is archived', () => {
-        expect(wrapper.vm.isArchived).toBe(false);
-      });
-    });
-
-    describe('author', () => {
-      it('returns value of `requirement.author`', () => {
-        expect(wrapper.vm.author).toBe(requirement1.author);
-      });
-    });
-
-    describe('testReport', () => {
-      it('returns testReport object from reports array within `requirement`', () => {
-        expect(wrapper.vm.testReport).toBe(mockTestReport);
-      });
-    });
-  });
-
   describe('methods', () => {
-    describe('handleUpdateRequirementSave', () => {
-      it('emits `updateSave` event on component with params passed as it is', () => {
-        wrapper.vm.handleUpdateRequirementSave('foo');
-
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.emitted('updateSave')).toBeTruthy();
-          expect(wrapper.emitted('updateSave')[0]).toEqual(['foo']);
-        });
-      });
-    });
-
     describe('handleArchiveClick', () => {
       it('emits `archiveClick` event on component with object containing `requirement.iid` & `state` as "ARCHIVED" as param', () => {
         wrapper.vm.handleArchiveClick();
@@ -151,14 +81,11 @@ describe('RequirementItem', () => {
       });
     });
 
-    it('renders requirement-form component', () => {
-      wrapper.setProps({
-        showUpdateForm: true,
-      });
+    it('emits `show-click` event with requirement as param', () => {
+      wrapper.trigger('click');
 
-      return wrapper.vm.$nextTick(() => {
-        expect(wrapper.find(RequirementForm).exists()).toBe(true);
-      });
+      expect(wrapper.emitted('show-click')).toBeTruthy();
+      expect(wrapper.emitted('show-click')[0]).toEqual([requirement1]);
     });
 
     it('renders element containing requirement reference', () => {
@@ -194,7 +121,7 @@ describe('RequirementItem', () => {
 
     it('renders requirement-status-badge component', () => {
       const statusBadgeElSm = wrapper.find('.issuable-main-info').find(RequirementStatusBadge);
-      const statusBadgeElMd = wrapper.find('.issuable-meta').find(RequirementStatusBadge);
+      const statusBadgeElMd = wrapper.find('.controls').find(RequirementStatusBadge);
 
       expect(statusBadgeElSm.exists()).toBe(true);
       expect(statusBadgeElMd.exists()).toBe(true);
@@ -204,12 +131,15 @@ describe('RequirementItem', () => {
     });
 
     it('renders element containing requirement `Edit` button when `requirement.userPermissions.updateRequirement` is true', () => {
-      const editButtonEl = wrapper.find('.controls .requirement-edit').find(GlDeprecatedButton);
+      const editButtonEl = wrapper.find('.controls .requirement-edit').find(GlButton);
 
       expect(editButtonEl.exists()).toBe(true);
       expect(editButtonEl.attributes('title')).toBe('Edit');
-      expect(editButtonEl.find(GlIcon).exists()).toBe(true);
-      expect(editButtonEl.find(GlIcon).props('name')).toBe('pencil');
+
+      editButtonEl.vm.$emit('click');
+
+      expect(wrapper.emitted('edit-click')).toBeTruthy();
+      expect(wrapper.emitted('edit-click')[0]).toEqual([wrapper.vm.requirement]);
     });
 
     it('does not render element containing requirement `Edit` button when `requirement.userPermissions.updateRequirement` is false', () => {
@@ -227,14 +157,10 @@ describe('RequirementItem', () => {
     });
 
     it('renders element containing requirement `Archive` button when `requirement.userPermissions.adminRequirement` is true', () => {
-      const archiveButtonEl = wrapper
-        .find('.controls .requirement-archive')
-        .find(GlDeprecatedButton);
+      const archiveButtonEl = wrapper.find('.controls .requirement-archive').find(GlButton);
 
       expect(archiveButtonEl.exists()).toBe(true);
       expect(archiveButtonEl.attributes('title')).toBe('Archive');
-      expect(archiveButtonEl.find(GlIcon).exists()).toBe(true);
-      expect(archiveButtonEl.find(GlIcon).props('name')).toBe('archive');
     });
 
     it('does not render element containing requirement `Archive` button when `requirement.userPermissions.adminRequirement` is false', () => {
@@ -251,23 +177,8 @@ describe('RequirementItem', () => {
       wrapperNoArchive.destroy();
     });
 
-    it('renders loading icon within archive button when `stateChangeRequestActive` prop is true', () => {
-      wrapper.setProps({
-        stateChangeRequestActive: true,
-      });
-
-      return wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper
-            .find('.requirement-archive')
-            .find(GlLoadingIcon)
-            .exists(),
-        ).toBe(true);
-      });
-    });
-
     it('renders `Reopen` button when current requirement is archived and `requirement.userPermissions.adminRequirement` is true', () => {
-      const reopenButton = wrapperArchived.find('.requirement-reopen').find(GlDeprecatedButton);
+      const reopenButton = wrapperArchived.find('.requirement-reopen').find(GlButton);
 
       expect(reopenButton.exists()).toBe(true);
       expect(reopenButton.props('loading')).toBe(false);
@@ -286,7 +197,7 @@ describe('RequirementItem', () => {
       });
 
       return wrapperArchived.vm.$nextTick(() => {
-        expect(wrapperArchived.contains('.controls .requirement-reopen')).toBe(false);
+        expect(wrapperArchived.find('.controls .requirement-reopen').exists()).toBe(false);
       });
     });
   });

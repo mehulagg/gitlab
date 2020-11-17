@@ -9,7 +9,7 @@ module ApprovalRules
       filter_eligible_groups!
       filter_eligible_protected_branches!
 
-      if rule.update(params)
+      if with_audit_logged { rule.update(params) }
         log_audit_event(rule)
         rule.reset
 
@@ -20,6 +20,17 @@ module ApprovalRules
     end
 
     private
+
+    def with_audit_logged(&block)
+      audit_context = {
+        name: 'update_aproval_rules',
+        author: current_user,
+        scope: rule.project,
+        target: rule
+      }
+
+      ::Gitlab::Audit::Auditor.audit(audit_context, &block)
+    end
 
     def filter_eligible_users!
       return unless params.key?(:user_ids)

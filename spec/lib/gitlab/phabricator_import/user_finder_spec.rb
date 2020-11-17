@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::UserFinder, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::PhabricatorImport::UserFinder, :clean_gitlab_redis_cache do
   let(:project) { create(:project, namespace: create(:group)) }
 
   subject(:finder) { described_class.new(project, %w[first-phid second-phid]) }
@@ -58,6 +58,7 @@ describe Gitlab::PhabricatorImport::UserFinder, :clean_gitlab_redis_cache do
           )
         ]
       end
+
       let(:client) do
         client = instance_double(Gitlab::PhabricatorImport::Conduit::User)
         allow(client).to receive(:users).and_return(response)

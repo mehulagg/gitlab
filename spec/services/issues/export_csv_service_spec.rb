@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issues::ExportCsvService do
+RSpec.describe Issues::ExportCsvService do
   let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
@@ -38,8 +38,8 @@ describe Issues::ExportCsvService do
     before do
       # Creating a timelog touches the updated_at timestamp of issue,
       # so create these first.
-      issue.timelogs.create(time_spent: 360, user: user)
-      issue.timelogs.create(time_spent: 200, user: user)
+      issue.timelogs.create!(time_spent: 360, user: user)
+      issue.timelogs.create!(time_spent: 200, user: user)
       issue.update!(milestone: milestone,
                     assignees: [user],
                     description: 'Issue with details',

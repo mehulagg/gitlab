@@ -9,7 +9,7 @@ module EE
         resource :projects, requirements: ::API::API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
           desc 'Create Evidence for a Release' do
             detail 'This feature was introduced in GitLab 12.10.'
-            success Entities::Release
+            success ::API::Entities::Release
           end
           params do
             requires :tag_name, type: String, desc: 'The name of the tag', as: :tag

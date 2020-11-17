@@ -1,6 +1,5 @@
 import { debounce } from 'lodash';
 import { editor as monacoEditor, KeyCode, KeyMod, Range } from 'monaco-editor';
-import store from '../stores';
 import DecorationsController from './decorations/controller';
 import DirtyDiffController from './diff/controller';
 import Disposable from './common/disposable';
@@ -19,14 +18,14 @@ function setupThemes() {
 }
 
 export default class Editor {
-  static create(options = {}) {
+  static create(...args) {
     if (!this.editorInstance) {
-      this.editorInstance = new Editor(options);
+      this.editorInstance = new Editor(...args);
     }
     return this.editorInstance;
   }
 
-  constructor(options = {}) {
+  constructor(store, options = {}) {
     this.currentModel = null;
     this.instance = null;
     this.dirtyDiffController = null;
@@ -41,6 +40,7 @@ export default class Editor {
       ...defaultDiffEditorOptions,
       ...options,
     };
+    this.store = store;
 
     setupThemes();
     registerLanguages(...languages);
@@ -157,8 +157,10 @@ export default class Editor {
   }
 
   updateDimensions() {
-    this.instance.layout();
-    this.updateDiffView();
+    if (this.instance) {
+      this.instance.layout();
+      this.updateDiffView();
+    }
   }
 
   setPosition({ lineNumber, column }) {
@@ -210,6 +212,7 @@ export default class Editor {
   }
 
   addCommands() {
+    const { store } = this;
     const getKeyCode = key => {
       const monacoKeyMod = key.indexOf('KEY_') === 0;
 

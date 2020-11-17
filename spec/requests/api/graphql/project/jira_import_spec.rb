@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'query Jira import data' do
+RSpec.describe 'query Jira import data' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -19,6 +19,7 @@ describe 'query Jira import data' do
       total_issue_count: 4
     )
   end
+
   let_it_be(:jira_import2) do
     create(
       :jira_import_state, :finished,
@@ -31,6 +32,7 @@ describe 'query Jira import data' do
       total_issue_count: 3
     )
   end
+
   let(:query) do
     %(
       query {
@@ -53,6 +55,7 @@ describe 'query Jira import data' do
       }
     )
   end
+
   let(:jira_imports) { graphql_data.dig('project', 'jiraImports', 'nodes')}
   let(:jira_import_status) { graphql_data.dig('project', 'jiraImportStatus')}
 
@@ -106,7 +109,7 @@ describe 'query Jira import data' do
         let(:query) do
           %(
             query {
-              project(fullPath:"#{project.full_path}") {
+              project(fullPath: "#{project.full_path}") {
                 jiraImports(first: 1) {
                   nodes {
                     jiraProjectKey
@@ -132,7 +135,7 @@ describe 'query Jira import data' do
         let(:query) do
           %(
             query {
-              project(fullPath:"#{project.full_path}") {
+              project(fullPath: "#{project.full_path}") {
                 jiraImports(last: 1) {
                   nodes {
                     jiraProjectKey

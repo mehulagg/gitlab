@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GrapeLogging::Loggers::ExceptionLogger do
+RSpec.describe Gitlab::GrapeLogging::Loggers::ExceptionLogger do
   let(:mock_request) { OpenStruct.new(env: {}) }
   let(:response_body) { nil }
 
@@ -98,7 +98,7 @@ describe Gitlab::GrapeLogging::Loggers::ExceptionLogger do
         before do
           current_backtrace = caller
           allow(exception).to receive(:backtrace).and_return(current_backtrace)
-          expected['exception.backtrace'] = Gitlab::BacktraceCleaner.clean_backtrace(current_backtrace)
+          expected['exception.backtrace'] = Rails.backtrace_cleaner.clean(current_backtrace)
         end
 
         it 'includes the backtrace' do

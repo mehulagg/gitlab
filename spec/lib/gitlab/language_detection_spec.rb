@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::LanguageDetection do
+RSpec.describe Gitlab::LanguageDetection do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:ruby) { create(:programming_language, name: 'Ruby') }
   let_it_be(:haskell) { create(:programming_language, name: 'Haskell') }
@@ -15,6 +15,7 @@ describe Gitlab::LanguageDetection do
      { value: 1.51, label: "Go", color: "#2a4776", highlight: "#244776" },
      { value: 1.1, label: "MepmepLang", color: "#2a4776", highlight: "#244776" }]
   end
+
   let(:repository_languages) do
     [RepositoryLanguage.new(share: 10, programming_language: ruby)]
   end

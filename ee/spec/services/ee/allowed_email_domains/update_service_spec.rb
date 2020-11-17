@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::AllowedEmailDomains::UpdateService do
+RSpec.describe EE::AllowedEmailDomains::UpdateService do
   let(:group) { create(:group) }
   let(:user) { create(:user) }
 

@@ -4,7 +4,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
 import AlertsServiceForm from '~/alerts_service_settings/components/alerts_service_form.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -15,6 +15,7 @@ const defaultProps = {
   alertsSetupUrl: 'http://invalid',
   alertsUsageUrl: 'http://invalid',
   initialActivated: false,
+  isDisabled: false,
 };
 
 describe('AlertsServiceForm', () => {
@@ -163,6 +164,19 @@ describe('AlertsServiceForm', () => {
         return wrapper.vm.toggleActivated(true).then(() => {
           expect(wrapper.find(ToggleButton).props('value')).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('form is disabled', () => {
+    beforeEach(() => {
+      createComponent({ isDisabled: true });
+    });
+
+    it('cannot be toggled', () => {
+      wrapper.find(ToggleButton).vm.$emit('change');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find(ToggleButton).props('disabledInput')).toBe(true);
       });
     });
   });

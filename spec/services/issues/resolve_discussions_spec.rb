@@ -2,7 +2,7 @@
 
 require 'spec_helper.rb'
 
-describe Issues::ResolveDiscussions do
+RSpec.describe Issues::ResolveDiscussions do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -79,7 +79,7 @@ describe Issues::ResolveDiscussions do
                                                    noteable: merge_request,
                                                    project: merge_request.target_project,
                                                    line_number: 15
-                                                   )])
+        )])
         service = DummyService.new(
           project,
           user,

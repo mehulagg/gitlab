@@ -15,15 +15,31 @@ FactoryBot.define do
     # on pipeline factories to avoid circular references
     transient { head_pipeline_of { nil } }
 
+    transient { child_of { nil } }
+
+    after(:build) do |pipeline, evaluator|
+      if evaluator.child_of
+        pipeline.project = evaluator.child_of.project
+        pipeline.source = :parent_pipeline
+      end
+    end
+
     after(:create) do |pipeline, evaluator|
       merge_request = evaluator.head_pipeline_of
-      merge_request&.update(head_pipeline: pipeline)
+      merge_request&.update!(head_pipeline: pipeline)
+
+      if evaluator.child_of
+        bridge = create(:ci_bridge, pipeline: evaluator.child_of)
+        create(:ci_sources_pipeline,
+          source_job: bridge,
+          pipeline: pipeline)
+      end
     end
 
     factory :ci_pipeline do
       transient { ci_ref_presence { true } }
 
-      after(:build) do |pipeline, evaluator|
+      before(:create) do |pipeline, evaluator|
         pipeline.ensure_ci_ref! if evaluator.ci_ref_presence && pipeline.ci_ref_id.nil?
       end
 
@@ -65,6 +81,22 @@ FactoryBot.define do
         add_attribute(:protected) { true }
       end
 
+      trait :with_report_results do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :report_results, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_codequality_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :codequality_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
       trait :with_test_reports do
         status { :success }
 
@@ -89,6 +121,14 @@ FactoryBot.define do
         end
       end
 
+      trait :with_test_reports_with_three_failures do
+        status { :success }
+
+        after(:build) do |pipeline, _evaluator|
+          pipeline.builds << build(:ci_build, :test_reports_with_three_failures, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
       trait :with_accessibility_reports do
         status { :success }
 
@@ -102,6 +142,12 @@ FactoryBot.define do
 
         after(:build) do |pipeline, evaluator|
           pipeline.builds << build(:ci_build, :coverage_reports, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_coverage_report_artifact do
+        after(:build) do |pipeline, evaluator|
+          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, pipeline: pipeline, project: pipeline.project)
         end
       end
 

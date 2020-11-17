@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Frontend testing standards and style guidelines
 
 There are two types of test suites you'll encounter while developing frontend code
@@ -24,9 +30,7 @@ We have started to migrate frontend tests to the [Jest](https://jestjs.io) testi
 
 Jest tests can be found in `/spec/frontend` and `/ee/spec/frontend` in EE.
 
-> **Note:**
->
-> Most examples have a Jest and Karma example. See the Karma examples only as explanation to what's going on in the code, should you stumble over some use cases during your discovery. The Jest examples are the one you should follow.
+Most examples have a Jest and Karma example. See the Karma examples only as explanation to what's going on in the code, should you stumble over some use cases during your discovery. The Jest examples are the one you should follow.
 
 ## Karma test suite
 
@@ -111,6 +115,37 @@ describe('Component', () => {
 
 Remember that the performance of each test depends on the environment.
 
+### Timout error due to async components
+
+If your component is fetching some other components asynchroneously based on some conditions, it might happen so that your Jest suite for this component will become flaky timing out from time to time. 
+
+```javascript
+// ide.vue
+export default {
+  components: {
+    'error-message': () => import('./error_message.vue'),
+    'gl-button': () => import('@gitlab/ui/src/components/base/button/button.vue'),
+    ...
+};
+```
+
+To address this issue, you can "help" Jest by stubbing the async components so that Jest would not need to fetch those asynchroneously at the run-time.
+
+```javascript
+// ide_spec.js
+import { GlButton } from '@gitlab/ui';
+import ErrorMessage from '~/ide/components/error_message.vue';
+...
+return shallowMount(ide, {
+  ...
+  stubs: {
+    ErrorMessage,
+    GlButton,
+    ...
+  },
+})
+```
+
 ## What and how to test
 
 Before jumping into more gritty details about Jest-specific workflows like mocks and spies, we should briefly cover what to test with Jest.
@@ -170,22 +205,14 @@ Some more examples can be found in the [Frontend unit tests section](testing_lev
 
 Another common gotcha is that the specs end up verifying the mock is working. If you are using mocks, the mock should support the test, but not be the target of the test.
 
-**Bad:**
-
 ```javascript
 const spy = jest.spyOn(idGenerator, 'create')
 spy.mockImplementation = () = '1234'
 
+// Bad
 expect(idGenerator.create()).toBe('1234')
-```
 
-**Good:**
-
-```javascript
-const spy = jest.spyOn(idGenerator, 'create')
-spy.mockImplementation = () = '1234'
-
-// Actually focusing on the logic of your component and just leverage the controllable mocks output
+// Good: actually focusing on the logic of your component and just leverage the controllable mocks output
 expect(wrapper.find('div').html()).toBe('<div id="1234">...</div>')
 ```
 
@@ -204,29 +231,45 @@ Following you'll find some general common practices you will find as part of our
 
 ### How to query DOM elements
 
-When it comes to querying DOM elements in your tests, it is best to uniquely and semantically target the element. Sometimes this cannot be done feasibly. In these cases, adding test attributes to simplify the selectors might be the best option.
+When it comes to querying DOM elements in your tests, it is best to uniquely and semantically target
+the element.
 
-Preferentially, in component testing with `@vue/test-utils`, you should query for child components using the component itself. This helps enforce that specific behavior can be covered by that component's individual unit tests. Otherwise, try to use:
+Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro).
+When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries#byrole)
+as these enforce accessibility best practices as well. The examples below demonstrate the order of preference.
+
+When writing Vue component unit tests, it can be wise to query children by component, so that the unit test can focus on comprehensive value coverage
+rather than dealing with the complexity of a child component's behavior.
+
+Sometimes, neither of the above are feasible. In these cases, adding test attributes to simplify the selectors might be the best option. A list of
+possible selectors include:
 
 - A semantic attribute like `name` (also verifies that `name` was setup properly)
 - A `data-testid` attribute ([recommended by maintainers of `@vue/test-utils`](https://github.com/vuejs/vue-test-utils/issues/1498#issuecomment-610133465))
 - a Vue `ref` (if using `@vue/test-utils`)
 
-Examples:
-
 ```javascript
-it('exists', () => {
-    // Good
-    wrapper.find(FooComponent);
-    wrapper.find('input[name=foo]');
-    wrapper.find('[data-testid="foo"]');
-    wrapper.find({ ref: 'foo'});
+import { getByRole, getByText } from '@testing-library/dom'
 
-    // Bad
-    wrapper.find('.js-foo');
-    wrapper.find('.btn-primary');
-    wrapper.find('.qa-foo-component');
-    wrapper.find('[data-qa-selector="foo"]');
+// In this example, `wrapper` is a `@vue/test-utils` wrapper returned from `mount` or `shallowMount`.
+it('exists', () => {
+  // Best (especially for integration tests)
+  getByRole(wrapper.element, 'link', { name: /Click Me/i })
+  getByRole(wrapper.element, 'link', { name: 'Click Me' })
+  getByText(wrapper.element, 'Click Me')
+  getByText(wrapper.element, /Click Me/i)
+
+  // Good (especially for unit tests)
+  wrapper.find(FooComponent);
+  wrapper.find('input[name=foo]');
+  wrapper.find('[data-testid="foo"]');
+  wrapper.find({ ref: 'foo'});
+
+  // Bad
+  wrapper.find('.js-foo');
+  wrapper.find('.btn-primary');
+  wrapper.find('.qa-foo-component');
+  wrapper.find('[data-qa-selector="foo"]');
 });
 ```
 
@@ -234,28 +277,47 @@ It is not recommended that you add `.js-*` classes just for testing purposes. On
 
 Do not use a `.qa-*` class or `data-qa-selector` attribute for any tests other than QA end-to-end testing.
 
+### Querying for child components
+
+When testing Vue components with `@vue/test-utils` another possible approach is querying for child
+components instead of querying for DOM nodes. This assumes that implementation details of behavior
+under test should be covered by that component's individual unit test. There is no strong preference
+in writing DOM or component queries as long as your tests reliably cover expected behavior for the
+component under test.
+
+Example:
+
+```javascript
+it('exists', () => {
+    wrapper.find(FooComponent);
+});
+```
+
 ### Naming unit tests
 
 When writing describe test blocks to test specific functions/methods,
 please use the method name as the describe block name.
 
-```javascript
-// Good
-describe('methodName', () => {
-  it('passes', () => {
-    expect(true).toEqual(true);
-  });
-});
+**Bad**:
 
-// Bad
+```javascript
 describe('#methodName', () => {
   it('passes', () => {
     expect(true).toEqual(true);
   });
 });
 
-// Bad
 describe('.methodName', () => {
+  it('passes', () => {
+    expect(true).toEqual(true);
+  });
+});
+```
+
+**Good**:
+
+```javascript
+describe('methodName', () => {
   it('passes', () => {
     expect(true).toEqual(true);
   });
@@ -273,74 +335,55 @@ it('tests a promise', async () => {
 });
 
 it('tests a promise rejection', async () => {
-  expect.assertions(1);
-  try {
-    await user.getUserName(1);
-  } catch (e) {
-    expect(e).toEqual({
-      error: 'User with 1 not found.',
-    });
-  }
+  await expect(user.getUserName(1)).rejects.toThrow('User with 1 not found.');
 });
 ```
 
-You can also work with Promise chains. In this case, you can make use of the `done` callback and `done.fail` in case an error occurred. Following are some examples:
+You can also simply return a promise from the test function.
+
+Using the `done` and `done.fail` callbacks is discouraged when working with
+promises. They should only be used when testing callback-based code.
+
+**Bad**:
 
 ```javascript
-// Good
-it('tests a promise', done => {
-  promise
-    .then(data => {
-      expect(data).toBe(asExpected);
-    })
-    .then(done)
-    .catch(done.fail);
-});
-
-// Good
-it('tests a promise rejection', done => {
-  promise
-    .then(done.fail)
-    .catch(error => {
-      expect(error).toBe(expectedError);
-    })
-    .then(done)
-    .catch(done.fail);
-});
-
-// Bad (missing done callback)
+// missing return
 it('tests a promise', () => {
   promise.then(data => {
     expect(data).toBe(asExpected);
   });
 });
 
-// Bad (missing catch)
-it('tests a promise', done => {
-  promise
-    .then(data => {
-      expect(data).toBe(asExpected);
-    })
-    .then(done);
-});
-
-// Bad (use done.fail in asynchronous tests)
+// uses done/done.fail
 it('tests a promise', done => {
   promise
     .then(data => {
       expect(data).toBe(asExpected);
     })
     .then(done)
-    .catch(fail);
+    .catch(done.fail);
+});
+```
+
+**Good**:
+
+```javascript
+// verifying a resolved promise
+it('tests a promise', () => {
+  return promise
+    .then(data => {
+      expect(data).toBe(asExpected);
+    });
 });
 
-// Bad (missing catch)
-it('tests a promise rejection', done => {
-  promise
-    .catch(error => {
-      expect(error).toBe(expectedError);
-    })
-    .then(done);
+// verifying a resolved promise using Jest's `resolves` matcher
+it('tests a promise', () => {
+  return expect(promise).resolves.toBe(asExpected);
+});
+
+// verifying a rejected promise using Jest's `rejects` matcher
+it('tests a promise rejection', () => {
+  return expect(promise).rejects.toThrow(expectedError);
 });
 ```
 
@@ -545,6 +588,130 @@ In order to ensure that a clean wrapper object and DOM are being used in each te
 
 See also the [Vue Test Utils documentation on `destroy`](https://vue-test-utils.vuejs.org/api/wrapper/#destroy).
 
+### Jest best practices
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34209) in GitLab 13.2.
+
+#### Prefer `toBe` over `toEqual` when comparing primitive values
+
+Jest has [`toBe`](https://jestjs.io/docs/en/expect#tobevalue) and
+[`toEqual`](https://jestjs.io/docs/en/expect#toequalvalue) matchers.
+As [`toBe`](https://jestjs.io/docs/en/expect#tobevalue) uses
+[`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is)
+to compare values, it's faster (by default) than using `toEqual`.
+While the latter will eventually fallback to leverage [`Object.is`](https://github.com/facebook/jest/blob/master/packages/expect/src/jasmineUtils.ts#L91),
+for primitive values, it should only be used when complex objects need a comparison.
+
+Examples:
+
+```javascript
+const foo = 1;
+
+// Bad
+expect(foo).toEqual(1);
+
+// Good
+expect(foo).toBe(1);
+```
+
+#### Prefer more befitting matchers
+
+Jest provides useful matchers like `toHaveLength` or `toBeUndefined` to make your tests more
+readable and to produce more understandable error messages. Check their docs for the
+[full list of matchers](https://jestjs.io/docs/en/expect#methods).
+
+Examples:
+
+```javascript
+const arr = [1, 2];
+
+// prints:
+// Expected length: 1
+// Received length: 2
+expect(arr).toHaveLength(1);
+
+// prints:
+// Expected: 1
+// Received: 2
+expect(arr.length).toBe(1);
+
+// prints:
+// expect(received).toBe(expected) // Object.is equality
+// Expected: undefined
+// Received: "bar"
+const foo = 'bar';
+expect(foo).toBe(undefined);
+
+// prints:
+// expect(received).toBeUndefined()
+// Received: "bar"
+const foo = 'bar';
+expect(foo).toBeUndefined();
+```
+
+#### Avoid using `toBeTruthy` or `toBeFalsy`
+
+Jest also provides following matchers: `toBeTruthy` and `toBeFalsy`. We should not use them because
+they make tests weaker and produce false-positive results.
+
+For example, `expect(someBoolean).toBeFalsy()` passes when `someBoolean === null`, and when
+`someBoolean === false`.
+
+#### Tricky `toBeDefined` matcher
+
+Jest has the tricky `toBeDefined` matcher that can produce false positive test. Because it
+[validates](https://github.com/facebook/jest/blob/master/packages/expect/src/matchers.ts#L204)
+the given value for `undefined` only.
+
+```javascript
+// Bad: if finder returns null, the test will pass
+expect(wrapper.find('foo')).toBeDefined();
+
+// Good
+expect(wrapper.find('foo').exists()).toBe(true);
+```
+
+#### Avoid using `setImmediate`
+
+Try to avoid using `setImmediate`. `setImmediate` is an ad-hoc solution to run your callback after
+the I/O completes. And it's not part of the Web API, hence, we target NodeJS environments in our
+unit tests.
+
+Instead of `setImmediate`, use `jest.runAllTimers` or `jest.runOnlyPendingTimers` to run pending timers.
+The latter is useful when you have `setInterval` in the code. **Remember:** our Jest configuration uses fake timers.
+
+## Avoid non-deterministic specs
+
+Non-determinism is the breeding ground for flaky and brittle specs. Such specs end up breaking the CI pipeline, interrupting the work flow of other contributors.
+
+1. Make sure your test subject's collaborators (e.g., axios, apollo, lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
+1. Make sure tests are focused and not doing "extra work" (e.g., needlessly creating the test subject more than once in an individual test)
+
+### Faking `Date` for determinism
+
+Consider using `useFakeDate` to ensure a consistent value is returned with every `new Date()` or `Date.now()`.
+
+```javascript
+import { useFakeDate } from 'helpers/fake_date';
+
+describe('cool/component', () => {
+  useFakeDate();
+
+  // ...
+});
+```
+
+### Faking `Math.random` for determinism
+
+Consider replacing `Math.random` with a fake when the test subject depends on it.
+
+```javascript
+beforeEach(() => {
+  // https://xkcd.com/221/
+  jest.spyOn(Math, 'random').mockReturnValue(0.4);
+});
+```
+
 ## Factories
 
 TBU
@@ -623,7 +790,7 @@ While you work on a test suite, you may want to run these specs in watch mode, s
 # Watch and rerun all specs matching the name icon
 yarn jest --watch icon
 
-# Watch and rerun one specifc file
+# Watch and rerun one specific file
 yarn jest --watch path/to/spec/file.spec.js
 ```
 
@@ -678,13 +845,37 @@ yarn karma -f 'spec/javascripts/ide/**/file_spec.js'
 
 ## Frontend test fixtures
 
-Code that is added to HAML templates (in `app/views/`) or makes Ajax requests to the backend has tests that require HTML or JSON from the backend.
-Fixtures for these tests are located at:
+Frontend fixtures are files containing responses from backend controllers. These responses can be either HTML
+generated from haml templates or JSON payloads. Frontend tests that rely on these responses are
+often using fixtures to validate correct integration with the backend code.
+
+### Generate fixtures
+
+You can find code to generate test fixtures in:
 
 - `spec/frontend/fixtures/`, for running tests in CE.
 - `ee/spec/frontend/fixtures/`, for running tests in EE.
 
-Fixture files in:
+You can generate fixtures by running:
+
+- `bin/rake frontend:fixtures` to generate all fixtures
+- `bin/rspec spec/frontend/fixtures/merge_requests.rb` to generate specific fixtures (in this case for `merge_request.rb`)
+
+You can find generated fixtures are in `tmp/tests/frontend/fixtures-ee`.
+
+#### Creating new fixtures
+
+For each fixture, you can find the content of the `response` variable in the output file.
+For example, test named `"merge_requests/diff_discussion.json"` in `spec/frontend/fixtures/merge_requests.rb`
+will produce output file `tmp/tests/frontend/fixtures-ee/merge_requests/diff_discussion.json`.
+The `response` variable gets automatically set if the test is marked as `type: :request` or `type: :controller`.
+
+When creating a new fixture, it often makes sense to take a look at the corresponding tests for the
+endpoint in `(ee/)spec/controllers/` or `(ee/)spec/requests/`.
+
+### Use fixtures
+
+Jest and Karma test suites import fixtures in different ways:
 
 - The Karma test suite are served by [jasmine-jquery](https://github.com/velesin/jasmine-jquery).
 - Jest use `spec/frontend/helpers/fixtures.js`.
@@ -709,14 +900,6 @@ it('uses some HTML element', () => {
   // ...
 });
 ```
-
-HTML and JSON fixtures are generated from backend views and controllers using RSpec (see `spec/frontend/fixtures/*.rb`).
-
-For each fixture, the content of the `response` variable is stored in the output file.
-This variable gets automatically set if the test is marked as `type: :request` or `type: :controller`.
-Fixtures are regenerated using the `bin/rake frontend:fixtures` command but you can also generate them individually,
-for example `bin/rspec spec/frontend/fixtures/merge_requests.rb`.
-When creating a new fixture, it often makes sense to take a look at the corresponding tests for the endpoint in `(ee/)spec/controllers/` or `(ee/)spec/requests/`.
 
 ## Data-driven tests
 
@@ -745,6 +928,32 @@ it.each([
     expect(renderPipeline(status)).toEqual(icon)
  }
 );
+```
+
+**Note**: only use template literal block if pretty print is **not** needed for spec output. For example, empty strings, nested objects etc.
+
+For example, when testing the difference between an empty search string and a non-empty search string, the use of the array block syntax with the pretty print option would be preferred. That way the differences between an empty string e.g. `''` and a non-empty string e.g. `'search string'` would be visible in the spec output. Whereas with a template literal block, the empty string would be shown as a space, which could lead to a confusing developer experience
+
+```javascript
+// bad
+it.each`
+    searchTerm | expected
+    ${''} | ${{ issue: { users: { nodes: [] } } }}
+    ${'search term'} | ${{ issue: { other: { nested: [] } } }}
+`('when search term is $searchTerm, it returns $expected', ({ searchTerm, expected }) => {
+  expect(search(searchTerm)).toEqual(expected)
+});
+
+// good
+it.each([
+    ['', { issue: { users: { nodes: [] } } }],
+    ['search term', { issue: { other: { nested: [] } } }],
+])('when search term is %p, expect to return %p',
+ (searchTerm, expected) => {
+    expect(search(searchTerm)).toEqual(expected)
+ }
+);
+
 ```
 
 ```javascript
@@ -856,7 +1065,8 @@ Some regressions only affect a specific browser version. We can install and test
 
 [BrowserStack](https://www.browserstack.com/) allows you to test more than 1200 mobile devices and browsers.
 You can use it directly through the [live app](https://www.browserstack.com/live) or you can install the [chrome extension](https://chrome.google.com/webstore/detail/browserstack/nkihdmlheodkdfojglpcjjmioefjahjb) for easy access.
-You can find the credentials on 1Password, under `frontendteam@gitlab.com`.
+Sign in to BrowserStack with the credentials saved in the **Engineering** vault of GitLab's
+[shared 1Password account](https://about.gitlab.com/handbook/security/#1password-guide).
 
 ### Firefox
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Security::Configuration::SaveAutoFixService do
+RSpec.describe Security::Configuration::SaveAutoFixService do
   describe '#execute' do
     let_it_be(:project) { create(:project) }
 

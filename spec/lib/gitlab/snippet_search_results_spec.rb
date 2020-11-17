@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SnippetSearchResults do
+RSpec.describe Gitlab::SnippetSearchResults do
   include SearchHelpers
 
   let_it_be(:snippet) { create(:snippet, content: 'foo', file_name: 'foo') }
@@ -18,6 +18,12 @@ describe Gitlab::SnippetSearchResults do
     it 'returns the expected formatted count' do
       expect(results).to receive(:limited_snippet_titles_count).and_return(1234)
       expect(results.formatted_count('snippet_titles')).to eq(max_limited_count)
+    end
+  end
+
+  describe '#highlight_map' do
+    it 'returns the expected highlight map' do
+      expect(results.highlight_map('snippet_titles')).to eq({})
     end
   end
 

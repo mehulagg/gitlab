@@ -2,7 +2,10 @@ import { n__, s__, sprintf } from '~/locale';
 import { addLicensesMatchingReportGroupStatus, reportGroupHasAtLeastOneLicense } from './utils';
 import { LICENSE_APPROVAL_STATUS, REPORT_GROUPS } from '../constants';
 
-export const isLoading = state => state.isLoadingManagedLicenses || state.isLoadingLicenseReport;
+export const isLoading = state =>
+  state.isLoadingManagedLicenses ||
+  state.isLoadingLicenseReport ||
+  state.isLoadingLicenseCheckApprovalRule;
 
 export const isLicenseBeingUpdated = state => (id = null) => state.pendingLicenses.includes(id);
 
@@ -17,10 +20,19 @@ export const licenseReportGroups = state =>
     reportGroupHasAtLeastOneLicense,
   );
 
-export const licenseSummaryText = (state, getters) => {
-  const hasReportItems = getters.licenseReport && getters.licenseReport.length;
-  const baseReportHasLicenses = state.existingLicenses.length;
+export const hasReportItems = (_, getters) => {
+  return Boolean(getters.licenseReportLength);
+};
 
+export const baseReportHasLicenses = state => {
+  return Boolean(state.existingLicenses.length);
+};
+
+export const licenseReportLength = (_, getters) => {
+  return getters.licenseReport.length;
+};
+
+export const licenseSummaryText = (state, getters) => {
   if (getters.isLoading) {
     return sprintf(s__('ciReport|Loading %{reportName} report'), {
       reportName: s__('License Compliance'),
@@ -33,37 +45,13 @@ export const licenseSummaryText = (state, getters) => {
     });
   }
 
-  if (hasReportItems) {
-    const licenseReportLength = getters.licenseReport.length;
-
-    if (!baseReportHasLicenses) {
-      return getters.reportContainsBlacklistedLicense
-        ? n__(
-            'LicenseCompliance|License Compliance detected %d license and policy violation for the source branch only; approval required',
-            'LicenseCompliance|License Compliance detected %d licenses and policy violations for the source branch only; approval required',
-            licenseReportLength,
-          )
-        : n__(
-            'LicenseCompliance|License Compliance detected %d license for the source branch only',
-            'LicenseCompliance|License Compliance detected %d licenses for the source branch only',
-            licenseReportLength,
-          );
-    }
-
-    return getters.reportContainsBlacklistedLicense
-      ? n__(
-          'LicenseCompliance|License Compliance detected %d new license and policy violation; approval required',
-          'LicenseCompliance|License Compliance detected %d new licenses and policy violations; approval required',
-          licenseReportLength,
-        )
-      : n__(
-          'LicenseCompliance|License Compliance detected %d new license',
-          'LicenseCompliance|License Compliance detected %d new licenses',
-          licenseReportLength,
-        );
+  if (getters.hasReportItems) {
+    return state.hasLicenseCheckApprovalRule
+      ? getters.summaryTextWithLicenseCheck
+      : getters.summaryTextWithoutLicenseCheck;
   }
 
-  if (!baseReportHasLicenses) {
+  if (!getters.baseReportHasLicenses) {
     return s__(
       'LicenseCompliance|License Compliance detected no licenses for the source branch only',
     );
@@ -72,10 +60,63 @@ export const licenseSummaryText = (state, getters) => {
   return s__('LicenseCompliance|License Compliance detected no new licenses');
 };
 
+export const summaryTextWithLicenseCheck = (_, getters) => {
+  if (!getters.baseReportHasLicenses) {
+    return getters.reportContainsBlacklistedLicense
+      ? n__(
+          'LicenseCompliance|License Compliance detected %d license and policy violation for the source branch only; approval required',
+          'LicenseCompliance|License Compliance detected %d licenses and policy violations for the source branch only; approval required',
+          getters.licenseReportLength,
+        )
+      : n__(
+          'LicenseCompliance|License Compliance detected %d license for the source branch only',
+          'LicenseCompliance|License Compliance detected %d licenses for the source branch only',
+          getters.licenseReportLength,
+        );
+  }
+
+  return getters.reportContainsBlacklistedLicense
+    ? n__(
+        'LicenseCompliance|License Compliance detected %d new license and policy violation; approval required',
+        'LicenseCompliance|License Compliance detected %d new licenses and policy violations; approval required',
+        getters.licenseReportLength,
+      )
+    : n__(
+        'LicenseCompliance|License Compliance detected %d new license',
+        'LicenseCompliance|License Compliance detected %d new licenses',
+        getters.licenseReportLength,
+      );
+};
+
+export const summaryTextWithoutLicenseCheck = (_, getters) => {
+  if (!getters.baseReportHasLicenses) {
+    return getters.reportContainsBlacklistedLicense
+      ? n__(
+          'LicenseCompliance|License Compliance detected %d license and policy violation for the source branch only',
+          'LicenseCompliance|License Compliance detected %d licenses and policy violations for the source branch only',
+          getters.licenseReportLength,
+        )
+      : n__(
+          'LicenseCompliance|License Compliance detected %d license for the source branch only',
+          'LicenseCompliance|License Compliance detected %d licenses for the source branch only',
+          getters.licenseReportLength,
+        );
+  }
+
+  return getters.reportContainsBlacklistedLicense
+    ? n__(
+        'LicenseCompliance|License Compliance detected %d new license and policy violation',
+        'LicenseCompliance|License Compliance detected %d new licenses and policy violations',
+        getters.licenseReportLength,
+      )
+    : n__(
+        'LicenseCompliance|License Compliance detected %d new license',
+        'LicenseCompliance|License Compliance detected %d new licenses',
+        getters.licenseReportLength,
+      );
+};
+
 export const reportContainsBlacklistedLicense = (_, getters) =>
   (getters.licenseReport || []).some(
     license => license.approvalStatus === LICENSE_APPROVAL_STATUS.DENIED,
   );
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

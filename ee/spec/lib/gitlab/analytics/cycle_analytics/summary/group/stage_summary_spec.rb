@@ -13,10 +13,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
   describe "#new_issues" do
     context 'with from date' do
       before do
-        Timecop.freeze(5.days.ago) { create(:issue, project: project) }
-        Timecop.freeze(5.days.ago) { create(:issue, project: project_2) }
-        Timecop.freeze(5.days.from_now) { create(:issue, project: project) }
-        Timecop.freeze(5.days.from_now) { create(:issue, project: project_2) }
+        travel_to(5.days.ago) { create(:issue, project: project) }
+        travel_to(5.days.ago) { create(:issue, project: project_2) }
+        travel_to(5.days.from_now) { create(:issue, project: project) }
+        travel_to(5.days.from_now) { create(:issue, project: project_2) }
       end
 
       it "finds the number of issues created after it" do
@@ -31,7 +31,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
 
       context 'with subgroups' do
         before do
-          Timecop.freeze(5.days.from_now) { create(:issue, project: create(:project, namespace: create(:group, parent: group))) }
+          travel_to(5.days.from_now) { create(:issue, project: create(:project, namespace: create(:group, parent: group))) }
         end
 
         it "finds issues from them" do
@@ -41,7 +41,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
 
       context 'with projects specified in options' do
         before do
-          Timecop.freeze(5.days.from_now) { create(:issue, project: create(:project, namespace: group)) }
+          travel_to(5.days.from_now) { create(:issue, project: create(:project, namespace: group)) }
         end
 
         subject { described_class.new(group, options: { from: Time.now, current_user: user, projects: [project.id, project_2.id] }).data }
@@ -80,6 +80,27 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
         end
       end
 
+      context 'with `label_name` filter' do
+        let(:label1) { create(:group_label, group: group) }
+        let(:label2) { create(:group_label, group: group) }
+
+        before do
+          issue = project.issues.last
+
+          Issues::UpdateService.new(
+            issue.project,
+            user,
+            label_ids: [label1.id, label2.id]
+          ).execute(issue)
+        end
+
+        subject { described_class.new(group, options: { from: Time.now, current_user: user, label_name: [label1.name, label2.name] }).data }
+
+        it 'finds issue with two labels' do
+          expect(subject.first[:value]).to eq('1')
+        end
+      end
+
       context 'when `from` and `to` parameters are provided' do
         subject { described_class.new(group, options: { from: 10.days.ago, to: Time.now, current_user: user }).data }
 
@@ -91,9 +112,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
 
     context 'with other projects' do
       before do
-        Timecop.freeze(5.days.from_now) { create(:issue, project: create(:project, namespace: create(:group))) }
-        Timecop.freeze(5.days.from_now) { create(:issue, project: project) }
-        Timecop.freeze(5.days.from_now) { create(:issue, project: project_2) }
+        travel_to(5.days.from_now) { create(:issue, project: create(:project, namespace: create(:group))) }
+        travel_to(5.days.from_now) { create(:issue, project: project) }
+        travel_to(5.days.from_now) { create(:issue, project: project_2) }
       end
 
       it "doesn't find issues from them" do
@@ -105,10 +126,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
   describe "#deploys" do
     context 'with from date' do
       before do
-        Timecop.freeze(5.days.ago) { create(:deployment, :success, project: project) }
-        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project) }
-        Timecop.freeze(5.days.ago) { create(:deployment, :success, project: project_2) }
-        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project_2) }
+        travel_to(5.days.ago) { create(:deployment, :success, project: project) }
+        travel_to(5.days.from_now) { create(:deployment, :success, project: project) }
+        travel_to(5.days.ago) { create(:deployment, :success, project: project_2) }
+        travel_to(5.days.from_now) { create(:deployment, :success, project: project_2) }
       end
 
       it "finds the number of deploys made created after it" do
@@ -123,7 +144,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
 
       context 'with subgroups' do
         before do
-          Timecop.freeze(5.days.from_now) do
+          travel_to(5.days.from_now) do
             create(:deployment, :success, project: create(:project, :repository, namespace: create(:group, parent: group)))
           end
         end
@@ -135,7 +156,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
 
       context 'with projects specified in options' do
         before do
-          Timecop.freeze(5.days.from_now) do
+          travel_to(5.days.from_now) do
             create(:deployment, :success, project: create(:project, :repository, namespace: group, name: 'not_applicable'))
           end
         end
@@ -158,7 +179,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
 
     context 'with other projects' do
       before do
-        Timecop.freeze(5.days.from_now) do
+        travel_to(5.days.from_now) do
           create(:deployment, :success, project: create(:project, :repository, namespace: create(:group)))
         end
       end
@@ -186,7 +207,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
     end
 
     before do
-      Timecop.freeze(5.days.ago) do
+      travel_to(5.days.ago) do
         create(:deployment, :success, project: project)
       end
     end
@@ -203,7 +224,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
       let(:to) { 10.days.from_now }
 
       before do
-        Timecop.freeze(5.days.from_now) do
+        travel_to(5.days.from_now) do
           create(:deployment, :success, project: project)
         end
       end

@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe Feature, stub_feature_flags: false do
+RSpec.describe Feature, stub_feature_flags: false do
   before do
     # reset Flipper AR-engine
     Feature.reset
+    skip_feature_flags_yaml_validation
   end
 
   describe '.get' do
@@ -21,65 +22,28 @@ describe Feature, stub_feature_flags: false do
   end
 
   describe '.persisted_names' do
-    context 'when FF_LEGACY_PERSISTED_NAMES=false' do
-      before do
-        stub_env('FF_LEGACY_PERSISTED_NAMES', 'false')
-      end
+    it 'returns the names of the persisted features' do
+      Feature.enable('foo')
 
-      it 'returns the names of the persisted features' do
-        Feature.enable('foo')
-
-        expect(described_class.persisted_names).to contain_exactly('foo')
-      end
-
-      it 'returns an empty Array when no features are presisted' do
-        expect(described_class.persisted_names).to be_empty
-      end
-
-      it 'caches the feature names when request store is active',
-       :request_store, :use_clean_rails_memory_store_caching do
-        Feature.enable('foo')
-
-        expect(Gitlab::ProcessMemoryCache.cache_backend)
-          .to receive(:fetch)
-          .once
-          .with('flipper/v1/features', expires_in: 1.minute)
-          .and_call_original
-
-        2.times do
-          expect(described_class.persisted_names).to contain_exactly('foo')
-        end
-      end
+      expect(described_class.persisted_names).to contain_exactly('foo')
     end
 
-    context 'when FF_LEGACY_PERSISTED_NAMES=true' do
-      before do
-        stub_env('FF_LEGACY_PERSISTED_NAMES', 'true')
-      end
+    it 'returns an empty Array when no features are presisted' do
+      expect(described_class.persisted_names).to be_empty
+    end
 
-      it 'returns the names of the persisted features' do
-        Feature.enable('foo')
+    it 'caches the feature names when request store is active',
+      :request_store, :use_clean_rails_memory_store_caching do
+      Feature.enable('foo')
 
+      expect(Gitlab::ProcessMemoryCache.cache_backend)
+        .to receive(:fetch)
+        .once
+        .with('flipper/v1/features', expires_in: 1.minute)
+        .and_call_original
+
+      2.times do
         expect(described_class.persisted_names).to contain_exactly('foo')
-      end
-
-      it 'returns an empty Array when no features are presisted' do
-        expect(described_class.persisted_names).to be_empty
-      end
-
-      it 'caches the feature names when request store is active',
-       :request_store, :use_clean_rails_memory_store_caching do
-        Feature.enable('foo')
-
-        expect(Gitlab::ProcessMemoryCache.cache_backend)
-          .to receive(:fetch)
-          .once
-          .with('flipper:persisted_names', expires_in: 1.minute)
-          .and_call_original
-
-        2.times do
-          expect(described_class.persisted_names).to contain_exactly('foo')
-        end
       end
     end
 
@@ -277,6 +241,39 @@ describe Feature, stub_feature_flags: false do
           expect { described_class.enabled?(:enabled_feature_flag, actor) }
             .to raise_error /needs to include `FeatureGate` or implement `flipper_id`/
         end
+      end
+    end
+
+    context 'validates usage of feature flag with YAML definition' do
+      let(:definition) do
+        Feature::Definition.new('development/my_feature_flag.yml',
+          name: 'my_feature_flag',
+          type: 'development',
+          default_enabled: false
+        ).tap(&:validate!)
+      end
+
+      before do
+        stub_env('LAZILY_CREATE_FEATURE_FLAG', '0')
+
+        allow(Feature::Definition).to receive(:valid_usage!).and_call_original
+        allow(Feature::Definition).to receive(:definitions) do
+          { definition.key => definition }
+        end
+      end
+
+      it 'when usage is correct' do
+        expect { described_class.enabled?(:my_feature_flag) }.not_to raise_error
+      end
+
+      it 'when invalid type is used' do
+        expect { described_class.enabled?(:my_feature_flag, type: :licensed) }
+          .to raise_error(/The `type:` of/)
+      end
+
+      it 'when invalid default_enabled is used' do
+        expect { described_class.enabled?(:my_feature_flag, default_enabled: true) }
+          .to raise_error(/The `default_enabled:` of/)
       end
     end
   end

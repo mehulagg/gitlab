@@ -1,15 +1,21 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
+import { mount, createLocalVue } from '@vue/test-utils';
 import IdeTree from '~/ide/components/ide_tree.vue';
-import store from '~/ide/stores';
-import { createComponentWithStore } from '../../helpers/vue_mount_component_helper';
-import { resetStore, file } from '../helpers';
+import { createStore } from '~/ide/stores';
+import { keepAlive } from '../../helpers/keep_alive_component_helper';
+import { file } from '../helpers';
 import { projectData } from '../mock_data';
 
-describe('IdeRepoTree', () => {
-  let vm;
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
+describe('IdeTree', () => {
+  let store;
+  let wrapper;
 
   beforeEach(() => {
-    const IdeRepoTree = Vue.extend(IdeTree);
+    store = createStore();
 
     store.state.currentProjectId = 'abcproject';
     store.state.currentBranchId = 'master';
@@ -19,16 +25,36 @@ describe('IdeRepoTree', () => {
       loading: false,
     });
 
-    vm = createComponentWithStore(IdeRepoTree, store).$mount();
+    wrapper = mount(keepAlive(IdeTree), {
+      store,
+      localVue,
+    });
   });
 
   afterEach(() => {
-    vm.$destroy();
-
-    resetStore(vm.$store);
+    wrapper.destroy();
   });
 
   it('renders list of files', () => {
-    expect(vm.$el.textContent).toContain('fileName');
+    expect(wrapper.text()).toContain('fileName');
+  });
+
+  describe('activated', () => {
+    let inititializeSpy;
+
+    beforeEach(async () => {
+      inititializeSpy = jest.spyOn(wrapper.find(IdeTree).vm, 'initialize');
+      store.state.viewer = 'diff';
+
+      await wrapper.vm.reactivate();
+    });
+
+    it('re initializes the component', () => {
+      expect(inititializeSpy).toHaveBeenCalled();
+    });
+
+    it('updates viewer to "editor" by default', () => {
+      expect(store.state.viewer).toBe('editor');
+    });
   });
 });

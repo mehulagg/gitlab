@@ -1,19 +1,20 @@
 import { GlFilteredSearchToken, GlFilteredSearchSuggestion, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import PipelineStatusToken from '~/pipelines/components/tokens/pipeline_status_token.vue';
+import PipelineStatusToken from '~/pipelines/components/pipelines_list/tokens/pipeline_status_token.vue';
 
 describe('Pipeline Status Token', () => {
   let wrapper;
 
-  const findFilteredSearchToken = () => wrapper.find(GlFilteredSearchToken);
-  const findAllFilteredSearchSuggestions = () => wrapper.findAll(GlFilteredSearchSuggestion);
-  const findAllGlIcons = () => wrapper.findAll(GlIcon);
-
   const stubs = {
     GlFilteredSearchToken: {
+      props: GlFilteredSearchToken.props,
       template: `<div><slot name="suggestions"></slot></div>`,
     },
   };
+
+  const findFilteredSearchToken = () => wrapper.find(stubs.GlFilteredSearchToken);
+  const findAllFilteredSearchSuggestions = () => wrapper.findAll(GlFilteredSearchSuggestion);
+  const findAllGlIcons = () => wrapper.findAll(GlIcon);
 
   const defaultProps = {
     config: {
@@ -27,12 +28,12 @@ describe('Pipeline Status Token', () => {
     },
   };
 
-  const createComponent = options => {
+  const createComponent = () => {
     wrapper = shallowMount(PipelineStatusToken, {
       propsData: {
         ...defaultProps,
       },
-      ...options,
+      stubs,
     });
   };
 
@@ -50,10 +51,6 @@ describe('Pipeline Status Token', () => {
   });
 
   describe('shows statuses correctly', () => {
-    beforeEach(() => {
-      createComponent({ stubs });
-    });
-
     it('renders all pipeline statuses available', () => {
       expect(findAllFilteredSearchSuggestions()).toHaveLength(wrapper.vm.statuses.length);
       expect(findAllGlIcons()).toHaveLength(wrapper.vm.statuses.length);

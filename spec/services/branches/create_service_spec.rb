@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Branches::CreateService do
+RSpec.describe Branches::CreateService do
   subject(:service) { described_class.new(project, user) }
 
   let_it_be(:project) { create(:project_empty_repo) }
@@ -43,6 +43,26 @@ describe Branches::CreateService do
         expect(result[:status]).to eq(:error)
         expect(result[:message]).to eq('Invalid reference name: unknown')
       end
+    end
+
+    it 'logs and returns an error if there is a PreReceiveError exception' do
+      error_message = 'pre receive error'
+      raw_message = "GitLab: #{error_message}"
+      pre_receive_error = Gitlab::Git::PreReceiveError.new(raw_message)
+
+      allow(project.repository).to receive(:add_branch).and_raise(pre_receive_error)
+
+      expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+        pre_receive_error,
+        pre_receive_message: raw_message,
+        branch_name: 'new-feature',
+        ref: 'unknown'
+      )
+
+      result = service.execute('new-feature', 'unknown')
+
+      expect(result[:status]).to eq(:error)
+      expect(result[:message]).to eq(error_message)
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::Entry::Jobs do
+RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
   let(:entry) { described_class.new(config) }
 
   let(:config) do
@@ -68,7 +68,7 @@ describe Gitlab::Ci::Config::Entry::Jobs do
           let(:config) { { rspec: nil } }
 
           it 'reports error' do
-            expect(entry.errors).to include "jobs config should contain valid jobs"
+            expect(entry.errors).to include 'jobs rspec config should implement a script: or a trigger: keyword'
           end
         end
 

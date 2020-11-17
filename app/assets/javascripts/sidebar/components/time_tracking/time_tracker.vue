@@ -1,4 +1,5 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import TimeTrackingHelpState from './help_state.vue';
 import TimeTrackingCollapsedState from './collapsed_state.vue';
 import TimeTrackingSpentOnlyPane from './spent_only_pane.vue';
@@ -11,6 +12,7 @@ import eventHub from '../../event_hub';
 export default {
   name: 'IssuableTimeTracker',
   components: {
+    GlIcon,
     TimeTrackingCollapsedState,
     TimeTrackingEstimateOnlyPane,
     TimeTrackingSpentOnlyPane,
@@ -40,6 +42,21 @@ export default {
     limitToHours: {
       type: Boolean,
       default: false,
+      required: false,
+    },
+    /*
+      In issue list, "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
+      The actual hiding is controlled with css classes:
+        Hide "time-tracking-collapsed-state" 
+          if .right-sidebar .right-sidebar-collapsed .sidebar-collapsed-icon
+        Show "time-tracking-collapsed-state"
+          if .right-sidebar .right-sidebar-expanded .sidebar-collapsed-icon
+      
+      In Swimlanes sidebar, we do not use collapsed state at all.
+    */
+    showCollapsed: {
+      type: Boolean,
+      default: true,
       required: false,
     },
   },
@@ -91,8 +108,9 @@ export default {
 </script>
 
 <template>
-  <div v-cloak class="time_tracker time-tracking-component-wrap">
+  <div v-cloak class="time-tracker time-tracking-component-wrap" data-testid="time-tracker">
     <time-tracking-collapsed-state
+      v-if="showCollapsed"
       :show-comparison-state="showComparisonState"
       :show-no-time-tracking-state="showNoTimeTrackingState"
       :show-help-state="showHelpState"
@@ -101,17 +119,23 @@ export default {
       :time-spent-human-readable="humanTimeSpent"
       :time-estimate-human-readable="humanTimeEstimate"
     />
-    <div class="title hide-collapsed">
+    <div class="title hide-collapsed gl-mb-3">
       {{ __('Time tracking') }}
-      <div v-if="!showHelpState" class="help-button float-right" @click="toggleHelpState(true)">
-        <i class="fa fa-question-circle" aria-hidden="true"> </i>
+      <div
+        v-if="!showHelpState"
+        data-testid="helpButton"
+        class="help-button float-right"
+        @click="toggleHelpState(true)"
+      >
+        <gl-icon name="question-o" />
       </div>
       <div
-        v-if="showHelpState"
+        v-else
+        data-testid="closeHelpButton"
         class="close-help-button float-right"
         @click="toggleHelpState(false)"
       >
-        <i class="fa fa-close" aria-hidden="true"> </i>
+        <gl-icon name="close" />
       </div>
     </div>
     <div class="time-tracking-content hide-collapsed">

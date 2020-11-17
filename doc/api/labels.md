@@ -24,6 +24,7 @@ GET /projects/:id/labels
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user                                                              |
 | `with_counts` | boolean        | no       | Whether or not to include issue and merge request counts. Defaults to `false`. _([Introduced in GitLab 12.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/31543))_ |
 | `include_ancestor_groups` | boolean | no | Include ancestor groups. Defaults to `true`. |
+| `search` | string | no | Keyword to filter labels by. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/labels?with_counts=true"
@@ -199,7 +200,8 @@ DELETE /projects/:id/labels/:label_id
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/labels/bug"
 ```
 
-NOTE: **Note:** An older endpoint `DELETE /projects/:id/labels` with `name` in the parameters is still available, but deprecated.
+NOTE: **Note:**
+An older endpoint `DELETE /projects/:id/labels` with `name` in the parameters is still available, but deprecated.
 
 ## Edit an existing label
 
@@ -242,13 +244,17 @@ Example response:
 }
 ```
 
-NOTE: **Note:** An older endpoint `PUT /projects/:id/labels` with `name` or `label_id` in the parameters is still available, but deprecated.
+NOTE: **Note:**
+An older endpoint `PUT /projects/:id/labels` with `name` or `label_id` in the parameters is still available, but deprecated.
 
 ## Promote a project label to a group label
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/25218) in GitLab 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/25218) in GitLab 12.3.
+> - In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/231472), promoting a
+>   project label keeps that label's ID and changes it into a group label. Previously, promoting a
+>   project label created a new group label with a new ID and deleted the old label.
 
-Promotes a project label to a group label.
+Promotes a project label to a group label. The label keeps its ID.
 
 ```plaintext
 PUT /projects/:id/labels/:label_id/promote
@@ -279,7 +285,8 @@ Example response:
 }
 ```
 
-NOTE: **Note:** An older endpoint `PUT /projects/:id/labels/promote` with `name` in the parameters is still available, but deprecated.
+NOTE: **Note:**
+An older endpoint `PUT /projects/:id/labels/promote` with `name` in the parameters is still available, but deprecated.
 
 ## Subscribe to a label
 

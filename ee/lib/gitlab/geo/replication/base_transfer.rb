@@ -8,7 +8,12 @@ module Gitlab
 
         attr_reader :file_type, :file_id, :filename, :expected_checksum, :request_data, :resource
 
-        TEMP_PREFIX = 'tmp_'.freeze
+        TEMP_PREFIX = 'tmp_'
+        DOWNLOAD_TIMEOUT = {
+          connect: 60,
+          write: 60,
+          read: 60
+        }.freeze
 
         def initialize(resource:, file_type:, file_id:, request_data:, expected_checksum: nil, filename: nil)
           @resource = resource
@@ -128,7 +133,7 @@ module Gitlab
 
           begin
             # Make the request
-            response = ::HTTP.get(url, headers: req_headers)
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
 
             # Check for failures
             unless response.status.success?
@@ -183,7 +188,11 @@ module Gitlab
 
           begin
             # Make the request
-            response = ::HTTP.follow.get(url, headers: req_headers)
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
+
+            if response.status.redirect?
+              response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(response['Location'])
+            end
 
             # Check for failures
             unless response.status.success?

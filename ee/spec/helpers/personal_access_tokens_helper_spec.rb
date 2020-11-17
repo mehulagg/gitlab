@@ -160,4 +160,22 @@ RSpec.describe PersonalAccessTokensHelper do
 
     it_behaves_like 'feature availability'
   end
+
+  describe '#token_expiry_banner_message' do
+    subject { helper.token_expiry_banner_message(user) }
+
+    let_it_be(:user) { create(:user) }
+
+    context 'when user has an expired token requiring rotation' do
+      let_it_be(:expired_pat) { create(:personal_access_token, :expired, user: user, created_at: 1.month.ago) }
+
+      it { is_expected.to eq('At least one of your Personal Access Tokens is expired, but expiration enforcement is disabled. %{generate_new}') }
+    end
+
+    context 'when user has an expiring token requiring rotation' do
+      let_it_be(:expiring_pat) { create(:personal_access_token, expires_at: 3.days.from_now, user: user, created_at: 1.month.ago) }
+
+      it { is_expected.to eq('At least one of your Personal Access Tokens will expire soon, but expiration enforcement is disabled. %{generate_new}') }
+    end
+  end
 end

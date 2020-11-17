@@ -1,12 +1,11 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDeprecatedButton,
-    Icon,
+    GlButton,
+    GlIcon,
   },
   props: {
     rule: {
@@ -25,15 +24,16 @@ export default {
 
 <template>
   <div>
-    <gl-deprecated-button variant="none" @click="requestEditRule(rule)">
+    <gl-button @click="requestEditRule(rule)">
       <span>{{ __('Edit') }}</span>
-    </gl-deprecated-button>
-    <gl-deprecated-button
+    </gl-button>
+    <gl-button
       class="gl-ml-3 btn btn-inverted"
       variant="danger"
+      category="primary"
       @click="requestDeleteRule(rule)"
     >
-      <icon name="remove" :aria-label="__('Remove')" />
-    </gl-deprecated-button>
+      <gl-icon name="remove" :aria-label="__('Remove')" />
+    </gl-button>
   </div>
 </template>

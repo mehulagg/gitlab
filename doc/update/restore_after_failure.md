@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Restoring from backup after a failed upgrade
 
 Upgrades are usually smooth and restoring from backup is a rare occurrence.
@@ -10,7 +16,9 @@ the previous version you were using.
 
 First, roll back the code or package. For source installations this involves
 checking out the older version (branch or tag). For Omnibus installations this
-means installing the older `.deb` or `.rpm` package. Then, restore from a backup.
+means installing the older
+[`.deb` or `.rpm` package](https://packages.gitlab.com/gitlab). Then, restore from a
+backup.
 Follow the instructions in the
 [Backup and Restore](../raketasks/backup_restore.md#restore-gitlab)
 documentation.

@@ -3,6 +3,27 @@
 module InsightsActions
   extend ActiveSupport::Concern
 
+  module Embeddable
+    extend ActiveSupport::Concern
+
+    included do
+      before_action do
+        push_frontend_feature_flag(:embed_analytics_report, insights_entity)
+      end
+    end
+
+    def embedded
+      response.set_header('X-Frame-Options', 'SAMEORIGIN')
+
+      return render_404 unless Feature.enabled?(:embed_analytics_report, insights_entity)
+      return render_404 unless can?(current_user, :view_embedded_analytics_report, insights_entity)
+
+      render :embedded, layout: false
+    end
+  end
+
+  include Embeddable
+
   included do
     before_action :check_insights_available!
     before_action :validate_params, only: [:query]
@@ -47,8 +68,12 @@ module InsightsActions
     @query_param ||= params[:query] || {}
   end
 
-  def period_param
-    @period_param ||= query_param[:group_by]
+  def period_field_param
+    @period_field_param ||= query_param[:period_field]
+  end
+
+  def group_by_param
+    @group_by_param ||= query_param[:group_by]
   end
 
   def projects_param
@@ -61,17 +86,17 @@ module InsightsActions
 
   def insights_json
     issuables = finder.find
-    insights = reduce(issuables: issuables, period_limit: finder.period_limit)
+    insights = reduce(issuables: issuables, period_limit: finder.period_limit, period_field: period_field_param || finder.period_field)
     serializer.present(insights)
   end
 
-  def reduce(issuables:, period_limit: nil)
+  def reduce(issuables:, period_limit:, period_field:)
     case type_param
     when 'stacked-bar', 'line'
-      Gitlab::Insights::Reducers::LabelCountPerPeriodReducer.reduce(issuables, period: period_param, period_limit: period_limit, labels: collection_labels_param)
+      Gitlab::Insights::Reducers::LabelCountPerPeriodReducer.reduce(issuables, period: group_by_param, period_limit: period_limit, period_field: period_field, labels: collection_labels_param)
     when 'bar', 'pie'
-      if period_param
-        Gitlab::Insights::Reducers::CountPerPeriodReducer.reduce(issuables, period: period_param, period_limit: period_limit)
+      if group_by_param
+        Gitlab::Insights::Reducers::CountPerPeriodReducer.reduce(issuables, period: group_by_param, period_limit: period_limit, period_field: period_field)
       else
         Gitlab::Insights::Reducers::CountPerLabelReducer.reduce(issuables, labels: collection_labels_param)
       end
@@ -90,7 +115,7 @@ module InsightsActions
     when 'stacked-bar'
       Gitlab::Insights::Serializers::Chartjs::MultiSeriesSerializer
     when 'bar', 'pie'
-      if period_param
+      if group_by_param
         Gitlab::Insights::Serializers::Chartjs::BarTimeSeriesSerializer
       else
         Gitlab::Insights::Serializers::Chartjs::BarSerializer

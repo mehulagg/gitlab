@@ -6,7 +6,7 @@ import { chartHeight, legendLayoutTypes } from '../../constants';
 import { s__ } from '~/locale';
 import { graphDataValidatorForValues } from '../../utils';
 import { getTimeAxisOptions, axisTypes } from './options';
-import { timezones } from '../../format_date';
+import { formats, timezones } from '../../format_date';
 
 export default {
   components: {
@@ -61,14 +61,16 @@ export default {
   },
   computed: {
     chartData() {
-      return this.graphData.metrics.map(({ result }) => {
-        // This needs a fix. Not only metrics[0] should be shown.
-        // See https://gitlab.com/gitlab-org/gitlab/-/issues/220492
-        if (!result || result.length === 0) {
-          return [];
-        }
-        return result[0].values.map(val => val[1]);
-      });
+      return this.graphData.metrics
+        .map(({ label: name, result }) => {
+          // This needs a fix. Not only metrics[0] should be shown.
+          // See https://gitlab.com/gitlab-org/gitlab/-/issues/220492
+          if (!result || result.length === 0) {
+            return [];
+          }
+          return { name, data: result[0].values.map(val => val[1]) };
+        })
+        .slice(0, 1);
     },
     xAxisTitle() {
       return this.graphData.x_label !== undefined ? this.graphData.x_label : '';
@@ -97,7 +99,7 @@ export default {
     chartOptions() {
       return {
         xAxis: {
-          ...getTimeAxisOptions({ timezone: this.timezone }),
+          ...getTimeAxisOptions({ timezone: this.timezone, format: formats.shortTime }),
           type: this.xAxisType,
         },
         dataZoom: [this.dataZoomConfig],
@@ -136,7 +138,7 @@ export default {
     <gl-stacked-column-chart
       ref="chart"
       v-bind="$attrs"
-      :data="chartData"
+      :bars="chartData"
       :option="chartOptions"
       :x-axis-title="xAxisTitle"
       :y-axis-title="yAxisTitle"
@@ -144,7 +146,6 @@ export default {
       :group-by="groupBy"
       :width="width"
       :height="height"
-      :series-names="seriesNames"
       :legend-layout="legendLayout"
       :legend-average-text="legendAverageText"
       :legend-current-text="legendCurrentText"

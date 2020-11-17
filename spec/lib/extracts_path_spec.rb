@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ExtractsPath do
+RSpec.describe ExtractsPath do
   include described_class
   include RepoHelpers
   include Gitlab::Routing
@@ -110,6 +110,19 @@ describe ExtractsPath do
 
           assign_ref_vars
         end
+      end
+    end
+
+    context 'ref and path are nil' do
+      let(:params) { { path: nil, ref: nil } }
+
+      it 'does not set commit' do
+        expect(container.repository).not_to receive(:commit).with('')
+        expect(self).to receive(:render_404)
+
+        assign_ref_vars
+
+        expect(@commit).to be_nil
       end
     end
   end

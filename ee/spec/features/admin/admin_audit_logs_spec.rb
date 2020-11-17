@@ -105,32 +105,77 @@ RSpec.describe 'Admin::AuditLogs', :js do
     describe 'filter by date' do
       let_it_be(:audit_event_1) { create(:user_audit_event, created_at: 5.days.ago) }
       let_it_be(:audit_event_2) { create(:user_audit_event, created_at: 3.days.ago) }
-      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: 1.day.ago) }
+      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: Date.current) }
+      let_it_be(:events_path) { :admin_audit_logs_path }
+      let_it_be(:entity) { nil }
 
-      it 'shows only 2 days old events' do
-        visit admin_audit_logs_path(created_after: 4.days.ago.to_date, created_before: 2.days.ago.to_date)
+      it_behaves_like 'audit events date filter'
+    end
 
-        find('[data-testid="audit-events-table"] td', match: :first)
+    describe 'personal access token events' do
+      shared_examples 'personal access token audit event' do
+        it 'show personal access token event details' do
+          visit admin_audit_logs_path
 
-        expect(page).not_to have_content(audit_event_1.present.date)
-        expect(page).to have_content(audit_event_2.present.date)
-        expect(page).not_to have_content(audit_event_3.present.date)
+          expect(page).to have_content(message)
+        end
       end
 
-      it 'shows only yesterday events' do
-        visit admin_audit_logs_path(created_after: 2.days.ago.to_date)
+      context 'create personal access token' do
+        let(:personal_access_token_params) { { name: 'Test token', impersonation: false, scopes: [:api], expires_at: Date.today + 1.month } }
+        let(:personal_access_token) do
+          PersonalAccessTokens::CreateService.new(
+            current_user: admin, target_user: user, params: personal_access_token_params
+          ).execute.payload[:personal_access_token]
+        end
 
-        find('[data-testid="audit-events-table"] td', match: :first)
+        context 'when creation succeeds' do
+          before do
+            personal_access_token
+          end
 
-        expect(page).not_to have_content(audit_event_1.present.date)
-        expect(page).not_to have_content(audit_event_2.present.date)
-        expect(page).to have_content(audit_event_3.present.date)
+          let(:message) { "Created personal access token with id #{personal_access_token.id}" }
+
+          it_behaves_like 'personal access token audit event'
+        end
+
+        context 'when creation fails' do
+          before do
+            allow_any_instance_of(ServiceResponse).to receive(:success?).and_return(false)
+            allow_any_instance_of(ServiceResponse).to receive(:message).and_return('error')
+            personal_access_token
+          end
+
+          let(:message) { "Attempted to create personal access token but failed with message: error" }
+
+          it_behaves_like 'personal access token audit event'
+        end
       end
 
-      it 'shows a message if provided date is invalid' do
-        visit admin_audit_logs_path(created_after: '12-345-6789')
+      context 'revoke personal access token' do
+        let(:personal_access_token) { create(:personal_access_token, user: user) }
 
-        expect(page).to have_content('Invalid date format. Please use UTC format as YYYY-MM-DD')
+        context 'when revocation succeeds' do
+          before do
+            PersonalAccessTokens::RevokeService.new(admin, token: personal_access_token).execute
+          end
+
+          let(:message) { "Revoked personal access token with id #{personal_access_token.id}" }
+
+          it_behaves_like 'personal access token audit event'
+        end
+
+        context 'when revocation fails' do
+          let(:message) { "Attempted to revoke personal access token with id #{personal_access_token.id} but failed with message: error" }
+
+          before do
+            allow_any_instance_of(ServiceResponse).to receive(:success?).and_return(false)
+            allow_any_instance_of(ServiceResponse).to receive(:message).and_return('error')
+            PersonalAccessTokens::RevokeService.new(admin, token: personal_access_token).execute
+          end
+
+          it_behaves_like 'personal access token audit event'
+        end
       end
     end
 
@@ -162,13 +207,14 @@ RSpec.describe 'Admin::AuditLogs', :js do
   end
 
   def filter_for(type, name)
-    within '[data-qa-selector="admin_audit_log_filter"]' do
-      find('input').click
+    filter_container = '[data-testid="audit-events-filter"]'
 
+    find(filter_container).click
+    within filter_container do
       click_link type
       click_link name
 
-      find('button[type="button"]').click
+      find('button[type="button"]:not([name="clear"])').click
     end
 
     wait_for_requests

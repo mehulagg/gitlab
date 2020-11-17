@@ -11,16 +11,25 @@ module Gitlab
             def perform!
               raise ArgumentError, 'missing config content' unless @command.config_content
 
-              @command.config_processor = ::Gitlab::Ci::YamlProcessor.new(
+              result = ::Gitlab::Ci::YamlProcessor.new(
                 @command.config_content, {
                   project: project,
                   sha: @pipeline.sha,
                   user: current_user,
                   parent_pipeline: parent_pipeline
                 }
-              )
-            rescue Gitlab::Ci::YamlProcessor::ValidationError => ex
-              error(ex.message, config_error: true)
+              ).execute
+
+              add_warnings_to_pipeline(result.warnings)
+
+              if result.valid?
+                @command.yaml_processor_result = result
+              else
+                error(result.errors.first, config_error: true)
+              end
+
+              @pipeline.merged_yaml = result.merged_yaml
+
             rescue => ex
               Gitlab::ErrorTracking.track_exception(ex,
                 project_id: project.id,
@@ -33,6 +42,14 @@ module Gitlab
 
             def break?
               @pipeline.errors.any? || @pipeline.persisted?
+            end
+
+            private
+
+            def add_warnings_to_pipeline(warnings)
+              return unless warnings.present?
+
+              warnings.each { |message| warning(message) }
             end
           end
         end

@@ -1,0 +1,5 @@
+---
+title: Fix scoped label text color in dark mode
+merge_request: 47602
+author:
+type: fixed

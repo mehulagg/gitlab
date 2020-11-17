@@ -4,22 +4,28 @@
       = _('Owner')
     .table-mobile-content
       = render 'shared/credentials_inventory/users/user_detail', user: personal_access_token.user
-  .table-section.section-30
+  .table-section.section-20
     .table-mobile-header{ role: 'rowheader' }
       = _('Scope')
-    .table-mobile-content
+    .table-mobile-content.gl-white-space-normal
       - scopes = personal_access_token.scopes
       = scopes.present? ? scopes.join(", ") : _('No Scopes')
-  .table-section.section-10
+  .table-section.section-15
     .table-mobile-header{ role: 'rowheader' }
       = _('Created On')
     .table-mobile-content
       = personal_access_token.created_at.to_date
-  .table-section.section-10
+  .table-section.section-15
     .table-mobile-header{ role: 'rowheader' }
       = _('Expiration')
+    .table-mobile-content.gl-w-full
+      = render 'shared/credentials_inventory/expiry_date', credential: personal_access_token
+  .table-section.section-10
+    .table-mobile-header{ role: 'rowheader' }
+      = _('Revoked')
     .table-mobile-content
-      - if personal_access_token.expires?
-        = personal_access_token.expires_at
-      - else
-        = _('Never')
+      - if personal_access_token.revoked?
+        -# We're inferring the revoked date from the last updated_at, see https://gitlab.com/gitlab-org/gitlab/-/issues/218046#note_362875952
+        = personal_access_token.updated_at.to_date
+      - elsif revoke_button_available? && personal_access_token.active?
+        = link_to _('Revoke'), personal_access_token_revoke_path(personal_access_token), method: :put, data: { confirm: _('Are you sure you want to revoke this personal access token? This action cannot be undone.') }, class: 'btn btn-danger btn-danger-secondary btn-md btn-secondary gl-button'

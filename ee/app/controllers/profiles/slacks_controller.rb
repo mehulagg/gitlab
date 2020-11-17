@@ -7,6 +7,8 @@ class Profiles::SlacksController < Profiles::ApplicationController
 
   layout 'application'
 
+  feature_category :users
+
   def edit
     @projects = disabled_projects if current_user
   end

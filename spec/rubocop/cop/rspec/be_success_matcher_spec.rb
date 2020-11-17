@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-
+require 'rubocop'
 require_relative '../../../../rubocop/cop/rspec/be_success_matcher'
 
-describe RuboCop::Cop::RSpec::BeSuccessMatcher, type: :rubocop do
+RSpec.describe RuboCop::Cop::RSpec::BeSuccessMatcher, type: :rubocop do
   include CopHelper
 
   let(:source_file) { 'spec/foo_spec.rb' }

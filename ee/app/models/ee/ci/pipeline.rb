@@ -14,8 +14,8 @@ module EE
       prepended do
         include UsageStatistics
 
-        has_many :vulnerabilities_occurrence_pipelines, class_name: 'Vulnerabilities::OccurrencePipeline'
-        has_many :vulnerability_findings, source: :occurrence, through: :vulnerabilities_occurrence_pipelines, class_name: 'Vulnerabilities::Occurrence'
+        has_many :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :pipeline
+        has_many :vulnerability_findings, source: :finding, through: :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::Finding'
 
         has_many :auto_canceled_pipelines, class_name: 'Ci::Pipeline', foreign_key: 'auto_canceled_by_id'
         has_many :auto_canceled_jobs, class_name: 'CommitStatus', foreign_key: 'auto_canceled_by_id'
@@ -23,16 +23,17 @@ module EE
         # Subscriptions to this pipeline
         has_many :downstream_bridges, class_name: '::Ci::Bridge', foreign_key: :upstream_pipeline_id
         has_many :security_scans, class_name: 'Security::Scan', through: :builds
+        has_many :security_findings, class_name: 'Security::Finding', through: :security_scans, source: :findings
 
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
         # Legacy way to fetch security reports based on job name. This has been replaced by the reports feature.
         scope :with_legacy_security_reports, -> do
-          joins(:downloadable_artifacts).where(ci_builds: { name: %w[sast secret_detection dependency_scanning sast:container container_scanning dast] })
+          joins(:downloadable_artifacts).where(ci_builds: { name: %w[sast secret_detection dependency_scanning container_scanning dast] })
         end
 
         scope :with_vulnerabilities, -> do
-          where('EXISTS (?)', ::Vulnerabilities::OccurrencePipeline.where('ci_pipelines.id=vulnerability_occurrence_pipelines.pipeline_id').select(1))
+          where('EXISTS (?)', ::Vulnerabilities::FindingPipeline.where('ci_pipelines.id=vulnerability_occurrence_pipelines.pipeline_id').select(1))
         end
 
         # This structure describes feature levels
@@ -45,10 +46,14 @@ module EE
           container_scanning: %i[container_scanning],
           dast: %i[dast],
           performance: %i[merge_request_performance_metrics],
+          browser_performance: %i[merge_request_performance_metrics],
+          load_performance: %i[merge_request_performance_metrics],
           license_management: %i[license_scanning],
           license_scanning: %i[license_scanning],
           metrics: %i[metrics_reports],
-          requirements: %i[requirements]
+          requirements: %i[requirements],
+          coverage_fuzzing: %i[coverage_fuzzing],
+          api_fuzzing: %i[api_fuzzing]
         }.freeze
 
         state_machine :status do
@@ -57,6 +62,7 @@ module EE
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
+              ::Security::StoreScansWorker.perform_async(pipeline.id)
               SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
             end
           end
@@ -91,20 +97,18 @@ module EE
       def batch_lookup_report_artifact_for_file_type(file_type)
         return unless available_licensed_report_type?(file_type)
 
-        latest_report_artifacts
-          .values_at(*::Ci::JobArtifact.associated_file_types_for(file_type.to_s))
-          .flatten
-          .compact
-          .last
+        super
       end
 
       def expose_license_scanning_data?
         batch_lookup_report_artifact_for_file_type(:license_scanning).present?
       end
 
-      def security_reports
-        ::Gitlab::Ci::Reports::Security::Reports.new(sha).tap do |security_reports|
-          builds.latest.with_reports(::Ci::JobArtifact.security_reports).each do |build|
+      def security_reports(report_types: [])
+        reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
+
+        ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+          latest_report_builds(reports_scope).each do |build|
             build.collect_security_reports!(security_reports)
           end
         end
@@ -112,7 +116,7 @@ module EE
 
       def license_scanning_report
         ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_license_scanning_reports!(license_management_report)
           end
         end
@@ -120,10 +124,10 @@ module EE
 
       def dependency_list_report
         ::Gitlab::Ci::Reports::DependencyList::Report.new.tap do |dependency_list_report|
-          builds.latest.with_reports(::Ci::JobArtifact.dependency_list_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.dependency_list_reports).each do |build|
             build.collect_dependency_list_reports!(dependency_list_report)
           end
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_licenses_for_dependency_list!(dependency_list_report)
           end
         end
@@ -131,7 +135,7 @@ module EE
 
       def metrics_report
         ::Gitlab::Ci::Reports::Metrics::Report.new.tap do |metrics_report|
-          builds.latest.with_reports(::Ci::JobArtifact.metrics_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.metrics_reports).each do |build|
             build.collect_metrics_reports!(metrics_report)
           end
         end
@@ -159,45 +163,45 @@ module EE
         merge_request_pipeline? && merge_train_ref?
       end
 
+      def latest_failed_security_builds
+        security_builds.select(&:latest?)
+                       .select(&:failed?)
+      end
+
+      def license_scan_completed?
+        latest_report_builds(::Ci::JobArtifact.license_scanning_reports).exists?
+      end
+
+      def can_store_security_reports?
+        project.can_store_security_reports? && has_security_reports?
+      end
+
+      def has_security_findings?
+        security_findings.exists?
+      end
+
       private
 
-      def project_has_subscriptions?
-        return false unless ::Feature.enabled?(:ci_project_subscriptions, project)
+      def has_security_reports?
+        has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+      end
 
-        project.downstream_projects.any?
+      def project_has_subscriptions?
+        project.feature_available?(:ci_project_subscriptions) &&
+          project.downstream_projects.any?
       end
 
       def merge_train_ref?
         ::MergeRequest.merge_train_ref?(ref)
       end
 
-      # This batch loads the latest reports for each CI job artifact
-      # type (e.g. sast, dast, etc.) in a single SQL query to eliminate
-      # the need to do N different `job_artifacts.where(file_type:
-      # X).last` calls.
-      #
-      # Return a hash of file type => array of 1 job artifact
-      def latest_report_artifacts
-        ::Gitlab::SafeRequestStore.fetch("pipeline:#{self.id}:latest_report_artifacts") do
-          # Note we use read_attribute(:project_id) to read the project
-          # ID instead of self.project_id. The latter appears to load
-          # the Project model. This extra filter doesn't appear to
-          # affect query plan but included to ensure we don't leak the
-          # wrong informaiton.
-          ::Ci::JobArtifact.where(
-            id: job_artifacts.with_reports
-              .select('max(ci_job_artifacts.id) as id')
-              .where(project_id: self.read_attribute(:project_id))
-              .group(:file_type)
-          )
-            .preload(:job)
-            .group_by(&:file_type)
-        end
-      end
-
       def available_licensed_report_type?(file_type)
         feature_names = REPORT_LICENSED_FEATURES.fetch(file_type)
         feature_names.nil? || feature_names.any? { |feature| project.feature_available?(feature) }
+      end
+
+      def security_builds
+        @security_builds ||= ::Security::SecurityJobsFinder.new(pipeline: self).execute
       end
     end
   end

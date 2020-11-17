@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 module RackAttackSpecHelpers
-  def post_args_with_token_headers(url, token_headers)
-    [url, params: nil, headers: token_headers]
-  end
-
   def api_get_args_with_token_headers(partial_url, token_headers)
     ["/api/#{API::API.version}#{partial_url}", params: nil, headers: token_headers]
   end
@@ -29,5 +25,17 @@ module RackAttackSpecHelpers
     yield
 
     expect(response).to have_gitlab_http_status(:too_many_requests)
+  end
+
+  def expect_ok(&block)
+    yield
+
+    expect(response).to have_gitlab_http_status(:ok)
+  end
+
+  def random_next_ip
+    allow_next_instance_of(Rack::Attack::Request) do |instance|
+      allow(instance).to receive(:ip).and_return(FFaker::Internet.ip_v4_address)
+    end
   end
 end

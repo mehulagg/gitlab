@@ -1,15 +1,14 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 
 export default {
   name: 'TimeTrackingCollapsedState',
   components: {
-    icon,
+    GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     showComparisonState: {
@@ -98,14 +97,12 @@ export default {
 
 <template>
   <div
-    v-tooltip
+    v-gl-tooltip:body.viewport.left
     :title="tooltipText"
+    data-testid="collapsedState"
     class="sidebar-collapsed-icon"
-    data-container="body"
-    data-placement="left"
-    data-boundary="viewport"
   >
-    <icon name="timer" />
+    <gl-icon name="timer" />
     <div class="time-tracking-collapsed-summary">
       <div :class="divClass">
         <span :class="spanClass"> {{ text }} </span>

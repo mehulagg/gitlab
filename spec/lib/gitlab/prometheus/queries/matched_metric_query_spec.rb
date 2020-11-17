@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Prometheus::Queries::MatchedMetricQuery do
+RSpec.describe Gitlab::Prometheus::Queries::MatchedMetricQuery do
   include Prometheus::MetricBuilders
 
   let(:metric_group_class) { Gitlab::Prometheus::MetricGroup }
@@ -17,6 +17,7 @@ describe Gitlab::Prometheus::Queries::MatchedMetricQuery do
     [{ '__name__' => 'metric_a' },
      { '__name__' => 'metric_b' }]
   end
+
   let(:partially_empty_series_info) { [{ '__name__' => 'metric_a', 'environment' => '' }] }
   let(:empty_series_info) { [] }
 

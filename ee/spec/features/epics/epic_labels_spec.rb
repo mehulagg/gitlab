@@ -38,7 +38,7 @@ RSpec.describe 'Assign labels to an epic', :js do
   context 'when labels icon is clicked on collapsed sidebar' do
     before do
       page.within('aside.right-sidebar') do
-        find('.fa-tags').click
+        find('[data-testid="labels-icon"]').click
       end
       wait_for_requests
     end

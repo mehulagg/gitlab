@@ -10,8 +10,8 @@ module EE
     # See https://gitlab.com/gitlab-org/gitlab/issues/7846
     prepended do
       include ::Emails::AdminNotification
-      include ::Emails::ServiceDesk
       include ::Emails::Epics
+      include ::Emails::Requirements
     end
 
     attr_reader :group

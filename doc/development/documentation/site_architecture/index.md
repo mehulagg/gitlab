@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: "Learn how GitLab's documentation website is architectured."
 ---
 
@@ -111,7 +114,7 @@ located in the [Dockerfiles directory](https://gitlab.com/gitlab-org/gitlab-docs
 
 If you need to rebuild the Docker images immediately (must have maintainer level permissions):
 
-CAUTION: **Caution**
+CAUTION: **Caution:**
 If you change the dockerfile configuration and rebuild the images, you can break the master
 pipeline in the main `gitlab` repository as well as in `gitlab-docs`. Create an image with
 a different name first and test it to ensure you do not break the pipelines.
@@ -138,6 +141,8 @@ If you need to build and deploy the site immediately (must have maintainer level
 1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI / CD > Schedules**.
 1. For the `Build docs.gitlab.com every 4 hours` scheduled pipeline, click the **play** (**{play}**) button.
 
+Read more about the [deployment process](deployment_process.md).
+
 ## Using YAML data files
 
 The easiest way to achieve something similar to
@@ -152,9 +157,9 @@ Suppose we have the `content/_data/versions.yaml` file with the content:
 
 ```yaml
 versions:
-- 10.6
-- 10.5
-- 10.4
+  - 10.6
+  - 10.5
+  - 10.4
 ```
 
 We can then loop over the `versions` array with something like:
@@ -225,11 +230,13 @@ for its search function. This is how it works:
    there's a JavaScript snippet which initiates DocSearch by using an API key
    and an index name (`gitlab`) that are needed for Algolia to show the results.
 
-NOTE: **For GitLab employees:**
-The credentials to access the Algolia dashboard are stored in 1Password. If you
-want to receive weekly reports of the search usage, search the Google doc with
+### Algolia notes for GitLab team members
+
+If you’re a GitLab team member, find credentials for the Algolia dashboard
+in the shared [GitLab 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
+To receive weekly reports of the search usage, search the Google doc with
 title `Email, Slack, and GitLab Groups and Aliases`, search for `docsearch`,
-and add a comment with your email to be added to the alias that gets the weekly
+and add a comment with your email. You'll be added to the alias that gets the weekly
 reports.
 
 ## Monthly release process (versions)

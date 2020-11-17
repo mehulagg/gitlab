@@ -1,5 +1,0 @@
-- return unless EE::Gitlab::ServiceDesk.available?(project: @project)
-
-= nav_link(controller: :issues, action: :service_desk ) do
-  = link_to service_desk_project_issues_path(@project), title: 'Service Desk' do
-    = _('Service Desk')

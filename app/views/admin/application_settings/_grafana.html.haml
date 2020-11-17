@@ -4,7 +4,7 @@
   %fieldset
     %p
       = _("Add a Grafana button in the admin sidebar, monitoring section, to access a variety of statistics on the health and performance of GitLab.")
-      = link_to icon('question-circle'), help_page_path('administration/monitoring/performance/grafana_configuration.md')
+      = link_to sprite_icon('question-o'), help_page_path('administration/monitoring/performance/grafana_configuration.md')
     .form-group
       .form-check
         = f.check_box :grafana_enabled, class: 'form-check-input'
@@ -14,4 +14,4 @@
       = f.label :grafana_url, _('Grafana URL'), class: 'label-bold'
       = f.text_field :grafana_url, class: 'form-control', placeholder: '/-/grafana'
 
-  = f.submit _('Save changes'), class: "btn btn-success"
+  = f.submit _('Save changes'), class: "gl-button btn btn-success"

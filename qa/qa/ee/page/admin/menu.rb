@@ -47,7 +47,7 @@ module QA
 
           def go_to_template_settings
             hover_element(:admin_settings_item) do
-              within_submenu(:admin_sidebar_settings_submenu) do
+              within_submenu(:admin_sidebar_settings_submenu_content) do
                 click_element :admin_settings_template_item
               end
             end

@@ -10,22 +10,20 @@ RSpec.describe Gitlab::Prometheus::Queries::PacketFlowMetricsQuery do
       { "metric" => { "verdict" => "DROPPED" }, "value" => [1582231596.64, "5.002730665588791"] }
     ]
   end
+
   let(:client) { double('prometheus_client', query: query_response) }
 
   subject { described_class.new(client) }
 
   describe '#query' do
     it 'sends prometheus query' do
-      query = 'sum by(verdict) (' \
-              'increase(hubble_flows_processed_total{destination="query-12345678-production"}[1w])' \
-              ' or on(source,destination,verdict) ' \
-              'increase(hubble_flows_processed_total{source="query-12345678-production"}[1w]))'
-      subject.query(namespace)
+      query = 'sum by(verdict) (increase(hubble_flows_processed_total[1w]))'
+      subject.query
       expect(client).to have_received(:query).with(query)
     end
 
     it 'returns metrics' do
-      result = subject.query(namespace)
+      result = subject.query
       expect(result).to match(forwards: 73772, drops: 5)
     end
   end

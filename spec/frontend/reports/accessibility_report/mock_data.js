@@ -51,5 +51,3 @@ export const mockReport = {
   existing_notes: [],
   existing_warnings: [],
 };
-
-export default () => {};

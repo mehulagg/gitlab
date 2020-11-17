@@ -1,14 +1,22 @@
-import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
-import Vue from 'vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import Status from 'ee/sidebar/components/status/status.vue';
 import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
 
 const getStatusText = wrapper => wrapper.find('.value .text-plain').text();
 
-const getTooltipText = wrapper => wrapper.find(GlTooltip).text();
+const getStatusTitleText = wrapper => wrapper.find('[data-testid="statusTitle"]').text();
+
+const getStatusTooltipValue = wrapper =>
+  getBinding(wrapper.find({ ref: 'status' }).element, 'gl-tooltip').value;
+
+const getEditButtonTooltipValue = wrapper =>
+  getBinding(wrapper.find('[data-testid="editButtonTooltip"]').element, 'gl-tooltip').value;
 
 const getEditButton = wrapper => wrapper.find({ ref: 'editButton' });
+
+const getDropdownClasses = wrapper => wrapper.find('[data-testid="dropdownWrapper"]').classes();
 
 const getDropdownElement = wrapper => wrapper.find(GlDropdown);
 
@@ -20,22 +28,29 @@ describe('Status', () => {
   function shallowMountStatus(propsData) {
     wrapper = shallowMount(Status, {
       propsData,
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
     });
   }
 
   function mountStatus(propsData) {
     wrapper = mount(Status, {
       propsData,
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
     });
   }
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('shows the text "Status"', () => {
     shallowMountStatus();
-    expect(wrapper.find('.title').text()).toBe('Health status');
+    expect(getStatusTitleText(wrapper)).toBe('Health status');
   });
 
   describe('loading icon', () => {
@@ -46,7 +61,7 @@ describe('Status', () => {
 
       shallowMountStatus(props);
 
-      expect(wrapper.contains(GlLoadingIcon)).toBe(true);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
 
     it('is hidden when not retrieving data', () => {
@@ -56,7 +71,7 @@ describe('Status', () => {
 
       shallowMountStatus(props);
 
-      expect(wrapper.contains(GlLoadingIcon)).toBe(false);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
     });
   });
 
@@ -71,19 +86,27 @@ describe('Status', () => {
       expect(getEditButton(wrapper).exists()).toBe(true);
     });
 
-    it('is hidden when user cannot edit', () => {
-      const props = {
-        isEditable: false,
-      };
+    describe('when disabled', () => {
+      beforeEach(() => {
+        const props = {
+          isEditable: false,
+        };
 
-      shallowMountStatus(props);
+        shallowMountStatus(props);
+      });
+      it('is disabled when user cannot edit', () => {
+        expect(getEditButton(wrapper).attributes().disabled).toBe('true');
+      });
 
-      expect(getEditButton(wrapper).exists()).toBe(false);
+      it('will render a tooltip with an informative message', () => {
+        const tooltipTitle = 'Health status cannot be edited because this issue is closed';
+        expect(getEditButtonTooltipValue(wrapper).title).toBe(tooltipTitle);
+      });
     });
   });
 
   describe('remove status dropdown item', () => {
-    it('is displayed when there is a status', () => {
+    it('is displayed when there is a status', async () => {
       const props = {
         isEditable: true,
         status: healthStatus.AT_RISK,
@@ -93,9 +116,8 @@ describe('Status', () => {
 
       wrapper.vm.isDropdownShowing = true;
 
-      wrapper.vm.$nextTick(() => {
-        expect(getRemoveStatusItem(wrapper).exists()).toBe(true);
-      });
+      await wrapper.vm.$nextTick();
+      expect(getRemoveStatusItem(wrapper).exists()).toBe(true);
     });
 
     it('emits an onDropdownClick event with argument null when clicked', () => {
@@ -131,7 +153,7 @@ describe('Status', () => {
       });
 
       it('shows "Status" in the tooltip', () => {
-        expect(getTooltipText(wrapper)).toBe('Health status');
+        expect(getStatusTooltipValue(wrapper).title).toBe('Health status');
       });
     });
 
@@ -149,7 +171,9 @@ describe('Status', () => {
       });
 
       it(`shows "Status: ${healthStatusTextMap[statusValue]}" in the tooltip`, () => {
-        expect(getTooltipText(wrapper)).toBe(`Health status: ${healthStatusTextMap[statusValue]}`);
+        expect(getStatusTooltipValue(wrapper).title).toBe(
+          `Health status: ${healthStatusTextMap[statusValue]}`,
+        );
       });
     });
   });
@@ -164,7 +188,7 @@ describe('Status', () => {
 
       const dropdown = wrapper.find('.dropdown');
 
-      expect(dropdown.classes()).toContain('d-none');
+      expect(dropdown.classes()).toContain('gl-display-none');
     });
 
     describe('when hidden', () => {
@@ -176,12 +200,11 @@ describe('Status', () => {
         mountStatus(props);
       });
 
-      it('shows the dropdown when the Edit button is clicked', () => {
+      it('shows the dropdown when the Edit button is clicked', async () => {
         getEditButton(wrapper).trigger('click');
 
-        return Vue.nextTick().then(() => {
-          expect(wrapper.find('.dropdown').classes()).toContain('show');
-        });
+        await wrapper.vm.$nextTick();
+        expect(getDropdownClasses(wrapper)).toContain('show');
       });
     });
 
@@ -191,7 +214,7 @@ describe('Status', () => {
           isEditable: true,
         };
 
-        shallowMountStatus(props);
+        mountStatus(props);
 
         wrapper.setData({ isDropdownShowing: true });
       });
@@ -206,22 +229,20 @@ describe('Status', () => {
         ).toContain(message);
       });
 
-      it('hides form when the `edit` button is clicked', () => {
+      it('hides form when the `edit` button is clicked', async () => {
         getEditButton(wrapper).trigger('click');
 
-        return Vue.nextTick().then(() => {
-          expect(wrapper.find('.dropdown').classes()).toContain('d-none');
-        });
+        await wrapper.vm.$nextTick();
+        expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
       });
 
-      it('hides form when a dropdown item is clicked', () => {
+      it('hides form when a dropdown item is clicked', async () => {
         const dropdownItem = wrapper.findAll(GlDropdownItem).at(1);
 
         dropdownItem.vm.$emit('click');
 
-        return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.find('.dropdown').classes()).toContain('d-none');
-        });
+        await wrapper.vm.$nextTick();
+        expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
       });
     });
 
@@ -260,15 +281,14 @@ describe('Status', () => {
       // Test that "onTrack", "needsAttention", and "atRisk" values are emitted when form is submitted
       it.each(getIterableArray(Object.values(healthStatus)))(
         'emits onFormSubmit event with argument "%s" when user selects the option and submits form',
-        (status, index) => {
+        async (status, index) => {
           wrapper
             .findAll(GlDropdownItem)
             .at(index + 1)
             .vm.$emit('click', { preventDefault: () => null });
 
-          return Vue.nextTick().then(() => {
-            expect(wrapper.emitted().onDropdownClick[0]).toEqual([status]);
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.emitted().onDropdownClick[0]).toEqual([status]);
         },
       );
     });

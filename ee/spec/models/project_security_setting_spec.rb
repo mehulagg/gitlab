@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectSecuritySetting do
+RSpec.describe ProjectSecuritySetting do
   describe 'associations' do
     subject { create(:project_security_setting) }
 

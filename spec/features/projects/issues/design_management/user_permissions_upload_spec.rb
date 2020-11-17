@@ -12,10 +12,6 @@ RSpec.describe 'User design permissions', :js do
     enable_design_management
 
     visit project_issue_path(project, issue)
-
-    click_link 'Designs'
-
-    wait_for_requests
   end
 
   it 'user does not have permissions to upload design' do

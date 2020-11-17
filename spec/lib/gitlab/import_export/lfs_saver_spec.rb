@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::LfsSaver do
+RSpec.describe Gitlab::ImportExport::LfsSaver do
   let(:shared) { project.import_export_shared }
   let(:export_path) { "#{Dir.tmpdir}/project_tree_saver_spec" }
   let(:project) { create(:project) }
@@ -73,14 +73,6 @@ describe Gitlab::ImportExport::LfsSaver do
               ]
             }
           )
-        end
-
-        it 'does not save a json file if feature is disabled' do
-          stub_feature_flags(export_lfs_objects_projects: false)
-
-          saver.save
-
-          expect(File.exist?(lfs_json_file)).to eq(false)
         end
       end
     end

@@ -3,6 +3,7 @@ import { GlColumnChart, GlLineChart, GlStackedColumnChart } from '@gitlab/ui/dis
 
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
+import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 
 import InsightsChartError from './insights_chart_error.vue';
 import { CHART_TYPES } from '../constants';
@@ -14,8 +15,9 @@ export default {
     GlColumnChart,
     GlLineChart,
     GlStackedColumnChart,
-    ResizableChartContainer,
     InsightsChartError,
+    ResizableChartContainer,
+    ChartSkeletonLoader,
   },
   props: {
     loaded: {
@@ -117,43 +119,7 @@ export default {
 };
 </script>
 <template>
-  <resizable-chart-container v-if="loaded" class="insights-chart">
-    <h5 class="text-center">{{ title }}</h5>
-    <p v-if="description" class="text-center">{{ description }}</p>
-    <gl-column-chart
-      v-if="isColumnChart"
-      v-bind="$attrs"
-      :height="$options.height"
-      :data="data.datasets"
-      x-axis-type="category"
-      :x-axis-title="data.xAxisTitle"
-      :y-axis-title="data.yAxisTitle"
-      :option="chartOptions"
-      @created="onChartCreated"
-    />
-    <gl-stacked-column-chart
-      v-else-if="isStackedColumnChart"
-      v-bind="$attrs"
-      :height="$options.height"
-      :data="data.datasets"
-      :group-by="data.labels"
-      :series-names="data.seriesNames"
-      x-axis-type="category"
-      :x-axis-title="data.xAxisTitle"
-      :y-axis-title="data.yAxisTitle"
-      :option="chartOptions"
-      @created="onChartCreated"
-    />
-    <gl-line-chart
-      v-else-if="isLineChart"
-      v-bind="$attrs"
-      :height="$options.height"
-      :data="data.datasets"
-      :option="chartOptions"
-      @created="onChartCreated"
-    />
-  </resizable-chart-container>
-  <div v-else-if="error" class="insights-chart">
+  <div v-if="error" class="insights-chart">
     <insights-chart-error
       :chart-name="title"
       :title="__('This chart could not be displayed')"
@@ -161,4 +127,40 @@ export default {
       :error="error"
     />
   </div>
+  <resizable-chart-container v-else class="insights-chart">
+    <h5 class="text-center">{{ title }}</h5>
+    <p v-if="description" class="text-center">{{ description }}</p>
+    <gl-column-chart
+      v-if="loaded && isColumnChart"
+      v-bind="$attrs"
+      :height="$options.height"
+      :bars="data.datasets"
+      x-axis-type="category"
+      :x-axis-title="data.xAxisTitle"
+      :y-axis-title="data.yAxisTitle"
+      :option="chartOptions"
+      @created="onChartCreated"
+    />
+    <gl-stacked-column-chart
+      v-else-if="loaded && isStackedColumnChart"
+      v-bind="$attrs"
+      :height="$options.height"
+      :bars="data.datasets"
+      :group-by="data.labels"
+      x-axis-type="category"
+      :x-axis-title="data.xAxisTitle"
+      :y-axis-title="data.yAxisTitle"
+      :option="chartOptions"
+      @created="onChartCreated"
+    />
+    <gl-line-chart
+      v-else-if="loaded && isLineChart"
+      v-bind="$attrs"
+      :height="$options.height"
+      :data="data.datasets"
+      :option="chartOptions"
+      @created="onChartCreated"
+    />
+    <chart-skeleton-loader v-else />
+  </resizable-chart-container>
 </template>

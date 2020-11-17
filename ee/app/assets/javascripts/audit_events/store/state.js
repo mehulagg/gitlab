@@ -1,8 +1,5 @@
 export default () => ({
-  filterValue: {
-    id: null,
-    type: null,
-  },
+  filterValue: [],
 
   startDate: null,
   endDate: null,

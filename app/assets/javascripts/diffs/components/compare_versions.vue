@@ -1,20 +1,19 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlTooltipDirective, GlLink, GlDeprecatedButton, GlSprintf } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlButton, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { polyfillSticky } from '~/lib/utils/sticky';
-import Icon from '~/vue_shared/components/icon.vue';
 import CompareDropdownLayout from './compare_dropdown_layout.vue';
 import SettingsDropdown from './settings_dropdown.vue';
 import DiffStats from './diff_stats.vue';
-import { CENTERED_LIMITED_CONTAINER_CLASSES } from '../constants';
+import { CENTERED_LIMITED_CONTAINER_CLASSES, EVT_EXPAND_ALL_FILES } from '../constants';
+import eventHub from '../event_hub';
 
 export default {
   components: {
     CompareDropdownLayout,
-    Icon,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
     GlSprintf,
     SettingsDropdown,
     DiffStats,
@@ -32,14 +31,15 @@ export default {
       required: false,
       default: false,
     },
-    diffFilesLength: {
-      type: Number,
-      required: true,
+    diffFilesCountText: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   computed: {
     ...mapGetters('diffs', [
-      'hasCollapsedFile',
+      'whichCollapsedTypes',
       'diffCompareDropdownTargetVersions',
       'diffCompareDropdownSourceVersions',
     ]),
@@ -68,9 +68,11 @@ export default {
     ...mapActions('diffs', [
       'setInlineDiffViewType',
       'setParallelDiffViewType',
-      'expandAllFiles',
       'toggleShowTreeList',
     ]),
+    expandAllFiles() {
+      eventHub.$emit(EVT_EXPAND_ALL_FILES);
+    },
   },
 };
 </script>
@@ -83,18 +85,15 @@ export default {
         [CENTERED_LIMITED_CONTAINER_CLASSES]: isLimitedContainer,
       }"
     >
-      <button
+      <gl-button
         v-gl-tooltip.hover
-        type="button"
-        class="btn btn-default gl-mr-3 js-toggle-tree-list"
-        :class="{
-          active: showTreeList,
-        }"
+        variant="default"
+        icon="file-tree"
+        class="gl-mr-3 js-toggle-tree-list"
         :title="toggleFileBrowserTitle"
+        :selected="showTreeList"
         @click="toggleShowTreeList"
-      >
-        <icon name="file-tree" />
-      </button>
+      />
       <gl-sprintf
         v-if="showDropdowns"
         class="d-flex align-items-center compare-versions-container"
@@ -104,6 +103,7 @@ export default {
           <compare-dropdown-layout
             :versions="diffCompareDropdownTargetVersions"
             class="mr-version-compare-dropdown"
+            data-qa-selector="target_version_dropdown"
           />
         </template>
         <template #source>
@@ -119,20 +119,26 @@ export default {
       </div>
       <div class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
-          :diff-files-length="diffFilesLength"
+          :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"
           :removed-lines="removedLines"
         />
-        <gl-deprecated-button
+        <gl-button
           v-if="commit || startVersion"
           :href="latestVersionPath"
+          variant="default"
           class="gl-mr-3 js-latest-version"
         >
           {{ __('Show latest version') }}
-        </gl-deprecated-button>
-        <gl-deprecated-button v-show="hasCollapsedFile" class="gl-mr-3" @click="expandAllFiles">
+        </gl-button>
+        <gl-button
+          v-show="whichCollapsedTypes.any"
+          variant="default"
+          class="gl-mr-3"
+          @click="expandAllFiles"
+        >
           {{ __('Expand all') }}
-        </gl-deprecated-button>
+        </gl-button>
         <settings-dropdown />
       </div>
     </div>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DesignManagement::Version do
+RSpec.describe DesignManagement::Version do
   let_it_be(:issue) { create(:issue) }
 
   describe 'relations' do
@@ -31,7 +31,7 @@ describe DesignManagement::Version do
     it { is_expected.to validate_presence_of(:author) }
     it { is_expected.to validate_presence_of(:sha) }
     it { is_expected.to validate_presence_of(:designs) }
-    it { is_expected.to validate_presence_of(:issue_id) }
+    it { is_expected.to validate_presence_of(:issue) }
     it { is_expected.to validate_uniqueness_of(:sha).scoped_to(:issue_id).case_insensitive }
   end
 

@@ -16,7 +16,6 @@ module Gitlab
     # rubocop: disable CodeReuse/ActiveRecord
     def preload(groups)
       groups_and_ancestors = groups_and_ancestors_for(groups)
-
       # A Hash mapping group IDs to their corresponding Group instances.
       groups_map = groups_and_ancestors.each_with_object({}) do |group, hash|
         hash[group.id] = group

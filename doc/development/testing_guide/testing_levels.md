@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Testing levels
 
 ![Testing priority triangle](img/testing_triangle.png)
@@ -482,7 +488,7 @@ Every new feature should come with a [test plan](https://gitlab.com/gitlab-org/g
 
 | Tests path | Testing engine | Notes |
 | ---------- | -------------- | ----- |
-| `qa/qa/specs/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) + Custom QA framework | Tests should be placed under their corresponding [Product category](https://about.gitlab.com/handbook/product/categories/) |
+| `qa/qa/specs/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) + Custom QA framework | Tests should be placed under their corresponding [Product category](https://about.gitlab.com/handbook/product/product-categories/) |
 
 > See [end-to-end tests](end_to_end/index.md) for more information.
 

@@ -1,6 +1,5 @@
 <script>
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
 import MergeRequestTableRow from './mr_table_row.vue';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 
@@ -8,7 +7,7 @@ export default {
   components: {
     GlDropdown,
     GlDropdownItem,
-    Icon,
+    GlIcon,
     MergeRequestTableRow,
     Pagination,
   },
@@ -79,8 +78,8 @@ export default {
                   @click="$emit('columnMetricChange', option.key)"
                 >
                   <span class="d-flex">
-                    <icon
-                      class="flex-shrink-0 append-right-4"
+                    <gl-icon
+                      class="flex-shrink-0 gl-mr-2"
                       :class="{
                         invisible: !isSelectedMetric(option.key),
                       }"
@@ -109,7 +108,7 @@ export default {
       v-if="showPagination"
       :change="onPageChange"
       :page-info="pageInfo"
-      class="justify-content-center prepend-top-default"
+      class="justify-content-center gl-mt-3"
     />
   </div>
 </template>

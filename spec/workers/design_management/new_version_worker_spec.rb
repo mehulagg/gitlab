@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DesignManagement::NewVersionWorker do
+RSpec.describe DesignManagement::NewVersionWorker do
   describe '#perform' do
     let(:worker) { described_class.new }
 
@@ -34,6 +34,10 @@ describe DesignManagement::NewVersionWorker do
 
       it 'creates a system note' do
         expect { worker.perform(version.id) }.to change { Note.system.count }.by(1)
+      end
+
+      it 'does not create a system note if skip_system_notes is true' do
+        expect { worker.perform(version.id, true) }.not_to change { Note.system.count }
       end
 
       it 'invokes GenerateImageVersionsService' do

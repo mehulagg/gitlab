@@ -1,0 +1,3 @@
+- @no_container = true
+
+= render('shared/insights', endpoint: namespace_project_insights_path(@project.namespace, @project, format: :json), query_endpoint: query_namespace_project_insights_path(@project.namespace, @project), notice: project_insights_config.notice_text)

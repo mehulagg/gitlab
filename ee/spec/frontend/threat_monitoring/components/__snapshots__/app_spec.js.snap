@@ -22,6 +22,7 @@ exports[`ThreatMonitoringApp component given there is a default environment with
 >
   <network-policy-list-stub
     documentationpath="/docs"
+    newpolicypath="/policy/new"
   />
 </gl-tab-stub>
 `;

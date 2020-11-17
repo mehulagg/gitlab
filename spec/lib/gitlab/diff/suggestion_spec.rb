@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::Suggestion do
+RSpec.describe Gitlab::Diff::Suggestion do
   shared_examples 'correct suggestion raw content' do
     it 'returns correct raw data' do
       expect(suggestion.to_hash).to include(from_content: expected_lines.join,
@@ -31,9 +31,11 @@ describe Gitlab::Diff::Suggestion do
                                new_line: 9,
                                diff_refs: merge_request.diff_refs)
   end
+
   let(:diff_file) do
     position.diff_file(project.repository)
   end
+
   let(:text) { "# parsed suggestion content\n# with comments" }
 
   def blob_lines_data(from_line, to_line)

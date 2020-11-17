@@ -2,18 +2,22 @@
 
 require 'spec_helper'
 
-describe API::Files do
+RSpec.describe API::Files do
+  include RepoHelpers
+
   let(:user) { create(:user) }
   let!(:project) { create(:project, :repository, namespace: user.namespace ) }
   let(:guest) { create(:user) { |u| project.add_guest(u) } }
   let(:file_path) { "files%2Fruby%2Fpopen%2Erb" }
   let(:rouge_file_path) { "%2e%2e%2f" }
+  let(:absolute_path) { "%2Fetc%2Fpasswd.rb" }
   let(:invalid_file_message) { 'file_path should be a valid file path' }
   let(:params) do
     {
       ref: 'master'
     }
   end
+
   let(:author_email) { 'user@example.org' }
   let(:author_name) { 'John Doe' }
 
@@ -55,16 +59,34 @@ describe API::Files do
     end
   end
 
+  shared_examples 'when path is absolute' do
+    it 'returns 400 when file path is absolute' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+
+      if response.body.present?
+        expect(json_response['error']).to eq(invalid_file_message)
+      end
+    end
+  end
+
   describe "HEAD /projects/:id/repository/files/:file_path" do
     shared_examples_for 'repository files' do
+      let(:options) { {} }
+
       it 'returns 400 when file path is invalid' do
-        head api(route(rouge_file_path), current_user), params: params
+        head api(route(rouge_file_path), current_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
+      it_behaves_like 'when path is absolute' do
+        subject { head api(route(absolute_path), current_user, **options), params: params }
+      end
+
       it 'returns file attributes in headers' do
-        head api(route(file_path), current_user), params: params
+        head api(route(file_path), current_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.headers['X-Gitlab-File-Path']).to eq(CGI.unescape(file_path))
@@ -78,7 +100,7 @@ describe API::Files do
         file_path = "files%2Fjs%2Fcommit%2Ejs%2Ecoffee"
         params[:ref] = "6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9"
 
-        head api(route(file_path), current_user), params: params
+        head api(route(file_path), current_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.headers['X-Gitlab-File-Name']).to eq('commit.js.coffee')
@@ -87,7 +109,7 @@ describe API::Files do
 
       context 'when mandatory params are not given' do
         it "responds with a 400 status" do
-          head api(route("any%2Ffile"), current_user)
+          head api(route("any%2Ffile"), current_user, **options)
 
           expect(response).to have_gitlab_http_status(:bad_request)
         end
@@ -97,7 +119,7 @@ describe API::Files do
         it "responds with a 404 status" do
           params[:ref] = 'master'
 
-          head api(route('app%2Fmodels%2Fapplication%2Erb'), current_user), params: params
+          head api(route('app%2Fmodels%2Fapplication%2Erb'), current_user, **options), params: params
 
           expect(response).to have_gitlab_http_status(:not_found)
         end
@@ -107,7 +129,7 @@ describe API::Files do
         include_context 'disabled repository'
 
         it "responds with a 403 status" do
-          head api(route(file_path), current_user), params: params
+          head api(route(file_path), current_user, **options), params: params
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -134,8 +156,8 @@ describe API::Files do
     context 'when PATs are used' do
       it_behaves_like 'repository files' do
         let(:token) { create(:personal_access_token, scopes: ['read_repository'], user: user) }
-        let(:current_user) { user }
-        let(:api_user) { { personal_access_token: token } }
+        let(:current_user) { nil }
+        let(:options) { { personal_access_token: token } }
       end
     end
 
@@ -154,17 +176,21 @@ describe API::Files do
 
   describe "GET /projects/:id/repository/files/:file_path" do
     shared_examples_for 'repository files' do
-      let(:api_user) { current_user }
+      let(:options) { {} }
 
       it 'returns 400 for invalid file path' do
-        get api(route(rouge_file_path), api_user), params: params
+        get api(route(rouge_file_path), api_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq(invalid_file_message)
       end
 
+      it_behaves_like 'when path is absolute' do
+        subject { get api(route(absolute_path), api_user, **options), params: params }
+      end
+
       it 'returns file attributes as json' do
-        get api(route(file_path), api_user), params: params
+        get api(route(file_path), api_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['file_path']).to eq(CGI.unescape(file_path))
@@ -177,10 +203,30 @@ describe API::Files do
       it 'returns json when file has txt extension' do
         file_path = "bar%2Fbranch-test.txt"
 
-        get api(route(file_path), api_user), params: params
+        get api(route(file_path), api_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response.content_type).to eq('application/json')
+        expect(response.media_type).to eq('application/json')
+      end
+
+      context 'with filename with pathspec characters' do
+        let(:file_path) { ':wq' }
+        let(:newrev) { project.repository.commit('master').sha }
+
+        before do
+          create_file_in_repo(project, 'master', 'master', file_path, 'Test file')
+        end
+
+        it 'returns JSON wth commit SHA' do
+          params[:ref] = 'master'
+
+          get api(route(file_path), api_user, **options), params: params
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['file_path']).to eq(file_path)
+          expect(json_response['file_name']).to eq(file_path)
+          expect(json_response['last_commit_id']).to eq(newrev)
+        end
       end
 
       it 'returns file by commit sha' do
@@ -188,7 +234,7 @@ describe API::Files do
         file_path = "files%2Fjs%2Fcommit%2Ejs%2Ecoffee"
         params[:ref] = "6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9"
 
-        get api(route(file_path), api_user), params: params
+        get api(route(file_path), api_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['file_name']).to eq('commit.js.coffee')
@@ -200,7 +246,7 @@ describe API::Files do
         url = route(file_path) + "/raw"
         expect(Gitlab::Workhorse).to receive(:send_git_blob)
 
-        get api(url, api_user), params: params
+        get api(url, api_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(headers[Gitlab::Workhorse::DETECT_HEADER]).to eq "true"
@@ -209,7 +255,7 @@ describe API::Files do
       it 'returns blame file info' do
         url = route(file_path) + '/blame'
 
-        get api(url, api_user), params: params
+        get api(url, api_user, **options), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
       end
@@ -217,14 +263,14 @@ describe API::Files do
       it 'sets inline content disposition by default' do
         url = route(file_path) + "/raw"
 
-        get api(url, api_user), params: params
+        get api(url, api_user, **options), params: params
 
         expect(headers['Content-Disposition']).to eq(%q(inline; filename="popen.rb"; filename*=UTF-8''popen.rb))
       end
 
       context 'when mandatory params are not given' do
         it_behaves_like '400 response' do
-          let(:request) { get api(route("any%2Ffile"), current_user) }
+          let(:request) { get api(route("any%2Ffile"), current_user, **options) }
         end
       end
 
@@ -232,7 +278,7 @@ describe API::Files do
         let(:params) { { ref: 'master' } }
 
         it_behaves_like '404 response' do
-          let(:request) { get api(route('app%2Fmodels%2Fapplication%2Erb'), api_user), params: params }
+          let(:request) { get api(route('app%2Fmodels%2Fapplication%2Erb'), api_user, **options), params: params }
           let(:message) { '404 File Not Found' }
         end
       end
@@ -241,7 +287,7 @@ describe API::Files do
         include_context 'disabled repository'
 
         it_behaves_like '403 response' do
-          let(:request) { get api(route(file_path), api_user), params: params }
+          let(:request) { get api(route(file_path), api_user, **options), params: params }
         end
       end
     end
@@ -250,6 +296,7 @@ describe API::Files do
       it_behaves_like 'repository files' do
         let(:project) { create(:project, :public, :repository) }
         let(:current_user) { nil }
+        let(:api_user) { nil }
       end
     end
 
@@ -257,7 +304,8 @@ describe API::Files do
       it_behaves_like 'repository files' do
         let(:token) { create(:personal_access_token, scopes: ['read_repository'], user: user) }
         let(:current_user) { user }
-        let(:api_user) { { personal_access_token: token } }
+        let(:api_user) { nil }
+        let(:options) { { personal_access_token: token } }
       end
     end
 
@@ -271,6 +319,7 @@ describe API::Files do
     context 'when authenticated', 'as a developer' do
       it_behaves_like 'repository files' do
         let(:current_user) { user }
+        let(:api_user) { user }
       end
     end
 
@@ -326,6 +375,10 @@ describe API::Files do
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq(invalid_file_message)
+      end
+
+      it_behaves_like 'when path is absolute' do
+        subject { get api(route(absolute_path) + '/blame', current_user), params: params }
       end
 
       it 'returns blame file attributes as json' do
@@ -449,6 +502,10 @@ describe API::Files do
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq(invalid_file_message)
+      end
+
+      it_behaves_like 'when path is absolute' do
+        subject { get api(route(absolute_path) + '/raw', current_user), params: params }
       end
 
       it 'returns raw file info' do
@@ -575,6 +632,10 @@ describe API::Files do
       expect(json_response['error']).to eq(invalid_file_message)
     end
 
+    it_behaves_like 'when path is absolute' do
+      subject { post api(route(absolute_path), user), params: params }
+    end
+
     it "creates a new file in project repo" do
       post api(route(file_path), user), params: params
 
@@ -634,7 +695,7 @@ describe API::Files do
         post api(route("new_file_with_author%2Etxt"), user), params: params
 
         expect(response).to have_gitlab_http_status(:created)
-        expect(response.content_type).to eq('application/json')
+        expect(response.media_type).to eq('application/json')
         last_commit = project.repository.commit.raw
         expect(last_commit.author_email).to eq(author_email)
         expect(last_commit.author_name).to eq(author_name)
@@ -694,7 +755,7 @@ describe API::Files do
 
     it "updates existing file in project repo with accepts correct last commit id" do
       last_commit = Gitlab::Git::Commit
-                        .last_for_path(project.repository, 'master', URI.unescape(file_path))
+                        .last_for_path(project.repository, 'master', Addressable::URI.unencode_component(file_path))
       params_with_correct_id = params.merge(last_commit_id: last_commit.id)
 
       put api(route(file_path), user), params: params_with_correct_id
@@ -704,13 +765,24 @@ describe API::Files do
 
     it "returns 400 when file path is invalid" do
       last_commit = Gitlab::Git::Commit
-                        .last_for_path(project.repository, 'master', URI.unescape(file_path))
+                        .last_for_path(project.repository, 'master', Addressable::URI.unencode_component(file_path))
       params_with_correct_id = params.merge(last_commit_id: last_commit.id)
 
       put api(route(rouge_file_path), user), params: params_with_correct_id
 
       expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['error']).to eq(invalid_file_message)
+    end
+
+    it_behaves_like 'when path is absolute' do
+      let(:last_commit) do
+        Gitlab::Git::Commit
+        .last_for_path(project.repository, 'master', Addressable::URI.unencode_component(file_path))
+      end
+
+      let(:params_with_correct_id) { params.merge(last_commit_id: last_commit.id) }
+
+      subject { put api(route(absolute_path), user), params: params_with_correct_id }
     end
 
     it "returns a 400 bad request if no params given" do
@@ -746,6 +818,10 @@ describe API::Files do
 
       expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['error']).to eq(invalid_file_message)
+    end
+
+    it_behaves_like 'when path is absolute' do
+      subject { delete api(route(absolute_path), user), params: params }
     end
 
     it "deletes existing file in project repo" do
@@ -799,6 +875,7 @@ describe API::Files do
         encoding: 'base64'
       }
     end
+
     let(:get_params) do
       {
         ref: 'master'

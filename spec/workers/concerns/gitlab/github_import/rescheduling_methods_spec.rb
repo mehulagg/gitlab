@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::ReschedulingMethods do
+RSpec.describe Gitlab::GithubImport::ReschedulingMethods do
   let(:worker) do
     Class.new { include(Gitlab::GithubImport::ReschedulingMethods) }.new
   end
@@ -26,7 +26,7 @@ describe Gitlab::GithubImport::ReschedulingMethods do
     end
 
     context 'with an existing project' do
-      let(:project) { create(:project) }
+      let(:project) { create(:project, import_url: 'https://t0ken@github.com/repo/repo.git') }
 
       it 'notifies any waiters upon successfully importing the data' do
         expect(worker)

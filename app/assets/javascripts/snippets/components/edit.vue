@@ -1,36 +1,42 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __, sprintf } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
 import TitleField from '~/vue_shared/components/form/title.vue';
-import { getBaseURL, joinPaths, redirectTo } from '~/lib/utils/url_utility';
+import { redirectTo, joinPaths } from '~/lib/utils/url_utility';
 import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.vue';
+import {
+  SNIPPET_MARK_EDIT_APP_START,
+  SNIPPET_MEASURE_BLOBS_CONTENT,
+} from '~/performance/constants';
+import eventHub from '~/blob/components/eventhub';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 
 import UpdateSnippetMutation from '../mutations/updateSnippet.mutation.graphql';
 import CreateSnippetMutation from '../mutations/createSnippet.mutation.graphql';
 import { getSnippetMixin } from '../mixins/snippets';
-import {
-  SNIPPET_VISIBILITY_PRIVATE,
-  SNIPPET_CREATE_MUTATION_ERROR,
-  SNIPPET_UPDATE_MUTATION_ERROR,
-} from '../constants';
-import SnippetBlobEdit from './snippet_blob_edit.vue';
+import { SNIPPET_CREATE_MUTATION_ERROR, SNIPPET_UPDATE_MUTATION_ERROR } from '../constants';
+import { markBlobPerformance } from '../utils/blob';
+
+import SnippetBlobActionsEdit from './snippet_blob_actions_edit.vue';
 import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
 import SnippetDescriptionEdit from './snippet_description_edit.vue';
+
+eventHub.$on(SNIPPET_MEASURE_BLOBS_CONTENT, markBlobPerformance);
 
 export default {
   components: {
     SnippetDescriptionEdit,
     SnippetVisibilityEdit,
-    SnippetBlobEdit,
+    SnippetBlobActionsEdit,
     TitleField,
     FormFooterActions,
     GlButton,
     GlLoadingIcon,
   },
   mixins: [getSnippetMixin],
+  inject: ['selectedLevel'],
   props: {
     markdownPreviewPath: {
       type: String,
@@ -53,18 +59,24 @@ export default {
   },
   data() {
     return {
-      blob: {},
-      fileName: '',
-      content: '',
-      originalContent: '',
-      isContentLoading: true,
       isUpdating: false,
-      newSnippet: false,
+      actions: [],
+      snippet: {
+        title: '',
+        description: '',
+        visibilityLevel: this.selectedLevel,
+      },
     };
   },
   computed: {
+    hasBlobChanges() {
+      return this.actions.length > 0;
+    },
+    hasValidBlobs() {
+      return this.actions.every(x => x.content);
+    },
     updatePrevented() {
-      return this.snippet.title === '' || this.content === '' || this.isUpdating;
+      return this.snippet.title === '' || !this.hasValidBlobs || this.isUpdating;
     },
     isProjectSnippet() {
       return Boolean(this.projectPath);
@@ -75,8 +87,7 @@ export default {
         title: this.snippet.title,
         description: this.snippet.description,
         visibilityLevel: this.snippet.visibilityLevel,
-        fileName: this.fileName,
-        content: this.content,
+        blobActions: this.actions,
       };
     },
     saveButtonLabel() {
@@ -87,16 +98,13 @@ export default {
     },
     cancelButtonHref() {
       if (this.newSnippet) {
-        return this.projectPath ? `/${this.projectPath}/snippets` : `/snippets`;
+        return joinPaths('/', gon.relative_url_root, this.projectPath, '-/snippets');
       }
       return this.snippet.webUrl;
     },
-    titleFieldId() {
-      return `${this.isProjectSnippet ? 'project' : 'personal'}_snippet_title`;
-    },
-    descriptionFieldId() {
-      return `${this.isProjectSnippet ? 'project' : 'personal'}_snippet_description`;
-    },
+  },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: SNIPPET_MARK_EDIT_APP_START });
   },
   created() {
     window.addEventListener('beforeunload', this.onBeforeUnload);
@@ -108,16 +116,10 @@ export default {
     onBeforeUnload(e = {}) {
       const returnValue = __('Are you sure you want to lose unsaved changes?');
 
-      if (!this.hasChanges()) return undefined;
+      if (!this.hasBlobChanges || this.isUpdating) return undefined;
 
       Object.assign(e, { returnValue });
       return returnValue;
-    },
-    hasChanges() {
-      return this.content !== this.originalContent;
-    },
-    updateFileName(newName) {
-      this.fileName = newName;
     },
     flashAPIFailure(err) {
       const defaultErrorMsg = this.newSnippet
@@ -125,37 +127,6 @@ export default {
         : SNIPPET_UPDATE_MUTATION_ERROR;
       Flash(sprintf(defaultErrorMsg, { err }));
       this.isUpdating = false;
-    },
-    onNewSnippetFetched() {
-      this.newSnippet = true;
-      this.snippet = this.$options.newSnippetSchema;
-      this.blob = this.snippet.blob;
-      this.isContentLoading = false;
-    },
-    onExistingSnippetFetched() {
-      this.newSnippet = false;
-      const { blob } = this.snippet;
-      this.blob = blob;
-      this.fileName = blob.name;
-      const baseUrl = getBaseURL();
-      const url = joinPaths(baseUrl, blob.rawPath);
-
-      axios
-        .get(url)
-        .then(res => {
-          this.originalContent = res.data;
-          this.content = res.data;
-
-          this.isContentLoading = false;
-        })
-        .catch(e => this.flashAPIFailure(e));
-    },
-    onSnippetFetch(snippetRes) {
-      if (snippetRes.data.snippets.edges.length === 0) {
-        this.onNewSnippetFetched();
-      } else {
-        this.onExistingSnippetFetched();
-      }
     },
     getAttachedFiles() {
       const fileInputs = Array.from(this.$el.querySelectorAll('[name="files[]"]'));
@@ -192,7 +163,6 @@ export default {
           if (errors.length) {
             this.flashAPIFailure(errors[0]);
           } else {
-            this.originalContent = this.content;
             redirectTo(baseObj.snippet.webUrl);
           }
         })
@@ -200,18 +170,15 @@ export default {
           this.flashAPIFailure(e);
         });
     },
-  },
-  newSnippetSchema: {
-    title: '',
-    description: '',
-    visibilityLevel: SNIPPET_VISIBILITY_PRIVATE,
-    blob: {},
+    updateActions(actions) {
+      this.actions = actions;
+    },
   },
 };
 </script>
 <template>
   <form
-    class="snippet-form js-requires-input js-quick-submit common-note-form"
+    class="snippet-form js-quick-submit common-note-form"
     :data-snippet-type="isProjectSnippet ? 'project' : 'personal'"
     data-testid="snippet-edit-form"
     @submit.prevent="handleFormSubmit"
@@ -220,28 +187,23 @@ export default {
       v-if="isLoading"
       :label="__('Loading snippet')"
       size="lg"
-      class="loading-animation prepend-top-20 append-bottom-20"
+      class="loading-animation prepend-top-20 gl-mb-6"
     />
     <template v-else>
       <title-field
-        :id="titleFieldId"
+        id="snippet-title"
         v-model="snippet.title"
         data-qa-selector="snippet_title_field"
         required
         :autofocus="true"
       />
       <snippet-description-edit
-        :id="descriptionFieldId"
         v-model="snippet.description"
         :markdown-preview-path="markdownPreviewPath"
         :markdown-docs-path="markdownDocsPath"
       />
-      <snippet-blob-edit
-        v-model="content"
-        :file-name="fileName"
-        :is-loading="isContentLoading"
-        @name-change="updateFileName"
-      />
+      <snippet-blob-actions-edit :init-blobs="blobs" @actions="updateActions" />
+
       <snippet-visibility-edit
         v-model="snippet.visibilityLevel"
         :help-link="visibilityHelpLink"

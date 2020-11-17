@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -108,7 +111,7 @@ Make sure to follow all steps below:
    -authBackend http://127.0.0.1:8080/gitlab
    ```
 
-   **Note:**
+   NOTE: **Note:**
    If you are using a custom init script, make sure to edit the above
    GitLab Workhorse setting as needed.
 

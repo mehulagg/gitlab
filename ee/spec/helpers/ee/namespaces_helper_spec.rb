@@ -9,6 +9,7 @@ RSpec.describe EE::NamespacesHelper do
            :private,
            project_creation_level: admin_project_creation_level)
   end
+
   let!(:user) { create(:user) }
   let!(:user_project_creation_level) { nil }
   let!(:user_group) do
@@ -104,19 +105,55 @@ RSpec.describe EE::NamespacesHelper do
     end
   end
 
-  describe '#namespace_storage_usage_link' do
-    subject { helper.namespace_storage_usage_link(namespace) }
+  describe '#temporary_storage_increase_visible?' do
+    subject { helper.temporary_storage_increase_visible?(namespace) }
 
-    context 'when namespace is a group' do
-      let(:namespace) { build(:group) }
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:admin) { create(:user, namespace: namespace) }
+    let_it_be(:user) { create(:user) }
 
-      it { is_expected.to eq(group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')) }
+    context 'when enforce_namespace_storage_limit setting enabled' do
+      before do
+        stub_application_setting(enforce_namespace_storage_limit: true)
+      end
+
+      context 'when current_user is admin of namespace' do
+        before do
+          allow(helper).to receive(:current_user).and_return(admin)
+        end
+
+        it { is_expected.to eq(true) }
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(temporary_storage_increase: false)
+          end
+
+          it { is_expected.to eq(false) }
+        end
+      end
+
+      context 'when current_user is not the admin of namespace' do
+        before do
+          allow(helper).to receive(:current_user).and_return(user)
+        end
+
+        it { is_expected.to eq(false) }
+      end
     end
 
-    context 'when namespace is a user' do
-      let(:namespace) { build(:namespace) }
+    context 'when enforce_namespace_storage_limit setting disabled' do
+      before do
+        stub_application_setting(enforce_namespace_storage_limit: false)
+      end
 
-      it { is_expected.to eq(profile_usage_quotas_path(anchor: 'storage-quota-tab')) }
+      context 'when current_user is admin of namespace' do
+        before do
+          allow(helper).to receive(:current_user).and_return(admin)
+        end
+
+        it { is_expected.to eq(false) }
+      end
     end
   end
 end

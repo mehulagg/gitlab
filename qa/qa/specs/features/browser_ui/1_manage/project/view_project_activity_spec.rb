@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Project activity' do
-      it 'user creates an event in the activity page upon Git push' do
+      it 'user creates an event in the activity page upon Git push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/407' do
         Flow::Login.sign_in
 
         Resource::Repository::ProjectPush.fabricate! do |push|
@@ -13,9 +13,11 @@ module QA
         end.project.visit!
 
         Page::Project::Menu.perform(&:click_activity)
-        Page::Project::Activity.perform(&:click_push_events)
+        Page::Project::Activity.perform do |activity|
+          activity.click_push_events
 
-        expect(page).to have_content('pushed new branch master')
+          expect(activity).to have_content('pushed new branch master')
+        end
       end
     end
   end

@@ -44,21 +44,10 @@ RSpec.describe 'admin Geo Replication Nav', :js, :geo do
     end
   end
 
-  describe 'visit admin/geo/replication/package_files' do
-    it_behaves_like 'active sidebar link', 'Package Files' do
-      let(:path) { admin_geo_package_files_path }
-    end
-
-    context 'when geo_self_service_framework feature is disabled' do
-      before do
-        stub_feature_flags(geo_self_service_framework: false)
-
-        visit admin_geo_projects_path
-        wait_for_requests
-      end
-
-      it 'does not render navigational element' do
-        expect(page).not_to have_selector("a[title=\"Package Files\"]")
+  describe 'visit admin/geo/replication/*' do
+    Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+      it_behaves_like 'active sidebar link', replicator_class.replicable_title_plural do
+        let(:path) { admin_geo_replicables_path(replicable_name_plural: replicator_class.replicable_name_plural) }
       end
     end
   end

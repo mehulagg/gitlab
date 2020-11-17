@@ -20,7 +20,7 @@ module EE
           approval_state.project.require_password_to_approve?
         end
 
-        expose :approved_by, using: EE::API::Entities::Approvals do |approval_state|
+        expose :approved_by, using: ::API::Entities::Approvals do |approval_state|
           approval_state.merge_request.approvals
         end
 
@@ -51,7 +51,7 @@ module EE
         end
 
         expose :user_has_approved do |approval_state, options|
-          approval_state.has_approved?(options[:current_user])
+          approval_state.merge_request.approved_by?(options[:current_user])
         end
 
         expose :user_can_approve do |approval_state, options|

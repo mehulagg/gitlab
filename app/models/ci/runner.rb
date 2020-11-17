@@ -52,7 +52,7 @@ module Ci
     has_many :runner_namespaces, inverse_of: :runner
     has_many :groups, through: :runner_namespaces
 
-    has_one :last_build, ->() { order('id DESC') }, class_name: 'Ci::Build'
+    has_one :last_build, -> { order('id DESC') }, class_name: 'Ci::Build'
 
     before_save :ensure_token
 
@@ -237,6 +237,10 @@ module Ci
 
     def belongs_to_one_project?
       runner_projects.count == 1
+    end
+
+    def belongs_to_more_than_one_project?
+      self.projects.limit(2).count(:all) > 1
     end
 
     def assigned_to_group?

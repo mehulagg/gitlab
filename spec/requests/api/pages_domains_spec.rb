@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::PagesDomains do
+RSpec.describe API::PagesDomains do
   let_it_be(:project) { create(:project, path: 'my.project', pages_https_only: false) }
   let_it_be(:user) { create(:user) }
   let_it_be(:admin) { create(:admin) }
@@ -17,6 +17,7 @@ describe API::PagesDomains do
     build(:pages_domain, :without_key, :without_certificate, domain: 'www.other-domain.test', auto_ssl_enabled: true)
       .slice(:domain, :auto_ssl_enabled)
   end
+
   let(:pages_domain_secure_params) { build(:pages_domain, domain: 'ssl.other-domain.test', project: project).slice(:domain, :certificate, :key) }
   let(:pages_domain_secure_key_missmatch_params) {build(:pages_domain, :with_trusted_chain, project: project).slice(:domain, :certificate, :key) }
   let(:pages_domain_secure_missing_chain_params) {build(:pages_domain, :with_missing_chain, project: project).slice(:certificate) }

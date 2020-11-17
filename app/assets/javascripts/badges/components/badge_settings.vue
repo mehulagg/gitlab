@@ -1,8 +1,8 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import createFlash from '~/flash';
+import { GlSprintf, GlModal } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import Badge from './badge.vue';
 import BadgeForm from './badge_form.vue';
 import BadgeList from './badge_list.vue';
@@ -13,14 +13,26 @@ export default {
     Badge,
     BadgeForm,
     BadgeList,
-    GlModal: DeprecatedModal2,
+    GlModal,
+    GlSprintf,
+  },
+  i18n: {
+    deleteModalText: s__(
+      'Badges|You are going to delete this badge. Deleted badges %{strongStart}cannot%{strongEnd} be restored.',
+    ),
   },
   computed: {
     ...mapState(['badgeInModal', 'isEditing']),
-    deleteModalText() {
-      return s__(
-        'Badges|You are going to delete this badge. Deleted badges <strong>cannot</strong> be restored.',
-      );
+    primaryProps() {
+      return {
+        text: s__('Delete badge'),
+        attributes: [{ category: 'primary' }, { variant: 'danger' }],
+      };
+    },
+    cancelProps() {
+      return {
+        text: s__('Cancel'),
+      };
     },
   },
   methods: {
@@ -42,11 +54,11 @@ export default {
 <template>
   <div class="badge-settings">
     <gl-modal
-      id="delete-badge-modal"
-      :header-title-text="s__('Badges|Delete badge?')"
-      :footer-primary-button-text="s__('Badges|Delete badge')"
-      footer-primary-button-variant="danger"
-      @submit="onSubmitModal"
+      modal-id="delete-badge-modal"
+      :title="s__('Badges|Delete badge?')"
+      :action-primary="primaryProps"
+      :action-cancel="cancelProps"
+      @primary="onSubmitModal"
     >
       <div class="well">
         <badge
@@ -54,12 +66,18 @@ export default {
           :link-url="badgeInModal ? badgeInModal.renderedLinkUrl : ''"
         />
       </div>
-      <p v-html="deleteModalText"></p>
+      <p>
+        <gl-sprintf :message="$options.i18n.deleteModalText">
+          <template #strong="{ content }">
+            <strong>{{ content }}</strong>
+          </template>
+        </gl-sprintf>
+      </p>
     </gl-modal>
 
-    <badge-form v-show="isEditing" :is-editing="true" />
+    <badge-form v-show="isEditing" :is-editing="true" data-testid="edit-badge" />
 
-    <badge-form v-show="!isEditing" :is-editing="false" />
+    <badge-form v-show="!isEditing" :is-editing="false" data-testid="add-new-badge" />
     <badge-list v-show="!isEditing" />
   </div>
 </template>

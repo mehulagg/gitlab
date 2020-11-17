@@ -51,27 +51,20 @@ module API
           job_forbidden!(job, 'Job is not running') unless job.running?
         end
 
-        if Gitlab::Ci::Features.job_heartbeats_runner?(job.project)
-          job.runner&.heartbeat(get_runner_ip)
-        end
+        job.runner&.heartbeat(get_runner_ip)
 
         job
       end
 
       def current_job
         strong_memoize(:current_job) do
-          Ci::Build.find_by_id(params[:id])
+          ::Ci::Build.find_by_id(params[:id])
         end
       end
 
       def job_token_valid?(job)
         token = (params[JOB_TOKEN_PARAM] || env[JOB_TOKEN_HEADER]).to_s
         token && job.valid_token?(token)
-      end
-
-      def max_artifacts_size(job)
-        max_size = job.project.closest_setting(:max_artifacts_size)
-        max_size.megabytes.to_i
       end
 
       def job_forbidden!(job, reason)

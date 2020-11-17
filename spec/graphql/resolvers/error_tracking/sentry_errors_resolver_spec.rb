@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::ErrorTracking::SentryErrorsResolver do
+RSpec.describe Resolvers::ErrorTracking::SentryErrorsResolver do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -13,6 +13,10 @@ describe Resolvers::ErrorTracking::SentryErrorsResolver do
 
   let(:issues) { nil }
   let(:pagination) { nil }
+
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::ErrorTracking::SentryErrorType.connection_type)
+  end
 
   describe '#resolve' do
     context 'insufficient user permission' do

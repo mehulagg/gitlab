@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::CustomMetricEmbedService do
+RSpec.describe Metrics::Dashboard::CustomMetricEmbedService do
   include MetricsDashboardHelpers
 
   let_it_be(:project, reload: true) { build(:project) }
@@ -111,7 +111,8 @@ describe Metrics::Dashboard::CustomMetricEmbedService do
       it_behaves_like 'valid embedded dashboard service response'
 
       it 'does not cache the unprocessed dashboard' do
-        expect(Gitlab::Metrics::Dashboard::Cache).not_to receive(:fetch)
+        # Fail spec if any method of Cache class is called.
+        stub_const('Gitlab::Metrics::Dashboard::Cache', double)
 
         described_class.new(*service_params).get_dashboard
       end

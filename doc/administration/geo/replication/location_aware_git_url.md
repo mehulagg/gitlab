@@ -18,7 +18,7 @@ Though these instructions use [AWS Route53](https://aws.amazon.com/route53/),
 other services such as [Cloudflare](https://www.cloudflare.com/) could be used
 as well.
 
-NOTE: **Note**
+NOTE: **Note:**
 You can also use a load balancer to distribute web UI or API traffic to
 [multiple Geo **secondary** nodes](../../../user/admin_area/geo_nodes.md#multiple-secondary-nodes-behind-a-load-balancer).
 Importantly, the **primary** node cannot yet be included. See the feature request
@@ -43,8 +43,8 @@ In any case, you require:
 - A working GitLab **secondary** node.
 - A Route53 Hosted Zone managing your domain.
 
-If you have not yet setup a Geo **primary** node and **secondary** node, please consult
-[the Geo setup instructions](index.md#setup-instructions).
+If you haven't yet set up a Geo _primary_ node and _secondary_ node, see the
+[Geo setup instructions](../index.md#setup-instructions).
 
 ## Create a traffic policy
 

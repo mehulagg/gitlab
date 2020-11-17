@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Import::FogbugzProviderRepoEntity do
+RSpec.describe Import::FogbugzProviderRepoEntity do
   let(:provider_url) { 'https://demo.fogbugz.com/' }
   let(:repo_data) do
     {
@@ -10,6 +10,7 @@ describe Import::FogbugzProviderRepoEntity do
       'sProject' => 'demo'
     }
   end
+
   let(:repo) { Gitlab::FogbugzImport::Repository.new(repo_data) }
 
   subject { described_class.represent(repo, { provider_url: provider_url }).as_json }

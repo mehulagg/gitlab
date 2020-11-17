@@ -61,7 +61,7 @@ module Gitlab
                 'severity' => severity(vulnerability['riskcode']),
                 'solution' => sanitize(vulnerability['solution']),
                 'confidence' => confidence(vulnerability['confidence']),
-                'scanner' => { 'id' => 'zaproxy', 'name' => 'ZAProxy' },
+                'scanner' => { 'id' => 'zaproxy', 'name' => 'ZAProxy', 'vendor' => { 'name' => 'GitLab' } },
                 'identifiers' => [
                   {
                     'type' => 'ZAProxy_PluginId',

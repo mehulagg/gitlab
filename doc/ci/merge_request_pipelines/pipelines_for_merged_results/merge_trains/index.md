@@ -11,7 +11,9 @@ last_update: 2019-07-03
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9186) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.0.
 > - [Squash and merge](../../../../user/project/merge_requests/squash_and_merge.md) support [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13001) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.6.
 
-When [pipelines for merged results](../index.md#pipelines-for-merged-results-premium) are
+For more information about why you might want to use Merge Trains, read [How merge trains keep your master green](https://about.gitlab.com/blog/2020/01/30/all-aboard-merge-trains/).
+
+When [pipelines for merged results](../index.md#pipelines-for-merged-results) are
 enabled, the pipeline jobs run as if the changes from your source branch have already
 been merged into the target branch.
 
@@ -35,7 +37,6 @@ run.
 
 To add a merge request to a merge train, you need [permissions](../../../../user/permissions.md) to push to the target branch.
 
-NOTE: **Note:**
 Each merge train can run a maximum of **twenty** pipelines in parallel.
 If more than twenty merge requests are added to the merge train, the merge requests
 will be queued until a slot in the merge train is free. There is no limit to the
@@ -78,7 +79,7 @@ To enable merge trains:
 
 To enable merge trains for your project:
 
-1. If you are on a self-managed GitLab instance, ensure the [feature flag](#merge-trains-feature-flag-premium-only) is set correctly.
+1. If you are on a self-managed GitLab instance, ensure the [feature flag](#merge-trains-feature-flag) is set correctly.
 1. [Configure your CI/CD configuration file](../../index.md#configuring-pipelines-for-merge-requests)
    so that the pipeline or individual jobs run for merge requests.
 1. Visit your project's **Settings > General** and expand **Merge requests**.
@@ -146,7 +147,7 @@ is recreated and all pipelines restart.
 
 ### Merge request dropped from the merge train immediately
 
-If a merge request is not mergeable (for example, it's WIP, there is a merge
+If a merge request is not mergeable (for example, it's a draft merge request, there is a merge
 conflict, etc.), your merge request will be dropped from the merge train automatically.
 
 In these cases, the reason for dropping the merge request is in the **system notes**.
@@ -199,17 +200,23 @@ for more information.
 
 ### Merge Trains feature flag **(PREMIUM ONLY)**
 
-To enable and disable the Merge Trains feature, use the `:disable_merge_trains` feature flag.
+Merge trains are automatically enabled when [pipelines for merged results](../index.md#pipelines-for-merged-results)
+are enabled. To use pipelines for merged results without using merge trains, you must
+enable a [feature flag](../../../../user/feature_flags.md) that blocks the merge trains
+feature.
 
-To check if the feature flag is enabled on your GitLab instance,
-ask an administrator to execute the following commands:
+[GitLab administrators with access to the GitLab Rails console](../../../../administration/feature_flags.md)
+can enable the feature flag to disable merge trains:
 
-```shell
-> sudo gitlab-rails console                         # Login to Rails console of GitLab instance.
-> Feature.enabled?(:disable_merge_trains)           # Check if it's disabled or not.
-> Feature.enable(:disable_merge_trains)             # Disable Merge Trains.
-> Feature.disable(:disable_merge_trains)            # Enable Merge Trains.
+```ruby
+Feature.enable(:disable_merge_trains)
 ```
 
-When you disable this feature, all existing merge trains are cancelled and
+After you enable this feature flag, all existing merge trains are cancelled and
 the **Start/Add to Merge Train** button no longer appears in merge requests.
+
+To disable the feature flag, and enable merge trains again:
+
+```ruby
+Feature.disable(:disable_merge_trains)
+```

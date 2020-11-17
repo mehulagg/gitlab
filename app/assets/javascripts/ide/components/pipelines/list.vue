@@ -1,26 +1,34 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlIcon,
+  GlSafeHtmlDirective as SafeHtml,
+  GlTabs,
+  GlTab,
+  GlBadge,
+} from '@gitlab/ui';
 import { sprintf, __ } from '../../../locale';
-import Icon from '../../../vue_shared/components/icon.vue';
 import CiIcon from '../../../vue_shared/components/ci_icon.vue';
-import Tabs from '../../../vue_shared/components/tabs/tabs';
-import Tab from '../../../vue_shared/components/tabs/tab.vue';
-import EmptyState from '../../../pipelines/components/empty_state.vue';
+import EmptyState from '../../../pipelines/components/pipelines_list/empty_state.vue';
 import JobsList from '../jobs/list.vue';
 
 import IDEServices from '~/ide/services';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     CiIcon,
-    Tabs,
-    Tab,
     JobsList,
     EmptyState,
     GlLoadingIcon,
+    GlTabs,
+    GlTab,
+    GlBadge,
+  },
+  directives: {
+    SafeHtml,
   },
   computed: {
     ...mapState(['pipelinesEmptyStateSvgPath', 'links']),
@@ -59,7 +67,7 @@ export default {
 
 <template>
   <div class="ide-pipeline">
-    <gl-loading-icon v-if="showLoadingIcon" size="lg" class="prepend-top-default" />
+    <gl-loading-icon v-if="showLoadingIcon" size="lg" class="gl-mt-3" />
     <template v-else-if="hasLoadedPipeline">
       <header v-if="latestPipeline" class="ide-tree-header ide-pipeline-header">
         <ci-icon :status="latestPipeline.details.status" :size="24" class="d-flex" />
@@ -70,7 +78,7 @@ export default {
             target="_blank"
             class="ide-external-link position-relative"
           >
-            #{{ latestPipeline.id }} <icon :size="12" name="external-link" />
+            #{{ latestPipeline.id }} <gl-icon :size="12" name="external-link" />
           </a>
         </span>
       </header>
@@ -84,24 +92,28 @@ export default {
       <div v-else-if="latestPipeline.yamlError" class="bs-callout bs-callout-danger">
         <p class="gl-mb-0">{{ __('Found errors in your .gitlab-ci.yml:') }}</p>
         <p class="gl-mb-0 break-word">{{ latestPipeline.yamlError }}</p>
-        <p class="gl-mb-0" v-html="ciLintText"></p>
+        <p v-safe-html="ciLintText" class="gl-mb-0"></p>
       </div>
-      <tabs v-else class="ide-pipeline-list">
-        <tab :active="!pipelineFailed">
+      <gl-tabs v-else>
+        <gl-tab :active="!pipelineFailed">
           <template #title>
             {{ __('Jobs') }}
-            <span v-if="jobsCount" class="badge badge-pill"> {{ jobsCount }} </span>
+            <gl-badge v-if="jobsCount" size="sm" class="gl-tab-counter-badge">{{
+              jobsCount
+            }}</gl-badge>
           </template>
           <jobs-list :loading="isLoadingJobs" :stages="stages" />
-        </tab>
-        <tab :active="pipelineFailed">
+        </gl-tab>
+        <gl-tab :active="pipelineFailed">
           <template #title>
             {{ __('Failed Jobs') }}
-            <span v-if="failedJobsCount" class="badge badge-pill"> {{ failedJobsCount }} </span>
+            <gl-badge v-if="failedJobsCount" size="sm" class="gl-tab-counter-badge">{{
+              failedJobsCount
+            }}</gl-badge>
           </template>
           <jobs-list :loading="isLoadingJobs" :stages="failedStages" />
-        </tab>
-      </tabs>
+        </gl-tab>
+      </gl-tabs>
     </template>
   </div>
 </template>

@@ -23,7 +23,7 @@ describe('GeoReplicableEmptyState', () => {
   const createComponent = () => {
     wrapper = shallowMount(GeoReplicableEmptyState, {
       localVue,
-      store: createStore({ replicableType: MOCK_REPLICABLE_TYPE, useGraphQl: false }),
+      store: createStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
       propsData,
     });
   };

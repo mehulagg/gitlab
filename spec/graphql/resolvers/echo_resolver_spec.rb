@@ -2,11 +2,15 @@
 
 require 'spec_helper'
 
-describe Resolvers::EchoResolver do
+RSpec.describe Resolvers::EchoResolver do
   include GraphqlHelpers
 
   let(:current_user) { create(:user) }
   let(:text) { 'Message test' }
+
+  specify do
+    expect(described_class).to have_non_null_graphql_type(::GraphQL::STRING_TYPE)
+  end
 
   describe '#resolve' do
     it 'echoes text and username' do

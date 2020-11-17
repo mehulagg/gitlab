@@ -1,5 +1,6 @@
 .feature-flags-form {
   input.rollout-percentage {
+    /* stylelint-disable property-no-vendor-prefix */
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -7,5 +8,6 @@
     }
 
     -moz-appearance: textfield;
+    /* stylelint-enable property-no-vendor-prefix */
   }
 }

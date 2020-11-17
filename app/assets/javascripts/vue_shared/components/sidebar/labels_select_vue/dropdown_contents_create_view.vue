@@ -88,12 +88,16 @@ export default {
           @click.prevent="handleColorClick(color)"
         />
       </div>
-      <div class="color-input-container d-flex">
+      <div class="color-input-container gl-display-flex">
         <span
           class="dropdown-label-color-preview position-relative position-relative d-inline-block"
           :style="{ backgroundColor: selectedColor }"
         ></span>
-        <gl-form-input v-model.trim="selectedColor" :placeholder="__('Use custom color #FF0000')" />
+        <gl-form-input
+          v-model.trim="selectedColor"
+          class="gl-rounded-top-left-none gl-rounded-bottom-left-none"
+          :placeholder="__('Use custom color #FF0000')"
+        />
       </div>
     </div>
     <div class="dropdown-actions clearfix pt-2 px-2">
@@ -101,13 +105,13 @@ export default {
         :disabled="disableCreate"
         category="primary"
         variant="success"
-        class="pull-left d-flex align-items-center"
+        class="float-left d-flex align-items-center"
         @click="handleCreateClick"
       >
         <gl-loading-icon v-show="labelCreateInProgress" :inline="true" class="mr-1" />
         {{ __('Create') }}
       </gl-button>
-      <gl-button class="pull-right js-btn-cancel-create" @click="toggleDropdownContentsCreateView">
+      <gl-button class="float-right js-btn-cancel-create" @click="toggleDropdownContentsCreateView">
         {{ __('Cancel') }}
       </gl-button>
     </div>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::ReplicationToggleRequestService, :geo do
+RSpec.describe Geo::ReplicationToggleRequestService, :geo do
   include ::EE::GeoHelpers
   include ApiHelpers
 
@@ -22,7 +22,7 @@ describe Geo::ReplicationToggleRequestService, :geo do
     allow(Gitlab::HTTP).to receive(:perform_request).and_return(response)
     expect(Gitlab::Geo).to receive(:expire_cache!)
 
-    expect(subject.execute(args)).to be_truthy
+    expect(subject.execute(**args)).to be_truthy
   end
 
   it 'does not expire the geo cache on failure' do
@@ -34,6 +34,6 @@ describe Geo::ReplicationToggleRequestService, :geo do
     allow(Gitlab::HTTP).to receive(:perform_request).and_return(response)
     expect(Gitlab::Geo).not_to receive(:expire_cache!)
 
-    expect(subject.execute(args)).to be_falsey
+    expect(subject.execute(**args)).to be_falsey
   end
 end

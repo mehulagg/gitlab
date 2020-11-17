@@ -2,13 +2,7 @@
 stage: Verify
 group: Continuous Integration
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
-author: Ryan Hall
-author_gitlab: blitzgren
-level: intermediate
-article_type: tutorial
 type: tutorial
-date: 2018-03-07
-last_updated: 2019-03-11
 ---
 
 # DevOps and Game Dev with GitLab CI/CD
@@ -255,7 +249,7 @@ pipeline to include running the tests along with the existing build job.
 
 ## Continuous Integration
 
-To ensure our changes don't break the build and all tests still pass, we utilize
+To ensure our changes don't break the build and all tests still pass, we use
 Continuous Integration (CI) to run these checks automatically for every push.
 Read through this article to understand [Continuous Integration, Continuous Delivery, and Continuous Deployment](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/),
 and how these methods are leveraged by GitLab.
@@ -267,26 +261,26 @@ Please read through the [documentation on CI/CD configuration](../../../ci/yaml/
 ### Build your game with GitLab CI/CD
 
 We need to update our build job to ensure tests get run as well. Add `gulp build-test`
-to the end of the `script` array for the existing `build` job. Once these commands run,
+to the end of the `script` array for the existing `build` job. After these commands run,
 we know we will need to access everything in the `built` folder, given by GitLab CI/CD's `artifacts`.
 We'll also cache `node_modules` to avoid having to do a full re-pull of those dependencies:
 just pack them up in the cache. Here is the full `build` job:
 
 ```yaml
 build:
-    stage: build
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp
-        - gulp build-test
-    cache:
-        policy: push
-        paths:
-        - node_modules
-    artifacts:
-        paths:
-        - built
+  stage: build
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp
+    - gulp build-test
+  cache:
+    policy: push
+    paths:
+      - node_modules
+  artifacts:
+    paths:
+      - built
 ```
 
 ### Test your game with GitLab CI/CD
@@ -301,18 +295,18 @@ Following the YAML structure, the `test` job should look like this:
 
 ```yaml
 test:
-    stage: test
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp run-test
-    cache:
-        policy: push
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: test
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp run-test
+  cache:
+    policy: push
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 ```
 
 We have added unit tests for a `Weapon` class that shoots on a specified interval.
@@ -325,33 +319,33 @@ Our entire `.gitlab-ci.yml` file should now look like this:
 image: node:10
 
 build:
-    stage: build
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp
-        - gulp build-test
-    cache:
-        policy: push
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: build
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp
+    - gulp build-test
+  cache:
+    policy: push
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 
 test:
-    stage: test
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp run-test
-    cache:
-        policy: pull
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: test
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp run-test
+  cache:
+    policy: pull
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 ```
 
 ### Run your CI/CD pipeline
@@ -435,7 +429,7 @@ fully understand [IAM Best Practices in AWS](https://docs.aws.amazon.com/IAM/lat
 ### Deploy your game with GitLab CI/CD
 
 To deploy our build artifacts, we need to install the [AWS CLI](https://aws.amazon.com/cli/) on
-the Shared Runner. The Shared Runner also needs to be able to authenticate with your AWS
+the shared runner. The shared runner also needs to be able to authenticate with your AWS
 account to deploy the artifacts. By convention, AWS CLI will look for `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY`. GitLab's CI gives us a way to pass the variables we
 set up in the prior section using the `variables` portion of the `deploy` job. At the end,
@@ -445,18 +439,18 @@ trigger the `deploy` job of our pipeline. Put these together to get the followin
 
 ```yaml
 deploy:
-    stage: deploy
-    variables:
-        AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
-        AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
-    script:
-        - apt-get update
-        - apt-get install -y python3-dev python3-pip
-        - easy_install3 -U pip
-        - pip3 install --upgrade awscli
-        - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
-    only:
-        - master
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
+    AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
+  script:
+    - apt-get update
+    - apt-get install -y python3-dev python3-pip
+    - easy_install3 -U pip
+    - pip3 install --upgrade awscli
+    - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
+  only:
+    - master
 ```
 
 Be sure to update the region and S3 URL in that last script command to fit your setup.
@@ -466,46 +460,46 @@ Our final configuration file `.gitlab-ci.yml` looks like:
 image: node:10
 
 build:
-    stage: build
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp
-        - gulp build-test
-    cache:
-        policy: push
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: build
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp
+    - gulp build-test
+  cache:
+    policy: push
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 
 test:
-    stage: test
-    script:
-        - npm i gulp -g
-        - gulp run-test
-    cache:
-        policy: pull
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: test
+  script:
+    - npm i gulp -g
+    - gulp run-test
+  cache:
+    policy: pull
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 
 deploy:
-    stage: deploy
-    variables:
-        AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
-        AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
-    script:
-        - apt-get update
-        - apt-get install -y python3-dev python3-pip
-        - easy_install3 -U pip
-        - pip3 install --upgrade awscli
-        - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
-    only:
-        - master
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
+    AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
+  script:
+    - apt-get update
+    - apt-get install -y python3-dev python3-pip
+    - easy_install3 -U pip
+    - pip3 install --upgrade awscli
+    - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
+  only:
+    - master
 ```
 
 ## Conclusion

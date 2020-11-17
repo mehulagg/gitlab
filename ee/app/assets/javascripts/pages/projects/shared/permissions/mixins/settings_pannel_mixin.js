@@ -2,6 +2,7 @@ export default {
   data() {
     return {
       packagesEnabled: true,
+      requirementsEnabled: true,
     };
   },
   watch: {
@@ -13,7 +14,6 @@ export default {
 
         if (value === 0) {
           this.containerRegistryEnabled = false;
-          this.lfsEnabled = false;
           this.packagesEnabled = false;
         }
       } else if (oldValue === 0) {

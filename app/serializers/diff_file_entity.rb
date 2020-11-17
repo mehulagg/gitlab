@@ -3,6 +3,7 @@
 class DiffFileEntity < DiffFileBaseEntity
   include CommitsHelper
   include IconsHelper
+  include Gitlab::Utils::StrongMemoize
 
   expose :added_lines
   expose :removed_lines
@@ -54,11 +55,16 @@ class DiffFileEntity < DiffFileBaseEntity
 
   # Used for inline diffs
   expose :highlighted_diff_lines, using: DiffLineEntity, if: -> (diff_file, options) { inline_diff_view?(options, diff_file) && diff_file.text? } do |diff_file|
-    diff_file.diff_lines_for_serializer
+    file = conflict_file(options, diff_file) || diff_file
+    file.diff_lines_for_serializer
   end
 
   expose :is_fully_expanded do |diff_file|
-    diff_file.fully_expanded?
+    if conflict_file(options, diff_file)
+      false
+    else
+      diff_file.fully_expanded?
+    end
   end
 
   # Used for parallel diffs
@@ -71,16 +77,18 @@ class DiffFileEntity < DiffFileBaseEntity
   private
 
   def parallel_diff_view?(options, diff_file)
-    return true unless Feature.enabled?(:single_mr_diff_view, diff_file.repository.project, default_enabled: true)
-
     # If we're not rendering inline, we must be rendering parallel
     !inline_diff_view?(options, diff_file)
   end
 
   def inline_diff_view?(options, diff_file)
-    return true unless Feature.enabled?(:single_mr_diff_view, diff_file.repository.project, default_enabled: true)
-
     # If nothing is present, inline will be the default.
     options.fetch(:diff_view, :inline).to_sym == :inline
+  end
+
+  def conflict_file(options, diff_file)
+    strong_memoize(:conflict_file) do
+      options[:conflicts] && options[:conflicts][diff_file.new_path]
+    end
   end
 end

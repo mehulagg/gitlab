@@ -169,7 +169,8 @@ module Banzai
       # been queried the object is returned from the cache.
       def collection_objects_for_ids(collection, ids)
         if Gitlab::SafeRequestStore.active?
-          ids = ids.map(&:to_i)
+          ids = ids.map(&:to_i).uniq
+
           cache = collection_cache[collection_cache_key(collection)]
           to_query = ids - cache.keys
 
@@ -177,7 +178,10 @@ module Banzai
             collection.where(id: to_query).each { |row| cache[row.id] = row }
           end
 
-          ids.uniq.map { |id| cache[id] }.compact
+          ids.each_with_object([]) do |id, array|
+            row = cache[id]
+            array << row if row
+          end
         else
           collection.where(id: ids)
         end

@@ -25,12 +25,6 @@ RSpec.describe Vulnerabilities::IssueLinkPolicy do
       it { is_expected.to be_disallowed(:admin_vulnerability_issue_link) }
     end
 
-    context 'with missing issue' do
-      let(:issue) { nil }
-
-      it { is_expected.to be_disallowed(:admin_vulnerability_issue_link) }
-    end
-
     context 'when issue and link belong to the same project' do
       it { is_expected.to be_allowed(:admin_vulnerability_issue_link) }
     end
@@ -38,7 +32,7 @@ RSpec.describe Vulnerabilities::IssueLinkPolicy do
     context "when issue and link don't belong to the same project" do
       let(:issue) { create(:issue) }
 
-      it { is_expected.to be_disallowed(:admin_vulnerability_issue_link) }
+      it { is_expected.to be_allowed(:admin_vulnerability_issue_link) }
     end
   end
 end

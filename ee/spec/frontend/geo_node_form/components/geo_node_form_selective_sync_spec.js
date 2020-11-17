@@ -1,7 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlFormGroup, GlSprintf } from '@gitlab/ui';
 import GeoNodeFormSelectiveSync from 'ee/geo_node_form/components/geo_node_form_selective_sync.vue';
 import GeoNodeFormNamespaces from 'ee/geo_node_form/components/geo_node_form_namespaces.vue';
 import GeoNodeFormShards from 'ee/geo_node_form/components/geo_node_form_shards.vue';
+import { SELECTIVE_SYNC_MORE_INFO, OBJECT_STORAGE_MORE_INFO } from 'ee/geo_node_form/constants';
 import { MOCK_NODE, MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS } from '../mock_data';
 
 describe('GeoNodeFormSelectiveSync', () => {
@@ -15,6 +17,7 @@ describe('GeoNodeFormSelectiveSync', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(GeoNodeFormSelectiveSync, {
+      stubs: { GlFormGroup, GlSprintf },
       propsData: {
         ...defaultProps,
         ...props,
@@ -28,13 +31,24 @@ describe('GeoNodeFormSelectiveSync', () => {
 
   const findGeoNodeFormSyncContainer = () =>
     wrapper.find({ ref: 'geoNodeFormSelectiveSyncContainer' });
+  const findGeoNodeFormSelectiveSyncMoreInfoLink = () =>
+    wrapper.find('[data-testid="selectiveSyncMoreInfo"]');
   const findGeoNodeFormSyncTypeField = () => wrapper.find('#node-selective-synchronization-field');
   const findGeoNodeFormNamespacesField = () => wrapper.find(GeoNodeFormNamespaces);
   const findGeoNodeFormShardsField = () => wrapper.find(GeoNodeFormShards);
+  const findGeoNodeObjectStorageField = () => wrapper.find('#node-object-storage-field');
+  const findGeoNodeFormObjectStorageMoreInformation = () =>
+    wrapper.find('[data-testid="objectStorageMoreInfo"]');
 
   describe('template', () => {
     beforeEach(() => {
       createComponent();
+    });
+
+    it('renders section More Information link correctly', () => {
+      expect(findGeoNodeFormSelectiveSyncMoreInfoLink().attributes('href')).toBe(
+        SELECTIVE_SYNC_MORE_INFO,
+      );
     });
 
     it('renders Geo Node Form Sync Container', () => {
@@ -43,6 +57,16 @@ describe('GeoNodeFormSelectiveSync', () => {
 
     it('renders Geo Node Sync Type Field', () => {
       expect(findGeoNodeFormSyncTypeField().exists()).toBe(true);
+    });
+
+    it('renders Geo Node Object Storage Field', () => {
+      expect(findGeoNodeObjectStorageField().exists()).toBe(true);
+    });
+
+    it('renders Geo Node Form Object Storage More Information link correctly', () => {
+      expect(findGeoNodeFormObjectStorageMoreInformation().attributes('href')).toBe(
+        OBJECT_STORAGE_MORE_INFO,
+      );
     });
 
     describe.each`

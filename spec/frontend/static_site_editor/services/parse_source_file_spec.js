@@ -1,64 +1,102 @@
 import {
-  sourceContent as content,
-  sourceContentHeader as header,
-  sourceContentSpacing as spacing,
+  sourceContentYAML as content,
+  sourceContentHeaderYAML as yamlFrontMatter,
+  sourceContentHeaderObjYAML as yamlFrontMatterObj,
   sourceContentBody as body,
 } from '../mock_data';
 
 import parseSourceFile from '~/static_site_editor/services/parse_source_file';
 
-describe('parseSourceFile', () => {
-  const contentSimple = content;
+describe('static_site_editor/services/parse_source_file', () => {
   const contentComplex = [content, content, content].join('');
+  const complexBody = [body, content, content].join('');
+  const edit = 'and more';
+  const newContent = `${content} ${edit}`;
+  const newContentComplex = `${contentComplex} ${edit}`;
 
-  describe('the editable shape and its expected values', () => {
+  describe('unmodified front matter', () => {
     it.each`
-      sourceContent     | sourceHeader | sourceSpacing | sourceBody                           | desc
-      ${contentSimple}  | ${header}    | ${spacing}    | ${body}                              | ${'extracts header'}
-      ${contentComplex} | ${header}    | ${spacing}    | ${[body, content, content].join('')} | ${'extracts body'}
-    `('$desc', ({ sourceContent, sourceHeader, sourceSpacing, sourceBody }) => {
-      const { editable } = parseSourceFile(sourceContent);
-
-      expect(editable).toMatchObject({
-        raw: sourceContent,
-        header: sourceHeader,
-        spacing: sourceSpacing,
-        body: sourceBody,
-      });
-    });
-
-    it('returns the same front matter regardless of front matter duplication', () => {
-      const parsedSourceSimple = parseSourceFile(contentSimple);
-      const parsedSourceComplex = parseSourceFile(contentComplex);
-
-      expect(parsedSourceSimple.editable.header).toBe(parsedSourceComplex.editable.header);
+      parsedSource
+      ${parseSourceFile(content)}
+      ${parseSourceFile(contentComplex)}
+    `('returns $targetFrontMatter when frontMatter queried', ({ parsedSource }) => {
+      expect(parsedSource.matter()).toEqual(yamlFrontMatterObj);
     });
   });
 
-  describe('editable body to raw content default and changes', () => {
+  describe('unmodified content', () => {
     it.each`
-      sourceContent     | desc
-      ${contentSimple}  | ${'returns false by default for both raw and body'}
-      ${contentComplex} | ${'returns false by default for both raw and body'}
-    `('$desc', ({ sourceContent }) => {
-      const parsedSource = parseSourceFile(sourceContent);
-
-      expect(parsedSource.isModifiedRaw()).toBe(false);
-      expect(parsedSource.isModifiedBody()).toBe(false);
+      parsedSource
+      ${parseSourceFile(content)}
+      ${parseSourceFile(contentComplex)}
+    `('returns false by default', ({ parsedSource }) => {
+      expect(parsedSource.isModified()).toBe(false);
     });
 
     it.each`
-      sourceContent     | editableKey | syncKey            | isModifiedKey       | desc
-      ${contentSimple}  | ${'body'}   | ${'syncBodyToRaw'} | ${'isModifiedRaw'}  | ${'returns true after modification and sync'}
-      ${contentSimple}  | ${'raw'}    | ${'syncRawToBody'} | ${'isModifiedBody'} | ${'returns true after modification and sync'}
-      ${contentComplex} | ${'body'}   | ${'syncBodyToRaw'} | ${'isModifiedRaw'}  | ${'returns true after modification and sync'}
-      ${contentComplex} | ${'raw'}    | ${'syncRawToBody'} | ${'isModifiedBody'} | ${'returns true after modification and sync'}
-    `('$desc', ({ sourceContent, editableKey, syncKey, isModifiedKey }) => {
-      const parsedSource = parseSourceFile(sourceContent);
-      parsedSource.editable[editableKey] += 'Added content';
-      parsedSource[syncKey]();
+      parsedSource                       | isBody       | target
+      ${parseSourceFile(content)}        | ${undefined} | ${content}
+      ${parseSourceFile(content)}        | ${false}     | ${content}
+      ${parseSourceFile(content)}        | ${true}      | ${body}
+      ${parseSourceFile(contentComplex)} | ${undefined} | ${contentComplex}
+      ${parseSourceFile(contentComplex)} | ${false}     | ${contentComplex}
+      ${parseSourceFile(contentComplex)} | ${true}      | ${complexBody}
+    `(
+      'returns only the $target content when the `isBody` parameter argument is $isBody',
+      ({ parsedSource, isBody, target }) => {
+        expect(parsedSource.content(isBody)).toBe(target);
+      },
+    );
+  });
 
-      expect(parsedSource[isModifiedKey]()).toBe(true);
-    });
+  describe('modified front matter', () => {
+    const newYamlFrontMatter = '---\nnewKey: newVal\n---';
+    const newYamlFrontMatterObj = { newKey: 'newVal' };
+    const contentWithNewFrontMatter = content.replace(yamlFrontMatter, newYamlFrontMatter);
+    const contentComplexWithNewFrontMatter = contentComplex.replace(
+      yamlFrontMatter,
+      newYamlFrontMatter,
+    );
+
+    it.each`
+      parsedSource                       | targetContent
+      ${parseSourceFile(content)}        | ${contentWithNewFrontMatter}
+      ${parseSourceFile(contentComplex)} | ${contentComplexWithNewFrontMatter}
+    `(
+      'returns the correct front matter and modified content',
+      ({ parsedSource, targetContent }) => {
+        expect(parsedSource.matter()).toMatchObject(yamlFrontMatterObj);
+
+        parsedSource.syncMatter(newYamlFrontMatterObj);
+
+        expect(parsedSource.matter()).toMatchObject(newYamlFrontMatterObj);
+        expect(parsedSource.content()).toBe(targetContent);
+      },
+    );
+  });
+
+  describe('modified content', () => {
+    const newBody = `${body} ${edit}`;
+    const newComplexBody = `${complexBody} ${edit}`;
+
+    it.each`
+      parsedSource                       | hasMatter | isModified | targetRaw            | targetBody
+      ${parseSourceFile(content)}        | ${true}   | ${false}   | ${content}           | ${body}
+      ${parseSourceFile(content)}        | ${true}   | ${true}    | ${newContent}        | ${newBody}
+      ${parseSourceFile(contentComplex)} | ${true}   | ${false}   | ${contentComplex}    | ${complexBody}
+      ${parseSourceFile(contentComplex)} | ${true}   | ${true}    | ${newContentComplex} | ${newComplexBody}
+      ${parseSourceFile(body)}           | ${false}  | ${false}   | ${body}              | ${body}
+      ${parseSourceFile(body)}           | ${false}  | ${true}    | ${newBody}           | ${newBody}
+    `(
+      'returns $isModified after a $targetRaw sync',
+      ({ parsedSource, hasMatter, isModified, targetRaw, targetBody }) => {
+        parsedSource.syncContent(targetRaw);
+
+        expect(parsedSource.hasMatter()).toBe(hasMatter);
+        expect(parsedSource.isModified()).toBe(isModified);
+        expect(parsedSource.content()).toBe(targetRaw);
+        expect(parsedSource.content(true)).toBe(targetBody);
+      },
+    );
   });
 });

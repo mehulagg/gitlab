@@ -2,6 +2,34 @@
 
 module EE
   module ServicesHelper
+    extend ::Gitlab::Utils::Override
+
+    override :project_jira_issues_integration?
+    def project_jira_issues_integration?
+      @project.jira_issues_integration_available? && @project.jira_service.issues_enabled
+    end
+
+    override :integration_form_data
+    def integration_form_data(integration)
+      form_data = super
+
+      if integration.is_a?(JiraService)
+        form_data.merge!(
+          show_jira_issues_integration: @project&.feature_available?(:jira_issues_integration).to_s,
+          show_jira_vulnerabilities_integration: @project&.jira_vulnerabilities_integration_available?.to_s,
+          enable_jira_issues: integration.issues_enabled.to_s,
+          enable_jira_vulnerabilities: integration.jira_vulnerabilities_integration_enabled?.to_s,
+          project_key: integration.project_key,
+          vulnerabilities_issuetype: integration.vulnerabilities_issuetype,
+          gitlab_issues_enabled: @project&.issues_enabled?.to_s,
+          upgrade_plan_path: @project && ::Gitlab::CurrentSettings.should_check_namespace_plan? ? upgrade_plan_path(@project.group) : nil,
+          edit_project_path: @project ? edit_project_path(@project, anchor: 'js-shared-permissions') : nil
+        )
+      end
+
+      form_data
+    end
+
     def add_to_slack_link(project, slack_app_id)
       "https://slack.com/oauth/authorize?scope=commands&client_id=#{slack_app_id}&redirect_uri=#{slack_auth_project_settings_slack_url(project)}&state=#{escaped_form_authenticity_token}"
     end

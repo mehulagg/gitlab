@@ -10,6 +10,10 @@ RSpec.describe 'Container Registry', :js do
     create(:container_repository, name: 'my/image')
   end
 
+  let(:nameless_container_repository) do
+    create(:container_repository, name: '')
+  end
+
   before do
     sign_in(user)
     project.add_developer(user)
@@ -84,7 +88,7 @@ RSpec.describe 'Container Registry', :js do
         expect(service).to receive(:execute).with(container_repository) { { status: :success } }
         expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(container_repository.project, user, tags: ['1']) { service }
 
-        first('[data-testid="singleDeleteButton"]').click
+        first('[data-testid="single-delete-button"]').click
         expect(find('.modal .modal-title')).to have_content _('Remove tag')
         find('.modal .modal-footer .btn-danger').click
       end
@@ -93,6 +97,20 @@ RSpec.describe 'Container Registry', :js do
         visit_second_page
         expect(page).to have_content '20'
       end
+    end
+  end
+
+  describe 'image repo details when image has no name' do
+    before do
+      stub_container_registry_tags(tags: %w[latest], with_manifest: true)
+      project.container_repositories << nameless_container_repository
+      visit_container_registry
+    end
+
+    it 'renders correctly' do
+      find('a[data-testid="details-link"]').click
+
+      expect(page).to have_content 'latest'
     end
   end
 

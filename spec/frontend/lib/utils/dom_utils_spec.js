@@ -1,4 +1,11 @@
-import { addClassIfElementExists, canScrollUp, canScrollDown } from '~/lib/utils/dom_utils';
+import {
+  addClassIfElementExists,
+  canScrollUp,
+  canScrollDown,
+  parseBooleanDataAttributes,
+  isElementVisible,
+  isElementHidden,
+} from '~/lib/utils/dom_utils';
 
 const TEST_MARGIN = 5;
 
@@ -112,4 +119,78 @@ describe('DOM Utils', () => {
       expect(canScrollDown(element, TEST_MARGIN)).toBe(false);
     });
   });
+
+  describe('parseBooleanDataAttributes', () => {
+    let element;
+
+    beforeEach(() => {
+      setFixtures('<div data-foo-bar data-baz data-qux="">');
+      element = document.querySelector('[data-foo-bar]');
+    });
+
+    it('throws if not given an element', () => {
+      expect(() => parseBooleanDataAttributes(null, ['baz'])).toThrow();
+    });
+
+    it('throws if not given an array of dataset names', () => {
+      expect(() => parseBooleanDataAttributes(element)).toThrow();
+    });
+
+    it('returns an empty object if given an empty array of names', () => {
+      expect(parseBooleanDataAttributes(element, [])).toEqual({});
+    });
+
+    it('correctly parses boolean-like data attributes', () => {
+      expect(
+        parseBooleanDataAttributes(element, [
+          'fooBar',
+          'foobar',
+          'baz',
+          'qux',
+          'doesNotExist',
+          'toString',
+        ]),
+      ).toEqual({
+        fooBar: true,
+        foobar: false,
+        baz: true,
+        qux: true,
+        doesNotExist: false,
+
+        // Ensure prototype properties aren't false positives
+        toString: false,
+      });
+    });
+  });
+
+  describe.each`
+    offsetWidth | offsetHeight | clientRectsLength | visible
+    ${0}        | ${0}         | ${0}              | ${false}
+    ${1}        | ${0}         | ${0}              | ${true}
+    ${0}        | ${1}         | ${0}              | ${true}
+    ${0}        | ${0}         | ${1}              | ${true}
+  `(
+    'isElementVisible and isElementHidden',
+    ({ offsetWidth, offsetHeight, clientRectsLength, visible }) => {
+      const element = {
+        offsetWidth,
+        offsetHeight,
+        getClientRects: () => new Array(clientRectsLength),
+      };
+
+      const paramDescription = `offsetWidth=${offsetWidth}, offsetHeight=${offsetHeight}, and getClientRects().length=${clientRectsLength}`;
+
+      describe('isElementVisible', () => {
+        it(`returns ${visible} when ${paramDescription}`, () => {
+          expect(isElementVisible(element)).toBe(visible);
+        });
+      });
+
+      describe('isElementHidden', () => {
+        it(`returns ${!visible} when ${paramDescription}`, () => {
+          expect(isElementHidden(element)).toBe(!visible);
+        });
+      });
+    },
+  );
 });

@@ -14,6 +14,7 @@ module RequirementsManagement
     self.table_name = 'requirements'
 
     cache_markdown_field :title, pipeline: :single_line
+    cache_markdown_field :description, issuable_state_filter_enabled: true
 
     strip_attributes :title
 
@@ -22,7 +23,7 @@ module RequirementsManagement
 
     has_many :test_reports, inverse_of: :requirement
 
-    has_internal_id :iid, scope: :project, init: ->(s) { s&.project&.requirements&.maximum(:iid) }
+    has_internal_id :iid, scope: :project
 
     validates :author, :project, :title, presence: true
 
@@ -57,6 +58,14 @@ module RequirementsManagement
     # so it's better to use resource_parent instead of project directly
     def resource_parent
       project
+    end
+
+    def last_test_report_state
+      test_reports.last&.state
+    end
+
+    def last_test_report_manually_created?
+      test_reports.last&.build.nil?
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::ArtifactFileReader do
+RSpec.describe Gitlab::Ci::ArtifactFileReader do
   let(:job) { create(:ci_build) }
   let(:path) { 'generated.yml' } # included in the ci_build_artifacts.zip
 
@@ -16,6 +16,17 @@ describe Gitlab::Ci::ArtifactFileReader do
       it 'returns the content at the path' do
         is_expected.to be_present
         expect(YAML.safe_load(subject).keys).to contain_exactly('rspec', 'time', 'custom')
+      end
+
+      context 'when FF ci_new_artifact_file_reader is disabled' do
+        before do
+          stub_feature_flags(ci_new_artifact_file_reader: false)
+        end
+
+        it 'returns the content at the path' do
+          is_expected.to be_present
+          expect(YAML.safe_load(subject).keys).to contain_exactly('rspec', 'time', 'custom')
+        end
       end
 
       context 'when path does not exist' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Saml::User do
+RSpec.describe Gitlab::Auth::Saml::User do
   include LdapHelpers
   include LoginHelpers
 
@@ -19,6 +19,7 @@ describe Gitlab::Auth::Saml::User do
       email: 'john@mail.com'
     }
   end
+
   let(:ldap_user) { Gitlab::Auth::Ldap::Person.new(Net::LDAP::Entry.new, 'ldapmain') }
 
   describe '#save' do
@@ -194,6 +195,7 @@ describe Gitlab::Auth::Saml::User do
                   }
                 }
               end
+
               let(:auth_hash) { OmniAuth::AuthHash.new(auth_hash_base_attributes) }
               let(:uid_types) { %w(uid dn email) }
 

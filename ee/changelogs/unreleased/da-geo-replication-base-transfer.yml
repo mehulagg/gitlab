@@ -1,5 +1,0 @@
----
-title: Geo - Fix Gitlab::Geo::Replication::BaseTransfer for orphaned registries
-merge_request: 34292
-author:
-type: fixed

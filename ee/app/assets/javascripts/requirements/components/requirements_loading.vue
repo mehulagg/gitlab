@@ -1,5 +1,5 @@
 <script>
-import { GlSkeletonLoading, GlLoadingIcon } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlLoadingIcon } from '@gitlab/ui';
 
 import { DEFAULT_PAGE_SIZE, FilterState } from '../constants';
 

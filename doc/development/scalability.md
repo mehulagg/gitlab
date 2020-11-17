@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab scalability
 
 This section describes the current architecture of GitLab as it relates to
@@ -115,8 +121,7 @@ that backup, the database can apply the WAL logs in order until the
 database has reached the target time.
 
 On GitLab.com, Consul and Patroni work together to coordinate failovers with
-the read replicas. [Omnibus ships with repmgr instead of
-Patroni](../administration/postgresql/replication_and_failover.md).
+the read replicas. [Omnibus ships with both repmgr and Patroni](../administration/postgresql/replication_and_failover.md).
 
 #### Load-balancing
 

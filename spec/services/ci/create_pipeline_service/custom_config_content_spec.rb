@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Ci::CreatePipelineService do
+RSpec.describe Ci::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:user) { create(:admin) }
+  let_it_be(:user) { project.owner }
   let(:ref) { 'refs/heads/master' }
   let(:service) { described_class.new(project, user, { ref: ref }) }
 

@@ -1,4 +1,12 @@
+---
+stage: Plan
+group: Certify
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Reply by email
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/1173) in GitLab 8.0.
 
 GitLab can be set up to allow users to comment on issues and merge requests by
 replying to notification emails.
@@ -38,4 +46,4 @@ If it finds a reply key, it will be able to leave your reply as a comment on
 the entity the notification was about (issue, merge request, commit...).
 
 For more details about the `Message-ID`, `In-Reply-To`, and `References headers`,
-please consult [RFC 5322](https://tools.ietf.org/html/rfc5322#section-3.6.4).
+see [RFC 5322](https://tools.ietf.org/html/rfc5322#section-3.6.4).

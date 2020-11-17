@@ -4,6 +4,7 @@ class Wiki
   extend ::Gitlab::Utils::Override
   include HasRepository
   include Gitlab::Utils::StrongMemoize
+  include GlobalID::Identification
 
   MARKUPS = { # rubocop:disable Style/MultilineIfModifier
     'Markdown' => :markdown,
@@ -28,13 +29,46 @@ class Wiki
   # an operation fails.
   attr_reader :error_message
 
-  def self.for_container(container, user = nil)
-    "#{container.class.name}Wiki".constantize.new(container, user)
+  # Support run_after_commit callbacks, since we don't have a DB record
+  # we delegate to the container.
+  delegate :run_after_commit, to: :container
+
+  class << self
+    attr_accessor :container_class
+
+    def for_container(container, user = nil)
+      "#{container.class.name}Wiki".constantize.new(container, user)
+    end
+
+    # This is needed to support repository lookup through Gitlab::GlRepository::Identifier
+    def find_by_id(container_id)
+      container_class.find_by_id(container_id)&.wiki
+    end
   end
 
   def initialize(container, user = nil)
+    raise ArgumentError, "user must be a User, got #{user.class}" if user && !user.is_a?(User)
+
     @container = container
     @user = user
+  end
+
+  def ==(other)
+    other.is_a?(self.class) && container == other.container
+  end
+
+  # This is needed in:
+  # - Storage::Hashed
+  # - Gitlab::GlRepository::RepoType#identifier_for_container
+  #
+  # We also need an `#id` to support `build_stubbed` in tests, where the
+  # value doesn't matter.
+  #
+  # NOTE: Wikis don't have a DB record, so this ID can be the same
+  # for two wikis in different containers and should not be expected to
+  # be unique. Use `to_global_id` instead if you need a unique ID.
+  def id
+    container.id
   end
 
   def path
@@ -102,10 +136,10 @@ class Wiki
     limited = pages.size > limit
     pages = pages.first(limit) if limited
 
-    [WikiPage.group_by_directory(pages), limited]
+    [WikiDirectory.group_pages(pages), limited]
   end
 
-  # Finds a page within the repository based on a tile
+  # Finds a page within the repository based on a title
   # or slug.
   #
   # title - The human readable or parameterized title of
@@ -132,8 +166,9 @@ class Wiki
     commit = commit_details(:created, message, title)
 
     wiki.write_page(title, format.to_sym, content, commit)
+    after_wiki_activity
 
-    update_container_activity
+    true
   rescue Gitlab::Git::Wiki::DuplicatePageError => e
     @error_message = "Duplicate page: #{e.message}"
     false
@@ -143,16 +178,18 @@ class Wiki
     commit = commit_details(:updated, message, page.title)
 
     wiki.update_page(page.path, title || page.name, format.to_sym, content, commit)
+    after_wiki_activity
 
-    update_container_activity
+    true
   end
 
   def delete_page(page, message = nil)
     return unless page
 
     wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
+    after_wiki_activity
 
-    update_container_activity
+    true
   end
 
   def page_title_and_dir(title)
@@ -179,7 +216,7 @@ class Wiki
 
   override :repository
   def repository
-    @repository ||= Repository.new(full_path, container, shard: repository_storage, disk_path: disk_path, repo_type: Gitlab::GlRepository::WIKI)
+    @repository ||= Gitlab::GlRepository::WIKI.repository_for(self)
   end
 
   def repository_storage
@@ -194,7 +231,6 @@ class Wiki
   def full_path
     container.full_path + '.wiki'
   end
-  alias_method :id, :full_path
 
   # @deprecated use full_path when you need it for an URL route or disk_path when you want to point to the filesystem
   alias_method :path_with_namespace, :full_path
@@ -206,6 +242,17 @@ class Wiki
 
   def wiki_base_path
     web_url(only_path: true).sub(%r{/#{Wiki::HOMEPAGE}\z}, '')
+  end
+
+  # Callbacks for synchronous processing after wiki changes.
+  # These will be executed after any change made through GitLab itself (web UI and API),
+  # but not for Git pushes.
+  def after_wiki_activity
+  end
+
+  # Callbacks for background processing after wiki changes.
+  # These will be executed after any change to the wiki repository.
+  def after_post_receive
   end
 
   private
@@ -223,10 +270,6 @@ class Wiki
 
   def default_message(action, title)
     "#{user.username} #{action} page: #{title}"
-  end
-
-  def update_container_activity
-    container.after_wiki_activity
   end
 end
 

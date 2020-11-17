@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Geo', :orchestrated, :geo do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab Geo project deletion replication' do
       include Support::Api
 
@@ -25,7 +25,7 @@ module QA
         deleted_project_id = project_to_delete.id
       end
 
-      it 'replicates deletion of a project to secondary node' do
+      it 'replicates deletion of a project to secondary node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/696' do
         QA::Runtime::Logger.debug('Visiting the secondary geo node')
 
         QA::Flow::Login.while_signed_in(address: :geo_secondary) do

@@ -1,11 +1,11 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_item.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import { n__ } from '~/locale';
 
 export default {
   name: 'BlockingMergeRequestsBody',
-  components: { RelatedIssuableItem, Icon },
+  components: { RelatedIssuableItem, GlIcon },
   props: {
     issue: {
       type: Object,
@@ -34,7 +34,7 @@ export default {
 
 <template>
   <div v-if="issue.hiddenCount" class="p-3 d-flex align-items-center">
-    <icon class="gl-mr-3" name="eye-slash" aria-hidden="true" />
+    <gl-icon class="gl-mr-3" name="eye-slash" aria-hidden="true" />
     {{ hiddenBlockingMRsText }}
   </div>
   <related-issuable-item

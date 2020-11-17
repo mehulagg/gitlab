@@ -2,12 +2,12 @@
 import $ from 'jquery';
 import { mapGetters, mapActions } from 'vuex';
 import { escape } from 'lodash';
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { truncateSha } from '~/lib/utils/text_utility';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import { __, s__, sprintf } from '../../locale';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import noteHeader from './note_header.vue';
 import noteActions from './note_actions.vue';
@@ -21,8 +21,8 @@ import {
   getEndLineNumber,
   getLineClasses,
   commentLineOptions,
+  formatLineRange,
 } from './multiline_comment_utils';
-import MultilineCommentForm from './multiline_comment_form.vue';
 
 export default {
   name: 'NoteableNote',
@@ -33,7 +33,9 @@ export default {
     noteActions,
     NoteBody,
     TimelineEntryItem,
-    MultilineCommentForm,
+  },
+  directives: {
+    SafeHtml,
   },
   mixins: [noteable, resolvable, glFeatureFlagsMixin()],
   props: {
@@ -62,9 +64,19 @@ export default {
       default: false,
     },
     diffLines: {
-      type: Object,
+      type: Array,
       required: false,
       default: null,
+    },
+    discussionRoot: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    discussionResolvePath: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {
@@ -73,10 +85,8 @@ export default {
       isDeleting: false,
       isRequesting: false,
       isResolving: false,
-      commentLineStart: {
-        line_code: this.line?.line_code,
-        type: this.line?.type,
-      },
+      commentLineStart: {},
+      resolveAsThread: this.glFeatures.removeResolveNote,
     };
   },
   computed: {
@@ -129,6 +139,10 @@ export default {
       return this.note.isDraft;
     },
     canResolve() {
+      if (this.glFeatures.removeResolveNote && !this.discussionRoot) return false;
+
+      if (this.glFeatures.removeResolveNote) return this.note.current_user.can_resolve_discussion;
+
       return (
         this.note.current_user.can_resolve ||
         (this.note.isDraft && this.note.discussion_id !== null)
@@ -144,28 +158,49 @@ export default {
       return getEndLineNumber(this.lineRange);
     },
     showMultiLineComment() {
-      return (
-        this.glFeatures.multilineComments &&
-        this.startLineNumber &&
-        this.endLineNumber &&
-        (this.startLineNumber !== this.endLineNumber || this.isEditing)
-      );
+      if (
+        !this.glFeatures.multilineComments ||
+        !this.discussionRoot ||
+        this.startLineNumber.length === 0 ||
+        this.endLineNumber.length === 0
+      )
+        return false;
+
+      return this.line && this.startLineNumber !== this.endLineNumber;
     },
     commentLineOptions() {
-      if (this.diffLines) {
-        return commentLineOptions(this.diffLines, this.line.line_code);
+      const sideA = this.line.type === 'new' ? 'right' : 'left';
+      const sideB = sideA === 'left' ? 'right' : 'left';
+      const lines = this.diffFile.highlighted_diff_lines.length
+        ? this.diffFile.highlighted_diff_lines
+        : this.diffFile.parallel_diff_lines.map(l => l[sideA] || l[sideB]);
+      return commentLineOptions(lines, this.commentLineStart, this.line.line_code, sideA);
+    },
+    diffFile() {
+      if (this.commentLineStart.line_code) {
+        const lineCode = this.commentLineStart.line_code.split('_')[0];
+        return this.getDiffFileByHash(lineCode);
       }
 
-      const diffFile = this.diffFile || this.getDiffFileByHash(this.targetNoteHash);
-      if (!diffFile) return null;
-      return commentLineOptions(diffFile.highlighted_diff_lines, this.line.line_code);
+      return null;
     },
   },
-
   created() {
+    const line = this.note.position?.line_range?.start || this.line;
+
+    this.commentLineStart = line
+      ? {
+          line_code: line.line_code,
+          type: line.type,
+          old_line: line.old_line,
+          new_line: line.new_line,
+        }
+      : {};
+
     eventHub.$on('enterEditMode', ({ noteId }) => {
       if (noteId === this.note.id) {
         this.isEditing = true;
+        this.setSelectedCommentPositionHover();
         this.scrollToNoteIfNeeded($(this.$el));
       }
     });
@@ -185,9 +220,12 @@ export default {
       'toggleResolveNote',
       'scrollToNoteIfNeeded',
       'updateAssignees',
+      'setSelectedCommentPositionHover',
+      'updateDiscussionPosition',
     ]),
     editHandler() {
       this.isEditing = true;
+      this.setSelectedCommentPositionHover();
       this.$emit('handleEdit');
     },
     deleteHandler() {
@@ -224,13 +262,16 @@ export default {
     formUpdateHandler(noteText, parentElement, callback, resolveDiscussion) {
       const position = {
         ...this.note.position,
-        line_range: {
-          start_line_code: this.commentLineStart?.lineCode,
-          start_line_type: this.commentLineStart?.type,
-          end_line_code: this.line?.line_code,
-          end_line_type: this.line?.type,
-        },
       };
+
+      if (this.discussionRoot && this.commentLineStart && this.line) {
+        position.line_range = formatLineRange(this.commentLineStart, this.line);
+        this.updateDiscussionPosition({
+          discussionId: this.note.discussion_id,
+          position,
+        });
+      }
+
       this.$emit('handleUpdateNote', {
         note: this.note,
         noteText,
@@ -246,7 +287,7 @@ export default {
         note: {
           target_type: this.getNoteableData.targetType,
           target_id: this.note.noteable_id,
-          note: { note: noteText },
+          note: { note: noteText, position: JSON.stringify(position) },
         },
       };
       this.isRequesting = true;
@@ -266,6 +307,7 @@ export default {
           } else {
             this.isRequesting = false;
             this.isEditing = true;
+            this.setSelectedCommentPositionHover();
             this.$nextTick(() => {
               const msg = __('Something went wrong while editing your comment. Please try again.');
               Flash(msg, 'alert', this.$el);
@@ -313,29 +355,24 @@ export default {
     :class="classNameBindings"
     :data-award-url="note.toggle_award_path"
     :data-note-id="note.id"
-    class="note note-wrapper qa-noteable-note-item"
+    class="note note-wrapper"
+    data-qa-selector="noteable_note_container"
   >
-    <div v-if="showMultiLineComment" data-testid="multiline-comment">
-      <multiline-comment-form
-        v-if="isEditing && commentLineOptions && line"
-        v-model="commentLineStart"
-        :line="line"
-        :comment-line-options="commentLineOptions"
-        :line-range="note.position.line_range"
-        class="gl-mb-3 gl-text-gray-700 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
-      />
-      <div v-else class="gl-mb-3 gl-text-gray-700">
-        <gl-sprintf :message="__('Comment on lines %{startLine} to %{endLine}')">
-          <template #startLine>
-            <span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
-          </template>
-          <template #endLine>
-            <span :class="getLineClasses(endLineNumber)">{{ endLineNumber }}</span>
-          </template>
-        </gl-sprintf>
-      </div>
+    <div
+      v-if="showMultiLineComment"
+      data-testid="multiline-comment"
+      class="gl-mb-3 gl-text-gray-500 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
+    >
+      <gl-sprintf :message="__('Comment on lines %{startLine} to %{endLine}')">
+        <template #startLine>
+          <span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
+        </template>
+        <template #endLine>
+          <span :class="getLineClasses(endLineNumber)">{{ endLineNumber }}</span>
+        </template>
+      </gl-sprintf>
     </div>
-    <div v-once class="timeline-icon">
+    <div class="timeline-icon">
       <user-avatar-link
         :link-href="author.path"
         :img-src="author.avatar_url"
@@ -348,14 +385,13 @@ export default {
     <div class="timeline-content">
       <div class="note-header">
         <note-header
-          v-once
           :author="author"
           :created-at="note.created_at"
           :note-id="note.id"
           :is-confidential="note.confidential"
         >
           <slot slot="note-header-info" name="note-header-info"></slot>
-          <span v-if="commit" v-html="actionText"></span>
+          <span v-if="commit" v-safe-html="actionText"></span>
           <span v-else-if="note.created_at" class="d-none d-sm-inline">&middot;</span>
         </note-header>
         <note-actions
@@ -364,6 +400,10 @@ export default {
           :note-id="note.id"
           :note-url="note.noteable_note_url"
           :access-level="note.human_access"
+          :is-contributor="note.is_contributor"
+          :is-author="note.is_noteable_author"
+          :project-name="note.project_name"
+          :noteable-type="note.noteable_type"
           :show-reply="showReplyButton"
           :can-edit="note.current_user.can_edit"
           :can-award-emoji="note.current_user.can_award_emoji"

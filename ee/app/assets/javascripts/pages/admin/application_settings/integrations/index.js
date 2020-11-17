@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .select2(
       getDropdownConfig(
         s__('Elastic|None. Select namespaces to index.'),
-        '/autocomplete/namespace_routes.json',
+        '/-/autocomplete/namespace_routes.json',
       ),
     );
 
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .select2(
       getDropdownConfig(
         s__('Elastic|None. Select projects to index.'),
-        '/autocomplete/project_routes.json',
+        '/-/autocomplete/project_routes.json',
       ),
     );
 });

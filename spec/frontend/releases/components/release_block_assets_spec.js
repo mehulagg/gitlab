@@ -1,9 +1,12 @@
 import { mount } from '@vue/test-utils';
 import { GlCollapse } from '@gitlab/ui';
+import { trimText } from 'helpers/text_helper';
+import { getJSONFixture } from 'helpers/fixtures';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import ReleaseBlockAssets from '~/releases/components/release_block_assets.vue';
 import { ASSET_LINK_TYPE } from '~/releases/constants';
-import { trimText } from 'helpers/text_helper';
-import { assets } from '../mock_data';
+
+const { assets } = getJSONFixture('api/releases/release.json');
 
 describe('Release block assets', () => {
   let wrapper;
@@ -19,9 +22,6 @@ describe('Release block assets', () => {
 
   const createComponent = (propsData = defaultProps) => {
     wrapper = mount(ReleaseBlockAssets, {
-      provide: {
-        glFeatures: { releaseAssetLinkType: true },
-      },
       propsData,
     });
   };
@@ -30,7 +30,7 @@ describe('Release block assets', () => {
     wrapper.findAll('h5').filter(h5 => h5.text() === sections[type]);
 
   beforeEach(() => {
-    defaultProps = { assets };
+    defaultProps = { assets: convertObjectPropsToCamelCase(assets, { deep: true }) };
   });
 
   describe('with default props', () => {
@@ -42,7 +42,7 @@ describe('Release block assets', () => {
       const accordionButton = findAccordionButton();
 
       expect(accordionButton.exists()).toBe(true);
-      expect(trimText(accordionButton.text())).toBe('Assets 5');
+      expect(trimText(accordionButton.text())).toBe('Assets 8');
     });
 
     it('renders the accordion as expanded by default', () => {
@@ -96,9 +96,38 @@ describe('Release block assets', () => {
     });
   });
 
+  describe('sources', () => {
+    const testSources = ({ shouldSourcesBeRendered }) => {
+      assets.sources.forEach(s => {
+        expect(wrapper.find(`a[href="${s.url}"]`).exists()).toBe(shouldSourcesBeRendered);
+      });
+    };
+
+    describe('when the release has sources', () => {
+      beforeEach(() => {
+        createComponent(defaultProps);
+      });
+
+      it('renders sources', () => {
+        testSources({ shouldSourcesBeRendered: true });
+      });
+    });
+
+    describe('when the release does not have sources', () => {
+      beforeEach(() => {
+        delete defaultProps.assets.sources;
+        createComponent(defaultProps);
+      });
+
+      it('does not render any sources', () => {
+        testSources({ shouldSourcesBeRendered: false });
+      });
+    });
+  });
+
   describe('external vs internal links', () => {
     const containsExternalSourceIndicator = () =>
-      wrapper.contains('[data-testid="external-link-indicator"]');
+      wrapper.find('[data-testid="external-link-indicator"]').exists();
 
     describe('when a link is external', () => {
       beforeEach(() => {

@@ -34,19 +34,26 @@ module QA
         @retry_later_backoff = QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME
       end
 
+      def inspect
+        # For prettier failure messages
+        # Eg.: "expected QA::Page::File::Show not to have file "QA Test - File name"
+        # Instead of "expected #<QA::Page::File::Show:0x000055c6511e07b8 @retry_later_backoff=60> not to have file "QA Test - File name"
+        self.class.to_s
+      end
+
       def assert_no_element(name)
         assert_no_selector(element_selector_css(name))
       end
 
-      def refresh
+      def refresh(skip_finished_loading_check: false)
         page.refresh
 
-        wait_for_requests
+        wait_for_requests(skip_finished_loading_check: skip_finished_loading_check)
       end
 
-      def wait_until(max_duration: 60, sleep_interval: 0.1, reload: true, raise_on_failure: true)
+      def wait_until(max_duration: 60, sleep_interval: 0.1, reload: true, raise_on_failure: true, skip_finished_loading_check_on_refresh: false)
         Support::Waiter.wait_until(max_duration: max_duration, sleep_interval: sleep_interval, raise_on_failure: raise_on_failure) do
-          yield || (reload && refresh && false)
+          yield || (reload && refresh(skip_finished_loading_check: skip_finished_loading_check_on_refresh) && false)
         end
       end
 
@@ -141,6 +148,15 @@ module QA
         end
       end
 
+      # Use this to simulate moving the pointer to an element's coordinate
+      # and sending a click event.
+      # This is a helpful workaround when there is a transparent element overlapping
+      # the target element and so, normal `click_element` on target would raise
+      # Selenium::WebDriver::Error::ElementClickInterceptedError
+      def click_element_coordinates(name)
+        page.driver.browser.action.move_to(find_element(name).native).click.perform
+      end
+
       # replace with (..., page = self.class)
       def click_element(name, page = nil, **kwargs)
         wait_for_requests
@@ -169,7 +185,7 @@ module QA
       end
 
       def has_element?(name, **kwargs)
-        wait_for_requests
+        wait_for_requests(skip_finished_loading_check: !!kwargs.delete(:skip_finished_loading_check))
 
         disabled = kwargs.delete(:disabled)
 
@@ -207,15 +223,6 @@ module QA
 
       def has_normalized_ws_text?(text, wait: Capybara.default_max_wait_time)
         has_text?(text.gsub(/\s+/, " "), wait: wait)
-      end
-
-      def finished_loading?
-        wait_for_requests
-
-        # The number of selectors should be able to be reduced after
-        # migration to the new spinner is complete.
-        # https://gitlab.com/groups/gitlab-org/-/epics/956
-        has_no_css?('.gl-spinner, .fa-spinner, .spinner', wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
       end
 
       def finished_loading_block?

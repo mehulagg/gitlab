@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe JSONWebToken::RSAToken do
+RSpec.describe JSONWebToken::RSAToken do
   let(:rsa_key) do
     OpenSSL::PKey::RSA.new <<-eos.strip_heredoc
       -----BEGIN RSA PRIVATE KEY-----
@@ -14,6 +14,7 @@ describe JSONWebToken::RSAToken do
       -----END RSA PRIVATE KEY-----
     eos
   end
+
   let(:rsa_token) { described_class.new(nil) }
   let(:rsa_encoded) { rsa_token.encoded }
 

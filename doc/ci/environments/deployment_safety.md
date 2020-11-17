@@ -1,3 +1,9 @@
+---
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Deployment safety
 
 Deployment jobs can be more sensitive than other jobs in a pipeline,
@@ -7,7 +13,7 @@ that help maintain deployment security and stability.
 You can:
 
 - [Restrict write-access to a critical environment](#restrict-write-access-to-a-critical-environment)
-- [Restrict deployments for a particular period](#restrict-deployments-for-a-particular-period)
+- [Prevent deployments during deploy freeze windows](#prevent-deployments-during-deploy-freeze-windows)
 
 If you are using a continuous deployment workflow and want to ensure that concurrent deployments to the same environment do not happen, you should enable the following options:
 
@@ -26,7 +32,7 @@ Pipeline jobs in GitLab CI/CD run in parallel, so it's possible that two deploym
 jobs in two different pipelines attempt to deploy to the same environment at the same
 time. This is not desired behavior as deployments should happen sequentially.
 
-You can ensure only one deployment job runs at a time with the [`resource_group` keyword](../yaml/README.md#resource_group) keyword in your `.gitlab-ci.yml`.
+You can ensure only one deployment job runs at a time with the [`resource_group` keyword](../yaml/README.md#resource_group) in your `.gitlab-ci.yml`.
 
 For example:
 
@@ -65,8 +71,8 @@ runs by enabling the [Skip outdated deployment jobs](../pipelines/settings.md#sk
 
 Example of a problematic pipeline flow **before** enabling Skip outdated deployment jobs:
 
-1. Pipeline-A is created on the master branch.
-1. Later, Pipeline-B is created on the master branch (with a newer commit SHA).
+1. Pipeline-A is created on the `master` branch.
+1. Later, Pipeline-B is created on the `master` branch (with a newer commit SHA).
 1. The `deploy` job in Pipeline-B finishes first, and deploys the newer code.
 1. The `deploy` job in Pipeline-A finished later, and deploys the older code, **overwriting** the newer (latest) deployment.
 
@@ -77,10 +83,10 @@ The improved pipeline flow **after** enabling Skip outdated deployment jobs:
 1. The `deploy` job in Pipeline-B finishes first, and deploys the newer code.
 1. The `deploy` job in Pipeline-A is automatically cancelled, so that it doesn't overwrite the deployment from the newer pipeline.
 
-## Restrict deployments for a particular period
+## Prevent deployments during deploy freeze windows
 
 If you want to prevent deployments for a particular period, for example during a planned
-vacation period when most employees are out, you can set up a [Deploy Freeze](../../user/project/releases/index.md#set-a-deploy-freeze).
+vacation period when most employees are out, you can set up a [Deploy Freeze](../../user/project/releases/index.md#prevent-unintentional-releases-by-setting-a-deploy-freeze).
 During a deploy freeze period, no deployment can be executed. This is helpful to
 ensure that deployments do not happen unexpectedly.
 

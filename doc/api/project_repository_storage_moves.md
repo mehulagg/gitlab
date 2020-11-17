@@ -5,11 +5,35 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Project repository storage move API
+# Project repository storage moves API **(CORE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31285) in GitLab 13.0.
 
-Project repository storage can be moved. To retrieve project repository storage moves using the API, you must [authenticate yourself](README.md#authentication) as an administrator.
+Project repositories including wiki and design repositories can be moved between storages. This can be useful when
+[migrating to Gitaly Cluster](../administration/gitaly/praefect.md#migrate-existing-repositories-to-gitaly-cluster),
+for example.
+
+As project repository storage moves are processed, they transition through different states. Values
+of `state` are:
+
+- `initial`
+- `scheduled`
+- `started`
+- `finished`
+- `failed`
+- `replicated`
+- `cleanup failed`
+
+To ensure data integrity, projects are put in a temporary read-only state for the
+duration of the move. During this time, users receive a `The repository is temporarily
+read-only. Please try again later.` message if they try to push new commits.
+
+This API requires you to [authenticate yourself](README.md#authentication) as an administrator.
+
+## Limitations
+
+- The repositories associated with snippets [can't be moved with the API](https://gitlab.com/groups/gitlab-org/-/epics/3393).
+- Group-level wikis [can't be moved with the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
 
 ## Retrieve all project repository storage moves
 
@@ -23,7 +47,7 @@ are [paginated](README.md#pagination).
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/project_repository_storage_moves'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/project_repository_storage_moves"
 ```
 
 Example response:
@@ -66,7 +90,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/1/repository_storage_moves'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/repository_storage_moves"
 ```
 
 Example response:
@@ -106,7 +130,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/project_repository_storage_moves/1'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/project_repository_storage_moves/1"
 ```
 
 Example response:
@@ -145,7 +169,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/1/repository_storage_moves/1'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/repository_storage_moves/1"
 ```
 
 Example response:
@@ -170,6 +194,14 @@ Example response:
 
 ## Schedule a repository storage move for a project
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34119) in GitLab 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/2618) in GitLab 13.3, original repository is automatically removed after successful move and integrity check.
+
+CAUTION: **Caution:**
+Before GitLab 13.3, a repository move worked more like a repository copy as the
+original repository was not deleted from the original storage disk location and
+had to be manually cleaned up.
+
 ```plaintext
 POST /projects/:project_id/repository_storage_moves
 ```
@@ -179,13 +211,13 @@ Parameters:
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `project_id` | integer | yes | ID of the project |
-| `destination_storage_name` | string | yes | Name of the destination storage shard |
+| `destination_storage_name` | string | no | Name of the destination storage shard. In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/3209), the storage is selected automatically if not provided |
 
 Example request:
 
 ```shell
-curl --request POST --header "PRIVATE_TOKEN: <your_access_token>" --header "Content-Type: application/json" \
---data '{"destination_storage_name":"storage2"}' 'https://gitlab.example.com/api/v4/projects/1/repository_storage_moves'
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+--data '{"destination_storage_name":"storage2"}' "https://gitlab.example.com/api/v4/projects/1/repository_storage_moves"
 ```
 
 Example response:

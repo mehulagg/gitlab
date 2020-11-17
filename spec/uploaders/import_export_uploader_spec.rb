@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ImportExportUploader do
+RSpec.describe ImportExportUploader do
   let(:model) { build_stubbed(:import_export_upload) }
   let(:upload) { create(:upload, model: model) }
   let(:import_export_upload) { ImportExportUpload.new }
@@ -24,9 +24,14 @@ describe ImportExportUploader do
 
     include_context 'with storage', described_class::Store::REMOTE
 
-    it_behaves_like 'builds correct paths',
-                    store_dir: %r[import_export_upload/import_file/],
-                    upload_path: %r[import_export_upload/import_file/]
+    patterns = {
+      store_dir: %r[import_export_upload/import_file/],
+      upload_path: %r[import_export_upload/import_file/]
+    }
+
+    it_behaves_like 'builds correct paths', patterns do
+      let(:fixture) { File.join('spec', 'fixtures', 'group_export.tar.gz') }
+    end
 
     describe '#move_to_store' do
       it 'returns false' do

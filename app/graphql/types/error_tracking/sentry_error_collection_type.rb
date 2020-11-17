@@ -4,7 +4,7 @@ module Types
   module ErrorTracking
     class SentryErrorCollectionType < ::Types::BaseObject
       graphql_name 'SentryErrorCollection'
-      description 'An object containing a collection of Sentry errors, and a detailed error.'
+      description 'An object containing a collection of Sentry errors, and a detailed error'
 
       authorize :read_sentry_issue
 
@@ -17,11 +17,11 @@ module Types
             resolver: Resolvers::ErrorTracking::SentryErrorsResolver do
               argument :search_term,
                       String,
-                      description: 'Search term for the Sentry error.',
+                      description: 'Search query for the Sentry error details',
                       required: false
               argument :sort,
                       String,
-                      description: 'Attribute to sort on. Options are frequency, first_seen, last_seen. last_seen is default.',
+                      description: 'Attribute to sort on. Options are frequency, first_seen, last_seen. last_seen is default',
                       required: false
             end
       field :detailed_error, Types::ErrorTracking::SentryDetailedErrorType,

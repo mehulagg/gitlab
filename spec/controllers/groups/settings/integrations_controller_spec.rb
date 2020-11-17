@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Groups::Settings::IntegrationsController do
-  let_it_be(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:group) { create(:group) }
 
@@ -47,7 +46,7 @@ RSpec.describe Groups::Settings::IntegrationsController do
   describe '#edit' do
     context 'when user is not owner' do
       it 'renders not_found' do
-        get :edit, params: { group_id: group, id: Service.available_services_names.sample }
+        get :edit, params: { group_id: group, id: Service.available_services_names(include_project_specific: false).sample }
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -62,13 +61,13 @@ RSpec.describe Groups::Settings::IntegrationsController do
         it 'returns not_found' do
           stub_feature_flags(group_level_integrations: false)
 
-          get :edit, params: { group_id: group, id: Service.available_services_names.sample }
+          get :edit, params: { group_id: group, id: Service.available_services_names(include_project_specific: false).sample }
 
           expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
-      Service.available_services_names.each do |integration_name|
+      Service.available_services_names(include_project_specific: false).each do |integration_name|
         context "#{integration_name}" do
           it 'successfully displays the template' do
             get :edit, params: { group_id: group, id: integration_name }
@@ -82,10 +81,13 @@ RSpec.describe Groups::Settings::IntegrationsController do
   end
 
   describe '#update' do
-    let(:integration) { create(:jira_service, project: project) }
+    include JiraServiceHelper
+
+    let(:integration) { create(:jira_service, project: nil, group_id: group.id) }
 
     before do
       group.add_owner(user)
+      stub_jira_service_test
 
       put :update, params: { group_id: group, id: integration.class.to_param, service: { url: url } }
     end

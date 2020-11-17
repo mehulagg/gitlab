@@ -1,10 +1,9 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
+import { GlSprintf, GlIcon } from '@gitlab/ui';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import { sprintf, __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import resolvedStatusMixin from '../mixins/resolved_status';
-import { GlSprintf } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   getStartLineNumber,
@@ -14,7 +13,7 @@ import {
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlSprintf,
   },
   mixins: [resolvedStatusMixin, glFeatureFlagsMixin()],
@@ -52,14 +51,12 @@ export default {
       });
     },
     linePosition() {
-      if (this.draft.position && this.draft.position.position_type === IMAGE_DIFF_POSITION_TYPE) {
+      if (this.position?.position_type === IMAGE_DIFF_POSITION_TYPE) {
         // eslint-disable-next-line @gitlab/require-i18n-strings
-        return `${this.draft.position.x}x ${this.draft.position.y}y`;
+        return `${this.position.x}x ${this.position.y}y`;
       }
 
-      const position = this.discussion ? this.discussion.position : this.draft.position;
-
-      return position?.new_line || position?.old_line;
+      return this.position?.new_line || this.position?.old_line;
     },
     content() {
       const el = document.createElement('div');
@@ -70,15 +67,17 @@ export default {
     showLinePosition() {
       return this.draft.file_hash || this.isDiffDiscussion;
     },
+    position() {
+      return this.draft.position || this.discussion.position;
+    },
     startLineNumber() {
-      return getStartLineNumber(this.draft.position?.line_range);
+      return getStartLineNumber(this.position?.line_range);
     },
     endLineNumber() {
-      return getEndLineNumber(this.draft.position?.line_range);
+      return getEndLineNumber(this.position?.line_range);
     },
   },
   methods: {
-    ...mapActions('batchComments', ['scrollToDraft']),
     getLineClasses(lineNumber) {
       return getLineClasses(lineNumber);
     },
@@ -88,19 +87,9 @@ export default {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="review-preview-item menu-item"
-    :class="[
-      componentClasses,
-      {
-        'is-last': isLast,
-      },
-    ]"
-    @click="scrollToDraft(draft)"
-  >
+  <span>
     <span class="review-preview-item-header">
-      <icon class="flex-shrink-0" :name="iconName" />
+      <gl-icon class="flex-shrink-0" :name="iconName" />
       <span
         class="bold text-nowrap"
         :class="{ 'gl-align-items-center': glFeatures.multilineComments }"
@@ -137,7 +126,7 @@ export default {
       v-if="draft.discussion_id && resolvedStatusMessage"
       class="review-preview-item-footer draft-note-resolution p-0"
     >
-      <icon class="gl-mr-3" name="status_success" /> {{ resolvedStatusMessage }}
+      <gl-icon class="gl-mr-3" name="status_success" /> {{ resolvedStatusMessage }}
     </span>
-  </button>
+  </span>
 </template>

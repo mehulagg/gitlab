@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -21,12 +24,12 @@ on the repository.
 
 ### Internal projects
 
-Internal projects can be cloned by any logged in user.
+Internal projects can be cloned by any logged in user except [external users](../user/permissions.md#external-users).
 
 They will also be listed in the public access directory (`/public`), but only for logged
 in users.
 
-Any logged in user will have [Guest permissions](../user/permissions.md)
+Any logged in user except [external users](../user/permissions.md#external-users) will have [Guest permissions](../user/permissions.md)
 on the repository.
 
 NOTE: **Note:**
@@ -59,7 +62,7 @@ it. The restriction for visibility levels on the application setting level also
 applies to groups, so if that's set to internal, the explore page will be empty
 for anonymous users. The group page now has a visibility level icon.
 
-Admin users cannot create subgroups or projects with higher visibility level than that of the parent group.
+Admin users cannot create subgroups or projects with higher visibility level than that of the immediate parent group.
 
 ## Visibility of users
 

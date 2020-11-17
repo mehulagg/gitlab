@@ -4,15 +4,15 @@ require 'spec_helper'
 
 RSpec.describe EpicIssues::UpdateService do
   describe '#execute' do
-    let(:user) { create(:user) }
-    let(:group) { create(:group) }
-    let(:epic) { create(:epic, group: group) }
-    let(:issues) { create_list(:issue, 4) }
-    let!(:epic_issue1) { create(:epic_issue, epic: epic, issue: issues[0], relative_position: 3) }
-    let!(:epic_issue2) { create(:epic_issue, epic: epic, issue: issues[1], relative_position: 600) }
-    let!(:epic_issue3) { create(:epic_issue, epic: epic, issue: issues[2], relative_position: 1200) }
-    let!(:epic_issue4) { create(:epic_issue, epic: epic, issue: issues[3], relative_position: 2000) }
-    let(:default_position_value) { Gitlab::Database::MAX_INT_VALUE / 2 }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:epic) { create(:epic, group: group) }
+    let_it_be(:issues) { create_list(:issue, 4) }
+    let_it_be(:epic_issue1, reload: true) { create(:epic_issue, epic: epic, issue: issues[0], relative_position: 3) }
+    let_it_be(:epic_issue2, reload: true) { create(:epic_issue, epic: epic, issue: issues[1], relative_position: 600) }
+    let_it_be(:epic_issue3, reload: true) { create(:epic_issue, epic: epic, issue: issues[2], relative_position: 1200) }
+    let_it_be(:epic_issue4, reload: true) { create(:epic_issue, epic: epic, issue: issues[3], relative_position: 2000) }
+    let_it_be(:default_position_value) { Gitlab::Database::MAX_INT_VALUE / 2 }
 
     before do
       group.add_developer(user)
@@ -28,10 +28,10 @@ RSpec.describe EpicIssues::UpdateService do
 
     context 'when moving issues between different epics' do
       before do
-        epic_issue3.update_attribute(:epic, create(:epic, group: group))
+        epic_issue3.update_attribute(:epic, build(:epic, group: group))
       end
 
-      let(:params) { { move_before_id: epic_issue3.id, move_after_id: epic_issue4.id } }
+      let_it_be(:params) { { move_before_id: epic_issue3.id, move_after_id: epic_issue4.id } }
 
       subject { order_issue(epic_issue1, params) }
 
@@ -50,7 +50,7 @@ RSpec.describe EpicIssues::UpdateService do
     end
 
     context 'moving issue to the first position' do
-      let(:params) { { move_after_id: epic_issue1.id } }
+      let_it_be(:params) { { move_after_id: epic_issue1.id } }
 
       context 'when some positions are close to each other' do
         before do
@@ -76,7 +76,7 @@ RSpec.describe EpicIssues::UpdateService do
     end
 
     context 'moving issue to the third position' do
-      let(:params) { { move_before_id: epic_issue3.id, move_after_id: epic_issue4.id } }
+      let_it_be(:params) { { move_before_id: epic_issue3.id, move_after_id: epic_issue4.id } }
 
       context 'when some positions are close to each other' do
         before do

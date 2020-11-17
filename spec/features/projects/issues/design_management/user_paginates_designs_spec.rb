@@ -10,15 +10,8 @@ RSpec.describe 'User paginates issue designs', :js do
 
   before do
     enable_design_management
-
     create_list(:design, 2, :with_file, issue: issue)
-
     visit project_issue_path(project, issue)
-
-    click_link 'Designs'
-
-    wait_for_requests
-
     find('.js-design-list-item', match: :first).click
   end
 

@@ -1,7 +1,7 @@
 import { parseBoolean } from './lib/utils/common_utils';
 import axios from './lib/utils/axios_utils';
 import { __ } from './locale';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 
 const DEFERRED_LINK_CLASS = 'deferred-link';
 
@@ -18,17 +18,21 @@ export default class PersistentUserCallout {
 
   init() {
     const closeButton = this.container.querySelector('.js-close');
+    const followLink = this.container.querySelector('.js-follow-link');
 
-    if (!closeButton) {
-      return;
+    if (closeButton) {
+      this.handleCloseButtonCallout(closeButton);
+    } else if (followLink) {
+      this.handleFollowLinkCallout(followLink);
     }
+  }
 
+  handleCloseButtonCallout(closeButton) {
     closeButton.addEventListener('click', event => this.dismiss(event));
 
     if (this.deferLinks) {
       this.container.addEventListener('click', event => {
         const isDeferredLink = event.target.classList.contains(DEFERRED_LINK_CLASS);
-
         if (isDeferredLink) {
           const { href, target } = event.target;
 
@@ -36,6 +40,10 @@ export default class PersistentUserCallout {
         }
       });
     }
+  }
+
+  handleFollowLinkCallout(followLink) {
+    followLink.addEventListener('click', event => this.registerCalloutWithLink(event));
   }
 
   dismiss(event, deferredLinkOptions = null) {
@@ -55,6 +63,27 @@ export default class PersistentUserCallout {
       })
       .catch(() => {
         Flash(__('An error occurred while dismissing the alert. Refresh the page and try again.'));
+      });
+  }
+
+  registerCalloutWithLink(event) {
+    event.preventDefault();
+
+    const { href } = event.currentTarget;
+
+    axios
+      .post(this.dismissEndpoint, {
+        feature_name: this.featureId,
+      })
+      .then(() => {
+        window.location.assign(href);
+      })
+      .catch(() => {
+        Flash(
+          __(
+            'An error occurred while acknowledging the notification. Refresh the page and try again.',
+          ),
+        );
       });
   }
 

@@ -1,10 +1,12 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import Dropdown from './dropdown.vue';
 
 export default {
   components: {
     Dropdown,
+    GlButton,
   },
   computed: {
     ...mapGetters(['activeFile']),
@@ -48,7 +50,7 @@ export default {
 
 <template>
   <div class="d-flex align-items-center ide-file-templates qa-file-templates-bar">
-    <strong class="append-right-default"> {{ __('File templates') }} </strong>
+    <strong class="gl-mr-3"> {{ __('File templates') }} </strong>
     <dropdown
       :data="templateTypes"
       :label="selectedTemplateType.name || __('Choose a type...')"
@@ -65,9 +67,9 @@ export default {
       @click="selectTemplate"
     />
     <transition name="fade">
-      <button v-show="updateSuccess" type="button" class="btn btn-default" @click="undo">
+      <gl-button v-show="updateSuccess" category="secondary" variant="default" @click="undo">
         {{ __('Undo') }}
-      </button>
+      </gl-button>
     </transition>
   </div>
 </template>

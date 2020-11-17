@@ -7,6 +7,9 @@
       .issuable-main-info
         .issue-title.title
           %span.issue-title-text{ data: { qa_selector: 'epic_title_text' } }
+            - if epic.confidential?
+              %span.has-tooltip{ title: _('Confidential') }
+                = confidential_icon(epic)
             = link_to epic.title, epic_path(epic)
         .issuable-info
           %span.issuable-reference

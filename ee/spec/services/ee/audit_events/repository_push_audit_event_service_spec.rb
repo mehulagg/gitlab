@@ -20,11 +20,10 @@ RSpec.describe EE::AuditEvents::RepositoryPushAuditEventService do
     let(:attrs) do
       {
         author_id: user.id,
+        author_name: user.name,
         entity_id: entity.id,
         entity_type: entity_type,
-        type: 'SecurityEvent',
         created_at: timestamp,
-        updated_at: timestamp,
         ip_address: '127.0.0.1',
         details: {
           updated_ref: updated_ref,
@@ -41,7 +40,7 @@ RSpec.describe EE::AuditEvents::RepositoryPushAuditEventService do
       let(:updated_ref) { 'master' }
 
       it 'returns audit event attributes' do
-        Timecop.freeze(timestamp) do
+        travel_to(timestamp) do
           expect(service.attributes).to eq(attrs)
         end
       end
@@ -52,7 +51,7 @@ RSpec.describe EE::AuditEvents::RepositoryPushAuditEventService do
       let(:updated_ref) { 'v1.0' }
 
       it 'returns audit event attributes' do
-        Timecop.freeze(timestamp) do
+        travel_to(timestamp) do
           expect(service.attributes).to eq(attrs)
         end
       end

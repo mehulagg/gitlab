@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::CheckInstallationProgressService, '#execute' do
+RSpec.describe Clusters::Applications::CheckInstallationProgressService, '#execute' do
   RESCHEDULE_PHASES = Gitlab::Kubernetes::Pod::PHASES - [Gitlab::Kubernetes::Pod::SUCCEEDED, Gitlab::Kubernetes::Pod::FAILED].freeze
 
   let(:application) { create(:clusters_applications_helm, :installing) }
@@ -161,10 +161,10 @@ describe Clusters::Applications::CheckInstallationProgressService, '#execute' do
         expect(application.status_reason).to be_nil
       end
 
-      it 'tracks application install' do
-        expect(Gitlab::Tracking).to receive(:event).with('cluster:applications', "cluster_application_helm_installed")
-
+      it 'tracks application install', :snowplow do
         service.execute
+
+        expect_snowplow_event(category: 'cluster:applications', action: 'cluster_application_helm_installed')
       end
     end
 

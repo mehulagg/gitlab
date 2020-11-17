@@ -3,7 +3,7 @@ import { mapState, mapActions } from 'vuex';
 
 import { GlTooltip, GlIcon } from '@gitlab/ui';
 
-import { issuableTypesMap } from 'ee/related_issues/constants';
+import { issuableTypesMap } from '~/related_issues/constants';
 
 import EpicActionsSplitButton from './epic_issue_actions_split_button.vue';
 import EpicHealthStatus from './epic_health_status.vue';
@@ -48,7 +48,9 @@ export default {
       });
     },
     showCreateIssueForm() {
-      this.toggleCreateIssueForm({ toggleState: true });
+      this.toggleCreateIssueForm({
+        toggleState: true,
+      });
     },
     showAddEpicForm() {
       this.toggleAddItemForm({
@@ -57,7 +59,9 @@ export default {
       });
     },
     showCreateEpicForm() {
-      this.toggleCreateEpicForm({ toggleState: true });
+      this.toggleCreateEpicForm({
+        toggleState: true,
+      });
     },
   },
 };
@@ -90,7 +94,10 @@ export default {
           </span>
         </p>
       </gl-tooltip>
-      <div ref="countBadge" class="issue-count-badge text-secondary p-0 pr-3">
+      <div
+        ref="countBadge"
+        class="issue-count-badge gl-display-inline-flex text-secondary p-0 pr-3"
+      >
         <span v-if="allowSubEpics" class="d-inline-flex align-items-center">
           <gl-icon name="epic" class="mr-1" />
           {{ totalEpicsCount }}

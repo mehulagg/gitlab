@@ -1,5 +1,6 @@
 <script>
-import sanitize from 'sanitize-html';
+/* eslint-disable vue/no-v-html */
+import { sanitize } from '~/lib/dompurify';
 import Prompt from '../prompt.vue';
 
 export default {
@@ -23,10 +24,7 @@ export default {
   computed: {
     sanitizedOutput() {
       return sanitize(this.rawCode, {
-        allowedTags: sanitize.defaults.allowedTags.concat(['img', 'svg']),
-        allowedAttributes: {
-          img: ['src'],
-        },
+        ALLOWED_ATTR: ['src'],
       });
     },
     showOutput() {
@@ -39,6 +37,6 @@ export default {
 <template>
   <div class="output">
     <prompt type="Out" :count="count" :show-output="showOutput" />
-    <div v-html="sanitizedOutput"></div>
+    <div class="gl-overflow-auto" v-html="sanitizedOutput"></div>
   </div>
 </template>

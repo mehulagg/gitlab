@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Gfm::ReferenceRewriter do
+RSpec.describe Gitlab::Gfm::ReferenceRewriter do
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
 
@@ -108,6 +108,20 @@ describe Gitlab::Gfm::ReferenceRewriter do
           end
         end
       end
+    end
+
+    context 'when description contains a local reference' do
+      let(:local_issue) { create(:issue, project: old_project) }
+      let(:text) { "See ##{local_issue.iid}" }
+
+      it { is_expected.to eq("See #{old_project.path}##{local_issue.iid}") }
+    end
+
+    context 'when description contains a cross reference' do
+      let(:merge_request) { create(:merge_request) }
+      let(:text) { "See #{merge_request.project.full_path}!#{merge_request.iid}" }
+
+      it { is_expected.to eq(text) }
     end
 
     context 'with a commit' do

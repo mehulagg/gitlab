@@ -92,11 +92,6 @@ const getDateFromMilestonesTooltip = ({
   );
 };
 
-// This is for mocking methods from this
-// file within tests using `spyOnDependency`
-// which requires first param to always
-// be default export of dependency as per
-// https://gitlab.com/help/development/testing_guide/frontend_testing.md#stubbing-and-mocking
 const epicUtils = {
   gqClient,
   triggerDocumentEvent,

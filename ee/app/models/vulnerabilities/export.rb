@@ -2,15 +2,15 @@
 
 module Vulnerabilities
   class Export < ApplicationRecord
+    include FileStoreMounter
+
     self.table_name = "vulnerability_exports"
 
     belongs_to :project
     belongs_to :group
     belongs_to :author, optional: false, class_name: 'User'
 
-    mount_uploader :file, AttachmentUploader
-
-    after_save :update_file_store, if: :saved_change_to_file?
+    mount_file_store_uploader AttachmentUploader
 
     enum format: {
       csv: 0
@@ -75,12 +75,6 @@ module Vulnerabilities
 
     def retrieve_upload(_identifier, paths)
       Upload.find_by(model: self, path: paths)
-    end
-
-    def update_file_store
-      # The file.object_store is set during `uploader.store!`
-      # which happens after object is inserted/updated
-      self.update_column(:file_store, file.object_store)
     end
 
     private

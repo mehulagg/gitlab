@@ -1,5 +1,0 @@
----
-title: Elasticsearch integration started using aliases instead of using indices directly
-merge_request: 32107
-author:
-type: changed

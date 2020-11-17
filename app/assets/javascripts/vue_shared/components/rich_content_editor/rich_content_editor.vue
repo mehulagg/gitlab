@@ -2,21 +2,19 @@
 import 'codemirror/lib/codemirror.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
 
-import AddImageModal from './modals/add_image_modal.vue';
-import {
-  EDITOR_OPTIONS,
-  EDITOR_TYPES,
-  EDITOR_HEIGHT,
-  EDITOR_PREVIEW_STYLE,
-  CUSTOM_EVENTS,
-} from './constants';
+import AddImageModal from './modals/add_image/add_image_modal.vue';
+import InsertVideoModal from './modals/insert_video_modal.vue';
+import { EDITOR_TYPES, EDITOR_HEIGHT, EDITOR_PREVIEW_STYLE, CUSTOM_EVENTS } from './constants';
 
 import {
+  registerHTMLToMarkdownRenderer,
+  getEditorOptions,
   addCustomEventListener,
   removeCustomEventListener,
   addImage,
   getMarkdown,
-} from './editor_service';
+  insertVideo,
+} from './services/editor_service';
 
 export default {
   components: {
@@ -25,16 +23,17 @@ export default {
         toast => toast.Editor,
       ),
     AddImageModal,
+    InsertVideoModal,
   },
   props: {
-    value: {
+    content: {
       type: String,
       required: true,
     },
     options: {
       type: Object,
       required: false,
-      default: () => EDITOR_OPTIONS,
+      default: () => null,
     },
     initialEditType: {
       type: String,
@@ -51,6 +50,10 @@ export default {
       required: false,
       default: EDITOR_PREVIEW_STYLE,
     },
+    imageRoot: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -59,59 +62,67 @@ export default {
     };
   },
   computed: {
-    editorOptions() {
-      return { ...EDITOR_OPTIONS, ...this.options };
-    },
     editorInstance() {
       return this.$refs.editor;
     },
-  },
-  watch: {
-    value(newVal) {
-      const isSameMode = this.previousMode === this.editorApi.currentMode;
-      if (!isSameMode) {
-        /*
-        The ToastUI Editor consumes its content via the `initial-value` prop and then internally
-        manages changes. If we desire the `v-model` to work as expected, we need to manually call
-        `setMarkdown`. However, if we do this in each v-model change we'll continually prevent
-        the editor from internally managing changes. Thus we use the `previousMode` flag as
-        confirmation to actually update its internals. This is initially designed so that front
-        matter is excluded from editing in wysiwyg mode, but included in markdown mode.
-        */
-        this.editorInstance.invoke('setMarkdown', newVal);
-        this.previousMode = this.editorApi.currentMode;
-      }
+    customEventListeners() {
+      return [
+        { event: CUSTOM_EVENTS.openAddImageModal, listener: this.onOpenAddImageModal },
+        { event: CUSTOM_EVENTS.openInsertVideoModal, listener: this.onOpenInsertVideoModal },
+      ];
     },
   },
+  created() {
+    this.editorOptions = getEditorOptions(this.options);
+  },
   beforeDestroy() {
-    removeCustomEventListener(
-      this.editorApi,
-      CUSTOM_EVENTS.openAddImageModal,
-      this.onOpenAddImageModal,
-    );
-
-    this.editorApi.eventManager.removeEventHandler('changeMode', this.onChangeMode);
+    this.removeListeners();
   },
   methods: {
+    addListeners(editorApi) {
+      this.customEventListeners.forEach(({ event, listener }) => {
+        addCustomEventListener(editorApi, event, listener);
+      });
+
+      editorApi.eventManager.listen('changeMode', this.onChangeMode);
+    },
+    removeListeners() {
+      this.customEventListeners.forEach(({ event, listener }) => {
+        removeCustomEventListener(this.editorApi, event, listener);
+      });
+
+      this.editorApi.eventManager.removeEventHandler('changeMode', this.onChangeMode);
+    },
+    resetInitialValue(newVal) {
+      this.editorInstance.invoke('setMarkdown', newVal);
+    },
     onContentChanged() {
       this.$emit('input', getMarkdown(this.editorInstance));
     },
     onLoad(editorApi) {
       this.editorApi = editorApi;
 
-      addCustomEventListener(
-        this.editorApi,
-        CUSTOM_EVENTS.openAddImageModal,
-        this.onOpenAddImageModal,
-      );
+      registerHTMLToMarkdownRenderer(editorApi);
 
-      this.editorApi.eventManager.listen('changeMode', this.onChangeMode);
+      this.addListeners(editorApi);
     },
     onOpenAddImageModal() {
       this.$refs.addImageModal.show();
     },
-    onAddImage(image) {
-      addImage(this.editorInstance, image);
+    onAddImage({ imageUrl, altText, file }) {
+      const image = { imageUrl, altText };
+
+      if (file) {
+        this.$emit('uploadImage', { file, imageUrl });
+      }
+
+      addImage(this.editorInstance, image, file);
+    },
+    onOpenInsertVideoModal() {
+      this.$refs.insertVideoModal.show();
+    },
+    onInsertVideo(url) {
+      insertVideo(this.editorInstance, url);
     },
     onChangeMode(newMode) {
       this.$emit('modeChange', newMode);
@@ -123,7 +134,7 @@ export default {
   <div>
     <toast-editor
       ref="editor"
-      :initial-value="value"
+      :initial-value="content"
       :options="editorOptions"
       :preview-style="previewStyle"
       :initial-edit-type="initialEditType"
@@ -131,6 +142,7 @@ export default {
       @change="onContentChanged"
       @load="onLoad"
     />
-    <add-image-modal ref="addImageModal" @addImage="onAddImage" />
+    <add-image-modal ref="addImageModal" :image-root="imageRoot" @addImage="onAddImage" />
+    <insert-video-modal ref="insertVideoModal" @insertVideo="onInsertVideo" />
   </div>
 </template>

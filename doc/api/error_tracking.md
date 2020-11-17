@@ -1,10 +1,17 @@
+---
+stage: Monitor
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Error Tracking settings API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34940) in GitLab 12.7.
 
 ## Error Tracking project settings
 
-The project settings API allows you to retrieve the Error Tracking settings for a project. Only for project maintainers.
+The project settings API allows you to retrieve the [Error Tracking](../operations/error_tracking.md)
+settings for a project. Only for project maintainers.
 
 ### Get Error Tracking settings
 

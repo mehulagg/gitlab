@@ -12,10 +12,18 @@ In this document, we'll present an overview of the concepts of Continuous Integr
 Continuous Delivery, and Continuous Deployment, as well as an introduction to
 GitLab CI/CD.
 
-NOTE: **Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.**
-Watch our
-["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
+TIP: **Tip:**
+Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
+Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
+
+> For some additional information about GitLab CI/CD:
+>
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch the [CI/CD Ease of configuration](https://www.youtube.com/embed/opdLqwz6tcE) video.
+> - Watch the [Making the case for CI/CD in your organization](https://about.gitlab.com/compare/github-actions-alternative/)
+>   webcast to learn the benefits of CI/CD and how to measure the results of CI/CD automation.
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Learn how [Verizon reduced rebuilds](https://about.gitlab.com/blog/2019/02/14/verizon-customer-story/)
+>   from 30 days to under 8 hours with GitLab.
 
 ## Introduction to CI/CD methodologies
 
@@ -93,7 +101,7 @@ In this file, you can define the scripts you want to run, define include and
 cache dependencies, choose commands you want to run in sequence
 and those you want to run in parallel, define where you want to
 deploy your app, and specify whether you will want to run the scripts automatically
-or trigger any of them manually. Once you're familiar with
+or trigger any of them manually. After you're familiar with
 GitLab CI/CD you can add more advanced steps into the configuration file.
 
 To add scripts to that file, you'll need to organize them in a
@@ -102,7 +110,7 @@ the tests you wish to perform. To visualize the process, imagine
 that all the scripts you add to the configuration file are the
 same as the commands you run on a terminal on your computer.
 
-Once you've added your `.gitlab-ci.yml` configuration file to your
+After you've added your `.gitlab-ci.yml` configuration file to your
 repository, GitLab will detect it and run your scripts with the
 tool called [GitLab Runner](https://docs.gitlab.com/runner/), which
 works similarly to your terminal.
@@ -149,17 +157,17 @@ Consider the following example for how GitLab CI/CD fits in a
 common development workflow.
 
 Assume that you have discussed a code implementation in an issue
-and worked locally on your proposed changes. Once you push your
+and worked locally on your proposed changes. After you push your
 commits to a feature branch in a remote repository in GitLab,
 the CI/CD pipeline set for your project is triggered. By doing
 so, GitLab CI/CD:
 
-- Runs automated scripts (sequential or parallel) to:
+- Runs automated scripts (sequentially or in parallel) to:
   - Build and test your app.
   - Preview the changes per merge request with Review Apps, as you
     would see in your `localhost`.
 
-Once you're happy with your implementation:
+After you're happy with your implementation:
 
 - Get your code reviewed and approved.
 - Merge the feature branch into the default branch.
@@ -188,9 +196,10 @@ according to each stage (Verify, Package, Release).
 
 1. **Verify**:
    - Automatically build and test your application with Continuous Integration.
-   - Analyze your source code quality with [GitLab Code Quality](../../user/project/merge_requests/code_quality.md). **(STARTER)**
-   - Determine the performance impact of code changes with [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md). **(PREMIUM)**
-   - Perform a series of tests, such as [Container Scanning](../../user/application_security/container_scanning/index.md) **(ULTIMATE)**, [Dependency Scanning](../../user/application_security/dependency_scanning/index.md) **(ULTIMATE)**, and [JUnit tests](../junit_test_reports.md).
+   - Analyze your source code quality with [GitLab Code Quality](../../user/project/merge_requests/code_quality.md).
+   - Determine the browser performance impact of code changes with [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md). **(PREMIUM)**
+   - Determine the server performance impact of code changes with [Load Performance Testing](../../user/project/merge_requests/load_performance_testing.md). **(PREMIUM)**
+   - Perform a series of tests, such as [Container Scanning](../../user/application_security/container_scanning/index.md) **(ULTIMATE)**, [Dependency Scanning](../../user/application_security/dependency_scanning/index.md) **(ULTIMATE)**, and [Unit tests](../unit_test_reports.md).
    - Deploy your changes with [Review Apps](../review_apps/index.md) to preview the app changes on every branch.
 1. **Package**:
    - Store Docker images with [Container Registry](../../user/packages/container_registry/index.md).
@@ -202,7 +211,7 @@ according to each stage (Verify, Package, Release).
    - Continuous Delivery, manually click to deploy your app to production.
    - Deploy static websites with [GitLab Pages](../../user/project/pages/index.md).
    - Ship features to only a portion of your pods and let a percentage of your user base to visit the temporarily deployed feature with [Canary Deployments](../../user/project/canary_deployments.md). **(PREMIUM)**
-   - Deploy your features behind [Feature Flags](../../user/project/operations/feature_flags.md). **(PREMIUM)**
+   - Deploy your features behind [Feature Flags](../../operations/feature_flags.md). **(PREMIUM)**
    - Add release notes to any Git tag with [GitLab Releases](../../user/project/releases/index.md).
    - View of the current health and status of each CI environment running on Kubernetes with [Deploy Boards](../../user/project/deploy_boards.md). **(PREMIUM)**
    - Deploy your application to a production environment in a Kubernetes cluster with [Auto Deploy](../../topics/autodevops/stages.md#auto-deploy).
@@ -226,13 +235,16 @@ To get started with GitLab CI/CD, you need to familiarize yourself
 with the [`.gitlab-ci.yml`](../yaml/README.md) configuration file
 syntax and with its attributes.
 
-This document [introduces the concepts of GitLab CI/CD in the scope of GitLab Pages](../../user/project/pages/getting_started_part_four.md), for deploying static websites.
+This document [introduces the concepts of GitLab CI/CD in the scope of GitLab Pages](../../user/project/pages/getting_started/pages_from_scratch.md), for deploying static websites.
 Although it's meant for users who want to write their own Pages
 script from scratch, it also serves as an introduction to the setup process for GitLab CI/CD.
-It covers the very first general steps of writing a CI/CD configuration
+It covers the first general steps of writing a CI/CD configuration
 file, so we recommend you read through it to understand GitLab's CI/CD
 logic, and learn how to write your own script (or tweak an
 existing one) for any application.
 
 For a deep view of GitLab's CI/CD configuration options, check the
 [`.gitlab-ci.yml` full reference](../yaml/README.md).
+
+For help making your pipelines faster and more efficient, see the
+[pipeline efficiency documentation](../pipelines/pipeline_efficiency.md).

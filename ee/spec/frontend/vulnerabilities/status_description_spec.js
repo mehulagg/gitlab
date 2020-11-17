@@ -1,14 +1,19 @@
 import { mount } from '@vue/test-utils';
-import { GlLink, GlSkeletonLoading, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlLink,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlLoadingIcon,
+} from '@gitlab/ui';
 import { capitalize } from 'lodash';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
+import StatusText from 'ee/vulnerabilities/components/status_description.vue';
+import { VULNERABILITY_STATE_OBJECTS, VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import StatusText from 'ee/vulnerabilities/components/status_description.vue';
-import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 
-const NON_DETECTED_STATES = Object.keys(VULNERABILITY_STATE_OBJECTS);
-const ALL_STATES = ['detected', ...NON_DETECTED_STATES];
+const { detected, ...NON_DETECTED_STATE_OBJECTS } = VULNERABILITY_STATE_OBJECTS;
+const NON_DETECTED_STATES = Object.keys(NON_DETECTED_STATE_OBJECTS);
+const ALL_STATES = Object.keys(VULNERABILITY_STATES);
 
 describe('Vulnerability status description component', () => {
   let wrapper;
@@ -22,39 +27,43 @@ describe('Vulnerability status description component', () => {
   const userAvatar = () => wrapper.find(UserAvatarLink);
   const userLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const skeletonLoader = () => wrapper.find(GlSkeletonLoading);
+  const statusEl = () => wrapper.find('[data-testid="status"]');
 
   // Create a date using the passed-in string, or just use the current time if nothing was passed in.
   const createDate = value => (value ? new Date(value) : new Date()).toISOString();
 
-  const createWrapper = ({
-    vulnerability = {},
-    pipeline = {},
-    user,
-    isLoadingVulnerability = false,
-    isLoadingUser = false,
-  } = {}) => {
-    const v = vulnerability;
-    const p = pipeline;
-
+  const createWrapper = (props = {}) => {
+    const vulnerability = props.vulnerability || { pipeline: {} };
     // Automatically create the ${v.state}_at property if it doesn't exist. Otherwise, every test would need to create
     // it manually for the component to mount properly.
-    if (v.state === 'detected') {
-      p.created_at = p.created_at || createDate();
+    if (vulnerability.state === 'detected') {
+      vulnerability.pipeline.created_at = vulnerability.pipeline.created_at || createDate();
     } else {
-      const propertyName = `${v.state}_at`;
-      v[propertyName] = v[propertyName] || createDate();
+      const propertyName = `${vulnerability.state}_at`;
+      vulnerability[propertyName] = vulnerability[propertyName] || createDate();
     }
 
-    wrapper = mount(StatusText, {
-      propsData: { vulnerability, pipeline, user, isLoadingVulnerability, isLoadingUser },
-    });
+    wrapper = mount(StatusText, { propsData: { ...props, vulnerability } });
   };
 
   describe('state text', () => {
     it.each(ALL_STATES)('shows the correct string for the vulnerability state "%s"', state => {
-      createWrapper({ vulnerability: { state } });
+      createWrapper({ vulnerability: { state, pipeline: {} } });
 
       expect(wrapper.text()).toMatch(new RegExp(`^${capitalize(state)}`));
+    });
+
+    it.each`
+      description                          | isStatusBolded
+      ${'does not show bolded state text'} | ${false}
+      ${'shows bolded state text'}         | ${true}
+    `('$description if isStatusBolded is isStatusBolded', ({ isStatusBolded }) => {
+      createWrapper({
+        vulnerability: { state: 'detected', pipeline: { created_at: createDate('2001') } },
+        isStatusBolded,
+      });
+
+      expect(statusEl().classes('gl-font-weight-bold')).toBe(isStatusBolded);
     });
   });
 
@@ -62,8 +71,7 @@ describe('Vulnerability status description component', () => {
     it('uses the pipeline created date when the vulnerability state is "detected"', () => {
       const pipelineDateString = createDate('2001');
       createWrapper({
-        vulnerability: { state: 'detected' },
-        pipeline: { created_at: pipelineDateString },
+        vulnerability: { state: 'detected', pipeline: { created_at: pipelineDateString } },
       });
 
       expect(timeAgo().props('time')).toBe(pipelineDateString);
@@ -75,8 +83,11 @@ describe('Vulnerability status description component', () => {
       state => {
         const expectedDate = createDate();
         createWrapper({
-          vulnerability: { state, [`${state}_at`]: expectedDate },
-          pipeline: { created_at: 'pipeline_created_at' },
+          vulnerability: {
+            state,
+            pipeline: { created_at: 'pipeline_created_at' },
+            [`${state}_at`]: expectedDate,
+          },
         });
 
         expect(timeAgo().props('time')).toBe(expectedDate);
@@ -87,8 +98,7 @@ describe('Vulnerability status description component', () => {
   describe('pipeline link', () => {
     it('shows the pipeline link when the vulnerability state is "detected"', () => {
       createWrapper({
-        vulnerability: { state: 'detected' },
-        pipeline: { url: 'pipeline/url' },
+        vulnerability: { state: 'detected', pipeline: { url: 'pipeline/url' } },
       });
 
       expect(pipelineLink().attributes('href')).toBe('pipeline/url');
@@ -98,8 +108,7 @@ describe('Vulnerability status description component', () => {
       'does not show the pipeline link when the vulnerability state is "%s"',
       state => {
         createWrapper({
-          vulnerability: { state },
-          pipeline: { url: 'pipeline/url' },
+          vulnerability: { state, pipeline: { url: 'pipeline/url' } },
         });
 
         expect(pipelineLink().exists()).toBe(false); // The user avatar should be shown instead, those tests are handled separately.
@@ -152,7 +161,7 @@ describe('Vulnerability status description component', () => {
     });
 
     it('hides the skeleton loader and shows everything else when the vulnerability is not loading', () => {
-      createWrapper({ vulnerability: { state: 'detected' } });
+      createWrapper({ vulnerability: { state: 'detected', pipeline: {} } });
 
       expect(skeletonLoader().exists()).toBe(false);
       expect(timeAgo().exists()).toBe(true);

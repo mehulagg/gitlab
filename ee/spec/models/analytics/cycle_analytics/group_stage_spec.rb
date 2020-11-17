@@ -3,16 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe Analytics::CycleAnalytics::GroupStage do
-  describe 'associations' do
-    it { is_expected.to belong_to(:group) }
+  describe 'uniqueness validation on name' do
+    subject { build(:cycle_analytics_group_stage) }
+
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to([:group_id, :group_value_stream_id]) }
   end
 
-  it_behaves_like 'cycle analytics stage' do
+  describe 'associations' do
+    it { is_expected.to belong_to(:group) }
+    it { is_expected.to belong_to(:value_stream) }
+  end
+
+  it_behaves_like 'value stream analytics stage' do
     let(:parent) { create(:group) }
     let(:parent_name) { :group }
   end
 
-  include_examples 'cycle analytics label based stage' do
+  include_examples 'value stream analytics label based stage' do
     let_it_be(:parent) { create(:group) }
     let_it_be(:parent_in_subgroup) { create(:group, parent: parent) }
     let_it_be(:group_label) { create(:group_label, group: parent) }

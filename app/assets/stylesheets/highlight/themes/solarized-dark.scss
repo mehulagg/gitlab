@@ -1,6 +1,6 @@
 /* https://gist.github.com/qguv/7936275 */
 
-@import "../common";
+@import '../common';
 
 /*
 * Solarized dark colors
@@ -129,6 +129,9 @@ $solarized-dark-il: #2aa198;
       @include dark-diff-match-line;
     }
 
+    .diff-td.diff-line-num.hll:not(.empty-cell),
+    .diff-td.line-coverage.hll:not(.empty-cell),
+    .diff-td.line_content.hll:not(.empty-cell),
     td.diff-line-num.hll:not(.empty-cell),
     td.line-coverage.hll:not(.empty-cell),
     td.line_content.hll:not(.empty-cell) {
@@ -138,6 +141,13 @@ $solarized-dark-il: #2aa198;
 
     .line-coverage {
       @include line-coverage-border-color($solarized-dark-coverage, $solarized-dark-no-coverage);
+    }
+
+    .diff-grid-left:hover,
+    .diff-grid-right:hover {
+      .diff-line-num:not(.empty-cell) {
+        @include line-number-hover($solarized-dark-over-bg);
+      }
     }
 
     .diff-line-num.new,
@@ -165,12 +175,7 @@ $solarized-dark-il: #2aa198;
     .diff-line-num {
       &.is-over,
       &.hll:not(.empty-cell).is-over {
-        background-color: $solarized-dark-over-bg;
-        border-color: darken($solarized-dark-over-bg, 5%);
-
-        a {
-          color: darken($solarized-dark-over-bg, 15%);
-        }
+        @include line-number-hover($solarized-dark-over-bg);
       }
     }
 
@@ -244,13 +249,19 @@ $solarized-dark-il: #2aa198;
   .c1 { color: $solarized-dark-c1; } /* Comment.Single */
   .cs { color: $solarized-dark-cs; } /* Comment.Special */
   .gd { color: $solarized-dark-gd; } /* Generic.Deleted */
-  .ge { color: $solarized-dark-ge; font-style: italic; } /* Generic.Emph */
+  .ge { /* Generic.Emph */
+    color: $solarized-dark-ge;
+    font-style: italic;
+  }
   .gr { color: $solarized-dark-gr; } /* Generic.Error */
   .gh { color: $solarized-dark-gh; } /* Generic.Heading */
   .gi { color: $solarized-dark-gi; } /* Generic.Inserted */
   .go { color: $solarized-dark-go; } /* Generic.Output */
   .gp { color: $solarized-dark-gp; } /* Generic.Prompt */
-  .gs { color: $solarized-dark-gs; font-weight: $gl-font-weight-bold; } /* Generic.Strong */
+  .gs { /* Generic.Strong */
+    color: $solarized-dark-gs;
+    font-weight: $gl-font-weight-bold;
+  }
   .gu { color: $solarized-dark-gu; } /* Generic.Subheading */
   .gt { color: $solarized-dark-gt; } /* Generic.Traceback */
   .kc { color: $solarized-dark-kc; } /* Keyword.Constant */

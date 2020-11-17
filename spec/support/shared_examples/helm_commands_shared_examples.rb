@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'helm command generator' do
+RSpec.shared_examples 'helm command generator' do
   describe '#generate_script' do
     let(:helm_setup) do
       <<~EOS
@@ -14,7 +14,19 @@ shared_examples 'helm command generator' do
   end
 end
 
-shared_examples 'helm command' do
+RSpec.shared_examples 'helm command' do
+  describe 'HELM_VERSION' do
+    subject { command.class::HELM_VERSION }
+
+    it { is_expected.to match(/\d+\.\d+\.\d+/) }
+  end
+
+  describe '#env' do
+    subject { command.env }
+
+    it { is_expected.to be_a Hash }
+  end
+
   describe '#rbac?' do
     subject { command.rbac? }
 

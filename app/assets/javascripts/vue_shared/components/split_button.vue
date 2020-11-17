@@ -28,7 +28,7 @@ export default {
     variant: {
       type: String,
       required: false,
-      default: 'secondary',
+      default: 'default',
     },
   },
 
@@ -58,7 +58,7 @@ export default {
 
 <template>
   <gl-dropdown
-    :menu-class="`dropdown-menu-selectable ${menuClass}`"
+    :menu-class="menuClass"
     split
     :text="dropdownToggleText"
     :variant="variant"
@@ -68,8 +68,8 @@ export default {
     <template v-for="(item, itemIndex) in actionItems">
       <gl-dropdown-item
         :key="item.eventName"
-        :active="selectedItem === item"
-        active-class="is-active"
+        :is-check-item="true"
+        :is-checked="selectedItem === item"
         @click="changeSelectedItem(item)"
       >
         <strong>{{ item.title }}</strong>

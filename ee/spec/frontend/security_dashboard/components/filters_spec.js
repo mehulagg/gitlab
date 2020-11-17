@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
 import createStore from 'ee/security_dashboard/store';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -10,14 +10,15 @@ describe('Filter component', () => {
   let wrapper;
   let store;
 
-  const findReportTypeFilter = () => wrapper.find('.js-filter-report_type');
-
   const createWrapper = (props = {}) => {
-    wrapper = mount(Filters, {
+    wrapper = shallowMount(Filters, {
       localVue,
       store,
       propsData: {
         ...props,
+      },
+      slots: {
+        buttons: '<div class="button-slot"></div>',
       },
     });
   };
@@ -37,7 +38,7 @@ describe('Filter component', () => {
     });
 
     it('should display all filters', () => {
-      expect(wrapper.findAll('.js-filter')).toHaveLength(3);
+      expect(wrapper.findAll('.js-filter')).toHaveLength(2);
     });
 
     it('should display "Hide dismissed vulnerabilities" toggle', () => {
@@ -45,23 +46,10 @@ describe('Filter component', () => {
     });
   });
 
-  describe('Report type', () => {
-    it.each`
-      dastProps                                                  | string
-      ${{ vulnerabilitiesCount: 0, scannedResourcesCount: 123 }} | ${'(0 vulnerabilities, 123 urls scanned)'}
-      ${{ vulnerabilitiesCount: 481, scannedResourcesCount: 0 }} | ${'(481 vulnerabilities, 0 urls scanned)'}
-      ${{ vulnerabilitiesCount: 1, scannedResourcesCount: 1 }}   | ${'(1 vulnerability, 1 url scanned)'}
-      ${{ vulnerabilitiesCount: 321 }}                           | ${'(321 vulnerabilities)'}
-      ${{ scannedResourcesCount: 890 }}                          | ${'(890 urls scanned)'}
-      ${{ vulnerabilitiesCount: 0 }}                             | ${'(0 vulnerabilities)'}
-      ${{ scannedResourcesCount: 0 }}                            | ${'(0 urls scanned)'}
-    `('shows security report summary $string', ({ dastProps, string }) => {
-      createWrapper({
-        securityReportSummary: {
-          dast: dastProps,
-        },
-      });
-      expect(findReportTypeFilter().text()).toContain(string);
+  describe('buttons slot', () => {
+    it('should exist', () => {
+      createWrapper();
+      expect(wrapper.find('.button-slot').exists()).toBe(true);
     });
   });
 });

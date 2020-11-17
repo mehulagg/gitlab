@@ -1,17 +1,19 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
-import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
-import state from 'ee/vue_shared/security_reports/store/state';
+import appStore from 'ee/vue_shared/security_reports/store';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
-import sastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
+import * as secretDetectionTypes from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutation_types';
 import { mount } from '@vue/test-utils';
 import { waitForMutation } from 'helpers/vue_test_utils_helper';
 import { trimText } from 'helpers/text_helper';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import axios from '~/lib/utils/axios_utils';
 import { mrStates } from '~/mr_popover/constants';
-import { TEST_HOST } from 'helpers/test_constants';
+import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
+import ReportSection from '~/reports/components/report_section.vue';
 
 import {
   sastDiffSuccessMock,
@@ -19,6 +21,7 @@ import {
   containerScanningDiffSuccessMock,
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
+  coverageFuzzingDiffSuccessMock,
   mockFindings,
 } from './mock_data';
 
@@ -26,11 +29,15 @@ const CONTAINER_SCANNING_DIFF_ENDPOINT = 'container_scanning.json';
 const DEPENDENCY_SCANNING_DIFF_ENDPOINT = 'dependency_scanning.json';
 const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
-const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_scanning.json';
+const PIPELINE_JOBS_ENDPOINT = 'jobs.json';
+const SECRET_DETECTION_DIFF_ENDPOINT = 'secret_detection.json';
+const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
 describe('Grouped security reports app', () => {
   let wrapper;
   let mock;
+
+  const findReportSection = () => wrapper.find(ReportSection);
 
   const props = {
     headBlobPath: 'path',
@@ -40,15 +47,44 @@ describe('Grouped security reports app', () => {
     dastHelpPath: 'path',
     dependencyScanningHelpPath: 'path',
     secretScanningHelpPath: 'path',
+    canReadVulnerabilityFeedbackPath: true,
     vulnerabilityFeedbackPath: 'vulnerability_feedback_path.json',
     vulnerabilityFeedbackHelpPath: 'path',
+    coverageFuzzingHelpPath: 'path',
     pipelineId: 123,
+    projectId: 321,
+    projectFullPath: 'path',
   };
 
-  const createWrapper = (propsData, provide = {}) => {
+  const defaultDastSummary = {
+    scannedResourcesCount: 211,
+    scannedResources: { nodes: [] },
+    scannedResourcesCsvPath: '',
+  };
+
+  const glModalDirective = jest.fn();
+
+  const createWrapper = (propsData, options, provide) => {
     wrapper = mount(GroupedSecurityReportsApp, {
       propsData,
-      provide,
+      data() {
+        return {
+          dastSummary: defaultDastSummary,
+          ...options?.data,
+        };
+      },
+      directives: {
+        glModal: {
+          bind(el, { value }) {
+            glModalDirective(value);
+          },
+        },
+      },
+      store: appStore(),
+      provide: {
+        glFeatures: { coverageFuzzingMrWidget: true },
+        ...provide,
+      },
     });
   };
 
@@ -58,11 +94,8 @@ describe('Grouped security reports app', () => {
   });
 
   afterEach(() => {
-    wrapper.vm.$store.replaceState({
-      ...state(),
-      sast: sastState(),
-    });
-    wrapper.vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
     mock.restore();
   });
 
@@ -74,7 +107,8 @@ describe('Grouped security reports app', () => {
         dast: true,
         containerScanning: true,
         dependencyScanning: true,
-        secretScanning: true,
+        secretDetection: true,
+        coverageFuzzing: true,
       },
     };
 
@@ -84,7 +118,8 @@ describe('Grouped security reports app', () => {
       gl.mrWidgetData.dependency_scanning_comparison_path = DEPENDENCY_SCANNING_DIFF_ENDPOINT;
       gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
       gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_SCANNING_DIFF_ENDPOINT;
+      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
+      gl.mrWidgetData.coverage_fuzzing_comparison_path = COVERAGE_FUZZING_DIFF_ENDPOINT;
     });
 
     describe('with error', () => {
@@ -93,7 +128,8 @@ describe('Grouped security reports app', () => {
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(500);
         mock.onGet(DAST_DIFF_ENDPOINT).reply(500);
         mock.onGet(SAST_DIFF_ENDPOINT).reply(500);
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(500);
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(500);
+        mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(500);
 
         createWrapper(allReportProps);
 
@@ -102,15 +138,21 @@ describe('Grouped security reports app', () => {
           waitForMutation(wrapper.vm.$store, types.RECEIVE_CONTAINER_SCANNING_DIFF_ERROR),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_ERROR),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DEPENDENCY_SCANNING_DIFF_ERROR),
-          waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_ERROR),
+          waitForMutation(
+            wrapper.vm.$store,
+            `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_ERROR}`,
+          ),
+          waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR),
         ]);
       });
 
       it('renders error state', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning failed loading any results',
-        );
+        expect(
+          wrapper.vm.$el
+            .querySelector('[data-testid="report-section-code-text"]')
+            .textContent.trim(),
+        ).toEqual('Security scanning failed loading any results');
 
         expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
           'Expand',
@@ -136,20 +178,24 @@ describe('Grouped security reports app', () => {
 
     describe('while loading', () => {
       beforeEach(() => {
+        mock.onGet(PIPELINE_JOBS_ENDPOINT).reply(200, {});
         mock.onGet(CONTAINER_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, {});
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, {});
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, {});
+        mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, {});
 
         createWrapper(allReportProps);
       });
 
       it('renders loading summary text + spinner', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).not.toBeNull();
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning is loading',
-        );
+        expect(
+          wrapper.vm.$el
+            .querySelector('[data-testid="report-section-code-text"]')
+            .textContent.trim(),
+        ).toEqual('Security scanning is loading');
 
         expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
           'Expand',
@@ -159,6 +205,61 @@ describe('Grouped security reports app', () => {
         expect(wrapper.vm.$el.textContent).toContain('Dependency scanning is loading');
         expect(wrapper.vm.$el.textContent).toContain('Container scanning is loading');
         expect(wrapper.vm.$el.textContent).toContain('DAST is loading');
+        expect(wrapper.vm.$el.textContent).toContain('Coverage fuzzing is loading');
+      });
+    });
+
+    describe('with empty reports', () => {
+      beforeEach(() => {
+        const emptyResponse = { ...dastDiffSuccessMock, fixed: [], added: [] };
+        mock.onGet(CONTAINER_SCANNING_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(DAST_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(SAST_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, emptyResponse);
+
+        createWrapper(allReportProps);
+
+        return Promise.all([
+          waitForMutation(wrapper.vm.$store, `sast/${sastTypes.RECEIVE_DIFF_SUCCESS}`),
+          waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS),
+          waitForMutation(wrapper.vm.$store, types.RECEIVE_CONTAINER_SCANNING_DIFF_SUCCESS),
+          waitForMutation(wrapper.vm.$store, types.RECEIVE_DEPENDENCY_SCANNING_DIFF_SUCCESS),
+          waitForMutation(
+            wrapper.vm.$store,
+            `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
+          ),
+          waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS),
+        ]);
+      });
+
+      it('renders reports', () => {
+        // It's not loading
+        expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
+
+        // Renders the summary text
+        expect(
+          wrapper.vm.$el
+            .querySelector('[data-testid="report-section-code-text"]')
+            .textContent.trim(),
+        ).toEqual('Security scanning detected no vulnerabilities.');
+
+        // Renders Sast result
+        expect(trimText(wrapper.vm.$el.textContent)).toContain('SAST detected no vulnerabilities.');
+
+        // Renders DSS result
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'Dependency scanning detected no vulnerabilities.',
+        );
+
+        // Renders container scanning result
+        expect(wrapper.vm.$el.textContent).toContain(
+          'Container scanning detected no vulnerabilities.',
+        );
+
+        // Renders DAST result
+        expect(wrapper.vm.$el.textContent).toContain('DAST detected no vulnerabilities.');
       });
     });
 
@@ -168,7 +269,8 @@ describe('Grouped security reports app', () => {
         mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, dependencyScanningDiffSuccessMock);
         mock.onGet(DAST_DIFF_ENDPOINT).reply(200, dastDiffSuccessMock);
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, sastDiffSuccessMock);
-        mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
+        mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
+        mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
 
         createWrapper(allReportProps);
 
@@ -177,7 +279,11 @@ describe('Grouped security reports app', () => {
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_CONTAINER_SCANNING_DIFF_SUCCESS),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_DEPENDENCY_SCANNING_DIFF_SUCCESS),
-          waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS),
+          waitForMutation(
+            wrapper.vm.$store,
+            `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
+          ),
+          waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS),
         ]);
       });
 
@@ -186,8 +292,12 @@ describe('Grouped security reports app', () => {
         expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
 
         // Renders the summary text
-        expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning detected 8 new, and 7 fixed vulnerabilities',
+        expect(
+          trimText(
+            wrapper.vm.$el.querySelector('[data-testid="report-section-code-text"]').textContent,
+          ),
+        ).toEqual(
+          'Security scanning detected 10 potential vulnerabilities 6 Critical 4 High and 0 Others',
         );
 
         // Renders the expand button
@@ -197,27 +307,32 @@ describe('Grouped security reports app', () => {
 
         // Renders Sast result
         expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'SAST detected 1 new, and 2 fixed vulnerabilities',
+          'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders DSS result
         expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'Dependency scanning detected 2 new, and 1 fixed vulnerabilities',
+          'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders container scanning result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'Container scanning detected 2 new, and 1 fixed vulnerabilities',
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders DAST result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'DAST detected 1 new, and 2 fixed vulnerabilities',
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
+        );
+
+        // Renders container scanning result
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
 
       it('opens modal with more information', () => {
-        wrapper.vm.$el.querySelector('.break-link').click();
+        wrapper.vm.$el.querySelector('[aria-label="Vulnerability Name"]').click();
 
         return Vue.nextTick().then(() => {
           expect(wrapper.vm.$el.querySelector('.modal-title').textContent.trim()).toEqual(
@@ -237,6 +352,7 @@ describe('Grouped security reports app', () => {
         ${'container-scanning'}  | ${containerScanningDiffSuccessMock.fixed}  | ${containerScanningDiffSuccessMock.added}
         ${'dast'}                | ${dastDiffSuccessMock.fixed}               | ${dastDiffSuccessMock.added}
         ${'secret-scanning'}     | ${secretScanningDiffSuccessMock.fixed}     | ${secretScanningDiffSuccessMock.added}
+        ${'coverage-fuzzing'}    | ${coverageFuzzingDiffSuccessMock.fixed}    | ${coverageFuzzingDiffSuccessMock.added}
       `(
         'renders a grouped-issues-list with the correct props for "$reportType" issues',
         ({ reportType, resolvedIssues, unresolvedIssues }) => {
@@ -261,12 +377,51 @@ describe('Grouped security reports app', () => {
       createWrapper({
         headBlobPath: 'path',
         pipelinePath,
+        projectFullPath: 'path',
       });
     });
 
     it('should calculate the security tab path', () => {
-      expect(wrapper.vm.securityTab).toEqual(`${pipelinePath}/security`);
+      const button = wrapper.find('.report-btn');
+      expect(button.attributes('target')).toBe('_blank');
+      expect(button.attributes('href')).toBe(`${pipelinePath}/security`);
     });
+
+    it('should render view full report button', () => {
+      const button = wrapper.find('.report-btn');
+      expect(button.exists()).toBe(true);
+    });
+  });
+
+  describe('coverage fuzzing reports', () => {
+    describe.each([true, false])(
+      'given coverage fuzzing comparison endpoint is /fuzzing and featureEnabled is %s',
+      shouldShowFuzzing => {
+        beforeEach(() => {
+          gl.mrWidgetData = gl.mrWidgetData || {};
+          gl.mrWidgetData.coverage_fuzzing_comparison_path = '/fuzzing';
+
+          createWrapper(
+            {
+              ...props,
+              enabledReports: {
+                coverageFuzzing: true,
+              },
+            },
+            {},
+            {
+              glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
+            },
+          );
+        });
+
+        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
+            shouldShowFuzzing,
+          );
+        });
+      },
+    );
   });
 
   describe('container scanning reports', () => {
@@ -293,8 +448,8 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.text()).toContain(
-        'Container scanning detected 2 new, and 1 fixed vulnerabilities',
+      expect(trimText(wrapper.text())).toContain(
+        'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
       );
     });
   });
@@ -323,15 +478,13 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.vm.$el.textContent).toContain(
-        'Dependency scanning detected 2 new, and 1 fixed vulnerabilities',
+      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
       );
     });
   });
 
   describe('dast reports', () => {
-    const scanUrl = `${TEST_HOST}/group/project/-/jobs/123546789`;
-
     beforeEach(() => {
       gl.mrWidgetData = gl.mrWidgetData || {};
       gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
@@ -339,12 +492,6 @@ describe('Grouped security reports app', () => {
       mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
         ...dastDiffSuccessMock,
         base_report_out_of_date: true,
-        scans: [
-          {
-            scanned_resources_count: 211,
-            job_path: scanUrl,
-          },
-        ],
       });
 
       createWrapper({
@@ -362,40 +509,53 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.vm.$el.textContent).toContain(
-        'DAST detected 1 new, and 2 fixed vulnerabilities',
+      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
       );
     });
 
-    it('shows the scanned URLs count and a link to the CI job if available', () => {
+    it('shows the scanned URLs count and opens a modal', async () => {
       const jobLink = wrapper.find('[data-qa-selector="dast-ci-job-link"]');
 
       expect(wrapper.text()).toContain('211 URLs scanned');
       expect(jobLink.exists()).toBe(true);
       expect(jobLink.text()).toBe('View details');
-      expect(jobLink.attributes('href')).toBe(scanUrl);
+
+      jobLink.vm.$emit('click');
+      await wrapper.vm.$nextTick();
+
+      expect(glModalDirective).toHaveBeenCalled();
     });
 
     it('does not show scanned resources info if there is 0 scanned URL', () => {
       mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
         ...dastDiffSuccessMock,
         base_report_out_of_date: true,
-        scans: [
-          {
-            scanned_resources_count: 0,
-            job_path: scanUrl,
+      });
+
+      // set scanned urls count to 0
+      const summaryWithoutUrls = {
+        ...defaultDastSummary,
+        scannedResourcesCount: 0,
+      };
+
+      createWrapper(
+        {
+          ...props,
+          enabledReports: {
+            dast: true,
           },
-        ],
-      });
-      createWrapper({
-        ...props,
-        enabledReports: {
-          dast: true,
         },
-      });
+        {
+          data: {
+            dastSummary: summaryWithoutUrls,
+          },
+        },
+      );
+
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         expect(wrapper.text()).not.toContain('0 URLs scanned');
-        expect(wrapper.contains('[data-qa-selector="dast-ci-job-link"]')).toBe(false);
+        expect(wrapper.find('[data-qa-selector="dast-ci-job-link"]').exists()).toBe(false);
       });
     });
   });
@@ -403,18 +563,21 @@ describe('Grouped security reports app', () => {
   describe('secret scanning reports', () => {
     const initSecretScan = (isEnabled = true) => {
       gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_SCANNING_DIFF_ENDPOINT;
+      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
 
-      mock.onGet(SECRET_SCANNING_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
+      mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
 
       createWrapper({
         ...props,
         enabledReports: {
-          secretScanning: isEnabled,
+          secretDetection: isEnabled,
         },
       });
 
-      return waitForMutation(wrapper.vm.$store, types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS);
+      return waitForMutation(
+        wrapper.vm.$store,
+        `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
+      );
     };
 
     describe('enabled', () => {
@@ -423,16 +586,18 @@ describe('Grouped security reports app', () => {
       });
 
       it('should render the component', () => {
-        expect(wrapper.contains('[data-qa-selector="secret_scan_report"]')).toBe(true);
+        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(true);
       });
 
-      it('should set setSecretScanningDiffEndpoint', () => {
-        expect(wrapper.vm.secretScanning.paths.diffEndpoint).toEqual(SECRET_SCANNING_DIFF_ENDPOINT);
+      it('should set diffEndpoint', () => {
+        expect(wrapper.vm.secretDetection.paths.diffEndpoint).toEqual(
+          SECRET_DETECTION_DIFF_ENDPOINT,
+        );
       });
 
       it('should display the correct numbers of vulnerabilities', () => {
-        expect(wrapper.text()).toContain(
-          'Secret scanning detected 2 new, and 1 fixed vulnerabilities',
+        expect(trimText(wrapper.text())).toContain(
+          'Secret scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
     });
@@ -443,7 +608,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not render the component', () => {
-        expect(wrapper.contains('[data-qa-selector="secret_scan_report"]')).toBe(false);
+        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(false);
       });
     });
   });
@@ -470,8 +635,8 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(wrapper.vm.$el.textContent).toContain(
-        'SAST detected 1 new, and 2 fixed vulnerabilities',
+      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
       );
     });
   });
@@ -541,6 +706,46 @@ describe('Grouped security reports app', () => {
       it('should not display out of date message', () => {
         expect(wrapper.vm.$el.textContent).not.toContain('Security report is out of date.');
       });
+    });
+  });
+
+  describe('track report section expansion using Snowplow', () => {
+    let trackingSpy;
+    const { category, action } = trackMrSecurityReportDetails;
+
+    beforeEach(() => {
+      createWrapper(props);
+      trackingSpy = mockTracking(category, wrapper.vm.$el, jest.spyOn);
+    });
+
+    afterEach(() => {
+      unmockTracking();
+    });
+
+    it('tracks an event when toggled', () => {
+      expect(trackingSpy).not.toHaveBeenCalled();
+      findReportSection().vm.$emit('toggleEvent');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(trackingSpy).toHaveBeenCalledWith(category, action);
+      });
+    });
+
+    it('tracks an event only the first time it is toggled', () => {
+      const report = findReportSection();
+
+      expect(trackingSpy).not.toHaveBeenCalled();
+      report.vm.$emit('toggleEvent');
+      return wrapper.vm
+        .$nextTick()
+        .then(() => {
+          expect(trackingSpy).toHaveBeenCalledWith(category, action);
+          expect(trackingSpy).toHaveBeenCalledTimes(1);
+          report.vm.$emit('toggleEvent');
+        })
+        .then(wrapper.vm.$nextTick())
+        .then(() => {
+          expect(trackingSpy).toHaveBeenCalledTimes(1);
+        });
     });
   });
 });

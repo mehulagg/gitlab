@@ -84,8 +84,19 @@ module Gitlab
 
       # Returns true if load balancing is to be enabled.
       def self.enable?
-        return false unless ::License.feature_available?(:db_load_balancing)
         return false if program_name == 'rake' || Gitlab::Runtime.sidekiq?
+        return false unless self.configured?
+
+        true
+      end
+
+      # Returns true if load balancing has been configured. Since
+      # Sidekiq does not currently use load balancing, we
+      # may want Web application servers to detect replication lag by
+      # posting the write location of the database if load balancing is
+      # configured.
+      def self.configured?
+        return false unless ::License.feature_available?(:db_load_balancing)
 
         hosts.any? || service_discovery_enabled?
       end

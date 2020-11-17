@@ -1,7 +1,9 @@
 - page_title _('Audit Events')
 
 %h3.page-title= _('Group Audit Events')
-%p.light= _('Events in %{group_name}') % { group_name: @group.name }
+%p.light= _('Group-level events in %{group_name} (no project-level events)') % { group_name: @group.name }
 
-= render 'shared/audit_events/event_filter', path: group_audit_events_path(@group)
-= render 'shared/audit_events/event_table', events: @events
+#js-group-audit-events-app{ data: { form_path: group_audit_events_path(@group),
+  events: @events.to_json,
+  is_last_page: @is_last_page.to_json,
+  filter_token_options: group_audit_event_tokens(@group.id).to_json } }

@@ -30,20 +30,20 @@ module Labels
     end
 
     def filter_labels_ids_in_param(key)
-      ids = params[key].to_a
+      ids = Array.wrap(params[key])
       return [] if ids.empty?
 
       # rubocop:disable CodeReuse/ActiveRecord
-      existing_ids = available_labels.by_ids(ids).pluck(:id)
+      existing_ids = available_labels.id_in(ids).pluck(:id)
       # rubocop:enable CodeReuse/ActiveRecord
       ids.map(&:to_i) & existing_ids
     end
 
-    private
-
     def available_labels
       @available_labels ||= LabelsFinder.new(current_user, finder_params).execute
     end
+
+    private
 
     def finder_params
       params = { include_ancestor_groups: true }

@@ -21,7 +21,8 @@ export default {
     },
     projectId: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
     syncStatus: {
       type: String,
@@ -65,6 +66,11 @@ export default {
       ],
     };
   },
+  computed: {
+    hasProject() {
+      return Boolean(this.projectId);
+    },
+  },
   methods: {
     ...mapActions(['initiateReplicableSync']),
   },
@@ -74,7 +80,7 @@ export default {
 
 <template>
   <div class="card">
-    <div class="card-header d-flex align-center">
+    <div v-if="hasProject" class="card-header d-flex align-center">
       <gl-link class="font-weight-bold" :href="`/${name}`" target="_blank">{{ name }}</gl-link>
       <div class="ml-auto">
         <gl-button
@@ -83,6 +89,9 @@ export default {
           >{{ __('Resync') }}</gl-button
         >
       </div>
+    </div>
+    <div v-else class="card-header">
+      <span class="font-weight-bold">{{ name }}</span>
     </div>
     <div class="card-body">
       <div class="d-flex flex-column flex-md-row">

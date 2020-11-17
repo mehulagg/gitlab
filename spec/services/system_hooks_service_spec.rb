@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SystemHooksService do
+RSpec.describe SystemHooksService do
   let(:user)           { create(:user) }
   let(:project)        { create(:project) }
   let(:project_member) { create(:project_member) }
@@ -85,7 +85,7 @@ describe SystemHooksService do
     end
 
     it 'handles nil datetime columns' do
-      user.update(created_at: nil, updated_at: nil)
+      user.update!(created_at: nil, updated_at: nil)
       data = event_data(user, :destroy)
 
       expect(data[:created_at]).to be(nil)

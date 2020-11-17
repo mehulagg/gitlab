@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EnvironmentSerializer do
+RSpec.describe EnvironmentSerializer do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
 
@@ -26,6 +26,7 @@ describe EnvironmentSerializer do
                           project: project,
                           sha: project.commit.id)
     end
+
     let(:resource) { deployment.environment }
 
     before do

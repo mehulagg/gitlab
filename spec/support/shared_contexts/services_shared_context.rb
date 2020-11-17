@@ -2,6 +2,8 @@
 
 Service.available_services_names.each do |service|
   RSpec.shared_context service do
+    include JiraServiceHelper if service == 'jira'
+
     let(:dashed_service) { service.dasherize }
     let(:service_method) { "#{service}_service".to_sym }
     let(:service_klass) { "#{service}_service".classify.constantize }
@@ -12,6 +14,8 @@ Service.available_services_names.each do |service|
       service_attrs_list.inject({}) do |hash, k|
         if k =~ /^(token*|.*_token|.*_key)/
           hash.merge!(k => 'secrettoken')
+        elsif service == 'confluence' && k == :confluence_url
+          hash.merge!(k => 'https://example.atlassian.net/wiki')
         elsif k =~ /^(.*_url|url|webhook)/
           hash.merge!(k => "http://example.com")
         elsif service_klass.method_defined?("#{k}?")
@@ -37,6 +41,7 @@ Service.available_services_names.each do |service|
 
     before do
       enable_license_for_service(service)
+      stub_jira_service_test if service == 'jira'
     end
 
     def initialize_service(service)

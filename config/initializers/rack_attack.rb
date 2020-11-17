@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Specs for this file can be found on:
 # * spec/lib/gitlab/throttle_spec.rb
 # * spec/requests/rack_attack_global_spec.rb
@@ -13,6 +15,13 @@ module Gitlab::Throttle
 
   def self.omnibus_protected_paths_present?
     Rack::Attack.throttles.key?('protected paths')
+  end
+
+  def self.bypass_header
+    env_value = ENV['GITLAB_THROTTLE_BYPASS_HEADER']
+    return unless env_value.present?
+
+    "HTTP_#{env_value.upcase.tr('-', '_')}"
   end
 
   def self.unauthenticated_options
@@ -68,6 +77,15 @@ class Rack::Attack
     end
   end
 
+  # Product analytics feature is in experimental stage.
+  # At this point we want to limit amount of events registered
+  # per application (aid stands for application id).
+  throttle('throttle_product_analytics_collector', limit: 100, period: 60) do |req|
+    if req.product_analytics_collector_request?
+      req.params['aid']
+    end
+  end
+
   throttle('throttle_authenticated_web', Gitlab::Throttle.authenticated_web_options) do |req|
     if req.web_request? &&
         Gitlab::Throttle.settings.throttle_authenticated_web_enabled
@@ -103,6 +121,11 @@ class Rack::Attack
     end
   end
 
+  safelist('throttle_bypass_header') do |req|
+    Gitlab::Throttle.bypass_header.present? &&
+      req.get_header(Gitlab::Throttle.bypass_header) == '1'
+  end
+
   class Request
     def unauthenticated?
       !(authenticated_user_id([:api, :rss, :ics]) || authenticated_runner_id)
@@ -126,6 +149,10 @@ class Rack::Attack
 
     def health_check_request?
       path =~ %r{^/-/(health|liveness|readiness)}
+    end
+
+    def product_analytics_collector_request?
+      path.start_with?('/-/collector/i')
     end
 
     def should_be_skipped?

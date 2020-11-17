@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe IssueSerializer do
-  let(:resource) { create(:issue) }
-  let(:user)     { create(:user) }
+RSpec.describe IssueSerializer do
+  let_it_be(:resource) { create(:issue) }
+  let_it_be(:user) { create(:user) }
+
   let(:json_entity) do
     described_class.new(current_user: user)
       .represent(resource, serializer: serializer)

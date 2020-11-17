@@ -12,7 +12,10 @@ module TriggerableHooks
     merge_request_hooks:      :merge_requests_events,
     job_hooks:                :job_events,
     pipeline_hooks:           :pipeline_events,
-    wiki_page_hooks:          :wiki_page_events
+    wiki_page_hooks:          :wiki_page_events,
+    deployment_hooks:         :deployment_events,
+    feature_flag_hooks:       :feature_flag_events,
+    release_hooks:            :releases_events
   }.freeze
 
   extend ActiveSupport::Concern

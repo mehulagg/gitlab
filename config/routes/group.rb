@@ -5,20 +5,23 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         controller: :groups,
         constraints: { id: Gitlab::PathRegex.full_namespace_route_regex, format: /(html|json|atom|ics)/ }) do
     scope(path: '-') do
-      get :edit, as: :edit_group
-      get :issues, as: :issues_group_calendar, action: :issues_calendar, constraints: lambda { |req| req.format == :ics }
-      get :issues, as: :issues_group
-      get :merge_requests, as: :merge_requests_group
-      get :projects, as: :projects_group
-      get :details, as: :details_group
-      get :activity, as: :activity_group
-      put :transfer, as: :transfer_group
-      post :export, as: :export_group
-      get :download_export, as: :download_export_group
+      # These routes are legit and the cop rule will be improved in
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/230703
+      get :edit, as: :edit_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :issues, as: :issues_group_calendar, action: :issues_calendar, constraints: lambda { |req| req.format == :ics } # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :issues, as: :issues_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :merge_requests, as: :merge_requests_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :projects, as: :projects_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :details, as: :details_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :activity, as: :activity_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      put :transfer, as: :transfer_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      post :export, as: :export_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :download_export, as: :download_export_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :unfoldered_environment_names, as: :unfoldered_environment_names_group # rubocop:disable Cop/PutGroupRoutesUnderScope
 
       # TODO: Remove as part of refactor in https://gitlab.com/gitlab-org/gitlab-foss/issues/49693
-      get 'shared', action: :show, as: :group_shared
-      get 'archived', action: :show, as: :group_archived
+      get 'shared', action: :show, as: :group_shared # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get 'archived', action: :show, as: :group_archived # rubocop:disable Cop/PutGroupRoutesUnderScope
     end
 
     get '/', action: :show, as: :group_canonical
@@ -33,6 +36,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         put :reset_registration_token
         patch :update_auto_devops
         post :create_deploy_token, path: 'deploy_token/create', to: 'repository#create_deploy_token'
+        get :runner_setup_scripts, format: :json
       end
 
       resource :repository, only: [:show], controller: 'repository' do
@@ -55,13 +59,18 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       post :toggle_subscription, on: :member
     end
 
+    resources :packages, only: [:index]
+
     resources :milestones, constraints: { id: %r{[^/]+} } do
       member do
+        get :issues
         get :merge_requests
         get :participants
         get :labels
       end
     end
+
+    resources :releases, only: [:index]
 
     resources :deploy_tokens, constraints: { id: /\d+/ }, only: [] do
       member do
@@ -79,7 +88,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       delete :leave, on: :collection
     end
 
-    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+/ }
+    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+|:id/ }
 
     resources :uploads, only: [:create] do
       collection do
@@ -98,6 +107,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     end
 
     resources :container_registries, only: [:index, :show], controller: 'registry/repositories'
+    resource :dependency_proxy, only: [:show, :update]
   end
 
   scope(path: '*id',
@@ -108,5 +118,16 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     patch '/', action: :update
     put '/', action: :update
     delete '/', action: :destroy
+  end
+end
+
+# Dependency proxy for containers
+# Because docker adds v2 prefix to URI this need to be outside of usual group routes
+scope format: false do
+  get 'v2', to: proc { [200, {}, ['']] } # rubocop:disable Cop/PutGroupRoutesUnderScope
+
+  constraints image: Gitlab::PathRegex.container_image_regex, sha: Gitlab::PathRegex.container_image_blob_sha_regex do
+    get 'v2/*group_id/dependency_proxy/containers/*image/manifests/*tag' => 'groups/dependency_proxy_for_containers#manifest' # rubocop:todo Cop/PutGroupRoutesUnderScope
+    get 'v2/*group_id/dependency_proxy/containers/*image/blobs/:sha' => 'groups/dependency_proxy_for_containers#blob' # rubocop:todo Cop/PutGroupRoutesUnderScope
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::RefreshAuthorizedProjectsService do
+RSpec.describe Users::RefreshAuthorizedProjectsService do
   include ExclusiveLeaseHelpers
 
   # We're using let! here so that any expectations for the service class are not
@@ -74,6 +74,26 @@ describe Users::RefreshAuthorizedProjectsService do
         .with([to_remove.project_id], [[user.id, project.id, Gitlab::Access::MAINTAINER]])
 
       service.execute_without_lease
+    end
+
+    it 'removes duplicate entries' do
+      [Gitlab::Access::MAINTAINER, Gitlab::Access::REPORTER].each do |access_level|
+        user.project_authorizations.create!(project: project, access_level: access_level)
+      end
+
+      expect(service).to(
+        receive(:update_authorizations)
+          .with([project.id], [[user.id, project.id, Gitlab::Access::MAINTAINER]])
+          .and_call_original)
+
+      service.execute_without_lease
+
+      expect(user.project_authorizations.count).to eq(1)
+      project_authorization = ProjectAuthorization.where(
+        project_id: project.id,
+        user_id: user.id,
+        access_level: Gitlab::Access::MAINTAINER)
+      expect(project_authorization).to exist
     end
 
     it 'sets the access level of a project to the highest available level' do

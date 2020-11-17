@@ -19,14 +19,9 @@ module QA
                 element :icon_status, ':data-qa-selector="`status_${status}_icon`" ' # rubocop:disable QA/ElementWithPattern
               end
 
-              view 'ee/app/assets/javascripts/vue_shared/license_compliance/components/set_approval_status_modal.vue' do
-                element :license_management_modal
-                element :approve_license_button
-                element :blacklist_license_button
-              end
-
               view 'ee/app/assets/javascripts/vue_shared/license_compliance/mr_widget_license_report.vue' do
                 element :license_report_widget
+                element :manage_licenses_button
               end
             end
           end
@@ -37,7 +32,7 @@ module QA
             end
           end
 
-          def has_blacklisted_license?(name)
+          def has_denied_license?(name)
             within_element(:report_item_row, text: name) do
               has_element?(:status_failed_icon, wait: 1)
             end
@@ -50,14 +45,14 @@ module QA
             wait_for_animated_element(:license_management_modal)
           end
 
-          def approve_license(name)
-            click_license(name)
-            click_element(:approve_license_button)
-          end
-
-          def blacklist_license(name)
-            click_license(name)
-            click_element(:blacklist_license_button)
+          def click_manage_licenses_button
+            previous_page = page.current_url
+            within_element(:license_report_widget) do
+              click_element :manage_licenses_button
+            end
+            wait_until(max_duration: 15, reload: false) do
+              page.current_url != previous_page
+            end
           end
         end
       end

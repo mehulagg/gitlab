@@ -1,85 +1,124 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlDaterangePicker } from '@gitlab/ui';
 
+import DateRangeButtons from 'ee/audit_events/components/date_range_buttons.vue';
 import DateRangeField from 'ee/audit_events/components/date_range_field.vue';
-import { parsePikadayDate } from '~/lib/utils/datetime_utility';
+import { CURRENT_DATE, MAX_DATE_RANGE } from 'ee/audit_events/constants';
+import {
+  dateAtFirstDayOfMonth,
+  getDateInPast,
+  parsePikadayDate,
+} from '~/lib/utils/datetime_utility';
 
 describe('DateRangeField component', () => {
-  const DATE = '1970-01-01';
   let wrapper;
 
-  const createComponent = (props = {}) => {
-    const formElement = document.createElement('form');
-    document.body.appendChild(formElement);
+  const startDate = parsePikadayDate('2020-03-13');
+  const endDate = parsePikadayDate('2020-03-14');
 
-    return shallowMount(DateRangeField, {
-      propsData: { formElement, ...props },
+  const findDatePicker = () => wrapper.find(GlDaterangePicker);
+  const findDateRangeButtons = () => wrapper.find(DateRangeButtons);
+
+  const createComponent = (props = {}) => {
+    wrapper = shallowMount(DateRangeField, {
+      propsData: { ...props },
     });
   };
 
-  beforeEach(() => {
-    delete window.location;
-    window.location = { search: '' };
-  });
-
   afterEach(() => {
-    document.querySelector('form').remove();
     wrapper.destroy();
+    wrapper = null;
   });
 
-  it('should populate the initial start date if passed in the query string', () => {
-    window.location.search = `?created_after=${DATE}`;
-    wrapper = createComponent();
+  describe('default behaviour', () => {
+    it('sets the max date range on the date picker', () => {
+      createComponent();
 
-    expect(wrapper.find(GlDaterangePicker).props()).toMatchObject({
-      defaultStartDate: parsePikadayDate(DATE),
-      defaultEndDate: null,
+      expect(findDatePicker().props('maxDateRange')).toBe(MAX_DATE_RANGE);
+    });
+
+    it("sets the max selectable date to today's date on the date picker", () => {
+      createComponent();
+
+      expect(
+        findDatePicker()
+          .props('defaultMaxDate')
+          .toDateString(),
+      ).toBe(CURRENT_DATE.toDateString());
+    });
+
+    it('sets the default start date to the start of the month', () => {
+      createComponent();
+
+      expect(
+        findDatePicker()
+          .props('defaultStartDate')
+          .toDateString(),
+      ).toBe(dateAtFirstDayOfMonth(CURRENT_DATE).toDateString());
+    });
+
+    it("sets the default end date to today's date", () => {
+      createComponent();
+
+      expect(
+        findDatePicker()
+          .props('defaultEndDate')
+          .toDateString(),
+      ).toBe(CURRENT_DATE.toDateString());
+    });
+
+    it('passes both startDate and endDate to the date picker as default dates', () => {
+      createComponent({ startDate, endDate });
+
+      expect(findDatePicker().props()).toMatchObject({
+        defaultStartDate: startDate,
+        defaultEndDate: endDate,
+      });
     });
   });
 
-  it('should populate the initial end date if passed in the query string', () => {
-    window.location.search = `?created_before=${DATE}`;
-    wrapper = createComponent();
+  describe('when a only a endDate is picked', () => {
+    it('emits the "selected" event with the picked endDate and startDate set to the day before', async () => {
+      createComponent();
+      findDatePicker().vm.$emit('input', { endDate });
 
-    expect(wrapper.find(GlDaterangePicker).props()).toMatchObject({
-      defaultStartDate: null,
-      defaultEndDate: parsePikadayDate(DATE),
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted().selected[0]).toEqual([
+        {
+          startDate: getDateInPast(endDate, 1),
+          endDate,
+        },
+      ]);
     });
   });
 
-  it('should populate both the initial start and end dates if passed in the query string', () => {
-    window.location.search = `?created_after=${DATE}&created_before=${DATE}`;
-    wrapper = createComponent();
+  describe('when a new date range is picked', () => {
+    it('emits the "selected" event with the picked startDate and endDate', async () => {
+      createComponent();
+      findDatePicker().vm.$emit('input', { startDate, endDate });
 
-    expect(wrapper.find(GlDaterangePicker).props()).toMatchObject({
-      defaultStartDate: parsePikadayDate(DATE),
-      defaultEndDate: parsePikadayDate(DATE),
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted().selected[0]).toEqual([
+        {
+          startDate,
+          endDate,
+        },
+      ]);
     });
   });
 
-  it('should populate the date hidden fields on input', () => {
-    wrapper = createComponent();
+  describe('when a date range button is pressed', () => {
+    it('emits the "selected" event with the picked startDate and endDate', async () => {
+      createComponent();
+      findDateRangeButtons().vm.$emit('input', { startDate, endDate });
 
-    wrapper
-      .find(GlDaterangePicker)
-      .vm.$emit('input', { startDate: parsePikadayDate(DATE), endDate: parsePikadayDate(DATE) });
-
-    return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.find('input[name="created_after"]').attributes().value).toEqual(DATE);
-      expect(wrapper.find('input[name="created_before"]').attributes().value).toEqual(DATE);
-    });
-  });
-
-  it('should submit the form on input change', () => {
-    wrapper = createComponent();
-    const spy = jest.spyOn(wrapper.props().formElement, 'submit');
-
-    wrapper
-      .find(GlDaterangePicker)
-      .vm.$emit('input', { startDate: parsePikadayDate(DATE), endDate: parsePikadayDate(DATE) });
-
-    return wrapper.vm.$nextTick().then(() => {
-      expect(spy).toHaveBeenCalledTimes(1);
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted().selected[0]).toEqual([
+        {
+          startDate,
+          endDate,
+        },
+      ]);
     });
   });
 });

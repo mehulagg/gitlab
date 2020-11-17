@@ -14,7 +14,7 @@ const EE_TYPES = {
 class ListEE extends List {
   constructor(...args) {
     super(...args);
-    this.totalWeight = 0;
+    this.totalWeight = args[0]?.totalWeight || 0;
   }
 
   getTypeInfo(type) {

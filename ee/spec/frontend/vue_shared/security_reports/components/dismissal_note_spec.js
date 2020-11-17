@@ -1,4 +1,5 @@
 import { shallowMount, mount } from '@vue/test-utils';
+import { GlSprintf } from '@gitlab/ui';
 import component from 'ee/vue_shared/security_reports/components/dismissal_note.vue';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 
@@ -22,7 +23,7 @@ describe('dismissal note', () => {
   let wrapper;
 
   const mountComponent = (options, mountFn = shallowMount) => {
-    wrapper = mountFn(component, options);
+    wrapper = mountFn(component, { ...options, stubs: { GlSprintf } });
   };
 
   describe('with no attached project or pipeline', () => {
@@ -97,13 +98,8 @@ describe('dismissal note', () => {
     });
 
     it('should escape the project name', () => {
-      // Note: We have to check the computed prop here because
-      // vue test utils unescapes the result of wrapper.text()
-
-      expect(wrapper.vm.eventText).not.toContain(project.value);
-      expect(wrapper.vm.eventText).toContain(
-        'Foo &lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;',
-      );
+      // wrapper.text() is the text string, if the tag was parsed then it would be missing <script> from the string.
+      expect(wrapper.text()).toContain(unsafeProject.value);
     });
   });
 

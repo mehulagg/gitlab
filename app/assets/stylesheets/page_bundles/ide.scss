@@ -5,7 +5,9 @@
 @import './ide_theme_overrides';
 
 @import './ide_themes/dark';
+@import './ide_themes/solarized-light';
 @import './ide_themes/solarized-dark';
+@import './ide_themes/monokai';
 
 $search-list-icon-width: 18px;
 $ide-activity-bar-width: 60px;
@@ -145,7 +147,7 @@ $ide-commit-header-height: 48px;
   }
 
   &:not([disabled]):hover {
-    background-color: var(--ide-input-border, $gray-200);
+    background-color: var(--ide-input-border, $gray-100);
   }
 
   &:not([disabled]):focus {
@@ -176,11 +178,11 @@ $ide-commit-header-height: 48px;
     height: 100%;
     overflow: auto;
     padding: $gl-padding;
-    background-color: var(--ide-border-color, transparent);
+    background-color: var(--ide-empty-state-background, transparent);
   }
 
   .file-container {
-    background-color: var(--ide-border-color, $gray-darker);
+    background-color: var(--ide-empty-state-background, $gray-darker);
     display: flex;
     height: 100%;
     align-items: center;
@@ -250,10 +252,6 @@ $ide-commit-header-height: 48px;
   > div + div {
     padding-left: $gl-padding;
   }
-}
-
-.ide-status-file {
-  text-align: right;
 }
 // Not great, but this is to deal with our current output
 .multi-file-preview-holder {
@@ -370,7 +368,7 @@ $ide-commit-header-height: 48px;
     display: block;
     margin-left: auto;
     margin-right: auto;
-    color: var(--ide-text-color-secondary, $gray-700);
+    color: var(--ide-text-color-secondary, $gray-500);
   }
 
   .file-status-icon {
@@ -400,7 +398,7 @@ $ide-commit-header-height: 48px;
   }
 
   &:active {
-    background: var(--ide-background, $gray-200);
+    background: var(--ide-background, $gray-100);
   }
 
   &.is-active {
@@ -495,7 +493,7 @@ $ide-commit-header-height: 48px;
   height: 100vh;
   align-items: center;
   justify-content: center;
-  background-color: var(--ide-border-color, transparent);
+  background-color: var(--ide-empty-state-background, transparent);
 }
 
 .ide {
@@ -571,7 +569,7 @@ $ide-commit-header-height: 48px;
 
   &:focus {
     color: var(--ide-text-color, $gl-text-color);
-    background-color: var(--ide-background-hover, $gray-200);
+    background-color: var(--ide-background-hover, $gray-100);
   }
 
   &.active {
@@ -693,7 +691,7 @@ $ide-commit-header-height: 48px;
   border-bottom: 1px solid var(--ide-border-color-alt, $white-dark);
 
   svg {
-    color: var(--ide-text-color-secondary, $gray-700);
+    color: var(--ide-text-color-secondary, $gray-500);
 
     &:focus,
     &:hover {
@@ -725,7 +723,7 @@ $ide-commit-header-height: 48px;
 
       &,
       &:hover {
-        color: var(--ide-text-color-secondary, $gray-700);
+        color: var(--ide-text-color-secondary, $gray-500);
       }
     }
 
@@ -867,9 +865,6 @@ $ide-commit-header-height: 48px;
 .ide-external-link {
   svg {
     display: none;
-    position: absolute;
-    top: 2px;
-    right: -$gl-padding;
   }
 
   &:hover,
@@ -920,12 +915,6 @@ $ide-commit-header-height: 48px;
       margin: 0;
     }
   }
-}
-
-.ide-pipeline-list {
-  flex: 1;
-  overflow: auto;
-  padding: 0 $gl-padding;
 }
 
 .ide-pipeline-header {
@@ -1050,7 +1039,7 @@ $ide-commit-header-height: 48px;
   background-color: var(--ide-background, $gray-50);
 
   &:hover {
-    background-color: var(--ide-file-row-btn-hover-background, $gray-200);
+    background-color: var(--ide-file-row-btn-hover-background, $gray-100);
   }
 
   &:active,
@@ -1087,7 +1076,7 @@ $ide-commit-header-height: 48px;
   max-width: 24px;
   padding: 0;
   margin: 0 ($grid-size / 2);
-  color: var(--ide-text-color-secondary, $gl-gray-light);
+  color: var(--ide-text-color-secondary, $gray-600);
 
   &:first-child {
     margin-left: 0;
@@ -1101,7 +1090,7 @@ $ide-commit-header-height: 48px;
   &:focus {
     outline: 0;
     box-shadow: none;
-    border-color: var(--ide-border-color, $gray-200);
+    border-color: var(--ide-border-color, $gray-100);
   }
 }
 
@@ -1140,11 +1129,11 @@ $ide-commit-header-height: 48px;
 .ide-file-icon-holder {
   display: flex;
   align-items: center;
-  color: var(--ide-text-color-secondary, $gray-700);
+  color: var(--ide-text-color-secondary, $gray-500);
 }
 
 .file-row:active {
-  background: var(--ide-background, $gray-200);
+  background: var(--ide-background, $gray-100);
 }
 
 .file-row.is-active {

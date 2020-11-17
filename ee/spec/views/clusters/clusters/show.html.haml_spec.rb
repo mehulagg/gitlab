@@ -17,30 +17,11 @@ RSpec.describe 'clusters/clusters/show' do
       allow(view).to receive(:clusterable).and_return(clusterable_presenter)
     end
 
-    context 'with feature cluster_health available' do
-      before do
-        stub_licensed_features(cluster_health: true)
-      end
+    it 'displays the Cluster health section' do
+      render
 
-      it 'displays the Cluster health section' do
-        render
-
-        expect(rendered).to have_selector('#cluster-health-tab')
-        expect(rendered).to have_content('Health')
-      end
-    end
-
-    context 'without feature cluster_health available' do
-      before do
-        stub_licensed_features(cluster_health: false)
-      end
-
-      it 'does not show the Cluster health section' do
-        render
-
-        expect(rendered).not_to have_selector('#cluster-health')
-        expect(rendered).not_to have_content('Cluster health')
-      end
+      expect(rendered).to have_selector('#cluster-health-tab')
+      expect(rendered).to have_content('Health')
     end
   end
 

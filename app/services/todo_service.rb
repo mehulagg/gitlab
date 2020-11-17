@@ -8,6 +8,7 @@
 #   TodoService.new.new_issue(issue, current_user)
 #
 class TodoService
+  include Gitlab::Utils::UsageData
   # When create an issue we should:
   #
   #  * create a todo for assignee if issue is assigned
@@ -49,12 +50,20 @@ class TodoService
     todo_users.each(&:update_todos_count_cache)
   end
 
-  # When we reassign an issuable we should:
+  # When we reassign an assignable object (issuable, alert) we should:
   #
-  #  * create a pending todo for new assignee if issuable is assigned
+  #  * create a pending todo for new assignee if object is assigned
   #
-  def reassigned_issuable(issuable, current_user, old_assignees = [])
+  def reassigned_assignable(issuable, current_user, old_assignees = [])
     create_assignment_todo(issuable, current_user, old_assignees)
+  end
+
+  # When we reassign an reviewable object (merge request) we should:
+  #
+  #  * create a pending todo for new reviewer if object is assigned
+  #
+  def reassigned_reviewable(issuable, current_user, old_reviewers = [])
+    create_reviewer_todo(issuable, current_user, old_reviewers)
   end
 
   # When create a merge request we should:
@@ -154,17 +163,9 @@ class TodoService
     resolve_todos_for_target(awardable, current_user)
   end
 
-  # When assigning an alert we should:
-  #
-  #  * create a pending todo for new assignee if alert is assigned
-  #
-  def assign_alert(alert, current_user)
-    create_assignment_todo(alert, current_user, [])
-  end
-
-  # When user marks an issue as todo
-  def mark_todo(issuable, current_user)
-    attributes = attributes_for_todo(issuable.project, issuable, current_user, Todo::MARKED)
+  # When user marks a target as todo
+  def mark_todo(target, current_user)
+    attributes = attributes_for_todo(target.project, target, current_user, Todo::MARKED)
     create_todos(current_user, attributes)
   end
 
@@ -217,6 +218,9 @@ class TodoService
     Array(users).map do |user|
       next if pending_todos(user, attributes).exists?
 
+      issue_type = attributes.delete(:issue_type)
+      track_todo_creation(user, issue_type)
+
       todo = Todo.create(attributes.merge(user_id: user.id))
       user.update_todos_count_cache
       todo
@@ -225,6 +229,7 @@ class TodoService
 
   def new_issuable(issuable, author)
     create_assignment_todo(issuable, author)
+    create_reviewer_todo(issuable, author) if issuable.allows_reviewers?
     create_mention_todos(issuable.project, issuable, author)
   end
 
@@ -255,6 +260,14 @@ class TodoService
       assignees = target.assignees - old_assignees
       attributes = attributes_for_todo(target.project, target, author, Todo::ASSIGNED)
       create_todos(assignees, attributes)
+    end
+  end
+
+  def create_reviewer_todo(target, author, old_reviewers = [])
+    if target.reviewers.any?
+      reviewers = target.reviewers - old_reviewers
+      attributes = attributes_for_todo(target.project, target, author, Todo::REVIEW_REQUESTED)
+      create_todos(reviewers, attributes)
     end
   end
 
@@ -290,6 +303,8 @@ class TodoService
 
     if target.is_a?(Commit)
       attributes.merge!(target_id: nil, commit_id: target.id)
+    elsif target.is_a?(Issue)
+      attributes[:issue_type] = target.issue_type
     end
 
     attributes
@@ -336,6 +351,12 @@ class TodoService
 
   def pending_todos(user, criteria = {})
     PendingTodosFinder.new(user, criteria).execute
+  end
+
+  def track_todo_creation(user, issue_type)
+    return unless issue_type == 'incident'
+
+    track_usage_event(:incident_management_incident_todo, user.id)
   end
 end
 

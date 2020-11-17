@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::CreateService do
+RSpec.describe Users::CreateService do
   describe '#execute' do
     let(:admin_user) { create(:admin) }
 
@@ -154,6 +154,7 @@ describe Users::CreateService do
       let(:params) do
         { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass', skip_confirmation: true }
       end
+
       let(:service) { described_class.new(nil, params) }
 
       it 'persists the given attributes' do

@@ -1,70 +1,92 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import SingleStatChart from '~/monitoring/components/charts/single_stat.vue';
-import { singleStatMetricsResult } from '../../mock_data';
+import { singleStatGraphData } from '../../graph_data';
 
 describe('Single Stat Chart component', () => {
-  let singleStatChart;
+  let wrapper;
 
-  beforeEach(() => {
-    singleStatChart = shallowMount(SingleStatChart, {
+  const createComponent = (props = {}) => {
+    wrapper = shallowMount(SingleStatChart, {
       propsData: {
-        graphData: singleStatMetricsResult,
+        graphData: singleStatGraphData({}, { unit: 'MB' }),
+        ...props,
       },
     });
+  };
+
+  const findChart = () => wrapper.find(GlSingleStat);
+
+  beforeEach(() => {
+    createComponent();
   });
 
   afterEach(() => {
-    singleStatChart.destroy();
+    wrapper.destroy();
   });
 
   describe('computed', () => {
     describe('statValue', () => {
       it('should interpolate the value and unit props', () => {
-        expect(singleStatChart.vm.statValue).toBe('91.00MB');
+        expect(findChart().props('value')).toBe('1.00MB');
       });
 
       it('should change the value representation to a percentile one', () => {
-        singleStatChart.setProps({
-          graphData: {
-            ...singleStatMetricsResult,
-            maxValue: 120,
-          },
+        createComponent({
+          graphData: singleStatGraphData({ max_value: 120 }, { value: 91 }),
         });
 
-        expect(singleStatChart.vm.statValue).toContain('75.83%');
+        expect(findChart().props('value')).toContain('75.83%');
       });
 
       it('should display NaN for non numeric maxValue values', () => {
-        singleStatChart.setProps({
-          graphData: {
-            ...singleStatMetricsResult,
-            maxValue: 'not a number',
-          },
+        createComponent({
+          graphData: singleStatGraphData({ max_value: 'not a number' }),
         });
 
-        expect(singleStatChart.vm.statValue).toContain('NaN');
+        expect(findChart().props('value')).toContain('NaN');
       });
 
       it('should display NaN for missing query values', () => {
-        singleStatChart.setProps({
-          graphData: {
-            ...singleStatMetricsResult,
-            metrics: [
-              {
-                ...singleStatMetricsResult.metrics[0],
-                result: [
-                  {
-                    ...singleStatMetricsResult.metrics[0].result[0],
-                    value: [''],
-                  },
-                ],
-              },
-            ],
-            maxValue: 120,
-          },
+        createComponent({
+          graphData: singleStatGraphData({ max_value: 120 }, { value: 'NaN' }),
         });
 
-        expect(singleStatChart.vm.statValue).toContain('NaN');
+        expect(findChart().props('value')).toContain('NaN');
+      });
+
+      it('should not display `unit` when `unit` is undefined', () => {
+        createComponent({
+          graphData: singleStatGraphData({}, { unit: undefined }),
+        });
+
+        expect(findChart().props('value')).not.toContain('undefined');
+      });
+
+      it('should not display `unit` when `unit` is null', () => {
+        createComponent({
+          graphData: singleStatGraphData({}, { unit: null }),
+        });
+
+        expect(findChart().props('value')).not.toContain('null');
+      });
+
+      describe('when a field attribute is set', () => {
+        it('displays a label value instead of metric value when field attribute is used', () => {
+          createComponent({
+            graphData: singleStatGraphData({ field: 'job' }, { isVector: true }),
+          });
+
+          expect(findChart().props('value')).toContain('prometheus');
+        });
+
+        it('displays No data to display if field attribute is not present', () => {
+          createComponent({
+            graphData: singleStatGraphData({ field: 'this-does-not-exist' }),
+          });
+
+          expect(findChart().props('value')).toContain('No data to display');
+        });
       });
     });
   });

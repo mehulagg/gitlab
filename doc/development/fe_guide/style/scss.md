@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 disqus_identifier: 'https://docs.gitlab.com/ee/development/fe_guide/style_guide_scss.html'
 ---
 
@@ -23,6 +26,14 @@ Classes in [`utilities.scss`](https://gitlab.com/gitlab-org/gitlab/blob/master/a
 
 Avoid [Bootstrap's Utility Classes](https://getbootstrap.com/docs/4.3/utilities/).
 
+NOTE: **Note:**
+While migrating [Bootstrap's Utility Classes](https://getbootstrap.com/docs/4.3/utilities/)
+to the [GitLab UI](https://gitlab.com/gitlab-org/gitlab-ui/-/blob/master/doc/css.md#utilities)
+utility classes, note both the classes for margin and padding differ. The size scale used at
+GitLab differs from the scale used in the Bootstrap library. For a Bootstrap padding or margin
+utility, you may need to double the size of the applied utility to achieve the same visual
+result (such as `ml-1` becoming `gl-ml-2`).
+
 #### Where should I put new utility classes?
 
 If a class you need has not been added to GitLab UI, you get to add it! Follow the naming patterns documented in the [utility files](https://gitlab.com/gitlab-org/gitlab-ui/-/tree/master/src/scss/utility-mixins) and refer to [GitLab UI's CSS documentation](https://gitlab.com/gitlab-org/gitlab-ui/-/blob/master/doc/contributing/adding_css.md#adding-utility-mixins) for more details, especially about adding responsive and stateful rules.
@@ -38,15 +49,10 @@ We recommend a "utility-first" approach.
 
 This encourages an organic growth of component classes and prevents the creation of one-off unreusable classes. Also, the kind of classes that emerge from "utility-first" tend to be design-centered (e.g. `.button`, `.alert`, `.card`) rather than domain-centered (e.g. `.security-report-widget`, `.commit-header-icon`).
 
-Examples of component classes that were created using "utility-first" include:
-
-- [`.circle-icon-container`](https://gitlab.com/gitlab-org/gitlab/blob/579fa8b8ec7eb38d40c96521f517c9dab8c3b97a/app/assets/stylesheets/framework/icons.scss#L85)
-- [`.d-flex-center`](https://gitlab.com/gitlab-org/gitlab/blob/900083d89cd6af391d26ab7922b3f64fa2839bef/app/assets/stylesheets/framework/common.scss#L425)
-
 Inspiration:
 
-- <https://tailwindcss.com/docs/utility-first/>
-- <https://tailwindcss.com/docs/extracting-components/>
+- <https://tailwindcss.com/docs/utility-first>
+- <https://tailwindcss.com/docs/extracting-components>
 
 ### Naming
 

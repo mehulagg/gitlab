@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CommitWithPipeline do
+RSpec.describe CommitWithPipeline do
   let(:project) { create(:project, :public, :repository) }
   let(:commit)  { described_class.new(project.commit) }
 
@@ -13,6 +13,7 @@ describe CommitWithPipeline do
         sha: commit.sha,
         status: 'success')
     end
+
     let!(:second_pipeline) do
       create(:ci_empty_pipeline,
         project: project,

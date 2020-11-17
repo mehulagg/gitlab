@@ -4,25 +4,13 @@ module EE
   module RegistrationsHelper
     include ::Gitlab::Utils::StrongMemoize
 
-    def in_subscription_flow?
-      redirect_path == new_subscriptions_path
-    end
-
-    def in_trial_flow?
-      redirect_path == new_trial_path
-    end
-
-    def in_invitation_flow?
-      redirect_path&.starts_with?('/-/invites/')
-    end
-
-    def setup_for_company_label_text
-      if in_subscription_flow?
-        _('Who will be using this GitLab subscription?')
-      elsif in_trial_flow?
-        _('Who will be using this GitLab trial?')
-      else
-        _('Who will be using GitLab?')
+    def visibility_level_options
+      available_visibility_levels(@group).map do |level|
+        {
+          level: level,
+          label: visibility_level_label(level),
+          description: visibility_level_description(level, @group)
+        }
       end
     end
 

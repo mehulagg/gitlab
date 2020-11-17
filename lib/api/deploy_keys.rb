@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class DeployKeys < Grape::API
+  class DeployKeys < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     helpers do
       def add_deploy_keys_project(project, attrs = {})
@@ -25,8 +27,7 @@ module API
     get "deploy_keys" do
       authenticated_as_admin!
 
-      deploy_keys = DeployKey.all.preload_users
-      present paginate(deploy_keys), with: Entities::SSHKey
+      present paginate(DeployKey.all), with: Entities::DeployKey
     end
 
     params do
@@ -43,7 +44,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get ":id/deploy_keys" do
-        keys = user_project.deploy_keys_projects.preload(deploy_key: [:user])
+        keys = user_project.deploy_keys_projects.preload(:deploy_key)
 
         present paginate(keys), with: Entities::DeployKeysProject
       end
@@ -105,7 +106,7 @@ module API
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Update an existing deploy key for a project' do
-        success Entities::SSHKey
+        success Entities::DeployKey
       end
       params do
         requires :key_id, type: Integer, desc: 'The ID of the deploy key'
@@ -140,7 +141,7 @@ module API
 
       desc 'Enable a deploy key for a project' do
         detail 'This feature was added in GitLab 8.11'
-        success Entities::SSHKey
+        success Entities::DeployKey
       end
       params do
         requires :key_id, type: Integer, desc: 'The ID of the deploy key'
@@ -150,7 +151,7 @@ module API
                                                       current_user, declared_params).execute
 
         if key
-          present key, with: Entities::SSHKey
+          present key, with: Entities::DeployKey
         else
           not_found!('Deploy Key')
         end

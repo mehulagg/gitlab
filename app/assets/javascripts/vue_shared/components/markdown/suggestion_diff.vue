@@ -27,6 +27,11 @@ export default {
       type: String,
       required: true,
     },
+    suggestionsCount: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   computed: {
     batchSuggestionsCount() {
@@ -62,12 +67,14 @@ export default {
   <div class="md-suggestion">
     <suggestion-diff-header
       class="qa-suggestion-diff-header js-suggestion-diff-header"
+      :suggestions-count="suggestionsCount"
       :can-apply="suggestion.appliable && suggestion.current_user.can_apply && !disabled"
       :is-applied="suggestion.applied"
       :is-batched="isBatched"
       :is-applying-batch="suggestion.is_applying_batch"
       :batch-suggestions-count="batchSuggestionsCount"
       :help-page-path="helpPagePath"
+      :inapplicable-reason="suggestion.inapplicable_reason"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"

@@ -31,6 +31,7 @@ class AuditLogFinder
     audit_events = init_collection
     audit_events = by_entity(audit_events)
     audit_events = by_created_at(audit_events)
+    audit_events = by_author(audit_events)
 
     sort(audit_events)
   end
@@ -61,6 +62,12 @@ class AuditLogFinder
     audit_events
   end
 
+  def by_author(audit_events)
+    return audit_events unless valid_author_id?
+
+    audit_events.by_author_id(params[:author_id])
+  end
+
   def sort(audit_events)
     audit_events.order_by(params[:sort])
   end
@@ -71,5 +78,9 @@ class AuditLogFinder
 
   def valid_entity_id?
     params[:entity_id].to_i.nonzero?
+  end
+
+  def valid_author_id?
+    params[:author_id].to_i.nonzero?
   end
 end

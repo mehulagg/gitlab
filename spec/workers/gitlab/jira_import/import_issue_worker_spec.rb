@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::JiraImport::ImportIssueWorker do
+RSpec.describe Gitlab::JiraImport::ImportIssueWorker do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:jira_issue_label_1) { create(:label, project: project) }
@@ -24,7 +24,8 @@ describe Gitlab::JiraImport::ImportIssueWorker do
       build(:issue, project_id: project.id, title: 'jira issue')
         .as_json.merge(
           'label_ids' => [jira_issue_label_1.id, jira_issue_label_2.id], 'assignee_ids' => assignee_ids
-        ).compact
+        ).except('issue_type')
+        .compact
     end
 
     context 'when any exception raised while inserting to DB' do

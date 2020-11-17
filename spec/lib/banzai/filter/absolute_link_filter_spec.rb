@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::AbsoluteLinkFilter do
+RSpec.describe Banzai::Filter::AbsoluteLinkFilter do
   def filter(doc, context = {})
     described_class.call(doc, context)
   end
@@ -12,6 +12,7 @@ describe Banzai::Filter::AbsoluteLinkFilter do
       let(:only_path_context) do
         { only_path: false }
       end
+
       let(:fake_url) { 'http://www.example.com' }
 
       before do

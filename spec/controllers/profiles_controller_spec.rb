@@ -84,9 +84,10 @@ RSpec.describe ProfilesController, :request_store do
     it 'allows setting a user status' do
       sign_in(user)
 
-      put :update, params: { user: { status: { message: 'Working hard!' } } }
+      put :update, params: { user: { status: { message: 'Working hard!', availability: 'busy' } } }
 
       expect(user.reload.status.message).to eq('Working hard!')
+      expect(user.reload.status.availability).to eq('busy')
       expect(response).to have_gitlab_http_status(:found)
     end
 
@@ -98,6 +99,19 @@ RSpec.describe ProfilesController, :request_store do
 
       expect(user.reload.job_title).to eq(title)
       expect(response).to have_gitlab_http_status(:found)
+    end
+  end
+
+  describe 'GET audit_log' do
+    it 'tracks search event', :snowplow do
+      sign_in(user)
+
+      get :audit_log
+
+      expect_snowplow_event(
+        category: 'ProfilesController',
+        action: 'search_audit_event'
+      )
     end
   end
 

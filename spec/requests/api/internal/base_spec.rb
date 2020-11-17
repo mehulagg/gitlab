@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe API::Internal::Base do
+RSpec.describe API::Internal::Base do
+  include APIInternalBaseHelpers
+
   let_it_be(:user, reload: true) { create(:user) }
   let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
   let_it_be(:personal_snippet) { create(:personal_snippet, :repository, author: user) }
@@ -48,43 +50,63 @@ describe API::Internal::Base do
     end
   end
 
+  shared_examples 'actor key validations' do
+    context 'key id is not provided' do
+      let(:key_id) { nil }
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Could not find a user without a key')
+      end
+    end
+
+    context 'key does not exist' do
+      let(:key_id) { non_existing_record_id }
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Could not find the given key')
+      end
+    end
+
+    context 'key without user' do
+      let(:key_id) { create(:key, user: nil).id }
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Could not find a user for the given key')
+      end
+    end
+  end
+
   describe 'GET /internal/two_factor_recovery_codes' do
-    it 'returns an error message when the key does not exist' do
+    let(:key_id) { key.id }
+
+    subject do
       post api('/internal/two_factor_recovery_codes'),
            params: {
              secret_token: secret_token,
-             key_id: non_existing_record_id
+             key_id: key_id
            }
-
-      expect(json_response['success']).to be_falsey
-      expect(json_response['message']).to eq('Could not find the given key')
     end
 
-    it 'returns an error message when the key is a deploy key' do
-      deploy_key = create(:deploy_key)
+    it_behaves_like 'actor key validations'
 
-      post api('/internal/two_factor_recovery_codes'),
-           params: {
-             secret_token: secret_token,
-             key_id: deploy_key.id
-           }
+    context 'key is a deploy key' do
+      let(:key_id) { create(:deploy_key).id }
 
-      expect(json_response['success']).to be_falsey
-      expect(json_response['message']).to eq('Deploy keys cannot be used to retrieve recovery codes')
-    end
+      it 'returns an error message' do
+        subject
 
-    it 'returns an error message when the user does not exist' do
-      key_without_user = create(:key, user: nil)
-
-      post api('/internal/two_factor_recovery_codes'),
-           params: {
-             secret_token: secret_token,
-             key_id: key_without_user.id
-           }
-
-      expect(json_response['success']).to be_falsey
-      expect(json_response['message']).to eq('Could not find a user for the given key')
-      expect(json_response['recovery_codes']).to be_nil
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Deploy keys cannot be used to retrieve recovery codes')
+      end
     end
 
     context 'when two-factor is enabled' do
@@ -93,11 +115,7 @@ describe API::Internal::Base do
         allow_any_instance_of(User)
           .to receive(:generate_otp_backup_codes!).and_return(%w(119135e5a3ebce8e 34bd7b74adbc8861))
 
-        post api('/internal/two_factor_recovery_codes'),
-             params: {
-               secret_token: secret_token,
-               key_id: key.id
-             }
+        subject
 
         expect(json_response['success']).to be_truthy
         expect(json_response['recovery_codes']).to match_array(%w(119135e5a3ebce8e 34bd7b74adbc8861))
@@ -108,11 +126,7 @@ describe API::Internal::Base do
       it 'returns an error message' do
         allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(false)
 
-        post api('/internal/two_factor_recovery_codes'),
-             params: {
-               secret_token: secret_token,
-               key_id: key.id
-             }
+        subject
 
         expect(json_response['success']).to be_falsey
         expect(json_response['recovery_codes']).to be_nil
@@ -120,8 +134,126 @@ describe API::Internal::Base do
     end
   end
 
+  describe 'POST /internal/personal_access_token' do
+    let(:key_id) { key.id }
+
+    subject do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id: key_id
+           }
+    end
+
+    it_behaves_like 'actor key validations'
+
+    context 'key is a deploy key' do
+      let(:key_id) { create(:deploy_key).id }
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Deploy keys cannot be used to create personal access tokens')
+      end
+    end
+
+    it 'returns an error message when given an non existent user' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             user_id: 0
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("Could not find the given user")
+    end
+
+    it 'returns an error message when no name parameter is received' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("No token name specified")
+    end
+
+    it 'returns an error message when no scopes parameter is received' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken'
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("No token scopes specified")
+    end
+
+    it 'returns an error message when expires_at contains an invalid date' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: ['api'],
+             expires_at: 'invalid-date'
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("Invalid token expiry date: 'invalid-date'")
+    end
+
+    it 'returns an error message when it receives an invalid scope' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: %w(read_api badscope read_repository)
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to match(/\AInvalid scope: 'badscope'. Valid scopes are: /)
+    end
+
+    it 'returns a token without expiry when the expires_at parameter is missing' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: %w(read_api read_repository)
+           }
+
+      expect(json_response['success']).to be_truthy
+      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['scopes']).to match_array(%w(read_api read_repository))
+      expect(json_response['expires_at']).to be_nil
+    end
+
+    it 'returns a token with expiry when it receives a valid expires_at parameter' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: %w(read_api read_repository),
+             expires_at: '9001-11-17'
+           }
+
+      expect(json_response['success']).to be_truthy
+      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['scopes']).to match_array(%w(read_api read_repository))
+      expect(json_response['expires_at']).to eq('9001-11-17')
+    end
+  end
+
   describe "POST /internal/lfs_authenticate" do
     before do
+      stub_lfs_setting(enabled: true)
       project.add_developer(user)
     end
 
@@ -161,6 +293,33 @@ describe API::Internal::Base do
         lfs_auth_user(non_existing_record_id, project)
 
         expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      it 'returns a 404 when LFS is disabled on the project' do
+        project.update!(lfs_enabled: false)
+        lfs_auth_user(user.id, project)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      context 'other repository types' do
+        it 'returns the correct information for a project wiki' do
+          wiki = create(:project_wiki, project: project)
+          lfs_auth_user(user.id, wiki)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['username']).to eq(user.username)
+          expect(json_response['repository_http_path']).to eq(wiki.http_url_to_repo)
+          expect(json_response['expires_in']).to eq(Gitlab::LfsToken::DEFAULT_EXPIRE_TIME)
+          expect(Gitlab::LfsToken.new(user).token_valid?(json_response['lfs_token'])).to be_truthy
+        end
+
+        it 'returns a 404 when the container does not support LFS' do
+          snippet = create(:project_snippet)
+          lfs_auth_user(user.id, snippet)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
       end
     end
 
@@ -283,7 +442,7 @@ describe API::Internal::Base do
       let(:env) { {} }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       before do
@@ -321,11 +480,13 @@ describe API::Internal::Base do
           expect(json_response["status"]).to be_truthy
           expect(json_response["gl_project_path"]).to eq(project.wiki.full_path)
           expect(json_response["gl_repository"]).to eq("wiki-#{project.id}")
+          expect(json_response["gl_key_type"]).to eq("key")
+          expect(json_response["gl_key_id"]).to eq(key.id)
           expect(user.reload.last_activity_on).to be_nil
         end
 
         it_behaves_like 'sets hook env' do
-          let(:gl_repository) { Gitlab::GlRepository::WIKI.identifier_for_container(project) }
+          let(:gl_repository) { Gitlab::GlRepository::WIKI.identifier_for_container(project.wiki) }
         end
       end
 
@@ -444,6 +605,8 @@ describe API::Internal::Base do
             expect(json_response["status"]).to be_truthy
             expect(json_response["gl_repository"]).to eq("project-#{project.id}")
             expect(json_response["gl_project_path"]).to eq(project.full_path)
+            expect(json_response["gl_key_type"]).to eq("key")
+            expect(json_response["gl_key_id"]).to eq(key.id)
             expect(json_response["gitaly"]).not_to be_nil
             expect(json_response["gitaly"]["repository"]).not_to be_nil
             expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
@@ -467,21 +630,6 @@ describe API::Internal::Base do
             expect(json_response["git_config_options"]).to include("uploadpack.allowFilter=true")
             expect(json_response["git_config_options"]).to include("uploadpack.allowAnySHA1InWant=true")
           end
-
-          context 'when gitaly_upload_pack_filter feature flag is disabled' do
-            before do
-              stub_feature_flags(gitaly_upload_pack_filter: false)
-            end
-
-            it 'returns only maxInputSize and not partial clone git config' do
-              push(key, project)
-
-              expect(json_response["git_config_options"]).to be_present
-              expect(json_response["git_config_options"]).to include("receive.maxInputSize=1048576")
-              expect(json_response["git_config_options"]).not_to include("uploadpack.allowFilter=true")
-              expect(json_response["git_config_options"]).not_to include("uploadpack.allowAnySHA1InWant=true")
-            end
-          end
         end
 
         context 'when receive_max_input_size is empty' do
@@ -495,18 +643,6 @@ describe API::Internal::Base do
             expect(json_response["git_config_options"]).to be_present
             expect(json_response["git_config_options"]).to include("uploadpack.allowFilter=true")
             expect(json_response["git_config_options"]).to include("uploadpack.allowAnySHA1InWant=true")
-          end
-
-          context 'when gitaly_upload_pack_filter feature flag is disabled' do
-            before do
-              stub_feature_flags(gitaly_upload_pack_filter: false)
-            end
-
-            it 'returns an empty git config' do
-              push(key, project)
-
-              expect(json_response["git_config_options"]).to be_empty
-            end
           end
         end
       end
@@ -574,6 +710,7 @@ describe API::Internal::Base do
           }
         }
       end
+
       let(:console_messages) { ['informational message'] }
       let(:custom_action_result) { Gitlab::GitAccessResult::CustomAction.new(payload, console_messages) }
 
@@ -733,6 +870,8 @@ describe API::Internal::Base do
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response["status"]).to be_truthy
           expect(json_response["gitaly"]).not_to be_nil
+          expect(json_response["gl_key_type"]).to eq("deploy_key")
+          expect(json_response["gl_key_id"]).to eq(key.id)
           expect(json_response["gitaly"]["repository"]).not_to be_nil
           expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
           expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
@@ -1067,7 +1206,7 @@ describe API::Internal::Base do
         let(:gl_repository) { "snippet-#{personal_snippet.id}" }
 
         it 'does not try to notify that project moved' do
-          allow(Gitlab::GlRepository).to receive(:parse).and_return([personal_snippet, nil, Gitlab::GlRepository::PROJECT])
+          allow(Gitlab::GlRepository).to receive(:parse).and_return([personal_snippet, nil, Gitlab::GlRepository::SNIPPET])
 
           expect(Gitlab::Checks::ProjectMoved).not_to receive(:fetch_message)
 
@@ -1095,86 +1234,157 @@ describe API::Internal::Base do
     end
   end
 
-  def gl_repository_for(container)
-    case container
-    when ProjectWiki
-      Gitlab::GlRepository::WIKI.identifier_for_container(container.project)
-    when Project
-      Gitlab::GlRepository::PROJECT.identifier_for_container(container)
-    when Snippet
-      Gitlab::GlRepository::SNIPPET.identifier_for_container(container)
-    else
-      nil
+  describe 'POST /internal/two_factor_config' do
+    let(:key_id) { key.id }
+
+    before do
+      stub_feature_flags(two_factor_for_cli: true)
+    end
+
+    subject do
+      post api('/internal/two_factor_config'),
+           params: {
+             secret_token: secret_token,
+             key_id: key_id
+           }
+    end
+
+    it_behaves_like 'actor key validations'
+
+    context 'when the key is a deploy key' do
+      let(:key) { create(:deploy_key) }
+
+      it 'does not required two factor' do
+        subject
+
+        expect(json_response['success']).to be_truthy
+        expect(json_response['two_factor_required']).to be_falsey
+      end
+    end
+
+    context 'when two-factor is enabled' do
+      it 'returns user two factor config' do
+        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true)
+
+        subject
+
+        expect(json_response['success']).to be_truthy
+        expect(json_response['two_factor_required']).to be_truthy
+      end
+    end
+
+    context 'when two-factor is not enabled' do
+      it 'returns an error message' do
+        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(false)
+
+        subject
+
+        expect(json_response['success']).to be_truthy
+        expect(json_response['two_factor_required']).to be_falsey
+      end
+    end
+
+    context 'two_factor_for_cli feature is disabled' do
+      before do
+        stub_feature_flags(two_factor_for_cli: false)
+      end
+
+      context 'when two-factor is enabled for the user' do
+        it 'returns user two factor config' do
+          allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true)
+
+          subject
+
+          expect(json_response['success']).to be_falsey
+        end
+      end
     end
   end
 
-  def full_path_for(container)
-    case container
-    when PersonalSnippet
-      "snippets/#{container.id}"
-    when ProjectSnippet
-      "#{container.project.full_path}/snippets/#{container.id}"
-    else
-      container.full_path
+  describe 'POST /internal/two_factor_otp_check' do
+    let(:key_id) { key.id }
+    let(:otp) { '123456'}
+
+    before do
+      stub_feature_flags(two_factor_for_cli: true)
     end
-  end
 
-  def pull(key, container, protocol = 'ssh')
-    post(
-      api("/internal/allowed"),
-      params: {
-        key_id: key.id,
-        project: full_path_for(container),
-        gl_repository: gl_repository_for(container),
-        action: 'git-upload-pack',
-        secret_token: secret_token,
-        protocol: protocol
-      }
-    )
-  end
+    subject do
+      post api('/internal/two_factor_otp_check'),
+           params: {
+             secret_token: secret_token,
+             key_id: key_id,
+             otp_attempt: otp
+           }
+    end
 
-  def push(key, container, protocol = 'ssh', env: nil, changes: nil)
-    push_with_path(key,
-                   full_path: full_path_for(container),
-                   gl_repository: gl_repository_for(container),
-                   protocol: protocol,
-                   env: env,
-                   changes: changes)
-  end
+    it_behaves_like 'actor key validations'
 
-  def push_with_path(key, full_path:, gl_repository: nil, protocol: 'ssh', env: nil, changes: nil)
-    changes ||= 'd14d6c0abdd253381df51a723d58691b2ee1ab08 570e7b2abdd848b95f2f578043fc23bd6f6fd24d refs/heads/master'
+    context 'when the key is a deploy key' do
+      let(:key_id) { create(:deploy_key).id }
 
-    params = {
-      changes: changes,
-      key_id: key.id,
-      project: full_path,
-      action: 'git-receive-pack',
-      secret_token: secret_token,
-      protocol: protocol,
-      env: env
-    }
-    params[:gl_repository] = gl_repository if gl_repository
+      it 'returns an error message' do
+        subject
 
-    post(
-      api("/internal/allowed"),
-      params: params
-    )
-  end
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Deploy keys cannot be used for Two Factor')
+      end
+    end
 
-  def archive(key, container)
-    post(
-      api("/internal/allowed"),
-      params: {
-        ref: 'master',
-        key_id: key.id,
-        project: full_path_for(container),
-        gl_repository: gl_repository_for(container),
-        action: 'git-upload-archive',
-        secret_token: secret_token,
-        protocol: 'ssh'
-      }
-    )
+    context 'when the two factor is enabled' do
+      before do
+        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true)
+      end
+
+      context 'when the OTP is valid' do
+        it 'returns success' do
+          allow_any_instance_of(Users::ValidateOtpService).to receive(:execute).with(otp).and_return(status: :success)
+
+          subject
+
+          expect(json_response['success']).to be_truthy
+        end
+      end
+
+      context 'when the OTP is invalid' do
+        it 'is not success' do
+          allow_any_instance_of(Users::ValidateOtpService).to receive(:execute).with(otp).and_return(status: :error)
+
+          subject
+
+          expect(json_response['success']).to be_falsey
+        end
+      end
+    end
+
+    context 'when the two factor is disabled' do
+      before do
+        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(false)
+      end
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq 'Two-factor authentication is not enabled for this user'
+      end
+    end
+
+    context 'two_factor_for_cli feature is disabled' do
+      before do
+        stub_feature_flags(two_factor_for_cli: false)
+      end
+
+      context 'when two-factor is enabled for the user' do
+        it 'returns user two factor config' do
+          allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true)
+
+          subject
+
+          expect(json_response['success']).to be_falsey
+        end
+      end
+    end
   end
 
   def lfs_auth_project(project)

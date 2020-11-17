@@ -68,12 +68,6 @@ module EE
         end
       end
 
-      def check_sha_param!(params, merge_request)
-        if params[:sha] && merge_request.diff_head_sha != params[:sha]
-          render_api_error!("SHA does not match HEAD of source branch: #{merge_request.diff_head_sha}", 409)
-        end
-      end
-
       # Normally, only admin users should have access to see LDAP
       # groups. However, due to the "Allow group owners to manage LDAP-related
       # group settings" setting, any group owner can sync LDAP groups with
@@ -146,16 +140,6 @@ module EE
 
       def private_token
         params[::APIGuard::PRIVATE_TOKEN_PARAM] || env[::APIGuard::PRIVATE_TOKEN_HEADER]
-      end
-
-      def job_token_authentication?
-        initial_current_user && @current_authenticated_job.present? # rubocop:disable Gitlab/ModuleWithInstanceVariables
-      end
-
-      # Returns the job associated with the token provided for
-      # authentication, if any
-      def current_authenticated_job
-        @current_authenticated_job
       end
 
       def warden

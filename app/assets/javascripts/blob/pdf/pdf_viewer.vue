@@ -1,6 +1,6 @@
 <script>
-import PdfLab from '../../pdf/index.vue';
 import { GlLoadingIcon } from '@gitlab/ui';
+import PdfLab from '../../pdf/index.vue';
 
 export default {
   components: {
@@ -34,7 +34,7 @@ export default {
 </script>
 
 <template>
-  <div class="js-pdf-viewer container-fluid md prepend-top-default append-bottom-default">
+  <div class="js-pdf-viewer container-fluid md gl-mt-3 gl-mb-3">
     <div v-if="loading && !error" class="text-center loading">
       <gl-loading-icon class="mt-5" size="lg" />
     </div>

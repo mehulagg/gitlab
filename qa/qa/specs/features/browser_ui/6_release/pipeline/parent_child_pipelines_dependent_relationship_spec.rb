@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Release', :docker, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217250', type: :investigating } do
+  RSpec.describe 'Release', :runner, :reliable do
     describe 'Parent-child pipelines dependent relationship' do
       let!(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'pipelines-dependent-relationship'
         end
       end
+
       let!(:runner) do
         Resource::Runner.fabricate_via_api! do |runner|
           runner.project = project
@@ -24,41 +25,27 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'parent pipelines passes if child passes' do
+      it 'parent pipelines passes if child passes', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/751' do
         add_ci_files(success_child_ci_file)
-        view_pipelines
+        Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completion')
 
         Page::Project::Pipeline::Show.perform do |parent_pipeline|
+          expect(parent_pipeline).to have_child_pipeline
           expect(parent_pipeline).to have_passed
-
-          parent_pipeline.retry_on_exception(sleep_interval: 1.0) do
-            parent_pipeline.click_linked_job(project.name)
-          end
-          expect(parent_pipeline).to have_job("child_job")
         end
       end
 
-      it 'parent pipeline fails if child fails' do
+      it 'parent pipeline fails if child fails', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/752' do
         add_ci_files(fail_child_ci_file)
-        view_pipelines
+        Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completion')
 
         Page::Project::Pipeline::Show.perform do |parent_pipeline|
+          expect(parent_pipeline).to have_child_pipeline
           expect(parent_pipeline).to have_failed
-
-          parent_pipeline.retry_on_exception(sleep_interval: 1.0) do
-            parent_pipeline.click_linked_job(project.name)
-          end
-          expect(parent_pipeline).to have_job("child_job")
         end
       end
 
       private
-
-      def view_pipelines
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_completion)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
-      end
 
       def success_child_ci_file
         {

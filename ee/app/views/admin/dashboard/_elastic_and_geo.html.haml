@@ -1,9 +1,9 @@
-= feature_entry(_('Elasticsearch'),
-  href: integrations_admin_application_settings_path(anchor: 'js-elasticsearch-settings'),
+= feature_entry(_('Advanced Search'),
+  href: general_admin_application_settings_path(anchor: 'js-elasticsearch-settings'),
   doc_href: help_page_path('integration/elasticsearch'),
   enabled: Gitlab::CurrentSettings.elasticsearch_search?)
 
 = feature_entry(_('Geo'),
   href: admin_geo_nodes_path,
-  doc_href: help_page_path('administration/geo/replication/index'),
+  doc_href: help_page_path('administration/geo/index.md'),
   enabled: Gitlab::Geo.enabled?)

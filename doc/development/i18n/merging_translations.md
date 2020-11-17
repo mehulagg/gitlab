@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Merging translations from CrowdIn
 
 CrowdIn automatically syncs the `gitlab.pot` file with the CrowdIn service, presenting
@@ -25,13 +31,14 @@ suggesting to automate this process. Disapproving will exclude the
 invalid translation, the merge request will be updated within a few
 minutes.
 
+If the translation has failed validation due to angle brackets `<` or `>`
+it should be disapproved on CrowdIn as our strings should be
+using [variables](externalization.md#html) for HTML instead.
+
 It might be handy to pause the integration on the CrowdIn side for a
 little while so translations don't keep coming. This can be done by
 clicking `Pause sync` on the [CrowdIn integration settings
 page](https://translate.gitlab.com/project/gitlab-ee/settings#integration).
-
-When all failures are resolved, the translations need to be double
-checked once more as discussed in [confidential issue](../../user/project/issues/confidential_issues.md) `https://gitlab.com/gitlab-org/gitlab/-/issues/19485`.
 
 ## Merging translations
 
@@ -56,7 +63,7 @@ have been fixed on master.
 
 ## Recreate the GitLab integration in CrowdIn
 
-NOTE: ***Note:**
+NOTE: **Note:**
 These instructions work only for GitLab Team Members.
 
 If for some reason the GitLab integration in CrowdIn does not exist, it can be

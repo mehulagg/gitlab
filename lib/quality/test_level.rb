@@ -12,6 +12,9 @@ module Quality
         lib/gitlab/background_migration
         lib/ee/gitlab/background_migration
       ],
+      frontend_fixture: %w[
+        frontend/fixtures
+      ],
       unit: %w[
         bin
         channels
@@ -63,7 +66,7 @@ module Quality
     end
 
     def pattern(level)
-      @patterns[level] ||= "#{prefix}spec/#{folders_pattern(level)}{,/**/}*_spec.rb"
+      @patterns[level] ||= "#{prefix}spec/#{folders_pattern(level)}{,/**/}*#{suffix(level)}"
     end
 
     def regexp(level)
@@ -76,6 +79,9 @@ module Quality
       # spec/lib/gitlab/background_migration and tests under spec/lib are unit by default
       when regexp(:migration), regexp(:background_migration)
         :migration
+      # Detect frontend fixture before matching other unit tests
+      when regexp(:frontend_fixture)
+        :frontend_fixture
       when regexp(:unit)
         :unit
       when regexp(:integration)
@@ -93,8 +99,23 @@ module Quality
 
     private
 
+    def suffix(level)
+      case level
+      when :frontend_fixture
+        ".rb"
+      else
+        "_spec.rb"
+      end
+    end
+
+    def migration_and_background_migration_folders
+      TEST_LEVEL_FOLDERS.fetch(:migration) + TEST_LEVEL_FOLDERS.fetch(:background_migration)
+    end
+
     def folders_pattern(level)
       case level
+      when :migration
+        "{#{migration_and_background_migration_folders.join(',')}}"
       # Geo specs aren't in a specific folder, but they all have the :geo tag, so we must search for them globally
       when :all, :geo
         '**'
@@ -105,6 +126,8 @@ module Quality
 
     def folders_regex(level)
       case level
+      when :migration
+        "(#{migration_and_background_migration_folders.join('|')})"
       # Geo specs aren't in a specific folder, but they all have the :geo tag, so we must search for them globally
       when :all, :geo
         ''

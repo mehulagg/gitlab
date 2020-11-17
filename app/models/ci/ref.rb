@@ -3,6 +3,7 @@
 module Ci
   class Ref < ApplicationRecord
     extend Gitlab::Ci::Model
+    include AfterCommitQueue
     include Gitlab::OptimisticLocking
 
     FAILING_STATUSES = %w[failed broken still_failing].freeze
@@ -15,6 +16,7 @@ module Ci
         transition unknown: :success
         transition fixed: :success
         transition %i[failed broken still_failing] => :fixed
+        transition success: same
       end
 
       event :do_fail do
@@ -29,6 +31,12 @@ module Ci
       state :fixed, value: 3
       state :broken, value: 4
       state :still_failing, value: 5
+
+      after_transition any => [:fixed, :success] do |ci_ref|
+        ci_ref.run_after_commit do
+          Ci::PipelineSuccessUnlockArtifactsWorker.perform_async(ci_ref.last_finished_pipeline_id)
+        end
+      end
     end
 
     class << self
@@ -43,12 +51,10 @@ module Ci
     end
 
     def last_finished_pipeline_id
-      Ci::Pipeline.where(ci_ref_id: self.id).finished.order(id: :desc).select(:id).take&.id
+      Ci::Pipeline.last_finished_for_ref_id(self.id)&.id
     end
 
     def update_status_by!(pipeline)
-      return unless Gitlab::Ci::Features.pipeline_fixed_notifications?
-
       retry_lock(self) do
         next unless last_finished_pipeline_id == pipeline.id
 

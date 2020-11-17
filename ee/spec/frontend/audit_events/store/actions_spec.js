@@ -18,10 +18,9 @@ describe('Audit Event actions', () => {
   });
 
   it.each`
-    action              | type                      | payload
-    ${'setDateRange'}   | ${types.SET_DATE_RANGE}   | ${{ startDate, endDate }}
-    ${'setFilterValue'} | ${types.SET_FILTER_VALUE} | ${{ id: '1', type: 'user' }}
-    ${'setSortBy'}      | ${types.SET_SORT_BY}      | ${'created_asc'}
+    action            | type                    | payload
+    ${'setDateRange'} | ${types.SET_DATE_RANGE} | ${{ startDate, endDate }}
+    ${'setSortBy'}    | ${types.SET_SORT_BY}    | ${'created_asc'}
   `(
     '$action should commit $type with $payload and dispatches "searchForAuditEvents"',
     ({ action, type, payload }) => {
@@ -39,6 +38,11 @@ describe('Audit Event actions', () => {
       );
     },
   );
+
+  it('setFilterValue action should commit to the store', () => {
+    const payload = [{ type: 'User', value: { data: 1, operator: '=' } }];
+    testAction(actions.setFilterValue, payload, state, [{ type: types.SET_FILTER_VALUE, payload }]);
+  });
 
   describe('searchForAuditEvents', () => {
     let spy;
@@ -111,7 +115,7 @@ describe('Audit Event actions', () => {
               created_after: new Date('2020-06-05T00:00:00.000Z'),
               created_before: new Date('2020-06-25T00:00:00.000Z'),
               entity_id: '44',
-              entity_type: 'User',
+              entity_type: 'user',
               sort: 'created_desc',
             },
           },

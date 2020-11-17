@@ -42,15 +42,15 @@ describe('IssueLink component', () => {
         wrapper = createWrapper({ propsData: { issue } });
       });
 
-      test('should contain the correct issue icon', () => {
+      it('should contain the correct issue icon', () => {
         expect(findIssueWithState(state)).toBeTruthy();
       });
 
-      test('should contain a link to the issue', () => {
+      it('should contain a link to the issue', () => {
         expect(findIssueLink(issue.iid).attributes('href')).toBe(issue.webUrl);
       });
 
-      test('should contain the title', () => {
+      it('should contain the title', () => {
         const tooltip = getBinding(findIssueLink(issue.iid).element, 'gl-tooltip');
         expect(tooltip).toBeDefined();
         expect(tooltip.value).toBe(issue.title);

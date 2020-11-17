@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlEmptyState, GlDeprecatedButton } from '@gitlab/ui';
+import { GlEmptyState, GlButton } from '@gitlab/ui';
 import RequirementsEmptyState from 'ee/requirements/components/requirements_empty_state.vue';
 import { FilterState } from 'ee/requirements/constants';
 
@@ -106,7 +106,7 @@ describe('RequirementsEmptyState', () => {
     });
 
     it('renders new requirement button when project has no requirements', () => {
-      const newReqButton = wrapper.find(GlDeprecatedButton);
+      const newReqButton = wrapper.find(GlButton);
 
       expect(newReqButton.exists()).toBe(true);
       expect(newReqButton.text()).toBe('New requirement');
@@ -122,7 +122,7 @@ describe('RequirementsEmptyState', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const newReqButton = wrapper.find(GlDeprecatedButton);
+        const newReqButton = wrapper.find(GlButton);
 
         expect(newReqButton.exists()).toBe(false);
       });
@@ -134,7 +134,7 @@ describe('RequirementsEmptyState', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const newReqButton = wrapper.find(GlDeprecatedButton);
+        const newReqButton = wrapper.find(GlButton);
 
         expect(newReqButton.exists()).toBe(false);
       });

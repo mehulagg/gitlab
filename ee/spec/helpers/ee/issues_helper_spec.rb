@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe EE::IssuesHelper do
-  let(:project) { create(:project) }
+  let(:group) { create :group }
+  let(:project) { create :project, group: group }
   let(:issue) { create :issue, project: project }
 
   describe '#issue_closed_link' do
@@ -13,7 +14,7 @@ RSpec.describe EE::IssuesHelper do
     context 'with linked issue' do
       context 'with promoted issue' do
         before do
-          issue.update(promoted_to_epic: new_epic)
+          issue.update!(promoted_to_epic: new_epic)
         end
 
         context 'when user has permission to see new epic' do
@@ -70,25 +71,55 @@ RSpec.describe EE::IssuesHelper do
     end
   end
 
-  describe '#show_moved_service_desk_issue_warning?' do
-    let(:project1) { create(:project, service_desk_enabled: true) }
-    let(:project2) { create(:project, service_desk_enabled: true) }
-    let!(:old_issue) { create(:issue, author: User.support_bot, project: project1) }
-    let!(:new_issue) { create(:issue, author: User.support_bot, project: project2) }
+  describe '#show_timeline_view_toggle?' do
+    subject { helper.show_timeline_view_toggle?(issue) }
 
-    before do
-      allow(::EE::Gitlab::ServiceDesk).to receive(:enabled?).and_return(true)
-      old_issue.update(moved_to: new_issue)
+    it { is_expected.to be_falsy }
+
+    context 'issue is an incident' do
+      let(:issue) { build_stubbed(:incident) }
+
+      it { is_expected.to be_falsy }
+
+      context 'with license' do
+        before do
+          stub_licensed_features(incident_timeline_view: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
+
+  describe '#scoped_labels_available?' do
+    shared_examples 'without license' do
+      before do
+        stub_licensed_features(scoped_labels: false)
+      end
+
+      it { is_expected.to be_falsy }
     end
 
-    it 'is true when moved issue project has service desk disabled' do
-      project2.update!(service_desk_enabled: false)
+    shared_examples 'with license' do
+      before do
+        stub_licensed_features(scoped_labels: true)
+      end
 
-      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(true)
+      it { is_expected.to be_truthy }
     end
 
-    it 'is false when moved issue project has service desk enabled' do
-      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(false)
+    context 'project' do
+      subject { helper.scoped_labels_available?(project) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
+    end
+
+    context 'group' do
+      subject { helper.scoped_labels_available?(group) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
     end
   end
 end

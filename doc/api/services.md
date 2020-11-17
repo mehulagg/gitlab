@@ -1,6 +1,13 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Services API
 
->**Note:** This API requires an access token with Maintainer or Owner permissions
+NOTE: **Note:**
+This API requires an access token with Maintainer or Owner permissions
 
 ## List all active services
 
@@ -229,8 +236,8 @@ Parameters:
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `token` | string | true | Buildkite project GitLab token |
-| `project_url` | string | true | `https://buildkite.com/example/project` |
-| `enable_ssl_verification` | boolean | false | Enable SSL verification |
+| `project_url` | string | true | Pipeline URL. For example, `https://buildkite.com/example/pipeline` |
+| `enable_ssl_verification` | boolean | false | DEPRECATED: This parameter has no effect since SSL verification will always be enabled |
 | `push_events` | boolean | false | Enable notifications for push events |
 
 ### Delete Buildkite service
@@ -304,7 +311,7 @@ Parameters:
 | --------- | ---- | -------- | ----------- |
 | `webhook` | string | true | The Unify Circuit webhook. For example, `https://circuit.com/rest/v2/webhooks/incoming/...`. |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". The default value is "default" |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `issues_events` | boolean | false | Enable notifications for issue events |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
@@ -349,7 +356,7 @@ Parameters:
 | --------- | ---- | -------- | ----------- |
 | `webhook` | string | true | The Webex Teams webhook. For example, `https://api.ciscospark.com/v1/webhooks/incoming/...`. |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". The default value is "default" |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `issues_events` | boolean | false | Enable notifications for issue events |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
@@ -475,7 +482,7 @@ Parameters:
 | `send_from_committer_email` | boolean | false | Send from committer |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `tag_push_events` | boolean | false | Enable notifications for tag push events |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". Notifications will be always fired for tag pushes. |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". Notifications will be always fired for tag pushes. The default value is "all" |
 
 ### Delete Emails on push service
 
@@ -491,6 +498,42 @@ Get Emails on push service settings for a project.
 
 ```plaintext
 GET /projects/:id/services/emails-on-push
+```
+
+## Confluence service
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220934) in GitLab 13.2.
+
+Replaces the link to the internal wiki with a link to a Confluence Cloud Workspace.
+
+### Create/Edit Confluence service
+
+Set Confluence service for a project.
+
+```plaintext
+PUT /projects/:id/services/confluence
+```
+
+Parameters:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `confluence_url` | string | true | The URL of the Confluence Cloud Workspace hosted on atlassian.net.  |
+
+### Delete Confluence service
+
+Delete Confluence service for a project.
+
+```plaintext
+DELETE /projects/:id/services/confluence
+```
+
+### Get Confluence service settings
+
+Get Confluence service settings for a project.
+
+```plaintext
+GET /projects/:id/services/confluence
 ```
 
 ## External Wiki
@@ -600,9 +643,9 @@ GET /projects/:id/services/github
 
 ## Hangouts Chat
 
-Google GSuite team collaboration tool.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20290) in GitLab 11.2.
 
->**Note:** This service was [introduced in v11.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20290)
+Google GSuite team collaboration tool.
 
 ### Create/Edit Hangouts Chat service
 
@@ -612,7 +655,8 @@ Set Hangouts Chat service for a project.
 PUT /projects/:id/services/hangouts-chat
 ```
 
->**Note:** Specific event parameters (for example, `push_events` flag) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
+NOTE: **Note:**
+Specific event parameters (for example, `push_events` flag) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
 
@@ -621,7 +665,7 @@ Parameters:
 | `webhook` | string | true | The Hangouts Chat webhook. For example, `https://chat.googleapis.com/v1/spaces...`. |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
 | `notify_only_default_branch` | boolean | false | DEPRECATED: This parameter has been replaced with `branches_to_be_notified` |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". The default value is "default" |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `issues_events` | boolean | false | Enable notifications for issue events |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
@@ -676,7 +720,7 @@ Parameters:
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events |
 | `tag_push_events` | boolean | false | Enable notifications for tag push events |
 | `note_events` | boolean | false | Enable notifications for note events |
-| `confidental_note_events` | boolean | false | Enable notifications for confidential note events |
+| `confidential_note_events` | boolean | false | Enable notifications for confidential note events |
 | `pipeline_events` | boolean | false | Enable notifications for pipeline events |
 
 ### Delete HipChat service
@@ -769,7 +813,7 @@ Parameters:
 | `username`      | string | yes  | The username of the user created to be used with GitLab/Jira. |
 | `password`      | string | yes  | The password of the user created to be used with GitLab/Jira. |
 | `active`        | boolean | no  | Activates or deactivates the service. Defaults to false (deactivated). |
-| `jira_issue_transition_id` | string | no | The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the **Transitions (id)** column. By default, this ID is set to `2`. |
+| `jira_issue_transition_id` | string | no | The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the transitions ID column. By default, this ID is set to `2`. |
 | `commit_events` | boolean | false | Enable notifications for commit events |
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events |
 | `comment_on_event_enabled` | boolean | false | Enable comments inside Jira issues on each GitLab event (commit / merge request) |
@@ -934,7 +978,7 @@ Parameters:
 | `recipients` | string | yes | Comma-separated list of recipient email addresses |
 | `add_pusher` | boolean | no | Add pusher to recipients list |
 | `notify_only_broken_pipelines` | boolean | no | Notify only broken pipelines |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected. The default value is "default" |
 | `notify_only_default_branch` | boolean | no | Send notifications only for the default branch ([introduced in GitLab 12.0](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/28271)) |
 | `pipeline_events` | boolean | false | Enable notifications for pipeline events |
 
@@ -1008,7 +1052,7 @@ Parameters:
 | --------- | ---- | -------- | ----------- |
 | `api_url` | string | true | Prometheus API Base URL. For example, `http://prometheus.example.com/`. |
 | `google_iap_audience_client_id` | string | false | Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com) |
-| `google_iap_service_account_json` | string | false | credentials.json file for your service account, like { "type": "service_account", "project_id": ... } |
+| `google_iap_service_account_json` | string | false | `credentials.json` file for your service account, like { "type": "service_account", "project_id": ... } |
 
 ### Delete Prometheus service
 
@@ -1115,7 +1159,8 @@ Set Slack service for a project.
 PUT /projects/:id/services/slack
 ```
 
->**Note:** Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
+NOTE: **Note:**
+Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
 
@@ -1126,7 +1171,7 @@ Parameters:
 | `channel` | string | false | Default channel to use if others are not configured |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
 | `notify_only_default_branch` | boolean | false | DEPRECATED: This parameter has been replaced with `branches_to_be_notified` |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". The default value is "default" |
 | `commit_events` | boolean | false | Enable notifications for commit events |
 | `confidential_issue_channel` | string | false | The name of the channel to receive confidential issues events notifications |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
@@ -1185,7 +1230,7 @@ Parameters:
 | `webhook` | string | true | The Microsoft Teams webhook. For example, `https://outlook.office.com/webhook/...` |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
 | `notify_only_default_branch` | boolean | false | DEPRECATED: This parameter has been replaced with `branches_to_be_notified` |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". The default value is "default" |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `issues_events` | boolean | false | Enable notifications for issue events |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
@@ -1224,7 +1269,8 @@ Set Mattermost service for a project.
 PUT /projects/:id/services/mattermost
 ```
 
->**Note:** Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
+NOTE: **Note:**
+Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
 
@@ -1235,7 +1281,7 @@ Parameters:
 | `channel` | string | false | Default channel to use if others are not configured |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
 | `notify_only_default_branch` | boolean | false | DEPRECATED: This parameter has been replaced with `branches_to_be_notified` |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected". The default value is "default" |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `issues_events` | boolean | false | Enable notifications for issue events |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |

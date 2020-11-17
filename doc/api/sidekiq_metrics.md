@@ -1,6 +1,12 @@
-# Sidekiq Metrics API
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
->**Note:** This endpoint is only available on GitLab 8.9 and above.
+# Sidekiq Metrics API **(CORE ONLY)**
+
+> Introduced in GitLab 8.9.
 
 This API endpoint allows you to retrieve some information about the current state
 of Sidekiq, its jobs, queues, and processes.

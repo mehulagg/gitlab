@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationWorker do
+RSpec.describe ApplicationWorker do
   let_it_be(:worker) do
     Class.new do
       def self.name
@@ -45,7 +45,7 @@ describe ApplicationWorker do
       instance.jid = 'a jid'
 
       expect(result).to include(
-        'class' => worker.class,
+        'class' => instance.class.name,
         'job_status' => 'running',
         'queue' => worker.queue,
         'jid' => instance.jid
@@ -69,7 +69,7 @@ describe ApplicationWorker do
     it 'does not override predefined context keys with custom payload' do
       payload['class'] = 'custom value'
 
-      expect(result).to include('class' => worker.class)
+      expect(result).to include('class' => instance.class.name)
     end
   end
 

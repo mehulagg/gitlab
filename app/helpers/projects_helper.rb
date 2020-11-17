@@ -7,7 +7,7 @@ module ProjectsHelper
   end
 
   def link_to_project(project)
-    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name) do
+    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name), class: 'gl-link' do
       title = content_tag(:span, project.name, class: 'project-name')
 
       if project.namespace
@@ -84,18 +84,8 @@ module ProjectsHelper
   end
 
   def project_title(project)
-    namespace_link =
-      if project.group
-        group_title(project.group, nil, nil)
-      else
-        owner = project.namespace.owner
-        link_to(simple_sanitize(owner.name), user_path(owner))
-      end
-
-    project_link = link_to project_path(project) do
-      icon = project_icon(project, alt: project.name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
-      [icon, content_tag("span", simple_sanitize(project.name), class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
-    end
+    namespace_link = build_namespace_breadcrumb_link(project)
+    project_link = build_project_breadcrumb_link(project)
 
     namespace_link = breadcrumb_list_item(namespace_link) unless project.group
     project_link = breadcrumb_list_item project_link
@@ -104,12 +94,12 @@ module ProjectsHelper
   end
 
   def remove_project_message(project)
-    _("You are going to remove %{project_full_name}. Removed project CANNOT be restored! Are you ABSOLUTELY sure?") %
+    _("You are going to delete %{project_full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
   def transfer_project_message(project)
-    _("You are going to transfer %{project_full_name} to another owner. Are you ABSOLUTELY sure?") %
+    _("You are going to transfer %{project_full_name} to another namespace. Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
@@ -180,13 +170,12 @@ module ProjectsHelper
   end
 
   def link_to_autodeploy_doc
-    link_to _('About auto deploy'), help_page_path('autodevops/index.md#auto-deploy'), target: '_blank'
+    link_to _('About auto deploy'), help_page_path('topics/autodevops/stages.md', anchor: 'auto-deploy'), target: '_blank'
   end
 
   def autodeploy_flash_notice(branch_name)
-    translation = _("Branch <strong>%{branch_name}</strong> was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}") %
-      { branch_name: truncate(sanitize(branch_name)), link_to_autodeploy_doc: link_to_autodeploy_doc }
-    translation.html_safe
+    html_escape(_("Branch %{branch_name} was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}")) %
+      { branch_name: tag.strong(truncate(sanitize(branch_name))), link_to_autodeploy_doc: link_to_autodeploy_doc }
   end
 
   def project_list_cache_key(project, pipeline_status: true)
@@ -302,9 +291,8 @@ module ProjectsHelper
     !disabled && !compact_mode
   end
 
-  # overridden in EE
   def settings_operations_available?
-    can?(current_user, :read_environment, @project)
+    !@project.archived? && can?(current_user, :admin_operations, @project)
   end
 
   def error_tracking_setting_project_json
@@ -353,14 +341,14 @@ module ProjectsHelper
 
     description =
       if share_with_group && share_with_members
-        _("You can invite a new member to <strong>%{project_name}</strong> or invite another group.")
+        _("You can invite a new member to %{project_name} or invite another group.")
       elsif share_with_group
-        _("You can invite another group to <strong>%{project_name}</strong>.")
+        _("You can invite another group to %{project_name}.")
       elsif share_with_members
-        _("You can invite a new member to <strong>%{project_name}</strong>.")
+        _("You can invite a new member to %{project_name}.")
       end
 
-    description.html_safe % { project_name: project.name }
+    html_escape(description) % { project_name: tag.strong(project.name) }
   end
 
   def metrics_external_dashboard_url
@@ -384,9 +372,12 @@ module ProjectsHelper
   end
 
   def project_license_name(project)
-    project.repository.license&.name
+    key = "project:#{project.id}:license_name"
+
+    Gitlab::SafeRequestStore.fetch(key) { project.repository.license&.name }
   rescue GRPC::Unavailable, GRPC::DeadlineExceeded, Gitlab::Git::CommandError => e
     Gitlab::ErrorTracking.track_exception(e)
+    Gitlab::SafeRequestStore[key] = nil
 
     nil
   end
@@ -397,7 +388,7 @@ module ProjectsHelper
     nav_tabs = [:home]
 
     unless project.empty_repo?
-      nav_tabs << [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
+      nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
     end
 
@@ -418,8 +409,8 @@ module ProjectsHelper
       nav_tabs << :operations
     end
 
-    if can?(current_user, :read_cycle_analytics, project)
-      nav_tabs << :cycle_analytics
+    if can_view_product_analytics?(current_user, project)
+      nav_tabs << :product_analytics
     end
 
     tab_ability_map.each do |tab, ability|
@@ -428,20 +419,34 @@ module ProjectsHelper
       end
     end
 
-    nav_tabs << external_nav_tabs(project)
+    apply_external_nav_tabs(nav_tabs, project)
 
-    nav_tabs.flatten
+    nav_tabs += package_nav_tabs(project, current_user)
+
+    nav_tabs
   end
 
-  def external_nav_tabs(project)
+  def package_nav_tabs(project, current_user)
     [].tap do |tabs|
-      tabs << :external_issue_tracker if project.external_issue_tracker
-      tabs << :external_wiki if project.external_wiki
+      if ::Gitlab.config.packages.enabled && can?(current_user, :read_package, project)
+        tabs << :packages
+      end
+    end
+  end
+
+  def apply_external_nav_tabs(nav_tabs, project)
+    nav_tabs << :external_issue_tracker if project.external_issue_tracker
+    nav_tabs << :external_wiki if project.external_wiki
+
+    if project.has_confluence?
+      nav_tabs.delete(:wiki)
+      nav_tabs << :confluence
     end
   end
 
   def tab_ability_map
     {
+      cycle_analytics:    :read_cycle_analytics,
       environments:       :read_environment,
       metrics_dashboards: :metrics_dashboard,
       milestones:         :read_milestone,
@@ -450,19 +455,36 @@ module ProjectsHelper
       builds:             :read_build,
       clusters:           :read_cluster,
       serverless:         :read_cluster,
+      terraform:          :read_terraform_state,
       error_tracking:     :read_sentry_issue,
       alert_management:   :read_alert_management_alert,
+      incidents:          :read_issue,
       labels:             :read_label,
       issues:             :read_issue,
       project_members:    :read_project_member,
-      wiki:               :read_wiki
+      wiki:               :read_wiki,
+      feature_flags:      :read_feature_flag
     }
   end
 
   def can_view_operations_tab?(current_user, project)
-    [:read_environment, :read_cluster, :metrics_dashboard].any? do |ability|
+    [
+      :metrics_dashboard,
+      :read_alert_management_alert,
+      :read_environment,
+      :read_issue,
+      :read_sentry_issue,
+      :read_cluster,
+      :read_feature_flag,
+      :read_terraform_state
+    ].any? do |ability|
       can?(current_user, ability, project)
     end
+  end
+
+  def can_view_product_analytics?(current_user, project)
+    Feature.enabled?(:product_analytics, project) &&
+      can?(current_user, :read_product_analytics, project)
   end
 
   def search_tab_ability_map
@@ -533,7 +555,11 @@ module ProjectsHelper
   end
 
   def sidebar_operations_link_path(project = @project)
-    metrics_project_environments_path(project) if can?(current_user, :read_environment, project)
+    if can?(current_user, :read_environment, project)
+      metrics_project_environments_path(project)
+    else
+      project_feature_flags_path(project)
+    end
   end
 
   def project_last_activity(project)
@@ -565,7 +591,7 @@ module ProjectsHelper
   end
 
   def project_child_container_class(view_path)
-    view_path == "projects/issues/issues" ? "prepend-top-default" : "project-show-#{view_path}"
+    view_path == "projects/issues/issues" ? "gl-mt-3" : "project-show-#{view_path}"
   end
 
   def project_issues(project)
@@ -581,6 +607,7 @@ module ProjectsHelper
   def project_permissions_settings(project)
     feature = project.project_feature
     {
+      packagesEnabled: !!project.packages_enabled,
       visibilityLevel: project.visibility_level,
       requestAccessEnabled: !!project.request_access_enabled,
       issuesAccessLevel: feature.issues_access_level,
@@ -601,6 +628,8 @@ module ProjectsHelper
 
   def project_permissions_panel_data(project)
     {
+      packagesAvailable: ::Gitlab.config.packages.enabled,
+      packagesHelpPath: help_page_path('user/packages/index'),
       currentSettings: project_permissions_settings(project),
       canDisableEmails: can_disable_emails?(project, current_user),
       canChangeVisibilityLevel: can_change_visibility_level?(project, current_user),
@@ -615,7 +644,7 @@ module ProjectsHelper
       pagesAvailable: Gitlab.config.pages.enabled,
       pagesAccessControlEnabled: Gitlab.config.pages.access_control,
       pagesAccessControlForced: ::Gitlab::Pages.access_control_is_forced?,
-      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control-core')
+      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control')
     }
   end
 
@@ -716,9 +745,16 @@ module ProjectsHelper
       functions
       error_tracking
       alert_management
+      incidents
+      incident_management
       user
       gcp
       logs
+      product_analytics
+      metrics_dashboard
+      feature_flags
+      tracings
+      terraform
     ]
   end
 
@@ -727,14 +763,6 @@ module ProjectsHelper
       project.has_auto_devops_implicitly_enabled? &&
       project.builds_enabled? &&
       !project.repository.gitlab_ci_yml
-  end
-
-  def vue_file_list_enabled?
-    Feature.enabled?(:vue_file_list, @project, default_enabled: true)
-  end
-
-  def native_code_navigation_enabled?(project)
-    Feature.enabled?(:code_navigation, project, default_enabled: true)
   end
 
   def show_visibility_confirm_modal?(project)
@@ -747,9 +775,31 @@ module ProjectsHelper
   end
 
   def project_access_token_available?(project)
-    return false if ::Gitlab.com?
+    can?(current_user, :admin_resource_access_tokens, project)
+  end
 
-    ::Feature.enabled?(:resource_access_token, project)
+  def build_project_breadcrumb_link(project)
+    project_name = simple_sanitize(project.name)
+
+    push_to_schema_breadcrumb(project_name, project_path(project))
+
+    link_to project_path(project) do
+      icon = project_icon(project, alt: project_name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
+      [icon, content_tag("span", project_name, class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
+    end
+  end
+
+  def build_namespace_breadcrumb_link(project)
+    if project.group
+      group_title(project.group, nil, nil)
+    else
+      owner = project.namespace.owner
+      name = simple_sanitize(owner.name)
+      url = user_path(owner)
+
+      push_to_schema_breadcrumb(name, url)
+      link_to(name, url)
+    end
   end
 end
 

@@ -1,4 +1,8 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference, index
 description: 'Read through the GitLab User documentation to learn how to use, configure, and customize GitLab and GitLab.com to your own needs.'
 ---
 
@@ -45,28 +49,39 @@ GitLab is a Git-based platform that integrates a great number of essential tools
 - Building, testing, and deploying with built-in [Continuous Integration](../ci/README.md).
 - Deploying personal and professional static websites with [GitLab Pages](project/pages/index.md).
 - Integrating with Docker by using [GitLab Container Registry](packages/container_registry/index.md).
-- Tracking the development lifecycle by using [GitLab Value Stream Analytics](project/cycle_analytics.md).
+- Tracking the development lifecycle by using [GitLab Value Stream Analytics](analytics/value_stream_analytics.md).
+- Provide support with [Service Desk](project/service_desk.md).
+- [Export issues as CSV](project/issues/csv_export.md).
 
 With GitLab Enterprise Edition, you can also:
 
-- Provide support with [Service Desk](project/service_desk.md).
 - Improve collaboration with:
   - [Merge Request Approvals](project/merge_requests/merge_request_approvals.md). **(STARTER)**
   - [Multiple Assignees for Issues](project/issues/multiple_assignees_for_issues.md). **(STARTER)**
   - [Multiple Issue Boards](project/issue_board.md#multiple-issue-boards).
 - Create formal relationships between issues with [Related Issues](project/issues/related_issues.md).
 - Use [Burndown Charts](project/milestones/burndown_charts.md) to track progress during a sprint or while working on a new version of their software.
-- Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Global Search](search/advanced_global_search.md) and [Advanced Syntax Search](search/advanced_search_syntax.md) for faster, more advanced code search across your entire GitLab instance.
+- Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Search](search/advanced_global_search.md) and [Advanced Search Syntax](search/advanced_search_syntax.md) for faster, more advanced code search across your entire GitLab instance.
 - [Authenticate users with Kerberos](../integration/kerberos.md).
 - [Mirror a repository](project/repository/repository_mirroring.md) from elsewhere on your local server.
-- [Export issues as CSV](project/issues/csv_export.md).
-- View your entire CI/CD pipeline involving more than one project with [Multiple-Project Pipelines](../ci/multi_project_pipeline_graphs.md).
+- View your entire CI/CD pipeline involving more than one project with [Multiple-Project Pipelines](../ci/multi_project_pipelines.md).
 - [Lock files](project/file_lock.md) to prevent conflicts.
 - View the current health and status of each CI environment running on Kubernetes with [Deploy Boards](project/deploy_boards.md).
 - Leverage continuous delivery method with [Canary Deployments](project/canary_deployments.md).
 - Scan your code for vulnerabilities and [display them in merge requests](application_security/sast/index.md).
 
 You can also [integrate](project/integrations/overview.md) GitLab with numerous third-party applications, such as Mattermost, Microsoft Teams, HipChat, Trello, Slack, Bamboo CI, Jira, and a lot more.
+
+## User types
+
+There are several types of users in GitLab:
+
+- Regular users and GitLab.com users. <!-- Note: further description TBA -->
+- [Groups](group/index.md) of users.
+- GitLab [admin area](admin_area/index.md) user.
+- [GitLab Administrator](../administration/index.md) with full access to
+  self-managed instances' features and settings.
+- [Internal users](../development/internal_users.md).
 
 ## Projects
 
@@ -82,18 +97,6 @@ it all at once, from one single project.
   reviews, live preview changes per branch, and request approvals with Merge Requests.
 - [Milestones](project/milestones/index.md): Work on multiple issues and merge
   requests towards the same target date with Milestones.
-
-## GitLab CI/CD
-
-Use built-in [GitLab CI/CD](../ci/README.md) to test, build, and deploy your applications
-directly from GitLab. No third-party integrations needed.
-
-- [GitLab Auto Deploy](../topics/autodevops/stages.md#auto-deploy): Deploy your application out-of-the-box with GitLab Auto Deploy.
-- [Review Apps](../ci/review_apps/index.md): Live-preview the changes introduced by a merge request with Review Apps.
-- [GitLab Pages](project/pages/index.md): Publish your static site directly from
-  GitLab with GitLab Pages. You can build, test, and deploy any Static Site Generator with Pages.
-- [GitLab Container Registry](packages/container_registry/index.md): Build and deploy Docker
-  images with Container Registry.
 
 ## Account
 
@@ -133,10 +136,10 @@ the best of GitLab Flavored Markdown in your threads, comments,
 issues and merge requests descriptions, and everywhere else GFM is
 supported.
 
-## Todos
+## To-Do List
 
-Never forget to reply to your collaborators. [GitLab Todos](todos.md)
-are a tool for working faster and more effectively with your team,
+Never forget to reply to your collaborators. [GitLab To-Do List](todos.md)
+is a tool for working faster and more effectively with your team,
 by listing all user or group mentions, as well as issues and merge
 requests you're assigned to.
 
@@ -148,7 +151,16 @@ requests you're assigned to.
 
 [Snippets](snippets.md) are code blocks that you want to store in GitLab, from which
 you have quick access to. You can also gather feedback on them through
-[Discussions](#Discussions).
+[Discussions](#discussions).
+
+## GitLab CI/CD
+
+Use built-in [GitLab CI/CD](../ci/README.md) to test, build, and deploy your applications
+directly from GitLab. No third-party integrations needed.
+
+## Features behind feature flags
+
+Understand what [features behind feature flags](feature_flags.md) mean.
 
 ## Keyboard shortcuts
 
@@ -174,9 +186,9 @@ Automate GitLab via [API](../api/README.md).
 
 Learn what is [Git](../topics/git/index.md) and its best practices.
 
-## Instance statistics
+## Instance-level analytics
 
-See [various statistics](instance_statistics/index.md) of your GitLab instance.
+See [various statistics](admin_area/analytics/index.md) of your GitLab instance.
 
 ## Operations Dashboard **(PREMIUM)**
 

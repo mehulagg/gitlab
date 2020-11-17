@@ -15,10 +15,10 @@ describe('Audit Event mutations', () => {
   });
 
   it.each`
-    mutation                  | payload                      | expectedState
-    ${types.SET_FILTER_VALUE} | ${{ id: '1', type: 'user' }} | ${{ filterValue: { id: '1', type: 'user' } }}
-    ${types.SET_DATE_RANGE}   | ${{ startDate, endDate }}    | ${{ startDate, endDate }}
-    ${types.SET_SORT_BY}      | ${'created_asc'}             | ${{ sortBy: 'created_asc' }}
+    mutation                  | payload                                                  | expectedState
+    ${types.SET_FILTER_VALUE} | ${[{ type: 'User', value: { data: 1, operator: '=' } }]} | ${{ filterValue: [{ type: 'User', value: { data: 1, operator: '=' } }] }}
+    ${types.SET_DATE_RANGE}   | ${{ startDate, endDate }}                                | ${{ startDate, endDate }}
+    ${types.SET_SORT_BY}      | ${'created_asc'}                                         | ${{ sortBy: 'created_asc' }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {
@@ -32,7 +32,7 @@ describe('Audit Event mutations', () => {
   describe(`${types.INITIALIZE_AUDIT_EVENTS}`, () => {
     const payload = {
       entity_id: '1',
-      entity_type: 'user',
+      entity_type: 'User',
       created_after: startDate,
       created_before: endDate,
       sort: 'created_asc',
@@ -40,7 +40,7 @@ describe('Audit Event mutations', () => {
 
     it.each`
       stateKey         | expectedState
-      ${'filterValue'} | ${{ id: payload.entity_id, type: payload.entity_type }}
+      ${'filterValue'} | ${[{ type: payload.entity_type, value: { data: payload.entity_id, operator: '=' } }]}
       ${'startDate'}   | ${payload.created_after}
       ${'endDate'}     | ${payload.created_before}
       ${'sortBy'}      | ${payload.sort}

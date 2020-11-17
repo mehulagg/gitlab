@@ -22,7 +22,7 @@ module Mutations
       argument :confidential,
                 GraphQL::BOOLEAN_TYPE,
                 required: false,
-                description: 'Indicates if the epic is confidential. Will be ignored if `confidential_epics` feature flag is disabled'
+                description: 'Indicates if the epic is confidential'
 
       argument :start_date_fixed,
                 GraphQL::STRING_TYPE,

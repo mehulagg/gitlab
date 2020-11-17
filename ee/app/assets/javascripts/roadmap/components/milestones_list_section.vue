@@ -1,12 +1,31 @@
 <script>
 import { mapState, mapActions } from 'vuex';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import eventHub from '../event_hub';
+import { __, n__ } from '~/locale';
 import { EPIC_DETAILS_CELL_WIDTH, EPIC_ITEM_HEIGHT, TIMELINE_CELL_MIN_WIDTH } from '../constants';
 import MilestoneTimeline from './milestone_timeline.vue';
+
+const EXPAND_BUTTON_EXPANDED = {
+  name: 'chevron-down',
+  iconLabel: __('Collapse milestones'),
+  tooltip: __('Collapse'),
+};
+
+const EXPAND_BUTTON_COLLAPSED = {
+  name: 'chevron-right',
+  iconLabel: __('Expand milestones'),
+  tooltip: __('Expand'),
+};
 
 export default {
   components: {
     MilestoneTimeline,
+    GlButton,
+    GlIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     presetType: {
@@ -31,6 +50,7 @@ export default {
       offsetLeft: 0,
       showBottomShadow: false,
       roadmapShellEl: null,
+      milestonesExpanded: true,
     };
   },
   computed: {
@@ -47,6 +67,17 @@ export default {
       return {
         left: `${this.offsetLeft}px`,
       };
+    },
+    expandButton() {
+      return this.milestonesExpanded ? EXPAND_BUTTON_EXPANDED : EXPAND_BUTTON_COLLAPSED;
+    },
+    milestonesCount() {
+      return this.milestones.length;
+    },
+    milestonesCountText() {
+      return Number.isInteger(this.milestonesCount)
+        ? n__(`%d milestone`, `%d milestones`, this.milestonesCount)
+        : '';
     },
   },
   mounted() {
@@ -76,23 +107,55 @@ export default {
     handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
       this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
     },
+    toggleMilestonesExpanded() {
+      this.milestonesExpanded = !this.milestonesExpanded;
+    },
   },
 };
 </script>
 
 <template>
-  <div :style="sectionContainerStyles" class="milestones-list-section d-table">
+  <div :style="sectionContainerStyles" class="milestones-list-section gl-display-table clearfix">
     <div
-      class="milestones-list-title d-table-cell bold border-bottom align-top position-sticky pt-2 pl-3"
+      class="milestones-list-title gl-display-table-cell border-bottom gl-vertical-align-top position-sticky gl-px-3 gl-pt-2"
     >
-      {{ __('Milestones') }}
+      <div class="gl-display-flex gl-align-items-center">
+        <span
+          v-gl-tooltip.hover.topright="{
+            title: expandButton.tooltip,
+            offset: 15,
+            boundary: 'viewport',
+          }"
+          data-testid="expandButton"
+        >
+          <gl-button
+            :aria-label="expandButton.iconLabel"
+            variant="link"
+            @click="toggleMilestonesExpanded"
+          >
+            <gl-icon :name="expandButton.name" class="text-secondary" aria-hidden="true" />
+          </gl-button>
+        </span>
+        <div class="gl-overflow-hidden gl-flex-grow-1 gl-mx-3 gl-font-weight-bold">
+          {{ __('Milestones') }}
+        </div>
+        <div
+          v-gl-tooltip="milestonesCountText"
+          class="gl-display-flex gl-align-items-center gl-justify-content-center text-secondary gl-white-space-nowrap"
+          data-testid="count"
+        >
+          <gl-icon name="clock" class="gl-mr-2" aria-hidden="true" />
+          <span :aria-label="milestonesCountText">{{ milestonesCount }}</span>
+        </div>
+      </div>
     </div>
-    <div class="milestones-list-items d-table-cell">
+    <div class="milestones-list-items gl-display-table-cell">
       <milestone-timeline
         :preset-type="presetType"
         :timeframe="timeframe"
         :milestones="milestones"
         :current-group-id="currentGroupId"
+        :milestones-expanded="milestonesExpanded"
       />
     </div>
     <div v-show="showBottomShadow" :style="shadowCellStyles" class="scroll-bottom-shadow"></div>

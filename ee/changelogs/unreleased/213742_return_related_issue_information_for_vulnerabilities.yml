@@ -1,5 +1,0 @@
----
-title: Introduce `issueLinks` field for VulnerabilityType on GraphQL API
-merge_request: 33173
-author:
-type: added

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BitbucketImport::Importer do
+RSpec.describe Gitlab::BitbucketImport::Importer do
   include ImportSpecHelper
 
   before do
@@ -87,6 +87,7 @@ describe Gitlab::BitbucketImport::Importer do
       values: sample_issues_statuses
     }
   end
+
   let(:counter) { double('counter', increment: true) }
 
   subject { described_class.new(project) }
@@ -109,6 +110,7 @@ describe Gitlab::BitbucketImport::Importer do
         created_at: Time.now,
         updated_at: Time.now)
     end
+
     let(:author_line) { "*Created by: someuser*\n\n" }
 
     before do
@@ -226,8 +228,8 @@ describe Gitlab::BitbucketImport::Importer do
 
       it 'counts imported pull requests' do
         expect(Gitlab::Metrics).to receive(:counter).with(
-          :bitbucket_importer_imported_pull_requests,
-          'The number of imported Bitbucket pull requests'
+          :bitbucket_importer_imported_merge_requests_total,
+          'The number of imported merge (pull) requests'
         )
 
         expect(counter).to receive(:increment)
@@ -310,7 +312,7 @@ describe Gitlab::BitbucketImport::Importer do
         # attributes later.
         existing_label.reload
 
-        Timecop.freeze(Time.now + 1.minute) do
+        travel_to(Time.now + 1.minute) do
           importer.execute
 
           label_after_import = project.labels.find(existing_label.id)
@@ -369,8 +371,8 @@ describe Gitlab::BitbucketImport::Importer do
 
       it 'counts imported issues' do
         expect(Gitlab::Metrics).to receive(:counter).with(
-          :bitbucket_importer_imported_issues,
-          'The number of imported Bitbucket issues'
+          :bitbucket_importer_imported_issues_total,
+          'The number of imported issues'
         )
 
         expect(counter).to receive(:increment)
@@ -389,23 +391,27 @@ describe Gitlab::BitbucketImport::Importer do
         allow(subject).to receive(:import_issues)
         allow(subject).to receive(:import_pull_requests)
 
-        allow(Gitlab::Metrics).to receive(:counter) { counter }
-        allow(Gitlab::Metrics).to receive(:histogram) { histogram }
+        allow(Gitlab::Metrics).to receive(:counter).and_return(counter)
+        allow(Gitlab::Metrics).to receive(:histogram).and_return(histogram)
+        allow(histogram).to receive(:observe)
+        allow(counter).to receive(:increment)
       end
 
       it 'counts and measures duration of imported projects' do
         expect(Gitlab::Metrics).to receive(:counter).with(
-          :bitbucket_importer_imported_projects,
-          'The number of imported Bitbucket projects'
+          :bitbucket_importer_imported_projects_total,
+          'The number of imported projects'
         )
 
         expect(Gitlab::Metrics).to receive(:histogram).with(
           :bitbucket_importer_total_duration_seconds,
-          'Total time spent importing Bitbucket projects, in seconds'
+          'Total time spent importing projects, in seconds',
+          {},
+          Gitlab::Import::Metrics::IMPORT_DURATION_BUCKETS
         )
 
         expect(counter).to receive(:increment)
-        expect(histogram).to receive(:observe).with({ importer: described_class::IMPORTER }, anything)
+        expect(histogram).to receive(:observe).with({ importer: :bitbucket_importer }, anything)
 
         subject.execute
       end

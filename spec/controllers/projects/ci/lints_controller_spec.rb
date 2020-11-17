@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe Projects::Ci::LintsController do
   include StubRequests
 
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
 
   before do
     sign_in(user)
@@ -20,7 +20,7 @@ RSpec.describe Projects::Ci::LintsController do
         get :show, params: { namespace_id: project.namespace, project_id: project }
       end
 
-      it { expect(response).to be_successful }
+      it { expect(response).to have_gitlab_http_status(:ok) }
 
       it 'renders show page' do
         expect(response).to render_template :show
@@ -45,7 +45,11 @@ RSpec.describe Projects::Ci::LintsController do
   end
 
   describe 'POST #create' do
+    subject { post :create, params: params }
+
+    let(:params) { { namespace_id: project.namespace, project_id: project, content: content, format: :json } }
     let(:remote_file_path) { 'https://gitlab.com/gitlab-org/gitlab-foss/blob/1234/.gitlab-ci-1.yml' }
+    let(:parsed_body) { Gitlab::Json.parse(response.body) }
 
     let(:remote_file_content) do
       <<~HEREDOC
@@ -68,22 +72,57 @@ RSpec.describe Projects::Ci::LintsController do
       HEREDOC
     end
 
-    context 'with a valid gitlab-ci.yml' do
+    shared_examples 'returns a successful validation' do
       before do
-        stub_full_request(remote_file_path).to_return(body: remote_file_content)
-        project.add_developer(user)
-
-        post :create, params: { namespace_id: project.namespace, project_id: project, content: content }
+        subject
       end
 
-      it { expect(response).to be_successful }
+      it 'returns successfully' do
+        expect(response).to have_gitlab_http_status :ok
+      end
 
-      it 'render show page' do
-        expect(response).to render_template :show
+      it 'renders json' do
+        expect(response.content_type).to eq 'application/json'
+        expect(parsed_body).to include('errors', 'warnings', 'jobs', 'valid')
+        expect(parsed_body).to match_schema('entities/lint_result_entity')
       end
 
       it 'retrieves project' do
         expect(assigns(:project)).to eq(project)
+      end
+    end
+
+    context 'with a valid gitlab-ci.yml' do
+      before do
+        stub_full_request(remote_file_path).to_return(body: remote_file_content)
+        project.add_developer(user)
+      end
+
+      it_behaves_like 'returns a successful validation'
+
+      context 'using legacy validation (YamlProcessor)' do
+        it_behaves_like 'returns a successful validation'
+
+        it 'runs validations through YamlProcessor' do
+          expect(Gitlab::Ci::YamlProcessor).to receive(:new).and_call_original
+
+          subject
+        end
+      end
+
+      context 'using dry_run mode' do
+        subject { post :create, params: params.merge(dry_run: 'true') }
+
+        it_behaves_like 'returns a successful validation'
+
+        it 'runs validations through Ci::CreatePipelineService' do
+          expect(Ci::CreatePipelineService)
+            .to receive(:new)
+            .with(project, user, ref: 'master')
+            .and_call_original
+
+          subject
+        end
       end
     end
 
@@ -98,12 +137,26 @@ RSpec.describe Projects::Ci::LintsController do
 
       before do
         project.add_developer(user)
-
-        post :create, params: { namespace_id: project.namespace, project_id: project, content: content }
+        subject
       end
 
-      it 'assigns errors' do
-        expect(assigns[:errors]).to eq(['root config contains unknown keys: rubocop'])
+      it_behaves_like 'returns a successful validation'
+
+      it 'assigns result with errors' do
+        expect(parsed_body['errors']).to match_array([
+          'jobs rubocop config should implement a script: or a trigger: keyword',
+          'jobs config should contain at least one visible job'
+        ])
+      end
+
+      context 'with dry_run mode' do
+        subject { post :create, params: params.merge(dry_run: 'true') }
+
+        it 'assigns result with errors' do
+          expect(parsed_body['errors']).to eq(['jobs rubocop config should implement a script: or a trigger: keyword'])
+        end
+
+        it_behaves_like 'returns a successful validation'
       end
     end
 

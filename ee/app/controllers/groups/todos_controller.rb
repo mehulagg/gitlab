@@ -6,6 +6,8 @@ class Groups::TodosController < Groups::ApplicationController
 
   before_action :authenticate_user!, only: [:create]
 
+  feature_category :epics
+
   private
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -13,7 +15,7 @@ class Groups::TodosController < Groups::ApplicationController
     strong_memoize(:epic) do
       next if params[:issuable_type] != 'epic'
 
-      @group.epics.find_by(id: params[:issuable_id])
+      EpicsFinder.new(current_user, group_id: @group.id).find(params[:issuable_id])
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord

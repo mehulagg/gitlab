@@ -2,11 +2,11 @@ import { slugify } from '~/lib/utils/text_utility';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { SUPPORTED_FORMATS } from '~/lib/utils/unit_format';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { parseTemplatingVariables } from './variable_mapping';
-import { NOT_IN_DB_PREFIX, linkTypes } from '../constants';
+import { mergeURLVariables, parseTemplatingVariables } from './variable_mapping';
 import { DATETIME_RANGE_TYPES } from '~/lib/utils/constants';
 import { timeRangeToParams, getRangeType } from '~/lib/utils/datetime_range';
 import { isSafeURL, mergeUrlParams } from '~/lib/utils/url_utility';
+import { NOT_IN_DB_PREFIX, linkTypes, OUT_OF_THE_BOX_DASHBOARDS_PATH_PREFIX } from '../constants';
 
 export const gqClient = createGqClient(
   {},
@@ -165,7 +165,7 @@ const mapLinksToViewModel = ({ url = null, title = '', type } = {}) => {
  * @param {Object} panel - Metrics panel
  * @returns {Object}
  */
-const mapPanelToViewModel = ({
+export const mapPanelToViewModel = ({
   id = null,
   title = '',
   type,
@@ -173,9 +173,14 @@ const mapPanelToViewModel = ({
   x_label,
   y_label,
   y_axis = {},
+  field,
   metrics = [],
   links = [],
+  min_value,
   max_value,
+  split,
+  thresholds,
+  format,
 }) => {
   // Both `x_axis.name` and `x_label` are supported for now
   // https://gitlab.com/gitlab-org/gitlab/issues/210521
@@ -193,7 +198,12 @@ const mapPanelToViewModel = ({
     y_label: yAxis.name, // Changing y_label to yLabel is pending https://gitlab.com/gitlab-org/gitlab/issues/207198
     yAxis,
     xAxis,
+    field,
+    minValue: min_value,
     maxValue: max_value,
+    split,
+    thresholds,
+    format,
     links: links.map(mapLinksToViewModel),
     metrics: mapToMetricsViewModel(metrics),
   };
@@ -289,7 +299,7 @@ export const mapToDashboardViewModel = ({
 }) => {
   return {
     dashboard,
-    variables: parseTemplatingVariables(templating),
+    variables: mergeURLVariables(parseTemplatingVariables(templating.variables)),
     links: links.map(mapLinksToViewModel),
     panelGroups: panel_groups.map(mapToPanelGroupViewModel),
   };
@@ -352,10 +362,15 @@ const normalizeStringResult = result => [
  * [
  *  {
  *    "metric": { "<label_name>": "<label_value>", ... },
- *    "value": [ <unix_time>, "<sample_value>" ]
+ *    "value": [ <unix_time>, "<sample_value>" ],
+ *    "values": [ [ <unix_time>, "<sample_value>" ] ]
  *  },
  *  ...
  * ]
+ *
+ * `metric` - Key-value pairs object representing metric measured
+ * `value` - The vector result
+ * `values` - An array with a single value representing the result
  *
  * This method also adds the matrix version of the vector
  * by introducing a `values` array with a single element. This
@@ -379,16 +394,28 @@ const normalizeVectorResult = result =>
  *
  * {
  *   "metric": { "<label_name>": "<label_value>", ... },
+ *   "value": [ <unix_time>, "<sample_value>" ],
  *   "values": [ [ <unix_time>, "<sample_value>" ], ... ]
  * },
+ *
+ * `metric` - Key-value pairs object representing metric measured
+ * `value` - The last (more recent) result
+ * `values` - A range of results for the metric
  *
  * See https://prometheus.io/docs/prometheus/latest/querying/api/#range-vectors
  *
  * @param {array} result
- * @returns {array}
+ * @returns {object} Normalized result.
  */
 const normalizeResultMatrix = result =>
-  result.map(({ metric, values }) => ({ metric, values: values.map(mapScalarValue) }));
+  result.map(({ metric, values }) => {
+    const mappedValues = values.map(mapScalarValue);
+    return {
+      metric,
+      value: mappedValues[mappedValues.length - 1],
+      values: mappedValues,
+    };
+  });
 
 /**
  * Parse response data from a Prometheus Query that comes
@@ -436,7 +463,35 @@ export const normalizeQueryResponseData = data => {
  *
  * This is currently only used by getters/getCustomVariablesParams
  *
- * @param {String} key Variable key that needs to be prefixed
+ * @param {String} name Variable key that needs to be prefixed
  * @returns {String}
  */
-export const addPrefixToCustomVariableParams = key => `variables[${key}]`;
+export const addPrefixToCustomVariableParams = name => `variables[${name}]`;
+
+/**
+ * Normalize custom dashboard paths. This method helps support
+ * metrics dashboard to work with custom dashboard file names instead
+ * of the entire path.
+ *
+ * If dashboard is empty, it is the overview dashboard.
+ * If dashboard is set, it usually is a custom dashboard unless
+ * explicitly it is set to overview dashboard path.
+ *
+ * @param {String} dashboard dashboard path
+ * @param {String} dashboardPrefix custom dashboard directory prefix
+ * @returns {String} normalized dashboard path
+ */
+export const normalizeCustomDashboardPath = (dashboard, dashboardPrefix = '') => {
+  const currDashboard = dashboard || '';
+  let dashboardPath = `${dashboardPrefix}/${currDashboard}`;
+
+  if (!currDashboard) {
+    dashboardPath = '';
+  } else if (
+    currDashboard.startsWith(dashboardPrefix) ||
+    currDashboard.startsWith(OUT_OF_THE_BOX_DASHBOARDS_PATH_PREFIX)
+  ) {
+    dashboardPath = currDashboard;
+  }
+  return dashboardPath;
+};

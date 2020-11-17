@@ -3,20 +3,26 @@ import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
 import '~/behaviors/markdown/render_gfm';
 import { Range } from 'monaco-editor';
+import waitForPromises from 'helpers/wait_for_promises';
+import waitUsingRealTimer from 'helpers/wait_using_real_timer';
 import axios from '~/lib/utils/axios_utils';
+import service from '~/ide/services';
 import { createStoreOptions } from '~/ide/stores';
 import RepoEditor from '~/ide/components/repo_editor.vue';
 import Editor from '~/ide/lib/editor';
-import { leftSidebarViews, FILE_VIEW_MODE_EDITOR, FILE_VIEW_MODE_PREVIEW } from '~/ide/constants';
+import {
+  leftSidebarViews,
+  FILE_VIEW_MODE_EDITOR,
+  FILE_VIEW_MODE_PREVIEW,
+  viewerTypes,
+} from '~/ide/constants';
 import { createComponentWithStore } from '../../helpers/vue_mount_component_helper';
-import waitForPromises from 'helpers/wait_for_promises';
 import { file } from '../helpers';
 import { exampleConfigs, exampleFiles } from '../lib/editorconfig/mock_data';
 
 describe('RepoEditor', () => {
   let vm;
   let store;
-  let mockActions;
 
   const waitForEditorSetup = () =>
     new Promise(resolve => {
@@ -30,12 +36,16 @@ describe('RepoEditor', () => {
     vm = createComponentWithStore(Vue.extend(RepoEditor), store, {
       file: store.state.openFiles[0],
     });
+
+    jest.spyOn(vm, 'getFileData').mockResolvedValue();
+    jest.spyOn(vm, 'getRawFileData').mockResolvedValue();
+
     vm.$mount();
   };
 
   const createOpenFile = path => {
     const origFile = store.state.openFiles[0];
-    const newFile = { ...origFile, path, key: path };
+    const newFile = { ...origFile, path, key: path, name: 'myfile.txt', content: 'hello world' };
 
     store.state.entries[path] = newFile;
 
@@ -43,21 +53,12 @@ describe('RepoEditor', () => {
   };
 
   beforeEach(() => {
-    mockActions = {
-      getFileData: jest.fn().mockResolvedValue(),
-      getRawFileData: jest.fn().mockResolvedValue(),
-    };
-
     const f = {
-      ...file(),
-      viewMode: FILE_VIEW_MODE_EDITOR,
+      ...file('file.txt'),
+      content: 'hello world',
     };
 
     const storeOptions = createStoreOptions();
-    storeOptions.actions = {
-      ...storeOptions.actions,
-      ...mockActions,
-    };
     store = new Vuex.Store(storeOptions);
 
     f.active = true;
@@ -90,6 +91,8 @@ describe('RepoEditor', () => {
   });
 
   const findEditor = () => vm.$el.querySelector('.multi-file-editor-holder');
+  const changeViewMode = viewMode =>
+    store.dispatch('editor/updateFileEditor', { path: vm.file.path, data: { viewMode } });
 
   describe('default', () => {
     beforeEach(() => {
@@ -141,6 +144,7 @@ describe('RepoEditor', () => {
           ...vm.file,
           projectId: 'namespace/project',
           path: 'sample.md',
+          name: 'sample.md',
           content: 'testing 123',
         });
 
@@ -199,7 +203,8 @@ describe('RepoEditor', () => {
 
     describe('when open file is binary and not raw', () => {
       beforeEach(done => {
-        vm.file.binary = true;
+        vm.file.name = 'file.dat';
+        vm.file.content = '🐱'; // non-ascii binary content
 
         vm.$nextTick(done);
       });
@@ -405,7 +410,10 @@ describe('RepoEditor', () => {
     describe('when files view mode is preview', () => {
       beforeEach(done => {
         jest.spyOn(vm.editor, 'updateDimensions').mockImplementation();
-        vm.file.viewMode = FILE_VIEW_MODE_PREVIEW;
+        changeViewMode(FILE_VIEW_MODE_PREVIEW);
+        vm.file.name = 'myfile.md';
+        vm.file.content = 'hello world';
+
         vm.$nextTick(done);
       });
 
@@ -416,7 +424,7 @@ describe('RepoEditor', () => {
 
       describe('when file view mode changes to editor', () => {
         it('should update dimensions', () => {
-          vm.file.viewMode = FILE_VIEW_MODE_EDITOR;
+          changeViewMode(FILE_VIEW_MODE_EDITOR);
 
           return vm.$nextTick().then(() => {
             expect(vm.editor.updateDimensions).toHaveBeenCalled();
@@ -438,7 +446,7 @@ describe('RepoEditor', () => {
         vm.initEditor();
         vm.$nextTick()
           .then(() => {
-            expect(mockActions.getFileData).not.toHaveBeenCalled();
+            expect(vm.getFileData).not.toHaveBeenCalled();
           })
           .then(done)
           .catch(done.fail);
@@ -449,10 +457,11 @@ describe('RepoEditor', () => {
         vm.file.raw = '';
 
         vm.initEditor();
+
         vm.$nextTick()
           .then(() => {
-            expect(mockActions.getFileData).toHaveBeenCalled();
-            expect(mockActions.getRawFileData).toHaveBeenCalled();
+            expect(vm.getFileData).toHaveBeenCalled();
+            expect(vm.getRawFileData).toHaveBeenCalled();
           })
           .then(done)
           .catch(done.fail);
@@ -464,8 +473,8 @@ describe('RepoEditor', () => {
         vm.initEditor();
         vm.$nextTick()
           .then(() => {
-            expect(mockActions.getFileData).not.toHaveBeenCalled();
-            expect(mockActions.getRawFileData).not.toHaveBeenCalled();
+            expect(vm.getFileData).not.toHaveBeenCalled();
+            expect(vm.getRawFileData).not.toHaveBeenCalled();
             expect(vm.editor.createInstance).not.toHaveBeenCalled();
           })
           .then(done)
@@ -526,6 +535,63 @@ describe('RepoEditor', () => {
       });
     });
 
+    describe('populates editor with the fetched content', () => {
+      beforeEach(() => {
+        vm.getRawFileData.mockRestore();
+      });
+
+      const createRemoteFile = name => ({
+        ...file(name),
+        tmpFile: false,
+      });
+
+      it('after switching viewer from edit to diff', async () => {
+        jest.spyOn(service, 'getRawFileData').mockImplementation(async () => {
+          expect(vm.file.loading).toBe(true);
+
+          // switching from edit to diff mode usually triggers editor initialization
+          store.state.viewer = viewerTypes.diff;
+
+          // we delay returning the file to make sure editor doesn't initialize before we fetch file content
+          await waitUsingRealTimer(30);
+          return 'rawFileData123\n';
+        });
+
+        const f = createRemoteFile('newFile');
+        Vue.set(store.state.entries, f.path, f);
+
+        vm.file = f;
+
+        await waitForEditorSetup();
+        expect(vm.model.getModel().getValue()).toBe('rawFileData123\n');
+      });
+
+      it('after opening multiple files at the same time', async () => {
+        const fileA = createRemoteFile('fileA');
+        const fileB = createRemoteFile('fileB');
+        Vue.set(store.state.entries, fileA.path, fileA);
+        Vue.set(store.state.entries, fileB.path, fileB);
+
+        jest
+          .spyOn(service, 'getRawFileData')
+          .mockImplementationOnce(async () => {
+            // opening fileB while the content of fileA is still being fetched
+            vm.file = fileB;
+            return 'fileA-rawContent\n';
+          })
+          .mockImplementationOnce(async () => {
+            // we delay returning fileB content to make sure the editor doesn't initialize prematurely
+            await waitUsingRealTimer(30);
+            return 'fileB-rawContent\n';
+          });
+
+        vm.file = fileA;
+
+        await waitForEditorSetup();
+        expect(vm.model.getModel().getValue()).toBe('fileB-rawContent\n');
+      });
+    });
+
     describe('onPaste', () => {
       const setFileName = name => {
         Vue.set(vm, 'file', {
@@ -557,6 +623,11 @@ describe('RepoEditor', () => {
           });
         });
 
+      // Pasting an image does a lot of things like using the FileReader API,
+      // so, waitForPromises isn't very reliable (and causes a flaky spec)
+      // Read more about state.watch: https://vuex.vuejs.org/api/#watch
+      const waitForFileContentChange = () => watchState(s => s.entries['foo/bar.md'].content);
+
       beforeEach(() => {
         setFileName('bar.md');
 
@@ -573,18 +644,19 @@ describe('RepoEditor', () => {
           // set cursor to line 2, column 1
           vm.editor.instance.setSelection(new Range(2, 1, 2, 1));
           vm.editor.instance.focus();
+
+          jest.spyOn(vm.editor.instance, 'hasTextFocus').mockReturnValue(true);
         });
       });
 
       it('adds an image entry to the same folder for a pasted image in a markdown file', () => {
         pasteImage();
 
-        return waitForPromises().then(() => {
+        return waitForFileContentChange().then(() => {
           expect(vm.$store.state.entries['foo/foo.png']).toMatchObject({
             path: 'foo/foo.png',
             type: 'blob',
             content: 'Zm9v',
-            binary: true,
             rawPath: 'data:image/png;base64,Zm9v',
           });
         });
@@ -593,10 +665,7 @@ describe('RepoEditor', () => {
       it("adds a markdown image tag to the file's contents", () => {
         pasteImage();
 
-        // Pasting an image does a lot of things like using the FileReader API,
-        // so, waitForPromises isn't very reliable (and causes a flaky spec)
-        // Read more about state.watch: https://vuex.vuejs.org/api/#watch
-        return watchState(s => s.entries['foo/bar.md'].content).then(() => {
+        return waitForFileContentChange().then(() => {
           expect(vm.file.content).toBe('hello world\n![foo.png](./foo.png)');
         });
       });
@@ -629,8 +698,8 @@ describe('RepoEditor', () => {
         return waitForEditorSetup().then(() => {
           expect(vm.rules).toEqual(monacoRules);
           expect(vm.model.options).toMatchObject(monacoRules);
-          expect(mockActions.getFileData).not.toHaveBeenCalled();
-          expect(mockActions.getRawFileData).not.toHaveBeenCalled();
+          expect(vm.getFileData).not.toHaveBeenCalled();
+          expect(vm.getRawFileData).not.toHaveBeenCalled();
         });
       },
     );
@@ -646,13 +715,13 @@ describe('RepoEditor', () => {
       createComponent();
 
       return waitForEditorSetup().then(() => {
-        expect(mockActions.getFileData.mock.calls.map(([, args]) => args)).toEqual([
+        expect(vm.getFileData.mock.calls.map(([args]) => args)).toEqual([
           { makeFileActive: false, path: 'foo/bar/baz/.editorconfig' },
           { makeFileActive: false, path: 'foo/bar/.editorconfig' },
           { makeFileActive: false, path: 'foo/.editorconfig' },
           { makeFileActive: false, path: '.editorconfig' },
         ]);
-        expect(mockActions.getRawFileData.mock.calls.map(([, args]) => args)).toEqual([
+        expect(vm.getRawFileData.mock.calls.map(([args]) => args)).toEqual([
           { path: 'foo/bar/baz/.editorconfig' },
           { path: 'foo/bar/.editorconfig' },
           { path: 'foo/.editorconfig' },

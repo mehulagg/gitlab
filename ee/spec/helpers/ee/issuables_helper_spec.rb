@@ -13,8 +13,9 @@ RSpec.describe IssuablesHelper do
     end
 
     context 'for an epic' do
+      let_it_be(:epic) { create(:epic, author: user, description: 'epic text', confidential: true) }
+
       it 'returns the correct data' do
-        epic = create(:epic, author: user, description: 'epic text')
         @group = epic.group
 
         expected_data = {
@@ -26,7 +27,6 @@ RSpec.describe IssuablesHelper do
           canDestroy: true,
           canAdmin: true,
           issuableRef: "&#{epic.iid}",
-          issuableStatus: "opened",
           markdownPreviewPath: "/groups/#{@group.full_path}/preview_markdown",
           markdownDocsPath: '/help/user/markdown',
           issuableTemplateNamesPath: '',
@@ -35,10 +35,11 @@ RSpec.describe IssuablesHelper do
           groupPath: @group.path,
           initialTitleHtml: epic.title,
           initialTitleText: epic.title,
-          initialDescriptionHtml: '<p dir="auto">epic text</p>',
+          initialDescriptionHtml: '<p data-sourcepos="1:1-1:9" dir="auto">epic text</p>',
           initialDescriptionText: 'epic text',
           initialTaskStatus: '0 of 0 tasks completed',
-          projectsEndpoint: "/api/v4/groups/#{@group.id}/projects"
+          projectsEndpoint: "/api/v4/groups/#{@group.id}/projects",
+          confidential: epic.confidential
         }
         expect(helper.issuable_initial_data(epic)).to eq(expected_data)
       end
@@ -61,7 +62,7 @@ RSpec.describe IssuablesHelper do
         it 'returns the correct data that includes publishedIncidentUrl' do
           @project = issue.project
 
-          expect(StatusPage::Storage).to receive(:details_url).with(issue).and_return('http://status.com')
+          expect(Gitlab::StatusPage::Storage).to receive(:details_url).with(issue).and_return('http://status.com')
           expect(helper.issuable_initial_data(issue)).to include(
             publishedIncidentUrl: 'http://status.com'
           )

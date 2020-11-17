@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class GroupMilestones < Grape::API
+  class GroupMilestones < ::API::Base
     include MilestoneResponses
     include PaginationParams
 
-    before do
-      authenticate!
-    end
+    before { authenticate! }
+
+    feature_category :issue_tracking
 
     params do
       requires :id, type: String, desc: 'The ID of a group'

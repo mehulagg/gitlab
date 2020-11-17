@@ -1,5 +1,0 @@
----
-title: Fix Elasticsearch query error for ES 7.7
-merge_request: 32813
-author:
-type: fixed

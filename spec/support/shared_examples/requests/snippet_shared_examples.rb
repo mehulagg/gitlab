@@ -2,6 +2,10 @@
 
 RSpec.shared_examples 'update with repository actions' do
   context 'when the repository exists' do
+    before do
+      allow_any_instance_of(Snippet).to receive(:multiple_files?).and_return(false)
+    end
+
     it 'commits the changes to the repository' do
       existing_blob = snippet.blobs.first
       new_file_name = existing_blob.path + '_new'
@@ -74,18 +78,14 @@ RSpec.shared_examples 'update with repository actions' do
   end
 end
 
-RSpec.shared_examples 'snippet response without repository URLs' do
-  it 'skip inclusion of repository URLs' do
-    expect(json_response).not_to have_key('ssh_url_to_repo')
-    expect(json_response).not_to have_key('http_url_to_repo')
-  end
-end
-
 RSpec.shared_examples 'snippet blob content' do
   it 'returns content from repository' do
+    expect(Gitlab::Workhorse).to receive(:send_git_blob).and_call_original
+
     subject
 
-    expect(response.body).to eq(snippet.blobs.first.data)
+    expect(response.header[Gitlab::Workhorse::DETECT_HEADER]).to eq 'true'
+    expect(response.header[Gitlab::Workhorse::SEND_DATA_HEADER]).to start_with('git-blob:')
   end
 
   context 'when snippet repository is empty' do
@@ -96,5 +96,82 @@ RSpec.shared_examples 'snippet blob content' do
 
       expect(response.body).to eq(snippet.content)
     end
+  end
+end
+
+RSpec.shared_examples 'snippet creation with files parameter' do
+  using RSpec::Parameterized::TableSyntax
+
+  where(:path, :content, :status, :error) do
+    '.gitattributes'      | 'file content' | :created     | nil
+    'valid/path/file.rb'  | 'file content' | :created     | nil
+
+    '.gitattributes'      | nil            | :bad_request | 'files[0][content] is empty'
+    '.gitattributes'      | ''             | :bad_request | 'files[0][content] is empty'
+
+    ''                    | 'file content' | :bad_request | 'files[0][file_path] is empty'
+    nil                   | 'file content' | :bad_request | 'files[0][file_path] should be a valid file path, files[0][file_path] is empty'
+    '../../etc/passwd'    | 'file content' | :bad_request | 'files[0][file_path] should be a valid file path'
+  end
+
+  with_them do
+    let(:file_path)    { path }
+    let(:file_content) { content }
+
+    before do
+      subject
+    end
+
+    it 'responds correctly' do
+      expect(response).to have_gitlab_http_status(status)
+      expect(json_response['error']).to eq(error)
+    end
+  end
+
+  it 'returns 400 if both files and content are provided' do
+    params[:file_name] = 'foo.rb'
+    params[:content] = 'bar'
+
+    subject
+
+    expect(response).to have_gitlab_http_status(:bad_request)
+    expect(json_response['error']).to eq 'files, content are mutually exclusive'
+  end
+
+  it 'returns 400 when neither files or content are provided' do
+    params.delete(:files)
+
+    subject
+
+    expect(response).to have_gitlab_http_status(:bad_request)
+    expect(json_response['error']).to eq 'files, content are missing, exactly one parameter must be provided'
+  end
+end
+
+RSpec.shared_examples 'snippet creation without files parameter' do
+  let(:file_params) { { file_name: 'testing.rb', content: 'snippet content' } }
+
+  it 'allows file_name and content parameters' do
+    subject
+
+    expect(response).to have_gitlab_http_status(:created)
+  end
+
+  it 'returns 400 if file_name and content are not both provided' do
+    params.delete(:file_name)
+
+    subject
+
+    expect(response).to have_gitlab_http_status(:bad_request)
+    expect(json_response['error']).to eq 'file_name is missing'
+  end
+
+  it 'returns 400 if content is blank' do
+    params[:content] = ''
+
+    subject
+
+    expect(response).to have_gitlab_http_status(:bad_request)
+    expect(json_response['error']).to eq 'content is empty'
   end
 end

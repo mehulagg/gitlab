@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BitbucketServer::Representation::Comment do
+RSpec.describe BitbucketServer::Representation::Comment do
   let(:activities) { Gitlab::Json.parse(fixture_file('importers/bitbucket_server/activities.json'))['values'] }
   let(:comment) { activities.first }
 
@@ -13,7 +13,30 @@ describe BitbucketServer::Representation::Comment do
   end
 
   describe '#author_username' do
-    it { expect(subject.author_username).to eq('root' ) }
+    it 'returns username' do
+      expect(subject.author_username).to eq('username')
+    end
+
+    context 'when username is absent' do
+      before do
+        comment['comment']['author'].delete('username')
+      end
+
+      it 'returns slug' do
+        expect(subject.author_username).to eq('slug')
+      end
+    end
+
+    context 'when slug and username are absent' do
+      before do
+        comment['comment']['author'].delete('username')
+        comment['comment']['author'].delete('slug')
+      end
+
+      it 'returns displayName' do
+        expect(subject.author_username).to eq('root')
+      end
+    end
   end
 
   describe '#author_email' do

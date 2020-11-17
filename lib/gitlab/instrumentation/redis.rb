@@ -5,9 +5,9 @@ module Gitlab
     # Aggregates Redis measurements from different request storage sources.
     class Redis
       ActionCable = Class.new(RedisBase)
-      Cache = Class.new(RedisBase)
+      Cache = Class.new(RedisBase).enable_redis_cluster_validation
       Queues = Class.new(RedisBase)
-      SharedState = Class.new(RedisBase)
+      SharedState = Class.new(RedisBase).enable_redis_cluster_validation
 
       STORAGES = [ActionCable, Cache, Queues, SharedState].freeze
 
@@ -37,7 +37,7 @@ module Gitlab
 
         %i[get_request_count query_time read_bytes write_bytes].each do |method|
           define_method method do
-            STORAGES.sum(&method) # rubocop:disable CodeReuse/ActiveRecord
+            STORAGES.sum(&method)
           end
         end
       end

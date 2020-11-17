@@ -1,6 +1,6 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlLink, GlIntersperse, GlModal, GlDeprecatedButton, GlModalDirective } from '@gitlab/ui';
+import { GlLink, GlIntersperse, GlModal, GlButton, GlModalDirective } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 
 const MODAL_ID_PREFIX = 'license-component-link-modal-';
@@ -10,7 +10,7 @@ export default {
   components: {
     GlIntersperse,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
     GlModal,
   },
   directives: {
@@ -52,6 +52,11 @@ export default {
       return s__('Modal|Close');
     },
   },
+  methods: {
+    getComponentLabel({ name, version }) {
+      return version ? `${name} (${version})` : name;
+    },
+  },
 };
 </script>
 
@@ -64,18 +69,18 @@ export default {
         class="js-component-links-component-list-item"
       >
         <gl-link v-if="component.blob_path" :href="component.blob_path" target="_blank">{{
-          component.name
+          getComponentLabel(component)
         }}</gl-link>
-        <template v-else>{{ component.name }}</template>
+        <template v-else>{{ getComponentLabel(component) }}</template>
       </span>
-      <gl-deprecated-button
+      <gl-button
         v-if="hasComponentsInModal"
         v-gl-modal-directive="modalId"
         variant="link"
         class="align-baseline js-component-links-modal-trigger"
       >
         {{ modalButtonText }}
-      </gl-deprecated-button>
+      </gl-button>
     </gl-intersperse>
     <gl-modal
       v-if="hasComponentsInModal"

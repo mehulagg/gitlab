@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::IssuableMetadata do
+RSpec.describe Gitlab::IssuableMetadata do
   let_it_be(:user) { create(:user) }
   let_it_be(:project1) { create(:project, :public, :repository, creator: user, namespace: user.namespace) }
   let_it_be(:project2) { create(:project, :public, :repository, creator: user, namespace: user.namespace) }

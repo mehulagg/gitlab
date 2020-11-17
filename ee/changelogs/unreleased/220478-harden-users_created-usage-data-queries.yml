@@ -1,5 +1,0 @@
----
-title: Harden users_created usage data queries
-merge_request: 33956
-author:
-type: performance

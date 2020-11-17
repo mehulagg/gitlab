@@ -5,6 +5,23 @@ import { collapseSystemNotes } from './collapse_utils';
 export const discussions = state => {
   let discussionsInState = clone(state.discussions);
   // NOTE: not testing bc will be removed when backend is finished.
+
+  if (state.isTimelineEnabled) {
+    discussionsInState = discussionsInState
+      .reduce((acc, discussion) => {
+        const transformedToIndividualNotes = discussion.notes.map(note => ({
+          ...discussion,
+          id: note.id,
+          created_at: note.created_at,
+          individual_note: true,
+          notes: [note],
+        }));
+
+        return acc.concat(transformedToIndividualNotes);
+      }, [])
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  }
+
   if (state.discussionSortOrder === constants.DESC) {
     discussionsInState = discussionsInState.reverse();
   }
@@ -26,6 +43,10 @@ export const isNotesFetched = state => state.isNotesFetched;
  */
 
 export const sortDirection = state => state.discussionSortOrder;
+
+export const persistSortOrder = state => state.persistSortOrder;
+
+export const timelineEnabled = state => state.isTimelineEnabled;
 
 export const isLoading = state => state.isLoading;
 
@@ -194,7 +215,9 @@ export const findUnresolvedDiscussionIdNeighbor = (state, getters) => ({
   diffOrder,
   step,
 }) => {
-  const ids = getters.unresolvedDiscussionsIdsOrdered(diffOrder);
+  const diffIds = getters.unresolvedDiscussionsIdsOrdered(diffOrder);
+  const dateIds = getters.unresolvedDiscussionsIdsOrdered(false);
+  const ids = diffIds.length ? diffIds : dateIds;
   const index = ids.indexOf(discussionId) + step;
 
   if (index < 0 && step < 0) {
@@ -230,5 +253,5 @@ export const getDiscussion = state => discussionId =>
 
 export const commentsDisabled = state => state.commentsDisabled;
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const suggestionsCount = (state, getters) =>
+  Object.values(getters.notesById).filter(n => n.suggestions.length).length;

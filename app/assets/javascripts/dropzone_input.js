@@ -7,6 +7,7 @@ import csrf from './lib/utils/csrf';
 import axios from './lib/utils/axios_utils';
 import { n__, __ } from '~/locale';
 import { getFilename } from '~/lib/utils/file_upload';
+import { spriteIcon } from '~/lib/utils/common_utils';
 
 Dropzone.autoDiscover = false;
 
@@ -25,7 +26,7 @@ function getErrorMessage(res) {
 
 export default function dropzoneInput(form, config = { parallelUploads: 2 }) {
   const divHover = '<div class="div-dropzone-hover"></div>';
-  const iconPaperclip = '<i class="fa fa-paperclip div-dropzone-icon"></i>';
+  const iconPaperclip = spriteIcon('paperclip', 'div-dropzone-icon s24');
   const $attachButton = form.find('.button-attach-file');
   const $attachingFileMessage = form.find('.attaching-file-message');
   const $cancelButton = form.find('.button-cancel-uploading-files');
@@ -70,7 +71,6 @@ export default function dropzoneInput(form, config = { parallelUploads: 2 }) {
     headers: csrf.headers,
     previewContainer: false,
     ...config,
-    processing: () => $('.div-dropzone-alert').alert('close'),
     dragover: () => {
       $mdArea.addClass('is-dropzone-hover');
       form.find('.div-dropzone-hover').css('opacity', 0.7);
@@ -245,8 +245,6 @@ export default function dropzoneInput(form, config = { parallelUploads: 2 }) {
     $uploadingErrorMessage.html(message);
   };
 
-  const closeAlertMessage = () => form.find('.div-dropzone-alert').alert('close');
-
   const insertToTextArea = (filename, url) => {
     const $child = $(child);
     const textarea = $child.get(0);
@@ -266,7 +264,6 @@ export default function dropzoneInput(form, config = { parallelUploads: 2 }) {
     formData.append('file', item, filename);
 
     showSpinner();
-    closeAlertMessage();
 
     axios
       .post(uploadsPath, formData)

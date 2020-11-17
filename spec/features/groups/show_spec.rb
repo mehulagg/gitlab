@@ -81,8 +81,7 @@ RSpec.describe 'Group show page' do
         it 'allows creating subgroups' do
           visit path
 
-          expect(page)
-            .to have_css("li[data-text='New subgroup']", visible: false)
+          expect(page).to have_link('New subgroup')
         end
       end
     end
@@ -102,8 +101,7 @@ RSpec.describe 'Group show page' do
             path = group_path(relaxed_group)
             visit path
 
-            expect(page)
-              .to have_css("li[data-text='New subgroup']", visible: false)
+            expect(page).to have_link('New subgroup')
           end
         end
 
@@ -116,9 +114,7 @@ RSpec.describe 'Group show page' do
             path = group_path(restricted_group)
             visit path
 
-            expect(page)
-              .not_to have_selector("li[data-text='New subgroup']",
-                                    visible: false)
+            expect(page).not_to have_link('New subgroup')
           end
         end
       end
@@ -183,5 +179,18 @@ RSpec.describe 'Group show page' do
 
       expect(page).to have_selector('.notifications-btn.disabled', visible: true)
     end
+  end
+
+  context 'page og:description' do
+    let(:group) { create(:group, description: '**Lorem** _ipsum_ dolor sit [amet](https://example.com)') }
+    let(:maintainer) { create(:user) }
+
+    before do
+      group.add_maintainer(maintainer)
+      sign_in(maintainer)
+      visit path
+    end
+
+    it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet'
   end
 end

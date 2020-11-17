@@ -11,7 +11,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
       }
     end
 
-    subject { described_class.new(YAML.dump(config)) }
+    subject { described_class.new(YAML.dump(config)).execute }
 
     context 'needs upstream pipeline' do
       let(:needs) { { pipeline: 'some/project' } }
@@ -174,9 +174,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
       end
 
       it 'returns errors' do
-        expect { subject }
-          .to raise_error(Gitlab::Ci::YamlProcessor::ValidationError,
-                          'jobs:bridge config should contain either a trigger or a needs:pipeline')
+        expect(subject.errors).to include(
+          'jobs:bridge config should contain either a trigger or a needs:pipeline')
       end
     end
 
@@ -198,10 +197,37 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
       end
 
       it 'returns errors' do
-        expect { subject }
-          .to raise_error(Gitlab::Ci::YamlProcessor::ValidationError,
-                          'jobs:test:needs:need ref should be a string')
+        expect(subject.errors).to contain_exactly(
+          'jobs:test:needs:need ref should be a string')
       end
+    end
+  end
+
+  describe 'Secrets' do
+    let(:secrets) do
+      {
+        DATABASE_PASSWORD: {
+          vault: 'production/db/password'
+        }
+      }
+    end
+
+    let(:config) { { deploy_to_production: { stage: 'deploy', script: ['echo'], secrets: secrets } } }
+
+    subject(:result) { described_class.new(YAML.dump(config)).execute }
+
+    it "returns secrets info" do
+      secrets = result.stage_builds_attributes('deploy').first.fetch(:secrets)
+
+      expect(secrets).to eq({
+        DATABASE_PASSWORD: {
+          vault: {
+            engine: { name: 'kv-v2', path: 'kv-v2' },
+            path: 'production/db',
+            field: 'password'
+          }
+        }
+      })
     end
   end
 end

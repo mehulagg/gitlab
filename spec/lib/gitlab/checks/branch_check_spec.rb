@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::BranchCheck do
+RSpec.describe Gitlab::Checks::BranchCheck do
   include_context 'change access checks context'
 
   describe '#validate!' do
@@ -16,6 +16,29 @@ describe Gitlab::Checks::BranchCheck do
 
       it 'raises an error' do
         expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'The default branch of a project cannot be deleted.')
+      end
+    end
+
+    context "prohibited branches check" do
+      it "prohibits 40-character hexadecimal branch names" do
+        allow(subject).to receive(:branch_name).and_return("267208abfe40e546f5e847444276f7d43a39503e")
+
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "You cannot create a branch with a 40-character hexadecimal branch name.")
+      end
+
+      it "doesn't prohibit a nested hexadecimal in a branch name" do
+        allow(subject).to receive(:branch_name).and_return("fix-267208abfe40e546f5e847444276f7d43a39503e")
+
+        expect { subject.validate! }.not_to raise_error
+      end
+
+      context "the feature flag is disabled" do
+        it "doesn't prohibit a 40-character hexadecimal branch name" do
+          stub_feature_flags(prohibit_hexadecimal_branch_names: false)
+          allow(subject).to receive(:branch_name).and_return("267208abfe40e546f5e847444276f7d43a39503e")
+
+          expect { subject.validate! }.not_to raise_error
+        end
       end
     end
 

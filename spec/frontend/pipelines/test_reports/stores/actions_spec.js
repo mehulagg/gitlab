@@ -5,7 +5,7 @@ import * as actions from '~/pipelines/stores/test_reports/actions';
 import * as types from '~/pipelines/stores/test_reports/mutation_types';
 import { TEST_HOST } from '../../../helpers/test_constants';
 import testAction from '../../../helpers/vuex_action_helper';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash.js');
 
@@ -14,34 +14,37 @@ describe('Actions TestReports Store', () => {
   let state;
 
   const testReports = getJSONFixture('pipelines/test_report.json');
+  const summary = { total_count: 1 };
 
-  const endpoint = `${TEST_HOST}/test_reports.json`;
+  const suiteEndpoint = `${TEST_HOST}/tests/:suite_name.json`;
+  const summaryEndpoint = `${TEST_HOST}/test_reports/summary.json`;
   const defaultState = {
-    endpoint,
+    suiteEndpoint,
+    summaryEndpoint,
     testReports: {},
-    selectedSuite: {},
+    selectedSuite: null,
   };
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    state = defaultState;
+    state = { ...defaultState };
   });
 
   afterEach(() => {
     mock.restore();
   });
 
-  describe('fetch reports', () => {
+  describe('fetch report summary', () => {
     beforeEach(() => {
-      mock.onGet(`${TEST_HOST}/test_reports.json`).replyOnce(200, testReports, {});
+      mock.onGet(summaryEndpoint).replyOnce(200, summary, {});
     });
 
     it('sets testReports and shows tests', done => {
       testAction(
-        actions.fetchReports,
+        actions.fetchSummary,
         null,
         state,
-        [{ type: types.SET_REPORTS, payload: testReports }],
+        [{ type: types.SET_SUMMARY, payload: summary }],
         [{ type: 'toggleLoading' }, { type: 'toggleLoading' }],
         done,
       );
@@ -49,11 +52,9 @@ describe('Actions TestReports Store', () => {
 
     it('should create flash on API error', done => {
       testAction(
-        actions.fetchReports,
+        actions.fetchSummary,
         null,
-        {
-          endpoint: null,
-        },
+        { summaryEndpoint: null },
         [],
         [{ type: 'toggleLoading' }, { type: 'toggleLoading' }],
         () => {
@@ -64,28 +65,78 @@ describe('Actions TestReports Store', () => {
     });
   });
 
-  describe('set selected suite', () => {
-    const selectedSuite = testReports.test_suites[0];
+  describe('fetch test suite', () => {
+    beforeEach(() => {
+      const buildIds = [1];
+      testReports.test_suites[0].build_ids = buildIds;
+      const endpoint = suiteEndpoint.replace(':suite_name', testReports.test_suites[0].name);
+      mock
+        .onGet(endpoint, { params: { build_ids: buildIds } })
+        .replyOnce(200, testReports.test_suites[0], {});
+    });
 
-    it('sets selectedSuite', done => {
+    it('sets test suite and shows tests', done => {
+      const suite = testReports.test_suites[0];
+      const index = 0;
+
       testAction(
-        actions.setSelectedSuite,
-        selectedSuite,
-        state,
-        [{ type: types.SET_SELECTED_SUITE, payload: selectedSuite }],
+        actions.fetchTestSuite,
+        index,
+        { ...state, testReports },
+        [{ type: types.SET_SUITE, payload: { suite, index } }],
+        [{ type: 'toggleLoading' }, { type: 'toggleLoading' }],
+        done,
+      );
+    });
+
+    it('should create flash on API error', done => {
+      const index = 0;
+
+      testAction(
+        actions.fetchTestSuite,
+        index,
+        { ...state, testReports, suiteEndpoint: null },
+        [],
+        [{ type: 'toggleLoading' }, { type: 'toggleLoading' }],
+        () => {
+          expect(createFlash).toHaveBeenCalled();
+          done();
+        },
+      );
+    });
+
+    describe('when we already have the suite data', () => {
+      it('should not fetch suite', done => {
+        const index = 0;
+        testReports.test_suites[0].hasFullSuite = true;
+
+        testAction(actions.fetchTestSuite, index, { ...state, testReports }, [], [], done);
+      });
+    });
+  });
+
+  describe('set selected suite index', () => {
+    it('sets selectedSuiteIndex', done => {
+      const selectedSuiteIndex = 0;
+
+      testAction(
+        actions.setSelectedSuiteIndex,
+        selectedSuiteIndex,
+        { ...state, hasFullReport: true },
+        [{ type: types.SET_SELECTED_SUITE_INDEX, payload: selectedSuiteIndex }],
         [],
         done,
       );
     });
   });
 
-  describe('remove selected suite', () => {
-    it('sets selectedSuite to {}', done => {
+  describe('remove selected suite index', () => {
+    it('sets selectedSuiteIndex to null', done => {
       testAction(
-        actions.removeSelectedSuite,
+        actions.removeSelectedSuiteIndex,
         {},
         state,
-        [{ type: types.SET_SELECTED_SUITE, payload: {} }],
+        [{ type: types.SET_SELECTED_SUITE_INDEX, payload: null }],
         [],
         done,
       );

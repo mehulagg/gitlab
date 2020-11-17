@@ -6,7 +6,7 @@ describe('GeoReplicable Store Getters', () => {
   let state;
 
   beforeEach(() => {
-    state = createState({ replicableType: MOCK_REPLICABLE_TYPE, useGraphQl: false });
+    state = createState({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null });
   });
 
   describe('replicableTypeName', () => {

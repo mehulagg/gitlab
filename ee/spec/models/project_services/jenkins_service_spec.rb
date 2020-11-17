@@ -31,13 +31,14 @@ RSpec.describe JenkinsService do
 
   describe 'username validation' do
     before do
-      @jenkins_service = described_class.create(
+      @jenkins_service = described_class.create!(
         active: active,
         project: project,
         properties: {
           jenkins_url: 'http://jenkins.example.com/',
           password: 'password',
-          username: 'username'
+          username: 'username',
+          project_name: 'my_project'
         }
       )
     end
@@ -68,7 +69,7 @@ RSpec.describe JenkinsService do
           expect(subject).not_to validate_presence_of :username
 
           subject.password = ''
-          subject.save
+          subject.save!
         end
       end
     end
@@ -137,7 +138,7 @@ RSpec.describe JenkinsService do
       user = create(:user, username: 'username')
       project = create(:project, name: 'project')
       push_sample_data = Gitlab::DataBuilder::Push.build_sample(project, user)
-      jenkins_service = described_class.create(jenkins_params)
+      jenkins_service = described_class.create!(jenkins_params)
       stub_request(:post, jenkins_hook_url).with(headers: { 'Authorization' => jenkins_authorization })
 
       result = jenkins_service.test(push_sample_data)
@@ -167,7 +168,7 @@ RSpec.describe JenkinsService do
     let(:namespace) { create(:group, :private) }
     let(:project) { create(:project, :private, name: 'project', namespace: namespace) }
     let(:push_sample_data) { Gitlab::DataBuilder::Push.build_sample(project, user) }
-    let(:jenkins_service) { described_class.create(jenkins_params) }
+    let(:jenkins_service) { described_class.create!(jenkins_params) }
 
     before do
       stub_request(:post, jenkins_hook_url)
@@ -232,7 +233,7 @@ RSpec.describe JenkinsService do
 
     context 'when a password was previously set' do
       before do
-        @jenkins_service = described_class.create(
+        @jenkins_service = described_class.create!(
           project: project,
           properties: {
             jenkins_url: 'http://jenkins.example.com/',
@@ -244,26 +245,26 @@ RSpec.describe JenkinsService do
 
       it 'resets password if url changed' do
         @jenkins_service.jenkins_url = 'http://jenkins-edited.example.com/'
-        @jenkins_service.save
+        @jenkins_service.save!
         expect(@jenkins_service.password).to be_nil
       end
 
       it 'resets password if username is blank' do
         @jenkins_service.username = ''
-        @jenkins_service.save
+        @jenkins_service.save!
         expect(@jenkins_service.password).to be_nil
       end
 
       it 'does not reset password if username changed' do
         @jenkins_service.username = 'some_name'
-        @jenkins_service.save
+        @jenkins_service.save!
         expect(@jenkins_service.password).to eq('password')
       end
 
       it 'does not reset password if new url is set together with password, even if it\'s the same password' do
         @jenkins_service.jenkins_url = 'http://jenkins_edited.example.com/'
         @jenkins_service.password = 'password'
-        @jenkins_service.save
+        @jenkins_service.save!
         expect(@jenkins_service.password).to eq('password')
         expect(@jenkins_service.jenkins_url).to eq('http://jenkins_edited.example.com/')
       end
@@ -271,14 +272,14 @@ RSpec.describe JenkinsService do
       it 'resets password if url changed, even if setter called multiple times' do
         @jenkins_service.jenkins_url = 'http://jenkins1.example.com/'
         @jenkins_service.jenkins_url = 'http://jenkins1.example.com/'
-        @jenkins_service.save
+        @jenkins_service.save!
         expect(@jenkins_service.password).to be_nil
       end
     end
 
     context 'when no password was previously set' do
       before do
-        @jenkins_service = described_class.create(
+        @jenkins_service = described_class.create!(
           project: create(:project),
           properties: {
             jenkins_url: 'http://jenkins.example.com/',
@@ -290,7 +291,7 @@ RSpec.describe JenkinsService do
       it 'saves password if new url is set together with password' do
         @jenkins_service.jenkins_url = 'http://jenkins_edited.example.com/'
         @jenkins_service.password = 'password'
-        @jenkins_service.save
+        @jenkins_service.save!
         expect(@jenkins_service.password).to eq('password')
         expect(@jenkins_service.jenkins_url).to eq('http://jenkins_edited.example.com/')
       end

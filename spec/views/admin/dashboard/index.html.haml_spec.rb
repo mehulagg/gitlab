@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'admin/dashboard/index.html.haml' do
+RSpec.describe 'admin/dashboard/index.html.haml' do
   include Devise::Test::ControllerHelpers
 
   before do
@@ -31,5 +31,14 @@ describe 'admin/dashboard/index.html.haml' do
     render
 
     expect(rendered).to have_content "#{Gitlab::VERSION} (#{Gitlab.revision})"
+  end
+
+  it 'does not include license breakdown' do
+    render
+
+    expect(rendered).not_to have_content "Users in License"
+    expect(rendered).not_to have_content "Billable Users"
+    expect(rendered).not_to have_content "Maximum Users"
+    expect(rendered).not_to have_content "Users over License"
   end
 end

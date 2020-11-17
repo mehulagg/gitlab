@@ -8,10 +8,11 @@
 module Metrics
   module Dashboard
     class GitlabAlertEmbedService < ::Metrics::Dashboard::BaseEmbedService
+      include Gitlab::Metrics::Dashboard::Defaults
       include Gitlab::Utils::StrongMemoize
 
       SEQUENCE = [
-        STAGES::EndpointInserter,
+        STAGES::MetricEndpointInserter,
         STAGES::PanelIdsInserter
       ].freeze
 
@@ -63,7 +64,8 @@ module Metrics
         {
           title: prometheus_metric.title,
           y_label: prometheus_metric.y_label,
-          metrics: [prometheus_metric.to_metric_hash]
+          metrics: [prometheus_metric.to_metric_hash],
+          type: DEFAULT_PANEL_TYPE
         }
       end
 

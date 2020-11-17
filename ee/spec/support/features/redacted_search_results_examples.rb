@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'a redacted search results page' do
+RSpec.shared_examples 'a redacted search results page' do |include_anonymous: true|
   let(:public_group) { create(:group, :public) }
   let(:public_restricted_project) { create(:project, :repository, :public, :wiki_repo, namespace: public_group, name: 'The Project') }
   let(:issue_access_level) { ProjectFeature::PRIVATE }
@@ -41,7 +41,7 @@ RSpec.shared_examples 'a redacted search results page' do
   end
 
   it_behaves_like 'redacted search results page assertions', true
-  it_behaves_like 'redacted search results page assertions', false
+  it_behaves_like 'redacted search results page assertions', false if include_anonymous
 end
 
 # Only intended to be used in the above shared examples to avoid duplication of

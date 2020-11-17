@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Fluentd do
+RSpec.describe Clusters::Applications::Fluentd do
   let(:waf_log_enabled) { true }
   let(:cilium_log_enabled) { true }
   let(:fluentd) { create(:clusters_applications_fluentd, waf_log_enabled: waf_log_enabled, cilium_log_enabled: cilium_log_enabled) }
@@ -21,11 +21,11 @@ describe Clusters::Applications::Fluentd do
   describe '#install_command' do
     subject { fluentd.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with fluentd arguments' do
       expect(subject.name).to eq('fluentd')
-      expect(subject.chart).to eq('stable/fluentd')
+      expect(subject.chart).to eq('fluentd/fluentd')
       expect(subject.version).to eq('2.4.0')
       expect(subject).to be_rbac
     end

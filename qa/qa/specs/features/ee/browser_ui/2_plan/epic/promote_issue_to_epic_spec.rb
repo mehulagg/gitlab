@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'promote issue to epic' do
-      it 'promotes issue to epic' do
+      it 'promotes issue to epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/604' do
         Flow::Login.sign_in
 
         project = Resource::Project.fabricate_via_api! do |project|

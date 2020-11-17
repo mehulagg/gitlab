@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BoardUserPreference do
+RSpec.describe BoardUserPreference do
   before do
     create(:board_user_preference)
   end

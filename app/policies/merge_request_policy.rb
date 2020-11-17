@@ -10,6 +10,14 @@ class MergeRequestPolicy < IssuablePolicy
   # it would not be safe to prevent :create_note there, since
   # note permissions are shared, and this would apply too broadly.
   rule { ~can?(:read_merge_request) }.prevent :create_note
+
+  rule { can?(:update_merge_request) }.policy do
+    enable :approve_merge_request
+  end
+
+  rule { ~anonymous & can?(:read_merge_request) }.policy do
+    enable :create_todo
+  end
 end
 
 MergeRequestPolicy.prepend_if_ee('EE::MergeRequestPolicy')

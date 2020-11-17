@@ -1,7 +1,7 @@
 import Vue from 'vue';
 
+import { issuableTypesMap } from '~/related_issues/constants';
 import * as types from './mutation_types';
-import { issuableTypesMap } from 'ee/related_issues/constants';
 
 export default {
   [types.SET_INITIAL_CONFIG](
@@ -158,6 +158,7 @@ export default {
     state.showCreateIssueForm = toggleState;
     state.showAddItemForm = false;
     state.showCreateEpicForm = false;
+    state.issuableType = issuableTypesMap.ISSUE;
   },
 
   [types.SET_PENDING_REFERENCES](state, references) {
@@ -260,5 +261,16 @@ export default {
   },
   [types.RECIEVE_PROJECTS_FAILURE](state) {
     state.projectsFetchInProgress = false;
+  },
+
+  [types.REQUEST_DESCENDANT_GROUPS](state) {
+    state.descendantGroupsFetchInProgress = true;
+  },
+  [types.RECEIVE_DESCENDANT_GROUPS_SUCCESS](state, descendantGroups) {
+    state.descendantGroups = descendantGroups;
+    state.descendantGroupsFetchInProgress = false;
+  },
+  [types.RECEIVE_DESCENDANT_GROUPS_FAILURE](state) {
+    state.descendantGroupsFetchInProgress = false;
   },
 };

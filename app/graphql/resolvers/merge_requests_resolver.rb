@@ -6,6 +6,18 @@ module Resolvers
 
     alias_method :project, :synchronized_object
 
+    def self.accept_assignee
+      argument :assignee_username, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Username of the assignee'
+    end
+
+    def self.accept_author
+      argument :author_username, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Username of the author'
+    end
+
     argument :iids, [GraphQL::STRING_TYPE],
               required: false,
               description: 'Array of IIDs of merge requests, for example `[1, 2]`'
@@ -28,6 +40,19 @@ module Resolvers
              required: false,
              as: :label_name,
              description: 'Array of label names. All resolved merge requests will have all of these labels.'
+    argument :merged_after, Types::TimeType,
+             required: false,
+             description: 'Merge requests merged after this date'
+    argument :merged_before, Types::TimeType,
+             required: false,
+             description: 'Merge requests merged before this date'
+    argument :milestone_title, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Title of the milestone'
+    argument :sort, Types::MergeRequestSortEnum,
+             description: 'Sort merge requests by this criteria',
+             required: false,
+             default_value: 'created_desc'
 
     def self.single
       ::Resolvers::MergeRequestResolver

@@ -7,11 +7,11 @@ module Gitlab
     module Reports
       module Security
         class AggregatedReport
-          attr_reader :occurrences
+          attr_reader :findings
 
-          def initialize(reports, occurrences)
+          def initialize(reports, findings)
             @reports = reports
-            @occurrences = occurrences
+            @findings = findings
           end
 
           def created_at

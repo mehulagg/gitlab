@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Delete existing migrations
 
 When removing existing migrations from the GitLab project, you have to take into account
@@ -23,7 +29,7 @@ Migrations can be disabled if:
 In order to disable a migration, the following steps apply to all types of migrations:
 
 1. Turn the migration into a no-op by removing the code inside `#up`, `#down`
-  or `#perform` methods, and adding `#no-op` comment instead.
+  or `#perform` methods, and adding `# no-op` comment instead.
 1. Add a comment explaining why the code is gone.
 
 Disabling migrations requires explicit approval of Database Maintainer.

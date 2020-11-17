@@ -1,7 +1,13 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # License **(CORE ONLY)**
 
-In order to interact with license endpoints, you need to authenticate yourself
-as an admin.
+To interact with license endpoints, you need to authenticate yourself as an
+admin.
 
 ## Retrieve information about the current license
 

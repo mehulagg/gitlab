@@ -1,7 +1,7 @@
 - project = local_assigns.fetch(:project)
 - issuable = local_assigns.fetch(:issuable)
 
-- return unless issuable.can_assign_epic?(current_user)
+- return unless issuable.can_assign_epic?(current_user) && issuable.supports_epic?
 - form = local_assigns.fetch(:form)
 
 .form-group.row.issue-epic

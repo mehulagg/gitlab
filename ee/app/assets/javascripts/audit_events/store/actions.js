@@ -18,9 +18,8 @@ export const setDateRange = ({ commit, dispatch }, { startDate, endDate }) => {
   dispatch('searchForAuditEvents');
 };
 
-export const setFilterValue = ({ commit, dispatch }, { id, type }) => {
-  commit(types.SET_FILTER_VALUE, { id, type });
-  dispatch('searchForAuditEvents');
+export const setFilterValue = ({ commit }, filterValue) => {
+  commit(types.SET_FILTER_VALUE, filterValue);
 };
 
 export const setSortBy = ({ commit, dispatch }, sortBy) => {

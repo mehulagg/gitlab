@@ -23,13 +23,17 @@ module Geo
 
     def should_verify_checksum?
       return false if resync?
-      return false unless primary_checksum.present?
+      return false unless primary_checksummed?
 
       mismatch?(secondary_checksum)
     end
 
     def resync?
       registry.public_send("resync_#{type}") # rubocop:disable GitlabSecurity/PublicSend
+    end
+
+    def primary_checksummed?
+      primary_checksum.present?
     end
 
     def primary_checksum
@@ -71,6 +75,7 @@ module Geo
         end
 
       registry.update!(
+        "primary_#{type}_checksummed" => primary_checksummed?,
         "#{type}_verification_checksum_sha" => checksum,
         "#{type}_verification_checksum_mismatched" => mismatch,
         "#{type}_checksum_mismatch" => mismatch.present?,

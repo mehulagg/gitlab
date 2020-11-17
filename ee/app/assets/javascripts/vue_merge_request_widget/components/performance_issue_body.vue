@@ -6,8 +6,8 @@
 import ReportLink from '~/reports/components/report_link.vue';
 
 function formatScore(value) {
-  if (Math.floor(value) !== value) {
-    return parseFloat(value).toFixed(2);
+  if (Number(value) && !Number.isInteger(value)) {
+    return (Math.floor(parseFloat(value) * 100) / 100).toFixed(2);
   }
   return value;
 }
@@ -43,7 +43,7 @@ export default {
 };
 </script>
 <template>
-  <div class="report-block-list-issue-description prepend-top-5 append-bottom-5">
+  <div class="report-block-list-issue-description gl-mt-2 gl-mb-2">
     <div class="report-block-list-issue-description-text">
       <template v-if="issueScore">
         {{ issue.name }}: <strong>{{ issueScore }}</strong>

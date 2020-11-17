@@ -3,6 +3,8 @@
 class Projects::ApproversController < Projects::ApplicationController
   before_action :authorize_for_subject!
 
+  feature_category :code_review
+
   # @deprecated
   def destroy
     subject.approvers.find(params[:id]).destroy

@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::Prometheus::Queries::AdditionalMetricsDeploymentQuery do
+RSpec.describe Gitlab::Prometheus::Queries::AdditionalMetricsDeploymentQuery do
   around do |example|
-    Timecop.freeze(Time.local(2008, 9, 1, 12, 0, 0)) { example.run }
+    travel_to(Time.local(2008, 9, 1, 12, 0, 0)) { example.run }
   end
 
   include_examples 'additional metrics query' do

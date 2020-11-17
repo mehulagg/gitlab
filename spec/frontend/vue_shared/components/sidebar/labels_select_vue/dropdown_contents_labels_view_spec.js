@@ -1,9 +1,14 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 
-import { GlButton, GlLoadingIcon, GlSearchBoxByType, GlLink } from '@gitlab/ui';
+import {
+  GlIntersectionObserver,
+  GlButton,
+  GlLoadingIcon,
+  GlSearchBoxByType,
+  GlLink,
+} from '@gitlab/ui';
 import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/utils/keycodes';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import DropdownContentsLabelsView from '~/vue_shared/components/sidebar/labels_select_vue/dropdown_contents_labels_view.vue';
 import LabelItem from '~/vue_shared/components/sidebar/labels_select_vue/label_item.vue';
 
@@ -17,46 +22,46 @@ import { mockConfig, mockLabels, mockRegularLabel } from './mock_data';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-const createComponent = (initialState = mockConfig) => {
-  const store = new Vuex.Store({
-    getters,
-    mutations,
-    state: {
-      ...defaultState(),
-      footerCreateLabelTitle: 'Create label',
-      footerManageLabelTitle: 'Manage labels',
-    },
-    actions: {
-      ...actions,
-      fetchLabels: jest.fn(),
-    },
-  });
-
-  store.dispatch('setInitialState', initialState);
-  store.dispatch('receiveLabelsSuccess', mockLabels);
-
-  return shallowMount(DropdownContentsLabelsView, {
-    localVue,
-    store,
-  });
-};
-
 describe('DropdownContentsLabelsView', () => {
   let wrapper;
-  let wrapperStandalone;
+
+  const createComponent = (initialState = mockConfig) => {
+    const store = new Vuex.Store({
+      getters,
+      mutations,
+      state: {
+        ...defaultState(),
+        footerCreateLabelTitle: 'Create label',
+        footerManageLabelTitle: 'Manage labels',
+      },
+      actions: {
+        ...actions,
+        fetchLabels: jest.fn(),
+      },
+    });
+
+    store.dispatch('setInitialState', initialState);
+    store.dispatch('receiveLabelsSuccess', mockLabels);
+
+    wrapper = shallowMount(DropdownContentsLabelsView, {
+      localVue,
+      store,
+    });
+  };
 
   beforeEach(() => {
-    wrapper = createComponent();
-    wrapperStandalone = createComponent({
-      ...mockConfig,
-      variant: 'standalone',
-    });
+    createComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapperStandalone.destroy();
+    wrapper = null;
   });
+
+  const findDropdownContent = () => wrapper.find('[data-testid="dropdown-content"]');
+  const findDropdownTitle = () => wrapper.find('[data-testid="dropdown-title"]');
+  const findDropdownFooter = () => wrapper.find('[data-testid="dropdown-footer"]');
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
   describe('computed', () => {
     describe('visibleLabels', () => {
@@ -69,6 +74,16 @@ describe('DropdownContentsLabelsView', () => {
         expect(wrapper.vm.visibleLabels[0].title).toBe('Bug');
       });
 
+      it('returns matching labels with fuzzy filtering', () => {
+        wrapper.setData({
+          searchKey: 'bg',
+        });
+
+        expect(wrapper.vm.visibleLabels.length).toBe(2);
+        expect(wrapper.vm.visibleLabels[0].title).toBe('Bug');
+        expect(wrapper.vm.visibleLabels[1].title).toBe('Boog');
+      });
+
       it('returns all labels when `searchKey` is empty', () => {
         wrapper.setData({
           searchKey: '',
@@ -76,6 +91,29 @@ describe('DropdownContentsLabelsView', () => {
 
         expect(wrapper.vm.visibleLabels.length).toBe(mockLabels.length);
       });
+    });
+
+    describe('showNoMatchingResultsMessage', () => {
+      it.each`
+        searchKey | labels        | labelsDescription | returnValue
+        ${''}     | ${[]}         | ${'empty'}        | ${false}
+        ${'bug'}  | ${[]}         | ${'empty'}        | ${true}
+        ${''}     | ${mockLabels} | ${'not empty'}    | ${false}
+        ${'bug'}  | ${mockLabels} | ${'not empty'}    | ${false}
+      `(
+        'returns $returnValue when searchKey is "$searchKey" and visibleLabels is $labelsDescription',
+        async ({ searchKey, labels, returnValue }) => {
+          wrapper.setData({
+            searchKey,
+          });
+
+          wrapper.vm.$store.dispatch('receiveLabelsSuccess', labels);
+
+          await wrapper.vm.$nextTick();
+
+          expect(wrapper.vm.showNoMatchingResultsMessage).toBe(returnValue);
+        },
+      );
     });
   });
 
@@ -87,6 +125,38 @@ describe('DropdownContentsLabelsView', () => {
 
       it('returns false when provided `label` param is not one of the selected labels', () => {
         expect(wrapper.vm.isLabelSelected(mockLabels[2])).toBe(false);
+      });
+    });
+
+    describe('handleComponentAppear', () => {
+      it('calls `focusInput` on searchInput field', async () => {
+        wrapper.vm.$refs.searchInput.focusInput = jest.fn();
+
+        await wrapper.vm.handleComponentAppear();
+
+        expect(wrapper.vm.$refs.searchInput.focusInput).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleComponentDisappear', () => {
+      it('calls action `receiveLabelsSuccess` with empty array', () => {
+        jest.spyOn(wrapper.vm, 'receiveLabelsSuccess');
+
+        wrapper.vm.handleComponentDisappear();
+
+        expect(wrapper.vm.receiveLabelsSuccess).toHaveBeenCalledWith([]);
+      });
+    });
+
+    describe('handleCreateLabelClick', () => {
+      it('calls actions `receiveLabelsSuccess` with empty array and `toggleDropdownContentsCreateView`', () => {
+        jest.spyOn(wrapper.vm, 'receiveLabelsSuccess');
+        jest.spyOn(wrapper.vm, 'toggleDropdownContentsCreateView');
+
+        wrapper.vm.handleCreateLabelClick();
+
+        expect(wrapper.vm.receiveLabelsSuccess).toHaveBeenCalledWith([]);
+        expect(wrapper.vm.toggleDropdownContentsCreateView).toHaveBeenCalled();
       });
     });
 
@@ -113,6 +183,19 @@ describe('DropdownContentsLabelsView', () => {
         });
 
         expect(wrapper.vm.currentHighlightItem).toBe(2);
+      });
+
+      it('resets the search text when the Enter key is pressed', () => {
+        wrapper.setData({
+          currentHighlightItem: 1,
+          searchKey: 'bug',
+        });
+
+        wrapper.vm.handleKeyDown({
+          keyCode: ENTER_KEY_CODE,
+        });
+
+        expect(wrapper.vm.searchKey).toBe('');
       });
 
       it('calls action `updateSelectedLabels` with currently highlighted label when Enter key is pressed', () => {
@@ -185,15 +268,15 @@ describe('DropdownContentsLabelsView', () => {
   });
 
   describe('template', () => {
-    it('renders component container element with class `labels-select-contents-list`', () => {
-      expect(wrapper.attributes('class')).toContain('labels-select-contents-list');
+    it('renders gl-intersection-observer as component root', () => {
+      expect(wrapper.find(GlIntersectionObserver).exists()).toBe(true);
     });
 
     it('renders gl-loading-icon component when `labelsFetchInProgress` prop is true', () => {
       wrapper.vm.$store.dispatch('requestLabels');
 
       return wrapper.vm.$nextTick(() => {
-        const loadingIconEl = wrapper.find(GlLoadingIcon);
+        const loadingIconEl = findLoadingIcon();
 
         expect(loadingIconEl.exists()).toBe(true);
         expect(loadingIconEl.attributes('class')).toContain('labels-fetch-loading');
@@ -201,18 +284,24 @@ describe('DropdownContentsLabelsView', () => {
     });
 
     it('renders dropdown title element', () => {
-      const titleEl = wrapper.find('.dropdown-title > span');
+      const titleEl = findDropdownTitle();
 
       expect(titleEl.exists()).toBe(true);
       expect(titleEl.text()).toBe('Assign labels');
     });
 
     it('does not render dropdown title element when `state.variant` is "standalone"', () => {
-      expect(wrapperStandalone.find('.dropdown-title').exists()).toBe(false);
+      createComponent({ ...mockConfig, variant: 'standalone' });
+      expect(findDropdownTitle().exists()).toBe(false);
+    });
+
+    it('renders dropdown title element when `state.variant` is "embedded"', () => {
+      createComponent({ ...mockConfig, variant: 'embedded' });
+      expect(findDropdownTitle().exists()).toBe(true);
     });
 
     it('renders dropdown close button element', () => {
-      const closeButtonEl = wrapper.find('.dropdown-title').find(GlButton);
+      const closeButtonEl = findDropdownTitle().find(GlButton);
 
       expect(closeButtonEl.exists()).toBe(true);
       expect(closeButtonEl.props('icon')).toBe('close');
@@ -222,27 +311,21 @@ describe('DropdownContentsLabelsView', () => {
       const searchInputEl = wrapper.find(GlSearchBoxByType);
 
       expect(searchInputEl.exists()).toBe(true);
-      expect(searchInputEl.attributes('autofocus')).toBe('true');
-    });
-
-    it('renders smart-virtual-list element', () => {
-      expect(wrapper.find(SmartVirtualList).exists()).toBe(true);
     });
 
     it('renders label elements for all labels', () => {
       expect(wrapper.findAll(LabelItem)).toHaveLength(mockLabels.length);
     });
 
-    it('renders label element with "is-focused" when value of `currentHighlightItem` is more than -1', () => {
+    it('renders label element with `highlight` set to true when value of `currentHighlightItem` is more than -1', () => {
       wrapper.setData({
         currentHighlightItem: 0,
       });
 
       return wrapper.vm.$nextTick(() => {
-        const labelsEl = wrapper.findAll('.dropdown-content li');
-        const labelItemEl = labelsEl.at(0).find(LabelItem);
+        const labelItemEl = findDropdownContent().find(LabelItem);
 
-        expect(labelItemEl.props('highlight')).toBe(true);
+        expect(labelItemEl.attributes('highlight')).toBe('true');
       });
     });
 
@@ -252,22 +335,31 @@ describe('DropdownContentsLabelsView', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const noMatchEl = wrapper.find('.dropdown-content li');
+        const noMatchEl = findDropdownContent().find('li');
 
         expect(noMatchEl.isVisible()).toBe(true);
         expect(noMatchEl.text()).toContain('No matching results');
       });
     });
 
+    it('renders empty content while loading', () => {
+      wrapper.vm.$store.state.labelsFetchInProgress = true;
+
+      return wrapper.vm.$nextTick(() => {
+        const dropdownContent = findDropdownContent();
+        const loadingIcon = findLoadingIcon();
+
+        expect(dropdownContent.exists()).toBe(true);
+        expect(dropdownContent.isVisible()).toBe(true);
+        expect(loadingIcon.exists()).toBe(true);
+        expect(loadingIcon.isVisible()).toBe(true);
+      });
+    });
+
     it('renders footer list items', () => {
-      const createLabelLink = wrapper
-        .find('.dropdown-footer')
-        .findAll(GlLink)
-        .at(0);
-      const manageLabelsLink = wrapper
-        .find('.dropdown-footer')
-        .findAll(GlLink)
-        .at(1);
+      const footerLinks = findDropdownFooter().findAll(GlLink);
+      const createLabelLink = footerLinks.at(0);
+      const manageLabelsLink = footerLinks.at(1);
 
       expect(createLabelLink.exists()).toBe(true);
       expect(createLabelLink.text()).toBe('Create label');
@@ -279,8 +371,7 @@ describe('DropdownContentsLabelsView', () => {
       wrapper.vm.$store.state.allowLabelCreate = false;
 
       return wrapper.vm.$nextTick(() => {
-        const createLabelLink = wrapper
-          .find('.dropdown-footer')
+        const createLabelLink = findDropdownFooter()
           .findAll(GlLink)
           .at(0);
 
@@ -289,7 +380,12 @@ describe('DropdownContentsLabelsView', () => {
     });
 
     it('does not render footer list items when `state.variant` is "standalone"', () => {
-      expect(wrapperStandalone.find('.dropdown-footer').exists()).toBe(false);
+      createComponent({ ...mockConfig, variant: 'standalone' });
+      expect(findDropdownFooter().exists()).toBe(false);
+    });
+
+    it('renders footer list items when `state.variant` is "embedded"', () => {
+      expect(findDropdownFooter().exists()).toBe(true);
     });
   });
 });

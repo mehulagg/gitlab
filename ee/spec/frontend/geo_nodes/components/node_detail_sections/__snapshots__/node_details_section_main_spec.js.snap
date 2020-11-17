@@ -6,13 +6,13 @@ exports[`NodeDetailsSectionMain template node url section renders section correc
   data-testid="nodeUrl"
 >
   <span
-    class="gl-text-gray-700"
+    class="gl-text-gray-500"
   >
     Node URL
   </span>
    
   <a
-    class="gl-link gl-display-flex gl-align-items-center gl-text-black-normal gl-font-weight-bold gl-text-decoration-underline gl-mt-1"
+    class="gl-link gl-display-flex gl-align-items-center gl-text-body gl-font-weight-bold gl-text-decoration-underline gl-mt-1"
     href="http://127.0.0.1:3001/"
     rel="noopener noreferrer"
     target="_blank"
@@ -20,6 +20,7 @@ exports[`NodeDetailsSectionMain template node url section renders section correc
     http://127.0.0.1:3001/ 
     <svg
       class="gl-ml-1 gl-icon s16"
+      data-testid="external-link-icon"
     >
       <use
         href="#external-link"
@@ -35,7 +36,7 @@ exports[`NodeDetailsSectionMain template node version section renders section co
   data-testid="nodeVersion"
 >
   <span
-    class="gl-text-gray-700"
+    class="gl-text-gray-500"
   >
     GitLab version
   </span>

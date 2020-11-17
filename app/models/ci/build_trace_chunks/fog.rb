@@ -8,11 +8,31 @@ module Ci
       end
 
       def data(model)
-        connection.get_object(bucket_name, key(model))[:body]
+        files.get(key(model))&.body
+      rescue Excon::Error::NotFound
+        # If the object does not exist in the object storage, this method returns nil.
       end
 
-      def set_data(model, data)
-        connection.put_object(bucket_name, key(model), data)
+      def set_data(model, new_data)
+        # TODO: Support AWS S3 server side encryption
+        files.create({
+          key: key(model),
+          body: new_data
+        })
+      end
+
+      def append_data(model, new_data, offset)
+        if offset > 0
+          truncated_data = data(model).to_s.byteslice(0, offset)
+          new_data = truncated_data + new_data
+        end
+
+        set_data(model, new_data)
+        new_data.bytesize
+      end
+
+      def size(model)
+        data(model).to_s.bytesize
       end
 
       def delete_data(model)
@@ -27,7 +47,7 @@ module Ci
 
       def delete_keys(keys)
         keys.each do |key|
-          connection.delete_object(bucket_name, key_raw(*key))
+          files.destroy(key_raw(*key))
         end
       end
 
@@ -51,6 +71,14 @@ module Ci
         return unless available?
 
         @connection ||= ::Fog::Storage.new(object_store.connection.to_hash.deep_symbolize_keys)
+      end
+
+      def fog_directory
+        @fog_directory ||= connection.directories.new(key: bucket_name)
+      end
+
+      def files
+        @files ||= fog_directory.files
       end
 
       def object_store

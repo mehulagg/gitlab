@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::JiraImport do
+RSpec.describe Gitlab::JiraImport do
   let(:project_id) { 321 }
 
   describe '.validate_project_settings!' do
@@ -11,7 +11,7 @@ describe Gitlab::JiraImport do
     let_it_be(:project, reload: true) { create(:project) }
     let(:additional_params) { {} }
 
-    subject { described_class.validate_project_settings!(project, additional_params) }
+    subject { described_class.validate_project_settings!(project, **additional_params) }
 
     shared_examples 'raise Jira import error' do |message|
       it 'returns error' do

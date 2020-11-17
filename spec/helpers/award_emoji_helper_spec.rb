@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AwardEmojiHelper do
+RSpec.describe AwardEmojiHelper do
   describe '.toggle_award_url' do
     subject { helper.toggle_award_url(awardable) }
 
@@ -14,7 +14,7 @@ describe AwardEmojiHelper do
       subject { helper.toggle_award_url(note) }
 
       it 'returns correct url' do
-        expected_url = "/snippets/#{note.noteable.id}/notes/#{note.id}/toggle_award_emoji"
+        expected_url = "/-/snippets/#{note.noteable.id}/notes/#{note.id}/toggle_award_emoji"
 
         expect(subject).to eq(expected_url)
       end
@@ -38,7 +38,7 @@ describe AwardEmojiHelper do
       let(:awardable) { snippet }
 
       it 'returns correct url' do
-        expected_url = "/snippets/#{snippet.id}/toggle_award_emoji"
+        expected_url = "/-/snippets/#{snippet.id}/toggle_award_emoji"
 
         expect(subject).to eq(expected_url)
       end

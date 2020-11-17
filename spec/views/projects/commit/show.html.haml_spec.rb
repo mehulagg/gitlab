@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'projects/commit/show.html.haml' do
+RSpec.describe 'projects/commit/show.html.haml' do
   let(:project) { create(:project, :repository) }
   let(:commit) { project.commit }
 
@@ -13,6 +13,12 @@ describe 'projects/commit/show.html.haml' do
     assign(:noteable, commit)
     assign(:notes, [])
     assign(:diffs, commit.diffs)
+
+    controller.params[:controller] = 'projects/commit'
+    controller.params[:action] = 'show'
+    controller.params[:namespace_id] = project.namespace.to_param
+    controller.params[:project_id] = project.to_param
+    controller.params[:id] = commit.id
 
     allow(view).to receive(:current_user).and_return(nil)
     allow(view).to receive(:can?).and_return(false)

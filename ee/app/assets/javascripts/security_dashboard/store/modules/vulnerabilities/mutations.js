@@ -31,23 +31,8 @@ export default {
     state.errorLoadingVulnerabilities = true;
     state.loadingVulnerabilitiesErrorCode = errorCode;
   },
-  [types.SET_VULNERABILITIES_COUNT_ENDPOINT](state, payload) {
-    state.vulnerabilitiesCountEndpoint = payload;
-  },
   [types.SET_VULNERABILITIES_PAGE](state, payload) {
     state.pageInfo = { ...state.pageInfo, page: payload };
-  },
-  [types.REQUEST_VULNERABILITIES_COUNT](state) {
-    state.isLoadingVulnerabilitiesCount = true;
-    state.errorLoadingVulnerabilitiesCount = false;
-  },
-  [types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS](state, payload) {
-    state.isLoadingVulnerabilitiesCount = false;
-    state.vulnerabilitiesCount = payload;
-  },
-  [types.RECEIVE_VULNERABILITIES_COUNT_ERROR](state) {
-    state.isLoadingVulnerabilitiesCount = false;
-    state.errorLoadingVulnerabilitiesCount = true;
   },
   [types.SET_VULNERABILITIES_HISTORY_ENDPOINT](state, payload) {
     state.vulnerabilitiesHistoryEndpoint = payload;

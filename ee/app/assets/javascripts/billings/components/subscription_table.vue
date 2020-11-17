@@ -29,7 +29,13 @@ export default {
     },
   },
   computed: {
-    ...mapState('subscription', ['isLoading', 'hasError', 'plan', 'tables', 'endpoint']),
+    ...mapState('subscription', [
+      'isLoadingSubscription',
+      'hasErrorSubscription',
+      'plan',
+      'tables',
+      'endpoint',
+    ]),
     ...mapGetters('subscription', ['isFreePlan']),
     subscriptionHeader() {
       const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.plan.name);
@@ -85,8 +91,8 @@ export default {
 <template>
   <div>
     <div
-      v-if="!isLoading && !hasError"
-      class="card prepend-top-default subscription-table js-subscription-table"
+      v-if="!isLoadingSubscription && !hasErrorSubscription"
+      class="card gl-mt-3 subscription-table js-subscription-table"
     >
       <div class="js-subscription-header card-header">
         <strong>{{ subscriptionHeader }}</strong>
@@ -115,10 +121,10 @@ export default {
     </div>
 
     <gl-loading-icon
-      v-else-if="isLoading && !hasError"
+      v-else-if="isLoadingSubscription && !hasErrorSubscription"
       :label="s__('SubscriptionTable|Loading subscriptions')"
       size="lg"
-      class="prepend-top-10 append-bottom-10"
+      class="gl-mt-3 gl-mb-3"
     />
   </div>
 </template>

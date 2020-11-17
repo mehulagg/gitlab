@@ -24,22 +24,18 @@ module Gitlab
 
         groups = project.invited_groups.where_full_path_in(extractor.names)
 
-        if Feature.enabled?(:codeowners_match_ancestor_groups, default_enabled: true)
-          group_list = groups.with_route.with_users.to_a
+        group_list = groups.with_route.with_users.to_a
 
-          if project.group
-            # If the project.group's ancestor group(s) are listed as owners, add
-            #   them to group_list
-            #
-            if applicable_ancestors(extractor.names).any?
-              group_list.concat(applicable_ancestors(extractor.names))
-            end
+        if project.group
+          # If the project.group's ancestor group(s) are listed as owners, add
+          #   them to group_list
+          #
+          if applicable_ancestors(extractor.names).any?
+            group_list.concat(applicable_ancestors(extractor.names))
           end
-
-          group_list.uniq
-        else
-          groups.with_route.with_users
         end
+
+        group_list.uniq
       end
 
       def applicable_ancestors(extractor_names)

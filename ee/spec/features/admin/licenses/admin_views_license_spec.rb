@@ -6,8 +6,8 @@ RSpec.describe "Admin views license" do
   let_it_be(:admin) { create(:admin) }
 
   before do
-    stub_feature_flags(licenses_app: false)
     sign_in(admin)
+    allow_any_instance_of(Gitlab::ExpiringSubscriptionMessage).to receive(:grace_period_effective_from).and_return(Date.today - 45.days)
   end
 
   context "when license is valid" do
@@ -32,14 +32,14 @@ RSpec.describe "Admin views license" do
     end
 
     context "when license expired" do
-      let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: Date.yesterday).export).save(validate: false) }
+      let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: Date.yesterday).export).save!(validate: false) }
 
       it { expect(page).to have_content("Your subscription expired!") }
 
       context "when license blocks changes" do
-        let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: Date.yesterday, block_changes_at: Date.today).export).save(validate: false) }
+        let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: Date.yesterday, block_changes_at: Date.today).export).save!(validate: false) }
 
-        it { expect(page).to have_content "You didn't renew your Starter subscription so it was downgraded to the GitLab Core Plan" }
+        it { expect(page).to have_content "You didn't renew your subscription so it was downgraded to the GitLab Core Plan" }
       end
     end
 

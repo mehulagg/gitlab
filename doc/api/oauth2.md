@@ -1,3 +1,10 @@
+---
+type: reference, howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated   with this page, see https://about.gitlab.com/handbook/engineering/ux/technica  l-writing/#designated-technical-writers
+---
+
 # GitLab as an OAuth2 provider
 
 This document covers using the [OAuth2](https://oauth.net/2/) protocol to allow
@@ -28,12 +35,24 @@ During registration, by enabling proper scopes, you can limit the range of
 resources which the `application` can access. Upon creation, you'll obtain the
 `application` credentials: _Application ID_ and _Client Secret_ - **keep them secure**.
 
-CAUTION: **Important:**
-OAuth specification advises sending the `state` parameter with each request to
-`/oauth/authorize`. We highly recommended sending a unique value with each request
-and validate it against the one in the redirect request. This is important in
-order to prevent [CSRF attacks](https://wiki.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)).
-The `state` parameter really should have been a requirement in the standard!
+### Prevent CSRF attacks
+
+To [protect redirect-based flows](https://tools.ietf.org/id/draft-ietf-oauth-security-topics-13.html#rec_redirect),
+the OAuth specification recommends the use of "One-time use CSRF tokens carried in the state
+parameter, which are securely bound to the user agent", with each request to the
+`/oauth/authorize` endpoint. This can prevent
+[CSRF attacks](https://wiki.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)).
+
+### Use HTTPS in production
+
+For production, please use HTTPS for your `redirect_uri`.
+For development, GitLab allows insecure HTTP redirect URIs.
+
+As OAuth2 bases its security entirely on the transport layer, you should not use unprotected
+URIs. For more information, see the [OAuth 2.0 RFC](https://tools.ietf.org/html/rfc6749#section-3.1.2.1)
+and the [OAuth 2.0 Threat Model RFC](https://tools.ietf.org/html/rfc6819#section-4.4.2.1).
+These factors are particularly important when using the
+[Implicit grant flow](#implicit-grant-flow), where actual credentials are included in the `redirect_uri`.
 
 In the following sections you will find detailed instructions on how to obtain
 authorization with each flow.
@@ -61,7 +80,7 @@ The web application flow is:
    include the GET `code` parameter, for example:
 
    ```plaintext
-   http://myapp.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
+   https://example.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
    ```
 
    You should then use `code` to request an access token.
@@ -72,7 +91,7 @@ The web application flow is:
 
    ```ruby
    parameters = 'client_id=APP_ID&client_secret=APP_SECRET&code=RETURNED_CODE&grant_type=authorization_code&redirect_uri=REDIRECT_URI'
-   RestClient.post 'http://gitlab.example.com/oauth/token', parameters
+   RestClient.post 'https://gitlab.example.com/oauth/token', parameters
    ```
 
    Example response:
@@ -125,7 +144,7 @@ will include a fragment with `access_token` as well as token details in GET
 parameters, for example:
 
 ```plaintext
-http://myapp.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_STATE_HASH&token_type=bearer&expires_in=3600
+https://example.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_STATE_HASH&token_type=bearer&expires_in=3600
 ```
 
 ### Resource owner password credentials flow
@@ -198,7 +217,7 @@ By default, the scope of the access token is `api`, which provides complete read
 For testing, you can use the `oauth2` Ruby gem:
 
 ```ruby
-client = OAuth2::Client.new('the_client_id', 'the_client_secret', :site => "http://example.com")
+client = OAuth2::Client.new('the_client_id', 'the_client_secret', :site => "https://example.com")
 access_token = client.password.get_token('user@example.com', 'secret')
 puts access_token.token
 ```

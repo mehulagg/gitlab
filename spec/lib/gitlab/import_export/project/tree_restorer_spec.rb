@@ -6,7 +6,7 @@ def match_mr1_note(content_regex)
   MergeRequest.find_by(title: 'MR1').notes.select { |n| n.note.match(/#{content_regex}/)}.first
 end
 
-describe Gitlab::ImportExport::Project::TreeRestorer do
+RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
   include ImportExport::CommonUtil
   using RSpec::Parameterized::TableSyntax
 
@@ -291,10 +291,6 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
           expect(@project.auto_devops.deploy_strategy).to eq('continuous')
         end
 
-        it 'restores the correct service' do
-          expect(CustomIssueTrackerService.first).not_to be_nil
-        end
-
         it 'restores zoom meetings' do
           meetings = @project.issues.first.zoom_meetings
 
@@ -506,6 +502,7 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
       let(:project_tree_restorer) do
         described_class.new(user: user, shared: shared, project: project)
       end
+
       let(:restored_project_json) { project_tree_restorer.restore }
 
       it 'does not read a symlink' do
@@ -553,8 +550,7 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
             labels: 2,
             label_with_priorities: 'A project label',
             milestones: 1,
-            first_issue_labels: 1,
-            services: 1
+            first_issue_labels: 1
         end
 
         context 'when there is an existing build with build token' do
@@ -637,7 +633,6 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
           label_with_priorities: 'A project label',
           milestones: 1,
           first_issue_labels: 1,
-          services: 1,
           import_failures: 1
 
         it 'records the failures in the database' do
@@ -686,13 +681,7 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
         end
 
         it 'overrides project feature access levels' do
-          access_level_keys = project.project_feature.attributes.keys.select { |a| a =~ /_access_level/ }
-
-          # `pages_access_level` is not included, since it is not available in the public API
-          # and has a dependency on project's visibility level
-          # see ProjectFeature model
-          access_level_keys.delete('pages_access_level')
-
+          access_level_keys = ProjectFeature.available_features.map { |feature| ProjectFeature.access_level_attribute(feature) }
           disabled_access_levels = Hash[access_level_keys.collect { |item| [item, 'disabled'] }]
 
           project.create_import_data(data: { override_params: disabled_access_levels })
@@ -755,18 +744,6 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
         before do
           setup_import_export_config('light')
           setup_reader(reader)
-        end
-
-        it 'does not import any templated services' do
-          expect(restored_project_json).to eq(true)
-
-          expect(project.services.where(template: true).count).to eq(0)
-        end
-
-        it 'does not import any instance services' do
-          expect(restored_project_json).to eq(true)
-
-          expect(project.services.where(instance: true).count).to eq(0)
         end
 
         it 'imports labels' do
@@ -937,6 +914,7 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
             }
           ]
         end
+
         let(:tree_hash) { { 'project_members' => project_members } }
 
         before do
@@ -972,7 +950,6 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
           label_with_priorities: nil,
           milestones: 1,
           first_issue_labels: 0,
-          services: 0,
           import_failures: 1
 
         it 'records the failures in the database' do
@@ -996,6 +973,7 @@ describe Gitlab::ImportExport::Project::TreeRestorer do
         create(:project, :builds_disabled, :issues_disabled,
                { name: 'project', path: 'project' })
       end
+
       let(:shared) { project.import_export_shared }
       let(:project_tree_restorer) { described_class.new(user: user, shared: shared, project: project) }
 

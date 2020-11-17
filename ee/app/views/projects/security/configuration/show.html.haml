@@ -1,7 +1,7 @@
 - breadcrumb_title _("Security Configuration")
 - page_title _("Security Configuration")
 
-#js-security-configuration{ data: { **@configuration.to_h,
+#js-security-configuration{ data: { **@configuration.to_html_data_attribute,
   auto_fix_help_path: '/',
   toggle_autofix_setting_endpoint: 'configuration/auto_fix',
   container_scanning_help_path: help_page_path('user/application_security/container_scanning/index'),

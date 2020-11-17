@@ -1,6 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import {
   REQUEST_UNSCANNED_PROJECTS,
@@ -35,6 +35,3 @@ export const receiveUnscannedProjectsError = ({ commit }) => {
 
   commit(RECEIVE_UNSCANNED_PROJECTS_ERROR);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

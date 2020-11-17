@@ -7,7 +7,11 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          expose :weight, if: ->(issue, _) { issue.supports_weight? }
+          expose :weight, if: ->(issue, _) { issue.weight_available? }
+
+          expose(:blocking_issues_count) do |issue, options|
+            issuable_metadata.blocking_issues_count
+          end
         end
       end
     end

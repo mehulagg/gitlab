@@ -107,7 +107,9 @@ describe('EpicsSelect', () => {
             initialEpic: mockEpic2,
           });
 
-          expect(wrapper.vm.$store.state.selectedEpic).toBe(mockEpic2);
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.vm.$store.state.selectedEpic).toBe(mockEpic2);
+          });
         });
       });
 

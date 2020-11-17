@@ -1,5 +1,0 @@
----
-title: Stop recording JSON parser errors due to third party license scanning integrations
-merge_request: 26944
-author:
-type: fixed

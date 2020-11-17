@@ -14,3 +14,12 @@
       = _('Last Accessed On')
     .table-mobile-content
       = (last_used_at = ssh_key.last_used_at).present? ? last_used_at.to_date : _('Never')
+  .table-section.section-15
+    .table-mobile-header{ role: 'rowheader' }
+      = _('Expiration')
+    .table-mobile-content.gl-w-full
+      = render 'shared/credentials_inventory/expiry_date', credential: ssh_key
+  .table-section.section-5
+    .table-mobile-header{ role: 'rowheader' }
+    .table-mobile-content
+      = button_to _('Delete'), '#', class: "btn btn-danger btn-danger-secondary btn-md btn-secondary gl-button js-confirm-modal-button", data: ssh_key_delete_modal_data(ssh_key, ssh_key_delete_path(ssh_key))

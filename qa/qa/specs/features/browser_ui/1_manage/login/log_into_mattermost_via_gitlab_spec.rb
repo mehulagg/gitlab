@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Manage', :orchestrated, :mattermost do
+  RSpec.describe 'Manage', :orchestrated, :mattermost do
     describe 'Mattermost login' do
-      it 'user logs into Mattermost using GitLab OAuth' do
+      it 'user logs into Mattermost using GitLab OAuth', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/666' do
         Flow::Login.sign_in
 
         Support::Retrier.retry_on_exception do

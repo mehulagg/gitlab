@@ -4,12 +4,14 @@ fragment AlertListItem on AlertManagementAlert {
   severity
   status
   startedAt
-  endedAt
   eventCount
   issueIid
   assignees {
     nodes {
+      name
       username
+      avatarUrl
+      webUrl
     }
   }
 }

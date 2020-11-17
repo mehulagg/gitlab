@@ -1,15 +1,15 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import userAvatarImage from '../../vue_shared/components/user_avatar/user_avatar_image.vue';
 import limitWarning from './limit_warning_component.vue';
 import totalTime from './total_time_component.vue';
-import icon from '../../vue_shared/components/icon.vue';
 
 export default {
   components: {
     userAvatarImage,
     totalTime,
     limitWarning,
-    icon,
+    GlIcon,
   },
   props: {
     items: {
@@ -52,12 +52,13 @@ export default {
           </span>
           <template v-if="mergeRequest.state === 'closed'">
             <span class="merge-request-state">
-              <i class="fa fa-ban" aria-hidden="true"> </i> {{ mergeRequest.state.toUpperCase() }}
+              <gl-icon name="cancel" class="gl-vertical-align-text-bottom" />
+              {{ __('CLOSED') }}
             </span>
           </template>
           <template v-else>
             <span v-if="mergeRequest.branch" class="merge-request-branch">
-              <icon :size="16" name="fork" />
+              <gl-icon :size="16" name="fork" />
               <a :href="mergeRequest.branch.url"> {{ mergeRequest.branch.name }} </a>
             </span>
           </template>

@@ -3,75 +3,65 @@
 require 'spec_helper'
 
 RSpec.describe Dashboard::ProjectsController do
-  include ExternalAuthorizationServiceHelpers
+  let_it_be(:user) { create(:user) }
 
-  let(:user) { create(:user) }
+  describe '#removed' do
+    render_views
+    subject { get :removed, format: :json }
 
-  describe 'GET #index' do
     before do
       sign_in(user)
+
+      allow(Kaminari.config).to receive(:default_per_page).and_return(1)
     end
 
-    context 'onboarding welcome page' do
+    shared_examples 'returns not found' do
+      it do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when licensed' do
       before do
-        allow(Gitlab).to receive(:com?) { true }
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      shared_examples '200 status' do
-        it 'renders the index template' do
-          get :index
+      context 'for admin users', :enable_admin_mode do
+        let_it_be(:user) { create(:admin) }
+        let_it_be(:projects) { create_list(:project, 2, :archived, creator: user, marked_for_deletion_at: 3.days.ago) }
+
+        it 'returns success' do
+          subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to render_template(:index)
+        end
+
+        it 'paginates the records' do
+          subject
+
+          expect(assigns(:projects).count).to eq(1)
+        end
+
+        it 'accounts total removable projects' do
+          subject
+
+          expect(assigns(:removed_projects_count).count).to eq(2)
         end
       end
 
-      context 'when the feature is enabled' do
-        before do
-          stub_feature_flags(user_onboarding: true)
-        end
+      context 'for non-admin users' do
+        it_behaves_like 'returns not found'
+      end
+    end
 
-        context 'and the user does not have projects' do
-          before do
-            stub_feature_flags(project_list_filter_bar: false)
-          end
-
-          it 'renders the welcome page if it has not dismissed onboarding' do
-            cookies[:onboarding_dismissed] = 'false'
-
-            get :index
-
-            expect(response).to redirect_to(explore_onboarding_index_path)
-          end
-
-          it 'renders the index template if it has dismissed the onboarding' do
-            cookies[:onboarding_dismissed] = 'true'
-
-            get :index
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response).to render_template(:index)
-          end
-        end
-
-        context 'and the user has projects' do
-          let(:project) { create(:project) }
-
-          before do
-            project.add_developer(user)
-          end
-
-          it_behaves_like '200 status'
-        end
+    context 'when not licensed' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when the feature is disabled' do
-        before do
-          stub_feature_flags(user_onboarding: false)
-        end
-
-        it_behaves_like '200 status'
-      end
+      it_behaves_like 'returns not found'
     end
   end
 end

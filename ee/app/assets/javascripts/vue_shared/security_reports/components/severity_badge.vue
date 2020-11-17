@@ -1,22 +1,7 @@
 <script>
-import { s__ } from '~/locale';
 import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
-
-export const CLASS_NAME_MAP = {
-  critical: 'text-danger-800',
-  high: 'text-danger-600',
-  medium: 'text-warning-400',
-  low: 'text-warning-300',
-  info: 'text-primary-400',
-  unknown: 'text-secondary-400',
-};
-
-export const TOOLTIP_TITLE_MAP = {
-  unknown: s__(
-    `SecurityReports|The rating "unknown" indicates that the underlying scanner doesn’t contain or provide a severity rating.`,
-  ),
-};
+import { SEVERITY_CLASS_NAME_MAP, SEVERITY_TOOLTIP_TITLE_MAP } from './constants';
 
 export default {
   name: 'SeverityBadge',
@@ -34,13 +19,13 @@ export default {
   },
   computed: {
     hasSeverityBadge() {
-      return Object.keys(CLASS_NAME_MAP).includes(this.severityKey);
+      return Object.keys(SEVERITY_CLASS_NAME_MAP).includes(this.severityKey);
     },
     severityKey() {
       return this.severity.toLowerCase();
     },
     className() {
-      return CLASS_NAME_MAP[this.severityKey];
+      return SEVERITY_CLASS_NAME_MAP[this.severityKey];
     },
     iconName() {
       return `severity-${this.severityKey}`;
@@ -49,7 +34,7 @@ export default {
       return SEVERITY_LEVELS[this.severityKey] || this.severity;
     },
     tooltipTitle() {
-      return TOOLTIP_TITLE_MAP[this.severityKey];
+      return SEVERITY_TOOLTIP_TITLE_MAP[this.severityKey];
     },
   },
 };

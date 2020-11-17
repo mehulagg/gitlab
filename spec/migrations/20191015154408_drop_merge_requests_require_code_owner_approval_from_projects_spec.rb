@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191015154408_drop_merge_requests_require_code_owner_approval_from_projects.rb')
+require_migration!('drop_merge_requests_require_code_owner_approval_from_projects')
 
-describe DropMergeRequestsRequireCodeOwnerApprovalFromProjects do
+RSpec.describe DropMergeRequestsRequireCodeOwnerApprovalFromProjects do
   let(:projects_table) { table(:projects) }
 
   subject(:migration) { described_class.new }

@@ -32,7 +32,7 @@ RSpec.describe Projects::ProjectMembersController do
 
       context 'and the project group has membership lock enabled' do
         before do
-          project.namespace.update(membership_lock: true)
+          project.namespace.update!(membership_lock: true)
         end
 
         it 'responds with 403' do
@@ -64,7 +64,7 @@ RSpec.describe Projects::ProjectMembersController do
 
     context 'when project group has membership lock enabled' do
       before do
-        project.namespace.update(membership_lock: true)
+        project.namespace.update!(membership_lock: true)
       end
 
       it 'responds with 403' do
@@ -90,7 +90,7 @@ RSpec.describe Projects::ProjectMembersController do
 
     context 'when project group has membership lock enabled' do
       before do
-        project.namespace.update(membership_lock: true)
+        project.namespace.update!(membership_lock: true)
       end
 
       it 'responds with 403' do

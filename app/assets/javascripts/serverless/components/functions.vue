@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import EnvironmentRow from './environment_row.vue';
 import EmptyState from './empty_state.vue';
@@ -10,24 +10,14 @@ export default {
   components: {
     EnvironmentRow,
     EmptyState,
+    GlLink,
     GlLoadingIcon,
   },
-  props: {
-    clustersPath: {
-      type: String,
-      required: true,
-    },
-    helpPath: {
-      type: String,
-      required: true,
-    },
-    statusPath: {
-      type: String,
-      required: true,
-    },
+  directives: {
+    SafeHtml,
   },
   computed: {
-    ...mapState(['installed', 'isLoading', 'hasFunctionData']),
+    ...mapState(['installed', 'isLoading', 'hasFunctionData', 'helpPath', 'statusPath']),
     ...mapGetters(['getFunctions']),
 
     checkingInstalled() {
@@ -75,11 +65,7 @@ export default {
 
 <template>
   <section id="serverless-functions" class="flex-grow">
-    <gl-loading-icon
-      v-if="checkingInstalled"
-      size="lg"
-      class="prepend-top-default append-bottom-default"
-    />
+    <gl-loading-icon v-if="checkingInstalled" size="lg" class="gl-mt-3 gl-mb-3" />
 
     <div v-else-if="isInstalled">
       <div v-if="hasFunctionData">
@@ -95,11 +81,7 @@ export default {
             </ul>
           </div>
         </template>
-        <gl-loading-icon
-          v-if="isLoading"
-          size="lg"
-          class="prepend-top-default append-bottom-default js-functions-loader"
-        />
+        <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3 gl-mb-3 js-functions-loader" />
       </div>
       <div v-else class="empty-state js-empty-state">
         <div class="text-content">
@@ -112,9 +94,9 @@ export default {
             }}
           </p>
           <ul>
-            <li v-html="noServerlessConfigFile"></li>
-            <li v-html="noGitlabYamlConfigured"></li>
-            <li v-html="mismatchedServerlessFunctions"></li>
+            <li v-safe-html="noServerlessConfigFile"></li>
+            <li v-safe-html="noGitlabYamlConfigured"></li>
+            <li v-safe-html="mismatchedServerlessFunctions"></li>
             <li>{{ s__('Serverless|The deploy job has not finished.') }}</li>
           </ul>
 
@@ -126,14 +108,14 @@ export default {
             }}
           </p>
           <div class="text-center">
-            <a :href="helpPath" class="btn btn-success">
-              {{ s__('Serverless|Learn more about Serverless') }}
-            </a>
+            <gl-link :href="helpPath" class="btn btn-success">{{
+              s__('Serverless|Learn more about Serverless')
+            }}</gl-link>
           </div>
         </div>
       </div>
     </div>
 
-    <empty-state v-else :clusters-path="clustersPath" :help-path="helpPath" />
+    <empty-state v-else />
   </section>
 </template>

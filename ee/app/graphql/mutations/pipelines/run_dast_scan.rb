@@ -27,17 +27,19 @@ module Mutations
                required: true,
                description: 'The type of scan to be run.'
 
-      authorize :create_pipeline
+      authorize :create_on_demand_dast_scan
 
       def resolve(project_path:, target_url:, branch:, scan_type:)
         project = authorized_find!(full_path: project_path)
-        raise_resource_not_available_error! unless Feature.enabled?(:security_on_demand_scans_feature_flag, project)
 
-        service = Ci::RunDastScanService.new(project: project, user: current_user)
-        pipeline = service.execute(branch: branch, target_url: target_url)
-        success_response(project: project, pipeline: pipeline)
-      rescue *Ci::RunDastScanService::EXCEPTIONS => err
-        error_response(err)
+        service = ::Ci::RunDastScanService.new(project, current_user)
+        result = service.execute(branch: branch, target_url: target_url)
+
+        if result.success?
+          success_response(project: project, pipeline: result.payload)
+        else
+          error_response(result.message)
+        end
       end
 
       private
@@ -57,8 +59,8 @@ module Mutations
         }
       end
 
-      def error_response(err)
-        { errors: [err.message] }
+      def error_response(message)
+        { errors: [message] }
       end
     end
   end

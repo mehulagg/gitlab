@@ -8,5 +8,10 @@ module EE
     def todo_types_options
       super + [{ id: 'Epic', text: 'Epic' }]
     end
+
+    override :todo_author_display?
+    def todo_author_display?(todo)
+      super && !todo.merge_train_removed?
+    end
   end
 end

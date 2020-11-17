@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Google OAuth2 OmniAuth Provider
 
 To enable the Google OAuth2 OmniAuth provider you must register your application
@@ -84,9 +90,10 @@ On your GitLab server:
    For installations from source:
 
    ```yaml
-   - { name: 'google_oauth2', app_id: 'YOUR_APP_ID',
-     app_secret: 'YOUR_APP_SECRET',
-     args: { access_type: 'offline', approval_prompt: '' } }
+   - { name: 'google_oauth2',
+       app_id: 'YOUR_APP_ID',
+       app_secret: 'YOUR_APP_SECRET',
+       args: { access_type: 'offline', approval_prompt: '' } }
    ```
 
 1. Change `YOUR_APP_ID` to the client ID from the Google Developer page

@@ -1,14 +1,13 @@
-import { s__ } from '~/locale';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
-import httpStatus from '~/lib/utils/http_status';
-import createFlash from '~/flash';
 import testAction from 'helpers/vuex_action_helper';
-import { joinPaths } from '~/lib/utils/url_utility';
-
 import * as actions from 'ee/threat_monitoring/store/modules/network_policies/actions';
 import * as types from 'ee/threat_monitoring/store/modules/network_policies/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/network_policies/state';
+import { s__ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { joinPaths } from '~/lib/utils/url_utility';
 
 import { mockPoliciesResponse } from '../../../mock_data';
 
@@ -18,13 +17,19 @@ const networkPoliciesEndpoint = 'networkPoliciesEndpoint';
 
 describe('Network Policy actions', () => {
   let state;
+  let mock;
+  const environmentId = 3;
+  const policy = { name: 'policy', manifest: 'foo', isEnabled: true };
 
   beforeEach(() => {
     state = getInitialState();
+    state.policiesEndpoint = networkPoliciesEndpoint;
+    mock = new MockAdapter(axios);
   });
 
   afterEach(() => {
     createFlash.mockClear();
+    mock.restore();
   });
 
   describe('setEndpoints', () => {
@@ -44,23 +49,11 @@ describe('Network Policy actions', () => {
   });
 
   describe('fetchPolicies', () => {
-    let mock;
-    const currentEnvironmentId = 3;
-
-    beforeEach(() => {
-      state.policiesEndpoint = networkPoliciesEndpoint;
-      mock = new MockAdapter(axios);
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
-
     describe('on success', () => {
       beforeEach(() => {
         mock
           .onGet(networkPoliciesEndpoint, {
-            params: { environment_id: currentEnvironmentId },
+            params: { environment_id: environmentId },
           })
           .replyOnce(httpStatus.OK, mockPoliciesResponse);
       });
@@ -68,7 +61,7 @@ describe('Network Policy actions', () => {
       it('should dispatch the request and success actions', () =>
         testAction(
           actions.fetchPolicies,
-          currentEnvironmentId,
+          environmentId,
           state,
           [
             { type: types.REQUEST_POLICIES },
@@ -79,26 +72,69 @@ describe('Network Policy actions', () => {
           ],
           [],
         ));
+
+      describe('without environment id', () => {
+        beforeEach(() => {
+          mock.onGet(networkPoliciesEndpoint, null).replyOnce(httpStatus.OK, mockPoliciesResponse);
+        });
+        it('should dispatch the request and success actions', () =>
+          testAction(
+            actions.fetchPolicies,
+            null,
+            state,
+            [
+              { type: types.REQUEST_POLICIES },
+              {
+                type: types.RECEIVE_POLICIES_SUCCESS,
+                payload: mockPoliciesResponse,
+              },
+            ],
+            [],
+          ));
+      });
     });
 
     describe('on error', () => {
-      const error = { error: 'foo' };
+      describe('without payload', () => {
+        const error = { error: 'foo' };
 
-      beforeEach(() => {
-        mock.onGet(networkPoliciesEndpoint).replyOnce(500, error);
+        beforeEach(() => {
+          mock.onGet(networkPoliciesEndpoint).replyOnce(500, error);
+        });
+
+        it('should dispatch the request, error actions and updates payload', () =>
+          testAction(
+            actions.fetchPolicies,
+            environmentId,
+            state,
+            [{ type: types.REQUEST_POLICIES }, { type: types.RECEIVE_POLICIES_ERROR, payload: [] }],
+            [],
+          ).then(() => {
+            expect(createFlash).toHaveBeenCalled();
+          }));
       });
 
-      it('should dispatch the request and error actions', () =>
-        testAction(
-          actions.fetchPolicies,
-          currentEnvironmentId,
-          state,
-          [
-            { type: types.REQUEST_POLICIES },
-            { type: types.RECEIVE_POLICIES_ERROR, payload: 'foo' },
-          ],
-          [],
-        ));
+      describe('with payload', () => {
+        const payload = { error: 'foo', payload: [policy] };
+
+        beforeEach(() => {
+          mock.onGet(networkPoliciesEndpoint).replyOnce(500, payload);
+        });
+
+        it('should dispatch the request, error actions and updates payload', () =>
+          testAction(
+            actions.fetchPolicies,
+            environmentId,
+            state,
+            [
+              { type: types.REQUEST_POLICIES },
+              { type: types.RECEIVE_POLICIES_ERROR, payload: [policy] },
+            ],
+            [],
+          ).then(() => {
+            expect(createFlash).toHaveBeenCalled();
+          }));
+      });
     });
 
     describe('with an empty endpoint', () => {
@@ -109,49 +145,125 @@ describe('Network Policy actions', () => {
       it('should dispatch RECEIVE_POLICES_ERROR', () =>
         testAction(
           actions.fetchPolicies,
-          currentEnvironmentId,
+          environmentId,
           state,
           [
             {
               type: types.RECEIVE_POLICIES_ERROR,
-              payload: s__('NetworkPolicies|Something went wrong, unable to fetch policies'),
+              payload: [],
             },
           ],
           [],
-        ));
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
+    });
+  });
+
+  describe('createPolicy', () => {
+    const createdPolicy = { name: 'policy', manifest: 'bar', isEnabled: true };
+
+    describe('on success', () => {
+      beforeEach(() => {
+        mock
+          .onPost(networkPoliciesEndpoint, {
+            environment_id: environmentId,
+            manifest: policy.manifest,
+          })
+          .replyOnce(httpStatus.OK, createdPolicy);
+      });
+
+      it('should dispatch the request and success actions', () =>
+        testAction(
+          actions.createPolicy,
+          { environmentId, policy },
+          state,
+          [
+            { type: types.REQUEST_CREATE_POLICY },
+            {
+              type: types.RECEIVE_CREATE_POLICY_SUCCESS,
+              payload: createdPolicy,
+            },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
+    });
+
+    describe('on error', () => {
+      const error = { error: 'foo' };
+
+      beforeEach(() => {
+        mock
+          .onPost(networkPoliciesEndpoint, {
+            environment_id: environmentId,
+            manifest: policy.manifest,
+          })
+          .replyOnce(500, error);
+      });
+
+      it('should dispatch the request and error actions', () =>
+        testAction(
+          actions.createPolicy,
+          { environmentId, policy },
+          state,
+          [
+            { type: types.REQUEST_CREATE_POLICY },
+            { type: types.RECEIVE_CREATE_POLICY_ERROR, payload: 'foo' },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
+    });
+
+    describe('with an empty endpoint', () => {
+      beforeEach(() => {
+        state.policiesEndpoint = '';
+      });
+
+      it('should dispatch RECEIVE_CREATE_POLICY_ERROR', () =>
+        testAction(
+          actions.createPolicy,
+          { environmentId, policy },
+          state,
+          [
+            {
+              type: types.RECEIVE_CREATE_POLICY_ERROR,
+              payload: s__('NetworkPolicies|Something went wrong, failed to update policy'),
+            },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
     });
 
     describe('without environment id', () => {
-      it('should dispatch RECEIVE_POLICIES_ERROR', () =>
+      it('should dispatch RECEIVE_CREATE_POLICY_ERROR', () =>
         testAction(
-          actions.fetchPolicies,
-          undefined,
+          actions.createPolicy,
+          {
+            environmentId: undefined,
+            policy,
+          },
           state,
           [
             {
-              type: types.RECEIVE_POLICIES_ERROR,
-              payload: s__('NetworkPolicies|Something went wrong, unable to fetch policies'),
+              type: types.RECEIVE_CREATE_POLICY_ERROR,
+              payload: s__('NetworkPolicies|Something went wrong, failed to update policy'),
             },
           ],
           [],
-        ));
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
     });
   });
 
   describe('updatePolicy', () => {
-    let mock;
-    const environmentId = 3;
-    const policy = { name: 'policy', manifest: 'foo', isEnabled: true };
     const updatedPolicy = { name: 'policy', manifest: 'bar', isEnabled: true };
-
-    beforeEach(() => {
-      state.policiesEndpoint = networkPoliciesEndpoint;
-      mock = new MockAdapter(axios);
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
 
     describe('on success', () => {
       beforeEach(() => {
@@ -203,7 +315,9 @@ describe('Network Policy actions', () => {
             { type: types.RECEIVE_UPDATE_POLICY_ERROR, payload: 'foo' },
           ],
           [],
-        ));
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
     });
 
     describe('with an empty endpoint', () => {
@@ -223,7 +337,9 @@ describe('Network Policy actions', () => {
             },
           ],
           [],
-        ));
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
     });
 
     describe('without environment id', () => {
@@ -242,7 +358,111 @@ describe('Network Policy actions', () => {
             },
           ],
           [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
+    });
+  });
+
+  describe('deletePolicy', () => {
+    describe('on success', () => {
+      beforeEach(() => {
+        mock
+          .onDelete(joinPaths(networkPoliciesEndpoint, policy.name), {
+            params: {
+              environment_id: environmentId,
+              manifest: policy.manifest,
+            },
+          })
+          .replyOnce(httpStatus.OK);
+      });
+
+      it('should dispatch the request and success actions', () =>
+        testAction(
+          actions.deletePolicy,
+          { environmentId, policy },
+          state,
+          [
+            { type: types.REQUEST_DELETE_POLICY },
+            {
+              type: types.RECEIVE_DELETE_POLICY_SUCCESS,
+              payload: { policy },
+            },
+          ],
+          [],
         ));
+    });
+
+    describe('on error', () => {
+      const error = { error: 'foo' };
+
+      beforeEach(() => {
+        mock
+          .onDelete(joinPaths(networkPoliciesEndpoint, policy.name), {
+            params: {
+              environment_id: environmentId,
+              manifest: policy.manifest,
+            },
+          })
+          .replyOnce(500, error);
+      });
+
+      it('should dispatch the request and error actions', () =>
+        testAction(
+          actions.deletePolicy,
+          { environmentId, policy },
+          state,
+          [
+            { type: types.REQUEST_DELETE_POLICY },
+            { type: types.RECEIVE_DELETE_POLICY_ERROR, payload: 'foo' },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
+    });
+
+    describe('with an empty endpoint', () => {
+      beforeEach(() => {
+        state.policiesEndpoint = '';
+      });
+
+      it('should dispatch RECEIVE_DELETE_POLICY_ERROR', () =>
+        testAction(
+          actions.deletePolicy,
+          { environmentId, policy },
+          state,
+          [
+            {
+              type: types.RECEIVE_DELETE_POLICY_ERROR,
+              payload: s__('NetworkPolicies|Something went wrong, failed to update policy'),
+            },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
+    });
+
+    describe('without environment id', () => {
+      it('should dispatch RECEIVE_DELETE_POLICY_ERROR', () =>
+        testAction(
+          actions.deletePolicy,
+          {
+            environmentId: undefined,
+            policy,
+          },
+          state,
+          [
+            {
+              type: types.RECEIVE_DELETE_POLICY_ERROR,
+              payload: s__('NetworkPolicies|Something went wrong, failed to update policy'),
+            },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalled();
+        }));
     });
   });
 });

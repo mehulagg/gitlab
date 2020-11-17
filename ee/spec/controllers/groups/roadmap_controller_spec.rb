@@ -49,7 +49,7 @@ RSpec.describe Groups::RoadmapController do
             end
 
             it 'defaults to sort_value_start_date_soon' do
-              user.user_preference.update(roadmaps_sort: nil)
+              user.user_preference.update!(roadmaps_sort: nil)
 
               get :show, params: { group_id: group }
 
@@ -59,7 +59,7 @@ RSpec.describe Groups::RoadmapController do
 
           context 'when roadmaps_sort is present' do
             it 'update roadmaps_sort with current value' do
-              user.user_preference.update(roadmaps_sort: 'created_desc')
+              user.user_preference.update!(roadmaps_sort: 'created_desc')
 
               get :show, params: { group_id: group, sort: 'start_date_asc' }
 

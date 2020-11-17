@@ -38,7 +38,7 @@ class MigrateCiJobArtifactsToSeparateRegistry < ActiveRecord::Migration[4.2]
           $BODY$
           LANGUAGE 'plpgsql'
           VOLATILE;
-          EOF
+      EOF
 
       execute <<~EOF
           CREATE TRIGGER replicate_job_artifact_registry
@@ -52,9 +52,7 @@ class MigrateCiJobArtifactsToSeparateRegistry < ActiveRecord::Migration[4.2]
   end
 
   def down
-    # rubocop:disable Migration/DropTable
     tracking_db.drop_table :job_artifact_registry
-    # rubocop:enable Migration/DropTable
 
     execute('DROP TRIGGER IF EXISTS replicate_job_artifact_registry ON file_registry')
     execute('DROP FUNCTION IF EXISTS replicate_job_artifact_registry()')

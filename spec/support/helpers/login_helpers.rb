@@ -40,7 +40,7 @@ module LoginHelpers
       if user_or_role.is_a?(User)
         user_or_role
       else
-        create(user_or_role)
+        create(user_or_role) # rubocop:disable Rails/SaveBang
       end
 
     gitlab_sign_in_with(user, **kwargs)
@@ -109,6 +109,11 @@ module LoginHelpers
   def fake_successful_u2f_authentication
     allow(U2fRegistration).to receive(:authenticate).and_return(true)
     FakeU2fDevice.new(page, nil).fake_u2f_authentication
+  end
+
+  def fake_successful_webauthn_authentication
+    allow_any_instance_of(Webauthn::AuthenticateService).to receive(:execute).and_return(true)
+    FakeWebauthnDevice.new(page, nil).fake_webauthn_authentication
   end
 
   def mock_auth_hash_with_saml_xml(provider, uid, email, saml_response)

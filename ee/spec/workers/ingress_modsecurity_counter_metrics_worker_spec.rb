@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IngressModsecurityCounterMetricsWorker, :clean_gitlab_redis_shared_state do
+RSpec.describe IngressModsecurityCounterMetricsWorker, :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
   subject(:worker) { described_class.new }

@@ -10,7 +10,6 @@ module Gitlab
       Acme::Client::Error::Timeout
       Acme::Client::Error::UnsupportedOperation
       ActiveRecord::ConnectionTimeoutError
-      ActiveRecord::QueryCanceled
       Gitlab::RequestContext::RequestDeadlineExceeded
       GRPC::DeadlineExceeded
       JIRA::HTTPError
@@ -27,9 +26,11 @@ module Gitlab
           # Sanitize fields based on those sanitized from Rails.
           config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
           config.processors << ::Gitlab::ErrorTracking::Processor::SidekiqProcessor
+          config.processors << ::Gitlab::ErrorTracking::Processor::GrpcErrorProcessor
+
           # Sanitize authentication headers
           config.sanitize_http_headers = %w[Authorization Private-Token]
-          config.tags = { program: Gitlab.process_name }
+          config.tags = extra_tags_from_env.merge(program: Gitlab.process_name)
           config.before_send = method(:before_send)
 
           yield config if block_given?
@@ -122,6 +123,7 @@ module Gitlab
         end
 
         extra = sanitize_request_parameters(extra)
+        inject_sql_query_into_extra(exception, extra)
 
         if sentry && Raven.configuration.server
           Raven.capture_exception(exception, tags: default_tags, extra: extra)
@@ -148,6 +150,12 @@ module Gitlab
         filter.filter(parameters)
       end
 
+      def inject_sql_query_into_extra(exception, extra)
+        return unless exception.is_a?(ActiveRecord::StatementInvalid)
+
+        extra[:sql] = PgQuery.normalize(exception.sql.to_s)
+      end
+
       def sentry_dsn
         return unless Rails.env.production? || Rails.env.development?
         return unless Gitlab.config.sentry.enabled
@@ -166,6 +174,15 @@ module Gitlab
         }
       end
 
+      # Static tags that are set on application start
+      def extra_tags_from_env
+        Gitlab::Json.parse(ENV.fetch('GITLAB_SENTRY_EXTRA_TAGS', '{}')).to_hash
+      rescue => e
+        Gitlab::AppLogger.debug("GITLAB_SENTRY_EXTRA_TAGS could not be parsed as JSON: #{e.class.name}: #{e.message}")
+
+        {}
+      end
+
       # Debugging for https://gitlab.com/gitlab-org/gitlab-foss/issues/57727
       def add_context_from_exception_type(event, hint)
         if ActiveModel::MissingAttributeError === hint[:exception]
@@ -173,8 +190,7 @@ module Gitlab
                             .connection
                             .schema_cache
                             .instance_variable_get(:@columns_hash)
-                            .map { |k, v| [k, v.map(&:first)] }
-                            .to_h
+                            .transform_values { |v| v.map(&:first) }
 
           event.extra.merge!(columns_hash)
         end

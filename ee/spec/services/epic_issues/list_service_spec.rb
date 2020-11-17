@@ -3,22 +3,22 @@
 require 'spec_helper'
 
 RSpec.describe EpicIssues::ListService do
-  let(:user) { create :user }
-  let(:group) { create(:group, :private) }
-  let(:project) { create(:project_empty_repo, group: group) }
-  let(:other_project) { create(:project_empty_repo, group: group) }
-  let(:epic) { create(:epic, group: group) }
+  let_it_be(:user) { create :user }
+  let_it_be(:group, refind: true) { create(:group, :private) }
+  let_it_be(:project, refind: true) { create(:project_empty_repo, group: group) }
+  let_it_be(:other_project) { create(:project_empty_repo, group: group) }
+  let_it_be(:epic, refind: true) { create(:epic, group: group) }
 
   # Reloading issues here is needed because when storing datetime on postgres
   # nanoseconds precision is ignored when fetching records but not when inserting,
   # which makes the expectations fails for created_at field.
-  let!(:issue1) { create(:issue, project: project, weight: 1).reload }
-  let!(:issue2) { create(:issue, project: project).reload }
-  let!(:issue3) { create(:issue, project: other_project).reload }
+  let_it_be(:issue1) { create(:issue, project: project, weight: 1).reload }
+  let_it_be(:issue2) { create(:issue, project: project).reload }
+  let_it_be(:issue3) { create(:issue, project: other_project).reload }
 
-  let!(:epic_issue1) { create(:epic_issue, issue: issue1, epic: epic, relative_position: 2) }
-  let!(:epic_issue2) { create(:epic_issue, issue: issue2, epic: epic, relative_position: 1) }
-  let!(:epic_issue3) { create(:epic_issue, issue: issue3, epic: epic, relative_position: 3) }
+  let_it_be(:epic_issue1) { create(:epic_issue, issue: issue1, epic: epic, relative_position: 2) }
+  let_it_be(:epic_issue2) { create(:epic_issue, issue: issue2, epic: epic, relative_position: 1) }
+  let_it_be(:epic_issue3) { create(:epic_issue, issue: issue3, epic: epic, relative_position: 3) }
 
   describe '#execute' do
     subject { described_class.new(epic, user).execute }

@@ -6,7 +6,7 @@ module Gitlab
       module StageEvents
         class ProductionStageEnd < StageEvent
           def self.name
-            _("Issue first depoloyed to production")
+            _("Issue first deployed to production")
           end
 
           def self.identifier
@@ -19,6 +19,11 @@ module Gitlab
 
           def timestamp_projection
             mr_metrics_table[:first_deployed_to_production_at]
+          end
+
+          override :column_list
+          def column_list
+            [timestamp_projection]
           end
 
           # rubocop: disable CodeReuse/ActiveRecord

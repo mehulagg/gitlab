@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { GlButtonGroup, GlButton } from '@gitlab/ui';
 import BlobHeaderActions from '~/blob/components/blob_header_default_actions.vue';
 import {
   BTN_COPY_CONTENTS_TITLE,
@@ -6,17 +7,20 @@ import {
   BTN_RAW_TITLE,
   RICH_BLOB_VIEWER,
 } from '~/blob/components/constants';
-import { GlButtonGroup, GlDeprecatedButton } from '@gitlab/ui';
 import { Blob } from './mock_data';
 
 describe('Blob Header Default Actions', () => {
   let wrapper;
   let btnGroup;
   let buttons;
-  const hrefPrefix = 'http://localhost';
+
+  const blobHash = 'foo-bar';
 
   function createComponent(propsData = {}) {
     wrapper = mount(BlobHeaderActions, {
+      provide: {
+        blobHash,
+      },
       propsData: {
         rawPath: Blob.rawPath,
         ...propsData,
@@ -27,7 +31,7 @@ describe('Blob Header Default Actions', () => {
   beforeEach(() => {
     createComponent();
     btnGroup = wrapper.find(GlButtonGroup);
-    buttons = wrapper.findAll(GlDeprecatedButton);
+    buttons = wrapper.findAll(GlButton);
   });
 
   afterEach(() => {
@@ -47,11 +51,11 @@ describe('Blob Header Default Actions', () => {
     });
 
     it('correct href attribute on RAW button', () => {
-      expect(buttons.at(1).vm.$el.href).toBe(`${hrefPrefix}${Blob.rawPath}`);
+      expect(buttons.at(1).attributes('href')).toBe(Blob.rawPath);
     });
 
     it('correct href attribute on Download button', () => {
-      expect(buttons.at(2).vm.$el.href).toBe(`${hrefPrefix}${Blob.rawPath}?inline=false`);
+      expect(buttons.at(2).attributes('href')).toBe(`${Blob.rawPath}?inline=false`);
     });
 
     it('does not render "Copy file contents" button as disables if the viewer is Simple', () => {
@@ -62,7 +66,7 @@ describe('Blob Header Default Actions', () => {
       createComponent({
         activeViewer: RICH_BLOB_VIEWER,
       });
-      buttons = wrapper.findAll(GlDeprecatedButton);
+      buttons = wrapper.findAll(GlButton);
 
       expect(buttons.at(0).attributes('disabled')).toBeTruthy();
     });

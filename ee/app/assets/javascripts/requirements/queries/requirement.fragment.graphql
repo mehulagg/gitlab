@@ -1,0 +1,28 @@
+#import "~/graphql_shared/fragments/author.fragment.graphql"
+
+fragment Requirement on Requirement {
+  iid
+  title
+  titleHtml
+  description
+  descriptionHtml
+  createdAt
+  updatedAt
+  state
+  lastTestReportState
+  lastTestReportManuallyCreated
+  testReports(first: 1, sort: CREATED_DESC) {
+    nodes {
+      id
+      state
+      createdAt
+    }
+  }
+  userPermissions {
+    updateRequirement
+    adminRequirement
+  }
+  author {
+    ...Author
+  }
+}

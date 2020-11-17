@@ -5,7 +5,7 @@ import DismissalCommentModalFooter from 'ee/vue_shared/security_reports/componen
 import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import ModalFooter from 'ee/vue_shared/security_reports/components/modal_footer.vue';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import VulnerabilityDetails from 'ee/vue_shared/security_reports/components/vulnerability_details.vue';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { __ } from '~/locale';
@@ -26,11 +26,6 @@ export default {
     modal: {
       type: Object,
       required: true,
-    },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: false,
-      default: '',
     },
     canCreateIssue: {
       type: Boolean,
@@ -205,7 +200,6 @@ export default {
         :remediation="remediation"
         :has-mr="vulnerability.hasMergeRequest"
         :has-download="canDownloadPatchForThisVulnerability"
-        :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
       />
 
       <div v-if="showFeedbackNotes" class="card my-4">

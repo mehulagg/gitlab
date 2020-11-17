@@ -145,6 +145,56 @@ describe('text_utility', () => {
     });
   });
 
+  describe('truncate', () => {
+    it('returns the original string when str length is less than maxLength', () => {
+      const str = 'less than 20 chars';
+      expect(textUtils.truncate(str, 20)).toEqual(str);
+    });
+
+    it('returns truncated string when str length is more than maxLength', () => {
+      const str = 'more than 10 chars';
+      expect(textUtils.truncate(str, 10)).toEqual(`${str.substring(0, 10 - 1)}…`);
+    });
+
+    it('returns the original string when rendered width is exactly equal to maxWidth', () => {
+      const str = 'Exactly 16 chars';
+      expect(textUtils.truncate(str, 16)).toEqual(str);
+    });
+  });
+
+  describe('truncateWidth', () => {
+    const clientWidthDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth');
+
+    beforeAll(() => {
+      // Mock measured width of ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+      Object.defineProperty(Element.prototype, 'clientWidth', {
+        value: 431,
+        writable: false,
+      });
+    });
+
+    afterAll(() => {
+      Object.defineProperty(Element.prototype, 'clientWidth', clientWidthDescriptor);
+    });
+
+    it('returns the original string when rendered width is less than maxWidth', () => {
+      const str = '< 80px';
+      expect(textUtils.truncateWidth(str)).toEqual(str);
+    });
+
+    it('returns truncated string when rendered width is more than maxWidth', () => {
+      const str = 'This is wider than 80px';
+      expect(textUtils.truncateWidth(str)).toEqual(`${str.substring(0, 10)}…`);
+    });
+
+    it('returns the original string when rendered width is exactly equal to maxWidth', () => {
+      const str = 'Exactly 159.62962962962965px';
+      expect(textUtils.truncateWidth(str, { maxWidth: 159.62962962962965, fontSize: 10 })).toEqual(
+        str,
+      );
+    });
+  });
+
   describe('truncateSha', () => {
     it('shortens SHAs to 8 characters', () => {
       expect(textUtils.truncateSha('verylongsha')).toBe('verylong');
@@ -152,6 +202,27 @@ describe('text_utility', () => {
 
     it('leaves short SHAs as is', () => {
       expect(textUtils.truncateSha('shortsha')).toBe('shortsha');
+    });
+  });
+
+  describe('convertUnicodeToAscii', () => {
+    it('does nothing on an empty string', () => {
+      expect(textUtils.convertUnicodeToAscii('')).toBe('');
+    });
+
+    it('does nothing on an already ascii string', () => {
+      expect(textUtils.convertUnicodeToAscii('The quick brown fox jumps over the lazy dog.')).toBe(
+        'The quick brown fox jumps over the lazy dog.',
+      );
+    });
+
+    it('replaces Unicode characters', () => {
+      expect(textUtils.convertUnicodeToAscii('Dĭd söméònê äšk fœŕ Ůnĭċődę?')).toBe(
+        'Did soemeone aesk foer Unicode?',
+      );
+
+      expect(textUtils.convertUnicodeToAscii("Jürgen's Projekt")).toBe("Juergen's Projekt");
+      expect(textUtils.convertUnicodeToAscii('öäüÖÄÜ')).toBe('oeaeueOeAeUe');
     });
   });
 
@@ -252,6 +323,21 @@ describe('text_utility', () => {
       ${'hello'}          | ${true}
     `('returns $result for input $txt', ({ result, txt }) => {
       expect(textUtils.hasContent(txt)).toEqual(result);
+    });
+  });
+
+  describe('isValidSha1Hash', () => {
+    const validSha1Hash = '92d10c15';
+    const stringOver40 = new Array(42).join('a');
+
+    it.each`
+      hash              | valid
+      ${validSha1Hash}  | ${true}
+      ${'__characters'} | ${false}
+      ${'abc'}          | ${false}
+      ${stringOver40}   | ${false}
+    `(`returns $valid for $hash`, ({ hash, valid }) => {
+      expect(textUtils.isValidSha1Hash(hash)).toBe(valid);
     });
   });
 });

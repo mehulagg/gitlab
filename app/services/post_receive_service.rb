@@ -29,11 +29,7 @@ class PostReceiveService
       response.add_alert_message(message)
     end
 
-    response.add_alert_message(storage_size_limit_alert)
-
-    broadcast_message = BroadcastMessage.current_banner_messages&.last&.message
     response.add_alert_message(broadcast_message)
-
     response.add_merge_request_urls(merge_request_urls)
 
     # Neither User nor Project are guaranteed to be returned; an orphaned write deploy
@@ -79,15 +75,20 @@ class PostReceiveService
 
   private
 
-  def storage_size_limit_alert
-    return unless repository&.repo_type&.project?
+  def broadcast_message
+    banner = nil
 
-    payload = Namespaces::CheckStorageSizeService.new(project.namespace, user).execute.payload
-    return unless payload.present?
+    if project
+      scoped_messages = BroadcastMessage.current_banner_messages(project.full_path).select do |message|
+        message.target_path.present? && message.matches_current_path(project.full_path)
+      end
 
-    alert_level = "##### #{payload[:alert_level].to_s.upcase} #####"
+      banner = scoped_messages.last
+    end
 
-    [alert_level, payload[:usage_message], payload[:explanation_message]].join("\n")
+    banner ||= BroadcastMessage.current_banner_messages.last
+
+    banner&.message
   end
 end
 

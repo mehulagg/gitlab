@@ -1,4 +1,10 @@
-export default {
+import {
+  HEADER_TOTAL_ENTRIES,
+  HEADER_PAGE_NUMBER,
+  HEADER_ITEMS_PER_PAGE,
+} from 'ee/billings/constants';
+
+export const mockDataSubscription = {
   gold: {
     plan: {
       name: 'Gold',
@@ -58,3 +64,58 @@ export default {
     },
   },
 };
+
+export const mockDataSeats = {
+  data: [
+    {
+      name: 'Administrator',
+      username: 'root',
+      avatar_url: 'path/to/img',
+      web_url: 'path/to/user',
+    },
+    {
+      name: 'Agustin Walker',
+      username: 'lester.orn',
+      avatar_url: 'path/to/img',
+      web_url: 'path/to/user',
+    },
+    {
+      name: 'Joella Miller',
+      username: 'era',
+      avatar_url: 'path/to/img',
+      web_url: 'path/to/user',
+    },
+  ],
+  headers: {
+    [HEADER_TOTAL_ENTRIES]: '3',
+    [HEADER_PAGE_NUMBER]: '1',
+    [HEADER_ITEMS_PER_PAGE]: '1',
+  },
+};
+
+export const seatsTableItems = [
+  {
+    user: {
+      name: 'Administrator',
+      username: '@root',
+      avatar_url: 'path/to/img',
+      web_url: 'path/to/user',
+    },
+  },
+  {
+    user: {
+      name: 'Agustin Walker',
+      username: '@lester.orn',
+      avatar_url: 'path/to/img',
+      web_url: 'path/to/user',
+    },
+  },
+  {
+    user: {
+      name: 'Joella Miller',
+      username: '@era',
+      avatar_url: 'path/to/img',
+      web_url: 'path/to/user',
+    },
+  },
+];

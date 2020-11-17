@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ImportFailure do
+RSpec.describe ImportFailure do
   describe 'Scopes' do
     let_it_be(:project) { create(:project) }
     let_it_be(:correlation_id) { 'ABC' }
@@ -16,7 +16,7 @@ describe ImportFailure do
 
     it 'orders hard failures by newest first' do
       older_failure = hard_failure.dup
-      Timecop.freeze(1.day.before(hard_failure.created_at)) do
+      travel_to(1.day.before(hard_failure.created_at)) do
         older_failure.save!
 
         expect(ImportFailure.hard_failures_by_correlation_id(correlation_id)).to eq([hard_failure, older_failure])

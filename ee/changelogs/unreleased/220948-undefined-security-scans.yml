@@ -1,5 +1,0 @@
----
-title: Return empty scans when head_pipeline is missing
-merge_request: 34193
-author:
-type: fixed

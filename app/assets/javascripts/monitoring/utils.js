@@ -5,12 +5,63 @@ import {
   removeParams,
   updateHistory,
 } from '~/lib/utils/url_utility';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import {
   timeRangeParamNames,
   timeRangeFromParams,
   timeRangeToParams,
 } from '~/lib/utils/datetime_range';
 import { VARIABLE_PREFIX } from './constants';
+
+/**
+ * Extracts the initial state and props from HTML dataset
+ * and places them in separate objects to setup bundle.
+ * @param {*} dataset
+ */
+export const stateAndPropsFromDataset = (dataset = {}) => {
+  const {
+    currentDashboard,
+    deploymentsEndpoint,
+    dashboardEndpoint,
+    dashboardsEndpoint,
+    panelPreviewEndpoint,
+    dashboardTimezone,
+    canAccessOperationsSettings,
+    operationsSettingsPath,
+    projectPath,
+    logsPath,
+    externalDashboardUrl,
+    currentEnvironmentName,
+    customDashboardBasePath,
+    addDashboardDocumentationPath,
+    ...dataProps
+  } = dataset;
+
+  // HTML attributes are always strings, parse other types.
+  dataProps.hasMetrics = parseBoolean(dataProps.hasMetrics);
+  dataProps.customMetricsAvailable = parseBoolean(dataProps.customMetricsAvailable);
+  dataProps.prometheusAlertsAvailable = parseBoolean(dataProps.prometheusAlertsAvailable);
+
+  return {
+    initState: {
+      currentDashboard,
+      deploymentsEndpoint,
+      dashboardEndpoint,
+      dashboardsEndpoint,
+      panelPreviewEndpoint,
+      dashboardTimezone,
+      canAccessOperationsSettings,
+      operationsSettingsPath,
+      projectPath,
+      logsPath,
+      externalDashboardUrl,
+      currentEnvironmentName,
+      customDashboardBasePath,
+      addDashboardDocumentationPath,
+    },
+    dataProps,
+  };
+};
 
 /**
  * List of non time range url parameters
@@ -160,8 +211,10 @@ export const removePrefixFromLabel = label =>
  * @returns {Object}
  */
 export const convertVariablesForURL = variables =>
-  Object.keys(variables || {}).reduce((acc, key) => {
-    acc[addPrefixToLabel(key)] = variables[key]?.value;
+  variables.reduce((acc, { name, value }) => {
+    if (value !== null) {
+      acc[addPrefixToLabel(name)] = value;
+    }
     return acc;
   }, {});
 
@@ -170,11 +223,10 @@ export const convertVariablesForURL = variables =>
  * begin with a constant prefix so that it doesn't collide with
  * other URL params.
  *
- * @param {String} New URL
+ * @param {String} search URL
  * @returns {Object} The custom variables defined by the user in the URL
  */
-
-export const getPromCustomVariablesFromUrl = (search = window.location.search) => {
+export const templatingVariablesFromUrl = (search = window.location.search) => {
   const params = queryToObject(search);
   // pick the params with variable prefix
   const paramsWithVars = pickBy(params, (val, key) => key.startsWith(VARIABLE_PREFIX));
@@ -352,40 +404,5 @@ export const barChartsDataParser = (data = []) =>
     }),
     {},
   );
-
-/**
- * Custom variables are defined in the dashboard yml file
- * and their values can be passed through the URL.
- *
- * On component load, this method merges variables data
- * from the yml file with URL data to store in the Vuex store.
- * Not all params coming from the URL need to be stored. Only
- * the ones that have a corresponding variable defined in the
- * yml file.
- *
- * This ensures that there is always a single source of truth
- * for variables
- *
- * This method can be improved further. See the below issue
- * https://gitlab.com/gitlab-org/gitlab/-/issues/217713
- *
- * @param {Object} varsFromYML template variables from yml file
- * @returns {Object}
- */
-export const mergeURLVariables = (varsFromYML = {}) => {
-  const varsFromURL = getPromCustomVariablesFromUrl();
-  const variables = {};
-  Object.keys(varsFromYML).forEach(key => {
-    if (Object.prototype.hasOwnProperty.call(varsFromURL, key)) {
-      variables[key] = {
-        ...varsFromYML[key],
-        value: varsFromURL[key],
-      };
-    } else {
-      variables[key] = varsFromYML[key];
-    }
-  });
-  return variables;
-};
 
 export default {};

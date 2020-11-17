@@ -25,7 +25,14 @@ RSpec.describe Projects::CycleAnalyticsController do
     end
   end
 
-  describe 'cycle analytics not set up flag' do
+  context 'tracking visits to html page' do
+    it_behaves_like 'tracking unique visits', :show do
+      let(:request_params) { { namespace_id: project.namespace, project_id: project } }
+      let(:target_id) { 'p_analytics_valuestream' }
+    end
+  end
+
+  describe 'value stream analytics not set up flag' do
     context 'with no data' do
       it 'is true' do
         get(:show,
@@ -60,4 +67,6 @@ RSpec.describe Projects::CycleAnalyticsController do
       end
     end
   end
+
+  include_examples GracefulTimeoutHandling
 end

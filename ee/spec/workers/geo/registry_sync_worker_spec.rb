@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RegistrySyncWorker, :geo, :use_sql_query_cache_for_tracking_db do
+RSpec.describe Geo::RegistrySyncWorker, :geo, :use_sql_query_cache_for_tracking_db do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

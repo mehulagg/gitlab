@@ -6,6 +6,7 @@ export default () => ({
   labelsCreateTitle: '',
   footerCreateLabelTitle: '',
   footerManageLabelTitle: '',
+  dropdownButtonText: '',
 
   // Paths
   namespace: '',
@@ -14,6 +15,7 @@ export default () => ({
 
   // UI Flags
   variant: '',
+  allowLabelRemove: false,
   allowLabelCreate: false,
   allowLabelEdit: false,
   allowScopedLabels: false,

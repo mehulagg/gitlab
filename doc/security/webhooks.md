@@ -1,11 +1,14 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: concepts, reference, howto
 ---
 
 # Webhooks and insecure internal web services
 
 NOTE: **Note:**
-On GitLab.com the [maximum number of webhooks](../user/gitlab_com/index.md#maximum-number-of-webhooks) per project is limited.
+On GitLab.com, the [maximum number of webhooks and their size](../user/gitlab_com/index.md#webhooks) per project, and per group, is limited.
 
 If you have non-GitLab web services running on your GitLab server or within its
 local network, these may be vulnerable to exploitation via Webhooks.

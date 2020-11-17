@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe MergeRequests::BuildService do
+RSpec.describe MergeRequests::BuildService do
   using RSpec::Parameterized::TableSyntax
   include RepoHelpers
   include ProjectForksHelper
@@ -87,6 +87,10 @@ describe MergeRequests::BuildService do
       let(:mr_params) { params.merge(force_remove_source_branch: '1') }
       let(:source_project) { fork_project(project, user) }
       let(:merge_request) { described_class.new(project, user, mr_params).execute }
+
+      before do
+        project.add_reporter(user)
+      end
 
       it 'assigns force_remove_source_branch' do
         expect(merge_request.force_remove_source_branch?).to be_truthy
@@ -189,8 +193,8 @@ describe MergeRequests::BuildService do
 
       it_behaves_like 'allows the merge request to be created'
 
-      it 'adds a WIP prefix to the merge request title' do
-        expect(merge_request.title).to eq('WIP: Feature branch')
+      it 'adds a Draft prefix to the merge request title' do
+        expect(merge_request.title).to eq('Draft: Feature branch')
       end
     end
 
@@ -510,7 +514,7 @@ describe MergeRequests::BuildService do
       let(:target_project) { create(:project, :public, :repository) }
 
       before do
-        target_project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        target_project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
       end
 
       it 'sets the target_project correctly' do

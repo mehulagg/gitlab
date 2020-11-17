@@ -9,7 +9,6 @@ describe('performance bar wrapper', () => {
   let vm;
 
   beforeEach(() => {
-    URL.createObjectURL = jest.fn();
     performance.getEntriesByType = jest.fn().mockReturnValue([]);
 
     // clear html so that elements from previous tests don't mess with this test
@@ -44,7 +43,7 @@ describe('performance bar wrapper', () => {
       {},
     );
 
-    vm = performanceBar({ container: '#js-peek' });
+    vm = performanceBar(peekWrapper);
   });
 
   afterEach(() => {

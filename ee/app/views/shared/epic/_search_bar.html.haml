@@ -10,7 +10,7 @@
 .epics-filters{ class: "#{'epics-roadmap-filters' if show_roadmap_presets}" }
   .epics-details-filters.filtered-search-block.d-flex.flex-column.flex-md-row.row-content-block.second-block
     - if show_roadmap_presets
-      .btn-group.btn-group-toggle.append-right-default.js-btn-roadmap-presets{ data: { toggle: 'buttons' } }
+      .btn-group.btn-group-toggle.gl-mr-3.js-btn-roadmap-presets{ data: { toggle: 'buttons' } }
         %label.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_quarters) }
           %input{ type: 'radio', name: 'presetType', autocomplete: 'off', checked: ("checked" if is_quarters), value: 'QUARTERS' }
             = _('Quarters')
@@ -20,7 +20,7 @@
         %label.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_weeks) }
           %input{ type: 'radio', name: 'presetType', autocomplete: 'off', checked: ("checked" if is_weeks), value: 'WEEKS' }
             = _('Weeks')
-      .filter-dropdown-container.append-right-default
+      .filter-dropdown-container.gl-mr-3
         = render 'shared/epic/state_dropdown'
     = form_tag page_filter_path, method: :get, class: 'flex-fill filter-form js-filter-form' do
       - if params[:search].present?
@@ -81,7 +81,7 @@
                       {{ title }}
 
           %button.clear-search.hidden{ type: 'button' }
-            = icon('times')
+            = sprite_icon('close', size: 16, css_class: 'clear-search-icon')
         - unless hide_sort_dropdown
           .filter-dropdown-container
             = render 'shared/epic/sort_dropdown', hide_extra_sort_options: hide_extra_sort_options

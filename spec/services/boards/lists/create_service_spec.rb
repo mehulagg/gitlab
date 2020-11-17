@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::Lists::CreateService do
+RSpec.describe Boards::Lists::CreateService do
   describe '#execute' do
     shared_examples 'creating board lists' do
       let(:user)    { create(:user) }
@@ -57,6 +57,21 @@ describe Boards::Lists::CreateService do
           service = described_class.new(parent, user, label_id: label.id)
 
           expect { service.execute(board) }.to raise_error(ActiveRecord::RecordNotFound)
+        end
+      end
+
+      context 'when backlog param is sent' do
+        it 'creates one and only one backlog list' do
+          service = described_class.new(parent, user, 'backlog' => true)
+          list = service.execute(board)
+
+          expect(list.list_type).to eq('backlog')
+          expect(list.position).to be_nil
+          expect(list).to be_valid
+
+          another_backlog = service.execute(board)
+
+          expect(another_backlog).to eq list
         end
       end
     end

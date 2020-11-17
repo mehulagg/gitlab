@@ -53,3 +53,11 @@ model/db   @gl-database
 
 [dOcUmEnTaTiOn]
 README.md  @gl-docs
+
+[Two Words]
+README.md  @gl-database
+model/db   @gl-database
+
+[Double::Colon]
+README.md  @gl-database
+model/db   @gl-database

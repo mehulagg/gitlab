@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::SecurityReportSummaryResolver do
+RSpec.describe Resolvers::SecurityReportSummaryResolver do
   include GraphqlHelpers
 
   let_it_be(:pipeline) { double('project') }
@@ -18,7 +18,8 @@ describe Resolvers::SecurityReportSummaryResolver do
           dast: [:scanned_resources_count, :vulnerabilities_count],
           sast: [:scanned_resources_count, :vulnerabilities_count],
           container_scanning: [:scanned_resources_count, :vulnerabilities_count],
-          dependency_scanning: [:scanned_resources_count, :vulnerabilities_count]
+          dependency_scanning: [:scanned_resources_count, :vulnerabilities_count],
+          coverage_fuzzing: [:scanned_resources_count, :vulnerabilities_count]
         }
       end
 

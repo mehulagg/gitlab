@@ -14,8 +14,8 @@ module EE
           when Epic
             instance.group_epic_url(object.group, object, **options)
           when Iteration
-            instance.group_iteration_url(object.group, object, **options)
-          when Vulnerability
+            instance.iteration_url(object, **options)
+          when ::Vulnerability
             instance.project_security_vulnerability_url(object.project, object, **options)
           else
             super
@@ -35,15 +35,14 @@ module EE
           end
         end
 
-        override :wiki_page_url
-        def wiki_page_url(wiki, page, **options)
+        override :wiki_url
+        def wiki_url(wiki, **options)
           if wiki.container.is_a?(Group)
-            # TODO: Use the new route for group wikis once we add it.
-            # https://gitlab.com/gitlab-org/gitlab/-/issues/211360
-            instance.group_canonical_url(wiki.container, **options) + "/-/wikis/#{page.to_param}"
-          else
-            super
+            options[:controller] = 'groups/wikis'
+            options[:group_id] = wiki.container
           end
+
+          super
         end
       end
     end

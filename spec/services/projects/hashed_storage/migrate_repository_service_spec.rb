@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::HashedStorage::MigrateRepositoryService do
+RSpec.describe Projects::HashedStorage::MigrateRepositoryService do
   include GitHelpers
 
   let(:gitlab_shell) { Gitlab::Shell.new }
@@ -74,6 +74,42 @@ describe Projects::HashedStorage::MigrateRepositoryService do
         rugged_config = rugged_repo(project.repository).config['gitlab.fullpath']
 
         expect(rugged_config).to eq project.full_path
+      end
+    end
+
+    context 'when exception happens' do
+      it 'handles OpenSSL::Cipher::CipherError' do
+        expect(project).to receive(:ensure_runners_token).and_raise(OpenSSL::Cipher::CipherError)
+
+        expect { service.execute }.not_to raise_exception
+      end
+
+      it 'ensures rollback when OpenSSL::Cipher::CipherError' do
+        expect(project).to receive(:ensure_runners_token).and_raise(OpenSSL::Cipher::CipherError)
+        expect(service).to receive(:rollback_folder_move).and_call_original
+
+        service.execute
+        project.reload
+
+        expect(project.legacy_storage?).to be_truthy
+        expect(project.repository_read_only?).to be_falsey
+      end
+
+      it 'handles Gitlab::Git::CommandError' do
+        expect(project).to receive(:write_repository_config).and_raise(Gitlab::Git::CommandError)
+
+        expect { service.execute }.not_to raise_exception
+      end
+
+      it 'ensures rollback when Gitlab::Git::CommandError' do
+        expect(project).to receive(:write_repository_config).and_raise(Gitlab::Git::CommandError)
+        expect(service).to receive(:rollback_folder_move).and_call_original
+
+        service.execute
+        project.reload
+
+        expect(project.legacy_storage?).to be_truthy
+        expect(project.repository_read_only?).to be_falsey
       end
     end
 

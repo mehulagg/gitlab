@@ -52,18 +52,18 @@ export default {
       {{ toggleText }}
     </gl-button>
     <template v-if="collapsed">
-      <span class="gl-text-gray-700">{{ __('Last reply by') }}</span>
+      <span class="gl-text-gray-500">{{ __('Last reply by') }}</span>
       <gl-link
         :href="lastReply.author.webUrl"
         target="_blank"
-        class="link-inherit-color gl-text-black-normal gl-text-decoration-none gl-font-weight-bold gl-ml-2 gl-mr-2"
+        class="link-inherit-color gl-text-body gl-text-decoration-none gl-font-weight-bold gl-ml-2 gl-mr-2"
       >
         {{ lastReply.author.name }}
       </gl-link>
       <time-ago-tooltip
         :time="lastReply.createdAt"
         tooltip-placement="bottom"
-        class="gl-text-gray-700"
+        class="gl-text-gray-500"
       />
     </template>
   </li>

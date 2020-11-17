@@ -10,7 +10,7 @@ module QA
           super
         end
 
-        def refresh
+        def refresh(skip_finished_loading_check: false)
           log("refreshing #{current_url}")
 
           super
@@ -60,6 +60,12 @@ module QA
 
         def uncheck_element(name)
           log("unchecking :#{name}")
+
+          super
+        end
+
+        def click_element_coordinates(name)
+          log(%Q(clicking the coordinates of :#{name}))
 
           super
         end
@@ -120,7 +126,7 @@ module QA
           found
         end
 
-        def finished_loading?
+        def finished_loading?(wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           log('waiting for loading to complete...')
           now = Time.now
 

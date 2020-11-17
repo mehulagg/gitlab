@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BasePolicy do
+RSpec.describe BasePolicy do
   include ExternalAuthorizationServiceHelpers
   include AdminModeHelper
 
@@ -19,6 +19,34 @@ describe BasePolicy do
 
     it 'uses GlobalPolicy when :global is given' do
       expect(DeclarativePolicy.class_for(:global)).to eq(GlobalPolicy)
+    end
+  end
+
+  shared_examples 'admin only access' do |policy|
+    let(:current_user) { build_stubbed(:user) }
+
+    subject { described_class.new(current_user, nil) }
+
+    it { is_expected.not_to be_allowed(policy) }
+
+    context 'for admins' do
+      let(:current_user) { build_stubbed(:admin) }
+
+      it 'allowed when in admin mode' do
+        enable_admin_mode!(current_user)
+
+        is_expected.to be_allowed(policy)
+      end
+
+      it 'prevented when not in admin mode' do
+        is_expected.not_to be_allowed(policy)
+      end
+    end
+
+    context 'for anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.not_to be_allowed(policy) }
     end
   end
 
@@ -41,51 +69,15 @@ describe BasePolicy do
         enable_external_authorization_service_check
       end
 
-      it { is_expected.not_to be_allowed(:read_cross_project) }
-
-      context 'for admins' do
-        let(:current_user) { build_stubbed(:admin) }
-
-        subject { described_class.new(current_user, nil) }
-
-        it 'allowed when in admin mode' do
-          enable_admin_mode!(current_user)
-
-          is_expected.to be_allowed(:read_cross_project)
-        end
-
-        it 'prevented when not in admin mode' do
-          is_expected.not_to be_allowed(:read_cross_project)
-        end
-      end
-
-      context 'for anonymous' do
-        let(:current_user) { nil }
-
-        it { is_expected.not_to be_allowed(:read_cross_project) }
-      end
+      it_behaves_like 'admin only access', :read_cross_project
     end
   end
 
   describe 'full private access' do
-    let(:current_user) { build_stubbed(:user) }
+    it_behaves_like 'admin only access', :read_all_resources
+  end
 
-    subject { described_class.new(current_user, nil) }
-
-    it { is_expected.not_to be_allowed(:read_all_resources) }
-
-    context 'for admins' do
-      let(:current_user) { build_stubbed(:admin) }
-
-      it 'allowed when in admin mode' do
-        enable_admin_mode!(current_user)
-
-        is_expected.to be_allowed(:read_all_resources)
-      end
-
-      it 'prevented when not in admin mode' do
-        is_expected.not_to be_allowed(:read_all_resources)
-      end
-    end
+  describe 'change_repository_storage' do
+    it_behaves_like 'admin only access', :change_repository_storage
   end
 end

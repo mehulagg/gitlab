@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Project' do
+RSpec.describe 'Project', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222234' do
   describe 'when creating from group template' do
     let(:user) { create(:user) }
     let(:group) { create(:group, name: 'parent-group') }
@@ -17,7 +17,7 @@ RSpec.describe 'Project' do
       sign_in user
     end
 
-    it "defaults to correct namespace", :js do
+    it "defaults to correct namespace" do
       visit new_project_path
       find('#create-from-template-tab').click
       find('.custom-group-project-templates-tab').click
@@ -26,7 +26,7 @@ RSpec.describe 'Project' do
       expect(find('.js-select-namespace')).to have_content group.name
     end
 
-    it "uses supplied namespace", :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222234' do
+    it "uses supplied namespace" do
       visit new_project_path(namespace_id: other_subgroup.id)
       find('#create-from-template-tab').click
       find('.custom-group-project-templates-tab').click

@@ -54,11 +54,17 @@ module Types
     field :container_registry_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the project stores Docker container images in a container registry'
     field :shared_runners_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-          description: 'Indicates if Shared Runners are enabled for the project'
+          description: 'Indicates if shared runners are enabled for the project'
     field :lfs_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the project has Large File Storage (LFS) enabled'
     field :merge_requests_ff_only_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if no merge commits should be created and all merges should instead be fast-forwarded, which means that merging is only allowed if the branch could be fast-forwarded.'
+
+    field :service_desk_enabled, GraphQL::BOOLEAN_TYPE, null: true,
+          description: 'Indicates if the project has service desk enabled.'
+
+    field :service_desk_address, GraphQL::STRING_TYPE, null: true,
+          description: 'E-mail address of the service desk.'
 
     field :avatar_url, GraphQL::STRING_TYPE, null: true, calls_gitaly: true,
           description: 'URL to avatar image file of the project',
@@ -128,7 +134,7 @@ module Types
           null: true,
           description: 'Merge requests of the project',
           extras: [:lookahead],
-          resolver: Resolvers::MergeRequestsResolver
+          resolver: Resolvers::ProjectMergeRequestsResolver
 
     field :merge_request,
           Types::MergeRequestType,
@@ -140,10 +146,21 @@ module Types
           Types::IssueType.connection_type,
           null: true,
           description: 'Issues of the project',
+          extras: [:lookahead],
           resolver: Resolvers::IssuesResolver
 
+    field :issue_status_counts,
+          Types::IssueStatusCountsType,
+          null: true,
+          description: 'Counts of issues by status for the project',
+          extras: [:lookahead],
+          resolver: Resolvers::IssueStatusCountsResolver
+
+    field :milestones, Types::MilestoneType.connection_type, null: true,
+          description: 'Milestones of the project',
+          resolver: Resolvers::ProjectMilestonesResolver
+
     field :project_members,
-          Types::ProjectMemberType.connection_type,
           description: 'Members of the project',
           resolver: Resolvers::ProjectMembersResolver
 
@@ -153,16 +170,27 @@ module Types
           description: 'Environments of the project',
           resolver: Resolvers::EnvironmentsResolver
 
+    field :environment,
+          Types::EnvironmentType,
+          null: true,
+          description: 'A single environment of the project',
+          resolver: Resolvers::EnvironmentsResolver.single
+
     field :issue,
           Types::IssueType,
           null: true,
           description: 'A single issue of the project',
           resolver: Resolvers::IssuesResolver.single
 
+    field :packages, Types::PackageType.connection_type, null: true,
+         description: 'Packages of the project',
+         resolver: Resolvers::PackagesResolver
+
     field :pipelines,
           Types::Ci::PipelineType.connection_type,
           null: true,
           description: 'Build pipelines of the project',
+          extras: [:lookahead],
           resolver: Resolvers::ProjectPipelinesResolver
 
     field :pipeline,
@@ -206,7 +234,7 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the project',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :jira_imports,
           Types::JiraImportType.connection_type,
@@ -239,24 +267,35 @@ module Types
           description: 'Counts of alerts by status for the project',
           resolver: Resolvers::AlertManagement::AlertStatusCountsResolver
 
+    field :alert_management_integrations,
+          Types::AlertManagement::IntegrationType.connection_type,
+          null: true,
+          description: 'Integrations which can receive alerts for the project',
+          resolver: Resolvers::AlertManagement::IntegrationsResolver
+
     field :releases,
           Types::ReleaseType.connection_type,
           null: true,
           description: 'Releases of the project',
-          resolver: Resolvers::ReleasesResolver,
-          feature_flag: :graphql_release_data
+          resolver: Resolvers::ReleasesResolver
 
     field :release,
           Types::ReleaseType,
           null: true,
           description: 'A single release of the project',
           resolver: Resolvers::ReleasesResolver.single,
-          feature_flag: :graphql_release_data
+          authorize: :download_code
 
     field :container_expiration_policy,
           Types::ContainerExpirationPolicyType,
           null: true,
           description: 'The container expiration policy of the project'
+
+    field :container_repositories,
+          Types::ContainerRepositoryType.connection_type,
+          null: true,
+          description: 'Container repositories of the project',
+          resolver: Resolvers::ContainerRepositoriesResolver
 
     field :label,
           Types::LabelType,
@@ -266,6 +305,12 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :terraform_states,
+          Types::Terraform::StateType.connection_type,
+          null: true,
+          description: 'Terraform states associated with the project',
+          resolver: Resolvers::Terraform::StatesResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|

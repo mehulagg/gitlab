@@ -1,25 +1,24 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlDropdown,
   GlDropdownItem,
   GlModal,
   GlSearchBoxByType,
   GlModalDirective,
 } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 import { s__, sprintf } from '~/locale';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
     GlModal,
     GlSearchBoxByType,
-    Icon,
     ReviewAppLink,
     ModalCopyButton,
   },
@@ -155,14 +154,16 @@ export default {
 </script>
 <template>
   <div class="inline">
-    <gl-deprecated-button
+    <gl-button
       v-gl-modal="modalId"
-      class="btn btn-default btn-sm gl-ml-3 js-review-button"
+      category="secondary"
+      class="gl-ml-3 js-review-button"
+      size="small"
       :class="cssClass"
       type="button"
     >
       {{ s__('VisualReviewApp|Review') }}
-    </gl-deprecated-button>
+    </gl-button>
     <gl-modal
       ref="modal"
       :modal-id="modalId"
@@ -193,16 +194,18 @@ export default {
           :title="copyToClipboard.mrId"
           :text="appMetadata.mergeRequestId.toString()"
           :modal-id="modalId"
-          css-classes="border-0 gl-pt-0 gl-pr-0 gl-pl-1-deprecated-no-really-do-not-use-me gl-pb-0"
+          css-classes="border-0 gl-pt-0 gl-pr-0 gl-pl-2 gl-pb-0"
         />
       </p>
       <p v-html="instructionText.step4"></p>
       <template #modal-footer>
-        <gl-deprecated-button @click="cancel">
+        <gl-button category="secondary" @click="cancel">
           {{ s__('VisualReviewApp|Cancel') }}
-        </gl-deprecated-button>
+        </gl-button>
         <gl-dropdown
           v-if="shouldShowChanges"
+          :text="s__('VisualReviewApp|Open review app')"
+          icon="external-link"
           dropup
           right
           split
@@ -211,11 +214,7 @@ export default {
           data-track-label="review_app"
           @click="ok"
         >
-          <gl-search-box-by-type v-model.trim="changesSearchTerm" class="m-2" />
-          <template #button-content>
-            {{ s__('VisualReviewApp|Open review app') }}
-            <icon class="fgray" name="external-link" />
-          </template>
+          <gl-search-box-by-type v-model.trim="changesSearchTerm" />
           <gl-dropdown-item
             v-for="change in filteredChanges"
             :key="change.path"

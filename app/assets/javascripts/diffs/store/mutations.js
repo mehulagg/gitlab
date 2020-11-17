@@ -1,4 +1,10 @@
+import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import {
+  DIFF_FILE_MANUAL_COLLAPSE,
+  DIFF_FILE_AUTOMATIC_COLLAPSE,
+  INLINE_DIFF_VIEW_TYPE,
+} from '../constants';
 import {
   findDiffFile,
   addLineReferences,
@@ -14,6 +20,12 @@ function updateDiffFilesInState(state, files) {
   return Object.assign(state, { diffFiles: files });
 }
 
+function renderFile(file) {
+  Object.assign(file, {
+    renderIt: true,
+  });
+}
+
 export default {
   [types.SET_BASE_CONFIG](state, options) {
     const {
@@ -24,7 +36,6 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
-      useSingleDiffStyle,
     } = options;
     Object.assign(state, {
       endpoint,
@@ -34,7 +45,6 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
-      useSingleDiffStyle,
     });
   },
 
@@ -57,10 +67,7 @@ export default {
   [types.SET_DIFF_DATA](state, data) {
     let files = state.diffFiles;
 
-    if (
-      !(gon?.features?.diffsBatchLoad && window.location.search.indexOf('diff_id') === -1) &&
-      data.diff_files
-    ) {
+    if (window.location.search.indexOf('diff_id') !== -1 && data.diff_files) {
       files = prepareDiffData(data, files);
     }
 
@@ -84,9 +91,7 @@ export default {
   },
 
   [types.RENDER_FILE](state, file) {
-    Object.assign(file, {
-      renderIt: true,
-    });
+    renderFile(file);
   },
 
   [types.SET_MERGE_REQUEST_DIFFS](state, mergeRequestDiffs) {
@@ -154,7 +159,9 @@ export default {
     addContextLines({
       inlineLines: diffFile.highlighted_diff_lines,
       parallelLines: diffFile.parallel_diff_lines,
-      diffViewType: state.diffViewType,
+      diffViewType: window.gon?.features?.unifiedDiffLines
+        ? INLINE_DIFF_VIEW_TYPE
+        : state.diffViewType,
       contextLines: lines,
       bottom,
       lineNumbers,
@@ -167,16 +174,6 @@ export default {
     const [newFileData] = files.filter(f => f.file_hash === file.file_hash);
     const selectedFile = state.diffFiles.find(f => f.file_hash === file.file_hash);
     Object.assign(selectedFile, { ...newFileData });
-  },
-
-  [types.EXPAND_ALL_FILES](state) {
-    state.diffFiles.forEach(file => {
-      Object.assign(file, {
-        viewer: Object.assign(file.viewer, {
-          collapsed: false,
-        }),
-      });
-    });
   },
 
   [types.SET_LINE_DISCUSSIONS_FOR_FILE](state, { discussion, diffPositionByLineCode, hash }) {
@@ -249,7 +246,7 @@ export default {
           });
         }
 
-        if (!file.parallel_diff_lines || !file.highlighted_diff_lines) {
+        if (!file.parallel_diff_lines.length || !file.highlighted_diff_lines.length) {
           const newDiscussions = (file.discussions || [])
             .filter(d => d.id !== discussion.id)
             .concat(discussion);
@@ -293,8 +290,9 @@ export default {
   [types.TOGGLE_SHOW_TREE_LIST](state) {
     state.showTreeList = !state.showTreeList;
   },
-  [types.UPDATE_CURRENT_DIFF_FILE_ID](state, fileId) {
+  [types.VIEW_DIFF_FILE](state, fileId) {
     state.currentDiffFileId = fileId;
+    Vue.set(state.viewedDiffFileIds, fileId, true);
   },
   [types.OPEN_DIFF_FILE_COMMENT_FORM](state, formData) {
     state.commentForms.push({
@@ -323,6 +321,7 @@ export default {
   [types.SET_TREE_DATA](state, { treeEntries, tree }) {
     state.treeEntries = treeEntries;
     state.tree = tree;
+    state.isTreeLoaded = true;
   },
   [types.SET_RENDER_TREE_LIST](state, renderTreeList) {
     state.renderTreeList = renderTreeList;
@@ -350,11 +349,24 @@ export default {
     file.isShowingFullFile = true;
     file.isLoadingFullFile = false;
   },
-  [types.SET_FILE_COLLAPSED](state, { filePath, collapsed }) {
+  [types.SET_FILE_COLLAPSED](
+    state,
+    { filePath, collapsed, trigger = DIFF_FILE_AUTOMATIC_COLLAPSE },
+  ) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
 
     if (file && file.viewer) {
-      file.viewer.collapsed = collapsed;
+      if (trigger === DIFF_FILE_MANUAL_COLLAPSE) {
+        file.viewer.automaticallyCollapsed = false;
+        file.viewer.manuallyCollapsed = collapsed;
+      } else if (trigger === DIFF_FILE_AUTOMATIC_COLLAPSE) {
+        file.viewer.automaticallyCollapsed = collapsed;
+        file.viewer.manuallyCollapsed = null;
+      }
+    }
+
+    if (file && !collapsed) {
+      renderFile(file);
     }
   },
   [types.SET_HIDDEN_VIEW_DIFF_FILE_LINES](state, { filePath, lines }) {
@@ -366,8 +378,13 @@ export default {
   },
   [types.SET_CURRENT_VIEW_DIFF_FILE_LINES](state, { filePath, lines }) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
-    const currentDiffLinesKey =
-      state.diffViewType === 'inline' ? 'highlighted_diff_lines' : 'parallel_diff_lines';
+    let currentDiffLinesKey;
+
+    if (window.gon?.features?.unifiedDiffLines || state.diffViewType === 'inline') {
+      currentDiffLinesKey = 'highlighted_diff_lines';
+    } else {
+      currentDiffLinesKey = 'parallel_diff_lines';
+    }
 
     file[currentDiffLinesKey] = lines;
   },

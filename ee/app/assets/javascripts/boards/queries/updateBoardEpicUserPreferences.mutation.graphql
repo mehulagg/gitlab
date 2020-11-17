@@ -1,0 +1,14 @@
+mutation updateBoardEpicUserPreferences(
+  $boardId: BoardID!
+  $epicId: EpicID!
+  $collapsed: Boolean!
+) {
+  updateBoardEpicUserPreferences(
+    input: { boardId: $boardId, epicId: $epicId, collapsed: $collapsed }
+  ) {
+    errors
+    epicUserPreferences {
+      collapsed
+    }
+  }
+}

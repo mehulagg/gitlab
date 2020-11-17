@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe SortingHelper do
+RSpec.describe SortingHelper do
   include ApplicationHelper
   include IconsHelper
   include ExploreHelper
@@ -47,6 +47,24 @@ describe SortingHelper do
 
     it 'returns icon with sort-lowest when sorting by due_date' do
       expect(issuable_sort_direction_button('due_date')).to include('sort-lowest')
+    end
+  end
+
+  describe '#search_sort_direction_button' do
+    before do
+      set_sorting_url 'test_label'
+    end
+
+    it 'keeps label filter param' do
+      expect(search_sort_direction_button('created_asc')).to include('label_name=test_label')
+    end
+
+    it 'returns icon with sort-lowest when sort is asc' do
+      expect(search_sort_direction_button('created_asc')).to include('sort-lowest')
+    end
+
+    it 'returns icon with sort-highest when sort is desc' do
+      expect(search_sort_direction_button('created_desc')).to include('sort-highest')
     end
   end
 

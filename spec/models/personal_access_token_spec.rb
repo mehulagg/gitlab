@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PersonalAccessToken do
+RSpec.describe PersonalAccessToken do
   subject { described_class }
 
   describe '.build' do
@@ -29,6 +29,18 @@ describe PersonalAccessToken do
         create_list(:personal_access_token, 2)
 
         expect(described_class.for_user(user_1)).to contain_exactly(token_of_user_1)
+      end
+    end
+
+    describe '.for_users' do
+      it 'returns personal access tokens for the specified users only' do
+        user_1 = create(:user)
+        user_2 = create(:user)
+        token_of_user_1 = create(:personal_access_token, user: user_1)
+        token_of_user_2 = create(:personal_access_token, user: user_2)
+        create_list(:personal_access_token, 3)
+
+        expect(described_class.for_users([user_1, user_2])).to contain_exactly(token_of_user_1, token_of_user_2)
       end
     end
   end
@@ -165,6 +177,7 @@ describe PersonalAccessToken do
       let_it_be(:revoked_token) { create(:personal_access_token, revoked: true) }
       let_it_be(:valid_token_and_notified) { create(:personal_access_token, expires_at: 2.days.from_now, expire_notification_delivered: true) }
       let_it_be(:valid_token) { create(:personal_access_token, expires_at: 2.days.from_now) }
+      let_it_be(:long_expiry_token) { create(:personal_access_token, expires_at: '999999-12-31'.to_date) }
 
       context 'in one day' do
         it "doesn't have any tokens" do
@@ -179,6 +192,18 @@ describe PersonalAccessToken do
       end
     end
 
+    describe '.expired_today_and_not_notified' do
+      let_it_be(:active) { create(:personal_access_token) }
+      let_it_be(:expired_yesterday) { create(:personal_access_token, expires_at: Date.yesterday) }
+      let_it_be(:revoked_token) { create(:personal_access_token, expires_at: Date.current, revoked: true) }
+      let_it_be(:expired_today) { create(:personal_access_token, expires_at: Date.current) }
+      let_it_be(:expired_today_and_notified) { create(:personal_access_token, expires_at: Date.current, after_expiry_notification_delivered: true) }
+
+      it 'returns tokens that have expired today' do
+        expect(described_class.expired_today_and_not_notified).to contain_exactly(expired_today)
+      end
+    end
+
     describe '.without_impersonation' do
       let_it_be(:impersonation_token) { create(:personal_access_token, :impersonation) }
       let_it_be(:personal_access_token) { create(:personal_access_token) }
@@ -187,10 +212,24 @@ describe PersonalAccessToken do
         expect(described_class.without_impersonation).to contain_exactly(personal_access_token)
       end
     end
+
+    describe 'revoke scopes' do
+      let_it_be(:revoked_token) { create(:personal_access_token, :revoked) }
+      let_it_be(:non_revoked_token) { create(:personal_access_token, revoked: false) }
+      let_it_be(:non_revoked_token2) { create(:personal_access_token, revoked: nil) }
+
+      describe '.revoked' do
+        it { expect(described_class.revoked).to contain_exactly(revoked_token) }
+      end
+
+      describe '.not_revoked' do
+        it { expect(described_class.not_revoked).to contain_exactly(non_revoked_token, non_revoked_token2) }
+      end
+    end
   end
 
   describe '.simple_sorts' do
-    it 'includes overriden keys' do
+    it 'includes overridden keys' do
       expect(described_class.simple_sorts.keys).to include(*%w(expires_at_asc expires_at_desc))
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupMemberPolicy do
+RSpec.describe GroupMemberPolicy do
   let(:guest) { create(:user) }
   let(:owner) { create(:user) }
   let(:group) { create(:group, :private) }
@@ -42,6 +42,7 @@ describe GroupMemberPolicy do
     it do
       expect_disallowed(:destroy_group_member)
       expect_disallowed(:update_group_member)
+      expect_allowed(:read_group)
     end
   end
 

@@ -4,14 +4,16 @@ require_dependency 'api/validations/validators/limit'
 
 module API
   module Terraform
-    class State < Grape::API
+    class State < ::API::Base
       include ::Gitlab::Utils::StrongMemoize
+
+      feature_category :infrastructure_as_code
 
       default_format :json
 
       before do
         authenticate!
-        authorize! :admin_terraform_state, user_project
+        authorize! :read_terraform_state, user_project
       end
 
       params do
@@ -35,34 +37,40 @@ module API
           route_setting :authentication, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
           get do
             remote_state_handler.find_with_lock do |state|
-              no_content! unless state.file.exists?
+              no_content! unless state.latest_file && state.latest_file.exists?
 
               env['api.format'] = :binary # this bypasses json serialization
-              body state.file.read
-              status :ok
+              body state.latest_file.read
             end
           end
 
           desc 'Add a new terraform state or update an existing one'
           route_setting :authentication, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
           post do
+            authorize! :admin_terraform_state, user_project
+
             data = request.body.read
             no_content! if data.empty?
 
             remote_state_handler.handle_with_lock do |state|
-              state.file = CarrierWaveStringFile.new(data)
-              state.save!
-              status :ok
+              state.update_file!(CarrierWaveStringFile.new(data), version: params[:serial], build: current_authenticated_job)
             end
+
+            body false
+            status :ok
           end
 
           desc 'Delete a terraform state of a certain name'
           route_setting :authentication, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
           delete do
+            authorize! :admin_terraform_state, user_project
+
             remote_state_handler.handle_with_lock do |state|
               state.destroy!
-              status :ok
             end
+
+            body false
+            status :ok
           end
 
           desc 'Lock a terraform state of a certain name'
@@ -77,6 +85,8 @@ module API
             requires :Path, type: String, desc: 'Terraform path'
           end
           post '/lock' do
+            authorize! :admin_terraform_state, user_project
+
             status_code = :ok
             lock_info = {
               'Operation' => params[:Operation],
@@ -108,6 +118,8 @@ module API
             optional :ID, type: String, limit: 255, desc: 'Terraform state lock ID'
           end
           delete '/lock' do
+            authorize! :admin_terraform_state, user_project
+
             remote_state_handler.unlock!
             status :ok
           rescue ::Terraform::RemoteStateHandler::StateLockedError

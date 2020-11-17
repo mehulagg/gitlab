@@ -70,6 +70,10 @@ module GitlabRoutingHelper
     project_commit_url(entity.project, entity.sha, *args)
   end
 
+  def release_url(entity, *args)
+    project_release_url(entity.project, entity, *args)
+  end
+
   def preview_markdown_path(parent, *args)
     return group_preview_markdown_path(parent, *args) if parent.is_a?(Group)
 
@@ -100,8 +104,12 @@ module GitlabRoutingHelper
     toggle_award_emoji_snippet_path(*args)
   end
 
-  def toggle_award_emoji_namespace_project_project_snippet_path(*args)
-    toggle_award_emoji_namespace_project_snippet_path(*args)
+  def toggle_award_emoji_project_project_snippet_path(*args)
+    toggle_award_emoji_project_snippet_path(*args)
+  end
+
+  def toggle_award_emoji_project_project_snippet_url(*args)
+    toggle_award_emoji_project_snippet_url(*args)
   end
 
   ## Members
@@ -269,6 +277,24 @@ module GitlabRoutingHelper
       new_args = snippet_query_params(snippet, *args)
       raw_snippet_url(snippet, *new_args)
     end
+  end
+
+  def gitlab_raw_snippet_blob_url(snippet, path, ref = nil, **options)
+    params = {
+      snippet_id: snippet,
+      ref: ref || snippet.repository.root_ref,
+      path: path
+    }
+
+    if snippet.is_a?(ProjectSnippet)
+      project_snippet_blob_raw_url(snippet.project, **params, **options)
+    else
+      snippet_blob_raw_url(**params, **options)
+    end
+  end
+
+  def gitlab_raw_snippet_blob_path(snippet, path, ref = nil, **options)
+    gitlab_raw_snippet_blob_url(snippet, path, ref, only_path: true, **options)
   end
 
   def gitlab_snippet_notes_path(snippet, *args)

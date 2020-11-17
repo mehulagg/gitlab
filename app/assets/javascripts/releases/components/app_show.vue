@@ -1,13 +1,13 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlSkeletonLoading } from '@gitlab/ui';
 import ReleaseBlock from './release_block.vue';
+import ReleaseSkeletonLoader from './release_skeleton_loader.vue';
 
 export default {
   name: 'ReleaseShowApp',
   components: {
-    GlSkeletonLoading,
     ReleaseBlock,
+    ReleaseSkeletonLoader,
   },
   computed: {
     ...mapState('detail', ['isFetchingRelease', 'fetchError', 'release']),
@@ -21,8 +21,8 @@ export default {
 };
 </script>
 <template>
-  <div class="prepend-top-default">
-    <gl-skeleton-loading v-if="isFetchingRelease" />
+  <div class="gl-mt-3">
+    <release-skeleton-loader v-if="isFetchingRelease" />
 
     <release-block v-else-if="!fetchError" :release="release" />
   </div>

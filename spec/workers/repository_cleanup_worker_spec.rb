@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RepositoryCleanupWorker do
+RSpec.describe RepositoryCleanupWorker do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -25,13 +25,13 @@ describe RepositoryCleanupWorker do
     end
 
     it 'raises an error if the project cannot be found' do
-      project.destroy
+      project.destroy!
 
       expect { worker.perform(project.id, user.id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
 
     it 'raises an error if the user cannot be found' do
-      user.destroy
+      user.destroy!
 
       expect { worker.perform(project.id, user.id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
@@ -39,6 +39,8 @@ describe RepositoryCleanupWorker do
 
   describe '#sidekiq_retries_exhausted' do
     let(:job) { { 'args' => [project.id, user.id], 'error_message' => 'Error' } }
+
+    subject(:sidekiq_retries_exhausted) { described_class.sidekiq_retries_exhausted_block.call(job, StandardError.new) }
 
     it 'does not send a failure notification for a RecordNotFound error' do
       expect(NotificationService).not_to receive(:new)
@@ -51,7 +53,13 @@ describe RepositoryCleanupWorker do
         expect(service).to receive(:repository_cleanup_failure).with(project, user, 'Error')
       end
 
-      described_class.sidekiq_retries_exhausted_block.call(job, StandardError.new)
+      sidekiq_retries_exhausted
+    end
+
+    it 'cleans up the attempt' do
+      expect(Projects::CleanupService).to receive(:cleanup_after).with(project)
+
+      sidekiq_retries_exhausted
     end
   end
 end

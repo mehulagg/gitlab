@@ -1,5 +1,6 @@
 require 'sidekiq/web'
 require 'sidekiq/cron/web'
+require 'product_analytics/collector_app'
 
 Rails.application.routes.draw do
   concern :access_requestable do
@@ -24,19 +25,17 @@ Rails.application.routes.draw do
     controllers applications: 'oauth/applications',
                 authorized_applications: 'oauth/authorized_applications',
                 authorizations: 'oauth/authorizations',
-                token_info: 'oauth/token_info'
+                token_info: 'oauth/token_info',
+                tokens: 'oauth/tokens'
   end
 
   # This prefixless path is required because Jira gets confused if we set it up with a path
   # More information: https://gitlab.com/gitlab-org/gitlab/issues/6752
   scope path: '/login/oauth', controller: 'oauth/jira/authorizations', as: :oauth_jira do
-    Gitlab.ee do
-      get :authorize, action: :new
-      get :callback
-      post :access_token
-    end
+    get :authorize, action: :new
+    get :callback
+    post :access_token
 
-    # This helps minimize merge conflicts with CE for this scope block
     match '*all', via: [:get, :post], to: proc { [404, {}, ['']] }
   end
 
@@ -46,8 +45,7 @@ Rails.application.routes.draw do
 
   # Sign up
   scope path: '/users/sign_up', module: :registrations, as: :users_sign_up do
-    get :welcome
-    patch :update_registration
+    resource :welcome, only: [:show, :update], controller: 'welcome'
     resource :experience_level, only: [:show, :update]
 
     Gitlab.ee do
@@ -58,6 +56,7 @@ Rails.application.routes.draw do
 
   # Search
   get 'search' => 'search#show'
+  get 'search/autocomplete' => 'search#autocomplete', as: :search_autocomplete
   get 'search/count' => 'search#count', as: :search_count
 
   # JSON Web Token
@@ -75,6 +74,7 @@ Rails.application.routes.draw do
     get '/autocomplete/projects' => 'autocomplete#projects'
     get '/autocomplete/award_emojis' => 'autocomplete#award_emojis'
     get '/autocomplete/merge_request_target_branches' => 'autocomplete#merge_request_target_branches'
+    get '/autocomplete/deploy_keys_with_owners' => 'autocomplete#deploy_keys_with_owners'
 
     Gitlab.ee do
       get '/autocomplete/project_groups' => 'autocomplete#project_groups'
@@ -82,11 +82,15 @@ Rails.application.routes.draw do
       get '/autocomplete/namespace_routes' => 'autocomplete#namespace_routes'
     end
 
+    get '/whats_new' => 'whats_new#index'
+
     # '/-/health' implemented by BasicHealthCheck middleware
     get 'liveness' => 'health#liveness'
     get 'readiness' => 'health#readiness'
     resources :metrics, only: [:index]
     mount Peek::Railtie => '/peek', as: 'peek_routes'
+
+    get 'runner_setup/platforms' => 'runner_setup#platforms'
 
     # Boards resources shared between group and projects
     resources :boards, only: [] do
@@ -119,19 +123,17 @@ Rails.application.routes.draw do
     get 'ide/*vueroute' => 'ide#index', format: false
 
     draw :operations
-    draw :instance_statistics
+    draw :jira_connect
 
     Gitlab.ee do
       draw :security
       draw :smartcard
-      draw :jira_connect
       draw :username
       draw :trial
       draw :trial_registration
       draw :country
       draw :country_state
       draw :subscription
-      draw :analytics
 
       scope '/push_from_secondary/:geo_node_id' do
         draw :git_http
@@ -171,9 +173,14 @@ Rails.application.routes.draw do
     resources :abuse_reports, only: [:new, :create]
 
     # JWKS (JSON Web Key Set) endpoint
-    # Used by third parties to verify CI_JOB_JWT, placeholder route
-    # in case we decide to move away from doorkeeper-openid_connect
-    get 'jwks' => 'doorkeeper/openid_connect/discovery#keys'
+    # Used by third parties to verify CI_JOB_JWT
+    get 'jwks' => 'jwks#index'
+
+    draw :snippets
+    draw :profile
+
+    # Product analytics collector
+    match '/collector/i', to: ProductAnalytics::CollectorApp.new, via: :all
   end
   # End of the /-/ scope.
 
@@ -189,8 +196,6 @@ Rails.application.routes.draw do
       member do
         Gitlab.ee do
           get :metrics, format: :json
-          get :metrics_dashboard
-          get :'/prometheus/api/v1/*proxy_path', to: 'clusters#prometheus_proxy', as: :prometheus_api
           get :environments, format: :json
         end
 
@@ -200,6 +205,8 @@ Rails.application.routes.draw do
           delete '/:application', to: 'clusters/applications#destroy', as: :uninstall_applications
         end
 
+        get :metrics_dashboard
+        get :'/prometheus/api/v1/*proxy_path', to: 'clusters#prometheus_proxy', as: :prometheus_api
         get :cluster_status, format: :json
         delete :clear_cache
       end
@@ -242,6 +249,8 @@ Rails.application.routes.draw do
     post :preview_markdown
   end
 
+  draw :group
+
   resources :projects, only: [:index, :new, :create]
 
   get '/projects/:id' => 'projects#resolve'
@@ -250,17 +259,24 @@ Rails.application.routes.draw do
   draw :api
   draw :sidekiq
   draw :help
-  draw :snippets
   draw :google_api
   draw :import
   draw :uploads
   draw :explore
   draw :admin
-  draw :profile
   draw :dashboard
-  draw :group
   draw :user
   draw :project
+
+  # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
+  scope as: 'deprecated' do
+    draw :snippets
+    draw :profile
+  end
+
+  Gitlab.ee do
+    get '/sitemap' => 'sitemap#show', format: :xml
+  end
 
   root to: "root#index"
 

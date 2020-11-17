@@ -2,8 +2,51 @@
 
 require 'spec_helper'
 
-describe Ci::Ref do
+RSpec.describe Ci::Ref do
+  using RSpec::Parameterized::TableSyntax
+
   it { is_expected.to belong_to(:project) }
+
+  describe 'state machine transitions' do
+    context 'unlock artifacts transition' do
+      let(:ci_ref) { create(:ci_ref) }
+      let(:unlock_artifacts_worker_spy) { class_spy(::Ci::PipelineSuccessUnlockArtifactsWorker) }
+
+      before do
+        stub_const('Ci::PipelineSuccessUnlockArtifactsWorker', unlock_artifacts_worker_spy)
+      end
+
+      where(:initial_state, :action, :count) do
+        :unknown | :succeed! | 1
+        :unknown | :do_fail! | 0
+        :success | :succeed! | 1
+        :success | :do_fail! | 0
+        :failed | :succeed! | 1
+        :failed | :do_fail! | 0
+        :fixed | :succeed! | 1
+        :fixed | :do_fail! | 0
+        :broken | :succeed! | 1
+        :broken | :do_fail! | 0
+        :still_failing | :succeed | 1
+        :still_failing | :do_fail | 0
+      end
+
+      with_them do
+        context "when transitioning states" do
+          before do
+            status_value = Ci::Ref.state_machines[:status].states[initial_state].value
+            ci_ref.update!(status: status_value)
+          end
+
+          it 'calls unlock artifacts service' do
+            ci_ref.send(action)
+
+            expect(unlock_artifacts_worker_spy).to have_received(:perform_async).exactly(count).times
+          end
+        end
+      end
+    end
+  end
 
   describe '.ensure_for' do
     let_it_be(:project) { create(:project, :repository) }
@@ -59,6 +102,35 @@ describe Ci::Ref do
       let(:expected_ref_path) { 'refs/heads/feature' }
 
       it_behaves_like 'ensures ci_ref'
+    end
+  end
+
+  describe '#last_finished_pipeline_id' do
+    let(:pipeline_status) { :running }
+    let(:pipeline_source) { Enums::Ci::Pipeline.sources[:push] }
+    let(:pipeline) { create(:ci_pipeline, pipeline_status, source: pipeline_source) }
+    let(:ci_ref) { pipeline.ci_ref }
+
+    context 'when there are no finished pipelines' do
+      it 'returns nil' do
+        expect(ci_ref.last_finished_pipeline_id).to be_nil
+      end
+    end
+
+    context 'when there are finished pipelines' do
+      let(:pipeline_status) { :success }
+
+      it 'returns the pipeline id' do
+        expect(ci_ref.last_finished_pipeline_id).to eq(pipeline.id)
+      end
+
+      context 'when the pipeline a dangling pipeline' do
+        let(:pipeline_source) { Enums::Ci::Pipeline.sources[:ondemand_dast_scan] }
+
+        it 'returns nil' do
+          expect(ci_ref.last_finished_pipeline_id).to be_nil
+        end
+      end
     end
   end
 
@@ -128,16 +200,6 @@ describe Ci::Ref do
 
     context 'when pipeline status is not complete' do
       let(:pipeline) { create(:ci_pipeline, :running, ci_ref: ci_ref) }
-
-      it_behaves_like 'no-op'
-    end
-
-    context 'when feature flag is disabled' do
-      let(:pipeline) { create(:ci_pipeline, :success, ci_ref: ci_ref) }
-
-      before do
-        stub_feature_flags(ci_pipeline_fixed_notifications: false)
-      end
 
       it_behaves_like 'no-op'
     end

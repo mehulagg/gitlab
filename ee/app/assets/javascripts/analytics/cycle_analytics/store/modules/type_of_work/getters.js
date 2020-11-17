@@ -2,9 +2,9 @@ import { getTasksByTypeData } from '../../../utils';
 
 export const selectedTasksByTypeFilters = (state = {}, _, rootState = {}) => {
   const { selectedLabelIds = [], subject } = state;
-  const { selectedGroup, selectedProjectIds = [], startDate = null, endDate = null } = rootState;
+  const { currentGroup, selectedProjectIds = [], startDate = null, endDate = null } = rootState;
   return {
-    selectedGroup,
+    currentGroup,
     selectedProjectIds,
     startDate,
     endDate,
@@ -21,5 +21,5 @@ export const tasksByTypeChartData = ({ data = [] } = {}, _, rootState = {}) => {
         startDate,
         endDate,
       })
-    : { groupBy: [], data: [], seriesNames: [] };
+    : { groupBy: [], data: [] };
 };

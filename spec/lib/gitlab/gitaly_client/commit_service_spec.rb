@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::CommitService do
+RSpec.describe Gitlab::GitalyClient::CommitService do
   let(:project) { create(:project, :repository) }
   let(:storage_name) { project.repository_storage }
   let(:relative_path) { project.disk_path + '.git' }
@@ -13,6 +13,10 @@ describe Gitlab::GitalyClient::CommitService do
   let(:client) { described_class.new(repository) }
 
   describe '#diff_from_parent' do
+    before do
+      stub_feature_flags(increased_diff_limits: false)
+    end
+
     context 'when a commit has a parent' do
       it 'sends an RPC request with the parent ID as left commit' do
         request = Gitaly::CommitDiffRequest.new(
@@ -28,7 +32,7 @@ describe Gitlab::GitalyClient::CommitService do
           safe_max_files: 100,
           safe_max_lines: 5000,
           safe_max_bytes: 512000,
-          max_patch_bytes: 102400
+          max_patch_bytes: 204800
         )
 
         expect_any_instance_of(Gitaly::DiffService::Stub).to receive(:commit_diff).with(request, kind_of(Hash))
@@ -53,7 +57,7 @@ describe Gitlab::GitalyClient::CommitService do
           safe_max_files: 100,
           safe_max_lines: 5000,
           safe_max_bytes: 512000,
-          max_patch_bytes: 102400
+          max_patch_bytes: 204800
         )
 
         expect_any_instance_of(Gitaly::DiffService::Stub).to receive(:commit_diff).with(request, kind_of(Hash))
@@ -266,6 +270,7 @@ describe Gitlab::GitalyClient::CommitService do
         repository: repository_message, revision: revision
       )
     end
+
     let(:response) do
       Gitaly::CommitStatsResponse.new(
         oid: revision,
@@ -290,7 +295,8 @@ describe Gitlab::GitalyClient::CommitService do
       request = Gitaly::FindCommitsRequest.new(
         repository: repository_message,
         disable_walk: true,
-        order: 'NONE'
+        order: 'NONE',
+        global_options: Gitaly::GlobalOptions.new(literal_pathspecs: false)
       )
 
       expect_any_instance_of(Gitaly::CommitService::Stub).to receive(:find_commits)
@@ -303,7 +309,8 @@ describe Gitlab::GitalyClient::CommitService do
       request = Gitaly::FindCommitsRequest.new(
         repository: repository_message,
         disable_walk: true,
-        order: 'TOPO'
+        order: 'TOPO',
+        global_options: Gitaly::GlobalOptions.new(literal_pathspecs: false)
       )
 
       expect_any_instance_of(Gitaly::CommitService::Stub).to receive(:find_commits)
@@ -317,7 +324,8 @@ describe Gitlab::GitalyClient::CommitService do
         repository: repository_message,
         disable_walk: true,
         order: 'NONE',
-        author: "Billy Baggins <bilbo@shire.com>"
+        author: "Billy Baggins <bilbo@shire.com>",
+        global_options: Gitaly::GlobalOptions.new(literal_pathspecs: false)
       )
 
       expect_any_instance_of(Gitaly::CommitService::Stub).to receive(:find_commits)
@@ -338,7 +346,8 @@ describe Gitlab::GitalyClient::CommitService do
           revision: (options[:revision] || '').dup.force_encoding(Encoding::ASCII_8BIT),
           path: (options[:path] || '').dup.force_encoding(Encoding::ASCII_8BIT),
           limit: (options[:limit] || 1000).to_i,
-          offset: (options[:offset] || 0).to_i
+          offset: (options[:offset] || 0).to_i,
+          global_options: Gitaly::GlobalOptions.new(literal_pathspecs: true)
         )
 
         allow_any_instance_of(Gitaly::CommitService::Stub)
@@ -379,6 +388,21 @@ describe Gitlab::GitalyClient::CommitService do
 
     def wrap_commits(commits)
       commits.map { |commit| Gitlab::Git::Commit.new(repository, commit) }
+    end
+  end
+
+  describe '#list_commits_by_ref_name' do
+    let(:project) { create(:project, :repository, create_branch: 'ü/unicode/multi-byte') }
+
+    it 'lists latest commits grouped by a ref name' do
+      response = client.list_commits_by_ref_name(%w[master feature v1.0.0 nonexistent ü/unicode/multi-byte])
+
+      expect(response.keys.count).to eq 4
+      expect(response.fetch('master').id).to eq 'b83d6e391c22777fca1ed3012fce84f633d7fed0'
+      expect(response.fetch('feature').id).to eq '0b4bc9a49b562e85de7cc9e834518ea6828729b9'
+      expect(response.fetch('v1.0.0').id).to eq '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9'
+      expect(response.fetch('ü/unicode/multi-byte')).to be_present
+      expect(response).not_to have_key 'nonexistent'
     end
   end
 end

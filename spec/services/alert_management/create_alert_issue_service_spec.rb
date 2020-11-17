@@ -8,17 +8,15 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:payload) do
     {
-      'title' => 'Alert title',
-      'annotations' => {
-        'title' => 'Alert title'
-      },
       'startsAt' => '2020-04-27T10:10:22.265949279Z',
       'generatorURL' => 'http://8d467bd4607a:9090/graph?g0.expr=vector%281%29&g0.tab=1'
     }
   end
+
   let_it_be(:generic_alert, reload: true) { create(:alert_management_alert, :triggered, project: project, payload: payload) }
   let_it_be(:prometheus_alert, reload: true) { create(:alert_management_alert, :triggered, :prometheus, project: project, payload: payload) }
   let(:alert) { generic_alert }
+  let(:alert_presenter) { alert.present }
   let(:created_issue) { Issue.last! }
 
   describe '#execute' do
@@ -49,6 +47,10 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
 
         expect(alert.reload.issue_id).to eq(created_issue.id)
       end
+
+      it 'creates a system note' do
+        expect { execute }.to change { alert.reload.notes.count }.by(1)
+      end
     end
 
     shared_examples 'setting an issue attributes' do
@@ -61,93 +63,11 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
       end
 
       it 'sets the issue title' do
-        expect(created_issue.title).to eq(alert_presenter.title)
+        expect(created_issue.title).to eq(alert.title)
       end
 
       it 'sets the issue description' do
-        expect(created_issue.description).to include(alert_presenter.issue_summary_markdown.strip)
-      end
-    end
-
-    shared_examples 'sets issue labels' do
-      let(:title) { 'incident' }
-      let(:color) { '#CC0033' }
-      let(:description) do
-        <<~DESCRIPTION.chomp
-          Denotes a disruption to IT services and \
-          the associated issues require immediate attention
-        DESCRIPTION
-      end
-
-      shared_examples 'existing label' do
-        it 'does not create new label' do
-          expect { execute }.not_to change(Label, :count)
-        end
-
-        it 'adds the existing label' do
-          execute
-
-          expect(created_issue.labels).to eq([label])
-        end
-      end
-
-      shared_examples 'new label' do
-        it 'adds newly created label' do
-          expect { execute }.to change(Label, :count).by(1)
-        end
-
-        it 'sets label attributes' do
-          execute
-
-          created_label = project.reload.labels.last!
-          expect(created_issue.labels).to eq([created_label])
-          expect(created_label.title).to eq(title)
-          expect(created_label.color).to eq(color)
-          expect(created_label.description).to eq(description)
-        end
-      end
-
-      context 'with predefined project label' do
-        it_behaves_like 'existing label' do
-          let!(:label) { create(:label, project: project, title: title) }
-        end
-      end
-
-      context 'with predefined group label' do
-        it_behaves_like 'existing label' do
-          let!(:label) { create(:group_label, group: group, title: title) }
-        end
-      end
-
-      context 'without label' do
-        it_behaves_like 'new label'
-      end
-
-      context 'with duplicate labels', issue: 'https://gitlab.com/gitlab-org/gitlab-foss/issues/65042' do
-        before do
-          # Replicate race condition to create duplicates
-          build(:label, project: project, title: title).save!(validate: false)
-          build(:label, project: project, title: title).save!(validate: false)
-        end
-
-        it 'create an issue without labels' do
-          # Verify we have duplicates
-          expect(project.labels.size).to eq(2)
-          expect(project.labels.map(&:title)).to all(eq(title))
-
-          message = <<~MESSAGE.chomp
-            Cannot create incident issue with labels ["#{title}"] for \
-            "#{project.full_name}": Labels is invalid.
-            Retrying without labels.
-          MESSAGE
-
-          expect(Gitlab::AppLogger)
-            .to receive(:info)
-            .with(message)
-
-          expect(execute).to be_success
-          expect(created_issue.labels).to be_empty
-        end
+        expect(created_issue.description).to include(alert_presenter.send(:issue_summary_markdown).strip)
       end
     end
 
@@ -163,35 +83,52 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
         expect(user).to have_received(:can?).with(:create_issue, project)
       end
 
+      context 'with alert severity' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:alert_severity, :incident_severity) do
+          'critical' | 'critical'
+          'high'     | 'high'
+          'medium'   | 'medium'
+          'low'      | 'low'
+          'info'     | 'unknown'
+          'unknown'  | 'unknown'
+        end
+
+        with_them do
+          before do
+            alert.update!(severity: alert_severity)
+            execute
+          end
+
+          it 'sets the correct severity level' do
+            expect(created_issue.severity).to eq(incident_severity)
+          end
+        end
+      end
+
       context 'when the alert is prometheus alert' do
         let(:alert) { prometheus_alert }
-        let(:alert_presenter) do
-          Gitlab::Alerting::Alert.new(project: project, payload: alert.payload).present
-        end
+        let(:issue) { subject.payload[:issue] }
 
         it_behaves_like 'creating an alert issue'
         it_behaves_like 'setting an issue attributes'
-        it_behaves_like 'sets issue labels'
       end
 
       context 'when the alert is generic' do
         let(:alert) { generic_alert }
-        let(:alert_presenter) do
-          alert_payload = Gitlab::Alerting::NotificationPayloadParser.call(alert.payload.to_h)
-          Gitlab::Alerting::Alert.new(project: project, payload: alert_payload).present
-        end
+        let(:issue) { subject.payload[:issue] }
 
         it_behaves_like 'creating an alert issue'
         it_behaves_like 'setting an issue attributes'
-        it_behaves_like 'sets issue labels'
       end
 
       context 'when issue cannot be created' do
-        let(:alert) { prometheus_alert }
+        let(:alert) { generic_alert }
 
         before do
-          # set invalid payload for Prometheus alert
-          alert.update!(payload: {})
+          # Invalid alert
+          alert.update_columns(title: '')
         end
 
         it 'has an unsuccessful status' do

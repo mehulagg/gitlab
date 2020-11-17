@@ -10,7 +10,6 @@ describe('StageNavItem', () => {
     const func = shallow ? shallowMount : mount;
     return func(StageNavItem, {
       propsData: {
-        canEdit: false,
         isActive: false,
         isUserAllowed: false,
         isDefaultStage: true,
@@ -119,13 +118,13 @@ describe('StageNavItem', () => {
       expect(wrapper.find('.stage-median').text()).toBe('Not available');
     });
     it('does not render options menu', () => {
-      expect(wrapper.find('.more-actions-toggle').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="more-actions-toggle"]').exists()).toBe(false);
     });
   });
 
   describe('User can edit stages', () => {
     beforeEach(() => {
-      wrapper = createComponent({ canEdit: true, isUserAllowed: true }, false);
+      wrapper = createComponent({ isUserAllowed: true }, false);
     });
 
     afterEach(() => {
@@ -136,7 +135,7 @@ describe('StageNavItem', () => {
     });
 
     it('does not render options menu', () => {
-      expect(wrapper.find('.more-actions-toggle').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="more-actions-toggle"]').exists()).toBe(false);
     });
 
     it('can not edit the stage', () => {

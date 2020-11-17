@@ -13,7 +13,7 @@
 #   - `#lease_timeout`
 #
 # The worker spec should include `it_behaves_like 'reenqueuer'` and
-# `it_behaves_like 'it is rate limited to 1 call per'`.
+# `it_behaves_like '#perform is rate limited to 1 call per'`.
 #
 # Optionally override `#minimum_duration` to adjust the rate limit.
 #
@@ -60,8 +60,6 @@ module Reenqueuer
     5.seconds
   end
 
-  # We intend to get rid of sleep:
-  # https://gitlab.com/gitlab-org/gitlab/issues/121697
   module ReenqueuerSleeper
     # The block will run, and then sleep until the minimum duration. Returns the
     # block's return value.
@@ -73,7 +71,7 @@ module Reenqueuer
     #   end
     #
     def ensure_minimum_duration(minimum_duration)
-      start_time = Time.now
+      start_time = Time.current
 
       result = yield
 
@@ -95,7 +93,7 @@ module Reenqueuer
     end
 
     def elapsed_time(start_time)
-      Time.now - start_time
+      Time.current - start_time
     end
   end
 end

@@ -23,6 +23,10 @@ module API
         authorize!(:admin_epic_link, epic)
       end
 
+      def authorize_can_destroy_epic_link!
+        authorize!(:destroy_epic_link, epic)
+      end
+
       def authorize_can_create!
         authorize!(:admin_epic, user_group)
       end

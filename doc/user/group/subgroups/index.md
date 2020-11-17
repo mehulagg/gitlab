@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto, concepts
 ---
 
@@ -7,22 +10,24 @@ type: reference, howto, concepts
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/2772) in GitLab 9.0.
 
 GitLab supports up to 20 levels of subgroups, also known as nested groups or hierarchical groups.
-levels of groups.
 
 By using subgroups you can do the following:
 
 - **Separate internal / external organizations.** Since every group
-  can have its own visibility level, you are able to host groups for different
-  purposes under the same umbrella.
+  can have its own visibility level ([public, internal, or private](../../../development/permissions.md#general-permissions)),
+  you're able to host groups for different purposes under the same umbrella.
 - **Organize large projects.** For large projects, subgroups makes it
   potentially easier to separate permissions on parts of the source code.
 - **Make it easier to manage people and control visibility.** Give people
   different [permissions](../../permissions.md#group-members-permissions) depending on their group [membership](#membership).
 
+For more information on allowed permissions in groups and projects, see
+[visibility levels](../../../development/permissions.md#general-permissions).
+
 ## Overview
 
 A group can have many subgroups inside it, and at the same time a group can have
-only 1 parent group. It resembles a directory behavior or a nested items list:
+only one immediate parent group. It resembles a directory behavior or a nested items list:
 
 - Group 1
   - Group 1.1
@@ -78,7 +83,10 @@ By default, groups created in:
 - GitLab 12.2 or later allow both Owners and Maintainers to create subgroups.
 - GitLab 12.1 or earlier only allow Owners to create subgroups.
 
-This setting can be for any group by an Owner or Administrator.
+The setting can be changed for any group by:
+
+- A group owner. Select the group, and navigate to **Settings > General > Permissions, LFS, 2FA**.
+- An administrator. Navigate to **Admin Area > Overview > Groups**, select the group, and choose **Edit**.
 
 For more information check the
 [permissions table](../../permissions.md#group-members-permissions). For a list
@@ -86,19 +94,18 @@ of words that are not allowed to be used as group names see the
 [reserved names](../../reserved_names.md).
 
 Users can always create subgroups if they are explicitly added as an Owner (or
-Maintainer, if that setting is enabled) to a parent group, even if group
+Maintainer, if that setting is enabled) to an immediate parent group, even if group
 creation is disabled by an administrator in their settings.
 
 To create a subgroup:
 
-1. In the group's dashboard expand the **New project** split button, select
-   **New subgroup** and click the **New subgroup** button.
+1. In the group's dashboard click the **New subgroup** button.
 
-   ![Subgroups page](img/create_subgroup_button.png)
+   ![Subgroups page](img/create_subgroup_button_v13_6.png)
 
-1. Create a new group like you would normally do. Notice that the parent group
+1. Create a new group like you would normally do. Notice that the immediate parent group
    namespace is fixed under **Group path**. The visibility level can differ from
-   the parent group.
+   the immediate parent group.
 
    ![Subgroups page](img/create_new_group.png)
 
@@ -110,12 +117,13 @@ Follow the same process to create any subsequent groups.
 ## Membership
 
 When you add a member to a subgroup, they inherit the membership and permission
-level from the parent group. This model allows access to nested groups if you
+level from the parent group(s). This model allows access to nested groups if you
 have membership in one of its parents.
 
-Jobs for pipelines in subgroups can use [Runners](../../../ci/runners/README.md) registered to the parent group. This means secrets configured for the parent group are available to subgroup jobs.
+Jobs for pipelines in subgroups can use [runners](../../../ci/runners/README.md) registered to the parent group(s).
+This means secrets configured for the parent group are available to subgroup jobs.
 
-In addition, maintainers of projects that belong to subgroups can see the details of Runners registered to parent groups.
+In addition, maintainers of projects that belong to subgroups can see the details of runners registered to parent group(s).
 
 The group permissions for a member can be changed only by Owners, and only on
 the **Members** page of the group the member was added.

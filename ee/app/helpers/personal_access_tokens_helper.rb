@@ -23,6 +23,14 @@ module PersonalAccessTokensHelper
     PersonalAccessToken.enforce_pat_expiration_feature_available?
   end
 
+  def token_expiry_banner_message(user)
+    verifier = PersonalAccessTokens::RotationVerifierService.new(user)
+
+    return _('At least one of your Personal Access Tokens is expired, but expiration enforcement is disabled. %{generate_new}') if verifier.expired?
+
+    return _('At least one of your Personal Access Tokens will expire soon, but expiration enforcement is disabled. %{generate_new}') if verifier.expiring_soon?
+  end
+
   private
 
   def instance_level_personal_access_token_expiration_policy_enabled?

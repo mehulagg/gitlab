@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'notify/changed_milestone_email.html.haml' do
+RSpec.describe 'notify/changed_milestone_email.html.haml' do
   let(:milestone) { create(:milestone, title: 'some-milestone') }
   let(:milestone_link) { milestone_url(milestone) }
 
@@ -22,7 +22,7 @@ describe 'notify/changed_milestone_email.html.haml' do
 
   context 'milestone with start and due dates' do
     before do
-      milestone.update(start_date: '2018-01-01', due_date: '2018-12-31')
+      milestone.update!(start_date: '2018-01-01', due_date: '2018-12-31')
     end
 
     it 'renders with date range' do

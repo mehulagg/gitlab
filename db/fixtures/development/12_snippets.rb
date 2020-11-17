@@ -1,42 +1,51 @@
 require './spec/support/sidekiq_middleware'
 
-Gitlab::Seeder.quiet do
-  content =<<eos
-class Member < ActiveRecord::Base
-  include Notifiable
-  include Gitlab::Access
+SNIPPET_REPO_URL = "https://gitlab.com/gitlab-org/gitlab-snippet-test.git"
+BUNDLE_PATH = File.join(Rails.root, 'db/fixtures/development/gitlab-snippet-test.bundle')
 
-  belongs_to :user
-  belongs_to :source, polymorphic: true
+class Gitlab::Seeder::SnippetRepository
+  def initialize(snippet)
+    @snippet = snippet
+  end
 
-  validates :user, presence: true
-  validates :source, presence: true
-  validates :user_id, uniqueness: { scope: [:source_type, :source_id], message: "already exists in source" }
-  validates :access_level, inclusion: { in: Gitlab::Access.all_values }, presence: true
+  def import
+    if File.exists?(BUNDLE_PATH)
+      @snippet.repository.create_from_bundle(BUNDLE_PATH)
+    else
+      @snippet.repository.import_repository(SNIPPET_REPO_URL)
+      @snippet.repository.bundle_to_disk(BUNDLE_PATH)
+    end
+  end
 
-  scope :guests, -> { where(access_level: GUEST) }
-  scope :reporters, -> { where(access_level: REPORTER) }
-  scope :developers, -> { where(access_level: DEVELOPER) }
-  scope :maintainers,  -> { where(access_level: MAINTAINER) }
-  scope :owners,  -> { where(access_level: OWNER) }
-
-  delegate :name, :username, :email, to: :user, prefix: true
+  def self.cleanup
+    File.delete(BUNDLE_PATH) if File.exists?(BUNDLE_PATH)
+  rescue => e
+    warn "\nError cleaning up snippet bundle: #{e}"
+  end
 end
-eos
 
-  50.times do |i|
+Gitlab::Seeder.quiet do
+  20.times do |i|
     user = User.not_mass_generated.sample
 
-    PersonalSnippet.seed(:id, [{
-      id: i,
-      author_id: user.id,
+    user.snippets.create({
+      type: 'PersonalSnippet',
       title: FFaker::Lorem.sentence(3),
-      file_name:  FFaker::Internet.domain_word + '.rb',
+      file_name:  'file.rb',
       visibility_level: Gitlab::VisibilityLevel.values.sample,
-      content: content,
-    }])
+      content: 'foo'
+    }).tap do |snippet|
+      unless snippet.repository_exists?
+        Gitlab::Seeder::SnippetRepository.new(snippet).import
+      end
+
+      snippet.track_snippet_repository(snippet.repository.storage)
+      snippet.statistics.refresh!
+    end
 
     print('.')
   end
+
+  Gitlab::Seeder::SnippetRepository.cleanup
 end
 

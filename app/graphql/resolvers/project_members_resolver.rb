@@ -1,21 +1,14 @@
 # frozen_string_literal: true
+# rubocop:disable Graphql/ResolverType (inherited from MembersResolver)
 
 module Resolvers
-  class ProjectMembersResolver < BaseResolver
-    argument :search, GraphQL::STRING_TYPE,
-              required: false,
-              description: 'Search query'
+  class ProjectMembersResolver < MembersResolver
+    authorize :read_project_member
 
-    type Types::ProjectMemberType, null: true
+    private
 
-    alias_method :project, :object
-
-    def resolve(**args)
-      return Member.none unless project.present?
-
+    def finder_class
       MembersFinder
-        .new(project, context[:current_user], params: args)
-        .execute
     end
   end
 end

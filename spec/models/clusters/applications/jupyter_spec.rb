@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Jupyter do
+RSpec.describe Clusters::Applications::Jupyter do
   include_examples 'cluster application core specs', :clusters_applications_jupyter
   include_examples 'cluster application status specs', :clusters_applications_jupyter
   include_examples 'cluster application version specs', :clusters_applications_jupyter
@@ -52,7 +52,7 @@ describe Clusters::Applications::Jupyter do
 
     subject { jupyter.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with 4 arguments' do
       expect(subject.name).to eq('jupyter')

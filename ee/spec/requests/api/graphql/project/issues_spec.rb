@@ -47,4 +47,72 @@ RSpec.describe 'getting an issue list for a project' do
       end
     end
   end
+
+  describe 'blocked' do
+    let_it_be(:group) { create(:group, :public) }
+    let_it_be(:project) { create(:project, namespace: group) }
+    let_it_be(:unrelated_issue) { create(:issue, project: project) }
+    let_it_be(:blocked_issue1) { create(:issue, project: project) }
+    let_it_be(:blocking_issue1) { create(:issue, project: project) }
+    let_it_be(:blocked_issue2) { create(:issue, project: project) }
+    let_it_be(:blocking_issue2) { create(:issue, :confidential, project: project) }
+    let_it_be(:blocking_issue3) { create(:issue, project: project) }
+
+    let_it_be(:issue_link1) { create(:issue_link, source: blocked_issue1, target: blocking_issue1, link_type: 'is_blocked_by') }
+    let_it_be(:issue_link2) { create(:issue_link, source: blocking_issue2, target: blocked_issue2, link_type: 'blocks') }
+    let_it_be(:issue_link3) { create(:issue_link, source: blocking_issue3, target: blocked_issue2, link_type: 'blocks') }
+
+    let(:query) do
+      graphql_query_for('project', { fullPath: project.full_path }, query_graphql_field('issues', {}, issue_links_aggregates_query))
+    end
+
+    let(:single_issue_query) do
+      graphql_query_for('project', { fullPath: project.full_path }, query_graphql_field('issues', { iid: blocked_issue1.iid.to_s }, issue_links_aggregates_query))
+    end
+
+    let(:issue_links_aggregates_query) do
+      <<~QUERY
+        nodes {
+          id
+          blocked
+          blockedByCount
+        }
+      QUERY
+    end
+
+    before do
+      group.add_developer(current_user)
+    end
+
+    context 'working query' do
+      before do
+        post_graphql(single_issue_query, current_user: current_user)
+      end
+
+      it_behaves_like 'a working graphql query'
+    end
+
+    it 'uses the LazyBlockAggregate service' do
+      expect(::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate).to receive(:new)
+
+      post_graphql(single_issue_query, current_user: current_user)
+    end
+
+    it 'returns the correct result', :aggregate_failures do
+      check_result(blocked_issue1, true, 1)
+      check_result(blocked_issue2, true, 2)
+      check_result(blocking_issue1, false, 0)
+      check_result(blocking_issue2, false, 0)
+    end
+
+    def check_result(issue, expected_blocked, expected_blocked_count)
+      post_graphql(query, current_user: current_user)
+
+      nodes = graphql_data.dig('project', 'issues', 'nodes')
+      node = nodes.find { |r| r['id'] == issue.to_global_id.to_s }
+
+      expect(node['blocked']).to eq expected_blocked
+      expect(node['blockedByCount']).to eq expected_blocked_count
+    end
+  end
 end

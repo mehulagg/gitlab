@@ -4,13 +4,11 @@ module EE
   module ClustersHelper
     extend ::Gitlab::Utils::Override
 
-    override :has_multiple_clusters?
-    def has_multiple_clusters?
-      clusterable.feature_available?(:multiple_clusters)
-    end
+    override :display_cluster_agents?
+    def display_cluster_agents?(clusterable)
+      return unless ::Feature.enabled?(:cluster_agent_list, default_enabled: true)
 
-    def show_cluster_health_graphs?
-      clusterable.feature_available?(:cluster_health)
+      clusterable.is_a?(Project) && clusterable.feature_available?(:cluster_agents)
     end
   end
 end

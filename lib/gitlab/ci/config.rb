@@ -39,6 +39,10 @@ module Gitlab
         @root.errors
       end
 
+      def warnings
+        @root.warnings
+      end
+
       def to_hash
         @config
       end
@@ -50,12 +54,20 @@ module Gitlab
         root.variables_value
       end
 
+      def variables_with_data
+        root.variables_entry.value_with_data
+      end
+
       def stages
         root.stages_value
       end
 
       def jobs
         root.jobs_value
+      end
+
+      def normalized_jobs
+        @normalized_jobs ||= Ci::Config::Normalizer.new(jobs).normalize_jobs
       end
 
       private
@@ -93,7 +105,7 @@ module Gitlab
         Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error, @context.sentry_payload)
       end
 
-      # Overriden in EE
+      # Overridden in EE
       def rescue_errors
         RESCUE_ERRORS
       end

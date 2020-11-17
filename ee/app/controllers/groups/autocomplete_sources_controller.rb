@@ -3,12 +3,20 @@
 class Groups::AutocompleteSourcesController < Groups::ApplicationController
   before_action :load_autocomplete_service, except: [:members]
 
+  feature_category :subgroups, [:members]
+  feature_category :issue_tracking, [:issues, :labels, :milestones, :commands]
+  feature_category :code_review, [:merge_requests]
+  feature_category :epics, [:epics]
+
   def members
     render json: ::Groups::ParticipantsService.new(@group, current_user).execute(target)
   end
 
   def issues
-    render json: issuable_serializer.represent(@autocomplete_service.issues, parent_group: @group)
+    render json: issuable_serializer.represent(
+      @autocomplete_service.issues(confidential_only: params[:confidential_only], issue_types: params[:issue_types]),
+      parent_group: @group
+    )
   end
 
   def merge_requests
@@ -20,7 +28,7 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
   end
 
   def epics
-    render json: @autocomplete_service.epics
+    render json: @autocomplete_service.epics(confidential_only: params[:confidential_only])
   end
 
   def commands
@@ -43,10 +51,9 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def target
-    case params[:type]&.downcase
-    when 'epic'
-      EpicsFinder.new(current_user, group_id: @group.id).find_by(iid: params[:type_id])
-    end
+    QuickActions::TargetService
+      .new(nil, current_user, group: @group)
+      .execute(params[:type], params[:type_id])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

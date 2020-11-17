@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Ci::DestroyPipelineService do
+RSpec.describe ::Ci::DestroyPipelineService do
   let(:project) { create(:project, :repository) }
   let!(:pipeline) { create(:ci_pipeline, :success, project: project, sha: project.commit.id) }
 
@@ -29,7 +29,7 @@ describe ::Ci::DestroyPipelineService do
     end
 
     it 'does not log an audit event' do
-      expect { subject }.not_to change { SecurityEvent.count }
+      expect { subject }.not_to change { AuditEvent.count }
     end
 
     context 'when the pipeline has jobs' do

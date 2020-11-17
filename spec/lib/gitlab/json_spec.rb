@@ -174,22 +174,211 @@ RSpec.describe Gitlab::Json do
   end
 
   describe ".generate" do
-    it "delegates to the adapter" do
-      args = [{ foo: "bar" }]
+    let(:obj) do
+      { test: true, "foo.bar" => "baz", is_json: 1, some: [1, 2, 3] }
+    end
 
-      expect(JSON).to receive(:generate).with(*args)
+    it "generates JSON" do
+      expected_string = <<~STR.chomp
+        {"test":true,"foo.bar":"baz","is_json":1,"some":[1,2,3]}
+      STR
 
-      subject.generate(*args)
+      expect(subject.generate(obj)).to eq(expected_string)
+    end
+
+    it "allows you to customise the output" do
+      opts = {
+        indent: "  ",
+        space: " ",
+        space_before: " ",
+        object_nl: "\n",
+        array_nl: "\n"
+      }
+
+      json = subject.generate(obj, opts)
+
+      expected_string = <<~STR.chomp
+        {
+          "test" : true,
+          "foo.bar" : "baz",
+          "is_json" : 1,
+          "some" : [
+            1,
+            2,
+            3
+          ]
+        }
+      STR
+
+      expect(json).to eq(expected_string)
     end
   end
 
   describe ".pretty_generate" do
-    it "delegates to the adapter" do
-      args = [{ foo: "bar" }]
+    let(:obj) do
+      {
+        test: true,
+        "foo.bar" => "baz",
+        is_json: 1,
+        some: [1, 2, 3],
+        more: { test: true },
+        multi_line_empty_array: [],
+        multi_line_empty_obj: {}
+      }
+    end
 
-      expect(JSON).to receive(:pretty_generate).with(*args)
+    it "generates pretty JSON" do
+      expected_string = <<~STR.chomp
+        {
+          "test": true,
+          "foo.bar": "baz",
+          "is_json": 1,
+          "some": [
+            1,
+            2,
+            3
+          ],
+          "more": {
+            "test": true
+          },
+          "multi_line_empty_array": [
 
-      subject.pretty_generate(*args)
+          ],
+          "multi_line_empty_obj": {
+          }
+        }
+      STR
+
+      expect(subject.pretty_generate(obj)).to eq(expected_string)
+    end
+
+    it "allows you to customise the output" do
+      opts = {
+        space_before: " "
+      }
+
+      json = subject.pretty_generate(obj, opts)
+
+      expected_string = <<~STR.chomp
+        {
+          "test" : true,
+          "foo.bar" : "baz",
+          "is_json" : 1,
+          "some" : [
+            1,
+            2,
+            3
+          ],
+          "more" : {
+            "test" : true
+          },
+          "multi_line_empty_array" : [
+
+          ],
+          "multi_line_empty_obj" : {
+          }
+        }
+      STR
+
+      expect(json).to eq(expected_string)
+    end
+  end
+
+  context "the feature table is missing" do
+    before do
+      allow(Feature::FlipperFeature).to receive(:table_exists?).and_return(false)
+    end
+
+    it "skips legacy mode handling" do
+      expect(Feature).not_to receive(:enabled?).with(:json_wrapper_legacy_mode, default_enabled: true)
+
+      subject.send(:handle_legacy_mode!, {})
+    end
+  end
+
+  context "the database is missing" do
+    before do
+      allow(Feature::FlipperFeature).to receive(:table_exists?).and_raise(PG::ConnectionBad)
+    end
+
+    it "still parses json" do
+      expect(subject.parse("{}")).to eq({})
+    end
+
+    it "still generates json" do
+      expect(subject.dump({})).to eq("{}")
+    end
+  end
+
+  describe Gitlab::Json::GrapeFormatter do
+    subject { described_class.call(obj, env) }
+
+    let(:obj) { { test: true } }
+    let(:env) { {} }
+    let(:result) { "{\"test\":true}" }
+
+    context "grape_gitlab_json flag is enabled" do
+      before do
+        stub_feature_flags(grape_gitlab_json: true)
+      end
+
+      it "generates JSON" do
+        expect(subject).to eq(result)
+      end
+
+      it "uses Gitlab::Json" do
+        expect(Gitlab::Json).to receive(:dump).with(obj)
+
+        subject
+      end
+    end
+
+    context "grape_gitlab_json flag is disabled" do
+      before do
+        stub_feature_flags(grape_gitlab_json: false)
+      end
+
+      it "generates JSON" do
+        expect(subject).to eq(result)
+      end
+
+      it "uses Grape::Formatter::Json" do
+        expect(Grape::Formatter::Json).to receive(:call).with(obj, env)
+
+        subject
+      end
+    end
+  end
+
+  describe Gitlab::Json::LimitedEncoder do
+    subject { described_class.encode(obj, limit: 8.kilobytes) }
+
+    context 'when object size is acceptable' do
+      let(:obj) { { test: true } }
+
+      it 'returns json string' do
+        is_expected.to eq("{\"test\":true}")
+      end
+    end
+
+    context 'when object is too big' do
+      let(:obj) { [{ test: true }] * 1000 }
+
+      it 'raises LimitExceeded error' do
+        expect { subject }.to raise_error(
+          Gitlab::Json::LimitedEncoder::LimitExceeded
+        )
+      end
+    end
+
+    context 'when json_limited_encoder is disabled' do
+      let(:obj) { [{ test: true }] * 1000 }
+
+      it 'does not raise an error' do
+        stub_feature_flags(json_limited_encoder: false)
+
+        expect { subject }.not_to raise_error
+      end
     end
   end
 end

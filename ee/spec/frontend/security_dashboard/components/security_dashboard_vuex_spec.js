@@ -8,20 +8,14 @@ import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_chart.vue';
-import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list_vuex.vue';
-import VulnerabilitySeverity from 'ee/security_dashboard/components/vulnerability_severity.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 
 import createStore from 'ee/security_dashboard/store';
-import { getParameterValues } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
 
 const pipelineId = 123;
 const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
-const vulnerabilitiesCountEndpoint = `${TEST_HOST}/vulnerabilities_summary`;
 const vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilities_history`;
-const vulnerableProjectsEndpoint = `${TEST_HOST}/vulnerable_projects`;
-const vulnerabilityFeedbackHelpPath = `${TEST_HOST}/vulnerabilities_feedback_help`;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   getParameterValues: jest.fn().mockReturnValue([]),
@@ -30,8 +24,8 @@ jest.mock('~/lib/utils/url_utility', () => ({
 describe('Security Dashboard component', () => {
   let wrapper;
   let mock;
-  let lockFilterSpy;
   let setPipelineIdSpy;
+  let fetchPipelineJobsSpy;
   let store;
 
   const createComponent = props => {
@@ -41,17 +35,14 @@ describe('Security Dashboard component', () => {
         SecurityDashboardLayout,
       },
       methods: {
-        lockFilter: lockFilterSpy,
         setPipelineId: setPipelineIdSpy,
+        fetchPipelineJobs: fetchPipelineJobsSpy,
       },
       propsData: {
         dashboardDocumentation: '',
         vulnerabilitiesEndpoint,
-        vulnerabilitiesCountEndpoint,
         vulnerabilitiesHistoryEndpoint,
-        vulnerableProjectsEndpoint,
         pipelineId,
-        vulnerabilityFeedbackHelpPath,
         ...props,
       },
     });
@@ -59,8 +50,8 @@ describe('Security Dashboard component', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    lockFilterSpy = jest.fn();
     setPipelineIdSpy = jest.fn();
+    fetchPipelineJobsSpy = jest.fn();
     store = createStore();
   });
 
@@ -88,42 +79,16 @@ describe('Security Dashboard component', () => {
       expect(wrapper.find(VulnerabilityChart).exists()).toBe(true);
     });
 
-    it('does not render the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(false);
-    });
-
-    it('does not lock to a project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(false);
-    });
-
-    it('does not lock project filters', () => {
-      expect(lockFilterSpy).not.toHaveBeenCalled();
-    });
-
     it('sets the pipeline id', () => {
       expect(setPipelineIdSpy).toHaveBeenCalledWith(pipelineId);
     });
 
-    describe('when the total number of vulnerabilities change', () => {
-      const newCount = 3;
-
-      beforeEach(() => {
-        store.state.vulnerabilities.pageInfo = { total: newCount };
-      });
-
-      it('emits a vulnerabilitiesCountChanged event', () => {
-        expect(wrapper.emitted('vulnerabilitiesCountChanged')).toEqual([[newCount]]);
-      });
+    it('fetchs the pipeline jobs', () => {
+      expect(fetchPipelineJobsSpy).toHaveBeenCalledWith();
     });
 
     it('renders the issue modal', () => {
-      expect(wrapper.contains(IssueModal)).toBe(true);
-    });
-
-    it('passes the "vulnerabilityFeedbackHelpPath" prop to the issue modal', () => {
-      expect(wrapper.find(IssueModal).props('vulnerabilityFeedbackHelpPath')).toBe(
-        vulnerabilityFeedbackHelpPath,
-      );
+      expect(wrapper.find(IssueModal).exists()).toBe(true);
     });
 
     it.each`
@@ -159,7 +124,7 @@ describe('Security Dashboard component', () => {
   describe('issue modal', () => {
     it.each`
       givenState                                                                                   | expectedProps
-      ${{ modal: { vulnerability: 'foo' } }}                                                       | ${{ modal: { vulnerability: 'foo' }, vulnerabilityFeedbackHelpPath, canCreateIssue: false, canCreateMergeRequest: false, canDismissVulnerability: false, isCreatingIssue: false, isDismissingVulnerability: false, isCreatingMergeRequest: false }}
+      ${{ modal: { vulnerability: 'foo' } }}                                                       | ${{ modal: { vulnerability: 'foo' }, canCreateIssue: false, canCreateMergeRequest: false, canDismissVulnerability: false, isCreatingIssue: false, isDismissingVulnerability: false, isCreatingMergeRequest: false }}
       ${{ modal: { vulnerability: { create_vulnerability_feedback_issue_path: 'foo' } } }}         | ${expect.objectContaining({ canCreateIssue: true })}
       ${{ modal: { vulnerability: { create_vulnerability_feedback_merge_request_path: 'foo' } } }} | ${expect.objectContaining({ canCreateMergeRequest: true })}
       ${{ modal: { vulnerability: { create_vulnerability_feedback_dismissal_path: 'foo' } } }}     | ${expect.objectContaining({ canDismissVulnerability: true })}
@@ -178,37 +143,9 @@ describe('Security Dashboard component', () => {
     );
   });
 
-  describe('with project lock', () => {
-    const project = {
-      id: 123,
-    };
-    beforeEach(() => {
-      createComponent({
-        lockToProject: project,
-      });
-    });
-
-    it('renders the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(true);
-    });
-
-    it('locks to a given project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(true);
-    });
-
-    it('locks the filters to a given project', () => {
-      expect(lockFilterSpy).toHaveBeenCalledWith({
-        filterId: 'project_id',
-        optionId: project.id,
-      });
-    });
-  });
-
   describe.each`
     endpointProp                        | Component
-    ${'vulnerabilitiesCountEndpoint'}   | ${VulnerabilityCountList}
     ${'vulnerabilitiesHistoryEndpoint'} | ${VulnerabilityChart}
-    ${'vulnerableProjectsEndpoint'}     | ${VulnerabilitySeverity}
   `('with an empty $endpointProp', ({ endpointProp, Component }) => {
     beforeEach(() => {
       createComponent({
@@ -218,19 +155,6 @@ describe('Security Dashboard component', () => {
 
     it(`does not show the ${Component.name}`, () => {
       expect(wrapper.find(Component).exists()).toBe(false);
-    });
-  });
-
-  describe('dismissed vulnerabilities', () => {
-    it.each`
-      description                                                        | getParameterValuesReturnValue | expected
-      ${'hides dismissed vulnerabilities by default'}                    | ${[]}                         | ${true}
-      ${'shows dismissed vulnerabilities if scope param is "all"'}       | ${['all']}                    | ${false}
-      ${'hides dismissed vulnerabilities if scope param is "dismissed"'} | ${['dismissed']}              | ${true}
-    `('$description', ({ getParameterValuesReturnValue, expected }) => {
-      getParameterValues.mockImplementation(() => getParameterValuesReturnValue);
-      createComponent();
-      expect(wrapper.vm.$store.state.filters.hideDismissed).toBe(expected);
     });
   });
 

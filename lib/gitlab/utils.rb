@@ -7,21 +7,43 @@ module Gitlab
 
     # Ensure that the relative path will not traverse outside the base directory
     # We url decode the path to avoid passing invalid paths forward in url encoded format.
-    # We are ok to pass some double encoded paths to File.open since they won't resolve.
     # Also see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24223#note_284122580
     # It also checks for ALT_SEPARATOR aka '\' (forward slash)
-    def check_path_traversal!(path, allowed_absolute: false)
-      path = CGI.unescape(path)
+    def check_path_traversal!(path)
+      return unless path.is_a?(String)
 
-      if path.start_with?("..#{File::SEPARATOR}", "..#{File::ALT_SEPARATOR}") ||
-          path.include?("#{File::SEPARATOR}..#{File::SEPARATOR}") ||
-          path.end_with?("#{File::SEPARATOR}..") ||
-          (!allowed_absolute && Pathname.new(path).absolute?)
+      path = decode_path(path)
+      path_regex = /(\A(\.{1,2})\z|\A\.\.[\/\\]|[\/\\]\.\.\z|[\/\\]\.\.[\/\\]|\n)/
 
+      if path.match?(path_regex)
         raise PathTraversalAttackError.new('Invalid path')
       end
 
       path
+    end
+
+    def allowlisted?(absolute_path, allowlist)
+      path = absolute_path.downcase
+
+      allowlist.map(&:downcase).any? do |allowed_path|
+        path.start_with?(allowed_path)
+      end
+    end
+
+    def check_allowed_absolute_path!(path, allowlist)
+      return unless Pathname.new(path).absolute?
+      return if allowlisted?(path, allowlist)
+
+      raise StandardError, "path #{path} is not allowed"
+    end
+
+    def decode_path(encoded_path)
+      decoded = CGI.unescape(encoded_path)
+      if decoded != CGI.unescape(decoded)
+        raise StandardError, "path #{encoded_path} is not allowed"
+      end
+
+      decoded
     end
 
     def force_utf8(str)
@@ -30,7 +52,7 @@ module Gitlab
 
     def ensure_utf8_size(str, bytes:)
       raise ArgumentError, 'Empty string provided!' if str.empty?
-      raise ArgumentError, 'Negative string size provided!' if bytes.negative?
+      raise ArgumentError, 'Negative string size provided!' if bytes < 0
 
       truncated = str.each_char.each_with_object(+'') do |char, object|
         if object.bytesize + char.bytesize > bytes
@@ -56,7 +78,7 @@ module Gitlab
     #   * Maximum length is 63 bytes
     #   * First/Last Character is not a hyphen
     def slugify(str)
-      return str.downcase
+      str.downcase
         .gsub(/[^a-z0-9]/, '-')[0..62]
         .gsub(/(\A-+|-+\z)/, '')
     end
@@ -177,6 +199,44 @@ module Gitlab
       hash.flat_map { |k, v| Array.wrap(v).zip([k].cycle) }
         .group_by(&:first)
         .transform_values { |kvs| kvs.map(&:last) }
+    end
+
+    # This sort is stable (see https://en.wikipedia.org/wiki/Sorting_algorithm#Stability)
+    # contrary to the bare Ruby sort_by method. Using just sort_by leads to
+    # instability across different platforms (e.g., x86_64-linux and x86_64-darwin18)
+    # which in turn leads to different sorting results for the equal elements across
+    # these platforms.
+    # This method uses a list item's original index position to break ties.
+    def stable_sort_by(list)
+      list.sort_by.with_index { |x, idx| [yield(x), idx] }
+    end
+
+    # Check for valid brackets (`[` and `]`) in a string using this aspects:
+    # * open brackets count == closed brackets count
+    # * (optionally) reject nested brackets via `allow_nested: false`
+    # * open / close brackets coherence, eg. ][[] -> invalid
+    def valid_brackets?(string = '', allow_nested: true)
+      # remove everything except brackets
+      brackets = string.remove(/[^\[\]]/)
+
+      return true if brackets.empty?
+      # balanced counts check
+      return false if brackets.size.odd?
+
+      unless allow_nested
+        # nested brackets check
+        return false if brackets.include?('[[') || brackets.include?(']]')
+      end
+
+      # open / close brackets coherence check
+      untrimmed = brackets
+      loop do
+        trimmed = untrimmed.gsub('[]', '')
+        return true if trimmed.empty?
+        return false if trimmed == untrimmed
+
+        untrimmed = trimmed
+      end
     end
   end
 end

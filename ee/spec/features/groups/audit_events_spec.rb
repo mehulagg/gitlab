@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Groups > Audit Events', :js do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create(:user) }
   let(:alex) { create(:user, name: 'Alex') }
   let(:group) { create(:group) }
@@ -45,34 +47,30 @@ RSpec.describe 'Groups > Audit Events', :js do
 
       wait_for_requests
 
-      group_member = group.members.find_by(user_id: alex)
-
-      page.within "#group_member_#{group_member.id}" do
+      page.within first_row do
         click_button 'Developer'
-        click_link 'Maintainer'
+        click_button 'Maintainer'
       end
 
       find(:link, text: 'Settings').click
 
       click_link 'Audit Events'
 
-      page.within('#audits') do
-        expect(page).to have_content 'Change access level from developer to maintainer'
+      page.within('.audit-log-table') do
+        expect(page).to have_content 'Changed access level from Developer to Maintainer'
         expect(page).to have_content(user.name)
         expect(page).to have_content('Alex')
       end
     end
   end
 
-  describe 'filter by date', js: false do
+  describe 'filter by date' do
     let!(:audit_event_1) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 5.days.ago) }
     let!(:audit_event_2) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 1.day.ago) }
+    let!(:audit_event_3) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: Date.current) }
+    let!(:events_path) { :group_audit_events_path }
+    let!(:entity) { group }
 
-    before do
-      visit group_audit_events_path(group)
-    end
-
-    it_behaves_like 'audit events filter'
+    it_behaves_like 'audit events date filter'
   end
 end

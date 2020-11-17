@@ -66,12 +66,12 @@ export default {
 <template>
   <div class="js-file-title file-title-flex-parent">
     <blob-filepath :blob="blob">
-      <template #filepathPrepend>
+      <template #filepath-prepend>
         <slot name="prepend"></slot>
       </template>
     </blob-filepath>
 
-    <div class="file-actions d-none d-sm-flex">
+    <div class="gl-display-none gl-display-sm-flex">
       <viewer-switcher v-if="showViewerSwitcher" v-model="viewer" />
 
       <slot name="actions"></slot>

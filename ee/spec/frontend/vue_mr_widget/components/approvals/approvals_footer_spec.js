@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { GlDeprecatedButton, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import stubChildren from 'helpers/stub_children';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
 const testSuggestedApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));
@@ -12,17 +12,21 @@ describe('EE MRWidget approvals footer', () => {
   let wrapper;
 
   const createComponent = (props = {}) => {
-    wrapper = shallowMount(ApprovalsFooter, {
+    wrapper = mount(ApprovalsFooter, {
       propsData: {
         suggestedApprovers: testSuggestedApprovers(),
         approvalRules: testApprovalRules(),
         ...props,
       },
+      stubs: {
+        ...stubChildren(ApprovalsFooter),
+        GlButton: false,
+      },
     });
   };
 
-  const findToggle = () => wrapper.find('button');
-  const findToggleIcon = () => findToggle().find(Icon);
+  const findToggle = () => wrapper.find(GlButton);
+  const findToggleIcon = () => findToggle().find(GlIcon);
   const findToggleLoadingIcon = () => findToggle().find(GlLoadingIcon);
   const findExpandButton = () => wrapper.find(GlDeprecatedButton);
   const findCollapseButton = () => wrapper.find(GlDeprecatedButton);
@@ -139,10 +143,10 @@ describe('EE MRWidget approvals footer', () => {
       it('expands when clicked', () => {
         const button = findToggle();
 
-        button.trigger('click');
+        button.vm.$emit('click');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [true] }]);
+          expect(wrapper.emitted().input).toEqual([[true]]);
         });
       });
     });
@@ -188,7 +192,7 @@ describe('EE MRWidget approvals footer', () => {
         wrapper.vm
           .$nextTick()
           .then(() => {
-            expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [true] }]);
+            expect(wrapper.emitted().input).toEqual([[true]]);
           })
           .then(done)
           .catch(done.fail);

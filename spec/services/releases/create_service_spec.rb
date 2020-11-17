@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Releases::CreateService do
+RSpec.describe Releases::CreateService do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:tag_name) { project.repository.tag_names.first }
@@ -21,6 +21,12 @@ describe Releases::CreateService do
     shared_examples 'a successful release creation' do
       it 'creates a new release' do
         expected_job_count = MailScheduler::NotificationServiceWorker.jobs.size + 1
+
+        expect_next_instance_of(Release) do |release|
+          expect(release)
+            .to receive(:execute_hooks)
+            .with('create')
+        end
 
         result = service.execute
 
@@ -198,10 +204,11 @@ describe Releases::CreateService do
         released_at: released_at
       }.compact
     end
+
     let(:last_release) { project.releases.last }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     subject { service.execute }

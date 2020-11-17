@@ -20,6 +20,9 @@ RSpec.shared_examples 'a blob replicator' do
 
   it_behaves_like 'a replicator'
 
+  # This could be included in each model's spec, but including it here is DRYer.
+  include_examples 'a replicable model'
+
   describe '#handle_after_create_commit' do
     it 'creates a Geo::Event' do
       expect do
@@ -30,67 +33,107 @@ RSpec.shared_examples 'a blob replicator' do
         "replicable_name" => replicator.replicable_name, "event_name" => "created", "payload" => { "model_record_id" => replicator.model_record.id })
     end
 
-    it 'schedules the checksum calculation if needed' do
-      expect(Geo::BlobVerificationPrimaryWorker).to receive(:perform_async)
-      expect(replicator).to receive(:needs_checksum?).and_return(true)
+    it 'calls #after_verifiable_update' do
+      expect(replicator).to receive(:after_verifiable_update)
 
       replicator.handle_after_create_commit
     end
 
-    it 'does not schedule the checksum calculation if feature flag is disabled' do
-      stub_feature_flags(geo_self_service_framework_replication: false)
-
-      expect(Geo::BlobVerificationPrimaryWorker).not_to receive(:perform_async)
-      allow(replicator).to receive(:needs_checksum?).and_return(true)
-
-      replicator.handle_after_create_commit
-    end
-  end
-
-  describe '#calculate_checksum!' do
-    it 'calculates the checksum' do
-      model_record.save!
-
-      replicator.calculate_checksum!
-
-      expect(model_record.reload.verification_checksum).not_to be_nil
-      expect(model_record.reload.verified_at).not_to be_nil
-    end
-
-    it 'saves the error message and increments retry counter' do
-      model_record.save!
-
-      allow(model_record).to receive(:calculate_checksum!) do
-        raise StandardError.new('Failure to calculate checksum')
+    context 'when replication feature flag is disabled' do
+      before do
+        stub_feature_flags(replicator.replication_enabled_feature_key => false)
       end
 
-      replicator.calculate_checksum!
+      it 'does not call #after_verifiable_update' do
+        expect(replicator).not_to receive(:after_verifiable_update)
 
-      expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
-      expect(model_record.verification_retry_count).to be 1
+        replicator.handle_after_create_commit
+      end
+
+      it 'does not publish' do
+        expect(replicator).not_to receive(:publish)
+
+        replicator.handle_after_create_commit
+      end
     end
   end
 
-  describe '#consume_created_event' do
-    context "when the blob's project is not excluded by selective sync" do
+  describe '#handle_after_destroy' do
+    it 'creates a Geo::Event' do
+      expect do
+        replicator.handle_after_destroy
+      end.to change { ::Geo::Event.count }.by(1)
+
+      expect(::Geo::Event.last.attributes).to include(
+        "replicable_name" => replicator.replicable_name, "event_name" => "deleted", "payload" => { "model_record_id" => replicator.model_record.id, "blob_path" => replicator.blob_path })
+    end
+
+    context 'when replication feature flag is disabled' do
+      before do
+        stub_feature_flags(replicator.replication_enabled_feature_key => false)
+      end
+
+      it 'does not publish' do
+        expect(replicator).not_to receive(:publish)
+
+        replicator.handle_after_create_commit
+      end
+    end
+  end
+
+  describe 'created event consumption' do
+    context "when the blob's project is in replicables for this geo node" do
       it 'invokes Geo::BlobDownloadService' do
-        expect(replicator).to receive(:excluded_by_selective_sync?).and_return(false)
+        expect(replicator).to receive(:in_replicables_for_current_secondary?).and_return(true)
         service = double(:service)
 
         expect(service).to receive(:execute)
         expect(::Geo::BlobDownloadService).to receive(:new).with(replicator: replicator).and_return(service)
 
-        replicator.consume_event_created
+        replicator.consume(:created)
       end
     end
 
-    context "when the blob's project is excluded by selective sync" do
+    context "when the blob's project is not in replicables for this geo node" do
       it 'does not invoke Geo::BlobDownloadService' do
-        expect(replicator).to receive(:excluded_by_selective_sync?).and_return(true)
+        expect(replicator).to receive(:in_replicables_for_current_secondary?).and_return(false)
 
         expect(::Geo::BlobDownloadService).not_to receive(:new)
 
-        replicator.consume_event_created
+        replicator.consume(:created)
+      end
+    end
+  end
+
+  describe 'deleted event consumption' do
+    before do
+      model_record.save!
+    end
+
+    let!(:model_record_id) { replicator.model_record_id }
+    let!(:blob_path) { replicator.blob_path }
+    let!(:deleted_params) { { model_record_id: model_record_id, blob_path: blob_path } }
+
+    context 'when model_record was deleted from the DB and the replicator only has its ID' do
+      before do
+        model_record.delete
+      end
+
+      # The replicator is instantiated by Geo::EventService on the secondary
+      # side, after the model_record no longer exists. This line ensures the
+      # replicator does not hold an instance of ActiveRecord::Base, which helps
+      # avoid a regression of
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/233040
+      let(:secondary_side_replicator) { replicator.class.new(model_record_id: model_record_id) }
+
+      it 'invokes Geo::FileRegistryRemovalService' do
+        service = double(:service)
+
+        expect(service).to receive(:execute)
+        expect(::Geo::FileRegistryRemovalService)
+          .to receive(:new).with(secondary_side_replicator.replicable_name, model_record_id, blob_path).and_return(service)
+
+        secondary_side_replicator.consume(:deleted, deleted_params)
       end
     end
   end
@@ -115,17 +158,14 @@ RSpec.shared_examples 'a blob replicator' do
     it 'is a Class' do
       expect(invoke_model).to be_a(Class)
     end
+  end
 
-    # For convenience (and reliability), instead of asking developers to include shared examples on each model spec as well
-    context 'replicable model' do
-      it 'defines #replicator' do
-        expect(model_record).to respond_to(:replicator)
-      end
+  describe '#blob_path' do
+    context 'when the file is locally stored' do
+      it 'returns a valid path to a file' do
+        file_exist = File.exist?(replicator.blob_path)
 
-      it 'invokes replicator.handle_after_create_commit on create' do
-        expect(replicator).to receive(:handle_after_create_commit)
-
-        model_record.save!
+        expect(file_exist).to be_truthy
       end
     end
   end

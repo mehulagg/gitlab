@@ -11,24 +11,30 @@ export default {
     const isDiscussion = type === constants.DISCUSSION_NOTE || type === constants.DIFF_NOTE;
 
     if (!exists) {
-      const noteData = {
-        expanded: true,
-        id: discussion_id,
-        individual_note: !isDiscussion,
-        notes: [note],
-        reply_id: discussion_id,
-      };
+      let discussion = data.discussion || note.base_discussion;
 
-      if (isDiscussion && isInMRPage()) {
-        noteData.resolvable = note.resolvable;
-        noteData.resolved = false;
-        noteData.active = true;
-        noteData.resolve_path = note.resolve_path;
-        noteData.resolve_with_issue_path = note.resolve_with_issue_path;
-        noteData.diff_discussion = false;
+      if (!discussion) {
+        discussion = {
+          expanded: true,
+          id: discussion_id,
+          individual_note: !isDiscussion,
+          reply_id: discussion_id,
+        };
+
+        if (isDiscussion && isInMRPage()) {
+          discussion.resolvable = note.resolvable;
+          discussion.resolved = false;
+          discussion.active = true;
+          discussion.resolve_path = note.resolve_path;
+          discussion.resolve_with_issue_path = note.resolve_with_issue_path;
+          discussion.diff_discussion = false;
+        }
       }
 
-      state.discussions.push(noteData);
+      note.base_discussion = undefined; // No point keeping a reference to this
+      discussion.notes = [note];
+
+      state.discussions.push(discussion);
     }
   },
 
@@ -93,6 +99,14 @@ export default {
 
   [types.SET_NOTEABLE_DATA](state, data) {
     Object.assign(state, { noteableData: data });
+  },
+
+  [types.SET_ISSUE_CONFIDENTIAL](state, data) {
+    state.noteableData.confidential = data;
+  },
+
+  [types.SET_ISSUABLE_LOCK](state, locked) {
+    state.noteableData.discussion_locked = locked;
   },
 
   [types.SET_USER_DATA](state, data) {
@@ -270,6 +284,11 @@ export default {
     Object.assign(selectedDiscussion, { ...note });
   },
 
+  [types.UPDATE_DISCUSSION_POSITION](state, { discussionId, position }) {
+    const selectedDiscussion = state.discussions.find(disc => disc.id === discussionId);
+    if (selectedDiscussion) Object.assign(selectedDiscussion.position, { ...position });
+  },
+
   [types.CLOSE_ISSUE](state) {
     Object.assign(state.noteableData, { state: constants.CLOSED });
   },
@@ -300,8 +319,21 @@ export default {
     discussion.truncated_diff_lines = utils.prepareDiffLines(diffLines);
   },
 
-  [types.SET_DISCUSSIONS_SORT](state, sort) {
-    state.discussionSortOrder = sort;
+  [types.SET_DISCUSSIONS_SORT](state, { direction, persist }) {
+    state.discussionSortOrder = direction;
+    state.persistSortOrder = persist;
+  },
+
+  [types.SET_TIMELINE_VIEW](state, value) {
+    state.isTimelineEnabled = value;
+  },
+
+  [types.SET_SELECTED_COMMENT_POSITION](state, position) {
+    state.selectedCommentPosition = position;
+  },
+
+  [types.SET_SELECTED_COMMENT_POSITION_HOVER](state, position) {
+    state.selectedCommentPositionHover = position;
   },
 
   [types.DISABLE_COMMENTS](state, value) {
@@ -357,5 +389,8 @@ export default {
   },
   [types.UPDATE_ASSIGNEES](state, assignees) {
     state.noteableData.assignees = assignees;
+  },
+  [types.SET_FETCHING_DISCUSSIONS](state, value) {
+    state.currentlyFetchingDiscussions = value;
   },
 };

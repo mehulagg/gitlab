@@ -1,28 +1,43 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlLink } from '@gitlab/ui';
 import IdeStatusList from '~/ide/components/ide_status_list.vue';
 import TerminalSyncStatusSafe from '~/ide/components/terminal_sync/terminal_sync_status_safe.vue';
 
 const TEST_FILE = {
   name: 'lorem.md',
+  content: 'abc\nndef',
+  permalink: '/lorem.md',
+};
+const TEST_FILE_EDITOR = {
+  fileLanguage: 'markdown',
   editorRow: 3,
   editorColumn: 23,
-  fileLanguage: 'markdown',
-  content: 'abc\nndef',
 };
+const TEST_EDITOR_POSITION = `${TEST_FILE_EDITOR.editorRow}:${TEST_FILE_EDITOR.editorColumn}`;
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('ide/components/ide_status_list', () => {
+  let activeFileEditor;
   let activeFile;
   let store;
   let wrapper;
 
+  const findLink = () => wrapper.find(GlLink);
   const createComponent = (options = {}) => {
     store = new Vuex.Store({
       getters: {
         activeFile: () => activeFile,
+      },
+      modules: {
+        editor: {
+          namespaced: true,
+          getters: {
+            activeFileEditor: () => activeFileEditor,
+          },
+        },
       },
     });
 
@@ -35,6 +50,7 @@ describe('ide/components/ide_status_list', () => {
 
   beforeEach(() => {
     activeFile = TEST_FILE;
+    activeFileEditor = TEST_FILE_EDITOR;
   });
 
   afterEach(() => {
@@ -44,15 +60,14 @@ describe('ide/components/ide_status_list', () => {
     wrapper = null;
   });
 
-  const getEditorPosition = file => `${file.editorRow}:${file.editorColumn}`;
-
   describe('with regular file', () => {
     beforeEach(() => {
       createComponent();
     });
 
-    it('shows file name', () => {
-      expect(wrapper.text()).toContain(TEST_FILE.name);
+    it('shows a link to the file that contains the file name', () => {
+      expect(findLink().attributes('href')).toBe(TEST_FILE.permalink);
+      expect(findLink().text()).toBe(TEST_FILE.name);
     });
 
     it('shows file eol', () => {
@@ -61,22 +76,23 @@ describe('ide/components/ide_status_list', () => {
     });
 
     it('shows file editor position', () => {
-      expect(wrapper.text()).toContain(getEditorPosition(TEST_FILE));
+      expect(wrapper.text()).toContain(TEST_EDITOR_POSITION);
     });
 
     it('shows file language', () => {
-      expect(wrapper.text()).toContain(TEST_FILE.fileLanguage);
+      expect(wrapper.text()).toContain(TEST_FILE_EDITOR.fileLanguage);
     });
   });
 
   describe('with binary file', () => {
     beforeEach(() => {
-      activeFile.binary = true;
+      activeFile.name = 'abc.dat';
+      activeFile.content = '🐱'; // non-ascii binary content
       createComponent();
     });
 
     it('does not show file editor position', () => {
-      expect(wrapper.text()).not.toContain(getEditorPosition(TEST_FILE));
+      expect(wrapper.text()).not.toContain(TEST_EDITOR_POSITION);
     });
   });
 

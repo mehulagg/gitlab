@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
+import createStore from './store';
 import GeoSettingsApp from './components/app.vue';
 
 Vue.use(Translate);
@@ -9,6 +10,7 @@ export default () => {
 
   return new Vue({
     el,
+    store: createStore(),
     components: {
       GeoSettingsApp,
     },

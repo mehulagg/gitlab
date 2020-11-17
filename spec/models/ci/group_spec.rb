@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::Group do
+RSpec.describe Ci::Group do
   let_it_be(:project) { create(:project) }
 
   let!(:jobs) { build_list(:ci_build, 1, :success, project: project) }
@@ -29,24 +29,8 @@ describe Ci::Group do
       [create(:ci_build, :failed)]
     end
 
-    context 'when ci_composite_status is enabled' do
-      before do
-        stub_feature_flags(ci_composite_status: true)
-      end
-
-      it 'returns a failed status' do
-        expect(subject.status).to eq('failed')
-      end
-    end
-
-    context 'when ci_composite_status is disabled' do
-      before do
-        stub_feature_flags(ci_composite_status: false)
-      end
-
-      it 'returns a failed status' do
-        expect(subject.status).to eq('failed')
-      end
+    it 'returns a failed status' do
+      expect(subject.status).to eq('failed')
     end
   end
 

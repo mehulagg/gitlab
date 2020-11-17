@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequestsHelper do
+RSpec.describe MergeRequestsHelper do
   include ActionView::Helpers::UrlHelper
   include ProjectForksHelper
 
@@ -75,7 +75,7 @@ describe MergeRequestsHelper do
 
   describe '#tab_link_for' do
     let(:merge_request) { create(:merge_request, :simple) }
-    let(:options) { Hash.new }
+    let(:options) { {} }
 
     subject { tab_link_for(merge_request, :show, options) { 'Discussion' } }
 

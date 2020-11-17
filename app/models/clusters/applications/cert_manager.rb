@@ -30,7 +30,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: 'certmanager',
           repository: repository,
           version: VERSION,
@@ -38,18 +38,16 @@ module Clusters
           chart: chart,
           files: files.merge(cluster_issuer_file),
           preinstall: pre_install_script,
-          postinstall: post_install_script,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          postinstall: post_install_script
         )
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        helm_command_module::DeleteCommand.new(
           name: 'certmanager',
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,
-          postdelete: post_delete_script,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          postdelete: post_delete_script
         )
       end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['Pipeline'] do
+RSpec.describe GitlabSchema.types['Pipeline'] do
   it { expect(described_class.graphql_name).to eq('Pipeline') }
 
   it 'includes the ee specific fields' do

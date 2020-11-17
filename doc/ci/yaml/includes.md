@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# GitLab CI/CD YAML includes
+# GitLab CI/CD include examples
 
 In addition to the [`includes` examples](README.md#include) listed in the
 [GitLab CI YAML reference](README.md), this page lists more variations of `include`
@@ -73,10 +73,11 @@ automatically fetched and evaluated along with the content of `.gitlab-ci.yml`.
 Content of `https://gitlab.com/awesome-project/raw/master/.before-script-template.yml`:
 
 ```yaml
-before_script:
-  - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev nodejs
-  - gem install bundler --no-document
-  - bundle install --jobs $(nproc)  "${FLAGS[@]}"
+default:
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev nodejs
+    - gem install bundler --no-document
+    - bundle install --jobs $(nproc)  "${FLAGS[@]}"
 ```
 
 Content of `.gitlab-ci.yml`:

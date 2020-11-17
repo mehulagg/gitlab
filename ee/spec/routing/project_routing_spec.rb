@@ -47,12 +47,6 @@ RSpec.describe 'EE-specific project routing' do
     end
   end
 
-  describe Projects::Settings::OperationsController, 'routing' do
-    it 'to #reset_alerting_token' do
-      expect(post('/gitlab/gitlabhq/-/settings/operations/reset_alerting_token')).to route_to('projects/settings/operations#reset_alerting_token', namespace_id: 'gitlab', project_id: 'gitlabhq')
-    end
-  end
-
   describe Projects::ProtectedEnvironmentsController, 'routing' do
     describe 'legacy routing' do
       it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/protected_environments", "/gitlab/gitlabhq/-/protected_environments"
@@ -62,6 +56,12 @@ RSpec.describe 'EE-specific project routing' do
   describe Projects::AuditEventsController, 'routing' do
     describe 'legacy routing' do
       it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/audit_events", "/gitlab/gitlabhq/-/audit_events"
+    end
+  end
+
+  describe Projects::Integrations::Jira::IssuesController, 'routing', type: :routing do
+    it "to #index" do
+      expect(get("/gitlab/gitlabhq/-/integrations/jira/issues")).to route_to('projects/integrations/jira/issues#index', namespace_id: 'gitlab', project_id: 'gitlabhq')
     end
   end
 end

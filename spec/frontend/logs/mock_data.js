@@ -7,6 +7,8 @@ export const mockDocumentationPath = '/documentation.md';
 export const mockLogsEndpoint = '/dummy_logs_path.json';
 export const mockCursor = 'MOCK_CURSOR';
 export const mockNextCursor = 'MOCK_NEXT_CURSOR';
+export const mockManagedAppName = 'kubernetes-cluster-1';
+export const mockManagedAppsEndpoint = `${mockProjectPath}/clusters.json`;
 
 const makeMockEnvironment = (id, name, advancedQuerying) => ({
   id,
@@ -21,6 +23,31 @@ export const mockEnvironments = [
   mockEnvironment,
   makeMockEnvironment(101, 'staging', false),
   makeMockEnvironment(102, 'review/a-feature', false),
+];
+
+export const mockManagedApps = [
+  {
+    cluster_type: 'project_type',
+    enabled: true,
+    environment_scope: '*',
+    name: 'kubernetes-cluster-1',
+    provider_type: 'user',
+    status: 'connected',
+    path: '/root/autodevops-deploy/-/clusters/15',
+    gitlab_managed_apps_logs_path: '/root/autodevops-deploy/-/logs?cluster_id=15',
+    enable_advanced_logs_querying: true,
+  },
+  {
+    cluster_type: 'project_type',
+    enabled: true,
+    environment_scope: '*',
+    name: 'kubernetes-cluster-2',
+    provider_type: 'user',
+    status: 'connected',
+    path: '/root/autodevops-deploy/-/clusters/16',
+    gitlab_managed_apps_logs_path: null,
+    enable_advanced_logs_querying: false,
+  },
 ];
 
 export const mockPodName = 'production-764c58d697-aaaaa';

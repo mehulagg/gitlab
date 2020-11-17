@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::UsageDataCounters::IngressModsecurityCounter, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::UsageDataCounters::IngressModsecurityCounter, :clean_gitlab_redis_shared_state do
   describe '.add' do
     it 'increases packets_processed and packets_anomalous counters and sets statistics_unavailable counter' do
       described_class.add(3, 10_200, 2_500)

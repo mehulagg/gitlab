@@ -1,10 +1,9 @@
 /* eslint no-param-reassign: "off" */
 
 import $ from 'jquery';
+import { emojiFixtureMap, initEmojiMock, describeEmojiFields } from 'helpers/emoji';
+import '~/lib/utils/jquery_at_who';
 import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete';
-
-import 'jquery.caret';
-import '@gitlab/at.js';
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { getJSONFixture } from 'helpers/fixtures';
@@ -312,7 +311,7 @@ describe('GfmAutoComplete', () => {
           title: 'My Group',
           search: 'my-group My Group',
           icon:
-            '<svg class="s16 vertical-align-middle prepend-left-5"><use xlink:href="undefined#notifications-off" /></svg>',
+            '<svg class="s16 vertical-align-middle gl-ml-2"><use xlink:href="undefined#notifications-off" /></svg>',
         },
       ]);
     });
@@ -379,6 +378,7 @@ describe('GfmAutoComplete', () => {
           username: 'my-group',
           title: '',
           icon: '',
+          availabilityStatus: '',
         }),
       ).toBe('<li>IMG my-group <small></small> </li>');
     });
@@ -390,6 +390,7 @@ describe('GfmAutoComplete', () => {
           username: 'my-group',
           title: '',
           icon: '<i class="icon"/>',
+          availabilityStatus: '',
         }),
       ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
     });
@@ -401,8 +402,23 @@ describe('GfmAutoComplete', () => {
           username: 'my-group',
           title: 'MyGroup+',
           icon: '<i class="icon"/>',
+          availabilityStatus: '',
         }),
       ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
+    });
+
+    it('should add user availability status if availabilityStatus is set', () => {
+      expect(
+        GfmAutoComplete.Members.templateFunction({
+          avatarTag: 'IMG',
+          username: 'my-group',
+          title: '',
+          icon: '<i class="icon"/>',
+          availabilityStatus: '<span class="gl-text-gray-500"> (Busy)</span>',
+        }),
+      ).toBe(
+        '<li>IMG my-group <small><span class="gl-text-gray-500"> (Busy)</span></small> <i class="icon"/></li>',
+      );
     });
   });
 
@@ -419,8 +435,9 @@ describe('GfmAutoComplete', () => {
     let $textarea;
 
     beforeEach(() => {
+      setFixtures('<textarea></textarea>');
       autocomplete = new GfmAutoComplete(dataSources);
-      $textarea = $('<textarea></textarea>');
+      $textarea = $('textarea');
       autocomplete.setup($textarea, { labels: true });
     });
 
@@ -489,6 +506,116 @@ describe('GfmAutoComplete', () => {
         ${'/relabel ~'} | ${assignedLabels}
         ${'/unlabel ~'} | ${assignedLabels}
       `('$input shows $output.length labels', expectLabels);
+    });
+  });
+
+  describe('emoji', () => {
+    const { atom, heart, star } = emojiFixtureMap;
+    const assertInserted = ({ input, subject, emoji }) =>
+      expect(subject).toBe(`:${emoji?.name || input}:`);
+    const assertTemplated = ({ input, subject, emoji, field }) =>
+      expect(subject.replace(/\s+/g, ' ')).toBe(
+        `<li>${field || input} <gl-emoji data-name="${emoji?.name || input}"></gl-emoji> </li>`,
+      );
+
+    let mock;
+
+    beforeEach(async () => {
+      mock = await initEmojiMock();
+
+      await new GfmAutoComplete({}).loadEmojiData({ atwho() {}, trigger() {} }, ':');
+      if (!GfmAutoComplete.glEmojiTag) throw new Error('emoji not loaded');
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    describe.each`
+      name                        | inputFormat           | assert
+      ${'insertTemplateFunction'} | ${name => ({ name })} | ${assertInserted}
+      ${'templateFunction'}       | ${name => name}       | ${assertTemplated}
+    `('Emoji.$name', ({ name, inputFormat, assert }) => {
+      const execute = (accessor, input, emoji) =>
+        assert({
+          input,
+          emoji,
+          field: accessor && accessor(emoji),
+          subject: GfmAutoComplete.Emoji[name](inputFormat(input)),
+        });
+
+      describeEmojiFields('for $field', ({ accessor }) => {
+        it('should work with lowercase', () => {
+          execute(accessor, accessor(atom), atom);
+        });
+
+        it('should work with uppercase', () => {
+          execute(accessor, accessor(atom).toUpperCase(), atom);
+        });
+
+        it('should work with partial value', () => {
+          execute(accessor, accessor(atom).slice(1), atom);
+        });
+      });
+
+      it('should work with unicode value', () => {
+        execute(null, atom.moji, atom);
+      });
+
+      it('should pass through unknown value', () => {
+        execute(null, 'foo bar baz');
+      });
+    });
+
+    const expectEmojiOrder = (first, second) => {
+      const keys = Object.keys(emojiFixtureMap);
+      const firstIndex = keys.indexOf(first);
+      const secondIndex = keys.indexOf(second);
+      expect(firstIndex).toBeGreaterThanOrEqual(0);
+      expect(secondIndex).toBeGreaterThanOrEqual(0);
+      expect(firstIndex).toBeLessThan(secondIndex);
+    };
+
+    describe('Emoji.insertTemplateFunction', () => {
+      it('should map ":heart" to :heart: [regression]', () => {
+        // the bug mapped heart to black_heart because the latter sorted first
+        expectEmojiOrder('black_heart', 'heart');
+
+        const item = GfmAutoComplete.Emoji.insertTemplateFunction({ name: 'heart' });
+        expect(item).toEqual(`:${heart.name}:`);
+      });
+
+      it('should map ":star" to :star: [regression]', () => {
+        // the bug mapped star to custard because the latter sorted first
+        expectEmojiOrder('custard', 'star');
+
+        const item = GfmAutoComplete.Emoji.insertTemplateFunction({ name: 'star' });
+        expect(item).toEqual(`:${star.name}:`);
+      });
+    });
+
+    describe('Emoji.templateFunction', () => {
+      it('should map ":heart" to ❤ [regression]', () => {
+        // the bug mapped heart to black_heart because the latter sorted first
+        expectEmojiOrder('black_heart', 'heart');
+
+        const item = GfmAutoComplete.Emoji.templateFunction('heart')
+          .replace(/(<gl-emoji)\s+(data-name)/, '$1 $2')
+          .replace(/>\s+|\s+</g, s => s.trim());
+        expect(item).toEqual(
+          `<li>${heart.name}<gl-emoji data-name="${heart.name}"></gl-emoji></li>`,
+        );
+      });
+
+      it('should map ":star" to ⭐ [regression]', () => {
+        // the bug mapped star to custard because the latter sorted first
+        expectEmojiOrder('custard', 'star');
+
+        const item = GfmAutoComplete.Emoji.templateFunction('star')
+          .replace(/(<gl-emoji)\s+(data-name)/, '$1 $2')
+          .replace(/>\s+|\s+</g, s => s.trim());
+        expect(item).toEqual(`<li>${star.name}<gl-emoji data-name="${star.name}"></gl-emoji></li>`);
+      });
     });
   });
 });

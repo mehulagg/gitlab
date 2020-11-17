@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::AddContextService do
+RSpec.describe MergeRequests::AddContextService do
   let(:project) { create(:project, :repository) }
   let(:admin) { create(:admin) }
   let(:merge_request) { create(:merge_request, source_project: project, target_project: project, author: admin) }
@@ -12,10 +12,20 @@ describe MergeRequests::AddContextService do
   subject(:service) { described_class.new(project, admin, merge_request: merge_request, commits: commits) }
 
   describe "#execute" do
-    it "adds context commit" do
-      service.execute
+    context "when admin mode is enabled", :enable_admin_mode do
+      it "adds context commit" do
+        service.execute
 
-      expect(merge_request.merge_request_context_commit_diff_files.length).to eq(2)
+        expect(merge_request.merge_request_context_commit_diff_files.length).to eq(2)
+      end
+    end
+
+    context "when admin mode is disabled" do
+      it "doesn't add context commit" do
+        subject.execute
+
+        expect(merge_request.merge_request_context_commit_diff_files.length).to eq(0)
+      end
     end
 
     context "when user doesn't have permission to update merge request" do

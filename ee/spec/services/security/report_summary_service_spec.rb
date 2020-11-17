@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Security::ReportSummaryService, '#execute' do
+RSpec.describe Security::ReportSummaryService, '#execute' do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
 
   before_all do
     create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) do |job|
-      create(:ee_ci_job_artifact, :dast, job: job, project: project)
+      create(:ee_ci_job_artifact, :dast_large_scanned_resources_field, job: job, project: project)
     end
     create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) do |job|
       create(:ee_ci_job_artifact, :sast, job: job, project: project)
@@ -20,9 +20,6 @@ describe Security::ReportSummaryService, '#execute' do
     create(:ci_build, :success, name: 'ds_job', pipeline: pipeline, project: project) do |job|
       create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: project)
     end
-
-    create_security_scan(project, pipeline, 'dast', 34)
-    create_security_scan(project, pipeline, 'sast', 12)
   end
 
   before do
@@ -46,7 +43,7 @@ describe Security::ReportSummaryService, '#execute' do
 
     it 'returns only the request fields' do
       expect(result).to eq({
-        dast: { scanned_resources_count: 34, vulnerabilities_count: 20 },
+        dast: { scanned_resources_count: 26, vulnerabilities_count: 20 },
         container_scanning: { vulnerabilities_count: 8 }
       })
     end
@@ -73,7 +70,7 @@ describe Security::ReportSummaryService, '#execute' do
   context 'All fields are requested' do
     let(:selection_information) do
       {
-        dast: [:scanned_resources_count, :vulnerabilities_count],
+        dast: [:scanned_resources_count, :vulnerabilities_count, :scanned_resources, :scanned_resources_csv_path],
         sast: [:scanned_resources_count, :vulnerabilities_count],
         container_scanning: [:scanned_resources_count, :vulnerabilities_count],
         dependency_scanning: [:scanned_resources_count, :vulnerabilities_count]
@@ -82,8 +79,8 @@ describe Security::ReportSummaryService, '#execute' do
 
     it 'returns the scanned_resources_count' do
       expect(result).to match(a_hash_including(
-                                dast: a_hash_including(scanned_resources_count: 34),
-                                sast: a_hash_including(scanned_resources_count: 12),
+                                dast: a_hash_including(scanned_resources_count: 26),
+                                sast: a_hash_including(scanned_resources_count: 0),
                                 container_scanning: a_hash_including(scanned_resources_count: 0),
                                 dependency_scanning: a_hash_including(scanned_resources_count: 0)
                               ))
@@ -98,21 +95,26 @@ describe Security::ReportSummaryService, '#execute' do
                               ))
     end
 
-    context 'When ran no security scans' do
+    it 'returns the scanned resources limited to 20' do
+      expect(result[:dast][:scanned_resources].length).to eq(20)
+    end
+
+    it 'returns the scanned_resources_csv_path' do
+      expected_path = Gitlab::Routing.url_helpers.project_security_scanned_resources_path(
+        project,
+        format: :csv,
+        pipeline_id: pipeline.id
+      )
+
+      expect(result[:dast][:scanned_resources_csv_path]).to eq(expected_path)
+    end
+
+    context 'When no security scans ran' do
       let(:pipeline) { create(:ci_pipeline, :success) }
 
-      it 'returns 0 vulnerabilities' do
-        expect(result[:dast][:vulnerabilities_count]).to be(0)
-      end
-
-      it 'returns 0 scanned resources' do
-        expect(result[:dast][:scanned_resources_count]).to be(0)
+      it 'returns nil' do
+        expect(result[:dast]).to be_nil
       end
     end
   end
-end
-
-def create_security_scan(project, pipeline, report_type, scanned_resources_count)
-  dast_build = create(:ee_ci_build, :artifacts, project: project, pipeline: pipeline, name: report_type)
-  create(:security_scan, scan_type: report_type, scanned_resources_count: scanned_resources_count, build: dast_build)
 end

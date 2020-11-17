@@ -66,7 +66,7 @@ RSpec.describe Epics::TreeReorderService do
 
       context 'when user does have permission to admin the base epic' do
         before do
-          group.add_developer(user)
+          group.add_reporter(user)
         end
 
         context 'when relative_position is not valid' do
@@ -101,6 +101,10 @@ RSpec.describe Epics::TreeReorderService do
 
             it 'updates the parent' do
               expect { subject }.to change { tree_object_2.reload.epic }.from(epic1).to(epic)
+            end
+
+            it 'creates system notes' do
+              expect { subject }.to change { Note.system.count }.by(3)
             end
           end
 
@@ -207,6 +211,10 @@ RSpec.describe Epics::TreeReorderService do
 
                 expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
               end
+
+              it 'creates system notes' do
+                expect { subject }.to change { Note.system.count }.by(3)
+              end
             end
           end
         end
@@ -215,86 +223,118 @@ RSpec.describe Epics::TreeReorderService do
           let!(:tree_object_1) { epic1 }
           let!(:tree_object_2) { epic2 }
 
-          context 'when user does not have permissions to admin the previous parent' do
-            let(:other_group) { create(:group) }
-            let(:other_epic) { create(:epic, group: other_group) }
+          context 'when subepics feature is disabled' do
             let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
 
             before do
-              epic2.update(parent: other_epic)
+              stub_licensed_features(epics: true, subepics: false)
             end
 
             it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
           end
 
-          context 'when there is some other error with the new parent' do
-            let(:other_group) { create(:group) }
-            let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
-
+          context 'when subepics feature is enabled' do
             before do
-              other_group.add_developer(user)
-              epic.update(group: other_group)
-              epic2.update(parent: epic1)
+              stub_licensed_features(epics: true, subepics: true)
             end
 
-            it_behaves_like 'error for the tree update', "This epic can't be added because it must belong to the same group as the parent, or subgroup of the parent epic’s group"
-          end
-
-          context 'when user does not have permissions to admin the new parent' do
-            let(:other_group) { create(:group) }
-            let(:other_epic) { create(:epic, group: other_group) }
-            let(:new_parent_id) { GitlabSchema.id_from_object(other_epic) }
-
-            it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
-          end
-
-          context 'when the reordered epics are not subepics of the base epic' do
-            let(:another_group) { create(:group) }
-            let(:another_epic) { create(:epic, group: another_group) }
-
-            before do
-              epic1.update(group: another_group, parent: another_epic)
-              epic2.update(group: another_group, parent: another_epic)
-            end
-
-            it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
-          end
-
-          context 'when moving is successful' do
-            it 'updates the links relative positions' do
-              subject
-
-              expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
-            end
-
-            context 'when new parent is current epic' do
+            context 'when user does not have permissions to admin the previous parent' do
+              let(:other_group) { create(:group) }
+              let(:other_epic) { create(:epic, group: other_group) }
               let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
 
-              it 'updates the relative positions' do
+              before do
+                epic2.update(parent: other_epic)
+              end
+
+              it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
+            end
+
+            context 'when user does not have permissions to admin the previous parent links' do
+              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+
+              before do
+                group.add_guest(user)
+              end
+
+              it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
+            end
+
+            context 'when there is some other error with the new parent' do
+              let(:other_group) { create(:group) }
+              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+
+              before do
+                other_group.add_developer(user)
+                epic.update(group: other_group)
+                epic2.update(parent: epic1)
+              end
+
+              it_behaves_like 'error for the tree update', "This epic cannot be added. An epic must belong to the same group or subgroup as its parent epic."
+            end
+
+            context 'when user does not have permissions to admin the new parent' do
+              let(:other_group) { create(:group) }
+              let(:other_epic) { create(:epic, group: other_group) }
+              let(:new_parent_id) { GitlabSchema.id_from_object(other_epic) }
+
+              it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
+            end
+
+            context 'when user '
+
+            context 'when the reordered epics are not subepics of the base epic' do
+              let(:another_group) { create(:group) }
+              let(:another_epic) { create(:epic, group: another_group) }
+
+              before do
+                epic1.update(group: another_group, parent: another_epic)
+                epic2.update(group: another_group, parent: another_epic)
+              end
+
+              it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
+            end
+
+            context 'when moving is successful' do
+              it 'updates the links relative positions' do
                 subject
 
                 expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
               end
 
-              it 'does not update the parent_id' do
-                expect { subject }.not_to change { tree_object_2.reload.parent }
-              end
-            end
+              context 'when new parent is current epic' do
+                let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
 
-            context 'when object being moved is from another epic and new_parent_id matches parent of adjacent object' do
-              let(:other_epic) { create(:epic, group: group) }
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
-              let(:epic3) { create(:epic, parent: other_epic, group: group) }
-              let(:tree_object_2) { epic3 }
+                it 'updates the relative positions' do
+                  subject
 
-              it 'updates the relative positions and parent_id' do
-                subject
+                  expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
+                end
 
-                expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
+                it 'does not update the parent_id' do
+                  expect { subject }.not_to change { tree_object_2.reload.parent }
+                end
               end
 
-              it 'updates the parent' do
-                expect { subject }.to change { tree_object_2.reload.parent }.from(other_epic).to(epic)
+              context 'when object being moved is from another epic and new_parent_id matches parent of adjacent object' do
+                let(:other_epic) { create(:epic, group: group) }
+                let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+                let(:epic3) { create(:epic, parent: other_epic, group: group) }
+                let(:tree_object_2) { epic3 }
+
+                it 'updates the relative positions' do
+                  subject
+
+                  expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
+                end
+
+                it 'updates the parent' do
+                  expect { subject }.to change { tree_object_2.reload.parent }.from(other_epic).to(epic)
+                end
+
+                it 'creates system notes' do
+                  expect { subject }.to change { Note.system.count }.by(2)
+                end
               end
             end
           end

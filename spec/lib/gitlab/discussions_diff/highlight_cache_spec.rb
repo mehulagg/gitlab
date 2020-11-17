@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
   def fake_file(offset)
     {
       text: 'foo',
@@ -33,9 +33,9 @@ describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
 
       mapping.each do |key, value|
         full_key = described_class.cache_key_for(key)
-        found = Gitlab::Redis::Cache.with { |r| r.get(full_key) }
+        found_key = Gitlab::Redis::Cache.with { |r| r.get(full_key) }
 
-        expect(found).to eq(value.to_json)
+        expect(described_class.gzip_decompress(found_key)).to eq(value.to_json)
       end
     end
   end

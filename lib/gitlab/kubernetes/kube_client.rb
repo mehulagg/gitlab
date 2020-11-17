@@ -21,7 +21,8 @@ module Gitlab
         istio: { group: 'apis/networking.istio.io', version: 'v1alpha3' },
         knative: { group: 'apis/serving.knative.dev', version: 'v1alpha1' },
         metrics: { group: 'apis/metrics.k8s.io', version: 'v1beta1' },
-        networking: { group: 'apis/networking.k8s.io', version: 'v1' }
+        networking: { group: 'apis/networking.k8s.io', version: 'v1' },
+        cilium_networking: { group: 'apis/cilium.io', version: 'v2' }
       }.freeze
 
       SUPPORTED_API_GROUPS.each do |name, params|
@@ -60,18 +61,11 @@ module Gitlab
       # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
       # group client
       delegate :update_cluster_role_binding,
-        to: :rbac_client
-
-      # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
-      # group client
-      delegate :create_role,
-      :get_role,
-      :update_role,
-      to: :rbac_client
-
-      # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
-      # group client
-      delegate :update_role_binding,
+        :create_role,
+        :get_role,
+        :update_role,
+        :delete_role_binding,
+        :update_role_binding,
         to: :rbac_client
 
       # non-entity methods that can only work with the core client
@@ -91,9 +85,19 @@ module Gitlab
       # group client
       delegate :create_network_policy,
         :get_network_policies,
+        :get_network_policy,
         :update_network_policy,
         :delete_network_policy,
         to: :networking_client
+
+      # CiliumNetworkPolicy methods delegate to the apis/cilium.io api
+      # group client
+      delegate :create_cilium_network_policy,
+        :get_cilium_network_policies,
+        :get_cilium_network_policy,
+        :update_cilium_network_policy,
+        :delete_cilium_network_policy,
+        to: :cilium_networking_client
 
       attr_reader :api_prefix, :kubeclient_options
 
@@ -107,15 +111,15 @@ module Gitlab
       def self.graceful_request(cluster_id)
         { status: :connected, response: yield }
       rescue *Gitlab::Kubernetes::Errors::CONNECTION
-        { status: :unreachable }
+        { status: :unreachable, connection_error: :connection_error }
       rescue *Gitlab::Kubernetes::Errors::AUTHENTICATION
-        { status: :authentication_failure }
+        { status: :authentication_failure, connection_error: :authentication_error }
       rescue Kubeclient::HttpError => e
-        { status: kubeclient_error_status(e.message) }
+        { status: kubeclient_error_status(e.message), connection_error: :http_error }
       rescue => e
         Gitlab::ErrorTracking.track_exception(e, cluster_id: cluster_id)
 
-        { status: :unknown_failure }
+        { status: :unknown_failure, connection_error: :unknown_error }
       end
 
       # KubeClient uses the same error class
@@ -156,10 +160,36 @@ module Gitlab
         end
       end
 
+      # Ingresses resource is currently on the apis/extensions api group
+      # until Kubernetes 1.21. Kubernetest 1.22+ has ingresses resources in
+      # the networking.k8s.io/v1 api group.
+      #
+      # As we still support Kubernetes 1.12+, we will need to support both.
+      def get_ingresses(**args)
+        extensions_client.discover unless extensions_client.discovered
+
+        if extensions_client.respond_to?(:get_ingresses)
+          extensions_client.get_ingresses(**args)
+        else
+          networking_client.get_ingresses(**args)
+        end
+      end
+
+      def patch_ingress(*args)
+        extensions_client.discover unless extensions_client.discovered
+
+        if extensions_client.respond_to?(:patch_ingress)
+          extensions_client.patch_ingress(*args)
+        else
+          networking_client.patch_ingress(*args)
+        end
+      end
+
       def create_or_update_cluster_role_binding(resource)
         update_cluster_role_binding(resource)
       end
 
+      # Note that we cannot update roleRef as that is immutable
       def create_or_update_role_binding(resource)
         update_role_binding(resource)
       end

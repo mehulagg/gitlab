@@ -35,6 +35,14 @@ describe('Jobs Store Utils', () => {
         lines: [],
       });
     });
+
+    it('pre-closes a section when specified in options', () => {
+      const headerLine = { content: [{ text: 'foo' }], section_options: { collapsed: 'true' } };
+
+      const parsedHeaderLine = parseHeaderLine(headerLine, 2);
+
+      expect(parsedHeaderLine.isClosed).toBe(true);
+    });
   });
 
   describe('parseLine', () => {
@@ -181,7 +189,7 @@ describe('Jobs Store Utils', () => {
       });
     });
 
-    describe('collpasible section', () => {
+    describe('collapsible section', () => {
       it('adds a `isClosed` property', () => {
         expect(result[1].isClosed).toEqual(false);
       });
@@ -190,7 +198,7 @@ describe('Jobs Store Utils', () => {
         expect(result[1].isHeader).toEqual(true);
       });
 
-      it('creates a lines array property with the content of the collpasible section', () => {
+      it('creates a lines array property with the content of the collapsible section', () => {
         expect(result[1].lines.length).toEqual(2);
         expect(result[1].lines[0].content).toEqual(utilsMockData[2].content);
         expect(result[1].lines[1].content).toEqual(utilsMockData[3].content);

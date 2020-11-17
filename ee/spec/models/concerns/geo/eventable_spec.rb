@@ -23,7 +23,7 @@ RSpec.describe Geo::Eventable do
 
   describe '#consumer_klass_name' do
     it 'returns the even class name without the module part' do
-      event = build(:geo_repository_created_event)
+      event = build_stubbed(:geo_repository_created_event)
 
       expect(event.consumer_klass_name).to eq 'RepositoryCreatedEvent'
     end

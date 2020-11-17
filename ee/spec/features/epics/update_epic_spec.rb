@@ -114,7 +114,7 @@ RSpec.describe 'Update Epic', :js do
       end
 
       it 'uploads a file when dragging into textarea' do
-        link_css = 'a.no-attachment-icon img[alt="banana_sample"]'
+        link_css = 'a.no-attachment-icon img.js-lazy-loaded[alt="banana_sample"]'
         link_match = %r{/groups/#{Regexp.escape(group.full_path)}/-/uploads/\h{32}/banana_sample\.gif\z}
         dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
 

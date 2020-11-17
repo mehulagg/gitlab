@@ -1,9 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { mockIssue1 } from '../mock_data';
-
 import IssueHealthStatus from 'ee/related_items_tree/components/issue_health_status.vue';
 import { issueHealthStatus, issueHealthStatusCSSMapping } from 'ee/related_items_tree/constants';
+import { mockIssue1 } from '../mock_data';
 
 const createComponent = () => {
   const { healthStatus } = mockIssue1;

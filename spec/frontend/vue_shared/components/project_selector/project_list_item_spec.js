@@ -29,7 +29,7 @@ describe('ProjectListItem component', () => {
   it('does not render a check mark icon if selected === false', () => {
     wrapper = shallowMount(Component, options);
 
-    expect(wrapper.contains('.js-selected-icon.js-unselected')).toBe(true);
+    expect(wrapper.find('.js-selected-icon').exists()).toBe(false);
   });
 
   it('renders a check mark icon if selected === true', () => {
@@ -37,7 +37,7 @@ describe('ProjectListItem component', () => {
 
     wrapper = shallowMount(Component, options);
 
-    expect(wrapper.contains('.js-selected-icon.js-selected')).toBe(true);
+    expect(wrapper.find('.js-selected-icon').exists()).toBe(true);
   });
 
   it(`emits a "clicked" event when clicked`, () => {
@@ -53,7 +53,7 @@ describe('ProjectListItem component', () => {
   it(`renders the project avatar`, () => {
     wrapper = shallowMount(Component, options);
 
-    expect(wrapper.contains('.js-project-avatar')).toBe(true);
+    expect(wrapper.find('.js-project-avatar').exists()).toBe(true);
   });
 
   it(`renders a simple namespace name with a trailing slash`, () => {
@@ -72,6 +72,16 @@ describe('ProjectListItem component', () => {
     const renderedNamespace = trimText(wrapper.find('.js-project-namespace').text());
 
     expect(renderedNamespace).toBe('a / ... / e /');
+  });
+
+  it(`renders a simple namespace name of a GraphQL project`, () => {
+    options.propsData.project.name_with_namespace = undefined;
+    options.propsData.project.nameWithNamespace = 'test';
+
+    wrapper = shallowMount(Component, options);
+    const renderedNamespace = trimText(wrapper.find('.js-project-namespace').text());
+
+    expect(renderedNamespace).toBe('test /');
   });
 
   it(`renders the project name`, () => {

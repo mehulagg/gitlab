@@ -6,17 +6,17 @@ export default () => {
 
   if (!container) return;
 
-  const { groupFullPath } = container.dataset;
+  const { groupFullPath, groupName } = container.dataset;
 
   // eslint-disable-next-line no-new
   new Vue({
     el: container,
+    provide: {
+      groupFullPath,
+      groupName,
+    },
     render(h) {
-      return h(GroupActivityCard, {
-        props: {
-          groupFullPath,
-        },
-      });
+      return h(GroupActivityCard);
     },
   });
 };

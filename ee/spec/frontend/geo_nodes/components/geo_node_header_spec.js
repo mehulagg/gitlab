@@ -65,7 +65,7 @@ describe('GeoNodeHeader', () => {
       });
 
       it(`should ${showWarning ? 'render' : 'not render'} the status icon`, () => {
-        expect(Boolean(vm.$el.querySelector('.ic-warning'))).toBe(showWarning);
+        expect(Boolean(vm.$el.querySelector('[data-testid="warning-icon"]'))).toBe(showWarning);
       });
     });
   });

@@ -3,9 +3,12 @@
 module Gitlab
   module SPDX
     class CatalogueGateway
-      URL = 'https://spdx.org/licenses/licenses.json'
+      URL = 'https://spdx.org/licenses/licenses.json'.freeze
+      OFFLINE_CATALOGUE = Rails.root.join('vendor/spdx.json').freeze
 
       def fetch
+        return offline_catalogue if Feature.enabled?(:offline_spdx_catalogue, default_enabled: true)
+
         response = ::Gitlab::HTTP.get(URL)
 
         if response.success?
@@ -31,6 +34,10 @@ module Gitlab
 
       def empty_catalogue
         build_catalogue(licenses: [])
+      end
+
+      def offline_catalogue
+        parse(File.read(OFFLINE_CATALOGUE))
       end
 
       def build_catalogue(hash)

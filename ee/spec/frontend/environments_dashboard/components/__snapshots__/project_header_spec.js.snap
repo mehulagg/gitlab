@@ -56,7 +56,7 @@ exports[`Project Header matches the snapshot 1`] = `
       title="More actions"
       type="button"
     >
-      <icon-stub
+      <gl-icon-stub
         class="text-secondary"
         name="ellipsis_v"
         size="16"
@@ -67,17 +67,20 @@ exports[`Project Header matches the snapshot 1`] = `
       class="dropdown-menu dropdown-menu-right"
     >
       <li>
-        <gl-deprecated-button-stub
+        <gl-button-stub
+          buttontextclasses=""
+          category="primary"
           class="js-remove-button"
-          size="md"
-          variant="secondary"
+          icon=""
+          size="medium"
+          variant="link"
         >
           <span
             class="text-danger"
           >
              Remove 
           </span>
-        </gl-deprecated-button-stub>
+        </gl-button-stub>
       </li>
     </ul>
   </div>

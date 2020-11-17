@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::SyntaxHighlightFilter do
+RSpec.describe Banzai::Filter::SyntaxHighlightFilter do
   include FilterSpecHelper
 
   shared_examples "XSS prevention" do |lang|
@@ -24,6 +24,14 @@ describe Banzai::Filter::SyntaxHighlightFilter do
     end
 
     include_examples "XSS prevention", ""
+  end
+
+  context "when contains mermaid diagrams" do
+    it "ignores mermaid blocks" do
+      result = filter('<pre data-mermaid-style="display"><code>mermaid code</code></pre>')
+
+      expect(result.to_html).to eq('<pre data-mermaid-style="display"><code>mermaid code</code></pre>')
+    end
   end
 
   context "when a valid language is specified" do

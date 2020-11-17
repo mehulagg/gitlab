@@ -26,7 +26,6 @@ RSpec.describe 'Login' do
       user.reload
       expect(user.reset_password_token).not_to be_nil
 
-      find('a[href="#login-pane"]').click
       gitlab_sign_in(user)
       expect(current_path).to eq root_path
 
@@ -110,7 +109,7 @@ RSpec.describe 'Login' do
 
         gitlab_sign_in(user)
 
-        expect(page).not_to have_content('You have to confirm your email address before continuing.')
+        expect(page).not_to have_content(I18n.t('devise.failure.unconfirmed'))
         expect(page).not_to have_link('Resend confirmation email', href: new_user_confirmation_path)
       end
     end
@@ -124,7 +123,7 @@ RSpec.describe 'Login' do
 
           gitlab_sign_in(user)
 
-          expect(page).to have_content('You have to confirm your email address before continuing.')
+          expect(page).to have_content(I18n.t('devise.failure.unconfirmed'))
           expect(page).to have_link('Resend confirmation email', href: new_user_confirmation_path)
         end
       end
@@ -175,6 +174,14 @@ RSpec.describe 'Login' do
         enter_code(user.current_otp)
 
         expect(page).not_to have_content(I18n.t('devise.failure.already_authenticated'))
+      end
+
+      it 'does not allow sign-in if the user password is updated before entering a one-time code' do
+        user.update!(password: 'new_password')
+
+        enter_code(user.current_otp)
+
+        expect(page).to have_content('An error occurred. Please sign in again.')
       end
 
       context 'using one-time code' do
@@ -232,7 +239,7 @@ RSpec.describe 'Login' do
           expect(codes.size).to eq 10
 
           # Ensure the generated codes get saved
-          user.save
+          user.save(touch: false)
         end
 
         context 'with valid code' do
@@ -290,7 +297,7 @@ RSpec.describe 'Login' do
             code = codes.sample
             expect(user.invalidate_otp_backup_code!(code)).to eq true
 
-            user.save!
+            user.save!(touch: false)
             expect(user.reload.otp_backup_codes.size).to eq 9
 
             enter_code(code)
@@ -503,7 +510,7 @@ RSpec.describe 'Login' do
 
         context 'within the grace period' do
           it 'redirects to two-factor configuration page' do
-            Timecop.freeze do
+            freeze_time do
               expect(authentication_metrics)
                 .to increment(:user_authenticated_counter)
 
@@ -585,42 +592,95 @@ RSpec.describe 'Login' do
 
   describe 'UI tabs and panes' do
     context 'when no defaults are changed' do
-      it 'correctly renders tabs and panes' do
-        ensure_tab_pane_correctness
+      it 'does not render any tabs' do
+        visit new_user_session_path
+
+        ensure_no_tabs
+      end
+
+      it 'renders link to sign up path' do
+        visit new_user_session_path
+
+        expect(page.body).to have_link('Register now', href: new_user_registration_path)
       end
     end
 
     context 'when signup is disabled' do
       before do
         stub_application_setting(signup_enabled: false)
+
+        visit new_user_session_path
       end
 
-      it 'correctly renders tabs and panes' do
-        ensure_tab_pane_correctness
+      it 'does not render any tabs' do
+        ensure_no_tabs
+      end
+
+      it 'does not render link to sign up path' do
+        visit new_user_session_path
+
+        expect(page.body).not_to have_link('Register now', href: new_user_registration_path)
       end
     end
 
     context 'when ldap is enabled' do
+      include LdapHelpers
+
+      let(:provider) { 'ldapmain' }
+      let(:ldap_server_config) do
+        {
+          'label' => 'Main LDAP',
+          'provider_name' => provider,
+          'attributes' => {},
+          'encryption' => 'plain',
+          'uid' => 'uid',
+          'base' => 'dc=example,dc=com'
+        }
+      end
+
       before do
+        stub_ldap_setting(enabled: true)
+        allow(::Gitlab::Auth::Ldap::Config).to receive_messages(enabled: true, servers: [ldap_server_config])
+        allow(Gitlab::Auth::OAuth::Provider).to receive_messages(providers: [provider.to_sym])
+
+        Ldap::OmniauthCallbacksController.define_providers!
+        Rails.application.reload_routes!
+
+        allow_next_instance_of(ActionDispatch::Routing::RoutesProxy) do |instance|
+          allow(instance).to receive(:"user_#{provider}_omniauth_callback_path")
+            .and_return("/users/auth/#{provider}/callback")
+        end
+
         visit new_user_session_path
-        allow(page).to receive(:form_based_providers).and_return([:ldapmain])
-        allow(page).to receive(:ldap_enabled).and_return(true)
       end
 
       it 'correctly renders tabs and panes' do
-        ensure_tab_pane_correctness(false)
+        ensure_tab_pane_correctness(['Main LDAP', 'Standard'])
+      end
+
+      it 'renders link to sign up path' do
+        expect(page.body).to have_link('Register now', href: new_user_registration_path)
       end
     end
 
     context 'when crowd is enabled' do
       before do
+        allow(Gitlab::Auth::OAuth::Provider).to receive_messages(providers: [:crowd])
+        stub_application_setting(crowd_enabled: true)
+
+        Ldap::OmniauthCallbacksController.define_providers!
+        Rails.application.reload_routes!
+
+        allow_next_instance_of(ActionDispatch::Routing::RoutesProxy) do |instance|
+          allow(instance).to receive(:user_crowd_omniauth_authorize_path)
+            .and_return("/users/auth/crowd/callback")
+        end
+
         visit new_user_session_path
-        allow(page).to receive(:form_based_providers).and_return([:crowd])
-        allow(page).to receive(:crowd_enabled?).and_return(true)
       end
 
       it 'correctly renders tabs and panes' do
-        ensure_tab_pane_correctness(false)
+        ensure_tab_pane_correctness(%w(Crowd Standard))
       end
     end
   end
@@ -820,7 +880,7 @@ RSpec.describe 'Login' do
           gitlab_sign_in(user)
 
           expect(current_path).to eq new_user_session_path
-          expect(page).to have_content('You have to confirm your email address before continuing.')
+          expect(page).to have_content(I18n.t('devise.failure.unconfirmed'))
         end
       end
     end

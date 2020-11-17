@@ -7,6 +7,7 @@ module Types
       description 'State of a test report'
 
       value 'PASSED', value: 'passed'
+      value 'FAILED', value: 'failed'
     end
   end
 end

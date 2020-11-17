@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::ProcessInitialBookkeepingService do
+RSpec.describe Elastic::ProcessInitialBookkeepingService do
   let(:project) { create(:project) }
   let(:issue) { create(:issue) }
 

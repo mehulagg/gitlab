@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProfilesHelper do
+RSpec.describe ProfilesHelper do
   describe '#commit_email_select_options' do
     it 'returns an array with private commit email along with all the verified emails' do
       user = create(:user)
@@ -31,7 +31,7 @@ describe ProfilesHelper do
     end
 
     it 'returns DB stored commit_email' do
-      user.update(commit_email: Gitlab::PrivateCommitEmail::TOKEN)
+      user.update!(commit_email: Gitlab::PrivateCommitEmail::TOKEN)
 
       expect(helper.selected_commit_email(user)).to eq(Gitlab::PrivateCommitEmail::TOKEN)
     end
@@ -77,6 +77,21 @@ describe ProfilesHelper do
       allow(helper).to receive(:current_user).and_return(ldap_user)
 
       expect(helper.attribute_provider_label(:email)).to eq('LDAP')
+    end
+  end
+
+  describe "#user_status_set_to_busy?" do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:availability, :result) do
+      "busy"    | true
+      "not_set" | false
+      ""        | false
+      nil       | false
+    end
+
+    with_them do
+      it { expect(helper.user_status_set_to_busy?(OpenStruct.new(availability: availability))).to eq(result) }
     end
   end
 

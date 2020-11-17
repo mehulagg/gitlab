@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Expression::Lexer do
+RSpec.describe Gitlab::Ci::Pipeline::Expression::Lexer do
   let(:token_class) do
     Gitlab::Ci::Pipeline::Expression::Token
   end
@@ -80,6 +80,18 @@ describe Gitlab::Ci::Pipeline::Expression::Lexer do
 
       with_them do
         it { is_expected.to eq(tokens) }
+      end
+
+      context 'with parentheses are used' do
+        where(:expression, :tokens) do
+          '($PRESENT_VARIABLE =~ /my var/) && $EMPTY_VARIABLE =~ /nope/' | ['(', '$PRESENT_VARIABLE', '=~', '/my var/', ')', '&&', '$EMPTY_VARIABLE', '=~', '/nope/']
+          '$PRESENT_VARIABLE =~ /my var/ || ($EMPTY_VARIABLE =~ /nope/)' | ['$PRESENT_VARIABLE', '=~', '/my var/', '||', '(', '$EMPTY_VARIABLE', '=~', '/nope/', ')']
+          '($PRESENT_VARIABLE && (null || $EMPTY_VARIABLE == ""))'       | ['(', '$PRESENT_VARIABLE', '&&', '(', 'null', '||', '$EMPTY_VARIABLE', '==', '""', ')', ')']
+        end
+
+        with_them do
+          it { is_expected.to eq(tokens) }
+        end
       end
     end
   end

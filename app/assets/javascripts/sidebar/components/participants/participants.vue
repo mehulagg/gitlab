@@ -1,15 +1,15 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, n__, sprintf } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
 import userAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     userAvatarImage,
+    GlIcon,
     GlLoadingIcon,
   },
   props: {
@@ -86,15 +86,12 @@ export default {
   <div>
     <div
       v-if="showParticipantLabel"
-      v-tooltip
+      v-gl-tooltip.left.viewport
       :title="participantLabel"
       class="sidebar-collapsed-icon"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
       @click="onClickCollapsedIcon"
     >
-      <i class="fa fa-users" aria-hidden="true"> </i>
+      <gl-icon name="users" />
       <gl-loading-icon v-if="loading" />
       <span v-else data-testid="collapsed-count"> {{ participantCount }} </span>
     </div>

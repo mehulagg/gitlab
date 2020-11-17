@@ -1,4 +1,5 @@
 import { shallowMount, mount } from '@vue/test-utils';
+import { getByText } from '@testing-library/dom';
 import { GlLoadingIcon } from '@gitlab/ui';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import { issueEvents, issueStage, allowedStages } from '../mock_data';
@@ -16,6 +17,7 @@ const $sel = {
 
 const headers = ['Stage', 'Median', issueStage.legend, 'Time'];
 const noDataSvgPath = 'path/to/no/data';
+const tooMuchDataError = "We don't have enough data to show this stage.";
 
 const StageTableNavSlot = {
   name: 'stage-table-nav-slot-stub',
@@ -28,6 +30,7 @@ function createComponent(props = {}, shallow = false) {
     propsData: {
       currentStage: issueStage,
       isLoading: false,
+      isLoadingStage: false,
       isEmptyStage: false,
       currentStageEvents: issueEvents,
       noDataSvgPath,
@@ -48,13 +51,13 @@ function createComponent(props = {}, shallow = false) {
 }
 
 describe('StageTable', () => {
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   describe('headers', () => {
     beforeEach(() => {
       wrapper = createComponent();
-    });
-
-    afterEach(() => {
-      wrapper.destroy();
     });
 
     it('will render the headers', () => {
@@ -71,10 +74,6 @@ describe('StageTable', () => {
   describe('is loaded with data', () => {
     beforeEach(() => {
       wrapper = createComponent();
-    });
-
-    afterEach(() => {
-      wrapper.destroy();
     });
 
     it('will render the events list', () => {
@@ -110,6 +109,10 @@ describe('StageTable', () => {
         expect(evshtml).toContain(ev.title);
       });
     });
+
+    it('will not display the default data message', () => {
+      expect(wrapper.html()).not.toContain(tooMuchDataError);
+    });
   });
 
   it('isLoading = true', () => {
@@ -117,13 +120,27 @@ describe('StageTable', () => {
     expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
   });
 
+  describe('isLoadingStage = true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ isLoadingStage: true }, true);
+    });
+
+    it('will render the list of stages', () => {
+      const navEl = wrapper.find($sel.nav).element;
+
+      allowedStages.forEach(stage => {
+        expect(getByText(navEl, stage.title, { selector: 'li' })).not.toBe(null);
+      });
+    });
+
+    it('will render a loading icon', () => {
+      expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
+    });
+  });
+
   describe('isEmptyStage = true', () => {
     beforeEach(() => {
       wrapper = createComponent({ isEmptyStage: true });
-    });
-
-    afterEach(() => {
-      wrapper.destroy();
     });
 
     it('will render the empty stage illustration', () => {
@@ -131,8 +148,23 @@ describe('StageTable', () => {
       expect(wrapper.find($sel.illustration).html()).toContain(noDataSvgPath);
     });
 
-    it('will display the no data message', () => {
-      expect(wrapper.html()).toContain("We don't have enough data to show this stage.");
+    it('will display the default no data message', () => {
+      expect(wrapper.html()).toContain(tooMuchDataError);
+    });
+  });
+
+  describe('emptyStateMessage set', () => {
+    const emptyStateMessage = 'Too much data';
+    beforeEach(() => {
+      wrapper = createComponent({ isEmptyStage: true, emptyStateMessage });
+    });
+
+    it('will not display the default data message', () => {
+      expect(wrapper.html()).not.toContain(tooMuchDataError);
+    });
+
+    it('will display the custom message', () => {
+      expect(wrapper.html()).toContain(emptyStateMessage);
     });
   });
 });

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Importing issues from CSV
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23532) in GitLab 11.7.
@@ -7,7 +13,8 @@ Issues can be imported to a project by uploading a CSV file with the columns
 
 The user uploading the CSV file will be set as the author of the imported issues.
 
-NOTE: **Note:** A permission level of [Developer](../../permissions.md), or higher, is required
+NOTE: **Note:**
+A permission level of [Developer](../../permissions.md), or higher, is required
 to import issues.
 
 ## Prepare for the import

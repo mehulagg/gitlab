@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Keys::LastUsedService do
+RSpec.describe Keys::LastUsedService do
   describe '#execute', :clean_gitlab_redis_shared_state do
     it 'updates the key when it has not been used recently' do
       key = create(:key, last_used_at: 1.year.ago)
       time = Time.zone.now
 
-      Timecop.freeze(time) { described_class.new(key).execute }
+      travel_to(time) { described_class.new(key).execute }
 
       expect(key.reload.last_used_at).to be_like_time(time)
     end

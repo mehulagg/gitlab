@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'sentry errors requests' do
+RSpec.describe 'sentry errors requests' do
   include GraphqlHelpers
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:project_setting) { create(:project_error_tracking_setting, project: project) }
@@ -29,10 +29,12 @@ describe 'sentry errors requests' do
 
     let(:error_data) { graphql_data.dig('project', 'sentryErrors', 'detailedError') }
 
-    it_behaves_like 'a working graphql query' do
-      before do
-        post_graphql(query, current_user: current_user)
-      end
+    it 'returns a successful response', :aggregate_failures, :quarantine do
+      post_graphql(query, current_user: current_user)
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(graphql_errors).to be_nil
+      expect(json_response.keys).to include('data')
     end
 
     context 'when data is loading via reactive cache' do
@@ -191,7 +193,7 @@ describe 'sentry errors requests' do
 
   describe 'getting a stack trace' do
     let_it_be(:sentry_stack_trace) { build(:error_tracking_error_event) }
-    let(:sentry_gid) { Gitlab::ErrorTracking::DetailedError.new(id: 1).to_global_id.to_s }
+    let(:sentry_gid) { global_id_of(Gitlab::ErrorTracking::DetailedError.new(id: 1)) }
 
     let(:stack_trace_fields) do
       all_graphql_fields_for('SentryErrorStackTrace'.classify)

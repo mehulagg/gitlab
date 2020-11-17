@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
 class Groups::ContributionAnalyticsController < Groups::ApplicationController
+  include Analytics::UniqueVisitsHelper
+
   before_action :group
   before_action :check_contribution_analytics_available!
   before_action :authorize_read_contribution_analytics!
 
   layout 'group'
+
+  track_unique_visits :show, target_id: 'g_analytics_contribution'
+
+  feature_category :planning_analytics
 
   def show
     @start_date = data_collector.from

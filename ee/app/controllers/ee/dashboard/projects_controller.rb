@@ -5,31 +5,43 @@ module EE
     module ProjectsController
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
-      include ::OnboardingExperimentHelper
+
+      prepended do
+        before_action :check_adjourned_deletion_listing_availability, only: [:removed]
+      end
+
+      # rubocop:disable Gitlab/ModuleWithInstanceVariables
+      def removed
+        @projects = load_projects(params.merge(aimed_for_deletion: true))
+
+        respond_to do |format|
+          format.html
+          format.json do
+            render json: {
+              html: view_to_html_string("dashboard/projects/_projects", projects: @projects)
+            }
+          end
+        end
+      end
+      # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       private
-
-      override :render_projects
-      def render_projects
-        return redirect_to explore_onboarding_index_path if show_onboarding_welcome_page?
-
-        super
-      end
 
       override :preload_associations
       def preload_associations(projects)
         super.with_compliance_framework_settings
+             .with_group_saml_provider
       end
 
-      def show_onboarding_welcome_page?
-        return false if onboarding_cookie_set?
-        return false unless allow_access_to_onboarding?
+      override :load_projects
+      def load_projects(finder_params)
+        @removed_projects_count = ::ProjectsFinder.new(params: { aimed_for_deletion: true }, current_user: current_user).execute # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
-        !show_projects?(projects, params)
+        super
       end
 
-      def onboarding_cookie_set?
-        cookies['onboarding_dismissed'] == 'true'
+      def check_adjourned_deletion_listing_availability
+        return render_404 unless can?(current_user, :list_removable_projects)
       end
     end
   end

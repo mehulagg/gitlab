@@ -70,9 +70,10 @@ export const tagsListResponse = {
       size: 19,
       layers: 10,
       location: 'location',
-      path: 'bar',
-      created_at: 1505828744434,
+      path: 'bar:centos6',
+      created_at: '2020-06-29T10:23:51.766+00:00',
       destroy_path: 'path',
+      digest: 'sha256:1ab51d519f574b636ae7788051c60239334ae8622a9fd82a0cf7bae7786dfd5c',
     },
     {
       name: 'test-tag',
@@ -80,9 +81,10 @@ export const tagsListResponse = {
       short_revision: 'b969de599',
       size: 19,
       layers: 10,
-      path: 'foo',
+      path: 'foo:test-tag',
       location: 'location-2',
-      created_at: 1505828744434,
+      created_at: '2020-06-29T10:23:51.766+00:00',
+      digest: 'sha256:1ab51d519f574b636ae7788051c60239334ae8622a9fd82a0cf7bae7736dfd5c',
     },
   ],
   headers,
@@ -94,4 +96,15 @@ export const imagePagination = {
   total: 14,
   totalPages: 2,
   nextPage: 2,
+};
+
+export const imageDetailsMock = {
+  id: 1,
+  name: 'rails-32309',
+  path: 'gitlab-org/gitlab-test/rails-32309',
+  project_id: 1,
+  location: '0.0.0.0:5000/gitlab-org/gitlab-test/rails-32309',
+  created_at: '2020-06-29T10:23:47.838Z',
+  cleanup_policy_started_at: null,
+  delete_api_path: 'http://0.0.0.0:3000/api/v4/projects/1/registry/repositories/1',
 };

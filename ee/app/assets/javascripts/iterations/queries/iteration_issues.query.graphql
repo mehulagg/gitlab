@@ -1,0 +1,35 @@
+#import "./iteration_issues.fragment.graphql"
+
+query IterationIssues(
+  $fullPath: ID!
+  $id: ID!
+  $isGroup: Boolean = true
+  $beforeCursor: String = ""
+  $afterCursor: String = ""
+  $firstPageSize: Int
+  $lastPageSize: Int
+) {
+  group(fullPath: $fullPath) @include(if: $isGroup) {
+    issues(
+      iterationId: [$id]
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+      includeSubgroups: true
+    ) {
+      ...IterationIssues
+    }
+  }
+  project(fullPath: $fullPath) @skip(if: $isGroup) {
+    issues(
+      iterationId: [$id]
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+    ) {
+      ...IterationIssues
+    }
+  }
+}

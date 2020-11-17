@@ -4,7 +4,7 @@ module IssuesHelper
   def issue_css_classes(issue)
     classes = ["issue"]
     classes << "closed" if issue.closed?
-    classes << "today" if issue.today?
+    classes << "today" if issue.new?
     classes << "user-can-drag" if @sort == 'relative_position'
     classes.join(' ')
   end
@@ -41,7 +41,7 @@ module IssuesHelper
   end
 
   def confidential_icon(issue)
-    icon('eye-slash') if issue.confidential?
+    sprite_icon('eye-slash', css_class: 'gl-vertical-align-text-bottom') if issue.confidential?
   end
 
   def award_user_list(awards, current_user, limit: 10)
@@ -132,6 +132,47 @@ module IssuesHelper
   end
 
   def show_moved_service_desk_issue_warning?(issue)
+    return false unless issue.moved_from
+    return false unless issue.from_service_desk?
+
+    issue.moved_from.project.service_desk_enabled? && !issue.project.service_desk_enabled?
+  end
+
+  def use_startup_call?
+    request.query_parameters.empty? && @sort == 'created_date'
+  end
+
+  def startup_call_params
+    {
+      state: 'opened',
+      with_labels_details: 'true',
+      page: 1,
+      per_page: 20,
+      order_by: 'created_at',
+      sort: 'desc'
+    }
+  end
+
+  def issue_header_actions_data(project, issuable, current_user)
+    new_issuable_params = ({ issuable_template: 'incident', issue: { issue_type: 'incident' } } if issuable.incident?)
+
+    {
+      can_create_issue: show_new_issue_link?(project).to_s,
+      can_reopen_issue: can?(current_user, :reopen_issue, issuable).to_s,
+      can_report_spam: issuable.submittable_as_spam_by?(current_user).to_s,
+      can_update_issue: can?(current_user, :update_issue, issuable).to_s,
+      iid: issuable.iid,
+      is_issue_author: (issuable.author == current_user).to_s,
+      issue_type: issuable_display_type(issuable),
+      new_issue_path: new_project_issue_path(project, new_issuable_params),
+      project_path: project.full_path,
+      report_abuse_path: new_abuse_report_path(user_id: issuable.author.id, ref_url: issue_url(issuable)),
+      submit_as_spam_path: mark_as_spam_project_issue_path(project, issuable)
+    }
+  end
+
+  # Overridden in EE
+  def scoped_labels_available?(parent)
     false
   end
 end

@@ -4,7 +4,7 @@ require 'fast_spec_helper'
 
 require_relative '../../../../rubocop/cop/rspec/any_instance_of'
 
-describe RuboCop::Cop::RSpec::AnyInstanceOf, type: :rubocop do
+RSpec.describe RuboCop::Cop::RSpec::AnyInstanceOf, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -15,6 +15,7 @@ describe RuboCop::Cop::RSpec::AnyInstanceOf, type: :rubocop do
       allow_any_instance_of(User).to receive(:invalidate_issue_cache_counts)
       SRC
     end
+
     let(:corrected_source) do
       <<~SRC
       allow_next_instance_of(User) do |instance|
@@ -40,6 +41,7 @@ describe RuboCop::Cop::RSpec::AnyInstanceOf, type: :rubocop do
       expect_any_instance_of(User).to receive(:invalidate_issue_cache_counts).with(args).and_return(double)
       SRC
     end
+
     let(:corrected_source) do
       <<~SRC
       expect_next_instance_of(User) do |instance|

@@ -1,5 +1,0 @@
----
-title: Improve performance of Advanced Search API (Issues scope) by preloading more associations
-merge_request: 30778
-author:
-type: performance

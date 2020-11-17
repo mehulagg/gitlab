@@ -8,17 +8,7 @@ module Geo
       FILE_SERVICE_OBJECT_TYPE = :job_artifact
 
       def registry_finder
-        @registry_finder ||= Geo::JobArtifactRegistryFinder.new(current_node_id: Gitlab::Geo.current_node.id)
-      end
-
-      def find_unsynced_jobs(batch_size:)
-        if Geo::JobArtifactRegistry.registry_consistency_worker_enabled?
-          convert_registry_relation_to_job_args(
-            registry_finder.find_never_synced_registries(find_batch_params(batch_size))
-          )
-        else
-          super
-        end
+        @registry_finder ||= Geo::JobArtifactRegistryFinder.new
       end
     end
   end

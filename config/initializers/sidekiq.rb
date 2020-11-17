@@ -1,15 +1,20 @@
 # frozen_string_literal: true
+module SidekiqLogArguments
+  def self.enabled?
+    Gitlab::Utils.to_boolean(ENV['SIDEKIQ_LOG_ARGUMENTS'], default: true)
+  end
+end
 
 def enable_reliable_fetch?
   return true unless Feature::FlipperFeature.table_exists?
 
-  Feature.enabled?(:gitlab_sidekiq_reliable_fetcher, default_enabled: true)
+  Feature.enabled?(:gitlab_sidekiq_reliable_fetcher, type: :ops, default_enabled: true)
 end
 
 def enable_semi_reliable_fetch_mode?
   return true unless Feature::FlipperFeature.table_exists?
 
-  Feature.enabled?(:gitlab_sidekiq_enable_semi_reliable_fetcher, default_enabled: true)
+  Feature.enabled?(:gitlab_sidekiq_enable_semi_reliable_fetcher, type: :ops, default_enabled: true)
 end
 
 # Custom Queues configuration
@@ -18,7 +23,7 @@ queues_config_hash[:namespace] = Gitlab::Redis::Queues::SIDEKIQ_NAMESPACE
 
 enable_json_logs = Gitlab.config.sidekiq.log_format == 'json'
 enable_sidekiq_memory_killer = ENV['SIDEKIQ_MEMORY_KILLER_MAX_RSS'].to_i.nonzero?
-use_sidekiq_daemon_memory_killer = ENV["SIDEKIQ_DAEMON_MEMORY_KILLER"].to_i.nonzero?
+use_sidekiq_daemon_memory_killer = ENV.fetch("SIDEKIQ_DAEMON_MEMORY_KILLER", 1).to_i.nonzero?
 use_sidekiq_legacy_memory_killer = !use_sidekiq_daemon_memory_killer
 
 Sidekiq.configure_server do |config|
@@ -35,7 +40,7 @@ Sidekiq.configure_server do |config|
 
   config.server_middleware(&Gitlab::SidekiqMiddleware.server_configurator({
     metrics: Settings.monitoring.sidekiq_exporter,
-    arguments_logger: ENV['SIDEKIQ_LOG_ARGUMENTS'] && !enable_json_logs,
+    arguments_logger: SidekiqLogArguments.enabled? && !enable_json_logs,
     memory_killer: enable_sidekiq_memory_killer && use_sidekiq_legacy_memory_killer
   }))
 
@@ -70,7 +75,7 @@ Sidekiq.configure_server do |config|
       cron_jobs[k]['class'] = cron_jobs[k].delete('job_class')
     else
       cron_jobs.delete(k)
-      Rails.logger.error("Invalid cron_jobs config key: '#{k}'. Check your gitlab config file.") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("Invalid cron_jobs config key: '#{k}'. Check your gitlab config file.")
     end
   end
   Sidekiq::Cron::Job.load_from_hash! cron_jobs

@@ -32,6 +32,7 @@ RSpec.describe Issues::MoveService do
     end
 
     context 'resource weight events' do
+      let(:old_issue) { create(:issue, project: old_project, author: user, weight: 5) }
       let!(:event1) { create(:resource_weight_event, issue: old_issue, weight: 1) }
       let!(:event2) { create(:resource_weight_event, issue: old_issue, weight: 42) }
       let!(:event3) { create(:resource_weight_event, issue: old_issue, weight: 5) }
@@ -47,42 +48,15 @@ RSpec.describe Issues::MoveService do
     end
   end
 
-  describe '#rewrite_related_issues' do
+  describe '#rewrite_related_vulnerability_issues' do
     let(:user) { create(:user) }
-    let(:admin) { create(:admin) }
-    let(:authorized_project) { create(:project) }
-    let(:authorized_project2) { create(:project) }
-    let(:unauthorized_project) { create(:project) }
 
-    let(:authorized_issue_b) { create(:issue, project: authorized_project) }
-    let(:authorized_issue_c) { create(:issue, project: authorized_project2) }
-    let(:authorized_issue_d) { create(:issue, project: authorized_project2) }
-    let(:unauthorized_issue) { create(:issue, project: unauthorized_project) }
+    let!(:vulnerabilities_issue_link) { create(:vulnerabilities_issue_link, issue: old_issue) }
 
-    let!(:issue_link_a) { create(:issue_link, source: old_issue, target: authorized_issue_b) }
-    let!(:issue_link_b) { create(:issue_link, source: old_issue, target: unauthorized_issue) }
-    let!(:issue_link_c) { create(:issue_link, source: old_issue, target: authorized_issue_c) }
-    let!(:issue_link_d) { create(:issue_link, source: authorized_issue_d, target: old_issue) }
+    it 'updates all vulnerability issue links with new issue' do
+      new_issue = move_service.execute(old_issue, new_project)
 
-    before do
-      stub_licensed_features(related_issues: true)
-      authorized_project.add_developer(user)
-      authorized_project2.add_developer(user)
-    end
-
-    context 'multiple related issues' do
-      it 'moves all related issues and retains permissions' do
-        new_issue = move_service.execute(old_issue, new_project)
-
-        expect(new_issue.related_issues(admin))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d, unauthorized_issue])
-
-        expect(new_issue.related_issues(user))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
-
-        expect(authorized_issue_d.related_issues(user))
-          .to match_array([new_issue])
-      end
+      expect(vulnerabilities_issue_link.reload.issue).to eq(new_issue)
     end
   end
 
@@ -102,53 +76,38 @@ RSpec.describe Issues::MoveService do
         expect(new_issue.epic_issue).to eq(epic_issue)
       end
 
-      it 'ignores epic issue reference if user can not update the epic' do
-        new_issue = move_service.execute(old_issue, new_project)
+      it 'tracks usage data for changed epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
 
-        expect(new_issue.epic_issue).to be_nil
-      end
-    end
-  end
+        epic_issue.epic.group.add_reporter(user)
 
-  context 'updating sent notifications' do
-    let!(:old_issue_notification_1) { create(:sent_notification, project: old_issue.project, noteable: old_issue) }
-    let!(:old_issue_notification_2) { create(:sent_notification, project: old_issue.project, noteable: old_issue) }
-    let!(:other_issue_notification) { create(:sent_notification, project: old_issue.project) }
-
-    context 'when issue is from service desk' do
-      before do
-        allow(old_issue).to receive(:from_service_desk?).and_return(true)
-      end
-
-      it 'updates moved issue sent notifications' do
-        new_issue = move_service.execute(old_issue, new_project)
-
-        old_issue_notification_1.reload
-        old_issue_notification_2.reload
-        expect(old_issue_notification_1.project_id).to eq(new_issue.project_id)
-        expect(old_issue_notification_1.noteable_id).to eq(new_issue.id)
-        expect(old_issue_notification_2.project_id).to eq(new_issue.project_id)
-        expect(old_issue_notification_2.noteable_id).to eq(new_issue.id)
-      end
-
-      it 'does not update other issues sent notifications' do
-        expect do
-          move_service.execute(old_issue, new_project)
-          other_issue_notification.reload
-        end.not_to change { other_issue_notification.noteable_id }
-      end
-    end
-
-    context 'when issue is not from service desk' do
-      it 'does not update sent notifications' do
         move_service.execute(old_issue, new_project)
+      end
 
-        old_issue_notification_1.reload
-        old_issue_notification_2.reload
-        expect(old_issue_notification_1.project_id).to eq(old_issue.project_id)
-        expect(old_issue_notification_1.noteable_id).to eq(old_issue.id)
-        expect(old_issue_notification_2.project_id).to eq(old_issue.project_id)
-        expect(old_issue_notification_2.noteable_id).to eq(old_issue.id)
+      context 'user can not update the epic' do
+        it 'ignores epic issue reference' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.epic_issue).to be_nil
+        end
+
+        it 'does not send usage data for changed epic action' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_changed_epic_action)
+
+          move_service.execute(old_issue, new_project)
+        end
+      end
+
+      context 'epic update fails' do
+        it 'does not send usage data for changed epic action' do
+          allow_next_instance_of(::EpicIssue) do |epic_issue|
+            allow(epic_issue).to receive(:update).and_return(false)
+          end
+
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_changed_epic_action)
+
+          move_service.execute(old_issue, new_project)
+        end
       end
     end
   end

@@ -42,12 +42,12 @@
               - if project_registry.last_repository_sync_failure
                 %li.d-flex.text-danger-500
                   = sprite_icon('warning', size: 18)
-                  %span.prepend-left-5
+                  %span.gl-ml-2
                     = s_('Geo|Synchronization failed - %{error}') % { error: project_registry.last_repository_sync_failure }
               - if project_registry.last_repository_verification_failure
                 %li.d-flex.text-danger-500
                   = sprite_icon('warning', size: 18)
-                  %span.prepend-left-5
+                  %span.gl-ml-2
                     = s_('Geo|Verification failed - %{error}') % { error: project_registry.last_repository_verification_failure }
           .col-sm-4.mt-3.mt-sm-0
             .project-status-title.text-muted

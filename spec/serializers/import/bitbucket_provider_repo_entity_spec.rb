@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Import::BitbucketProviderRepoEntity do
+RSpec.describe Import::BitbucketProviderRepoEntity do
   let(:repo_data) do
     {
       'name' => 'repo_name',
@@ -17,6 +17,7 @@ describe Import::BitbucketProviderRepoEntity do
       }
     }
   end
+
   let(:repo) { Bitbucket::Representation::Repo.new(repo_data) }
 
   subject { described_class.new(repo).as_json }

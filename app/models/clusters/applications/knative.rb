@@ -70,15 +70,14 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: name,
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
           chart: chart,
           files: files,
           repository: REPOSITORY,
-          postinstall: install_knative_metrics,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          postinstall: install_knative_metrics
         )
       end
 
@@ -95,13 +94,12 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        helm_command_module::DeleteCommand.new(
           name: name,
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,
           predelete: delete_knative_services_and_metrics,
-          postdelete: delete_knative_istio_leftovers,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          postdelete: delete_knative_istio_leftovers
         )
       end
 

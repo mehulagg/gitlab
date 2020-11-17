@@ -44,9 +44,11 @@ RSpec.describe 'EE-specific admin routing' do
     end
   end
 
-  describe Admin::Geo::PackageFilesController, 'routing' do
-    it 'routes / to #index' do
-      expect(get('/admin/geo/replication/package_files')).to route_to('admin/geo/package_files#index')
+  describe Admin::Geo::ReplicablesController, 'routing' do
+    Gitlab::Geo.enabled_replicator_classes.map(&:replicable_name_plural).each do |replicable_name_plural|
+      it "routes /admin/geo/replication/#{replicable_name_plural} to replicables#index" do
+        expect(get("/admin/geo/replication/#{replicable_name_plural}")).to route_to('admin/geo/replicables#index', replicable_name_plural: replicable_name_plural)
+      end
     end
   end
 

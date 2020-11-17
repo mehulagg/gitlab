@@ -1,7 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import { sprintf, s__ } from '~/locale';
 import { GlIcon } from '@gitlab/ui';
+import { sprintf, s__ } from '~/locale';
 import formattingMixins from '../formatting_mixins';
 import SummaryDetails from './order_summary/summary_details.vue';
 
@@ -33,26 +33,23 @@ export default {
 };
 </script>
 <template>
-  <div class="order-summary d-flex flex-column flex-grow-1 prepend-top-5 mt-lg-5">
+  <div class="order-summary d-flex flex-column flex-grow-1 gl-mt-2 mt-lg-5">
     <div class="d-lg-none">
       <div @click="toggleCollapse">
-        <h4
-          class="d-flex justify-content-between gl-font-lg"
-          :class="{ 'prepend-bottom-32': !collapsed }"
-        >
+        <h4 class="d-flex justify-content-between gl-font-lg" :class="{ 'gl-mb-7': !collapsed }">
           <div class="d-flex">
             <gl-icon v-if="collapsed" name="chevron-right" :size="18" />
             <gl-icon v-else name="chevron-down" :size="18" />
             <div>{{ titleWithName }}</div>
           </div>
-          <div class="prepend-left-default">{{ formatAmount(totalAmount, usersPresent) }}</div>
+          <div class="gl-ml-3">{{ formatAmount(totalAmount, usersPresent) }}</div>
         </h4>
       </div>
       <summary-details v-show="!collapsed" />
     </div>
     <div class="d-none d-lg-block">
       <div class="append-bottom-20">
-        <h4 class="gl-font-size-20-deprecated-no-really-do-not-use-me">
+        <h4>
           {{ titleWithName }}
         </h4>
       </div>

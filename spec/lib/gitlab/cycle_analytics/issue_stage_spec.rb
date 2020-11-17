@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CycleAnalytics::IssueStage do
+RSpec.describe Gitlab::CycleAnalytics::IssueStage do
   let(:stage_name) { :issue }
   let(:project) { create(:project) }
   let(:issue_1) { create(:issue, project: project, created_at: 90.minutes.ago) }
@@ -29,7 +29,7 @@ describe Gitlab::CycleAnalytics::IssueStage do
 
   describe '#median' do
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'counts median from issues with metrics' do
@@ -65,7 +65,7 @@ describe Gitlab::CycleAnalytics::IssueStage do
 
     describe '#group_median' do
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       it 'counts median from issues with metrics' do
@@ -87,7 +87,7 @@ describe Gitlab::CycleAnalytics::IssueStage do
 
       describe '#group_median' do
         around do |example|
-          Timecop.freeze { example.run }
+          freeze_time { example.run }
         end
 
         it 'counts median from issues with metrics' do

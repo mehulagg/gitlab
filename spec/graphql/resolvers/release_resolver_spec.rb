@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::ReleaseResolver do
+RSpec.describe Resolvers::ReleaseResolver do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project, :private) }
@@ -36,7 +36,7 @@ describe Resolvers::ReleaseResolver do
         let(:args) { {} }
 
         it 'raises an error' do
-          expect { resolve_release }.to raise_error(ArgumentError, "missing keyword: tag_name")
+          expect { resolve_release }.to raise_error(ArgumentError, "missing keyword: :tag_name")
         end
       end
     end

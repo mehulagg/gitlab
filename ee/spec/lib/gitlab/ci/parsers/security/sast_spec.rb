@@ -3,17 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
-  describe '#parse!' do
-    subject(:parser) { described_class.new }
+  using RSpec::Parameterized::TableSyntax
 
-    let(:commit_sha) { "d8978e74745e18ce44d88814004d4255ac6a65bb" }
+  describe '#parse!' do
+    let_it_be(:pipeline) { create(:ci_pipeline) }
+
     let(:created_at) { 2.weeks.ago }
 
+    subject(:parser) { described_class.new }
+
     context "when parsing valid reports" do
-      where(report_format: %i(sast sast_deprecated))
+      where(:report_format, :scanner_length) do
+        :sast               | 4
+        :sast_deprecated    | 3
+      end
 
       with_them do
-        let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, commit_sha, created_at) }
+        let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, created_at) }
         let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
         before do
@@ -22,14 +28,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
           end
         end
 
-        it "parses all identifiers and occurrences" do
-          expect(report.occurrences.length).to eq(33)
+        it "parses all identifiers and findings" do
+          expect(report.findings.length).to eq(33)
           expect(report.identifiers.length).to eq(17)
-          expect(report.scanners.length).to eq(3)
+          expect(report.scanners.length).to eq(scanner_length)
         end
 
         it 'generates expected location' do
-          location = report.occurrences.first.location
+          location = report.findings.first.location
 
           expect(location).to be_a(::Gitlab::Ci::Reports::Security::Locations::Sast)
           expect(location).to have_attributes(
@@ -42,13 +48,13 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
         end
 
         it "generates expected metadata_version" do
-          expect(report.occurrences.first.metadata_version).to eq('1.2')
+          expect(report.findings.first.metadata_version).to eq('1.2')
         end
       end
     end
 
     context "when parsing an empty report" do
-      let(:report) { Gitlab::Ci::Reports::Security::Report.new('sast', commit_sha, created_at) }
+      let(:report) { Gitlab::Ci::Reports::Security::Report.new('sast', pipeline, created_at) }
       let(:blob) { Gitlab::Json.generate({}) }
 
       it { expect(parser.parse!(blob, report)).to be_empty }

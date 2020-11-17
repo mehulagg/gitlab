@@ -15,7 +15,8 @@ export default {
   props: {
     currentStage: {
       type: Object,
-      required: true,
+      required: false,
+      default: () => {},
     },
     medians: {
       type: Object,
@@ -26,10 +27,6 @@ export default {
       required: true,
     },
     isCreatingCustomStage: {
-      type: Boolean,
-      required: true,
-    },
-    canEditStages: {
       type: Boolean,
       required: true,
     },
@@ -76,7 +73,14 @@ export default {
   },
   methods: {
     medianValue(id) {
-      return this.medians[id] ? this.medians[id] : null;
+      return this.medians[id]?.value || null;
+    },
+    isActiveStage(stageId) {
+      const { currentStage, isCreatingCustomStage } = this;
+      return Boolean(!isCreatingCustomStage && currentStage && stageId === currentStage.id);
+    },
+    medianError(id) {
+      return this.medians[id]?.error || '';
     },
   },
   STAGE_ACTIONS,
@@ -91,19 +95,18 @@ export default {
       :key="`ca-stage-title-${stage.title}`"
       :title="stage.title"
       :value="medianValue(stage.id)"
-      :is-active="!isCreatingCustomStage && stage.id === currentStage.id"
-      :can-edit="canEditStages"
+      :is-active="isActiveStage(stage.id)"
       :is-default-stage="!stage.custom"
+      :error-message="medianError(stage.id)"
       @remove="$emit($options.STAGE_ACTIONS.REMOVE, stage.id)"
       @hide="$emit($options.STAGE_ACTIONS.HIDE, { id: stage.id, hidden: true })"
       @select="$emit($options.STAGE_ACTIONS.SELECT, stage)"
       @edit="$emit($options.STAGE_ACTIONS.EDIT, stage)"
     />
     <add-stage-button
-      v-if="canEditStages"
       :class="$options.noDragClass"
       :active="isCreatingCustomStage"
-      @showform="$emit('showAddStageForm')"
+      @showform="$emit($options.STAGE_ACTIONS.ADD_STAGE)"
     />
   </ul>
 </template>

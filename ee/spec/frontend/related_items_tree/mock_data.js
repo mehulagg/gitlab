@@ -1,4 +1,5 @@
 import { TEST_HOST } from 'spec/test_constants';
+import { ChildState } from 'ee/related_items_tree/constants';
 
 export const mockInitialConfig = {
   epicsEndpoint: `${TEST_HOST}/epics`,
@@ -24,7 +25,7 @@ export const mockParentItem = {
   descendantCounts: {
     openedEpics: 1,
     closedEpics: 1,
-    openedIssues: 1,
+    openedIssues: 2,
     closedIssues: 1,
   },
   healthStatus: {
@@ -62,7 +63,7 @@ export const mockEpic1 = {
   id: 'gid://gitlab/Epic/4',
   iid: '4',
   title: 'Quo ea ipsa enim perferendis at omnis officia.',
-  state: 'opened',
+  state: ChildState.Open,
   webPath: '/groups/gitlab-org/-/epics/4',
   reference: '&4',
   relationPath: '/groups/gitlab-org/-/epics/1/links/4',
@@ -88,7 +89,7 @@ export const mockEpic2 = {
   id: 'gid://gitlab/Epic/3',
   iid: '3',
   title: 'A nisi mollitia explicabo quam soluta dolor hic.',
-  state: 'closed',
+  state: ChildState.Closed,
   webPath: '/groups/gitlab-org/-/epics/3',
   reference: '&3',
   relationPath: '/groups/gitlab-org/-/epics/1/links/3',
@@ -110,12 +111,57 @@ export const mockEpic2 = {
   },
 };
 
+// Epic meta data for having some open issues
+export const mockEpicMeta1 = {
+  descendantCounts: {
+    openedEpics: 1,
+    closedEpics: 1,
+    openedIssues: 2,
+    closedIssues: 1,
+  },
+  healthStatus: {
+    issuesOnTrack: 1,
+    issuesAtRisk: 0,
+    issuesNeedingAttention: 1,
+  },
+};
+
+// Epic meta data for having no open issues
+export const mockEpicMeta2 = {
+  descendantCounts: {
+    openedEpics: 0,
+    closedEpics: 1,
+    openedIssues: 0,
+    closedIssues: 2,
+  },
+  healthStatus: {
+    issuesOnTrack: 0,
+    issuesAtRisk: 0,
+    issuesNeedingAttention: 0,
+  },
+};
+
+// Epic meta data for having no child issues
+export const mockEpicMeta3 = {
+  descendantCounts: {
+    openedEpics: 0,
+    closedEpics: 1,
+    openedIssues: 0,
+    closedIssues: 0,
+  },
+  healthStatus: {
+    issuesOnTrack: 0,
+    issuesAtRisk: 0,
+    issuesNeedingAttention: 0,
+  },
+};
+
 export const mockIssue1 = {
   iid: '8',
   epicIssueId: 'gid://gitlab/EpicIssue/3',
   title: 'Nostrum cum mollitia quia recusandae fugit deleniti voluptatem delectus.',
   closedAt: null,
-  state: 'opened',
+  state: ChildState.Open,
   createdAt: '2019-02-18T14:06:41Z',
   confidential: true,
   dueDate: '2019-06-14',
@@ -149,7 +195,7 @@ export const mockIssue2 = {
   epicIssueId: 'gid://gitlab/EpicIssue/4',
   title: 'Dismiss Cipher with no integrity',
   closedAt: null,
-  state: 'opened',
+  state: ChildState.Open,
   createdAt: '2019-02-18T14:13:05Z',
   confidential: false,
   dueDate: null,
@@ -164,12 +210,12 @@ export const mockIssue2 = {
   healthStatus: 'needsAttention',
 };
 
-export const mockIssue3 = {
+export const mockClosedIssue = {
   iid: '42',
   epicIssueId: 'gid://gitlab/EpicIssue/5',
   title: 'View closed issues in epic',
   closedAt: null,
-  state: 'closed',
+  state: ChildState.Closed,
   createdAt: '2019-02-18T14:13:05Z',
   confidential: false,
   dueDate: null,
@@ -186,7 +232,7 @@ export const mockIssue3 = {
 
 export const mockEpics = [mockEpic1, mockEpic2];
 
-export const mockIssues = [mockIssue1, mockIssue2];
+export const mockIssues = [mockIssue1, mockIssue2, mockClosedIssue];
 
 export const mockQueryResponse = {
   data: {
@@ -225,6 +271,9 @@ export const mockQueryResponse = {
             {
               node: mockIssue2,
             },
+            {
+              node: mockClosedIssue,
+            },
           ],
           pageInfo: {
             endCursor: 'def',
@@ -233,9 +282,9 @@ export const mockQueryResponse = {
         },
         descendantCounts: mockParentItem.descendantCounts,
         healthStatus: {
-          atRisk: 1,
+          atRisk: 0,
           needsAttention: 1,
-          onTrack: 0,
+          onTrack: 1,
         },
       },
     },
@@ -274,7 +323,7 @@ export const mockQueryResponse2 = {
         issues: {
           edges: [
             {
-              node: mockIssue3,
+              node: mockClosedIssue,
             },
             {
               node: mockIssue1,

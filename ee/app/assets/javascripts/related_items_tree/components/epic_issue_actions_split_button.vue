@@ -1,5 +1,10 @@
 <script>
-import { GlDropdown, GlDropdownDivider, GlDropdownHeader, GlDropdownItem } from '@gitlab/ui';
+import {
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownDivider,
+  GlDeprecatedDropdownHeader,
+  GlDeprecatedDropdownItem,
+} from '@gitlab/ui';
 
 import { s__, __ } from '~/locale';
 
@@ -29,10 +34,10 @@ export default {
   epicActionItems,
   issueActionItems,
   components: {
-    GlDropdown,
-    GlDropdownDivider,
-    GlDropdownHeader,
-    GlDropdownItem,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownDivider,
+    GlDeprecatedDropdownHeader,
+    GlDeprecatedDropdownItem,
   },
   props: {
     allowSubEpics: {
@@ -50,32 +55,32 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown
+  <gl-deprecated-dropdown
     :text="__('Add')"
     variant="secondary"
     data-qa-selector="epic_issue_actions_split_button"
     right
   >
-    <gl-dropdown-header>{{ __('Issue') }}</gl-dropdown-header>
-    <gl-dropdown-item
+    <gl-deprecated-dropdown-header>{{ __('Issue') }}</gl-deprecated-dropdown-header>
+    <gl-deprecated-dropdown-item
       v-for="item in $options.issueActionItems"
       :key="item.eventName"
       active-class="is-active"
       @click="change(item)"
     >
       {{ item.title }}
-    </gl-dropdown-item>
+    </gl-deprecated-dropdown-item>
     <template v-if="allowSubEpics">
-      <gl-dropdown-divider />
-      <gl-dropdown-header>{{ __('Epic') }}</gl-dropdown-header>
-      <gl-dropdown-item
+      <gl-deprecated-dropdown-divider />
+      <gl-deprecated-dropdown-header>{{ __('Epic') }}</gl-deprecated-dropdown-header>
+      <gl-deprecated-dropdown-item
         v-for="item in $options.epicActionItems"
         :key="item.eventName"
         active-class="is-active"
         @click="change(item)"
       >
         {{ item.title }}
-      </gl-dropdown-item>
+      </gl-deprecated-dropdown-item>
     </template>
-  </gl-dropdown>
+  </gl-deprecated-dropdown>
 </template>

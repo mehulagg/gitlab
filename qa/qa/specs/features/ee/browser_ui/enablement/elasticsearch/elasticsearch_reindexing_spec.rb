@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Search using Elasticsearch', :orchestrated, :elasticsearch, :requires_admin do
       include Runtime::Fixtures
       let(:project_name) { 'testing_elasticsearch_indexing' }
@@ -29,7 +29,7 @@ module QA
         end.project.visit!
       end
 
-      it 'tests reindexing after push', retry: 3 do
+      it 'tests reindexing after push', retry: 3, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/679' do
         expect { Runtime::Search.find_code(project_file_name, project_file_content) }.not_to raise_error
 
         QA::Page::Main::Menu.perform do |menu|
@@ -43,7 +43,7 @@ module QA
         end
       end
 
-      it 'tests reindexing after webIDE', retry: 3 do
+      it 'tests reindexing after webIDE', retry: 3, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/680' do
         template = {
             file_name: 'LICENSE',
             name: 'Mozilla Public License 2.0',
@@ -66,11 +66,14 @@ module QA
           menu.search_for content[0..33]
         end
 
-        Page::Search::Results.perform do |search|
-          search.switch_to_code
-
-          expect(search).to have_file_in_project template[:file_name], project.name
-          expect(search).to have_file_with_content template[:file_name], content[0..33]
+        QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 12) do
+          Page::Search::Results.perform do |search|
+            search.switch_to_code
+            aggregate_failures "testing expectations" do
+              expect(search).to have_file_in_project template[:file_name], project.name
+              expect(search).to have_file_with_content template[:file_name], content[0..33]
+            end
+          end
         end
       end
     end

@@ -5,7 +5,7 @@ module Elastic
     class SnippetClassProxy < ApplicationClassProxy
       def elastic_search(query, options: {})
         query_hash = basic_query_hash(%w(title description), query)
-        query_hash = filter(query_hash, options)
+        query_hash = context.name(:snippet, :authorized) { filter(query_hash, options) }
 
         search(query_hash, options)
       end
@@ -27,6 +27,7 @@ module Elastic
         # Match any of the filter conditions, in addition to the existing conditions
         query_hash[:query][:bool][:filter] << {
           bool: {
+            _name: context.name,
             should: filter_conditions
           }
         }
@@ -40,6 +41,7 @@ module Elastic
         # Include accessible personal snippets
         filter_conditions << {
           bool: {
+            _name: context.name(:personal),
             filter: [
               { terms: { visibility_level: Gitlab::VisibilityLevel.levels_for_user(user) } }
             ],
@@ -51,8 +53,9 @@ module Elastic
         if user
           filter_conditions << {
             bool: {
+              _name: context.name(:authored),
               filter: [
-                { term: { author_id: user.id } }
+                { term: { author_id: { _name: context.name(:as_author), value: user.id } } }
               ],
               must_not: { exists: { field: 'project_id' } }
             }
@@ -76,6 +79,7 @@ module Elastic
 
           filter_conditions << {
             bool: {
+              _name: context.name(:membership, :id),
               must: [
                 { terms: { project_id: project_ids } }
               ]

@@ -1,6 +1,6 @@
 query issueSprint($fullPath: ID!, $iid: String!) {
   project(fullPath: $fullPath) {
-    issue (iid: $iid) {
+    issue(iid: $iid) {
       iteration {
         id
         title

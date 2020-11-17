@@ -26,6 +26,9 @@ GET /groups/:id/labels
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user.                                                               |
 | `with_counts` | boolean        | no       | Whether or not to include issue and merge request counts. Defaults to `false`. _([Introduced in GitLab 12.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/31543))_ |
 | `include_ancestor_groups` | boolean | no | Include ancestor groups. Defaults to `true`. |
+| `include_descendant_groups` | boolean | no | Include descendant groups. Defaults to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
+| `only_group_labels` | boolean | no | Toggle to include only group labels or also project labels. Defaults to `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
+| `search` | string | no | Keyword to filter labels by. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/labels?with_counts=true"
@@ -75,6 +78,8 @@ GET /groups/:id/labels/:label_id
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user.                                                               |
 | `label_id` | integer or string | yes | The ID or title of a group's label. |
 | `include_ancestor_groups` | boolean | no | Include ancestor groups. Defaults to `true`. |
+| `include_descendant_groups` | boolean | no | Include descendant groups. Defaults to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
+| `only_group_labels` | boolean | no | Toggle to include only group labels or also project labels. Defaults to `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259024) in GitLab 13.6 |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/labels/bug"
@@ -170,7 +175,8 @@ Example response:
 }
 ```
 
-NOTE: **Note:** An older endpoint `PUT /groups/:id/labels` with `name` in the parameters is still available, but deprecated.
+NOTE: **Note:**
+An older endpoint `PUT /groups/:id/labels` with `name` in the parameters is still available, but deprecated.
 
 ## Delete a group label
 
@@ -189,7 +195,8 @@ DELETE /groups/:id/labels/:label_id
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/labels/bug"
 ```
 
-NOTE: **Note:** An older endpoint `DELETE /groups/:id/labels` with `name` in the parameters is still available, but deprecated.
+NOTE: **Note:**
+An older endpoint `DELETE /groups/:id/labels` with `name` in the parameters is still available, but deprecated.
 
 ## Subscribe to a group label
 

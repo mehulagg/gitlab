@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe MarkupHelper do
+RSpec.describe MarkupHelper do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) do
     user = create(:user, username: 'gfm')
     project.add_maintainer(user)
     user
   end
+
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
   let_it_be(:snippet) { create(:project_snippet, project: project) }

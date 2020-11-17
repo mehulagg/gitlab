@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::Users::SnippetsResolver do
+RSpec.describe Resolvers::Users::SnippetsResolver do
   include GraphqlHelpers
 
   describe '#resolve' do
@@ -73,7 +73,7 @@ describe Resolvers::Users::SnippetsResolver do
 
         expect do
           resolve_snippets(args: args)
-        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+        end.to raise_error(GraphQL::CoercionError)
       end
     end
   end

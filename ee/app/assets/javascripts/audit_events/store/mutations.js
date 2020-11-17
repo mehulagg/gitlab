@@ -11,14 +11,14 @@ export default {
       sort: sortBy = null,
     } = {},
   ) {
-    state.filterValue = { id, type };
+    state.filterValue = type && id ? [{ type, value: { data: id, operator: '=' } }] : [];
     state.startDate = startDate;
     state.endDate = endDate;
     state.sortBy = sortBy;
   },
 
-  [types.SET_FILTER_VALUE](state, { id, type }) {
-    state.filterValue = { id, type };
+  [types.SET_FILTER_VALUE](state, filterValue) {
+    state.filterValue = filterValue;
   },
 
   [types.SET_DATE_RANGE](state, { startDate, endDate }) {

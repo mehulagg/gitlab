@@ -181,6 +181,14 @@ RSpec.describe SnippetsFinder do
             private_project_snippet
           )
       end
+
+      context 'when no personal snippets are visible' do
+        let(:user) { nil }
+
+        it 'does not return any record' do
+          expect(subject).to be_empty
+        end
+      end
     end
   end
 end

@@ -70,13 +70,14 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       let(:traits) { [:with_detached_merge_request_pipeline] }
       let(:options) { {} }
 
-      it 'shows a warning that fork project cannot create merge request pipelines', :sidekiq_might_not_need_inline do
+      it 'shows a warning that fork project merge request does not create merge request pipelines by default', :sidekiq_might_not_need_inline do
         visit project_merge_request_path(project, merge_request)
 
         within('.warning_message') do
           expect(page)
-            .to have_content('Fork merge requests do not create merge request' \
-                             ' pipelines which validate a post merge result')
+            .to have_content('Fork project merge requests do not create merge' \
+                             ' request pipelines that validate a post merge result' \
+                             ' unless invoked by a project member.')
         end
       end
     end

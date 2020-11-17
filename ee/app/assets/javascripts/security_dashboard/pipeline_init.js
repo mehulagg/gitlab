@@ -16,13 +16,14 @@ export default () => {
     dashboardDocumentation,
     emptyStateSvgPath,
     pipelineId,
+    pipelineIid,
     projectId,
     sourceBranch,
     vulnerabilitiesEndpoint,
-    vulnerabilityFeedbackHelpPath,
     emptyStateUnauthorizedSvgPath,
     emptyStateForbiddenSvgPath,
     projectFullPath,
+    pipelineJobsPath,
   } = el.dataset;
 
   const loadingErrorIllustrations = {
@@ -41,13 +42,14 @@ export default () => {
         props: {
           projectId: parseInt(projectId, 10),
           pipelineId: parseInt(pipelineId, 10),
+          pipelineIid: parseInt(pipelineIid, 10),
           vulnerabilitiesEndpoint,
-          vulnerabilityFeedbackHelpPath,
           sourceBranch,
           dashboardDocumentation,
           emptyStateSvgPath,
           loadingErrorIllustrations,
           projectFullPath,
+          pipelineJobsPath,
         },
       });
     },

@@ -1,24 +1,19 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "licenses": [
     {
-      "id": "WTFPL",
-      "name": "WTFPL License",
-      "url": "http://www.wtfpl.net/",
-      "count": 1
+      "id": "Apache-2.0",
+      "name": "Apache License 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   ],
   "dependencies": [
     {
-      "name": "wtfpl_init",
-      "licenses": [
-        "WTFPL"
-      ],
-      "url": "https://rubygems.org/gems/wtfpl_init",
-      "description": "Download WTFPL license file and rename to LICENSE.md or something",
-      "paths": [
-        "."
-      ]
+      "name": "test_dependency",
+      "version": "0.1.0",
+      "package_manager": "bundler",
+      "path": "Gemfile.lock",
+      "licenses": ["Apache-2.0"]
     }
   ]
 }

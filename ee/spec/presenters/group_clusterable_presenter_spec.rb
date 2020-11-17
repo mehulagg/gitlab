@@ -40,10 +40,4 @@ RSpec.describe GroupClusterablePresenter do
       it { is_expected.to be_nil }
     end
   end
-
-  describe '#metrics_dashboard_path' do
-    subject { presenter.metrics_dashboard_path(cluster) }
-
-    it { is_expected.to eq(metrics_dashboard_group_cluster_path(group, cluster)) }
-  end
 end

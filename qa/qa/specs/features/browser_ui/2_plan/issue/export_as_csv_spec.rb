@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Issues list' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -24,7 +24,7 @@ module QA
         Page::Project::Menu.perform(&:click_issues)
       end
 
-      it 'successfully exports issues list as CSV' do
+      it 'successfully exports issues list as CSV', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/764' do
         Page::Project::Issue::Index.perform do |index|
           index.click_export_as_csv_button
 

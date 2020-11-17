@@ -12,8 +12,8 @@ module QA
 
             base.class_eval do
               prepend QA::Page::Project::SubMenus::Common
+              prepend SubMenus::LicenseCompliance
               prepend SubMenus::SecurityCompliance
-              prepend SubMenus::Packages
               prepend SubMenus::Project
               prepend SubMenus::Repository
               prepend SubMenus::Settings

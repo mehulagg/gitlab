@@ -52,25 +52,6 @@ RSpec.describe API::GroupClusters do
         expect(json_response['environment_scope']).to eq('*')
       end
     end
-
-    context 'when license has multiple clusters feature' do
-      before do
-        stub_licensed_features(multiple_clusters: true)
-
-        create(:cluster, :provided_by_gcp, :group,
-               groups: [group])
-
-        post api("/groups/#{group.id}/clusters/user", current_user), params: cluster_params
-      end
-
-      it 'responds with 201' do
-        expect(response).to have_gitlab_http_status(:created)
-      end
-
-      it 'allows multiple clusters to be associated to group' do
-        expect(group.reload.clusters.count).to eq(2)
-      end
-    end
   end
 
   describe 'PUT /groups/:id/clusters/:cluster_id' do

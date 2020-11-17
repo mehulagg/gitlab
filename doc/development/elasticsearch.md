@@ -1,13 +1,21 @@
+---
+stage: Enablement
+group: Global Search
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Elasticsearch knowledge **(STARTER ONLY)**
 
 This area is to maintain a compendium of useful information when working with Elasticsearch.
 
 Information on how to enable Elasticsearch and perform the initial indexing is in
-the [Elasticsearch integration documentation](../integration/elasticsearch.md#enabling-elasticsearch).
+the [Elasticsearch integration documentation](../integration/elasticsearch.md#enabling-advanced-search).
 
 ## Deep Dive
 
 In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
+
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab's specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
 ## Supported Versions
 
@@ -60,7 +68,7 @@ The `whitespace` tokenizer was selected in order to have more control over how t
 
 Please see the `code` filter for an explanation on how tokens are split.
 
-NOTE: **Known Issues**:
+NOTE: **Note:**
 Currently the [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#known-issues).
 
 #### `code_search_analyzer`
@@ -111,11 +119,8 @@ Patterns:
 - `'"((?:\\"|[^"]|\\")*)"'`: captures terms inside quotes, removing the quotes
 - `"'((?:\\'|[^']|\\')*)'"`: same as above, for single-quotes
 - `'\.([^.]+)(?=\.|\s|\Z)'`: separate terms with periods in-between
-- `'\/?([^\/]+)(?=\/|\b)'`: separate path terms `like/this/one`
-
-#### `edgeNGram_filter`
-
-Uses an [Edge NGram token filter](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-edgengram-tokenfilter.html) to allow inputs with only parts of a token to find the token. For example it would turn `glasses` into permutations starting with `gl` and ending with `glasses`, which would allow a search for "`glass`" to find the original token `glasses`
+- `'([\p{L}_.-]+)'`: some common chars in file names to keep the whole filename intact (eg. `my_file-ñame.txt`)
+- `'([\p{L}\d_]+)'`: letters, numbers and underscores are the most common tokens in programming. Always capture them greedily regardless of context.
 
 ## Gotchas
 
@@ -123,6 +128,9 @@ Uses an [Edge NGram token filter](https://www.elastic.co/guide/en/elasticsearch/
 - `Character` filters (as opposed to token filters) always replace the original character, so they're not a good choice as they can hinder exact searches
 
 ## Zero downtime reindexing with multiple indices
+
+NOTE: **Note:**
+This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Currently GitLab can only handle a single version of setting. Any setting/schema changes would require reindexing everything from scratch. Since reindexing can take a long time, this can cause search functionality downtime.
 
@@ -160,7 +168,8 @@ The global configurations per version are now in the `Elastic::(Version)::Config
 
 ### Creating new version of schema
 
-NOTE: **Note:** this is not applicable yet as multiple indices functionality is not fully implemented.
+NOTE: **Note:**
+This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (e.g. `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (e.g. `V12p3`).
 
@@ -174,6 +183,38 @@ If the current version is `v12p1`, and we need to create a new version for `v12p
 1. Copy the entire folder of `latest` as `v12p1`
 1. Change the namespace for files under `v12p1` folder from `Latest` to `V12p1`
 1. Make changes to files under the `latest` folder as needed
+
+## Creating a new Global Search migration
+
+> This functionality was introduced by [#234046](https://gitlab.com/gitlab-org/gitlab/-/issues/234046).
+
+NOTE: **Note:**
+This only supported for indices created with GitLab 13.0 or greater.
+
+Migrations are stored in the [`ee/elastic/migrate/`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/elastic/migrate) folder with `YYYYMMDDHHMMSS_migration_name.rb`
+file name format, which is similar to Rails database migrations:
+
+```ruby
+# frozen_string_literal: true
+
+class MigrationName < Elastic::Migration
+  # Important: Any update to the Elastic index mappings should be replicated in Elastic::Latest::Config
+
+  def migrate
+  end
+
+  # Check if the migration has completed
+  # Return true if completed, otherwise return false
+  def completed?
+  end
+end
+```
+
+Applied migrations are stored in `gitlab-#{RAILS_ENV}-migrations` index. All unexecuted migrations
+are applied by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
+cron worker sequentially.
+
+Any update to the Elastic index mappings should be replicated in [`Elastic::Latest::Config`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/elastic/latest/config.rb).
 
 ## Performance Monitoring
 
@@ -211,7 +252,7 @@ logs will also include the time spent on Database and Gitaly requests, which
 may help to diagnose which part of the search is performing poorly.
 
 There are additional logs specific to Elasticsearch that are sent to
-[`elasticsearch.log`](../administration/logs.md#elasticsearchlog-starter-only)
+[`elasticsearch.log`](../administration/logs.md#elasticsearchlog)
 that may contain information to help diagnose performance issues.
 
 ### Performance Bar
@@ -221,6 +262,16 @@ Bar`](../administration/monitoring/performance/performance_bar.md), which can
 be used both locally in development and on any deployed GitLab instance to
 diagnose poor search performance. This will show the exact queries being made,
 which is useful to diagnose why a search might be slow.
+
+### Correlation ID and `X-Opaque-Id`
+
+Our [correlation
+ID](distributed_tracing.md#developer-guidelines-for-working-with-correlation-ids)
+is forwarded by all requests from Rails to Elasticsearch as the
+[`X-Opaque-Id`](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html#_identifying_running_tasks)
+header which allows us to track any
+[tasks](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html)
+in the cluster back the request in GitLab.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 /* https://github.com/richleland/pygments-css/blob/master/monokai.css */
 
-@import "../common";
+@import '../common';
 
 /*
 * Monokai Colors
@@ -125,6 +125,9 @@ $monokai-gi: #a6e22e;
       @include dark-diff-match-line;
     }
 
+    .diff-td.diff-line-num.hll:not(.empty-cell),
+    .diff-td.line-coverage.hll:not(.empty-cell),
+    .diff-td.line_content.hll:not(.empty-cell),
     td.diff-line-num.hll:not(.empty-cell),
     td.line-coverage.hll:not(.empty-cell),
     td.line_content.hll:not(.empty-cell) {
@@ -158,15 +161,17 @@ $monokai-gi: #a6e22e;
       }
     }
 
+    .diff-grid-left:hover,
+    .diff-grid-right:hover {
+      .diff-line-num:not(.empty-cell) {
+        @include line-number-hover($monokai-over-bg);
+      }
+    }
+
     .diff-line-num {
       &.is-over,
       &.hll:not(.empty-cell).is-over {
-        background-color: $monokai-over-bg;
-        border-color: darken($monokai-over-bg, 5%);
-
-        a {
-          color: darken($monokai-over-bg, 15%);
-        }
+        @include line-number-hover($monokai-over-bg);
       }
     }
 
@@ -211,7 +216,10 @@ $monokai-gi: #a6e22e;
 
   .hll { background-color: $monokai-hll; }
   .c { color: $monokai-c; } /* Comment */
-  .err { color: $monokai-err-color; background-color: $monokai-err-bg; } /* Error */
+  .err { /* Error */
+    color: $monokai-err-color;
+    background-color: $monokai-err-bg;
+  }
   .k { color: $monokai-k; } /* Keyword */
   .l { color: $monokai-l; } /* Literal */
   .n { color: $monokai-n; } /* Name */

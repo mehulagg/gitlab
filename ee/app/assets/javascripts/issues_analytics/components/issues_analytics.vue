@@ -182,7 +182,7 @@ export default {
 
       <gl-column-chart
         data-qa-selector="issues_analytics_graph"
-        :data="{ Full: data }"
+        :bars="[{ name: 'Full', data }]"
         :option="chartOptions"
         :y-axis-title="s__('IssuesAnalytics|Issues opened')"
         :x-axis-title="s__('IssuesAnalytics|Last 12 months') + ' (' + chartDateRange + ')'"

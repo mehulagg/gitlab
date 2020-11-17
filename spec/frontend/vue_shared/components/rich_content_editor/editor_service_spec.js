@@ -2,18 +2,51 @@ import {
   generateToolbarItem,
   addCustomEventListener,
   removeCustomEventListener,
+  registerHTMLToMarkdownRenderer,
   addImage,
+  insertVideo,
   getMarkdown,
-} from '~/vue_shared/components/rich_content_editor/editor_service';
+  getEditorOptions,
+} from '~/vue_shared/components/rich_content_editor/services/editor_service';
+import buildHTMLToMarkdownRenderer from '~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer';
+import buildCustomRenderer from '~/vue_shared/components/rich_content_editor/services/build_custom_renderer';
+import sanitizeHTML from '~/vue_shared/components/rich_content_editor/services/sanitize_html';
+
+jest.mock('~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer');
+jest.mock('~/vue_shared/components/rich_content_editor/services/build_custom_renderer');
+jest.mock('~/vue_shared/components/rich_content_editor/services/sanitize_html');
 
 describe('Editor Service', () => {
-  const mockInstance = {
-    eventManager: { addEventType: jest.fn(), removeEventHandler: jest.fn(), listen: jest.fn() },
-    editor: { exec: jest.fn() },
-    invoke: jest.fn(),
+  let mockInstance;
+  let event;
+  let handler;
+  const parseHtml = str => {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = str;
+    return wrapper.firstChild;
   };
-  const event = 'someCustomEvent';
-  const handler = jest.fn();
+
+  beforeEach(() => {
+    mockInstance = {
+      eventManager: { addEventType: jest.fn(), removeEventHandler: jest.fn(), listen: jest.fn() },
+      editor: {
+        exec: jest.fn(),
+        isWysiwygMode: jest.fn(),
+        getSquire: jest.fn(),
+        insertText: jest.fn(),
+      },
+      invoke: jest.fn(),
+      toMarkOptions: {
+        renderer: {
+          constructor: {
+            factory: jest.fn(),
+          },
+        },
+      },
+    };
+    event = 'someCustomEvent';
+    handler = jest.fn();
+  });
 
   describe('generateToolbarItem', () => {
     const config = {
@@ -58,12 +91,57 @@ describe('Editor Service', () => {
   });
 
   describe('addImage', () => {
-    it('calls the exec method on the instance', () => {
-      const mockImage = { imageUrl: 'some/url.png', description: 'some description' };
+    const file = new File([], 'some-file.jpg');
+    const mockImage = { imageUrl: 'some/url.png', altText: 'some alt text' };
 
-      addImage(mockInstance, mockImage);
+    it('calls the insertElement method on the squire instance when in WYSIWYG mode', () => {
+      jest.spyOn(URL, 'createObjectURL');
+      mockInstance.editor.isWysiwygMode.mockReturnValue(true);
+      mockInstance.editor.getSquire.mockReturnValue({ insertElement: jest.fn() });
 
-      expect(mockInstance.editor.exec).toHaveBeenCalledWith('AddImage', mockImage);
+      addImage(mockInstance, mockImage, file);
+
+      expect(mockInstance.editor.getSquire().insertElement).toHaveBeenCalled();
+      expect(global.URL.createObjectURL).toHaveBeenLastCalledWith(file);
+    });
+
+    it('calls the insertText method on the instance when in Markdown mode', () => {
+      mockInstance.editor.isWysiwygMode.mockReturnValue(false);
+      addImage(mockInstance, mockImage, file);
+
+      expect(mockInstance.editor.insertText).toHaveBeenCalledWith('![some alt text](some/url.png)');
+    });
+  });
+
+  describe('insertVideo', () => {
+    const mockUrl = 'some/url';
+    const htmlString = `<figure contenteditable="false" class="gl-relative gl-h-0 video_container"><iframe class="gl-absolute gl-top-0 gl-left-0 gl-w-full gl-h-full" width="560" height="315" frameborder="0" src="some/url"></iframe></figure>`;
+    const mockInsertElement = jest.fn();
+
+    beforeEach(() =>
+      mockInstance.editor.getSquire.mockReturnValue({ insertElement: mockInsertElement }),
+    );
+
+    describe('WYSIWYG mode', () => {
+      it('calls the insertElement method on the squire instance with an iFrame element', () => {
+        mockInstance.editor.isWysiwygMode.mockReturnValue(true);
+
+        insertVideo(mockInstance, mockUrl);
+
+        expect(mockInstance.editor.getSquire().insertElement).toHaveBeenCalledWith(
+          parseHtml(htmlString),
+        );
+      });
+    });
+
+    describe('Markdown mode', () => {
+      it('calls the insertText method on the editor instance with the iFrame element HTML', () => {
+        mockInstance.editor.isWysiwygMode.mockReturnValue(false);
+
+        insertVideo(mockInstance, mockUrl);
+
+        expect(mockInstance.editor.insertText).toHaveBeenCalledWith(htmlString);
+      });
     });
   });
 
@@ -72,6 +150,65 @@ describe('Editor Service', () => {
       getMarkdown(mockInstance);
 
       expect(mockInstance.invoke).toHaveBeenCalledWith('getMarkdown');
+    });
+  });
+
+  describe('registerHTMLToMarkdownRenderer', () => {
+    let baseRenderer;
+    const htmlToMarkdownRenderer = {};
+    const extendedRenderer = {};
+
+    beforeEach(() => {
+      baseRenderer = mockInstance.toMarkOptions.renderer;
+      buildHTMLToMarkdownRenderer.mockReturnValueOnce(htmlToMarkdownRenderer);
+      baseRenderer.constructor.factory.mockReturnValueOnce(extendedRenderer);
+
+      registerHTMLToMarkdownRenderer(mockInstance);
+    });
+
+    it('builds a new instance of the HTML to Markdown renderer', () => {
+      expect(buildHTMLToMarkdownRenderer).toHaveBeenCalledWith(baseRenderer);
+    });
+
+    it('extends base renderer with the HTML to Markdown renderer', () => {
+      expect(baseRenderer.constructor.factory).toHaveBeenCalledWith(
+        baseRenderer,
+        htmlToMarkdownRenderer,
+      );
+    });
+
+    it('replaces the default renderer with extended renderer', () => {
+      expect(mockInstance.toMarkOptions.renderer).toBe(extendedRenderer);
+    });
+  });
+
+  describe('getEditorOptions', () => {
+    const externalOptions = {
+      customRenderers: {},
+    };
+    const renderer = {};
+
+    beforeEach(() => {
+      buildCustomRenderer.mockReturnValueOnce(renderer);
+    });
+
+    it('generates a configuration object with a custom HTML renderer and toolbarItems', () => {
+      expect(getEditorOptions()).toHaveProp('customHTMLRenderer', renderer);
+      expect(getEditorOptions()).toHaveProp('toolbarItems');
+    });
+
+    it('passes external renderers to the buildCustomRenderers function', () => {
+      getEditorOptions(externalOptions);
+      expect(buildCustomRenderer).toHaveBeenCalledWith(externalOptions.customRenderers);
+    });
+
+    it('uses the internal sanitizeHTML service for HTML sanitization', () => {
+      const options = getEditorOptions();
+      const html = '<div></div>';
+
+      options.customHTMLSanitizer(html);
+
+      expect(sanitizeHTML).toHaveBeenCalledWith(html);
     });
   });
 });

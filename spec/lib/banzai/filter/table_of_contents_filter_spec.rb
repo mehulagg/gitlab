@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::TableOfContentsFilter do
+RSpec.describe Banzai::Filter::TableOfContentsFilter do
   include FilterSpecHelper
 
   def header(level, text)
@@ -62,6 +62,11 @@ describe Banzai::Filter::TableOfContentsFilter do
 
       it 'removes any leading or trailing spaces' do
         doc = filter(header(1, " \r\n\tTitle with spaces\r\n\t "))
+        expect(doc.css('h1 a').first.attr('href')).to eq '#title-with-spaces'
+      end
+
+      it 'removes a product suffix' do
+        doc = filter(header(1, "Title with spaces (ULTIMATE)"))
         expect(doc.css('h1 a').first.attr('href')).to eq '#title-with-spaces'
       end
 

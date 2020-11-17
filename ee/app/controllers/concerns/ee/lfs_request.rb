@@ -37,7 +37,7 @@ module EE
 
     def lfs_push_size
       strong_memoize(:lfs_push_size) do
-        objects.sum { |o| o[:size] } # rubocop: disable CodeReuse/ActiveRecord
+        objects.sum { |o| o[:size] }
       end
     end
   end

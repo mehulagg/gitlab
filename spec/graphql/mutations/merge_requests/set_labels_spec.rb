@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Mutations::MergeRequests::SetLabels do
+RSpec.describe Mutations::MergeRequests::SetLabels do
   let(:merge_request) { create(:merge_request) }
   let(:user) { create(:user) }
 
@@ -18,9 +18,7 @@ describe Mutations::MergeRequests::SetLabels do
 
     subject { mutation.resolve(project_path: merge_request.project.full_path, iid: merge_request.iid, label_ids: label_ids) }
 
-    it 'raises an error if the resource is not accessible to the user' do
-      expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-    end
+    it_behaves_like 'permission level for merge request mutation is correctly verified'
 
     context 'when the user can update the merge request' do
       before do

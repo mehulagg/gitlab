@@ -40,8 +40,8 @@ module DashboardHelper
       end)
 
       if doc_href.present?
-        link_to_doc = link_to(sprite_icon('question', size: 16), doc_href,
-                              class: 'prepend-left-5', title: _('Documentation'),
+        link_to_doc = link_to(sprite_icon('question'), doc_href,
+                              class: 'gl-ml-2', title: _('Documentation'),
                               target: '_blank', rel: 'noopener noreferrer')
 
         concat(link_to_doc)
@@ -56,10 +56,6 @@ module DashboardHelper
 
     if can?(current_user, :read_cross_project)
       links += [:activity, :milestones]
-    end
-
-    if can?(current_user, :read_instance_statistics)
-      links << :analytics
     end
 
     links

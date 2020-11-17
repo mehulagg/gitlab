@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'getting pipeline information nested in a project' do
+RSpec.describe 'getting pipeline information nested in a project' do
   include GraphqlHelpers
 
   let(:project) { create(:project, :repository, :public) }
@@ -28,5 +28,11 @@ describe 'getting pipeline information nested in a project' do
     post_graphql(query, current_user: current_user)
 
     expect(pipeline_graphql_data).not_to be_nil
+  end
+
+  it 'contains configSource' do
+    post_graphql(query, current_user: current_user)
+
+    expect(pipeline_graphql_data.dig('configSource')).to eq('UNKNOWN_SOURCE')
   end
 end

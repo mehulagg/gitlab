@@ -1,5 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import { showTreeEntry, getFiles, setDirectoryData } from '~/ide/stores/actions/tree';
 import * as types from '~/ide/stores/mutation_types';
 import axios from '~/lib/utils/axios_utils';
@@ -97,7 +98,7 @@ describe('Multi-file store tree actions', () => {
 
         store.state.projects = {
           'abc/def': {
-            web_url: `${gl.TEST_HOST}/files`,
+            web_url: `${TEST_HOST}/files`,
             branches: {
               'master-testing': {
                 commit: {

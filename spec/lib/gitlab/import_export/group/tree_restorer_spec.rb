@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::Group::TreeRestorer do
+RSpec.describe Gitlab::ImportExport::Group::TreeRestorer do
   include ImportExport::CommonUtil
 
   describe 'restore group tree' do
@@ -172,7 +172,7 @@ describe Gitlab::ImportExport::Group::TreeRestorer do
         let(:filepath) { "group_exports/visibility_levels/#{visibility_level}" }
 
         it "imports all subgroups as #{visibility_level}" do
-          expect(group.children.map(&:visibility_level)).to eq(expected_visibilities)
+          expect(group.children.map(&:visibility_level)).to match_array(expected_visibilities)
         end
       end
     end

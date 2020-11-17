@@ -1,5 +1,5 @@
-import * as commonUtils from '~/lib/utils/common_utils';
 import $ from 'jquery';
+import * as commonUtils from '~/lib/utils/common_utils';
 
 describe('common_utils', () => {
   describe('parseUrl', () => {
@@ -330,32 +330,6 @@ describe('common_utils', () => {
     });
   });
 
-  describe('normalizeCRLFHeaders', () => {
-    const testContext = {};
-    beforeEach(() => {
-      testContext.CLRFHeaders =
-        'a-header: a-value\nAnother-Header: ANOTHER-VALUE\nLaSt-HeAdEr: last-VALUE';
-      jest.spyOn(String.prototype, 'split');
-      testContext.normalizeCRLFHeaders = commonUtils.normalizeCRLFHeaders(testContext.CLRFHeaders);
-    });
-
-    it('should split by newline', () => {
-      expect(String.prototype.split).toHaveBeenCalledWith('\n');
-    });
-
-    it('should split by colon+space for each header', () => {
-      expect(String.prototype.split.mock.calls.filter(args => args[0] === ': ').length).toBe(3);
-    });
-
-    it('should return a normalized headers object', () => {
-      expect(testContext.normalizeCRLFHeaders).toEqual({
-        'A-HEADER': 'a-value',
-        'ANOTHER-HEADER': 'ANOTHER-VALUE',
-        'LAST-HEADER': 'last-VALUE',
-      });
-    });
-  });
-
   describe('parseIntPagination', () => {
     it('should parse to integers all string values and return pagination object', () => {
       const pagination = {
@@ -507,27 +481,6 @@ describe('common_utils', () => {
           expect(errBackoffResp.message).toBe('BACKOFF_TIMEOUT');
           done();
         });
-    });
-  });
-
-  describe('setFavicon', () => {
-    beforeEach(() => {
-      const favicon = document.createElement('link');
-      favicon.setAttribute('id', 'favicon');
-      favicon.setAttribute('href', 'default/favicon');
-      favicon.setAttribute('data-default-href', 'default/favicon');
-      document.body.appendChild(favicon);
-    });
-
-    afterEach(() => {
-      document.body.removeChild(document.getElementById('favicon'));
-    });
-
-    it('should set page favicon to provided favicon', () => {
-      const faviconPath = '//custom_favicon';
-      commonUtils.setFavicon(faviconPath);
-
-      expect(document.getElementById('favicon').getAttribute('href')).toEqual(faviconPath);
     });
   });
 
@@ -1003,6 +956,25 @@ describe('common_utils', () => {
       expect(commonUtils.roundOffFloat(34567.14159, -3)).toBeCloseTo(35000);
       expect(commonUtils.roundOffFloat(34567.14159, -4)).toBeCloseTo(30000);
       expect(commonUtils.roundOffFloat(34567.14159, -5)).toBeCloseTo(0);
+    });
+  });
+
+  describe('roundDownFloat', () => {
+    it('Rounds down decimal places of a float number with provided precision', () => {
+      expect(commonUtils.roundDownFloat(3.141592, 3)).toBe(3.141);
+    });
+
+    it('Rounds down a float number to a whole number when provided precision is zero', () => {
+      expect(commonUtils.roundDownFloat(3.141592, 0)).toBe(3);
+      expect(commonUtils.roundDownFloat(3.9, 0)).toBe(3);
+    });
+
+    it('Rounds down float number to nearest 0, 10, 100, 1000 and so on when provided precision is below 0', () => {
+      expect(commonUtils.roundDownFloat(34567.14159, -1)).toBeCloseTo(34560);
+      expect(commonUtils.roundDownFloat(34567.14159, -2)).toBeCloseTo(34500);
+      expect(commonUtils.roundDownFloat(34567.14159, -3)).toBeCloseTo(34000);
+      expect(commonUtils.roundDownFloat(34567.14159, -4)).toBeCloseTo(30000);
+      expect(commonUtils.roundDownFloat(34567.14159, -5)).toBeCloseTo(0);
     });
   });
 

@@ -173,10 +173,12 @@ RSpec.describe TodoService do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let!(:second_todo) do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let(:note) { create(:note, noteable: epic, project: nil, author: john_doe, note: mentions) }
 
         context 'when a note is created for an epic' do
@@ -320,6 +322,23 @@ RSpec.describe TodoService do
           service.new_merge_request(merge_request, author)
 
           should_not_create_todo(user: non_member, target: merge_request, action: Todo::APPROVAL_REQUIRED)
+        end
+      end
+    end
+
+    describe '#merge_train_removed' do
+      let(:merge_participants) { [admin, create(:user)] }
+
+      before do
+        allow(merge_request).to receive(:merge_participants).and_return(merge_participants)
+      end
+
+      it 'creates a pending todo for each merge_participant' do
+        merge_request.update!(merge_when_pipeline_succeeds: true, merge_user: admin)
+        service.merge_train_removed(merge_request)
+
+        merge_participants.each do |participant|
+          should_create_todo(user: participant, author: participant, target: merge_request, action: Todo::MERGE_TRAIN_REMOVED)
         end
       end
     end

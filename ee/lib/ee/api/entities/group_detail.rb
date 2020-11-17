@@ -9,6 +9,8 @@ module EE
         prepended do
           expose :shared_runners_minutes_limit
           expose :extra_shared_runners_minutes_limit
+          expose :prevent_forking_outside_group?,
+                 as: :prevent_forking_outside_group
         end
       end
     end

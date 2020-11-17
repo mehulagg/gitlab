@@ -1,6 +1,0 @@
-= render "admin/geo/shared/replication_nav"
-- if Feature.enabled?(:geo_self_service_framework)
-  #js-geo-replicable{ data: { "geo-replicable-empty-svg-path" => image_path("illustrations/empty-state/geo-replication-empty.svg"),
-    "geo-troubleshooting-link" => help_page_path("administration/geo/replication/troubleshooting.html"),
-    "replicable-type" => "package_files",
-    "graphql" => "true" } }

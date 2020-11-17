@@ -1,3 +1,9 @@
+---
+stage: Release
+group: Progressive Delivery
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Deploy Tokens API
 
 ## List all deploy tokens
@@ -90,7 +96,7 @@ POST /projects/:id/deploy_tokens
 | ---------  | ---- | -------- | ----------- |
 | `id`       | integer/string   | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `name`            | string    | yes | New deploy token's name |
-| `expires_at`      | datetime  | no  | Expiration date for the deploy token. Does not expire if no value is provided. |
+| `expires_at`      | datetime  | no  | Expiration date for the deploy token. Does not expire if no value is provided. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `username`        | string    | no  | Username for deploy token. Default is `gitlab+deploy-token-{n}` |
 | `scopes`   | array of strings | yes | Indicates the deploy token scopes. Must be at least one of `read_repository`, `read_registry`, `write_registry`, `read_package_registry`, or `write_package_registry`. |
 
@@ -136,7 +142,8 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 ## Group deploy tokens
 
-These endpoints require group maintainer access or higher.
+Group maintainers and owners can list group deploy
+tokens. Only group owners can create and delete group deploy tokens.
 
 ### List group deploy tokens
 
@@ -191,7 +198,7 @@ POST /groups/:id/deploy_tokens
 | ---------  | ---- | -------- | ----------- |
 | `id`              | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `name`            | string    | yes | New deploy token's name |
-| `expires_at`      | datetime  | no  | Expiration date for the deploy token. Does not expire if no value is provided. |
+| `expires_at`      | datetime  | no  | Expiration date for the deploy token. Does not expire if no value is provided. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `username`        | string    | no  | Username for deploy token. Default is `gitlab+deploy-token-{n}` |
 | `scopes`   | array of strings | yes | Indicates the deploy token scopes. Must be at least one of `read_repository`, `read_registry`, `write_registry`, `read_package_registry`, or `write_package_registry`. |
 

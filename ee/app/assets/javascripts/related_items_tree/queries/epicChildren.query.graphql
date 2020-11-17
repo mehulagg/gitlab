@@ -14,7 +14,7 @@ query childItems(
     path
     fullPath
     epic(iid: $iid) {
-      ...BaseEpic
+      ...RelatedTreeBaseEpic
       children(first: $pageSize, after: $epicEndCursor) {
         edges {
           node {

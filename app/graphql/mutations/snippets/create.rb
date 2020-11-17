@@ -3,6 +3,7 @@
 module Mutations
   module Snippets
     class Create < BaseMutation
+      include SpammableMutationFields
       include ResolvesProject
 
       graphql_name 'CreateSnippet'
@@ -15,14 +16,6 @@ module Mutations
       argument :title, GraphQL::STRING_TYPE,
                required: true,
                description: 'Title of the snippet'
-
-      argument :file_name, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'File name of the snippet'
-
-      argument :content, GraphQL::STRING_TYPE,
-               required: true,
-               description: 'Content of the snippet'
 
       argument :description, GraphQL::STRING_TYPE,
                required: false,
@@ -40,6 +33,10 @@ module Mutations
                required: false,
                description: 'The paths to files uploaded in the snippet description'
 
+      argument :blob_actions, [Types::Snippets::BlobActionInputType],
+               description: 'Actions to perform over the snippet repository and blobs',
+               required: false
+
       def resolve(args)
         project_path = args.delete(:project_path)
 
@@ -49,20 +46,23 @@ module Mutations
           raise_resource_not_available_error!
         end
 
-        # We need to rename `uploaded_files` into `files` because
-        # it's the expected key param
-        args[:files] = args.delete(:uploaded_files)
-
         service_response = ::Snippets::CreateService.new(project,
-                                           context[:current_user],
-                                           args).execute
+                                                         context[:current_user],
+                                                         create_params(args)).execute
 
         snippet = service_response.payload[:snippet]
 
-        {
-          snippet: service_response.success? ? snippet : nil,
-          errors: errors_on_object(snippet)
-        }
+        # Only when the user is not an api user and the operation was successful
+        if !api_user? && service_response.success?
+          ::Gitlab::UsageDataCounters::EditorUniqueCounter.track_snippet_editor_edit_action(author: current_user)
+        end
+
+        with_spam_fields(snippet) do
+          {
+            snippet: service_response.success? ? snippet : nil,
+            errors: errors_on_object(snippet)
+          }
+        end
       end
 
       private
@@ -81,6 +81,20 @@ module Mutations
 
       def can_create_personal_snippet?
         Ability.allowed?(context[:current_user], :create_snippet)
+      end
+
+      def create_params(args)
+        with_spam_params do
+          args.tap do |create_args|
+            # We need to rename `blob_actions` into `snippet_actions` because
+            # it's the expected key param
+            create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
+
+            # We need to rename `uploaded_files` into `files` because
+            # it's the expected key param
+            create_args[:files] = create_args.delete(:uploaded_files)
+          end
+        end
       end
     end
   end

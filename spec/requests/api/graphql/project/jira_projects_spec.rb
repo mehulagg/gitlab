@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe 'query Jira projects' do
+RSpec.describe 'query Jira projects' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
-  include_context 'jira projects request context'
+  include_context 'Jira projects request context'
 
   let(:services) { graphql_data_at(:project, :services, :edges) }
   let(:jira_projects) { services.first.dig('node', 'projects', 'nodes') }
@@ -79,34 +79,6 @@ describe 'query Jira projects' do
           let(:projects_query) { 'projects(first: 1)' }
 
           it_behaves_like 'fetches first project'
-        end
-
-        context 'with before cursor' do
-          let(:projects_query) { 'projects(before: "Mg==", first: 1)' }
-
-          it_behaves_like 'fetches first project'
-        end
-
-        context 'with after cursor' do
-          let(:projects_query) { 'projects(after: "MA==", first: 1)' }
-
-          it_behaves_like 'fetches first project'
-        end
-      end
-
-      context 'with valid but inexistent after cursor' do
-        let(:projects_query) { 'projects(after: "MTk==")' }
-
-        it 'retuns empty list of jira projects' do
-          expect(jira_projects.size).to eq(0)
-        end
-      end
-
-      context 'with invalid after cursor' do
-        let(:projects_query) { 'projects(after: "invalid==")' }
-
-        it 'treats the invalid cursor as no cursor and returns list of jira projects' do
-          expect(jira_projects.size).to eq(2)
         end
       end
     end

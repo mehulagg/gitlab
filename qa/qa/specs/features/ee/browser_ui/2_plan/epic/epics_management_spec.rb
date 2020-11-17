@@ -1,19 +1,30 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Epics Management' do
       before do
         Flow::Login.sign_in
       end
 
-      it 'creates an epic', :reliable do
+      it 'creates an epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/522' do
         epic_title = 'Epic created via GUI'
         EE::Resource::Epic.fabricate_via_browser_ui! do |epic|
           epic.title = epic_title
         end
 
         expect(page).to have_content(epic_title)
+      end
+
+      it 'creates a confidential epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/967' do
+        epic_title = 'Confidential epic created via GUI'
+        EE::Resource::Epic.fabricate_via_browser_ui! do |epic|
+          epic.title = epic_title
+          epic.confidential = true
+        end
+
+        expect(page).to have_content(epic_title)
+        expect(page).to have_content("This is a confidential epic.")
       end
 
       context 'Resources created via API' do
@@ -25,7 +36,7 @@ module QA
             epic.visit!
           end
 
-          it 'adds/removes issue to/from epic', :reliable do
+          it 'adds/removes issue to/from epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/526' do
             EE::Page::Group::Epic::Show.perform do |show|
               show.add_issue_to_epic(issue.web_url)
 
@@ -37,27 +48,29 @@ module QA
             end
           end
 
-          it 'comments on epic', :reliable do
+          it 'comments on epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/525' do
             comment = 'My Epic Comment'
             EE::Page::Group::Epic::Show.perform do |show|
-              show.add_comment_to_epic(comment)
-            end
+              show.comment(comment)
 
-            expect(page).to have_content(comment)
+              expect(show).to have_comment(comment)
+            end
           end
 
-          it 'closes and reopens an epic' do
-            EE::Page::Group::Epic::Show.perform(&:close_reopen_epic)
+          it 'closes and reopens an epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/524' do
+            EE::Page::Group::Epic::Show.perform do |show|
+              show.close_reopen_epic
 
-            expect(page).to have_content('Closed')
+              expect(show).to have_system_note('closed')
 
-            EE::Page::Group::Epic::Show.perform(&:close_reopen_epic)
+              show.close_reopen_epic
 
-            expect(page).to have_content('Open')
+              expect(show).to have_system_note('opened')
+            end
           end
         end
 
-        it 'adds/removes issue to/from epic using quick actions' do
+        it 'adds/removes issue to/from epic using quick actions', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/523' do
           issue.visit!
 
           Page::Project::Issue::Show.perform do |show|
@@ -68,8 +81,10 @@ module QA
 
           epic.visit!
 
-          expect(page).to have_content('added issue')
-          expect(page).to have_content('removed issue')
+          EE::Page::Group::Epic::Show.perform do |show|
+            expect(show).to have_system_note('added issue')
+            expect(show).to have_system_note('removed issue')
+          end
         end
 
         def create_issue_resource

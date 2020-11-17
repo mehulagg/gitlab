@@ -13,7 +13,7 @@ RSpec.describe Vulnerabilities::ScannerEntity do
     subject { entity.as_json }
 
     it 'contains required fields' do
-      expect(subject).to include(:name, :external_id)
+      expect(subject).to include(:name, :external_id, :vendor)
     end
   end
 end

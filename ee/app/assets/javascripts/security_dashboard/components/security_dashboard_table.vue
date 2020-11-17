@@ -23,7 +23,7 @@ export default {
       'pageInfo',
       'vulnerabilities',
     ]),
-    ...mapGetters('filters', ['activeFilters']),
+    ...mapState('filters', ['filters']),
     ...mapGetters('vulnerabilities', [
       'dashboardListError',
       'hasSelectedAllVulnerabilities',
@@ -49,7 +49,7 @@ export default {
       'selectAllVulnerabilities',
     ]),
     fetchPage(page) {
-      this.fetchVulnerabilities({ ...this.activeFilters, page });
+      this.fetchVulnerabilities({ ...this.filters, page });
     },
     handleSelectAll() {
       return this.hasSelectedAllVulnerabilities
@@ -76,6 +76,12 @@ export default {
       </div>
       <div class="table-section flex-grow-1" role="rowheader">
         {{ s__('Reports|Vulnerability') }}
+      </div>
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Identifier') }}
+      </div>
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Scanner') }}
       </div>
       <div class="table-section section-20" role="rowheader"></div>
     </div>
@@ -104,7 +110,7 @@ export default {
         @openModal="openModal({ vulnerability })"
       />
 
-      <slot v-if="showEmptyState" name="emptyState">
+      <slot v-if="showEmptyState" name="empty-state">
         <gl-empty-state
           :title="s__(`We've found no vulnerabilities`)"
           :description="
@@ -119,7 +125,7 @@ export default {
         v-if="showPagination"
         :change="fetchPage"
         :page-info="pageInfo"
-        class="justify-content-center prepend-top-default"
+        class="justify-content-center gl-mt-3"
       />
     </template>
   </div>

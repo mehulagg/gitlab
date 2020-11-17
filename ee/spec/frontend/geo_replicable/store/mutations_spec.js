@@ -11,7 +11,7 @@ import {
 describe('GeoReplicable Store Mutations', () => {
   let state;
   beforeEach(() => {
-    state = createState({ replicableType: MOCK_REPLICABLE_TYPE, useGraphQl: false });
+    state = createState({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null });
   });
 
   describe('SET_FILTER', () => {

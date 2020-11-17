@@ -26,8 +26,8 @@ module Gitlab
         GitalyClient.call(@storage, :repository_service, :cleanup, request, timeout: GitalyClient.fast_timeout)
       end
 
-      def garbage_collect(create_bitmap)
-        request = Gitaly::GarbageCollectRequest.new(repository: @gitaly_repo, create_bitmap: create_bitmap)
+      def garbage_collect(create_bitmap, prune:)
+        request = Gitaly::GarbageCollectRequest.new(repository: @gitaly_repo, create_bitmap: create_bitmap, prune: prune)
         GitalyClient.call(@storage, :repository_service, :garbage_collect, request, timeout: GitalyClient.long_timeout)
       end
 
@@ -201,9 +201,9 @@ module Gitlab
         response = GitalyClient.call(@storage, :repository_service, :fsck, request, timeout: GitalyClient.long_timeout)
 
         if response.error.empty?
-          return "", 0
+          ["", 0]
         else
-          return response.error.b, 1
+          [response.error.b, 1]
         end
       end
 
@@ -335,7 +335,6 @@ module Gitlab
       def search_files_by_content(ref, query, options = {})
         request = Gitaly::SearchFilesByContentRequest.new(repository: @gitaly_repo, ref: ref, query: query)
         response = GitalyClient.call(@storage, :repository_service, :search_files_by_content, request, timeout: GitalyClient.default_timeout)
-
         search_results_from_response(response, options)
       end
 
@@ -410,7 +409,10 @@ module Gitlab
           request,
           timeout: timeout
         )
+        write_stream_to_file(response, save_path)
+      end
 
+      def write_stream_to_file(response, save_path)
         File.open(save_path, 'wb') do |f|
           response.each do |message|
             f.write(message.data)

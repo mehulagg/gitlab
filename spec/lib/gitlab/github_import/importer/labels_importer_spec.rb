@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cache do
   let(:project) { create(:project, import_source: 'foo/bar') }
   let(:client) { double(:client) }
   let(:importer) { described_class.new(project, client) }
@@ -85,13 +85,13 @@ describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cac
       end
 
       it 'includes the created timestamp' do
-        Timecop.freeze do
+        freeze_time do
           expect(label_hash[:created_at]).to eq(Time.zone.now)
         end
       end
 
       it 'includes the updated timestamp' do
-        Timecop.freeze do
+        freeze_time do
           expect(label_hash[:updated_at]).to eq(Time.zone.now)
         end
       end

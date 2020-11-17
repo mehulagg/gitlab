@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Milestones::PromoteService do
+RSpec.describe Milestones::PromoteService do
   let(:group) { create(:group) }
   let(:project) { create(:project, namespace: group) }
   let(:user) { create(:user) }
@@ -23,7 +23,7 @@ describe Milestones::PromoteService do
       end
 
       it 'raises error if project does not belong to a group' do
-        project.update(namespace: user.namespace)
+        project.update!(namespace: user.namespace)
 
         expect { service.execute(milestone) }.to raise_error(described_class::PromoteMilestoneError)
       end

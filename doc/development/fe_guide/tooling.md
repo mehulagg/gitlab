@@ -1,8 +1,53 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Tooling
 
 ## ESLint
 
 We use ESLint to encapsulate and enforce frontend code standards. Our configuration may be found in the [`gitlab-eslint-config`](https://gitlab.com/gitlab-org/gitlab-eslint-config) project.
+
+### Yarn Script
+
+This section describes yarn scripts that are available to validate and apply automatic fixes to files using ESLint.
+
+To check all currently staged files (based on `git diff`) with ESLint, run the following script:
+
+```shell
+yarn eslint-staged
+```
+
+A list of problems found will be logged to the console.
+
+To apply automatic ESLint fixes to all currently staged files (based on `git diff`), run the following script:
+
+```shell
+yarn eslint-staged-fix
+```
+
+If manual changes are required, a list of changes will be sent to the console.
+
+To check **all** files in the repository with ESLint, run the following script:
+
+```shell
+yarn eslint
+```
+
+A list of problems found will be logged to the console.
+
+To apply automatic ESLint fixes to **all** files in the repository, run the following script:
+
+```shell
+yarn eslint-fix
+```
+
+If manual changes are required, a list of changes will be sent to the console.
+
+CAUTION: **Caution:**
+Limit use to global rule updates. Otherwise, the changes can lead to huge Merge Requests.
 
 ### Disabling ESLint in new files
 
@@ -15,9 +60,8 @@ rules only if you are invoking/instantiating existing code modules.
 - [`no-new`](https://eslint.org/docs/rules/no-new)
 - [`class-method-use-this`](https://eslint.org/docs/rules/class-methods-use-this)
 
-NOTE: **Note:**
-Disable these rules on a per-line basis. This makes it easier to refactor
-in the future. E.g. use `eslint-disable-next-line` or `eslint-disable-line`.
+Disable these rules on a per-line basis. This makes it easier to refactor in the
+future. For example, use `eslint-disable-next-line` or `eslint-disable-line`.
 
 ### Disabling ESLint for a single violation
 
@@ -56,13 +100,18 @@ When declaring multiple globals, always use one `/* global [name] */` line per v
 
 ## Formatting with Prettier
 
-Our code is automatically formatted with [Prettier](https://prettier.io) to follow our style guides. Prettier is taking care of formatting `.js`, `.vue`, and `.scss` files based on the standard prettier rules. You can find all settings for Prettier in `.prettierrc`.
+> Support for `.graphql` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227280) in GitLab 13.2.
+
+Our code is automatically formatted with [Prettier](https://prettier.io) to follow our style guides. Prettier is taking care of formatting `.js`, `.vue`, `.graphql`, and `.scss` files based on the standard prettier rules. You can find all settings for Prettier in `.prettierrc`.
 
 ### Editor
 
-The easiest way to include prettier in your workflow is by setting up your preferred editor (all major editors are supported) accordingly. We suggest setting up prettier to run automatically when each file is saved. Find [here](https://prettier.io/docs/en/editors.html) the best way to set it up in your preferred editor.
+The recommended method to include Prettier in your workflow is to set up your
+preferred editor (all major editors are supported) accordingly. We suggest
+setting up Prettier to run when each file is saved. For instructions about using
+Prettier in your preferred editor, see the [Prettier documentation](https://prettier.io/docs/en/editors.html).
 
-Please take care that you only let Prettier format the same file types as the global Yarn script does (`.js`, `.vue`, and `.scss`). In VSCode by example you can easily exclude file formats in your settings file:
+Please take care that you only let Prettier format the same file types as the global Yarn script does (`.js`, `.vue`, `.graphql`, and `.scss`). In VSCode by example you can easily exclude file formats in your settings file:
 
 ```json
   "prettier.disableLanguages": [
@@ -131,6 +180,9 @@ To select Prettier as a formatter, add the following properties to your User or 
   },
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[graphql]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
 ```
@@ -148,6 +200,9 @@ To automatically format your files with Prettier, add the following properties t
     "editor.formatOnSave": true
   },
   "[vue]": {
+    "editor.formatOnSave": true
+  },
+  "[graphql]": {
     "editor.formatOnSave": true
   },
 }

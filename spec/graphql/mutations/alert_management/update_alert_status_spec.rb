@@ -30,16 +30,20 @@ RSpec.describe Mutations::AlertManagement::UpdateAlertStatus do
         )
       end
 
+      it_behaves_like 'an incident management tracked event', :incident_management_alert_status_changed do
+        let(:user) { current_user }
+      end
+
       context 'error occurs when updating' do
         it 'returns the alert with errors' do
           # Stub an error on the alert
-          allow_next_instance_of(Resolvers::AlertManagement::AlertResolver) do |resolver|
-            allow(resolver).to receive(:resolve).and_return(alert)
+          allow_next_instance_of(::AlertManagement::AlertsFinder) do |finder|
+            allow(finder).to receive(:execute).and_return([alert])
           end
 
           allow(alert).to receive(:save).and_return(false)
           allow(alert).to receive(:errors).and_return(
-            double(full_messages: %w(foo bar))
+            double(full_messages: %w(foo bar), :[] => nil)
           )
           expect(resolve).to eq(
             alert: alert,

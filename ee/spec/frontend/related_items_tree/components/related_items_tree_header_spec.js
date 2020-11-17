@@ -5,11 +5,11 @@ import { GlTooltip, GlIcon } from '@gitlab/ui';
 import RelatedItemsTreeHeader from 'ee/related_items_tree/components/related_items_tree_header.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { issuableTypesMap } from 'ee/related_issues/constants';
 
 import EpicActionsSplitButton from 'ee/related_items_tree/components/epic_issue_actions_split_button.vue';
 import EpicHealthStatus from 'ee/related_items_tree/components/epic_health_status.vue';
 
+import { issuableTypesMap } from '~/related_issues/constants';
 import { mockInitialConfig, mockParentItem, mockQueryResponse } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -61,7 +61,7 @@ describe('RelatedItemsTree', () => {
 
       it('returns string containing issue count based on available direct children within state', () => {
         expect(wrapper.find(GlTooltip).text()).toContain(`Issues •
-        1 open, 1 closed`);
+        2 open, 1 closed`);
       });
     });
 
@@ -232,7 +232,7 @@ describe('RelatedItemsTree', () => {
         const issuesEl = wrapper.findAll('.issue-count-badge > span').at(1);
         const issueIcon = issuesEl.find(GlIcon);
 
-        expect(issuesEl.text().trim()).toContain('2');
+        expect(issuesEl.text().trim()).toContain('3');
         expect(issueIcon.isVisible()).toBe(true);
         expect(issueIcon.props('name')).toBe('issues');
       });

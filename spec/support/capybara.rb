@@ -9,6 +9,9 @@ require 'selenium-webdriver'
 # Give CI some extra time
 timeout = ENV['CI'] || ENV['CI_SERVER'] ? 60 : 30
 
+# Support running Capybara on a specific port to allow saving commonly used pages
+Capybara.server_port = ENV['CAPYBARA_PORT'] if ENV['CAPYBARA_PORT']
+
 # Define an error class for JS console messages
 JSConsoleError = Class.new(StandardError)
 
@@ -47,6 +50,10 @@ Capybara.register_driver :chrome do |app|
   )
 
   options = Selenium::WebDriver::Chrome::Options.new
+
+  # Force the browser's scale factor to prevent inconsistencies on high-res devices
+  options.add_argument('--force-device-scale-factor=1')
+
   options.add_argument("window-size=#{CAPYBARA_WINDOW_SIZE.join(',')}")
 
   # Chrome won't work properly in a Docker container in sandbox mode
@@ -120,6 +127,10 @@ RSpec.configure do |config|
       port: session.server.port,
       protocol: 'http')
 
+    # CSRF protection is disabled by default. We only enable this for JS specs because some forms
+    # require Javascript to set the CSRF token.
+    allow_any_instance_of(ActionController::Base).to receive(:protect_against_forgery?).and_return(true)
+
     # reset window size between tests
     unless session.current_window.size == CAPYBARA_WINDOW_SIZE
       begin
@@ -153,11 +164,20 @@ RSpec.configure do |config|
     # fixed. If we raised the `JSException` the fixed test would be marked as
     # failed again.
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
-      console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
+      begin
+        console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
 
-      if console.present?
-        message = "Unexpected browser console output:\n" + console.map(&:message).join("\n")
-        raise JSConsoleError, message
+        if console.present?
+          message = "Unexpected browser console output:\n" + console.map(&:message).join("\n")
+          raise JSConsoleError, message
+        end
+      rescue Selenium::WebDriver::Error::WebDriverError => error
+        if error.message =~ /unknown command: session\/[0-9a-zA-Z]+(?:\/se)?\/log/
+          message = "Unable to access Chrome javascript console logs. You may be using an outdated version of ChromeDriver."
+          raise JSConsoleError, message
+        else
+          raise error
+        end
       end
     end
 

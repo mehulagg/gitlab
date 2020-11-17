@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import promoteLabelModal from '~/pages/projects/labels/components/promote_label_modal.vue';
 import eventHub from '~/pages/projects/labels/event_hub';
 import axios from '~/lib/utils/axios_utils';
@@ -11,7 +12,7 @@ describe('Promote label modal', () => {
     labelTitle: 'Documentation',
     labelColor: '#5cb85c',
     labelTextColor: '#ffffff',
-    url: `${gl.TEST_HOST}/dummy/promote/labels`,
+    url: `${TEST_HOST}/dummy/promote/labels`,
     groupName: 'group',
   };
 
@@ -31,10 +32,9 @@ describe('Promote label modal', () => {
     });
 
     it('contains a label span with the color', () => {
-      const labelFromTitle = vm.$el.querySelector('.modal-header .label.color-label');
-
-      expect(labelFromTitle.style.backgroundColor).not.toBe(null);
-      expect(labelFromTitle.textContent).toContain(vm.labelTitle);
+      expect(vm.labelColor).not.toBe(null);
+      expect(vm.labelColor).toBe(labelMockData.labelColor);
+      expect(vm.labelTitle).toBe(labelMockData.labelTitle);
     });
   });
 
@@ -51,7 +51,7 @@ describe('Promote label modal', () => {
     });
 
     it('redirects when a label is promoted', done => {
-      const responseURL = `${gl.TEST_HOST}/dummy/endpoint`;
+      const responseURL = `${TEST_HOST}/dummy/endpoint`;
       jest.spyOn(axios, 'post').mockImplementation(url => {
         expect(url).toBe(labelMockData.url);
         expect(eventHub.$emit).toHaveBeenCalledWith(

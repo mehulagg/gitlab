@@ -245,6 +245,24 @@ describe('issue_note_form component', () => {
 
       expect(updateDraft).toHaveBeenCalledWith(dummyAutosaveKey, dummyContent);
     });
+
+    it('does not save draft when ctrl+enter is pressed', () => {
+      const options = {
+        noteBody: '',
+        autosaveKey: dummyAutosaveKey,
+      };
+
+      props = { ...props, ...options };
+      wrapper = createComponentWrapper();
+
+      wrapper.setData({ isSubmittingWithKeydown: true });
+
+      const textarea = wrapper.find('textarea');
+      textarea.setValue('some content');
+      textarea.trigger('keydown.enter', { metaKey: true });
+
+      expect(updateDraft).not.toHaveBeenCalled();
+    });
   });
 
   describe('with batch comments', () => {
@@ -254,6 +272,7 @@ describe('issue_note_form component', () => {
       wrapper = createComponentWrapper();
       wrapper.setProps({
         ...props,
+        isDraft: true,
         noteId: '',
         discussion: { ...discussionMock, for_commit: false },
       });
@@ -272,6 +291,27 @@ describe('issue_note_form component', () => {
 
     it('shows resolve checkbox', () => {
       expect(wrapper.find('.js-resolve-checkbox').exists()).toBe(true);
+    });
+
+    it('hides resolve checkbox', async () => {
+      wrapper.setProps({
+        isDraft: false,
+        discussion: {
+          ...discussionMock,
+          notes: [
+            ...discussionMock.notes.map(n => ({
+              ...n,
+              resolvable: true,
+              current_user: { ...n.current_user, can_resolve_discussion: false },
+            })),
+          ],
+          for_commit: false,
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.js-resolve-checkbox').exists()).toBe(false);
     });
 
     it('hides actions for commits', () => {

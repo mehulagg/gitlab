@@ -1,36 +1,15 @@
 import * as pathUtils from 'path';
 import { decorateData } from '~/ide/stores/utils';
-import state from '~/ide/stores/state';
-import commitState from '~/ide/stores/modules/commit/state';
-import mergeRequestsState from '~/ide/stores/modules/merge_requests/state';
-import pipelinesState from '~/ide/stores/modules/pipelines/state';
-import branchesState from '~/ide/stores/modules/branches/state';
-import fileTemplatesState from '~/ide/stores/modules/file_templates/state';
-import paneState from '~/ide/stores/modules/pane/state';
-
-export const resetStore = store => {
-  const newState = {
-    ...state(),
-    commit: commitState(),
-    mergeRequests: mergeRequestsState(),
-    pipelines: pipelinesState(),
-    branches: branchesState(),
-    fileTemplates: fileTemplatesState(),
-    rightPane: paneState(),
-  };
-  store.replaceState(newState);
-};
+import { commitActionTypes } from '~/ide/constants';
 
 export const file = (name = 'name', id = name, type = '', parent = null) =>
   decorateData({
     id,
     type,
     icon: 'icon',
-    url: 'url',
     name,
     path: parent ? `${parent.path}/${name}` : name,
     parentPath: parent ? parent.path : '',
-    lastCommit: {},
   });
 
 export const createEntriesFromPaths = paths =>
@@ -50,3 +29,17 @@ export const createEntriesFromPaths = paths =>
         ...entries,
       };
     }, {});
+
+export const createTriggerChangeAction = payload => ({
+  type: 'triggerFilesChange',
+  ...(payload ? { payload } : {}),
+});
+
+export const createTriggerRenamePayload = (path, newPath) => ({
+  type: commitActionTypes.move,
+  path,
+  newPath,
+});
+
+export const createTriggerRenameAction = (path, newPath) =>
+  createTriggerChangeAction(createTriggerRenamePayload(path, newPath));

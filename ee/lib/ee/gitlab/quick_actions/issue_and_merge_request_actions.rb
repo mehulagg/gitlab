@@ -30,7 +30,7 @@ module EE
           params "0, 1, 2, …"
           types Issue, MergeRequest
           condition do
-            quick_action_target.supports_weight? &&
+            quick_action_target.weight_available? &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
           end
           parse_params do |weight|
@@ -49,7 +49,7 @@ module EE
           types Issue, MergeRequest
           condition do
             quick_action_target.persisted? &&
-              quick_action_target.supports_weight? &&
+              quick_action_target.weight_available? &&
               quick_action_target.weight? &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
           end

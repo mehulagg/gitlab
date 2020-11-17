@@ -1,0 +1,8 @@
+---
+name: geo_merge_request_diff_replication
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34248
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/247100
+milestone: '13.4'
+type: development
+group: group::geo
+default_enabled: true

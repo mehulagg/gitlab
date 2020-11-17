@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlNewDropdown, GlNewDropdownItem, GlButton, GlSearchBoxByType } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlDropdown, GlDropdownItem, GlButton, GlLink, GlSearchBoxByType } from '@gitlab/ui';
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
 import { iterationSelectTextMap } from 'ee/sidebar/constants';
 import setIterationOnIssue from 'ee/sidebar/queries/set_iteration_on_issue.mutation.graphql';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -63,6 +63,17 @@ describe('IterationSelect', () => {
 
       expect(wrapper.find('[data-testid="select-iteration"]').text()).toBe('title');
     });
+
+    it('links to the current iteration', () => {
+      createComponent({
+        data: {
+          iterations: [{ id: 'id', title: 'title', webUrl: 'webUrl' }],
+          currentIteration: 'id',
+        },
+      });
+
+      expect(wrapper.find(GlLink).attributes().href).toBe('webUrl');
+    });
   });
 
   describe('when a user cannot edit', () => {
@@ -74,49 +85,46 @@ describe('IterationSelect', () => {
   });
 
   describe('when a user can edit', () => {
-    it('opens the dropdown on click of the edit button', () => {
+    it('opens the dropdown on click of the edit button', async () => {
       createComponent({ props: { canEdit: true } });
 
-      expect(wrapper.find(GlNewDropdown).isVisible()).toBe(false);
+      expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
 
       toggleDropdown();
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.find(GlNewDropdown).isVisible()).toBe(true);
-      });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
     });
 
-    it('focuses on the input', () => {
+    it('focuses on the input', async () => {
       createComponent({ props: { canEdit: true } });
 
       const spy = jest.spyOn(wrapper.vm.$refs.search, 'focusInput');
 
       toggleDropdown();
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(spy).toHaveBeenCalled();
-      });
+      await wrapper.vm.$nextTick();
+      expect(spy).toHaveBeenCalled();
     });
 
-    it('stops propagation of the click event to avoid opening milestone dropdown', () => {
+    it('stops propagation of the click event to avoid opening milestone dropdown', async () => {
       const spy = jest.fn();
       createComponent({ props: { canEdit: true } });
 
-      expect(wrapper.find(GlNewDropdown).isVisible()).toBe(false);
+      expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
 
       toggleDropdown(spy);
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(spy).toHaveBeenCalledTimes(1);
-      });
+      await wrapper.vm.$nextTick();
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     describe('when user is editing', () => {
       describe('when rendering the dropdown', () => {
-        it('shows GlNewDropdown', () => {
+        it('shows GlDropdown', () => {
           createComponent({ props: { canEdit: true }, data: { editing: true } });
 
-          expect(wrapper.find(GlNewDropdown).isVisible()).toBe(true);
+          expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
         });
 
         describe('GlDropdownItem with the right title and id', () => {
@@ -130,7 +138,7 @@ describe('IterationSelect', () => {
           it('renders title $title', () => {
             expect(
               wrapper
-                .findAll(GlNewDropdownItem)
+                .findAll(GlDropdownItem)
                 .filter(w => w.text() === title)
                 .at(0)
                 .text(),
@@ -140,7 +148,7 @@ describe('IterationSelect', () => {
           it('checks the correct dropdown item', () => {
             expect(
               wrapper
-                .findAll(GlNewDropdownItem)
+                .findAll(GlDropdownItem)
                 .filter(w => w.props('isChecked') === true)
                 .at(0)
                 .text(),
@@ -153,12 +161,12 @@ describe('IterationSelect', () => {
             createComponent({});
           });
 
-          it('finds GlNewDropdownItem with "No iteration"', () => {
-            expect(wrapper.find(GlNewDropdownItem).text()).toBe('No iteration');
+          it('finds GlDropdownItem with "No iteration"', () => {
+            expect(wrapper.find(GlDropdownItem).text()).toBe('No iteration');
           });
 
           it('"No iteration" is checked', () => {
-            expect(wrapper.find(GlNewDropdownItem).props('isChecked')).toBe(true);
+            expect(wrapper.find(GlDropdownItem).props('isChecked')).toBe(true);
           });
         });
 
@@ -170,7 +178,7 @@ describe('IterationSelect', () => {
               });
 
               wrapper
-                .findAll(GlNewDropdownItem)
+                .findAll(GlDropdownItem)
                 .filter(w => w.text() === 'title')
                 .at(0)
                 .vm.$emit('click');
@@ -190,7 +198,7 @@ describe('IterationSelect', () => {
                 });
 
                 wrapper
-                  .findAll(GlNewDropdownItem)
+                  .findAll(GlDropdownItem)
                   .filter(w => w.text() === 'title')
                   .at(0)
                   .vm.$emit('click');
@@ -203,10 +211,9 @@ describe('IterationSelect', () => {
                 });
               });
 
-              it('sets the value returned from the mutation to currentIteration', () => {
-                return wrapper.vm.$nextTick().then(() => {
-                  expect(wrapper.vm.currentIteration).toBe('123');
-                });
+              it('sets the value returned from the mutation to currentIteration', async () => {
+                await wrapper.vm.$nextTick();
+                expect(wrapper.vm.currentIteration).toBe('123');
               });
             });
 
@@ -230,16 +237,15 @@ describe('IterationSelect', () => {
                   bootstrapComponent(mutationResp);
 
                   wrapper
-                    .findAll(GlNewDropdownItem)
+                    .findAll(GlDropdownItem)
                     .filter(w => w.text() === 'title')
                     .at(0)
                     .vm.$emit('click');
                 });
 
-                it('calls createFlash with $expectedMsg', () => {
-                  return wrapper.vm.$nextTick().then(() => {
-                    expect(createFlash).toHaveBeenCalledWith(expectedMsg);
-                  });
+                it('calls createFlash with $expectedMsg', async () => {
+                  await wrapper.vm.$nextTick();
+                  expect(createFlash).toHaveBeenCalledWith(expectedMsg);
                 });
               });
             });
@@ -252,33 +258,31 @@ describe('IterationSelect', () => {
           createComponent({});
         });
 
-        it('sets the search term', () => {
+        it('sets the search term', async () => {
           wrapper.find(GlSearchBoxByType).vm.$emit('input', 'testing');
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.vm.searchTerm).toBe('testing');
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.searchTerm).toBe('testing');
         });
       });
 
       describe('when the user off clicks', () => {
         describe('when the dropdown is open', () => {
-          beforeEach(() => {
+          beforeEach(async () => {
             createComponent({});
 
             toggleDropdown();
 
-            return wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
           });
 
-          it('closes the dropdown', () => {
-            expect(wrapper.find(GlNewDropdown).isVisible()).toBe(true);
+          it('closes the dropdown', async () => {
+            expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
 
             toggleDropdown();
 
-            return wrapper.vm.$nextTick().then(() => {
-              expect(wrapper.find(GlNewDropdown).isVisible()).toBe(false);
-            });
+            await wrapper.vm.$nextTick();
+            expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
           });
         });
       });

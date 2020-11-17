@@ -11,7 +11,7 @@ module AutoMerge
         yield if block_given?
       end
 
-      # Notify the event that auto merge is enabled or merge param is updated
+      notify(merge_request)
       AutoMergeProcessWorker.perform_async(merge_request.id)
 
       strategy.to_sym
@@ -60,7 +60,26 @@ module AutoMerge
       end
     end
 
+    ##
+    # NOTE: This method is to be removed when `disallow_to_create_merge_request_pipelines_in_target_project`
+    # feature flag is removed.
+    def self.can_add_to_merge_train?(merge_request)
+      if Gitlab::Ci::Features.disallow_to_create_merge_request_pipelines_in_target_project?(merge_request.target_project)
+        merge_request.for_same_project?
+      else
+        true
+      end
+    end
+
+    def can_add_to_merge_train?(merge_request)
+      self.class.can_add_to_merge_train?(merge_request)
+    end
+
     private
+
+    # Overridden in child classes
+    def notify(merge_request)
+    end
 
     def strategy
       strong_memoize(:strategy) do

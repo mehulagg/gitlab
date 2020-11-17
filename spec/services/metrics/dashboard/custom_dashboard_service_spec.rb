@@ -2,23 +2,30 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::CustomDashboardService, :use_clean_rails_memory_store_caching do
+RSpec.describe Metrics::Dashboard::CustomDashboardService, :use_clean_rails_memory_store_caching do
   include MetricsDashboardHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:environment) { create(:environment, project: project) }
 
+  let(:dashboard_path) { '.gitlab/dashboards/test.yml' }
+  let(:service_params) { [project, user, { environment: environment, dashboard_path: dashboard_path }] }
+
+  subject { described_class.new(*service_params) }
+
   before do
     project.add_maintainer(user)
   end
 
-  describe '#get_dashboard' do
-    let(:dashboard_path) { '.gitlab/dashboards/test.yml' }
-    let(:service_params) { [project, user, { environment: environment, dashboard_path: dashboard_path }] }
-    let(:service_call) { subject.get_dashboard }
+  describe '#raw_dashboard' do
+    let(:project) { project_with_dashboard(dashboard_path) }
 
-    subject { described_class.new(*service_params) }
+    it_behaves_like '#raw_dashboard raises error if dashboard loading fails'
+  end
+
+  describe '#get_dashboard' do
+    let(:service_call) { subject.get_dashboard }
 
     context 'when the dashboard does not exist' do
       it_behaves_like 'misconfigured dashboard service response', :not_found
@@ -48,6 +55,33 @@ describe Metrics::Dashboard::CustomDashboardService, :use_clean_rails_memory_sto
 
         described_class.new(*service_params).get_dashboard
         described_class.new(*service_params).get_dashboard
+      end
+
+      it 'tracks panel type' do
+        allow(::Gitlab::Tracking).to receive(:event).and_call_original
+
+        described_class.new(*service_params).get_dashboard
+
+        expect(::Gitlab::Tracking).to have_received(:event)
+          .with('MetricsDashboard::Chart', 'chart_rendered', { label: 'area-chart' })
+          .at_least(:once)
+      end
+
+      context 'with metric in database' do
+        let!(:prometheus_metric) do
+          create(:prometheus_metric, project: project, identifier: 'metric_a1', group: 'custom')
+        end
+
+        it 'includes metric_id' do
+          dashboard = described_class.new(*service_params).get_dashboard
+
+          metric_id = dashboard[:dashboard][:panel_groups].find { |panel_group| panel_group[:group] == 'Group A' }
+            .fetch(:panels).find { |panel| panel[:title] == 'Super Chart A1' }
+            .fetch(:metrics).find { |metric| metric[:id] == 'metric_a1' }
+            .fetch(:metric_id)
+
+          expect(metric_id).to eq(prometheus_metric.id)
+        end
       end
 
       context 'and the dashboard is then deleted' do
@@ -92,9 +126,20 @@ describe Metrics::Dashboard::CustomDashboardService, :use_clean_rails_memory_sto
             path: dashboard_path,
             display_name: 'test.yml',
             default: false,
-            system_dashboard: false
+            system_dashboard: false,
+            out_of_the_box_dashboard: false
           }]
         )
+      end
+
+      it 'caches repo file list' do
+        expect(Gitlab::Metrics::Dashboard::RepoDashboardFinder).to receive(:list_dashboards)
+          .with(project)
+          .once
+          .and_call_original
+
+        described_class.all_dashboard_paths(project)
+        described_class.all_dashboard_paths(project)
       end
     end
   end

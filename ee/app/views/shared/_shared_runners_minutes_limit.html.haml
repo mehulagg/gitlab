@@ -4,7 +4,7 @@
 %div{ class: [(classes if defined? classes)] }
   .shared-runner-quota-message.gl-pt-5.gl-pb-3
     .js-vue-alert{ 'v-cloak': true, data: { variant: notification.style,
-      secondary_button_text: _('Buy more Pipeline minutes'),
-      secondary_button_link: ::EE::SUBSCRIPTIONS_MORE_MINUTES_URL,
+      primary_button_text: _('Buy more Pipeline minutes'),
+      primary_button_link: ::EE::SUBSCRIPTIONS_MORE_MINUTES_URL,
       dismissible: 'false' } }
       = notification.text

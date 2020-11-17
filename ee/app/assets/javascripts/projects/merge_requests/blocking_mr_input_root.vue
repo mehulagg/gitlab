@@ -1,6 +1,6 @@
 <script>
-import RelatedIssuableInput from 'ee/related_issues/components/related_issuable_input.vue';
-import { issuableTypesMap } from 'ee/related_issues/constants';
+import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
+import { issuableTypesMap } from '~/related_issues/constants';
 
 export default {
   components: {

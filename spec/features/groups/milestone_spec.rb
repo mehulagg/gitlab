@@ -8,7 +8,7 @@ RSpec.describe 'Group milestones' do
   let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group ).user }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before do
@@ -83,6 +83,7 @@ RSpec.describe 'Group milestones' do
           description: 'Lorem Ipsum is simply dummy text'
         )
       end
+
       let_it_be(:active_project_milestone2) { create(:milestone, project: other_project, state: 'active', title: 'v1.1') }
       let_it_be(:closed_project_milestone1) { create(:milestone, project: project, state: 'closed', title: 'v2.0') }
       let_it_be(:closed_project_milestone2) { create(:milestone, project: other_project, state: 'closed', title: 'v2.0') }

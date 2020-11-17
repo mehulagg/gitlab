@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'rspec-parameterized'
 
-describe Gitlab::InstrumentationHelper do
+RSpec.describe Gitlab::InstrumentationHelper do
   using RSpec::Parameterized::TableSyntax
 
   describe '.keys' do
@@ -95,6 +95,16 @@ describe Gitlab::InstrumentationHelper do
         # Gitaly
         expect(payload[:gitaly_calls]).to be_nil
         expect(payload[:gitaly_duration]).to be_nil
+      end
+    end
+
+    context 'when the request matched a Rack::Attack safelist' do
+      it 'logs the safelist name' do
+        Gitlab::Instrumentation::Throttle.safelist = 'foobar'
+
+        subject
+
+        expect(payload[:throttle_safelist]).to eq('foobar')
       end
     end
   end

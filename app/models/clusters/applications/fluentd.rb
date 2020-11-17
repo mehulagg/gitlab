@@ -22,18 +22,21 @@ module Clusters
       validate :has_at_least_one_log_enabled?
 
       def chart
-        'stable/fluentd'
+        'fluentd/fluentd'
+      end
+
+      def repository
+        'https://gitlab-org.gitlab.io/cluster-integration/helm-stable-archive'
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: 'fluentd',
           repository: repository,
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
           chart: chart,
-          files: files,
-          local_tiller_enabled: cluster.local_tiller_enabled?
+          files: files
         )
       end
 

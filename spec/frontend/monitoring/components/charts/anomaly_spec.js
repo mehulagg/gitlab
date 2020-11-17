@@ -3,28 +3,14 @@ import { TEST_HOST } from 'helpers/test_constants';
 import Anomaly from '~/monitoring/components/charts/anomaly.vue';
 
 import { colorValues } from '~/monitoring/constants';
-import {
-  anomalyDeploymentData,
-  mockProjectDir,
-  anomalyMockGraphData,
-  anomalyMockResultValues,
-} from '../../mock_data';
+import { anomalyDeploymentData, mockProjectDir } from '../../mock_data';
+import { anomalyGraphData } from '../../graph_data';
 import MonitorTimeSeriesChart from '~/monitoring/components/charts/time_series.vue';
 
 const mockProjectPath = `${TEST_HOST}${mockProjectDir}`;
 
-const makeAnomalyGraphData = (datasetName, template = anomalyMockGraphData) => {
-  const metrics = anomalyMockResultValues[datasetName].map((values, index) => ({
-    ...template.metrics[index],
-    result: [
-      {
-        metrics: {},
-        values,
-      },
-    ],
-  }));
-  return { ...template, metrics };
-};
+const TEST_UPPER = 11;
+const TEST_LOWER = 9;
 
 describe('Anomaly chart component', () => {
   let wrapper;
@@ -38,22 +24,30 @@ describe('Anomaly chart component', () => {
   const getTimeSeriesProps = () => findTimeSeries().props();
 
   describe('wrapped monitor-time-series-chart component', () => {
-    const dataSetName = 'noAnomaly';
-    const dataSet = anomalyMockResultValues[dataSetName];
+    const mockValues = ['10', '10', '10'];
+
+    const mockGraphData = anomalyGraphData(
+      {},
+      {
+        upper: mockValues.map(() => String(TEST_UPPER)),
+        values: mockValues,
+        lower: mockValues.map(() => String(TEST_LOWER)),
+      },
+    );
+
     const inputThresholds = ['some threshold'];
 
     beforeEach(() => {
       setupAnomalyChart({
-        graphData: makeAnomalyGraphData(dataSetName),
+        graphData: mockGraphData,
         deploymentData: anomalyDeploymentData,
         thresholds: inputThresholds,
         projectPath: mockProjectPath,
       });
     });
 
-    it('is a Vue instance', () => {
+    it('renders correctly', () => {
       expect(findTimeSeries().exists()).toBe(true);
-      expect(findTimeSeries().isVueInstance()).toBe(true);
     });
 
     describe('receives props correctly', () => {
@@ -65,21 +59,21 @@ describe('Anomaly chart component', () => {
 
         it('receives "metric" with all data', () => {
           const { graphData } = getTimeSeriesProps();
-          const query = graphData.metrics[0];
-          const expectedQuery = makeAnomalyGraphData(dataSetName).metrics[0];
-          expect(query).toEqual(expectedQuery);
+          const metric = graphData.metrics[0];
+          const expectedMetric = mockGraphData.metrics[0];
+          expect(metric).toEqual(expectedMetric);
         });
 
         it('receives the "metric" results', () => {
           const { graphData } = getTimeSeriesProps();
           const { result } = graphData.metrics[0];
           const { values } = result[0];
-          const [metricDataset] = dataSet;
-          expect(values).toEqual(expect.any(Array));
 
-          values.forEach(([, y], index) => {
-            expect(y).toBeCloseTo(metricDataset[index][1]);
-          });
+          expect(values).toEqual([
+            [expect.any(String), 10],
+            [expect.any(String), 10],
+            [expect.any(String), 10],
+          ]);
         });
       });
 
@@ -108,14 +102,13 @@ describe('Anomaly chart component', () => {
 
         it('upper boundary values are stacked on top of lower boundary', () => {
           const [lowerSeries, upperSeries] = series;
-          const [, upperDataset, lowerDataset] = dataSet;
 
-          lowerSeries.data.forEach(([, y], i) => {
-            expect(y).toBeCloseTo(lowerDataset[i][1]);
+          lowerSeries.data.forEach(([, y]) => {
+            expect(y).toBeCloseTo(TEST_LOWER);
           });
 
-          upperSeries.data.forEach(([, y], i) => {
-            expect(y).toBeCloseTo(upperDataset[i][1] - lowerDataset[i][1]);
+          upperSeries.data.forEach(([, y]) => {
+            expect(y).toBeCloseTo(TEST_UPPER - TEST_LOWER);
           });
         });
       });
@@ -140,11 +133,10 @@ describe('Anomaly chart component', () => {
             }),
           );
         });
+
         it('does not display anomalies', () => {
           const { symbolSize, itemStyle } = seriesConfig;
-          const [metricDataset] = dataSet;
-
-          metricDataset.forEach((v, dataIndex) => {
+          mockValues.forEach((v, dataIndex) => {
             const size = symbolSize(null, { dataIndex });
             const color = itemStyle.color({ dataIndex });
 
@@ -155,9 +147,10 @@ describe('Anomaly chart component', () => {
         });
 
         it('can format y values (to use in tooltips)', () => {
-          expect(parseFloat(wrapper.vm.yValueFormatted(0, 0))).toEqual(dataSet[0][0][1]);
-          expect(parseFloat(wrapper.vm.yValueFormatted(1, 0))).toEqual(dataSet[1][0][1]);
-          expect(parseFloat(wrapper.vm.yValueFormatted(2, 0))).toEqual(dataSet[2][0][1]);
+          mockValues.forEach((v, dataIndex) => {
+            const formatted = wrapper.vm.yValueFormatted(0, dataIndex);
+            expect(parseFloat(formatted)).toEqual(parseFloat(v));
+          });
         });
       });
 
@@ -179,12 +172,18 @@ describe('Anomaly chart component', () => {
   });
 
   describe('with no boundary data', () => {
-    const dataSetName = 'noBoundary';
-    const dataSet = anomalyMockResultValues[dataSetName];
+    const noBoundaryData = anomalyGraphData(
+      {},
+      {
+        upper: [],
+        values: ['10', '10', '10'],
+        lower: [],
+      },
+    );
 
     beforeEach(() => {
       setupAnomalyChart({
-        graphData: makeAnomalyGraphData(dataSetName),
+        graphData: noBoundaryData,
         deploymentData: anomalyDeploymentData,
       });
     });
@@ -204,7 +203,7 @@ describe('Anomaly chart component', () => {
       });
 
       it('can format y values (to use in tooltips)', () => {
-        expect(parseFloat(wrapper.vm.yValueFormatted(0, 0))).toEqual(dataSet[0][0][1]);
+        expect(parseFloat(wrapper.vm.yValueFormatted(0, 0))).toEqual(10);
         expect(wrapper.vm.yValueFormatted(1, 0)).toBe(''); // missing boundary
         expect(wrapper.vm.yValueFormatted(2, 0)).toBe(''); // missing boundary
       });
@@ -212,12 +211,20 @@ describe('Anomaly chart component', () => {
   });
 
   describe('with one anomaly', () => {
-    const dataSetName = 'oneAnomaly';
-    const dataSet = anomalyMockResultValues[dataSetName];
+    const mockValues = ['10', '20', '10'];
+
+    const oneAnomalyData = anomalyGraphData(
+      {},
+      {
+        upper: mockValues.map(() => TEST_UPPER),
+        values: mockValues,
+        lower: mockValues.map(() => TEST_LOWER),
+      },
+    );
 
     beforeEach(() => {
       setupAnomalyChart({
-        graphData: makeAnomalyGraphData(dataSetName),
+        graphData: oneAnomalyData,
         deploymentData: anomalyDeploymentData,
       });
     });
@@ -226,13 +233,12 @@ describe('Anomaly chart component', () => {
       it('displays one anomaly', () => {
         const { seriesConfig } = getTimeSeriesProps();
         const { symbolSize, itemStyle } = seriesConfig;
-        const [metricDataset] = dataSet;
 
-        const bigDots = metricDataset.filter((v, dataIndex) => {
+        const bigDots = mockValues.filter((v, dataIndex) => {
           const size = symbolSize(null, { dataIndex });
           return size > 0.1;
         });
-        const redDots = metricDataset.filter((v, dataIndex) => {
+        const redDots = mockValues.filter((v, dataIndex) => {
           const color = itemStyle.color({ dataIndex });
           return color === colorValues.anomalySymbol;
         });
@@ -244,13 +250,21 @@ describe('Anomaly chart component', () => {
   });
 
   describe('with offset', () => {
-    const dataSetName = 'negativeBoundary';
-    const dataSet = anomalyMockResultValues[dataSetName];
-    const expectedOffset = 4; // Lowst point in mock data is -3.70, it gets rounded
+    const mockValues = ['10', '11', '12'];
+    const mockUpper = ['20', '20', '20'];
+    const mockLower = ['-1', '-2', '-3.70'];
+    const expectedOffset = 4; // Lowest point in mock data is -3.70, it gets rounded
 
     beforeEach(() => {
       setupAnomalyChart({
-        graphData: makeAnomalyGraphData(dataSetName),
+        graphData: anomalyGraphData(
+          {},
+          {
+            upper: mockUpper,
+            values: mockValues,
+            lower: mockLower,
+          },
+        ),
         deploymentData: anomalyDeploymentData,
       });
     });
@@ -266,11 +280,11 @@ describe('Anomaly chart component', () => {
           const { graphData } = getTimeSeriesProps();
           const { result } = graphData.metrics[0];
           const { values } = result[0];
-          const [metricDataset] = dataSet;
+
           expect(values).toEqual(expect.any(Array));
 
           values.forEach(([, y], index) => {
-            expect(y).toBeCloseTo(metricDataset[index][1] + expectedOffset);
+            expect(y).toBeCloseTo(parseFloat(mockValues[index]) + expectedOffset);
           });
         });
       });
@@ -281,14 +295,12 @@ describe('Anomaly chart component', () => {
         const { option } = getTimeSeriesProps();
         const { series } = option;
         const [lowerSeries, upperSeries] = series;
-        const [, upperDataset, lowerDataset] = dataSet;
-
         lowerSeries.data.forEach(([, y], i) => {
-          expect(y).toBeCloseTo(lowerDataset[i][1] + expectedOffset);
+          expect(y).toBeCloseTo(parseFloat(mockLower[i]) + expectedOffset);
         });
 
         upperSeries.data.forEach(([, y], i) => {
-          expect(y).toBeCloseTo(upperDataset[i][1] - lowerDataset[i][1]);
+          expect(y).toBeCloseTo(parseFloat(mockUpper[i] - mockLower[i]));
         });
       });
     });

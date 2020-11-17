@@ -14,6 +14,9 @@ Similar to [project-level](../../project/clusters/index.md) and
 group-level Kubernetes clusters allow you to connect a Kubernetes cluster to
 your group, enabling you to use the same cluster across multiple projects.
 
+To view your group level Kubernetes clusters, navigate to your project and select
+**Kubernetes** from the left-hand menu.
+
 ## Installing applications
 
 GitLab can install and manage some applications in your group-level
@@ -38,14 +41,15 @@ the project.
 In the case of sub-groups, GitLab uses the cluster of the closest ancestor group
 to the project, provided the cluster is not disabled.
 
-## Multiple Kubernetes clusters **(PREMIUM)**
+## Multiple Kubernetes clusters
 
-With [GitLab Premium](https://about.gitlab.com/pricing/premium/), you can associate
-more than one Kubernetes cluster to your group, and maintain different clusters
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35094) to GitLab Core in 13.2.
+
+You can associate more than one Kubernetes cluster to your group, and maintain different clusters
 for different environments, such as development, staging, and production.
 
 When adding another cluster,
-[set an environment scope](#environment-scopes-premium) to help
+[set an environment scope](#environment-scopes) to help
 differentiate the new cluster from your other clusters.
 
 ## GitLab-managed clusters
@@ -68,9 +72,8 @@ for deployments with a cluster not managed by GitLab, you must ensure:
   (this is [not automatic](https://gitlab.com/gitlab-org/gitlab/-/issues/31519)). Editing
   `KUBE_NAMESPACE` directly is discouraged.
 
-NOTE: **Note:**
 If you [install applications](#installing-applications) on your cluster, GitLab creates
-the resources required to run them even if you choose to manage your own cluster.
+the resources required to run them, even if you choose to manage your own cluster.
 
 ### Clearing the cluster cache
 
@@ -83,7 +86,7 @@ your cluster, which can cause deployment jobs to fail.
 
 To clear the cache:
 
-1. Navigate to your group’s **{cloud-gear}** **Kubernetes** page,
+1. Navigate to your group’s **Kubernetes** page,
    and select your cluster.
 1. Expand the **Advanced settings** section.
 1. Click **Clear cluster cache**.
@@ -93,7 +96,7 @@ To clear the cache:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24580) in GitLab 11.8.
 
 Domains at the cluster level permit support for multiple domains
-per [multiple Kubernetes clusters](#multiple-kubernetes-clusters-premium). When specifying a domain,
+per [multiple Kubernetes clusters](#multiple-kubernetes-clusters) When specifying a domain,
 this will be automatically set as an environment variable (`KUBE_INGRESS_BASE_DOMAIN`) during
 the [Auto DevOps](../../../topics/autodevops/index.md) stages.
 
@@ -127,8 +130,8 @@ And the following environments are set in [`.gitlab-ci.yml`](../../../ci/yaml/RE
 
 ```yaml
 stages:
-- test
-- deploy
+  - test
+  - deploy
 
 test:
   stage: test
@@ -161,10 +164,10 @@ For a consolidated view of which CI [environments](../../../ci/environments/inde
 are deployed to the Kubernetes cluster, see the documentation for
 [cluster environments](../../clusters/environments.md).
 
-## Security of Runners
+## Security of runners
 
-For important information about securely configuring GitLab Runners, see
-[Security of Runners](../../project/clusters/add_remove_clusters.md#security-of-gitlab-runners)
+For important information about securely configuring runners, see
+[Security of runners](../../project/clusters/add_remove_clusters.md#security-of-runners)
 documentation for project-level clusters.
 
 ## More information

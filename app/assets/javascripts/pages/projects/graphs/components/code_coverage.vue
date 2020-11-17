@@ -1,9 +1,9 @@
 <script>
-import { GlAlert, GlDropdown, GlDropdownItem, GlIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlDropdown, GlDropdownItem, GlSprintf } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
-import axios from '~/lib/utils/axios_utils';
 import { get } from 'lodash';
+import axios from '~/lib/utils/axios_utils';
 
 import { __ } from '~/locale';
 
@@ -13,7 +13,6 @@ export default {
     GlAreaChart,
     GlDropdown,
     GlDropdownItem,
-    GlIcon,
     GlSprintf,
   },
   props: {
@@ -63,17 +62,19 @@ export default {
     selectedDailyCoverageName() {
       return this.selectedDailyCoverage?.group_name;
     },
-    formattedData() {
-      if (this.selectedDailyCoverage?.data) {
-        return this.selectedDailyCoverage.data.map(value => [
-          dateFormat(value.date, 'mmm dd'),
-          value.coverage,
-        ]);
-      }
-
+    sortedData() {
       // If the fetching failed, we return an empty array which
       // allow the graph to render while empty
-      return [];
+      if (!this.selectedDailyCoverage?.data) {
+        return [];
+      }
+
+      return [...this.selectedDailyCoverage.data].sort(
+        (a, b) => new Date(a.date) - new Date(b.date),
+      );
+    },
+    formattedData() {
+      return this.sortedData.map(value => [dateFormat(value.date, 'mmm dd'), value.coverage]);
     },
     chartData() {
       return [
@@ -137,18 +138,11 @@ export default {
           v-for="({ group_name }, index) in dailyCoverageData"
           :key="index"
           :value="group_name"
+          :is-check-item="true"
+          :is-checked="index === selectedCoverageIndex"
           @click="setSelectedCoverage(index)"
         >
-          <div class="gl-display-flex">
-            <gl-icon
-              v-if="index === selectedCoverageIndex"
-              name="mobile-issue-close"
-              class="gl-absolute"
-            />
-            <span class="gl-display-flex align-items-center ml-4">
-              {{ group_name }}
-            </span>
-          </div>
+          {{ group_name }}
         </gl-dropdown-item>
       </gl-dropdown>
     </div>
@@ -159,10 +153,10 @@ export default {
       :option="chartOptions"
       :format-tooltip-text="formatTooltipText"
     >
-      <template v-if="canShowData" #tooltipTitle>
+      <template v-if="canShowData" #tooltip-title>
         {{ tooltipTitle }}
       </template>
-      <template v-if="canShowData" #tooltipContent>
+      <template v-if="canShowData" #tooltip-content>
         <gl-sprintf :message="__('Code Coverage: %{coveragePercentage}%{percentSymbol}')">
           <template #coveragePercentage>
             {{ coveragePercentage }}

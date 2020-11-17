@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::EmojiFilter do
+RSpec.describe Banzai::Filter::EmojiFilter do
   include FilterSpecHelper
 
   it 'replaces supported name emoji' do
@@ -19,6 +19,20 @@ describe Banzai::Filter::EmojiFilter do
     exp = act = '<p>:foo:</p>'
     doc = filter(act)
     expect(doc.to_html).to match Regexp.escape(exp)
+  end
+
+  it 'ignores unicode versions of trademark, copyright, and registered trademark' do
+    exp = act = '<p>™ © ®</p>'
+    doc = filter(act)
+    expect(doc.to_html).to match Regexp.escape(exp)
+  end
+
+  it 'replaces name versions of trademark, copyright, and registered trademark' do
+    doc = filter('<p>:tm: :copyright: :registered:</p>')
+
+    expect(doc.css('gl-emoji')[0].text).to eq '™'
+    expect(doc.css('gl-emoji')[1].text).to eq '©'
+    expect(doc.css('gl-emoji')[2].text).to eq '®'
   end
 
   it 'correctly encodes the URL' do

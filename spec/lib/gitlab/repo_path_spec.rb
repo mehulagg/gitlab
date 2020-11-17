@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Gitlab::RepoPath do
+RSpec.describe ::Gitlab::RepoPath do
   include Gitlab::Routing
 
   let_it_be(:project) { create(:project, :repository) }
@@ -18,7 +18,7 @@ describe ::Gitlab::RepoPath do
       end
 
       it 'parses a full wiki project path' do
-        expect(described_class.parse(project.wiki.repository.full_path)).to eq([project, project, Gitlab::GlRepository::WIKI, nil])
+        expect(described_class.parse(project.wiki.repository.full_path)).to eq([project.wiki, project, Gitlab::GlRepository::WIKI, nil])
       end
 
       it 'parses a personal snippet repository path' do
@@ -36,7 +36,7 @@ describe ::Gitlab::RepoPath do
       end
 
       it 'parses a relative wiki path' do
-        expect(described_class.parse(project.full_path + '.wiki.git')).to eq([project, project, Gitlab::GlRepository::WIKI, nil])
+        expect(described_class.parse(project.full_path + '.wiki.git')).to eq([project.wiki, project, Gitlab::GlRepository::WIKI, nil])
       end
 
       it 'parses a relative path starting with /' do
@@ -49,7 +49,7 @@ describe ::Gitlab::RepoPath do
         end
 
         it 'parses a relative wiki path' do
-          expect(described_class.parse(redirect.path + '.wiki.git')).to eq([project, project, Gitlab::GlRepository::WIKI, redirect_route])
+          expect(described_class.parse(redirect.path + '.wiki.git')).to eq([project.wiki, project, Gitlab::GlRepository::WIKI, redirect_route])
         end
 
         it 'parses a relative path starting with /' do

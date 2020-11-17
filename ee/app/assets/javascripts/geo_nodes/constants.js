@@ -31,6 +31,16 @@ export const HEALTH_STATUS_CLASS = {
   offline: 'text-secondary-800 bg-secondary-100',
 };
 
+export const REPLICATION_STATUS_CLASS = {
+  enabled: 'gl-text-green-600 gl-bg-green-100',
+  disabled: 'gl-text-orange-600 gl-bg-orange-100',
+};
+
+export const REPLICATION_STATUS_ICON = {
+  enabled: 'play',
+  disabled: 'pause',
+};
+
 export const TIME_DIFF = {
   FIVE_MINS: 300,
   HOUR: 3600,
@@ -43,6 +53,9 @@ export const HELP_INFO_URL =
 
 export const REPLICATION_HELP_URL =
   'https://docs.gitlab.com/ee/administration/geo/replication/datatypes.html#limitations-on-replicationverification';
+
+export const REPLICATION_PAUSE_URL =
+  'https://docs.gitlab.com/ee/administration/geo/replication/#pausing-and-resuming-replication';
 
 export const HELP_NODE_HEALTH_URL =
   'https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html#check-the-health-of-the-secondary-node';

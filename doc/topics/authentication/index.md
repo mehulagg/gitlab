@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Authentication
 
 This page gathers all the resources for the topic **Authentication** within GitLab.
@@ -44,5 +50,4 @@ This page gathers all the resources for the topic **Authentication** within GitL
 
 - [Kanboard Plugin GitLab Authentication](https://github.com/kanboard/plugin-gitlab-auth)
 - [Jenkins GitLab OAuth Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+OAuth+Plugin)
-- [How to customize GitLab to support OpenID authentication](https://blog.eric.van-der-vlist.com/2013/11/23/how-to-customize-gitlab-to-support-openid-authentication/)
 - [OKD - Configuring Authentication and User Agent](https://docs.okd.io/3.11/install_config/configuring_authentication.html#GitLab)

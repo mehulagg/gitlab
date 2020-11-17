@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::ObsoleteIgnoredColumns do
+RSpec.describe Gitlab::Database::ObsoleteIgnoredColumns do
   before do
     stub_const('Testing', Module.new)
     stub_const('Testing::MyBase', Class.new(ActiveRecord::Base))
@@ -52,7 +52,7 @@ describe Gitlab::Database::ObsoleteIgnoredColumns do
 
   describe '#execute' do
     it 'returns a list of class names and columns pairs' do
-      Timecop.freeze(REMOVE_DATE) do
+      travel_to(REMOVE_DATE) do
         expect(subject.execute).to eq([
           ['Testing::A', {
             'unused' => IgnorableColumns::ColumnIgnore.new(Date.parse('2019-01-01'), '12.0'),

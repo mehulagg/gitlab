@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::FeatureFlagIssuesController do
+RSpec.describe Projects::FeatureFlagIssuesController do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:reporter) { create(:user) }
@@ -13,7 +13,7 @@ describe Projects::FeatureFlagIssuesController do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
+    stub_licensed_features(feature_flags_related_issues: true)
   end
 
   describe 'GET #index' do
@@ -162,19 +162,9 @@ describe Projects::FeatureFlagIssuesController do
       expect(json_response.map { |issue| issue['id'] }).to eq([issue_b.id])
     end
 
-    it 'returns not found when the feature is off' do
-      stub_feature_flags(feature_flags_issue_links: false)
-      feature_flag, _, _ = setup
-      sign_in(developer)
-
-      get_request(project, feature_flag)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
-    context 'when feature flags are unlicensed' do
+    context 'when feature flag related issues feature is unlicensed' do
       before do
-        stub_licensed_features(feature_flags: false)
+        stub_licensed_features(feature_flags_related_issues: false)
       end
 
       it 'does not return linked issues' do
@@ -184,6 +174,214 @@ describe Projects::FeatureFlagIssuesController do
         get_request(project, feature_flag)
 
         expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
+  describe 'POST #create' do
+    def setup
+      feature_flag = create(:operations_feature_flag, project: project)
+      issue = create(:issue, project: project)
+
+      [feature_flag, issue]
+    end
+
+    def post_request(project, feature_flag, issue)
+      post_params = {
+        namespace_id: project.namespace,
+        project_id: project,
+        feature_flag_iid: feature_flag,
+        issuable_references: [issue.to_reference(full: true)],
+        link_type: 'relates_to'
+      }
+
+      post :create, params: post_params, format: :json
+    end
+
+    it 'creates a link between the feature flag and the issue' do
+      feature_flag, issue = setup
+      sign_in(developer)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to match(a_hash_including({
+        'issuables' => [a_hash_including({
+          'id' => issue.id,
+          'link_type' => 'relates_to'
+        })]
+      }))
+    end
+
+    it 'creates a link for the correct feature flag when there are multiple feature flags and projects' do
+      other_project = create(:project)
+      other_project.add_developer(developer)
+      create(:issue, project: other_project)
+      create(:operations_feature_flag, project: other_project)
+      feature_flag, issue = setup
+      sign_in(developer)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to match(a_hash_including({
+        'issuables' => [a_hash_including({
+          'id' => issue.id
+        })]
+      }))
+    end
+
+    it 'creates a cross project link for a project in the same namespace' do
+      other_project = create(:project, namespace: project.namespace)
+      other_project.add_developer(developer)
+      feature_flag = create(:operations_feature_flag, project: project)
+      issue = create(:issue, project: other_project)
+      sign_in(developer)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to match(a_hash_including({
+        'issuables' => [a_hash_including({
+          'id' => issue.id
+        })]
+      }))
+    end
+
+    it 'creates a cross project link for a project in another namespace' do
+      other_project = create(:project)
+      other_project.add_developer(developer)
+      feature_flag = create(:operations_feature_flag, project: project)
+      issue = create(:issue, project: other_project)
+      sign_in(developer)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to match(a_hash_including({
+        'issuables' => [a_hash_including({
+          'id' => issue.id
+        })]
+      }))
+    end
+
+    it 'does not create a link for a reporter' do
+      feature_flag, issue = setup
+      sign_in(reporter)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(::FeatureFlagIssue.count).to eq(0)
+    end
+
+    it "does not create a cross project link when the user is not a member of the issue's project" do
+      other_project = create(:project, namespace: project.namespace)
+      feature_flag = create(:operations_feature_flag, project: project)
+      issue = create(:issue, project: other_project, confidential: true)
+      sign_in(developer)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(::FeatureFlagIssue.count).to eq(0)
+    end
+
+    it "does not create a cross project link when the user is a guest of the issue's project" do
+      other_project = create(:project, namespace: project.namespace)
+      other_project.add_guest(developer)
+      feature_flag = create(:operations_feature_flag, project: project)
+      issue = create(:issue, project: other_project, confidential: true)
+      sign_in(developer)
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(::FeatureFlagIssue.count).to eq(0)
+    end
+
+    it 'does not create a link when the user cannot read the issue' do
+      feature_flag, issue = setup
+      sign_in(developer)
+      allow(Ability).to receive(:issues_readable_by_user).and_call_original
+      allow(Ability).to receive(:issues_readable_by_user).with([issue], developer).and_return([])
+
+      post_request(project, feature_flag, issue)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(::FeatureFlagIssue.count).to eq(0)
+    end
+
+    context 'when feature flag related issues feature is unlicensed' do
+      before do
+        stub_licensed_features(feature_flags_related_issues: false)
+      end
+
+      it 'does not create a link between the feature flag and the issue' do
+        feature_flag, issue = setup
+        sign_in(developer)
+
+        post_request(project, feature_flag, issue)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(::FeatureFlagIssue.count).to eq(0)
+      end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    def setup
+      feature_flag = create(:operations_feature_flag, project: project)
+      issue = create(:issue, project: project)
+      link = create(:feature_flag_issue, feature_flag: feature_flag, issue: issue)
+
+      [feature_flag, issue, link]
+    end
+
+    def delete_request(project, feature_flag, feature_flag_issue)
+      params = {
+        namespace_id: project.namespace,
+        project_id: project,
+        feature_flag_iid: feature_flag,
+        id: feature_flag_issue
+      }
+
+      delete :destroy, params: params, format: :json
+    end
+
+    it 'unlinks the issue from the feature flag' do
+      feature_flag, _issue, link = setup
+      sign_in(developer)
+
+      delete_request(project, feature_flag, link)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(feature_flag.reload.issues).to eq([])
+    end
+
+    it 'does not unlink the issue for a reporter' do
+      feature_flag, issue, link = setup
+      sign_in(reporter)
+
+      delete_request(project, feature_flag, link)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(feature_flag.reload.issues).to eq([issue])
+    end
+
+    context 'when feature flag related issues feature is unlicensed' do
+      before do
+        stub_licensed_features(feature_flags_related_issues: false)
+      end
+
+      it 'does not unlink the issue' do
+        feature_flag, issue, link = setup
+        sign_in(developer)
+
+        delete_request(project, feature_flag, link)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(feature_flag.reload.issues).to eq([issue])
       end
     end
   end

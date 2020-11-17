@@ -121,13 +121,6 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
           expect(response).to have_gitlab_http_status(:ok)
           expect(assigns(:build).id).to eq(job.id)
         end
-
-        it 'has the correct build collection' do
-          builds = assigns(:builds).map(&:id)
-
-          expect(builds).to include(job.id, second_job.id)
-          expect(builds).not_to include(third_job.id)
-        end
       end
 
       context 'when job does not exist' do
@@ -201,33 +194,85 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       end
 
       context 'when job has artifacts' do
-        before do
-          get_show_json
-        end
-
         context 'with not expiry date' do
           let(:job) { create(:ci_build, :success, :artifacts, pipeline: pipeline) }
 
-          it 'exposes needed information' do
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response).to match_response_schema('job/job_details')
-            expect(json_response['artifact']['download_path']).to match(%r{artifacts/download})
-            expect(json_response['artifact']['browse_path']).to match(%r{artifacts/browse})
-            expect(json_response['artifact']).not_to have_key('expired')
-            expect(json_response['artifact']).not_to have_key('expired_at')
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']['download_path']).to match(%r{artifacts/download})
+              expect(json_response['artifact']['browse_path']).to match(%r{artifacts/browse})
+              expect(json_response['artifact']).not_to have_key('keep_path')
+              expect(json_response['artifact']).not_to have_key('expired')
+              expect(json_response['artifact']).not_to have_key('expired_at')
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']['download_path']).to match(%r{artifacts/download})
+              expect(json_response['artifact']['browse_path']).to match(%r{artifacts/browse})
+              expect(json_response['artifact']).not_to have_key('keep_path')
+              expect(json_response['artifact']).not_to have_key('expired')
+              expect(json_response['artifact']).not_to have_key('expired_at')
+            end
           end
         end
 
-        context 'with expiry date' do
+        context 'with expired artifacts' do
           let(:job) { create(:ci_build, :success, :artifacts, :expired, pipeline: pipeline) }
 
-          it 'exposes needed information' do
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response).to match_response_schema('job/job_details')
-            expect(json_response['artifact']).not_to have_key('download_path')
-            expect(json_response['artifact']).not_to have_key('browse_path')
-            expect(json_response['artifact']['expired']).to eq(true)
-            expect(json_response['artifact']['expire_at']).not_to be_empty
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']).not_to have_key('download_path')
+              expect(json_response['artifact']).not_to have_key('browse_path')
+              expect(json_response['artifact']).not_to have_key('keep_path')
+              expect(json_response['artifact']['expired']).to eq(true)
+              expect(json_response['artifact']['expire_at']).not_to be_empty
+              expect(json_response['artifact']['locked']).to eq(false)
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']).to have_key('download_path')
+              expect(json_response['artifact']).to have_key('browse_path')
+              expect(json_response['artifact']).to have_key('keep_path')
+              expect(json_response['artifact']['expired']).to eq(true)
+              expect(json_response['artifact']['expire_at']).not_to be_empty
+              expect(json_response['artifact']['locked']).to eq(true)
+            end
           end
         end
       end
@@ -646,109 +691,6 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
     end
   end
 
-  describe 'GET legacy trace.json' do
-    before do
-      stub_feature_flags(job_log_json: false)
-      get_trace
-    end
-
-    context 'when job has a trace artifact' do
-      let(:job) { create(:ci_build, :trace_artifact, pipeline: pipeline) }
-
-      it 'returns a trace' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['id']).to eq job.id
-        expect(json_response['status']).to eq job.status
-        expect(json_response['state']).to be_present
-        expect(json_response['append']).not_to be_nil
-        expect(json_response['truncated']).not_to be_nil
-        expect(json_response['size']).to be_present
-        expect(json_response['total']).to be_present
-        expect(json_response['html']).to eq(job.trace.html)
-      end
-    end
-
-    context 'when job has a trace' do
-      let(:job) { create(:ci_build, :trace_live, pipeline: pipeline) }
-
-      it 'returns a trace' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['id']).to eq job.id
-        expect(json_response['status']).to eq job.status
-        expect(json_response['html']).to eq('<span>BUILD TRACE</span>')
-      end
-    end
-
-    context 'when job has no traces' do
-      let(:job) { create(:ci_build, pipeline: pipeline) }
-
-      it 'returns no traces' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['id']).to eq job.id
-        expect(json_response['status']).to eq job.status
-        expect(json_response['html']).to be_nil
-      end
-    end
-
-    context 'when job has a trace with ANSI sequence and Unicode' do
-      let(:job) { create(:ci_build, :unicode_trace_live, pipeline: pipeline) }
-
-      it 'returns a trace with Unicode' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['id']).to eq job.id
-        expect(json_response['status']).to eq job.status
-        expect(json_response['html']).to include("ヾ(´༎ຶД༎ຶ`)ﾉ")
-      end
-    end
-
-    context 'when trace artifact is in ObjectStorage' do
-      let(:url) { 'http://object-storage/trace' }
-      let(:file_path) { expand_fixture_path('trace/sample_trace') }
-      let!(:job) { create(:ci_build, :success, :trace_artifact, pipeline: pipeline) }
-
-      before do
-        allow_any_instance_of(JobArtifactUploader).to receive(:file_storage?) { false }
-        allow_any_instance_of(JobArtifactUploader).to receive(:url) { url }
-        allow_any_instance_of(JobArtifactUploader).to receive(:size) { File.size(file_path) }
-      end
-
-      context 'when there are no network issues' do
-        before do
-          stub_remote_url_206(url, file_path)
-
-          get_trace
-        end
-
-        it 'returns a trace' do
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['id']).to eq job.id
-          expect(json_response['status']).to eq job.status
-          expect(json_response['html']).to eq(job.trace.html)
-        end
-      end
-
-      context 'when there is a network issue' do
-        before do
-          stub_remote_url_500(url)
-        end
-
-        it 'returns a trace' do
-          expect { get_trace }.to raise_error(Gitlab::HttpIO::FailedToGetChunkError)
-        end
-      end
-    end
-
-    def get_trace
-      get :trace,
-        params: {
-          namespace_id: project.namespace,
-          project_id: project,
-          id: job.id
-        },
-        format: :json
-    end
-  end
-
   describe 'GET status.json' do
     let(:job) { create(:ci_build, pipeline: pipeline) }
     let(:status) { job.detailed_status(double('user')) }
@@ -815,19 +757,21 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
              name: 'master', project: project)
 
       sign_in(user)
-
-      post_play
     end
 
     context 'when job is playable' do
       let(:job) { create(:ci_build, :playable, pipeline: pipeline) }
 
       it 'redirects to the played job page' do
+        post_play
+
         expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(namespace_project_job_path(id: job.id))
       end
 
       it 'transits to pending' do
+        post_play
+
         expect(job.reload).to be_pending
       end
 
@@ -835,7 +779,44 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
         let(:variable_attributes) { [{ key: 'first', secret_value: 'first' }] }
 
         it 'assigns the job variables' do
+          post_play
+
           expect(job.reload.job_variables.map(&:key)).to contain_exactly('first')
+        end
+      end
+
+      context 'when job is bridge' do
+        let(:downstream_project) { create(:project) }
+        let(:job) { create(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project) }
+
+        before do
+          downstream_project.add_developer(user)
+        end
+
+        it 'redirects to the pipeline page' do
+          post_play
+
+          expect(response).to have_gitlab_http_status(:found)
+          expect(response).to redirect_to(pipeline_path(pipeline))
+          builds_namespace_project_pipeline_path(id: pipeline.id)
+        end
+
+        it 'transits to pending' do
+          post_play
+
+          expect(job.reload).to be_pending
+        end
+
+        context 'when FF ci_manual_bridges is disabled' do
+          before do
+            stub_feature_flags(ci_manual_bridges: false)
+          end
+
+          it 'returns 404' do
+            post_play
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
         end
       end
     end
@@ -844,6 +825,8 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       let(:job) { create(:ci_build, pipeline: pipeline) }
 
       it 'renders unprocessable_entity' do
+        post_play
+
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end

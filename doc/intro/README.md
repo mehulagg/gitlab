@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 comments: false
 ---
 
@@ -25,7 +28,7 @@ Create issues, labels, milestones, cast your vote, and review issues.
 Create merge requests and review code.
 
 - [Fork a project and contribute to it](../user/project/repository/forking_workflow.md)
-- [Create a new merge request](../gitlab-basics/add-merge-request.md)
+- [Create a new merge request](../user/project/merge_requests/creating_merge_requests.md)
 - [Automatically close issues from merge requests](../user/project/issues/managing_issues.md#closing-issues-automatically)
 - [Automatically merge when pipeline succeeds](../user/project/merge_requests/merge_when_pipeline_succeeds.md)
 - [Revert any commit](../user/project/merge_requests/revert_changes.md)

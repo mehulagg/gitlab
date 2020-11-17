@@ -8,9 +8,11 @@ module SCA
       name: ->(policy) { policy.name }
     }.with_indifferent_access
 
-    attr_reader :id, :name, :url, :dependencies, :spdx_identifier, :classification
+    attr_reader :id, :name, :url, :dependencies, :spdx_identifier, :classification,
+                :approval_status
 
     def initialize(reported_license, software_policy)
+      @approval_status = software_policy&.approval_status || 'unclassified'
       @id = software_policy&.id
       @name = software_policy&.name || reported_license&.name
       @url = reported_license&.url

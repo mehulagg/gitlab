@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NoteSummary do
+RSpec.describe NoteSummary do
   let(:project)  { build(:project) }
   let(:noteable) { build(:issue) }
   let(:user)     { build(:user) }
@@ -23,7 +23,7 @@ describe NoteSummary do
 
   describe '#note' do
     it 'returns note hash' do
-      Timecop.freeze do
+      freeze_time do
         expect(create_note_summary.note).to eq(noteable: noteable, project: project, author: user, note: 'note',
                                                created_at: Time.current)
       end

@@ -26,7 +26,7 @@ export default {
 </script>
 <template>
   <div class="file-header-content d-flex align-items-center lh-100">
-    <slot name="filepathPrepend"></slot>
+    <slot name="filepath-prepend"></slot>
 
     <template v-if="blob.path">
       <file-icon :file-name="blob.path" :size="18" aria-hidden="true" css-classes="mr-2" />
@@ -43,6 +43,7 @@ export default {
       :text="blob.path"
       :gfm="gfmCopyText"
       :title="__('Copy file path')"
+      category="tertiary"
       css-class="btn-clipboard btn-transparent lh-100 position-static"
     />
   </div>

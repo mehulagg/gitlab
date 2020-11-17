@@ -1,17 +1,17 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
-
 import GeoNodeLastUpdated from 'ee/geo_nodes/components/geo_node_last_updated.vue';
 import {
   HELP_NODE_HEALTH_URL,
   GEO_TROUBLESHOOTING_URL,
   STATUS_DELAY_THRESHOLD_MS,
 } from 'ee/geo_nodes/constants';
+import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 
 describe('GeoNodeLastUpdated', () => {
   let wrapper;
 
-  const staleStatusTime = new Date(Date.now() - STATUS_DELAY_THRESHOLD_MS).getTime();
+  const staleStatusTime = differenceInMilliseconds(STATUS_DELAY_THRESHOLD_MS);
   const nonStaleStatusTime = new Date().getTime();
 
   const defaultProps = {

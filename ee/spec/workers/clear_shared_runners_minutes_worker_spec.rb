@@ -36,7 +36,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         it 'resets timer' do
           subject
 
-          expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.now)
+          expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.current)
         end
 
         context 'when there are namespaces that were not reset after the reset steps' do
@@ -50,7 +50,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
           it 'raises an exception' do
             expect { worker.perform }.to raise_error(
               Ci::Minutes::BatchResetService::BatchNotResetError,
-              'Some namespace shared runner minutes were not reset.'
+              'Some namespace shared runner minutes were not reset'
             )
           end
         end
@@ -68,7 +68,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         it 'resets timer' do
           subject
 
-          expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.now)
+          expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.current)
         end
       end
 
@@ -118,7 +118,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         [:last_ci_minutes_notification_at, :last_ci_minutes_usage_notification_level].each do |attr|
           context "when #{attr} is present" do
             before do
-              namespace.update_attribute(attr, Time.now)
+              namespace.update_attribute(attr, Time.current)
             end
 
             it 'nullifies the field' do
@@ -147,11 +147,12 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
       end
 
       it 'runs a worker per batch' do
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(2, 4)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(5, 7)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(8, 10)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(11, 13)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(14, 16)
+        # Spread evenly accross 3 hours (10800 seconds)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(0.seconds, 2, 4)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(2700.seconds, 5, 7)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(5400.seconds, 8, 10)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(8100.seconds, 11, 13)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(10800.seconds, 14, 16)
 
         subject
       end

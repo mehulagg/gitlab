@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Group, 'Routable' do
+RSpec.describe Group, 'Routable' do
   let!(:group) { create(:group, name: 'foo') }
 
   describe 'Validations' do
@@ -22,7 +22,7 @@ describe Group, 'Routable' do
       end
 
       it 'updates route record on path change' do
-        group.update(path: 'wow', name: 'much')
+        group.update!(path: 'wow', name: 'much')
 
         expect(group.route.path).to eq('wow')
         expect(group.route.name).to eq('much')
@@ -164,7 +164,7 @@ describe Group, 'Routable' do
   end
 end
 
-describe Project, 'Routable' do
+RSpec.describe Project, 'Routable' do
   describe '#full_path' do
     let(:project) { build_stubbed(:project) }
 

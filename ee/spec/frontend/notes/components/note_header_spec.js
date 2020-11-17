@@ -1,7 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import NoteHeader from '~/notes/components/note_header.vue';
 import GitlabTeamMemberBadge from 'ee/vue_shared/components/user_avatar/badges/gitlab_team_member_badge.vue';
+import NoteHeader from '~/notes/components/note_header.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

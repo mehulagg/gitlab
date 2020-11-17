@@ -1,10 +1,9 @@
 <script>
-import { omit, throttle } from 'lodash';
-import { GlLink, GlDeprecatedButton, GlTooltip, GlResizeObserverDirective } from '@gitlab/ui';
+import { isEmpty, omit, throttle } from 'lodash';
+import { GlLink, GlTooltip, GlResizeObserverDirective, GlIcon } from '@gitlab/ui';
 import { GlAreaChart, GlLineChart, GlChartSeriesLabel } from '@gitlab/ui/dist/charts';
 import { s__ } from '~/locale';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
-import Icon from '~/vue_shared/components/icon.vue';
 import { panelTypes, chartHeight, lineTypes, lineWidths, legendLayoutTypes } from '../../constants';
 import { getYAxisOptions, getTimeAxisOptions, getChartGrid, getTooltipFormatter } from './options';
 import { annotationsYAxis, generateAnnotationsSeries } from './annotations';
@@ -25,10 +24,9 @@ export default {
     GlAreaChart,
     GlLineChart,
     GlTooltip,
-    GlDeprecatedButton,
     GlChartSeriesLabel,
     GlLink,
-    Icon,
+    GlIcon,
   },
   directives: {
     GlResizeObserverDirective,
@@ -41,6 +39,11 @@ export default {
       validator: graphDataValidatorForValues.bind(null, false),
     },
     option: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
+    timeRange: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -174,10 +177,17 @@ export default {
     chartOptions() {
       const { yAxis, xAxis } = this.option;
       const option = omit(this.option, ['series', 'yAxis', 'xAxis']);
+      const xAxisBounds = isEmpty(this.timeRange)
+        ? {}
+        : {
+            min: this.timeRange.start,
+            max: this.timeRange.end,
+          };
 
       const timeXAxis = {
         ...getTimeAxisOptions({ timezone: this.timezone }),
         ...xAxis,
+        ...xAxisBounds,
       };
 
       const dataYAxis = {
@@ -392,21 +402,21 @@ export default {
       @updated="onChartUpdated"
     >
       <template v-if="tooltip.type === 'deployments'">
-        <template slot="tooltipTitle">
+        <template slot="tooltip-title">
           {{ __('Deployed') }}
         </template>
-        <div slot="tooltipContent" class="d-flex align-items-center">
-          <icon name="commit" class="mr-2" />
+        <div slot="tooltip-content" class="d-flex align-items-center">
+          <gl-icon name="commit" class="mr-2" />
           <gl-link :href="tooltip.commitUrl">{{ tooltip.sha }}</gl-link>
         </div>
       </template>
       <template v-else>
-        <template slot="tooltipTitle">
+        <template slot="tooltip-title">
           <div class="text-nowrap">
             {{ tooltip.title }}
           </div>
         </template>
-        <template slot="tooltipContent" :tooltip="tooltip">
+        <template slot="tooltip-content" :tooltip="tooltip">
           <div
             v-for="(content, key) in tooltip.content"
             :key="key"

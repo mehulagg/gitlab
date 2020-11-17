@@ -1,8 +1,8 @@
 <script>
 import { isEmpty } from 'lodash';
-import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 import { mapState, mapActions } from 'vuex';
 import { GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
+import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 import { s__ } from '~/locale';
 import Step from './step.vue';
 

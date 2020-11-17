@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::FastHashSerializer do
+RSpec.describe Gitlab::ImportExport::FastHashSerializer do
   # FastHashSerializer#execute generates the hash which is not easily accessible
   # and includes `JSONBatchRelation` items which are serialized at this point.
   # Wrapping the result into JSON generating/parsing is for making
@@ -10,14 +10,17 @@ describe Gitlab::ImportExport::FastHashSerializer do
   # all items are properly serialized while traversing the simple hash.
   subject { Gitlab::Json.parse(Gitlab::Json.generate(described_class.new(project, tree).execute)) }
 
-  let!(:project) { setup_project }
-  let(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { setup_project }
   let(:shared) { project.import_export_shared }
   let(:reader) { Gitlab::ImportExport::Reader.new(shared: shared) }
   let(:tree) { reader.project_tree }
 
-  before do
+  before_all do
     project.add_maintainer(user)
+  end
+
+  before do
     allow_any_instance_of(MergeRequest).to receive(:source_branch_sha).and_return('ABCD')
     allow_any_instance_of(MergeRequest).to receive(:target_branch_sha).and_return('DCBA')
   end
@@ -133,12 +136,6 @@ describe Gitlab::ImportExport::FastHashSerializer do
     expect(builds_count).to eq(1)
   end
 
-  it 'has no when YML attributes but only the DB column' do
-    expect_any_instance_of(Gitlab::Ci::YamlProcessor).not_to receive(:build_attributes)
-
-    subject
-  end
-
   it 'has pipeline commits' do
     expect(subject['ci_pipelines']).not_to be_empty
   end
@@ -173,14 +170,6 @@ describe Gitlab::ImportExport::FastHashSerializer do
 
   it 'has merge request resource label events' do
     expect(subject['merge_requests'].first['resource_label_events']).not_to be_empty
-  end
-
-  it 'saves the correct service type' do
-    expect(subject['services'].first['type']).to eq('CustomIssueTrackerService')
-  end
-
-  it 'saves the properties for a service' do
-    expect(subject['services'].first['properties']).to eq('one' => 'value')
   end
 
   it 'has project feature' do
@@ -238,7 +227,6 @@ describe Gitlab::ImportExport::FastHashSerializer do
                      group: group,
                      approvals_before_merge: 1
                     )
-    allow(project).to receive(:commit).and_return(Commit.new(RepoHelpers.sample_commit, project))
 
     issue = create(:issue, assignees: [user], project: project)
     snippet = create(:project_snippet, project: project)
