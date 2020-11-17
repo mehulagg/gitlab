@@ -1,5 +1,6 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import Cookies from 'js-cookie';
+import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
@@ -8,11 +9,12 @@ import RoadmapFilters from './roadmap_filters.vue';
 import RoadmapShell from './roadmap_shell.vue';
 
 import eventHub from '../event_hub';
-import { EXTEND_AS } from '../constants';
+import { EXTEND_AS, EPICS_LIMIT, EPICS_LIMIT_DISMISSED_COOKIE_NAME } from '../constants';
 
 export default {
   components: {
     EpicsListEmpty,
+    GlAlert,
     GlLoadingIcon,
     RoadmapFilters,
     RoadmapShell,
@@ -31,6 +33,11 @@ export default {
       type: String,
       required: true,
     },
+  },
+  data() {
+    return {
+      isWarningDismissed: Cookies.get(EPICS_LIMIT_DISMISSED_COOKIE_NAME) === 'true',
+    };
   },
   computed: {
     ...mapState([
@@ -62,6 +69,9 @@ export default {
     timeframeEnd() {
       const last = this.timeframe.length - 1;
       return this.timeframe[last];
+    },
+    isWarningVisible() {
+      return !this.isWarningDismissed && this.epics.length > EPICS_LIMIT;
     },
   },
   mounted() {
@@ -125,6 +135,10 @@ export default {
           .catch(() => {});
       });
     },
+    dismissTooManyEpicsWarning() {
+      Cookies.set(EPICS_LIMIT_DISMISSED_COOKIE_NAME, 'true', { expires: 365 });
+      this.isWarningDismissed = true;
+    },
   },
 };
 </script>
@@ -132,6 +146,20 @@ export default {
 <template>
   <div class="roadmap-app-container gl-h-full">
     <roadmap-filters v-if="showFilteredSearchbar" />
+    <gl-alert
+      v-if="isWarningVisible"
+      class="js-epics-limit-callout"
+      variant="warning"
+      :secondary-button-text="__('Learn more')"
+      secondary-button-link="https://docs.gitlab.com/ee/user/group/roadmap/"
+      @dismiss="dismissTooManyEpicsWarning"
+    >
+      {{
+        s__(
+          'Some of your epics may not be visible. A roadmap is limited to the first 1,000 epics, in your selected sort order.',
+        )
+      }}
+    </gl-alert>
     <div :class="{ 'overflow-reset': epicsFetchResultEmpty }" class="roadmap-container">
       <gl-loading-icon v-if="epicsFetchInProgress" class="gl-mt-5" size="md" />
       <epics-list-empty

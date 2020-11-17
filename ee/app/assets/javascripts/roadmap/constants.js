@@ -63,3 +63,7 @@ export const EPIC_LEVEL_MARGIN = {
   3: 'ml-8',
   4: 'ml-10',
 };
+
+export const EPICS_LIMIT = 1000;
+
+export const EPICS_LIMIT_DISMISSED_COOKIE_NAME = 'epics_limit_warning_dismissed';
