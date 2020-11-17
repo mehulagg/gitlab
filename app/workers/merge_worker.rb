@@ -3,7 +3,7 @@
 class MergeWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
-  feature_category :source_code_management
+  feature_category :code_review
   urgency :high
   weight 5
   loggable_arguments 2
