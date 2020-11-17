@@ -43,7 +43,7 @@ module DesignManagement
       end
 
       # Skip attempting to process images that would be rejected by CarrierWave.
-      return unless DesignManagement::DesignV432x230Uploader::MIME_TYPE_WHITELIST.include?(raw_file.content_type)
+      return unless DesignManagement::DesignV432x230Uploader::MIME_TYPE_WHITELIST.include?(raw_file.media_type)
 
       # Store and process the file
       action.image_v432x230.store!(raw_file)
@@ -77,7 +77,7 @@ module DesignManagement
           # of the file, due to the file not having an extension.
           #
           # Set the content_type from the `Blob`.
-          file.content_type = blob.content_type
+          file.media_type = blob.media_type
           h[blob.path] = file
         end
       end

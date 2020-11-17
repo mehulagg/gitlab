@@ -20,7 +20,7 @@ RSpec.describe UploadedFile do
 
       it 'sets properly the attributes' do
         expect(subject.original_filename).to eq(filename)
-        expect(subject.content_type).to eq(content_type)
+        expect(subject.media_type).to eq(content_type)
         expect(subject.sha256).to eq(sha256)
         expect(subject.remote_id).to be_nil
         expect(subject.path).to end_with(path_suffix)
@@ -42,7 +42,7 @@ RSpec.describe UploadedFile do
 
       it 'sets properly the attributes' do
         expect(subject.original_filename).to eq(filename)
-        expect(subject.content_type).to eq('application/octet-stream')
+        expect(subject.media_type).to eq('application/octet-stream')
         expect(subject.sha256).to eq('sha256')
         expect(subject.path).to be_nil
         expect(subject.size).to eq(123456)

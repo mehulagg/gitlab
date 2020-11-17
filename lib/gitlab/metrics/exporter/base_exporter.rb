@@ -84,7 +84,7 @@ module Gitlab
           result = probe.execute
 
           res.status = result.http_status
-          res.content_type = 'application/json; charset=utf-8'
+          res.media_type = 'application/json; charset=utf-8'
           res.body = result.json.to_json
         end
       end

@@ -20,7 +20,7 @@ module Gitlab
             file = {
               tempfile:     tmp,
               filename:     attachment.filename,
-              content_type: attachment.content_type
+              content_type: attachment.media_type
             }
 
             uploader = UploadService.new(upload_parent, file, uploader_class).execute
@@ -39,11 +39,11 @@ module Gitlab
       # from the uploaded attachments
       def filter_signature_attachments(message)
         attachments = message.attachments
-        content_type = normalize_mime(message.content_type)
-        protocol = normalize_mime(message.content_type_parameters[:protocol])
+        content_type = normalize_mime(message.media_type)
+        protocol = normalize_mime(message.media_type_parameters[:protocol])
 
         if content_type == 'multipart/signed' && protocol
-          attachments.delete_if { |attachment| protocol == normalize_mime(attachment.content_type) }
+          attachments.delete_if { |attachment| protocol == normalize_mime(attachment.media_type) }
         end
 
         attachments

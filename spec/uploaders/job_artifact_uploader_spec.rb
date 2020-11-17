@@ -102,7 +102,7 @@ RSpec.describe JobArtifactUploader do
     # escape characters so MIME detectors usually fail to determine what
     # the Content-Type is.
     it 'does not set Content-Type' do
-      expect(uploader.file.content_type).to be_blank
+      expect(uploader.file.media_type).to be_blank
     end
   end
 end

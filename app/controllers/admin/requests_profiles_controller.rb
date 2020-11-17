@@ -12,10 +12,10 @@ class Admin::RequestsProfilesController < Admin::ApplicationController
     clean_name = Rack::Utils.clean_path_info(params[:name])
     profile    = Gitlab::RequestProfiler.find(clean_name)
 
-    unless profile && profile.content_type
+    unless profile && profile.media_type
       return redirect_to admin_requests_profiles_path, alert: 'Profile not found'
     end
 
-    send_file profile.file_path, type: "#{profile.content_type}; charset=utf-8", disposition: 'inline'
+    send_file profile.file_path, type: "#{profile.media_type}; charset=utf-8", disposition: 'inline'
   end
 end

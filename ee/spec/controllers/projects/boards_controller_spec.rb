@@ -110,7 +110,7 @@ RSpec.describe Projects::BoardsController do
         it 'returns a not found 404 response' do
           create_board name: 'Backend'
 
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
           expect(response).to have_gitlab_http_status(:not_found)
         end
       end
@@ -187,7 +187,7 @@ RSpec.describe Projects::BoardsController do
       it 'returns a not found 404 response' do
         update_board board, update_params
 
-        expect(response.content_type).to eq 'application/json'
+        expect(response.media_type).to eq 'application/json'
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end

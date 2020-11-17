@@ -171,7 +171,7 @@ module Gitlab
 
         def primary_missing_file?(response)
           return false unless response.status.not_found?
-          return false unless response.content_type.mime_type == 'application/json'
+          return false unless response.media_type.mime_type == 'application/json'
 
           json_response = response.parse
 

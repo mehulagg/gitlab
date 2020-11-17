@@ -35,6 +35,6 @@ RSpec.shared_examples 'upload with content type' do |content_type|
 
   it 'will not change upload file content type' do
     uploader.cache!(fixture_file)
-    expect(uploader.file.content_type).to eq(content_type)
+    expect(uploader.file.media_type).to eq(content_type)
   end
 end

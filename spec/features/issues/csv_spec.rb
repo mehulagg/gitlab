@@ -52,7 +52,7 @@ RSpec.describe 'Issues csv' do
   it 'includes a csv attachment', :sidekiq_might_not_need_inline do
     request_csv
 
-    expect(attachment.content_type).to include('text/csv')
+    expect(attachment.media_type).to include('text/csv')
   end
 
   it 'ignores pagination', :sidekiq_might_not_need_inline do

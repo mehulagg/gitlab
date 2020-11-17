@@ -1935,7 +1935,7 @@ RSpec.describe Notify do
 
     matcher :have_part_with do |expected|
       match do |actual|
-        actual.body.parts.any? { |part| part.content_type.try(:match, /#{expected}/) }
+        actual.body.parts.any? { |part| part.media_type.try(:match, /#{expected}/) }
       end
     end
   end

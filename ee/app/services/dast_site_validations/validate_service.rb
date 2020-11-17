@@ -41,7 +41,7 @@ module DastSiteValidations
 
       case dast_site_validation.validation_strategy
       when 'text_file'
-        response.content_type == 'text/plain' && response.body == token
+        response.media_type == 'text/plain' && response.body == token
       when 'header'
         response.headers[DastSiteValidation::HEADER] == token
       else

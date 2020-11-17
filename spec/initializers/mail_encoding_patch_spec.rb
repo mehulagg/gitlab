@@ -13,7 +13,7 @@ RSpec.describe 'Mail quoted-printable transfer encoding patch and Unicode charac
       expect(new_email.subject).to eq(email.subject)
       expect(new_email.from).to eq(email.from)
       expect(new_email.to).to eq(email.to)
-      expect(new_email.content_type).to eq(email.content_type)
+      expect(new_email.media_type).to eq(email.media_type)
       expect(new_email.content_transfer_encoding).to eq(email.content_transfer_encoding)
 
       expect(new_email.encoded).to eq(email.encoded)
@@ -156,7 +156,7 @@ RSpec.describe 'Mail quoted-printable transfer encoding patch and Unicode charac
 
       part = Mail::Part.new
       part.body = [image].pack('m')
-      part.content_type = 'image/jpg'
+      part.media_type = 'image/jpg'
       part.content_transfer_encoding = 'base64'
 
       email.parts << part
@@ -182,7 +182,7 @@ RSpec.describe 'Mail quoted-printable transfer encoding patch and Unicode charac
 
       part = Mail::Part.new
       part.body = [image].pack('M*')
-      part.content_type = 'image/jpg'
+      part.media_type = 'image/jpg'
       part.content_transfer_encoding = 'quoted-printable'
 
       email.parts << part
@@ -196,7 +196,7 @@ RSpec.describe 'Mail quoted-printable transfer encoding patch and Unicode charac
         expect(email.subject).to eq(email.subject)
         expect(email.from).to eq(email.from)
         expect(email.to).to eq(email.to)
-        expect(email.content_type).to eq(email.content_type)
+        expect(email.media_type).to eq(email.media_type)
         expect(email.content_transfer_encoding).to eq(email.content_transfer_encoding)
 
         # Content cannot be recovered

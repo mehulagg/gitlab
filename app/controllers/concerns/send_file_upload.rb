@@ -44,7 +44,7 @@ module SendFileUpload
     types = MIME::Types.type_for(filename)
 
     if types.present?
-      types.first.content_type
+      types.first.media_type
     else
       "application/octet-stream"
     end

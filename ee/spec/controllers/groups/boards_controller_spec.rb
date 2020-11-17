@@ -38,7 +38,7 @@ RSpec.describe Groups::BoardsController do
           list_boards format: :json
 
           expect(response).to have_gitlab_http_status(:not_found)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
         end
       end
     end

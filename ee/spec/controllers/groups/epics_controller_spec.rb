@@ -281,7 +281,7 @@ RSpec.describe Groups::EpicsController do
           group.add_developer(user)
           show_epic
 
-          expect(response.content_type).to eq 'text/html'
+          expect(response.media_type).to eq 'text/html'
           expect(response).to render_template 'groups/epics/show'
         end
 
@@ -302,7 +302,7 @@ RSpec.describe Groups::EpicsController do
             show_epic
 
             expect(response).to have_gitlab_http_status(:not_found)
-            expect(response.content_type).to eq 'text/html'
+            expect(response.media_type).to eq 'text/html'
           end
         end
 
@@ -329,7 +329,7 @@ RSpec.describe Groups::EpicsController do
             show_epic(:json)
 
             expect(response).to have_gitlab_http_status(:not_found)
-            expect(response.content_type).to eq 'application/json'
+            expect(response.media_type).to eq 'application/json'
           end
         end
       end
@@ -413,7 +413,7 @@ RSpec.describe Groups::EpicsController do
         group.add_developer(user)
         subject
 
-        expect(response.content_type).to eq 'application/json'
+        expect(response.media_type).to eq 'application/json'
         expect(json_response).to include('title_text', 'title', 'description', 'description_text')
       end
 

@@ -97,7 +97,7 @@ RSpec.describe 'Commits' do
           it do
             visit pipeline_path(pipeline)
             click_on 'Download artifacts'
-            expect(page.response_headers['Content-Type']).to eq(artifacts_file.content_type)
+            expect(page.response_headers['Content-Type']).to eq(artifacts_file.media_type)
           end
         end
 

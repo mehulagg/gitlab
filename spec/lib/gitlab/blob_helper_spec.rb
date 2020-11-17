@@ -91,11 +91,11 @@ RSpec.describe Gitlab::BlobHelper do
 
   describe '#content_type' do
     it 'returns text/plain' do
-      expect(blob.content_type).to eq('text/plain; charset=utf-8')
+      expect(blob.media_type).to eq('text/plain; charset=utf-8')
     end
 
     it 'returns text/plain' do
-      expect(large_blob.content_type).to eq('application/pdf')
+      expect(large_blob.media_type).to eq('application/pdf')
     end
   end
 

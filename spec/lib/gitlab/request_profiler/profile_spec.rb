@@ -36,7 +36,7 @@ RSpec.describe Gitlab::RequestProfiler::Profile do
 
       it 'returns valid data' do
         expect(profile).to be_valid
-        expect(profile.content_type).to eq('text/html')
+        expect(profile.media_type).to eq('text/html')
       end
     end
 
@@ -45,7 +45,7 @@ RSpec.describe Gitlab::RequestProfiler::Profile do
 
       it 'returns valid data' do
         expect(profile).to be_valid
-        expect(profile.content_type).to eq('text/plain')
+        expect(profile.media_type).to eq('text/plain')
       end
     end
 
@@ -54,7 +54,7 @@ RSpec.describe Gitlab::RequestProfiler::Profile do
 
       it 'returns valid data' do
         expect(profile).not_to be_valid
-        expect(profile.content_type).to be_nil
+        expect(profile.media_type).to be_nil
       end
     end
   end

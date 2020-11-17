@@ -10,7 +10,7 @@ module Gitlab
         def self.delivering_email(message)
           unless Gitlab::CurrentSettings.html_emails_enabled
             message.parts.delete_if do |part|
-              part.content_type.start_with?('text/html')
+              part.media_type.start_with?('text/html')
             end
           end
         end

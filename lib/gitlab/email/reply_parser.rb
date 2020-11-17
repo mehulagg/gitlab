@@ -52,7 +52,7 @@ module Gitlab
           return ""
         end
 
-        if (part.content_type || '').include? 'text/html'
+        if (part.media_type || '').include? 'text/html'
           HTMLParser.parse_reply(decoded)
         else
           decoded
