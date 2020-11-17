@@ -9,25 +9,51 @@ module DastSiteProfiles
         service = DastSites::FindOrCreateService.new(project, current_user)
         dast_site = service.execute!(url: target_url)
 
-        dast_site_profile = DastSiteProfile.create!(project: project, dast_site: dast_site, name: name)
+        # key generation
+        cipher = OpenSSL::Cipher.new('aes-256-cbc')
+        cipher.encrypt
+        secret_key = cipher.random_key
+        secret_key_iv = cipher.random_iv
 
+        # persist db record and encode/encrypt keys
+        dast_site_profile = DastSiteProfile.create!(
+          project: project,
+          dast_site: dast_site,
+          name: name,
+          secret_key: Base64.encode64(secret_key),
+          secret_key_iv: Base64.encode64(secret_key_iv)
+        )
+
+        # create new environment
         Environment.create!(
           project: project,
           name: dast_site_profile.environment_scope
         )
 
+        # create username variable
+        cipher = OpenSSL::Cipher.new('aes-256-cbc')
+        cipher.encrypt
+        cipher.key = secret_key
+        cipher.iv = secret_key_iv
+
         Ci::Variable.create!(
           project_id: 22,
-          key: 'DAST_USERNAME_BASE64',
-          value: SecureRandom.base64,
+          key: 'DAST_ENCRYPTED_USERNAME',
+          value: Base64.encode64(cipher.update('username') + cipher.final),
           masked: true,
           environment_scope: dast_site_profile.environment_scope
         )
 
+        # create password variable
+        cipher = OpenSSL::Cipher.new('aes-256-cbc')
+        cipher.encrypt
+        cipher.key = secret_key
+        cipher.iv = secret_key_iv
+
         Ci::Variable.create!(
           project_id: 22,
-          key: 'DAST_PASSWORD_BASE64',
-          value: SecureRandom.base64,
+          key: 'DAST_ENCRYPTED_PASSWORD',
+          value: Base64.encode64(cipher.update('password') + cipher.final),
           masked: true,
           environment_scope: dast_site_profile.environment_scope
         )
