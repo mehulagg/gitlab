@@ -28,7 +28,7 @@ To use GitLab CI/CD:
    If you don't have a runner, [install GitLab Runner](https://docs.gitlab.com/runner/install/)
    and [register a runner](https://docs.gitlab.com/runner/register/) for your instance, project, or group.
 1. [Create a `.gitlab-ci.yml` file](#create-a-gitlab-ciyml-file)
-   at the root of your repository. This file tells the runner what to do.
+   at the root of your repository. This file is where you define your CI/CD jobs.
 
 When you commit the file to your repository, the runner runs your jobs.
 The job results [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
@@ -41,7 +41,7 @@ You might already have runners available for your project, including
 [shared runners](../runners/README.md#shared-runners), which are
 available to all projects in your GitLab instance.
 
-To view runners:
+To view available runners:
 
 - Go to **Settings > CI/CD** and expand **Runners**.
 
@@ -50,7 +50,7 @@ you have a runner available to process your jobs.
 
 If no runners are listed on the **Runners** page in the UI, you or an administrator
 must [install GitLab Runner](https://docs.gitlab.com/runner/install/) and
-[register individual runners](https://docs.gitlab.com/runner/register/).
+[register](https://docs.gitlab.com/runner/register/) at least one runner.
 
 If you are testing CI/CD, you can install GitLab Runner and register runners on your local machine.
 When your CI/CD jobs run, they will run on your local machine.
@@ -65,8 +65,8 @@ In this file, you define:
 - The structure and order of jobs that the runner should execute.
 - The decisions the runner should make when specific conditions are encountered.
 
-For example, you may want to run a suite of tests when you check in to
-any branch except `master`. Then, when you check in to `master`, you want
+For example, you might want to run a suite of tests when you commit to
+any branch except `master`. When you commit to `master`, you want
 to run the same suite, but also publish your application.
 
 All of this is defined in the `.gitlab-ci.yml` file.
@@ -91,12 +91,13 @@ To create a `.gitlab-ci.yml` file:
    test-job1:
      stage: test
      script:
-       - echo "This job might test something"
+       - echo "This job tests something"
 
    test-job2:
      stage: test
      script:
-       - echo "This job takes 20 seconds longer to test something"
+       - echo "This job tests something, but takes more time than test-job1."
+       - echo "It waits 20 seconds to simulate a slower job."
        - sleep 20
 
    deploy-prod:
