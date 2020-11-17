@@ -36,7 +36,7 @@ export default {
 </script>
 
 <template>
-    <gl-dropdown text="__('Edit')" >
+    <gl-dropdown :text="__('Edit')">
       <gl-dropdown-item
         :class="{
           'is-active': viewer === $options.viewerTypes.mr,
