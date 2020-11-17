@@ -13,7 +13,7 @@ module Mutations
                 required: false,
                 description: 'Whether or not to include merged CI yaml in the response'
 
-      field :stages, Types::Ci::StageType.connection_type,
+      field :stages, [Types::Ci::Config::StageType],
             null: true,
             description: 'Result for the YAML processor'
 
@@ -28,12 +28,12 @@ module Mutations
           stages = stages(result.stages)
           jobs = jobs(result.jobs)
           groups = groups(jobs)
-          stage_groups(stages, groups)
+          stages = stage_groups(stages, groups)
 
           response = {
                         status: 'valid',
                         errors: [],
-                        stages: stages.select { |stage| !stage.groups.empty? }
+                        stages: stages.select { |stage| !stage[:groups].empty? }
                       }
         else
           response = { status: 'invalid', errors: [result.errors.first] }
@@ -47,24 +47,37 @@ module Mutations
       private
 
       def stages(config_stages)
-        config_stages.map { |stage| OpenStruct.new(name: stage, groups: []) }
+        config_stages.map { |stage|  { name: stage, groups: [] } }
       end
 
       def jobs(config_jobs)
-        config_jobs.map { |job_name, job| CommitStatus.new(name: job_name, stage: job[:stage] ) }
+        config_jobs.map do |job_name, job|
+          {
+            name: job_name,
+            stage: job[:stage],
+            group_name: CommitStatus.new(name: job_name).group_name,
+            needs: needs(job) || []
+          }
+        end
+      end
+
+      def needs(job)
+        job[:needs][:job]&.map do |job_need|
+          { name: job_need[:name], artifacts: job_need[:artifacts] }
+        end
       end
 
       def groups(jobs)
-        group_names = jobs.map(&:group_name).uniq
-        groups = group_names.map do |group|
-          group_jobs = jobs.select { |job| job.group_name == group }
-          ::Ci::Group.new(nil, group_jobs.first.stage, name: group, jobs: group_jobs)
+        group_names = jobs.map { |job| job[:group_name] }.uniq
+        group_names.map do |group|
+          group_jobs = jobs.select { |job| job[:group_name] == group }
+          { jobs: group_jobs, name: group, stage: group_jobs.first[:stage] }
         end
       end
 
       def stage_groups(stage_data, groups)
-        stage_data.map do |stage|
-          stage.groups = groups.select { |group| group.stage == stage.name }
+        stage_data.each do |stage|
+          stage[:groups] = groups.select { |group| group[:stage] == stage[:name] }
         end
       end
     end
