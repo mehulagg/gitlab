@@ -284,7 +284,7 @@ RSpec.describe Snippets::UpdateService do
         end
 
         it 'logs the error' do
-          expect(Gitlab::AppLogger).to receive(:error).with(error_message)
+          expect(Gitlab::AppLogger).to receive(:error).with("Snippet update error: #{error_message}")
 
           subject
         end
