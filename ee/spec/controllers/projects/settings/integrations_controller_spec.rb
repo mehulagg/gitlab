@@ -29,7 +29,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
 
   context 'Sets correct services list' do
     let(:active_services) { assigns(:services).map(&:type) }
-    let(:disabled_services) { %w(SlackSlashCommandsService) }
+    let(:disabled_services) { %w(GithubService) }
 
     it 'enables SlackSlashCommandsService and disables GitlabSlackApplication' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
@@ -60,7 +60,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
       let(:namespace) { create(:group, :private) }
       let(:project) { create(:project, :private, namespace: namespace) }
 
-      context 'when checking of namespace plan is enabled' do
+      context 'when checking if namespace plan is enabled' do
         before do
           allow(Gitlab::CurrentSettings.current_application_settings).to receive(:should_check_namespace_plan?) { true }
         end
@@ -71,13 +71,13 @@ RSpec.describe Projects::Settings::IntegrationsController do
 
         context 'and namespace has a plan' do
           let(:namespace) { create(:group, :private) }
-          let!(:gitlab_subscription) { create(:gitlab_subscription, :bronze, namespace: namespace) }
+          let!(:gitlab_subscription) { create(:gitlab_subscription, :silver, namespace: namespace) }
 
           it_behaves_like 'endpoint without disabled services'
         end
       end
 
-      context 'when checking of namespace plan is not enabled' do
+      context 'when checking if namespace plan is not enabled' do
         before do
           allow(Gitlab::CurrentSettings.current_application_settings).to receive(:should_check_namespace_plan?) { false }
         end
