@@ -86,73 +86,73 @@ RSpec.describe SnippetsController do
       end
     end
 
-    # context 'when the personal snippet is private' do
-    #   let_it_be(:personal_snippet) { create(:personal_snippet, :private, :repository, author: user) }
+    context 'when the personal snippet is private' do
+      let_it_be(:personal_snippet) { create(:personal_snippet, :private, :repository, author: user) }
 
-    #   context 'when signed in' do
-    #     before do
-    #       sign_in(user)
-    #     end
+      context 'when signed in' do
+        before do
+          sign_in(user)
+        end
 
-    #     context 'when signed in user is not the author' do
-    #       let(:other_personal_snippet) { create(:personal_snippet, :private, author: other_user) }
+        context 'when signed in user is not the author' do
+          let(:other_personal_snippet) { create(:personal_snippet, :private, author: other_user) }
 
-    #       it 'responds with status 404' do
-    #         get :show, params: { id: other_personal_snippet.to_param }
+          it 'responds with status 404' do
+            get :show, params: { id: other_personal_snippet.to_param }
 
-    #         expect(response).to have_gitlab_http_status(:not_found)
-    #       end
-    #     end
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
 
-    #     context 'when signed in user is the author' do
-    #       it_behaves_like 'successful response' do
-    #         subject { get :show, params: { id: personal_snippet.to_param } }
-    #       end
+        context 'when signed in user is the author' do
+          it_behaves_like 'successful response' do
+            subject { get :show, params: { id: personal_snippet.to_param } }
+          end
 
-    #       it 'responds with status 404 when embeddable content is requested' do
-    #         get :show, params: { id: personal_snippet.to_param }, format: :js
+          it 'responds with status 404 when embeddable content is requested' do
+            get :show, params: { id: personal_snippet.to_param }, format: :js
 
-    #         expect(response).to have_gitlab_http_status(:not_found)
-    #       end
-    #     end
-    #   end
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
 
-    #   context 'when not signed in' do
-    #     it 'redirects to the sign in page' do
-    #       get :show, params: { id: personal_snippet.to_param }
+      context 'when not signed in' do
+        it 'redirects to the sign in page' do
+          get :show, params: { id: personal_snippet.to_param }
 
-    #       expect(response).to redirect_to(new_user_session_path)
-    #     end
-    #   end
-    # end
+          expect(response).to redirect_to(new_user_session_path)
+        end
+      end
+    end
 
-    # context 'when the personal snippet is internal' do
-    #   let_it_be(:personal_snippet) { create(:personal_snippet, :internal, :repository, author: user) }
+    context 'when the personal snippet is internal' do
+      let_it_be(:personal_snippet) { create(:personal_snippet, :internal, :repository, author: user) }
 
-    #   context 'when signed in' do
-    #     before do
-    #       sign_in(user)
-    #     end
+      context 'when signed in' do
+        before do
+          sign_in(user)
+        end
 
-    #     it_behaves_like 'successful response' do
-    #       subject { get :show, params: { id: personal_snippet.to_param } }
-    #     end
+        it_behaves_like 'successful response' do
+          subject { get :show, params: { id: personal_snippet.to_param } }
+        end
 
-    #     it 'responds with status 404 when embeddable content is requested' do
-    #       get :show, params: { id: personal_snippet.to_param }, format: :js
+        it 'responds with status 404 when embeddable content is requested' do
+          get :show, params: { id: personal_snippet.to_param }, format: :js
 
-    #       expect(response).to have_gitlab_http_status(:not_found)
-    #     end
-    #   end
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
 
-    #   context 'when not signed in' do
-    #     it 'redirects to the sign in page' do
-    #       get :show, params: { id: personal_snippet.to_param }
+      context 'when not signed in' do
+        it 'redirects to the sign in page' do
+          get :show, params: { id: personal_snippet.to_param }
 
-    #       expect(response).to redirect_to(new_user_session_path)
-    #     end
-    #   end
-    # end
+          expect(response).to redirect_to(new_user_session_path)
+        end
+      end
+    end
 
     context 'when the personal snippet is public' do
       let(:personal_snippet) { public_snippet }
@@ -174,7 +174,7 @@ RSpec.describe SnippetsController do
         end
 
         it_behaves_like 'tracking unique hll events', :track_editor_snippets_show do
-          subject { get :show, params: { id: public_snippet.to_param } }
+          subject(:request) { get :show, params: { id: public_snippet.to_param } }
 
           let(:target_id) { 'i_snippets_show' }
           let(:expected_type) { instance_of(String) }

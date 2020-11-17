@@ -50,7 +50,6 @@ module SnippetsActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def show
-    # binding.pry
     respond_to do |format|
       format.html do
         @note = Note.new(noteable: @snippet, project: @snippet.project)
