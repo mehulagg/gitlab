@@ -329,6 +329,8 @@ gem 'peek', '~> 1.1'
 # Snowplow events tracking
 gem 'snowplow-tracker', '~> 0.6.1'
 
+gem 'irb', require: false
+
 # Metrics
 group :metrics do
   gem 'method_source', '~> 1.0', require: false
