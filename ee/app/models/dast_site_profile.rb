@@ -14,6 +14,12 @@ class DastSiteProfile < ApplicationRecord
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
+  attr_encrypted :secret_key,
+                 mode: :per_attribute_iv_and_salt,
+                 insecure_mode: true,
+                 key: Settings.attr_encrypted_db_key_base,
+                 algorithm: 'aes-256-cbc'
+
   def environment_scope
     return unless persisted?
 
