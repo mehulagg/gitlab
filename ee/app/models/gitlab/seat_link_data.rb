@@ -4,7 +4,7 @@ module Gitlab
   class SeatLinkData
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :timestamp, :key, :max_users, :active_users
+    attr_reader :timestamp, :key, :max_users, :active_users, :checked_at
 
     delegate :to_json, to: :data
 
@@ -12,11 +12,12 @@ module Gitlab
     # are preferable, like for SyncSeatLinkWorker, to determine seat link data, and in others,
     # like for SyncSeatLinkRequestWorker, the params are passed because the values from when
     # the job was enqueued are necessary.
-    def initialize(timestamp: nil, key: default_key, max_users: nil, active_users: nil)
+    def initialize(timestamp: nil, key: default_key, max_users: nil, active_users: nil, checked_at: Time.current)
       @timestamp = timestamp || historical_data&.recorded_at
       @key = key
       @max_users = max_users || default_max_count
       @active_users = active_users || default_active_count
+      @checked_at = checked_at
     end
 
     # Returns true if historical data exists between license start and the given date.
