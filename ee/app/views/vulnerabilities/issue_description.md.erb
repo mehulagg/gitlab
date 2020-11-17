@@ -67,6 +67,7 @@
 <% if vulnerability.scanner.present? %>
 * <%= _("Name") %>: <%= vulnerability.scanner[:name] %>
 <% end %>
+<% if vulnerability.scan.present? %>
 <% if vulnerability.scan[:type].present? %>
 * <%= _("Type") %>: <%= vulnerability.scan[:type] %>
 <% end %>
@@ -78,5 +79,6 @@
 <% end %>
 <% if vulnerability.scan[:end_time].present? %>
 * <%= _("End Time") %>: <%= vulnerability.scan[:end_time] %>
+<% end %>
 <% end %>
 <% end %>
