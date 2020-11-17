@@ -34,7 +34,7 @@ module Groups
       sort_value_start_date_soon
     end
 
-    def remember_sorting_key
+    def remember_sorting_key(sort_field = nil)
       @remember_sorting_key ||= "roadmap_sort"
     end
 

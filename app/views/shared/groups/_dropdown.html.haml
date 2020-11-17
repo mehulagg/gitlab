@@ -1,17 +1,25 @@
 - options_hash = local_assigns.fetch(:options_hash, groups_sort_options_hash)
 - show_archive_options = local_assigns.fetch(:show_archive_options, false)
+- if @group_projects_sort.present?
+  - default_sort_by = @group_projects_sort
+- elsif @sort.present?
+  - default_sort_by = @sort
+- elsif params[:sort]
+  - default_sort_by = params[:sort]
+- else
+  - default_sort_by = sort_value_recently_created
 
 .dropdown.inline.js-group-filter-dropdown-wrap.gl-mr-3
   %button.dropdown-menu-toggle{ type: 'button', 'data-toggle' => 'dropdown' }
     %span.dropdown-label
-      = options_hash[@group_projects_sort]
+      = options_hash[default_sort_by]
     = icon('chevron-down')
   %ul.dropdown-menu.dropdown-menu-right.dropdown-menu-selectable
     %li.dropdown-header
       = _("Sort by")
     - options_hash.each do |value, title|
       %li.js-filter-sort-order
-        = link_to filter_groups_path(sort: value), class: ("is-active" if @group_projects_sort == value) do
+        = link_to filter_groups_path(sort: value), class: ("is-active" if default_sort_by == value) do
           = title
     - if show_archive_options
       %li.divider
