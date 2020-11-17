@@ -29,22 +29,22 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
     end
   end
 
-  describe '.migration_has_finished?' do
+  describe '.migration_has_finished_uncached?' do
     let(:migration) { subject.migrations.first }
     let(:migration_name) { migration.name.underscore }
 
     it 'returns true if migration has finished' do
-      expect(subject.migration_has_finished?(migration_name)).to eq(false)
+      expect(subject.migration_has_finished_uncached?(migration_name)).to eq(false)
 
       migration.save!(completed: false)
       refresh_index!
 
-      expect(subject.migration_has_finished?(migration_name)).to eq(false)
+      expect(subject.migration_has_finished_uncached?(migration_name)).to eq(false)
 
       migration.save!(completed: true)
       refresh_index!
 
-      expect(subject.migration_has_finished?(migration_name)).to eq(true)
+      expect(subject.migration_has_finished_uncached?(migration_name)).to eq(true)
     end
   end
 
