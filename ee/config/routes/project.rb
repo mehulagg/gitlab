@@ -114,6 +114,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :iterations do
           resources :inherited, only: [:show], constraints: { id: /\d+/ }
         end
+
+        namespace :incident_management do
+          resources :oncall_schedules, only: [:index]
+        end
       end
       # End of the /-/ scope.
 
