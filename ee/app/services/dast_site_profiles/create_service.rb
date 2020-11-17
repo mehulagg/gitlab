@@ -20,8 +20,8 @@ module DastSiteProfiles
           project: project,
           dast_site: dast_site,
           name: name,
-          secret_key: Base64.encode64(secret_key),
-          secret_key_iv: Base64.encode64(secret_key_iv)
+          secret_key: Base64.encode64(secret_key).strip,
+          secret_key_iv: Base64.encode64(secret_key_iv).strip
         )
 
         # create new environment
