@@ -177,6 +177,7 @@ module QA
     end
 
     module Main
+      autoload :FormlessLogin, 'qa/page/main/formless_login'
       autoload :Login, 'qa/page/main/login'
       autoload :Menu, 'qa/page/main/menu'
       autoload :OAuth, 'qa/page/main/oauth'

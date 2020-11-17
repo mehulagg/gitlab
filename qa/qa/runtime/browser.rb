@@ -169,7 +169,7 @@ module QA
 
           simulate_slow_connection if Runtime::Env.simulate_slow_connection?
 
-          page_class.validate_elements_present!
+          page_class.validate_elements_present! unless page_class.is_a?(String)
 
           if QA::Runtime::Env.qa_cookies
             browser = Capybara.current_session.driver.browser

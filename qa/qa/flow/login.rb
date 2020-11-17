@@ -22,8 +22,20 @@ module QA
         end
       end
 
-      def sign_in(as: nil, address: :gitlab, skip_page_validation: false)
+      def sign_in(as: nil, address: :gitlab, skip_page_validation: false, formless: true)
         Page::Main::Menu.perform(&:sign_out) if Page::Main::Menu.perform(&:signed_in?)
+
+        if formless && Runtime::Env.gitlab_qa_formless_login_token
+          Page::Main::FormlessLogin.new(as, address)
+
+          if Page::Main::Menu.perform(&:signed_in?)
+            Runtime::Logger.debug("Formless login successful")
+            return
+          else
+            Runtime::Logger.warn("Formless login failed...Falling back to UI login")
+          end
+        end
+
         Runtime::Browser.visit(address, Page::Main::Login)
         Page::Main::Login.perform { |login| login.sign_in_using_credentials(user: as, skip_page_validation: skip_page_validation) }
       end

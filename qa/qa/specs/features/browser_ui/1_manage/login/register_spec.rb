@@ -56,7 +56,7 @@ module QA
           # Use the UI instead of API to delete the account since
           # this is the only test that exercise this UI.
           # Other tests should use the API for this purpose.
-          Flow::Login.sign_in(as: user)
+          Flow::Login.sign_in(as: user, formless: false)
           Page::Main::Menu.perform(&:click_settings_link)
           Page::Profile::Menu.perform(&:click_account)
           Page::Profile::Accounts::Show.perform do |show|
@@ -67,7 +67,7 @@ module QA
         it 'allows recreating with same credentials', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/937' do
           expect(Page::Main::Menu.perform(&:signed_in?)).to be_falsy
 
-          Flow::Login.sign_in(as: user, skip_page_validation: true)
+          Flow::Login.sign_in(as: user, skip_page_validation: true, formless: false)
 
           expect(page).to have_text("Invalid Login or password")
 

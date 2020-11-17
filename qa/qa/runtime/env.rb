@@ -395,6 +395,10 @@ module QA
         ENV['DEPLOY_VERSION']
       end
 
+      def gitlab_qa_formless_login_token
+        ENV['GITLAB_QA_FORMLESS_LOGIN_TOKEN']
+      end
+
       private
 
       def remote_grid_credentials

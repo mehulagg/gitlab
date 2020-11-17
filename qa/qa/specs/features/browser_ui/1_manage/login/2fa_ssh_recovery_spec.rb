@@ -28,7 +28,7 @@ module QA
           output.scan(/([A-Za-z0-9]{16})\n/).flatten.first
         end
 
-        Flow::Login.sign_in(as: user, skip_page_validation: true)
+        Flow::Login.sign_in(as: user, skip_page_validation: true, formless: false)
         Page::Main::TwoFactorAuth.perform do |two_fa_auth|
           two_fa_auth.set_2fa_code(recovery_code)
           two_fa_auth.click_verify_code_button
@@ -37,7 +37,7 @@ module QA
         expect(Page::Main::Menu.perform(&:signed_in?)).to be_truthy
 
         Page::Main::Menu.perform(&:sign_out)
-        Flow::Login.sign_in(as: user, skip_page_validation: true)
+        Flow::Login.sign_in(as: user, skip_page_validation: true, formless: false)
         Page::Main::TwoFactorAuth.perform do |two_fa_auth|
           two_fa_auth.set_2fa_code(recovery_code)
           two_fa_auth.click_verify_code_button

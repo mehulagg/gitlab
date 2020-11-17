@@ -35,7 +35,7 @@ module QA
       it 'allows using 2FA recovery code once only', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/972' do
         recovery_code = enable_2fa_for_user_and_fetch_recovery_code(developer_user)
 
-        Flow::Login.sign_in(as: developer_user, skip_page_validation: true)
+        Flow::Login.sign_in(as: developer_user, skip_page_validation: true, formless: false)
 
         Page::Main::TwoFactorAuth.perform do |two_fa_auth|
           two_fa_auth.set_2fa_code(recovery_code)
@@ -46,7 +46,7 @@ module QA
 
         Page::Main::Menu.perform(&:sign_out)
 
-        Flow::Login.sign_in(as: developer_user, skip_page_validation: true)
+        Flow::Login.sign_in(as: developer_user, skip_page_validation: true, formless: false)
 
         Page::Main::TwoFactorAuth.perform do |two_fa_auth|
           two_fa_auth.set_2fa_code(recovery_code)

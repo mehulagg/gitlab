@@ -4,7 +4,7 @@ module QA
   RSpec.describe 'Manage', :orchestrated, :mattermost do
     describe 'Mattermost login' do
       it 'user logs into Mattermost using GitLab OAuth', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/666' do
-        Flow::Login.sign_in
+        Flow::Login.sign_in(formless: false)
 
         Support::Retrier.retry_on_exception do
           Runtime::Browser.visit(:mattermost, Page::Mattermost::Login)

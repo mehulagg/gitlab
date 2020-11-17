@@ -39,7 +39,7 @@ module QA
 
         enable_two_factor_authentication_for_user(developer_user)
 
-        Flow::Login.sign_in(as: developer_user, skip_page_validation: true)
+        Flow::Login.sign_in(as: developer_user, skip_page_validation: true, formless: false)
 
         Page::Main::TwoFactorAuth.perform do |two_fa_auth|
           two_fa_auth.set_2fa_code('000000')
