@@ -529,7 +529,8 @@ To disable Gitaly on a GitLab server:
 
 ## Enable TLS support
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22602) in GitLab 11.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22602) in GitLab 11.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/3160) in GitLab 13.6, outgoing TLS connections to GitLab provide client certificates if configured.
 
 Gitaly supports TLS encryption. To communicate with a Gitaly instance that listens for secure
 connections, you must use `tls://` URL scheme in the `gitaly_address` of the corresponding
