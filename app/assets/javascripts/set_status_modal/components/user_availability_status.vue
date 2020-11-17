@@ -8,7 +8,7 @@ export default {
       type: Object,
       required: true,
       default: () => ({
-        availability: false,
+        availability: '',
       }),
     },
   },

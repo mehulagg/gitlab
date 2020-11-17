@@ -1,6 +1,8 @@
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import UserPopover from '~/vue_shared/components/user_popover/user_popover.vue';
+import UserAvailabilityStatus from '~/set_status_modal/components/user_availability_status.vue';
+import { AVAILABILITY_STATUS } from '~/set_status_modal/utils';
 
 const DEFAULT_PROPS = {
   user: {
@@ -34,6 +36,7 @@ describe('User Popover Component', () => {
   const findByTestId = testid => wrapper.find(`[data-testid="${testid}"]`);
   const findUserStatus = () => wrapper.find('.js-user-status');
   const findTarget = () => document.querySelector('.js-user-link');
+  const findAvailabilityStatus = () => wrapper.find(UserAvailabilityStatus);
 
   const createWrapper = (props = {}, options = {}) => {
     wrapper = shallowMount(UserPopover, {
@@ -44,6 +47,7 @@ describe('User Popover Component', () => {
       },
       stubs: {
         'gl-sprintf': GlSprintf,
+        UserAvailabilityStatus,
       },
       ...options,
     });
@@ -198,6 +202,30 @@ describe('User Popover Component', () => {
       createWrapper({ user });
 
       expect(findUserStatus().exists()).toBe(false);
+    });
+
+    it('should show the busy status if user set to busy', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        status: { availability: AVAILABILITY_STATUS.BUSY },
+      };
+
+      createWrapper({ user });
+
+      expect(findAvailabilityStatus().exists()).toBe(true);
+      expect(wrapper.text()).toContain(user.name);
+      expect(wrapper.html()).toContain('(Busy)');
+    });
+
+    it('should hide the busy status for any other status', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        status: { availability: AVAILABILITY_STATUS.NOT_SET },
+      };
+
+      createWrapper({ user });
+
+      expect(findAvailabilityStatus().exists()).toBe(false);
     });
   });
 
