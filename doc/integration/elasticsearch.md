@@ -435,7 +435,7 @@ After the reindexing is completed, the original index will be scheduled to be de
 
 While the reindexing is running, you will be able to follow its progress under that same section.
 
-### Background reindex migrations
+### Background migrations
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/234046) in GitLab 13.6.
 
