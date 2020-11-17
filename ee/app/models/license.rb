@@ -133,6 +133,7 @@ class License < ApplicationRecord
     container_scanning
     coverage_fuzzing
     credentials_inventory
+    custom_compliance_frameworks
     dast
     dependency_scanning
     devops_adoption
