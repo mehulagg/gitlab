@@ -37,9 +37,9 @@ module DastSiteProfiles
         cipher.iv = secret_key_iv
 
         Ci::Variable.create!(
-          project_id: 22,
+          project_id: project.id,
           key: 'DAST_ENCRYPTED_USERNAME',
-          value: Base64.encode64(cipher.update('username') + cipher.final),
+          value: Base64.encode64(cipher.update('username') + cipher.final).strip,
           masked: true,
           environment_scope: dast_site_profile.environment_scope
         )
@@ -51,9 +51,9 @@ module DastSiteProfiles
         cipher.iv = secret_key_iv
 
         Ci::Variable.create!(
-          project_id: 22,
+          project_id: project.id,
           key: 'DAST_ENCRYPTED_PASSWORD',
-          value: Base64.encode64(cipher.update('password') + cipher.final),
+          value: Base64.encode64(cipher.update('password') + cipher.final).strip,
           masked: true,
           environment_scope: dast_site_profile.environment_scope
         )
