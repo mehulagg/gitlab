@@ -193,6 +193,8 @@ export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
 
+  endDate.setHours(23, 59, 59); // make sure we're at the end of the day
+
   for (
     let currentDate = newDate(startDate);
     currentDate <= endDate;
