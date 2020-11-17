@@ -58,6 +58,12 @@ module DastSiteProfiles
           environment_scope: dast_site_profile.environment_scope
         )
 
+        # decipher = OpenSSL::Cipher.new('aes-256-cbc')
+        # decipher.decrypt
+        # decipher.key = secret_key
+        # decipher.iv = secret_key_iv
+        # decipher.update(cipher_text) + decipher.final
+
         ServiceResponse.success(payload: dast_site_profile)
       end
 
