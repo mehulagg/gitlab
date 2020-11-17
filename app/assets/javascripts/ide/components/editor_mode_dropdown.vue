@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlDropdown } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import { viewerTypes } from '../constants';
 
@@ -7,6 +7,7 @@ export default {
   components: {
     GlButton,
     GlDropdown,
+    GlDropdownItem,
   },
   props: {
     viewer: {
@@ -35,39 +36,30 @@ export default {
 </script>
 
 <template>
-  <div class="dropdown">
-    <gl-button variant="link" data-toggle="gl-dropdown">{{ __('Edit') }}</gl-button>
-    <div class="dropdown-menu dropdown-menu-selectable dropdown-open-left">
-      <ul>
-        <li>
-          <a
-            :class="{
-              'is-active': viewer === $options.viewerTypes.mr,
-            }"
-            href="#"
-            @click.prevent="changeMode($options.viewerTypes.mr)"
-          >
-            <strong class="dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
-            <span class="dropdown-menu-inner-content">
-              {{ __('Compare changes with the merge request target branch') }}
-            </span>
-          </a>
-        </li>
-        <li>
-          <a
-            :class="{
-              'is-active': viewer === $options.viewerTypes.diff,
-            }"
-            href="#"
-            @click.prevent="changeMode($options.viewerTypes.diff)"
-          >
-            <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
-            <span class="dropdown-menu-inner-content">
-              {{ __('Compare changes with the last commit') }}
-            </span>
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
+    <gl-dropdown text="__('Edit')" >
+      <gl-dropdown-item
+        :class="{
+          'is-active': viewer === $options.viewerTypes.mr,
+        }"
+        href="#"
+        @click.prevent="changeMode($options.viewerTypes.mr)"
+      >
+        <strong class="dropdown-menu-inner-title"> {{ mergeReviewLine }} </strong>
+        <span class="dropdown-menu-inner-content">
+          {{ __('Compare changes with the merge request target branch') }}
+        </span>
+      </gl-dropdown-item>
+      <gl-dropdown-item
+        :class="{
+          'is-active': viewer === $options.viewerTypes.diff,
+        }"
+        href="#"
+        @click.prevent="changeMode($options.viewerTypes.diff)"
+      >
+        <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
+        <span class="dropdown-menu-inner-content">
+          {{ __('Compare changes with the last commit') }}
+        </span>
+      </gl-dropdown-item>
+    </gl-dropdown>
 </template>
