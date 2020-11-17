@@ -355,9 +355,6 @@ mappings.
 
 #### Trigger the re-index from `primary`
 
-NOTE: **Note:**
-GitLab 13.6 - Added background migrations for Elasticsearch. This reduced the need to manaully run reindexing. [Advanced Search Migration Details](../development/elasticsearch.md#creating-a-new-global-search-migration)
-
 To trigger the re-index from `primary` index:
 
 1. Use the Elasticsearch [Reindex API](https://www.elastic.co/guide/en/elasticsearch/reference/7.6/docs-reindex.html):
@@ -437,6 +434,56 @@ CAUTION: **Caution:**
 After the reindexing is completed, the original index will be scheduled to be deleted after 14 days. You can cancel this action by pressing the cancel button.
 
 While the reindexing is running, you will be able to follow its progress under that same section.
+
+### Background reindex migrations
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/234046) in GitLab 13.6.
+
+With reindex migrations running in the background, there's no need for a manual
+intervention. This usually happens in situations where new features are added to
+Advanced Search, which means adding or changing the way content is indexed.
+
+Reindexing can still be performed
+[manually](#trigger-the-reindex-via-the-advanced-search-administration) when needed.
+
+To confirm that the background migrations ran, you can check with:
+
+```shell
+curl "$CLUSTER_URL/gitlab-production-migrations/_search?q=*" | jq .
+```
+
+This should return something similar to:
+
+```json
+{
+  "took": 14,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "gitlab-production-migrations",
+        "_type": "_doc",
+        "_id": "20201105181100",
+        "_score": 1,
+        "_source": {
+          "completed": true
+        }
+      }
+    ]
+  }
+}
+```
 
 ## GitLab Advanced Search Rake tasks
 
