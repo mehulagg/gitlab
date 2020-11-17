@@ -13114,6 +13114,34 @@ CREATE TABLE issues_self_managed_prometheus_alert_events (
     updated_at timestamp with time zone NOT NULL
 );
 
+CREATE TABLE iterations (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    start_date date,
+    due_date date,
+    project_id bigint,
+    group_id bigint,
+    iid integer NOT NULL,
+    cached_markdown_version integer,
+    title text NOT NULL,
+    title_html text,
+    description text,
+    description_html text,
+    state_enum smallint DEFAULT 1 NOT NULL,
+    CONSTRAINT sprints_must_belong_to_project_or_group CHECK ((((project_id <> NULL::bigint) AND (group_id IS NULL)) OR ((group_id <> NULL::bigint) AND (project_id IS NULL)))),
+    CONSTRAINT sprints_title CHECK ((char_length(title) <= 255))
+);
+
+CREATE SEQUENCE iterations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE iterations_id_seq OWNED BY iterations.id;
+
 CREATE TABLE jira_connect_installations (
     id bigint NOT NULL,
     client_key character varying,
@@ -16402,34 +16430,6 @@ CREATE SEQUENCE spam_logs_id_seq
 
 ALTER SEQUENCE spam_logs_id_seq OWNED BY spam_logs.id;
 
-CREATE TABLE sprints (
-    id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    start_date date,
-    due_date date,
-    project_id bigint,
-    group_id bigint,
-    iid integer NOT NULL,
-    cached_markdown_version integer,
-    title text NOT NULL,
-    title_html text,
-    description text,
-    description_html text,
-    state_enum smallint DEFAULT 1 NOT NULL,
-    CONSTRAINT sprints_must_belong_to_project_or_group CHECK ((((project_id <> NULL::bigint) AND (group_id IS NULL)) OR ((group_id <> NULL::bigint) AND (project_id IS NULL)))),
-    CONSTRAINT sprints_title CHECK ((char_length(title) <= 255))
-);
-
-CREATE SEQUENCE sprints_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE sprints_id_seq OWNED BY sprints.id;
-
 CREATE TABLE status_page_published_incidents (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -17960,6 +17960,8 @@ ALTER TABLE ONLY issue_user_mentions ALTER COLUMN id SET DEFAULT nextval('issue_
 
 ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
 
+ALTER TABLE ONLY iterations ALTER COLUMN id SET DEFAULT nextval('iterations_id_seq'::regclass);
+
 ALTER TABLE ONLY jira_connect_installations ALTER COLUMN id SET DEFAULT nextval('jira_connect_installations_id_seq'::regclass);
 
 ALTER TABLE ONLY jira_connect_subscriptions ALTER COLUMN id SET DEFAULT nextval('jira_connect_subscriptions_id_seq'::regclass);
@@ -18235,8 +18237,6 @@ ALTER TABLE ONLY software_license_policies ALTER COLUMN id SET DEFAULT nextval('
 ALTER TABLE ONLY software_licenses ALTER COLUMN id SET DEFAULT nextval('software_licenses_id_seq'::regclass);
 
 ALTER TABLE ONLY spam_logs ALTER COLUMN id SET DEFAULT nextval('spam_logs_id_seq'::regclass);
-
-ALTER TABLE ONLY sprints ALTER COLUMN id SET DEFAULT nextval('sprints_id_seq'::regclass);
 
 ALTER TABLE ONLY status_page_published_incidents ALTER COLUMN id SET DEFAULT nextval('status_page_published_incidents_id_seq'::regclass);
 
@@ -19155,11 +19155,14 @@ ALTER TABLE ONLY issues_prometheus_alert_events
 ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
     ADD CONSTRAINT issues_self_managed_prometheus_alert_events_pkey PRIMARY KEY (issue_id, self_managed_prometheus_alert_event_id);
 
-ALTER TABLE ONLY sprints
+ALTER TABLE ONLY iterations
     ADD CONSTRAINT iteration_start_and_due_daterange_group_id_constraint EXCLUDE USING gist (group_id WITH =, daterange(start_date, due_date, '[]'::text) WITH &&) WHERE ((group_id IS NOT NULL));
 
-ALTER TABLE ONLY sprints
+ALTER TABLE ONLY iterations
     ADD CONSTRAINT iteration_start_and_due_daterange_project_id_constraint EXCLUDE USING gist (project_id WITH =, daterange(start_date, due_date, '[]'::text) WITH &&) WHERE ((project_id IS NOT NULL));
+
+ALTER TABLE ONLY iterations
+    ADD CONSTRAINT iterations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY jira_connect_installations
     ADD CONSTRAINT jira_connect_installations_pkey PRIMARY KEY (id);
@@ -19649,9 +19652,6 @@ ALTER TABLE ONLY software_licenses
 
 ALTER TABLE ONLY spam_logs
     ADD CONSTRAINT spam_logs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY sprints
-    ADD CONSTRAINT sprints_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY status_page_published_incidents
     ADD CONSTRAINT status_page_published_incidents_pkey PRIMARY KEY (id);
@@ -21069,6 +21069,18 @@ CREATE INDEX index_issues_on_updated_by_id ON issues USING btree (updated_by_id)
 
 CREATE INDEX index_issues_project_id_issue_type_incident ON issues USING btree (project_id) WHERE (issue_type = 1);
 
+CREATE INDEX index_iterations_on_due_date ON iterations USING btree (due_date);
+
+CREATE INDEX index_iterations_on_group_id ON iterations USING btree (group_id);
+
+CREATE UNIQUE INDEX index_iterations_on_group_id_and_title ON iterations USING btree (group_id, title) WHERE (group_id IS NOT NULL);
+
+CREATE UNIQUE INDEX index_iterations_on_project_id_and_iid ON iterations USING btree (project_id, iid);
+
+CREATE UNIQUE INDEX index_iterations_on_project_id_and_title ON iterations USING btree (project_id, title) WHERE (project_id IS NOT NULL);
+
+CREATE INDEX index_iterations_on_title ON iterations USING btree (title);
+
 CREATE UNIQUE INDEX index_jira_connect_installations_on_client_key ON jira_connect_installations USING btree (client_key);
 
 CREATE INDEX index_jira_connect_subscriptions_on_namespace_id ON jira_connect_subscriptions USING btree (namespace_id);
@@ -21991,21 +22003,9 @@ CREATE INDEX index_software_licenses_on_spdx_identifier ON software_licenses USI
 
 CREATE UNIQUE INDEX index_software_licenses_on_unique_name ON software_licenses USING btree (name);
 
-CREATE INDEX index_sprints_on_description_trigram ON sprints USING gin (description gin_trgm_ops);
+CREATE INDEX index_sprints_on_description_trigram ON iterations USING gin (description gin_trgm_ops);
 
-CREATE INDEX index_sprints_on_due_date ON sprints USING btree (due_date);
-
-CREATE INDEX index_sprints_on_group_id ON sprints USING btree (group_id);
-
-CREATE UNIQUE INDEX index_sprints_on_group_id_and_title ON sprints USING btree (group_id, title) WHERE (group_id IS NOT NULL);
-
-CREATE UNIQUE INDEX index_sprints_on_project_id_and_iid ON sprints USING btree (project_id, iid);
-
-CREATE UNIQUE INDEX index_sprints_on_project_id_and_title ON sprints USING btree (project_id, title) WHERE (project_id IS NOT NULL);
-
-CREATE INDEX index_sprints_on_title ON sprints USING btree (title);
-
-CREATE INDEX index_sprints_on_title_trigram ON sprints USING gin (title gin_trgm_ops);
+CREATE INDEX index_sprints_on_title_trigram ON iterations USING gin (title gin_trgm_ops);
 
 CREATE UNIQUE INDEX index_status_page_published_incidents_on_issue_id ON status_page_published_incidents USING btree (issue_id);
 
@@ -22780,10 +22780,10 @@ ALTER TABLE ONLY push_event_payloads
     ADD CONSTRAINT fk_36c74129da FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_builds
-    ADD CONSTRAINT fk_3a9eaa254d FOREIGN KEY (stage_id) REFERENCES ci_stages(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_3a9eaa254d FOREIGN KEY (stage_id) RFERENCES ci_stages(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issues
-    ADD CONSTRAINT fk_3b8c72ea56 FOREIGN KEY (sprint_id) REFERENCES sprints(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_3b8c72ea56 FOREIGN KEY (sprint_id) REFERENCES iterations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_3c1fd1cccc FOREIGN KEY (due_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
@@ -22921,7 +22921,7 @@ ALTER TABLE ONLY backup_labels
     ADD CONSTRAINT fk_7de4989a69 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY merge_requests
-    ADD CONSTRAINT fk_7e85395a64 FOREIGN KEY (sprint_id) REFERENCES sprints(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_7e85395a64 FOREIGN KEY (sprint_id) REFERENCES iterations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_7f28d925f3 FOREIGN KEY (merged_by_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -22929,7 +22929,7 @@ ALTER TABLE ONLY merge_request_metrics
 ALTER TABLE ONLY group_import_states
     ADD CONSTRAINT fk_8053b3ebd6 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY sprints
+ALTER TABLE ONLY iterations
     ADD CONSTRAINT fk_80aa8a1f95 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY import_export_uploads
@@ -23226,7 +23226,7 @@ ALTER TABLE ONLY namespaces
 ALTER TABLE ONLY fork_networks
     ADD CONSTRAINT fk_e7b436b2b5 FOREIGN KEY (root_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY sprints
+ALTER TABLE ONLY iterations
     ADD CONSTRAINT fk_e8206c9686 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY application_settings
@@ -24376,7 +24376,7 @@ ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_cedf8cce4d FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY resource_iteration_events
-    ADD CONSTRAINT fk_rails_cee126f66c FOREIGN KEY (iteration_id) REFERENCES sprints(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_rails_cee126f66c FOREIGN KEY (iteration_id) REFERENCES iterations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY epic_metrics
     ADD CONSTRAINT fk_rails_d071904753 FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;

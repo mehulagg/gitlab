@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Iteration < ApplicationRecord
-  self.table_name = 'sprints'
-
   attr_accessor :skip_future_date_validation
   attr_accessor :skip_project_validation
 
