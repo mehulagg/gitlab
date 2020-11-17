@@ -1,9 +1,12 @@
 import Vue from 'vue';
 import MainApp from 'ee/vulnerabilities/components/vulnerability.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 (function createMainApp() {
   const el = document.getElementById('js-vulnerability-main');
-  const vulnerability = JSON.parse(el.dataset.vulnerability);
+  const vulnerability = convertObjectPropsToCamelCase(JSON.parse(el.dataset.vulnerability), {
+    deep: true,
+  });
 
   return new Vue({
     el,

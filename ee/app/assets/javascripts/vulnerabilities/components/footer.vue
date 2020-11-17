@@ -6,6 +6,7 @@ import Api from 'ee/api';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 import { GlIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
@@ -50,12 +51,12 @@ export default {
     },
     project() {
       return {
-        url: this.vulnerability.project.full_path,
-        value: this.vulnerability.project.full_name,
+        url: this.vulnerability.project.fullPath,
+        value: this.vulnerability.project.fullName,
       };
     },
     solutionInfo() {
-      const { solution, has_mr: hasMr, remediations, state } = this.vulnerability;
+      const { solution, hasMr, remediations, state } = this.vulnerability;
 
       const remediation = remediations?.[0];
       const hasDownload = Boolean(
@@ -103,7 +104,7 @@ export default {
     },
     fetchDiscussions() {
       axios
-        .get(this.vulnerability.discussions_url)
+        .get(this.vulnerability.discussionsUrl)
         .then(({ data, headers: { date } }) => {
           this.discussionsDictionary = data.reduce((acc, discussion) => {
             acc[discussion.id] = discussion;
@@ -139,13 +140,13 @@ export default {
       this.poll = new Poll({
         resource: {
           fetchNotes: () =>
-            axios.get(this.vulnerability.notes_url, {
+            axios.get(this.vulnerability.notesUrl, {
               headers: { 'X-Last-Fetched-At': this.lastFetchedAt },
             }),
         },
         method: 'fetchNotes',
         successCallback: ({ data: { notes, last_fetched_at: lastFetchedAt } }) => {
-          this.updateNotes(notes);
+          this.updateNotes(convertObjectPropsToCamelCase(notes, { deep: true }));
           this.lastFetchedAt = lastFetchedAt;
         },
         errorCallback: () =>
@@ -158,23 +159,23 @@ export default {
       notes.forEach(note => {
         // If the note exists, update it.
         if (this.noteDictionary[note.id]) {
-          const updatedDiscussion = { ...this.discussionsDictionary[note.discussion_id] };
+          const updatedDiscussion = { ...this.discussionsDictionary[note.discussionId] };
           updatedDiscussion.notes = updatedDiscussion.notes.map(curr =>
             curr.id === note.id ? note : curr,
           );
-          this.discussionsDictionary[note.discussion_id] = updatedDiscussion;
+          this.discussionsDictionary[note.discussionId] = updatedDiscussion;
         }
         // If the note doesn't exist, but the discussion does, add the note to the discussion.
-        else if (this.discussionsDictionary[note.discussion_id]) {
-          const updatedDiscussion = { ...this.discussionsDictionary[note.discussion_id] };
+        else if (this.discussionsDictionary[note.discussionId]) {
+          const updatedDiscussion = { ...this.discussionsDictionary[note.discussionId] };
           updatedDiscussion.notes.push(note);
-          this.discussionsDictionary[note.discussion_id] = updatedDiscussion;
+          this.discussionsDictionary[note.discussionId] = updatedDiscussion;
         }
         // If the discussion doesn't exist, create it.
         else {
           const newDiscussion = {
-            id: note.discussion_id,
-            reply_id: note.discussion_id,
+            id: note.discussionId,
+            replyId: note.discussionId,
             notes: [note],
           };
           this.$set(this.discussionsDictionary, newDiscussion.id, newDiscussion);
@@ -198,9 +199,9 @@ export default {
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
 
-    <div v-if="vulnerability.merge_request_feedback" class="card gl-mt-5">
+    <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
-        :feedback="vulnerability.merge_request_feedback"
+        :feedback="vulnerability.mergeRequestFeedback"
         :project="project"
         class="card-body"
       />
@@ -208,9 +209,9 @@ export default {
 
     <related-issues
       :endpoint="issueLinksEndpoint"
-      :can-modify-related-issues="vulnerability.can_modify_related_issues"
+      :can-modify-related-issues="vulnerability.canModifyRelatedIssues"
       :project-path="project.url"
-      :help-path="vulnerability.related_issues_help_path"
+      :help-path="vulnerability.relatedIssuesHelpPath"
     />
 
     <div class="notes" data-testid="detection-note">
@@ -233,7 +234,7 @@ export default {
         v-for="discussion in discussions"
         :key="discussion.id"
         :discussion="discussion"
-        :notes-url="vulnerability.notes_url"
+        :notes-url="vulnerability.notesUrl"
       />
     </ul>
   </div>
