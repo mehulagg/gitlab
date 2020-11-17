@@ -15,7 +15,6 @@ import DropdownButton from './dropdown_button.vue';
 import DropdownContents from './dropdown_contents.vue';
 
 import { DropdownVariant } from './constants';
-import { toggleDropdownContents } from './store/actions';
 
 Vue.use(Vuex);
 
