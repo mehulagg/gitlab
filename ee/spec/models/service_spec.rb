@@ -6,7 +6,6 @@ RSpec.describe Service do
   let(:ee_project_services) do
     %w[
       github
-      jenkins
     ]
   end
 
