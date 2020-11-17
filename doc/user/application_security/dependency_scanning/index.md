@@ -70,6 +70,7 @@ The following languages and dependency managers are supported:
 | [sbt](https://www.scala-sbt.org/) 1.2 and below ([Ivy](http://ant.apache.org/ivy/)) | Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 
 Plans are underway for supporting the following languages, dependency managers, and dependency files. For details, see the issue link for each.
+For work-arounds, see the [Troubleshooting section](#troubleshooting)
 
 | Package Managers    | Languages | Supported files | Scan tools | Issue |
 | ------------------- | --------- | --------------- | ---------- | ----- |
@@ -491,6 +492,50 @@ As a workaround, remove the [`retire.js`](analyzers.md#selecting-specific-analyz
 [DS_DEFAULT_ANALYZERS](#configuring-dependency-scanning).
 
 ## Troubleshooting
+
+### Working around missing support for certain language
+
+As noted in the ["Supported languages" section](#supported-languages-and-package-managers)
+some dependency definition files are not yet supported.
+
+Nonetheless, Dependency Scanning can be achieved by converting the definition file.
+Converters may be provided by the language, package manager or third-party tooling.
+
+Generally, the approach is the following:
+
+1. Define a dedicated converter job in your `.gitlab-ci.yml` file.
+   Use a suitable Docker image and/or script to facilitate the conversion.
+1. Let that job upload the converted, supported file as an artifact.
+1. Make the `dependency_scanning` job depend on the converter job.
+
+For example, the currently unsupported `poetry.lock` file can be
+[exported](https://python-poetry.org/docs/cli/#export)
+to the supported `requirements.txt` as follows:
+
+```yml
+include:
+  - template: Dependency-Scanning.gitlab-ci.yml
+
+stages:
+  - convert
+  - test
+
+variables:
+  PIP_REQUIREMENTS_FILE: "converted-by-ci.txt"
+
+convert:
+  stage: convert
+  image: <which-contains-poetry-or>
+  script:
+    - <or-installs-poetry>
+    - poetry export --output "$PIP_REQUIREMENTS_FILE"
+  artifacts:
+    paths:
+      - "$PIP_REQUIREMENTS_FILE"
+
+dependency_scanning:
+  dependencies: ["convert"]
+```
 
 ### `Error response from daemon: error processing tar file: docker-tar: relocation error`
 
