@@ -22,6 +22,7 @@ module Ci
         variables.concat(secret_instance_variables)
         variables.concat(secret_group_variables)
         variables.concat(secret_project_variables(environment: environment))
+        variables.concat(secret_ondemand_variables(environment: environment))
         variables.concat(trigger_request.user_variables) if trigger_request
         variables.concat(pipeline.variables)
         variables.concat(pipeline.pipeline_schedule.job_variables) if pipeline.pipeline_schedule
@@ -101,6 +102,19 @@ module Ci
 
     def secret_project_variables(environment: persisted_environment)
       project.ci_variables_for(ref: git_ref, environment: environment)
+    end
+
+    def secret_ondemand_variables(environment: persisted_environment)
+      return [] unless pipeline.source == 'ondemand_dast_scan' && pipeline.config_source == 'parameter_source'
+
+      dast_site_profile = DastSiteProfile.where(id: environment.scan(/\d+/)[0]).first # rubocop:disable Rails/FindBy
+
+      if dast_site_profile
+        Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(key: 'DAST_SITE_PROFILE_SECRET_KEY', value: dast_site_profile.secret_key, masked: true)
+          variables.append(key: 'DAST_SITE_PROFILE_SECRET_KEY_IV', value: dast_site_profile.secret_key_iv, masked: true)
+        end
+      end
     end
 
     private
