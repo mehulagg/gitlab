@@ -160,6 +160,20 @@ gitops:
   ...
 ```
 
+It is also possible to support manifest projects that contain multiple directories or subdirectories of yaml files.
+
+In order to support multiple manifest files, use the `paths` attribute:
+
+```yaml
+gitops:
+  manifest_projects:
+  - id: "path-to/your-manifest-project-number1"
+  paths:
+    - glob: '/team1/app1/*.yaml'
+```
+
+Please refer to [additional documentation and examples](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/configuration_repository.md#manifest_projects-section)
+
 ### Create an Agent record in GitLab
 
 Next, create an GitLab Rails Agent record so the Agent can associate itself with
