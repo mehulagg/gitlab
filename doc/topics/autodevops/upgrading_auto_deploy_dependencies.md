@@ -114,6 +114,12 @@ If your Auto DevOps project has an active environment that was deployed with the
    `kubectl apply -f $backup`.
 1. Remove the `MIGRATE_HELM_2TO3` variable.
 
+#### In-Cluster PostgreSQL Channel 2
+
+The v2 auto-deploy-image drops support for [legacy in-cluster PostgreSQL](upgrading_postgresql.md) (i.e. channel 1).
+If your Kubernetes cluster still depends on it, please upgrade and migrate [with the instruction](upgrading_postgresql.md)
+[with v1 auto-deploy-image](#use-a-specific-version-of-auto-deploy-dependencies).
+
 #### Traffic routing change for canary deployments and incremental rollouts
 
 > [Introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/109) in GitLab 13.4.
