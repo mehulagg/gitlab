@@ -5,4 +5,8 @@
   .dashboard-grid {
     grid-template-columns: 1fr auto auto 35%;
   }
+
+  .dropdown-menu li button:enabled:hover {
+    color: $white;
+  }
 }
