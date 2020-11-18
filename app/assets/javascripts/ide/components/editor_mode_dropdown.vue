@@ -36,7 +36,7 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="__('Edit')">
+  <gl-dropdown :text="__('Edit')" :size="__('small')">
     <gl-dropdown-item
       href="#"
       :is-check-item="true"
@@ -51,7 +51,7 @@ export default {
     <gl-dropdown-item
       href="#"
       :is-check-item="true"
-      :is-checked="viewer === $options.viewerTypes.mr"
+      :is-checked="viewer === $options.viewerTypes.diff"
       @click.prevent="changeMode($options.viewerTypes.diff)"
     >
       <strong class="dropdown-menu-inner-title">{{ __('Reviewing') }}</strong>
