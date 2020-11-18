@@ -426,7 +426,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     before do
       allow(described_class).to receive(:grafana_embed_usage_data).and_return(2)
-      create(:service, project: projects[1], type: 'JenkinsService', active: true)
     end
 
     subject { described_class.data }
