@@ -1,0 +1,8 @@
+---
+name: graphql_framework_authorization
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.6'
+type: development
+group: group::ecosystem
+default_enabled: false

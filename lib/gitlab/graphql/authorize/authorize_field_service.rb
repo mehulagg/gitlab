@@ -15,10 +15,14 @@ module Gitlab
 
         def authorized_resolve
           proc do |parent_typed_object, args, ctx|
-            resolved_type = @old_resolve_proc.call(parent_typed_object, args, ctx)
-            authorizing_object = authorize_against(parent_typed_object, resolved_type)
+            if Feature.enabled?(:graphql_framework_authorization)
+              @old_resolve_proc.call(parent_typed_object, args, ctx)
+            else
+              resolved_type = @old_resolve_proc.call(parent_typed_object, args, ctx)
+              authorizing_object = authorize_against(parent_typed_object, resolved_type)
 
-            filter_allowed(ctx[:current_user], resolved_type, authorizing_object)
+              filter_allowed(ctx[:current_user], resolved_type, authorizing_object)
+            end
           end
         end
 
