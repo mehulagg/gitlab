@@ -528,6 +528,104 @@ aware of the following implications:
    docker run --rm -t -i -v $(pwd)/src:/home/app/src test-image:latest run_app_tests
    ```
 
+## Authenticating to registry with Docker in Docker
+
+When using Docker in Docker the [normal authentication
+methods](using_docker_images.html#define-an-image-from-a-private-container-registry)
+won't work because a fresh Docker daemon is started with the service.
+
+### Run docker login
+
+Inside of [`before_script`](../yaml/#before_script) run `docker login`.
+
+```yaml
+image: docker:19.03.13
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+  - docker:19.03.13-dind
+
+build:
+  stage: build
+  before_script:
+    - echo "$DOCKER_REGISTRY_PASS" | docker login $DOCKER_REGISTRY --username $DOCKER_REGISTRY_USER --password-stdin
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
+```
+
+If you want to log in to Docker Hub you need to leave `$DOCKER_REGISTRY`
+empty or remove it.
+
+### Mount `~/.docker/config.json` to each job
+
+If you are an administrator for GitLab Runner you can mount a file to
+`~/.docker/config.json` with the authentication configuration so every
+job that the runner picks up it will be authenticated already. If you
+are using the official `docker:19.03.13` image the home directory is
+under `/root`.
+
+For example if we have `/opt/.docker/config.json` file like below, by
+following the
+[`DOCKER_AUTH_CONFIG`](using_docker_images.html#determining-your-docker_auth_config-data)
+documentation:
+
+```json
+{
+    "auths": {
+        "https://index.docker.io/v1/": {
+            "auth": "bXlfdXNlcm5hbWU6bXlfcGFzc3dvcmQ="
+        }
+    }
+}
+```
+
+#### Docker
+
+Update the [volume
+mounts](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#volumes-in-the-runnersdocker-section)
+to include the file.
+
+```toml
+[[runners]]
+  ...
+  executor = "docker"
+  [runners.docker]
+    ...
+    privileged = true
+    volumes = ["/opt/.docker/config.json:/root/.docker/config.json:ro"]
+```
+
+#### Kubernetes
+
+Create a [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with the content
+of this file. You can do this with a command like:
+
+```shell
+kubectl create configmap docker-client-config --namespace gitlab-runner --from-file /opt/.docker/config.json
+```
+
+Update the [volume
+mounts](https://docs.gitlab.com/runner/executors/kubernetes.html#using-volumes)
+to include the file.
+
+```toml
+[[runners]]
+  ...
+  executor = "kubernetes"
+  [runners.kubernetes]
+    image = "alpine:3.12"
+    privileged = true
+    [[runners.kubernetes.volumes.config_map]]
+      name = "docker-client-config"
+      mount_path = "/root/.docker/config.json"
+      # If you are running GitLab Runner 13.5
+      # or lower you can remove this
+      sub_path = "config.json"
+```
+
 ## Making Docker-in-Docker builds faster with Docker layer caching
 
 When using Docker-in-Docker, Docker downloads all layers of your image every
