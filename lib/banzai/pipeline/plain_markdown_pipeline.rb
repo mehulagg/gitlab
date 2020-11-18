@@ -5,6 +5,7 @@ module Banzai
     class PlainMarkdownPipeline < BasePipeline
       def self.filters
         FilterArray[
+          Filter::MarkdownPreEscapeFilter,
           Filter::MarkdownFilter
         ]
       end

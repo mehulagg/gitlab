@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Banzai::Pipeline::FullPipeline do
+  using RSpec::Parameterized::TableSyntax
+
   describe 'References' do
     let(:project) { create(:project, :public) }
     let(:issue)   { create(:issue, project: project) }
@@ -129,6 +131,49 @@ RSpec.describe Banzai::Pipeline::FullPipeline do
       output = described_class.to_html(invalid_markdown, project: project)
 
       expect(output).to include("test [[<em>TOC</em>]]")
+    end
+  end
+
+  describe 'backslash escapes' do
+    let_it_be(:project) { create(:project, :public) }
+    let_it_be(:issue)   { create(:issue, project: project) }
+
+    it 'does not convert an escaped reference' do
+      markdown = "\\#{issue.to_reference}"
+      output = described_class.to_html(markdown, project: project)
+
+      expect(output).to include("<gl-literal>#</gl-literal>#{issue.iid}")
+    end
+
+    # https://spec.commonmark.org/0.29/#backslash-escapes
+    it 'converts all ASCII punctuation to literals', :aggregate_failures do
+      markdown = %q(\!\"\#\$\%\&\'\*\+\,\-\.\/\:\;\<\=\>\?\@\[\]\^\_\`\{\|\}\~) + %q[\(\)\\\\]
+      punctuation = %w(! " # $ % &amp; ' * + , - . / : ; &lt; = &gt; ? @ [ \\ ] ^ _ ` { | } ~ ) + %w[( )]
+
+      output = described_class.to_html(markdown, project: project)
+
+      punctuation.each { |char| expect(output).to include("<gl-literal>#{char}</gl-literal>") }
+    end
+
+    describe 'escaped characters are treated as regular characters and do not have their usual Markdown meanings' do
+      where(:markdown, :expected) do
+        %q(\*not emphasized*)              | %q(<gl-literal>*</gl-literal>not emphasized*)
+        %q(\<br/> not a tag)               | %q(<gl-literal>&lt;</gl-literal>br/&gt; not a tag)
+        %q!\[not a link](/foo)!            | %q!<gl-literal>[</gl-literal>not a link](/foo)!
+        %q(\`not code`)                    | %q(<gl-literal>`</gl-literal>not code`)
+        %q(1\. not a list)                 | %q(1<gl-literal>.</gl-literal> not a list)
+        %q(\# not a heading)               | %q(<gl-literal>#</gl-literal> not a heading)
+        %q(\[foo]: /url "not a reference") | %q(<gl-literal>[</gl-literal>foo]: /url "not a reference")
+        %q(\&ouml; not a character entity) | %q(<gl-literal>&amp;</gl-literal>ouml; not a character entity)
+      end
+
+      with_them do
+        it 'keeps them as literals' do
+          output = described_class.to_html(markdown, project: project)
+
+          expect(output).to include(expected)
+        end
+      end
     end
   end
 end

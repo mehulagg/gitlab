@@ -28,6 +28,9 @@ module Banzai
         whitelist[:attributes]['li'] = %w(id)
         whitelist[:transformers].push(self.class.remove_non_footnote_ids)
 
+        # Allow our custom `gl-literal` element
+        whitelist[:elements].push('gl-literal')
+
         whitelist
       end
 
