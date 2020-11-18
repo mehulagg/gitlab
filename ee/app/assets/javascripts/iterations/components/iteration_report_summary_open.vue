@@ -45,7 +45,11 @@ export default {
   },
   data() {
     return {
-      issues: {},
+      issues: {
+        assigned: 0,
+        open: 0,
+        closed: 0,
+      },
     };
   },
   computed: {
@@ -72,17 +76,14 @@ export default {
         {
           title: __('Completed'),
           value: this.issues.open,
-          icon: true,
         },
         {
           title: __('Incomplete'),
           value: this.issues.assigned,
-          icon: true,
         },
         {
           title: __('Unstarted'),
           value: this.issues.closed,
-          icon: true,
         },
       ];
     },

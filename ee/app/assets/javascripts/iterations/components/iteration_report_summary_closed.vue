@@ -38,7 +38,11 @@ export default {
   },
   data() {
     return {
-      issues: {},
+      issues: {
+        complete: 0,
+        incomplete: 0,
+        total: 0,
+      },
     };
   },
   computed: {
