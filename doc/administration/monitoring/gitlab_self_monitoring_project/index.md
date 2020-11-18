@@ -39,7 +39,7 @@ metrics exposed by the [GitLab exporter](../prometheus/gitlab_metrics.md#metrics
 ## Deleting the self monitoring project
 
 CAUTION: **Warning:**
-If you delete the self monitoring project, you will lose any changes made to the
+Deleting the self monitoring project deletes any changes made to the
 project. If you create the project again, it is created in its default state.
 
 1. Navigate to **Admin Area > Settings > Metrics and profiling**, and expand the **Self monitoring** section.
