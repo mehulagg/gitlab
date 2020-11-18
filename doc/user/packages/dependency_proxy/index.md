@@ -34,7 +34,7 @@ For a list of planned additions, view the
 
 ## Enable the Dependency Proxy
 
-For instructions on enabling the Dependency Proxy on Self-Managed instances, refer to the [Dependency Proxy administration](https://docs.gitlab.com/ee/administration/packages/dependency_proxy.html) page.
+For instructions on enabling the Dependency Proxy on Self-Managed instances, refer to the [Dependency Proxy administration](../../../administration/packages/dependency_proxy.html) page.
 
 ## View the Dependency Proxy
 
