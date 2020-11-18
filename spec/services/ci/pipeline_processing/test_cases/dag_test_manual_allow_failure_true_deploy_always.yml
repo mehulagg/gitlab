@@ -13,7 +13,7 @@ config:
 
 init:
   expect:
-    pipeline: created
+    pipeline: manual
     stages:
       test: skipped
       deploy: created
@@ -22,6 +22,3 @@ init:
       deploy: created
 
 transitions: []
-
-# TODO: should we run `deploy`?
-# Further discussions: https://gitlab.com/gitlab-org/gitlab/-/issues/213080

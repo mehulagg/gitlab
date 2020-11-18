@@ -32,7 +32,7 @@ module Ci
 
         # This methods gets composite status of all processables
         def status_of_all
-          status_for_array(all_statuses, dag: false)
+          status_for_array(all_statuses, dag: false, pipeline: true)
         end
 
         # This methods gets composite status for processables with given names
@@ -76,9 +76,9 @@ module Ci
 
         private
 
-        def status_for_array(statuses, dag:)
+        def status_for_array(statuses, dag:, pipeline: false)
           result = Gitlab::Ci::Status::Composite
-            .new(statuses, dag: dag)
+            .new(statuses, dag: dag, pipeline: pipeline)
             .status
           result || 'success'
         end

@@ -67,7 +67,7 @@ transitions:
   - event: success
     jobs: [test]
     expect:
-      pipeline: running
+      pipeline: manual
       stages:
         build: success
         test: success

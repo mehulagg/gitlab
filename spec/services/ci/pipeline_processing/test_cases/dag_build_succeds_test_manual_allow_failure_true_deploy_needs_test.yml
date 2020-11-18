@@ -30,7 +30,7 @@ transitions:
   - event: success
     jobs: [build]
     expect:
-      pipeline: running
+      pipeline: manual
       stages:
         build: success
         test: skipped

@@ -7,7 +7,7 @@ module Gitlab
         include Gitlab::Utils::StrongMemoize
 
         # This class accepts an array of arrays/hashes/or objects
-        def initialize(all_statuses, with_allow_failure: true, dag: false)
+        def initialize(all_statuses, with_allow_failure: true, dag: false, pipeline: false)
           unless all_statuses.respond_to?(:pluck)
             raise ArgumentError, "all_statuses needs to respond to `.pluck`"
           end
@@ -16,6 +16,7 @@ module Gitlab
           @status_key = 0
           @allow_failure_key = 1 if with_allow_failure
           @dag = dag
+          @pipeline = pipeline
 
           consume_all_statuses(all_statuses)
         end
@@ -38,6 +39,14 @@ module Gitlab
             elsif @dag && !only_of?(:success, :failed, :canceled, :skipped, :success_with_warnings)
               # DAG is blocked from executing if a dependent is not "complete"
               'pending'
+            elsif @pipeline &&
+                    all_of?(:ignored, :created) &&
+                    only_of?(:success, :failed, :canceled, :skipped, :success_with_warnings, :ignored, :created)
+              # This condition means that this pipeline has a manual job with `allow_failure:true`,
+              # and that manual job is needed by a DAG job.
+              # The status of the manual job is (manual-allow_failure:true) => `ignored`.
+              # The status of the DAG job is `created`.
+              'manual'
             elsif only_of?(:skipped, :ignored)
               'skipped'
             elsif only_of?(:success, :skipped, :success_with_warnings, :ignored)
@@ -90,6 +99,10 @@ module Gitlab
             matching == @status_set.size
         end
 
+        def all_of?(*names)
+          names.all? { |name| @status_set.include?(name) }
+        end
+
         def consume_all_statuses(all_statuses)
           columns = []
           columns[@status_key] = :status
@@ -105,9 +118,9 @@ module Gitlab
           description = Array(description)
 
           status =
-            if success_with_warnings?(description)
+            if success_with_warnings?(description) # failed/canceled with allow_failure:true
               :success_with_warnings
-            elsif ignored_status?(description)
+            elsif ignored_status?(description) # manual with allow_failure:true
               :ignored
             else
               description[@status_key].to_sym

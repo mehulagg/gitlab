@@ -12,7 +12,7 @@ config:
 
 init:
   expect:
-    pipeline: created
+    pipeline: manual
     stages:
       test: skipped
       deploy: created
@@ -53,6 +53,3 @@ transitions:
       jobs:
         test: failed
         deploy: pending
-
-# TOOD: should we run deploy?
-# Further discussions: https://gitlab.com/gitlab-org/gitlab/-/issues/213080

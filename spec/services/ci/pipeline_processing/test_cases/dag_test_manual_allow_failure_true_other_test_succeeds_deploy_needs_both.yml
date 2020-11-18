@@ -29,7 +29,7 @@ transitions:
   - event: success
     jobs: [test1]
     expect:
-      pipeline: running
+      pipeline: manual
       stages:
         test: success
         deploy: created
@@ -37,6 +37,3 @@ transitions:
         test1: success
         test2: manual
         deploy: created
-
-# TODO: should deploy run?
-# Further discussions: https://gitlab.com/gitlab-org/gitlab/-/issues/213080
