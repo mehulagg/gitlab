@@ -6,6 +6,7 @@ module SortingPreference
 
   def set_sort_order(field = nil, default_order = nil)
     sort_field = field || sorting_field
+
     set_sort_order_from_user_preference(sort_field) ||
       set_sort_order_from_cookie(sort_field) ||
       params[:sort] ||
