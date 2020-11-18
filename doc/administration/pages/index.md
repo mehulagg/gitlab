@@ -415,9 +415,6 @@ internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 
 ### Using a custom Certificate Authority (CA)
 
-NOTE: **Note:**
-[Before 13.3](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4411), when using Omnibus, a [workaround was required](https://docs.gitlab.com/13.1/ee/administration/pages/index.html#using-a-custom-certificate-authority-ca).
-
 When using certificates issued by a custom CA, [Access Control](../../user/project/pages/pages_access_control.md#gitlab-pages-access-control) and
 the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#browsing-artifacts)
 will fail to work if the custom CA is not recognized.
@@ -556,7 +553,6 @@ database encryption. Proceed with caution.
 1. On the **GitLab server**, to enable Pages, add the following to `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   gitlab_pages['enable'] = true
    pages_external_url "http://<pages_server_URL>"
    ```
 
@@ -587,18 +583,11 @@ database encryption. Proceed with caution.
    to include:
 
    ```ruby
-   external_url 'http://<gitlab_server_IP_or_URL>'
+   roles ['pages_role']
+
    pages_external_url "http://<pages_server_URL>"
-   postgresql['enable'] = false
-   redis['enable'] = false
-   prometheus['enable'] = false
-   puma['enable'] = false
-   sidekiq['enable'] = false
-   gitlab_workhorse['enable'] = false
-   gitaly['enable'] = false
-   alertmanager['enable'] = false
-   node_exporter['enable'] = false
-   gitlab_rails['auto_migrate'] = false
+
+   gitlab_pages['gitlab_server'] = 'http://<gitlab_server_IP_or_URL>'
    ```
 
 1. Create a backup of the secrets file on the **Pages server**:

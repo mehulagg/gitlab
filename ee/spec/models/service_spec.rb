@@ -3,32 +3,32 @@
 require 'spec_helper'
 
 RSpec.describe Service do
-  describe 'Available services' do
-    let(:ee_services) do
-      %w[
-        github
-        jenkins
-      ]
-    end
+  let(:ee_project_services) do
+    %w[
+      github
+      jenkins
+    ]
+  end
 
-    it { expect(described_class.available_services_names).to include(*ee_services) }
+  describe '.available_services_names' do
+    it { expect(described_class.available_services_names).to include(*ee_project_services) }
   end
 
   describe '.project_specific_services_names' do
     before do
-      allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
+      allow(::Gitlab).to receive(:com?).and_return(com)
     end
 
-    context 'when not on gitlab.com and not in development environment' do
-      let(:dev_env_or_com) { false }
+    context 'when not on gitlab.com' do
+      let(:com) { false }
 
-      it { expect(described_class.project_specific_services_names).to eq([]) }
+      it { expect(described_class.project_specific_services_names).to match_array(ee_project_services) }
     end
 
-    context 'when on gitlab.com or in dev environment' do
-      let(:dev_env_or_com) { true }
+    context 'when on gitlab.com' do
+      let(:com) { true }
 
-      it { expect(described_class.project_specific_services_names).to eq(%w[gitlab_slack_application]) }
+      it { expect(described_class.project_specific_services_names).to match_array(ee_project_services + ['gitlab_slack_application']) }
     end
   end
 end

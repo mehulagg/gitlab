@@ -31,15 +31,6 @@ module EE
       end
     end
 
-    override :issue_closed_link
-    def issue_closed_link(issue, current_user, css_class: '')
-      if issue.promoted? && can?(current_user, :read_epic, issue.promoted_to_epic)
-        link_to(s_('IssuableStatus|promoted'), issue.promoted_to_epic, class: css_class)
-      else
-        super
-      end
-    end
-
     def issue_in_subepic?(issue, epic_id)
       # This helper is used if a list of issues are filtered by epic id
       return false if epic_id.blank?
@@ -55,9 +46,27 @@ module EE
       issue.incident? && issue.project.feature_available?(:incident_timeline_view)
     end
 
+    # OVERRIDES
+
     override :scoped_labels_available?
     def scoped_labels_available?(parent)
       parent.feature_available?(:scoped_labels)
+    end
+
+    override :issue_closed_link
+    def issue_closed_link(issue, current_user, css_class: '')
+      if issue.promoted? && can?(current_user, :read_epic, issue.promoted_to_epic)
+        link_to(s_('IssuableStatus|promoted'), issue.promoted_to_epic, class: css_class)
+      else
+        super
+      end
+    end
+
+    override :issue_header_actions_data
+    def issue_header_actions_data(project, issuable, current_user)
+      actions = super
+      actions[:can_promote_to_epic] = issuable.can_be_promoted_to_epic?(current_user).to_s
+      actions
     end
   end
 end

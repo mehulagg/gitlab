@@ -6,6 +6,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
   include Gitlab::Routing.url_helpers
 
   let(:project) { create(:project, :repository) }
+  let(:project_with_no_repo) { create(:project) }
   let(:current_user) { create(:user) }
 
   it 'presents the given project' do
@@ -39,6 +40,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
     it 'includes the path to gitlab_ci history' do
       expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
+    end
+
+    context 'when the project is empty' do
+      subject { described_class.new(project_with_no_repo, auto_fix_permission: true, current_user: current_user).to_html_data_attribute }
+
+      it 'includes a blank gitlab_ci history path' do
+        expect(subject[:gitlab_ci_history_path]).to eq('')
+      end
     end
 
     context "when the latest default branch pipeline's source is auto devops" do

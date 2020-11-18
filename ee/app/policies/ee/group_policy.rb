@@ -114,7 +114,10 @@ module EE
         enable :download_wiki_code
       end
 
-      rule { guest }.enable :read_wiki
+      rule { guest }.policy do
+        enable :read_wiki
+        enable :read_group_release_stats
+      end
 
       rule { reporter }.policy do
         enable :admin_list

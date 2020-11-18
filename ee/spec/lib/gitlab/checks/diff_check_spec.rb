@@ -60,6 +60,18 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         it 'returns false' do
           expect(validate_code_owners).to eq(false)
         end
+
+        context 'when push_rules_supersede_code_owners is disabled' do
+          before do
+            stub_feature_flags(push_rules_supersede_code_owners: false)
+          end
+
+          it 'returns branch_requires_code_owner_approval?' do
+            expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+            expect(validate_code_owners).to eq(true)
+          end
+        end
       end
     end
 

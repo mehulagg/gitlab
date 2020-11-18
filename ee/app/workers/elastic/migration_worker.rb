@@ -34,6 +34,8 @@ module Elastic
         completed = migration.completed?
         logger.info "MigrationWorker: migration[#{migration.name}] updating with completed: #{completed}"
         migration.save!(completed: completed)
+
+        Elastic::DataMigrationService.drop_migration_has_finished_cache!(migration)
       end
     end
 

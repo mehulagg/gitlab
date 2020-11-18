@@ -312,6 +312,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         expect(body).to start_with('<span id="LC1" class="line" lang="json">')
         expect(body).to include('<span class="nl">"license_key"</span>')
         expect(body).to include("<span class=\"s2\">\"#{yesterday.to_date}\"</span>")
+        expect(body).to include("<span class=\"s2\">\"#{yesterday.iso8601}\"</span>")
         expect(body).to include("<span class=\"mi\">#{max_count}</span>")
         expect(body).to include("<span class=\"mi\">#{current_count}</span>")
       end

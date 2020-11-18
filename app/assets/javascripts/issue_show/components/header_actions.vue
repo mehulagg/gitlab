@@ -1,11 +1,13 @@
 <script>
 import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlLink, GlModal } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
-import createFlash from '~/flash';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import { IssuableType } from '~/issuable_show/constants';
 import { IssuableStatus, IssueStateEvent } from '~/issue_show/constants';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
+import promoteToEpicMutation from '../queries/promote_to_epic.mutation.graphql';
 import updateIssueMutation from '../queries/update_issue.mutation.graphql';
 
 export default {
@@ -24,8 +26,19 @@ export default {
     text: __('Yes, close issue'),
     attributes: [{ variant: 'warning' }],
   },
+  i18n: {
+    promoteErrorMessage: __(
+      'Something went wrong while promoting the issue to an epic. Please try again.',
+    ),
+    promoteSuccessMessage: __(
+      'The issue was successfully promoted to an epic. Redirecting to epic...',
+    ),
+  },
   inject: {
     canCreateIssue: {
+      default: false,
+    },
+    canPromoteToEpic: {
       default: false,
     },
     canReopenIssue: {
@@ -73,6 +86,9 @@ export default {
       return this.isClosed
         ? sprintf(__('Reopen %{issueType}'), { issueType: this.issueType })
         : sprintf(__('Close %{issueType}'), { issueType: this.issueType });
+    },
+    qaSelector() {
+      return this.isClosed ? 'reopen_issue_button' : 'close_issue_button';
     },
     buttonVariant() {
       return this.isClosed ? 'default' : 'warning';
@@ -135,6 +151,37 @@ export default {
           this.isUpdatingState = false;
         });
     },
+    promoteToEpic() {
+      this.isUpdatingState = true;
+
+      this.$apollo
+        .mutate({
+          mutation: promoteToEpicMutation,
+          variables: {
+            input: {
+              iid: this.iid,
+              projectPath: this.projectPath,
+            },
+          },
+        })
+        .then(({ data }) => {
+          if (data.promoteToEpic.errors.length) {
+            createFlash({ message: data.promoteToEpic.errors.join('; ') });
+            return;
+          }
+
+          createFlash({
+            message: this.$options.i18n.promoteSuccessMessage,
+            type: FLASH_TYPES.SUCCESS,
+          });
+
+          visitUrl(data.promoteToEpic.epic.webPath);
+        })
+        .catch(() => createFlash({ message: this.$options.i18n.promoteErrorMessage }))
+        .finally(() => {
+          this.isUpdatingState = false;
+        });
+    },
   },
 };
 </script>
@@ -151,6 +198,9 @@ export default {
       </gl-dropdown-item>
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
+      </gl-dropdown-item>
+      <gl-dropdown-item v-if="canPromoteToEpic" :disabled="isUpdatingState" @click="promoteToEpic">
+        {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">
         {{ __('Report abuse') }}
@@ -169,6 +219,7 @@ export default {
       v-if="showToggleIssueStateButton"
       class="gl-display-none gl-display-sm-inline-flex!"
       category="secondary"
+      :data-qa-selector="qaSelector"
       :loading="isUpdatingState"
       :variant="buttonVariant"
       @click="toggleIssueState"
@@ -189,6 +240,14 @@ export default {
 
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
+      </gl-dropdown-item>
+      <gl-dropdown-item
+        v-if="canPromoteToEpic"
+        :disabled="isUpdatingState"
+        data-testid="promote-button"
+        @click="promoteToEpic"
+      >
+        {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">
         {{ __('Report abuse') }}

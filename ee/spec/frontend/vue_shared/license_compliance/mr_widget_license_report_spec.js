@@ -333,12 +333,6 @@ describe('License Report MR Widget', () => {
     });
   });
 
-  it('should render set approval modal', () => {
-    mountComponent();
-
-    expect(wrapper.find('#modal-set-license-approval')).not.toBeNull();
-  });
-
   it('should init store after mount', () => {
     const actions = {
       setAPISettings: jest.fn(),

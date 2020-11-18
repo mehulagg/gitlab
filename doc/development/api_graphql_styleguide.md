@@ -397,7 +397,7 @@ field :foo, GraphQL::STRING_TYPE,
                    'if `my_feature_flag` feature flag is disabled'
 
 def foo
-  object.foo unless Feature.enabled?(:my_feature_flag, object)
+  object.foo if Feature.enabled?(:my_feature_flag, object)
 end
 ```
 
@@ -756,7 +756,7 @@ To find objects to display in a field, we can add resolvers to
 Arguments can be defined within the resolver in the same way as in a mutation.
 See the [Mutation arguments](#object-identifier-arguments) section.
 
-To limit the amount of queries performed, we can use `BatchLoader`.
+To limit the amount of queries performed, we can use [BatchLoader](graphql_guide/batchloader.md).
 
 ### Writing resolvers
 

@@ -543,6 +543,7 @@ RSpec.describe Vulnerabilities::Finding do
         project: project
       )
     end
+
     let_it_be(:feedback) do
       create(
         :vulnerability_feedback,

@@ -9,23 +9,25 @@
     {
       "id": "MIT",
       "name": "MIT License",
-      "url": "https://opensource.org/licenses/MIT"
+      "url": "http://opensource.org/licenses/mit-license"
     }
   ],
   "dependencies": [
     {
-      "name": "actioncable",
-      "version": "6.0.3.3",
-      "package_manager": "bundler",
-      "path": "Gemfile.lock",
-      "licenses": ["MIT"]
-    },
-    {
-      "name": "test_package",
+      "name": "test_dependency",
       "version": "0.1.0",
       "package_manager": "bundler",
       "path": "Gemfile.lock",
       "licenses": ["Apache-2.0"]
+    },
+    {
+      "name": "actioncable",
+      "version": "1.2",
+      "url": "http://rubyonrails.org",
+      "package_manager": "bundler",
+      "description": "WebSocket framework for Rails.",
+      "path": ".",
+      "licenses": ["MIT"]
     }
   ]
 }

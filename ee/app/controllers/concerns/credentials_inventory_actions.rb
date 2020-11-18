@@ -30,13 +30,16 @@ module CredentialsInventoryActions
   end
 
   def revoke
-    personal_access_token = PersonalAccessTokensFinder.new({ user: users, impersonation: false }, current_user).find(params[:id])
-    service = PersonalAccessTokens::RevokeService.new(current_user, token: personal_access_token).execute
-    if service.success?
-      flash[:notice] = service.message
+    personal_access_token = personal_access_token_finder.find_by_id(params[:id])
+    return render_404 unless personal_access_token
+
+    result = revoke_service(personal_access_token).execute
+
+    if result.success?
+      flash[:notice] = result.message
       notify_deleted_or_revoked_credential(personal_access_token)
     else
-      flash[:alert] = service.message
+      flash[:alert] = result.message
     end
 
     redirect_to credentials_inventory_path(page: params[:page])
@@ -46,7 +49,7 @@ module CredentialsInventoryActions
 
   def filter_credentials
     if show_personal_access_tokens?
-      ::PersonalAccessTokensFinder.new({ user: users, impersonation: false, sort: 'id_desc' }).execute
+      ::PersonalAccessTokensFinder.new({ users: users, impersonation: false, sort: 'id_desc' }).execute
     elsif show_ssh_keys?
       ::KeysFinder.new({ users: users, key_type: 'ssh' }).execute
     end
@@ -67,7 +70,27 @@ module CredentialsInventoryActions
     end
   end
 
+  def personal_access_token_finder
+    if revocable.instance_of?(Group)
+      ::PersonalAccessTokensFinder.new({ impersonation: false, users: users })
+    else
+      ::PersonalAccessTokensFinder.new({ impersonation: false }, current_user)
+    end
+  end
+
+  def revoke_service(token)
+    if revocable.instance_of?(Group)
+      ::PersonalAccessTokens::RevokeService.new(current_user, token: token, group: revocable)
+    else
+      ::PersonalAccessTokens::RevokeService.new(current_user, token: token)
+    end
+  end
+
   def users
+    raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+  end
+
+  def revocable
     raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end
 end

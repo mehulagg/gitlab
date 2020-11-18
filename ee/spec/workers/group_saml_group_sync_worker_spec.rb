@@ -12,6 +12,8 @@ RSpec.describe GroupSamlGroupSyncWorker do
     let_it_be(:group) { create(:group, parent: top_level_group) }
     let_it_be(:group_link) { create(:saml_group_link, group: group) }
 
+    let(:worker) { described_class.new }
+
     context 'when the group does not have group_saml_group_sync feature licensed' do
       before do
         create(:saml_provider, group: top_level_group, enabled: true)
@@ -44,7 +46,8 @@ RSpec.describe GroupSamlGroupSyncWorker do
         end
 
         it 'calls the sync service with the group links' do
-          stub_sync_service_expectation([top_level_group_link, group_link])
+          expect_sync_service_call(group_links: [top_level_group_link, group_link])
+          expect_metadata_logging_call({ added: 2, updated: 0, removed: 0 })
 
           perform([top_level_group_link.id, group_link.id])
         end
@@ -55,24 +58,53 @@ RSpec.describe GroupSamlGroupSyncWorker do
           described_class.new.perform(non_existing_record_id, top_level_group.id, [group_link])
         end
 
+        it 'includes groups with links in manage_group_ids' do
+          expect_sync_service_call(
+            group_links: [top_level_group_link],
+            manage_group_ids: [top_level_group.id, group.id]
+          )
+
+          perform([top_level_group_link.id])
+        end
+
         context 'when a group link falls outside the top-level group' do
           let(:outside_group_link) { create(:saml_group_link, group: create(:group)) }
 
           it 'drops group links outside the top level group' do
-            stub_sync_service_expectation([group_link])
+            expect_sync_service_call(group_links: [group_link])
+            expect_metadata_logging_call({ added: 1, updated: 0, removed: 0 })
 
             perform([outside_group_link.id, group_link])
+          end
+        end
+
+        context 'with a group in the hierarchy that has no group links' do
+          let(:group_without_links) { create(:group, parent: group) }
+
+          it 'is not included in manage_group_ids' do
+            expect_sync_service_call(group_links: [top_level_group_link, group_link])
+            expect_metadata_logging_call({ added: 2, updated: 0, removed: 0 })
+
+            perform([top_level_group_link.id, group_link.id])
           end
         end
       end
     end
 
-    def stub_sync_service_expectation(group_links)
-      expect(Groups::SyncService).to receive(:new).with(nil, user, group_links: group_links).and_call_original
+    def expect_sync_service_call(group_links:, manage_group_ids: nil)
+      manage_group_ids = [top_level_group.id, group.id] if manage_group_ids.nil?
+
+      expect(Groups::SyncService).to receive(:new).with(
+        top_level_group, user, group_links: group_links, manage_group_ids: manage_group_ids
+      ).and_call_original
+    end
+
+    def expect_metadata_logging_call(stats)
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:stats, stats)
     end
 
     def perform(group_links)
-      described_class.new.perform(user.id, top_level_group.id, group_links)
+      worker.perform(user.id, top_level_group.id, group_links)
     end
   end
 end

@@ -91,6 +91,7 @@ RSpec.describe HistoricalUserData::CsvService do
     let_it_be(:historical_datum) do
       create(:historical_data, recorded_at: license_start_date, active_user_count: 1)
     end
+
     let_it_be(:historical_datum2) do
       create(:historical_data, recorded_at: license_start_date + 1.day, active_user_count: 2)
     end

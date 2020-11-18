@@ -4,18 +4,16 @@ import initRoadmap from 'ee/roadmap/roadmap_bundle';
 import initFilteredSearch from '~/pages/search/init_filtered_search';
 import UserCallout from '~/user_callout';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initFilteredSearch({
-    page: 'epics',
-    isGroup: true,
-    isGroupDecendent: true,
-    useDefaultState: false,
-    filteredSearchTokenKeys: FilteredSearchTokenKeysEpics,
-    stateFiltersSelector: '.epics-state-filters',
-  });
-  initEpicCreateApp(true);
-  initRoadmap();
-
-  // eslint-disable-next-line no-new
-  new UserCallout({ className: 'js-epics-limit-callout' });
+initFilteredSearch({
+  page: 'epics',
+  isGroup: true,
+  isGroupDecendent: true,
+  useDefaultState: false,
+  filteredSearchTokenKeys: FilteredSearchTokenKeysEpics,
+  stateFiltersSelector: '.epics-state-filters',
 });
+initEpicCreateApp(true);
+initRoadmap();
+
+// eslint-disable-next-line no-new
+new UserCallout({ className: 'js-epics-limit-callout' });

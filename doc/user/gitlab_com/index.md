@@ -152,7 +152,7 @@ Shared runners provided by GitLab are **not** configurable. Consider [installing
 Linux shared runners on GitLab.com run in [autoscale mode](https://docs.gitlab.com/runner/configuration/autoscale.html) and are powered by Google Cloud Platform.
 Autoscaling means reduced waiting times to spin up CI/CD jobs, and isolated VMs for each project,
 thus maximizing security. They're free to use for public open source projects and limited
-to 2000 CI minutes per month per group for private projects. More minutes
+to 400 CI minutes per month per group for private projects. More minutes
 [can be purchased](../../subscriptions/gitlab_com/index.md#purchase-additional-ci-minutes), if
 needed. Read about all [GitLab.com plans](https://about.gitlab.com/pricing/).
 
@@ -635,7 +635,7 @@ You can view more information in our runbooks such as:
 By default, GitLab does not expire job logs. Job logs are retained indefinitely,
 and can't be configured on GitLab.com to expire. You can erase job logs
 [manually with the Jobs API](../../api/jobs.md#erase-a-job) or by
-[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline). 
+[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline).
 
 ## GitLab.com at scale
 

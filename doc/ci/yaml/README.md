@@ -445,10 +445,10 @@ or template includes.
 ##### Multiple files from a project
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26793) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it. **(CORE ONLY)**
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to disable it. **(CORE ONLY)**
 
 You can include multiple files from the same project:
 
@@ -461,10 +461,10 @@ include:
       - '/templates/.tests.yml'
 ```
 
-Including multiple files from the same project is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+Including multiple files from the same project is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -1350,10 +1350,11 @@ if there is no `if:` statement that limits the job to branch or merge request pi
 ##### Variables in `rules:changes`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34272) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-variables-support-in-ruleschanges). **(CORE ONLY)**
+> - It was [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/267192) in GitLab 13.6.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-variables-support-in-ruleschanges). **(CORE ONLY)**
 
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
@@ -1377,10 +1378,10 @@ The `$` character can be used for both variables and paths. For example, if the
 
 ###### Enable or disable variables support in `rules:changes` **(CORE ONLY)**
 
-Variables support in `rules:changes` is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+Variables support in `rules:changes` is under development, but is ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -3896,7 +3897,7 @@ For example, when creating a Release from a Git tag:
 job:
   release:
     tag_name: $CI_COMMIT_TAG
-    description: changelog.txt
+    description: 'Release description'
 ```
 
 It is also possible to create any unique tag, in which case `only: tags` is not mandatory.
@@ -3906,7 +3907,7 @@ A semantic versioning example:
 job:
   release:
     tag_name: ${MAJOR}_${MINOR}_${REVISION}
-    description: changelog.txt
+    description: 'Release description'
 ```
 
 - The Release is created only if the job's main script succeeds.

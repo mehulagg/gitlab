@@ -27,7 +27,10 @@ After adding a new queue, run `bin/rake
 gitlab:sidekiq:all_queues_yml:generate` to regenerate
 `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
 it can be picked up by
-[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md). 
+Additionally, run
+`bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
+`config/sidekiq_queues.yml`.
 
 ## Queue Namespaces
 
@@ -818,7 +821,7 @@ This approach requires multiple releases.
 ##### Parameter hash
 
 This approach will not require multiple releases if an existing worker already
-utilizes a parameter hash.
+uses a parameter hash.
 
 1. Use a parameter hash in the worker to allow future flexibility.
 

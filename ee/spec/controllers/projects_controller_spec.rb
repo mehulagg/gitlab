@@ -6,7 +6,7 @@ RSpec.describe ProjectsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
 
-  let(:project) { create(:project) }
+  let_it_be(:project, reload: true) { create(:project) }
 
   let_it_be(:public_project) { create(:project, :public, :repository, namespace: group) }
 
@@ -307,6 +307,48 @@ RSpec.describe ProjectsController do
           request
 
           expect(project.reload.merge_pipelines_enabled).to be_falsy
+        end
+      end
+    end
+
+    context 'when merge_trains_enabled param is specified' do
+      let(:params) { { merge_trains_enabled: true } }
+
+      let(:request) do
+        put :update, params: { namespace_id: project.namespace, id: project, project: params }
+      end
+
+      before do
+        stub_licensed_features(merge_pipelines: true, merge_trains: true)
+      end
+
+      it 'updates the attribute' do
+        request
+
+        expect(project.merge_trains_enabled).to be_truthy
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(merge_trains: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.merge_trains_enabled).to be_falsy
+        end
+      end
+
+      context 'when license is not sufficient' do
+        before do
+          stub_licensed_features(merge_trains: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.merge_trains_enabled).to be_falsy
         end
       end
     end

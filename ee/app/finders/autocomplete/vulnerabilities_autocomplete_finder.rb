@@ -20,10 +20,10 @@ module Autocomplete
     DEFAULT_AUTOCOMPLETE_LIMIT = 5
 
     def execute
-      return [] unless vulnerable.feature_available?(:security_dashboard)
+      return ::Vulnerability.none unless vulnerable.feature_available?(:security_dashboard)
 
       ::Security::VulnerabilitiesFinder # rubocop: disable CodeReuse/Finder
-        .new(vulnerable, params)
+        .new(vulnerable)
         .execute
         .autocomplete_search(params[:search].to_s)
         .with_limit(DEFAULT_AUTOCOMPLETE_LIMIT)

@@ -1,0 +1,5 @@
+---
+title: Refactor license delete confirmation modal to use Pajamas
+merge_request: 46149
+author:
+type: other

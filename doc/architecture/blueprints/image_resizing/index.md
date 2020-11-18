@@ -23,7 +23,7 @@ sequenceDiagram
         Note right of RailsApp: Width Allowlist: https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/avatarable.rb#L10
         RailsApp->>Workhorse: `send-scaled-img:` request
         Note right of RailsApp: Set `send-scaled-img:` Header
-        Workhorse->>Workhorse: Image resizing using Go lib 
+        Workhorse->>Workhorse: Image resizing using Go lib
         Workhorse->>Requester: Serve the resized image
     else All other cases
         RailsApp->>Workhorse: Usual request scenario
@@ -46,14 +46,14 @@ The MVC Avatar resizing implementation is integrated into Workhorse. With the ex
 
 ## Iterations
 
-1. [x] POC on different image resizing solutions
-1. [x] Review solutions with security team
-1. [x] Implement avatar resizing MVC
-1. [ ] Deploy, measure, monitor
-1. [ ] Clarify features for content image resizing
-1. [ ] Weigh options between using current implementation of image resizing vs new solution
-1. [ ] Implement content image resizing MVC
-1. [ ] Deploy, measure, monitor
+1. ✓ POC on different image resizing solutions
+1. ✓ Review solutions with security team
+1. ✓ Implement avatar resizing MVC
+1. Deploy, measure, monitor
+1. Clarify features for content image resizing
+1. Weigh options between using current implementation of image resizing vs new solution
+1. Implement content image resizing MVC
+1. Deploy, measure, monitor
 
 ## Who
 

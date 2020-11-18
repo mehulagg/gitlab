@@ -12,7 +12,7 @@ module EE
     end
 
     def jira_vulnerabilities_integration_enabled?
-      project.jira_vulnerabilities_integration_available? && vulnerabilities_enabled
+      project&.jira_vulnerabilities_integration_available? && vulnerabilities_enabled
     end
 
     def project_key_required?

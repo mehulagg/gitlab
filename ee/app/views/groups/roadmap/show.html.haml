@@ -9,6 +9,7 @@
 - sub_epics_feature_available = @group.feature_available?(:subepics)
 - allow_sub_epics = sub_epics_feature_available ? 'true' : 'false'
 - page_title _("Epics Roadmap")
+- add_page_specific_style 'page_bundles/roadmap'
 
 - has_filters_applied = params[:label_name].present? || params[:author_username].present? || params[:search].present?
 

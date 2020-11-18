@@ -7,6 +7,7 @@ RSpec.describe API::Issues, :mailer do
   let_it_be(:project) do
     create(:project, :public, creator_id: user.id, namespace: user.namespace)
   end
+
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
   let_it_be(:group_project) { create(:project, :public, creator_id: user.id, namespace: group) }

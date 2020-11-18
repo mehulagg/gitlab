@@ -32,7 +32,7 @@ RSpec.describe 'Two merge requests on a merge train' do
     project.add_maintainer(maintainer_1)
     project.add_maintainer(maintainer_2)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     stub_ci_pipeline_yaml_file(YAML.dump(ci_yaml))
 
     head_pipeline = double('Ci::Pipeline')

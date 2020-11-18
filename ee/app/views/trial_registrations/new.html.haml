@@ -1,5 +1,8 @@
 - page_title _('Start a Free Gold Trial')
 - add_page_specific_style 'page_bundles/signup'
+- content_for :page_specific_javascripts do
+  = render "layouts/google_tag_manager_head"
+= render "layouts/google_tag_manager_body"
 
 %h2.center.pt-6.pb-4.gl-mb-0
   = _('Start a Free Gold Trial')

@@ -124,11 +124,7 @@ RSpec.shared_examples 'write access for a read-only GitLab instance' do
 
       where(:description, :path) do
         'LFS request to batch'        | '/root/rouge.git/info/lfs/objects/batch'
-        'LFS request to locks verify' | '/root/rouge.git/info/lfs/locks/verify'
-        'LFS request to locks create' | '/root/rouge.git/info/lfs/locks'
-        'LFS request to locks unlock' | '/root/rouge.git/info/lfs/locks/1/unlock'
         'request to git-upload-pack'  | '/root/rouge.git/git-upload-pack'
-        'request to git-receive-pack' | '/root/rouge.git/git-receive-pack'
       end
 
       with_them do
@@ -138,6 +134,21 @@ RSpec.shared_examples 'write access for a read-only GitLab instance' do
 
           expect(response).not_to be_redirect
           expect(subject).not_to disallow_request
+        end
+      end
+
+      where(:description, :path) do
+        'LFS request to locks verify' | '/root/rouge.git/info/lfs/locks/verify'
+        'LFS request to locks create' | '/root/rouge.git/info/lfs/locks'
+        'LFS request to locks unlock' | '/root/rouge.git/info/lfs/locks/1/unlock'
+      end
+
+      with_them do
+        it "expects a POST #{description} URL not to be allowed" do
+          response = request.post(path)
+
+          expect(response).to be_redirect
+          expect(subject).to disallow_request
         end
       end
     end

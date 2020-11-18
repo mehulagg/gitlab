@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Global Search
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -171,7 +171,7 @@ The first step is to confirm GitLab is using Elasticsearch for the search functi
 To do this:
 
 1. Confirm the integration is enabled in **Admin Area > Settings > General**.
-1. Confirm searches utilize Elasticsearch by accessing the rails console
+1. Confirm searches use Elasticsearch by accessing the rails console
    (`sudo gitlab-rails console`) and running the following commands:
 
    ```rails

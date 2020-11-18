@@ -11,7 +11,7 @@
 
 - style = namespace_storage_alert_style(alert_level)
 - icon = namespace_storage_alert_icon(alert_level)
-- purchase_link = purchase_storage_url if can_purchase_storage_for_namespace?(namespace)
+- purchase_link = purchase_storage_url if purchase_storage_link_enabled?(namespace)
 - usage_link = namespace_storage_usage_link(root_namespace)
 - show_storage_banner_actions = purchase_link || usage_link
 

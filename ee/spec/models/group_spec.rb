@@ -1174,4 +1174,49 @@ RSpec.describe Group do
 
     it { is_expected.to match([user.email]) }
   end
+
+  describe 'Releases Stats' do
+    context 'when there are no releases' do
+      describe '#releases_count' do
+        it 'returns 0' do
+          expect(group.releases_count).to eq(0)
+        end
+      end
+
+      describe '#releases_percentage' do
+        it 'returns 0 and does not attempt to divide by 0' do
+          expect(group.releases_percentage).to eq(0)
+        end
+      end
+    end
+
+    context 'when there are some releases' do
+      before do
+        subgroup_1 = create(:group, parent: group)
+        subgroup_2 = create(:group, parent: subgroup_1)
+
+        project_in_group = create(:project, group: group)
+        _project_in_subgroup_1 = create(:project, group: subgroup_1)
+        project_in_subgroup_2 = create(:project, group: subgroup_2)
+        project_in_unrelated_group = create(:project)
+
+        create(:release, project: project_in_group)
+        create(:release, project: project_in_subgroup_2)
+        create(:release, project: project_in_unrelated_group)
+      end
+
+      describe '#releases_count' do
+        it 'counts all releases for group and descendants' do
+          expect(group.releases_count).to eq(2)
+        end
+      end
+
+      describe '#releases_percentage' do
+        it 'calculates projects with releases percentage for group and descendants' do
+          # 2 out of 3 projects have releases
+          expect(group.releases_percentage).to eq(67)
+        end
+      end
+    end
+  end
 end

@@ -2,7 +2,6 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlLink, GlIcon } from '@gitlab/ui';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
-import SetLicenseApprovalModal from 'ee/vue_shared/license_compliance/components/set_approval_status_modal.vue';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import ReportItem from '~/reports/components/report_item.vue';
@@ -20,7 +19,6 @@ export default {
     GlLink,
     ReportItem,
     ReportSection,
-    SetLicenseApprovalModal,
     SmartVirtualList,
     GlIcon,
   },
@@ -121,7 +119,6 @@ export default {
 </script>
 <template>
   <div>
-    <set-license-approval-modal />
     <report-section
       :status="licenseReportStatus"
       :loading-text="licenseSummaryText"
@@ -185,6 +182,7 @@ export default {
           :class="{ 'gl-mr-3': fullReportPath }"
           :href="licenseManagementSettingsPath"
           class="btn btn-default btn-sm js-manage-licenses"
+          data-qa-selector="manage_licenses_button"
         >
           {{ s__('ciReport|Manage licenses') }}
         </a>

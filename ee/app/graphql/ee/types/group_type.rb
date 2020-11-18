@@ -73,6 +73,12 @@ module EE
               description: 'Represents the code coverage activity for this group',
               resolver: ::Resolvers::Ci::CodeCoverageActivitiesResolver,
               feature_flag: :group_coverage_data_report_graph
+
+        field :stats,
+              ::Types::GroupStatsType,
+              null: true,
+              description: 'Group statistics',
+              method: :itself
       end
     end
   end

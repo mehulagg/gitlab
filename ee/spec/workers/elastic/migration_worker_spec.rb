@@ -67,6 +67,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
             end
 
             expect(migration).to receive(:save!).with(completed: completed)
+            expect(Elastic::DataMigrationService).to receive(:drop_migration_has_finished_cache!).with(migration)
 
             subject.perform
           end

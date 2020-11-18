@@ -43,7 +43,6 @@ export default {
     integrationFormSteps: {
       step1: {
         label: s__('AlertSettings|1. Select integration type'),
-        help: s__('AlertSettings|Learn more about our upcoming %{linkStart}integrations%{linkEnd}'),
         enterprise: s__(
           'AlertSettings|In free versions of GitLab, only one integration for each type can be added. %{linkStart}Upgrade your subscription%{linkEnd} to add additional integrations.',
         ),
@@ -55,17 +54,23 @@ export default {
       step3: {
         label: s__('AlertSettings|3. Set up webhook'),
         help: s__(
-          'AlertSettings|Utilize the URL and authorization key below to authorize an external service to send Alerts to GitLab. Review your chosen services documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint.',
+          "AlertSettings|Utilize the URL and authorization key below to authorize an external service to send alerts to GitLab. Review your external service's documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint.",
+        ),
+        prometheusHelp: s__(
+          'AlertSettings|Utilize the URL and authorization key below to authorize Prometheus to send alerts to GitLab. Review the Prometheus documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint.',
         ),
         info: s__('AlertSettings|Authorization key'),
         reset: s__('AlertSettings|Reset Key'),
       },
       step4: {
-        label: s__('AlertSettings|4. Test integration(optional)'),
+        label: s__('AlertSettings|4. Sample alert payload (optional)'),
         help: s__(
-          'AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with to send a test alert to the %{linkStart}alerts page%{linkEnd}. This payload can be used to test the integration using the "save and test payload" button.',
+          'AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This payload can be used to create a custom mapping (optional), or to test the integration (also optional).',
         ),
-        placeholder: s__('AlertSettings|Enter test alert JSON....'),
+        prometheusHelp: s__(
+          'AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This payload can be used to test the integration (optional).',
+        ),
+        placeholder: s__('AlertSettings|{ "events": [{ "application": "Name of application" }] }'),
         resetHeader: s__('AlertSettings|Reset the mapping'),
         resetBody: s__(
           "AlertSettings|If you edit the payload, the stored mapping will be reset, and you'll need to re-map the fields.",
@@ -73,11 +78,14 @@ export default {
         resetOk: s__('AlertSettings|Proceed with editing'),
         editPayload: s__('AlertSettings|Edit payload'),
         submitPayload: s__('AlertSettings|Submit payload'),
+        payloadParsedSucessMsg: s__(
+          'AlertSettings|Sample payload has been parsed. You can now map the fields.',
+        ),
       },
       step5: {
         label: s__('AlertSettings|5. Map fields (optional)'),
         intro: s__(
-          'AlertSettings|The default GitLab alert keys are listed below. In the event an exact match could be found in the sample payload provided, that key will be mapped automatically. In all other cases, please define which payload key should map to the specified GitLab key. Any payload keys not shown in this list will not display in the alert list, but will display on the alert details page.',
+          "AlertSettings|If you've provided a sample alert payload, you can create a custom mapping for your endpoint. The default GitLab alert keys are listed below. Please define which payload key should map to the specified GitLab key.",
         ),
       },
       prometheusFormUrl: {
@@ -93,7 +101,7 @@ export default {
       opsgenie: {
         label: s__('AlertSettings|2. Add link to your Opsgenie alert list'),
         info: s__(
-          'AlertSettings|Utilizing this option will link the GitLab Alerts navigation item to your exisiting Opsgenie instance. By selecting this option, you cannot recieve alerts from any other source in GitLab; it will effectivley be turing Alerts within GitLab off as a feature.',
+          'AlertSettings|Utilizing this option will link the GitLab Alerts navigation item to your existing Opsgenie instance. By selecting this option, you cannot receive alerts from any other source in GitLab; it will effectively be turning Alerts within GitLab off as a feature.',
         ),
       },
     },
@@ -138,6 +146,12 @@ export default {
       type: Boolean,
       required: true,
     },
+    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+    canManageOpsgenie: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   apollo: {
     currentIntegration: {
@@ -162,12 +176,22 @@ export default {
     };
   },
   computed: {
+    isPrometheus() {
+      return this.selectedIntegration === this.$options.typeSet.prometheus;
+    },
     jsonIsValid() {
       return this.integrationTestPayload.error === null;
     },
     // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
     disabledIntegrations() {
-      return this.opsgenie.active ? [typeSet.http, typeSet.prometheus] : [typeSet.opsgenie];
+      const options = [];
+      if (this.opsgenie.active) {
+        options.push(typeSet.http, typeSet.prometheus);
+      } else if (!this.canManageOpsgenie) {
+        options.push(typeSet.opsgenie);
+      }
+
+      return options;
     },
     options() {
       return integrationTypesNew.map(el => ({
@@ -211,10 +235,10 @@ export default {
       );
     },
     mappingBuilderFields() {
-      return this.customMapping?.samplePayload?.payloadAlerFields?.nodes || [];
+      return this.customMapping?.samplePayload?.payloadAlerFields?.nodes;
     },
     mappingBuilderMapping() {
-      return this.customMapping?.storedMapping?.nodes || [];
+      return this.customMapping?.storedMapping?.nodes;
     },
     hasSamplePayload() {
       return Boolean(this.customMapping?.samplePayload);
@@ -246,10 +270,13 @@ export default {
       }
 
       // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      if (this.opsgenie.active && this.selectedIntegration === typeSet.opsgenie) {
+      if (this.canManageOpsgenie && this.selectedIntegration === typeSet.opsgenie) {
         this.isManagingOpsgenie = true;
         this.active = this.opsgenie.active;
         this.integrationForm.apiUrl = this.opsgenie.opsgenieMvcTargetUrl;
+      } else {
+        // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+        this.isManagingOpsgenie = false;
       }
     },
     // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
@@ -316,6 +343,9 @@ export default {
         error: null,
       };
       this.active = false;
+
+      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
+      this.isManagingOpsgenie = false;
     },
     resetAuthKey() {
       if (!this.currentIntegration) {
@@ -352,6 +382,8 @@ export default {
           this.customMapping = res;
           this.integrationTestPayload.json = res?.samplePayload.body;
           this.resetSamplePayloadConfirmed = false;
+
+          this.$toast.show(this.$options.i18n.integrationFormSteps.step4.payloadParsedSucessMsg);
         })
         .finally(() => {
           this.parsingPayload = false;
@@ -382,13 +414,6 @@ export default {
         :options="options"
         @change="integrationTypeSelect"
       />
-
-      <div class="gl-my-4">
-        <alert-settings-form-help-block
-          :message="$options.i18n.integrationFormSteps.step1.help"
-          link="https://gitlab.com/groups/gitlab-org/-/epics/4390"
-        />
-      </div>
 
       <div v-if="!canAddIntegration" class="gl-my-4" data-testid="multi-integrations-not-supported">
         <alert-settings-form-help-block
@@ -446,7 +471,11 @@ export default {
           label-for="integration-webhook"
         >
           <alert-settings-form-help-block
-            :message="$options.i18n.integrationFormSteps.step3.help"
+            :message="
+              isPrometheus
+                ? $options.i18n.integrationFormSteps.step3.prometheusHelp
+                : $options.i18n.integrationFormSteps.step3.help
+            "
             link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
           />
 
@@ -457,8 +486,8 @@ export default {
             class="gl-my-4 gl-font-weight-normal"
           />
 
-          <div v-if="selectedIntegration === $options.typeSet.prometheus" class="gl-my-4">
-            <span>
+          <div v-if="isPrometheus" class="gl-my-4">
+            <span class="gl-font-weight-bold">
               {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
             </span>
 
@@ -466,7 +495,7 @@ export default {
               id="integration-apiUrl"
               v-model="integrationForm.apiUrl"
               type="text"
-              :placeholder="$options.targetPrometheusUrlPlaceholder"
+              :placeholder="$options.placeholders.prometheus"
             />
 
             <span class="gl-text-gray-400">
@@ -475,7 +504,7 @@ export default {
           </div>
 
           <div class="gl-my-4">
-            <span>
+            <span class="gl-font-weight-bold">
               {{ s__('AlertSettings|Webhook URL') }}
             </span>
 
@@ -491,13 +520,13 @@ export default {
           </div>
 
           <div class="gl-my-4">
-            <span>
+            <span class="gl-font-weight-bold">
               {{ $options.i18n.integrationFormSteps.step3.info }}
             </span>
 
             <gl-form-input-group
               id="authorization-key"
-              class="gl-mb-2"
+              class="gl-mb-3"
               readonly
               :value="integrationForm.token"
             >
@@ -510,7 +539,7 @@ export default {
               </template>
             </gl-form-input-group>
 
-            <gl-button v-gl-modal.authKeyModal :disabled="!active" class="gl-mt-3">
+            <gl-button v-gl-modal.authKeyModal :disabled="!active">
               {{ $options.i18n.integrationFormSteps.step3.reset }}
             </gl-button>
             <gl-modal
@@ -524,14 +553,20 @@ export default {
             </gl-modal>
           </div>
         </gl-form-group>
+
         <gl-form-group
           id="test-integration"
           :label="$options.i18n.integrationFormSteps.step4.label"
           label-for="test-integration"
+          :class="{ 'gl-mb-0!': showMappingBuilder }"
           :invalid-feedback="integrationTestPayload.error"
         >
           <alert-settings-form-help-block
-            :message="$options.i18n.integrationFormSteps.step4.help"
+            :message="
+              isPrometheus || !showMappingBuilder
+                ? $options.i18n.integrationFormSteps.step4.prometheusHelp
+                : $options.i18n.integrationFormSteps.step4.help
+            "
             :link="generic.alertsUsageUrl"
           />
 
@@ -541,69 +576,61 @@ export default {
             :disabled="isPayloadEditDisabled"
             :state="jsonIsValid"
             :placeholder="$options.i18n.integrationFormSteps.step4.placeholder"
-            class="gl-my-4"
+            class="gl-my-3"
             :debounce="$options.JSON_VALIDATE_DELAY"
             rows="6"
             max-rows="10"
             @input="validateJson"
           />
-
-          <template v-if="showMappingBuilder">
-            <gl-button
-              v-if="canEditPayload"
-              v-gl-modal.resetPayloadModal
-              :disabled="!active"
-              class="gl-mt-3"
-            >
-              {{ $options.i18n.integrationFormSteps.step4.editPayload }}
-            </gl-button>
-
-            <gl-button
-              v-else
-              :disabled="!active"
-              :loading="parsingPayload"
-              class="gl-mt-3"
-              @click="parseMapping"
-            >
-              {{ $options.i18n.integrationFormSteps.step4.submitPayload }}
-            </gl-button>
-            <gl-modal
-              modal-id="resetPayloadModal"
-              :title="$options.i18n.integrationFormSteps.step4.resetHeader"
-              :ok-title="$options.i18n.integrationFormSteps.step4.resetOk"
-              ok-variant="danger"
-              @ok="resetSamplePayloadConfirmed = true"
-            >
-              {{ $options.i18n.integrationFormSteps.step4.resetBody }}
-            </gl-modal>
-          </template>
         </gl-form-group>
+
+        <template v-if="showMappingBuilder">
+          <gl-button
+            v-if="canEditPayload"
+            v-gl-modal.resetPayloadModal
+            data-testid="payload-action-btn"
+            :disabled="!active"
+            class="gl-mt-3"
+          >
+            {{ $options.i18n.integrationFormSteps.step4.editPayload }}
+          </gl-button>
+
+          <gl-button
+            v-else
+            data-testid="payload-action-btn"
+            :class="{ 'gl-mt-3': integrationTestPayload.error }"
+            :disabled="!active"
+            :loading="parsingPayload"
+            @click="parseMapping"
+          >
+            {{ $options.i18n.integrationFormSteps.step4.submitPayload }}
+          </gl-button>
+          <gl-modal
+            modal-id="resetPayloadModal"
+            :title="$options.i18n.integrationFormSteps.step4.resetHeader"
+            :ok-title="$options.i18n.integrationFormSteps.step4.resetOk"
+            ok-variant="danger"
+            @ok="resetSamplePayloadConfirmed = true"
+          >
+            {{ $options.i18n.integrationFormSteps.step4.resetBody }}
+          </gl-modal>
+        </template>
 
         <gl-form-group
           v-if="showMappingBuilder"
           id="mapping-builder"
+          class="gl-mt-5"
           :label="$options.i18n.integrationFormSteps.step5.label"
           label-for="mapping-builder"
         >
-          <span class="gl-text-gray-500">{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
+          <span>{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
           <mapping-builder
             :payload-fields="mappingBuilderFields"
             :mapping="mappingBuilderMapping"
           />
         </gl-form-group>
       </div>
-      <div class="gl-display-flex gl-justify-content-end">
-        <gl-button type="reset" class="gl-mr-3 js-no-auto-disable">{{ __('Cancel') }}</gl-button>
-        <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
-        <gl-button
-          data-testid="integration-test-and-submit"
-          :disabled="Boolean(integrationTestPayload.error) || isManagingOpsgenie"
-          category="secondary"
-          variant="success"
-          class="gl-mr-1 js-no-auto-disable"
-          @click="submitWithTestPayload"
-          >{{ s__('AlertSettings|Save and test payload') }}</gl-button
-        >
+      <div class="gl-display-flex gl-justify-content-start gl-py-3">
         <gl-button
           type="submit"
           variant="success"
@@ -611,6 +638,23 @@ export default {
           data-testid="integration-form-submit"
           >{{ s__('AlertSettings|Save integration') }}
         </gl-button>
+        <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
+        <gl-button
+          v-if="!isManagingOpsgenie"
+          data-testid="integration-test-and-submit"
+          :disabled="Boolean(integrationTestPayload.error)"
+          category="secondary"
+          variant="success"
+          class="gl-mx-3 js-no-auto-disable"
+          @click="submitWithTestPayload"
+          >{{ s__('AlertSettings|Save and test payload') }}</gl-button
+        >
+        <gl-button
+          type="reset"
+          class="js-no-auto-disable"
+          :class="{ 'gl-ml-3': isManagingOpsgenie }"
+          >{{ __('Cancel') }}</gl-button
+        >
       </div>
     </gl-collapse>
   </gl-form>

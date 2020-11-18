@@ -80,16 +80,6 @@ RSpec.describe SearchHelper do
         it 'does not include iterations endpoint in dashboard context' do
           expect(options[:data]['iterations-endpoint']).to be(nil)
         end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(filter_bar_iterations: false)
-          end
-
-          it 'does not include iterations endpoint' do
-            expect(options[:data]['iterations-endpoint']).to be(nil)
-          end
-        end
       end
 
       context 'when iterations are not available' do

@@ -1,0 +1,6 @@
+---
+title: Chain of custody reports in the compliance dashboard can now also be generated
+  for a specific merge commit.
+merge_request: 46994
+author:
+type: changed

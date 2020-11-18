@@ -9,6 +9,7 @@ RSpec.describe Gitlab::Audit::Events::Preloader do
       create(:audit_event, created_at: 1.day.ago)
     ]
   end
+
   let(:audit_events_relation) { AuditEvent.where(id: audit_events.map(&:id)) }
 
   describe '.preload!' do

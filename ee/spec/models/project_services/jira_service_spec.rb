@@ -40,6 +40,12 @@ RSpec.describe JiraService do
   describe 'jira_vulnerabilities_integration_enabled?' do
     subject(:jira_vulnerabilities_integration_enabled) { jira_service.jira_vulnerabilities_integration_enabled? }
 
+    context 'when integration is not configured for the project' do
+      let(:options) { { project: nil } }
+
+      it { is_expected.to be_falsey }
+    end
+
     context 'when jira integration is not available for the project' do
       before do
         allow(jira_service.project).to receive(:jira_vulnerabilities_integration_available?).and_return(false)
