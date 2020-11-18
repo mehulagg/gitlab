@@ -18,7 +18,9 @@ the feature flag is set to enabled. If the feature contains any database migrati
 *should* include a changelog entry for the database changes.
 
 DANGER: **Warning:**
-Feature flags **must** be used in the MR that introduces them, or it will result in a [broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due to the `rspec:feature-flags` job that only runs on master.
+Feature flags **must** be used in the MR that introduces them. Not doing so causes a
+[broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
+to the `rspec:feature-flags` job that only runs on the `master` branch.
 
 CAUTION: **Caution:**
 All newly-introduced feature flags should be [disabled by default](process.md#feature-flags-in-gitlab-development).
