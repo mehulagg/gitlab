@@ -28,23 +28,20 @@ export default {
 </script>
 
 <template>
-  <div>
-    <gl-button
-      v-gl-tooltip.hover
-      :title="
-        s__(
-          'DesignManagement|Adding a design with the same filename replaces the file in a new version.',
-        )
-      "
-      :disabled="isSaving"
-      :loading="isSaving"
-      variant="default"
-      size="small"
-      @click="openFileUpload"
-    >
-      {{ s__('DesignManagement|Upload designs') }}
-    </gl-button>
-
+  <gl-button
+    v-gl-tooltip.hover
+    :title="
+      s__(
+        'DesignManagement|Adding a design with the same filename replaces the file in a new version.',
+      )
+    "
+    :disabled="isSaving"
+    :loading="isSaving"
+    variant="default"
+    size="small"
+    @click="openFileUpload"
+  >
+    {{ s__('DesignManagement|Upload designs') }}
     <input
       ref="fileUpload"
       type="file"
@@ -54,5 +51,5 @@ export default {
       multiple
       @change="onFileUploadChange"
     />
-  </div>
+  </gl-button>
 </template>

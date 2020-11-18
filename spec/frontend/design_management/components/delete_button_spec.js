@@ -46,7 +46,7 @@ describe('Batch delete button component', () => {
         return wrapper.vm.$nextTick();
       })
       .then(() => {
-        expect(wrapper.emitted().deleteSelectedDesigns).toBeTruthy();
+        expect(wrapper.emitted('delete-selected-designs')).toBeTruthy();
       });
   });
 
@@ -61,6 +61,6 @@ describe('Batch delete button component', () => {
       },
     );
 
-    expect(findButton().text()).toBe(testText);
+    expect(findButton().text()).toContain(testText);
   });
 });

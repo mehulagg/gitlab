@@ -1,22 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Design management upload button component renders inverted upload design button 1`] = `
-<div
+<gl-button-stub
+  buttontextclasses=""
+  category="primary"
+  icon=""
   isinverted="true"
+  size="small"
+  title="Adding a design with the same filename replaces the file in a new version."
+  variant="default"
 >
-  <gl-button-stub
-    buttontextclasses=""
-    category="primary"
-    icon=""
-    size="small"
-    title="Adding a design with the same filename replaces the file in a new version."
-    variant="default"
-  >
-    
-    Upload designs
   
-  </gl-button-stub>
-   
+  Upload designs
+  
   <input
     accept="image/*"
     class="hide"
@@ -24,24 +20,21 @@ exports[`Design management upload button component renders inverted upload desig
     name="design_file"
     type="file"
   />
-</div>
+</gl-button-stub>
 `;
 
 exports[`Design management upload button component renders upload design button 1`] = `
-<div>
-  <gl-button-stub
-    buttontextclasses=""
-    category="primary"
-    icon=""
-    size="small"
-    title="Adding a design with the same filename replaces the file in a new version."
-    variant="default"
-  >
-    
-    Upload designs
+<gl-button-stub
+  buttontextclasses=""
+  category="primary"
+  icon=""
+  size="small"
+  title="Adding a design with the same filename replaces the file in a new version."
+  variant="default"
+>
   
-  </gl-button-stub>
-   
+  Upload designs
+  
   <input
     accept="image/*"
     class="hide"
@@ -49,5 +42,5 @@ exports[`Design management upload button component renders upload design button 
     name="design_file"
     type="file"
   />
-</div>
+</gl-button-stub>
 `;
