@@ -130,8 +130,7 @@ module Types
           description: 'Labels of the merge request'
     field :discussion_locked, GraphQL::BOOLEAN_TYPE,
           description: 'Indicates if comments on the merge request are locked to members only',
-          null: false,
-          resolve: -> (obj, _args, _ctx) { !!obj.discussion_locked }
+          null: false
     field :time_estimate, GraphQL::INT_TYPE, null: false,
           description: 'Time estimate of the merge request'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
@@ -194,6 +193,11 @@ module Types
     def commit_count
       object&.metrics&.commits_count
     end
+
+    def discussion_locked
+      !!object.discussion_locked
+    end
   end
 end
+
 Types::MergeRequestType.prepend_if_ee('::EE::Types::MergeRequestType')
