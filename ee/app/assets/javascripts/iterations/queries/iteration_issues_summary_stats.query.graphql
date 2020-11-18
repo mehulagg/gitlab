@@ -1,0 +1,20 @@
+query IterationIssuesSummaryStats($id: ID!) {
+  iteration(id: $id) {
+    report {
+      stats {
+        total {
+          weight
+          count
+        }
+        complete {
+          weight
+          count
+        }
+        incomplete {
+          weight
+          count
+        }
+      }
+    }
+  }
+}
