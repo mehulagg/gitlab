@@ -15,7 +15,7 @@ class Groups::ApplicationController < ApplicationController
   private
 
   def group
-    if controller_name == "groups" && (action_name == "details" || action_name == "show" || action_name == "index")
+    if controller_name == "groups" && %w(details show index).include?(action_name)
       @group_projects_sort = set_sort_order(Project::SORTING_PREFERENCE_FIELD, sort_value_name)
     end
 
