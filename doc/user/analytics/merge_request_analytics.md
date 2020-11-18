@@ -88,9 +88,11 @@ To filter results:
 
 The date range is set to the past 12 months by default. You can modify the date range by changing the "From" and/or "To" values that appear alongside the filter bar. After changing either value, the data displayed on the page will update automatically.
 
-## Bookmarking
+## Tip: Bookmark preferred settings
 
-The filters and date range you select are bookmarkable. After you have applied a change to the filter bar or the date range, you can create a bookmark for yourself or copy-paste the URL from the address bar to share it with someone else.
+You can bookmark preferred filters and date ranges. After you have applied a change to the
+filter bar or the date range, you'll see that information in the URL. You can create a
+bookmark for those preferred settings in your browser.
 
 ## Permissions
 
