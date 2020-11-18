@@ -89,9 +89,9 @@ them with an environment scope. The environment scope associates clusters with [
 [environment-specific variables](../../../ci/variables/README.md#limit-the-environment-scopes-of-environment-variables) work.
 
 The default environment scope is `*`, which means all jobs, regardless of their
-environment, use that cluster. Each scope can only be used by a single
-cluster in a project, and a validation error occurs if otherwise.
-Also, jobs that don't have an environment keyword set can't access any cluster.
+environment, use that cluster. Each scope can be used only by a single cluster
+in a project, and a validation error occurs if otherwise. Also, jobs that don't
+have an environment keyword set can't access any cluster.
 
 For example, let's say the following Kubernetes clusters exist in a project:
 
@@ -157,9 +157,10 @@ applications running on the cluster.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22011) in GitLab 11.5.
 > - Became [optional](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/26565) in GitLab 11.11.
 
-You can choose to allow GitLab to manage your cluster for you. If your cluster is
-managed by GitLab, resources for your projects are automatically created. See the
-[Access controls](add_remove_clusters.md#access-controls) section for details on which resources are created.
+You can choose to allow GitLab to manage your cluster for you. If your cluster
+is managed by GitLab, resources for your projects are automatically created. See
+the [Access controls](add_remove_clusters.md#access-controls) section for
+details about the created resources.
 
 If you choose to manage your own cluster, project-specific resources aren't created
 automatically. If you are using [Auto DevOps](../../../topics/autodevops/index.md), you must
@@ -256,14 +257,14 @@ The Kubernetes cluster integration exposes the following
 GitLab CI/CD build environment to deployment jobs, which are jobs that have
 [defined a target environment](../../../ci/environments/index.md#defining-environments).
 
-| Variable | Description |
-| -------- | ----------- |
-| `KUBE_URL` | Equal to the API URL. |
-| `KUBE_TOKEN` | The Kubernetes token of the [environment service account](add_remove_clusters.md#access-controls). Prior to GitLab 11.5, `KUBE_TOKEN` was the Kubernetes token of the main service account of the cluster integration. |
-| `KUBE_NAMESPACE` | The namespace associated with the project's deployment service account. In the format `<project_name>-<project_id>-<environment>`. For GitLab-managed clusters, a matching namespace is automatically created by GitLab in the cluster. If your cluster was created before GitLab 12.2, the default `KUBE_NAMESPACE` is set to `<project_name>-<project_id>`. |
-| `KUBE_CA_PEM_FILE` | Path to a file containing PEM data. Only present if a custom CA bundle was specified. |
-| `KUBE_CA_PEM` | (**deprecated**) Raw PEM data. Only if a custom CA bundle was specified. |
-| `KUBECONFIG` | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This configuration also embeds the same token defined in `KUBE_TOKEN` so you likely only need this variable. This variable name is also automatically picked up by `kubectl` so you don't need to reference it explicitly if using `kubectl`. |
+| Variable                   | Description |
+|----------------------------|-------------|
+| `KUBE_URL`                 | Equal to the API URL. |
+| `KUBE_TOKEN`               | The Kubernetes token of the [environment service account](add_remove_clusters.md#access-controls). Prior to GitLab 11.5, `KUBE_TOKEN` was the Kubernetes token of the main service account of the cluster integration. |
+| `KUBE_NAMESPACE`           | The namespace associated with the project's deployment service account. In the format `<project_name>-<project_id>-<environment>`. For GitLab-managed clusters, a matching namespace is automatically created by GitLab in the cluster. If your cluster was created before GitLab 12.2, the default `KUBE_NAMESPACE` is set to `<project_name>-<project_id>`. |
+| `KUBE_CA_PEM_FILE`         | Path to a file containing PEM data. Only present if a custom CA bundle was specified. |
+| `KUBE_CA_PEM`              | (**deprecated**) Raw PEM data. Only if a custom CA bundle was specified. |
+| `KUBECONFIG`               | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This configuration also embeds the same token defined in `KUBE_TOKEN` so you likely need only this variable. This variable name is also automatically picked up by `kubectl` so you don't need to reference it explicitly if using `kubectl`. |
 | `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](#base-domain) for more information. |
 
 ### Custom namespace
