@@ -331,6 +331,9 @@ You can also [drag issues](#drag-issues-between-lists) to change their position 
 
 ![Drag issues between swimlanes](img/epics_swimlanes_drag_and_drop.png)
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a video overview, see [Epics Swimlanes Walkthrough - 13.6](https://www.youtube.com/watch?v=nHC7-kz5P2g) (November 2020).
+
 ## Work In Progress limits **(STARTER)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11403) in GitLab 12.7
