@@ -18,10 +18,9 @@ Please link to the respective test case in the testcases project
 <!-- Base labels. -->
 /label ~"Quality" ~"QA" ~test
 
-<!-- If the test is addressing a test gap, select a label according to the feature under test, please use just one. 
+<!-- If the test is addressing a test gap, select a label according to the feature under test, please use just one. -->
 
 /label ~"Quality:test-gap" ~"Quality:EE test gaps"
--->
 
 <!-- Select the appropriate feature label, ~"feature::addition" for tests added for new features, ~"feature::maintenance" for tests added for existing features -->
 /label ~"feature::addition" ~"feature::maintenance" 
