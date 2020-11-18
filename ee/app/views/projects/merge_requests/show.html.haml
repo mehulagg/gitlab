@@ -1,6 +1,6 @@
 = render_ce "projects/merge_requests/show"
 
-= javascript_tag nonce: true do
+= javascript_tag do
   :plain
     // Append static, server-generated data not included in merge request entity (EE-Only)
     // Object.assign would be useful here, but it blows up Phantom.js in tests
