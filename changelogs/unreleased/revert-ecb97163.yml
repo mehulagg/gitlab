@@ -1,0 +1,5 @@
+---
+title: Fix GKE group cluster creation
+merge_request: 47992
+author:
+type: fixed
