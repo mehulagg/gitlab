@@ -12,13 +12,12 @@ module Ci
     }.freeze
 
     def self.ci_template_raw
-      @ci_template_raw ||= Gitlab::Template::GitlabCiYmlTemplate.find('DAST').content
+      @ci_template_raw ||= Gitlab::Template::GitlabCiYmlTemplate.find('DAST-On-Demand-Scan').content
     end
 
     def self.ci_template
       @ci_template ||= YAML.safe_load(ci_template_raw).tap do |template|
         template['stages'] = ['dast']
-        template['dast'].delete('rules')
       end
     end
 
