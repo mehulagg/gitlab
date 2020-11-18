@@ -14,7 +14,7 @@ export default class FileTemplateSelector {
     this.$wrapper = $(cfg.wrapper);
     this.$dropdownIcon = this.$wrapper.find('.dropdown-menu-toggle-icon');
     this.$loadingIcon = $(
-      '<div class="gl-spinner gl-spinner-orange gl-spinner-sm gl-display-none"></div>',
+      '<div class="gl-spinner gl-spinner-orange gl-spinner-sm gl-absolute gl-top-3 gl-right-3 gl-display-none"></div>',
     ).insertAfter(this.$dropdownIcon);
     this.$dropdownToggleText = this.$wrapper.find('.dropdown-toggle-text');
 
