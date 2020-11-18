@@ -1,6 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import $ from 'jquery';
 import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
 import Api from 'ee/api';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
 
@@ -22,7 +23,7 @@ describe('Branches Select', () => {
   let store;
   let $input;
 
-  const createComponent = (props = {}) => {
+  const createComponent = async (props = {}) => {
     wrapper = shallowMount(localVue.extend(BranchesSelect), {
       propsData: {
         projectId: '1',
@@ -32,6 +33,8 @@ describe('Branches Select', () => {
       store: new Vuex.Store(store),
       attachToDocument: true,
     });
+
+    await waitForPromises();
 
     $input = $(wrapper.vm.$refs.input);
   };
@@ -50,16 +53,16 @@ describe('Branches Select', () => {
     wrapper.destroy();
   });
 
-  it('renders select2 input', () => {
+  it('renders select2 input', async () => {
     expect(select2Container()).toBe(null);
 
-    createComponent();
+    await createComponent();
 
     expect(select2Container()).not.toBe(null);
   });
 
-  it('displays all the protected branches and any branch', done => {
-    createComponent();
+  it('displays all the protected branches and any branch', async done => {
+    await createComponent();
     waitForEvent($input, 'select2-loaded')
       .then(() => {
         const nodeList = select2DropdownOptions();
@@ -74,7 +77,7 @@ describe('Branches Select', () => {
 
   describe('with search term', () => {
     beforeEach(() => {
-      createComponent();
+      return createComponent();
     });
 
     it('fetches protected branches with search term', done => {
@@ -116,8 +119,8 @@ describe('Branches Select', () => {
     });
   });
 
-  it('emits input when data changes', done => {
-    createComponent();
+  it('emits input when data changes', async done => {
+    await createComponent();
 
     const selectedIndex = 1;
     const selectedId = TEST_BRANCHES_SELECTIONS[selectedIndex].id;
