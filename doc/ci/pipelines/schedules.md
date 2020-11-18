@@ -56,7 +56,7 @@ is installed on.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12328) in GitLab 9.4.
 
-You can pass any number of arbitrary variables and they will be available in
+You can pass any number of arbitrary variables and they are available in
 GitLab CI/CD so that they can be used in your [`.gitlab-ci.yml` file](../../ci/yaml/README.md).
 
 ![Scheduled pipeline variables](img/pipeline_schedule_variables.png)
