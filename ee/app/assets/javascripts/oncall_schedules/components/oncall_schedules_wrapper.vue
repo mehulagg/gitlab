@@ -1,38 +1,47 @@
 <script>
-import { GlEmptyState, GlButton } from '@gitlab/ui';
-import { s__ } from '~/locale';
+  import {GlEmptyState, GlButton, GlModalDirective} from '@gitlab/ui';
+  import AddScheduleModal from './add_schedule_modal.vue';
+  import {s__} from '~/locale';
 
-export const i18n = {
-  emptyState: {
-    title: s__('OnCallSchedules|Create on-call schedules  in GitLab'),
-    description: s__('OnCallSchedules|Route alerts directly to specific members of your team'),
-    button: s__('OnCallSchedules|Add a schedule'),
-  },
-};
+  const addScheduleModalId = 'addScheduleModal';
 
-export default {
-  i18n,
-  inject: ['emptyOncallSchedulesSvgPath'],
-  components: {
-    GlEmptyState,
-    GlButton,
-  },
-  methods: {
-    createSchedule() {},
-  },
-};
+  export const i18n = {
+    emptyState: {
+      title: s__('OnCallSchedules|Create on-call schedules  in GitLab'),
+      description: s__('OnCallSchedules|Route alerts directly to specific members of your team'),
+      button: s__('OnCallSchedules|Add a schedule'),
+    },
+  };
+
+  export default {
+    i18n,
+    addScheduleModalId,
+    inject: ['emptyOncallSchedulesSvgPath'],
+    components: {
+      GlEmptyState,
+      GlButton,
+      AddScheduleModal,
+    },
+    directives: {
+      GlModal: GlModalDirective,
+    },
+    methods: {},
+  };
 </script>
 
 <template>
-  <gl-empty-state
-    :title="$options.i18n.emptyState.title"
-    :description="$options.i18n.emptyState.description"
-    :svg-path="emptyOncallSchedulesSvgPath"
-  >
-    <template #actions>
-      <gl-button variant="info" @click="createSchedule">{{
-        $options.i18n.emptyState.button
-      }}</gl-button>
-    </template>
-  </gl-empty-state>
+  <div>
+    <gl-empty-state
+      :title="$options.i18n.emptyState.title"
+      :description="$options.i18n.emptyState.description"
+      :svg-path="emptyOncallSchedulesSvgPath"
+    >
+      <template #actions>
+        <gl-button variant="info" v-gl-modal="$options.addScheduleModalId">
+          {{ $options.i18n.emptyState.button }}
+        </gl-button>
+      </template>
+    </gl-empty-state>
+    <add-schedule-modal :modal-id="$options.addScheduleModalId"></add-schedule-modal>
+  </div>
 </template>
