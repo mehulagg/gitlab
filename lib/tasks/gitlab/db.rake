@@ -203,5 +203,22 @@ namespace :gitlab do
       Gitlab::AppLogger.error(e)
       raise
     end
+
+    desc 'Check if there have been user additions to the database'
+    task active: :environment do
+      if ActiveRecord::Base.connection.migration_context.needs_migration?
+        exit 1
+      end
+
+      # A list of projects that GitLab creates automatically on install/upgrade
+      # gc = Gitlab::CurrentSettings.current_application_settings
+      seed_projects = [Gitlab::CurrentSettings.current_application_settings.self_monitoring_project]
+
+      if (Project.count - seed_projects.select {|x| !x.nil? }.length).eql?(0)
+        exit 1
+      end
+
+      exit 0
+    end
   end
 end
