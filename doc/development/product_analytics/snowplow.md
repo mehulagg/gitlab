@@ -150,6 +150,15 @@ Below is a list of supported `data-track-*` attributes:
 | `data-track-value`    | false    | The `value` as described in our [Structured event taxonomy](#structured-event-taxonomy). If omitted, this is the element's `value` property or an empty string. For checkboxes, the default value is the element's checked attribute or `false` when unchecked. |
 | `data-track-context`  | false    | The `context` as described in our [Structured event taxonomy](#structured-event-taxonomy). |
 
+#### Caveats
+
+When using GitLab helper method [`nav_link`](https://gitlab.com/gitlab-org/gitlab/-/blob/898b286de322e5df6a38d257b10c94974d580df8/app/helpers/tab_helper.rb#L69) be sure to wrap `html_options` under `html_options` keyword argument, this behavior can be confused with `ActionView` helper method [`link_to`](https://api.rubyonrails.org/v5.2.3/classes/ActionView/Helpers/UrlHelper.html#method-i-link_to) that does not require additional wrapping of `html_options`
+
+`nav_link(controller: ['dashboard/groups', 'explore/groups'], html_options: { data: { track_label: "groups_dropdown", track_event: "click_dropdown" } })`
+
+vs
+
+
 ### Tracking within Vue components
 
 There's a tracking Vue mixin that can be used in components if more complex tracking is required. To use it, first import the `Tracking` library and request a mixin.
