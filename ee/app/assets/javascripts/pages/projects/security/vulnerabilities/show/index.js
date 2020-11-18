@@ -13,7 +13,7 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
     provide: {
       reportType: vulnerability.reportType,
-      createIssueUrl: vulnerability.createIssueUrl,
+      newIssueUrl: vulnerability.newIssueUrl,
       projectFingerprint: vulnerability.projectFingerprint,
       vulnerabilityId: vulnerability.id,
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
