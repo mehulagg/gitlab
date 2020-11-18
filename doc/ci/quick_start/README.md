@@ -97,7 +97,8 @@ To create a `.gitlab-ci.yml` file:
      stage: test
      script:
        - echo "This job tests something, but takes more time than test-job1."
-       - echo "It waits 20 seconds to simulate a slower job."
+       - echo "After the echo commands complete, it runs the sleep command for 20 seconds"
+       - echo "which simulates a test that runs 20 seconds longer than test-job1"
        - sleep 20
 
    deploy-prod:
