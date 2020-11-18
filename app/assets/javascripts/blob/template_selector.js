@@ -95,13 +95,11 @@ export default class TemplateSelector {
   }
 
   startLoadingSpinner() {
-    console.log('startLoadingSpinner :: ');
     this.$loadingIcon.removeClass('gl-display-none');
     this.$dropdownIcon.addClass('gl-display-none');
   }
 
   stopLoadingSpinner() {
-    console.log('stopLoadingSpinner :: ');
     this.$loadingIcon.addClass('gl-display-none');
     this.$dropdownIcon.removeClass('gl-display-none');
   }
