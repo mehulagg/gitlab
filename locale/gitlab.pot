@@ -2565,9 +2565,6 @@ msgstr ""
 msgid "AlertSettings|HTTP Endpoint"
 msgstr ""
 
-msgid "AlertSettings|HTTP endpoint"
-msgstr ""
-
 msgid "AlertSettings|If you edit the payload, the stored mapping will be reset, and you'll need to re-map the fields."
 msgstr ""
 
@@ -2688,9 +2685,6 @@ msgstr ""
 msgid "AlertsIntegrations|Current integrations"
 msgstr ""
 
-msgid "AlertsIntegrations|HTTP endpoint"
-msgstr ""
-
 msgid "AlertsIntegrations|Integration Name"
 msgstr ""
 
@@ -2698,9 +2692,6 @@ msgid "AlertsIntegrations|Integration payload is invalid. You can still save you
 msgstr ""
 
 msgid "AlertsIntegrations|No integrations have been added yet"
-msgstr ""
-
-msgid "AlertsIntegrations|Prometheus"
 msgstr ""
 
 msgid "AlertsIntegrations|The current integration could not be updated. Please try again."
@@ -10825,9 +10816,6 @@ msgid "Error loading template."
 msgstr ""
 
 msgid "Error loading viewer"
-msgstr ""
-
-msgid "Error message:"
 msgstr ""
 
 msgid "Error occurred when fetching sidebar data"
@@ -23571,9 +23559,6 @@ msgid "Save Changes"
 msgstr ""
 
 msgid "Save Push Rules"
-msgstr ""
-
-msgid "Save anyway"
 msgstr ""
 
 msgid "Save application"
