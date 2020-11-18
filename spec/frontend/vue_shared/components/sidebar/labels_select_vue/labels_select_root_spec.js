@@ -227,11 +227,23 @@ describe('LabelsSelectRoot', () => {
     });
   });
 
-  // it('calls toggleDropdownContents action when isEditing prop is changing to true', () => {
-  //   createComponent({ ...mockConfig });
-  // });
+  it('calls toggleDropdownContents action when isEditing prop is changing to true', async () => {
+    createComponent();
 
-  // it('does not call toggleDropdownContents action when isEditing prop is changing to false', () => {
-  //   createComponent({ ...mockConfig });
-  // });
+    jest.spyOn(store, 'dispatch').mockResolvedValue();
+    wrapper.setProps({ isEditing: true });
+    await wrapper.vm.$nextTick;
+
+    expect(store.dispatch).toHaveBeenCalledWith('toggleDropdownContents');
+  });
+
+  it('does not call toggleDropdownContents action when isEditing prop is changing to false', async () => {
+    createComponent();
+
+    jest.spyOn(store, 'dispatch').mockResolvedValue();
+    wrapper.setProps({ isEditing: false });
+    await wrapper.vm.$nextTick;
+
+    expect(store.dispatch).not.toHaveBeenCalled();
+  });
 });
