@@ -46,7 +46,7 @@ The throughput chart shows the number of merge requests merged per month.
 
 ### Throughput table
 
-Data table displaying the most recent merge requests merged in the date range.  Up to 20 merge requests are displayed at a time, and pagination controls appear below the table when there are more than 20.  The following data is displayed for each merge request:
+Data table displaying the most recent merge requests merged in the date range. Up to 20 merge requests are displayed at a time, and pagination controls appear below the table when there are more than 20. The following data is displayed for each merge request:
 
 - Title (as a link to the merge request itself)
 - ID
@@ -86,11 +86,11 @@ To filter results:
 
 ## Date range
 
-The date range is set to the past 12 months by default.  You can modify the date range by changing the "From" and/or "To" values that appear alongside the filter bar.  After changing either value, the data displayed on the page will update automatically.
+The date range is set to the past 12 months by default. You can modify the date range by changing the "From" and/or "To" values that appear alongside the filter bar. After changing either value, the data displayed on the page will update automatically.
 
 ## Bookmarking
 
-The filters and date range you select are bookmarkable.  After you have applied a change to the filter bar or the date range, you can create a bookmark for yourself or copy-paste the URL from the address bar to share it with someone else.
+The filters and date range you select are bookmarkable. After you have applied a change to the filter bar or the date range, you can create a bookmark for yourself or copy-paste the URL from the address bar to share it with someone else.
 
 ## Permissions
 
