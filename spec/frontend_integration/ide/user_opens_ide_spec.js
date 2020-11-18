@@ -6,28 +6,27 @@ describe('IDE: User opens IDE', () => {
   useOverclockTimers();
 
   let vm;
-  let root;
+  let container;
 
   beforeEach(() => {
-    root = document.createElement('div');
-    document.body.appendChild(root);
+    setFixtures('<div class="webide-container"></div>');
+    container = document.querySelector('.webide-container');
   });
 
   afterEach(() => {
     vm.$destroy();
     vm = null;
-    root.remove();
   });
 
   it('shows loading indicator while the IDE is loading', async () => {
-    vm = ideHelper.createIdeComponent(root);
+    vm = ideHelper.createIdeComponent(container);
 
-    expect(root.querySelectorAll('.multi-file-loading-container')).toHaveLength(3);
+    expect(container.querySelectorAll('.multi-file-loading-container')).toHaveLength(3);
   });
 
   describe('when the project is empty', () => {
     beforeEach(() => {
-      vm = ideHelper.createIdeComponent(root, { isRepoEmpty: true });
+      vm = ideHelper.createIdeComponent(container, { isRepoEmpty: true });
     });
 
     it('shows "No files" in the left sidebar', async () => {
@@ -43,7 +42,7 @@ describe('IDE: User opens IDE', () => {
 
   describe('when the file tree is loaded', () => {
     beforeEach(async () => {
-      vm = ideHelper.createIdeComponent(root);
+      vm = ideHelper.createIdeComponent(container);
 
       await screen.findByText('README'); // wait for file tree to load
     });
@@ -77,7 +76,7 @@ describe('IDE: User opens IDE', () => {
 
   describe('a path to a text file is present in the URL', () => {
     beforeEach(async () => {
-      vm = ideHelper.createIdeComponent(root, { path: 'README.md' });
+      vm = ideHelper.createIdeComponent(container, { path: 'README.md' });
 
       // a new tab is open for README.md
       await findByText(document.querySelector('.multi-file-edit-pane'), 'README.md');
@@ -90,7 +89,7 @@ describe('IDE: User opens IDE', () => {
 
   describe('a path to a binary file is present in the URL', () => {
     beforeEach(async () => {
-      vm = ideHelper.createIdeComponent(root, { path: 'Gemfile.zip' });
+      vm = ideHelper.createIdeComponent(container, { path: 'Gemfile.zip' });
 
       // a new tab is open for Gemfile.zip
       await findByText(document.querySelector('.multi-file-edit-pane'), 'Gemfile.zip');
@@ -106,7 +105,7 @@ describe('IDE: User opens IDE', () => {
 
   describe('a path to an image is present in the URL', () => {
     beforeEach(async () => {
-      vm = ideHelper.createIdeComponent(root, { path: 'files/images/logo-white.png' });
+      vm = ideHelper.createIdeComponent(container, { path: 'files/images/logo-white.png' });
 
       // a new tab is open for logo-white.png
       await findByText(document.querySelector('.multi-file-edit-pane'), 'logo-white.png');
@@ -122,7 +121,7 @@ describe('IDE: User opens IDE', () => {
 
   describe('path in URL is a directory', () => {
     beforeEach(async () => {
-      vm = ideHelper.createIdeComponent(root, { path: 'files/images' });
+      vm = ideHelper.createIdeComponent(container, { path: 'files/images' });
 
       // wait for folders in left sidebar to be expanded
       await screen.findByText('images');
@@ -145,7 +144,7 @@ describe('IDE: User opens IDE', () => {
 
   describe("a file for path in url doesn't exist in the repo", () => {
     beforeEach(async () => {
-      vm = ideHelper.createIdeComponent(root, { path: 'abracadabra/hocus-focus.txt' });
+      vm = ideHelper.createIdeComponent(container, { path: 'abracadabra/hocus-focus.txt' });
 
       // a new tab is open for hocus-focus.txt
       await findByText(document.querySelector('.multi-file-edit-pane'), 'hocus-focus.txt');

@@ -8,21 +8,20 @@ describe('WebIDE', () => {
   useOverclockTimers();
 
   let vm;
-  let root;
+  let container;
 
   beforeEach(() => {
-    root = document.createElement('div');
-    document.body.appendChild(root);
+    setFixtures('<div class="webide-container"></div>');
+    container = document.querySelector('.webide-container');
   });
 
   afterEach(() => {
     vm.$destroy();
     vm = null;
-    root.remove();
   });
 
   it('user commits changes', async () => {
-    vm = ideHelper.createIdeComponent(root);
+    vm = ideHelper.createIdeComponent(container);
 
     await ideHelper.createFile('foo/bar/test.txt', 'Lorem ipsum dolar sit');
     await ideHelper.deleteFile('foo/bar/.gitkeep');
@@ -56,7 +55,7 @@ describe('WebIDE', () => {
   });
 
   it('user adds file that starts with +', async () => {
-    vm = ideHelper.createIdeComponent(root);
+    vm = ideHelper.createIdeComponent(container);
 
     await ideHelper.createFile('+test', 'Hello world!');
     await ideHelper.openFile('+test');
