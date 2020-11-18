@@ -10,15 +10,14 @@ class Groups::ApplicationController < ApplicationController
 
   skip_before_action :authenticate_user!
   before_action :group
+  before_action :set_sorting
   requires_cross_project_access
+
+  GROUP_PROJECTS_SORT_ACTIONS = %w(details show index).freeze
 
   private
 
   def group
-    if controller_name == "groups" && %w(details show index).include?(action_name)
-      @group_projects_sort = set_sort_order(Project::SORTING_PREFERENCE_FIELD, sort_value_name)
-    end
-
     @group ||= find_routable!(Group, params[:group_id] || params[:id])
   end
 
@@ -62,6 +61,20 @@ class Groups::ApplicationController < ApplicationController
     params[:group_id] = group.to_param
 
     url_for(safe_params)
+  end
+
+  def set_sorting
+    if has_project_list?
+      @group_projects_sort = set_sort_order(Project::SORTING_PREFERENCE_FIELD, sort_value_name)
+    end
+  end
+
+  def has_project_list?
+    if controller_name == "groups" && GROUP_PROJECTS_SORT_ACTIONS.include?(action_name)
+      true
+    else
+      controller_name == "children"
+    end
   end
 end
 
