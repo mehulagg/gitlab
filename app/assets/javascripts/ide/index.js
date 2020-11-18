@@ -9,6 +9,8 @@ import { parseBoolean } from '../lib/utils/common_utils';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import { DEFAULT_THEME } from './lib/themes';
 
+// import runTest from 'test_helpers/../ide/temp';
+
 Vue.use(Translate);
 
 /**
@@ -78,4 +80,6 @@ export function startIde(options) {
     resetServiceWorkersPublicPath();
     initIde(ideElement, options);
   }
+
+  // runTest();
 }
