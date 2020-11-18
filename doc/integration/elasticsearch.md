@@ -443,9 +443,6 @@ With reindex migrations running in the background, there's no need for a manual
 intervention. This usually happens in situations where new features are added to
 Advanced Search, which means adding or changing the way content is indexed.
 
-Reindexing can still be performed
-[manually](#trigger-the-reindex-via-the-advanced-search-administration) when needed.
-
 To confirm that the background migrations ran, you can check with:
 
 ```shell
@@ -484,6 +481,8 @@ This should return something similar to:
   }
 }
 ```
+
+In order to debug issues with the migrations you can check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog).
 
 ## GitLab Advanced Search Rake tasks
 
