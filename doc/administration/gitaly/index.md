@@ -536,8 +536,8 @@ Gitaly supports TLS encryption. To communicate with a Gitaly instance that liste
 connections, you must use `tls://` URL scheme in the `gitaly_address` of the corresponding
 storage entry in the GitLab configuration.
 
-Gitaly provides the same server certificates as client certificates in outgoing
-requests to GitLab. This can be used as part of a mutual TLS authentication strategy
+Gitaly provides the same server certificates as client certificates in TLS
+connections to GitLab. This can be used as part of a mutual TLS authentication strategy
 when combined with reverse proxies (for example, NGINX) that validate client certificate
 to grant access to GitLab.
 
