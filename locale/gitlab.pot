@@ -15254,10 +15254,10 @@ msgstr ""
 msgid "Iteration|cannot be more than 500 years in the future"
 msgstr ""
 
-msgid "I’m familiar with the basics of project management and DevOps."
+msgid "I’m familiar with the basics of DevOps."
 msgstr ""
 
-msgid "I’m not very familiar with the basics of project management and DevOps."
+msgid "I’m not familiar with the basics of DevOps."
 msgstr ""
 
 msgid "Jaeger URL"
@@ -24926,13 +24926,13 @@ msgstr ""
 msgid "Show list"
 msgstr ""
 
-msgid "Show me everything"
+msgid "Show me advanced features"
 msgstr ""
 
 msgid "Show me how to add a pipeline"
 msgstr ""
 
-msgid "Show me more advanced stuff"
+msgid "Show me the basics"
 msgstr ""
 
 msgid "Show only direct members"
