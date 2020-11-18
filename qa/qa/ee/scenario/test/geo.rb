@@ -11,7 +11,7 @@ module QA
           include QA::Scenario::Bootable
           include QA::Scenario::SharedAttributes
 
-          tags :geo
+          tags :subsetgeo
 
           attribute :geo_primary_address, '--primary-address PRIMARY'
           attribute :geo_primary_name, '--primary-name PRIMARY_NAME'
