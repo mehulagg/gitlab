@@ -199,9 +199,10 @@ to integrate with.
 
 ### Precedence with multiple Prometheus configurations
 
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
 Although you can enable both a [manual configuration](#manual-configuration-of-prometheus)
-and [auto configuration](#managed-prometheus-on-kubernetes) of Prometheus, you can only
-use one:
+and [auto configuration](#managed-prometheus-on-kubernetes) of Prometheus, you
+can use only one:
 
 - If you have enabled a
   [Prometheus manual configuration](#manual-configuration-of-prometheus)
