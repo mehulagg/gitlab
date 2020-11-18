@@ -46,7 +46,9 @@ The throughput chart shows the number of merge requests merged per month.
 
 ### Throughput table
 
-Data table displaying the most recent merge requests merged in the date range. Up to 20 merge requests are displayed at a time, and pagination controls appear below the table when there are more than 20. The following data is displayed for each merge request:
+The Throughput table displays the most recent merge requests merged in the date range. The
+table displays up to 20 merge requests at a time. If there are more than 20 merge requests,
+you can paginate to them. For each merge request, you can review the following data:
 
 - Title (as a link to the merge request itself)
 - ID
