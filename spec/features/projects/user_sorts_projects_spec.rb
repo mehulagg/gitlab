@@ -10,6 +10,32 @@ RSpec.describe 'User sorts projects and order persists' do
   let_it_be(:group_member) { create(:group_member, :maintainer, user: user, group: group) }
   let_it_be(:project) { create(:project, :public, group: group) }
 
+  shared_examples_for "sort order persists across all views" do |project_paths_label, group_paths_label|
+    it "is set on the dashboard_projects_path" do
+      visit(dashboard_projects_path)
+
+      expect(find('.dropdown-menu a.is-active', text: project_paths_label)).to have_content(project_paths_label)
+    end
+
+    it "is set on the explore_projects_path" do
+      visit(explore_projects_path)
+
+      expect(find('.dropdown-menu a.is-active', text: project_paths_label)).to have_content(project_paths_label)
+    end
+
+    it "is set on the group_canonical_path" do
+      visit(group_canonical_path(group))
+
+      expect(find('.dropdown-menu a.is-active', text: group_paths_label)).to have_content(group_paths_label)
+    end
+
+    it "is set on the details_group_path" do
+      visit(details_group_path(group))
+
+      expect(find('.dropdown-menu a.is-active', text: group_paths_label)).to have_content(group_paths_label)
+    end
+  end
+
   context "from explore projects" do
     before do
       sign_in(user)
@@ -18,100 +44,39 @@ RSpec.describe 'User sorts projects and order persists' do
       first(:link, 'Last updated').click
     end
 
-    it "is set on the dashboard_projects_path" do
+    it_behaves_like "sort order persists across all views", "Last updated", "Last updated"
+  end
+
+  context 'from dashboard projects' do
+    before do
+      sign_in(user)
       visit(dashboard_projects_path)
-
-      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+      find('#sort-projects-dropdown').click
+      first(:link, 'Name').click
     end
 
-    it "is set on the explore_projects_path" do
-      visit(explore_projects_path)
+    it_behaves_like "sort order persists across all views", "Name", "Name"
+  end
 
-      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
-    end
-
-    it "is set on the group_canonical_path" do
+  context 'from group homepage' do
+    before do
+      sign_in(user)
       visit(group_canonical_path(group))
-
-      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+      find('button.dropdown-menu-toggle').click
+      first(:link, 'Last created').click
     end
 
-    it "is set on the details_group_path" do
+    it_behaves_like "sort order persists across all views", "Created date", "Last created"
+  end
+
+  context 'from group details' do
+    before do
+      sign_in(user)
       visit(details_group_path(group))
-
-      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+      find('button.dropdown-menu-toggle').click
+      first(:link, 'Most stars').click
     end
-  end
 
-  it 'from dashboard projects' do
-    sign_in(user)
-    visit(dashboard_projects_path)
-    find('#sort-projects-dropdown').click
-
-    first(:link, 'Name').click
-
-    visit(dashboard_projects_path)
-
-    expect(find('.dropdown-menu a.is-active', text: 'Name')).to have_content('Name')
-
-    visit(explore_projects_path)
-
-    expect(find('.dropdown-menu a.is-active', text: 'Name')).to have_content('Name')
-
-    visit(group_canonical_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Name')).to have_content('Name')
-
-    visit(details_group_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Name')).to have_content('Name')
-  end
-
-  it 'from group homepage' do
-    sign_in(user)
-    visit(group_canonical_path(group))
-    find('button.dropdown-menu-toggle').click
-
-    first(:link, 'Last created').click
-
-    visit(dashboard_projects_path)
-
-    expect(find('.dropdown-menu a.is-active', text: 'Created date')).to have_content('Created date')
-
-    visit(explore_projects_path)
-
-    expect(find('.dropdown-menu a.is-active', text: 'Created date')).to have_content('Created date')
-
-    visit(group_canonical_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Last created')).to have_content('Last created')
-
-    visit(details_group_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Last created')).to have_content('Last created')
-  end
-
-  it 'from group details' do
-    sign_in(user)
-    visit(details_group_path(group))
-    find('button.dropdown-menu-toggle').click
-
-    first(:link, 'Most stars').click
-
-    visit(dashboard_projects_path)
-
-    expect(find('.dropdown-menu a.is-active', text: 'Stars')).to have_content('Stars')
-
-    visit(explore_projects_path)
-
-    expect(find('.dropdown-menu a.is-active', text: 'Stars')).to have_content('Stars')
-
-    visit(group_canonical_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Most stars')).to have_content('Most stars')
-
-    visit(details_group_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Most stars')).to have_content('Most stars')
+    it_behaves_like "sort order persists across all views", "Stars", "Most stars"
   end
 end
