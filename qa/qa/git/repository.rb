@@ -56,10 +56,6 @@ module QA
         self.username, self.password = default_credentials
       end
 
-      def use_developer_credentials
-        self.username, self.password = developer_credentials
-      end
-
       def use_default_identity
         configure_identity('GitLab QA', 'root@gitlab.com')
       end
@@ -247,10 +243,6 @@ module QA
         else
           [Runtime::User.username, Runtime::User.password]
         end
-      end
-
-      def developer_credentials
-        %w(developer-user dev_passwd)
       end
 
       def read_netrc_content

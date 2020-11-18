@@ -77,7 +77,6 @@ module QA
           new_page.fill_description(@description)
           new_page.choose_milestone(@milestone) if @milestone
           new_page.assign_to_me if @assignee == 'me'
-          new_page.assign_to_user(@assignee) if @assignee != 'me'
           labels.each do |label|
             new_page.select_label(label)
           end
