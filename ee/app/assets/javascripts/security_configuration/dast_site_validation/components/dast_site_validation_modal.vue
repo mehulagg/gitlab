@@ -15,7 +15,6 @@ import { omit } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import download from '~/lib/utils/downloader';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import {
   DAST_SITE_VALIDATION_MODAL_ID,
@@ -43,7 +42,6 @@ export default {
     GlSkeletonLoader,
     GlTruncate,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
       type: String,
@@ -66,14 +64,7 @@ export default {
   },
   computed: {
     validationMethodOptions() {
-      const isHttpHeaderValidationEnabled = this.glFeatures
-        .securityOnDemandScansHttpHeaderValidation;
-
-      const enabledValidationMethods = omit(DAST_SITE_VALIDATION_METHODS, [
-        !isHttpHeaderValidationEnabled ? DAST_SITE_VALIDATION_METHOD_HTTP_HEADER : '',
-      ]);
-
-      return Object.values(enabledValidationMethods);
+      return Object.values(DAST_SITE_VALIDATION_METHODS);
     },
     urlObject() {
       try {
