@@ -4,7 +4,7 @@ import { GlFormGroup } from 'jest/registry/shared/stubs';
 import component from '~/registry/settings/components/expiration_textarea.vue';
 import { NAME_REGEX_LENGTH } from '~/registry/shared/constants';
 
-describe('Expiration Policy Form', () => {
+describe('ExpirationTextarea', () => {
   let wrapper;
 
   const defaultProps = {
