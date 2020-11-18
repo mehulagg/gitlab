@@ -19,6 +19,7 @@ FactoryBot.define do
       create(:jira_import_state, :finished, project: projects[1], label: jira_label, imported_issues_count: 3)
       create(:jira_import_state, :scheduled, project: projects[1], label: jira_label)
       create(:prometheus_service, project: projects[1])
+      create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:service, project: projects[0], type: 'SlackSlashCommandsService', active: true)
       create(:service, project: projects[1], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'SlackService', active: true)
