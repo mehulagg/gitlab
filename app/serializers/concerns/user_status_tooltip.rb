@@ -9,6 +9,7 @@ module UserStatusTooltip
 
   included do
     expose :user_status_if_loaded, as: :status_tooltip_html
+    expose :status
 
     def user_status_if_loaded
       return unless object.association(:status).loaded?

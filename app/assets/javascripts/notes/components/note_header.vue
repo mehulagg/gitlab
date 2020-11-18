@@ -2,7 +2,7 @@
 /* eslint-disable vue/no-v-html */
 import { mapActions } from 'vuex';
 import { GlIcon, GlLoadingIcon, GlTooltipDirective, GlSprintf } from '@gitlab/ui';
-import { isUserBusy } from '~/set_status_modal/utils';
+import { isUserBusy, hasStatusSet } from '~/set_status_modal/utils';
 import timeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
@@ -85,7 +85,10 @@ export default {
       };
     },
     authorStatus() {
-      return this.author.status_tooltip_html;
+      if (this.author?.status && hasStatusSet(this.author.status)) {
+        return this.author.status_tooltip_html;
+      }
+      return false;
     },
     authorIsBusy() {
       const { status } = this.author;
