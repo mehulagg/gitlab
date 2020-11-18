@@ -908,8 +908,17 @@ module Ci
     end
 
     def collect_coverage_reports!(coverage_report)
+      project_path, worktree_paths = if Feature.enabled?(:smart_cobertura_parser, project)
+                                       [project.full_path, pipeline.all_worktree_paths]
+                                     end
+
       each_report(Ci::JobArtifact::COVERAGE_REPORT_FILE_TYPES) do |file_type, blob|
-        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, coverage_report)
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+          blob,
+          coverage_report,
+          project_path: project_path,
+          worktree_paths: worktree_paths
+        )
       end
 
       coverage_report

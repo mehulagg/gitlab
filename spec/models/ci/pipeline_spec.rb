@@ -3343,6 +3343,16 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         ])
       end
 
+      it 'does not do N+1 queries' do
+        single_build_pipeline = create(:ci_empty_pipeline, status: :created, project: project)
+        single_rspec = create(:ci_build, :success, name: 'rspec', pipeline: single_build_pipeline, project: project)
+        create(:ci_job_artifact, :cobertura, job: single_rspec, project: project)
+
+        control = ActiveRecord::QueryRecorder.new { single_build_pipeline.coverage_reports }
+
+        expect { subject }.not_to exceed_query_limit(control)
+      end
+
       context 'when builds are retried' do
         let!(:build_rspec) { create(:ci_build, :retried, :success, name: 'rspec', pipeline: pipeline, project: project) }
         let!(:build_golang) { create(:ci_build, :retried, :success, name: 'golang', pipeline: pipeline, project: project) }

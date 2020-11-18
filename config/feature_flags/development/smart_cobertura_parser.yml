@@ -1,0 +1,8 @@
+---
+name: smart_cobertura_parser
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.6'
+type: development
+group: group::testing
+default_enabled: false
