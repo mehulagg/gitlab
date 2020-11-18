@@ -221,6 +221,15 @@ export const contentTop = () => {
   const heightCalculators = [
     () => $('#js-peek').outerHeight(),
     () => $('.navbar-gitlab').outerHeight(),
+    ({ desktop }) => {
+      let size = 0;
+
+      if (!desktop) {
+        size = $('.line-resolve-all-container').outerHeight();
+      }
+
+      return size;
+    },
     () => $('.merge-request-tabs').outerHeight(),
     () => $('.js-diff-files-changed').outerHeight(),
     () => {
