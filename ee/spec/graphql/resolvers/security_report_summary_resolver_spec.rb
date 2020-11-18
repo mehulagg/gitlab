@@ -29,10 +29,10 @@ RSpec.describe Resolvers::SecurityReportSummaryResolver do
           pipeline,
           expected_selection_info
         ) do |summary_service|
-          expect(summary_service).to receive(:execute)
+          expect(summary_service).to receive(:execute).and_return({})
         end
 
-        resolve(described_class, obj: pipeline, args: { lookahead: lookahead })
+        resolve(described_class, obj: pipeline, lookahead: lookahead)
       end
     end
   end

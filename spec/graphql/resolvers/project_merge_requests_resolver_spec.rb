@@ -26,7 +26,7 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
     it 'filters merge requests by assignee username' do
       result = resolve_mr(project, assignee_username: other_user.username)
 
-      expect(result).to eq([merge_request_with_author_and_assignee])
+      expect(result).to contain_exactly(merge_request_with_author_and_assignee)
     end
 
     it 'does not find anything' do
@@ -40,7 +40,7 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
     it 'filters merge requests by author username' do
       result = resolve_mr(project, author_username: other_user.username)
 
-      expect(result).to eq([merge_request_with_author_and_assignee])
+      expect(result).to contain_exactly(merge_request_with_author_and_assignee)
     end
 
     it 'does not find anything' do

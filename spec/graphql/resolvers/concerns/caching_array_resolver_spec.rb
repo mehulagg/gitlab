@@ -9,13 +9,19 @@ RSpec.describe ::CachingArrayResolver do
   let(:query_context) { {} }
   let(:max_page_size) { 10 }
   let(:field) { double('Field', max_page_size: max_page_size) }
-  let(:schema) { double('Schema', default_max_page_size: 3) }
+  let(:schema) do
+    Class.new(GitlabSchema) do
+      default_max_page_size 3
+    end
+  end
 
   let_it_be(:caching_resolver) do
     mod = described_class
 
     Class.new(::Resolvers::BaseResolver) do
       include mod
+      type [::Types::UserType], null: true
+      argument :is_admin, ::GraphQL::BOOLEAN_TYPE, required: false
 
       def query_input(is_admin:)
         is_admin
@@ -44,6 +50,8 @@ RSpec.describe ::CachingArrayResolver do
 
         Class.new(::Resolvers::BaseResolver) do
           include mod
+          type [::Types::UserType], null: true
+          argument :username, ::GraphQL::STRING_TYPE, required: false
 
           def query_input(username:)
             username
@@ -72,7 +80,7 @@ RSpec.describe ::CachingArrayResolver do
         expect(User).to receive(:from_union).twice.and_call_original
 
         results = users.in_groups_of(2, false).map do |users|
-          resolve(resolver, args: { username: users.map(&:username) }, field: field, schema: schema)
+          resolve(resolver, args: { username: users.map(&:username) }, schema: schema)
         end
 
         expect(results.flat_map(&method(:force))).to match_array(users)
@@ -199,7 +207,9 @@ RSpec.describe ::CachingArrayResolver do
 
   def resolve_users(is_admin, resolver = caching_resolver)
     args = { is_admin: is_admin }
-    resolve(resolver, args: args, field: field, ctx: query_context, schema: schema)
+    opts = resolver.field_options
+    allow(resolver).to receive(:field_options).and_return(opts.merge(max_page_size: max_page_size))
+    resolve(resolver, args: args, ctx: query_context, schema: schema)
   end
 
   def force(lazy)

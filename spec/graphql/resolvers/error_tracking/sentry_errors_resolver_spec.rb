@@ -88,12 +88,12 @@ RSpec.describe Resolvers::ErrorTracking::SentryErrorsResolver do
 
         it 'sets the pagination variables' do
           result = resolve_errors
-          expect(result.next_cursor).to eq 'next'
-          expect(result.previous_cursor).to eq 'prev'
+          expect(result.end_cursor).to eq 'next'
+          expect(result.start_cursor).to eq 'prev'
         end
 
-        it 'returns an externally paginated array' do
-          expect(resolve_errors).to be_a Gitlab::Graphql::ExternallyPaginatedArray
+        it 'returns an externally paginated array connection' do
+          expect(resolve_errors).to be_a Gitlab::Graphql::Pagination::ExternallyPaginatedArrayConnection
         end
       end
     end

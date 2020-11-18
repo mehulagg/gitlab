@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Resolvers::IssuesResolver do
   include GraphqlHelpers
 
-  let(:current_user) { create(:user) }
+  let_it_be(:current_user) { create(:user) }
 
   let_it_be(:group)         { create(:group) }
   let_it_be(:project)       { create(:project, group: group) }
@@ -25,7 +25,7 @@ RSpec.describe Resolvers::IssuesResolver do
   end
 
   context "with a project" do
-    before do
+    before_all do
       project.add_developer(current_user)
       create(:label_link, label: label1, target: issue1)
       create(:label_link, label: label1, target: issue2)
@@ -43,11 +43,11 @@ RSpec.describe Resolvers::IssuesResolver do
       end
 
       it 'filters by milestone' do
-        expect(resolve_issues(milestone_title: milestone.title)).to contain_exactly(issue1)
+        expect(resolve_issues(milestone_title: [milestone.title])).to contain_exactly(issue1)
       end
 
       it 'filters by assignee_username' do
-        expect(resolve_issues(assignee_username: assignee.username)).to contain_exactly(issue2)
+        expect(resolve_issues(assignee_username: [assignee.username])).to contain_exactly(issue2)
       end
 
       it 'filters by two assignees' do
@@ -112,15 +112,19 @@ RSpec.describe Resolvers::IssuesResolver do
 
       describe 'filters by issue_type' do
         it 'filters by a single type' do
-          expect(resolve_issues(issue_types: ['incident'])).to contain_exactly(issue1)
+          expect(resolve_issues(types: %w[incident])).to contain_exactly(issue1)
+        end
+
+        it 'filters by a single type, negative assertion' do
+          expect(resolve_issues(types: %w[issue])).not_to include(issue1)
         end
 
         it 'filters by more than one type' do
-          expect(resolve_issues(issue_types: %w(incident issue))).to contain_exactly(issue1, issue2)
+          expect(resolve_issues(types: %w[incident issue])).to contain_exactly(issue1, issue2)
         end
 
         it 'ignores the filter if none given' do
-          expect(resolve_issues(issue_types: [])).to contain_exactly(issue1, issue2)
+          expect(resolve_issues(types: [])).to contain_exactly(issue1, issue2)
         end
       end
 
@@ -143,44 +147,44 @@ RSpec.describe Resolvers::IssuesResolver do
       describe 'sorting' do
         context 'when sorting by created' do
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: 'created_asc')).to eq [issue1, issue2]
+            expect(resolve_issues(sort: 'created_asc').to_a).to eq [issue1, issue2]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: 'created_desc')).to eq [issue2, issue1]
+            expect(resolve_issues(sort: 'created_desc').to_a).to eq [issue2, issue1]
           end
         end
 
         context 'when sorting by due date' do
-          let_it_be(:project) { create(:project) }
+          let_it_be(:project) { create(:project, :public) }
           let_it_be(:due_issue1) { create(:issue, project: project, due_date: 3.days.from_now) }
           let_it_be(:due_issue2) { create(:issue, project: project, due_date: nil) }
           let_it_be(:due_issue3) { create(:issue, project: project, due_date: 2.days.ago) }
           let_it_be(:due_issue4) { create(:issue, project: project, due_date: nil) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :due_date_asc)).to eq [due_issue3, due_issue1, due_issue4, due_issue2]
+            expect(resolve_issues(sort: :due_date_asc).to_a).to eq [due_issue3, due_issue1, due_issue4, due_issue2]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :due_date_desc)).to eq [due_issue1, due_issue3, due_issue4, due_issue2]
+            expect(resolve_issues(sort: :due_date_desc).to_a).to eq [due_issue1, due_issue3, due_issue4, due_issue2]
           end
         end
 
         context 'when sorting by relative position' do
-          let_it_be(:project) { create(:project) }
+          let_it_be(:project) { create(:project, :public) }
           let_it_be(:relative_issue1) { create(:issue, project: project, relative_position: 2000) }
           let_it_be(:relative_issue2) { create(:issue, project: project, relative_position: nil) }
           let_it_be(:relative_issue3) { create(:issue, project: project, relative_position: 1000) }
           let_it_be(:relative_issue4) { create(:issue, project: project, relative_position: nil) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :relative_position_asc)).to eq [relative_issue3, relative_issue1, relative_issue4, relative_issue2]
+            expect(resolve_issues(sort: :relative_position_asc).to_a).to eq [relative_issue3, relative_issue1, relative_issue4, relative_issue2]
           end
         end
 
         context 'when sorting by priority' do
-          let_it_be(:project) { create(:project) }
+          let_it_be(:project) { create(:project, :public) }
           let_it_be(:early_milestone) { create(:milestone, project: project, due_date: 10.days.from_now) }
           let_it_be(:late_milestone) { create(:milestone, project: project, due_date: 30.days.from_now) }
           let_it_be(:priority_label1) { create(:label, project: project, priority: 1) }
@@ -191,16 +195,16 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:priority_issue4) { create(:issue, project: project) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :priority_asc).items).to eq([priority_issue3, priority_issue1, priority_issue2, priority_issue4])
+            expect(resolve_issues(sort: :priority_asc).to_a).to eq([priority_issue3, priority_issue1, priority_issue2, priority_issue4])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :priority_desc).items).to eq([priority_issue1, priority_issue3, priority_issue2, priority_issue4])
+            expect(resolve_issues(sort: :priority_desc).to_a).to eq([priority_issue1, priority_issue3, priority_issue2, priority_issue4])
           end
         end
 
         context 'when sorting by label priority' do
-          let_it_be(:project) { create(:project) }
+          let_it_be(:project) { create(:project, :public) }
           let_it_be(:label1) { create(:label, project: project, priority: 1) }
           let_it_be(:label2) { create(:label, project: project, priority: 5) }
           let_it_be(:label3) { create(:label, project: project, priority: 10) }
@@ -210,16 +214,16 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:label_issue4) { create(:issue, project: project) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :label_priority_asc).items).to eq([label_issue3, label_issue1, label_issue2, label_issue4])
+            expect(resolve_issues(sort: :label_priority_asc).to_a).to eq([label_issue3, label_issue1, label_issue2, label_issue4])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :label_priority_desc).items).to eq([label_issue2, label_issue3, label_issue1, label_issue4])
+            expect(resolve_issues(sort: :label_priority_desc).to_a).to eq([label_issue2, label_issue3, label_issue1, label_issue4])
           end
         end
 
         context 'when sorting by milestone due date' do
-          let_it_be(:project) { create(:project) }
+          let_it_be(:project) { create(:project, :public) }
           let_it_be(:early_milestone) { create(:milestone, project: project, due_date: 10.days.from_now) }
           let_it_be(:late_milestone) { create(:milestone, project: project, due_date: 30.days.from_now) }
           let_it_be(:milestone_issue1) { create(:issue, project: project) }
@@ -227,26 +231,26 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:milestone_issue3) { create(:issue, project: project, milestone: late_milestone) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :milestone_due_asc).items).to eq([milestone_issue2, milestone_issue3, milestone_issue1])
+            expect(resolve_issues(sort: :milestone_due_asc).to_a).to eq([milestone_issue2, milestone_issue3, milestone_issue1])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :milestone_due_desc).items).to eq([milestone_issue3, milestone_issue2, milestone_issue1])
+            expect(resolve_issues(sort: :milestone_due_desc).to_a).to eq([milestone_issue3, milestone_issue2, milestone_issue1])
           end
         end
 
         context 'when sorting by severity' do
-          let_it_be(:project) { create(:project) }
+          let_it_be(:project) { create(:project, :public) }
           let_it_be(:issue_high_severity) { create_issue_with_severity(project, severity: :high) }
           let_it_be(:issue_low_severity) { create_issue_with_severity(project, severity: :low) }
           let_it_be(:issue_no_severity) { create(:incident, project: project) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :severity_asc)).to eq([issue_no_severity, issue_low_severity, issue_high_severity])
+            expect(resolve_issues(sort: :severity_asc).to_a).to eq([issue_no_severity, issue_low_severity, issue_high_severity])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :severity_desc)).to eq([issue_high_severity, issue_low_severity, issue_no_severity])
+            expect(resolve_issues(sort: :severity_desc).to_a).to eq([issue_high_severity, issue_low_severity, issue_no_severity])
           end
         end
       end
@@ -260,14 +264,16 @@ RSpec.describe Resolvers::IssuesResolver do
       end
 
       it 'finds a specific issue with iid', :request_store do
-        result = batch_sync(max_queries: 2) { resolve_issues(iid: issue1.iid) }
+        result = batch_sync(max_queries: 3) { resolve_issues(iid: issue1.iid).nodes }
 
         expect(result).to contain_exactly(issue1)
       end
 
       it 'batches queries that only include IIDs', :request_store do
-        result = batch_sync(max_queries: 2) do
-          resolve_issues(iid: issue1.iid) + resolve_issues(iids: issue2.iid)
+        result = batch_sync(max_queries: 3) do
+          [issue1, issue2]
+            .map { |issue| resolve_issues(iid: issue.iid.to_s) }
+            .flat_map(&:nodes)
         end
 
         expect(result).to contain_exactly(issue1, issue2)

@@ -11,7 +11,7 @@ RSpec.describe Resolvers::Projects::JiraImportsResolver do
 
   describe '#resolve' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:project, reload: true) { create(:project, :public) }
+    let_it_be(:project, reload: true) { create(:project) }
 
     context 'when project does not have Jira imports' do
       let(:current_user) { user }
@@ -60,8 +60,7 @@ RSpec.describe Resolvers::Projects::JiraImportsResolver do
         it 'returns Jira imports sorted ascending by created_at time' do
           imports = resolve_imports
 
-          expect(imports.size).to eq 2
-          expect(imports.map(&:jira_project_key)).to eq %w(BB AA)
+          expect(imports.to_a.map(&:jira_project_key)).to eq(%w[BB AA])
         end
       end
     end

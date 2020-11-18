@@ -29,9 +29,7 @@ RSpec.describe Resolvers::BoardListsResolver do
 
     context 'with unauthorized user' do
       it 'raises an error' do
-        expect do
-          resolve_board_lists(current_user: unauth_user)
-        end.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        expect(resolve_board_lists(current_user: unauth_user)).to be_nil
       end
     end
 

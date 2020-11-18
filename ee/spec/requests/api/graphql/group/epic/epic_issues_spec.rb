@@ -34,15 +34,15 @@ RSpec.describe 'Getting issues for an epic' do
     NODE
   end
 
-  def epic_query(params = {})
+  def epic_query(params = {}, epic_fields = epic_node)
     graphql_query_for("group", { "fullPath" => group.full_path },
-                       query_graphql_field("epics", params, epic_node)
+                       query_graphql_field("epics", params, epic_fields)
     )
   end
 
-  def issue_ids
-    node_array(epics_data).each_with_object({}) do |node, result|
-      result[node['iid'].to_i] = node_array(node['issues']['edges'], 'id')
+  def issue_ids(epics = epics_data)
+    node_array(epics).to_h do |node|
+      [node['iid'].to_i, node_array(node['issues']['edges'], 'id')]
     end
   end
 
@@ -75,13 +75,12 @@ RSpec.describe 'Getting issues for an epic' do
       end
 
       context 'pagination' do
-        let(:after_cursor) { '' }
-        let(:epic_node) do
+        def epic_fields(after)
           <<~NODE
             edges {
               node {
                 iid
-                issues(first: 1, after: "#{after_cursor}") {
+                issues(#{attributes_to_graphql(first: 1, after: after)}) {
                   pageInfo {
                     hasNextPage
                     hasPreviousPage
@@ -99,28 +98,33 @@ RSpec.describe 'Getting issues for an epic' do
           NODE
         end
 
-        context 'without a cursor' do
-          it 'return first page of issues' do
-            post_graphql(epic_query(iid: epic.iid), current_user: user)
+        let(:params) { { iid: epic.iid } }
 
-            expect(response).to have_gitlab_http_status(:success)
-            expect(first_epic_issues_page_info['hasNextPage']).to be_truthy
-            expect(first_epic_issues_page_info['endCursor']).to eq 'MQ'
-            expect(issue_ids[epic.iid]).to eq [issue.to_global_id.to_s]
-          end
+        def get_page(after)
+          query = epic_query(params, epic_fields(after))
+          post_graphql(query, current_user: user)
+
+          expect(response).to have_gitlab_http_status(:success)
+
+          data = ::Gitlab::Json.parse(response.body)
+          expect(data['errors']).to be_blank
+          epics = data.dig('data', 'group', 'epics', 'edges')
+          issues = issue_ids(epics)[epic.iid]
+          page = epics.dig(0, 'node', 'issues', 'pageInfo')
+
+          [issues, page]
         end
 
-        context 'with an after cursor' do
-          let(:after_cursor) { 'MQ' }
+        it 'paginates correctly' do
+          issues, page_1 = get_page(nil)
 
-          it 'return first page after the cursor' do
-            post_graphql(epic_query(iid: epic.iid), current_user: user)
+          expect(issues).to contain_exactly(global_id_of(issue))
+          expect(page_1).to include("hasNextPage" => true, "hasPreviousPage" => false)
 
-            expect(response).to have_gitlab_http_status(:success)
-            expect(first_epic_issues_page_info['hasNextPage']).to be_falsey
-            expect(first_epic_issues_page_info['endCursor']).to eq 'Mg'
-            expect(issue_ids[epic.iid]).to eq [confidential_issue.to_global_id.to_s]
-          end
+          next_issues, page_2 = get_page(page_1['endCursor'])
+
+          expect(next_issues).to contain_exactly(global_id_of(confidential_issue))
+          expect(page_2).to include("hasNextPage" => false, "hasPreviousPage" => true)
         end
       end
     end
@@ -160,7 +164,8 @@ RSpec.describe 'Getting issues for an epic' do
       # TODO remove the pending state of this spec when
       # we have an efficient way of preloading data on GraphQL.
       # For more information check: https://gitlab.com/gitlab-org/gitlab/-/issues/207898
-      xit 'avoids N+1 queries' do
+      it 'avoids N+1 queries' do
+        pending 'https://gitlab.com/gitlab-org/gitlab/-/issues/207898'
         control_count = ActiveRecord::QueryRecorder.new do
           post_graphql(epic_query(iid: epic.iid), current_user: user)
         end.count

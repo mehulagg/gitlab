@@ -11,11 +11,14 @@ RSpec.describe GitlabSchema.types['AlertManagementPrometheusIntegration'] do
   describe 'resolvers' do
     shared_examples_for 'has field with value' do |field_name|
       it 'correctly renders the field' do
-        expect(resolve_field(field_name, integration)).to eq(value)
+        result = resolve_field(field_name, integration, current_user: user)
+
+        expect(result).to eq(value)
       end
     end
 
     let_it_be_with_reload(:integration) { create(:prometheus_service) }
+    let_it_be(:user) { create(:user, maintainer_projects: [integration.project]) }
 
     it_behaves_like 'has field with value', 'name' do
       let(:value) { integration.title }
@@ -45,15 +48,21 @@ RSpec.describe GitlabSchema.types['AlertManagementPrometheusIntegration'] do
       end
     end
 
-    context 'without project' do
-      let_it_be(:integration) { create(:prometheus_service, project: nil, group: create(:group)) }
+    context 'group integration' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:integration) { create(:prometheus_service, project: nil, group: group) }
 
-      it_behaves_like 'has field with value', 'token' do
-        let(:value) { nil }
-      end
+      # Since it is impossible to authorize the parent here, given that the
+      # project is nil, all fields should be redacted:
 
-      it_behaves_like 'has field with value', 'url' do
-        let(:value) { nil }
+      described_class.fields.keys.each do |field_name|
+        context "field: #{field_name}" do
+          it 'is redacted' do
+            expect do
+              resolve_field(field_name, integration, current_user: user)
+            end.to raise_error(GraphqlHelpers::UnauthorizedObject)
+          end
+        end
       end
     end
   end
