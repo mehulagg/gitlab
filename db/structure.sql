@@ -13857,6 +13857,21 @@ CREATE SEQUENCE milestones_id_seq
 
 ALTER SEQUENCE milestones_id_seq OWNED BY milestones.id;
 
+CREATE TABLE namespace_actions (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    action smallint NOT NULL
+);
+
+CREATE SEQUENCE namespace_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE namespace_actions_id_seq OWNED BY namespace_actions.id;
+
 CREATE TABLE namespace_aggregation_schedules (
     namespace_id integer NOT NULL
 );
@@ -18018,6 +18033,8 @@ ALTER TABLE ONLY metrics_users_starred_dashboards ALTER COLUMN id SET DEFAULT ne
 
 ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_seq'::regclass);
 
+ALTER TABLE ONLY namespace_actions ALTER COLUMN id SET DEFAULT nextval('namespace_actions_id_seq'::regclass);
+
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_seq'::regclass);
@@ -19258,6 +19275,9 @@ ALTER TABLE ONLY milestone_releases
 
 ALTER TABLE ONLY milestones
     ADD CONSTRAINT milestones_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY namespace_actions
+    ADD CONSTRAINT namespace_actions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY namespace_aggregation_schedules
     ADD CONSTRAINT namespace_aggregation_schedules_pkey PRIMARY KEY (namespace_id);
@@ -21284,6 +21304,8 @@ CREATE INDEX index_mr_cleanup_schedules_timestamps ON merge_request_cleanup_sche
 CREATE UNIQUE INDEX index_mr_context_commits_on_merge_request_id_and_sha ON merge_request_context_commits USING btree (merge_request_id, sha);
 
 CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_nulls_last ON merge_request_metrics USING btree (target_project_id, merged_at DESC NULLS LAST, id DESC);
+
+CREATE INDEX index_namespace_actions_on_namespace_id ON namespace_actions USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
 
@@ -24055,6 +24077,9 @@ ALTER TABLE ONLY ci_pipelines_config
 
 ALTER TABLE ONLY approval_project_rules_groups
     ADD CONSTRAINT fk_rails_9071e863d1 FOREIGN KEY (approval_project_rule_id) REFERENCES approval_project_rules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY namespace_actions
+    ADD CONSTRAINT fk_rails_90b60743f3 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerability_occurrences
     ADD CONSTRAINT fk_rails_90fed4faba FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
