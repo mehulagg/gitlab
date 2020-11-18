@@ -24,7 +24,11 @@
           %span.issuable-authored.d-none.d-sm-inline-block
             &middot;
             opened #{time_ago_with_tooltip(issue.created_at, placement: 'bottom')}
-            by #{link_to_member(@project, issue.author, avatar: false)}
+            - if issue.service_desk_reply_to
+              by #{issue.service_desk_reply_to} via
+            - else
+              by
+            #{link_to_member(@project, issue.author, avatar: false)}
             = render_if_exists 'shared/issuable/gitlab_team_member_badge', {author: issue.author}
           - if issue.milestone
             %span.issuable-milestone.d-none.d-sm-inline-block
