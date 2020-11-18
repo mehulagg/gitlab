@@ -75,7 +75,6 @@ RSpec.describe 'create_tokens' do
         expect(self).to receive(:warn_missing_secret).with('otp_key_base')
         expect(self).to receive(:warn_missing_secret).with('db_key_base')
         expect(self).to receive(:warn_missing_secret).with('openid_connect_signing_key')
-        expect(self).to receive(:warn_missing_secret).with('enc_settings_key_base')
 
         create_tokens
       end

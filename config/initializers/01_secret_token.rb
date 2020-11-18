@@ -31,9 +31,11 @@ def create_tokens
     secret_key_base: file_secret_key || generate_new_secure_token,
     otp_key_base: env_secret_key || file_secret_key || generate_new_secure_token,
     db_key_base: generate_new_secure_token,
-    openid_connect_signing_key: generate_new_rsa_private_key,
-    enc_settings_key_base: generate_new_secure_token
+    openid_connect_signing_key: generate_new_rsa_private_key
   }
+
+  # enc_settings_key_base is optional for now
+  defaults[:enc_settings_key_base] = generate_new_secure_token if ENV['GITLAB_GENERATE_ENC_SETTINGS_KEY_BASE']
 
   missing_secrets = set_missing_keys(defaults)
   write_secrets_yml(missing_secrets) unless missing_secrets.empty?
