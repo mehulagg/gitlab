@@ -21,8 +21,8 @@ instrument code:
 
 - `instrument_method`: instruments a single class method.
 - `instrument_instance_method`: instruments a single instance method.
-- `instrument_class_hierarchy`: given a Class this method will recursively
-  instrument all sub-classes (both class and instance methods).
+- `instrument_class_hierarchy`: given a Class this method recursively
+  instruments all sub-classes (both class and instance methods).
 - `instrument_methods`: instruments all public and private class methods of a Module.
 - `instrument_instance_methods`: instruments all public and private instance methods of a
   Module.
@@ -91,7 +91,7 @@ Ruby code. In case of the above snippet you'd run the following:
 
 - `$ Banzai::Renderer.render`
 
-This will print out something along the lines of:
+This prints out something along the lines of:
 
 ```plaintext
 From: /path/to/your/gitlab/lib/gitlab/metrics/instrumentation.rb @ line 148:
@@ -131,7 +131,7 @@ Three values are measured for a block:
 
 Both the real and CPU timings are measured in milliseconds.
 
-Multiple calls to the same block will result in the final values being the sum
+Multiple calls to the same block results in the final values being the sum
 of all individual values. Take this code for example:
 
 ```ruby
@@ -142,7 +142,7 @@ of all individual values. Take this code for example:
 end
 ```
 
-Here the final value of `sleep_real_time` will be `3`, _not_ `1`.
+Here the final value of `sleep_real_time` is `3`, _not_ `1`.
 
 ## Tracking Custom Events
 
