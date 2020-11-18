@@ -231,8 +231,8 @@ Kubesec
 Laravel
 LDAP
 ldapsearch
-Leiningen
 Lefthook
+Leiningen
 Libravatar
 liveness
 Lograge
@@ -476,6 +476,8 @@ substrings
 subtree
 subtrees
 sudo
+swimlane
+swimlanes
 syslog
 tcpdump
 Thanos
