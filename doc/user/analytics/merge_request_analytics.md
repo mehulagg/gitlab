@@ -36,7 +36,7 @@ Merge Request Analytics could be used when:
 
 ## Visualizations and data
 
-The following visualizations and data are available, representing all merge requests that were merged in the past 12 months.
+The following visualizations and data are available, representing all merge requests that were merged in the given date range.
 
 ### Throughput chart
 
@@ -46,7 +46,21 @@ The throughput chart shows the number of merge requests merged per month.
 
 ### Throughput table
 
-Data table displaying a maximum of the 100 most recent merge requests merged for the time period.
+Data table displaying the most recent merge requests merged in the date range.  Up to 20 merge requests are displayed at a time, and pagination controls appear below the table when there are more than 20.  The following data is displayed for each merge request:
+
+- Title (as a link to the merge request itself)
+- ID
+- Pipeline status
+- Label count
+- Comment count
+- Approval count (if approved)
+- Date merged
+- Time to merge
+- Milestone
+- Commit count
+- Pipeline count
+- Line change counts
+- Assignees
 
 ![Throughput table](img/mr_throughput_table_v13_3.png "Merge Request Analytics - Throughput table listing the 100 merge requests most recently merged")
 
@@ -68,6 +82,15 @@ To filter results:
 1. Click on the filter bar.
 1. Select a parameter to filter by.
 1. Select a value from the autocompleted results, or enter search text to refine the results.
+1. Hit the "Return" key.
+
+## Date range
+
+The date range is set to the past 12 months by default.  You can modify the date range by changing the "From" and/or "To" values that appear alongside the filter bar.  After changing either value, the data displayed on the page will update automatically.
+
+## Bookmarking
+
+The filters and date range you select are bookmarkable.  After you have applied a change to the filter bar or the date range, you can create a bookmark for yourself or copy-paste the URL from the address bar to share it with someone else.
 
 ## Permissions
 
