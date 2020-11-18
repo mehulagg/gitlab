@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import AccessorUtilities from './lib/utils/accessor';
-import { loadCSSFile } from './lib/utils/css_utils';
 
 export default class ProjectSelectComboButton {
   constructor(select) {
@@ -47,14 +46,9 @@ export default class ProjectSelectComboButton {
   openDropdown(event) {
     import(/* webpackChunkName: 'select2' */ 'select2/select2')
       .then(() => {
-        // eslint-disable-next-line promise/no-nesting
-        loadCSSFile(gon.select2_css_path)
-          .then(() => {
-            $(event.currentTarget)
-              .siblings('.project-item-select')
-              .select2('open');
-          })
-          .catch(() => {});
+        $(event.currentTarget)
+          .siblings('.project-item-select')
+          .select2('open');
       })
       .catch(() => {});
   }

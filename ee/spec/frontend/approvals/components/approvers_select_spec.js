@@ -1,11 +1,9 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
-import 'select2/select2';
 import Api from 'ee/api';
 import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
 import { TYPE_USER, TYPE_GROUP } from 'ee/approvals/constants';
 import { TEST_HOST } from 'helpers/test_constants';
-import waitForPromises from 'helpers/wait_for_promises';
 
 const TEST_PROJECT_ID = '17';
 const TEST_GROUP_AVATAR = `${TEST_HOST}/group-avatar.png`;
@@ -53,20 +51,18 @@ describe('Approvals ApproversSelect', () => {
   let wrapper;
   let $input;
 
-  const factory = async (options = {}) => {
+  const factory = (options = {}) => {
     const propsData = {
       projectId: TEST_PROJECT_ID,
       ...options.propsData,
     };
 
-    wrapper = await shallowMount(ApproversSelect, {
+    wrapper = shallowMount(ApproversSelect, {
       ...options,
       propsData,
       localVue,
       attachToDocument: true,
     });
-
-    await waitForPromises();
 
     $input = $(wrapper.vm.$refs.input);
   };
@@ -84,16 +80,16 @@ describe('Approvals ApproversSelect', () => {
     wrapper.destroy();
   });
 
-  it('renders select2 input', async () => {
+  it('renders select2 input', () => {
     expect(select2Container()).toBe(null);
 
-    await factory();
+    factory();
 
     expect(select2Container()).not.toBe(null);
   });
 
-  it('queries and displays groups and users', async done => {
-    await factory();
+  it('queries and displays groups and users', done => {
+    factory();
 
     const expected = TEST_GROUPS.concat(TEST_USERS)
       .map(({ id, ...obj }) => obj)
@@ -114,8 +110,8 @@ describe('Approvals ApproversSelect', () => {
   describe('with search term', () => {
     const term = 'lorem';
 
-    beforeEach(async done => {
-      await factory();
+    beforeEach(done => {
+      factory();
 
       waitForEvent($input, 'select2-loaded')
         .then(jest.runOnlyPendingTimers)
@@ -140,8 +136,8 @@ describe('Approvals ApproversSelect', () => {
     const skipGroupIds = [7, 8];
     const skipUserIds = [9, 10];
 
-    beforeEach(async done => {
-      await factory({
+    beforeEach(done => {
+      factory({
         propsData: {
           skipGroupIds,
           skipUserIds,
@@ -170,8 +166,8 @@ describe('Approvals ApproversSelect', () => {
     });
   });
 
-  it('emits input when data changes', async done => {
-    await factory();
+  it('emits input when data changes', done => {
+    factory();
 
     const expectedFinal = [
       { ...TEST_USERS[0], type: TYPE_USER },

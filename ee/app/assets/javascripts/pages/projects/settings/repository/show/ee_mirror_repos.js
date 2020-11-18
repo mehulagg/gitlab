@@ -2,7 +2,6 @@ import $ from 'jquery';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import MirrorRepos from '~/mirrors/mirror_repos';
-import { loadCSSFile } from '~/lib/utils/css_utils';
 
 export default class EEMirrorRepos extends MirrorRepos {
   constructor(...args) {
@@ -79,15 +78,10 @@ export default class EEMirrorRepos extends MirrorRepos {
   initSelect2() {
     import(/* webpackChunkName: 'select2' */ 'select2/select2')
       .then(() => {
-        // eslint-disable-next-line promise/no-nesting
-        loadCSSFile(gon.select2_css_path)
-          .then(() => {
-            $('.js-mirror-user', this.$form).select2({
-              width: 'resolve',
-              dropdownAutoWidth: true,
-            });
-          })
-          .catch(() => {});
+        $('.js-mirror-user', this.$form).select2({
+          width: 'resolve',
+          dropdownAutoWidth: true,
+        });
       })
       .catch(() => {});
   }
