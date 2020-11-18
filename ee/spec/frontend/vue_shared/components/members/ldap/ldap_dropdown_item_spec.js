@@ -1,8 +1,8 @@
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import waitForPromises from 'helpers/wait_for_promises';
 import LdapDropdownItem from 'ee/vue_shared/components/members/ldap/ldap_dropdown_item.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

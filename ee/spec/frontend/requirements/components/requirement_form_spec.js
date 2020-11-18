@@ -1,7 +1,7 @@
-import $ from 'jquery';
-import { shallowMount } from '@vue/test-utils';
 import { GlDrawer, GlFormTextarea, GlFormCheckbox } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
+import { shallowMount } from '@vue/test-utils';
+import $ from 'jquery';
 
 import RequirementForm from 'ee/requirements/components/requirement_form.vue';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';

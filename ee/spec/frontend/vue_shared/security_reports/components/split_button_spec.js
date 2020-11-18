@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 
 const buttons = [

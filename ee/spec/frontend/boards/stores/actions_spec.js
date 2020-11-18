@@ -1,16 +1,16 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'helpers/test_constants';
-import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
-import actions, { gqlClient } from 'ee/boards/stores/actions';
-import * as types from 'ee/boards/stores/mutation_types';
 import { GroupByParamType } from 'ee/boards/constants';
+import actions, { gqlClient } from 'ee/boards/stores/actions';
+import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
+import * as types from 'ee/boards/stores/mutation_types';
+import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
+import { formatListIssues } from '~/boards/boards_util';
+import { ListType } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { ListType } from '~/boards/constants';
-import { formatListIssues } from '~/boards/boards_util';
 import {
   mockLists,
   mockIssue,

@@ -1,6 +1,6 @@
-import { TEST_HOST } from 'jest/helpers/test_constants';
-import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import initVulnerabilityReport from 'ee/security_dashboard/first_class_init';
+import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 
 const EMPTY_DIV = document.createElement('div');
 

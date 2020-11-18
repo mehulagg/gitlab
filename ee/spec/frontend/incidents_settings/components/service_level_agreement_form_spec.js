@@ -1,7 +1,7 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlButton, GlForm, GlFormGroup } from '@gitlab/ui';
-import ServiceLevelAgreementForm from 'ee/incidents_settings/components/service_level_agreement_form.vue';
+import { mount, shallowMount } from '@vue/test-utils';
 import merge from 'lodash/merge';
+import ServiceLevelAgreementForm from 'ee/incidents_settings/components/service_level_agreement_form.vue';
 
 const defaultData = { enabled: true, duration: 15, units: 'minutes' };
 

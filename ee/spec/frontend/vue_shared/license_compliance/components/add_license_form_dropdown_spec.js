@@ -1,6 +1,6 @@
+import { shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
 import Dropdown from 'ee/vue_shared/license_compliance/components/add_license_form_dropdown.vue';
-import { shallowMount } from '@vue/test-utils';
 
 let vm;
 let wrapper;

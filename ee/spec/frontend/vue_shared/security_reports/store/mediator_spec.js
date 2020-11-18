@@ -1,7 +1,7 @@
-import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import configureMediator, {
   updateIssueActionsMap,
 } from 'ee/vue_shared/security_reports/store/mediator';
+import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 
 const mockedStore = {
   dispatch: jest.fn(),

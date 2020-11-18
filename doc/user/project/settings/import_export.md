@@ -114,6 +114,7 @@ The following items will be exported:
 - LFS objects
 - Issue boards
 - Pipelines history
+- Push Rules
 
 The following items will NOT be exported:
 
@@ -123,7 +124,6 @@ The following items will NOT be exported:
 - Webhooks
 - Any encrypted tokens
 - Merge Request Approvers
-- Push Rules
 - Awards
 
 NOTE: **Note:**

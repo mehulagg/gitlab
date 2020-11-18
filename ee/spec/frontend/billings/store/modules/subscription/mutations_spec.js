@@ -1,7 +1,7 @@
-import createState from 'ee/billings/stores/modules/subscription/state';
+import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
 import mutations from 'ee/billings/stores/modules/subscription/mutations';
-import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
+import createState from 'ee/billings/stores/modules/subscription/state';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mockDataSubscription } from '../../../mock_data';
 

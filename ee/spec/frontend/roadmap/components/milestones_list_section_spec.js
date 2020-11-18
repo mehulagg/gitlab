@@ -1,14 +1,14 @@
 import { GlIcon, GlButton } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import milestonesListSectionComponent from 'ee/roadmap/components/milestones_list_section.vue';
 import MilestoneTimeline from 'ee/roadmap/components/milestone_timeline.vue';
-import createStore from 'ee/roadmap/store';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
+import milestonesListSectionComponent from 'ee/roadmap/components/milestones_list_section.vue';
 import {
   PRESET_TYPES,
   EPIC_DETAILS_CELL_WIDTH,
   TIMELINE_CELL_MIN_WIDTH,
 } from 'ee/roadmap/constants';
+import createStore from 'ee/roadmap/store';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import { mockTimeframeInitialDate, mockGroupId, rawMilestones } from 'ee_jest/roadmap/mock_data';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 

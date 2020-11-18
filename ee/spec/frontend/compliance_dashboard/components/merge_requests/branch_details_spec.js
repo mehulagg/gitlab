@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 
 import BranchDetails from 'ee/compliance_dashboard/components/merge_requests/branch_details.vue';
 

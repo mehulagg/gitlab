@@ -4,10 +4,10 @@ import MockAdapter from 'axios-mock-adapter';
 import JiraIssuesListRoot from 'ee/integrations/jira/issues_list/components/jira_issues_list_root.vue';
 
 import createFlash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableStates, IssuableListTabs, AvailableSortOptions } from '~/issuable_list/constants';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockProvide, mockJiraIssues } from '../mock_data';
 

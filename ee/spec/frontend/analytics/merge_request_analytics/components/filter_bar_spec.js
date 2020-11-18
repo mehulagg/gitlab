@@ -1,9 +1,9 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import storeConfig from 'ee/analytics/merge_request_analytics/store';
+import Vuex from 'vuex';
 import FilterBar from 'ee/analytics/merge_request_analytics/components/filter_bar.vue';
+import storeConfig from 'ee/analytics/merge_request_analytics/store';
 import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
 import {
   filterMilestones,
@@ -14,13 +14,13 @@ import {
   getFilterParams,
   getFilterValues,
 } from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/test_helper';
-import initialFiltersState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
-import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
+import { ITEM_TYPE } from '~/groups/constants';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
-import { ITEM_TYPE } from '~/groups/constants';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import initialFiltersState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
 
 describe('reports not configured empty state', () => {

@@ -1,19 +1,19 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton, GlBadge } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import waitForPromises from 'helpers/wait_for_promises';
-import UsersMockHelper from 'helpers/user_mock_data_helper';
 import Api from 'ee/api';
-import Header from 'ee/vulnerabilities/components/header.vue';
-import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
-import ResolutionAlert from 'ee/vulnerabilities/components/resolution_alert.vue';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import Header from 'ee/vulnerabilities/components/header.vue';
+import ResolutionAlert from 'ee/vulnerabilities/components/resolution_alert.vue';
+import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import VulnerabilityStateDropdown from 'ee/vulnerabilities/components/vulnerability_state_dropdown.vue';
 import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
+import UsersMockHelper from 'helpers/user_mock_data_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import * as urlUtility from '~/lib/utils/url_utility';
-import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
+import download from '~/lib/utils/downloader';
+import * as urlUtility from '~/lib/utils/url_utility';
 
 const vulnerabilityStateEntries = Object.entries(VULNERABILITY_STATE_OBJECTS);
 const mockAxios = new MockAdapter(axios);

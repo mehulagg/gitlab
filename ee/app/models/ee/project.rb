@@ -178,7 +178,6 @@ module EE
         to: :statistics, allow_nil: true
 
       delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_minutes_used?,
                :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
@@ -312,7 +311,7 @@ module EE
     end
 
     def shared_runners_available?
-      super && !shared_runners_limit_namespace.shared_runners_minutes_used?
+      super && !::Ci::Minutes::Quota.new(shared_runners_limit_namespace).minutes_used_up?
     end
 
     def link_pool_repository

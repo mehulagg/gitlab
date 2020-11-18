@@ -2,10 +2,10 @@ import { shallowMount } from '@vue/test-utils';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import { listObj } from 'jest/boards/mock_data';
 import BoardCard from '~/boards/components/board_card_layout.vue';
-import { mockIssues } from '../mock_data';
+import { ListType } from '~/boards/constants';
 import List from '~/boards/models/list';
 import { createStore } from '~/boards/stores';
-import { ListType } from '~/boards/constants';
+import { mockIssues } from '../mock_data';
 
 describe('IssuesLaneList', () => {
   let wrapper;

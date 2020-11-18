@@ -1,15 +1,15 @@
 import MockAdapter from 'axios-mock-adapter';
+import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
+import groupMilestones from 'ee/roadmap/queries/groupMilestones.query.graphql';
 import * as actions from 'ee/roadmap/store/actions';
 import * as types from 'ee/roadmap/store/mutation_types';
 import defaultState from 'ee/roadmap/store/state';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import * as epicUtils from 'ee/roadmap/utils/epic_utils';
 import * as roadmapItemUtils from 'ee/roadmap/utils/roadmap_item_utils';
-import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
-import groupMilestones from 'ee/roadmap/queries/groupMilestones.query.graphql';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import testAction from 'helpers/vuex_action_helper';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import {
   mockGroupId,
   basePath,

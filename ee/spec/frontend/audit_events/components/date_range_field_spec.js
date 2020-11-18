@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDaterangePicker } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DateRangeButtons from 'ee/audit_events/components/date_range_buttons.vue';
 import DateRangeField from 'ee/audit_events/components/date_range_field.vue';

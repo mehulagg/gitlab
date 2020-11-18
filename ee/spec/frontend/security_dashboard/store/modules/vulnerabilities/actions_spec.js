@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
+import * as actions from 'ee/security_dashboard/store/modules/vulnerabilities/actions';
+import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
+import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
+import initialState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 
-import initialState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
-import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
-import * as actions from 'ee/security_dashboard/store/modules/vulnerabilities/actions';
 import axios from '~/lib/utils/axios_utils';
 import toast from '~/vue_shared/plugins/global_toast';
 

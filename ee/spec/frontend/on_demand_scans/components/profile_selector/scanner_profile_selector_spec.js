@@ -1,7 +1,7 @@
-import { merge } from 'lodash';
 import { mount, shallowMount } from '@vue/test-utils';
-import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
+import { merge } from 'lodash';
 import ProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
+import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import { scannerProfiles } from '../../mock_data';
 
 const TEST_LIBRARY_PATH = '/test/scanner/profiles/library/path';

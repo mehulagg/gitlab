@@ -2,6 +2,7 @@ import $ from 'jquery';
 import Api from '~/api';
 import { sprintf, __ } from '~/locale';
 import { sanitizeItem } from '~/frequent_items/utils';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 
 const formatResult = selectedItem => {
   if (selectedItem.path_with_namespace) {
@@ -23,48 +24,56 @@ const formatSelection = selectedItem => {
   return __('All groups and projects');
 };
 
+const QueryAdmin = query => {
+  const groupsFetch = Api.groups(query.term, {});
+  const projectsFetch = Api.projects(query.term, {
+    order_by: 'id',
+    membership: false,
+  });
+  return Promise.all([projectsFetch, groupsFetch]).then(([projects, groups]) => {
+    const all = {
+      id: 'all',
+    };
+    const data = [all].concat(groups, projects.data).map(sanitizeItem);
+    return query.callback({
+      results: data,
+    });
+  });
+};
+
 const AdminEmailSelect = () => {
-  $('.ajax-admin-email-select').each((i, select) =>
-    $(select).select2({
-      placeholder: __('Select group or project'),
-      multiple: $(select).hasClass('multiselect'),
-      minimumInputLength: 0,
-      query(query) {
-        const groupsFetch = Api.groups(query.term, {});
-        const projectsFetch = Api.projects(query.term, {
-          order_by: 'id',
-          membership: false,
-        });
-        return Promise.all([projectsFetch, groupsFetch]).then(([projects, groups]) => {
-          const all = {
-            id: 'all',
-          };
-          const data = [all].concat(groups, projects.data).map(sanitizeItem);
-          return query.callback({
-            results: data,
-          });
-        });
-      },
-      id(object) {
-        if (object.path_with_namespace) {
-          return `project-${object.id}`;
-        } else if (object.path) {
-          return `group-${object.id}`;
-        }
-        return 'all';
-      },
-      formatResult(...args) {
-        return formatResult(...args);
-      },
-      formatSelection(...args) {
-        return formatSelection(...args);
-      },
-      dropdownCssClass: 'ajax-admin-email-dropdown',
-      escapeMarkup(m) {
-        return m;
-      },
-    }),
-  );
+  loadCSSFile(gon.select2_css_path)
+    .then(() => {
+      $('.ajax-admin-email-select').each((i, select) =>
+        $(select).select2({
+          placeholder: __('Select group or project'),
+          multiple: $(select).hasClass('multiselect'),
+          minimumInputLength: 0,
+          query(query) {
+            QueryAdmin(query);
+          },
+          id(object) {
+            if (object.path_with_namespace) {
+              return `project-${object.id}`;
+            } else if (object.path) {
+              return `group-${object.id}`;
+            }
+            return 'all';
+          },
+          formatResult(...args) {
+            return formatResult(...args);
+          },
+          formatSelection(...args) {
+            return formatSelection(...args);
+          },
+          dropdownCssClass: 'ajax-admin-email-dropdown',
+          escapeMarkup(m) {
+            return m;
+          },
+        }),
+      );
+    })
+    .catch(() => {});
 };
 
 export default () =>

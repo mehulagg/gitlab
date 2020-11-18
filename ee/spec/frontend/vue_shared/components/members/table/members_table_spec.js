@@ -1,6 +1,6 @@
+import { within } from '@testing-library/dom';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { within } from '@testing-library/dom';
 import { member as memberMock, members } from 'jest/vue_shared/components/members/mock_data';
 import MembersTable from '~/vue_shared/components/members/table/members_table.vue';
 

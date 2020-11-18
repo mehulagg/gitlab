@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import LicenseComplianceModal from 'ee/approvals/components/license_compliance/modal.vue';
 import { APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';

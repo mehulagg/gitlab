@@ -1,5 +1,5 @@
-import GfmAutoCompleteEE from 'ee/gfm_auto_complete';
 import $ from 'jquery';
+import GfmAutoCompleteEE from 'ee/gfm_auto_complete';
 import { TEST_HOST } from 'jest/helpers/test_constants';
 
 describe('GfmAutoCompleteEE', () => {

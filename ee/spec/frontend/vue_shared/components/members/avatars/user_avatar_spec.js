@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlBadge } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import { member as memberMock } from 'jest/vue_shared/components/members/mock_data';
 import UserAvatar from '~/vue_shared/components/members/avatars/user_avatar.vue';
 

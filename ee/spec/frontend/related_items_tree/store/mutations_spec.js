@@ -1,7 +1,6 @@
+import * as types from 'ee/related_items_tree/store/mutation_types';
 import mutations from 'ee/related_items_tree/store/mutations';
 import createDefaultState from 'ee/related_items_tree/store/state';
-
-import * as types from 'ee/related_items_tree/store/mutation_types';
 
 describe('RelatedItemsTree', () => {
   describe('store', () => {

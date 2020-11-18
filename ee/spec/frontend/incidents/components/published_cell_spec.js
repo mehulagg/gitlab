@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import PublishedCell from 'ee/incidents/components/published_cell.vue';
 
 describe('Incidents Published Cell', () => {

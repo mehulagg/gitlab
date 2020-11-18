@@ -1,13 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
 
+import * as actions from 'ee/security_dashboard/store/modules/vulnerable_projects/actions';
+import * as types from 'ee/security_dashboard/store/modules/vulnerable_projects/mutation_types';
+import createState from 'ee/security_dashboard/store/modules/vulnerable_projects/state';
 import testAction from 'helpers/vuex_action_helper';
 
-import createState from 'ee/security_dashboard/store/modules/vulnerable_projects/state';
-import * as types from 'ee/security_dashboard/store/modules/vulnerable_projects/mutation_types';
-import * as actions from 'ee/security_dashboard/store/modules/vulnerable_projects/actions';
-
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
 

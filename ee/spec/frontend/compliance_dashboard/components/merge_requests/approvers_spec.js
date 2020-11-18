@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAvatarLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import Approvers from 'ee/compliance_dashboard/components/merge_requests/approvers.vue';
 import { PRESENTABLE_APPROVERS_LIMIT } from 'ee/compliance_dashboard/constants';

@@ -1,6 +1,6 @@
-import createState from 'ee/analytics/productivity_analytics/store/modules/table/state';
-import * as getters from 'ee/analytics/productivity_analytics/store/modules/table/getters';
 import { tableSortOrder } from 'ee/analytics/productivity_analytics/constants';
+import * as getters from 'ee/analytics/productivity_analytics/store/modules/table/getters';
+import createState from 'ee/analytics/productivity_analytics/store/modules/table/state';
 
 describe('Productivity analytics table getters', () => {
   let state;

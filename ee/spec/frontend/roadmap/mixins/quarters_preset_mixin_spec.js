@@ -1,12 +1,11 @@
 import Vue from 'vue';
 
 import EpicItemTimelineComponent from 'ee/roadmap/components/epic_item_timeline.vue';
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import { getTimeframeForQuartersView } from 'ee/roadmap/utils/roadmap_utils';
 
-import { PRESET_TYPES } from 'ee/roadmap/constants';
-
-import mountComponent from 'helpers/vue_mount_component_helper';
 import { mockTimeframeInitialDate, mockEpic } from 'ee_jest/roadmap/mock_data';
+import mountComponent from 'helpers/vue_mount_component_helper';
 
 const mockTimeframeQuarters = getTimeframeForQuartersView(mockTimeframeInitialDate);
 

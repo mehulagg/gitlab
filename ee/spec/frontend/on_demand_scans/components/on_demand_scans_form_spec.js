@@ -1,6 +1,6 @@
-import { merge } from 'lodash';
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlForm, GlSkeletonLoader } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';

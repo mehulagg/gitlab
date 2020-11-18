@@ -684,7 +684,7 @@ RSpec.describe User do
       let(:group) { create :group_with_managed_accounts }
 
       before do
-        member1.update(managing_group: group)
+        member1.update!(managing_group: group)
       end
 
       it 'returns true with group managed account owner' do
@@ -1157,7 +1157,7 @@ RSpec.describe User do
 
       with_them do
         before do
-          user.update(user_type: user_type)
+          user.update!(user_type: user_type)
         end
 
         it { is_expected.to be expected_result }
@@ -1456,7 +1456,7 @@ RSpec.describe User do
 
     with_them do
       it 'returns the correct result for each plan on a personal namespace' do
-        plan = create(hosted_plan)
+        plan = create(hosted_plan) # rubocop:disable Rails/SaveBang
         create(:gitlab_subscription, namespace: user.namespace, hosted_plan: plan)
 
         expect(subject).to be result

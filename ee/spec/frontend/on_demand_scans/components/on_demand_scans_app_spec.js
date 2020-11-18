@@ -1,9 +1,9 @@
-import { merge } from 'lodash';
 import { shallowMount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
+import { merge } from 'lodash';
 import OnDemandScansApp from 'ee/on_demand_scans/components/on_demand_scans_app.vue';
-import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import OnDemandScansEmptyState from 'ee/on_demand_scans/components/on_demand_scans_empty_state.vue';
+import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 
 const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-scans`;
 const projectPath = 'group/project';

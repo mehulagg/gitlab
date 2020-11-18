@@ -23,6 +23,40 @@ RSpec.describe NamespacePolicy do
     end
   end
 
+  context 'custom_compliance_frameworks_enabled' do
+    let(:current_user) { owner }
+
+    context 'is licensed' do
+      before do
+        stub_licensed_features(custom_compliance_frameworks: true)
+      end
+
+      context 'current_user is namespace owner' do
+        it { is_expected.to be_allowed(:create_custom_compliance_frameworks) }
+      end
+
+      context 'current_user is not namespace owner' do
+        let(:current_user) { build_stubbed(:user) }
+
+        it { is_expected.to be_disallowed(:create_custom_compliance_frameworks) }
+      end
+
+      context 'current_user is administrator', :enable_admin_mode do
+        let(:current_user) { build_stubbed(:admin) }
+
+        it { is_expected.to be_allowed(:create_custom_compliance_frameworks) }
+      end
+    end
+
+    context 'not licensed' do
+      before do
+        stub_licensed_features(custom_compliance_frameworks: false)
+      end
+
+      it { is_expected.to be_disallowed(:create_custom_compliance_frameworks) }
+    end
+  end
+
   context ':over_storage_limit' do
     let(:current_user) { owner }
 

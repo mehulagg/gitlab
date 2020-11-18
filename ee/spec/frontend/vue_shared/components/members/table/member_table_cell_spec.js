@@ -1,7 +1,7 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { member as memberMock } from 'jest/vue_shared/components/members/mock_data';
 import MembersTableCell from 'ee/vue_shared/components/members/table/members_table_cell.vue';
+import { member as memberMock } from 'jest/vue_shared/components/members/mock_data';
 
 describe('MemberTableCell', () => {
   const WrappedComponent = {

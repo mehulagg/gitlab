@@ -1,9 +1,9 @@
+import { GlLoadingIcon, GlEmptyState, GlBadge, GlPagination } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlLoadingIcon, GlEmptyState, GlBadge, GlPagination } from '@gitlab/ui';
 import CodeReviewAnalyticsApp from 'ee/analytics/code_review_analytics/components/app.vue';
-import MergeRequestTable from 'ee/analytics/code_review_analytics/components/merge_request_table.vue';
 import FilterBar from 'ee/analytics/code_review_analytics/components/filter_bar.vue';
+import MergeRequestTable from 'ee/analytics/code_review_analytics/components/merge_request_table.vue';
 import * as actions from 'ee/analytics/code_review_analytics/store/actions';
 import createMergeRequestsState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
 import { TEST_HOST } from 'helpers/test_constants';

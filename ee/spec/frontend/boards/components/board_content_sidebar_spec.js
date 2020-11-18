@@ -1,11 +1,11 @@
-import { mount } from '@vue/test-utils';
 import { GlDrawer } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { mount } from '@vue/test-utils';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
-import { createStore } from '~/boards/stores';
 import { ISSUABLE } from '~/boards/constants';
+import { createStore } from '~/boards/stores';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;

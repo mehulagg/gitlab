@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 
 import EpicSidebar from 'ee/epic/components/epic_sidebar.vue';
+import { dateTypes } from 'ee/epic/constants';
 import createStore from 'ee/epic/store';
 
 import epicUtils from 'ee/epic/utils/epic_utils';
-import { dateTypes } from 'ee/epic/constants';
 
 import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 

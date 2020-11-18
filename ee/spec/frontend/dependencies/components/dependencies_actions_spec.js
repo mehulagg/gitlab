@@ -1,10 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
+import { shallowMount } from '@vue/test-utils';
+import DependenciesActions from 'ee/dependencies/components/dependencies_actions.vue';
 import createStore from 'ee/dependencies/store';
 import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
 import { SORT_FIELDS } from 'ee/dependencies/store/modules/list/constants';
-import DependenciesActions from 'ee/dependencies/components/dependencies_actions.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 
 describe('DependenciesActions component', () => {
   let store;

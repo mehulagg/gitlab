@@ -1,12 +1,11 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
-
-import initStore from 'ee/geo_settings/store';
-import * as types from 'ee/geo_settings/store/mutation_types';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 
 import GeoSettingsApp from 'ee/geo_settings/components/app.vue';
 import GeoSettingsForm from 'ee/geo_settings/components/geo_settings_form.vue';
+import initStore from 'ee/geo_settings/store';
+import * as types from 'ee/geo_settings/store/mutation_types';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

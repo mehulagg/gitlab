@@ -1,5 +1,5 @@
-import mutations from 'ee/analytics/cycle_analytics/store/modules/duration_chart/mutations';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/duration_chart/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/modules/duration_chart/mutations';
 
 import { transformedDurationData } from '../../../mock_data';
 

@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { trimText } from 'helpers/text_helper';
+import { shallowMount } from '@vue/test-utils';
 import MergeTrainHelperText from 'ee/vue_merge_request_widget/components/merge_train_helper_text.vue';
+import { trimText } from 'helpers/text_helper';
 
 describe('MergeTrainHelperText', () => {
   let wrapper;

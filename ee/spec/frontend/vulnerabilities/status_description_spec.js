@@ -1,13 +1,13 @@
-import { mount } from '@vue/test-utils';
 import {
   GlLink,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import { capitalize } from 'lodash';
-import UsersMockHelper from 'helpers/user_mock_data_helper';
 import StatusText from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
+import UsersMockHelper from 'helpers/user_mock_data_helper';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
