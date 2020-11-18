@@ -269,8 +269,7 @@ Changing the SAML or SCIM configuration or provider can cause the following case
 | Case                                                                        | Solution           |
 |------------------------------------------------------------------------------|--------------------|
 | SAML and SCIM identity mismatch which normally are the same on GitLab.com. | First [verify user's SAML NameId matches the SCIM externalId](#how-do-i-verify-users-saml-nameid-matches-the-scim-externalid) and then [update or fix the mismatched SCIM externalId and SAML NameId](#update-or-fix-mismatched-scim-externalid-and-saml-nameid). |
-| SCIM identity mismatch between GitLab and the Identify Provider SCIM app. | You can confirm whether you're hitting the error because of your SCIM identity mismatch between your SCIM app and GitLab.com by using [SCIM API](../../../api/scim.md#update-a-single-saml-user) which will show up in the `id` key and compare it with the user `externalId` in the SCIM app. Then use the same [SCIM API](../../../api/scim.md#update-a-single-saml-user) to update the SCIM `id` for the user on GitLab.com. |
-
+| SCIM identity mismatch between GitLab and the Identify Provider SCIM app. | You can confirm whether you're hitting the error because of your SCIM identity mismatch between your SCIM app and GitLab.com by using [SCIM API](../../../api/scim.md#update-a-single-saml-user) which will show up in the `id` key and and compare it with the user `externalId` in the SCIM app. Then use the same [SCIM API](../../../api/scim.md#update-a-single-saml-user) to update the SCIM `id` for the user on GitLab.com. |
 
 ### Azure
 
