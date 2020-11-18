@@ -13,7 +13,7 @@ CAUTION: **Caution:**
 This [Closed Beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#sts=Closed%20Beta) feature is being re-evaluated in favor of a different
 [solution](https://gitlab.com/gitlab-org/gitlab/-/issues/284406) that
 enables the Phabricator importer by default. The current importer is
-**not** complete. It imports issues only with titles and descriptions.
+**not** complete and imports only an issue's title and description.
 The GitLab project created during the import process contains only
 issues, and the associated repository is disabled.
 
