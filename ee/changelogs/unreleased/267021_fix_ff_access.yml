@@ -1,0 +1,5 @@
+---
+title: Fix `store_security_scans` feature flag usage
+merge_request: 48013
+author:
+type: fixed
