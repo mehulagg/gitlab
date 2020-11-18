@@ -10,28 +10,37 @@ RSpec.describe 'User sorts projects and order persists' do
   let_it_be(:group_member) { create(:group_member, :maintainer, user: user, group: group) }
   let_it_be(:project) { create(:project, :public, group: group) }
 
-  it 'from explore projects' do
-    sign_in(user)
-    visit(explore_projects_path)
-    find('#sort-projects-dropdown').click
+  context "from explore projects" do
+    before do
+      sign_in(user)
+      visit(explore_projects_path)
+      find('#sort-projects-dropdown').click
+      first(:link, 'Last updated').click
+    end
 
-    first(:link, 'Last updated').click
+    it "is set on the dashboard_projects_path" do
+      visit(dashboard_projects_path)
 
-    visit(dashboard_projects_path)
+      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    end
 
-    expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    it "is set on the explore_projects_path" do
+      visit(explore_projects_path)
 
-    visit(explore_projects_path)
+      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    end
 
-    expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    it "is set on the group_canonical_path" do
+      visit(group_canonical_path(group))
 
-    visit(group_canonical_path(group))
+      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    end
 
-    expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    it "is set on the details_group_path" do
+      visit(details_group_path(group))
 
-    visit(details_group_path(group))
-
-    expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+      expect(find('.dropdown-menu a.is-active', text: 'Last updated')).to have_content('Last updated')
+    end
   end
 
   it 'from dashboard projects' do
