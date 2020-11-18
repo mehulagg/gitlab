@@ -91,7 +91,9 @@ To delete the currently active issue board:
 You can tailor GitLab issue boards to your own preferred workflow.
 Here are some common use cases for issue boards.
 
-For examples of using issue boards along with epics, issue health status, scoped labels for various Agile frameworks, check:
+For examples of using issue boards along with [epics](../group/epics/index.md) **(PREMIUM)**,
+[issue health status](issues/index.md#health-status) **(ULTIMATE)**, and
+[scoped labels](labels.md#scoped-labels) **(PREMIUM)** for various Agile frameworks, check:
 
 - The [How to use GitLab for Agile portfolio planning and project management](https://about.gitlab.com/blog/2020/11/11/gitlab-for-agile-portfolio-planning-project-management/) blog post (November 2020)
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
