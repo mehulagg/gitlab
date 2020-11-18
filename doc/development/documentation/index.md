@@ -294,7 +294,7 @@ a release date of 2018-09-22. If it gets merged on 2018-09-15, it is
 available online on 2018-09-15, but, as the feature freeze date has passed, if
 the MR does not have a `~"Pick into 11.3"` label, the milestone has to be changed
 to 11.4 and it ships with all GitLab packages only on 2018-10-22,
-with GitLab 11.4. Meaning, it's only available under `/help` from GitLab
+with GitLab 11.4. Meaning, it's available only with `/help` from GitLab
 11.4 onward, but available on <https://docs.gitlab.com/> on the same day it was merged.
 
 ### Linking to `/help`
@@ -537,7 +537,8 @@ To have the screenshot focuses few more steps are needed:
 - **wait for the content**: `expect(screenshot_area).to have_content 'Expiration interval'`
 - **set the crop area**: `set_crop_data(screenshot_area, 20)`
 
-In particular `set_crop_data` accepts as arguments: a `DOM` element and a padding, the padding is added around the element enlarging the screenshot area.
+In particular, `set_crop_data` accepts as arguments: a `DOM` element and a
+padding. The padding is added around the element, enlarging the screenshot area.
 
 #### Live example
 
