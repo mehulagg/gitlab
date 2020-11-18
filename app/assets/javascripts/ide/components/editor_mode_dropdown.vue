@@ -1,11 +1,10 @@
 <script>
-import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import { viewerTypes } from '../constants';
 
 export default {
   components: {
-    GlButton,
     GlDropdown,
     GlDropdownItem,
   },
