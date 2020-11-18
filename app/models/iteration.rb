@@ -105,9 +105,9 @@ class Iteration < ApplicationRecord
   # ensure dates do not overlap with other Iterations in the same group/project tree
   def dates_do_not_overlap
     iterations = if parent_group.present? && resource_parent.is_a?(Project)
-                   Iteration.where(group: parent_group.self_and_ancestors).or(project.iterations)
+                   Iteration.where(group: parent_group.self_and_hierarchy).or(project.iterations)
                  elsif parent_group.present?
-                   Iteration.where(group: parent_group.self_and_ancestors)
+                   Iteration.where(group: parent_group.self_and_hierarchy)
                  else
                    project.iterations
                  end
