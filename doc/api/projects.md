@@ -2390,9 +2390,7 @@ Read more in the [Project members](members.md) documentation.
 > Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.2.
 
 Configure pull mirroring while [creating a new project](#create-project) or [update an existing project](#edit-project) using the API if the remote repository is publicly accessible or via `username/password authentication.`
-
-NOTE: **Note:**
-If your HTTP repository is not publicly accessible, add authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git` where password is a personal access token with the API scope enabled.
+Configure pull mirroring while [creating a new project](#create-project) or [update an existing project](#edit-project) using the API if the remote repository is publicly accessible or via `username/password` authentication. In case your HTTP repository is not publicly accessible, you can add the authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git`, where password is a [personal access token](../user/profile/personal_access_tokens.md) with the API scope enabled.
 
 The relevant API parameters to update are:
 
