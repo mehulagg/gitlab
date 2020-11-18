@@ -2394,9 +2394,9 @@ Configure pull mirroring while [creating a new project](#create-project) or [upd
 
 The relevant API parameters to update are:
 
-- `import_url`: URL (with `username:password` if needed) of remote repository being mirrored
-- `mirror`: enables pull mirroring on project when set to `true`
-- `only_mirror_protected_branches`: set to `true` for protected branches
+- `import_url`: URL of remote repository being mirrored (with `username:password` if needed).
+- `mirror`: Enables pull mirroring on project when set to `true`.
+- `only_mirror_protected_branches`: Set to `true` for protected branches.
 
 ## Start the pull mirroring process for a Project **(STARTER)**
 
