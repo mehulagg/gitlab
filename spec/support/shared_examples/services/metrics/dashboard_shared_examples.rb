@@ -46,7 +46,8 @@ RSpec.shared_examples 'refreshes cache when dashboard_version is changed' do
       allow(service).to receive(:dashboard_version).and_return('1', '2')
     end
 
-    expect(File).to receive(:read).twice.and_call_original
+    allow(File).to receive(:read).and_call_original
+    expect(File).to receive(:read).with(Rails.root.join(described_class::DASHBOARD_PATH)).twice.and_call_original
 
     service = described_class.new(*service_params)
 
