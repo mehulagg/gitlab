@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
-import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
+import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
 
@@ -72,6 +72,7 @@ describe('Iterations report', () => {
       descriptionHtml: 'The first week of June',
       startDate: '2020-06-02',
       dueDate: '2020-06-08',
+      state: 'opened',
     };
 
     describe('user without edit permission', () => {
@@ -137,7 +138,11 @@ describe('Iterations report', () => {
         });
 
         it('passes correct props to IterationReportSummary', () => {
-          expect(wrapper.find(IterationReportSummary).props('iterationId')).toBe(iteration.id);
+          expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
+            iterationId: iteration.id,
+            namespaceType: Namespace.Group,
+            fullPath: defaultProps.fullPath,
+          });
         });
 
         it('passes correct props to IterationReportTabs', () => {

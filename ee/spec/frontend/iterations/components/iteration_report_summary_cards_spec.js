@@ -1,25 +1,30 @@
-import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
+import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
 import { mount } from '@vue/test-utils';
 import { GlCard } from '@gitlab/ui';
 
-describe('Iterations report summary', () => {
+describe('Iterations report summary cards', () => {
   let wrapper;
-  const id = 3;
   const defaultProps = {
-    iterationId: `gid://gitlab/Iteration/${id}`,
+    columns: [
+      {
+        title: 'Completed',
+        value: 10,
+      },
+      {
+        title: 'Incomplete',
+        value: 3,
+      },
+      {
+        title: 'Unstarted',
+        value: 2,
+      },
+    ],
+    total: 15,
   };
 
-  const mountComponent = ({ props = defaultProps, loading = false, data = {} } = {}) => {
-    wrapper = mount(IterationReportSummary, {
+  const mountComponent = (props = defaultProps) => {
+    wrapper = mount(IterationReportSummaryCards, {
       propsData: props,
-      data() {
-        return data;
-      },
-      mocks: {
-        $apollo: {
-          queries: { issues: { loading } },
-        },
-      },
     });
   };
 
@@ -35,14 +40,6 @@ describe('Iterations report summary', () => {
   describe('with valid totals', () => {
     beforeEach(() => {
       mountComponent();
-
-      wrapper.setData({
-        issues: {
-          complete: 10,
-          incomplete: 3,
-          total: 15,
-        },
-      });
     });
 
     it('shows completed issues', () => {
@@ -70,23 +67,14 @@ describe('Iterations report summary', () => {
     });
   });
 
-  describe('with no issues', () => {
-    beforeEach(() => {
-      mountComponent();
-
-      wrapper.setData({
-        issues: {
-          complete: 0,
-          incomplete: 0,
-          total: 0,
-        },
-      });
+  it('hides "of" text if total is 0', () => {
+    mountComponent({
+      ...defaultProps,
+      total: 0,
     });
 
-    it('shows complete percentage', () => {
-      expect(findCompleteCard().text()).toContain('0');
-      expect(findIncompleteCard().text()).toContain('0');
-      expect(findUnstartedCard().text()).toContain('0');
-    });
+    expect(findCompleteCard().text()).not.toContain('of');
+    expect(findIncompleteCard().text()).not.toContain('of');
+    expect(findUnstartedCard().text()).not.toContain('of');
   });
 });

@@ -1,5 +1,4 @@
 <script>
-import { GlCard, GlIcon, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { fetchPolicies } from '~/lib/graphql';
 import IterationReportSummaryCards from './iteration_report_summary_cards.vue';

@@ -1,6 +1,5 @@
 <script>
 import { __ } from '~/locale';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
 import query from '../queries/iteration_issues_summary.query.graphql';
 import { Namespace } from '../constants';
@@ -56,7 +55,7 @@ export default {
     queryVariables() {
       return {
         fullPath: this.fullPath,
-        id: getIdFromGraphQLId(this.iterationId),
+        id: this.iterationId,
         isGroup: this.namespaceType === Namespace.Group,
       };
     },
@@ -75,7 +74,7 @@ export default {
       return [
         {
           title: __('Completed'),
-          value: this.issues.open,
+          value: this.issues.closed,
         },
         {
           title: __('Incomplete'),
@@ -83,7 +82,7 @@ export default {
         },
         {
           title: __('Unstarted'),
-          value: this.issues.closed,
+          value: this.issues.open,
         },
       ];
     },
