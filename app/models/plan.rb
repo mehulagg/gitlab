@@ -2,6 +2,7 @@
 
 class Plan < ApplicationRecord
   DEFAULT = 'default'.freeze
+  FREE    = 'free'.freeze
 
   has_one :limits, class_name: 'PlanLimits'
 
@@ -32,6 +33,10 @@ class Plan < ApplicationRecord
 
   def default?
     self.class.default_plans.include?(name)
+  end
+
+  def free?
+    code == FREE
   end
 
   def paid?

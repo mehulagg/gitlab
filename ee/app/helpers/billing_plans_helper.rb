@@ -48,9 +48,9 @@ module BillingPlansHelper
     plan.features.sort_by! { |feature| feature.highlight ? 0 : 1 }[0...4]
   end
 
-  def plan_purchase_or_upgrade_url(group, plan, current_plan)
+  def plan_purchase_or_upgrade_url(group, plan)
     if group.upgradable?
-      plan_upgrade_url(group, current_plan)
+      plan_upgrade_url(group, plan)
     else
       plan_purchase_url(group, plan)
     end
