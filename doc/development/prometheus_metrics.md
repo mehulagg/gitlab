@@ -75,5 +75,5 @@ This section describes how to add new metrics for self-monitoring
 1. Select the appropriate name for your metric. Refer to the guidelines
    for [Prometheus metric names](https://prometheus.io/docs/practices/naming/#metric-names).
 1. Update the list of [GitLab Prometheus metrics](../administration/monitoring/prometheus/gitlab_metrics.md).
-1. Trigger the relevant page/code that records the new metric.
+1. Trigger the relevant page or code that records the new metric.
 1. Check that the new metric appears at `/-/metrics`.
