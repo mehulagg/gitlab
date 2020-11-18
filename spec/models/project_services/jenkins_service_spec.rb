@@ -147,14 +147,6 @@ RSpec.describe JenkinsService do
     end
   end
 
-  shared_examples 'project with enabled Jenkins service' do
-    it 'invokes the Jenkins API' do
-      jenkins_service.execute(push_sample_data)
-
-      expect(a_request(:post, jenkins_hook_url)).to have_been_made.once
-    end
-  end
-
   describe '#execute' do
     let(:user) { create(:user, username: 'username') }
     let(:namespace) { create(:group, :private) }
@@ -166,26 +158,28 @@ RSpec.describe JenkinsService do
       stub_request(:post, jenkins_hook_url)
     end
 
-    context 'when normal setup' do
-      it_behaves_like 'project with enabled Jenkins service'
+    it 'invokes the Jenkins API' do
+      jenkins_service.execute(push_sample_data)
 
-      it 'adds default web hook headers to the request' do
-        jenkins_service.execute(push_sample_data)
+      expect(a_request(:post, jenkins_hook_url)).to have_been_made.once
+    end
 
-        expect(
-          a_request(:post, jenkins_hook_url)
-            .with(headers: { 'X-Gitlab-Event' => 'Push Hook', 'Authorization' => jenkins_authorization })
-        ).to have_been_made.once
-      end
+    it 'adds default web hook headers to the request' do
+      jenkins_service.execute(push_sample_data)
 
-      it 'request url contains properly serialized username and password' do
-        jenkins_service.execute(push_sample_data)
+      expect(
+        a_request(:post, jenkins_hook_url)
+          .with(headers: { 'X-Gitlab-Event' => 'Push Hook', 'Authorization' => jenkins_authorization })
+      ).to have_been_made.once
+    end
 
-        expect(
-          a_request(:post, 'http://jenkins.example.com/project/my_project')
-            .with(headers: { 'Authorization' => jenkins_authorization })
-        ).to have_been_made.once
-      end
+    it 'request url contains properly serialized username and password' do
+      jenkins_service.execute(push_sample_data)
+
+      expect(
+        a_request(:post, 'http://jenkins.example.com/project/my_project')
+          .with(headers: { 'Authorization' => jenkins_authorization })
+      ).to have_been_made.once
     end
   end
 
