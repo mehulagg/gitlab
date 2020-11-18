@@ -131,31 +131,6 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::DuplicateJob, :clean_gi
     end
   end
 
-  describe '#droppable?' do
-    where(:idempotent, :prevent_deduplication) do
-      # [true, false].repeated_permutation(2)
-      [[true, true],
-       [true, false],
-       [false, true],
-       [false, false]]
-    end
-
-    with_them do
-      before do
-        allow(AuthorizedProjectsWorker).to receive(:idempotent?).and_return(idempotent)
-        stub_feature_flags("disable_#{queue}_deduplication" => prevent_deduplication)
-      end
-
-      it 'is droppable when all conditions are met' do
-        if idempotent && !prevent_deduplication
-          expect(duplicate_job).to be_droppable
-        else
-          expect(duplicate_job).not_to be_droppable
-        end
-      end
-    end
-  end
-
   describe '#scheduled_at' do
     let(:scheduled_at) { 42 }
     let(:job) do

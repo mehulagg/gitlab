@@ -70,10 +70,6 @@ module Gitlab
           jid != existing_jid
         end
 
-        def droppable?
-          idempotent? && ::Feature.disabled?("disable_#{queue_name}_deduplication", type: :ops)
-        end
-
         def scheduled_at
           job['at']
         end
@@ -135,6 +131,7 @@ module Gitlab
 
           worker_klass.idempotent?
         end
+        alias_method :droppable?, :idempotent?
       end
     end
   end
