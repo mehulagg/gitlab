@@ -19,7 +19,6 @@ export default class TemplateSelector {
     this.listenForFilenameInput();
     this.renderMatchedDropdown();
     this.initAutosizeUpdateEvent();
-    console.log('TemplateSelector :: ');
   }
 
   initDropdown(dropdown, data) {

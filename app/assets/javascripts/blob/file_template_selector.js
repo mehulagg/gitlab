@@ -5,7 +5,6 @@ export default class FileTemplateSelector {
     this.mediator = mediator;
     this.$dropdown = null;
     this.$wrapper = null;
-    console.log('FileTemplateSelector :: ');
   }
 
   init() {
@@ -13,7 +12,6 @@ export default class FileTemplateSelector {
 
     this.$dropdown = $(cfg.dropdown);
     this.$wrapper = $(cfg.wrapper);
-    // this.$loadingIcon = this.$wrapper.find('.fa-chevron-down');
     this.$dropdownIcon = this.$wrapper.find('.dropdown-menu-toggle-icon');
     this.$loadingIcon = $(
       '<div class="gl-spinner gl-spinner-orange gl-spinner-sm gl-display-none"></div>',
