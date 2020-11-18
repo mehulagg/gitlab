@@ -8,7 +8,7 @@ type: concepts
 
 # Introduction to CI/CD with GitLab
 
-In this document, present an overview of the concepts of Continuous Integration,
+This document presents an overview of the concepts of Continuous Integration,
 Continuous Delivery, and Continuous Deployment, as well as an introduction to
 GitLab CI/CD.
 
