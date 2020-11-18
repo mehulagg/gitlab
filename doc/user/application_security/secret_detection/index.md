@@ -290,7 +290,7 @@ This error is usually caused by the `GIT_DEPTH` value of 50 that is set for all 
 
 For example, if a pipeline is triggered from a Merge Request containing 60 commits while the `GIT_DEPTH` is set to 50, the Secret Detection job will fail as the clone will not have been deep enough to contain all of the relevant commits. 
 
-You can confirm this to be the cause of the error by implementing a [logging level](./index.md#logging-level) of `debug`. Once implemented, the logs should look similar to the following example, wherein an "object not found" error can be seen:
+You can confirm this to be the cause of the error by implementing a [logging level](../../application_security/secret_detection/index.md#logging-level) of `debug`. Once implemented, the logs should look similar to the following example, wherein an "object not found" error can be seen:
 
 ```plaintext
 ERRO[2020-11-18T18:05:52Z] object not found                             
