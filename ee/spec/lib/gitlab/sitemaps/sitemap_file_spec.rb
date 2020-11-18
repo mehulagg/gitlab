@@ -11,7 +11,7 @@ RSpec.describe Gitlab::Sitemaps::SitemapFile do
 
   describe '#render' do
     it 'returns if no elements has been provided' do
-      expect(File).not_to receive(:read)
+      expect_file_not_to_read(described_class::SITEMAP_FILE_PATH)
 
       described_class.new.save # rubocop: disable Rails/SaveBang
     end
