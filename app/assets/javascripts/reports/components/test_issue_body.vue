@@ -1,7 +1,7 @@
 <script>
 import { mapActions } from 'vuex';
 import { GlBadge } from '@gitlab/ui';
-import { n__ } from '~/locale';
+import { sprintf, n__, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
@@ -33,11 +33,14 @@ export default {
   },
   methods: {
     ...mapActions(['openModal']),
-    recentFailuresText(count) {
-      return n__(
-        'Failed %d time in the last 14 days',
-        'Failed %d times in the last 14 days',
-        count,
+    recentFailuresText({ count, base_branch }) {
+      return sprintf(
+        n__(
+          s__('Reports|Failed %{count} time in %{base_branch} in the last 14 days'),
+          s__('Reports|Failed %{count} times in %{base_branch} in the last 14 days'),
+          count,
+        ),
+        { count, base_branch },
       );
     },
   },
