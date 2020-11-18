@@ -34,7 +34,7 @@ module QA
             end
 
             def add_issue_to_epic(issue_url)
-              click_element(:epic_issue_actions_split_button)
+              click_element(:epic_issue_actions_split_button, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
               find('button', text: 'Add an existing issue').click
               fill_element :add_issue_field, issue_url
               # Clicking the title blurs the input
