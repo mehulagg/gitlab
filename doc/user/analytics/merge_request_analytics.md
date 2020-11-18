@@ -46,6 +46,8 @@ The throughput chart shows the number of merge requests merged per month.
 
 ### Throughput table
 
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232651) in GitLab 13.3.
+
 The Throughput table displays the most recent merge requests merged in the date range. The
 table displays up to 20 merge requests at a time. If there are more than 20 merge requests,
 you can paginate to them. For each merge request, you can review the following data:
