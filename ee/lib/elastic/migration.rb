@@ -2,6 +2,8 @@
 
 module Elastic
   class Migration
+    include MigrationAttributes
+
     attr_reader :version
 
     def initialize(version)

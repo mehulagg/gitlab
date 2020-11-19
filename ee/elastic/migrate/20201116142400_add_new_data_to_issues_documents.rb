@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AddNewDataToIssuesDocuments < Elastic::Migration
-  BATCH_OPERATION_SIZE = 1000
+  batch_update!
 
   def migrate
     if completed?
@@ -11,11 +11,9 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
 
     log "Adding issues_access_level fields to issues documents"
 
-    # do this in postgres instead, loop through all of the indexed projects and kick off the issues indexing for each issue
-
-    # get all issues missing data
+    # get a batch of issues missing data
     query = {
-      size: BATCH_OPERATION_SIZE,
+      size: 1000,
       query: {
         bool: {
           must: {
@@ -42,12 +40,13 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
 
       hits.each do |hit|
         id = hit.dig('_source', 'id')
-        next unless id
+        es_id = hit.dig('_id')
+        es_parent = hit.dig('_source', 'join_field', 'parent')
 
-        # instead of finding the issues from the database, just send the issue to the track method and it will clean up
-        # any missing issues via elasticsearch deletes (and also clean up as we go)
-        issue = Issue.find(id)
-        issue.maintain_elasticsearch_update
+        # ensure that any issues missing from the database will be removed from Elasticsearch
+        # as the data is back-filled
+        issue_document_reference = Gitlab::Elastic::DocumentReference.new(Issue.class.name, id, es_id, es_parent)
+        Elastic::ProcessBookkeepingService.track!(issue_document_reference)
       end
     end
 
