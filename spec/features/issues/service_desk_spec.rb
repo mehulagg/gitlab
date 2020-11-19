@@ -27,6 +27,17 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
     end
   end
 
+  context 'issue page' do
+    let(:support_bot) { User.support_bot }
+    let!(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
+
+    it 'shows service_desk_reply_to in issue header' do
+      visit namespace_project_issue_path(namespace_id: project.namespace, project_id: project, id: service_desk_issue.id)
+
+      expect(page).to have_text('by service.desk@example.com via GitLab Support Bot')
+    end
+  end
+
   describe 'issues list' do
     context 'when service desk is supported' do
       context 'when there are no issues' do
