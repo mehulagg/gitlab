@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Active user sessions', :clean_gitlab_redis_shared_state do
   it 'Successful login adds a new active user login' do
     now = Time.zone.parse('2018-03-12 09:06')
-    Timecop.freeze(now) do
+    freeze_time(now) do
       user = create(:user)
       gitlab_sign_in(user)
       expect(current_path).to eq root_path
@@ -14,7 +14,7 @@ RSpec.describe 'Active user sessions', :clean_gitlab_redis_shared_state do
       expect(sessions.count).to eq 1
 
       # refresh the current page updates the updated_at
-      Timecop.freeze(now + 1.minute) do
+      freeze_time(now + 1.minute) do
         visit current_path
 
         sessions = ActiveSession.list(user)

@@ -24,7 +24,7 @@ RSpec.shared_examples '#perform is rate limited to 1 call per' do |minimum_durat
   before do
     # Allow Timecop freeze and travel without the block form
     Timecop.safe_mode = false
-    Timecop.freeze
+    freeze_time
 
     time_travel_during_perform(actual_duration)
   end

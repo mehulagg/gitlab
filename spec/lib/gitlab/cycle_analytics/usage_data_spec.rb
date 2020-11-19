@@ -10,7 +10,7 @@ RSpec.describe Gitlab::CycleAnalytics::UsageData do
       # deviation calculations.
       current_time = Time.at(Time.now.to_i)
 
-      Timecop.freeze(current_time) do
+      freeze_time(current_time) do
         user = create(:user, :admin)
         projects = create_list(:project, 2, :repository)
 

@@ -18,7 +18,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Median do
   subject { described_class.new(stage: stage, query: query).seconds }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   it 'retruns nil when no results' do

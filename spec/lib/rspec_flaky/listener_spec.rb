@@ -131,7 +131,7 @@ RSpec.describe RspecFlaky::Listener, :aggregate_failures do
         new_example = RspecFlaky::Example.new(rspec_example)
 
         now = Time.now
-        Timecop.freeze(now) do
+        freeze_time(now) do
           expect { listener.example_passed(notification) }
             .to change { listener.flaky_examples[new_example.uid].to_h }
         end
@@ -158,7 +158,7 @@ RSpec.describe RspecFlaky::Listener, :aggregate_failures do
         new_example = RspecFlaky::Example.new(rspec_example)
 
         now = Time.now
-        Timecop.freeze(now) do
+        freeze_time(now) do
           expect { listener.example_passed(notification) }
             .to change { listener.flaky_examples[new_example.uid].to_h }
         end

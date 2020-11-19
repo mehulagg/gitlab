@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Analytics::CycleAnalytics::RecordsFetcher do
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   let_it_be(:project) { create(:project, :empty_repo) }

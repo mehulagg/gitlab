@@ -116,7 +116,7 @@ RSpec.describe Reenqueuer::ReenqueuerSleeper do
       # Allow Timecop.travel without the block form
       Timecop.safe_mode = false
 
-      Timecop.freeze do
+      freeze_time do
         example.run
       end
 

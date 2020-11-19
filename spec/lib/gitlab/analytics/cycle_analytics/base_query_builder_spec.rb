@@ -24,7 +24,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder do
   end
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   describe 'date range parameters' do

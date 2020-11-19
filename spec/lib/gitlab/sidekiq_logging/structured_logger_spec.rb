@@ -78,7 +78,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'logs start and end of job' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           expect(logger).to receive(:info).with(start_payload).ordered
           expect(logger).to receive(:info).with(end_payload).ordered
           expect(subject).to receive(:log_job_start).and_call_original
@@ -89,7 +89,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'logs an exception in job' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           expect(logger).to receive(:info).with(start_payload)
           expect(logger).to receive(:warn).with(hash_including(exception_payload))
           expect(subject).to receive(:log_job_start).and_call_original
@@ -104,7 +104,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'does not modify the job' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           job_copy = job.deep_dup
 
           allow(logger).to receive(:info)
@@ -124,7 +124,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'logs start and end of job without args' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           expect(logger).to receive(:info).with(start_payload.except('args')).ordered
           expect(logger).to receive(:info).with(end_payload.except('args')).ordered
           expect(subject).to receive(:log_job_start).and_call_original
@@ -135,7 +135,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'logs without created_at and enqueued_at fields' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           excluded_fields = %w(created_at enqueued_at args scheduling_latency_s)
 
           expect(logger).to receive(:info).with(start_payload.except(*excluded_fields)).ordered
@@ -153,7 +153,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       let(:scheduling_latency_s) { 7200.0 }
 
       it 'logs with scheduling latency' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           expect(logger).to receive(:info).with(start_payload).ordered
           expect(logger).to receive(:info).with(end_payload).ordered
           expect(subject).to receive(:log_job_start).and_call_original
@@ -181,7 +181,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'logs with Gitaly and Rugged timing data' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           expect(logger).to receive(:info).with(start_payload).ordered
           expect(logger).to receive(:info).with(expected_end_payload).ordered
 
@@ -239,7 +239,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
 
       it 'logs it in the done log' do
-        Timecop.freeze(timestamp) do
+        freeze_time(timestamp) do
           expect(logger).to receive(:info).with(expected_start_payload).ordered
           expect(logger).to receive(:info).with(expected_end_payload).ordered
 
@@ -262,7 +262,7 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
     subject { described_class.new }
 
     it 'update payload correctly' do
-      Timecop.freeze(current_utc_time) do
+      freeze_time(current_utc_time) do
         subject.send(:add_time_keys!, time, payload)
 
         expect(payload).to eq(payload_with_time_keys)
