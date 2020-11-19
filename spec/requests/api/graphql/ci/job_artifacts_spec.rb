@@ -34,7 +34,7 @@ RSpec.describe 'Query.project(fullPath).pipelines.jobs.artifacts' do
 
     it 'returns a URL for downloading the artifact file' do
       job = create(:ci_build, pipeline: pipeline)
-      create(:ci_job_artifact, job: job)
+      create(:ci_job_artifact, :junit, job: job)
 
       post_graphql(query, current_user: user)
 
@@ -44,7 +44,9 @@ RSpec.describe 'Query.project(fullPath).pipelines.jobs.artifacts' do
       jobs_data = pipelines_data.first.dig('jobs', 'nodes')
       artifact_data = jobs_data.first.dig('artifacts', 'nodes').first
 
-      expect(artifact_data['downloadPath']).to eq('http://crimethinc.com')
+      expect(artifact_data['downloadPath']).to eq(
+        "/#{project.full_path}/-/jobs/#{job.id}/artifacts/download?file_type=junit"
+      )
     end
   end
 end
