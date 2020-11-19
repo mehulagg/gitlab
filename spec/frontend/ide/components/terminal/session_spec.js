@@ -70,7 +70,7 @@ describe('IDE TerminalSession', () => {
       factory();
 
       const button = wrapper.find('button');
-      button.trigger('click');
+      button.vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(button.text()).toEqual('Stop Terminal');
@@ -85,7 +85,7 @@ describe('IDE TerminalSession', () => {
       factory();
 
       const button = wrapper.find('button');
-      button.trigger('click');
+      button.vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(button.text()).toEqual('Restart Terminal');
