@@ -11,7 +11,16 @@ Geo replicates your database, your Git repositories, and few other assets.
 We will support and replicate more data in the future, that will enable you to
 failover with minimal effort, in a disaster situation.
 
-See [Geo limitations](../index.md#limitations) for more information.
+See [Geo limitations on ](../index.md#limitations) for more information.
+
+DANGER: **Warning:**
+Features not on this list, or with **No** in the **Replicated** column,
+are not replicated on the **secondary** node. Failing over without manually
+replicating data from those features will cause the data to be **lost**.
+If you wish to use those features on a **secondary** node, or to execute a failover
+successfully, you must replicate their data using some other means.
+
+There is a complete list of all GitLab [data types](replication/datatypes.md) and [existing support for replication and verification](replication/datatypes.md#limitations-on-replicationverification).
 
 CAUTION: **Warning:**
 Disaster recovery for multi-secondary configurations is in **Alpha**.
