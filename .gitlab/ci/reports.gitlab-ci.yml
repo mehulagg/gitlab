@@ -78,16 +78,42 @@ nodejs-scan-sast:
   image:
     name: "$SAST_ANALYZER_IMAGE_PREFIX/nodejs-scan:$SAST_ANALYZER_IMAGE_TAG"
 
-secrets-sast:
-  extends: .sast
+
+.secret-analyzer:
+  extends:
+    - .default-retry
+    - .reports:rules:sast
+  stage: test
+  needs: []
   image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:3"
+    name: "registry.gitlab.com/gitlab-org/security-products/analyzers/secrets:3"
+  services: []
+  # `rules` must be overridden explicitly by each child job
+  # see https://gitlab.com/gitlab-org/gitlab/-/issues/218444
   artifacts:
     paths:
       - gl-secret-detection-report.json  # GitLab-specific
     reports:
-      sast: gl-secret-detection-report.json
+      secret_detection: gl-secret-detection-report.json
     expire_in: 1 week  # GitLab-specific
+
+secret_detection_default_branch:
+  extends: .secret-analyzer
+  rules:
+    - if: $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
+  script:
+    - /analyzer run
+
+secret_detection:
+  extends: .secret-analyzer
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+  script:
+    - git fetch origin $CI_DEFAULT_BRANCH $CI_COMMIT_REF_NAME
+    - git log --left-right --cherry-pick --pretty=format:"%H" refs/remotes/origin/$CI_DEFAULT_BRANCH...refs/remotes/origin/$CI_COMMIT_REF_NAME > "$CI_COMMIT_SHA"_commit_list.txt
+    - export SECRET_DETECTION_COMMITS_FILE="$CI_COMMIT_SHA"_commit_list.txt
+    - /analyzer run
+    - rm "$CI_COMMIT_SHA"_commit_list.txt
 
 # We need to duplicate this job's definition because it seems it's impossible to
 # override an included `only.refs`.
