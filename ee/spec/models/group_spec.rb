@@ -262,11 +262,11 @@ RSpec.describe Group do
         it 'does not exceed SQL queries count' do
           groups = described_class.where(id: subgroup1)
           control_count = ActiveRecord::QueryRecorder.new do
-            described_class.groups_user_can_read_epics(groups, user, params)
+            described_class.groups_user_can_read_epics(groups, user, **params)
           end.count
 
           groups = described_class.where(id: [subgroup1, subgroup2])
-          expect { described_class.groups_user_can_read_epics(groups, user, params) }
+          expect { described_class.groups_user_can_read_epics(groups, user, **params) }
             .not_to exceed_query_limit(control_count + extra_query_count)
         end
       end
