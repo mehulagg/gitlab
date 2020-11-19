@@ -1,0 +1,8 @@
+# This file is a template demonstrating the `script` keyword.
+# Learn more about this keyword here: https://docs.gitlab.com/ee/ci/yaml/README.html#script
+
+# After committing this template, visit CI/CD > Jobs to inspect the results of this command.
+
+job:
+  # provide a shell script as argument for this keyword.
+  script: "echo 'Hello World!'"

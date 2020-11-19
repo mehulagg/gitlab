@@ -8,6 +8,7 @@ module EE
       dockerfiles: ::Gitlab::Template::CustomDockerfileTemplate,
       gitignores: ::Gitlab::Template::CustomGitignoreTemplate,
       gitlab_ci_ymls: ::Gitlab::Template::CustomGitlabCiYmlTemplate,
+      gitlab_ci_syntax_ymls: ::Gitlab::Template::CustomGitlabCiSyntaxYmlTemplate,
       metrics_dashboard_ymls: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate
     ).freeze
 
