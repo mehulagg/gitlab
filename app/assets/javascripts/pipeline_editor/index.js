@@ -3,7 +3,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import typeDefs from './graphql/typedefs.graphql';
-import { resolvers } from './graphql/resolvers';
+import resolvers from './graphql/resolvers';
 
 import PipelineEditorApp from './pipeline_editor_app.vue';
 
@@ -14,7 +14,13 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
     return null;
   }
 
-  const { ciConfigPath, commitId, defaultBranch, newMergeRequestPath, projectPath } = el?.dataset;
+  const {
+    ciConfigPath,
+    commitId,
+    defaultBranch,
+    newMergeRequestPath,
+    projectPath,
+  } = el?.dataset;
 
   Vue.use(VueApollo);
 
