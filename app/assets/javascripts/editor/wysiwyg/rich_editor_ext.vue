@@ -34,7 +34,7 @@ export default {
       return fromMarkdown({
         schema: this.editor.schema,
         markdown: this.instance.getValue(),
-        plugins: [[frontmatter.parse]],
+        plugins: [frontmatter.parse],
         mappers: {
           ...frontmatter.mapper,
         },

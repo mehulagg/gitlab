@@ -4,7 +4,7 @@ import MarkdownIt from 'markdown-it';
 export const fromMarkdown = ({ schema, markdown, plugins = [], mappers = {} }) => {
   const markdownit = new MarkdownIt('commonmark');
 
-  plugins.forEach(plugin => markdownit.use(...plugin));
+  plugins.forEach(plugin => markdownit.use(plugin));
 
   const parser = new MarkdownParser(schema, markdownit, {
     paragraph: { block: 'paragraph' },
