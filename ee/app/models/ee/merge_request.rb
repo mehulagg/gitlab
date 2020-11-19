@@ -193,26 +193,6 @@ module EE
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'container_scanning')
     end
 
-    def has_sast_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.sast_reports)
-    end
-
-    def has_secret_detection_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.secret_detection_reports)
-    end
-
-    def compare_sast_reports(current_user)
-      return missing_report_error("SAST") unless has_sast_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'sast')
-    end
-
-    def compare_secret_detection_reports(current_user)
-      return missing_report_error("secret detection") unless has_secret_detection_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'secret_detection')
-    end
-
     def has_dast_reports?
       !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dast_reports)
     end
@@ -280,10 +260,6 @@ module EE
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
       end
-    end
-
-    def missing_report_error(report_type)
-      { status: :error, status_reason: "This merge request does not have #{report_type} reports" }
     end
 
     def report_type_enabled?(report_type)
