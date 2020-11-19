@@ -32691,6 +32691,9 @@ msgstr ""
 msgid "open issue"
 msgstr ""
 
+msgid "opened %{timeAgoString} by %{email} via %{user}"
+msgstr ""
+
 msgid "opened %{timeAgoString} by %{user}"
 msgstr ""
 
