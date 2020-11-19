@@ -1,4 +1,5 @@
 import {
+  MODULE_API_FUZZING,
   MODULE_CONTAINER_SCANNING,
   MODULE_COVERAGE_FUZZING,
   MODULE_DAST,
@@ -24,6 +25,7 @@ export default () => ({
 
   reportTypes: [
     MODULE_CONTAINER_SCANNING,
+    MODULE_API_FUZZING,
     MODULE_COVERAGE_FUZZING,
     MODULE_DAST,
     MODULE_DEPENDENCY_SCANNING,
@@ -78,6 +80,22 @@ export default () => ({
     baseReportOutofDate: false,
     hasBaseReport: false,
   },
+  [API_COVERAGE_FUZZING]: {
+    paths: {
+      head: null,
+      base: null,
+      diffEndpoint: null,
+    },
+
+    isLoading: false,
+    hasError: false,
+
+    newIssues: [],
+    resolvedIssues: [],
+    allIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
+  },  
   [MODULE_DEPENDENCY_SCANNING]: {
     paths: {
       head: null,

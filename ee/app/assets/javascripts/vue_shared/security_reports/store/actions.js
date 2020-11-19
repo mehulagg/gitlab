@@ -178,6 +178,47 @@ export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
 export const updateCoverageFuzzingIssue = ({ commit }, issue) =>
   commit(types.UPDATE_COVERAGE_FUZZING_ISSUE, issue);
 
+/**
+ * API FUZZING
+ */
+export const setApiFuzzingDiffEndpoint = ({ commit }, path) =>
+  commit(types.SET_API_FUZZING_DIFF_ENDPOINT, path);
+
+export const requestApiFuzzingDiff = ({ commit }) =>
+  commit(types.REQUEST_API_FUZZING_DIFF);
+
+export const receiveApiFuzzingDiffSuccess = ({ commit }, response) =>
+  commit(types.RECEIVE_API_FUZZING_DIFF_SUCCESS, response);
+
+export const receiveApiFuzzingDiffError = ({ commit }) =>
+  commit(types.RECEIVE_API_FUZZING_DIFF_ERROR);
+
+export const fetchApiFuzzingDiff = ({ state, dispatch }) => {
+  dispatch('requestApiFuzzingDiff');
+
+  return Promise.all([
+    pollUntilComplete(state.ApiFuzzing.paths.diffEndpoint),
+    axios.get(state.vulnerabilityFeedbackPath, {
+      params: {
+        category: 'api_fuzzing',
+      },
+    }),
+  ])
+    .then(values => {
+      dispatch('receiveApiFuzzingDiffSuccess', {
+        diff: values[0].data,
+        enrichData: values[1].data,
+      });
+    })
+    .catch(() => {
+      dispatch('receiveApiFuzzingDiffError');
+    });
+};
+
+export const updateApiFuzzingIssue = ({ commit }, issue) =>
+  commit(types.UPDATE_API_FUZZING_ISSUE, issue);
+
+
 export const openModal = ({ dispatch }, payload) => {
   dispatch('setModalData', payload);
 

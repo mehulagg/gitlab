@@ -39,6 +39,14 @@ export const groupedCoverageFuzzingText = ({ coverageFuzzing }) =>
     messages.COVERAGE_FUZZING_IS_LOADING,
   );
 
+  export const groupedApiFuzzingText = ({ apiFuzzing }) =>
+    groupedReportText(
+      apiFuzzing,
+      messages.API_FUZZING,
+      messages.API_FUZZING_HAS_ERROR,
+      messages.API_FUZZING_IS_LOADING,
+    );  
+
 export const containerScanningStatusIcon = ({ containerScanning }) =>
   statusIcon(
     containerScanning.isLoading,
@@ -58,6 +66,9 @@ export const dependencyScanningStatusIcon = ({ dependencyScanning }) =>
 
 export const coverageFuzzingStatusIcon = ({ coverageFuzzing }) =>
   statusIcon(coverageFuzzing.isLoading, coverageFuzzing.hasError, coverageFuzzing.newIssues.length);
+
+export const apiFuzzingStatusIcon = ({ apiFuzzing }) =>
+  statusIcon(apiFuzzing.isLoading, apiFuzzing.hasError, apiFuzzing.newIssues.length);  
 
 export const isBaseSecurityReportOutOfDate = state =>
   state.reportTypes.some(reportType => state[reportType].baseReportOutofDate);

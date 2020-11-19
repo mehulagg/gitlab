@@ -242,6 +242,7 @@ export default {
     'dependencyScanning',
     'containerScanning',
     'coverageFuzzing',
+    'apiFuzzing',
     'secretDetection',
   ],
 };
@@ -328,6 +329,7 @@ export default {
         :enabled-reports="mr.enabledReports"
         :sast-help-path="mr.sastHelp"
         :dast-help-path="mr.dastHelp"
+        :api-fuzzing-help-path="mr.apiFuzzingHelp"
         :coverage-fuzzing-help-path="mr.coverageFuzzingHelp"
         :container-scanning-help-path="mr.containerScanningHelp"
         :dependency-scanning-help-path="mr.dependencyScanningHelp"

@@ -132,6 +132,36 @@ export default {
     Vue.set(state.coverageFuzzing, 'hasError', true);
   },
 
+  // API_FUZZING
+
+  [types.SET_API_FUZZING_DIFF_ENDPOINT](state, path) {
+    Vue.set(state.apiFuzzing.paths, 'diffEndpoint', path);
+  },
+
+  [types.REQUEST_API_FUZZING_DIFF](state) {
+    Vue.set(state.apiFuzzing, 'isLoading', true);
+  },
+
+  [types.RECEIVE_API_FUZZING_DIFF_SUCCESS](state, { diff, enrichData }) {
+    const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const scans = diff.scans || [];
+    const hasBaseReport = Boolean(diff.base_report_created_at);
+
+    Vue.set(state.apiFuzzing, 'isLoading', false);
+    Vue.set(state.apiFuzzing, 'newIssues', added);
+    Vue.set(state.apiFuzzing, 'resolvedIssues', fixed);
+    Vue.set(state.apiFuzzing, 'allIssues', existing);
+    Vue.set(state.apiFuzzing, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.apiFuzzing, 'hasBaseReport', hasBaseReport);
+    Vue.set(state.apiFuzzing, 'scans', scans);
+  },
+
+  [types.RECEIVE_API_FUZZING_DIFF_ERROR](state) {
+    Vue.set(state.apiFuzzing, 'isLoading', false);
+    Vue.set(state.apiFuzzing, 'hasError', true);
+  },
+
   // DEPENDECY SCANNING
 
   [types.SET_DEPENDENCY_SCANNING_DIFF_ENDPOINT](state, path) {

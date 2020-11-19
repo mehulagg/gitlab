@@ -19,6 +19,7 @@ import securityReportSummaryQuery from './graphql/mr_security_report_summary.gra
 import SecuritySummary from './components/security_summary.vue';
 import {
   MODULE_CONTAINER_SCANNING,
+  MODULE_API_FUZZING,
   MODULE_COVERAGE_FUZZING,
   MODULE_DAST,
   MODULE_DEPENDENCY_SCANNING,
@@ -97,6 +98,11 @@ export default {
       default: '',
     },
     dastHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    apiFuzzingHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -197,6 +203,7 @@ export default {
       MODULE_SAST,
       MODULE_CONTAINER_SCANNING,
       MODULE_DAST,
+      MODULE_API_FUZZING,
       MODULE_COVERAGE_FUZZING,
       MODULE_DEPENDENCY_SCANNING,
       MODULE_SECRET_DETECTION,
@@ -212,10 +219,12 @@ export default {
       'groupedContainerScanningText',
       'groupedDastText',
       'groupedDependencyText',
+      'groupedApiFuzzingText',
       'groupedCoverageFuzzingText',
       'containerScanningStatusIcon',
       'dastStatusIcon',
       'dependencyScanningStatusIcon',
+      'apiFuzzingStatusIcon',
       'coverageFuzzingStatusIcon',
       'isBaseSecurityReportOutOfDate',
       'canCreateIssue',
@@ -239,6 +248,9 @@ export default {
     },
     hasDastReports() {
       return this.enabledReports.dast;
+    },
+    hasApiFuzzingReports() {
+      this.enabledReports.apiFuzzing
     },
     hasCoverageFuzzingReports() {
       // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
@@ -267,6 +279,9 @@ export default {
     },
     dastDownloadLink() {
       return this.dastSummary?.scannedResourcesCsvPath || '';
+    },
+    hasApiFuzzingIssues() {
+      return this.hasIssuesForReportType(MODULE_API_FUZZING);
     },
     hasCoverageFuzzingIssues() {
       return this.hasIssuesForReportType(MODULE_COVERAGE_FUZZING);
@@ -346,6 +361,13 @@ export default {
       this.fetchCoverageFuzzingDiff();
       this.fetchPipelineJobs();
     }
+
+    const apiFuzzingDiffEndpoint = gl?.mrWidgetData?.api_fuzzing_comparison_path;
+
+    if (apiFuzzingDiffEndpoint && this.hasApiFuzzingReports) {
+      this.setApiFuzzingDiffEndpoint(apiFuzzingDiffEndpoint);
+      this.fetchApiFuzzingDiff();
+    }    
   },
   methods: {
     ...mapActions([
@@ -379,6 +401,8 @@ export default {
       'setDastDiffEndpoint',
       'fetchCoverageFuzzingDiff',
       'setCoverageFuzzingDiffEndpoint',
+      'fetchApiFuzzingDiff',
+      'setApiFuzzingDiffEndpoint',
     ]),
     ...mapActions(MODULE_SAST, {
       setSastDiffEndpoint: 'setDiffEndpoint',
@@ -601,6 +625,29 @@ export default {
             :resolved-issues="coverageFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
             data-testid="coverage-fuzzing-issues-list"
+          />
+        </template>
+
+        <template v-if="hasApiFuzzingReports">
+          <summary-row
+            :summary="groupedApiFuzzingText"
+            :status-icon="apiFuzzingStatusIcon"
+            :popover-options="apiFuzzingPopover"
+            class="js-api-fuzzing-widget"
+            data-qa-selector="api_fuzzing_report"
+          >
+            <template #summary>
+              <security-summary :message="groupedApiFuzzingText" />
+            </template>
+          </summary-row>
+
+          <grouped-issues-list
+            v-if="apiFuzzingShowIssues"
+            :unresolved-issues="apiFuzzing.newIssues"
+            :resolved-issues="apiFuzzing.resolvedIssues"
+            :component="$options.componentNames.SecurityIssueBody"
+            class="report-block-group-list"
+            data-testid="api-fuzzing-issues-list"
           />
         </template>
 
