@@ -35,6 +35,12 @@ RSpec.describe 'Filter issues by iteration', :js do
         stub_licensed_features(iterations: true)
 
         visit page_path
+
+        aggregate_failures do
+          expect(page).to have_content(iteration_1_issue.title)
+          expect(page).to have_content(iteration_2_issue.title)
+          expect(page).to have_content(no_iteration_issue.title)
+        end
       end
 
       it 'filters by iteration' do
