@@ -231,8 +231,7 @@ describe('LabelsSelectRoot', () => {
     createComponent();
 
     jest.spyOn(store, 'dispatch').mockResolvedValue();
-    wrapper.setProps({ isEditing: true });
-    await wrapper.vm.$nextTick;
+    await wrapper.setProps({ isEditing: true });
 
     expect(store.dispatch).toHaveBeenCalledWith('toggleDropdownContents');
   });
