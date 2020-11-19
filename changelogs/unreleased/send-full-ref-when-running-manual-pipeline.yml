@@ -1,0 +1,5 @@
+---
+title: Send full ref when triggering manual pipeline
+merge_request: 48142
+author:
+type: fixed
