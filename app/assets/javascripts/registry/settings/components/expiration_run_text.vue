@@ -11,12 +11,7 @@ export default {
     value: {
       type: String,
       required: false,
-      default: '',
-    },
-  },
-  computed: {
-    formattedValue() {
-      return this.value || NOT_SCHEDULED_POLICY_TEXT;
+      default: NOT_SCHEDULED_POLICY_TEXT,
     },
   },
   i18n: {
@@ -31,11 +26,6 @@ export default {
     :label="$options.i18n.NEXT_CLEANUP_LABEL"
     label-for="expiration-policy-info-text"
   >
-    <gl-form-input
-      id="expiration-policy-info-text"
-      class="gl-pl-0!"
-      plaintext
-      :value="formattedValue"
-    />
+    <gl-form-input id="expiration-policy-info-text" class="gl-pl-0!" plaintext :value="value" />
   </gl-form-group>
 </template>
