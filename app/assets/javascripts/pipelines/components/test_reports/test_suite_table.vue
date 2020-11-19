@@ -144,7 +144,7 @@ export default {
 
       <gl-pagination
         v-model="pageInfo.page"
-        class="d-flex justify-content-center"
+        class="gl-display-flex gl-justify-content-center"
         :per-page="pageInfo.perPage"
         :total-items="getSuiteTestCount"
         @input="setPage"
