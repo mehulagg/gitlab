@@ -84,13 +84,6 @@ RSpec.describe "User Feed" do
         expect(body).to have_content(Commit.truncate_sha(push_event.commit_id))
       end
     end
-    context 'user atom feed disabled by feature flag' do
-      it "NOT renders user atom feed" do
-        stub_feature_flags(atom_off: true)
-        visit user_path(user, :atom)
-        expect(page.status_code).to eq(404)
-      end
-    end
   end
 
   def issue_event(issue, user)
