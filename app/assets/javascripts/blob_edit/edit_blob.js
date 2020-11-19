@@ -15,9 +15,9 @@ export default class EditBlob {
     this.configureMonacoEditor();
 
     if (this.options.isMarkdown) {
-      import('~/editor/editor_markdown_ext')
-        .then(MarkdownExtension => {
-          this.editor.use(MarkdownExtension.default);
+      Promise.all([import('~/editor/editor_wysiwyg_ext'), import('~/editor/editor_markdown_ext')])
+        .then(([{ default: MarkdownExtension }, { default: WysiwygExtension }]) => {
+          this.editor.use([MarkdownExtension, WysiwygExtension] );
           addEditorMarkdownListeners(this.editor);
         })
         .catch(() => createFlash(BLOB_EDITOR_ERROR));
