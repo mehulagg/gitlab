@@ -13,7 +13,7 @@ describe('ExpirationDropdown', () => {
 
   const findFormSelect = () => wrapper.find(GlFormSelect);
   const findFormGroup = () => wrapper.find(GlFormGroup);
-  const findOptions = () => wrapper.findAll('[data-testid="options"]');
+  const findOptions = () => wrapper.findAll('[data-testid="option"]');
 
   const mountComponent = props => {
     wrapper = shallowMount(component, {
