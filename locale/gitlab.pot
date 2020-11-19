@@ -20175,6 +20175,9 @@ msgstr ""
 msgid "Please complete your profile with email address"
 msgstr ""
 
+msgid "Please contact your GitLab administrator if you think this is an error."
+msgstr ""
+
 msgid "Please contact your administrator with any questions."
 msgstr ""
 
@@ -31566,6 +31569,9 @@ msgid "Your request for access could not be processed: %{error_meesage}"
 msgstr ""
 
 msgid "Your request for access has been queued for review."
+msgstr ""
+
+msgid "Your request to join host fix this has been rejected."
 msgstr ""
 
 msgid "Your response has been recorded."

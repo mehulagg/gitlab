@@ -175,7 +175,7 @@
       - if @user.blocked?
         - if @user.blocked_pending_approval?
           = render 'admin/users/approve_user', user: @user
-          = render 'admin/users/block_user', user: @user
+          = render 'admin/users/reject_user', user: @user
         - else
           .card.border-info
             .card-header.gl-bg-blue-500.gl-text-white

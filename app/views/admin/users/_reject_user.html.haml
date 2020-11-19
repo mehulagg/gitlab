@@ -1,0 +1,8 @@
+.card.border-danger
+  .card-header.bg-danger.gl-text-white
+    = s_('AdminUsers|This user has requested access')
+  .card-body
+    = render partial: 'admin/users/user_reject_effects'
+    %br
+    = link_to s_('AdminUsers|Reject request'), approve_admin_user_path(user), method: :put, class: "btn delete-user-button gl-button btn-danger", data: { delete: s_('AdminUsers|Are you sure?') }
+

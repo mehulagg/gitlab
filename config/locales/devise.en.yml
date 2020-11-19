@@ -32,6 +32,8 @@ en:
         subject: "Password changed by administrator"
       user_admin_approval:
         subject: "Welcome to GitLab!"
+      user_admin_rejection:
+        subject: "GitLab account request rejected"
     omniauth_callbacks:
       failure: "Could not authenticate you from %{kind} because \"%{reason}\"."
       success: "Successfully authenticated from %{kind} account."
