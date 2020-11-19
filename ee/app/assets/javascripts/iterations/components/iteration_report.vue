@@ -220,7 +220,7 @@ export default {
         :namespace-type="namespaceType"
       />
       <burn-charts
-        v-if="glFeatures.iterationCharts && glFeatures.burnupCharts"
+        v-if="glFeatures.iterationCharts"
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"
         :iteration-id="iteration.id"

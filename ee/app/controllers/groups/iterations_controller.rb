@@ -6,7 +6,6 @@ class Groups::IterationsController < Groups::ApplicationController
   before_action :authorize_create_iteration!, only: [:new, :edit]
   before_action do
     push_frontend_feature_flag(:iteration_charts, group, default_enabled: true)
-    push_frontend_feature_flag(:burnup_charts, group, default_enabled: true)
   end
 
   feature_category :issue_tracking
