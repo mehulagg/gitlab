@@ -1,14 +1,13 @@
 ---
+type: reference
 stage: Manage
 group: Optimize
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Value Stream Analytics
+# Value Stream Analytics **(PREMIUM)**
 
-> - Introduced as Cycle Analytics prior to GitLab 12.3 at the project level.
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12077) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.3 at the group level.
-> - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23427) from Cycle Analytics to Value Stream Analytics in GitLab 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196455) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9 at the group level.
 
 Value Stream Analytics measures the time spent to go from an
 [idea to production](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#from-idea-to-production-with-gitlab)
@@ -16,14 +15,14 @@ Value Stream Analytics measures the time spent to go from an
 spent in each stage defined in the process.
 
 Value Stream Analytics is useful in order to quickly determine the velocity of a given
-project. It points to bottlenecks in the development process, enabling management
+group. It points to bottlenecks in the development process, enabling management
 to uncover, triage, and identify the root cause of slowdowns in the software development life cycle.
 
 For information on how to contribute to the development of Value Stream Analytics, see our [contributor documentation](../../development/value_stream_analytics.md).
 
-Project-level Value Stream Analytics is available via **Project > Analytics > Value Stream**.
+Group-level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
 
-Note: [Group-level Value Stream Analytics](../group/value_stream_analytics) is also available.
+Note: [Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
 
 ## Default stages
 
@@ -42,15 +41,35 @@ The stages tracked by Value Stream Analytics by default represent the [GitLab fl
 - **Staging** (Continuous Deployment)
   - Time between merging and deploying to production
 
+## Filter the analytics data
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13216) in GitLab 13.3
+
+GitLab provides the ability to filter analytics based on the following parameters:
+
+- Milestones (Group level)
+- Labels (Group level)
+- Author
+- Assignees
+
+To filter results:
+
+1. Select a group.
+1. Click on the filter bar.
+1. Select a parameter to filter by.
+1. Select a value from the autocompleted results, or type to refine the results.
+
+![Value stream analytics filter bar](img/vsa_filter_bar_v13.3.png "Active filter bar for value stream analytics")
+
 ### Date ranges
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36300) in GitLab 10.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13216) in GitLab 12.4.
 
-GitLab provides the ability to filter analytics based on a date range. To filter results, select one of these options:
+GitLab provides the ability to filter analytics based on a date range. To filter results:
 
-1. Last 7 days
-1. Last 30 days (default)
-1. Last 90 days
+1. Select a group.
+1. Optionally select a project.
+1. Select a date range using the available date pickers.
 
 ## How Time metrics are measured
 
@@ -60,6 +79,8 @@ The "Time" metrics near the top of the page are measured as follows:
 - **Cycle time**: median time from first commit to issue closed.
 
 Note: A commit is associated with an issue by [crosslinking](../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
+
+![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
 ## How the stages are measured
 
@@ -158,13 +179,188 @@ A few notes:
   cycles, calculate their median time and the result is what the dashboard of
   Value Stream Analytics is showing.
 
+## Customizable Stages
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12196) in GitLab 12.9.
+
+The default stages are designed to work straight out of the box, but they might not be suitable for
+all teams. Different teams use different approaches to building software, so some teams might want
+to customize their Value Stream Analytics.
+
+GitLab allows users to create multiple value streams, hide default stages and create custom stages that align better to their development workflow.
+
+### Stage path
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
+
+Stages are visually depicted as a horizontal process flow. Selecting a stage will update the
+the content below the value stream.
+
+This is disabled by default. If you have a self-managed instance, an
+administrator can [open a Rails console](../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
+and enable it with the following command:
+
+```ruby
+Feature.enable(:value_stream_analytics_path_navigation)
+```
+
+### Adding a stage
+
+In the following example we're creating a new stage that measures and tracks issues from creation
+time until they are closed.
+
+1. Navigate to your group's **Analytics > Value Stream**.
+1. Click the **Add a stage** button.
+1. Fill in the new stage form:
+   - Name: Issue start to finish.
+   - Start event: Issue created.
+   - End event: Issue closed.
+1. Click the **Add stage** button.
+
+![New Value Stream Analytics Stage](img/new_vsm_stage_v12_9.png "Form for creating a new stage")
+
+The new stage is persisted and it will always show up on the Value Stream Analytics page for your
+group.
+
+If you want to alter or delete the stage, you can easily do that for customized stages by:
+
+1. Hovering over the stage.
+1. Clicking the vertical ellipsis (**{ellipsis_v}**) button that appears.
+
+![Value Stream Analytics Stages](img/vsm_stage_list_v12_9.png)
+
+Creating a custom stage requires specifying two events:
+
+- A start.
+- An end.
+
+Be careful to choose a start event that occurs *before* your end event. For example, consider a
+stage that:
+
+- Started when an issue is added to a board.
+- Ended when the issue is created.
+
+This stage would not work because the end event has already happened when the start event occurs.
+To prevent such invalid stages, the UI prohibits incompatible start and end events. After you select
+the start event, the stop event dropdown will only list the compatible events.
+
+### Re-ordering stages
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196698) in GitLab 12.10.
+
+Once a custom stage has been added, you can "drag and drop" stages to rearrange their order. These changes are automatically saved to the system.
+
+### Label based stages
+
+The pre-defined start and end events can cover many use cases involving both issues and merge requests.
+
+For supporting more complex workflows, use stages based on group labels. These events are based on
+labels being added or removed. In particular, [scoped labels](../project/labels.md#scoped-labels)
+are useful for complex workflows.
+
+In this example, we'd like to measure more accurate code review times. The workflow is the following:
+
+- When the code review starts, the reviewer adds `workflow::code_review_start` label to the merge request.
+- When the code review is finished, the reviewer adds `workflow::code_review_complete` label to the merge request.
+
+Creating a new stage called "Code Review":
+
+![New Label Based Value Stream Analytics Stage](img/label_based_stage_vsm_v12_9.png "Creating a label based Value Stream Analytics Stage")
+
+### Hiding unused stages
+
+Sometimes certain default stages are not relevant to a team. In this case, you can easily hide stages
+so they no longer appear in the list. To hide stages:
+
+1. Add a custom stage to activate customizability.
+1. Hover over the default stage you want to hide.
+1. Click the vertical ellipsis (**{ellipsis_v}**) button that appears and select **Hide stage**.
+
+To recover a default stage that was previously hidden:
+
+1. Click **Add a stage** button.
+1. In the top right corner open the **Recover hidden stage** dropdown.
+1. Select a stage.
+
+### Creating a value stream
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221202) in GitLab 13.3
+
+A default value stream is readily available for each group. You can create additional value streams based on the different areas of work that you would like to measure.
+
+Once created, a new value stream includes the [seven stages](#default-stages) that follow
+[GitLab workflow](../../topics/gitlab_flow.md)
+best practices. You can customize this flow by adding, hiding or re-ordering stages.
+
+To create a value stream:
+
+1. Navigate to your group's **Analytics > Value Stream**.
+1. Click the Value stream dropdown and select **Create new Value Stream**
+1. Fill in a name for the new Value Stream
+1. Click the **Create Value Stream** button.
+
+![New value stream](img/new_value_stream_v13_3.png "Creating a new value stream")
+
+### Deleting a value stream
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221205) in GitLab 13.4.
+
+To delete a custom value stream:
+
+1. Navigate to your group's **Analytics > Value Stream**.
+1. Click the Value stream dropdown and select the value stream you would like to delete.
+1. Click the **Delete (name of value stream)**.
+1. Click the **Delete** button to confirm.
+
+![Delete value stream](img/delete_value_stream_v13.4.png "Deleting a custom value stream")
+
+### Disabling custom value streams
+
+Custom value streams are enabled by default. If you have a self-managed instance, an
+administrator can open a Rails console and disable them with the following command:
+
+```ruby
+Feature.disable(:value_stream_analytics_create_multiple_value_streams)
+```
+
+## Days to completion chart
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21631) in GitLab 12.6.
+> - [Chart median line removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235455) in GitLab 13.4.
+
+This chart visually depicts the total number of days it takes for cycles to be completed. (Totals are being replaced with averages in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/262070).)
+
+This chart uses the global page filters for displaying data based on the selected
+group, projects, and timeframe. In addition, specific stages can be selected
+from within the chart itself.
+
+The chart data is limited to the last 500 items.
+
+### Disabling chart
+
+This chart is enabled by default. If you have a self-managed instance, an
+administrator can open a Rails console and disable it with the following command:
+
+```ruby
+Feature.disable(:cycle_analytics_scatterplot_enabled)
+```
+
+## Type of work - Tasks by type chart
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32421) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
+
+This chart shows a cumulative count of issues and merge requests per day.
+
+This chart uses the global page filters for displaying data based on the selected
+group, projects, and timeframe. The chart defaults to showing counts for issues but can be
+toggled to show data for merge requests and further refined for specific group-level labels.
+
+By default the top group-level labels (max. 10) are pre-selected, with the ability to
+select up to a total of 15 labels.
+
 ## Permissions
 
-The current permissions on the Project-level Value Stream Analytics dashboard are:
-
-- Public projects - anyone can access.
-- Internal projects - any authenticated user can access.
-- Private projects - any member Guest and above can access.
+To access Group-level Value Stream Analytics, users must have Reporter access or above.
 
 You can [read more about permissions](../../user/permissions.md) in general.
 
