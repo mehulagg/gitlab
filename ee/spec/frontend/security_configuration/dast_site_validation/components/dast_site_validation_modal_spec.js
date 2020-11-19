@@ -1,13 +1,13 @@
 import { within } from '@testing-library/dom';
 import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-utils';
 import merge from 'lodash/merge';
-import { createMockClient } from 'mock-apollo-client';
+import createApolloProvider from 'helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_create.mutation.graphql';
+import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_token_create.mutation.graphql';
 import waitForPromises from 'jest/helpers/wait_for_promises';
 import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_token_create.mutation.graphql';
 import * as responses from '../mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -38,31 +38,13 @@ const defaultRequestHandlers = {
 
 describe('DastSiteValidationModal', () => {
   let wrapper;
-  let graphQLClient;
   let requestHandlers;
 
-  const mockClientFactory = handlers => {
-    const mockClient = createMockClient();
-
-    requestHandlers = {
-      ...defaultRequestHandlers,
-      ...handlers,
-    };
-
-    mockClient.setRequestHandler(dastSiteTokenCreateMutation, requestHandlers.dastSiteTokenCreate);
-
-    mockClient.setRequestHandler(
-      dastSiteValidationCreateMutation,
-      requestHandlers.dastSiteValidationCreate,
-    );
-
-    graphQLClient = mockClient;
-  };
-
-  const componentFactory = (mountFn = shallowMount) => options => {
-    if (!graphQLClient) {
-      mockClientFactory();
-    }
+  const componentFactory = (mountFn = shallowMount) => ({
+    mountOptions = {},
+    handlers = {},
+  } = {}) => {
+    requestHandlers = { ...defaultRequestHandlers, ...handlers };
     wrapper = mountFn(
       DastSiteValidationModal,
       merge(
@@ -77,12 +59,13 @@ describe('DastSiteValidationModal', () => {
             visible: true,
           },
         },
-        options,
+        mountOptions,
         {
           localVue,
-          apolloProvider: new VueApollo({
-            defaultClient: graphQLClient,
-          }),
+          apolloProvider: createApolloProvider([
+            [dastSiteTokenCreateMutation, requestHandlers.dastSiteTokenCreate],
+            [dastSiteValidationCreateMutation, requestHandlers.dastSiteValidationCreate],
+          ]),
         },
       ),
     );
@@ -105,7 +88,6 @@ describe('DastSiteValidationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    graphQLClient = null;
   });
 
   describe('rendering', () => {
@@ -123,10 +105,11 @@ describe('DastSiteValidationModal', () => {
 
     describe('error', () => {
       beforeEach(async () => {
-        mockClientFactory({
-          dastSiteTokenCreate: jest.fn().mockRejectedValue(new Error('GraphQL Network Error')),
+        createFullComponent({
+          handlers: {
+            dastSiteTokenCreate: jest.fn().mockRejectedValue(new Error('GraphQL Network Error')),
+          },
         });
-        createFullComponent();
         await waitForPromises();
       });
 
@@ -199,8 +182,10 @@ describe('DastSiteValidationModal', () => {
         ({ targetUrl: url, expectedPrefix, expectedPath, expectedTextFilePath }) => {
           beforeEach(async () => {
             createFullComponent({
-              propsData: {
-                targetUrl: url,
+              mountOptions: {
+                propsData: {
+                  targetUrl: url,
+                },
               },
             });
             await waitForPromises();
