@@ -892,43 +892,35 @@ RSpec.describe Service do
     end
   end
 
-  describe 'availability' do
-    let(:project_services) do
-      %w[
-        jenkins
-      ]
+  describe '.available_services_names' do
+    it 'calls the right methods' do
+      expect(described_class).to receive(:services_names).and_call_original
+      expect(described_class).to receive(:dev_services_names).and_call_original
+      expect(described_class).to receive(:project_specific_services_names).and_call_original
+
+      described_class.available_services_names
     end
 
-    describe '.available_services_names' do
-      it 'calls the right methods' do
-        expect(described_class).to receive(:services_names).and_call_original
-        expect(described_class).to receive(:dev_services_names).and_call_original
-        expect(described_class).to receive(:project_specific_services_names).and_call_original
+    it 'does not call project_specific_services_names with include_project_specific false' do
+      expect(described_class).to receive(:services_names).and_call_original
+      expect(described_class).to receive(:dev_services_names).and_call_original
+      expect(described_class).not_to receive(:project_specific_services_names)
 
-        described_class.available_services_names
-      end
-
-      it 'does not call project_specific_services_names with include_project_specific false' do
-        expect(described_class).to receive(:services_names).and_call_original
-        expect(described_class).to receive(:dev_services_names).and_call_original
-        expect(described_class).not_to receive(:project_specific_services_names)
-
-        described_class.available_services_names(include_project_specific: false)
-      end
-
-      it 'does not call dev_services_names with include_dev false' do
-        expect(described_class).to receive(:services_names).and_call_original
-        expect(described_class).not_to receive(:dev_services_names)
-        expect(described_class).to receive(:project_specific_services_names).and_call_original
-
-        described_class.available_services_names(include_dev: false)
-      end
-
-      it { expect(described_class.available_services_names).to include(*project_services) }
+      described_class.available_services_names(include_project_specific: false)
     end
 
-    describe '.project_specific_services_names' do
-      it { expect(described_class.project_specific_services_names).to match_array(project_services) }
+    it 'does not call dev_services_names with include_dev false' do
+      expect(described_class).to receive(:services_names).and_call_original
+      expect(described_class).not_to receive(:dev_services_names)
+      expect(described_class).to receive(:project_specific_services_names).and_call_original
+
+      described_class.available_services_names(include_dev: false)
     end
+
+    it { expect(described_class.available_services_names).to include('jenkins') }
+  end
+
+  describe '.project_specific_services_names' do
+    it { expect(described_class.project_specific_services_names).to include('jenkins') }
   end
 end
