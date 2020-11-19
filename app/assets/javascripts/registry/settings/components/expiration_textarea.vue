@@ -51,17 +51,22 @@ export default {
         message: nameRegexErrors,
       };
     },
+    internalValue: {
+      get() {
+        return this.value;
+      },
+      set(value) {
+        this.$emit('input', value);
+        this.$emit('validation', this.isInputValid(value));
+      },
+    },
   },
   methods: {
-    async inputHandler(value) {
-      this.$emit('input', value);
-      this.$emit('validation', this.validateInput(value));
-    },
-    validateInput(value) {
+    isInputValid(value) {
       return !value || value.length <= NAME_REGEX_LENGTH;
     },
     textAreaLengthErrorMessage(value) {
-      return this.validateInput(value) ? '' : TEXT_AREA_INVALID_FEEDBACK;
+      return this.isInputValid(value) ? '' : TEXT_AREA_INVALID_FEEDBACK;
     },
   },
 };
@@ -85,12 +90,11 @@ export default {
     </template>
     <gl-form-textarea
       :id="name"
-      :value="value"
+      v-model="internalValue"
       :placeholder="placeholder"
       :state="textAreaValidation.state"
       :disabled="disabled"
       trim
-      @input="inputHandler"
     />
     <template #description>
       <span data-testid="description" class="gl-text-gray-400">
