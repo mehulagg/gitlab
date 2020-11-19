@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: tutorial
 ---
 
-# Triggering pipelines through the API
+# Triggering pipelines through the API **(CORE)**
 
 Triggers can be used to force a pipeline rerun of a specific `ref` (branch or
 tag) with an API call.
