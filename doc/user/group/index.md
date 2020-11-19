@@ -798,6 +798,17 @@ With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar char
 
 With [GitLab Repositories Analytics](repositories_analytics/index.md), you can download a CSV of the latest coverage data for all the projects in your group.
 
+### Test code coverage overall activity
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
+
+With [GitLab Repositories Analytics](repositories_analytics/index.md), you can see the overall activity of all projects with code coverage.
+
+![Group repositories analytics](img/group_code_coverage_analytics.png)
+
+CAUTION: **Caution:**
+It is currently displaying today's code coverage data available for your projects.
+
 ## Dependency Proxy
 
 Use GitLab as a [dependency proxy](../packages/dependency_proxy/index.md) for upstream Docker images.

@@ -89,17 +89,5 @@ RSpec.describe GitlabSchema.types['Group'] do
         }
       )
     end
-
-    context 'when group_coverage_data_report flag is disabled' do
-      subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
-
-      it 'returns a graphQL error field does not exist' do
-        stub_feature_flags(group_coverage_data_report_graph: false)
-
-        expected_message = "Field 'codeCoverageActivities' doesn't exist on type 'Group'"
-
-        expect(subject.dig('errors').first.dig('message')).to eq(expected_message)
-      end
-    end
   end
 end
