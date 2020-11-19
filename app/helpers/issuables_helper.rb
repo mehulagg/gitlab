@@ -189,7 +189,7 @@ module IssuablesHelper
     output = []
     output << "Opened #{time_ago_with_tooltip(issuable.created_at)} by ".html_safe
 
-    if issuable.service_desk_reply_to
+    if issuable.is_a?(Issue) && issuable.service_desk_reply_to
       output << "#{issuable.service_desk_reply_to} via ".html_safe
     end
 
