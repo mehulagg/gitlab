@@ -8,13 +8,11 @@ import {
   GlSkeletonLoader,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { mapState, mapActions } from 'vuex';
-import { isEmpty } from 'lodash';
-import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
-import { ANY_GROUP, GROUP_QUERY_PARAM, PROJECT_QUERY_PARAM } from '../constants';
+
+import { ANY } from '../constants';
 
 export default {
-  name: 'GroupFilter',
+  name: 'SearchableDropdown',
   components: {
     GlDropdown,
     GlDropdownItem,
@@ -27,93 +25,90 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
-    initialGroup: {
+    displayData: {
       type: Object,
+      required: true,
+    },
+    isLoading: {
+      type: Boolean,
       required: false,
-      default: () => ({}),
+      default: false,
+    },
+    selectedData: {
+      type: Object,
+      required: true,
+    },
+    results: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
   },
   data() {
     return {
-      groupSearch: '',
+      search: '',
     };
   },
-  computed: {
-    ...mapState(['groups', 'fetchingGroups']),
-    selectedGroup: {
-      get() {
-        return isEmpty(this.initialGroup) ? ANY_GROUP : this.initialGroup;
-      },
-      set(group) {
-        visitUrl(setUrlParams({ [GROUP_QUERY_PARAM]: group.id, [PROJECT_QUERY_PARAM]: null }));
-      },
-    },
-  },
   methods: {
-    ...mapActions(['fetchGroups']),
-    isGroupSelected(group) {
-      return group.id === this.selectedGroup.id;
-    },
-    handleGroupChange(group) {
-      this.selectedGroup = group;
+    isSelected(selected) {
+      return selected.id === this.selectedData.id;
     },
   },
-  ANY_GROUP,
+  ANY,
 };
 </script>
 
 <template>
   <gl-dropdown
-    ref="groupFilter"
     class="gl-w-full"
     menu-class="gl-w-full!"
     toggle-class="gl-text-truncate gl-reset-line-height!"
-    :header-text="__('Filter results by group')"
-    @show="fetchGroups(groupSearch)"
+    :header-text="displayData.headerText"
+    @show="$emit('fetch', search)"
   >
     <template #button-content>
       <span class="dropdown-toggle-text gl-flex-grow-1 gl-text-truncate">
-        {{ selectedGroup.name }}
+        {{ selectedData[displayData.selectedDisplayValue] }}
       </span>
-      <gl-loading-icon v-if="fetchingGroups" inline class="mr-2" />
+      <gl-loading-icon v-if="isLoading" inline class="mr-2" />
       <gl-icon
-        v-if="!isGroupSelected($options.ANY_GROUP)"
+        v-if="!isSelected($options.ANY)"
         v-gl-tooltip
         name="clear"
         :title="__('Clear')"
         class="gl-text-gray-200! gl-hover-text-blue-800!"
-        @click.stop="handleGroupChange($options.ANY_GROUP)"
+        @click.stop="$emit('update', $options.ANY)"
       />
       <gl-icon name="chevron-down" />
     </template>
     <div class="gl-sticky gl-top-0 gl-z-index-1 gl-bg-white">
       <gl-search-box-by-type
-        v-model="groupSearch"
+        v-model="search"
         class="m-2"
         :debounce="500"
-        @input="fetchGroups"
+        @input="$emit('fetch', search)"
       />
       <gl-dropdown-item
         class="gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-pb-2! gl-mb-2"
         :is-check-item="true"
-        :is-checked="isGroupSelected($options.ANY_GROUP)"
-        @click="handleGroupChange($options.ANY_GROUP)"
+        :is-checked="isSelected($options.ANY)"
+        @click="$emit('update', $options.ANY)"
       >
-        {{ $options.ANY_GROUP.name }}
+        {{ $options.ANY.name }}
       </gl-dropdown-item>
     </div>
-    <div v-if="!fetchingGroups">
+    <div v-if="!isLoading">
       <gl-dropdown-item
-        v-for="group in groups"
-        :key="group.id"
+        v-for="result in results"
+        :key="result.id"
         :is-check-item="true"
-        :is-checked="isGroupSelected(group)"
-        @click="handleGroupChange(group)"
+        :is-checked="isSelected(result)"
+        @click="$emit('update', result)"
       >
-        {{ group.full_name }}
+        {{ result[displayData.resultsDisplayValue] }}
       </gl-dropdown-item>
     </div>
-    <div v-if="fetchingGroups" class="mx-3 mt-2">
+    <div v-if="isLoading" class="mx-3 mt-2">
       <gl-skeleton-loader :height="100">
         <rect y="0" width="90%" height="20" rx="4" />
         <rect y="40" width="70%" height="20" rx="4" />
