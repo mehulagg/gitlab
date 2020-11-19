@@ -66,16 +66,33 @@ Complementary reads:
 
 ### Development guidelines review
 
-When you submit a change to GitLab's development guidelines, request a review
-from:
+When you submit a change to GitLab's development guidelines, the people
+you ask for reviews from depend on the level of change:
 
-- A member of your team or group, to check for technical accuracy.
-- For **significant** changes or proposals, request review from:
+- If the proposed change is trivial, for example, if the MR:
+  - Fixes typos.
+  - Includes clarifying links, such as external programming language documentation.
+  - Makes changes to comply with the [documentation style guide](documentation/index.md)
+    in a way that clearly does not change the intent of the documentation.
+  Under these circumstances, the change can be reviewed, approved, and
+  merged by the responsible Technical Writer, as
+  [defined in the handbook](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines).
+
+- If the proposed change revises or adds an element to an existing
+  process, **also** request review from:
   - Engineering managers (FE, BE, DB, Security, UX, and others), according to the subject or process you're proposing.
+  - Engineers at the [Staff](https://about.gitlab.com/handbook/engineering/career-development/matrix/engineering/staff/) level, for this purpose
+    are considered equivalent to an engineering manager.
+
+- If the proposed change creates a new process, or changes an existing
+  process in a **significant** way, **also** request review from:
   - The VP of Development (DRI) ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
   final approval of the new or changed guidelines.
-- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
-  to review the content for consistency and adherence to documentation guidelines.
+
+In all cases, the [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
+reviews the content for consistency and adherence to documentation
+guidelines. That writer may also ask for additional approvals as suggested
+above.
 
 ## UX and Frontend guides
 
