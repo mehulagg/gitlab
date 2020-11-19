@@ -7,6 +7,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
 import DevopsAdoptionApp from 'ee/admin/dev_ops_report/components/devops_adoption_app.vue';
 import DevopsAdoptionEmptyState from 'ee/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
+import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devops_adoption_segment_modal.vue';
 import { DEVOPS_ADOPTION_STRINGS } from 'ee/admin/dev_ops_report/constants';
 import * as Sentry from '~/sentry/wrapper';
 import { groupNodes, nextGroupNode, groupPageInfo } from '../mock_data';
@@ -79,7 +80,7 @@ describe('DevopsAdoptionApp', () => {
       groupsSpy = null;
     });
 
-    describe('when no data is present', () => {
+    describe('when no group data is present', () => {
       beforeEach(async () => {
         groupsSpy = jest.fn().mockResolvedValueOnce({ __typename: 'Groups', nodes: [] });
         const mockApollo = createMockApolloProvider({ groupsSpy });
@@ -87,8 +88,8 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('displays the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(true);
+      it('does not render the segment modal', () => {
+        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('does not display the loader', () => {
@@ -96,7 +97,7 @@ describe('DevopsAdoptionApp', () => {
       });
     });
 
-    describe('when data is present', () => {
+    describe('when group data is present', () => {
       beforeEach(async () => {
         groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
         const mockApollo = createMockApolloProvider({ groupsSpy });
@@ -105,12 +106,12 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
       it('does not display the loader', () => {
         expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+      });
+
+      it('renders the segment modal', () => {
+        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
       });
 
       it('should fetch data once', () => {
@@ -134,12 +135,12 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
       it('does not display the loader', () => {
         expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+      });
+
+      it('does not render the segment modal', () => {
+        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data once', () => {
@@ -166,7 +167,7 @@ describe('DevopsAdoptionApp', () => {
       groupsSpy = null;
     });
 
-    describe('when data is present', () => {
+    describe('when group data is present', () => {
       beforeEach(async () => {
         groupsSpy = jest
           .fn()
@@ -179,12 +180,12 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
       it('does not display the loader', () => {
         expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+      });
+
+      it('renders the segment modal', () => {
+        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
       });
 
       it('should fetch data twice', () => {
@@ -211,10 +212,6 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
       it('does not display the loader', () => {
         expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
       });
@@ -237,19 +234,19 @@ describe('DevopsAdoptionApp', () => {
           .fn()
           .mockResolvedValueOnce(initialResponse)
           // `fetchMore` response
-          .mockRejectedValueOnce(error);
+          .mockRejectedValue(error);
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore');
         await waitForPromises();
       });
 
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
       it('does not display the loader', () => {
         expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+      });
+
+      it('does not render the segment modal', () => {
+        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data twice', () => {

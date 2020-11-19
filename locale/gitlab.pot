@@ -906,9 +906,6 @@ msgstr ""
 msgid "&lt;no scopes selected&gt;"
 msgstr ""
 
-msgid "&lt;project name&gt;"
-msgstr ""
-
 msgid "'%{data}' at %{location} does not match format: %{format}"
 msgstr ""
 
@@ -2272,6 +2269,15 @@ msgstr ""
 msgid "Administration"
 msgstr ""
 
+msgid "Admin|Additional users must be reviewed and approved by a system administrator. Learn more about %{help_link_start}usage caps%{help_link_end}."
+msgstr ""
+
+msgid "Admin|View pending user approvals"
+msgstr ""
+
+msgid "Admin|Your instance has reached its user cap"
+msgstr ""
+
 msgid "Advanced"
 msgstr ""
 
@@ -2565,9 +2571,6 @@ msgstr ""
 msgid "AlertSettings|HTTP Endpoint"
 msgstr ""
 
-msgid "AlertSettings|HTTP endpoint"
-msgstr ""
-
 msgid "AlertSettings|If you edit the payload, the stored mapping will be reset, and you'll need to re-map the fields."
 msgstr ""
 
@@ -2688,9 +2691,6 @@ msgstr ""
 msgid "AlertsIntegrations|Current integrations"
 msgstr ""
 
-msgid "AlertsIntegrations|HTTP endpoint"
-msgstr ""
-
 msgid "AlertsIntegrations|Integration Name"
 msgstr ""
 
@@ -2698,9 +2698,6 @@ msgid "AlertsIntegrations|Integration payload is invalid. You can still save you
 msgstr ""
 
 msgid "AlertsIntegrations|No integrations have been added yet"
-msgstr ""
-
-msgid "AlertsIntegrations|Prometheus"
 msgstr ""
 
 msgid "AlertsIntegrations|The current integration could not be updated. Please try again."
@@ -9445,6 +9442,12 @@ msgstr ""
 msgid "DevopsAdoptionSegment|The maximum number of segments has been reached"
 msgstr ""
 
+msgid "DevopsAdoption|%{selectedCount} group selected (20 max)"
+msgstr ""
+
+msgid "DevopsAdoption|%{selectedCount} groups selected (20 max)"
+msgstr ""
+
 msgid "DevopsAdoption|Add a segment to get started"
 msgstr ""
 
@@ -9452,6 +9455,9 @@ msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
+msgstr ""
+
+msgid "DevopsAdoption|Create new segment"
 msgstr ""
 
 msgid "DevopsAdoption|Deploys"
@@ -9464,6 +9470,15 @@ msgid "DevopsAdoption|Issues"
 msgstr ""
 
 msgid "DevopsAdoption|MRs"
+msgstr ""
+
+msgid "DevopsAdoption|My segment"
+msgstr ""
+
+msgid "DevopsAdoption|Name"
+msgstr ""
+
+msgid "DevopsAdoption|New segment"
 msgstr ""
 
 msgid "DevopsAdoption|Pipelines"
@@ -10827,9 +10842,6 @@ msgstr ""
 msgid "Error loading viewer"
 msgstr ""
 
-msgid "Error message:"
-msgstr ""
-
 msgid "Error occurred when fetching sidebar data"
 msgstr ""
 
@@ -11436,6 +11448,9 @@ msgid "Failed to remove user key."
 msgstr ""
 
 msgid "Failed to reset key. Please try again."
+msgstr ""
+
+msgid "Failed to retrieve page"
 msgstr ""
 
 msgid "Failed to save merge conflicts resolutions. Please try again!"
@@ -15254,10 +15269,10 @@ msgstr ""
 msgid "Iteration|cannot be more than 500 years in the future"
 msgstr ""
 
-msgid "I’m familiar with the basics of project management and DevOps."
+msgid "I’m familiar with the basics of DevOps."
 msgstr ""
 
-msgid "I’m not very familiar with the basics of project management and DevOps."
+msgid "I’m not familiar with the basics of DevOps."
 msgstr ""
 
 msgid "Jaeger URL"
@@ -18925,9 +18940,6 @@ msgstr ""
 msgid "OnDemandScans|Create a new site profile"
 msgstr ""
 
-msgid "OnDemandScans|Create new DAST scan"
-msgstr ""
-
 msgid "OnDemandScans|Manage profiles"
 msgstr ""
 
@@ -18950,9 +18962,6 @@ msgid "OnDemandScans|Run scan"
 msgstr ""
 
 msgid "OnDemandScans|Scanner profile"
-msgstr ""
-
-msgid "OnDemandScans|Schedule or run scans immediately against target sites. Currently available on-demand scan type: DAST. %{helpLinkStart}More information%{helpLinkEnd}"
 msgstr ""
 
 msgid "OnDemandScans|Select one of the existing profiles"
@@ -23567,9 +23576,6 @@ msgstr ""
 msgid "Save Push Rules"
 msgstr ""
 
-msgid "Save anyway"
-msgstr ""
-
 msgid "Save application"
 msgstr ""
 
@@ -24926,13 +24932,13 @@ msgstr ""
 msgid "Show list"
 msgstr ""
 
-msgid "Show me everything"
+msgid "Show me advanced features"
 msgstr ""
 
 msgid "Show me how to add a pipeline"
 msgstr ""
 
-msgid "Show me more advanced stuff"
+msgid "Show me the basics"
 msgstr ""
 
 msgid "Show only direct members"
@@ -27029,6 +27035,9 @@ msgid "The number of merge requests merged by month."
 msgstr ""
 
 msgid "The number of times an upload record could not find its file"
+msgstr ""
+
+msgid "The page could not be displayed because it timed out."
 msgstr ""
 
 msgid "The parent epic is confidential and can only contain confidential epics and issues"
@@ -30710,6 +30719,9 @@ msgstr ""
 msgid "Wiki|Pages"
 msgstr ""
 
+msgid "Wiki|The sidebar failed to load. You can reload the page to try again."
+msgstr ""
+
 msgid "Wiki|Title"
 msgstr ""
 
@@ -31008,6 +31020,9 @@ msgid "You can specify notification level per group or per project."
 msgstr ""
 
 msgid "You can test your .gitlab-ci.yml in %{linkStart}CI Lint%{linkEnd}."
+msgstr ""
+
+msgid "You can view the source or %{linkStart}%{cloneIcon} clone the repository%{linkEnd}"
 msgstr ""
 
 msgid "You cannot access the raw file. Please wait a minute."
@@ -32778,6 +32793,9 @@ msgid "project is read-only"
 msgstr ""
 
 msgid "project members"
+msgstr ""
+
+msgid "project name"
 msgstr ""
 
 msgid "projects"

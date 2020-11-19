@@ -4,6 +4,7 @@ import * as Sentry from '~/sentry/wrapper';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import { DEVOPS_ADOPTION_STRINGS, MAX_REQUEST_COUNT } from '../constants';
+import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
 
 export default {
   name: 'DevopsAdoptionApp',
@@ -11,6 +12,7 @@ export default {
     GlAlert,
     GlLoadingIcon,
     DevopsAdoptionEmptyState,
+    DevopsAdoptionSegmentModal,
   },
   i18n: {
     ...DEVOPS_ADOPTION_STRINGS.app,
@@ -19,6 +21,7 @@ export default {
     return {
       requestCount: MAX_REQUEST_COUNT,
       loadingError: false,
+      selectedSegmentId: null,
     };
   },
   apollo: {
@@ -38,11 +41,11 @@ export default {
     },
   },
   computed: {
+    hasGroupData() {
+      return Boolean(this.groups?.nodes?.length);
+    },
     isLoading() {
       return this.$apollo.queries.groups.loading;
-    },
-    isEmpty() {
-      return this.groups?.nodes?.length === 0;
     },
   },
   methods: {
@@ -73,5 +76,12 @@ export default {
     {{ $options.i18n.groupsError }}
   </gl-alert>
   <gl-loading-icon v-else-if="isLoading" size="md" class="gl-my-5" />
-  <devops-adoption-empty-state v-else-if="isEmpty" />
+  <div v-else>
+    <devops-adoption-empty-state :has-groups-data="hasGroupData" />
+    <devops-adoption-segment-modal
+      v-if="hasGroupData"
+      :groups="groups.nodes"
+      :segment-id="selectedSegmentId"
+    />
+  </div>
 </template>
