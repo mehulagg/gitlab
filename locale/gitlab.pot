@@ -19341,6 +19341,9 @@ msgstr ""
 msgid "PackageRegistry|For more information on the PyPi registry, %{linkStart}see the documentation%{linkEnd}."
 msgstr ""
 
+msgid "PackageRegistry|Generic"
+msgstr ""
+
 msgid "PackageRegistry|If you haven't already done so, you will need to add the below to your %{codeStart}.pypirc%{codeEnd} file."
 msgstr ""
 
