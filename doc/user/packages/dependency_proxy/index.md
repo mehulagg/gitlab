@@ -34,7 +34,8 @@ For a list of planned additions, view the
 
 ## Enable the Dependency Proxy
 
-For instructions on enabling the Dependency Proxy on Self-Managed instances, refer to the [Dependency Proxy administration](../../../administration/packages/dependency_proxy.md) page.
+The Dependency Proxy is disabled by default.
+[Learn how an administrator can enable it](../../../administration/packages/dependency_proxy.md).
 
 ## View the Dependency Proxy
 
