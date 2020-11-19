@@ -11,7 +11,10 @@ module IncidentManagement
     def execute
       return IncidentManagement::OncallSchedule.none unless available? && allowed?
 
-      project.incident_management_oncall_schedules
+      collection = project.incident_management_oncall_schedules
+      collection = by_iid(collection)
+
+      collection
     end
 
     private
@@ -25,6 +28,12 @@ module IncidentManagement
 
     def allowed?
       Ability.allowed?(current_user, :read_incident_management_oncall_schedule, project)
+    end
+
+    def by_iid(collection)
+      return collection unless params[:iid]
+
+      collection.for_iid(params[:iid])
     end
   end
 end

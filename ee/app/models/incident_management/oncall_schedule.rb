@@ -18,6 +18,8 @@ module IncidentManagement
     validates :description, length: { maximum: DESCRIPTION_LENGTH }
     validates :timezone, presence: true, inclusion: { in: :timezones }
 
+    scope :for_iid, -> (iid) { where(iid: iid) }
+
     private
 
     def timezones

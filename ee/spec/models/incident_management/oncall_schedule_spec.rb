@@ -39,4 +39,13 @@ RSpec.describe IncidentManagement::OncallSchedule do
     let(:scope_attrs) { { project: instance.project } }
     let(:usage) { :incident_management_oncall_schedules }
   end
+
+  describe '.for_iid' do
+    let_it_be(:oncall_schedule1) { create(:incident_management_oncall_schedule, project: project, name: 'S1') }
+    let_it_be(:oncall_schedule2) { create(:incident_management_oncall_schedule, project: project, name: 'S2') }
+
+    it 'returns only records with that IID' do
+      expect(described_class.for_iid(oncall_schedule1.iid)).to contain_exactly(oncall_schedule1)
+    end
+  end
 end
