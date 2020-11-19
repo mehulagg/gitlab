@@ -95,7 +95,9 @@ export default {
       return this.packageEntity.package_type === PackageType.NUGET;
     },
     showFiles() {
-      return this.packageEntity?.package_type !== PackageType.COMPOSER;
+      return ![PackageType.COMPOSER, PackageType.GENERIC].includes(
+        this.packageEntity?.package_type,
+      );
     },
   },
   methods: {
