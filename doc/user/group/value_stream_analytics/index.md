@@ -26,7 +26,7 @@ Note: [Project-level Value Stream Analytics](../../analytics/value_stream_analyt
 
 ## Default stages
 
-The stages tracked by Value Stream Analytics by default represent the [GitLab flow](../../topics/gitlab_flow.md). These stages can be customized in Group Level Value Stream Analytics.
+The stages tracked by Value Stream Analytics by default represent the [GitLab flow](../../../topics/gitlab_flow.md). These stages can be customized in Group Level Value Stream Analytics.
 
 - **Issue** (Tracker)
   - Time to schedule an issue (by milestone or by adding it to an issue board)
@@ -78,7 +78,7 @@ The "Time" metrics near the top of the page are measured as follows:
 - **Lead time**: median time from issue created to issue closed.
 - **Cycle time**: median time from first commit to issue closed.
 
-Note: A commit is associated with an issue by [crosslinking](../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
+Note: A commit is associated with an issue by [crosslinking](../../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
 
 ![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
@@ -97,7 +97,7 @@ Each stage of Value Stream Analytics is further described in the table below.
 | --------- | --------------- |
 | Issue     | Measures the median time between creating an issue and taking action to solve it, by either labeling it or adding it to a milestone, whatever comes first. The label will be tracked only if it already has an [Issue Board list](../project/issue_board.md) created for it. |
 | Plan      | Measures the median time between the action you took for the previous stage, and pushing the first commit to the branch. The very first commit of the branch is the one that triggers the separation between **Plan** and **Code**, and at least one of the commits in the branch needs to contain the related issue number (e.g., `#42`). If none of the commits in the branch mention the related issue number, it is not considered to the measurement time of the stage. |
-| Code      | Measures the median time between pushing a first commit (previous stage) and creating a merge request (MR) related to that commit. The key to keep the process tracked is to include the [issue closing pattern](../project/issues/managing_issues.md#closing-issues-automatically) to the description of the merge request (for example, `Closes #xxx`, where `xxx` is the number of the issue related to this merge request). If the closing pattern is not present, then the calculation takes the creation time of the first commit in the merge request as the start time. |
+| Code      | Measures the median time between pushing a first commit (previous stage) and creating a merge request (MR) related to that commit. The key to keep the process tracked is to include the [issue closing pattern](../../project/issues/managing_issues.md#closing-issues-automatically) to the description of the merge request (for example, `Closes #xxx`, where `xxx` is the number of the issue related to this merge request). If the closing pattern is not present, then the calculation takes the creation time of the first commit in the merge request as the start time. |
 | Test      | Measures the median time to run the entire pipeline for that project. It's related to the time GitLab CI/CD takes to run every job for the commits pushed to that merge request defined in the previous stage. It is basically the start->finish time for all pipelines. |
 | Review    | Measures the median time taken to review the merge request that has a closing issue pattern, between its creation and until it's merged. |
 | Staging   | Measures the median time between merging the merge request with a closing issue pattern until the very first deployment to a [production environment](#how-the-production-environment-is-identified). If there isn't a production environment, this is not tracked. |
@@ -105,7 +105,7 @@ Each stage of Value Stream Analytics is further described in the table below.
 How this works, behind the scenes:
 
 1. Issues and merge requests are grouped together in pairs, such that for each
-   `<issue, merge request>` pair, the merge request has the [issue closing pattern](../project/issues/managing_issues.md#closing-issues-automatically)
+   `<issue, merge request>` pair, the merge request has the [issue closing pattern](../../project/issues/managing_issues.md#closing-issues-automatically)
    for the corresponding issue. All other issues and merge requests are **not**
    considered.
 1. Then the `<issue, merge request>` pairs are filtered out by last XX days (specified
@@ -114,7 +114,7 @@ How this works, behind the scenes:
    we need for the stages, like issue creation date, merge request merge time,
    etc.
 
-To sum up, anything that doesn't follow [GitLab flow](../../topics/gitlab_flow.md) will not be tracked and the
+To sum up, anything that doesn't follow [GitLab flow](../../../topics/gitlab_flow.md) will not be tracked and the
 Value Stream Analytics dashboard will not present any data for:
 
 - Merge requests that do not close an issue.
@@ -123,7 +123,7 @@ Value Stream Analytics dashboard will not present any data for:
 
 ## How the production environment is identified
 
-Value Stream Analytics identifies production environments by looking for project [environments](../../ci/yaml/README.md#environment) with a name matching any of these patterns:
+Value Stream Analytics identifies production environments by looking for project [environments](../../../ci/yaml/README.md#environment) with a name matching any of these patterns:
 
 - `prod` or `prod/*`
 - `production` or `production/*`
@@ -147,10 +147,10 @@ environments is configured.
    12:00.
 1. Make a second commit to the branch which mentions the issue number at 12.30
    (stop of **Plan** stage / start of **Code** stage).
-1. Push branch and create a merge request that contains the [issue closing pattern](../project/issues/managing_issues.md#closing-issues-automatically)
+1. Push branch and create a merge request that contains the [issue closing pattern](../../project/issues/managing_issues.md#closing-issues-automatically)
    in its description at 14:00 (stop of **Code** stage / start of **Test** and
    **Review** stages).
-1. The CI starts running your scripts defined in [`.gitlab-ci.yml`](../../ci/yaml/README.md) and
+1. The CI starts running your scripts defined in [`.gitlab-ci.yml`](../../../ci/yaml/README.md) and
    takes 5min (stop of **Test** stage).
 1. Review merge request, ensure that everything is OK and merge the merge
    request at 19:00. (stop of **Review** stage / start of **Staging** stage).
@@ -197,7 +197,7 @@ Stages are visually depicted as a horizontal process flow. Selecting a stage wil
 the content below the value stream.
 
 This is disabled by default. If you have a self-managed instance, an
-administrator can [open a Rails console](../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
+administrator can [open a Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
 and enable it with the following command:
 
 ```ruby
@@ -255,7 +255,7 @@ Once a custom stage has been added, you can "drag and drop" stages to rearrange 
 The pre-defined start and end events can cover many use cases involving both issues and merge requests.
 
 For supporting more complex workflows, use stages based on group labels. These events are based on
-labels being added or removed. In particular, [scoped labels](../project/labels.md#scoped-labels)
+labels being added or removed. In particular, [scoped labels](../../project/labels.md#scoped-labels)
 are useful for complex workflows.
 
 In this example, we'd like to measure more accurate code review times. The workflow is the following:
@@ -289,7 +289,7 @@ To recover a default stage that was previously hidden:
 A default value stream is readily available for each group. You can create additional value streams based on the different areas of work that you would like to measure.
 
 Once created, a new value stream includes the [seven stages](#default-stages) that follow
-[GitLab workflow](../../topics/gitlab_flow.md)
+[GitLab workflow](../../../topics/gitlab_flow.md)
 best practices. You can customize this flow by adding, hiding or re-ordering stages.
 
 To create a value stream:
@@ -362,7 +362,7 @@ select up to a total of 15 labels.
 
 To access Group-level Value Stream Analytics, users must have Reporter access or above.
 
-You can [read more about permissions](../../user/permissions.md) in general.
+You can [read more about permissions](../../permissions.md) in general.
 
 ## More resources
 
