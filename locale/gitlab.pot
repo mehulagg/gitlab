@@ -14546,9 +14546,6 @@ msgstr[1] ""
 msgid "Instance Configuration"
 msgstr ""
 
-msgid "Instance Statistics"
-msgstr ""
-
 msgid "Instance administrators group already exists"
 msgstr ""
 
@@ -29286,6 +29283,9 @@ msgid "Upvotes"
 msgstr ""
 
 msgid "Usage"
+msgstr ""
+
+msgid "Usage Trends"
 msgstr ""
 
 msgid "Usage ping is off"
