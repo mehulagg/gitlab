@@ -1810,13 +1810,9 @@ documentation. Unfortunately, we still see features without documentation, and
 documentation without features. So, for now, we cannot rely 100% on the
 documentation site versions.
 
-Over time, version text will reference a progressively older version of GitLab.
-In cases where version text refers to versions of GitLab four or more major
-versions back, you can consider removing the text if it's irrelevant or confusing.
-
-For example, if the current major version is 12.x, version text referencing
-versions of GitLab 8.x and older are candidates for removal if necessary for
-clearer or cleaner documentation.
+As time passes, version text may reference progressively older versions
+of GitLab. When version text refers to [unsupported versions](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions) of GitLab,
+as defined in the handbook, consider removing the text for clarity.
 
 ## Products and features
 
