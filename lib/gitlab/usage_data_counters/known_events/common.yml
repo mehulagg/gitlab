@@ -235,6 +235,10 @@
   redis_slot: testing
   aggregation: weekly
   feature_flag: usage_data_i_testing_test_case_parsed
+- name: g_code_coverage_project_click_paid
+  category: testing
+  redis_slot: testing
+  aggregation: weekly
 # Project Management group
 - name: g_project_management_issue_title_changed
   category: issues_edit

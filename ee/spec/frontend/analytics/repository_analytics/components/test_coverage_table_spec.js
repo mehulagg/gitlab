@@ -6,6 +6,7 @@ import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/q
 import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import waitForPromises from 'jest/helpers/wait_for_promises';
+import { mockTracking } from 'helpers/tracking_helper';
 
 const localVue = createLocalVue();
 

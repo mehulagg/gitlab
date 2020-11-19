@@ -5,6 +5,7 @@ import { __, s__ } from '~/locale';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import api from '~/api';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
 
@@ -18,6 +19,11 @@ export default {
     GlTable,
     SelectProjectsDropdown,
     TimeAgoTooltip,
+  },
+  inject: {
+    userId: {
+      default: '',
+    }
   },
   apollo: {
     projects: {
@@ -118,6 +124,9 @@ export default {
 
       Vue.set(this.projectIds, id, true);
     },
+    trackEvent() {
+      api.trackRedisHllUserEvent('group_code_coverage_project_click', this.userId)
+    },
   },
   tableFields: [
     {
@@ -211,7 +220,7 @@ export default {
       </template>
 
       <template #cell(project)="{ item }">
-        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
+        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`" @click="trackEvent">
           {{ item.name }}
         </gl-link>
       </template>
