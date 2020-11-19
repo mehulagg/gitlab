@@ -32,7 +32,7 @@ export default {
         this.$emit('input', value);
       },
     },
-    policyEnabledText() {
+    toggleStatusText() {
       return this.enabled ? ENABLED_TEXT : DISABLED_TEXT;
     },
   },
@@ -46,7 +46,7 @@ export default {
       <span class="gl-ml-5 gl-line-height-24" data-testid="description">
         <gl-sprintf :message="$options.i18n.ENABLE_TOGGLE_DESCRIPTION">
           <template #toggleStatus>
-            <strong>{{ policyEnabledText }}</strong>
+            <strong>{{ toggleStatusText }}</strong>
           </template>
         </gl-sprintf>
       </span>
