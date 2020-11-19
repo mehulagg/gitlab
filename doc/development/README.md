@@ -80,6 +80,7 @@ you ask for reviews from depend on the level of change:
 
 - If the proposed change revises or adds an element to an existing
   process, **also** request review from:
+- A member of your team or group, to check for technical accuracy.
   - Engineering managers (FE, BE, DB, Security, UX, and others), according to the subject or process you're proposing.
   - Engineers at the [Staff](https://about.gitlab.com/handbook/engineering/career-development/matrix/engineering/staff/) level, for this purpose
     are considered equivalent to an engineering manager.
