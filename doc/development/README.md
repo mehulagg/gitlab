@@ -71,7 +71,7 @@ you ask for reviews from depend on the level of change:
 
 - If the proposed change is trivial, for example, if the MR:
   - Fixes typos.
-  - Includes clarifying links, such as external programming language documentation.
+  - Includes clarifying links, such as to external programming language documentation.
   - Makes changes to comply with the [documentation style guide](documentation/index.md)
     in a way that clearly does not change the intent of the documentation.
   Under these circumstances, the change can be reviewed, approved, and
