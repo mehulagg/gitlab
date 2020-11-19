@@ -25,6 +25,7 @@ import {
   npmPackage,
   npmFiles,
   nugetPackage,
+  genericPackage,
 } from '../../mock_data';
 
 const localVue = createLocalVue();
@@ -115,7 +116,7 @@ describe('PackagesApp', () => {
     expect(packageTitle()).toExist();
   });
 
-  it('renders an empty state component when no an invalid package is passed as a prop', () => {
+  it('renders an empty state component when an invalid package is passed as a prop', () => {
     createComponent({
       packageEntity: {},
     });
@@ -142,8 +143,12 @@ describe('PackagesApp', () => {
     expect(findInstallationCommands().props('packageEntity')).toEqual(wrapper.vm.packageEntity);
   });
 
-  it('hides the files table if package type is COMPOSER', () => {
-    createComponent({ packageEntity: composerPackage });
+  it.each`
+    name          | packageEntity
+    ${'composer'} | ${composerPackage}
+    ${'generic'}  | ${genericPackage}
+  `('hides the files table if package type is $name', ({ packageEntity }) => {
+    createComponent({ packageEntity });
     expect(allFileRows().exists()).toBe(false);
   });
 

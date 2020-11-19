@@ -170,4 +170,16 @@ export const mockTags = [
   },
 ];
 
+export const genericPackage = {
+  created_at: '2015-12-10',
+  id: 5,
+  name: 'GenericPackage',
+  package_files: [],
+  package_type: 'generic',
+  project_id: 1,
+  tags: [],
+  updated_at: '2015-12-10',
+  version: '1.0.0',
+};
+
 export const packageList = [mavenPackage, { ...npmPackage, tags: mockTags }, conanPackage];
