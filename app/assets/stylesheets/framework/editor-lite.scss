@@ -19,3 +19,18 @@
 [id^='editor-lite-'] {
   height: 500px;
 }
+
+.ProseMirror {
+  @include gl-p-5;
+  &:focus {
+   outline: none;
+  }
+  pre {
+    @include gl-bg-gray-50;
+    @include gl-p-3;
+    @include gl-border-solid;
+    @include gl-border-gray-100;
+    @include gl-border-1;
+    @include gl-rounded-small;
+  }
+}
