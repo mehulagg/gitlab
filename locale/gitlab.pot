@@ -7359,9 +7359,6 @@ msgstr ""
 msgid "ContainerRegistry|Run cleanup every:"
 msgstr ""
 
-msgid "ContainerRegistry|Save"
-msgstr ""
-
 msgid "ContainerRegistry|Some tags were not deleted"
 msgstr ""
 
