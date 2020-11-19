@@ -70,7 +70,7 @@ module Quality
     end
 
     def regexp(level)
-      @regexps[level] ||= Regexp.new("#{prefix}spec/#{folders_regex(level)}").freeze
+      @regexps[level] ||= Regexp.new("\\A#{prefix}spec/#{folders_regex(level)}").freeze
     end
 
     def level_for(file_path)
