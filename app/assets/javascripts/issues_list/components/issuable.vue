@@ -208,10 +208,8 @@ export default {
       return convertToCamelCase(this.issuable.health_status);
     },
     openedMessage() {
-      if (this.isJiraIssue)
-        return this.$options.i18n.openedAgoJira;
-      if (this.issuable.service_desk_reply_to)
-        return this.$options.i18n.openedAgoServiceDesk;
+      if (this.isJiraIssue) return this.$options.i18n.openedAgoJira;
+      if (this.issuable.service_desk_reply_to) return this.$options.i18n.openedAgoServiceDesk;
       return this.$options.i18n.openedAgo;
     },
   },
@@ -319,9 +317,7 @@ export default {
 
           <span data-testid="openedByMessage" class="gl-display-none d-sm-inline-block gl-mr-4">
             &middot;
-            <gl-sprintf
-              :message="openedMessage"
-            >
+            <gl-sprintf :message="openedMessage">
               <template #timeAgoString>
                 <span>{{ issuableCreatedAt }}</span>
               </template>
