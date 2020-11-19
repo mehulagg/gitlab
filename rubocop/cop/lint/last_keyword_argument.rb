@@ -39,25 +39,21 @@ module RuboCop
         def known_match?(file_path, line_number, method_name)
           file_path_from_root = file_path.sub(File.expand_path('../../..', __dir__), '')
 
-          keyword_warnings.any? do |warning|
+          self.class.keyword_warnings.any? do |warning|
             warning.include?("#{file_path_from_root}:#{line_number}") && warning.include?("called method `#{method_name}'")
           end
         end
 
-        def keyword_warnings
+        def self.keyword_warnings
           @keyword_warnings ||= keywords_list
         end
 
-        def keywords_list
+        def self.keywords_list
           hash = Dir.glob(DEPRECATIONS_GLOB).each_with_object({}) do |file, hash|
             hash.merge!(YAML.safe_load(File.read(file)))
           end
 
-          hash.values.flatten.select { |str| str.include?(KEYWORD_DEPRECATION_STR) }
-        end
-
-        def keywords_file_path
-          File.expand_path('../../../tmp/keyword_warn.txt', __dir__)
+          hash.values.flatten.select { |str| str.include?(KEYWORD_DEPRECATION_STR) }.uniq
         end
       end
     end

@@ -9,6 +9,10 @@ RSpec.describe RuboCop::Cop::Lint::LastKeywordArgument, type: :rubocop do
 
   subject(:cop) { described_class.new }
 
+  before do
+    described_class.instance_variable_set(:@keyword_warnings, nil)
+  end
+
   context 'deprecation files does not exist' do
     before do
       allow(Dir).to receive(:glob).and_return([])
