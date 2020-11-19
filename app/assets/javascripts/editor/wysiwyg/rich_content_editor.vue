@@ -1,14 +1,7 @@
 <script>
 import { EditorContent, EditorMenuBar } from 'tiptap';
-
-import GlButton from '../base/button/button.vue';
-import GlDropdown from '../base/dropdown/dropdown.vue';
-import GlDropdownItem from '../base/dropdown/dropdown_item.vue';
-import GlTooltip from '../../directives/tooltip';
-
+import { GlButton, GlDropdown, GlDropdownItem, GlTooltip, GlMarkdown } from "@gitlab/ui";
 import { headingLevels } from './constants';
-
-import GlMarkdown from '../base/markdown/markdown.vue';
 
 export default {
   components: {
