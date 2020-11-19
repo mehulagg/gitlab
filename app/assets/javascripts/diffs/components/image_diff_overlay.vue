@@ -39,6 +39,14 @@ export default {
       required: false,
       default: true,
     },
+    renderedWidth: {
+      type: Number,
+      required: true,
+    },
+    renderedHeight: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     ...mapGetters('diffs', ['getDiffFileByHash', 'getCommentFormForDiffFile']),
@@ -59,22 +67,18 @@ export default {
     },
     getPositionForObject(meta) {
       const { x, y, width, height } = meta;
-      const imageWidth = this.getImageDimensions().width;
-      const imageHeight = this.getImageDimensions().height;
-      const widthRatio = imageWidth / width;
-      const heightRatio = imageHeight / height;
 
       return {
-        x: Math.round(x * widthRatio),
-        y: Math.round(y * heightRatio),
+        x: (((x / width) * 100) / ((this.renderedWidth / width) * 100)) * 100,
+        y: (((y / height) * 100) / ((this.renderedHeight / height) * 100)) * 100,
       };
     },
     getPosition(discussion) {
       const { x, y } = this.getPositionForObject(discussion.position);
 
       return {
-        left: `${x}px`,
-        top: `${y}px`,
+        left: `${x}%`,
+        top: `${y}%`,
       };
     },
     clickedImage(x, y) {
@@ -86,6 +90,8 @@ export default {
         height,
         x,
         y,
+        xPercent: (((x / width) * 100) / ((this.renderedWidth / width) * 100)) * 100,
+        yPercent: (((y / height) * 100) / ((this.renderedHeight / height) * 100)) * 100,
       });
     },
   },
@@ -112,22 +118,19 @@ export default {
       type="button"
       @click="clickedToggle(discussion)"
     >
-      <gl-icon v-if="showCommentIcon" name="image-comment-dark" />
+      <gl-icon v-if="showCommentIcon" name="image-comment-dark" :size="24" />
       <template v-else>
         {{ toggleText(discussion, index) }}
       </template>
     </button>
     <button
-      v-if="currentCommentForm"
-      :style="{
-        left: `${currentCommentForm.x}px`,
-        top: `${currentCommentForm.y}px`,
-      }"
+      v-if="canComment && currentCommentForm"
+      :style="{ left: `${currentCommentForm.xPercent}%`, top: `${currentCommentForm.yPercent}%` }"
       :aria-label="__('Comment form position')"
-      class="btn-transparent comment-indicator"
+      class="btn-transparent comment-indicator position-absolute"
       type="button"
     >
-      <gl-icon name="image-comment-dark" />
+      <gl-icon name="image-comment-dark" :size="24" />
     </button>
   </div>
 </template>
