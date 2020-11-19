@@ -41,7 +41,7 @@ export default {
         v-for="option in formOptions"
         :key="option.key"
         :value="option.key"
-        data-testid="options"
+        data-testid="option"
       >
         {{ option.label }}
       </option>

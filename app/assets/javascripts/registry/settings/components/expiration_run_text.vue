@@ -27,7 +27,7 @@ export default {
 
 <template>
   <gl-form-group
-    id="expiration-policy-info-text"
+    id="expiration-policy-info-text-group"
     :label="$options.i18n.NEXT_CLEANUP_LABEL"
     label-for="expiration-policy-info-text"
   >

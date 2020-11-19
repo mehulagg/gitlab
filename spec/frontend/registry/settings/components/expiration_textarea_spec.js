@@ -59,7 +59,8 @@ describe('ExpirationTextarea', () => {
 
       expect(findDescription().text()).toMatchInterpolatedText(defaultProps.description);
     });
-    it('description has a link', () => {
+
+    it('has a description link', () => {
       mountComponent();
 
       const link = findDescriptionLink();
@@ -69,7 +70,7 @@ describe('ExpirationTextarea', () => {
   });
 
   describe('model', () => {
-    it('assign the right props to the textarea component', () => {
+    it('assigns the right props to the textarea component', () => {
       mountComponent({ value: 'foobar', disabled: true });
 
       expect(findTextArea().attributes()).toMatchObject({
@@ -112,10 +113,11 @@ describe('ExpirationTextarea', () => {
     });
 
     describe('when error is empty', () => {
-      it('if the user did not type validation is null', async () => {
+      it('if the user did not type validation is null', () => {
         mountComponent();
+
         expect(findFormGroup().attributes('state')).toBeUndefined();
-        expect(wrapper.emitted()).toEqual({});
+        expect(wrapper.emitted('validation')).toBeUndefined();
       });
 
       it(`if the user typed and is less than ${NAME_REGEX_LENGTH} state is true`, () => {
@@ -142,7 +144,7 @@ describe('ExpirationTextarea', () => {
           expect(findTextArea().attributes('state')).toBeUndefined();
         });
 
-        it('emit the @validation event with false payload', () => {
+        it('emits the @validation event with false payload', () => {
           expect(wrapper.emitted('validation')).toEqual([[false]]);
         });
       });

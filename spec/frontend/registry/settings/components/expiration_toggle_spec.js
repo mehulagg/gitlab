@@ -32,6 +32,7 @@ describe('ExpirationToggle', () => {
   describe('structure', () => {
     it('has a toggle component', () => {
       mountComponent();
+
       expect(findToggle().exists()).toBe(true);
     });
 
@@ -45,7 +46,7 @@ describe('ExpirationToggle', () => {
   });
 
   describe('model', () => {
-    it('assign the right props to the toggle component', () => {
+    it('assigns the right props to the toggle component', () => {
       mountComponent({ value: true, disabled: true });
 
       expect(findToggle().props()).toMatchObject({

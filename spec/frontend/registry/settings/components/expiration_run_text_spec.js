@@ -32,7 +32,7 @@ describe('ExpirationToggle', () => {
   });
 
   describe('model', () => {
-    it('assign the right props to the input component', () => {
+    it('assigns the right props to the input component', () => {
       mountComponent({ value: 'foo', disabled: true });
 
       expect(findInput().attributes()).toMatchObject({
@@ -40,7 +40,7 @@ describe('ExpirationToggle', () => {
       });
     });
 
-    it('assign the right props to the form-group component', () => {
+    it('assigns the right props to the form-group component', () => {
       mountComponent();
 
       expect(findFormGroup().attributes()).toMatchObject({
