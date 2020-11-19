@@ -94,7 +94,7 @@ class GroupsController < Groups::ApplicationController
       end
 
       format.atom do
-        if Feature.enabled?(:atom_off, type: :ops)
+        if Settings[:atom_off]
           return render_404
         end
         render_details_view_atom
@@ -109,7 +109,7 @@ class GroupsController < Groups::ApplicationController
       end
 
       format.atom do
-        if Feature.enabled?(:atom_off, type: :ops)
+        if Settings[:atom_off]
           return render_404
         end
         render_details_view_atom

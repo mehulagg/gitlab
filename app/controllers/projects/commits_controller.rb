@@ -29,7 +29,7 @@ class Projects::CommitsController < Projects::ApplicationController
     respond_to do |format|
       format.html
       format.atom do
-        if Feature.enabled?(:atom_off, type: :ops)
+        if Settings[:atom_off]
           return render_404
         end
         render layout: 'xml.atom'

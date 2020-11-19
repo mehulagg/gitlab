@@ -28,7 +28,7 @@ class UsersController < ApplicationController
       format.html
 
       format.atom do
-        if Feature.enabled?(:atom_off, type: :ops)
+        if Settings[:atom_off]
           return render_404
         end
         load_events
