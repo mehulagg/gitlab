@@ -6,8 +6,7 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
 import { useFakeDate } from 'helpers/fake_date';
-import waitForPromises from 'helpers/wait_for_promises';
-import { day1, day2, day3, day4, legacyBurndownEvents } from '../mock_data';
+import { day1, day2, day3, day4 } from '../mock_data';
 
 function fakeDate({ date }) {
   const [year, month, day] = date.split('-');
