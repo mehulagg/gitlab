@@ -5,7 +5,6 @@ import { __ } from '~/locale';
 import Terminal from './terminal.vue';
 import { isEndingStatus } from '../../stores/modules/terminal/utils';
 
-
 export default {
   components: {
     Terminal,
@@ -48,7 +47,8 @@ export default {
           :category="actionButton.category"
           size="medium"
           @click="actionButton.action"
-        >{{ actionButton.text }}</gl-button>
+          >{{ actionButton.text }}</gl-button
+        >
       </div>
     </header>
     <terminal :terminal-path="session.terminalPath" :status="session.status" />
