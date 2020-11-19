@@ -113,10 +113,10 @@ describe('ExpirationTextarea', () => {
     });
 
     describe('when error is empty', () => {
-      it('if the user did not type validation is null', () => {
+      it('if the user did not type validation is not emitted and the state is true', () => {
         mountComponent();
 
-        expect(findFormGroup().attributes('state')).toBeUndefined();
+        expect(findFormGroup().props('state')).toBe(true);
         expect(wrapper.emitted('validation')).toBeUndefined();
       });
 
@@ -124,9 +124,8 @@ describe('ExpirationTextarea', () => {
         mountComponent();
 
         findTextArea().vm.$emit('input', 'foo');
-        const formGroup = findFormGroup();
 
-        expect(formGroup.props('state')).toBeTruthy();
+        expect(findFormGroup().props('state')).toBe(true);
         expect(findTextArea().attributes('state')).toBe('true');
         expect(wrapper.emitted('validation')).toEqual([[true]]);
       });
