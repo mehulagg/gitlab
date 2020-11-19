@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Geo', :orchestrated, :geo, :subsetgeo do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab SSH push' do
       let(:file_name) { 'README.md' }
 
