@@ -71,7 +71,7 @@ module Gitlab
       end
 
       def process_relation_item!(relation_key, relation_definition, relation_index, data_hash)
-        relation_object = build_relation(relation_key, relation_definition, data_hash)
+        relation_object = build_relation(relation_key, relation_definition, data_hash, relation_index)
         return unless relation_object
         return if importable_class == ::Project && group_model?(relation_object)
 
@@ -83,7 +83,7 @@ module Gitlab
         end
       rescue => e
         import_failure_service.log_import_failure(
-          source: 'process_relation_item!',
+          source: __method__,
           relation_key: relation_key,
           relation_index: relation_index,
           exception: e)
@@ -139,23 +139,34 @@ module Gitlab
         end
       end
 
-      def build_relations(relation_key, relation_definition, data_hashes)
+      def build_relations(relation_key, relation_definition, data_hashes, relation_index)
         data_hashes
-          .map { |data_hash| build_relation(relation_key, relation_definition, data_hash) }
+          .map { |data_hash| build_relation(relation_key, relation_definition, data_hash, relation_index) }
           .tap { |entries| entries.compact! }
       end
 
-      def build_relation(relation_key, relation_definition, data_hash)
+      def build_relation(relation_key, relation_definition, data_hash, relation_index)
         # TODO: This is hack to not create relation for the author
         # Rather make `RelationFactory#set_note_author` to take care of that
         return data_hash if relation_key == 'author' || already_restored?(data_hash)
 
         # create relation objects recursively for all sub-objects
         relation_definition.each do |sub_relation_key, sub_relation_definition|
-          transform_sub_relations!(data_hash, sub_relation_key, sub_relation_definition)
+          transform_sub_relations!(data_hash, sub_relation_key, sub_relation_definition, relation_index)
         end
 
-        @relation_factory.create(relation_factory_params(relation_key, data_hash))
+        relation = @relation_factory.create(relation_factory_params(relation_key, data_hash))
+        relation.validate!
+
+        relation
+      rescue => e
+        import_failure_service.log_import_failure(
+          source: __method__,
+          relation_key: relation_key,
+          relation_index: relation_index,
+          exception: e)
+
+        nil
       end
 
       # Since we update the data hash in place as we restore relation items,
@@ -165,7 +176,7 @@ module Gitlab
         !relation_item.is_a?(Hash)
       end
 
-      def transform_sub_relations!(data_hash, sub_relation_key, sub_relation_definition)
+      def transform_sub_relations!(data_hash, sub_relation_key, sub_relation_definition, relation_index)
         sub_data_hash = data_hash[sub_relation_key]
         return unless sub_data_hash
 
@@ -176,12 +187,14 @@ module Gitlab
             build_relations(
               sub_relation_key,
               sub_relation_definition,
-              sub_data_hash).presence
+              sub_data_hash,
+              relation_index).presence
           else
             build_relation(
               sub_relation_key,
               sub_relation_definition,
-              sub_data_hash)
+              sub_data_hash,
+              relation_index)
           end
 
         if current_item
