@@ -84,8 +84,9 @@ you ask for reviews from depend on the level of change:
   - Engineers at the [Staff](https://about.gitlab.com/handbook/engineering/career-development/matrix/engineering/staff/) level, for this purpose
     are considered equivalent to an engineering manager.
 
-- If the proposed change creates a new process, or changes an existing
-  process in a **significant** way, **also** request review from:
+- If the proposed change creates a new process, or changes an existing process in
+a **significant** way, you may, in consultation with the engineering manager, **also**
+request review from:
   - The VP of Development (DRI) ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
   final approval of the new or changed guidelines.
 
