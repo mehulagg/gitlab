@@ -1,13 +1,13 @@
 <script>
 import { GlFormGroup, GlFormTextarea, GlSprintf, GlLink } from '@gitlab/ui';
-import { NAME_REGEX_LENGTH, TEXT_AREA_INVALID_FEEDBACK } from '../constants'
+import { NAME_REGEX_LENGTH, TEXT_AREA_INVALID_FEEDBACK } from '../constants';
 
 export default {
   components: {
     GlFormGroup,
     GlFormTextarea,
     GlSprintf,
-    GlLink
+    GlLink,
   },
   inject: ['tagsRegexHelpPagePath'],
   props: {
@@ -28,19 +28,19 @@ export default {
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     label: {
       type: String,
-      required: true
+      required: true,
     },
     placeholder: {
       type: String,
-      required: true
+      required: true,
     },
-    description:{
+    description: {
       type: String,
-      required: true
+      required: true,
     },
   },
   computed: {
@@ -54,53 +54,52 @@ export default {
   },
   methods: {
     async inputHandler(value) {
-      this.$emit('input', value)
-      this.$emit('validation', this.validateInput(value))
+      this.$emit('input', value);
+      this.$emit('validation', this.validateInput(value));
     },
     validateInput(value) {
-      return !value || value.length <= NAME_REGEX_LENGTH
+      return !value || value.length <= NAME_REGEX_LENGTH;
     },
     textAreaLengthErrorMessage(value) {
       return this.validateInput(value) ? '' : TEXT_AREA_INVALID_FEEDBACK;
     },
-  }
+  },
 };
 </script>
 
 <template>
-    <gl-form-group
-      :id="`${name}-form-group`"
-      :label-for="name"
+  <gl-form-group
+    :id="`${name}-form-group`"
+    :label-for="name"
+    :state="textAreaValidation.state"
+    :invalid-feedback="textAreaValidation.message"
+  >
+    <template #label>
+      <span data-testid="label">
+        <gl-sprintf :message="label">
+          <template #italic="{content}">
+            <i>{{ content }}</i>
+          </template>
+        </gl-sprintf>
+      </span>
+    </template>
+    <gl-form-textarea
+      :id="name"
+      :value="value"
+      :placeholder="placeholder"
       :state="textAreaValidation.state"
-      :invalid-feedback="textAreaValidation.message"
-    >
-      <template #label>
-        <span data-testid="label">
-          <gl-sprintf :message="label">
-            <template #italic="{content}">
-              <i>{{ content }}</i>
-            </template>
-          </gl-sprintf>
-        </span>
-      </template>
-      <gl-form-textarea
-        :id="name"
-        :value="value"
-        :placeholder="placeholder"
-        :state="textAreaValidation.state"
-        :disabled="disabled"
-        trim
-        @input="inputHandler"
-      />
-      <template #description>
-        <span data-testid="description" class="gl-text-gray-400">
-          <gl-sprintf :message="description">
-            <template #link="{content}">
-              <gl-link :href="tagsRegexHelpPagePath" target="_blank">{{content}}</gl-link>
-            </template>
-          </gl-sprintf>
-        </span>
-      </template>
-    </gl-form-group>
-  </div>
+      :disabled="disabled"
+      trim
+      @input="inputHandler"
+    />
+    <template #description>
+      <span data-testid="description" class="gl-text-gray-400">
+        <gl-sprintf :message="description">
+          <template #link="{content}">
+            <gl-link :href="tagsRegexHelpPagePath" target="_blank">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </span>
+    </template>
+  </gl-form-group>
 </template>
