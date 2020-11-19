@@ -1883,6 +1883,16 @@ class Project < ApplicationRecord
     end
   end
 
+  def add_template_export_job(current_user:, after_export_strategy: nil, params: {})
+    job_id = ProjectTemplateExportWorker.perform_async(current_user.id, self.id, after_export_strategy, params)
+
+    if job_id
+      Gitlab::AppLogger.info(message: 'Template Export job started', project_id: self.id, job_id: job_id)
+    else
+      Gitlab::AppLogger.error(message: 'Template Export job failed to start', project_id: self.id)
+    end
+  end
+
   def import_export_shared
     @import_export_shared ||= Gitlab::ImportExport::Shared.new(self)
   end
