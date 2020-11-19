@@ -1,6 +1,6 @@
 import { s__, __ } from '~/locale';
 
-export const SET_CLEANUP_POLICY_BUTTON = s__('ContainerRegistry|Save');
+export const SET_CLEANUP_POLICY_BUTTON = __('Save');
 export const CLEANUP_POLICY_CARD_HEADER = s__('ContainerRegistry|Tag expiration policy');
 export const UNAVAILABLE_FEATURE_TITLE = s__(
   `ContainerRegistry|Cleanup policy for tags is disabled`,
