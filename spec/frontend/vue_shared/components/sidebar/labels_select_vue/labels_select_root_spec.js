@@ -240,8 +240,7 @@ describe('LabelsSelectRoot', () => {
     createComponent();
 
     jest.spyOn(store, 'dispatch').mockResolvedValue();
-    wrapper.setProps({ isEditing: false });
-    await wrapper.vm.$nextTick;
+    await wrapper.setProps({ isEditing: false });
 
     expect(store.dispatch).not.toHaveBeenCalled();
   });
