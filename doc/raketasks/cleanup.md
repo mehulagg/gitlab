@@ -179,8 +179,8 @@ You can also limit the number of files to delete with `LIMIT`:
 sudo gitlab-rake gitlab:cleanup:orphan_job_artifact_files LIMIT=100
 ```
 
-This only deletes up to 100 files from disk. You can use this to
-delete a small set for testing purposes.
+This deletes only up to 100 files from disk. You can use this to delete a small
+set for testing purposes.
 
 Providing `DEBUG=1` displays the full path of every file that
 is detected as being an orphan.
