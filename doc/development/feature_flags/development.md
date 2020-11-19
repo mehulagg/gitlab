@@ -17,16 +17,17 @@ request removing the feature flag or the merge request where the default value o
 the feature flag is set to enabled. If the feature contains any database migrations, it
 *should* include a changelog entry for the database changes.
 
-DANGER: **Warning:**
-Feature flags **must** be used in the MR that introduces them. Not doing so causes a
-[broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
-to the `rspec:feature-flags` job that only runs on the `master` branch.
-
 CAUTION: **Caution:**
 All newly-introduced feature flags should be [disabled by default](process.md#feature-flags-in-gitlab-development).
 
 NOTE: **Note:**
 This document is the subject of continued work as part of an epic to [improve internal usage of Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
+
+## Risk of a broken master (main) branch
+
+Feature flags **must** be used in the MR that introduces them. Not doing so causes a
+[broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
+to the `rspec:feature-flags` job that only runs on the `master` branch.
 
 ## Types of feature flags
 
