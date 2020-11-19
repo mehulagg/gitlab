@@ -9,12 +9,12 @@ module Gitlab
       attr_reader :group, :default_project_filter, :filters
 
       # rubocop:disable Metrics/ParameterLists
-      def initialize(current_user, query, limit_project_ids = nil, group:, public_and_internal_projects: false, default_project_filter: false, order_by: nil, sort: nil, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, group:, public_and_internal_projects: false, default_project_filter: false, order_by: nil, sort: nil, filters: {}, max_count_size: nil)
         @group = group
         @default_project_filter = default_project_filter
         @filters = filters
 
-        super(current_user, query, limit_project_ids, public_and_internal_projects: public_and_internal_projects, order_by: order_by, sort: sort, filters: filters)
+        super(current_user, query, limit_project_ids, public_and_internal_projects: public_and_internal_projects, order_by: order_by, sort: sort, filters: filters, max_count_size: nil)
       end
       # rubocop:enable Metrics/ParameterLists
     end

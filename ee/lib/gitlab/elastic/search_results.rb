@@ -7,13 +7,13 @@ module Gitlab
 
       DEFAULT_PER_PAGE = Gitlab::SearchResults::DEFAULT_PER_PAGE
 
-      attr_reader :current_user, :query, :public_and_internal_projects, :order_by, :sort, :filters
+      attr_reader :current_user, :query, :public_and_internal_projects, :order_by, :sort, :filters, :max_count_size
 
       # Limit search results by passed projects
       # It allows us to search only for projects user has access to
       attr_reader :limit_project_ids
 
-      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, order_by: nil, sort: nil, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, order_by: nil, sort: nil, filters: {}, max_count_size: nil)
         @current_user = current_user
         @query = query
         @limit_project_ids = limit_project_ids
@@ -21,6 +21,7 @@ module Gitlab
         @order_by = order_by
         @sort = sort
         @filters = filters
+        @max_count_size = max_count_size
       end
 
       def objects(scope, page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil)
@@ -204,7 +205,8 @@ module Gitlab
           project_ids: limit_project_ids,
           public_and_internal_projects: public_and_internal_projects,
           order_by: order_by,
-          sort: sort
+          sort: sort,
+          max_count_size: max_count_size,
         }
       end
 

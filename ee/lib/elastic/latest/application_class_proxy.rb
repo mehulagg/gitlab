@@ -11,6 +11,7 @@ module Elastic
         es_options = routing_options(search_options)
 
         # Calling elasticsearch-ruby method
+        query = query.merge(track_total_hits: search_options[:max_count_size].presence || 10_000)
         super(query, es_options)
       end
 
