@@ -22,9 +22,8 @@ module BreadcrumbsHelper
   end
 
   def breadcrumb_list_item(link)
-    content_tag "li" do
-      link + sprite_icon("angle-right", size: 8, css_class: "breadcrumbs-list-angle")
-    end
+    tag.li(link, class: "breadcrumb-item gl-breadcrumb-item") +
+      tag.span(sprite_icon("angle-right", size: 8), class: "gl-breadcrumb-separator")
   end
 
   def add_to_breadcrumb_dropdown(link, location: :before)
