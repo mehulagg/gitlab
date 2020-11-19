@@ -22999,7 +22999,7 @@ ALTER TABLE ONLY ci_pipelines
     ADD CONSTRAINT fk_86635dbd80 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY services
-    ADD CONSTRAINT fk_868a8e7ad6 FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE SET NULL;
+    ADD CONSTRAINT fk_868a8e7ad6 FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_86c84214ec FOREIGN KEY (repository_renamed_event_id) REFERENCES geo_repository_renamed_events(id) ON DELETE CASCADE;
