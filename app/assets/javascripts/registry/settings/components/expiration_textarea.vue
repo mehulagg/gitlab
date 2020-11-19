@@ -44,8 +44,11 @@ export default {
     },
   },
   computed: {
+    textAreaLengthErrorMessage() {
+      return this.isInputValid(this.value) ? '' : TEXT_AREA_INVALID_FEEDBACK;
+    },
     textAreaValidation() {
-      const nameRegexErrors = this.error || this.textAreaLengthErrorMessage(this.value);
+      const nameRegexErrors = this.error || this.textAreaLengthErrorMessage;
       return {
         state: nameRegexErrors === null ? null : !nameRegexErrors,
         message: nameRegexErrors,
@@ -64,9 +67,6 @@ export default {
   methods: {
     isInputValid(value) {
       return !value || value.length <= NAME_REGEX_LENGTH;
-    },
-    textAreaLengthErrorMessage(value) {
-      return this.isInputValid(value) ? '' : TEXT_AREA_INVALID_FEEDBACK;
     },
   },
 };
