@@ -2164,6 +2164,9 @@ msgstr ""
 msgid "AdminUsers|External users cannot see internal or private projects unless access is explicitly granted. Also, external users cannot create projects, groups, or personal snippets."
 msgstr ""
 
+msgid "AdminUsers|If you reject the user:"
+msgstr ""
+
 msgid "AdminUsers|Is using seat"
 msgstr ""
 
@@ -2200,6 +2203,9 @@ msgstr ""
 msgid "AdminUsers|Regular users have access to their groups and projects"
 msgstr ""
 
+msgid "AdminUsers|Reject request"
+msgstr ""
+
 msgid "AdminUsers|Restore user access to the account, including web, Git and API."
 msgstr ""
 
@@ -2213,6 +2219,12 @@ msgid "AdminUsers|Send email to users"
 msgstr ""
 
 msgid "AdminUsers|Sort by"
+msgstr ""
+
+msgid "AdminUsers|The user can not sign in or access instance information."
+msgstr ""
+
+msgid "AdminUsers|The user will be deleted."
 msgstr ""
 
 msgid "AdminUsers|The user will be logged out"
@@ -12071,6 +12083,9 @@ msgid "For more information on how the number of active users is calculated, see
 msgstr ""
 
 msgid "For more information, go to the "
+msgstr ""
+
+msgid "For more information, please refer to the %{link_start}user account deletion documentation.%{link_end}"
 msgstr ""
 
 msgid "For more information, please review %{link_start_tag}Jaeger's configuration doc%{link_end_tag}"

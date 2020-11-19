@@ -175,7 +175,17 @@
       - if @user.blocked?
         - if @user.blocked_pending_approval?
           = render 'admin/users/approve_user', user: @user
-          = render 'admin/users/reject_user', user: @user
+          .card.border-danger
+            .card-header.bg-danger.gl-text-white
+              = s_('AdminUsers|This user has requested access')
+            .card-body
+              = render partial: 'admin/users/user_reject_effects'
+              %br
+              %button.delete-user-button.btn.gl-button.btn-danger{ data: { 'gl-modal-action': 'delete',
+                delete_user_url: admin_user_path(@user, hard_delete: true),
+                block_user_url: block_admin_user_path(@user),
+                username: sanitize_name(@user.name) } }
+                = s_('AdminUsers|Reject request')
         - else
           .card.border-info
             .card-header.gl-bg-blue-500.gl-text-white
