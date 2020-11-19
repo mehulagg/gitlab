@@ -68,7 +68,7 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
       context 'when there are issues' do
         let(:support_bot) { User.support_bot }
         let(:other_user) { create(:user) }
-        let!(:service_desk_issue) { create(:issue, project: project, author: support_bot) }
+        let!(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
         let!(:other_user_issue) { create(:issue, project: project, author: other_user) }
 
         describe 'service desk info content' do
@@ -93,6 +93,10 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
 
           it 'only displays issues created by support bot' do
             expect(page).to have_selector('.issues-list .issue', count: 1)
+          end
+
+          it 'shows service_desk_reply_to in issues list' do
+            expect(page).to have_text('by service.desk@example.com via GitLab Support Bot')
           end
         end
 
