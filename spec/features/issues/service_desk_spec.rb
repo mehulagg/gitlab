@@ -32,7 +32,7 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
     let!(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
 
     it 'shows service_desk_reply_to in issue header' do
-      visit namespace_project_issue_path(namespace_id: project.namespace, project_id: project, id: service_desk_issue.id)
+      visit project_issue_path(project, service_desk_issue)
 
       expect(page).to have_text('by service.desk@example.com via GitLab Support Bot')
     end
