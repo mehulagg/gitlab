@@ -1,0 +1,8 @@
+---
+name: oncall_scheduling_mvc
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46639
+rollout_issue_url:
+milestone: '13.7'
+type: development
+group: group::monitor
+default_enabled: false
