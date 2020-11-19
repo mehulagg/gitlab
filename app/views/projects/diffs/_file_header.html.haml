@@ -1,5 +1,6 @@
 - if local_assigns.fetch(:show_toggle, true)
-  %i.fa.diff-toggle-caret.fa-fw
+  = sprite_icon('chevron-right', css_class: 'diff-toggle-caret chevron-right gl-display-none')
+  = sprite_icon('chevron-down', css_class: 'diff-toggle-caret chevron-down gl-display-none')
 
 - if diff_file.submodule?
   %span
