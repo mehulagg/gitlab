@@ -223,8 +223,8 @@ export default {
       }
     },
 
-    isSelected(ref) {
-      return ref === this.refValue;
+    isSelected({ shortName }) {
+      return shortName === this.refValue.shortName;
     },
     removeVariable(index) {
       this.variables.splice(index, 1);
