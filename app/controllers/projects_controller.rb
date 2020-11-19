@@ -165,6 +165,9 @@ class ProjectsController < Projects::ApplicationController
       end
 
       format.atom do
+        if Feature.enabled?(:atom_off, type: :ops)
+           return render_404
+         end
         load_events
         render layout: 'xml.atom'
       end

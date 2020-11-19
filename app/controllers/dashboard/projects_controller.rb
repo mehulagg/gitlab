@@ -22,6 +22,9 @@ class Dashboard::ProjectsController < Dashboard::ApplicationController
         render_projects
       end
       format.atom do
+        if Feature.enabled?(:atom_off, type: :ops)
+          return render_404
+        end
         load_events
         render layout: 'xml.atom'
       end

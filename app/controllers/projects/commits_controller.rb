@@ -28,8 +28,12 @@ class Projects::CommitsController < Projects::ApplicationController
 
     respond_to do |format|
       format.html
-      format.atom { render layout: 'xml.atom' }
-
+      format.atom do
+        if Feature.enabled?(:atom_off, type: :ops)
+          return render_404
+        end
+        render layout: 'xml.atom'
+      end
       format.json do
         pager_json(
           'projects/commits/_commits',

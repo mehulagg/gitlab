@@ -65,7 +65,12 @@ class DashboardController < Dashboard::ApplicationController
 
     respond_to do |format|
       format.html { render }
-      format.atom { head :bad_request }
+      format.atom do
+       if Feature.enabled?(:atom_off, type: :ops)
+           return render_404
+       end
+       head :bad_request
+      end
     end
   end
 end
