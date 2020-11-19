@@ -181,11 +181,7 @@
             .card-body
               = render partial: 'admin/users/user_reject_effects'
               %br
-              %button.delete-user-button.btn.gl-button.btn-danger{ data: { 'gl-modal-action': 'delete',
-                delete_user_url: admin_user_path(@user, hard_delete: true),
-                block_user_url: block_admin_user_path(@user),
-                username: sanitize_name(@user.name) } }
-                = s_('AdminUsers|Reject request')
+              = link_to 'Reject request', admin_user_path(@user, hard_delete: true), method: :delete, class: "btn gl-button delete-user-button btn-danger", data: { confirm: s_('AdminUsers|Are you sure?') }
         - else
           .card.border-info
             .card-header.gl-bg-blue-500.gl-text-white
