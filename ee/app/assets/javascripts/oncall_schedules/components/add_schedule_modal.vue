@@ -1,9 +1,23 @@
 <script>
-  import {GlModal, GlForm, GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem} from '@gitlab/ui';
+  import {GlModal, GlForm, GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem, GlSearchBoxByType} from '@gitlab/ui';
   import {s__, __} from '~/locale';
 
+  const i18n = {
+    selectTimezone: s__('OnCallSchedules|Select timezone'),
+    search: __('Search'),
+    noResults: __('No matching results'),
+  };
+
   export default {
-    components: {GlModal, GlForm, GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem},
+    i18n,
+    inject: ['timezones'],
+    data() {
+      return {
+        tzSearchTerm: '',
+        ы
+      }
+    },
+    components: {GlModal, GlForm, GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem, GlSearchBoxByType},
     actionsProps: {
       primary: {
         text: s__('OnCallSchedules|Add schedule'),
@@ -21,29 +35,47 @@
         required: true,
       },
     },
-    data() {
-      return {
-        alert: null,
-        loading: false,
-        form: {},
-      };
-    },
     computed: {
-      okButtonText() {
-        return this.loading ? s__('Metrics|Duplicating...') : s__('Metrics|Duplicate');
+      filteredTimezones() {
+        const lowerCaseTzSearchTerm = this.tzSearchTerm.toLowerCase();
+        return this.timezones.filter(tz => {
+          return this.getFormattedTimezone(tz).toLowerCase().includes(lowerCaseTzSearchTerm);
+        });
+      },
+      noResults() {
+        return !this.filteredTimezones.length;
       },
     },
     methods: {
+      createSchedule() {
 
+      },
+      onReset() {
+      },
+      onSubmit() {
+      },
       hide() {
         this.alert = null;
       },
       formChange(form) {
         this.form = form;
       },
+
+      setSelectedTimezone(tz) {
+
+      },
+      getFormattedTimezone(tz) {
+        return `(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`;
+      },
+      isTimezoneSelected(tz) {
+
+      },
+
     },
   };
 </script>
+
+<!--:text="selectedValue(gitlabField.fallback)"-->
 
 <template>
   <gl-modal
@@ -52,7 +84,7 @@
     :title="s__('OnCallSchedules|Add schedule')"
     :action-primary="$options.actionsProps.primary"
     :action-cancel="$options.actionsProps.cancel"
-    @primary="ok"
+    @primary="createSchedule"
   >
     <gl-form @submit="onSubmit" @reset="onReset">
       <gl-form-group
@@ -77,10 +109,29 @@
         :description="s__('OnCallSchedules|Sets the default timezone for the schedule, for all participants')"
         label-for="schedule-timezone"
       >
-        <gl-dropdown text="Some dropdown" class="gl-w-full">
-          <gl-dropdown-item v-for="tz in timezones">Name</gl-dropdown-item>
+        <gl-dropdown
+          id="schedule-timezone"
+          class="timezone-dropdown gl-w-full"
+          :header-text="$options.i18n.selectTimezone"
+        >
+          <gl-search-box-by-type
+            v-model="tzSearchTerm"
+          />
+          <gl-dropdown-item
+            v-for="tz in filteredTimezones"
+            :key="getFormattedTimezone(tz)"
+            :is-checked="isTimezoneSelected(tz)"
+            is-check-item
+            @click="setSelectedTimezone(tz.identifier)"
+          >
+            <span class="gl-white-space-nowrap"> {{ getFormattedTimezone(tz) }}</span>
+          </gl-dropdown-item>
+          <gl-dropdown-item
+            v-if="noResults"
+          >
+            {{ $options.i18n.noResults }}
+          </gl-dropdown-item>
         </gl-dropdown>
-        <gl-form-select id="schedule-timezone"/>
       </gl-form-group>
     </gl-form>
   </gl-modal>

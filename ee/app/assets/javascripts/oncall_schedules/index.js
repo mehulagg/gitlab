@@ -6,11 +6,12 @@ export default () => {
 
   if (!el) return null;
 
-  const { emptyOncallSchedulesSvgPath } = el.dataset;
+  const { emptyOncallSchedulesSvgPath, timezones } = el.dataset;
 
   return new Vue({
     el,
     provide: {
+      timezones: JSON.parse(timezones),
       emptyOncallSchedulesSvgPath,
     },
     render(createElement) {
