@@ -83,6 +83,7 @@ stateDiagram-v2
 
     state ApplicationMonitoring {
       "Prometheus"
+      "Grafana"
     }
 
     state PgBouncer {
