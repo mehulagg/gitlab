@@ -149,6 +149,19 @@ module UsersHelper
     header + list
   end
 
+  def activate_user_modal_data(user)
+    {
+      path: activate_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Activate user %{username}?') % { username: sanitize_name(user.name) },
+        message: s_('AdminUsers|You can always deactivate their account again if needed.'),
+        okVariant: 'info',
+        okTitle: s_('AdminUsers|Activate')
+      }.to_json
+    }
+  end
+
   private
 
   def blocked_user_badge(user)

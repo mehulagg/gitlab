@@ -1499,9 +1499,6 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-msgid "Activate"
-msgstr ""
-
 msgid "Activate Service Desk"
 msgstr ""
 
@@ -2080,6 +2077,15 @@ msgstr ""
 msgid "AdminUsers|Access the API"
 msgstr ""
 
+msgid "AdminUsers|Activate"
+msgstr ""
+
+msgid "AdminUsers|Activate user"
+msgstr ""
+
+msgid "AdminUsers|Activate user %{username}?"
+msgstr ""
+
 msgid "AdminUsers|Active"
 msgstr ""
 
@@ -2267,6 +2273,9 @@ msgid "AdminUsers|You are about to permanently delete the user %{username}. This
 msgstr ""
 
 msgid "AdminUsers|You can always block their account again if needed."
+msgstr ""
+
+msgid "AdminUsers|You can always deactivate their account again if needed."
 msgstr ""
 
 msgid "AdminUsers|You can always unblock their account, their data will remain intact."

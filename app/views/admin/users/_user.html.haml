@@ -53,7 +53,8 @@
                     = s_('AdminUsers|Deactivate')
               - elsif user.deactivated?
                 %li
-                  = link_to _('Activate'), activate_admin_user_path(user), method: :put
+                  %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: activate_user_modal_data(user) }
+                    = s_('AdminUsers|Activate')
               - if user.access_locked?
                 %li
                   = link_to _('Unlock'), unlock_admin_user_path(user), method: :put, data: { confirm: _('Are you sure?') }
