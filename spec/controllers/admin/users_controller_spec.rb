@@ -66,6 +66,25 @@ RSpec.describe Admin::UsersController do
       expect(Issue.exists?(issue.id)).to be_falsy
     end
 
+    context 'when rejecting a pending user' do
+      let(:pending_user) { create(:user, :blocked_pending_approval) }
+
+      it 'hard deletes the user' do
+        delete :destroy, params: { id: pending_user.username, hard_delete: true }, format: :json
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(User.exists?(pending_user.id)).to be_falsy
+      end
+
+      it 'sends them a rejection email' do
+        expect_next_instance_of(NotificationService) do |notification|
+          allow(notification).to receive(:user_admin_rejection).with(pending_user.name, pending_user.email)
+        end
+
+        delete :destroy, params: { id: pending_user.username, hard_delete: true }, format: :json
+      end
+    end
+
     context 'prerequisites for account deletion' do
       context 'solo-owned groups' do
         let(:group) { create(:group) }
