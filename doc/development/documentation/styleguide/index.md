@@ -1810,9 +1810,16 @@ documentation. Unfortunately, we still see features without documentation, and
 documentation without features. So, for now, we cannot rely 100% on the
 documentation site versions.
 
+### Provide a historical context
+
 As time passes, version text may reference progressively older versions
-of GitLab. When version text refers to [unsupported versions](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions) of GitLab,
-as defined in the handbook, consider removing the text for clarity.
+of GitLab. We include version text for [unsupported versions](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions) of GitLab to help
+readers understand the historical context of a feature.
+
+However, there are limits. Ours are four major versions. For example,
+when GitLab 14.0 is released, we believe that documentation of features
+more than four major versions old (in this case, before GitLab 10.0)
+can be removed for clarity.
 
 ## Products and features
 
