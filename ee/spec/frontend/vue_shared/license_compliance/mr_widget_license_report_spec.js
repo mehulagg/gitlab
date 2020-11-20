@@ -1,10 +1,10 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import { LOADING, ERROR, SUCCESS } from 'ee/vue_shared/security_reports/store/constants';
 import { TEST_HOST } from 'spec/test_constants';
 import ReportItem from '~/reports/components/report_item.vue';
 import ReportSection from '~/reports/components/report_section.vue';
+import { LOADING, ERROR, SUCCESS } from '~/reports/constants';
 import {
   approvedLicense,
   blacklistedLicense,

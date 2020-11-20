@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import OnDemandScansApp from 'ee/on_demand_scans/components/on_demand_scans_app.vue';
-import OnDemandScansEmptyState from 'ee/on_demand_scans/components/on_demand_scans_empty_state.vue';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 
@@ -14,17 +13,10 @@ const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration
 describe('OnDemandScansApp', () => {
   let wrapper;
 
-  const findOnDemandScansEmptyState = () => wrapper.find(OnDemandScansEmptyState);
   const findOnDemandScansForm = () => wrapper.find(OnDemandScansForm);
-
-  const expectEmptyState = () => {
-    expect(wrapper.find(OnDemandScansForm).exists()).toBe(false);
-    expect(wrapper.find(OnDemandScansEmptyState).exists()).toBe(true);
-  };
 
   const expectForm = () => {
     expect(wrapper.find(OnDemandScansForm).exists()).toBe(true);
-    expect(wrapper.find(OnDemandScansEmptyState).exists()).toBe(false);
   };
 
   const createComponent = options => {
@@ -55,26 +47,8 @@ describe('OnDemandScansApp', () => {
     wrapper = null;
   });
 
-  describe('empty state', () => {
-    it('renders an empty state by default', () => {
-      expectEmptyState();
-    });
-
-    it('passes correct props to GlEmptyState', () => {
-      expect(findOnDemandScansEmptyState().props()).toMatchObject({
-        emptyStateSvgPath,
-        helpPagePath,
-      });
-    });
-  });
-
   describe('form', () => {
-    beforeEach(async () => {
-      findOnDemandScansEmptyState().vm.$emit('createNewScan');
-      await wrapper.vm.$nextTick();
-    });
-
-    it('renders the form when clicking on the primary button', () => {
+    it('renders the form', () => {
       expectForm();
     });
 
@@ -84,13 +58,6 @@ describe('OnDemandScansApp', () => {
         projectPath,
         defaultBranch,
       });
-    });
-
-    it('shows the empty state on cancel', async () => {
-      findOnDemandScansForm().vm.$emit('cancel');
-      await wrapper.vm.$nextTick();
-
-      expectEmptyState();
     });
   });
 });

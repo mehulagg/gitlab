@@ -9,7 +9,7 @@ class Projects::Quality::TestCasesController < Projects::ApplicationController
   before_action :authorize_create_issue!, only: [:new]
 
   before_action do
-    push_frontend_feature_flag(:quality_test_cases, project)
+    push_frontend_feature_flag(:quality_test_cases, project, default_enabled: true)
   end
 
   feature_category :quality_management
@@ -45,7 +45,7 @@ class Projects::Quality::TestCasesController < Projects::ApplicationController
   private
 
   def verify_test_cases_flag!
-    render_404 unless Feature.enabled?(:quality_test_cases, project)
+    render_404 unless Feature.enabled?(:quality_test_cases, project, default_enabled: true)
   end
 
   def test_cases_finder

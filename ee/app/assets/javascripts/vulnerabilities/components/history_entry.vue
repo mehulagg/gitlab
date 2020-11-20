@@ -59,8 +59,8 @@ export default {
     <event-item
       :id="systemNote.id"
       :author="systemNote.author"
-      :created-at="systemNote.updated_at"
-      :icon-name="systemNote.system_note_icon_name"
+      :created-at="systemNote.updatedAt"
+      :icon-name="systemNote.systemNoteIconName"
       icon-class="timeline-icon m-0"
       class="m-3"
     >
@@ -74,7 +74,7 @@ export default {
         :key="comment.id"
         ref="existingComment"
         :comment="comment"
-        :discussion-id="discussion.reply_id"
+        :discussion-id="discussion.replyId"
         :notes-url="notesUrl"
         @onCommentUpdated="updateComment"
         @onCommentDeleted="removeComment"
@@ -84,7 +84,7 @@ export default {
     <history-comment
       v-else
       ref="newComment"
-      :discussion-id="discussion.reply_id"
+      :discussion-id="discussion.replyId"
       :notes-url="notesUrl"
       @onCommentAdded="addComment"
     />

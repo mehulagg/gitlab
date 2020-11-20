@@ -46,10 +46,6 @@ module EE
       resource_parent&.feature_available?(:iterations) && weight_available?
     end
 
-    def burnup_charts_available?
-      ::Feature.enabled?(:iteration_charts, resource_parent, default_enabled: true)
-    end
-
     private
 
     def timebox_format_reference(format = :id)

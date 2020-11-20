@@ -605,6 +605,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: elastic_association_indexer
+  :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: elastic_commit_indexer
   :feature_category: :global_search
   :has_external_dependencies:
@@ -740,6 +748,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: requirements_management_import_requirements_csv
+  :feature_category: :requirements_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: requirements_management_process_requirements_reports
   :feature_category: :requirements_management

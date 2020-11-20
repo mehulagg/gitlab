@@ -11,12 +11,13 @@ import {
   groupedCoverageFuzzingText,
   groupedSummaryText,
   allReportsHaveError,
-  noBaseInAllReports,
   areReportsLoading,
+  areAllReportsLoading,
   containerScanningStatusIcon,
   dastStatusIcon,
   dependencyScanningStatusIcon,
   anyReportHasError,
+  anyReportHasIssues,
   summaryCounts,
   isBaseSecurityReportOutOfDate,
   canCreateIssue,
@@ -214,6 +215,29 @@ describe('Security reports getters', () => {
     });
   });
 
+  describe('areAllReportsLoading', () => {
+    it('returns true when all reports are loading', () => {
+      state.sast.isLoading = true;
+      state.dast.isLoading = true;
+      state.containerScanning.isLoading = true;
+      state.dependencyScanning.isLoading = true;
+      state.secretDetection.isLoading = true;
+      state.coverageFuzzing.isLoading = true;
+
+      expect(areAllReportsLoading(state)).toEqual(true);
+    });
+
+    it('returns false when some of the reports are loading', () => {
+      state.sast.isLoading = true;
+
+      expect(areAllReportsLoading(state)).toEqual(false);
+    });
+
+    it('returns false when none of the reports are loading', () => {
+      expect(areAllReportsLoading(state)).toEqual(false);
+    });
+  });
+
   describe('allReportsHaveError', () => {
     it('returns true when all reports have error', () => {
       state.sast.hasError = true;
@@ -252,15 +276,15 @@ describe('Security reports getters', () => {
     });
   });
 
-  describe('noBaseInAllReports', () => {
-    it('returns true when none reports have base', () => {
-      expect(noBaseInAllReports(state)).toEqual(true);
+  describe('anyReportHasIssues', () => {
+    it('returns true when any of the reports has new issues', () => {
+      state.dast.newIssues.push(generateVuln(LOW));
+
+      expect(anyReportHasIssues(state)).toEqual(true);
     });
 
-    it('returns false when any of the reports has a base', () => {
-      state.dast.hasBaseReport = true;
-
-      expect(noBaseInAllReports(state)).toEqual(false);
+    it('returns false when none of the reports has error', () => {
+      expect(anyReportHasIssues(state)).toEqual(false);
     });
   });
 

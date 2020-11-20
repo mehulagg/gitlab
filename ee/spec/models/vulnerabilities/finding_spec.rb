@@ -17,6 +17,8 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to have_many(:identifiers).class_name('Vulnerabilities::Identifier') }
     it { is_expected.to have_many(:finding_identifiers).class_name('Vulnerabilities::FindingIdentifier').with_foreign_key('occurrence_id') }
     it { is_expected.to have_many(:finding_links).class_name('Vulnerabilities::FindingLink').with_foreign_key('vulnerability_occurrence_id') }
+    it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation').with_foreign_key('vulnerability_occurrence_id') }
+    it { is_expected.to have_many(:remediations).through(:finding_remediations) }
   end
 
   describe 'validations' do

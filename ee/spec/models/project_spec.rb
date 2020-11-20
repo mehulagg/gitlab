@@ -2543,7 +2543,7 @@ RSpec.describe Project do
     end
   end
 
-  describe 'caculate template repositories' do
+  describe 'calculate template repositories' do
     let(:group1) { create(:group) }
     let(:group2) { create(:group) }
     let(:group2_sub1) { create(:group, parent: group2) }

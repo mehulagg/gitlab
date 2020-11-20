@@ -10,6 +10,7 @@ import VulnerabilityStateDropdown from 'ee/vulnerabilities/components/vulnerabil
 import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
@@ -25,15 +26,15 @@ describe('Vulnerability Header', () => {
 
   const defaultVulnerability = {
     id: 1,
-    created_at: new Date().toISOString(),
-    report_type: 'sast',
+    createdAt: new Date().toISOString(),
+    reportType: 'sast',
     state: 'detected',
-    create_mr_url: '/create_mr_url',
-    create_issue_url: '/create_issue_url',
-    project_fingerprint: 'abc123',
+    createMrUrl: '/create_mr_url',
+    createIssueUrl: '/create_issue_url',
+    projectFingerprint: 'abc123',
     pipeline: {
       id: 2,
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       url: 'pipeline_url',
       sourceBranch: 'master',
     },
@@ -53,8 +54,8 @@ describe('Vulnerability Header', () => {
     return {
       remediations: shouldShowMergeRequestButton ? [{ diff }] : null,
       hasMr: !shouldShowDownloadPatchButton,
-      merge_request_feedback: {
-        merge_request_path: shouldShowMergeRequestButton ? null : 'some path',
+      mergeRequestFeedback: {
+        mergeRequestPath: shouldShowMergeRequestButton ? null : 'some path',
       },
     };
   };
@@ -196,23 +197,25 @@ describe('Vulnerability Header', () => {
       it('emits createMergeRequest when create merge request button is clicked', () => {
         const mergeRequestPath = '/group/project/merge_request/123';
         const spy = jest.spyOn(urlUtility, 'redirectTo');
-        mockAxios.onPost(defaultVulnerability.create_mr_url).reply(200, {
+        mockAxios.onPost(defaultVulnerability.createMrUrl).reply(200, {
           merge_request_path: mergeRequestPath,
         });
         findGlButton().vm.$emit('click');
         return waitForPromises().then(() => {
           expect(mockAxios.history.post).toHaveLength(1);
           const [postRequest] = mockAxios.history.post;
-          expect(postRequest.url).toBe(defaultVulnerability.create_mr_url);
+          expect(postRequest.url).toBe(defaultVulnerability.createMrUrl);
           expect(JSON.parse(postRequest.data)).toMatchObject({
             vulnerability_feedback: {
               feedback_type: FEEDBACK_TYPES.MERGE_REQUEST,
-              category: defaultVulnerability.report_type,
-              project_fingerprint: defaultVulnerability.project_fingerprint,
+              category: defaultVulnerability.reportType,
+              project_fingerprint: defaultVulnerability.projectFingerprint,
               vulnerability_data: {
-                ...getVulnerability({ shouldShowMergeRequestButton: true }),
-                hasMr: true,
-                category: defaultVulnerability.report_type,
+                ...convertObjectPropsToSnakeCase(
+                  getVulnerability({ shouldShowMergeRequestButton: true }),
+                ),
+                has_mr: true,
+                category: defaultVulnerability.reportType,
                 state: 'resolved',
               },
             },
@@ -237,7 +240,7 @@ describe('Vulnerability Header', () => {
       beforeEach(() => {
         createWrapper({
           ...getVulnerability({ shouldShowMergeRequestButton: true }),
-          create_mr_url: '',
+          createMrUrl: '',
         });
       });
 
@@ -280,7 +283,7 @@ describe('Vulnerability Header', () => {
       const vulnerability = {
         ...defaultVulnerability,
         state: 'confirmed',
-        confirmed_by_id: user.id,
+        confirmedById: user.id,
       };
 
       createWrapper(vulnerability);
@@ -303,8 +306,8 @@ describe('Vulnerability Header', () => {
 
     beforeEach(() => {
       createWrapper({
-        resolved_on_default_branch: true,
-        project_default_branch: branchName,
+        resolvedOnDefaultBranch: true,
+        projectDefaultBranch: branchName,
       });
     });
 
@@ -334,7 +337,7 @@ describe('Vulnerability Header', () => {
       `loads the correct user for the vulnerability state "%s"`,
       state => {
         const user = createRandomUser();
-        createWrapper({ state, [`${state}_by_id`]: user.id });
+        createWrapper({ state, [`${state}ById`]: user.id });
 
         return waitForPromises().then(() => {
           expect(mockAxios.history.get).toHaveLength(1);
@@ -353,7 +356,7 @@ describe('Vulnerability Header', () => {
     });
 
     it('will show an error when the user cannot be loaded', () => {
-      createWrapper({ state: 'confirmed', confirmed_by_id: 1 });
+      createWrapper({ state: 'confirmed', confirmedById: 1 });
 
       mockAxios.onGet().replyOnce(500);
 
@@ -365,7 +368,7 @@ describe('Vulnerability Header', () => {
 
     it('will set the isLoadingUser property correctly when the user is loading and finished loading', () => {
       const user = createRandomUser();
-      createWrapper({ state: 'confirmed', confirmed_by_id: user.id });
+      createWrapper({ state: 'confirmed', confirmedById: user.id });
 
       expect(findStatusDescription().props('isLoadingUser')).toBe(true);
 

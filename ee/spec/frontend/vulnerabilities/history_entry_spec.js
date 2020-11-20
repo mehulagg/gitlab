@@ -9,8 +9,8 @@ describe('History Entry', () => {
     system: true,
     id: 1,
     note: 'changed vulnerability status to dismissed',
-    system_note_icon_name: 'cancel',
-    updated_at: new Date().toISOString(),
+    systemNoteIconName: 'cancel',
+    updatedAt: new Date().toISOString(),
     author: {
       name: 'author name',
       username: 'author username',
@@ -22,8 +22,8 @@ describe('History Entry', () => {
     id: 2,
     note: 'some note',
     author: {},
-    current_user: {
-      can_edit: true,
+    currentUser: {
+      canEdit: true,
     },
   };
 
@@ -53,8 +53,8 @@ describe('History Entry', () => {
     expect(eventItem().props()).toMatchObject({
       id: systemNote.id,
       author: systemNote.author,
-      createdAt: systemNote.updated_at,
-      iconName: systemNote.system_note_icon_name,
+      createdAt: systemNote.updatedAt,
+      iconName: systemNote.systemNoteIconName,
     });
   });
 

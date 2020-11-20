@@ -4,7 +4,6 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createIteration from '../queries/create_iteration.mutation.graphql';
 import updateIteration from '../queries/update_iteration.mutation.graphql';
 import DueDateSelectors from '~/due_date_select';
@@ -109,7 +108,7 @@ export default {
           variables: {
             input: {
               ...this.variables.input,
-              id: getIdFromGraphQLId(this.iteration.id),
+              id: this.iteration.id,
             },
           },
         })
