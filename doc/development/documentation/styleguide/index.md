@@ -1701,8 +1701,8 @@ request, and a merge request is preferred over an epic. For example:
 > [Introduced](<link-to-issue>) in GitLab 11.3.
 ```
 
-If listing information for multiple versions over time, add the information to a
-block-quoted, bulleted list. For example:
+If you are adding information about new features or changes in a release,
+update the blockquote to be a bulleted list:
 
 ```markdown
 > - [Introduced](<link-to-issue>) in GitLab 11.3.
