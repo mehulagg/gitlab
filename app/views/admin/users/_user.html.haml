@@ -37,8 +37,8 @@
                 - elsif user.blocked?
                   - if user.blocked_pending_approval?
                     = link_to s_('AdminUsers|Approve'), approve_admin_user_path(user), method: :put
-                    %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: user_block_data(user, user_block_effects) }
-                      = s_('AdminUsers|Block')
+                    %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: { confirm: s_('AdminUsers|Are you sure?') }}
+                      = link_to s_('AdminUsers|Reject'), admin_user_path(user, hard_delete: true), method: :delete
                   - else
                     = link_to _('Unblock'), unblock_admin_user_path(user), method: :put
                 - else
