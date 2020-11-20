@@ -1810,7 +1810,7 @@ documentation. Unfortunately, we still see features without documentation, and
 documentation without features. So, for now, we cannot rely 100% on the
 documentation site versions.
 
-### Provide a historical context
+### Provide a historical context (version text only)
 
 As time passes, version text may reference progressively older versions
 of GitLab. We include version text for [unsupported versions](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions) of GitLab to help
