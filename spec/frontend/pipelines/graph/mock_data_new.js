@@ -1,188 +1,226 @@
 export const mockPipelineResponse = {
-  'data': {
-    'project': {
+  data: {
+    project: {
       __typename: 'Project',
-      'pipeline': {
+      pipeline: {
         __typename: 'Pipeline',
-        'iid': '22',
-        'stages': {
+        id: '22',
+        stages: {
           __typename: 'CiStageConnection',
-          'nodes': [
+          nodes: [
             {
-              __typename: 'CiGroup',
-              'name': 'build',
-              'status': {
-                'action': null
+              __typename: 'CiStage',
+              name: 'build',
+              status: {
+                __typename: 'DetailedStatus',
+                action: null
               },
-              'groups': {
-                'nodes': [
+              groups: {
+                __typename: 'CiGroupConnection',
+                nodes: [
                   {
-                    'id': 'build_a_nlfjkdnlvskfnksvjknlfdjvlvnjdkjdf_nvjkenjkrlngjeknjkl',
-                    'size': 1,
-                    'status': {
-                      'label': 'passed',
-                      'group': 'success',
-                      'icon': 'status_success'
+                    __typename: 'CiGroup',
+                    name: 'build_a_nlfjkdnlvskfnksvjknlfdjvlvnjdkjdf_nvjkenjkrlngjeknjkl',
+                    size: 1,
+                    status: {
+                      __typename: 'DetailedStatus',
+                      label: 'passed',
+                      group: 'success',
+                      icon: 'status_success'
                     },
-                    'jobs': {
-                      'nodes': [
+                    jobs: {
+                      __typename: 'CiJobConnection',
+                      nodes: [
                         {
-                          'name': 'build_a_nlfjkdnlvskfnksvjknlfdjvlvnjdkjdf_nvjkenjkrlngjeknjkl',
-                          'scheduledAt': null,
-                          'status': {
-                            'icon': 'status_success',
-                            'tooltip': 'passed',
-                            'hasDetails': true,
-                            'detailsPath': '/root/abcd-dag/-/jobs/1482',
-                            'group': 'success',
-                            'action': {
-                              'buttonTitle': 'Retry this job',
-                              'icon': 'retry',
-                              'path': '/root/abcd-dag/-/jobs/1482/retry',
-                              'title': 'Retry'
+                          __typename: 'CiJob',
+                          name: 'build_a_nlfjkdnlvskfnksvjknlfdjvlvnjdkjdf_nvjkenjkrlngjeknjkl',
+                          scheduledAt: null,
+                          status: {
+                            __typename: 'DetailedStatus',
+                            icon: 'status_success',
+                            tooltip: 'passed',
+                            hasDetails: true,
+                            detailsPath: '/root/abcd-dag/-/jobs/1482',
+                            group: 'success',
+                            action: {
+                              __typename: 'StatusAction',
+                              buttonTitle: 'Retry this job',
+                              icon: 'retry',
+                              path: '/root/abcd-dag/-/jobs/1482/retry',
+                              title: 'Retry'
                             }
                           },
-                          'needs': {
-                            'nodes': []
+                          needs: {
+                            __typename: 'CiJobConnection',
+                            nodes: []
                           }
                         }
                       ]
                     }
                   },
                   {
-                    'id': 'build_b',
-                    'size': 1,
-                    'status': {
-                      'label': 'passed',
-                      'group': 'success',
-                      'icon': 'status_success'
+                    __typename: 'CiGroup',
+                    name: 'build_b',
+                    size: 1,
+                    status: {
+                      __typename: 'DetailedStatus',
+                      label: 'passed',
+                      group: 'success',
+                      icon: 'status_success'
                     },
-                    'jobs': {
-                      'nodes': [
+                    jobs: {
+                      __typename: 'CiJobConnection',
+                      nodes: [
                         {
-                          'name': 'build_b',
-                          'scheduledAt': null,
-                          'status': {
-                            'icon': 'status_success',
-                            'tooltip': 'passed',
-                            'hasDetails': true,
-                            'detailsPath': '/root/abcd-dag/-/jobs/1515',
-                            'group': 'success',
-                            'action': {
-                              'buttonTitle': 'Retry this job',
-                              'icon': 'retry',
-                              'path': '/root/abcd-dag/-/jobs/1515/retry',
-                              'title': 'Retry'
+                          __typename: 'CiJob',
+                          name: 'build_b',
+                          scheduledAt: null,
+                          status: {
+                            __typename: 'DetailedStatus',
+                            icon: 'status_success',
+                            tooltip: 'passed',
+                            hasDetails: true,
+                            detailsPath: '/root/abcd-dag/-/jobs/1515',
+                            group: 'success',
+                            action: {
+                              __typename: 'StatusAction',
+                              buttonTitle: 'Retry this job',
+                              icon: 'retry',
+                              path: '/root/abcd-dag/-/jobs/1515/retry',
+                              title: 'Retry'
                             }
                           },
-                          'needs': {
-                            'nodes': []
+                          needs: {
+                            __typename: 'CiJobConnection',
+                            nodes: []
                           }
                         }
                       ]
                     }
                   },
                   {
-                    'id': 'build_c',
-                    'size': 1,
-                    'status': {
-                      'label': 'passed',
-                      'group': 'success',
-                      'icon': 'status_success'
+                    __typename: 'CiGroup',
+                    name: 'build_c',
+                    size: 1,
+                    status: {
+                      __typename: 'DetailedStatus',
+                      label: 'passed',
+                      group: 'success',
+                      icon: 'status_success'
                     },
-                    'jobs': {
-                      'nodes': [
+                    jobs: {
+                      __typename: 'CiJobConnection',
+                      nodes: [
                         {
-                          'name': 'build_c',
-                          'scheduledAt': null,
-                          'status': {
-                            'icon': 'status_success',
-                            'tooltip': 'passed',
-                            'hasDetails': true,
-                            'detailsPath': '/root/abcd-dag/-/jobs/1484',
-                            'group': 'success',
-                            'action': {
-                              'buttonTitle': 'Retry this job',
-                              'icon': 'retry',
-                              'path': '/root/abcd-dag/-/jobs/1484/retry',
-                              'title': 'Retry'
+                          __typename: 'CiJob',
+                          name: 'build_c',
+                          scheduledAt: null,
+                          status: {
+                            __typename: 'DetailedStatus',
+                            icon: 'status_success',
+                            tooltip: 'passed',
+                            hasDetails: true,
+                            detailsPath: '/root/abcd-dag/-/jobs/1484',
+                            group: 'success',
+                            action: {
+                              __typename: 'StatusAction',
+                              buttonTitle: 'Retry this job',
+                              icon: 'retry',
+                              path: '/root/abcd-dag/-/jobs/1484/retry',
+                              title: 'Retry'
                             }
                           },
-                          'needs': {
-                            'nodes': []
+                          needs: {
+                            __typename: 'CiJobConnection',
+                            nodes: []
                           }
                         }
                       ]
                     }
                   },
                   {
-                    'id': 'build_d',
-                    'size': 3,
-                    'status': {
-                      'label': 'passed',
-                      'group': 'success',
-                      'icon': 'status_success'
+                    __typename: 'CiGroup',
+                    name: 'build_d',
+                    size: 3,
+                    status: {
+                      __typename: 'DetailedStatus',
+                      label: 'passed',
+                      group: 'success',
+                      icon: 'status_success'
                     },
-                    'jobs': {
-                      'nodes': [
+                    jobs: {
+                      __typename: 'CiJobConnection',
+                      nodes: [
                         {
-                          'name': 'build_d 1/3',
-                          'scheduledAt': null,
-                          'status': {
-                            'icon': 'status_success',
-                            'tooltip': 'passed',
-                            'hasDetails': true,
-                            'detailsPath': '/root/abcd-dag/-/jobs/1485',
-                            'group': 'success',
-                            'action': {
-                              'buttonTitle': 'Retry this job',
-                              'icon': 'retry',
-                              'path': '/root/abcd-dag/-/jobs/1485/retry',
-                              'title': 'Retry'
+                          __typename: 'CiJob',
+                          name: 'build_d 1/3',
+                          scheduledAt: null,
+                          status: {
+                            __typename: 'DetailedStatus',
+                            icon: 'status_success',
+                            tooltip: 'passed',
+                            hasDetails: true,
+                            detailsPath: '/root/abcd-dag/-/jobs/1485',
+                            group: 'success',
+                            action: {
+                              __typename: 'StatusAction',
+                              buttonTitle: 'Retry this job',
+                              icon: 'retry',
+                              path: '/root/abcd-dag/-/jobs/1485/retry',
+                              title: 'Retry'
                             }
                           },
-                          'needs': {
-                            'nodes': []
+                          needs: {
+                            __typename: 'CiJobConnection',
+                            nodes: []
                           }
                         },
                         {
-                          'name': 'build_d 2/3',
-                          'scheduledAt': null,
-                          'status': {
-                            'icon': 'status_success',
-                            'tooltip': 'passed',
-                            'hasDetails': true,
-                            'detailsPath': '/root/abcd-dag/-/jobs/1486',
-                            'group': 'success',
-                            'action': {
-                              'buttonTitle': 'Retry this job',
-                              'icon': 'retry',
-                              'path': '/root/abcd-dag/-/jobs/1486/retry',
-                              'title': 'Retry'
+                          __typename: 'CiJob',
+                          name: 'build_d 2/3',
+                          scheduledAt: null,
+                          status: {
+                            __typename: 'DetailedStatus',
+                            icon: 'status_success',
+                            tooltip: 'passed',
+                            hasDetails: true,
+                            detailsPath: '/root/abcd-dag/-/jobs/1486',
+                            group: 'success',
+                            action: {
+                              __typename: 'StatusAction',
+                              buttonTitle: 'Retry this job',
+                              icon: 'retry',
+                              path: '/root/abcd-dag/-/jobs/1486/retry',
+                              title: 'Retry'
                             }
                           },
-                          'needs': {
-                            'nodes': []
+                          needs: {
+                            __typename: 'CiJobConnection',
+                            nodes: []
                           }
                         },
                         {
-                          'name': 'build_d 3/3',
-                          'scheduledAt': null,
-                          'status': {
-                            'icon': 'status_success',
-                            'tooltip': 'passed',
-                            'hasDetails': true,
-                            'detailsPath': '/root/abcd-dag/-/jobs/1487',
-                            'group': 'success',
-                            'action': {
-                              'buttonTitle': 'Retry this job',
-                              'icon': 'retry',
-                              'path': '/root/abcd-dag/-/jobs/1487/retry',
-                              'title': 'Retry'
+                          __typename: 'CiJob',
+                          name: 'build_d 3/3',
+                          scheduledAt: null,
+                          status: {
+                            __typename: 'DetailedStatus',
+                            icon: 'status_success',
+                            tooltip: 'passed',
+                            hasDetails: true,
+                            detailsPath: '/root/abcd-dag/-/jobs/1487',
+                            group: 'success',
+                            action: {
+                              __typename: 'StatusAction',
+                              buttonTitle: 'Retry this job',
+                              icon: 'retry',
+                              path: '/root/abcd-dag/-/jobs/1487/retry',
+                              title: 'Retry'
                             }
                           },
-                          'needs': {
-                            'nodes': []
+                          needs: {
+                            __typename: 'CiJobConnection',
+                            nodes: []
                           }
                         }
                       ]
@@ -191,7 +229,7 @@ export const mockPipelineResponse = {
                 ]
               }
             },
-            {
+            /* {
               __typename: 'CiGroup',
               'name': 'test',
               'status': {
@@ -399,7 +437,7 @@ export const mockPipelineResponse = {
                   }
                 ]
               }
-            }
+            } */
           ]
         }
       }

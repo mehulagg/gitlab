@@ -1,6 +1,3 @@
-// shows alert
-// shows loader
-// shows graph
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
@@ -46,13 +43,15 @@ describe('Pipeline graph wrapper', () => {
     })
   };
 
-  const createComponentWithApollo = (options = {}) => {
+  const createComponentWithApollo = (
+      getPipelineDetailsHandler = jest.fn().mockResolvedValue(mockPipelineResponse)
+    ) => {
     const requestHandlers = [
-      [getPipelineDetails, jest.fn().mockResolvedValue(mockPipelineResponse)],
+      [getPipelineDetails, getPipelineDetailsHandler],
     ];
 
     const apolloProvider = createMockApollo(requestHandlers);
-    createComponent({ apolloProvider, ...options });
+    createComponent({ apolloProvider });
   }
 
   afterEach(() => {
@@ -80,33 +79,43 @@ describe('Pipeline graph wrapper', () => {
   });
 
   describe('when data has loaded', () => {
-
-    it('does not display the loading icon', async () => {
+    beforeEach(async () => {
       createComponentWithApollo();
-      await waitForPromises();
+      jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
+    })
 
+    it('does not display the loading icon', () => {
       expect(getLoadingIcon().exists()).toBe(false);
     });
 
-    it('does not display the alert', async () => {
-      createComponentWithApollo();
-      await waitForPromises();
-      await wrapper.vm.$nextTick();
-
-      console.log('&&&', wrapper.html());
+    it('does not display the alert', () => {
       expect(getAlert().exists()).toBe(false);
     });
 
-    it('displays the graph', async () => {
-      createComponentWithApollo();
-      await waitForPromises();
-      await wrapper.vm.$nextTick();
-
+    it('displays the graph', () => {
       expect(getGraph().exists()).toBe(true);
     });
-
   });
 
+  describe('when there is an error', () => {
+    beforeEach(async () => {
+      createComponentWithApollo(jest.fn().mockRejectedValue(new Error('GraphQL error')));
+      jest.runOnlyPendingTimers();
+      await wrapper.vm.$nextTick();
+    })
+
+    it('does not display the loading icon', () => {
+      expect(getLoadingIcon().exists()).toBe(false);
+    });
+
+    it('displays the alert', () => {
+      expect(getAlert().exists()).toBe(true);
+    });
+
+    it('does not display the graph', () => {
+      expect(getGraph().exists()).toBe(false);
+    });
+  });
 
 })
