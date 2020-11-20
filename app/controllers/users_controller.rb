@@ -20,7 +20,7 @@ class UsersController < ApplicationController
   before_action :user, except: [:exists, :suggests]
   before_action :authorize_read_user_profile!,
                 only: [:calendar, :calendar_activities, :groups, :projects, :contributed_projects, :starred_projects, :snippets]
-
+  before_action :render404_on_atom_disabled, only: [:show], if: :atom_request?
   feature_category :users
 
   def show
@@ -29,7 +29,7 @@ class UsersController < ApplicationController
 
       format.atom do
         load_events
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
+        render layout: 'xml.atom'
       end
 
       format.json do

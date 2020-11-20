@@ -21,6 +21,7 @@ class Projects::IssuesController < Projects::ApplicationController
   before_action :whitelist_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
   before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
+  before_action :render404_on_atom_disabled, only: [:index], if: :atom_request?
   after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
 
   before_action :set_issuables_index, if: ->(c) { SET_ISSUEABLES_INDEX_ONLY_ACTIONS.include?(c.action_name.to_sym) }
@@ -79,9 +80,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
     respond_to do |format|
       format.html
-      format.atom do
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
-      end
+      format.atom { render layout: 'xml.atom' }
       format.json do
         render json: {
           html: view_to_html_string("projects/issues/_issues"),

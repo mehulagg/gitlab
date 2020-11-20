@@ -25,6 +25,7 @@ class ProjectsController < Projects::ApplicationController
   before_action :project_export_enabled, only: [:export, :download_export, :remove_export, :generate_new_export]
   before_action :present_project, only: [:edit]
   before_action :authorize_download_code!, only: [:refs]
+  before_action :render404_on_atom_disabled, only: [:show], if: :atom_request?
 
   # Authorize
   before_action :authorize_admin_project!, only: [:edit, :update, :housekeeping, :download_export, :export, :remove_export, :generate_new_export]
@@ -166,7 +167,7 @@ class ProjectsController < Projects::ApplicationController
 
       format.atom do
         load_events
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
+        render layout: 'xml.atom'
       end
     end
   end

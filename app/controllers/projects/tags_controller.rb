@@ -9,6 +9,7 @@ class Projects::TagsController < Projects::ApplicationController
   before_action :require_non_empty_project
   before_action :authorize_download_code!
   before_action :authorize_admin_tag!, only: [:new, :create, :destroy]
+  before_action :render404_on_atom_disabled, only: [:index], if: :atom_request?
 
   feature_category :source_code_management, [:index, :show, :new, :destroy]
   feature_category :release_evidence, [:create]
@@ -28,9 +29,7 @@ class Projects::TagsController < Projects::ApplicationController
 
     respond_to do |format|
       format.html
-      format.atom do
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
-      end
+      format.atom { render layout: 'xml.atom' }
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord

@@ -571,6 +571,15 @@ class ApplicationController < ActionController::Base
 
     redirect_to users_sign_up_welcome_path
   end
+
+  def atom_request?
+    request.format == :atom
+  end
+
+  def render404_on_atom_disabled
+    return true unless Settings[:atom_off]
+    render_404
+  end
 end
 
 ApplicationController.prepend_if_ee('EE::ApplicationController')

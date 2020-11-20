@@ -5,6 +5,10 @@ module IssuableCollectionsAction
   include IssuableCollections
   include IssuesCalendar
 
+  included do
+    before_action :render404_on_atom_disabled, only: [:issues], if: :atom_request?
+  end
+
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def issues
     @issues = issuables_collection
@@ -15,9 +19,7 @@ module IssuableCollectionsAction
 
     respond_to do |format|
       format.html
-      format.atom do
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
-      end
+      format.atom { render layout: 'xml.atom' }
     end
   end
 

@@ -14,6 +14,7 @@ class Projects::CommitsController < Projects::ApplicationController
   before_action :authorize_download_code!
   before_action :validate_ref!, except: :commits_root
   before_action :set_commits, except: :commits_root
+  before_action :render404_on_atom_disabled, only: [:show], if: :atom_request?
 
   feature_category :source_code_management
 
@@ -28,9 +29,8 @@ class Projects::CommitsController < Projects::ApplicationController
 
     respond_to do |format|
       format.html
-      format.atom do
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
-      end
+      format.atom { render layout: 'xml.atom' }
+
       format.json do
         pager_json(
           'projects/commits/_commits',

@@ -12,6 +12,7 @@ class Dashboard::ProjectsController < Dashboard::ApplicationController
   before_action :set_non_archived_param, only: [:index, :starred]
   before_action :set_sorting
   before_action :projects, only: [:index]
+  before_action :render404_on_atom_disabled, only: [:index], if: :atom_request?
   skip_cross_project_access_check :index, :starred
 
   feature_category :projects
@@ -23,7 +24,7 @@ class Dashboard::ProjectsController < Dashboard::ApplicationController
       end
       format.atom do
         load_events
-        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
+        render layout: 'xml.atom'
       end
       format.json do
         render json: {

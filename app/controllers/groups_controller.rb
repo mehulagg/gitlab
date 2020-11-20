@@ -18,6 +18,7 @@ class GroupsController < Groups::ApplicationController
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
+  before_action :render404_on_atom_disabled, only: [:show, :details], if: :atom_request?
 
   # Authorize
   before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
@@ -94,7 +95,7 @@ class GroupsController < Groups::ApplicationController
       end
 
       format.atom do
-        Settings[:atom_off] ? render_404 : render_details_view_atom
+        render_details_view_atom
       end
     end
   end
@@ -106,7 +107,7 @@ class GroupsController < Groups::ApplicationController
       end
 
       format.atom do
-        Settings[:atom_off] ? render_404 : render_details_view_atom
+        render_details_view_atom
       end
     end
   end

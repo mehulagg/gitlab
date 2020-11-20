@@ -65,9 +65,7 @@ class DashboardController < Dashboard::ApplicationController
 
     respond_to do |format|
       format.html { render }
-      format.atom do
-        Settings[:atom_off] ? render_404 : head(:bad_request)
-      end
+      format.atom { head :bad_request }
     end
   end
 end
