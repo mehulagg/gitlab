@@ -1666,7 +1666,7 @@ documentation to display on this site based on GitLab's
 ### View older GitLab documentation versions
 
 If you're using an older version of GitLab whose version-specific information
-isn't available from docs.gitlab.com, use one of the following methods to view a
+isn't available from `docs.gitlab.com`, use one of the following methods to view a
 tagged and released set of documentation for your installed version:
 
 - In the [documentation archives](https://docs.gitlab.com/archives/).
