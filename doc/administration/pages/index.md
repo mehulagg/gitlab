@@ -811,3 +811,10 @@ Upgrading to an [officially supported operating system](https://about.gitlab.com
 This problem comes from the permissions of the GitLab Pages OAuth application. To fix it, go to
 **Admin > Applications > GitLab Pages** and edit the application. Under **Scopes**, ensure that the
 `api` scope is selected and save your changes.
+
+### Work-around in case no wildcard DNS entry can be set
+
+If this [prerequisite](#prerequisites) can't be met, you can still use GitLab Pages in a limited fashion.
+[Move](../../user/project/settings.md#transferring-an-existing-project-into-another-namespace)
+all projects into a single group namespace (for example called `pages`) and configure
+a [DNS entry](#dns-configuration) wihtout the `*.`-wildcard.
