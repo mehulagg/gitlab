@@ -578,6 +578,7 @@ class ApplicationController < ActionController::Base
 
   def render404_on_atom_disabled
     return true unless Settings[:atom_off]
+
     render_404
   end
 end
