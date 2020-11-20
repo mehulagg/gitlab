@@ -380,7 +380,7 @@ status.
 ## Actions you can take on an issue board
 
 - [Create a new list](#create-a-new-list).
-- [Delete an existing list](#delete-a-list).
+- [Remove an existing list](#remove-a-list).
 - [Add issues to a list](#add-issues-to-a-list).
 - [Remove an issue from a list](#remove-an-issue-from-a-list).
 - [Filter issues](#filter-issues) that appear across your issue board.
