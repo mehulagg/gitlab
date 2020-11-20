@@ -1683,8 +1683,7 @@ If all content in a section is related, add version text following the header
 for the section. The version information must be surrounded by blank lines, and
 each entry should be on its own line.
 
-Features should declare the GitLab version that introduced a feature in a
-blockquote following the header:
+Add the version history information as a blockquote:
 
 ```markdown
 ## Feature name
