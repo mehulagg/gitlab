@@ -1729,6 +1729,9 @@ This feature was [deprecated](link-to-issue) in GitLab 12.3 and replaced by
 [Feature name](link-to-feature-documentation).
 ```
 
+In the first major GitLab version after the feature was deprecated, be sure to
+remove information about that deprecated feature.
+
 #### Inline version text
 
 If you're adding content to an existing topic, you can add version information
@@ -1757,6 +1760,10 @@ DANGER: **Important:**
 This feature is in its end-of-life process. It is [deprecated](link-to-issue)
 for use in GitLab X.X, and is planned for [removal](link-to-issue) in GitLab X.X.
 ```
+
+After the feature or product is officially deprecated and removed, remove
+information about the product or feature from the GitLab documentation based on
+the GitLab version where it's actually removed.
 
 ### Versions in the past or future
 
