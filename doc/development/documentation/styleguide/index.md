@@ -928,7 +928,7 @@ For other punctuation rules, refer to the
   audit, thus preventing dead links and redirection issues when corrected.
 - Leave exactly one blank line before and after a heading.
 - Do not use links in headings.
-- Add the corresponding [product badge](#product-badges) according to the tier the
+- Add the corresponding [product badge](#product-tier-badges) according to the tier the
   feature belongs.
 - Our documentation site search engine prioritizes words used in headings and
   subheadings. Make you subheading titles clear, descriptive, and complete to help
@@ -961,8 +961,8 @@ the anchor `#this-is-an-example`.
 
 NOTE: **Note:**
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39717) in
-GitLab 13.4, [product badges](#product-badges) used in headings aren't included
-in the generated anchor links. For example, when you link to
+GitLab 13.4, [product badges](#product-tier-badges) used in headings aren't
+included in the generated anchor links. For example, when you link to
 `## This is an example **(CORE)**`, use the anchor `#this-is-an-example`.
 
 Keep in mind that the GitLab user interface links to many documentation pages
@@ -1674,7 +1674,7 @@ When a feature is added or updated, you can include its version information
 either as a **Version history** item or as an inline text reference.
 
 Version text shouldn't include information about the tier in which the feature
-is available. This information is provided by the [product badge](#product-badges)
+is available. This information is provided by the [product badge](#product-tier-badges)
 displayed for the page or feature.
 
 #### Version text in the **Version History**
@@ -1809,7 +1809,7 @@ When entering a product or feature name that includes a space (such as
 GitLab Community Edition), don't split the product or feature name across lines.
 ```
 
-### Product badges
+### Product tier badges
 
 When a feature is available in paid tiers, add the corresponding tier to the
 header or other page element according to the feature's availability:
@@ -1837,8 +1837,8 @@ labeled with their own tier markup.
 
 Whenever you have documentation related to the `gitlab.rb` file, you're working
 with a self-managed installation. The section or page probably applies only to
-self-managed instances. If so, include the relevant "`TIER` ONLY" [product badge](#product-badges)
-at the highest applicable heading level.
+self-managed instances. If so, include the relevant "`TIER` ONLY"
+[product badge](#product-tier-badges) at the highest applicable heading level.
 
 #### Product badge display behavior
 
