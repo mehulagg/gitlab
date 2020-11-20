@@ -1659,11 +1659,15 @@ elements:
 To help users be aware of recent product improvements or additions, we add
 GitLab version information to our documentation.
 
-This Style Guide uses GitLab's
-[Statement of Support](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions)
-for determining which GitLab documentation to display on this site. If you're
-using an older version of GitLab, use one of the following methods to view
-a tagged and released set of documentation for your installed version:
+The GitLab Technical Writing team determines which versions of GitLab's
+documentation to display on this site based on GitLab's
+[Statement of Support](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions).
+
+### View older GitLab documentation versions
+
+If you're using an older version of GitLab whose version-specific information
+isn't available from docs.gitlab.com, use one of the following methods to view a
+tagged and released set of documentation for your installed version:
 
 - In the [documentation archives](https://docs.gitlab.com/archives/).
 - At the `/help` URL for any GitLab installation.
