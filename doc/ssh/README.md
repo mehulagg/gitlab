@@ -122,7 +122,7 @@ Enter file in which to save the key (/home/user/.ssh/id_rsa):
 For guidance, proceed to the [common steps](#common-steps-for-generating-an-ssh-key-pair).
 
 NOTE: **Note:**
-If you've OpenSSH version 7.8 or below, consider the problems associated
+If you have OpenSSH version 7.8 or below, consider the problems associated
 with [encoding](#rsa-keys-and-openssh-from-versions-65-to-78).
 
 ### Common steps for generating an SSH key pair
