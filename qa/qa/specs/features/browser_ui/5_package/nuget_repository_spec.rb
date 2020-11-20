@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module QA
+  include Matchers::HavePackage
   RSpec.describe 'Package', :orchestrated, :packages do
     describe 'NuGet Repository' do
       include Runtime::Fixtures
@@ -84,7 +85,7 @@ module QA
 
         Page::Project::Packages::Index.perform do |index|
           expect(index).to have_content("Package deleted successfully")
-          expect(index).to have_no_package(package_name)
+          expect(index).not_to have_package(package_name)
         end
       end
     end
