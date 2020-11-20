@@ -1,4 +1,5 @@
 import { __, n__ } from '~/locale';
+import { sortObjectsBy } from '~/lib/utils/sort_utility';
 import { parallelizeDiffLines } from './utils';
 import {
   PARALLEL_DIFF_VIEW_TYPE,
@@ -89,8 +90,8 @@ export const getDiffFileByHash = state => fileHash =>
 export const flatBlobsList = state =>
   Object.values(state.treeEntries).filter(f => f.type === 'blob');
 
-export const allBlobs = (state, getters) =>
-  getters.flatBlobsList.reduce((acc, file) => {
+export const allBlobs = (state, getters) => {
+  const blobs = getters.flatBlobsList.reduce((acc, file) => {
     const { parentPath } = file;
 
     if (parentPath && !acc.some(f => f.path === parentPath)) {
@@ -105,6 +106,9 @@ export const allBlobs = (state, getters) =>
 
     return acc;
   }, []);
+
+  return sortObjectsBy(blobs, 'path', '/');
+};
 
 export const getCommentFormForDiffFile = state => fileHash =>
   state.commentForms.find(form => form.fileHash === fileHash);
