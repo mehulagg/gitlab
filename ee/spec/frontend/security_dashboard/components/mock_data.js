@@ -2,6 +2,7 @@ export const generateVulnerabilities = () => [
   {
     id: 'id_0',
     detectedAt: '2020-07-29T15:36:54Z',
+    autoFix: true,
     identifiers: [
       {
         externalType: 'cve',
@@ -34,6 +35,7 @@ export const generateVulnerabilities = () => [
   {
     id: 'id_1',
     detectedAt: '2020-07-22T19:31:24Z',
+    autoFix: false,
     identifiers: [
       {
         externalType: 'gemnasium',

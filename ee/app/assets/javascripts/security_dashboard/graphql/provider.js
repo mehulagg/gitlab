@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import createDefaultClient from '~/lib/graphql';
 import introspectionQueryResultData from './fragmentTypes.json';
+import resolvers from './resolvers';
 
 Vue.use(VueApollo);
 
@@ -12,15 +13,12 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData,
 });
 
-const defaultClient = createDefaultClient(
-  {},
-  {
-    cacheConfig: {
-      fragmentMatcher,
-    },
-    assumeImmutableResults: true,
+const defaultClient = createDefaultClient(resolvers, {
+  cacheConfig: {
+    fragmentMatcher,
   },
-);
+  assumeImmutableResults: true,
+});
 
 export default new VueApollo({
   defaultClient,
