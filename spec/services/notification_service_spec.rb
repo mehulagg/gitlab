@@ -2326,6 +2326,21 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
+  describe '#user_admin_rejection', :deliver_mails_inline do
+    let_it_be(:user) { create(:user, :blocked_pending_approval) }
+
+    before do
+      stub_application_setting(require_admin_approval_after_user_signup: true)
+      reset_delivered_emails!
+    end
+
+    it 'sends the user a rejection email' do
+      notification.user_admin_rejection(user.name, user.email)
+
+      should_only_email(user)
+    end
+  end
+
   describe 'GroupMember', :deliver_mails_inline do
     let(:added_user) { create(:user) }
 
