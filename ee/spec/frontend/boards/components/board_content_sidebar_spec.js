@@ -26,6 +26,15 @@ describe('ee/BoardContentSidebar', () => {
         'board-sidebar-due-date': '<div></div>',
         'board-sidebar-subscription': '<div></div>',
       },
+      mocks: {
+        $apollo: {
+          queries: {
+            participants: {
+              loading: false,
+            },
+          },
+        },
+      },
     });
   };
 
@@ -55,7 +64,7 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(IssuableTitle).text()).toContain('One');
   });
 
-  it('renders IssuableAssignees', () => {
+  it('renders BoardAssigneeDropdown', () => {
     expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
   });
 

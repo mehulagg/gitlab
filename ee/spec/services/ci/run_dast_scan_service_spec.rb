@@ -24,8 +24,13 @@ RSpec.describe Ci::RunDastScanService do
       expect(described_class.ci_template['stages']).to eq(['dast'])
     end
 
-    it 'has has no rules' do
-      expect(described_class.ci_template['dast']['rules']).to be_nil
+    it 'has one rule is always true' do
+      rules = described_class.ci_template['dast']['rules']
+
+      aggregate_failures do
+        expect(rules.size).to eq(1)
+        expect(rules).to include('when' => 'always')
+      end
     end
   end
 

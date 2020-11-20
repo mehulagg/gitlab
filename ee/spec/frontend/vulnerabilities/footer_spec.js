@@ -21,15 +21,15 @@ describe('Vulnerability Footer', () => {
 
   const vulnerability = {
     id: 1,
-    discussions_url: '/discussions',
-    notes_url: '/notes',
+    discussionsUrl: '/discussions',
+    notesUrl: '/notes',
     project: {
-      full_path: '/root/security-reports',
-      full_name: 'Administrator / Security Reports',
+      fullPath: '/root/security-reports',
+      fullName: 'Administrator / Security Reports',
     },
-    can_modify_related_issues: true,
-    related_issues_help_path: 'help/path',
-    has_mr: false,
+    canModifyRelatedIssues: true,
+    relatedIssuesHelpPath: 'help/path',
+    hasMr: false,
     pipeline: {},
   };
 
@@ -67,7 +67,7 @@ describe('Vulnerability Footer', () => {
         solution: properties.solution,
         remediation: properties.remediations[0],
         hasDownload: true,
-        hasMr: vulnerability.has_mr,
+        hasMr: vulnerability.hasMr,
       });
     });
 
@@ -89,14 +89,14 @@ describe('Vulnerability Footer', () => {
       // The object itself does not matter, we just want to make sure it's passed to the issue note.
       const mergeRequestFeedback = {};
 
-      createWrapper({ merge_request_feedback: mergeRequestFeedback });
+      createWrapper({ mergeRequestFeedback });
       expect(mergeRequestNote().exists()).toBe(true);
       expect(mergeRequestNote().props('feedback')).toBe(mergeRequestFeedback);
     });
   });
 
   describe('state history', () => {
-    const discussionUrl = vulnerability.discussions_url;
+    const discussionUrl = vulnerability.discussionsUrl;
 
     const historyList = () => wrapper.find({ ref: 'historyList' });
     const historyEntries = () => wrapper.findAll(HistoryEntry);
@@ -152,7 +152,7 @@ describe('Vulnerability Footer', () => {
       const createNotesRequest = (...notes) =>
         mockAxios
           .onGet(vulnerability.notes_url)
-          .replyOnce(200, { notes, last_fetched_at: Date.now() });
+          .replyOnce(200, { notes, lastFetchedAt: Date.now() });
 
       // Following #217184 the vulnerability polling uses an initial timeout
       // which we need to run and then wait for the subsequent request.
@@ -268,9 +268,9 @@ describe('Vulnerability Footer', () => {
       expect(relatedIssues().exists()).toBe(true);
       expect(relatedIssues().props()).toMatchObject({
         endpoint,
-        canModifyRelatedIssues: vulnerability.can_modify_related_issues,
-        projectPath: vulnerability.project.full_path,
-        helpPath: vulnerability.related_issues_help_path,
+        canModifyRelatedIssues: vulnerability.canModifyRelatedIssues,
+        projectPath: vulnerability.project.fullPath,
+        helpPath: vulnerability.relatedIssuesHelpPath,
       });
     });
   });

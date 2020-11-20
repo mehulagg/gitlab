@@ -189,6 +189,13 @@ RSpec.describe Gitlab::UsageData do
   describe '.requirements_counts' do
     subject { described_class.requirements_counts }
 
+    let_it_be(:requirement1) { create(:requirement) }
+    let_it_be(:requirement2) { create(:requirement) }
+    let_it_be(:requirement3) { create(:requirement) }
+    let_it_be(:test_report1) { create(:test_report, requirement: requirement1) }
+    let_it_be(:test_report2) { create(:test_report, requirement: requirement2, build: nil) }
+    let_it_be(:test_report3) { create(:test_report, requirement: requirement1) }
+
     context 'when requirements are disabled' do
       it 'returns empty hash' do
         stub_licensed_features(requirements: false)
@@ -201,9 +208,12 @@ RSpec.describe Gitlab::UsageData do
       it 'returns created requirements count' do
         stub_licensed_features(requirements: true)
 
-        create_list(:requirement, 2)
-
-        expect(subject).to eq({ requirements_created: 2 })
+        expect(subject).to eq({
+          requirements_created: 3,
+          requirement_test_reports_manual: 1,
+          requirement_test_reports_ci: 2,
+          requirements_with_test_report: 2
+        })
       end
     end
   end
@@ -457,12 +467,10 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
-        projects_prometheus_active: 2,
         projects_incident_sla_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
-        projects_prometheus_active: 1,
         projects_incident_sla_enabled: 2
       )
     end

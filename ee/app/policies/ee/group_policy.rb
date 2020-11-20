@@ -290,8 +290,6 @@ module EE
 
       rule { admin & is_gitlab_com }.enable :update_subscription_limit
 
-      rule { public_group }.enable :view_embedded_analytics_report
-
       rule { over_storage_limit }.policy do
         prevent :create_projects
         prevent :create_epic

@@ -234,6 +234,8 @@ export default {
       };
     },
   },
+  // TODO: Use the snake_case report types rather than the camelCased versions
+  // of them. See https://gitlab.com/gitlab-org/gitlab/-/issues/282430
   securityReportTypes: [
     'dast',
     'sast',

@@ -9345,6 +9345,7 @@ CREATE TABLE application_settings (
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
+    cloud_license_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
@@ -12925,6 +12926,27 @@ CREATE SEQUENCE ip_restrictions_id_seq
 
 ALTER SEQUENCE ip_restrictions_id_seq OWNED BY ip_restrictions.id;
 
+CREATE TABLE issuable_metric_images (
+    id bigint NOT NULL,
+    issue_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    file_store smallint,
+    file text NOT NULL,
+    url text,
+    CONSTRAINT check_5b3011e234 CHECK ((char_length(url) <= 255)),
+    CONSTRAINT check_7ed527062f CHECK ((char_length(file) <= 255))
+);
+
+CREATE SEQUENCE issuable_metric_images_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE issuable_metric_images_id_seq OWNED BY issuable_metric_images.id;
+
 CREATE TABLE issuable_severities (
     id bigint NOT NULL,
     issue_id bigint NOT NULL,
@@ -13867,6 +13889,22 @@ CREATE TABLE namespace_limits (
     namespace_id integer NOT NULL,
     temporary_storage_increase_ends_on date
 );
+
+CREATE TABLE namespace_onboarding_actions (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    action smallint NOT NULL
+);
+
+CREATE SEQUENCE namespace_onboarding_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE namespace_onboarding_actions_id_seq OWNED BY namespace_onboarding_actions.id;
 
 CREATE TABLE namespace_root_storage_statistics (
     namespace_id integer NOT NULL,
@@ -16627,7 +16665,7 @@ CREATE TABLE terraform_states (
     locked_by_user_id bigint,
     uuid character varying(32) NOT NULL,
     name character varying(255),
-    versioning_enabled boolean DEFAULT false NOT NULL
+    versioning_enabled boolean DEFAULT true NOT NULL
 );
 
 CREATE SEQUENCE terraform_states_id_seq
@@ -17190,6 +17228,23 @@ CREATE SEQUENCE vulnerability_finding_links_id_seq
 
 ALTER SEQUENCE vulnerability_finding_links_id_seq OWNED BY vulnerability_finding_links.id;
 
+CREATE TABLE vulnerability_findings_remediations (
+    id bigint NOT NULL,
+    vulnerability_occurrence_id bigint,
+    vulnerability_remediation_id bigint,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE vulnerability_findings_remediations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_findings_remediations_id_seq OWNED BY vulnerability_findings_remediations.id;
+
 CREATE TABLE vulnerability_historical_statistics (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -17315,6 +17370,29 @@ CREATE SEQUENCE vulnerability_occurrences_id_seq
     CACHE 1;
 
 ALTER SEQUENCE vulnerability_occurrences_id_seq OWNED BY vulnerability_occurrences.id;
+
+CREATE TABLE vulnerability_remediations (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    file_store smallint,
+    summary text NOT NULL,
+    file text NOT NULL,
+    checksum bytea NOT NULL,
+    CONSTRAINT check_ac0ccabff3 CHECK ((char_length(summary) <= 200)),
+    CONSTRAINT check_fe3325e3ba CHECK ((char_length(file) <= 255))
+);
+
+COMMENT ON COLUMN vulnerability_remediations.checksum IS 'Stores the SHA256 checksum of the attached diff file';
+
+CREATE SEQUENCE vulnerability_remediations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_remediations_id_seq OWNED BY vulnerability_remediations.id;
 
 CREATE TABLE vulnerability_scanners (
     id bigint NOT NULL,
@@ -17942,6 +18020,8 @@ ALTER TABLE ONLY internal_ids ALTER COLUMN id SET DEFAULT nextval('internal_ids_
 
 ALTER TABLE ONLY ip_restrictions ALTER COLUMN id SET DEFAULT nextval('ip_restrictions_id_seq'::regclass);
 
+ALTER TABLE ONLY issuable_metric_images ALTER COLUMN id SET DEFAULT nextval('issuable_metric_images_id_seq'::regclass);
+
 ALTER TABLE ONLY issuable_severities ALTER COLUMN id SET DEFAULT nextval('issuable_severities_id_seq'::regclass);
 
 ALTER TABLE ONLY issuable_slas ALTER COLUMN id SET DEFAULT nextval('issuable_slas_id_seq'::regclass);
@@ -18019,6 +18099,8 @@ ALTER TABLE ONLY metrics_dashboard_annotations ALTER COLUMN id SET DEFAULT nextv
 ALTER TABLE ONLY metrics_users_starred_dashboards ALTER COLUMN id SET DEFAULT nextval('metrics_users_starred_dashboards_id_seq'::regclass);
 
 ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_seq'::regclass);
+
+ALTER TABLE ONLY namespace_onboarding_actions ALTER COLUMN id SET DEFAULT nextval('namespace_onboarding_actions_id_seq'::regclass);
 
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
@@ -18298,6 +18380,8 @@ ALTER TABLE ONLY vulnerability_feedback ALTER COLUMN id SET DEFAULT nextval('vul
 
 ALTER TABLE ONLY vulnerability_finding_links ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_links_id_seq'::regclass);
 
+ALTER TABLE ONLY vulnerability_findings_remediations ALTER COLUMN id SET DEFAULT nextval('vulnerability_findings_remediations_id_seq'::regclass);
+
 ALTER TABLE ONLY vulnerability_historical_statistics ALTER COLUMN id SET DEFAULT nextval('vulnerability_historical_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_identifiers ALTER COLUMN id SET DEFAULT nextval('vulnerability_identifiers_id_seq'::regclass);
@@ -18309,6 +18393,8 @@ ALTER TABLE ONLY vulnerability_occurrence_identifiers ALTER COLUMN id SET DEFAUL
 ALTER TABLE ONLY vulnerability_occurrence_pipelines ALTER COLUMN id SET DEFAULT nextval('vulnerability_occurrence_pipelines_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_occurrences ALTER COLUMN id SET DEFAULT nextval('vulnerability_occurrences_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_remediations ALTER COLUMN id SET DEFAULT nextval('vulnerability_remediations_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_scanners ALTER COLUMN id SET DEFAULT nextval('vulnerability_scanners_id_seq'::regclass);
 
@@ -19120,6 +19206,9 @@ ALTER TABLE ONLY internal_ids
 ALTER TABLE ONLY ip_restrictions
     ADD CONSTRAINT ip_restrictions_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY issuable_metric_images
+    ADD CONSTRAINT issuable_metric_images_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY issuable_severities
     ADD CONSTRAINT issuable_severities_pkey PRIMARY KEY (id);
 
@@ -19266,6 +19355,9 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 
 ALTER TABLE ONLY namespace_limits
     ADD CONSTRAINT namespace_limits_pkey PRIMARY KEY (namespace_id);
+
+ALTER TABLE ONLY namespace_onboarding_actions
+    ADD CONSTRAINT namespace_onboarding_actions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY namespace_root_storage_statistics
     ADD CONSTRAINT namespace_root_storage_statistics_pkey PRIMARY KEY (namespace_id);
@@ -19753,6 +19845,9 @@ ALTER TABLE ONLY vulnerability_feedback
 ALTER TABLE ONLY vulnerability_finding_links
     ADD CONSTRAINT vulnerability_finding_links_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vulnerability_findings_remediations
+    ADD CONSTRAINT vulnerability_findings_remediations_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY vulnerability_historical_statistics
     ADD CONSTRAINT vulnerability_historical_statistics_pkey PRIMARY KEY (id);
 
@@ -19770,6 +19865,9 @@ ALTER TABLE ONLY vulnerability_occurrence_pipelines
 
 ALTER TABLE ONLY vulnerability_occurrences
     ADD CONSTRAINT vulnerability_occurrences_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vulnerability_remediations
+    ADD CONSTRAINT vulnerability_remediations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY vulnerability_scanners
     ADD CONSTRAINT vulnerability_scanners_pkey PRIMARY KEY (id);
@@ -20649,7 +20747,7 @@ CREATE INDEX index_deployments_on_environment_id_and_id ON deployments USING btr
 
 CREATE INDEX index_deployments_on_environment_id_and_iid_and_project_id ON deployments USING btree (environment_id, iid, project_id);
 
-CREATE INDEX index_deployments_on_environment_id_and_status ON deployments USING btree (environment_id, status);
+CREATE INDEX index_deployments_on_environment_status_sha ON deployments USING btree (environment_id, status, sha);
 
 CREATE INDEX index_deployments_on_id_and_status_and_created_at ON deployments USING btree (id, status, created_at);
 
@@ -21005,6 +21103,8 @@ CREATE UNIQUE INDEX index_internal_ids_on_usage_and_project_id ON internal_ids U
 
 CREATE INDEX index_ip_restrictions_on_group_id ON ip_restrictions USING btree (group_id);
 
+CREATE INDEX index_issuable_metric_images_on_issue_id ON issuable_metric_images USING btree (issue_id);
+
 CREATE UNIQUE INDEX index_issuable_severities_on_issue_id ON issuable_severities USING btree (issue_id);
 
 CREATE UNIQUE INDEX index_issuable_slas_on_issue_id ON issuable_slas USING btree (issue_id);
@@ -21288,6 +21388,8 @@ CREATE UNIQUE INDEX index_mr_context_commits_on_merge_request_id_and_sha ON merg
 CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_nulls_last ON merge_request_metrics USING btree (target_project_id, merged_at DESC NULLS LAST, id DESC);
 
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
+
+CREATE INDEX index_namespace_onboarding_actions_on_namespace_id ON namespace_onboarding_actions USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_root_storage_statistics_on_namespace_id ON namespace_root_storage_statistics USING btree (namespace_id);
 
@@ -21793,6 +21895,8 @@ CREATE INDEX index_releases_on_author_id ON releases USING btree (author_id);
 
 CREATE INDEX index_releases_on_project_id_and_tag ON releases USING btree (project_id, tag);
 
+CREATE INDEX index_releases_on_released_at ON releases USING btree (released_at);
+
 CREATE INDEX index_remote_mirrors_on_last_successful_update_at ON remote_mirrors USING btree (last_successful_update_at);
 
 CREATE INDEX index_remote_mirrors_on_project_id ON remote_mirrors USING btree (project_id);
@@ -21895,7 +21999,7 @@ CREATE UNIQUE INDEX index_scim_identities_on_user_id_and_group_id ON scim_identi
 
 CREATE UNIQUE INDEX index_scim_oauth_access_tokens_on_group_id_and_token_encrypted ON scim_oauth_access_tokens USING btree (group_id, token_encrypted);
 
-CREATE INDEX index_secure_ci_builds_on_user_id_created_at_parser_features ON ci_builds USING btree (user_id, created_at) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
+CREATE INDEX index_secure_ci_builds_on_user_id_name_created_at ON ci_builds USING btree (user_id, name, created_at) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('apifuzzer_fuzz'::character varying)::text, ('apifuzzer_fuzz_dnd'::character varying)::text, ('secret_detection'::character varying)::text])));
 
 CREATE INDEX index_security_ci_builds_on_name_and_id_parser_features ON ci_builds USING btree (name, id) WHERE (((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('license_scanning'::character varying)::text])) AND ((type)::text = 'Ci::Build'::text));
 
@@ -22153,6 +22257,8 @@ CREATE INDEX index_users_on_name_trigram ON users USING gin (name gin_trgm_ops);
 
 CREATE INDEX index_users_on_public_email ON users USING btree (public_email) WHERE ((public_email)::text <> ''::text);
 
+CREATE INDEX index_users_on_require_two_factor_authentication_from_group ON users USING btree (require_two_factor_authentication_from_group);
+
 CREATE UNIQUE INDEX index_users_on_reset_password_token ON users USING btree (reset_password_token);
 
 CREATE INDEX index_users_on_state ON users USING btree (state);
@@ -22229,6 +22335,10 @@ CREATE INDEX index_vulnerability_feedback_on_merge_request_id ON vulnerability_f
 
 CREATE INDEX index_vulnerability_feedback_on_pipeline_id ON vulnerability_feedback USING btree (pipeline_id);
 
+CREATE INDEX index_vulnerability_findings_remediations_on_remediation_id ON vulnerability_findings_remediations USING btree (vulnerability_remediation_id);
+
+CREATE UNIQUE INDEX index_vulnerability_findings_remediations_on_unique_keys ON vulnerability_findings_remediations USING btree (vulnerability_occurrence_id, vulnerability_remediation_id);
+
 CREATE INDEX index_vulnerability_historical_statistics_on_date_and_id ON vulnerability_historical_statistics USING btree (date, id);
 
 CREATE UNIQUE INDEX index_vulnerability_identifiers_on_project_id_and_fingerprint ON vulnerability_identifiers USING btree (project_id, fingerprint);
@@ -22254,6 +22364,8 @@ CREATE UNIQUE INDEX index_vulnerability_occurrences_on_unique_keys ON vulnerabil
 CREATE UNIQUE INDEX index_vulnerability_occurrences_on_uuid ON vulnerability_occurrences USING btree (uuid);
 
 CREATE INDEX index_vulnerability_occurrences_on_vulnerability_id ON vulnerability_occurrences USING btree (vulnerability_id);
+
+CREATE UNIQUE INDEX index_vulnerability_remediations_on_checksum ON vulnerability_remediations USING btree (checksum);
 
 CREATE UNIQUE INDEX index_vulnerability_scanners_on_project_id_and_external_id ON vulnerability_scanners USING btree (project_id, external_id);
 
@@ -23508,6 +23620,9 @@ ALTER TABLE ONLY project_alerting_settings
 ALTER TABLE ONLY dast_site_validations
     ADD CONSTRAINT fk_rails_285c617324 FOREIGN KEY (dast_site_token_id) REFERENCES dast_site_tokens(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY vulnerability_findings_remediations
+    ADD CONSTRAINT fk_rails_28a8d0cf93 FOREIGN KEY (vulnerability_occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY resource_state_events
     ADD CONSTRAINT fk_rails_29af06892a FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
@@ -23658,6 +23773,9 @@ ALTER TABLE ONLY merge_request_assignees
 ALTER TABLE ONLY packages_dependency_links
     ADD CONSTRAINT fk_rails_4437bf4070 FOREIGN KEY (dependency_id) REFERENCES packages_dependencies(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY namespace_onboarding_actions
+    ADD CONSTRAINT fk_rails_4504f6875a FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY project_auto_devops
     ADD CONSTRAINT fk_rails_45436b12b2 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -23747,6 +23865,9 @@ ALTER TABLE ONLY clusters_applications_knative
 
 ALTER TABLE ONLY terraform_states
     ADD CONSTRAINT fk_rails_558901b030 FOREIGN KEY (locked_by_user_id) REFERENCES users(id);
+
+ALTER TABLE ONLY issuable_metric_images
+    ADD CONSTRAINT fk_rails_56417a5a7f FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_deploy_keys
     ADD CONSTRAINT fk_rails_5682fc07f8 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT;
@@ -23867,6 +23988,9 @@ ALTER TABLE ONLY web_hook_logs
 
 ALTER TABLE ONLY jira_imports
     ADD CONSTRAINT fk_rails_675d38c03b FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY vulnerability_findings_remediations
+    ADD CONSTRAINT fk_rails_681c85ae0f FOREIGN KEY (vulnerability_remediation_id) REFERENCES vulnerability_remediations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_iteration_events
     ADD CONSTRAINT fk_rails_6830c13ac1 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;

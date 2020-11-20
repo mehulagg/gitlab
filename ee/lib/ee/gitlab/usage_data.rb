@@ -105,7 +105,10 @@ module EE
           return {} unless ::License.feature_available?(:requirements)
 
           {
-            requirements_created: count(RequirementsManagement::Requirement)
+            requirements_created: count(RequirementsManagement::Requirement),
+            requirement_test_reports_manual: count(RequirementsManagement::TestReport.without_build),
+            requirement_test_reports_ci: count(RequirementsManagement::TestReport.with_build),
+            requirements_with_test_report: distinct_count(RequirementsManagement::TestReport, :requirement_id)
           }
         end
 
@@ -309,7 +312,6 @@ module EE
         def usage_activity_by_stage_monitor(time_period)
           super.merge({
             operations_dashboard_users_with_projects_added: distinct_count(UsersOpsDashboardProject.joins(:user).merge(::User.active).where(time_period), :user_id),
-            projects_prometheus_active: distinct_count(::Project.with_active_prometheus_service.where(time_period), :creator_id),
             projects_incident_sla_enabled: count(::Project.with_enabled_incident_sla)
           })
         end

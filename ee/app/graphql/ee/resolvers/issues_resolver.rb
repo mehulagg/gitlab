@@ -22,7 +22,8 @@ module EE
       def preloads
         super.merge(
           {
-            sla_due_at: [:issuable_sla]
+            sla_due_at: [:issuable_sla],
+            metric_images: [:metric_images]
           }
         )
       end

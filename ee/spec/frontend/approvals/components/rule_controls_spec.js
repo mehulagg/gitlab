@@ -1,4 +1,4 @@
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
@@ -10,10 +10,7 @@ localVue.use(Vuex);
 
 const TEST_RULE = { id: 10 };
 
-const findButtonLabel = button => {
-  const icon = button.find(GlIcon);
-  return icon.exists() ? icon.attributes('aria-label') : button.text();
-};
+const findButtonLabel = button => button.attributes('aria-label') || button.text();
 const hasLabel = (button, label) => findButtonLabel(button) === label;
 
 describe('EE Approvals RuleControls', () => {

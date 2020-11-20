@@ -58,8 +58,6 @@
   - 1
 - - create_commit_signature
   - 2
-- - create_evidence
-  - 2
 - - create_github_webhook
   - 2
 - - create_note_diff_file
@@ -93,6 +91,8 @@
 - - disallow_two_factor_for_group
   - 1
 - - disallow_two_factor_for_subgroups
+  - 1
+- - elastic_association_indexer
   - 1
 - - elastic_commit_indexer
   - 1
@@ -289,6 +289,8 @@
 - - repository_update_mirror
   - 1
 - - repository_update_remote_mirror
+  - 1
+- - requirements_management_import_requirements_csv
   - 1
 - - requirements_management_process_requirements_reports
   - 1
