@@ -64,7 +64,7 @@ graph TB
   about things happening in the cluster.
 - `kas` is the GitLab Kubernetes Agent Server, and is responsible for:
   - Accepting requests from `agentk`.
-  - Authentication of requests from `agentk` by querying `GitLab RoR`.
+  - [Authentication of requests](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/identity_and_auth.md) from `agentk` by querying `GitLab RoR`.
   - Fetching agent's configuration from a corresponding Git repository by querying Gitaly.
   - Matching incoming requests from `GitLab RoR` with existing connections from
     the right `agentk`, forwarding requests to it and forwarding responses back.
