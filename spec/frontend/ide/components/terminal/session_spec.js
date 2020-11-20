@@ -39,6 +39,8 @@ describe('IDE TerminalSession', () => {
     });
   };
 
+  const findButton = () => wrapper.find(GlButton);
+
   beforeEach(() => {
     state = {
       session: { status: RUNNING, terminalPath: TEST_TERMINAL_PATH },
