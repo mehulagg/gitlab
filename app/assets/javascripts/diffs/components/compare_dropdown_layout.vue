@@ -23,10 +23,17 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="selectedVersionName">
+  <gl-dropdown
+    :text="selectedVersionName"
+    data-qa-selector="dropdown_content"
+    data-testid="dropdown-content"
+  >
     <gl-dropdown-item
       v-for="version in versions"
       :key="version.id"
+      :class="{
+        'is-active': version.selected,
+      }"
       :is-check-item="true"
       :is-checked="version.selected"
       :href="version.href"
