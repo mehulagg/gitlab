@@ -66,7 +66,7 @@ out into separate `config.yaml` files:
 
 To include the contents of `../../base_for_agents/config.yaml` in the finished
 configuration, use the `include: 'some_file_name.yml'` inclusion syntax (similar
-to the `.gitlab-ci.yml` [`include` directive](../../../ci/yaml/index.md#include))
+to the `.gitlab-ci.yml` [`include` directive](../../../ci/yaml/README.md#include))
 in the `config.yaml` files for each Agent.
 
 ## Monitor projects for changes
