@@ -421,12 +421,12 @@ choosing **Create project label** or **Create group label**.
 This creates the label immediately and adds it to the dropdown.
 You can now choose it to create a list.
 
-### Delete a list
+### Remove a list
 
-Deleting a list doesn't have any effect on issues and labels, as it's just the
+Removing a list doesn't have any effect on issues and labels, as it's just the
 list view that's removed. You can always restore it later if you need.
 
-To delete a list from an issue board:
+To remove a list from an issue board:
 
 1. Select the **List settings** icon (**{settings}**) on the top of the list you want to remove. The
    list settings sidebar opens on the right.
