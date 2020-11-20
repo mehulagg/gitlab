@@ -10,12 +10,6 @@ module Elastic
 
     def perform(version, name, filename)
       return false unless Gitlab::CurrentSettings.elasticsearch_indexing?
-      return false unless helper.alias_exists?
-
-      unless helper.index_exists?(index_name: helper.migrations_index_name)
-        logger.info 'BatchMigrationWorker: creating migrations index'
-        helper.create_migrations_index
-      end
 
       migration = Elastic::MigrationRecord.new(version: version.to_i, name: name, filename: filename)
       return false if migration.completed?
@@ -32,10 +26,6 @@ module Elastic
     end
 
     private
-
-    def helper
-      Gitlab::Elastic::Helper.default
-    end
 
     def logger
       @logger ||= ::Gitlab::Elasticsearch::Logger.build

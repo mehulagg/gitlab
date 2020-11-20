@@ -5,7 +5,7 @@ module MigrationAttributes
   include Gitlab::ClassAttributes
 
   # This should be set if a migration should be run against data
-  # in batches. This is typically the case if large amounts of data
+  # in batches. This is typically the case if large amounts of documents
   # are being added/updated or if the documents are being moved
   # to a new index.
   def batch_update!

@@ -33,12 +33,6 @@ RSpec.describe Elastic::MigrationBatchWorker, :elastic do
           stub_ee_application_setting(elasticsearch_indexing: true)
         end
 
-        it 'creates an index if it does not exist' do
-          Gitlab::Elastic::Helper.default.delete_index(index_name: @migrations_index_name)
-
-          expect { subject }.to change { Gitlab::Elastic::Helper.default.index_exists?(index_name: @migrations_index_name) }.from(false).to(true)
-        end
-
         context 'migration batch process' do
           using RSpec::Parameterized::TableSyntax
 
