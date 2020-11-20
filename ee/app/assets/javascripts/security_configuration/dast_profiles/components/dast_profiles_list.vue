@@ -17,6 +17,8 @@ import {
 } from 'ee/security_configuration/dast_site_validation/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
+const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
+
 export default {
   components: {
     GlAlert,
@@ -75,9 +77,7 @@ export default {
       validatingProfile: null,
     };
   },
-  DAST_SITE_VALIDATION_MODAL_ID,
-  DAST_SITE_VALIDATION_STATUS,
-  DAST_SITE_VALIDATION_STATUS_PROPS,
+  statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
   computed: {
     hasError() {
       return this.errorMessage !== '';
@@ -116,8 +116,17 @@ export default {
     handleCancel() {
       this.toBeDeletedProfileId = null;
     },
+    shouldShowValidationBtn(status) {
+      return (
+        this.glFeatures.securityOnDemandScansSiteValidation &&
+        (status === PENDING || status === FAILED)
+      );
+    },
+    shouldShowValidationStatus(status) {
+      return this.glFeatures.securityOnDemandScansSiteValidation && status !== PENDING;
+    },
     showValidationModal() {
-      this.$root.$emit('bv::show::modal', this.$options.DAST_SITE_VALIDATION_MODAL_ID);
+      this.$root.$emit('bv::show::modal', DAST_SITE_VALIDATION_MODAL_ID);
     },
     setValidatingProfile(profile) {
       this.validatingProfile = profile;
@@ -159,20 +168,15 @@ export default {
         </template>
 
         <template #cell(validationStatus)="{ value }">
-          <template
-            v-if="
-              glFeatures.securityOnDemandScansSiteValidation &&
-                value !== $options.DAST_SITE_VALIDATION_STATUS.PENDING
-            "
-          >
-            <span :class="$options.DAST_SITE_VALIDATION_STATUS_PROPS[value].cssClass">
-              {{ $options.DAST_SITE_VALIDATION_STATUS_PROPS[value].label }}
+          <template v-if="shouldShowValidationStatus(value)">
+            <span :class="$options.statuses[value].cssClass">
+              {{ $options.statuses[value].label }}
             </span>
             <gl-icon
               v-gl-tooltip
               name="question-o"
               class="gl-vertical-align-text-bottom gl-text-gray-300 gl-ml-2"
-              :title="$options.DAST_SITE_VALIDATION_STATUS_PROPS[value].tooltipText"
+              :title="$options.statuses[value].tooltipText"
             />
           </template>
         </template>
@@ -180,11 +184,7 @@ export default {
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
             <gl-button
-              v-if="
-                glFeatures.securityOnDemandScansSiteValidation &&
-                  (item.validationStatus === $options.DAST_SITE_VALIDATION_STATUS.PENDING ||
-                    item.validationStatus === $options.DAST_SITE_VALIDATION_STATUS.FAILED)
-              "
+              v-if="shouldShowValidationBtn(item.validationStatus)"
               variant="info"
               category="secondary"
               size="small"
