@@ -10,6 +10,26 @@ This page contains developer-specific information about the GitLab Kubernetes Ag
 [End-user documentation about the GitLab Kubernetes Agent](../../user/clusters/agent/index.md)
 is also available.
 
+The agent attempts to address the following issues:
+
+- Enables integrating a cluster located behind a firewall or NAT, with GitLab. To
+  learn more, read [issue #212810, Invert the model GitLab.com uses for Kubernetes integration by leveraging long lived reverse tunnels](https://gitlab.com/gitlab-org/gitlab/-/issues/212810).
+- Enables real-time access to API endpoints in a cluster. For an example use case, read
+  [issue #218220, Allow Prometheus in K8s cluster to be installed manually](https://gitlab.com/gitlab-org/gitlab/-/issues/218220#note_348729266).
+- Enables real-time features by pushing information about events happening in a cluster.
+  For example, a user could build a cluster view dashboard to visualize changes in progress
+  in a cluster. For more information about these efforts, read about the
+  [Real-Time Working Group](https://about.gitlab.com/company/team/structure/working-groups/real-time/).
+- Enables a [cache of Kubernetes objects through informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183))
+  kept up-to-date with very low latency. This cache helps:
+
+  - Reduce or eliminate information propagation latency by avoiding Kubernetes API calls
+    and polling, and only fetching data from an up-to-date cache.
+  - Lower the load placed on the Kubernetes API by removing polling.
+  - Eliminate any rate-limiting errors by removing polling.
+  - Simplify backend code by replacing polling code with cache access. While another
+    API call, no polling is needed. This example describes [fetching cached data synchronously from the front end](https://gitlab.com/gitlab-org/gitlab/-/issues/217792#note_348582537) instead of fetching data from the Kubernetes API.
+
 ## Architecture of the Kubernetes Agent
 
 The GitLab Kubernetes Agent and the GitLab Kubernetes Agent Server use
@@ -54,9 +74,9 @@ graph TB
 ## Guiding principles
 
 GitLab prefers to add logic into `kas` rather than `agentk`. `agentk` should be kept
-as simple as possible. On GitLab.com, `kas` is managed by GitLab, so upgrades and
-features can be added without requiring users of the integration to upgrade `agentk`
-running in their clusters.
+streamlined and small to minimize the need for upgrades. On GitLab.com, `kas` is
+managed by GitLab, so upgrades and features can be added without requiring users
+of the integration to upgrade `agentk` running in their clusters.
 
-`agentk` still can't be viewed as a dumb reverse proxy because it will eventually have
-features built [on top of the cache with informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183)).
+`agentk` can't be viewed as a dumb reverse proxy because features are planned to be built
+[on top of the cache with informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183)).
