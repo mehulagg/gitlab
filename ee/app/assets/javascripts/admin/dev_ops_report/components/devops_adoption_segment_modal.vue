@@ -1,5 +1,6 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlSprintf } from '@gitlab/ui';
+import createSegmentMutation from '../graphql/mutations/create_segment.mutation.graphql';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
 
 export default {
@@ -35,7 +36,15 @@ export default {
     },
   },
   methods: {
-    createSegment() {},
+    createSegment() {
+      this.$apollo.mutate({
+        mutation: createSegmentMutation,
+        variables: {
+          name: this.name,
+          groupIds: this.checkboxValues,
+        },
+      });
+    },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 };
