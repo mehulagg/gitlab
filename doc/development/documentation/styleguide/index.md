@@ -1668,7 +1668,7 @@ a tagged and released set of documentation for your installed version:
 - In the [documentation archives](https://docs.gitlab.com/archives/).
 - At the `/help` URL for any GitLab installation.
 
-### Text for documentation requiring version text
+### Where to put version text
 
 When a feature is added or updated, you can include its version information
 either as a **Version history** item or as an inline text reference.
