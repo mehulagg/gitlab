@@ -9,12 +9,13 @@ describe('initGroupMembersApp', () => {
   let wrapper;
 
   const setup = () => {
-    vm = initGroupMembersApp(
-      el,
-      ['account'],
-      { table: { 'data-qa-selector': 'members_list' } },
-      () => ({}),
-    );
+    vm = initGroupMembersApp(el, {
+      tableFields: ['account'],
+      tableAttrs: { table: { 'data-qa-selector': 'members_list' } },
+      tableSortableFields: ['account'],
+      requestFormatter: () => ({}),
+      filteredSearchBarOptions: { show: false },
+    });
     wrapper = createWrapper(vm);
   };
 
@@ -22,6 +23,7 @@ describe('initGroupMembersApp', () => {
     el = document.createElement('div');
     el.setAttribute('data-members', membersJsonString);
     el.setAttribute('data-group-id', '234');
+    el.setAttribute('data-can-manage-members', 'true');
     el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
 
     window.gon = { current_user_id: 123 };
@@ -59,6 +61,12 @@ describe('initGroupMembersApp', () => {
     setup();
 
     expect(vm.$store.state.sourceId).toBe(234);
+  });
+
+  it('parses and sets `data-can-manage-members` as `canManageMembers` in Vuex store', () => {
+    setup();
+
+    expect(vm.$store.state.canManageMembers).toBe(true);
   });
 
   it('parses and sets `members` in Vuex store', () => {

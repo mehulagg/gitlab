@@ -8,12 +8,13 @@ import {
 } from './constants';
 
 export const parseDataAttributes = el => {
-  const { members, groupId, memberPath } = el.dataset;
+  const { members, groupId, memberPath, canManageMembers = true } = el.dataset;
 
   return {
     members: convertObjectPropsToCamelCase(JSON.parse(members), { deep: true }),
     sourceId: parseInt(groupId, 10),
     memberPath,
+    canManageMembers: canManageMembers === 'true',
   };
 };
 

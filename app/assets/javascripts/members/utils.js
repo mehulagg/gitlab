@@ -1,4 +1,7 @@
 import { __ } from '~/locale';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import { setUrlParams } from '~/lib/utils/url_utility';
+import { FIELDS, DEFAULT_SORT } from './constants';
 
 export const generateBadges = (member, isCurrentUser) => [
   {
@@ -42,6 +45,50 @@ export const canUpdate = (member, currentUserId, sourceId) => {
   return (
     !isCurrentUser(member, currentUserId) && isDirectMember(member, sourceId) && member.canUpdate
   );
+};
+
+export const parseSortParam = sortableFields => {
+  const sortParam = getParameterByName('sort');
+
+  const sortedField = FIELDS.filter(field => sortableFields.includes(field.key)).find(
+    field => field.sort?.asc?.param === sortParam || field.sort?.desc?.param === sortParam,
+  );
+
+  if (!sortedField) {
+    return DEFAULT_SORT;
+  }
+
+  const isDesc = sortedField?.sort?.desc?.param === sortParam;
+
+  return {
+    sortBy: sortedField.key,
+    sortDesc: isDesc,
+    sortByLabel: isDesc ? sortedField?.sort?.desc?.label : sortedField?.sort?.asc?.label,
+  };
+};
+
+export const buildSortUrl = (sortBy, sortDesc, filteredSearchTokens, filteredSearchParam) => {
+  const sortDefinition = FIELDS.find(field => field.key === sortBy)?.sort;
+
+  if (!sortDefinition) {
+    return '';
+  }
+
+  const sortParam = sortDesc ? sortDefinition.desc.param : sortDefinition.asc.param;
+
+  const filterParams =
+    filteredSearchTokens?.reduce((accumulator, token) => {
+      return {
+        ...accumulator,
+        [token]: getParameterByName(token),
+      };
+    }, {}) || {};
+
+  if (filteredSearchParam) {
+    filterParams[filteredSearchParam] = getParameterByName(filteredSearchParam);
+  }
+
+  return setUrlParams({ ...filterParams, sort: sortParam }, window.location.href, true);
 };
 
 // Defined in `ee/app/assets/javascripts/vue_shared/components/members/utils.js`

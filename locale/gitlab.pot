@@ -1388,6 +1388,12 @@ msgstr ""
 msgid "Access granted"
 msgstr ""
 
+msgid "Access granted, ascending"
+msgstr ""
+
+msgid "Access granted, descending"
+msgstr ""
+
 msgid "Access requests"
 msgstr ""
 
@@ -1488,6 +1494,15 @@ msgid "Account ID"
 msgstr ""
 
 msgid "Account and limit"
+msgstr ""
+
+msgid "Account ascending"
+msgstr ""
+
+msgid "Account, ascending"
+msgstr ""
+
+msgid "Account, descending"
 msgstr ""
 
 msgid "Account: %{account}"
@@ -9538,6 +9553,9 @@ msgstr ""
 msgid "Diffs|Something went wrong while fetching diff lines."
 msgstr ""
 
+msgid "Direct"
+msgstr ""
+
 msgid "Direct member"
 msgstr ""
 
@@ -11924,6 +11942,9 @@ msgid "Filter by two-factor authentication"
 msgstr ""
 
 msgid "Filter by user"
+msgstr ""
+
+msgid "Filter members"
 msgstr ""
 
 msgid "Filter parameters are not valid. Make sure that the end date is after the start date."
@@ -15781,6 +15802,12 @@ msgstr ""
 msgid "Last seen"
 msgstr ""
 
+msgid "Last sign-in, ascending"
+msgstr ""
+
+msgid "Last sign-in, descending"
+msgstr ""
+
 msgid "Last successful sync"
 msgstr ""
 
@@ -16602,6 +16629,12 @@ msgstr ""
 msgid "Max role"
 msgstr ""
 
+msgid "Max role, ascending"
+msgstr ""
+
+msgid "Max role, descending"
+msgstr ""
+
 msgid "MaxBuilds"
 msgstr ""
 
@@ -16753,6 +16786,9 @@ msgid "Members of a group may only view projects they have permission to access"
 msgstr ""
 
 msgid "Members with access to %{strong_start}%{group_name}%{strong_end}"
+msgstr ""
+
+msgid "Membership"
 msgstr ""
 
 msgid "Members|%{time} by %{user}"
@@ -23733,6 +23769,9 @@ msgid "Search for this text"
 msgstr ""
 
 msgid "Search forks"
+msgstr ""
+
+msgid "Search invited"
 msgstr ""
 
 msgid "Search merge requests"

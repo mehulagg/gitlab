@@ -6,7 +6,13 @@ describe('initGroupMembersApp', () => {
   let vm;
 
   const createVm = () => {
-    vm = initGroupMembersApp(el, ['account'], {}, () => ({}));
+    vm = initGroupMembersApp(el, {
+      tableFields: ['account'],
+      tableAttrs: { table: { 'data-qa-selector': 'members_list' } },
+      tableSortableFields: ['account'],
+      requestFormatter: () => ({}),
+      filteredSearchBarOptions: { show: false },
+    });
   };
 
   beforeEach(() => {
