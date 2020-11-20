@@ -69,7 +69,7 @@ graph TB
   - Matching incoming requests from `GitLab RoR` with existing connections from
     the right `agentk`, forwarding requests to it and forwarding responses back.
   - (Optional) Sending notifications through ActionCable for events received from `agentk`.
-  - Polling manifest repositories for [GitOps support](gitops.md) by communicating with Gitaly.
+  - Polling manifest repositories for [GitOps support](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/gitops.md) by communicating with Gitaly.
 
 ## Guiding principles
 
