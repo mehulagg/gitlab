@@ -15,8 +15,9 @@ import {
   DAST_SITE_VALIDATION_STATUS_PROPS,
 } from 'ee/security_configuration/dast_site_validation/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
 
-const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
+const { PENDING, FAILED, INPROGRESS } = DAST_SITE_VALIDATION_STATUS;
 
 export default {
   components: {
@@ -69,11 +70,16 @@ export default {
       type: String,
       required: true,
     },
+    profileType: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       toBeDeletedProfileId: null,
       validatingProfile: null,
+      uniqueNonValidatedTargets: [],
     };
   },
   statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
@@ -104,6 +110,16 @@ export default {
       return [...dataFields, ...staticFields];
     },
   },
+  // Move this to use this.$watch() based on profile type
+  watch: {
+    profiles: {
+      immediate: true,
+      handler: 'validateTargets',
+    },
+  },
+  created() {
+    this.updateNonValidatedTargets();
+  },
   methods: {
     handleDelete() {
       this.$emit('delete-profile', this.toBeDeletedProfileId);
@@ -131,6 +147,47 @@ export default {
       this.validatingProfile = profile;
       this.$nextTick(() => {
         this.showValidationModal();
+      });
+    },
+    validateTargets() {
+      if (this.profileType !== 'siteProfiles') {
+        return;
+      }
+      const nonValidatedTargets = this.profiles
+        .filter(({ validationStatus }) => validationStatus === PENDING)
+        .map(({ normalizedTargetUrl }) => normalizedTargetUrl);
+
+      this.uniqueNonValidatedTargets = Array.from(new Set(nonValidatedTargets));
+    },
+    updateNonValidatedTargets() {
+      this.$apollo.addSmartQuery('validations', {
+        query: dastSiteValidationsQuery,
+        variables() {
+          return {
+            fullPath: this.fullPath,
+            urls: this.uniqueNonValidatedTargets,
+          };
+        },
+        pollInterval: 1000, // todo: make it a constant
+        manual: true,
+        skip() {
+          return !this.uniqueNonValidatedTargets.length;
+        },
+        result({ data, error }) {
+          debugger;
+          if (!error) {
+            const { project } = data;
+            const profileEdges = project?.validations?.edges ?? [];
+            const validationCompletedTargets = profileEdges.map(
+              ({ node: { normalizedTargetUrl } }) => status,
+            ); // fix
+
+            this.uniqueNonValidatedTargets =
+              this.uniqueNonValidatedTargets - validationCompletedTargets; // fix
+
+            // Loop through existing profiles and mutate the validation status by matching the normalised urls
+          }
+        },
       });
     },
   },
