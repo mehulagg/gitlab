@@ -1736,7 +1736,7 @@ In this case, add `([introduced/deprecated](<link-to-issue>) in GitLab X.X)`.
 Including the issue link is encouraged, but isn't a requirement. For example:
 
 ```markdown
-The voting strategy (GitLab 13.4 and later) requires the primary and secondary
+The voting strategy in GitLab 13.4 and later requires the primary and secondary
 voters to agree.
 ```
 
