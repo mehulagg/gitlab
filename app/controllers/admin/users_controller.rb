@@ -72,6 +72,18 @@ class Admin::UsersController < Admin::ApplicationController
     end
   end
 
+  def reject
+    user.delete_async(deleted_by: current_user, params: destroy_params)
+
+    respond_to do |format|
+      format.html { redirect_to admin_users_path, status: :found, notice: _("The user is being deleted.") }
+      format.json { head :ok }
+    end
+
+    DeviseMailer.user_admin_rejection(user).deliver_later
+
+  end
+
   def activate
     return redirect_back_or_admin_user(notice: _("Error occurred. A blocked user must be unblocked to be activated")) if user.blocked?
 
@@ -188,6 +200,7 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def destroy
+    DeviseMailer.user_admin_rejection(user).deliver_later
     user.delete_async(deleted_by: current_user, params: destroy_params)
 
     respond_to do |format|

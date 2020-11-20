@@ -1,6 +1,6 @@
-= email_default_heading(say_hi(@resource))
+= email_default_heading(_('Hello %{user},') % { user: @resource.name })
 
 %p
-  = _('Your request to join host fix this has been rejected.')
+  = _('Your request to join %{host} has been rejected.' % { host: Gitlab.config.gitlab.host })
 %p
   = _('Please contact your GitLab administrator if you think this is an error.')
