@@ -1,0 +1,7 @@
+query getPipelineCountByStatus($pipelineStatus: PipelineStatusEnum, $projectPath: ID!) {
+  project(fullPath: $projectPath) {
+    pipelines(status: $pipelineStatus) {
+      count
+    }
+  }
+}

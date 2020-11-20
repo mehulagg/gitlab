@@ -96,6 +96,10 @@ module Types
 
       field :project, Types::ProjectType, null: true,
             description: 'Project the pipeline belongs to'
+
+      field :total_pipelines, GraphQL::INT_TYPE, null: true,
+            description: 'Total pipeline count',
+            resolve: -> (obj, _args, _context) { obj.parent.all_pipelines.count(:all) }
     end
   end
 end
