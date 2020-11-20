@@ -298,7 +298,7 @@ Host gitlab.company.com
 ```
 
 Public SSH keys need to be unique to GitLab, as they bind to your account.
-Your SSH key is the only identifier you've when pushing code via SSH,
+Your SSH key is the only identifier you have when pushing code via SSH,
 that's why it needs to uniquely map to a single user.
 
 ## Per-repository SSH keys
