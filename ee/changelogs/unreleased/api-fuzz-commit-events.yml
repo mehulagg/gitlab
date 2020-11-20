@@ -1,0 +1,5 @@
+---
+title: Update API fuzz testing to only run on branch pipelines
+merge_request:
+author:
+type: changed
