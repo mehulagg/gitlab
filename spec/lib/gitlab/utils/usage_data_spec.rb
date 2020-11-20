@@ -37,6 +37,50 @@ RSpec.describe Gitlab::Utils::UsageData do
     end
   end
 
+  describe '#estimate_batch_distinct_count' do
+    let(:relation) { double(:relation) }
+
+    it 'delegates counting to counter class instance' do
+      expect_next_instance_of(Gitlab::Database::PostgresHllBatchDistinctCounter, relation, 'column') do |instance|
+        expect(instance).to receive(:estimate_distinct_count)
+                              .with(batch_size: nil, start: nil, finish: nil)
+                              .and_return(5)
+      end
+
+      expect(described_class.estimate_batch_distinct_count(relation, 'column', batch: false)).to eq(5)
+    end
+
+    it 'returns default fallback value when counting fails due to database error' do
+      stub_const("Gitlab::Utils::UsageData::FALLBACK", 15)
+      allow(Gitlab::Database::PostgresHllBatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid.new(''))
+
+      expect(described_class.estimate_batch_distinct_count(relation, batch: false)).to eq(15)
+    end
+
+    it 'logs error and returns DISTRIBUTED_HLL_FALLBACK value when counting raises any error', :aggregate_failures do
+      error = StandardError.new('')
+      stub_const("Gitlab::Utils::UsageData::DISTRIBUTED_HLL_FALLBACK", 15)
+      allow(Gitlab::Database::PostgresHllBatchDistinctCounter).to receive(:new).and_raise(error)
+
+      expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).with(error)
+      expect(described_class.estimate_batch_distinct_count(relation, batch: false)).to eq(15)
+    end
+
+    context 'feature flag: postgres_hll_batch_counting is disabled' do
+      before do
+        stub_feature_flags(postgres_hll_batch_counting: false)
+      end
+
+      it 'returns the count when counting succeeds' do
+        expect(described_class).to receive(:distinct_count)
+                                     .with(relation, 'column', batch: false, batch_size: 10, start: 1, finish: 11)
+                                     .and_return(5)
+
+        expect(described_class.estimate_batch_distinct_count(relation, 'column', batch: false, batch_size: 10, start: 1, finish: 11)).to eq(5)
+      end
+    end
+  end
+
   describe '#sum' do
     let(:relation) { double(:relation) }
 

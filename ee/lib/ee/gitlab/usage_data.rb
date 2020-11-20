@@ -404,8 +404,21 @@ module EE
         def count_secure_pipelines(time_period)
           return {} if time_period.blank?
 
-          start = ::Ci::Pipeline.minimum(:id)
-          finish = ::Ci::Pipeline.maximum(:id)
+          # HLL batch counting always iterate over pkey of
+          # given relation, while ordinary batch count
+          # iterated over counted attribute
+          if ::Feature.enabled?(:postgres_hll_batch_counting)
+            relation = ::Security::Scan
+                         .where(scan_type: ::Security::Scan.scan_types.values)
+                         .where(time_period)
+
+            start = relation.order(build_id: :asc).first&.build_id
+            finish = relation.order(build_id: :desc).first&.build_id
+          else
+            start = ::Ci::Pipeline.minimum(:id)
+            finish = ::Ci::Pipeline.maximum(:id)
+          end
+
           pipelines_with_secure_jobs = {}
 
           ::Security::Scan.scan_types.each do |name, scan_type|
@@ -413,7 +426,7 @@ module EE
                                 .where(status: 'success', retried: [nil, false])
                                 .where('security_scans.scan_type = ?', scan_type)
                                 .where(time_period)
-            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = start && finish ? estimate_batch_distinct_count(relation, :commit_id, batch_size: 1500, start: start, finish: finish, batch: false) : 0
           end
 
           pipelines_with_secure_jobs
