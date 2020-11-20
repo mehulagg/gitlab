@@ -29,7 +29,7 @@ class Projects::CommitsController < Projects::ApplicationController
     respond_to do |format|
       format.html
       format.atom do
-        Settings[:atom_off] ? render_404 : render layout: 'xml.atom'
+        Settings[:atom_off] ? render_404 : render(layout: 'xml.atom')
       end
       format.json do
         pager_json(
