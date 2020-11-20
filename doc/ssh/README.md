@@ -389,7 +389,7 @@ connecting to the GitLab server over SSH are identified by their SSH key instead
 of their username.
 
 SSH *client* operations performed on the GitLab server are executed as this
-user. It's possible to change the SSH configuration for this user. For example, to provide a private SSH key to authenticate these requests. However, this practice is **not supported** and is strongly discouraged as it presents significant security risks.
+user. Although it may be possible to change the SSH configuration for this user, for example, to provide a private SSH key to authenticate these requests, this practice is strongly **discouraged** as it presents significant security risks.
 
 The GitLab check process includes a check for this condition, and directs you
 to this section if your server is configured like this, for example:
