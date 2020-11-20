@@ -32625,9 +32625,6 @@ msgstr ""
 msgid "sign in"
 msgstr ""
 
-msgid "small"
-msgstr ""
-
 msgid "smartcn custom analyzer"
 msgstr ""
 
