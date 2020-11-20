@@ -30,9 +30,10 @@ export default {
       loadingKey: 'loading',
       result() {
         this.requestCount -= 1;
+        const nextPage = this.groups?.pageInfo?.nextPage;
 
-        if (this.requestCount > 0 && this.groups?.pageInfo?.nextPage) {
-          this.fetchNextPage();
+        if (this.requestCount > 0 && nextPage) {
+          this.fetchNextPage(nextPage);
         }
       },
       error(error) {
@@ -53,11 +54,11 @@ export default {
       this.loadingError = true;
       Sentry.captureException(error);
     },
-    fetchNextPage() {
+    fetchNextPage(nextPage) {
       this.$apollo.queries.groups
         .fetchMore({
           variables: {
-            nextPage: this.groups.pageInfo.nextPage,
+            nextPage,
           },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const { nodes, ...rest } = fetchMoreResult.groups;

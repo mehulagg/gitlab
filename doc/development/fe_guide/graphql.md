@@ -442,6 +442,8 @@ we want to fetch after or before a given endpoint.
 For example, here we're fetching 10 designs after a cursor:
 
 ```javascript
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
 query {
   project(fullPath: "root/my-project") {
     id
@@ -453,12 +455,17 @@ query {
               id
             }
           }
+          pageInfo {
+            ...PageInfo
+          }
         }
       }
     }
   }
 }
 ```
+
+Note that we are using the [`pageInfo.fragment.graphql`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/graphql_shared/fragments/pageInfo.fragment.graphql) to populate the `pageInfo` information.
 
 #### Using `fetchMore` method in components
 
@@ -468,13 +475,18 @@ In this case, we can either:
 - Skip passing a cursor.
 - Pass `null` explicitly to `after`.
 
-After data is fetched, we should save a `pageInfo` object. Let's assume we're storing
-it to Vue component `data`:
+After data is fetched, we can use the `update`-hook as an opportunity [to customize
+the data that is set in the vue property](https://apollo.vuejs.org/api/smart-query.html#options), getting a hold of the `pageInfo` object among other data.
+
+In the `result`-hook, we can inspect the `pageInfo` object to see if we need to fetch
+the next page. Note that we also keep a `requestCount` to ensure that the application
+keep requesting the next page, indefinitely:
 
 ```javascript
 data() {
   return {
     pageInfo: null,
+    requestCount: MAX_REQUEST_COUNT,
   }
 },
 apollo: {
@@ -482,49 +494,63 @@ apollo: {
     query: projectQuery,
     variables() {
       return {
-        // rest of design variables
+        // The rest of the design variables
         ...
         first: 10,
       };
     },
-    result(res) {
-      this.pageInfo = res.data?.project?.issue?.designCollection?.designs?.pageInfo;
+    update(data) {
+      const { id = null, issue = {} } data.project || {};
+      const { edges = [], pageInfo } = issue.designCollection?.designs || {};
+
+      return {
+        id,
+        edges,
+        pageInfo,
+      };
+    },
+    result() {
+      const { pageInfo } = this.designs;
+
+      // Decrement the request count with each new result
+      this.requestCount--;
+      // Only fetch next page if we have more requests and there is a next page to fetch
+      if (this.requestCount > 0 && pageInfo?.hasNextPage) {
+        this.fetchNextPage(pageInfo.endCursor);
+      }
     },
   },
 },
 ```
+
+Note: It is also possible to get the raw data straight from the first argument in the [`result`-hook](https://apollo.vuejs.org/api/smart-query.html#options).
 
 When we want to move to the next page, we use an Apollo `fetchMore` method, passing a
 new cursor (and, optionally, new variables) there. In the `updateQuery` hook, we have
 to return a result we want to see in the Apollo cache after fetching the next page.
 
 ```javascript
-fetchNextPage() {
-  // as a first step, we're checking if we have more pages to move forward
-  if (this.pageInfo?.hasNextPage) {
-    this.$apollo.queries.designs.fetchMore({
-      variables: {
-        // rest of design variables
-        ...
-        first: 10,
-        after: this.pageInfo?.endCursor,
-      },
-      updateQuery(previousResult, { fetchMoreResult }) {
-        // here we can implement the logic of adding new designs to fetched one (for example, if we use infinite scroll)
-        // or replacing old result with the new one if we use numbered pages
+fetchNextPage(endCursor) {
+  this.$apollo.queries.designs.fetchMore({
+    variables: {
+      // The rest of the design variables
+      ...
+      first: 10,
+      after: endCursor,
+    },
+    updateQuery(previousResult, { fetchMoreResult }) {
+      // Here we can implement the logic of adding new designs to fetched one
+      // (for example, if we use infinite scroll) or replacing old result
+      // with the new one if we use numbered pages
 
-        const newDesigns = fetchMoreResult.project.issue.designCollection.designs;
-        previousResult.project.issue.designCollection.designs.push(...newDesigns)
+      const newDesigns = fetchMoreResult.project.issue.designCollection.designs;
+      previousResult.project.issue.designCollection.designs.push(...newDesigns)
 
-        return previousResult;
-      },
-    });
-  }
+      return previousResult;
+    },
+  });
 }
 ```
-
-Please note we don't have to save `pageInfo` one more time; `fetchMore` triggers a query
-`result` hook as well.
 
 ### Managing performance
 
