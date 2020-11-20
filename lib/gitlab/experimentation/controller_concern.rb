@@ -38,7 +38,7 @@ module Gitlab
       def experiment_enabled?(experiment_key)
         return false if dnt_enabled?
 
-        return true if Experimentation.enabled_for_value?(experiment_key, experimentation_subject_index(experiment_key))
+        return true if Experimentation.enabled?(experiment_key, subject: experimentation_subject_index(experiment_key))
         return true if forced_enabled?(experiment_key)
 
         false
@@ -62,7 +62,7 @@ module Gitlab
 
       def record_experiment_user(experiment_key)
         return if dnt_enabled?
-        return unless Experimentation.enabled?(experiment_key) && current_user
+        return unless Experimentation.active?(experiment_key) && current_user
 
         ::Experiment.add_user(experiment_key, tracking_group(experiment_key), current_user)
       end
@@ -84,15 +84,15 @@ module Gitlab
       def experimentation_subject_index(experiment_key)
         return if experimentation_subject_id.blank?
 
-        if Experimentation.experiment(experiment_key).use_backwards_compatible_subject_index
-          experimentation_subject_id.delete('-').hex % 100
+        if Experimentation.get_experiment(experiment_key).use_backwards_compatible_subject_index
+          experimentation_subject_id.delete('-')
         else
-          Zlib.crc32("#{experiment_key}#{experimentation_subject_id}") % 100
+          experimentation_subject_id
         end
       end
 
       def track_experiment_event_for(experiment_key, action, value)
-        return unless Experimentation.enabled?(experiment_key)
+        return unless Experimentation.active?(experiment_key)
 
         yield experimentation_tracking_data(experiment_key, action, value)
       end
@@ -108,11 +108,11 @@ module Gitlab
       end
 
       def tracking_category(experiment_key)
-        Experimentation.experiment(experiment_key).tracking_category
+        Experimentation.get_experiment(experiment_key).tracking_category
       end
 
       def tracking_group(experiment_key, suffix = nil)
-        return unless Experimentation.enabled?(experiment_key)
+        return unless Experimentation.active?(experiment_key)
 
         group = experiment_enabled?(experiment_key) ? GROUP_EXPERIMENTAL : GROUP_CONTROL
 

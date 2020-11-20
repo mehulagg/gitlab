@@ -6,12 +6,10 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
   before do
     stub_const('Gitlab::Experimentation::EXPERIMENTS', {
         backwards_compatible_test_experiment: {
-          environment: environment,
           tracking_category: 'Team',
           use_backwards_compatible_subject_index: true
         },
         test_experiment: {
-          environment: environment,
           tracking_category: 'Team'
         }
       }
@@ -21,7 +19,6 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
     Feature.enable_percentage_of_time(:test_experiment_experiment_percentage, enabled_percentage)
   end
 
-  let(:environment) { Rails.env.test? }
   let(:enabled_percentage) { 10 }
 
   controller(ApplicationController) do
@@ -78,12 +75,10 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
   describe '#push_frontend_experiment' do
     it 'pushes an experiment to the frontend' do
       gon = instance_double('gon')
-      experiments = { experiments: { 'myExperiment' => true } }
-
       stub_experiment_for_user(my_experiment: true)
       allow(controller).to receive(:gon).and_return(gon)
 
-      expect(gon).to receive(:push).with(experiments, true)
+      expect(gon).to receive(:push).with({ experiments: { 'myExperiment' => true } }, true)
 
       controller.push_frontend_experiment(:my_experiment)
     end
@@ -97,8 +92,9 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
     subject { check_experiment }
 
     context 'cookie is not present' do
-      it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and an experimentation_subject_index of nil' do
-        expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(:test_experiment, nil)
+      it 'calls Gitlab::Experimentation.enabled? with the name of the experiment and an experimentation_subject_index of nil' do
+        expect(Gitlab::Experimentation).to receive(:enabled?).with(:test_experiment, subject: nil)
+
         check_experiment
       end
     end
@@ -112,27 +108,28 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       where(:experiment_key, :index_value) do
-        :test_experiment | 40 # Zlib.crc32('test_experimentabcd-1234') % 100 = 40
-        :backwards_compatible_test_experiment | 76 # 'abcd1234'.hex % 100 = 76
+        :test_experiment | 'abcd-1234'
+        :backwards_compatible_test_experiment | 'abcd1234'
       end
 
       with_them do
-        it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and the calculated experimentation_subject_index based on the uuid' do
-          expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(experiment_key, index_value)
+        it 'calls Gitlab::Experimentation.enabled? with the name of the experiment and the calculated experimentation_subject_index based on the uuid' do
+          expect(Gitlab::Experimentation).to receive(:enabled?).with(experiment_key, subject: index_value)
+
           check_experiment(experiment_key)
         end
       end
     end
 
     it 'returns true when DNT: 0 is set in the request' do
-      allow(Gitlab::Experimentation).to receive(:enabled_for_value?) { true }
+      allow(Gitlab::Experimentation).to receive(:enabled?) { true }
       controller.request.headers['DNT'] = '0'
 
       is_expected.to be_truthy
     end
 
     it 'returns false when DNT: 1 is set in the request' do
-      allow(Gitlab::Experimentation).to receive(:enabled_for_value?) { true }
+      allow(Gitlab::Experimentation).to receive(:enabled?) { true }
       controller.request.headers['DNT'] = '1'
 
       is_expected.to be_falsy

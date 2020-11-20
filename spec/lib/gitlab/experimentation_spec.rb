@@ -29,7 +29,7 @@ RSpec.describe Gitlab::Experimentation::EXPERIMENTS do
   end
 end
 
-RSpec.describe Gitlab::Experimentation, :snowplow do
+RSpec.describe Gitlab::Experimentation do
   before do
     stub_const('Gitlab::Experimentation::EXPERIMENTS', {
       backwards_compatible_test_experiment: {
@@ -48,8 +48,8 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
 
   let(:enabled_percentage) { 10 }
 
-  describe '.enabled?' do
-    subject { described_class.enabled?(:test_experiment) }
+  describe '.active?' do
+    subject { described_class.active?(:test_experiment) }
 
     context 'feature toggle is enabled and we are selected' do
       it { is_expected.to be_truthy }
@@ -57,7 +57,7 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
 
     describe 'experiment is not defined' do
       it 'returns false' do
-        expect(described_class.enabled?(:missing_experiment)).to be_falsey
+        expect(described_class.active?(:missing_experiment)).to be_falsey
       end
     end
 
@@ -68,72 +68,98 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
     end
   end
 
-  describe '.enabled_for_value?' do
-    subject { described_class.enabled_for_value?(:test_experiment, experimentation_subject_index) }
+  describe '.enabled?' do
+    context 'with new index calculation' do
+      let(:experiment_subject) { 'z' }
+      let(:enabled_percentage) { 50 }
 
-    let(:experimentation_subject_index) { 9 }
+      subject { described_class.enabled?(:test_experiment, subject: experiment_subject) }
 
-    context 'experiment is disabled' do
-      before do
-        allow(described_class).to receive(:enabled?).and_return(false)
-      end
+      context 'when experiment is active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(true)
+        end
 
-      it { is_expected.to be_falsey }
-    end
+        context 'when subject is part of the experiment' do
+          let(:experiment_subject) { 'z' } # Zlib.crc32('test_experimentz') % 100 = 33
 
-    context 'experiment is enabled' do
-      before do
-        allow(described_class).to receive(:enabled?).and_return(true)
-      end
+          it { is_expected.to be_truthy }
+        end
 
-      it { is_expected.to be_truthy }
-
-      describe 'experimentation_subject_index' do
-        context 'experimentation_subject_index is not set' do
-          let(:experimentation_subject_index) { nil }
+        context 'when subject is not part of the experiment' do
+          let(:experiment_subject) { 'a' } # Zlib.crc32('test_experimenta') % 100 = 61
 
           it { is_expected.to be_falsey }
         end
 
-        context 'experimentation_subject_index is an empty string' do
-          let(:experimentation_subject_index) { '' }
+        context 'when subject is nil' do
+          let(:experiment_subject) { nil }
 
           it { is_expected.to be_falsey }
         end
 
-        context 'experimentation_subject_index outside enabled ratio' do
-          let(:experimentation_subject_index) { 11 }
+        context 'when subject is an empty string' do
+          let(:experiment_subject) { '' }
+
+          it { is_expected.to be_falsey }
+        end
+
+        context 'when subject has a global_id' do
+          let(:experiment_subject) { double(:subject, to_global_id: 'z') }
+
+          it { is_expected.to be_truthy }
+        end
+      end
+
+      context 'when experiment is not active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'with backwards compatible index calculation' do
+      let(:experiment_subject) { 'abc' }
+      subject { described_class.enabled?(:backwards_compatible_test_experiment, subject: experiment_subject) }
+
+      context 'when experiment is active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(true)
+        end
+
+        context 'when subject is part of the experiment' do
+          let(:experiment_subject) { 'abcd' } # Digest::SHA1.hexdigest('abcd').hex % 100 = 7
+
+          it { is_expected.to be_truthy }
+        end
+
+        context 'when subject is not part of the experiment' do
+          let(:experiment_subject) { 'abc' } # Digest::SHA1.hexdigest('abc').hex % 100 = 17
+
+          it { is_expected.to be_falsey }
+        end
+
+        context 'when subject is nil' do
+          let(:experiment_subject) { nil }
+
+          it { is_expected.to be_falsey }
+        end
+
+        context 'when subject is an empty string' do
+          let(:experiment_subject) { '' }
 
           it { is_expected.to be_falsey }
         end
       end
-    end
-  end
 
-  describe '.enabled_for_attribute?' do
-    subject { described_class.enabled_for_attribute?(:test_experiment, attribute) }
+      context 'when experiment is not active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(false)
+        end
 
-    let(:attribute) { 'abcd' } # Digest::SHA1.hexdigest('abcd').hex % 100 = 7
-
-    context 'experiment is disabled' do
-      before do
-        allow(described_class).to receive(:enabled?).and_return(false)
-      end
-
-      it { is_expected.to be false }
-    end
-
-    context 'experiment is enabled' do
-      before do
-        allow(described_class).to receive(:enabled?).and_return(true)
-      end
-
-      it { is_expected.to be true }
-
-      context 'outside enabled ratio' do
-        let(:attribute) { 'abc' } # Digest::SHA1.hexdigest('abc').hex % 100 = 17
-
-        it { is_expected.to be false }
+        it { is_expected.to be_falsey }
       end
     end
   end

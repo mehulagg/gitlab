@@ -85,23 +85,22 @@ module Gitlab
     }.freeze
 
     class << self
-      def experiment(key)
-        Gitlab::Experimentation::Experiment.new(key, **EXPERIMENTS[key])
+      def get_experiment(key)
+        ::Gitlab::Experimentation::Experiment.new(key, **EXPERIMENTS[key])
       end
 
-      def enabled?(experiment_key)
+      def active?(experiment_key)
         return false unless EXPERIMENTS.key?(experiment_key)
 
-        experiment(experiment_key).enabled?
+        get_experiment(experiment_key).active?
       end
 
-      def enabled_for_attribute?(experiment_key, attribute)
-        index = Digest::SHA1.hexdigest(attribute).hex % 100
-        enabled_for_value?(experiment_key, index)
-      end
+      def enabled?(experiment_key, subject:)
+        return false if subject.blank?
+        return false unless active?(experiment_key)
 
-      def enabled_for_value?(experiment_key, value)
-        enabled?(experiment_key) && experiment(experiment_key).enabled_for_index?(value)
+        experiment = get_experiment(experiment_key)
+        experiment.enabled_for_subject?(subject)
       end
     end
   end

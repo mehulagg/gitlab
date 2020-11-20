@@ -97,11 +97,11 @@ addressed.
       class SomeWorker
         def perform
           # Check if the experiment is enabled at all (the percentage_of_time_value > 0)
-          return unless Gitlab::Experimentation.enabled?(:experiment_key)
+          return unless Gitlab::Experimentation.active?(:experiment_key)
 
           # Since we cannot access cookies in a worker, we need to bucket models based on a unique, unchanging attribute instead.
           # Use the following method to check if the experiment is enabled for a certain attribute, for example a username or email address:
-          if Gitlab::Experimentation.enabled_for_attribute?(:experiment_key, some_attribute)
+          if Gitlab::Experimentation.enabled?(:experiment_key, subject: some_subject_or_attribute)
             # execute experimental code
           else
             # execute control code
