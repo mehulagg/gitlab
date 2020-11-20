@@ -75,7 +75,7 @@ stateDiagram-v2
     }
 
     state ApplicationServer {
-      "AppServ_1..3"
+      "GitLab_Rails_1..3"
     }
 
     state LoadBalancer {
