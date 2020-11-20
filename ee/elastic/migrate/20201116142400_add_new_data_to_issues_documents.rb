@@ -3,7 +3,7 @@
 class AddNewDataToIssuesDocuments < Elastic::Migration
   batch_update!
 
-  BATCH_SIZE = 1000
+  BATCH_SIZE = 5000
 
   def migrate
     if completed?

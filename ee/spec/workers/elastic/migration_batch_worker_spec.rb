@@ -3,56 +3,74 @@
 require 'spec_helper'
 
 RSpec.describe Elastic::MigrationBatchWorker, :elastic do
+  let(:migration) { Elastic::DataMigrationService.migrations.first }
+
+  before do
+    allow(Elastic::MigrationRecord).to receive(:new).and_return(migration)
+  end
+
   subject { described_class.new }
 
-  describe '#perform' do
-    context 'indexing is disabled' do
-      before do
-        stub_ee_application_setting(elasticsearch_indexing: false)
-      end
+  include_examples 'an idempotent worker' do
+    let(:job_args) { [migration.version, migration.name, migration.filename] }
 
-      it 'returns without execution' do
-        expect(subject).not_to receive(:execute_migration)
-        expect(subject.perform('1', 'name', 'filename')).to be_falsey
-      end
-    end
-
-    context 'indexing is enabled' do
-      let(:migration) { Elastic::DataMigrationService.migrations.first }
-
-      before do
-        stub_ee_application_setting(elasticsearch_indexing: true)
-      end
-
-      it 'creates an index if it does not exist' do
-        Gitlab::Elastic::Helper.default.delete_index(index_name: @migrations_index_name)
-
-        expect { subject.perform(migration.version, migration.name, migration.filename) }.to change { Gitlab::Elastic::Helper.default.index_exists?(index_name: @migrations_index_name) }.from(false).to(true)
-      end
-
-      context 'migration batch process' do
-        using RSpec::Parameterized::TableSyntax
-
+    describe '#perform' do
+      context 'indexing is disabled' do
         before do
-          allow(Elastic::MigrationRecord).to receive(:new).and_return(migration)
-          allow(migration).to receive(:completed?).and_return(completed)
-        end
-        where(:completed) do
-          [true, false]
+          stub_ee_application_setting(elasticsearch_indexing: false)
         end
 
-        with_them do
-          it 'updates migration record as complete only when completed', :aggregate_failures do
-            expect(migration).to receive(:migrate).once
+        it 'returns without execution' do
+          expect(migration).not_to receive(:migrate)
 
-            if completed
-              expect(migration).to receive(:save!).with(completed: true)
-            else
-              expect(migration).not_to receive(:save!)
-              expect(Elastic::MigrationBatchWorker).to receive(:perform_in).with(5.minutes, migration.version, migration.name, migration.filename)
+          # cannot check return value due to how idempotent shared examples work
+          subject
+        end
+      end
+
+      context 'indexing is enabled' do
+        before do
+          stub_ee_application_setting(elasticsearch_indexing: true)
+        end
+
+        it 'creates an index if it does not exist' do
+          Gitlab::Elastic::Helper.default.delete_index(index_name: @migrations_index_name)
+
+          expect { subject }.to change { Gitlab::Elastic::Helper.default.index_exists?(index_name: @migrations_index_name) }.from(false).to(true)
+        end
+
+        context 'migration batch process' do
+          using RSpec::Parameterized::TableSyntax
+
+          before do
+            allow(migration).to receive(:completed?).and_return(completed_before_attempting_migrate, completed_after_migrate)
+          end
+
+          where(:completed_before_attempting_migrate, :completed_after_migrate) do
+            true  | true
+            false | false
+            false | true
+          end
+
+          with_them do
+            it 'runs migration and updates completed state appropriately', :aggregate_failures do
+              if completed_before_attempting_migrate
+                expect(migration).not_to receive(:migrate)
+              else
+                # idempotent job but allow call to be received multiple times (it re-enqueues itself)
+                expect(migration).to receive(:migrate).at_least(:once)
+
+                if completed_after_migrate
+                  expect(migration).to receive(:save!).with(completed: true)
+                else
+                  expect(migration).not_to receive(:save!)
+                  # idempotent job but allow call to be received multiple times (it re-enqueues itself)
+                  expect(Elastic::MigrationBatchWorker).to receive(:perform_in).at_least(:once).with(5.minutes, migration.version, migration.name, migration.filename)
+                end
+              end
+
+              subject
             end
-
-            subject.perform(migration.version, migration.name, migration.filename)
           end
         end
       end
