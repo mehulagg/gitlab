@@ -1742,6 +1742,17 @@ This feature was [deprecated](link-to-issue) in GitLab 12.3
 and replaced by [Feature name](link-to-feature-documentation).
 ```
 
+### Provide a historical context (version text only)
+
+As time passes, version text may reference progressively older versions
+of GitLab. We include version text for [unsupported versions](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions) of GitLab to help
+readers understand the historical context of a feature.
+
+However, there are limits. Ours are four major versions. For example,
+when GitLab 14.0 is released, we believe that documentation of features
+more than four major versions old (in this case, before GitLab 10.0)
+can be removed for clarity.
+
 #### Inline version text
 
 If you're adding content to an existing topic, you can add version information
@@ -1809,17 +1820,6 @@ This is even more important as we don't have a perfect process for shipping
 documentation. Unfortunately, we still see features without documentation, and
 documentation without features. So, for now, we cannot rely 100% on the
 documentation site versions.
-
-### Provide a historical context (version text only)
-
-As time passes, version text may reference progressively older versions
-of GitLab. We include version text for [unsupported versions](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions) of GitLab to help
-readers understand the historical context of a feature.
-
-However, there are limits. Ours are four major versions. For example,
-when GitLab 14.0 is released, we believe that documentation of features
-more than four major versions old (in this case, before GitLab 10.0)
-can be removed for clarity.
 
 ## Products and features
 
