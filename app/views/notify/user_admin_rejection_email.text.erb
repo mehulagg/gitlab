@@ -1,4 +1,4 @@
-<%= _('Hello #{@name},') %>
+<%= _('Hello %{name},') % { name: @name } %>
 
 <%= _('Your request to join %{host} has been rejected.') % { host: Gitlab.config.gitlab.host } %>
 

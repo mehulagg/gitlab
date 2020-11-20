@@ -72,20 +72,6 @@ class Admin::UsersController < Admin::ApplicationController
     end
   end
 
-  def reject
-    name = user.name
-    email = user.email
-
-    result = Users::DestroyService.new(current_user).execute(user, hard_delete: true)
-
-    if result[:status] == :success
-      NotificationService.new.user_admin_rejection(name, email).deliver_later
-      redirect_back_or_admin_user(notice: _("The user is being deleted."))
-    else
-      redirect_back_or_admin_user(alert: result[:message])
-    end
-  end
-
   def activate
     return redirect_back_or_admin_user(notice: _("Error occurred. A blocked user must be unblocked to be activated")) if user.blocked?
 
@@ -202,6 +188,13 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def destroy
+    if user.blocked_pending_approval?
+      name = user.name
+      email = user.email
+
+      NotificationService.new.user_admin_rejection(name, email)
+    end
+
     user.delete_async(deleted_by: current_user, params: destroy_params)
 
     respond_to do |format|

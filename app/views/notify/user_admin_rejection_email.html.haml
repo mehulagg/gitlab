@@ -1,5 +1,4 @@
-= email_default_heading(_('Hello #{@name},'))
-
+= email_default_heading(_('Hello %{name},') % { name: @name })
 %p
   = _('Your request to join %{host} has been rejected.' % { host: Gitlab.config.gitlab.host })
 %p
