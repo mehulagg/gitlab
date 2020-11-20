@@ -35,7 +35,11 @@ module QA
             click_element :new_user_register_button if has_element?(:new_user_register_button)
             click_element :get_started_button if has_element?(:get_started_button)
 
-            Page::Main::Menu.perform(&:has_personal_area?)
+            if user.expect_fabrication_success
+              Page::Main::Menu.perform(&:has_personal_area?)
+            else
+              Page::Main::Menu.perform(&:not_signed_in?)
+            end
           end
 
           raise "Failed to register and sign in" unless signed_in

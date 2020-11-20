@@ -431,6 +431,7 @@ module QA
           autoload :OutboundRequests, 'qa/page/admin/settings/component/outbound_requests'
           autoload :AccountAndLimit, 'qa/page/admin/settings/component/account_and_limit'
           autoload :PerformanceBar, 'qa/page/admin/settings/component/performance_bar'
+          autoload :SignUpRestrictions, 'qa/page/admin/settings/component/sign_up_restrictions'
         end
       end
 

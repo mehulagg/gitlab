@@ -7,7 +7,7 @@ module QA
     class User < Base
       attr_reader :unique_id
       attr_writer :username, :password
-      attr_accessor :admin, :provider, :extern_uid
+      attr_accessor :admin, :provider, :extern_uid, :expect_fabrication_success
 
       attribute :id
       attribute :name
@@ -18,6 +18,7 @@ module QA
       def initialize
         @admin = false
         @unique_id = SecureRandom.hex(8)
+        @expect_fabrication_success = true
       end
 
       def admin?
