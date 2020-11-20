@@ -666,15 +666,23 @@ it('calls mutation on submitting form ', () => {
 
 To test the logic of Apollo cache updates, we might want to mock an Apollo Client in our unit tests. We use [`mock-apollo-client`](https://www.npmjs.com/package/mock-apollo-client) library to mock Apollo client and [`createMockApollo` helper](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/helpers/mock_apollo_helper.js) we created on top of it.
 
-To separate tests with mocked client from 'usual' unit tests, it's recommended to create an additional component factory. This way we only create Apollo Client instance when it's necessary:
+To separate tests with mocked client from 'usual' unit tests, it's recommended to create an additional factory and pass the created `mockProvider` as an option to the `createComponent`-factory. This way we only create Apollo Client instance when it's necessary:
 
 ```javascript
-function createComponent() {...}
+function createMockApolloProvider() {...}
 
-function createComponentWithApollo() {...}
+function createComponent(options = {}) {
+  const { mockApollo } = options;
+  ...
+  return shallowMount(..., {
+    localVue,
+    apolloProvider: mockApollo,
+    ...
+  });
+}
 ```
 
-Then we need to inject `VueApollo` to Vue local instance (`localVue.use()` can also be called within `createComponentWithApollo()`)
+Then we need to inject `VueApollo` to Vue local instance (`localVue.use()` can also be called within `createMockApolloProvider()`)
 
 ```javascript
 import VueApollo from 'vue-apollo';
@@ -684,16 +692,24 @@ const localVue = createLocalVue();
 localVue.use(VueApollo);
 ```
 
-After this, on the global `describe`, we should create a variable for `fakeApollo`:
+After this, you can control whether you need a variable for `mockApollo` and assign it in the appropriate `describe`-scope:
 
 ```javascript
-describe('Some component with Apollo mock', () => {
+describe('Some component', () => {
   let wrapper;
-  let fakeApollo
-})
+
+  describe('with Apollo mock', () => {
+    let mockApollo;
+
+    beforeEach(() => {
+      mockApollo = createMockApolloProvider();
+      wrapper = createComponent({ mockApollo });
+    });
+  });
+});
 ```
 
-Within component factory, we need to define an array of _handlers_ for every query or mutation:
+Within `createMockApolloProvider`-factory, we need to define an array of _handlers_ for every query or mutation:
 
 ```javascript
 import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
@@ -702,13 +718,14 @@ import moveDesignMutation from '~/design_management/graphql/mutations/move_desig
 
 describe('Some component with Apollo mock', () => {
   let wrapper;
-  let fakeApollo;
+  let mockApollo;
 
-  function createComponentWithApollo() {
+  function createMockApolloProvider() {
     const requestHandlers = [
       [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
       [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
     ];
+    ...
   }
 })
 ```
@@ -718,23 +735,36 @@ After this, we need to create a mock Apollo Client instance using a helper:
 ```javascript
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 
-describe('Some component with Apollo mock', () => {
+describe('Some component', () => {
   let wrapper;
-  let fakeApollo;
 
-  function createComponentWithApollo() {
+  function createMockApolloProvider() {
     const requestHandlers = [
       [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
       [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
     ];
 
-    fakeApollo = createMockApollo(requestHandlers);
-    wrapper = shallowMount(Index, {
+    return createMockApollo(requestHandlers);
+  }
+
+  function createComponent(options = {}) {
+    const { mockApollo } = options;
+
+    return shallowMount(Index, {
       localVue,
-      apolloProvider: fakeApollo,
+      apolloProvider: mockApollo,
     });
   }
-})
+
+  describe('with Apollo mock', () => {
+    let mockApollo;
+
+    beforeEach(() => {
+      mockApollo = createMockApolloProvider();
+      wrapper = createComponent({ mockApollo });
+    });
+  });
+});
 ```
 
 When mocking resolved values, ensure the structure of the response is the same
@@ -744,13 +774,15 @@ When testing queries, please keep in mind they are promises, so they need to be 
 
 ```javascript
 it('renders a loading state', () => {
-  createComponentWithApollo();
+  const mockApollo = createMockApolloProvider();
+  const wrapper = createComponent({ mockApollo });
 
   expect(wrapper.find(LoadingSpinner).exists()).toBe(true)
 });
 
 it('renders designs list', async () => {
-  createComponentWithApollo();
+  const mockApollo = createMockApolloProvider();
+  const wrapper = createComponent({ mockApollo });
 
   jest.runOnlyPendingTimers();
   await wrapper.vm.$nextTick();
@@ -762,7 +794,7 @@ it('renders designs list', async () => {
 If we need to test a query error, we need to mock a rejected value as request handler:
 
 ```javascript
-function createComponentWithApollo() {
+function createMockApolloProvider() {
   ...
   const requestHandlers = [
     [getDesignListQuery, jest.fn().mockRejectedValue(new Error('GraphQL error')],
@@ -772,7 +804,7 @@ function createComponentWithApollo() {
 ...
 
 it('renders error if query fails', async () => {
-  createComponent()
+  const wrapper = createComponent();
 
   jest.runOnlyPendingTimers();
   await wrapper.vm.$nextTick();
@@ -786,7 +818,7 @@ Request handlers can also be passed to component factory as a parameter.
 Mutations could be tested the same way with a few additional `nextTick`s to get the updated result:
 
 ```javascript
-function createComponentWithApollo({
+function createMockApolloProvider({
   moveHandler = jest.fn().mockResolvedValue(moveDesignMutationResponse),
 }) {
   moveDesignHandler = moveHandler;
@@ -797,15 +829,21 @@ function createComponentWithApollo({
     [moveDesignMutation, moveDesignHandler],
   ];
 
-  fakeApollo = createMockApollo(requestHandlers);
-  wrapper = shallowMount(Index, {
+  return createMockApollo(requestHandlers);
+}
+
+function createComponent(options = {}) {
+  const { mockApollo } = options;
+
+  return shallowMount(Index, {
     localVue,
-    apolloProvider: fakeApollo,
+    apolloProvider: mockApollo,
   });
 }
 ...
 it('calls a mutation with correct parameters and reorders designs', async () => {
-  createComponentWithApollo({});
+  const mockApollo = createMockApolloProvider({});
+  const wrapper = createComponent({ mockApollo });
 
   wrapper.find(VueDraggable).vm.$emit('change', {
     moved: {
@@ -833,7 +871,7 @@ If your application contains `@client` queries, most probably you will have an A
 ```javascript
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 ...
-mockApollo = createMockApollo(requestHandlers, resolvers);
+const mockApollo = createMockApollo(requestHandlers, resolvers);
 ```
 
 Sometimes we want to test a `result` hook of the local query. In order to have it triggered, we need to populate a cache with correct data to be fetched with this query:
@@ -855,7 +893,7 @@ function createMockApolloProvider() {
     [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
   ];
 
-  mockApollo = createMockApollo(requestHandlers, {});
+  const mockApollo = createMockApollo(requestHandlers, {});
   mockApollo.clients.defaultClient.cache.writeQuery({
     query: fetchLocalUserQuery,
     data: {
@@ -887,7 +925,7 @@ import fetchLocalUserQuery from '~/design_management/graphql/queries/fetch_local
 function createMockApolloProvider(options = {}) {
   const { fetchLocalUserSpy } = options;
 
-  mockApollo = createMockApollo([], {
+  const mockApollo = createMockApollo([], {
     Query: {
       fetchLocalUser: fetchLocalUserSpy,
     },

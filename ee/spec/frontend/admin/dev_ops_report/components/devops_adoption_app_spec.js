@@ -124,7 +124,7 @@ describe('DevopsAdoptionApp', () => {
     });
 
     describe('when error is thrown in the initial request', () => {
-      const error = 'Error: foo!';
+      const error = new Error('foo!');
 
       beforeEach(async () => {
         jest.spyOn(Sentry, 'captureException');
