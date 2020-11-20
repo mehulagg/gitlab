@@ -2203,6 +2203,9 @@ msgstr ""
 msgid "AdminUsers|Regular users have access to their groups and projects"
 msgstr ""
 
+msgid "AdminUsers|Reject"
+msgstr ""
+
 msgid "AdminUsers|Restore user access to the account, including web, Git and API."
 msgstr ""
 
