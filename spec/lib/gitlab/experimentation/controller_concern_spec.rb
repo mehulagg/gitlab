@@ -430,7 +430,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
 
     it 'returns a string with the experiment tracking category & group joined with a ":"' do
       expect(controller).to receive(:tracking_category).with(experiment_key).and_return('Experiment::Category')
-      expect(controller).to receive(:tracking_group).with(experiment_key, '_group').and_return('experimental_group')
+      expect(controller).to receive(:tracking_group).with(experiment_key, '_group', nil).and_return('experimental_group')
 
       expect(subject).to eq('Experiment::Category:experimental_group')
     end

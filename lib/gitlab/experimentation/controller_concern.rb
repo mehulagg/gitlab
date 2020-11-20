@@ -28,23 +28,25 @@ module Gitlab
         }
       end
 
-      def push_frontend_experiment(experiment_key)
+      def push_frontend_experiment(experiment_key, attribute: nil)
         var_name = experiment_key.to_s.camelize(:lower)
-        enabled = experiment_enabled?(experiment_key)
+        enabled = experiment_enabled?(experiment_key, attribute: attribute)
 
         gon.push({ experiments: { var_name => enabled } }, true)
       end
 
-      def experiment_enabled?(experiment_key)
+      def experiment_enabled?(experiment_key, attribute: nil)
+        return true if forced_enabled?(experiment_key)
         return false if dnt_enabled?
 
-        return true if Experimentation.enabled_for_value?(experiment_key, experimentation_subject_index(experiment_key))
-        return true if forced_enabled?(experiment_key)
-
-        false
+        if attribute.nil?
+          Experimentation.enabled_for_value?(experiment_key, experimentation_subject_index(experiment_key))
+        else
+          Experimentation.enabled_for_attribute?(experiment_key, attribute)
+        end
       end
 
-      def track_experiment_event(experiment_key, action, value = nil)
+      def track_experiment_event(experiment_key, action, value = nil, attribute: nil)
         return if dnt_enabled?
 
         track_experiment_event_for(experiment_key, action, value) do |tracking_data|
@@ -52,7 +54,7 @@ module Gitlab
         end
       end
 
-      def frontend_experimentation_tracking_data(experiment_key, action, value = nil)
+      def frontend_experimentation_tracking_data(experiment_key, action, value = nil, attribute: nil)
         return if dnt_enabled?
 
         track_experiment_event_for(experiment_key, action, value) do |tracking_data|
@@ -60,15 +62,15 @@ module Gitlab
         end
       end
 
-      def record_experiment_user(experiment_key)
+      def record_experiment_user(experiment_key, attribute: nil)
         return if dnt_enabled?
         return unless Experimentation.enabled?(experiment_key) && current_user
 
-        ::Experiment.add_user(experiment_key, tracking_group(experiment_key), current_user)
+        ::Experiment.add_user(experiment_key, tracking_group(experiment_key, nil, attribute), current_user)
       end
 
-      def experiment_tracking_category_and_group(experiment_key)
-        "#{tracking_category(experiment_key)}:#{tracking_group(experiment_key, '_group')}"
+      def experiment_tracking_category_and_group(experiment_key, attribute: nil)
+        "#{tracking_category(experiment_key)}:#{tracking_group(experiment_key, '_group', attribute)}"
       end
 
       private
@@ -111,10 +113,10 @@ module Gitlab
         Experimentation.experiment(experiment_key).tracking_category
       end
 
-      def tracking_group(experiment_key, suffix = nil)
+      def tracking_group(experiment_key, suffix = nil, attribute = nil)
         return unless Experimentation.enabled?(experiment_key)
 
-        group = experiment_enabled?(experiment_key) ? GROUP_EXPERIMENTAL : GROUP_CONTROL
+        group = experiment_enabled?(experiment_key, attribute: attribute) ? GROUP_EXPERIMENTAL : GROUP_CONTROL
 
         suffix ? "#{group}#{suffix}" : group
       end
