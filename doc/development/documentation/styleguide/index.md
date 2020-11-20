@@ -1768,7 +1768,7 @@ For example:
 - In GitLab 12.2 and earlier, ...
 - In GitLab 11.6 and later, ...
 
-### Cleaning up versions after major releases
+### Removing versions after each major release
 
 Whenever a major GitLab release occurs, we will remove all version references
 to now-unsupported versions of GitLab. Note that this includes the removal of
