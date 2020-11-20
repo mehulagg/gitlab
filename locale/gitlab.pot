@@ -3249,6 +3249,9 @@ msgstr ""
 msgid "An error occurred while updating approvers"
 msgstr ""
 
+msgid "An error occurred while updating assignees."
+msgstr ""
+
 msgid "An error occurred while updating configuration."
 msgstr ""
 

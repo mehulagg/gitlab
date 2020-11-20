@@ -25,6 +25,8 @@ import issueCreateMutation from '../queries/issue_create.mutation.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
 import issueSetSubscriptionMutation from '../graphql/mutations/issue_set_subscription.mutation.graphql';
+import createFlash from '~/flash';
+import { __ } from '~/locale';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -334,6 +336,9 @@ export default {
         });
 
         return nodes;
+      })
+      .catch(() => {
+        createFlash({ message: __('An error occurred while updating assignees.') });
       });
   },
 

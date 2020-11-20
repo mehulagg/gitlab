@@ -18,6 +18,9 @@ import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.gra
 import destroyBoardListMutation from '~/boards/queries/board_list_destroy.mutation.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
+import createFlash from '~/flash';
+
+jest.mock('~/flash');
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -639,38 +642,57 @@ describe('setAssignees', () => {
   const refPath = `${projectPath}#3`;
   const iid = '1';
 
-  beforeEach(() => {
-    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-      data: { issueSetAssignees: { issue: { assignees: { nodes: [{ ...node }] } } } },
+  describe('when succeeds', () => {
+    beforeEach(() => {
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: { issueSetAssignees: { issue: { assignees: { nodes: [{ ...node }] } } } },
+      });
+    });
+
+    it('calls mutate with the correct values', async () => {
+      await actions.setAssignees(
+        { commit: () => {}, getters: { activeIssue: { iid, referencePath: refPath } } },
+        [name],
+      );
+
+      expect(gqlClient.mutate).toHaveBeenCalledWith({
+        mutation: updateAssignees,
+        variables: { iid, assigneeUsernames: [name], projectPath },
+      });
+    });
+
+    it('calls the correct mutation with the correct values', done => {
+      testAction(
+        actions.setAssignees,
+        {},
+        { activeIssue: { iid, referencePath: refPath }, commit: () => {} },
+        [
+          {
+            type: 'UPDATE_ISSUE_BY_ID',
+            payload: { prop: 'assignees', issueId: undefined, value: [node] },
+          },
+        ],
+        [],
+        done,
+      );
     });
   });
 
-  it('calls mutate with the correct values', async () => {
-    await actions.setAssignees(
-      { commit: () => {}, getters: { activeIssue: { iid, referencePath: refPath } } },
-      [name],
-    );
-
-    expect(gqlClient.mutate).toHaveBeenCalledWith({
-      mutation: updateAssignees,
-      variables: { iid, assigneeUsernames: [name], projectPath },
+  describe('when fails', () => {
+    beforeEach(() => {
+      jest.spyOn(gqlClient, 'mutate').mockRejectedValue();
     });
-  });
 
-  it('calls the correct mutation with the correct values', done => {
-    testAction(
-      actions.setAssignees,
-      {},
-      { activeIssue: { iid, referencePath: refPath }, commit: () => {} },
-      [
-        {
-          type: 'UPDATE_ISSUE_BY_ID',
-          payload: { prop: 'assignees', issueId: undefined, value: [node] },
-        },
-      ],
-      [],
-      done,
-    );
+    it('calls createFlash', async () => {
+      await actions.setAssignees({
+        commit: () => {},
+        getters: { activeIssue: { iid, referencePath: refPath } },
+      });
+
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while updating assignees.',
+      });
+    });
   });
 });
 
