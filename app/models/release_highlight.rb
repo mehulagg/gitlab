@@ -27,13 +27,18 @@ class ReleaseHighlight
   def self.load_items(page:)
     index = page - 1
     file_path = file_paths[index]
-
     file = File.read(file_path)
-
     items = YAML.safe_load(file, permitted_classes: [Date])
 
     platform = Gitlab.com? ? 'gitlab-com' : 'self-managed'
-    items&.select {|item| item[platform] }
+
+    items&.map! do |item|
+      next unless item[platform]
+
+      item.tap {|i| i['body'] = Kramdown::Document.new(i['body']).to_html }
+    end
+
+    items&.compact
   rescue Psych::Exception => e
     Gitlab::ErrorTracking.track_exception(e, file_path: file_path)
 

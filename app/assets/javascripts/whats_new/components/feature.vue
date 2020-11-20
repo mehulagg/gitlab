@@ -52,7 +52,7 @@ export default {
         class="img-thumbnail gl-px-8 gl-py-3 whats-new-item-image"
       />
     </gl-link>
-    <p class="gl-pt-3">{{ feature.body }}</p>
+    <div class="gl-pt-3" v-html="feature.body"></div>
     <gl-link
       :href="feature.url"
       target="_blank"

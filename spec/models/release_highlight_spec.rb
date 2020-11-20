@@ -82,6 +82,10 @@ RSpec.describe ReleaseHighlight do
         expect(subject[:next_page]).to eq(2)
       end
 
+      it 'parses the body as markdown and returns html' do
+        expect(subject[:items].first['body']).to match("<h2 id=\"bright-and-sunshinin-day\">bright and sunshinin’ day</h2>")
+      end
+
       context 'when Gitlab.com' do
         let(:dot_com) { true }
 
