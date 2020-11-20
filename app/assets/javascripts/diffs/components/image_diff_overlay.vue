@@ -69,8 +69,8 @@ export default {
       const { x, y, width, height } = meta;
 
       return {
-        x: (((x / width) * 100) / ((this.renderedWidth / width) * 100)) * 100,
-        y: (((y / height) * 100) / ((this.renderedHeight / height) * 100)) * 100,
+        x: (x / width) * 100,
+        y: (y / height) * 100,
       };
     },
     getPosition(discussion) {
@@ -83,15 +83,17 @@ export default {
     },
     clickedImage(x, y) {
       const { width, height } = this.getImageDimensions();
+      const xPercent = (((x / width) * 100) / ((this.renderedWidth / width) * 100)) * 100;
+      const yPercent = (((y / height) * 100) / ((this.renderedHeight / height) * 100)) * 100;
 
       this.openDiffFileCommentForm({
         fileHash: this.fileHash,
         width,
         height,
-        x,
-        y,
-        xPercent: (((x / width) * 100) / ((this.renderedWidth / width) * 100)) * 100,
-        yPercent: (((y / height) * 100) / ((this.renderedHeight / height) * 100)) * 100,
+        x: width * (xPercent / 100),
+        y: height * (yPercent / 100),
+        xPercent,
+        yPercent,
       });
     },
   },
