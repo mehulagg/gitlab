@@ -2203,9 +2203,6 @@ msgstr ""
 msgid "AdminUsers|Regular users have access to their groups and projects"
 msgstr ""
 
-msgid "AdminUsers|Reject request"
-msgstr ""
-
 msgid "AdminUsers|Restore user access to the account, including web, Git and API."
 msgstr ""
 
@@ -12700,6 +12697,9 @@ msgstr ""
 msgid "GitLab Workhorse"
 msgstr ""
 
+msgid "GitLab account request rejected"
+msgstr ""
+
 msgid "GitLab commit"
 msgstr ""
 
@@ -13739,6 +13739,9 @@ msgid "HealthCheck|No Health Problems Detected"
 msgstr ""
 
 msgid "HealthCheck|Unhealthy"
+msgstr ""
+
+msgid "Hello %{name},"
 msgstr ""
 
 msgid "Hello there"
@@ -31586,7 +31589,7 @@ msgstr ""
 msgid "Your request for access has been queued for review."
 msgstr ""
 
-msgid "Your request to join host fix this has been rejected."
+msgid "Your request to join %{host} has been rejected."
 msgstr ""
 
 msgid "Your response has been recorded."
