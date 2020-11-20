@@ -1,6 +1,5 @@
 <script>
 import { GlTooltip, GlButton } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
 
 export default {
@@ -9,7 +8,6 @@ export default {
     GlTooltip,
     GlButton,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     canAdminList: {
       type: Boolean,
@@ -39,7 +37,7 @@ export default {
 
 <template>
   <div class="board-extra-actions">
-    <span v-if="glFeatures.addIssuesButton" ref="addIssuesButtonTooltip" class="gl-ml-3">
+    <span ref="addIssuesButtonTooltip" class="gl-ml-3">
       <gl-button
         v-if="canAdminList"
         type="button"

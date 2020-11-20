@@ -303,7 +303,7 @@ export default () => {
 
   const issueBoardsModal = document.getElementById('js-add-issues-btn');
 
-  if (issueBoardsModal) {
+  if (issueBoardsModal && gon.features.addIssuesButton) {
     // eslint-disable-next-line no-new
     new Vue({
       el: issueBoardsModal,
