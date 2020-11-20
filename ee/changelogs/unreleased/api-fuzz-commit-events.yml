@@ -1,5 +1,5 @@
 ---
-title: Update API fuzz testing to only run on branch pipelines
-merge_request:
+title: Only run fuzzing on commit events, not all events
+merge_request: 48264
 author:
 type: changed
