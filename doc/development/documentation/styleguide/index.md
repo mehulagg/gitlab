@@ -1777,9 +1777,9 @@ if we're currently supporting GitLab versions 11.x through 13.x, special
 instructions for users of GitLab 10.2 and earlier to complete a task should be
 removed.
 
-To view information about the history of a feature,
-users can view GitLab [release posts](https://about.gitlab.com/releases/)
-or search for the issue or merge request where the work was done.
+To view information about the history of a feature, users can view GitLab
+[release posts](https://about.gitlab.com/releases/), or search for the issue or
+merge request where the work was done.
 
 ## Products and features
 
