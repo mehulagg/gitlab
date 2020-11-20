@@ -66,6 +66,12 @@ RSpec.describe Admin::UsersController do
       expect(Issue.exists?(issue.id)).to be_falsy
     end
 
+    it 'does not email a non-pending user' do
+      expect(NotificationService).not_to receive(:new)
+
+      delete :destroy, params: { id: user.username, hard_delete: true }, format: :json
+    end
+
     context 'when rejecting a pending user' do
       let(:pending_user) { create(:user, :blocked_pending_approval) }
 
