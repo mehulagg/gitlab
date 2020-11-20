@@ -6,6 +6,8 @@ module Elastic
 
     feature_category :global_search
     urgency :throttled
+    # TODO - add idempotent specs
+    idempotent!
 
     def perform(version, name, filename)
       return false unless Gitlab::CurrentSettings.elasticsearch_indexing?

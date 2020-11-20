@@ -31,27 +31,25 @@ RSpec.describe Elastic::MigrationBatchWorker, :elastic do
       end
 
       context 'migration batch process' do
-        before do
-          allow(migration).to receive(:completed?).and_return(completed)
-        end
-
         using RSpec::Parameterized::TableSyntax
 
+        before do
+          allow(Elastic::MigrationRecord).to receive(:new).and_return(migration)
+          allow(migration).to receive(:completed?).and_return(completed)
+        end
         where(:completed) do
           [true, false]
         end
 
         with_them do
           it 'updates migration record as complete only when completed', :aggregate_failures do
-            expect_next_instance_of(Elastic::MigrationRecord) do |migration_record|
-              expect(migration_record).to receive(:migrate).once
+            expect(migration).to receive(:migrate).once
 
-              if completed
-                expect(migration_record).to receive(:save!).with(completed: true)
-              else
-                expect(migration_record).not_to receive(:save!)
-                expect(Elastic::MigrationBatchWorker).to receive(:perform_in).with(5.minutes, migration.version, migration.name, migration.filename)
-              end
+            if completed
+              expect(migration).to receive(:save!).with(completed: true)
+            else
+              expect(migration).not_to receive(:save!)
+              expect(Elastic::MigrationBatchWorker).to receive(:perform_in).with(5.minutes, migration.version, migration.name, migration.filename)
             end
 
             subject.perform(migration.version, migration.name, migration.filename)
