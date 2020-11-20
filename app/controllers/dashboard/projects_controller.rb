@@ -22,11 +22,8 @@ class Dashboard::ProjectsController < Dashboard::ApplicationController
         render_projects
       end
       format.atom do
-        if Settings[:atom_off]
-          return render_404
-        end
         load_events
-        render layout: 'xml.atom'
+        Settings[:atom_off] ? render_404 : render layout: 'xml.atom'
       end
       format.json do
         render json: {

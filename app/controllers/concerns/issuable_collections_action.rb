@@ -16,10 +16,7 @@ module IssuableCollectionsAction
     respond_to do |format|
       format.html
       format.atom do
-        if Settings[:atom_off]
-          return render_404
-        end
-        render layout: 'xml.atom'
+        Settings[:atom_off] ? render_404 : render layout: 'xml.atom'
       end
     end
   end

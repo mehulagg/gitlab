@@ -165,11 +165,8 @@ class ProjectsController < Projects::ApplicationController
       end
 
       format.atom do
-        if Settings[:atom_off]
-           return render_404
-         end
         load_events
-        render layout: 'xml.atom'
+        Settings[:atom_off] ? return render_404 : render layout: 'xml.atom'
       end
     end
   end

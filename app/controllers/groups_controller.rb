@@ -94,10 +94,7 @@ class GroupsController < Groups::ApplicationController
       end
 
       format.atom do
-        if Settings[:atom_off]
-          return render_404
-        end
-        render_details_view_atom
+        Settings[:atom_off] ? render_404 : render_details_view_atom
       end
     end
   end
@@ -109,10 +106,7 @@ class GroupsController < Groups::ApplicationController
       end
 
       format.atom do
-        if Settings[:atom_off]
-          return render_404
-        end
-        render_details_view_atom
+        Settings[:atom_off] ? render_404 : render_details_view_atom
       end
     end
   end
