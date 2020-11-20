@@ -10,6 +10,7 @@ RSpec.describe 'GFM autocomplete', :js do
   let_it_be(:child_group) { create(:group, parent: group, name: 'My group') }
   let_it_be(:project) { create(:project, group: child_group) }
   let_it_be(:label) { create(:label, project: project, title: 'special+') }
+  let_it_be(:epic) { create(:epic, group: child_group) }
 
   let(:issue) { create(:issue, project: project) }
 
@@ -473,6 +474,7 @@ RSpec.describe 'GFM autocomplete', :js do
   describe 'when tribute_autocomplete feature flag is on' do
     before do
       stub_feature_flags(tribute_autocomplete: true)
+      stub_licensed_features(epics: true)
 
       sign_in(user)
       visit project_issue_path(project, issue)
@@ -847,6 +849,18 @@ RSpec.describe 'GFM autocomplete', :js do
       let(:expected_body) { object.to_reference }
 
       it_behaves_like 'autocomplete suggestions'
+    end
+
+    context 'epics' do
+      it 'shows epics' do
+        note = find('#note-body')
+
+        type(note, '&')
+
+        wait_for_requests
+
+        expect(find('.tribute-container ul', visible: true).text).to have_content(epic.title)
+      end
     end
 
     context 'when other notes are destroyed' do
