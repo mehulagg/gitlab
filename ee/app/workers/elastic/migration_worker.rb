@@ -42,7 +42,7 @@ module Elastic
     def execute_migration(migration)
       if migration.persisted?
         logger.info "MigrationWorker: migration[#{migration.name}] did not execute migrate method since it was already executed. Waiting for migration to complete"
-      elsif migration.batch_update?
+      elsif migration.batched?
         logger.info "MigrationWorker: migration[#{migration.name}] kicking off batch migration worker"
         Elastic::MigrationWorker.perform_async(migration.version, migration.name, migration.filename)
       else

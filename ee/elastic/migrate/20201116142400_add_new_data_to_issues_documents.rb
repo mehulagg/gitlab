@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AddNewDataToIssuesDocuments < Elastic::Migration
-  batch_update!
+  batched!
 
   BATCH_SIZE = 5000
 

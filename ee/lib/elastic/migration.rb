@@ -2,7 +2,7 @@
 
 module Elastic
   class Migration
-    include MigrationAttributes
+    include Elastic::MigrationAttributes
 
     attr_reader :version
 
