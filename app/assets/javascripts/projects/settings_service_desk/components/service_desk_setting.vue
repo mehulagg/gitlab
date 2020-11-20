@@ -31,6 +31,10 @@ export default {
       required: false,
       default: '',
     },
+    customEmailEnabled: {
+      type: Boolean,
+      required: false
+    },
     initialSelectedTemplate: {
       type: String,
       required: false,
@@ -69,7 +73,8 @@ export default {
       return [''].concat(this.templates);
     },
     hasProjectKeySupport() {
-      return Boolean(this.glFeatures.serviceDeskCustomAddress);
+      console.log(this.customEmailEnabled);
+      return Boolean(this.customEmailEnabled);
     },
     email() {
       return this.customEmail || this.incomingEmail;
