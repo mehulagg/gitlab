@@ -102,8 +102,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
         @coverage_path = coverage_reports_project_merge_request_path(@project, @merge_request, format: :json) if @merge_request.has_coverage_reports?
         @endpoint_metadata_url = endpoint_metadata_url(@project, @merge_request)
 
-        set_pipeline_variables
-
         render
       end
 
