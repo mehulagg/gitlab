@@ -45,7 +45,6 @@ export default {
           v-if="actionButton"
           :variant="actionButton.variant"
           :category="actionButton.category"
-          size="medium"
           @click="actionButton.action"
           >{{ actionButton.text }}</gl-button
         >
