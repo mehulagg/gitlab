@@ -13,7 +13,7 @@ module ComplianceManagement
       end
 
       def execute
-        return ServiceResponse.error(message: _('Feature not available')) unless permitted?
+        return ServiceResponse.error(message: _('Not permitted to create framework')) unless permitted?
 
         framework.assign_attributes(
           namespace: namespace,
@@ -28,7 +28,11 @@ module ComplianceManagement
       private
 
       def permitted?
-        can?(current_user, :create_custom_compliance_frameworks, namespace)
+        policy_class.new(current_user, namespace).can?(:create_custom_compliance_frameworks)
+      end
+
+      def policy_class
+        namespace.kind == 'user' ? NamespacePolicy : GroupPolicy
       end
 
       def success

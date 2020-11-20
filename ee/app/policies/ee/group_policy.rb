@@ -13,6 +13,7 @@ module EE
       condition(:epics_available) { @subject.feature_available?(:epics) }
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
       condition(:subepics_available) { @subject.feature_available?(:subepics) }
+      condition(:custom_compliance_frameworks_enabled) { License.feature_available?(:custom_compliance_frameworks) }
       condition(:contribution_analytics_available) do
         @subject.feature_available?(:contribution_analytics)
       end
@@ -307,6 +308,10 @@ module EE
         prevent :admin_group_member
         prevent :create_deploy_token
         prevent :create_subgroup
+      end
+
+      rule { (owner | admin) & custom_compliance_frameworks_enabled }.policy do
+        enable :create_custom_compliance_frameworks
       end
     end
 
