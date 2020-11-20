@@ -35,7 +35,7 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="__('Edit')" :size="__('small')">
+  <gl-dropdown :text="__('Edit')" size="small">
     <gl-dropdown-item
       href="#"
       :is-check-item="true"
