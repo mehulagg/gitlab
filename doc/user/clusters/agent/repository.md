@@ -6,6 +6,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Kubernetes Agent configuration repository **(PREMIUM ONLY)**
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
+> - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
+
 The GitLab Kubernetes Agent integration supports hosting your configuration for
 multiple GitLab Kubernetes Agents in a single repository. These agents can be running
 in the same cluster or in multiple clusters, and potentially with more than one Agent per cluster.
