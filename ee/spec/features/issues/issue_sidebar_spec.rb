@@ -98,6 +98,7 @@ RSpec.describe 'Issue Sidebar' do
 
       context 'when user closes an issue' do
         it 'disables the edit button' do
+          # TODO remove close-issue-button
           page.find('[data-testid="close-issue-button"]').click
 
           page.within('.health-status') do

@@ -2,6 +2,7 @@
 - can_update_merge_request = can?(current_user, :update_merge_request, @merge_request)
 - can_reopen_merge_request = can?(current_user, :reopen_merge_request, @merge_request)
 - state_human_name, state_icon_name = state_name_with_icon(@merge_request)
+- are_close_and_open_buttons_hidden = merge_request_button_hidden?(@merge_request, true) && merge_request_button_hidden?(@merge_request, false)
 
 - if @merge_request.closed_without_fork?
   .gl-alert.gl-alert-danger.gl-mb-5
@@ -24,8 +25,8 @@
       = sprite_icon('chevron-double-lg-left')
 
   .detail-page-header-actions.js-issuable-actions
-    .clearfix.issue-btn-group.dropdown
-      %button.btn.btn-default.float-left.d-md-none{ type: "button", data: { toggle: "dropdown" } }
+    .clearfix.dropdown
+      %button.btn.btn-default.float-left.d-md-none.gl-xs-w-full{ type: "button", data: { toggle: "dropdown" } }
         Options
         = icon('caret-down')
       .dropdown-menu.dropdown-menu-right
@@ -47,4 +48,7 @@
       - if can_update_merge_request
         = link_to 'Edit', edit_project_merge_request_path(@project, @merge_request), class: "d-none d-md-block btn gl-button btn-grouped js-issuable-edit qa-edit-button"
 
-      = render 'shared/issuable/close_reopen_button', issuable: @merge_request, can_update: can_update_merge_request, can_reopen: can_reopen_merge_request
+      - if can_update_merge_request && !are_close_and_open_buttons_hidden
+        = render 'shared/issuable/close_reopen_draft_report_toggle', issuable: @merge_request
+      - elsif !@merge_request.merged?
+        = link_to _('Report abuse'), new_abuse_report_path(user_id: @merge_request.author.id, ref_url: merge_request_url(@merge_request)), class: 'd-none d-md-block btn btn-grouped btn-close', title: _('Report abuse')

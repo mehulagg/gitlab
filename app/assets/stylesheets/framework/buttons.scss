@@ -200,13 +200,8 @@
     @include btn-orange;
   }
 
-  &.btn-close,
-  &.btn-close-color {
+  &.btn-close {
     @include btn-outline($white, $orange-500, $orange-500, $orange-50, $orange-600, $orange-600, $orange-100, $orange-700, $orange-700);
-  }
-
-  &.btn-spam {
-    @include btn-outline($white, $red-500, $red-500, $red-100, $red-700, $red-500, $red-200, $red-600, $red-800);
   }
 
   &.btn-danger,
@@ -217,11 +212,6 @@
 
   &.btn-cancel {
     float: right;
-  }
-
-  &.btn-reopen,
-  .btn-reopen-color {
-    /* should be same as parent class for now */
   }
 
   &.btn-grouped {

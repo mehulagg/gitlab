@@ -245,6 +245,7 @@ export const toggleResolveNote = ({ commit, dispatch }, { endpoint, isResolved, 
 };
 
 export const toggleBlockedIssueWarning = ({ commit }, value) => {
+  // TODO update this
   commit(types.TOGGLE_BLOCKED_ISSUE_WARNING, value);
   // Hides Close issue button at the top of issue page
   const closeDropdown = document.querySelector('.js-issuable-close-dropdown');

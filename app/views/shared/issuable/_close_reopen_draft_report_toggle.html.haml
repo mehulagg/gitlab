@@ -16,7 +16,7 @@
       %span.sr-only= _('Toggle dropdown')
       = sprite_icon "angle-down", size: 12
 
-    %ul.js-issuable-close-menu.dropdown-menu.dropdown-menu-right
+    %ul.dropdown-menu.dropdown-menu-right
       - if issuable.open?
         %li
           = link_to close_issuable_path(issuable), method: :put do
@@ -29,8 +29,8 @@
         - unless issuable.closed?
           %li.divider.droplab-item-ignore
 
-        %li.report-item
-          %a.report-abuse-link{ href: new_abuse_report_path(user_id: issuable.author.id, ref_url: issuable_url(issuable)) }
+        %li
+          %a{ href: new_abuse_report_path(user_id: issuable.author.id, ref_url: merge_request_url(issuable)) }
             .description
               %strong.title= _('Report abuse')
               %p.text
