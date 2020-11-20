@@ -22,10 +22,8 @@ RSpec.describe Mutations::Admin::Analytics::DevopsAdoption::Segments::Update do
           id
           name
           groups {
-            nodes {
-              id
-              name
-            }
+            id
+            name
           }
         }
       QL
@@ -52,7 +50,7 @@ RSpec.describe Mutations::Admin::Analytics::DevopsAdoption::Segments::Update do
     segment = mutation_response['segment']
     expect(segment['name']).to eq('new name')
 
-    group_names = segment['groups']['nodes'].map { |node| node['name'] }
+    group_names = segment['groups'].map { |node| node['name'] }
     expect(group_names).to match_array(%w[aaaa bbbb cccc])
   end
 
@@ -74,7 +72,7 @@ RSpec.describe Mutations::Admin::Analytics::DevopsAdoption::Segments::Update do
     end
 
     it 'removes all selections' do
-      expect(mutation_response['segment']['groups']['nodes']).to be_empty
+      expect(mutation_response['segment']['groups']).to be_empty
     end
   end
 end

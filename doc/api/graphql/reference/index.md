@@ -1104,9 +1104,25 @@ Segment.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `groups` | GroupConnection | Assigned groups |
+| `groups` | Group! => Array | Assigned groups |
 | `id` | ID! | ID of the segment |
+| `latestSnapshot` | DevopsAdoptionSnapshot | The latest adoption metrics for the segment |
 | `name` | String! | Name of the segment |
+
+### DevopsAdoptionSnapshot
+
+Snapshot.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `deploySucceeded` | Boolean! | A deployment was succeeded in the last 30 days |
+| `issueOpened` | Boolean! | An issue was opened in the last 30 days |
+| `mergeRequestApproved` | Boolean! | A merge request was opened in the last 30 days |
+| `mergeRequestOpened` | Boolean! | A merge request was opened in the last 30 days |
+| `pipelineSucceeded` | Boolean! | A pipeline was succeeded in the last 30 days |
+| `recordedAt` | Time! | The time the snapshot was recorded |
+| `runnerConfigured` | Boolean! | A runner was used in the last 30 days |
+| `securityScanSucceeded` | Boolean! | A security scan was succeeded in the last 30 days |
 
 ### DiffPosition
 

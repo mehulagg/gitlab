@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
   subject { build(:devops_adoption_segment) }
 
+  it { is_expected.to have_many(:segment_selections) }
+  it { is_expected.to have_many(:groups) }
+  it { is_expected.to have_many(:snapshots) }
+
   describe 'validation' do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name) }
@@ -35,6 +39,16 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
 
     it 'orders segments by name' do
       expect(subject).to eq([segment_2, segment_1])
+    end
+  end
+
+  describe '.latest_snapshot' do
+    let!(:segment) { create(:devops_adoption_segment, name: 'test_segment') }
+    let!(:latest_snapshot) { create(:devops_adoption_snapshot, segment: segment, recorded_at: 2.days.ago) }
+    let!(:old_snapshot) { create(:devops_adoption_snapshot, segment: segment, recorded_at: 5.days.ago) }
+
+    it 'loads the latest snapshot' do
+      expect(segment.latest_snapshot).to eq(latest_snapshot)
     end
   end
 

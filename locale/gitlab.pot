@@ -9549,6 +9549,9 @@ msgstr ""
 msgid "DevopsAdoptionSegment|The maximum number of segments has been reached"
 msgstr ""
 
+msgid "DevopsAdoptionSegment|The maximum number of selections has been reached"
+msgstr ""
+
 msgid "DevopsAdoption|%{selectedCount} group selected (20 max)"
 msgstr ""
 

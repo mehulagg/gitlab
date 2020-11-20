@@ -6539,32 +6539,17 @@ type DevopsAdoptionSegment {
   """
   Assigned groups
   """
-  groups(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-  ): GroupConnection
+  groups: [Group!]
 
   """
   ID of the segment
   """
   id: ID!
+
+  """
+  The latest adoption metrics for the segment
+  """
+  latestSnapshot: DevopsAdoptionSnapshot
 
   """
   Name of the segment
@@ -6605,6 +6590,51 @@ type DevopsAdoptionSegmentEdge {
   The item at the end of the edge.
   """
   node: DevopsAdoptionSegment
+}
+
+"""
+Snapshot
+"""
+type DevopsAdoptionSnapshot {
+  """
+  A deployment was succeeded in the last 30 days
+  """
+  deploySucceeded: Boolean!
+
+  """
+  An issue was opened in the last 30 days
+  """
+  issueOpened: Boolean!
+
+  """
+  A merge request was opened in the last 30 days
+  """
+  mergeRequestApproved: Boolean!
+
+  """
+  A merge request was opened in the last 30 days
+  """
+  mergeRequestOpened: Boolean!
+
+  """
+  A pipeline was succeeded in the last 30 days
+  """
+  pipelineSucceeded: Boolean!
+
+  """
+  The time the snapshot was recorded
+  """
+  recordedAt: Time!
+
+  """
+  A runner was used in the last 30 days
+  """
+  runnerConfigured: Boolean!
+
+  """
+  A security scan was succeeded in the last 30 days
+  """
+  securityScanSucceeded: Boolean!
 }
 
 input DiffImagePositionInput {
@@ -9870,41 +9900,6 @@ type Group {
   Web URL of the group
   """
   webUrl: String!
-}
-
-"""
-The connection type for Group.
-"""
-type GroupConnection {
-  """
-  A list of edges.
-  """
-  edges: [GroupEdge]
-
-  """
-  A list of nodes.
-  """
-  nodes: [Group]
-
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-An edge in a connection.
-"""
-type GroupEdge {
-  """
-  A cursor for use in pagination.
-  """
-  cursor: String!
-
-  """
-  The item at the end of the edge.
-  """
-  node: Group
 }
 
 """

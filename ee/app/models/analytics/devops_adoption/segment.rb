@@ -5,6 +5,8 @@ class Analytics::DevopsAdoption::Segment < ApplicationRecord
 
   has_many :segment_selections
   has_many :groups, through: :segment_selections
+  has_many :snapshots, inverse_of: :segment
+  has_one :latest_snapshot, -> { order(recorded_at: :desc) }, inverse_of: :segment, class_name: 'Snapshot'
 
   validates :name, presence: true, uniqueness: true, length: { maximum: 255 }
   validate :validate_segment_count, on: :create
