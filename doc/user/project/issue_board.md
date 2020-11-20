@@ -435,13 +435,22 @@ To delete a list from an issue board:
 
 ### Add issues to a list
 
-You can add issues to a list by clicking the **Add issues** button
+You can add issues to a list in a project issue board by clicking the **Add issues** button
 in the top right corner of the issue board. This opens up a modal
 window where you can see all the issues that do not belong to any list.
 
 Select one or more issues by clicking the cards and then click **Add issues**
 to add them to the selected list. You can limit the issues you want to add to
-the list by filtering by author, assignee, milestone, and label.
+the list by filtering by the following:
+
+- Assignee
+- Author
+- Epic
+- Label
+- Milestone
+- My Reaction
+- Release
+- Weight
 
 ![Bulk adding issues to lists](img/issue_boards_add_issues_modal_v13_6.png)
 
@@ -459,7 +468,16 @@ You should be able to use the filters on top of your issue board to show only
 the results you want. It's similar to the filtering used in the issue tracker,
 as the metadata from the issues and labels is re-used in the issue board.
 
-You can filter by author, assignee, milestone, and label.
+You can filter by the following:
+
+- Assignee
+- Author
+- Epic
+- Label
+- Milestone
+- My Reaction
+- Release
+- Weight
 
 ### Create workflows
 
