@@ -28,10 +28,6 @@ class DeviseMailerPreview < ActionMailer::Preview
     DeviseMailer.user_admin_approval(unsaved_user, {})
   end
 
-  def user_admin_rejection
-    DeviseMailer.user_admin_rejection(unsaved_user, {})
-  end
-
   private
 
   def unsaved_user

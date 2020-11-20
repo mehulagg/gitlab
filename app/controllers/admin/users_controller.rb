@@ -73,15 +73,17 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def reject
-    user.delete_async(deleted_by: current_user, params: destroy_params)
+    name = user.name
+    email = user.email
 
-    respond_to do |format|
-      format.html { redirect_to admin_users_path, status: :found, notice: _("The user is being deleted.") }
-      format.json { head :ok }
+    result = Users::DestroyService.new(current_user).execute(user, hard_delete: true)
+
+    if result[:status] == :success
+      NotificationService.new.user_admin_rejection(name, email).deliver_later
+      redirect_back_or_admin_user(notice: _("The user is being deleted."))
+    else
+      redirect_back_or_admin_user(alert: result[:message])
     end
-
-    DeviseMailer.user_admin_rejection(user).deliver_later
-
   end
 
   def activate
@@ -200,7 +202,6 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def destroy
-    DeviseMailer.user_admin_rejection(user).deliver_later
     user.delete_async(deleted_by: current_user, params: destroy_params)
 
     respond_to do |format|

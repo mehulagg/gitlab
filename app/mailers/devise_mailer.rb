@@ -17,10 +17,6 @@ class DeviseMailer < Devise::Mailer
     devise_mail(record, :user_admin_approval, opts)
   end
 
-  def user_admin_rejection(record, opts = {})
-    devise_mail(record, :user_admin_rejection, opts)
-  end
-
   protected
 
   def subject_for(key)
