@@ -219,6 +219,13 @@ module UsersHelper
 
     html_escape(s_('Profile|%{job_title} at %{organization}')) % { job_title: job_title, organization: organization }
   end
+
+  def user_display_name
+    return s_('UserProfile|Blocked user') if @user.blocked?
+    return s_('UserProfile|Unconfirmed user') unless @user.confirmed?
+
+    @user.name
+  end
 end
 
 UsersHelper.prepend_if_ee('EE::UsersHelper')
