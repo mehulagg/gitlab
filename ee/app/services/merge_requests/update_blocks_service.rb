@@ -40,10 +40,18 @@ module MergeRequests
 
       # If the block is invalid, silently fail to add it
       ids_to_add.each do |blocking_id|
-        ::MergeRequestBlock.create(
+        blocked = ::MergeRequestBlock.create(
           blocking_merge_request_id: blocking_id,
           blocked_merge_request_id: merge_request.id
         )
+
+        unless blocked.persisted?
+          merge_request.errors.merge!(blocked.errors)
+        end
+      end
+
+      if invalid_references.present?
+        merge_request.errors.add(:dependencies, 'failed to save: ' + invalid_references.join(", "))
       end
 
       true
@@ -51,7 +59,7 @@ module MergeRequests
 
     private
 
-    attr_reader :visible_blocks, :hidden_blocks
+    attr_reader :visible_blocks, :hidden_blocks, :invalid_references
 
     def update?
       params.fetch(:update, false)
@@ -70,10 +78,21 @@ module MergeRequests
         next [] unless references.present?
 
         # The analyzer will only return references the current user can see
-        analyzer = ::Gitlab::ReferenceExtractor.new(merge_request.target_project, current_user)
-        analyzer.analyze(references.join(" "))
+        @invalid_references = []
+        re_references = []
 
-        analyzer.merge_requests.map(&:id)
+        references.each do |reference|
+          analyzer = ::Gitlab::ReferenceExtractor.new(merge_request.target_project, current_user)
+          analyzer.analyze(reference)
+
+          if analyzer.merge_requests.count >= 1
+            re_references << analyzer.merge_requests
+          else
+            @invalid_references << reference
+          end
+        end
+
+        re_references.flatten.map(&:id)
       end
     end
 
