@@ -382,9 +382,10 @@ RSpec.describe "Admin::Users" do
         expect(page).to have_content(user.name)
         expect(page).to have_content('Pending approval')
         expect(page).to have_link('Approve user')
-        expect(page).to have_button('Block user')
-        expect(page).to have_button('Delete user')
-        expect(page).to have_button('Delete user and contributions')
+        expect(page).to have_link('Reject request')
+        expect(page).not_to have_button('Block user')
+        expect(page).not_to have_button('Delete user')
+        expect(page).not_to have_button('Delete user and contributions')
       end
     end
 
