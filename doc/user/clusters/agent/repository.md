@@ -9,7 +9,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
 > - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
-The GitLab Kubernetes Agent integration supports hosting your configuration for
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+The [GitLab Kubernetes Agent integration](index.md) supports hosting your configuration for
 multiple GitLab Kubernetes Agents in a single repository. These agents can be running
 in the same cluster or in multiple clusters, and potentially with more than one Agent per cluster.
 
@@ -17,7 +20,7 @@ The Agent bootstraps with the GitLab installation URL and an authentication toke
 and you provide the rest of the configuration in your repository, following
 Infrastructure as Code (IaaC) best practices.
 
-A minimal repository layout looks like this, with `my_agent_1` as the name (identity)
+A minimal repository layout looks like this, with `my_agent_1` as the identity
 of your Agent:
 
 ```plaintext
@@ -27,11 +30,28 @@ of your Agent:
           |- config.yaml
 ```
 
-## Share configuration with include directives
+To use multiple YAML files, specify a `paths` attribute in the `gitops` section:
+
+```yaml
+gitops:
+  manifest_projects:
+  - id: "path-to/your-manifest-project-number1"
+  paths:
+      # Read all .yaml files from team1/app1 directory.
+      # See https://github.com/bmatcuk/doublestar#about and
+      # https://pkg.go.dev/github.com/bmatcuk/doublestar/v2#Match for globbing rules.
+    - glob: '/team1/app1/*.yaml'
+      # Read all .yaml files from team2/apps and all subdirectories
+    - glob: '/team2/apps/**/*.yaml'
+      # If 'paths' is not specified or is an empty list, the configuration below is used
+    - glob: '/**/*.{yaml,yml,json}'
+```
+
+## Share configurations with include directives
 
 You can create a more complex repository layout containing a `config.yaml` file
 to serve as a shared base, while splitting the unique parts of each configuration
-out into separate files:
+out into separate `config.yaml` files:
 
 ```plaintext
 |- .gitlab
@@ -44,10 +64,10 @@ out into separate files:
           |- config.yaml
 ```
 
-The `config.yaml` file for each Agent can use the `include: 'some_file_name.yml'`
-inclusion syntax (similar to the `.gitlab-ci.yml`
-[`include` directive](../../../ci/yaml/index.md#include)) to include the contents of
-`../../base_for_agents/config.yaml` in the finished configuration.
+To include the contents of `../../base_for_agents/config.yaml` in the finished
+configuration, use the `include: 'some_file_name.yml'` inclusion syntax (similar
+to the `.gitlab-ci.yml` [`include` directive](../../../ci/yaml/index.md#include))
+in the `config.yaml` files for each Agent.
 
 ## Monitor projects for changes
 
