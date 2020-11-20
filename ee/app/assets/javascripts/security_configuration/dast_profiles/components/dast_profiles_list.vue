@@ -185,11 +185,14 @@ export default {
                   (item.validationStatus === $options.DAST_SITE_VALIDATION_STATUS.PENDING ||
                     item.validationStatus === $options.DAST_SITE_VALIDATION_STATUS.FAILED)
               "
+              variant="info"
+              category="secondary"
+              size="small"
               @click="setValidatingProfile(item)"
               >{{ s__('DastSiteValidation|Validate target site') }}</gl-button
             >
 
-            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5">{{
+            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
               __('Edit')
             }}</gl-button>
 
@@ -198,6 +201,7 @@ export default {
               icon="remove"
               variant="danger"
               category="secondary"
+              size="small"
               class="gl-mr-3"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
