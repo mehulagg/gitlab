@@ -597,6 +597,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: approve_blocked_users
+  :feature_category: :users
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: ci_batch_reset_minutes
   :feature_category: :continuous_integration
   :has_external_dependencies:
