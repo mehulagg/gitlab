@@ -146,13 +146,13 @@ jq 'select(."grpc.time_ms" > 30000)' current
 #### Print top three projects by request volume and their three longest durations
 
 ```shell
-jq -s -r 'map(select(."grpc.request.glProjectPath" != null and ."grpc.request.glProjectPath" != "" and ."grpc.time_ms" != null)) | group_by(."grpc.request.glProjectPath") | sort_by(-length) | limit(3; .[]) | sort_by(-."grpc.time_ms") | "CT: \(length)\tPROJECT: \(.[0]."grpc.request.glProjectPath")\tDURS: \(.[0]."grpc.time_ms"),  \(.[1]."grpc.time_ms"),  \(.[2]."grpc.time_ms")"' current
+jq -s -r 'map(select(."grpc.request.glProjectPath" != null and ."grpc.request.glProjectPath" != "" and ."grpc.time_ms" != null)) | group_by(."grpc.request.glProjectPath") | sort_by(-length) | limit(3; .[]) | sort_by(-."grpc.time_ms") | "CT: \(length)\tDURS: \(.[0]."grpc.time_ms"),  \(.[1]."grpc.time_ms"),  \(.[2]."grpc.time_ms")\tPROJECT: \(.[0]."grpc.request.glProjectPath")"' current
 ```
 
 **Example output**
 
 ```plaintext
-CT: 635 PROJECT: groupA/project1     DURS: 4292.269,  4228.853,  2885.548
-CT: 462 PROJECT: groupB/project5     DURS: 4368.981,  3623.553,  361.399
-CT: 455 PROJECT: groupC/project7     DURS: 387.295,  381.874,  373.988
+CT: 635   DURS: 4292.269,  4228.853,  2885.548    PROJECT: groupABC/project123
+CT: 462   DURS: 4368.981,  3623.553,  361.399     PROJECT: groupD/project4
+CT: 455   DURS: 387.295,  381.874,  373.988       PROJECT: groupEF/project56
 ```
