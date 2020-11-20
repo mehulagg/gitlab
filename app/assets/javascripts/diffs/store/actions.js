@@ -57,6 +57,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    viewDiffsFileByFile,
   } = options;
   commit(types.SET_BASE_CONFIG, {
     endpoint,
@@ -66,26 +67,37 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    viewDiffsFileByFile,
   });
 };
 
 export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
+  const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
+  let perPage = DIFFS_PER_PAGE;
+
+  if (diffsGradualLoad) {
+    perPage = state.viewDiffsFileByFile ? 1 : 5;
+  }
+
+  const startPage = diffsGradualLoad ? 0 : 1;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
   const urlParams = {
-    per_page: DIFFS_PER_PAGE,
     w: state.showWhitespace ? '0' : '1',
     view: 'inline',
   };
+  let totalLoaded = 0;
 
   commit(types.SET_BATCH_LOADING, true);
   commit(types.SET_RETRIEVING_BATCHES, true);
   eventHub.$emit(EVT_PERF_MARK_DIFF_FILES_START);
 
-  const getBatch = (page = 1) =>
+  const getBatch = (page = startPage) =>
     axios
-      .get(mergeUrlParams({ ...urlParams, page }, state.endpointBatch))
+      .get(mergeUrlParams({ ...urlParams, page, per_page: perPage }, state.endpointBatch))
       .then(({ data: { pagination, diff_files } }) => {
+        totalLoaded += diff_files.length;
+
         commit(types.SET_DIFF_DATA_BATCH, { diff_files });
         commit(types.SET_BATCH_LOADING, false);
 
@@ -97,7 +109,10 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           dispatch('setCurrentDiffFileIdFromNote', id.split('_').pop());
         }
 
-        if (!pagination.next_page) {
+        if (
+          (diffsGradualLoad && totalLoaded === pagination.total_pages) ||
+          (!diffsGradualLoad && !pagination.next_page)
+        ) {
           commit(types.SET_RETRIEVING_BATCHES, false);
 
           // We need to check that the currentDiffFileId points to a file that exists
@@ -123,6 +138,15 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
               }),
             );
           }
+
+          return null;
+        }
+
+        if (diffsGradualLoad) {
+          const nextPage = page + perPage;
+          perPage = Math.min(perPage + 10, DIFFS_PER_PAGE);
+
+          return nextPage;
         }
 
         return pagination.next_page;

@@ -21,9 +21,9 @@ module Gitlab
           @paginated_collection = load_paginated_collection(batch_page, batch_size, diff_options)
 
           @pagination_data = {
-            current_page: @paginated_collection.current_page,
-            next_page: @paginated_collection.next_page,
-            total_pages: @paginated_collection.total_pages
+            current_page: batch_gradual_load? ? nil : @paginated_collection.current_page,
+            next_page: batch_gradual_load? ? nil : @paginated_collection.next_page,
+            total_pages: batch_gradual_load? ? relation.size : @paginated_collection.total_pages
           }
         end
 
@@ -68,10 +68,18 @@ module Gitlab
 
           paths = diff_options&.fetch(:paths, nil)
 
-          paginated_collection = relation.page(batch_page).per(batch_size)
+          paginated_collection = if batch_gradual_load?
+                                  relation.offset(batch_page).limit(batch_size)
+                                else
+                                  relation.page(batch_page).per(batch_size)
+                                end
           paginated_collection = paginated_collection.by_paths(paths) if paths
 
           paginated_collection
+        end
+
+        def batch_gradual_load?
+          Feature.enabled?(:diffs_gradual_load, @merge_request_diff.project)
         end
       end
     end
