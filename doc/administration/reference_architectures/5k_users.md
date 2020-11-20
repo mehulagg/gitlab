@@ -48,6 +48,7 @@ stateDiagram-v2
     ApplicationServer --> PgBouncer
     PgBouncer --> Database
     ApplicationServer --> ObjectStorage
+    BackgroundJobs --> ObjectStorage
 
     ApplicationMonitoring -->ApplicationServer
     ApplicationMonitoring -->Redis
