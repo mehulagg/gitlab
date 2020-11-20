@@ -349,3 +349,8 @@ Where `<test_file>` is:
 
 - `qa/specs/features/browser_ui/1_manage/login/login_spec.rb` when running the Login example.
 - `qa/specs/features/browser_ui/2_plan/issues/issue_spec.rb` when running the Issue example.
+
+## End to End Merge Request template
+
+When submitting a new End to End Test, use the New End to End Test Merge Request template to help on any additional
+steps that are required prior a successful merge.
