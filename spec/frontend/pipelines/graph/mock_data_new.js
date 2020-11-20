@@ -9,7 +9,7 @@ export const mockPipelineResponse = {
           __typename: 'CiStageConnection',
           'nodes': [
             {
-              __typename: CiGroup,
+              __typename: 'CiGroup',
               'name': 'build',
               'status': {
                 'action': null
@@ -192,7 +192,7 @@ export const mockPipelineResponse = {
               }
             },
             {
-              __typename: CiGroup,
+              __typename: 'CiGroup',
               'name': 'test',
               'status': {
                 'action': null
