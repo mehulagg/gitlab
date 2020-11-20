@@ -16,6 +16,10 @@ module Gitlab
               @package_version = package_version
             end
 
+            def fingerprint_path
+              File.basename(file_path.to_s)
+            end
+
             private
 
             def fingerprint_data

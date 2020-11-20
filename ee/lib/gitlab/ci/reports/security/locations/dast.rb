@@ -18,6 +18,10 @@ module Gitlab
               @path = path
             end
 
+            def fingerprint_path
+              path
+            end
+
             private
 
             def fingerprint_data

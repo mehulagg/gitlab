@@ -20,6 +20,10 @@ module Gitlab
               @start_line = start_line
             end
 
+            def fingerprint_path
+              File.basename(file_path.to_s)
+            end
+
             private
 
             def fingerprint_data

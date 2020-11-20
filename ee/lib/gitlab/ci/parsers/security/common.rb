@@ -56,13 +56,14 @@ module Gitlab
           def create_vulnerability(report, data, version)
             identifiers = create_identifiers(report, data['identifiers'])
             links = create_links(report, data['links'])
+            location = create_location(data['location'] || {})
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
                 uuid: SecureRandom.uuid,
                 report_type: report.type,
-                name: data['message'],
+                name: finding_name(data, identifiers, location),
                 compare_key: data['cve'] || '',
-                location: create_location(data['location'] || {}),
+                location: location,
                 severity: parse_severity_level(data['severity']&.downcase),
                 confidence: parse_confidence_level(data['confidence']&.downcase),
                 scanner: create_scanner(report, data['scanner']),
@@ -134,6 +135,14 @@ module Gitlab
             return input if ::Vulnerabilities::Finding::CONFIDENCE_LEVELS.key?(input)
 
             'unknown'
+          end
+
+          def finding_name(data, identifiers, location)
+            return data['message'] if data['message'].present?
+            return data['name'] if data['name'].present?
+
+            identifier = identifiers.find(&:cve?) || identifiers.find(&:cwe?) || identifiers.first
+            "#{identifier.name} in #{location&.fingerprint_path}"
           end
 
           def create_location(location_data)
