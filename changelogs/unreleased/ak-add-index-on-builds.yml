@@ -1,0 +1,5 @@
+---
+title: Improve ci_builds runner_id index
+merge_request: 48241
+author:
+type: fixed

@@ -20423,7 +20423,7 @@ CREATE INDEX index_ci_builds_on_protected ON ci_builds USING btree (protected);
 
 CREATE INDEX index_ci_builds_on_queued_at ON ci_builds USING btree (queued_at);
 
-CREATE INDEX index_ci_builds_on_runner_id ON ci_builds USING btree (runner_id);
+CREATE INDEX index_ci_builds_on_runner_id_and_id_desc ON ci_builds USING btree (runner_id, id DESC);
 
 CREATE INDEX index_ci_builds_on_stage_id ON ci_builds USING btree (stage_id);
 
