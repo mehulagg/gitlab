@@ -275,4 +275,6 @@ removed with one of the future versions of GitLab.
 
 ### '404 not found' when triggering a pipeline
 
-If you get a response of `{"message":"404 Not Found"}` when triggering a pipeline, make sure you are not using a Personal Access Token. Add a new trigger and use the token generated when you create the trigger to authenticate when triggering a pipeline. 
+A response of `{"message":"404 Not Found"}` when triggering a pipeline might be caused
+by using a Personal Access Token instead of a trigger token. [Add a new trigger](#adding-a-new-trigger)
+and use that token to authenticate when triggering a pipeline.
