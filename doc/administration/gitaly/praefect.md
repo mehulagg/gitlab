@@ -59,6 +59,16 @@ Follow the [HA Gitaly epic](https://gitlab.com/groups/gitlab-org/-/epics/1489)
 for improvements including
 [horizontally distributing reads](https://gitlab.com/groups/gitlab-org/-/epics/2013).
 
+## Gitaly Cluster compared to Geo
+
+Gitaly Cluster provides redundancy, which is also provided by [Geo](../geo/index.md). However,
+Gitaly Cluster differs to Geo in the following ways:
+
+| Tool           | Nodes    | Locations | Latency | Provides redundancy for |
+|:---------------|:---------|:----------|:--------|:------------------------|
+| Gitaly Cluster | Multiple | Single    | Lower   | Data storage in Git     |
+| Geo            | Multiple | Multiple  | Higher  | Entire GitLab instance  |
+
 ## Cluster or shard
 
 Gitaly supports multiple models of scaling:
@@ -69,8 +79,8 @@ Gitaly supports multiple models of scaling:
 - Sharding using [repository storage paths](../repository_storage_paths.md), where each repository
   is stored on the assigned Gitaly node. All requests are routed to this node.
 
-| Cluster | Shard |
-|---|---|
+| Cluster                                           | Shard                                         |
+|:--------------------------------------------------|:----------------------------------------------|
 | ![Cluster example](img/cluster_example_v13_3.png) | ![Shard example](img/shard_example_v13_3.png) |
 
 Generally, Gitaly Cluster can replace sharded configurations, at the expense of additional storage
@@ -757,7 +767,7 @@ Big-IP LTM, and Citrix Net Scaler. This documentation outlines what ports
 and protocols you need configure.
 
 | LB Port | Backend Port | Protocol |
-|---------|--------------|----------|
+|:--------|:-------------|:---------|
 | 2305    | 2305         | TCP      |
 
 ### GitLab
