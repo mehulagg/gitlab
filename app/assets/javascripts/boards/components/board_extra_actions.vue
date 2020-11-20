@@ -19,6 +19,7 @@ export default {
       type: Boolean,
       required: true,
     },
+    // This prop should be removed as soon as addIssuesButton feature flag is removed
     openModal: {
       type: Function,
       required: true,
