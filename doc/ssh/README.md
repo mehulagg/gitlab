@@ -18,7 +18,7 @@ This page can help you configure secure SSH keys which you can use to help secur
 connections to GitLab repositories.
 
 - If you need information on creating SSH keys, start with our [options for SSH keys](#options-for-ssh-keys).
-- If you've SSH keys dedicated for your GitLab account, you may be interested in [Working with non-default SSH key pair paths](#working-with-non-default-ssh-key-pair-paths).
+- If you have SSH keys dedicated for your GitLab account, you may be interested in [Working with non-default SSH key pair paths](#working-with-non-default-ssh-key-pair-paths).
 - If you already have an SSH key pair, you can go to how you can [add an SSH key to your GitLab account](#adding-an-ssh-key-to-your-gitlab-account).
 
 ## Requirements
