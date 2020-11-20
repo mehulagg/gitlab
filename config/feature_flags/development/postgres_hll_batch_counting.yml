@@ -1,0 +1,8 @@
+---
+name: postgres_hll_batch_counting
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.6'
+type: development
+group: group::product analytics
+default_enabled: false

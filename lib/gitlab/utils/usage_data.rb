@@ -38,6 +38,7 @@ module Gitlab
       extend self
 
       FALLBACK = -1
+      DISTRIBUTED_HLL_FALLBACK = -2
 
       def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
         if batch
@@ -57,6 +58,19 @@ module Gitlab
         end
       rescue ActiveRecord::StatementInvalid
         FALLBACK
+      end
+
+      def estimate_batch_distinct_count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
+        if Feature.disabled?(:postgres_hll_batch_counting)
+          distinct_count(relation, column, batch: batch, batch_size: batch_size, start: start, finish: finish)
+        else
+          Gitlab::Database::PostgresHllBatchDistinctCounter.new(relation, column).estimate_distinct_count(batch_size: batch_size, start: start, finish: finish)
+        end
+      rescue ActiveRecord::StatementInvalid
+        FALLBACK
+      rescue StandardError => error
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error)
+        DISTRIBUTED_HLL_FALLBACK
       end
 
       def sum(relation, column, batch_size: nil, start: nil, finish: nil)

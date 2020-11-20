@@ -407,7 +407,7 @@ module EE
                                 .where(status: 'success', retried: [nil, false])
                                 .where('security_scans.scan_type = ?', scan_type)
                                 .where(time_period)
-            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = estimate_batch_distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
           end
 
           pipelines_with_secure_jobs
