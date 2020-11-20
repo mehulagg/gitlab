@@ -423,11 +423,15 @@ You can now choose it to create a list.
 
 ### Delete a list
 
-To delete a list from the issue board, use the small trash icon present
-in the list's heading. A confirmation dialog appears for you to confirm.
-
 Deleting a list doesn't have any effect on issues and labels, as it's just the
 list view that's removed. You can always restore it later if you need.
+
+To delete a list from an issue board:
+
+1. Select the **List settings** icon (**{settings}**) on the top of the list you want to remove. The
+   list settings sidebar opens on the right.
+1. Select **Remove list**. A confirmation dialog appears.
+1. Select **OK**.
 
 ### Add issues to a list
 
