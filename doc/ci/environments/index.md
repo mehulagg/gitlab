@@ -894,6 +894,12 @@ longer visible on the environment page.
 If the alert requires a [rollback](#retrying-and-rolling-back), you can select the
 deployment tab from the environment page and select which deployment to roll back to.
 
+#### Auto Rollback when a critical alert is raised **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35404) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
+
+
+
 ### Monitoring environments
 
 If you have enabled [Prometheus for monitoring system and response metrics](../../user/project/integrations/prometheus.md),

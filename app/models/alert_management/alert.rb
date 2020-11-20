@@ -13,6 +13,7 @@ module AlertManagement
     include Presentable
     include Gitlab::Utils::StrongMemoize
     include Referable
+    include AfterCommitQueue
 
     STATUSES = {
       triggered: 0,
@@ -68,6 +69,10 @@ module AlertManagement
       info: 4,
       unknown: 5
     }
+
+    after_create do |alert|
+      run_after_commit { alert.trigger_auto_rollback }
+    end
 
     state_machine :status, initial: :triggered do
       state :triggered, value: STATUSES[:triggered]
@@ -247,6 +252,12 @@ module AlertManagement
       strong_memoize(:parsed_payload) do
         Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: monitoring_tool)
       end
+    end
+
+    def trigger_auto_rollback
+      return unless critical? && environment&.auto_rollback_enabled?
+
+      Deployments::AutoRollbackWorker.perform_async(environment.id)
     end
 
     private
