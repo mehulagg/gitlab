@@ -21203,8 +21203,6 @@ CREATE UNIQUE INDEX index_label_priorities_on_project_id_and_label_id ON label_p
 
 CREATE UNIQUE INDEX index_labels_on_group_id_and_project_id_and_title ON labels USING btree (group_id, project_id, title);
 
-CREATE INDEX index_labels_on_group_id_and_title ON labels USING btree (group_id, title) WHERE (project_id = NULL::integer);
-
 CREATE INDEX index_labels_on_project_id ON labels USING btree (project_id);
 
 CREATE UNIQUE INDEX index_labels_on_project_id_and_title_unique ON labels USING btree (project_id, title) WHERE (group_id IS NULL);
@@ -21486,6 +21484,8 @@ CREATE INDEX index_on_identities_lower_extern_uid_and_provider ON identities USI
 CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON analytics_instance_statistics_measurements USING btree (identifier, recorded_at);
 
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
+
+CREATE INDEX index_on_labels_group_id_and_title_with_null_project_id ON labels USING btree (group_id, title) WHERE (project_id IS NULL);
 
 CREATE INDEX index_on_namespaces_lower_name ON namespaces USING btree (lower((name)::text));
 

@@ -58,17 +58,19 @@ module OptimizedIssuableLabelFilter
   end
 
   def find_label_ids(root_namespace)
-    finder_params = {
-      include_subgroups: true,
-      include_ancestor_groups: true,
-      include_descendant_groups: true,
-      group: root_namespace,
-      title: params.label_names
-    }
+    group_labels = Label
+      .where(project_id: nil)
+      .where(title: params.label_names)
+      .where(group_id: root_namespace.self_and_descendants.select(:id))
 
-    LabelsFinder
-      .new(nil, finder_params)
-      .execute(skip_authorization: true)
+    project_labels = Label
+      .where(group_id: nil)
+      .where(title: params.label_names)
+      .where(project_id: Project.select(:id).where(namespace_id: root_namespace.self_and_descendants.select(:id)))
+
+    Label
+      .from_union([group_labels, project_labels], remove_duplicates: false)
+      .reorder(nil)
       .pluck(:title, :id)
       .group_by(&:first)
       .values
