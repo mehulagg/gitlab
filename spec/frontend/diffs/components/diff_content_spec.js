@@ -6,6 +6,7 @@ import InlineDiffView from '~/diffs/components/inline_diff_view.vue';
 import NotDiffableViewer from '~/vue_shared/components/diff_viewer/viewers/not_diffable.vue';
 import NoPreviewViewer from '~/vue_shared/components/diff_viewer/viewers/no_preview.vue';
 import ParallelDiffView from '~/diffs/components/parallel_diff_view.vue';
+import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
 import ImageDiffOverlay from '~/diffs/components/image_diff_overlay.vue';
 import NoteForm from '~/notes/components/note_form.vue';
 import DiffDiscussions from '~/diffs/components/diff_discussions.vue';
