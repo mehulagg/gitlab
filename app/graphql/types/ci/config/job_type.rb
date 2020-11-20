@@ -5,7 +5,7 @@ module Types
     # rubocop: disable Graphql/AuthorizeTypes
     module Config
       class JobType < BaseObject
-        graphql_name 'CiConfigJobs'
+        graphql_name 'CiConfigJob'
 
         field :name, GraphQL::STRING_TYPE, null: true,
               description: 'Name of the job'

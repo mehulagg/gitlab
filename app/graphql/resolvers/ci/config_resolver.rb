@@ -1,25 +1,16 @@
 # frozen_string_literal: true
 
-module Mutations
+module Resolvers
   module Ci
-    class ConfigLint < BaseMutation
-      graphql_name 'ConfigLint'
+    class ConfigResolver < BaseResolver
 
       argument :content, GraphQL::STRING_TYPE,
-               required: false,
+               required: true,
                description: 'Contents of .gitlab-ci.yml'
 
       argument :include_merged_yaml, GraphQL::BOOLEAN_TYPE,
                 required: false,
                 description: 'Whether or not to include merged CI yaml in the response'
-
-      field :stages, [Types::Ci::Config::StageType],
-            null: true,
-            description: 'Result for the YAML processor'
-
-      field :status, GraphQL::STRING_TYPE,
-            null: true,
-            description: 'Status of linting, can be either valid or invalid'
 
       def resolve(content:, include_merged_yaml: false)
         result = Gitlab::Ci::YamlProcessor.new(content).execute
@@ -34,9 +25,12 @@ module Mutations
                         status: 'valid',
                         errors: [],
                         stages: stages.select { |stage| !stage[:groups].empty? }
-                      }
+                     }
         else
-          response = { status: 'invalid', errors: [result.errors.first] }
+          response = {
+                        status: 'invalid',
+                        errors: [result.errors.first]
+                     }
         end
 
         response.tap do |response|
@@ -71,7 +65,7 @@ module Mutations
         group_names = jobs.map { |job| job[:group_name] }.uniq
         group_names.map do |group|
           group_jobs = jobs.select { |job| job[:group_name] == group }
-          { jobs: group_jobs, name: group, stage: group_jobs.first[:stage] }
+          { jobs: group_jobs, name: group, stage: group_jobs.first[:stage], size: group_jobs.count }
         end
       end
 

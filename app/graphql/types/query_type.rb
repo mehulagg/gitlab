@@ -92,6 +92,10 @@ module Types
       description: 'Get runner setup instructions',
       resolver: Resolvers::Ci::RunnerSetupResolver
 
+    field :ci_config, Types::Ci::Config::ConfigType, null: true,
+          description: 'Contents of gitlab-ci.yml file',
+          resolver: Resolvers::Ci::ConfigResolver
+
     def design_management
       DesignManagementObject.new(nil)
     end
