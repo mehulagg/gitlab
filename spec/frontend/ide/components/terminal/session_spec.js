@@ -72,7 +72,7 @@ describe('IDE TerminalSession', () => {
       state.session = { status };
       factory();
 
-      const button = wrapper.find('button');
+      const button = findButton();
       button.vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
