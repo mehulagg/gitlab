@@ -5,6 +5,8 @@ module EE
     extend ::Gitlab::Utils::Override
 
     def gitlab_subscription_or_license
+      return if License.future_dated.present?
+
       return decorated_subscription if display_subscription_banner?
 
       License.current if display_license_banner?
