@@ -47,12 +47,8 @@ RSpec.shared_examples 'sorted paginated query' do
   end
 
   describe do
-    let(:sort_argument)  { "sort: #{sort_param}" if sort_param.present? }
-    let(:first_argument) { "first: #{first_param}" if first_param.present? }
+    let(:sort_argument)  { graphql_args(sort: sort_param) }
     let(:params)         { sort_argument }
-    let(:start_cursor)   { graphql_data_at(*data_path, :pageInfo, :startCursor) }
-    let(:end_cursor)     { graphql_data_at(*data_path, :pageInfo, :endCursor) }
-    let(:sorted_edges)   { graphql_data_at(*data_path, :edges) }
     let(:page_info)      { "pageInfo { startCursor endCursor }" }
 
     def pagination_query(params, page_info)
@@ -67,29 +63,86 @@ RSpec.shared_examples 'sorted paginated query' do
       super(data)
     end
 
+    def results
+      edges = graphql_dig_at(graphql_data(fresh_response_data), *data_path, :edges)
+      pagination_results_data(edges)
+    end
+
+    def end_cursor
+      graphql_dig_at(graphql_data(fresh_response_data), *data_path, :page_info, :end_cursor)
+    end
+
+    let(:query) { pagination_query(params, page_info) }
+
     before do
-      post_graphql(pagination_query(params, page_info), current_user: current_user)
+      post_graphql(query, current_user: current_user)
     end
 
     context 'when sorting' do
       it 'sorts correctly' do
-        expect(pagination_results_data(sorted_edges)).to eq expected_results
+        expect(results).to eq expected_results
       end
 
       context 'when paginating' do
-        let(:params) { [sort_argument, first_argument].compact.join(',') }
+        let(:params) { sort_argument.merge(first: first_param) }
+        let(:first_page) { expected_results.first(first_param) }
+        let(:rest) { expected_results.drop(first_param) }
 
         it 'paginates correctly' do
-          expect(pagination_results_data(sorted_edges)).to eq expected_results.first(first_param)
+          expect(results).to eq first_page
 
-          cursored_query = pagination_query([sort_argument, "after: \"#{end_cursor}\""].compact.join(','), page_info)
+          cursored_query = pagination_query(sort_argument.merge(after: end_cursor), page_info)
           post_graphql(cursored_query, current_user: current_user)
 
-          expect(response).to have_gitlab_http_status(:ok)
+          expect(results).to eq rest
+        end
+      end
+    end
+  end
+end
 
-          response_data = graphql_dig_at(Gitlab::Json.parse(response.body), :data, *data_path, :edges)
+RSpec.shared_examples 'sorted pagable query' do
+  let(:sort_argument)  { graphql_args(sort: sort_value) }
+  let(:page_info)      { "pageInfo { startCursor endCursor }" }
 
-          expect(pagination_results_data(response_data)).to eq expected_results.drop(first_param)
+  def paging_query(params)
+    raise('paging_query(params) must be defined in the test, see example in comment') unless defined?(super)
+
+    super
+  end
+
+  def nodes
+    graphql_dig_at(graphql_data(fresh_response_data), *data_path, :nodes)
+  end
+
+  def end_cursor
+    graphql_dig_at(graphql_data(fresh_response_data), *data_path, :page_info, :end_cursor)
+  end
+
+  context 'when sorting' do
+    it 'sorts correctly' do
+      post_graphql(paging_query(sort_argument), current_user: current_user)
+
+      expect(nodes).to eq all_results
+    end
+
+    it 'has at least 5 items' do
+      # We need to page a few times - this makes sure we can page at least twice
+      expect(all_results.size).to be >= 5
+    end
+
+    context 'when paginating' do
+      let(:page_size) { 2 }
+
+      it 'paginates correctly' do
+        all_results.in_groups_of(page_size, false).reduce(nil) do |cursor, group|
+          q = paging_query(sort_argument.merge(first: page_size, after: cursor))
+
+          post_graphql(q, current_user: current_user)
+
+          expect(nodes).to eq(group)
+
+          end_cursor
         end
       end
     end

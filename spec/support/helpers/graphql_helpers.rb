@@ -5,6 +5,38 @@ module GraphqlHelpers
 
   NoData = Class.new(StandardError)
 
+  class Args
+    delegate :blank?, :empty?, to: :to_h
+
+    def initialize(values)
+      @values = values.compact
+    end
+
+    def to_h
+      @values
+    end
+
+    def to_s
+      ::GraphqlHelpers.serialize_arguments(to_h)
+    end
+
+    def merge(other)
+      Args.new(@values.merge(other.to_h))
+    end
+
+    def +(other)
+      if other.is_a?(String)
+        to_s + other
+      else
+        merge(other)
+      end
+    end
+  end
+
+  def graphql_args(**values)
+    ::GraphqlHelpers::Args.new(values)
+  end
+
   # makes an underscored string look like a fieldname
   # "merge_request" => "mergeRequest"
   def self.fieldnamerize(underscored_field_name)
@@ -203,42 +235,97 @@ module GraphqlHelpers
     type = GitlabSchema.types[class_name.to_s]
     return "" unless type
 
-    type.fields.map do |name, field|
+    FieldSelection.new(select_fields(type, excluded, parent_types, max_depth))
+  end
+
+  class FieldSelection
+    attr_reader :selection
+
+    def initialize(selection)
+      @selection = selection
+    end
+
+    def to_s
+      serialize_field_selection(selection)
+    end
+
+    def paths
+      selection.flat_map do |field, subselection|
+        paths_in([field], subselection)
+      end
+    end
+
+    private
+
+    def paths_in(path, leaves)
+      return [path] if leaves.nil?
+
+      leaves.to_a.flat_map do |k, v|
+        paths_in([k], v).map { |tail| path + tail }
+      end
+    end
+
+    def serialize_field_selection(hash, level = 0)
+      indent = ' ' * level
+
+      hash.map do |field, subselection|
+        if subselection.nil?
+          "#{indent}#{field}"
+        else
+          subfields = serialize_field_selection(subselection, level + 1)
+          "#{indent}#{field} {\n#{subfields}\n#{indent}}"
+        end
+      end.join("\n")
+    end
+  end
+
+  def select_fields(type, excluded, parent_types, max_depth = 3)
+    return {} if max_depth <= 0
+
+    type.fields.flat_map do |name, field|
       # We can't guess arguments, so skip fields that require them
-      next if required_arguments?(field)
-      next if excluded.include?(name)
+      next [] if required_arguments?(field)
+      next [] if excluded.include?(name)
 
       singular_field_type = field_type(field)
 
       # If field type is the same as parent type, then we're hitting into
       # mutual dependency. Break it from infinite recursion
-      next if parent_types.include?(singular_field_type)
+      next [] if parent_types.include?(singular_field_type)
 
       if nested_fields?(field)
-        fields =
-          all_graphql_fields_for(singular_field_type, parent_types | [type], max_depth: max_depth - 1)
+        subselection = select_fields(singular_field_type, excluded, parent_types | [type], max_depth - 1)
+        next [] if subselection.empty?
 
-        "#{name} { #{fields} }" unless fields.blank?
+        [[name, subselection]]
       else
-        name
+        [[name, nil]]
       end
-    end.compact.join("\n")
+    end.to_h
   end
 
-  def attributes_to_graphql(attributes)
-    attributes.map do |name, value|
+  def attributes_to_graphql(arguments)
+    ::GraphqlHelpers.serialize_arguments(arguments)
+  end
+
+  def self.serialize_arguments(arguments)
+    arguments.map do |name, value|
       value_str = as_graphql_literal(value)
 
-      "#{GraphqlHelpers.fieldnamerize(name.to_s)}: #{value_str}"
+      "#{fieldnamerize(name.to_s)}: #{value_str}"
     end.join(", ")
   end
 
-  # Fairly dumb Ruby => GraphQL rendering function. Only suitable for testing.
-  # Use symbol for Enum values
   def as_graphql_literal(value)
+    ::GraphqlHelpers.as_graphql_literal(value)
+  end
+
+  # Transform values to GraphQL literal arguments.
+  # Use symbol for Enum values
+  def self.as_graphql_literal(value)
     case value
     when Array then "[#{value.map { |v| as_graphql_literal(v) }.join(',')}]"
-    when Hash then "{#{attributes_to_graphql(value)}}"
+    when Hash then "{#{serialize_arguments(value)}}"
     when Integer, Float then value.to_s
     when String then "\"#{value.gsub(/"/, '\\"')}\""
     when Symbol then value
@@ -320,12 +407,16 @@ module GraphqlHelpers
     { operations: operations.to_json, map: map.to_json }.merge(extracted_files)
   end
 
+  def fresh_response_data
+    Gitlab::Json.parse(response.body)
+  end
+
   # Raises an error if no data is found
-  def graphql_data
+  def graphql_data(body = json_response)
     # Note that `json_response` is defined as `let(:json_response)` and
     # therefore, in a spec with multiple queries, will only contain data
     # from the _first_ query, not subsequent ones
-    json_response['data'] || (raise NoData, graphql_errors)
+    body['data'] || (raise NoData, graphql_errors(body))
   end
 
   def graphql_data_at(*path)
@@ -342,7 +433,8 @@ module GraphqlHelpers
     end
   end
 
-  def graphql_errors
+  # See note at graphql_data about memoization and multiple requests
+  def graphql_errors(response = json_response)
     case json_response
     when Hash # regular query
       json_response['errors']
@@ -403,8 +495,16 @@ module GraphqlHelpers
     field_type(field).kind.enum?
   end
 
+  # There are a few non BaseField fields in our schema (pageInfo for one).
+  # None of them require arguments.
   def required_arguments?(field)
-    field.arguments.values.any? { |argument| argument.type.non_null? }
+    case field
+    when ::Types::BaseField
+      field.requires_argument?
+    else
+      tc = field.metadata[:type_class]
+      tc&.requires_argument? if tc.respond_to?(:requires_argument?)
+    end
   end
 
   def io_value?(value)
