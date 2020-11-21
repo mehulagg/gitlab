@@ -281,7 +281,7 @@ RSpec.describe 'getting merge request listings nested in a project' do
 
     context 'when sorting by merged_at DESC' do
       it_behaves_like 'sorted paginated query' do
-        let(:sort_param) { 'MERGED_AT_DESC' }
+        let(:sort_param) { :MERGED_AT_DESC }
         let(:first_param) { 2 }
 
         let(:expected_results) do

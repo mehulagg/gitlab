@@ -75,15 +75,23 @@ RSpec.describe 'getting test reports of a requirement' do
         data.map { |test_report| test_report.dig('node', 'id') }
       end
 
+      let(:in_creation_order) do
+        [test_report_3, test_report_2, test_report_1]
+      end
+
       it_behaves_like 'sorted paginated query' do
-        let(:sort_param)       { 'created_asc' }
+        let(:sort_param)       { :CREATED_ASC }
         let(:first_param)      { 2 }
         let(:expected_results) do
-          [
-            test_report_3.to_global_id.to_s,
-            test_report_2.to_global_id.to_s,
-            test_report_1.to_global_id.to_s
-          ]
+          in_creation_order.map { |r| global_id_of(r) }
+        end
+      end
+
+      it_behaves_like 'sorted paginated query' do
+        let(:sort_param)       { :CREATED_DESC }
+        let(:first_param)      { 2 }
+        let(:expected_results) do
+          in_creation_order.reverse.map { |r| global_id_of(r) }
         end
       end
     end

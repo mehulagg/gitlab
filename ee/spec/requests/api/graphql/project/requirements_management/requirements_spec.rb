@@ -183,7 +183,7 @@ RSpec.describe 'getting a requirement list for a project' do
 
         context 'when ascending' do
           it_behaves_like 'sorted paginated query' do
-            let(:sort_param)       { 'created_asc' }
+            let(:sort_param)       { :CREATED_ASC }
             let(:first_param)      { 2 }
             let(:expected_results) { [requirement4.iid, requirement3.iid, requirement5.iid, requirement1.iid, requirement2.iid] }
           end
@@ -191,7 +191,7 @@ RSpec.describe 'getting a requirement list for a project' do
 
         context 'when descending' do
           it_behaves_like 'sorted paginated query' do
-            let(:sort_param)       { 'created_desc' }
+            let(:sort_param)       { :CREATED_DESC }
             let(:first_param)      { 2 }
             let(:expected_results) { [requirement2.iid, requirement1.iid, requirement5.iid, requirement3.iid, requirement4.iid] }
           end

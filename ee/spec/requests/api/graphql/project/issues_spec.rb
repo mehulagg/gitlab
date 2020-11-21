@@ -32,7 +32,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'WEIGHT_ASC' }
+          let(:sort_param)       { :WEIGHT_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [weight_issue3.iid, weight_issue5.iid, weight_issue1.iid, weight_issue4.iid, weight_issue2.iid] }
         end
@@ -40,7 +40,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'WEIGHT_DESC' }
+          let(:sort_param)       { :WEIGHT_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [weight_issue1.iid, weight_issue5.iid, weight_issue3.iid, weight_issue4.iid, weight_issue2.iid] }
         end
