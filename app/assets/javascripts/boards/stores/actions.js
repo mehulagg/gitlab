@@ -315,6 +315,8 @@ export default {
   },
 
   setAssignees: ({ commit, getters }, assigneeUsernames) => {
+    commit(types.SET_ASSIGNEE_LOADING, true);
+
     return gqlClient
       .mutate({
         mutation: updateAssignees,
@@ -334,6 +336,9 @@ export default {
         });
 
         return nodes;
+      })
+      .finally(() => {
+        commit(types.SET_ASSIGNEE_LOADING, false);
       });
   },
 

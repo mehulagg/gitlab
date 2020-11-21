@@ -1,4 +1,5 @@
 import { mount, createLocalVue } from '@vue/test-utils';
+import { cloneDeep } from 'lodash';
 import {
   GlDropdownItem,
   GlAvatarLink,
@@ -33,11 +34,13 @@ describe('BoardCardAssigneeDropdown', () => {
   const anotherIssueName = 'hello';
 
   const createComponent = (search = '', loading = false) => {
+    const initialSelected = cloneDeep(store.getters.activeIssue.assignees);
+
     wrapper = mount(BoardAssigneeDropdown, {
       data() {
         return {
           search,
-          selected: store.getters.activeIssue.assignees,
+          selected: initialSelected,
           participants,
         };
       },
@@ -63,6 +66,7 @@ describe('BoardCardAssigneeDropdown', () => {
       [getIssueParticipants, getIssueParticipantsSpy],
       [searchUsers, getSearchUsersSpy],
     ]);
+    const initialSelected = cloneDeep(store.getters.activeIssue.assignees);
 
     wrapper = mount(BoardAssigneeDropdown, {
       localVue,
@@ -70,7 +74,7 @@ describe('BoardCardAssigneeDropdown', () => {
       data() {
         return {
           search,
-          selected: store.getters.activeIssue.assignees,
+          selected: initialSelected,
           participants,
         };
       },
@@ -367,6 +371,16 @@ describe('BoardCardAssigneeDropdown', () => {
 
     it('adds the user to the selected list', async () => {
       expect(findByText(currentUser.username).exists()).toBe(true);
+    });
+  });
+
+  describe('when setting an assignee', () => {
+    it('passes loading state from Vuex to BoardEditableItem', () => {
+      store.state.isSettingAssignees = true;
+
+      createComponent();
+
+      expect(wrapper.find(BoardEditableItem).props('loading')).toBe(true);
     });
   });
 });
