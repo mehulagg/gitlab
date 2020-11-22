@@ -306,6 +306,7 @@ build_artifact:
   stage: build
   script:
     - <your build script goes here>
+    - <example: bundle exec jekyll build -d public>
   artifacts:
     paths:
       - <built artifact>
