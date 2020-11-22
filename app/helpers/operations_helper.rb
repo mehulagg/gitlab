@@ -35,6 +35,15 @@ module OperationsHelper
     }
   end
 
+  def admin_alerts_settings_data()
+    {
+      'authorization_key' => nil,
+      'url' => nil,
+      'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
+      'disabled' => 'true',
+    }
+  end
+
   def operations_settings_data
     setting = project_incident_management_setting
     templates = setting.available_issue_templates.map { |t| { key: t.key, name: t.name } }

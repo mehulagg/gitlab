@@ -133,6 +133,25 @@ RSpec.describe OperationsHelper do
     end
   end
 
+  describe '#admin_alerts_settings_data' do
+    subject { helper.admin_alerts_settings_data }
+
+    before do
+      allow(helper).to receive(:can?).with(user, :admin_operations, project) { true }
+    end
+
+    context 'initial service configuration' do
+      it 'returns the correct values' do
+        expect(subject).to eq(
+          'authorization_key' => nil,
+          'url' => nil,
+          'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
+          'disabled' => 'true'
+        )
+      end
+    end
+  end
+
   describe '#operations_settings_data' do
     let_it_be(:operations_settings) do
       create(

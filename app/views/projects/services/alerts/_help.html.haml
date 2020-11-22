@@ -1,1 +1,3 @@
-.js-alerts-service-settings{ data: alerts_settings_data(disabled: true) }
+- is_admin_alert_page = request.original_url.to_s.include? "admin"
+
+.js-alerts-service-settings{ data: is_admin_alert_page ? admin_alerts_settings_data() : alerts_settings_data(disabled: true) }
