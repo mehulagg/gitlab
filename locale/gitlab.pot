@@ -31271,6 +31271,9 @@ msgstr ""
 msgid "You have insufficient permissions to remove this HTTP integration"
 msgstr ""
 
+msgid "You have insufficient permissions to update an on-call schedule for this project"
+msgstr ""
+
 msgid "You have insufficient permissions to update this HTTP integration"
 msgstr ""
 
