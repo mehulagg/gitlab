@@ -35,12 +35,12 @@ module OperationsHelper
     }
   end
 
-  def admin_alerts_settings_data()
+  def admin_alerts_settings_data
     {
       'authorization_key' => nil,
       'url' => nil,
       'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
-      'disabled' => 'true',
+      'disabled' => 'true'
     }
   end
 
