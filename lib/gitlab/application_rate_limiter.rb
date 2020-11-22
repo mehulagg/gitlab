@@ -71,8 +71,10 @@ module Gitlab
 
         Gitlab::Redis::Cache.with do |redis|
           cache_key = action_key(key, scope)
-          value     = redis.incr(cache_key)
-          redis.expire(cache_key, interval_value) if value == 1
+          redis.multi do | multi |
+            value = multi.incr(cache_key)
+            multi.expire(cache_key, interval_value) if value == 1
+          end
         end
 
         value

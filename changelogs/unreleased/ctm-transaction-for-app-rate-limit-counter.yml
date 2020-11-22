@@ -1,0 +1,5 @@
+---
+title: Wrap incr/expire into a multi for extra robustness
+merge_request: 48297
+author:
+type: fixed
