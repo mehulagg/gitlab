@@ -47,5 +47,5 @@ export default {
   API_FUZZING_IS_LOADING: sprintf(TRANSLATION_IS_LOADING, {
     reportType: API_FUZZING,
   }),
-  API_FUZZING_HAS_ERROR: sprintf(TRANSLATION_HAS_ERROR, { reportType: API_FUZZING }),  
+  API_FUZZING_HAS_ERROR: sprintf(TRANSLATION_HAS_ERROR, { reportType: API_FUZZING }),
 };

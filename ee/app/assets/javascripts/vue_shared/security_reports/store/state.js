@@ -80,7 +80,7 @@ export default () => ({
     baseReportOutofDate: false,
     hasBaseReport: false,
   },
-  [API_COVERAGE_FUZZING]: {
+  [MODULE_API_FUZZING]: {
     paths: {
       head: null,
       base: null,
@@ -95,7 +95,7 @@ export default () => ({
     allIssues: [],
     baseReportOutofDate: false,
     hasBaseReport: false,
-  },  
+  },
   [MODULE_DEPENDENCY_SCANNING]: {
     paths: {
       head: null,

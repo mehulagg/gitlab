@@ -250,7 +250,7 @@ export default {
       return this.enabledReports.dast;
     },
     hasApiFuzzingReports() {
-      this.enabledReports.apiFuzzing
+      return this.enabledReports.apiFuzzing;
     },
     hasCoverageFuzzingReports() {
       // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
@@ -367,7 +367,7 @@ export default {
     if (apiFuzzingDiffEndpoint && this.hasApiFuzzingReports) {
       this.setApiFuzzingDiffEndpoint(apiFuzzingDiffEndpoint);
       this.fetchApiFuzzingDiff();
-    }    
+    }
   },
   methods: {
     ...mapActions([
@@ -642,7 +642,7 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="apiFuzzingShowIssues"
+            v-if="hasApiFuzzingIssues"
             :unresolved-issues="apiFuzzing.newIssues"
             :resolved-issues="apiFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
