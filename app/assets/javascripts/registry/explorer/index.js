@@ -36,8 +36,8 @@ export default () => {
     });
 
   const attachBreadcrumb = () => {
-    const breadCrumbEl = document.querySelector('nav .js-breadcrumbs-list');
-    const crumbs = [...document.querySelectorAll('.js-breadcrumbs-list li')];
+    const breadCrumbEl = document.querySelector('nav .gl-breadcrumbs');
+    const crumbs = [...breadCrumbEl.querySelectorAll('li')];
     return new Vue({
       el: breadCrumbEl,
       store,

@@ -1,9 +1,12 @@
 <script>
-import { initial, first, last } from 'lodash';
-import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlBreadcrumb, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 
 export default {
   directives: { SafeHtml },
+  components: {
+    GlBreadcrumb,
+    GlIcon,
+  },
   props: {
     crumbs: {
       type: Array,
@@ -17,45 +20,30 @@ export default {
     isRootRoute() {
       return this.$route.name === this.rootRoute.name;
     },
-    rootCrumbs() {
-      return initial(this.crumbs);
-    },
-    divider() {
-      const { classList, tagName, innerHTML } = first(this.crumbs).querySelector('svg');
-      return { classList: [...classList], tagName, innerHTML };
-    },
-    lastCrumb() {
-      const { children } = last(this.crumbs);
-      const { tagName, className } = first(children);
-      return {
-        tagName,
-        className,
-        text: this.$route.meta.nameGenerator(this.$store.state),
-        path: { to: this.$route.name },
-      };
+    allCrumbs() {
+      const crumbs = this.crumbs.map(c => {
+        return { text: c.innerText, href: c.firstChild.href };
+      });
+      if (!this.isRootRoute) {
+        const crumb = crumbs.pop();
+        crumbs.push(
+          {
+            text: this.rootRoute.meta.nameGenerator(this.$store.state),
+            href: this.$router.options.base,
+          },
+          crumb,
+        );
+      }
+      return crumbs;
     },
   },
 };
 </script>
 
 <template>
-  <ul>
-    <li
-      v-for="(crumb, index) in rootCrumbs"
-      :key="index"
-      v-safe-html="crumb.innerHTML"
-      :class="crumb.className"
-    ></li>
-    <li v-if="!isRootRoute">
-      <router-link ref="rootRouteLink" :to="rootRoute.path">
-        {{ rootRoute.meta.nameGenerator($store.state) }}
-      </router-link>
-      <component :is="divider.tagName" v-safe-html="divider.innerHTML" :class="divider.classList" />
-    </li>
-    <li>
-      <component :is="lastCrumb.tagName" ref="lastCrumb" :class="lastCrumb.className">
-        <router-link ref="childRouteLink" :to="lastCrumb.path">{{ lastCrumb.text }}</router-link>
-      </component>
-    </li>
-  </ul>
+  <gl-breadcrumb :items="allCrumbs">
+    <template #separator>
+      <gl-icon name="angle-right" :size="8" />
+    </template>
+  </gl-breadcrumb>
 </template>
