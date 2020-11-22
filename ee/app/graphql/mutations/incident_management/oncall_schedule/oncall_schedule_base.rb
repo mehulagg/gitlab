@@ -19,6 +19,14 @@ module Mutations
             errors: result.errors
           }
         end
+
+        def find_object(project_path:, **args)
+          project = Project.find_by_full_path(project_path)
+
+          return unless project
+
+          ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, args).execute.first
+        end
       end
     end
   end
