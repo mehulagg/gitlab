@@ -2,7 +2,7 @@
 
 module Elastic
   module Latest
-    module IssuesConfig
+    module IssueConfig
       # To obtain settings and mappings methods
       extend Elasticsearch::Model::Indexing::ClassMethods
       extend Elasticsearch::Model::Naming::ClassMethods

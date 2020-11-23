@@ -6,16 +6,20 @@ module Elastic
   module ClassProxyUtil
     extend ActiveSupport::Concern
 
+    SEPARATE_INDEX_CLASSES = [
+      Issue
+    ].freeze
+
     def initialize(target)
       super(target)
 
-      per_index_config = "#{target.name}Config"
+      const_name = if SEPARATE_INDEX_CLASSES.include?(target)
+                     "#{target.name}Config"
+                   else
+                     'Config'
+                   end
 
-      config = if version_namespace.const_defined?(per_index_config, false)
-                 version_namespace.const_get(per_index_config, false)
-               else
-                 version_namespace.const_get('Config', false)
-               end
+      config = version_namespace.const_get(const_name, false)
 
       @index_name = config.index_name
       @document_type = config.document_type
