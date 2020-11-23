@@ -1,0 +1,12 @@
+@import 'mixins_and_variables_and_functions';
+
+.timezone-dropdown {
+  .dropdown-menu {
+    @include gl-w-full;
+  }
+
+  .gl-new-dropdown-item-text-primary {
+    @include gl-overflow-hidden;
+    @include gl-text-overflow-ellipsis;
+  }
+}

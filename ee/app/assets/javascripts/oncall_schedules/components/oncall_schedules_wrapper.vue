@@ -1,6 +1,9 @@
 <script>
-import { GlEmptyState, GlButton } from '@gitlab/ui';
+import { GlEmptyState, GlButton, GlModalDirective } from '@gitlab/ui';
+import AddScheduleModal from './add_schedule_modal.vue';
 import { s__ } from '~/locale';
+
+const addScheduleModalId = 'addScheduleModal';
 
 export const i18n = {
   emptyState: {
@@ -12,27 +15,33 @@ export const i18n = {
 
 export default {
   i18n,
+  addScheduleModalId,
   inject: ['emptyOncallSchedulesSvgPath'],
   components: {
     GlEmptyState,
     GlButton,
+    AddScheduleModal,
   },
-  methods: {
-    createSchedule() {},
+  directives: {
+    GlModal: GlModalDirective,
   },
+  methods: {},
 };
 </script>
 
 <template>
-  <gl-empty-state
-    :title="$options.i18n.emptyState.title"
-    :description="$options.i18n.emptyState.description"
-    :svg-path="emptyOncallSchedulesSvgPath"
-  >
-    <template #actions>
-      <gl-button variant="info" @click="createSchedule">{{
-        $options.i18n.emptyState.button
-      }}</gl-button>
-    </template>
-  </gl-empty-state>
+  <div>
+    <gl-empty-state
+      :title="$options.i18n.emptyState.title"
+      :description="$options.i18n.emptyState.description"
+      :svg-path="emptyOncallSchedulesSvgPath"
+    >
+      <template #actions>
+        <gl-button v-gl-modal="$options.addScheduleModalId" variant="info">
+          {{ $options.i18n.emptyState.button }}
+        </gl-button>
+      </template>
+    </gl-empty-state>
+    <add-schedule-modal :modal-id="$options.addScheduleModalId" />
+  </div>
 </template>

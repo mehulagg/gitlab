@@ -19009,10 +19009,22 @@ msgstr ""
 msgid "OnCallSchedules|Add a schedule"
 msgstr ""
 
+msgid "OnCallSchedules|Add schedule"
+msgstr ""
+
 msgid "OnCallSchedules|Create on-call schedules  in GitLab"
 msgstr ""
 
+msgid "OnCallSchedules|Failed to add schedule"
+msgstr ""
+
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"
+msgstr ""
+
+msgid "OnCallSchedules|Select timezone"
+msgstr ""
+
+msgid "OnCallSchedules|Sets the default timezone for the schedule, for all participants"
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."
@@ -28415,6 +28427,9 @@ msgid "Timeout"
 msgstr ""
 
 msgid "Timeout connecting to the Google API. Please try again."
+msgstr ""
+
+msgid "Timezone"
 msgstr ""
 
 msgid "Time|hr"
