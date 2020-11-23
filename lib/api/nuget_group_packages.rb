@@ -7,7 +7,6 @@
 # like `nuget install` or `nuget push`.
 #
 # This is the group level API.
-
 module API
   class NugetGroupPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
