@@ -15,11 +15,10 @@ RSpec.describe "Dashboard Feed" do
       end
 
       it 'returns a 404 for an atom request when disabled' do
-        Settings[:atom_off] = true
+        allow(Settings).to receive(:atom_off).and_return(true)
         personal_access_token = create(:personal_access_token, user: user)
         visit dashboard_projects_path(:atom, private_token: personal_access_token.token)
         expect(page.status_code).to eq(404)
-        Settings[:atom_off] = nil
       end
     end
 
@@ -30,12 +29,10 @@ RSpec.describe "Dashboard Feed" do
       end
 
       it 'returns a 404 for an atom request when disabled' do
-        Settings[:atom_off] = true
+        allow(Settings).to receive(:atom_off).and_return(true)
         visit dashboard_projects_path(:atom, feed_token: user.feed_token)
         expect(page.status_code).to eq(404)
-        Settings[:atom_off] = nil
       end
-
     end
 
     context 'feed content' do
