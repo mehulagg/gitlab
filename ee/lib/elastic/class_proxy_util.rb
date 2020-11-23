@@ -9,7 +9,13 @@ module Elastic
     def initialize(target)
       super(target)
 
-      config = version_namespace.const_get('Config', false)
+      per_index_config = "#{target.name}Config"
+
+      config = if version_namespace.const_defined?(per_index_config, false)
+                 version_namespace.const_get(per_index_config, false)
+               else
+                 version_namespace.const_get('Config', false)
+               end
 
       @index_name = config.index_name
       @document_type = config.document_type
