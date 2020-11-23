@@ -3,35 +3,22 @@
 module Elastic
   module MigrationAttributes
     extend ActiveSupport::Concern
+    include Gitlab::ClassAttributes
 
-    # This should be set if a migration should be run against data
-    # in batches. This is typically the case if large amounts of documents
-    # are being added/updated or if the documents are being moved
-    # to a new index.
-    def batched!
-      options[:batched] = true
+    DEFAULT_THROTTLE_TIME = 5.minutes
+
+    def migration_options
+      self.class.get_migration_options
     end
 
-    def batched?
-      options[:batched]
-    end
+    class_methods do
+      def migration_options(opts = { throttle_time: DEFAULT_THROTTLE_TIME })
+        class_attributes[:migration_options] = opts
+      end
 
-    protected
-
-    def get_option(name)
-      options[name] || superclass_options(name)
-    end
-
-    private
-
-    def options
-      @options ||= {}
-    end
-
-    def superclass_options(name)
-      return unless superclass.include? MigrationAttributes
-
-      superclass.get_option(name)
+      def get_migration_options
+        class_attributes[:migration_options] || {}
+      end
     end
   end
 end
