@@ -31,6 +31,7 @@ module Gitlab
       ISSUE_COMMENT_ADDED = 'g_project_management_issue_comment_added'
       ISSUE_COMMENT_EDITED = 'g_project_management_issue_comment_edited'
       ISSUE_COMMENT_REMOVED = 'g_project_management_issue_comment_removed'
+      ISSUE_CLONED = 'g_project_management_issue_cloned'
 
       class << self
         def track_issue_created_action(author:, time: Time.zone.now)
@@ -135,6 +136,10 @@ module Gitlab
 
         def track_issue_comment_removed_action(author:, time: Time.zone.now)
           track_unique_action(ISSUE_COMMENT_REMOVED, author, time)
+        end
+
+        def track_issue_cloned_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_CLONED, author, time)
         end
 
         private

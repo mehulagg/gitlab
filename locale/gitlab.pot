@@ -5641,6 +5641,9 @@ msgstr ""
 msgid "Clone repository"
 msgstr ""
 
+msgid "Clone this issue"
+msgstr ""
+
 msgid "Clone with %{http_label}"
 msgstr ""
 
@@ -5651,6 +5654,15 @@ msgid "Clone with KRB5"
 msgstr ""
 
 msgid "Clone with SSH"
+msgstr ""
+
+msgid "CloneIssue|Cannot clone issue due to insufficient permissions!"
+msgstr ""
+
+msgid "Cloned this issue to %{path_to_project}."
+msgstr ""
+
+msgid "Clones this issue, without comments, to %{project}."
 msgstr ""
 
 msgid "Close"
@@ -11378,6 +11390,9 @@ msgstr ""
 msgid "Failed to check related branches."
 msgstr ""
 
+msgid "Failed to clone this issue because target project doesn't exist."
+msgstr ""
+
 msgid "Failed to create Merge Request. Please try again."
 msgstr ""
 
@@ -15173,6 +15188,9 @@ msgstr ""
 msgid "Issue update failed"
 msgstr ""
 
+msgid "Issue was cloned."
+msgstr ""
+
 msgid "Issue was closed by %{name} %{reason}"
 msgstr ""
 
@@ -18380,6 +18398,9 @@ msgid "New issue"
 msgstr ""
 
 msgid "New issue title"
+msgstr ""
+
+msgid "New issue:"
 msgstr ""
 
 msgid "New iteration"
@@ -31200,6 +31221,9 @@ msgid "You do not have permissions to run the import."
 msgstr ""
 
 msgid "You do not have the correct permissions to override the settings from the LDAP group sync."
+msgstr ""
+
+msgid "You don't have access to the project."
 msgstr ""
 
 msgid "You don't have any U2F devices registered yet."
