@@ -8,7 +8,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
   def migrate
     if completed?
       log "Skipping adding issues_access_level fields to issues documents migration since it is already applied"
-      return
+      return false
     end
 
     log "Adding issues_access_level fields to issues documents for batch of #{BATCH_SIZE} documents"
@@ -36,7 +36,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
 
     # work a batch of issues
     results = client.search(index: helper.target_index_name, body: query)
-    hits = results.dig('hits', 'hits')
+    hits = results.dig('hits', 'hits') || []
 
     hits.each do |hit|
       id = hit.dig('_source', 'id')
@@ -50,6 +50,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
     end
 
     log "Adding issues_access_level fields to issues documents is completed for batch of #{BATCH_SIZE} documents"
+    true
   end
 
   def completed?
@@ -75,7 +76,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
 
     results = client.search(index: helper.target_index_name, body: query)
     doc_count = results.dig('aggregations', 'issues', 'doc_count')
-    doc_count && doc_count > 0
+    doc_count && doc_count == 0
   end
 
   private

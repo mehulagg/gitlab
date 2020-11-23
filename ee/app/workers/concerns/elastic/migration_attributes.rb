@@ -5,14 +5,12 @@ module Elastic
     extend ActiveSupport::Concern
     include Gitlab::ClassAttributes
 
-    DEFAULT_THROTTLE_TIME = 5.minutes
-
     def migration_options
       self.class.get_migration_options
     end
 
     class_methods do
-      def migration_options(opts = { throttle_time: DEFAULT_THROTTLE_TIME })
+      def migration_options(opts = {})
         class_attributes[:migration_options] = opts
       end
 
