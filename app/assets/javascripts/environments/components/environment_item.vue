@@ -74,10 +74,30 @@ export default {
      * @returns {Boolean}
      */
     hasLastDeploymentKey() {
-      if (this.model && this.model.last_deployment && !isEmpty(this.model.last_deployment)) {
-        return true;
-      }
-      return false;
+      return this.model?.last_deployment && !isEmpty(this.model.last_deployment);
+    },
+
+    /**
+     * Same as `hasLastDeploymentKey`, but for `upcoming_deployment`
+     * instead of `last_deployment`
+     */
+    hasUpcomingDeploymentKey() {
+      return this.model?.upcoming_deployment && !isEmpty(this.model.upcoming_deployment);
+    },
+
+    /**
+     * Whether the environment has `last_deployment` info _or_ `upcoming_deployment` info
+     */
+    hasDeploymentKey() {
+      return hasLastDeploymentKey || hasUpcomingDeploymentKey;
+    },
+
+    /**
+     * Returns `upcoming_deployment`, if present. If not, returns `last_deployment`.
+     * If both are missing, returns `undefined`.
+     */
+    deployment() {
+      return this.model?.upcoming_deployment || this.model?.last_deployment;
     },
 
     /**
@@ -122,16 +142,10 @@ export default {
      * Verifies if the `deployable` key is present in `last_deployment` key.
      * Used to verify whether we should or not render the rollback partial.
      *
-     * @returns {Boolean|Undefined}
+     * @returns {Boolean}
      */
     canRetry() {
-      return (
-        this.model &&
-        this.hasLastDeploymentKey &&
-        this.model.last_deployment &&
-        this.model.last_deployment.deployable &&
-        this.model.last_deployment.deployable.retry_path
-      );
+      return Boolean(!this.hasUpcomingDeploymentKey && this.deployment?.deployable.retry_path);
     },
 
     /**
