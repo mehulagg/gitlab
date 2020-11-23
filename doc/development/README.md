@@ -105,7 +105,7 @@ If the MR proposes changes limited to a particular stage, group, or team:
 
 #### Broader changes
 
-Some changes affect more than one individual group. For example:
+Some changes affect more than one group. For example:
 
 - Changes to code review guidelines.
 - Changes to commit message guidelines.
