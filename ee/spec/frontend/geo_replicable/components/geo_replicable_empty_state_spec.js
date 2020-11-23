@@ -1,5 +1,5 @@
-import { GlEmptyState } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlEmptyState, GlLink } from '@gitlab/ui';
+import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GeoReplicableEmptyState from 'ee/geo_replicable/components/geo_replicable_empty_state.vue';
 import createStore from 'ee/geo_replicable/store';
@@ -20,8 +20,8 @@ describe('GeoReplicableEmptyState', () => {
     geoReplicableEmptySvgPath: MOCK_GEO_REPLICATION_SVG_PATH,
   };
 
-  const createComponent = () => {
-    wrapper = shallowMount(GeoReplicableEmptyState, {
+  const createComponent = (mountFn = shallowMount) => {
+    wrapper = mountFn(GeoReplicableEmptyState, {
       localVue,
       store: createStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
       propsData,
@@ -30,9 +30,11 @@ describe('GeoReplicableEmptyState', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   const findGlEmptyState = () => wrapper.find(GlEmptyState);
+  const findGlLink = () => wrapper.find(GlLink);
 
   describe('template', () => {
     beforeEach(() => {
@@ -47,6 +49,20 @@ describe('GeoReplicableEmptyState', () => {
       it('sets correct svg', () => {
         expect(findGlEmptyState().attributes('svgpath')).toBe(MOCK_GEO_REPLICATION_SVG_PATH);
       });
+    });
+  });
+
+  describe('GlLink', () => {
+    beforeEach(() => {
+      createComponent(mount);
+    });
+
+    it('renders always', () => {
+      expect(findGlLink().exists()).toBe(true);
+    });
+
+    it('renders with correct link', () => {
+      expect(findGlLink().attributes('href')).toBe(MOCK_GEO_TROUBLESHOOTING_LINK);
     });
   });
 });
