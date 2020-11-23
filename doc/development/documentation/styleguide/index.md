@@ -7,18 +7,16 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 
 # Documentation Style Guide
 
-This document defines the standards for GitLab's documentation content and
-files.
+This document defines the standards for GitLab's documentation.
+Use this guide for standards on grammar, formatting, word usage, and more.
 
-For broader information about the documentation, see the [Documentation guidelines](index.md).
+For broader information about the documentation, see the [Documentation guidelines](../index.md).
 
 For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
 
 For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](../testing.md).
 
-Use this guide for standards on grammar, formatting, word usage, and more.
-
-You can also view a list of [recent updates to this guide](https://gitlab.com/dashboard/merge_requests?scope=all&utf8=%E2%9C%93&state=merged&label_name[]=tw-style&not[label_name][]=docs%3A%3Afix).
+You can view a list of [recent updates to this guide](https://gitlab.com/dashboard/merge_requests?scope=all&utf8=%E2%9C%93&state=merged&label_name[]=tw-style&not[label_name][]=docs%3A%3Afix).
 
 If you can't find what you need:
 
@@ -32,10 +30,8 @@ If you have questions about style, mention `@tw-style` in an issue or merge requ
 
 ## Documentation is the single source of truth (SSOT)
 
-### Why a single source of truth
-
-The documentation of GitLab products and features is the SSOT for all
-information related to implementation, usage, and troubleshooting. It evolves
+The GitLab documentation is the SSOT for all
+information related to GitLab implementation, usage, and troubleshooting. It evolves
 continuously, in keeping with new products and features, and with improvements
 for clarity, accuracy, and completeness.
 
@@ -45,10 +41,10 @@ about GitLab products.
 It also informs decisions about the kinds of content we include in our
 documentation.
 
-### All information
+### The documentation includes all information
 
-Include problem-solving actions that may address rare cases or be considered
-_risky_, so long as proper context is provided in the form of fully detailed
+The documentation includes problem-solving actions that may address rare cases or be considered
+_risky_, as long as proper context is provided in the form of fully detailed
 warnings and caveats. This kind of content should be included as it could be
 helpful to others and, when properly explained, its benefits outweigh the risks.
 If you think you have found an exception to this rule, contact the
@@ -58,7 +54,7 @@ We will add all troubleshooting information to the documentation, no matter how
 unlikely a user is to encounter a situation. For the [Troubleshooting sections](#troubleshooting),
 people in GitLab Support can merge additions themselves.
 
-### All media types
+### The documentation includes all media types
 
 Include any media types/sources if the content is relevant to readers. You can
 freely include or link presentations, diagrams, videos, and so on; no matter who
@@ -72,48 +68,33 @@ include it.
   quotation with the source cited. Typically it is better to either rephrase
   relevant information in your own words or link out to the other source.
 
-### No special types
+### Topic types
 
 In the software industry, it is a best practice to organize documentation in
-different types. For example, [Divio recommends](https://www.divio.com/blog/documentation/):
+different types. For example:
 
+- Concepts
+- Tasks
+- Reference
 - Tutorials
-- How-to guides
-- Explanation
-- Reference (for example, a glossary)
 
-At GitLab, we have so many product changes in our monthly releases that we can't
-afford to continuously update multiple types of information. If we have multiple
-types, the information will become outdated. Therefore, we have a
-[single template](../structure.md) for documentation.
+At GitLab, we have not traditionally used topic types. However, we are starting to
+move in this direction, so we can address these issues:
 
-We currently do not distinguish specific document types, although we are open to
-reconsidering this policy after the documentation has reached a future stage of
-maturity and quality. If you are reading this, then despite our continuous
-improvement efforts, that point hasn't been reached.
+- **Content is hard to find.** Our docs are comprehensive and include a large amount of
+  useful information. Topic types create repeatable patterns that make our content easier
+  to scan and parse.
+- **Content is often written from the contributor's point of view.**  Our docs
+  are written by contributors. Topic types (tasks specifically) help put
+  information into a format that is geared toward helping others, rather than
+  documenting how a feature was implemented.
 
-### Link instead of summarize
+GitLab uses these [topic type templates](../structure.md).
 
-There is a temptation to summarize the information on another page. This will
-cause the information to live in two places. Instead, link to the single source
-of truth and explain why it is important to consume the information.
+### Link instead of repeating text
 
-### Organize by topic, not by type
-
-Beyond top-level audience-type folders (for example, `administration`), we
-organize content by topic, not by type, so it can be located in the
-single-source-of-truth (SSOT) section for the subject matter.
-
-For example, do not create groupings of similar media types. For example:
-
-- Glossaries.
-- FAQs.
-- Sets of all articles or videos.
-
-Such grouping of content by type makes it difficult to browse for the information
-you need and difficult to maintain up-to-date content. Instead, organize content
-by its subject (for example, everything related to CI goes together) and
-cross-link between any related content.
+Rather than repeating information from another topic, link to the single source
+of truth and explain why it is important.
 
 ### Docs-first methodology
 
