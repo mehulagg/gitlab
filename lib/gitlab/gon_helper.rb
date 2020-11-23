@@ -61,15 +61,23 @@ module Gitlab
     def push_frontend_feature_flag(name, *args, **kwargs)
       enabled = Feature.enabled?(name, *args, **kwargs)
 
-      push_to_gon_features(name, enabled)
+      push_to_gon_attributes(:features, name, enabled)
     end
 
-    def push_to_gon_features(name, enabled)
+    # Exposes if a licensed feature is available.
+    # This is always set to false in CE.
+
+    # name - The name of the licensed feature
+    def push_licensed_feature(name, _obj = nil)
+      push_to_gon_attributes(:licensed_features, name, false)
+    end
+
+    def push_to_gon_attributes(key, name, enabled)
       var_name = name.to_s.camelize(:lower)
       # Here the `true` argument signals gon that the value should be merged
       # into any existing ones, instead of overwriting them. This allows you to
       # use this method to push multiple feature flags.
-      gon.push({ features: { var_name => enabled } }, true)
+      gon.push({ key => { var_name => enabled } }, true)
     end
 
     def default_avatar_url
@@ -83,3 +91,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::GonHelper.prepend_if_ee('EE::Gitlab::GonHelper')

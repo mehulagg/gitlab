@@ -32,6 +32,22 @@ RSpec.describe Gitlab::GonHelper do
     end
   end
 
+  describe '#push_licensed_feature' do
+    it 'pushes a licensed flag set to false to the frontend,' do
+      gon = instance_double('gon')
+
+      allow(helper)
+        .to receive(:gon)
+        .and_return(gon)
+
+      expect(gon)
+        .to receive(:push)
+        .with({ licensed_features: { 'testing' => false } }, true)
+
+      helper.push_licensed_feature(:testing)
+    end
+  end
+
   describe '#default_avatar_url' do
     it 'returns an absolute URL' do
       url = helper.default_avatar_url
