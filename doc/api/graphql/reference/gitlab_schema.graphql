@@ -21308,6 +21308,11 @@ type TerraformStateVersion {
   Timestamp the version was updated
   """
   updatedAt: Time!
+
+  """
+  The version number
+  """
+  version: Int
 }
 
 """
