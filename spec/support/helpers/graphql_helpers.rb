@@ -123,14 +123,15 @@ module GraphqlHelpers
   def variables_for_mutation(name, input)
     graphql_input = prepare_input_for_mutation(input)
 
-    result = { input_variable_name_for_mutation(name) => graphql_input }
+    { input_variable_name_for_mutation(name) => graphql_input }
+  end
 
-    # Avoid trying to serialize multipart data into JSON
-    if graphql_input.values.none? { |value| io_value?(value) }
-      result.to_json
-    else
-      result
-    end
+  def serialize_variables(variables)
+    return variables if variables.is_a?(String)
+
+    variables = variables.is_a?(Array) ? variables.map(&:to_h).reduce { |a, b| a.merge(b) } : variables.try(:to_h)
+
+    variables.to_json
   end
 
   UnauthorizedObject = Class.new(StandardError)
@@ -180,16 +181,21 @@ module GraphqlHelpers
   end
 
   def query_graphql_field(name, attributes = {}, fields = nil)
-    attributes, fields = [nil, attributes] if fields.nil?
+    attributes, fields = [nil, attributes] if fields.nil? && !attributes.is_a?(Hash)
 
     field = field_with_params(name, attributes)
 
     field + wrap_fields(fields || all_graphql_fields_for(name.to_s.classify)).to_s
   end
 
-  def query_nodes(name, args = nil, fields = nil)
-    fields ||= all_graphql_fields_for(name.to_s.classify, max_depth: 1)
-    query_graphql_path([[name, args], :nodes], fields)
+  def page_info_selection
+    "pageInfo { hasNextPage hasPreviousPage endCursor startCursor }"
+  end
+
+  def query_nodes(name, args = nil, fields = nil, of: name, include_pagination_info: false, max_depth: 1)
+    fields ||= all_graphql_fields_for(of.to_s.classify, max_depth: max_depth)
+    node_selection = include_pagination_info ? "#{page_info_selection} nodes" : :nodes
+    query_graphql_path([[name, args], node_selection], fields)
   end
 
   # e.g:
@@ -265,6 +271,70 @@ module GraphqlHelpers
     end.join(", ")
   end
 
+  def with_signature(variables, query)
+    %Q[query(#{variables.map(&:sig).join(', ')}) #{query}]
+  end
+
+  # Helper to pass variables around generated queries.
+  #
+  # e.g.:
+  #   first = var('Int')
+  #   after = var('String')
+  #
+  #   query = with_signature(
+  #     [first, after],
+  #     query_graphql_path([
+  #       [:project, { full_path: project.full_path }],
+  #       [:issues, { after: after, first: first }]
+  #       :nodes
+  #     ], all_graphql_fields_for('Issue'))
+  #   )
+  #
+  #   post_graphql(query, variables: [first.with(2), after.with(some_cursor)])
+  #
+  class Var
+    attr_reader :name, :type
+    attr_accessor :value
+
+    def initialize(name, type)
+      @name = name
+      @type = type
+    end
+
+    def sig
+      "$#{name}: #{type}"
+    end
+
+    def to_graphql_value
+      "$#{name}"
+    end
+
+    # We return a new object so that running the same query twice with
+    # different values does not risk re-using the value
+    #
+    # e.g.
+    #
+    #   x = var('Int')
+    #   expect { post_graphql(query, variables: x) }
+    #     .to issue_same_number_of_queries_as { post_graphql(query, variables: x.with(1)) }
+    #
+    # Here we post the `x` variable once with the value set to 1, and once with
+    # the value set to `nil`.
+    def with(value)
+      copy = Var.new(name, type)
+      copy.value = value
+      copy
+    end
+
+    def to_h
+      { name.to_sym => value }
+    end
+  end
+
+  def var(type)
+    Var.new(generate(:variable), type)
+  end
+
   # Fairly dumb Ruby => GraphQL rendering function. Only suitable for testing.
   # Use symbol for Enum values
   def as_graphql_literal(value)
@@ -277,7 +347,12 @@ module GraphqlHelpers
     when nil then 'null'
     when true then 'true'
     when false then 'false'
-    else raise ArgumentError, "Cannot represent #{value} as GraphQL literal"
+    else
+      if value.respond_to?(:to_graphql_value)
+        value.to_graphql_value
+      else
+        raise ArgumentError, "Cannot represent #{value} as GraphQL literal"
+      end
     end
   end
 
@@ -286,7 +361,7 @@ module GraphqlHelpers
   end
 
   def post_graphql(query, current_user: nil, variables: nil, headers: {})
-    params = { query: query, variables: variables&.to_json }
+    params = { query: query, variables: serialize_variables(variables) }
     post api('/', current_user, version: 'graphql'), params: params, headers: headers
   end
 
@@ -364,13 +439,19 @@ module GraphqlHelpers
     graphql_dig_at(graphql_data, *path)
   end
 
+  # Slightly more powerful than just `dig`:
+  # - also supports implicit flat-mapping (.e.g. :foo :nodes :bar :nodes)
   def graphql_dig_at(data, *path)
     keys = path.map { |segment| segment.is_a?(Integer) ? segment : GraphqlHelpers.fieldnamerize(segment) }
 
     # Allows for array indexing, like this
     # ['project', 'boards', 'edges', 0, 'node', 'lists']
     keys.reduce(data) do |memo, key|
-      memo.is_a?(Array) ? memo[key] : memo&.dig(key)
+      if memo.is_a?(Array)
+        key.is_a?(Integer) ? memo[key] : memo.flat_map { |e| Array.wrap(e[key]) }
+      else
+        memo&.dig(key)
+      end
     end
   end
 
