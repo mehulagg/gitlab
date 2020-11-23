@@ -6,6 +6,10 @@ module Resolvers
 
     authorize :read_group_member
 
+    argument :relations, [GroupMemberRelationEnum],
+              description: 'Filter members by the given member relations',
+              required: false
+
     private
 
     def preloads
