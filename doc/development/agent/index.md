@@ -20,7 +20,7 @@ The agent attempts to address the following issues:
   For example, a user could build a cluster view dashboard to visualize changes in progress
   in a cluster. For more information about these efforts, read about the
   [Real-Time Working Group](https://about.gitlab.com/company/team/structure/working-groups/real-time/).
-- Enables a [cache of Kubernetes objects through informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183))
+- Enables a [cache of Kubernetes objects through informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183),
   kept up-to-date with very low latency. This cache helps:
 
   - Reduce or eliminate information propagation latency by avoiding Kubernetes API calls
@@ -36,7 +36,7 @@ The GitLab Kubernetes Agent and the GitLab Kubernetes Agent Server use
 [bidirectional streaming](https://grpc.io/docs/guides/concepts/#bidirectional-streaming-rpc)
 to allow the connection acceptor (the gRPC server, GitLab Kubernetes Agent Server) to
 act as a client, sending requests as gRPC replies. The client-server relationship is
-inverted because the connection must by initiated from inside the Kubernetes cluster
+inverted because the connection must be initiated from inside the Kubernetes cluster
 to bypass any firewall or NAT the cluster may be located behind. To learn more about
 this inversion, read [issue #212810](https://gitlab.com/gitlab-org/gitlab/-/issues/212810).
 
@@ -79,4 +79,4 @@ managed by GitLab, so upgrades and features can be added without requiring users
 of the integration to upgrade `agentk` running in their clusters.
 
 `agentk` can't be viewed as a dumb reverse proxy because features are planned to be built
-[on top of the cache with informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183)).
+[on top of the cache with informers](https://github.com/kubernetes/client-go/blob/ccd5becdffb7fd8006e31341baaaacd14db2dcb7/tools/cache/shared_informer.go#L34-L183).
