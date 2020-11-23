@@ -1,0 +1,8 @@
+- return unless Feature.enabled?(:oncall_schedules_mvc, @project)
+- return unless @project.feature_available?(:oncall_schedules)
+- return unless current_user.can?(:read_incident_management_oncall_schedule, @project)
+
+= nav_link(controller: :oncall_schedules) do
+  = link_to project_incident_management_oncall_schedules_path(@project), title: _('On-call schedules') do
+    %span
+      = _('On-call schedules')
