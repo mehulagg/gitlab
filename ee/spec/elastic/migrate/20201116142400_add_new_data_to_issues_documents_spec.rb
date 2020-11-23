@@ -94,7 +94,7 @@ RSpec.describe AddNewDataToIssuesDocuments, :unit, :elastic do
       it 'updates all issue documents and logs a message', :aggregate_failures do
         expect(Gitlab::Elastic::Helper.default.client).to receive(:search).and_return(es_response_with_hits.with_indifferent_access)
         expect(Elastic::ProcessBookkeepingService).to receive(:track!).exactly(3).times
-        expect(logger).to receive(:info).exactly(2).times
+        expect(logger).to receive(:info).twice
 
         expect(subject).to be_truthy
       end
