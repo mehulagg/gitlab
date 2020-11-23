@@ -30,7 +30,7 @@ RSpec.describe 'Issues Feed' do
       end
 
       it 'returns a 404 for an atom request when disabled' do
-        allow(Settings).to receive(:atom_off).and_return(true)
+        allow(Settings).to receive(:[]).with(:atom_off).and_return(true)
         sign_in user
         visit project_issues_path(project, :atom)
 
@@ -55,7 +55,7 @@ RSpec.describe 'Issues Feed' do
       end
 
       it 'returns a 404 for an atom request when disabled' do
-        allow(Settings).to receive(:atom_off).and_return(true)
+        allow(Settings).to receive(:[]).with(:atom_off).and_return(true)
         personal_access_token = create(:personal_access_token, user: user)
         visit project_issues_path(project, :atom,
                                             private_token: personal_access_token.token)
@@ -79,7 +79,7 @@ RSpec.describe 'Issues Feed' do
       end
 
       it 'returns a 404 for an atom request when disabled' do
-        allow(Settings).to receive(:atom_off).and_return(true)
+        allow(Settings).to receive(:[]).with(:atom_off).and_return(true)
         visit project_issues_path(project, :atom,
                                             feed_token: user.feed_token)
         expect(page.status_code).to eq(404)

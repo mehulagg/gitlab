@@ -87,7 +87,7 @@ RSpec.describe "User Feed" do
 
     context 'when setting for atom off is on' do
       it 'returns a 404 for an atom request' do
-        allow(Settings).to receive(:atom_off).and_return(true)
+        allow(Settings).to receive(:[]).with(:atom_off).and_return(true)
         visit user_path(user, :atom, feed_token: user.feed_token)
         expect(page.status_code).to eq(404)
       end

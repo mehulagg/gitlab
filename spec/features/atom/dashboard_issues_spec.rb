@@ -34,7 +34,7 @@ RSpec.describe "Dashboard Issues Feed" do
       end
 
       it 'returns a 404 for an atom request when disabled' do
-        allow(Settings).to receive(:atom_off).and_return(true)
+        allow(Settings).to receive(:[]).with(:atom_off).and_return(true)
         personal_access_token = create(:personal_access_token, user: user)
         visit issues_dashboard_path(:atom, private_token: personal_access_token.token, assignee_username: user.username)
 
