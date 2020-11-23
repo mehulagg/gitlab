@@ -29,7 +29,7 @@ module Security
     end
 
     def execute
-      return unless can_use_security_findings?
+      return unless has_security_findings?
 
       ResultSet.new(security_findings, findings)
     end
@@ -38,10 +38,6 @@ module Security
 
     attr_reader :pipeline, :params
     delegate :project, :has_security_findings?, to: :pipeline, private: true
-
-    def can_use_security_findings?
-      Feature.enabled?(:store_security_findings, project) && has_security_findings?
-    end
 
     def findings
       security_findings.map(&method(:build_vulnerability_finding))
