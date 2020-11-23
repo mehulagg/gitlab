@@ -107,7 +107,7 @@ There are two ways to define the URL to be scanned by DAST:
   ```
   
    You can see an [example](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml)
-   of this in our Auto DevOps CI YAML. 
+   of this in our Auto DevOps CI YAML.
 
 If both values are set, the `DAST_WEBSITE` value takes precedence.
 
