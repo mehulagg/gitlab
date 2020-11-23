@@ -579,6 +579,13 @@ RSpec.describe ::SystemNotes::IssuablesService do
         expect { subject }.to raise_error StandardError, /Invalid direction/
       end
     end
+
+    context 'metrics' do
+      it 'tracks usage' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
+          .to receive(:track_issue_cloned_action).with(author: author)
+      end
+    end
   end
 
   describe '#mark_duplicate_issue' do
