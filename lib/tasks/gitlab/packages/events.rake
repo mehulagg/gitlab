@@ -9,8 +9,10 @@ namespace :gitlab do
         logger.info('Building list of package events...')
 
         path = File.join(File.dirname(::Gitlab::UsageDataCounters::HLLRedisCounter::KNOWN_EVENTS_PATH), 'package_events.yml')
-
         File.open(path, "w") { |file| file << generate_unique_events_list.to_yaml }
+
+        path = ::Gitlab::UsageDataCounters::GuestPackageEventCounter::KNOWN_EVENTS_PATH
+        File.open(path, "w") { |file| file << guest_events_list.to_yaml }
 
         logger.info("Events file `#{path}` generated successfully")
       rescue => e
@@ -34,6 +36,12 @@ namespace :gitlab do
             end
           end
         end.sort { |a, b| a["name"] <=> b["name"] }
+      end
+
+      def guest_events_list
+        event_pairs.map do |event_type, event_scope|
+          ::Packages::Event.allowed_event_name(event_scope, event_type, "guest")
+        end.compact.sort
       end
     end
   end
