@@ -29,7 +29,7 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
 
   context 'issue page' do
     let(:support_bot) { User.support_bot }
-    let!(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
+    let(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
 
     it 'shows service_desk_reply_to in issue header' do
       visit project_issue_path(project, service_desk_issue)
