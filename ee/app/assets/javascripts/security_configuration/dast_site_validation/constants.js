@@ -37,13 +37,13 @@ export const DAST_SITE_VALIDATION_STATUS_PROPS = {
     label: s__('DastSiteValidation|Validated'),
     cssClass: 'gl-text-green-500',
     tooltipText: s__(
-      'DastSiteValidation|Validation succeeded. Both active and passive scans can be run against the target site',
+      'DastSiteValidation|Validation succeeded. Both active and passive scans can be run against the target site.',
     ),
   },
   [DAST_SITE_VALIDATION_STATUS.FAILED]: {
     label: s__('DastSiteValidation|Validation failed'),
     cssClass: 'gl-text-red-500',
-    tooltipText: s__('DastSiteValidation|The validation has failed. Please try again'),
+    tooltipText: s__('DastSiteValidation|The validation has failed. Please try again.'),
   },
 };
 

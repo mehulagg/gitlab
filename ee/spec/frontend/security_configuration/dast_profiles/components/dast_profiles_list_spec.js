@@ -143,38 +143,30 @@ describe('EE - DastProfilesList', () => {
 
       describe('with site validation enabled', () => {
         describe.each`
-          status                  | label
-          ${'PENDING_VALIDATION'} | ${''}
-          ${'FAILED_VALIDATION'}  | ${'Validation failed'}
-        `('and $status status', ({ status, label }) => {
-          const profile = profiles.find(({ validationStatus }) => validationStatus === status);
-
-          it('should render Validate button', () => {
-            const actionsCell = getTableRowForProfile(profile).cells[3];
-            expect(within(actionsCell).queryByRole('button', { name: /validate/i })).not.toBe(null);
-          });
+          status           | statusEnum                 | label                  | hasValidateButton
+          ${'pending'}     | ${'PENDING_VALIDATION'}    | ${''}                  | ${true}
+          ${'in-progress'} | ${'INPROGRESS_VALIDATION'} | ${'Validating...'}     | ${false}
+          ${'passed'}      | ${'PASSED_VALIDATION'}     | ${'Validated'}         | ${false}
+          ${'failed'}      | ${'FAILED_VALIDATION'}     | ${'Validation failed'} | ${true}
+        `('profile with validation $status', ({ statusEnum, label, hasValidateButton }) => {
+          const profile = profiles.find(({ validationStatus }) => validationStatus === statusEnum);
 
           it(`should show correct label`, () => {
             const validationStatusCell = getTableRowForProfile(profile).cells[2];
             expect(validationStatusCell.innerText).toContain(label);
           });
-        });
 
-        describe.each`
-          status                     | label
-          ${'INPROGRESS_VALIDATION'} | ${'Validating...'}
-          ${'PASSED_VALIDATION'}     | ${'Validated'}
-        `('and $status', ({ status, label }) => {
-          const profile = profiles.find(({ validationStatus }) => validationStatus === status);
-
-          it('should not render Validate button', () => {
+          it(`should ${hasValidateButton ? '' : 'not '}render validate button`, () => {
             const actionsCell = getTableRowForProfile(profile).cells[3];
-            expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);
-          });
+            const validateButton = within(actionsCell).queryByRole('button', {
+              name: /validate/i,
+            });
 
-          it(`should show right label`, () => {
-            const validationStatusCell = getTableRowForProfile(profile).cells[2];
-            expect(validationStatusCell.innerText).toContain(label);
+            if (hasValidateButton) {
+              expect(validateButton).not.toBeNull();
+            } else {
+              expect(validateButton).toBeNull();
+            }
           });
         });
       });
