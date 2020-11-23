@@ -84,6 +84,15 @@ RSpec.describe "User Feed" do
         expect(body).to have_content(Commit.truncate_sha(push_event.commit_id))
       end
     end
+
+    context 'when setting for atom off is on' do
+      it 'returns a 404 for an atom request' do
+        Settings[:atom_off] = true
+        visit user_path(user, :atom, feed_token: user.feed_token)
+        expect(page.status_code).to eq(404)
+        Settings[:atom_off] = nil
+      end
+    end
   end
 
   def issue_event(issue, user)

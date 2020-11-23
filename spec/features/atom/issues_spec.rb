@@ -28,6 +28,14 @@ RSpec.describe 'Issues Feed' do
         expect(body).to have_selector('assignee email', text: issue.assignees.first.public_email)
         expect(body).to have_selector('entry summary', text: issue.title)
       end
+      it 'returns a 404 for an atom request when disabled' do
+        Settings[:atom_off] = true
+        sign_in user
+        visit project_issues_path(project, :atom)
+
+        expect(page.status_code).to eq(404)
+        Settings[:atom_off] = nil
+      end
     end
 
     context 'when authenticated via personal access token' do
@@ -45,6 +53,15 @@ RSpec.describe 'Issues Feed' do
         expect(body).to have_selector('assignee email', text: issue.assignees.first.public_email)
         expect(body).to have_selector('entry summary', text: issue.title)
       end
+      it 'returns a 404 for an atom request when disabled' do
+        Settings[:atom_off] = true
+        personal_access_token = create(:personal_access_token, user: user)
+        visit project_issues_path(project, :atom,
+                                            private_token: personal_access_token.token)
+
+        expect(page.status_code).to eq(404)
+        Settings[:atom_off] = nil
+      end
     end
 
     context 'when authenticated via feed token' do
@@ -59,6 +76,13 @@ RSpec.describe 'Issues Feed' do
         expect(body).to have_selector('assignees assignee email', text: issue.assignees.first.public_email)
         expect(body).to have_selector('assignee email', text: issue.assignees.first.public_email)
         expect(body).to have_selector('entry summary', text: issue.title)
+      end
+      it 'returns a 404 for an atom request when disabled' do
+        Settings[:atom_off] = true
+        visit project_issues_path(project, :atom,
+                                            feed_token: user.feed_token)
+        expect(page.status_code).to eq(404)
+        Settings[:atom_off] = nil
       end
     end
 
