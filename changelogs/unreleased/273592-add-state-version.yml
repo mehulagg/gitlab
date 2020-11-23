@@ -1,0 +1,5 @@
+---
+title: Added version field to terraform graphql
+merge_request: 48411
+author:
+type: changed
