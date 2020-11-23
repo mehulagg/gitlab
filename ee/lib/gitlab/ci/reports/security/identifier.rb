@@ -42,11 +42,11 @@ module Gitlab
           end
 
           def cve?
-            external_type.to_s.casecmp('cve') == 0
+            external_type.to_s.casecmp?('cve')
           end
 
           def cwe?
-            external_type.to_s.casecmp('cwe') == 0
+            external_type.to_s.casecmp?('cwe')
           end
 
           private

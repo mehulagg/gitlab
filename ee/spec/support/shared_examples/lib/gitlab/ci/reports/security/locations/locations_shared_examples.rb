@@ -40,9 +40,7 @@ RSpec.shared_examples 'vulnerability location' do
   describe '#fingerprint_path' do
     subject { described_class.new(**params).fingerprint_path }
 
-    it "generates expected fingerprint" do
-      expect(subject).to eq(expected_fingerprint_path)
-    end
+    it { is_expected.to eq(expected_fingerprint_path) }
   end
 
   describe '#==' do
