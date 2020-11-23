@@ -5,7 +5,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
   <!---->
    
   <p>
-    Setting up a webhook with PagerDuty will automatically create a GitLab issue for each PagerDuty incident.
+    Setting up a webhook with PagerDuty will automatically create a GitLab incident for each PagerDuty incident.
   </p>
    
   <form>
@@ -37,7 +37,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
         class="gl-text-gray-200 gl-pt-2"
       >
         <gl-sprintf-stub
-          message="Create a GitLab issue for each PagerDuty incident by %{docsLink}"
+          message="Create a GitLab incident for each PagerDuty incident by %{docsLink}"
         />
       </div>
        
