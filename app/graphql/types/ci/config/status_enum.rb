@@ -8,7 +8,7 @@ module Types
         description 'Values for YAML processor result'
 
         value 'valid', 'Valid gitlab-ci.yml', value: 'valid'
-        value 'invalid', 'Invalid gitlab-ci.yml', value: 'invalid'
+        value 'INVALID', 'Invalid gitlab-ci.yml'
       end
     end
   end
