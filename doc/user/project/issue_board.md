@@ -443,13 +443,14 @@ Select one or more issues by clicking the cards and then click **Add issues**
 to add them to the selected list. You can limit the issues you want to add to
 the list by filtering by the following:
 
-- Assignee
 - Author
-- Epic
-- Label
+- Assignee
 - Milestone
-- My Reaction
+- Iteration
 - Release
+- Label
+- My Reaction
+- Epic
 - Weight
 
 ![Bulk adding issues to lists](img/issue_boards_add_issues_modal_v13_6.png)
