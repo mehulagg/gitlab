@@ -168,7 +168,7 @@ body.gl-dark {
   --white: #{$white};
   --black: #{$black};
 
-  --svg-status-bg: transparent;
+  --svg-status-bg: #{$white};
 }
 
 $border-white-light: $gray-900;
