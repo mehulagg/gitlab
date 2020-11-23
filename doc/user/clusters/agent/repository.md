@@ -30,22 +30,6 @@ of your Agent:
           |- config.yaml
 ```
 
-To use multiple YAML files, specify a `paths` attribute in the `gitops` section:
-
-```yaml
-gitops:
-  manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  paths:
-      # Read all .yaml files from team1/app1 directory.
-      # See https://github.com/bmatcuk/doublestar#about and
-      # https://pkg.go.dev/github.com/bmatcuk/doublestar/v2#Match for globbing rules.
-    - glob: '/team1/app1/*.yaml'
-      # Read all .yaml files from team2/apps and all subdirectories
-    - glob: '/team2/apps/**/*.yaml'
-      # If 'paths' is not specified or is an empty list, the configuration below is used
-    - glob: '/**/*.{yaml,yml,json}'
-```
 ## Synchronize manifest projects
 
 Your `config.yaml` file contains a `gitops` section, which contains a `manifest_projects`
@@ -53,6 +37,8 @@ section. Each `id` in the `manifest_projects` section is the path to a Git repos
 with Kubernetes resource definitions in YAML or JSON format. The Agent monitors
 each project you declare, and when the project changes, GitLab deploys the changes
 using the Agent.
+
+To use multiple YAML files, specify a `paths` attribute in the `gitops` section.
 
 By default, the Agent monitors all resource kinds. You can exclude some types of resources
 from monitoring, enabling you to reduce the permissions the GitOps feature needs,
