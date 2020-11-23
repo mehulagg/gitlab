@@ -12,7 +12,8 @@ module Gitlab
         # on as we also use these to enrich pull requests with assigned labels.
         IMPORTERS = [
           Importer::IssuesImporter,
-          Importer::DiffNotesImporter
+          Importer::DiffNotesImporter,
+          Importer::ReviewNotesImporter
         ].freeze
 
         # client - An instance of Gitlab::GithubImport::Client.
