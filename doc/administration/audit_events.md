@@ -137,7 +137,7 @@ It's possible to filter particular actions by choosing an audit data type from
 the filter dropdown box. You can further filter by specific group, project, or user
 (for authentication events).
 
-![audit log](img/audit_log.png)
+![search audit log](img/search_audit_log_v13_6.png)
 
 Instance events can also be accessed via the [Instance Audit Events API](../api/audit_events.md#instance-audit-events).
 
@@ -193,19 +193,21 @@ This feature might not be available to you. Check the **version history** note a
 If available, you can enable it with a [feature flag](#enable-or-disable-audit-log-export-to-csv).
 
 Export to CSV allows customers to export the current filter view of your audit log as a
-CSV file,
-which stores tabular data in plain text. The data provides a comprehensive view with respect to
+CSV file, which stores tabular data in plain text. The data provides a comprehensive view with respect to
 audit events.
 
 To export the Audit Log to CSV, navigate to
 **{monitor}** **Admin Area > Monitoring > Audit Log**
 
 1. Click in the field **Search**.
-1. In the dropdown menu that appears, select the event type that you want to filter by.
+1. In the dropdown menu that appears, select the event type that you want to filter by. The available event types are:
+   - Group Events
+   - Project Events
+   - User Events
 1. Select the preferred date range.
 1. Click **Export as CSV**.
 
-![Export Audit Log](img/export_audit_log_v13_4.png)
+![export audit log](img/export_audit_log_v13_6.png)
 
 ### Sort
 
@@ -233,7 +235,7 @@ The first row contains the headers, which are listed in the following table alon
 
 ### Limitation
 
-The Audit Log CSV file size is limited to a maximum of `100,000` events.
+The Audit Log CSV file is limited to a maximum of `100,000` events.
 The remaining records are truncated when this limit is reached.
 
 ### Enable or disable Audit Log Export to CSV
