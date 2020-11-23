@@ -4286,25 +4286,48 @@ RSpec.describe Project, factory_default: :keep do
 
     subject { project.git_transfer_in_progress? }
 
-    it 'returns false when repo_reference_count and wiki_reference_count are 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
-
-      expect(subject).to be_falsey
+    before do
+      allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::PROJECT) do
+        double(:project_reference_counter, value: project_reference_counter)
+      end
+      allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::WIKI) do
+        double(:wiki_reference_counter, value: wiki_reference_counter)
+      end
+      allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::DESIGN) do
+        double(:design_reference_counter, value: design_reference_counter)
+      end
     end
 
-    it 'returns true when repo_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 2 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
+    context 'returns false when all reference counts are 0' do
+      let(:project_reference_counter) { 0 }
+      let(:wiki_reference_counter) { 0 }
+      let(:design_reference_counter) { 0 }
 
-      expect(subject).to be_truthy
+      specify { expect(subject).to be_falsey }
     end
 
-    it 'returns true when wiki_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 2 }
+    context 'returns true when project reference count is > 0' do
+      let(:project_reference_counter) { 2 }
+      let(:wiki_reference_counter) { 0 }
+      let(:design_reference_counter) { 0 }
 
-      expect(subject).to be_truthy
+      specify { expect(subject).to be_truthy }
+    end
+
+    context 'returns true when wiki reference count is > 0' do
+      let(:project_reference_counter) { 0 }
+      let(:wiki_reference_counter) { 2 }
+      let(:design_reference_counter) { 0 }
+
+      specify { expect(subject).to be_truthy }
+    end
+
+    context 'returns true when design reference count is > 0' do
+      let(:project_reference_counter) { 0 }
+      let(:wiki_reference_counter) { 0 }
+      let(:design_reference_counter) { 2 }
+
+      specify { expect(subject).to be_truthy }
     end
   end
 

@@ -2275,7 +2275,9 @@ class Project < ApplicationRecord
   end
 
   def git_transfer_in_progress?
-    repo_reference_count > 0 || wiki_reference_count > 0
+    [Gitlab::GlRepository::PROJECT, Gitlab::GlRepository::WIKI, Gitlab::GlRepository::DESIGN].any? do |type|
+      reference_counter(type: type).value > 0
+    end
   end
 
   def storage_version=(value)
@@ -2606,14 +2608,6 @@ class Project < ApplicationRecord
     if self.new_record? && Gitlab::CurrentSettings.hashed_storage_enabled
       self.storage_version = LATEST_STORAGE_VERSION
     end
-  end
-
-  def repo_reference_count
-    reference_counter.value
-  end
-
-  def wiki_reference_count
-    reference_counter(type: Gitlab::GlRepository::WIKI).value
   end
 
   def check_repository_absence!
