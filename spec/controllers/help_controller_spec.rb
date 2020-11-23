@@ -99,46 +99,51 @@ RSpec.describe HelpController do
 
   describe 'GET #show' do
     context 'for Markdown formats' do
-      context 'when requested file exists' do
-        before do
-          expect_file_read(File.join(Rails.root, 'doc/ssh/README.md'), content: fixture_file('blockquote_fence_after.md'))
+      subject { get :show, params: { path: path }, format: 'html' }
 
-          get :show, params: { path: 'ssh/README' }, format: :md
-        end
+      let(:path) { 'ssh/README' }
+      let(:gitlab_version) { '13.4.0-ee' }
 
-        it 'assigns to @markdown' do
-          expect(assigns[:markdown]).not_to be_empty
-        end
+      before do
+        stub_version(gitlab_version, 'deadbeaf')
+      end
 
-        it 'renders HTML' do
-          aggregate_failures do
-            expect(response).to render_template('show.html.haml')
-            expect(response.media_type).to eq 'text/html'
-          end
+      it 'redirects user to default documentation url with a specified version' do
+        is_expected.to redirect_to("https://docs.gitlab.com/13.4/ee/#{path}.html")
+      end
+
+      context 'when requested file is missing' do
+        let(:path) { 'foo/bar' }
+
+        it 'still redirects to the documentation website' do
+          is_expected.to redirect_to("https://docs.gitlab.com/13.4/ee/#{path}.html")
         end
       end
 
       context 'when a custom help_page_documentation_url is set' do
         before do
           stub_application_setting(help_page_documentation_base_url: documentation_base_url)
-          stub_version(gitlab_version, 'deadbeaf')
         end
 
-        subject { get :show, params: { path: path }, format: 'html' }
-
-        let(:gitlab_version) { '13.4.0-ee' }
-        let(:documentation_base_url) { 'https://docs.gitlab.com' }
-        let(:path) { 'ssh/README' }
+        let(:documentation_base_url) { 'https://docs.example.com' }
 
         it 'redirects user to custom documentation url with a specified version' do
           is_expected.to redirect_to("#{documentation_base_url}/13.4/ee/#{path}.html")
         end
 
         context 'when documentation url ends with a slash' do
-          let(:documentation_base_url) { 'https://docs.gitlab.com/' }
+          let(:documentation_base_url) { 'https://docs.example.com/' }
 
           it 'redirects user to custom documentation url without slash duplicates' do
-            is_expected.to redirect_to("https://docs.gitlab.com/13.4/ee/#{path}.html")
+            is_expected.to redirect_to("https://docs.example.com/13.4/ee/#{path}.html")
+          end
+        end
+
+        context 'when documentation url is broken' do
+          let(:documentation_base_url) { '???' }
+
+          it 'renders not found' do
+            is_expected.to be_not_found
           end
         end
 
@@ -148,26 +153,6 @@ RSpec.describe HelpController do
           it 'redirects user to custom documentation url without a version' do
             is_expected.to redirect_to("#{documentation_base_url}/ee/#{path}.html")
           end
-        end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(help_page_documentation_redirect: false)
-          end
-
-          it 'renders HTML' do
-            aggregate_failures do
-              is_expected.to render_template('show.html.haml')
-              expect(response.media_type).to eq 'text/html'
-            end
-          end
-        end
-      end
-
-      context 'when requested file is missing' do
-        it 'renders not found' do
-          get :show, params: { path: 'foo/bar' }, format: :md
-          expect(response).to be_not_found
         end
       end
     end

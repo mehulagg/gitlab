@@ -9,6 +9,7 @@ class HelpController < ApplicationController
   # Taken from Jekyll
   # https://github.com/jekyll/jekyll/blob/3.5-stable/lib/jekyll/document.rb#L13
   YAML_FRONT_MATTER_REGEXP = /\A(---\s*\n.*?\n?)^((---|\.\.\.)\s*$\n?)/m.freeze
+  GITLAB_DOCS_HOST = 'https://docs.gitlab.com'.freeze
 
   def index
     # Remove YAML frontmatter so that it doesn't look weird
@@ -30,7 +31,7 @@ class HelpController < ApplicationController
         if redirect_to_documentation_website?
           redirect_to documentation_url
         else
-          render_documentation
+          render 'errors/not_found.html.haml', layout: 'errors', status: :not_found
         end
       end
 
@@ -71,20 +72,17 @@ class HelpController < ApplicationController
   end
 
   def redirect_to_documentation_website?
-    return false unless Feature.enabled?(:help_page_documentation_redirect)
     return false unless Gitlab::UrlSanitizer.valid_web?(documentation_url)
 
     true
   end
 
   def documentation_url
-    return unless documentation_base_url
-
     @documentation_url ||= Gitlab::Utils.append_path(documentation_base_url, documentation_file_path)
   end
 
   def documentation_base_url
-    @documentation_base_url ||= Gitlab::CurrentSettings.current_application_settings.help_page_documentation_base_url.presence
+    @documentation_base_url ||= Gitlab::CurrentSettings.current_application_settings.help_page_documentation_base_url.presence || GITLAB_DOCS_HOST
   end
 
   def documentation_file_path
@@ -96,20 +94,5 @@ class HelpController < ApplicationController
 
     version = Gitlab.version_info
     [version.major, version.minor].join('.')
-  end
-
-  def render_documentation
-    # Note: We are purposefully NOT using `Rails.root.join` because of https://gitlab.com/gitlab-org/gitlab/-/issues/216028.
-    path = File.join(Rails.root, 'doc', "#{@path}.md")
-
-    if File.exist?(path)
-      # Remove YAML frontmatter so that it doesn't look weird
-      @markdown = File.read(path).gsub(YAML_FRONT_MATTER_REGEXP, '')
-
-      render 'show.html.haml'
-    else
-      # Force template to Haml
-      render 'errors/not_found.html.haml', layout: 'errors', status: :not_found
-    end
   end
 end
