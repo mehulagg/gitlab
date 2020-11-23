@@ -25,6 +25,19 @@ export default {
       default: '',
     },
   },
+  computed: {
+    formattedProfiles() {
+      return this.profiles.map(profile => {
+        const addSuffix = str => `${str} (${this.getScanModeText(profile.scanType)})`;
+        const profileName = addSuffix(profile.profileName);
+        return {
+          ...profile,
+          profileName,
+          dropdownLabel: profileName,
+        };
+      });
+    },
+  },
   methods: {
     getScanModeText(scanType) {
       return SCAN_TYPE_OPTIONS.find(({ value }) => scanType === value)?.text;
@@ -45,7 +58,7 @@ export default {
   <profile-selector
     :library-path="scannerProfilesLibraryPath"
     :new-profile-path="newScannerProfilePath"
-    :profiles="profiles.map(profile => ({ ...profile, dropdownLabel: profile.profileName }))"
+    :profiles="formattedProfiles"
     v-bind="$attrs"
     v-on="$listeners"
   >

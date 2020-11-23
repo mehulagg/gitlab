@@ -9,7 +9,7 @@ export default () => {
   }
 
   const {
-    helpPagePath,
+    dastSiteValidationDocsPath,
     emptyStateSvgPath,
     projectPath,
     defaultBranch,
@@ -17,6 +17,7 @@ export default () => {
     siteProfilesLibraryPath,
     newSiteProfilePath,
     newScannerProfilePath,
+    helpPagePath,
   } = el.dataset;
 
   return new Vue({
@@ -27,6 +28,7 @@ export default () => {
       siteProfilesLibraryPath,
       newScannerProfilePath,
       newSiteProfilePath,
+      dastSiteValidationDocsPath,
     },
     render(h) {
       return h(OnDemandScansApp, {

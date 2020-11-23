@@ -25,14 +25,19 @@ export default {
       default: () => [],
     },
     value: {
-      type: String,
+      type: Object,
       required: false,
       default: null,
     },
   },
   computed: {
     selectedProfile() {
-      return this.value ? this.profiles.find(({ id }) => this.value === id) : null;
+      return this.value?.id ? this.profiles.find(({ id }) => this.value.id === id) : null;
+    },
+  },
+  methods: {
+    isChecked({ id }) {
+      return this.value?.id === id;
     },
   },
 };
@@ -77,9 +82,9 @@ export default {
         <gl-dropdown-item
           v-for="profile in profiles"
           :key="profile.id"
-          :is-checked="value === profile.id"
+          :is-checked="isChecked(profile)"
           is-check-item
-          @click="$emit('input', profile.id)"
+          @click="$emit('input', profile)"
         >
           {{ profile.profileName }}
         </gl-dropdown-item>
