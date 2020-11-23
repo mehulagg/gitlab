@@ -1829,6 +1829,15 @@ class Project < ApplicationRecord
     ensure_pages_metadatum.update!(pages_deployment: deployment)
   end
 
+  def set_first_pages_deployment!(deployment)
+    metadatum = ensure_pages_metadatum
+    metadatum.with_lock do
+      next if metadatum.pages_deployment_id
+
+      metadatum.update!(pages_deployment: deployment)
+    end
+  end
+
   def write_repository_config(gl_full_path: full_path)
     # We'd need to keep track of project full path otherwise directory tree
     # created with hashed storage enabled cannot be usefully imported using
