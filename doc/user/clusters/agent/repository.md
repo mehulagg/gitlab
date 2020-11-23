@@ -40,11 +40,13 @@ using the Agent.
 
 To use multiple YAML files, specify a `paths` attribute in the `gitops` section.
 
-By default, the Agent monitors all resource kinds. You can exclude some types of resources
-from monitoring, enabling you to reduce the permissions the GitOps feature needs,
-by specifying `resource_exclusions`. To exclude all resources by default, while
-only enabling specific named resource, exclude all groups and kinds, and
-then use `resource_inclusions` to enable only your desired resources:
+By default, the Agent monitors all types of resources. You can exclude some types of resources
+from monitoring. This enables you to reduce the permissions needed by the GitOps feature,
+through `resource_exclusions`.
+
+To enable a specific named resource, first use `resource_inclusions` to enable desired resources.
+The following file excerpt includes specific `api_groups` and `kinds`. The `resource_exclusions`
+which follow excludes all other `api_groups` and `kinds`:
 
 ```yaml
 gitops:
