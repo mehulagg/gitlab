@@ -11,7 +11,7 @@ import {
 } from '@gitlab/ui';
 import {
   I18N_ALERT_SETTINGS_FORM,
-  NO_INCIDENT_TEMPLATE_SELECTED,
+  NO_ISSUE_TEMPLATE_SELECTED,
   TAKING_INCIDENT_ACTION_DOCS_LINK,
   ISSUE_TEMPLATES_DOCS_LINK,
 } from '../constants';
@@ -30,7 +30,7 @@ export default {
   inject: ['service', 'alertSettings'],
   data() {
     return {
-      templates: [NO_INCIDENT_TEMPLATE_SELECTED, ...this.alertSettings.templates],
+      templates: [NO_ISSUE_TEMPLATE_SELECTED, ...this.alertSettings.templates],
       createIssueEnabled: this.alertSettings.createIssue,
       issueTemplate: this.alertSettings.issueTemplateKey,
       sendEmailEnabled: this.alertSettings.sendEmail,
@@ -43,7 +43,7 @@ export default {
   ISSUE_TEMPLATES_DOCS_LINK,
   computed: {
     issueTemplateHeader() {
-      return this.issueTemplate || NO_INCIDENT_TEMPLATE_SELECTED.name;
+      return this.issueTemplate || NO_ISSUE_TEMPLATE_SELECTED.name;
     },
     formData() {
       return {
