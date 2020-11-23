@@ -417,6 +417,11 @@ list view that's removed. You can always restore it later if you need.
 
 ### Add issues to a list
 
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-adding-issues-to-the-list)
+
 You can add issues to a list by clicking the **Add issues** button
 in the top right corner of the issue board. This opens up a modal
 window where you can see all the issues that do not belong to any list.
@@ -426,6 +431,24 @@ to add them to the selected list. You can limit the issues you want to add to
 the list by filtering by author, assignee, milestone, and label.
 
 ![Bulk adding issues to lists](img/issue_boards_add_issues_modal_v13_6.png)
+
+#### Enable or disable adding issues to the list
+
+Adding issues to the list is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:add_issues_button)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:add_issues_button)
+```
 
 ### Remove an issue from a list
 
