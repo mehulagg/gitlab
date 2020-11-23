@@ -63,6 +63,15 @@ $$;
 
 COMMENT ON FUNCTION table_sync_function_2be879775d() IS 'Partitioning migration: table sync for audit_events table';
 
+CREATE FUNCTION trigger_bd9a12df66e4() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW."external_author" := NEW."service_desk_reply_to";
+  RETURN NEW;
+END;
+$$;
+
 CREATE TABLE audit_events_part_5fc467ac26 (
     id bigint NOT NULL,
     author_id integer NOT NULL,
@@ -22808,6 +22817,8 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
 CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+
+CREATE TRIGGER trigger_bd9a12df66e4 BEFORE INSERT OR UPDATE ON issues FOR EACH ROW EXECUTE FUNCTION trigger_bd9a12df66e4();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
