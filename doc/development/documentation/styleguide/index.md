@@ -111,12 +111,9 @@ of GitLab more efficient.
 
 New information that would be useful toward the future usage or troubleshooting
 of GitLab should not be written directly in a forum or other messaging system,
-but added to a documentation MR and then referenced, as described above. Note
-that among any other documentation changes, you can either:
+but added to a documentation MR and then referenced, as described above. 
 
-- Add a [Troubleshooting section](#troubleshooting) to a doc if none exists.
-- Un-comment and use the placeholder Troubleshooting section included as part of
-  our [documentation template](../structure.md#template-for-new-docs), if present.
+For example, you can add a [Troubleshooting topic](../structure.md#troubleshooting) if none exists.
 
 The more we reflexively add useful information to the documentation, the more
 (and more successfully) the documentation will be used to efficiently accomplish
@@ -200,8 +197,11 @@ included in backticks. For example:
 
 ## Structure
 
-Because we want documentation to be a SSOT, we should [organize by topic, not by
-type](#organize-by-topic-not-by-type).
+We include concept and task topic types in the same larger topic.
+
+In general, we have one topic that's a [landing page](../structure.md#landing-page).
+Below that topic in the left nav are individual topics. Each of these include a concept
+and multiple related tasks, reference, and troubleshooting topics.
 
 ### Folder structure overview
 
@@ -282,7 +282,7 @@ place for it.
 ### Avoid duplication
 
 Do not include the same information in multiple places.
-[Link to a single source of truth instead.](#link-instead-of-summarize)
+[Link to a single source of truth instead.](#link-instead-of-repeating-text)
 
 ### References across documents
 
@@ -970,7 +970,7 @@ do not use this option until further notice.
 ## Links
 
 Links are important in GitLab documentation. They allow you to [link instead of
-summarizing](#link-instead-of-summarize) to help preserve a [single source of truth](#why-a-single-source-of-truth)
+summarizing](#link-instead-of-repeating-text) to help preserve a [single source of truth](#documentation-is-the-single-source-of-truth-ssot)
 within GitLab documentation.
 
 We include guidance for links in the following categories:
