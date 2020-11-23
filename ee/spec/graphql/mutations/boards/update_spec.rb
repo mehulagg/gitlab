@@ -27,7 +27,7 @@ RSpec.describe Mutations::Boards::Update do
     }
   end
 
-  subject { mutation.resolve(mutation_params) }
+  subject { mutation.resolve(**mutation_params) }
 
   specify { expect(described_class).to require_graphql_authorizations(:admin_board) }
 
@@ -89,7 +89,7 @@ RSpec.describe Mutations::Boards::Update do
       end
 
       it 'raises exception when mutually exclusive params are given' do
-        expect { mutation.ready?(mutation_params) }
+        expect { mutation.ready?(**mutation_params) }
           .to raise_error(Gitlab::Graphql::Errors::ArgumentError, /one and only one of/)
       end
     end

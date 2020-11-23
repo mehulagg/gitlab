@@ -18,7 +18,7 @@ RSpec.describe Gitlab::Cleanup::ProjectUploads do
         let(:args) { [dry_run: false] }
 
         it 'moves the file to its proper location' do
-          subject.run!(*args)
+          subject.run!(**args)
 
           expect(File.exist?(path)).to be_falsey
           expect(File.exist?(new_path)).to be_truthy
@@ -28,13 +28,13 @@ RSpec.describe Gitlab::Cleanup::ProjectUploads do
           expect(logger).to receive(:info).with("Looking for orphaned project uploads to clean up...")
           expect(logger).to receive(:info).with("Did #{action}")
 
-          subject.run!(*args)
+          subject.run!(**args)
         end
       end
 
       shared_examples_for 'a dry run' do
         it 'does not move the file' do
-          subject.run!(*args)
+          subject.run!(**args)
 
           expect(File.exist?(path)).to be_truthy
           expect(File.exist?(new_path)).to be_falsey
@@ -44,7 +44,7 @@ RSpec.describe Gitlab::Cleanup::ProjectUploads do
           expect(logger).to receive(:info).with("Looking for orphaned project uploads to clean up. Dry run...")
           expect(logger).to receive(:info).with("Can #{action}")
 
-          subject.run!(*args)
+          subject.run!(**args)
         end
       end
 
