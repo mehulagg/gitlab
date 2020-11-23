@@ -2878,6 +2878,49 @@ RSpec.describe User do
     end
   end
 
+  describe '#solo_owned_groups' do
+    subject { create(:user) }
+
+    context 'no owned groups' do
+      it { expect(subject.solo_owned_groups).to be_empty }
+    end
+
+    context 'has owned groups' do
+      let_it_be(:group) { create(:group) }
+
+      before do
+        group.add_owner(subject)
+      end
+
+      context 'not solo owner' do
+        let_it_be(:user2) { create(:user) }
+
+        before do
+          group.add_owner(user2)
+        end
+
+        it { expect(subject.solo_owned_groups).to be_empty }
+      end
+
+      context 'solo owner' do
+        it { expect(subject.solo_owned_groups).to include(group) }
+
+        it 'avoids N+1 queries' do
+          instance1 = User.find(subject.id)
+          instance2 = User.find(subject.id)
+
+          control_count = ActiveRecord::QueryRecorder.new do
+            instance1.solo_owned_groups
+          end.count
+
+          create(:group).add_owner(subject)
+
+          expect { instance2.solo_owned_groups }.not_to exceed_query_limit(control_count)
+        end
+      end
+    end
+  end
+
   describe "#recent_push" do
     let(:user) { build(:user) }
     let(:project) { build(:project) }
