@@ -125,6 +125,8 @@ In these cases, use the following workflow:
    - [Infrastructure](https://about.gitlab.com/handbook/engineering/infrastructure/)
    If the MR is authored by an appropriate EM or Staff Engineer,
    you may skip this requirement.
+   1. If multiple groups are affected, you may need approvals at the
+      EM/Staff Engineer level from each affected area.
 
 1. Request review and approval from the Technical Writer assigned
    to [Development Guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines).
