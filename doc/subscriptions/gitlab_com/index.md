@@ -112,7 +112,7 @@ to the **Billing** section of the relevant namespace:
   | **Seats owed**              | If your maximum seats used exceeds the seats in your subscription, you'll owe an additional fee for the users you've added.             |
   | **Subscription start date** | Date your subscription started. If this is for a Free plan, is the date you transitioned off your group's paid plan.                    |
   | **Subscription end date**   | Date your current subscription will end. Does not apply to Free plans.                                                                  |
-  | **Billable users list**   | List of users that belong to your group subscription. Does not apply to Free plans. 
+  | **Billable users list**   | List of users that belong to your group subscription. Does not apply to Free plans.                                                                  |
 ## Renew your GitLab.com subscription
 
 To renew your subscription:
