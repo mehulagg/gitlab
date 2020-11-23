@@ -15101,7 +15101,8 @@ CREATE TABLE project_features (
     pages_access_level integer NOT NULL,
     forking_access_level integer,
     metrics_dashboard_access_level integer,
-    requirements_access_level integer DEFAULT 20 NOT NULL
+    requirements_access_level integer DEFAULT 20 NOT NULL,
+    operations_access_level integer DEFAULT 20 NOT NULL
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -22744,7 +22745,7 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
-CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE FUNCTION table_sync_function_2be879775d();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
