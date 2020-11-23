@@ -69,29 +69,74 @@ Complementary reads:
 When you submit a change to GitLab's development guidelines, the people
 you ask for reviews from depend on the level of change:
 
-- If the proposed change is trivial, for example, if the MR:
-  - Fixes typos.
-  - Includes clarifying links, such as to external programming language documentation.
-  - Makes changes to comply with the [documentation style guide](documentation/index.md)
-    in a way that clearly does not change the intent of the documentation.
-  Under these circumstances, the change can be reviewed, approved, and
-  merged by the responsible Technical Writer, as
-  [defined in the handbook](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines).
+#### Trivial changes
 
-- If the proposed change revises or adds an element to an existing
-  process, **also** request review from:
-- A member of your team or group, to check for technical accuracy.
-  - Engineering managers (FE, BE, DB, Security, UX, and others), according to the subject or process you're proposing.
-  - Engineers at the [Staff](https://about.gitlab.com/handbook/engineering/career-development/matrix/engineering/staff/) level, for this purpose
-    are considered equivalent to an engineering manager.
+Changes are "trivial" if they do not require extensive review.
+For example, if the MR:
 
-- If the proposed change creates a new process, or changes an existing process in
-a **significant** way, you may, in consultation with the engineering manager, **also**
-request review from:
-  - The VP of Development (DRI) ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
-  final approval of the new or changed guidelines.
+- Fixes typos.
+- Includes clarifying links, such as to external programming language documentation.
+- Makes changes to comply with the [documentation style guide](documentation/index.md)
+  in a way that clearly does not change the intent of the documentation.
 
-In all cases, the [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
+Such "trivial" changes can be reviewed, approved, and merged by
+any maintainer or any technical writer.
+
+#### Specific changes
+
+If the MR proposes changes limited to a particular stage, group, or team:
+
+1. Request review and approval from an experienced GitLab Team Member
+   who belongs to that group. For example, if:
+
+   - You're documenting a new internal API, used exclusively by a
+     given group, request review from a member of that group.
+   - Adding guidelines for the Geo team, request review from a
+     member of that team.
+   - Changing database guidelines, ask for a review from a member of
+     the database team.
+   - Updating Gitaly guidelines, get a review from a member of the
+     Gitaly group.
+
+1. After the engineering review is complete, assign the MR to the
+   Technical Writer [assigned to the group, stage, or team](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments).
+   - You can also request a consistency review from the
+     technical writer assigned to [development guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines).
+
+#### Broader changes
+
+Some changes affect more than one individual group. For example:
+
+- Changes to code review guidelines.
+- Changes to commit message guidelines.
+- Changes to feature flag guidelines.
+
+In these cases, use the following workflow:
+
+1. Request a peer review from a member of your team.
+1. Request a review and approval of an Engineering Manager (EM)
+   or Staff Engineer whose responsible in the area in question:
+   - [Frontend](https://about.gitlab.com/handbook/engineering/frontend/)
+   - [Backend](https://about.gitlab.com/handbook/engineering/)
+   - [Database](https://about.gitlab.com/handbook/engineering/development/database/)
+   - [User Experience (UX)](https://about.gitlab.com/handbook/engineering/ux/)
+   - [Security](https://about.gitlab.com/handbook/engineering/security/)
+   - [Quality](https://about.gitlab.com/handbook/engineering/quality/)
+   - [Infrastructure](https://about.gitlab.com/handbook/engineering/infrastructure/)
+   If the MR is authored by an appropriate EM or Staff Engineer,
+   you may skip this requirement.
+
+1. Request review and approval from the Technical Writer assigned
+   to [Development Guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines).
+
+1. Once these reviews are complete, consult with the EM/Staff Engineer
+   author / approver of the MR. If the change affects multiple areas
+   in a significant way:
+
+   - Request final review and approval from the VP of Development,
+     the DRI for Development Guidelines, @clefelhocz1.
+
+In all cases, the [Technical Writer assigned to development guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
 reviews the content for consistency and adherence to documentation
 guidelines. That writer may also ask for additional approvals as suggested
 above.
