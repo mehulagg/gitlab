@@ -15,21 +15,19 @@ module Elastic
 
       mappings dynamic: 'strict' do
         indexes :id, type: :integer
-        indexes :created_at, type: :date
-        indexes :updated_at, type: :date
-
         indexes :iid, type: :integer
 
         indexes :title, type: :text, index_options: 'positions'
         indexes :description, type: :text, index_options: 'positions'
+        indexes :created_at, type: :date
+        indexes :updated_at, type: :date
         indexes :state, type: :keyword
         indexes :project_id, type: :integer
-
-        indexes :visibility_level, type: :integer
-
-        indexes :assignee_id, type: :integer
         indexes :author_id, type: :integer
         indexes :confidential, type: :boolean
+        indexes :assignee_id, type: :integer
+        # TODO: uncomment after https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47819 is merged
+        # indexes :issues_access_level, type: :integer
       end
     end
   end
