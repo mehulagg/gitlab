@@ -20,7 +20,7 @@ The Agent bootstraps with the GitLab installation URL and an authentication toke
 and you provide the rest of the configuration in your repository, following
 Infrastructure as Code (IaaC) best practices.
 
-A minimal repository layout looks like this, with `my_agent_1` as the identity
+A minimal repository layout looks like this, with `my_agent_1` as the name
 of your Agent:
 
 ```plaintext
@@ -46,30 +46,7 @@ gitops:
       # If 'paths' is not specified or is an empty list, the configuration below is used
     - glob: '/**/*.{yaml,yml,json}'
 ```
-
-## Share configurations with include directives
-
-You can create a more complex repository layout containing a `config.yaml` file
-to serve as a shared base, while splitting the unique parts of each configuration
-out into separate `config.yaml` files:
-
-```plaintext
-|- .gitlab
-    |- base_for_agents
-    |  |- config.yaml
-    |- agents
-       |- my_agent_1
-       |  |- config.yaml
-       |- production-agent
-          |- config.yaml
-```
-
-To include the contents of `../../base_for_agents/config.yaml` in the finished
-configuration, use the `include: 'some_file_name.yml'` inclusion syntax (similar
-to the `.gitlab-ci.yml` [`include` directive](../../../ci/yaml/README.md#include))
-in the `config.yaml` files for each Agent.
-
-## Monitor projects for changes
+## Synchronize manifest projects
 
 Your `config.yaml` file contains a `gitops` section, which contains a `manifest_projects`
 section. Each `id` in the `manifest_projects` section is the path to a Git repository
