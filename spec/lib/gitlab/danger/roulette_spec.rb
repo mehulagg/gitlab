@@ -3,6 +3,7 @@
 require 'webmock/rspec'
 require 'timecop'
 
+require 'pry'
 require 'gitlab/danger/roulette'
 require 'active_support/testing/time_helpers'
 
@@ -162,6 +163,14 @@ RSpec.describe Gitlab::Danger::Roulette do
 
         it 'assigns frontend reviewer and maintainer' do
           expect(spins).to eq([described_class::Spin.new(:frontend, frontend_reviewer, frontend_maintainer, false, false)])
+        end
+      end
+
+      context 'when change contains many categories' do
+        let(:categories) { [:frontend, :test, :qa, :engineering_productivity, :ci_template, :backend] }
+
+        it 'has a deterministic sorting order' do
+          expect(spins.map(&:category)).to eql categories.sort
         end
       end
 
