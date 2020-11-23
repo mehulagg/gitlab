@@ -31,7 +31,7 @@ RSpec.describe 'layouts/application' do
       it 'has the notification dot' do
         render
 
-        expect(rendered).to have_css('span', class: 'header-user-notification-dot')
+        expect(rendered).to have_css('span', class: 'notification-dot')
         expect(rendered).to have_selector(track_selector)
       end
     end
@@ -40,7 +40,7 @@ RSpec.describe 'layouts/application' do
       it 'does not have the notification dot' do
         render
 
-        expect(rendered).not_to have_css('span', class: 'header-user-notification-dot')
+        expect(rendered).not_to have_css('span', class: 'notification-dot')
         expect(rendered).not_to have_selector(track_selector)
       end
     end

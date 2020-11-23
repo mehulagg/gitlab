@@ -11,28 +11,31 @@ function hideEndFade($scrollingTabs) {
   });
 }
 
+function deployNotificationFor(el) {
+  const storageKey = el.getAttribute('data-storage-key');
+  if (JSON.parse(localStorage.getItem(storageKey)) === false) {
+    $('.js-whats-new-notification-count').remove();
+  } else {
+    $('.header-help .notification-dot').removeClass('hidden');
+  }
+}
+
 function initDeferred() {
   $(document).trigger('init.scrolling-tabs');
 
   const whatsNewTriggerEl = document.querySelector('.js-whats-new-trigger');
-  if (whatsNewTriggerEl) {
-    const storageKey = whatsNewTriggerEl.getAttribute('data-storage-key');
+  if (!whatsNewTriggerEl) return;
 
-    $('.header-help').on('show.bs.dropdown', () => {
-      const displayNotification = JSON.parse(localStorage.getItem(storageKey));
-      if (displayNotification === false) {
-        $('.js-whats-new-notification-count').remove();
-      }
-    });
+  deployNotificationFor(whatsNewTriggerEl)
+  $('.header-help').on('show.bs.dropdown', () => deployNotificationFor(whatsNewTriggerEl))
 
-    whatsNewTriggerEl.addEventListener('click', () => {
-      import(/* webpackChunkName: 'whatsNewApp' */ '~/whats_new')
-        .then(({ default: initWhatsNew }) => {
-          initWhatsNew();
-        })
-        .catch(() => {});
-    });
-  }
+  whatsNewTriggerEl.addEventListener('click', () => {
+    import(/* webpackChunkName: 'whatsNewApp' */ '~/whats_new')
+      .then(({ default: initWhatsNew }) => {
+        initWhatsNew();
+      })
+      .catch(() => {});
+  });
 }
 
 export default function initLayoutNav() {

@@ -556,12 +556,11 @@
   border: 1px solid $gray-normal;
 }
 
-.header-user-notification-dot {
+.notification-dot {
   background-color: $orange-300;
   height: 12px;
   width: 12px;
-  right: 8px;
-  top: -8px;
+  margin-top: -15px;
 }
 
 .with-performance-bar .navbar-gitlab {
