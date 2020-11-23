@@ -32,6 +32,7 @@ RSpec.describe "Dashboard Issues Feed" do
         expect(response_headers['Content-Type']).to have_content('application/atom+xml')
         expect(body).to have_selector('title', text: "#{user.name} issues")
       end
+
       it 'returns a 404 for an atom request when disabled' do
         Settings[:atom_off] = true
         personal_access_token = create(:personal_access_token, user: user)
