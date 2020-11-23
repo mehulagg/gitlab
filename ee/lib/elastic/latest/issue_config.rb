@@ -14,7 +14,6 @@ module Elastic
       settings Elastic::Latest::Config.settings.to_hash
 
       mappings dynamic: 'strict' do
-        ### Shared fields
         indexes :id, type: :integer
         indexes :created_at, type: :date
         indexes :updated_at, type: :date
