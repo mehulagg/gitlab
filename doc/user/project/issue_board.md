@@ -474,6 +474,7 @@ You can filter by the following:
 - Assignee
 - Author
 - Epic
+- Iteration
 - Label
 - Milestone
 - My Reaction
