@@ -1,0 +1,5 @@
+---
+title: Rename issues `service_desk_reply_to` to `external_author`
+merge_request: 48363
+author: Lee Tickett
+type: other

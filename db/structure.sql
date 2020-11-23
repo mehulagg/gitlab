@@ -13120,7 +13120,7 @@ CREATE TABLE issues (
     description_html text,
     time_estimate integer,
     relative_position integer,
-    service_desk_reply_to character varying,
+    external_author character varying,
     cached_markdown_version integer,
     last_edited_at timestamp without time zone,
     last_edited_by_id integer,
