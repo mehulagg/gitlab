@@ -3,16 +3,14 @@
 require 'spec_helper'
 require File.expand_path('ee/elastic/migrate/20201116142400_add_new_data_to_issues_documents.rb')
 
-RSpec.describe AddNewDataToIssuesDocuments, :unit, :elastic do
+RSpec.describe AddNewDataToIssuesDocuments, :elastic do
   let(:logger) { double('Gitlab::Elasticsearch::Logger') }
+  let(:version) { 20201116142400 }
+  let(:migration) { described_class.new(version) }
 
   before do
     allow(::Gitlab::Elasticsearch::Logger).to receive(:build).and_return(logger)
-    #
-    # stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
-  let(:version) { 20201116142400 }
-  let(:migration) { described_class.new(version) }
 
   describe 'migration_options' do
     it 'has migration options set', :aggregate_failures do
