@@ -14,6 +14,7 @@ import { isEmpty } from 'lodash';
 import { __, sprintf } from '~/locale';
 import ZenMode from '~/zen_mode';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 
 import RequirementStatusBadge from './requirement_status_badge.vue';
 
@@ -21,6 +22,7 @@ import RequirementMeta from '../mixins/requirement_meta';
 import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
 
 export default {
+  maxTitleLength: MAX_TITLE_LENGTH,
   events: {
     drawerClose: 'drawer-close',
     disableEdit: 'disable-edit',
@@ -37,6 +39,7 @@ export default {
     GlButton,
     MarkdownField,
     RequirementStatusBadge,
+    IssuableBody,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -157,7 +160,7 @@ export default {
         this.$emit(this.$options.events.disableEdit);
       }
     },
-    handleSave() {
+    handleSave({ issuableTitle, issuableDescription }) {
       const { title, description } = this;
       const eventParams = {
         title,
@@ -201,6 +204,42 @@ export default {
       </div>
     </template>
     <template>
+      <issuable-body
+        :issuable="requirement"
+        :enable-edit="canUpdate && !isArchived"
+        :enable-autocomplete="false"
+        :edit-form-visible="enableRequirementEdit || isCreate"
+        :description-preview-path="descriptionPreviewPath"
+        :description-help-path="descriptionHelpPath"
+        status-badge-class="status-box-open"
+        status-icon="issue-open-m"
+        @edit-issuable="$emit($options.events.enableEdit, $event)"
+      >
+        <template #edit-form-actions="issuableMeta">
+          <gl-button
+            :disabled="
+              requirementRequestActive ||
+                issuableMeta.issuableTitle.length > $options.maxTitleLength ||
+                !issuableMeta.issuableTitle.length
+            "
+            :loading="requirementRequestActive"
+            variant="success"
+            category="primary"
+            class="gl-mr-auto js-requirement-save"
+            @click="handleSave(issuableMeta)"
+          >
+            {{ saveButtonLabel }}
+          </gl-button>
+          <gl-button
+            variant="default"
+            category="primary"
+            class="js-requirement-cancel"
+            @click="handleCancel"
+          >
+            {{ __('Cancel') }}
+          </gl-button>
+        </template>
+      </issuable-body>
       <div v-if="!enableRequirementEdit && !isCreate" class="requirement-details">
         <div
           class="title-container gl-display-flex gl-border-b-1 gl-border-b-solid gl-border-gray-100"
