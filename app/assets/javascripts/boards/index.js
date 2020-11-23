@@ -77,7 +77,6 @@ export default () => {
     el: $boardApp,
     components: {
       BoardContent,
-      Board: () => import('ee_else_ce/boards/components/board_column.vue'),
       BoardSidebar,
       BoardAddIssuesModal,
       BoardSettingsSidebar: () => import('~/boards/components/board_settings_sidebar.vue'),
@@ -193,7 +192,7 @@ export default () => {
       },
       performSearch() {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
-        if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
+        if (this.isShowingEpicsSwimlanes) {
           this.resetEpics();
           this.resetIssues();
           this.fetchEpicsSwimlanes({});

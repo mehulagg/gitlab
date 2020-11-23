@@ -3,6 +3,13 @@ import gettersCE from '~/boards/stores/getters';
 export default {
   ...gettersCE,
 
+  isSwimlanesOn: state => {
+    if (!gon?.features?.swimlanes) {
+      return false;
+    }
+
+    return state.isShowingEpicsSwimlanes;
+  },
   getIssuesByEpic: (state, getters) => (listId, epicId) => {
     return getters.getIssuesByList(listId).filter(issue => issue.epic && issue.epic.id === epicId);
   },
@@ -16,9 +23,6 @@ export default {
   },
 
   shouldUseGraphQL: state => {
-    return (
-      (gon?.features?.boardsWithSwimlanes && state.isShowingEpicsSwimlanes) ||
-      gon?.features?.graphqlBoardLists
-    );
+    return state.isShowingEpicsSwimlanes || gon?.features?.graphqlBoardLists;
   },
 };
