@@ -22,6 +22,7 @@ class GroupMember < Member
   scope :of_ldap_type, -> { where(ldap: true) }
   scope :count_users_by_group_id, -> { group(:source_id).count }
   scope :with_user, -> (user) { where(user: user) }
+  scope :with_group, -> (group) { where(group: group) }
 
   after_create :update_two_factor_requirement, unless: :invite?
   after_destroy :update_two_factor_requirement, unless: :invite?
