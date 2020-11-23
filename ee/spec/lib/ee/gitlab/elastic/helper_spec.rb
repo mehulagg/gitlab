@@ -40,6 +40,10 @@ RSpec.describe Gitlab::Elastic::Helper do
   end
 
   describe '#default_mappings' do
+    it 'has only one type' do
+      expect(helper.default_mappings.keys).to match_array %i(doc)
+    end
+
     context 'custom analyzers' do
       let(:custom_analyzers_mappings) { { doc: { properties: { title: { fields: { custom: true } } } } } }
 
