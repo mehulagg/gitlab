@@ -162,7 +162,8 @@ gitops:
 
 GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
 supports manifest projects containing
-[multiple directories (or subdirectories) of YAML files](repository.md).
+multiple directories (or subdirectories) of YAML files. To learn more about
+the Agent's [YAML configuration format](repository.md), read the documentation.
 
 ### Create an Agent record in GitLab
 
