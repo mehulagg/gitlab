@@ -1,0 +1,5 @@
+---
+title: Handle blank default branch in security configuration
+merge_request: 48328
+author:
+type: fixed
