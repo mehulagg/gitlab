@@ -56,14 +56,24 @@ stateDiagram-v2
     ApplicationMonitoring -->Database
     ApplicationMonitoring -->BackgroundJobs
 
+    Consul --> Database
+    Consul --> PgBouncer
+    Redis --> Consul
+    BackgroundJobs --> Consul
+
     state Database {
       "PG_Primary_Node"
       "PG_Secondary_Node_1..2"
     }
+
+    state Consul {
+      "Consul_1..3"
+    }
+
     state Redis {
       "R_Primary_Node"
       "R_Replica_Node_1..2"
-      "R_Consul/Sentinel_1..3"
+      "R_Sentinel_1..3"
     }
 
     state Gitaly {
@@ -90,7 +100,6 @@ stateDiagram-v2
     state PgBouncer {
       "Internal_Load_Balancer"
       "PgBouncer_1..3"
-
     }
 ```
 
