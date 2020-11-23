@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import StageColumnComponentLegacy from '~/pipelines/components/graph/stage_column_component_legacy.vue';
+import stageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 
 describe('stage column component', () => {
   const mockJob = {
@@ -31,7 +31,7 @@ describe('stage column component', () => {
       mockGroups.push(mockedJob);
     }
 
-    wrapper = shallowMount(StageColumnComponentLegacy, {
+    wrapper = shallowMount(stageColumnComponent, {
       propsData: {
         title: 'foo',
         groups: mockGroups,
