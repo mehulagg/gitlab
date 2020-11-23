@@ -2,6 +2,8 @@
 
 module Groups
   class ChildrenController < Groups::ApplicationController
+    extend ::Gitlab::Utils::Override
+
     before_action :group
     skip_cross_project_access_check :index
 
@@ -40,6 +42,13 @@ module Groups
                                              parent_group: parent,
                                              params: params.to_unsafe_h).execute
       @children = @children.page(params[:page])
+    end
+
+    private
+
+    override :has_project_list?
+    def has_project_list?
+      true
     end
   end
 end

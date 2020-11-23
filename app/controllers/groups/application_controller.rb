@@ -13,8 +13,6 @@ class Groups::ApplicationController < ApplicationController
   before_action :set_sorting
   requires_cross_project_access
 
-  GROUP_PROJECTS_SORT_ACTIONS = %w(details show index).freeze
-
   private
 
   def group
@@ -70,11 +68,7 @@ class Groups::ApplicationController < ApplicationController
   end
 
   def has_project_list?
-    if controller_name == "groups" && GROUP_PROJECTS_SORT_ACTIONS.include?(action_name)
-      true
-    else
-      controller_name == "children"
-    end
+    false
   end
 end
 
