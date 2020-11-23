@@ -20,6 +20,7 @@ module Gitlab
         # project - An instance of Project.
         def import(client, project)
           IMPORTERS.each do |klass|
+            KassioLogger.log(import_base_data_worker: klass)
             klass.new(project, client).execute
           end
 

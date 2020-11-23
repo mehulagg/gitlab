@@ -10,6 +10,7 @@ module Gitlab
       # notify_key - The Redis key to notify upon completion, if any.
       # rubocop: disable CodeReuse/ActiveRecord
       def perform(project_id, hash, notify_key = nil)
+        KassioLogger.log(rescheduling_methods: self.class.name)
         project = Project.find_by(id: project_id)
 
         return notify_waiter(notify_key) unless project

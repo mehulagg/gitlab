@@ -15,6 +15,7 @@ module Gitlab
       # next_stage - The name of the next stage to start when all jobs have been
       #              completed.
       def perform(project_id, waiters, next_stage)
+        KassioLogger.log(advance_stage: self.class.name)
         return unless import_state = find_import_state(project_id)
 
         new_waiters = wait_for_jobs(waiters)

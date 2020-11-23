@@ -5,6 +5,7 @@ module Gitlab
     module StageMethods
       # project_id - The ID of the GitLab project to import the data into.
       def perform(project_id)
+        KassioLogger.log(stage_methods: self.class.name)
         return unless (project = find_project(project_id))
 
         client = GithubImport.new_client_for(project)

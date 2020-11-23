@@ -26,8 +26,11 @@ module Gitlab
         def execute
           mr, already_exists = create_merge_request
 
+          KassioLogger.log(pull_request_imported: mr)
+
           if mr
             set_merge_request_assignees(mr)
+            set_merge_request_merged_by(mr)
             insert_git_data(mr, already_exists)
             issuable_finder.cache_database_id(mr.id)
           end
@@ -67,6 +70,16 @@ module Gitlab
 
         def set_merge_request_assignees(merge_request)
           merge_request.assignee_ids = [user_finder.assignee_id_for(pull_request)]
+        end
+
+        def set_merge_request_merged_by(merge_request)
+          KassioLogger.log(
+            merged?: pull_request.merged?,
+            merge_request: merge_request,
+            merged_by: pull_request.merged_by,
+            pull_request: pull_request
+          )
+          merge_request.metrics.merged_by = user_finder.user_id_for(pull_request.merged_by) if pull_request.merged?
         end
 
         def insert_git_data(merge_request, already_exists)

@@ -29,6 +29,7 @@ module Gitlab
       private
 
       def next_stage_worker(next_stage)
+        KassioLogger.log(next_stage: next_stage)
         STAGES.fetch(next_stage.to_sym)
       end
     end

@@ -13,18 +13,25 @@ module Gitlab
                          :source_branch_sha, :target_branch, :target_branch_sha,
                          :milestone_number, :author, :assignee, :created_at,
                          :updated_at, :merged_at, :source_repository_id,
-                         :target_repository_id, :source_repository_owner
+                         :target_repository_id, :source_repository_owner,
+                         :merged_by
 
         # Builds a PR from a GitHub API response.
         #
         # issue - An instance of `Sawyer::Resource` containing the PR details.
         def self.from_api_response(pr)
-          assignee =
-            if pr.assignee
-              Representation::User.from_api_response(pr.assignee)
-            end
+          KassioLogger.log(id: pr.number, representation_merged_by: pr.merged_by)
 
+          assignee = Representation::User.from_api_response(pr.assignee) if pr.assignee
+          merged_by = Representation::User.from_api_response(pr.merged_by) if pr.merged_by
           user = Representation::User.from_api_response(pr.user) if pr.user
+
+          KassioLogger.log(
+            assignee: assignee,
+            merged_by: merged_by,
+            user: user
+          )
+
           hash = {
             iid: pr.number,
             title: pr.title,
@@ -42,7 +49,8 @@ module Gitlab
             assignee: assignee,
             created_at: pr.created_at,
             updated_at: pr.updated_at,
-            merged_at: pr.merged_at
+            merged_at: pr.merged_at,
+            merged_by: merged_by
           }
 
           new(hash)
@@ -50,6 +58,8 @@ module Gitlab
 
         # Builds a new PR using a Hash that was built from a JSON payload.
         def self.from_json_hash(raw_hash)
+          KassioLogger.log(from_json_hash: raw_hash)
+
           hash = Representation.symbolize_hash(raw_hash)
 
           hash[:state] = hash[:state].to_sym
@@ -97,6 +107,10 @@ module Gitlab
           else
             attributes[:state]
           end
+        end
+
+        def merged?
+          state == :merged?
         end
 
         def cross_project?

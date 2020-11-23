@@ -11,6 +11,7 @@ module Gitlab
         # client - An instance of Gitlab::GithubImport::Client.
         # project - An instance of Project.
         def import(client, project)
+          KassioLogger.log('ImportPullRequestsWorker')
           waiter = Importer::PullRequestsImporter
             .new(project, client)
             .execute
