@@ -192,7 +192,7 @@ module GraphqlHelpers
     "pageInfo { hasNextPage hasPreviousPage endCursor startCursor }"
   end
 
-  def query_nodes(name, args = nil, fields = nil, of: name, include_pagination_info: false, max_depth: 1)
+  def query_nodes(name, fields = nil, args: nil, of: name, include_pagination_info: false, max_depth: 1)
     fields ||= all_graphql_fields_for(of.to_s.classify, max_depth: max_depth)
     node_selection = include_pagination_info ? "#{page_info_selection} nodes" : :nodes
     query_graphql_path([[name, args], node_selection], fields)
@@ -327,7 +327,7 @@ module GraphqlHelpers
     end
 
     def to_h
-      { name.to_sym => value }
+      { name => value }
     end
   end
 
