@@ -88,6 +88,7 @@ module.exports = path => {
       '^.+\\.(gql|graphql)$': 'jest-transform-graphql',
       '^.+\\.js$': 'babel-jest',
       '^.+\\.vue$': 'vue-jest',
+      '^.+\\.(md|zip|png)$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
       'node_modules/(?!(@gitlab/ui|bootstrap-vue|three|monaco-editor|monaco-yaml)/)',
