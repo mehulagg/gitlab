@@ -18,12 +18,12 @@ namespace :gitlab do
       end
 
       def event_pairs
-        ::Packages::Event.event_types.keys.product(::Packages::Event.originator_types.keys)
+        ::Packages::Event.event_types.keys.product(::Packages::Event::EVENT_SCOPES.keys)
       end
 
       def generate_unique_events_list
-        ::Packages::Event::EVENT_SCOPES.keys.each_with_object([]) do |event_scope, events|
-          event_pairs.each do |event_type, originator|
+        event_pairs.each_with_object([]) do |(event_type, event_scope), events|
+          ::Packages::Event.originator_types.keys.excluding('guest').each do |originator|
             if name = ::Packages::Event.allowed_event_name(event_scope, event_type, originator)
               events << {
                 "name" => name,
@@ -33,7 +33,7 @@ namespace :gitlab do
               }
             end
           end
-        end
+        end.sort { |a, b| a["name"] <=> b["name"] }
       end
     end
   end
