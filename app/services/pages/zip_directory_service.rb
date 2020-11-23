@@ -12,6 +12,9 @@ module Pages
     def execute
       ::Zip::File.open(@output_file, ::Zip::File::CREATE) do |zipfile|
         write_entries zipfile, [PUBLIC_DIR], ''
+
+        # shall we count directories or not?
+        zipfile.entries.count
       end
     end
 
