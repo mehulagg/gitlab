@@ -142,6 +142,8 @@ RSpec.describe 'admin Geo Projects', :js, :geo do
         labels.each do |label|
           expect(page).to have_content(label)
         end
+
+        expect(page).to have_css("svg[data-testid=\"#{icon}-icon\"")
       end
     end
   end
@@ -151,6 +153,7 @@ RSpec.describe 'admin Geo Projects', :js, :geo do
     let(:expected_registries) { [synced_registry] }
     let(:unexpected_registries) { [sync_pending_registry, sync_failed_registry, never_synced_registry] }
     let(:labels) { ['Status', 'Last successful sync', 'Last time verified', 'Last repository check run'] }
+    let(:icon) { 'check' }
 
     it_behaves_like 'shows filter specific projects and correct labels'
   end
@@ -160,6 +163,7 @@ RSpec.describe 'admin Geo Projects', :js, :geo do
     let(:expected_registries) { [sync_pending_registry] }
     let(:unexpected_registries) { [synced_registry, sync_failed_registry, never_synced_registry] }
     let(:labels) { ['Status', 'Next sync scheduled at', 'Last sync attempt'] }
+    let(:icon) { 'clock' }
 
     it_behaves_like 'shows filter specific projects and correct labels'
   end
@@ -169,6 +173,7 @@ RSpec.describe 'admin Geo Projects', :js, :geo do
     let(:expected_registries) { [sync_failed_registry] }
     let(:unexpected_registries) { [synced_registry, sync_pending_registry, never_synced_registry] }
     let(:labels) { ['Status', 'Next sync scheduled at', 'Last sync attempt'] }
+    let(:icon) { 'warning-solid' }
 
     it_behaves_like 'shows filter specific projects and correct labels'
   end

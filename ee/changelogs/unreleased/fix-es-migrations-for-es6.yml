@@ -1,5 +1,0 @@
----
-title: Fix create_migrations_index for ES6
-merge_request: 47651
-author:
-type: fixed

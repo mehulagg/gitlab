@@ -285,11 +285,11 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'per group SAML' do
-    context 'when group_saml is unavailable' do
-      def stub_group_saml_config(enabled)
-        allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
-      end
+    def stub_group_saml_config(enabled)
+      allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
+    end
 
+    context 'when group_saml is unavailable' do
       let(:current_user) { owner }
 
       context 'when group saml config is disabled' do
@@ -347,12 +347,13 @@ RSpec.describe GroupPolicy do
 
       context 'when group_saml_group_sync is licensed' do
         before do
+          stub_group_saml_config(true)
           stub_application_setting(check_namespace_plan: true)
         end
 
         before_all do
           create(:license, plan: License::ULTIMATE_PLAN)
-          create(:gitlab_subscription, :gold, namespace: group)
+          create(:gitlab_subscription, :silver, namespace: group)
         end
 
         context 'without an enabled SAML provider' do
@@ -395,6 +396,15 @@ RSpec.describe GroupPolicy do
 
           context 'admin' do
             let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+
+          context 'when the group is a subgroup' do
+            let_it_be(:subgroup) { create(:group, :private, parent: group) }
+            let(:current_user) { owner }
+
+            subject { described_class.new(current_user, subgroup) }
 
             it { is_expected.to be_allowed(:admin_saml_group_links) }
           end

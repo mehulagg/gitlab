@@ -1,5 +1,0 @@
----
-title: Fix blocking issues count cache when changing issue state
-merge_request: 46585
-author:
-type: fixed

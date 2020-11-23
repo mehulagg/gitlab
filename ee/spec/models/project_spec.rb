@@ -51,6 +51,8 @@ RSpec.describe Project do
     it { is_expected.to have_many(:project_aliases) }
     it { is_expected.to have_many(:approval_rules) }
 
+    it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
+
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
       let(:project) { rule.project }
@@ -2624,6 +2626,17 @@ RSpec.describe Project do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
 
       project.mark_primary_write_location
+    end
+  end
+
+  describe '#add_template_export_job' do
+    it 'starts project template export job' do
+      user = create(:user)
+      project = build(:project)
+
+      expect(ProjectTemplateExportWorker).to receive(:perform_async).with(user.id, project.id, nil, {})
+
+      project.add_template_export_job(current_user: user)
     end
   end
 end

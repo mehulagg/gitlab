@@ -23,8 +23,8 @@ and the advantage of the following special searches:
 
 | GitLab version                              | Elasticsearch version         |
 |---------------------------------------------|-------------------------------|
-| GitLab Enterprise Edition 13.6 or greater   | Elasticsearch 7.x (6.4 - 6.x deprecated to be removed in 13.8) |
-| GitLab Enterprise Edition 13.2 through 13.5 | Elasticsearch 6.4 through 7.x |
+| GitLab Enterprise Edition 13.9 or greater   | Elasticsearch 6.8 through 7.x |
+| GitLab Enterprise Edition 13.3 through 13.8 | Elasticsearch 6.4 through 7.x |
 | GitLab Enterprise Edition 12.7 through 13.2 | Elasticsearch 6.x through 7.x |
 | GitLab Enterprise Edition 11.5 through 12.6 | Elasticsearch 5.6 through 6.x |
 | GitLab Enterprise Edition 9.0 through 11.4  | Elasticsearch 5.1 through 5.5 |
@@ -928,6 +928,13 @@ Gitlab::Elastic::Indexer::Error: time="2020-01-23T09:13:00Z" level=fatal msg="he
 
 You probably have not used either `http://` or `https://` as part of your value in the **"URL"** field of the Elasticsearch Integration Menu. Please make sure you are using either `http://` or `https://` in this field as the [Elasticsearch client for Go](https://github.com/olivere/elastic) that we are using [needs the prefix for the URL to be accepted as valid](https://github.com/olivere/elastic/commit/a80af35aa41856dc2c986204e2b64eab81ccac3a).
 Once you have corrected the formatting of the URL, delete the index (via the [dedicated Rake task](#gitlab-advanced-search-rake-tasks)) and [reindex the content of your instance](#enabling-advanced-search).
+
+### My Elasticsearch cluster has a plugin and the integration is not working
+
+Certain 3rd party plugins may introduce bugs in your cluster or for whatever
+reason may be incompatible with our integration. You should try disabling
+plugins so you can rule out the possibility that the plugin is causing the
+problem.
 
 ### Low-level troubleshooting
 

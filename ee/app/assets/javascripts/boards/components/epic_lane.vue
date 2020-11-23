@@ -131,7 +131,8 @@ export default {
           :title="chevronTooltip"
           :icon="chevronIcon"
           class="gl-mr-2 gl-cursor-pointer"
-          variant="link"
+          category="tertiary"
+          size="small"
           data-testid="epic-lane-chevron"
           @click="toggleCollapsed"
         />

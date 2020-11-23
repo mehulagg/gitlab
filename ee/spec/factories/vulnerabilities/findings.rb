@@ -156,6 +156,34 @@ FactoryBot.define do
       end
     end
 
+    trait :with_secret_detection do
+      after(:build) do |finding|
+        finding.severity = "critical"
+        finding.confidence = "unknown"
+        finding.report_type = "secret_detection"
+        finding.name = "AWS API key"
+        finding.metadata_version = "3.0"
+        finding.raw_metadata =
+          { category: "secret_detection",
+            name: "AWS API key",
+            message: "AWS API key",
+            description: "Amazon Web Services API key detected; please remove and revoke it if this is a leak.",
+            cve: "aws-key.py:fac8c3618ca3c0b55431402635743c0d6884016058f696be4a567c4183c66cfd:AWS",
+            severity: "Critical",
+            confidence: "Unknown",
+            raw_source_code_extract: "AKIALALEMEM35243O345",
+            scanner: { id: "gitleaks", name: "Gitleaks" },
+            location: { file: "aws-key.py",
+                        commit: { author: "Analyzer", sha: "d874aae969588eb718e1ed18aa0be73ea69b3539" },
+                        start_line: 5, end_line: 5 },
+            identifiers: [{ type: "gitleaks_rule_id", name: "Gitleaks rule ID AWS", value: "AWS" }] }.to_json
+      end
+
+      after(:create) do |finding|
+        create(:vulnerability, :detected, project: finding.project, findings: [finding])
+      end
+    end
+
     trait :with_remediation do
       after(:build) do |finding|
         raw_metadata = Gitlab::Json.parse(finding.raw_metadata)
