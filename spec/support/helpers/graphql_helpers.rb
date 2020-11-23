@@ -17,13 +17,25 @@ module GraphqlHelpers
   # ready, then the early return is returned instead.
   #
   # Then the resolve method is called.
-  def resolve(resolver_class, args: {}, **resolver_args)
+  def resolve(resolver_class, args: {}, lookahead: :not_given, parent: :not_given, **resolver_args)
+    args = aliased_args(resolver_class, args)
+    args[:parent] = parent unless parent == :not_given
+    args[:lookahead] = lookahead unless lookahead == :not_given
     resolver = resolver_instance(resolver_class, **resolver_args)
     ready, early_return = sync_all { resolver.ready?(**args) }
 
     return early_return unless ready
 
     resolver.resolve(**args)
+  end
+
+  # TODO: Remove this method entirely when GraphqlHelpers uses real resolve_field
+  def aliased_args(resolver, args)
+    definitions = resolver.arguments
+
+    args.transform_keys do |k|
+      definitions[GraphqlHelpers.fieldnamerize(k)]&.keyword || k
+    end
   end
 
   def resolver_instance(resolver_class, obj: nil, ctx: {}, field: nil, schema: GitlabSchema)
@@ -121,14 +133,17 @@ module GraphqlHelpers
     end
   end
 
-  def resolve_field(name, object, args = {})
-    context = double("Context",
-                    schema: GitlabSchema,
-                    query: GraphQL::Query.new(GitlabSchema),
-                    parent: nil)
-    field = described_class.fields[name]
+  UnauthorizedObject = Class.new(StandardError)
+
+  def resolve_field(name, object, args = {}, current_user: nil)
+    q = GraphQL::Query.new(GitlabSchema)
+    context = GraphQL::Query::Context.new(query: q, object: object, values: { current_user: current_user })
+    allow(context).to receive(:parent).and_return(nil)
+    field = described_class.fields.fetch(GraphqlHelpers.fieldnamerize(name))
     instance = described_class.authorized_new(object, context)
-    field.resolve_field(instance, {}, context)
+    raise UnauthorizedObject unless instance
+
+    field.resolve_field(instance, args, context)
   end
 
   # Recursively convert a Hash with Ruby-style keys to GraphQL fieldname-style keys
@@ -165,10 +180,27 @@ module GraphqlHelpers
   end
 
   def query_graphql_field(name, attributes = {}, fields = nil)
-    <<~QUERY
-      #{field_with_params(name, attributes)}
-      #{wrap_fields(fields || all_graphql_fields_for(name.to_s.classify))}
-    QUERY
+    attributes, fields = [nil, attributes] if fields.nil?
+
+    field = field_with_params(name, attributes)
+
+    field + wrap_fields(fields || all_graphql_fields_for(name.to_s.classify)).to_s
+  end
+
+  def query_nodes(name, args = nil, fields = nil)
+    fields ||= all_graphql_fields_for(name.to_s.classify, max_depth: 1)
+    query_graphql_path([[name, args], :nodes], fields)
+  end
+
+  # e.g:
+  #   query_graphql_path(%i[foo bar baz], all_graphql_fields_for('Baz'))
+  #   => foo { bar { baz { x y z } } }
+  def query_graphql_path(segments, fields = nil)
+    # we really want foldr here...
+    segments.reverse.reduce(fields) do |tail, segment|
+      name, args = Array.wrap(segment)
+      query_graphql_field(name, args, tail)
+    end
   end
 
   def wrap_fields(fields)
@@ -497,6 +529,20 @@ module GraphqlHelpers
       context: { current_user: user },
       variables: {}
     )
+  end
+
+  # A lookahead that selects everything
+  def positive_lookahead
+    double(selects?: true).tap do |selection|
+      allow(selection).to receive(:selection).and_return(selection)
+    end
+  end
+
+  # A lookahead that selects nothing
+  def negative_lookahead
+    double(selects?: false).tap do |selection|
+      allow(selection).to receive(:selection).and_return(selection)
+    end
   end
 end
 
