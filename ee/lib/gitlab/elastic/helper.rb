@@ -13,6 +13,10 @@ module Gitlab
           Repository
       ].freeze
 
+      ES_SEPARATE_CLASSES = [
+        Issue
+      ].freeze
+
       attr_reader :version, :client
       attr_accessor :target_name
 
@@ -84,6 +88,35 @@ module Gitlab
         client.indices.create create_index_options
 
         migrations_index_name
+      end
+
+      def create_standalone_indices(with_alias: true, options: {})
+        ES_SEPARATE_CLASSES.each do |class_name|
+          proxy = ::Elastic::Latest::ApplicationClassProxy.new(Issue, use_separate_indices: true)
+
+          new_index_name = "#{target_name}-#{proxy.index_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
+
+          settings = proxy.settings
+          settings.merge!(options[:settings]) if options[:settings]
+
+          mappings = proxy.mappings
+          mappings.merge!(options[:mappings]) if options[:mappings]
+
+          create_index_options = {
+            index: new_index_name,
+            body: {
+              settings: settings.to_hash,
+              mappings: mappings.to_hash
+            }
+          }.merge(additional_index_options)
+
+          client.indices.create create_index_options
+
+          if with_alias
+            alias_name = "#{target_name}-#{proxy.index_name}"
+            client.indices.put_alias(name: alias_name, index: new_index_name)
+          end
+        end
       end
 
       def create_empty_index(with_alias: true, options: {})

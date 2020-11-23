@@ -6,14 +6,10 @@ module Elastic
   module ClassProxyUtil
     extend ActiveSupport::Concern
 
-    SEPARATE_INDEX_CLASSES = [
-      Issue
-    ].freeze
-
-    def initialize(target)
+    def initialize(target, use_separate_indices: false)
       super(target)
 
-      const_name = if SEPARATE_INDEX_CLASSES.include?(target)
+      const_name = if use_separate_indices && Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(target)
                      "#{target.name}Config"
                    else
                      'Config'
