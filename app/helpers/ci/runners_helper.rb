@@ -49,6 +49,13 @@ module Ci
         parent_shared_runners_availability: group.parent&.shared_runners_setting
       }
     end
+
+    def toggle_shared_runners_settings_data(project)
+      {
+        is_enabled: project.shared_runners_enabled?,
+        is_disabled_and_unoverridable: project.group&.shared_runners_setting == 'disabled_and_unoverridable'
+      }
+    end
   end
 end
 

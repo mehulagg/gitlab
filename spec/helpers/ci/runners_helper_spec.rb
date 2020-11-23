@@ -74,4 +74,35 @@ RSpec.describe Ci::RunnersHelper do
       expect(data[:parent_shared_runners_availability]).to eq('enabled')
     end
   end
+
+  describe '#toggle_shared_runners_settings_data' do
+    it 'returns value for shared runners status for project' do
+      project_without_shared_runners = create(:project, shared_runners_enabled: false)
+      data = toggle_shared_runners_settings_data(project_without_shared_runners)
+      expect(data[:is_enabled]).to eq(false)
+
+      project_with_shared_runners = create(:project, shared_runners_enabled: true)
+      data = toggle_shared_runners_settings_data(project_with_shared_runners)
+      expect(data[:is_enabled]).to eq(true)
+    end
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_setting, :is_disabled_and_unoverridable) do
+      'enabled'                    | false
+      'disabled_with_override'     | false
+      'disabled_and_unoverridable' | true
+    end
+
+    with_them do
+      it 'returns override runner status for project' do
+        group = create(:group)
+        project = create(:project, group: group)
+        allow(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
+
+        data = toggle_shared_runners_settings_data(project)
+        expect(data[:is_disabled_and_unoverridable]).to eq(is_disabled_and_unoverridable)
+      end
+    end
+  end
 end

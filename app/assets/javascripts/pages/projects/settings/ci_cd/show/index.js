@@ -4,6 +4,7 @@ import registrySettingsApp from '~/registry/settings/registry_settings_bundle';
 import initVariableList from '~/ci_variable_list';
 import initDeployFreeze from '~/deploy_freeze';
 import initSettingsPipelinesTriggers from '~/ci_settings_pipeline_triggers';
+import initSharedRunners from '~/projects/settings/mount_shared_runners';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -32,4 +33,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeployFreeze();
 
   initSettingsPipelinesTriggers();
+  initSharedRunners();
 });
