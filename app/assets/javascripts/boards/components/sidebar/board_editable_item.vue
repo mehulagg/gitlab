@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
   components: { GlButton, GlLoadingIcon },
@@ -13,6 +14,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    editText: {
+      type: String,
+      required: false,
+      default: __('Edit'),
     },
   },
   inject: ['canUpdate'],
@@ -75,7 +81,7 @@ export default {
         data-testid="edit-button"
         @click="toggle"
       >
-        {{ __('Edit') }}
+        {{ editText }}
       </gl-button>
     </div>
     <div v-show="!edit" class="gl-text-gray-500" data-testid="collapsed-content">

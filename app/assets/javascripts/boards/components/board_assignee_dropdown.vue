@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual, sortBy } from 'lodash';
 import {
   GlDropdownItem,
   GlDropdownDivider,
@@ -95,6 +95,13 @@ export default {
     currentUser() {
       return gon?.current_username;
     },
+    editToggleText() {
+      if (isEqual(this.sort(this.selected), this.sort(this.activeIssue.assignees))) {
+        return __('Edit');
+      }
+
+      return __('Apply');
+    },
   },
   created() {
     this.selected = cloneDeep(this.activeIssue.assignees);
@@ -105,6 +112,9 @@ export default {
       const [currentUserObject] = await this.setAssignees(this.currentUser);
 
       this.selectAssignee(currentUserObject);
+    },
+    sort(list) {
+      return sortBy(list, user => user?.username);
     },
     clearSelected() {
       this.selected = [];
@@ -131,7 +141,7 @@ export default {
 </script>
 
 <template>
-  <board-editable-item :title="assigneeText" @close="saveAssignees">
+  <board-editable-item :edit-text="editToggleText" :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
       <issuable-assignees :users="selected" @assign-self="assignSelf" />
     </template>
