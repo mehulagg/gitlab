@@ -4,7 +4,7 @@ module Types
   module Ci
     module Config
       class StatusEnum < BaseEnum
-        graphql_name 'CiConfigStatusEnum'
+        graphql_name 'CiConfigStatus'
         description 'Values for YAML processor result'
 
         value 'valid', 'Valid gitlab-ci.yml', value: 'valid'
