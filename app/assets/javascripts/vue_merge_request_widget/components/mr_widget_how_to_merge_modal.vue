@@ -37,6 +37,10 @@ export default {
     GlSprintf,
   },
   props: {
+    modalId: {
+      type: String,
+      required: true,
+    },
     canMerge: {
       type: Boolean,
       required: false,
@@ -94,7 +98,7 @@ export default {
 </script>
 
 <template>
-  <gl-modal modal-id="modal-merge-info" :title="$options.i18n.title" no-fade hide-footer>
+  <gl-modal :modal-id="modalId" :title="$options.i18n.title" no-fade hide-footer>
     <p>
       <strong>
         {{ $options.i18n.steps.step1.label }}

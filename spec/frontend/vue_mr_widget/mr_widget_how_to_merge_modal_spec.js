@@ -11,6 +11,7 @@ describe('MRWidgetHowToMerge', () => {
         return { ...data };
       },
       propsData: {
+        modalId: 'test-id',
         ...props,
       },
       stubs: {},

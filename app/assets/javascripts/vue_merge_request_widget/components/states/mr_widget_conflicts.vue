@@ -1,14 +1,21 @@
 <script>
 import $ from 'jquery';
 import { escape } from 'lodash';
+import { GlButton, GlModalDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 import StatusIcon from '../mr_widget_status_icon.vue';
+import MrWidgetHowToMergeModal from '../mr_widget_how_to_merge_modal.vue';
 
 export default {
   name: 'MRWidgetConflicts',
   components: {
     StatusIcon,
+    GlButton,
+    MrWidgetHowToMergeModal,
+  },
+  directives: {
+    GlModalDirective,
   },
   props: {
     /* TODO: This is providing all store and service down when it
@@ -30,6 +37,9 @@ export default {
     },
     showPopover() {
       return this.showResolveButton && this.mr.sourceBranchProtected;
+    },
+    isFork() {
+      return this.mr.sourceProjectFullPath !== this.mr.targetProjectFullPath;
     },
   },
   mounted() {
@@ -89,23 +99,33 @@ To merge this request, first rebase locally.`)
           </span>
         </span>
         <span v-if="showResolveButton" ref="popover">
-          <a
+          <gl-button
             :href="mr.conflictResolutionPath"
             :disabled="mr.sourceBranchProtected"
-            class="js-resolve-conflicts-button btn btn-default btn-sm"
+            class="js-resolve-conflicts-button"
           >
             {{ s__('mrWidget|Resolve conflicts') }}
-          </a>
+          </gl-button>
         </span>
-        <button
+        <gl-button
           v-if="mr.canMerge"
-          class="js-merge-locally-button btn btn-default btn-sm"
-          data-toggle="modal"
-          data-target="#modal_merge_info"
+          v-gl-modal-directive="'modal-merge-info-conflicts'"
+          class="js-merge-locally-button"
         >
           {{ s__('mrWidget|Merge locally') }}
-        </button>
+        </gl-button>
       </template>
     </div>
+    <mr-widget-how-to-merge-modal
+      :modal-id="'modal-merge-info-conflicts'"
+      :is-fork="isFork"
+      :can-merge="mr.canMerge"
+      :source-branch="mr.sourceBranch"
+      :source-project="mr.sourceProject"
+      :source-project-path="mr.sourceProjectFullPath"
+      :target-branch="mr.targetBranch"
+      :source-project-default-url="mr.sourceProjectDefaultUrl"
+      :reviewing-docs-path="mr.reviewingDocsPath"
+    />
   </div>
 </template>

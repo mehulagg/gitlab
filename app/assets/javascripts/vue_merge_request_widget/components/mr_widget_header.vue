@@ -147,13 +147,14 @@ export default {
             </gl-button>
           </span>
           <gl-button
-            v-gl-modal-directive="'modal-merge-info'"
+            v-gl-modal-directive="'modal-merge-info-header'"
             :disabled="mr.sourceBranchRemoved"
             class="js-check-out-branch gl-mr-3"
           >
             {{ s__('mrWidget|Check out branch') }}
           </gl-button>
           <mr-widget-how-to-merge-modal
+            :modal-id="'modal-merge-info-header'"
             :is-fork="isFork"
             :can-merge="mr.canMerge"
             :source-branch="mr.sourceBranch"
