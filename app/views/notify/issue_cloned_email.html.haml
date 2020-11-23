@@ -1,0 +1,9 @@
+%p
+  = _('Issue was cloned.')
+- if @can_access_project
+  %p
+    = _('New issue:')
+    = link_to project_issue_url(@new_project, @new_issue) do
+      = @new_issue.title
+- else
+  = _("You don't have access to the project.")
