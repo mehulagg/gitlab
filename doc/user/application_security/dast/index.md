@@ -100,7 +100,7 @@ There are two ways to define the URL to be scanned by DAST:
 
   ```yaml
   script:
-    - echo http://$CI_PROJECT_ID-$CI_ENVIRONMENT_SLUG.domain.com >environment_url.txt
+    - echo http://${CI_PROJECT_ID}-${CI_ENVIRONMENT_SLUG}.domain.com > environment_url.txt
   artifacts:
     paths: [environment_url.txt]
     when: always
