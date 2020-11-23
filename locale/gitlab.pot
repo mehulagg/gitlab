@@ -16881,6 +16881,9 @@ msgstr ""
 msgid "Members|Expired"
 msgstr ""
 
+msgid "Members|Filter members"
+msgstr ""
+
 msgid "Members|LDAP override enabled."
 msgstr ""
 
@@ -16903,6 +16906,9 @@ msgid "Members|Reverted to LDAP group sync settings."
 msgstr ""
 
 msgid "Members|Role updated successfully."
+msgstr ""
+
+msgid "Members|Search invited"
 msgstr ""
 
 msgid "Members|in %{time}"
