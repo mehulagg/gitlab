@@ -45,4 +45,6 @@ describe('Custom jest matchers', () => {
       });
     });
   });
+
+  describe('toExist', () => {});
 });

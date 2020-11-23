@@ -161,12 +161,7 @@ describe('EE - DastProfilesList', () => {
             const validateButton = within(actionsCell).queryByRole('button', {
               name: /validate/i,
             });
-
-            if (hasValidateButton) {
-              expect(validateButton).not.toBeNull();
-            } else {
-              expect(validateButton).toBeNull();
-            }
+            expect(validateButton).toExist(hasValidateButton);
           });
         });
       });

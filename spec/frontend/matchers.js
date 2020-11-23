@@ -68,4 +68,11 @@ export default {
 
     return { actual: received, message, pass };
   },
+  toExist(element, isPresent) {
+    const doesExist = !!element;
+    return {
+      pass: doesExist === isPresent,
+      message: () => `expected ${element} ${isPresent ? '' : 'not '}to exist`,
+    };
+  },
 };
