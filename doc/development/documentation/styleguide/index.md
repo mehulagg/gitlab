@@ -199,7 +199,7 @@ included in backticks. For example:
 
 We include concept and task topic types in the same larger topic.
 
-In general, we have one topic that's a [landing page](../structure.md#landing-page).
+In general, we have one topic that's a [landing page](../structure.md#landing-pages).
 Below that topic in the left nav are individual topics. Each of these include a concept
 and multiple related tasks, reference, and troubleshooting topics.
 
