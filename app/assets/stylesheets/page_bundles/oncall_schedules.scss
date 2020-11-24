@@ -10,3 +10,7 @@
     @include gl-text-overflow-ellipsis;
   }
 }
+
+.gl-token {
+  @include gl-text-white;
+}

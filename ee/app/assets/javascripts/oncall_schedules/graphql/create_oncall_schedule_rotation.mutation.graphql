@@ -1,0 +1,13 @@
+mutation oncallScheduleRotationCreate(
+  $oncallScheduleRotationCreateInput: OncallScheduleRotationCreateInput!
+) {
+  oncallScheduleRotationCreate(input: $oncallScheduleRotationCreateInput) {
+    errors
+    oncallScheduleRotation {
+      iid
+      name
+      description
+      timezone
+    }
+  }
+}
