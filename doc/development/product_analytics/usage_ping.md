@@ -464,13 +464,16 @@ Next, get the unique events for the current week.
    start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
    ```
 
-Recommendations:
+##### Recommendations:
 
+- Event aggregation should be a weekly.
 - Key should expire in 29 days for daily and 42 days for weekly.
-- If possible, data granularity should be a week. For example a key could be composed from the
-  metric's name and week of the year, `2020-33-{metric_name}`.
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
   adding new metrics.
+- Feature flag should be default enabled false when events are:
+   - triggered automatically by another service.
+   - triggered using `UsageData` API.
+   - there are added, more than 10 events, in one change.
 
 ##### Enable/Disable Redis HLL tracking
 
