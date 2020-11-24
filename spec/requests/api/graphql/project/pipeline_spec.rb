@@ -37,8 +37,8 @@ RSpec.describe 'getting pipeline information nested in a project' do
   end
 
   context 'batching' do
-    let!(:pipeline2) { create(:ci_pipeline, project: project) }
-    let!(:pipeline3) { create(:ci_pipeline, project: project) }
+    let!(:pipeline2) { create(:ci_pipeline, project: project, user: current_user, builds: [create(:ci_build, :success)]) }
+    let!(:pipeline3) { create(:ci_pipeline, project: project, user: current_user, builds: [create(:ci_build, :success)]) }
 
     let!(:query) do
       graphql_query_for(
@@ -65,7 +65,10 @@ RSpec.describe 'getting pipeline information nested in a project' do
     it 'keeps the queries under the threshold' do
       control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
 
-      expect(control.count).to be <= 23
+      aggregate_failures do
+        expect(control.count).to be <= 91
+        expect(response).to have_gitlab_http_status(:success)
+      end
     end
   end
 end

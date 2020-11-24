@@ -194,7 +194,8 @@ module Gitlab
             ordering = { 'id' => node[:id].to_s }
 
             order_list.each do |field|
-              field_name = field.attribute_name
+              p field
+              field_name = field == 'id' ? field : field.attribute_name
               field_value = node[field_name]
               ordering[field_name] = if field_value.is_a?(Time)
                                        field_value.strftime('%Y-%m-%d %H:%M:%S.%N %Z')

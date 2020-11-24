@@ -23,7 +23,16 @@ module Resolvers
     private
 
     def preloads
-      { user: [:users] }
+      {
+        coverage: [:latest_statuses],
+        stages: [:stages],
+        retryable: [:retryable_builds],
+        cancelable: [:cancelable_statuses],
+        jobs: [:statuses],
+        source_job: :source_job,
+        downstream: [:triggered_pipelines],
+        upstream: [:triggered_by_pipeline]
+      }
     end
   end
 end
