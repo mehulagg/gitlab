@@ -7,6 +7,7 @@ RSpec.describe Projects::TransferService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com') }
   let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
 
   subject(:execute_transfer) { described_class.new(project, user).execute(group).tap { project.reload } }
@@ -116,6 +117,16 @@ RSpec.describe Projects::TransferService do
         disk_path: "#{group.full_path}/#{project.path}",
         shard_name: project.repository_storage
       )
+    end
+
+    context 'with a project integration' do
+      let!(:project_integration) { create(:slack_service, project: project, webhook: 'http://project.slack.com') }
+
+      it 'updates integrations' do
+        execute_transfer
+
+        expect(project.slack_service.webhook).to eq(group_integration.webhook)
+      end
     end
   end
 

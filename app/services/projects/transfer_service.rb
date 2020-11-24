@@ -87,6 +87,8 @@ module Projects
         # Move uploads
         move_project_uploads(project)
 
+        update_integrations
+
         project.old_path_with_namespace = @old_path
 
         update_repository_configuration(@new_path)
@@ -214,6 +216,13 @@ module Projects
         project.shared_runners_enabled = false
       end
     end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def update_integrations
+      Service.where(project: project).delete_all
+      Service.create_from_active_default_integrations(project, :project_id)
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
   end
 end
 

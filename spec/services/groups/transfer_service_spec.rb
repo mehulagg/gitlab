@@ -238,8 +238,13 @@ RSpec.describe Groups::TransferService do
       end
 
       context 'when the group is allowed to be transferred' do
+        let_it_be(:new_parent_group_integration) { create(:slack_service, group: new_parent_group, project: nil, webhook: 'http://new-group.slack.com') }
+
         before do
+          allow(PropagateIntegrationWorker).to receive(:perform_async)
+
           create(:group_member, :owner, group: new_parent_group, user: user)
+
           transfer_service.execute(new_parent_group)
         end
 
@@ -262,6 +267,19 @@ RSpec.describe Groups::TransferService do
             group.reload
             expect(group.private?).to be_truthy
             expect(group.visibility_level).to eq(new_parent_group.visibility_level)
+          end
+        end
+
+        context 'with a group integration' do
+          let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com') }
+          let(:new_created_integration) { Service.find_by(group: group) }
+
+          it 'updates integrations' do
+            expect(new_created_integration.webhook).to eq(new_parent_group_integration.webhook)
+          end
+
+          it 'calls to PropagateIntegrationWorker' do
+            expect(PropagateIntegrationWorker).to have_received(:perform_async).with(new_created_integration.id)
           end
         end
 

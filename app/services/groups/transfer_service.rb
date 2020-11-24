@@ -28,9 +28,11 @@ module Groups
       Group.transaction do
         update_group_attributes
         ensure_ownership
+        update_integrations
       end
 
       post_update_hooks(@updated_project_ids)
+      propagate_integrations
 
       true
     end
@@ -194,6 +196,19 @@ module Groups
         result = Groups::UpdateSharedRunnersService.new(@group, current_user, shared_runners_setting: parent_setting).execute
 
         raise TransferError, result[:message] unless result[:status] == :success
+      end
+    end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def update_integrations
+      Service.where(group: @group).delete_all
+      Service.create_from_active_default_integrations(@group, :group_id)
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+
+    def propagate_integrations
+      @group.services.each do |integration|
+        PropagateIntegrationWorker.perform_async(integration.id)
       end
     end
   end
