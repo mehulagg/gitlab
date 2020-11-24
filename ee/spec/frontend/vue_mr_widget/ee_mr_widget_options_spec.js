@@ -1,11 +1,6 @@
-import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
 import mrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
-import { TEST_HOST } from 'helpers/test_constants';
-import waitForPromises from 'helpers/wait_for_promises';
-import { trimText } from 'helpers/text_helper';
-
 import {
   sastDiffSuccessMock,
   dastDiffSuccessMock,
@@ -14,6 +9,14 @@ import {
   secretScanningDiffSuccessMock,
   coverageFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
+import { TEST_HOST } from 'helpers/test_constants';
+import { trimText } from 'helpers/text_helper';
+import mountComponent from 'helpers/vue_mount_component_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
 import mockData, {
   baseBrowserPerformance,
   headBrowserPerformance,
@@ -21,10 +24,6 @@ import mockData, {
   headLoadPerformance,
   pipelineJobs,
 } from './mock_data';
-
-import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';

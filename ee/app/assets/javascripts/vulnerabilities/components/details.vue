@@ -23,7 +23,7 @@ export default {
       return this.vulnerability.location || {};
     },
     stacktraceSnippet() {
-      return this.vulnerability.stacktrace_snippet || '';
+      return this.vulnerability.stacktraceSnippet || '';
     },
     scanner() {
       return this.vulnerability.scanner || {};
@@ -32,10 +32,10 @@ export default {
       return (this.location.file || '') + (this.lineNumber ? `:${this.lineNumber}` : '');
     },
     fileUrl() {
-      return (this.location.blob_path || '') + (this.lineNumber ? `#L${this.lineNumber}` : '');
+      return (this.location.blobPath || '') + (this.lineNumber ? `#L${this.lineNumber}` : '');
     },
     lineNumber() {
-      const { start_line: start, end_line: end } = this.location;
+      const { startLine: start, endLine: end } = this.location;
       return end > start ? `${start}-${end}` : start;
     },
     scannerUrl() {
@@ -58,10 +58,10 @@ export default {
       };
     },
     assertion() {
-      return this.vulnerability.evidence_source?.name;
+      return this.vulnerability.evidenceSource?.name;
     },
     recordedMessage() {
-      return this.vulnerability?.supporting_messages?.find(
+      return this.vulnerability?.supportingMessages?.find(
         msg => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
       )?.response;
     },
@@ -115,12 +115,12 @@ export default {
     },
     shouldShowLocation() {
       return (
-        this.location.crash_address ||
-        this.location.crash_type ||
-        this.location.stacktrace_snippet ||
+        this.location.crashAddress ||
+        this.location.crashType ||
+        this.location.stacktraceSnippet ||
         this.location.file ||
         this.location.image ||
-        this.location.operating_system
+        this.location.operatingSystem
       );
     },
     hasRequest() {
@@ -181,7 +181,7 @@ export default {
         <severity-badge :severity="vulnerability.severity" class="gl-display-inline ml-1" />
       </detail-item>
       <detail-item :sprintf-message="__('%{labelStart}Scan Type:%{labelEnd} %{reportType}')"
-        >{{ vulnerability.report_type }}
+        >{{ vulnerability.reportType }}
       </detail-item>
       <detail-item
         v-if="scanner.name"
@@ -229,9 +229,9 @@ export default {
           >{{ location.image }}
         </detail-item>
         <detail-item
-          v-if="location.operating_system"
+          v-if="location.operatingSystem"
           :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
-          >{{ location.operating_system }}
+          >{{ location.operatingSystem }}
         </detail-item>
         <detail-item
           v-if="location.file"
@@ -240,15 +240,15 @@ export default {
           <gl-link :href="fileUrl" target="_blank">{{ fileText }}</gl-link>
         </detail-item>
         <detail-item
-          v-if="location.crash_address"
+          v-if="location.crashAddress"
           :sprintf-message="__('%{labelStart}Crash Address:%{labelEnd} %{crash_address}')"
-          >{{ location.crash_address }}
+          >{{ location.crashAddress }}
         </detail-item>
         <detail-item
-          v-if="location.stacktrace_snippet"
+          v-if="location.stacktraceSnippet"
           :sprintf-message="__('%{labelStart}Crash State:%{labelEnd} %{stacktrace_snippet}')"
         >
-          <code-block :code="location.stacktrace_snippet" max-height="225px" />
+          <code-block :code="location.stacktraceSnippet" max-height="225px" />
         </detail-item>
       </ul>
     </template>

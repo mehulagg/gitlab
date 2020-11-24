@@ -6,6 +6,8 @@ const PERSISTENT_USER_CALLOUTS = [
   '.js-admin-licensed-user-count-threshold',
   '.js-buy-pipeline-minutes-notification-callout',
   '.js-token-expiry-callout',
+  '.js-registration-enabled-callout',
+  '.js-new-user-signups-cap-reached',
 ];
 
 const initCallouts = () => {

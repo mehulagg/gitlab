@@ -1,11 +1,11 @@
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import { GlAlert, GlLink } from '@gitlab/ui';
 import SecurityConfigurationApp from 'ee/security_configuration/components/app.vue';
 import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
-import stubChildren from 'helpers/stub_children';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import stubChildren from 'helpers/stub_children';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { generateFeatures } from './helpers';
 

@@ -261,6 +261,7 @@ export default {
           :profiles-per-page="$options.profilesPerPage"
           :profiles="profileTypes[profileType].profiles"
           :fields="settings.tableFields"
+          :full-path="projectFullPath"
           @load-more-profiles="fetchMoreProfiles(profileType)"
           @delete-profile="deleteProfile(profileType, $event)"
         />

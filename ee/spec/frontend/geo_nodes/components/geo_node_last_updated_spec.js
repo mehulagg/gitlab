@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeLastUpdated from 'ee/geo_nodes/components/geo_node_last_updated.vue';
 import {
   HELP_NODE_HEALTH_URL,

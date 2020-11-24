@@ -172,6 +172,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         omniauth:
           { providers: omniauth_providers }
       )
+      allow(Devise).to receive(:omniauth_providers).and_return(%w(ldapmain ldapsecondary group_saml))
 
       for_defined_days_back do
         user = create(:user)
@@ -190,14 +191,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         groups: 2,
         users_created: 6,
         omniauth_providers: ['google_oauth2'],
-        user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4 }
+        user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4, 'standard' => 0, 'two-factor' => 0, 'two-factor-via-u2f-device' => 0, "two-factor-via-webauthn-device" => 0 }
       )
       expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
         events: 1,
         groups: 1,
         users_created: 3,
         omniauth_providers: ['google_oauth2'],
-        user_auth_by_provider: { 'group_saml' => 1, 'ldap' => 2 }
+        user_auth_by_provider: { 'group_saml' => 1, 'ldap' => 2, 'standard' => 0, 'two-factor' => 0, 'two-factor-via-u2f-device' => 0, "two-factor-via-webauthn-device" => 0 }
       )
     end
 
@@ -299,6 +300,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
         create(:project_tracing_setting)
         create(:project_error_tracking_setting)
+        create(:incident)
+        create(:incident, alert_management_alert: create(:alert_management_alert))
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
@@ -306,7 +309,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         clusters_applications_prometheus: 2,
         operations_dashboard_default_dashboard: 2,
         projects_with_tracing_enabled: 2,
-        projects_with_error_tracking_enabled: 2
+        projects_with_error_tracking_enabled: 2,
+        projects_with_incidents: 4,
+        projects_with_alert_incidents: 2
       )
 
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
@@ -314,7 +319,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         clusters_applications_prometheus: 1,
         operations_dashboard_default_dashboard: 1,
         projects_with_tracing_enabled: 1,
-        projects_with_error_tracking_enabled: 1
+        projects_with_error_tracking_enabled: 1,
+        projects_with_incidents: 2,
+        projects_with_alert_incidents: 1
       )
     end
   end
@@ -1228,7 +1235,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     subject { described_class.redis_hll_counters }
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
-    let(:ineligible_total_categories) { %w[source_code testing ci_secrets_management] }
+    let(:ineligible_total_categories) { %w[source_code testing ci_secrets_management incident_management_alerts] }
 
     it 'has all known_events' do
       expect(subject).to have_key(:redis_hll_counters)

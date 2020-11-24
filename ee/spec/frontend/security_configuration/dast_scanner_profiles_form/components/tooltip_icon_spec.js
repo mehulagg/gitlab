@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import TooltipIcon from 'ee/security_configuration/dast_scanner_profiles/components/tooltip_icon.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 describe('Tooltip Icon', () => {
   let wrapper;

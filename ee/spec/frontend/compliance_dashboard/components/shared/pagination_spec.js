@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPagination } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import Pagination from 'ee/compliance_dashboard/components/shared/pagination.vue';
 

@@ -1,7 +1,6 @@
-import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
-
 import { GlTab } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
 import UnscannedProjects from 'ee/security_dashboard/components/unscanned_projects.vue';
 import TabContent from 'ee/security_dashboard/components/unscanned_projects_tab_content.vue';

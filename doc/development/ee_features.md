@@ -122,10 +122,10 @@ This is also not just applied to models. Here's a list of other examples:
 
 To test an `EE` namespaced module that extends a CE class with EE features,
 create the spec file as you normally would in the `ee/spec` directory, including the second `ee/` subdirectory.
-For example, an extension `ee/app/models/ee/user.rb` would have its tests in `ee/app/models/ee/user_spec.rb`.
+For example, an extension `ee/app/models/ee/user.rb` would have its tests in `ee/spec/models/ee/user_spec.rb`.
 
 In the `RSpec.describe` call, use the CE class name where the EE module would be used.
-For example, in `ee/app/models/ee/user_spec.rb`, the test would start with:
+For example, in `ee/spec/models/ee/user_spec.rb`, the test would start with:
 
 ```ruby
 RSpec.describe User do
@@ -573,7 +573,7 @@ constants.
 
 #### EE parameters
 
-We can define `params` and utilize `use` in another `params` definition to
+We can define `params` and use `use` in another `params` definition to
 include parameters defined in EE. However, we need to define the "interface" first
 in CE in order for EE to override it. We don't have to do this in other places
 due to `prepend_if_ee`, but Grape is complex internally and we couldn't easily

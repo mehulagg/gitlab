@@ -1,11 +1,11 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'helpers/test_constants';
+import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import * as actions from 'ee/analytics/productivity_analytics/store/modules/charts/actions';
 import * as types from 'ee/analytics/productivity_analytics/store/modules/charts/mutation_types';
 import getInitialState from 'ee/analytics/productivity_analytics/store/modules/charts/state';
-import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import { mockHistogramData, mockScatterplotData } from '../../../mock_data';
 
 jest.mock('ee/analytics/productivity_analytics/utils', () => ({

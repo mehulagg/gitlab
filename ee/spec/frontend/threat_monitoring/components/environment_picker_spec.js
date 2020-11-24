@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/threat_monitoring/store';
 import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
 import {
   INVALID_CURRENT_ENVIRONMENT_NAME,
   ALL_ENVIRONMENT_NAME,
 } from 'ee/threat_monitoring/constants';
+import createStore from 'ee/threat_monitoring/store';
 import { mockEnvironmentsResponse } from '../mock_data';
 
 const mockEnvironments = mockEnvironmentsResponse.environments;

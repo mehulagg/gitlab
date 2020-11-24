@@ -1,0 +1,5 @@
+---
+title: Add Sidekiq job for importing csv requirements async
+merge_request: 46429
+author:
+type: added

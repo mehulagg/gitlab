@@ -1,3 +1,4 @@
+import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 import {
   normalizeLicense,
   getPackagesString,
@@ -7,9 +8,8 @@ import {
   addLicensesMatchingReportGroupStatus,
   reportGroupHasAtLeastOneLicense,
 } from 'ee/vue_shared/license_compliance/store/utils';
-import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
-import { licenseReport } from '../mock_data';
 import { STATUS_FAILED, STATUS_NEUTRAL, STATUS_SUCCESS } from '~/reports/constants';
+import { licenseReport } from '../mock_data';
 
 describe('utils', () => {
   describe('normalizeLicense', () => {

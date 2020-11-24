@@ -1,8 +1,8 @@
-import Vue from 'vue';
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover, GlLink } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import component from 'ee/approvals/components/approval_check_popover.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 
 describe('Approval Check Popover', () => {
   let wrapper;

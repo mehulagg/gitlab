@@ -5,21 +5,24 @@ require 'spec_helper'
 RSpec.describe Groups::Security::CredentialsController do
   let_it_be(:group_with_managed_accounts) { create(:group_with_managed_accounts, :private) }
   let_it_be(:managed_users) { create_list(:user, 2, :group_managed, managing_group: group_with_managed_accounts) }
+  let_it_be(:owner) { managed_users.first }
+  let_it_be(:maintainer) { managed_users.last }
+  let_it_be(:group_id) { group_with_managed_accounts.to_param }
+  let_it_be(:personal_access_token) { create(:personal_access_token, user: maintainer) }
 
   before do
     allow_next_instance_of(Gitlab::Auth::GroupSaml::SsoEnforcer) do |sso_enforcer|
       allow(sso_enforcer).to receive(:active_session?).and_return(true)
     end
 
-    owner = managed_users.first
     group_with_managed_accounts.add_owner(owner)
+    group_with_managed_accounts.add_maintainer(maintainer)
 
     sign_in(owner)
   end
 
   describe 'GET #index' do
     let(:filter) {}
-    let(:group_id) { group_with_managed_accounts.to_param }
 
     subject { get :index, params: { group_id: group_id.to_param, filter: filter } }
 
@@ -98,10 +101,6 @@ RSpec.describe Groups::Security::CredentialsController do
 
           context 'for a user without access to view credentials inventory' do
             before do
-              maintainer = managed_users.last
-
-              group_with_managed_accounts.add_maintainer(maintainer)
-
               sign_in(maintainer)
             end
 
@@ -115,7 +114,7 @@ RSpec.describe Groups::Security::CredentialsController do
       end
 
       context 'for a group that does not enforce group managed accounts' do
-        let(:group_id) { create(:group).to_param }
+        let_it_be(:group_id) { create(:group).id }
 
         it 'responds with 404' do
           subject
@@ -142,5 +141,169 @@ RSpec.describe Groups::Security::CredentialsController do
     let(:credentials_path) { group_security_credentials_path(filter: 'ssh_keys') }
 
     it_behaves_like 'credentials inventory controller delete SSH key', group_managed_account: true
+  end
+
+  describe 'PUT #revoke' do
+    shared_examples_for 'responds with 404' do
+      it do
+        put :revoke, params: { group_id: group_id.to_param, id: token_id }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    shared_examples_for 'displays the flash success message' do
+      it do
+        put :revoke, params: { group_id: group_id.to_param, id: token_id }
+
+        expect(response).to redirect_to(group_security_credentials_path)
+        expect(flash[:notice]).to start_with 'Revoked personal access token '
+      end
+    end
+
+    shared_examples_for 'displays the flash error message' do
+      it do
+        put :revoke, params: { group_id: group_id.to_param, id: token_id }
+
+        expect(response).to redirect_to(group_security_credentials_path)
+        expect(flash[:alert]).to eql 'Not permitted to revoke'
+      end
+    end
+
+    context 'when `credentials_inventory` feature is enabled' do
+      before do
+        stub_licensed_features(credentials_inventory: true, group_saml: true)
+        stub_feature_flags(revoke_managed_users_token: true)
+      end
+
+      context 'for a group that enforces group managed accounts' do
+        context 'when `revoke_managed_users_token` feature is enabled' do
+          before_all do
+            stub_feature_flags(revoke_managed_users_token: true)
+          end
+
+          context 'for a user with access to view credentials inventory' do
+            context 'non-existent personal access token specified' do
+              let(:token_id) { 999999999999999999999999999999999 }
+
+              it_behaves_like 'responds with 404'
+            end
+
+            describe 'with an existing personal access token' do
+              context 'personal access token is already revoked' do
+                let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: maintainer).id }
+
+                it_behaves_like 'displays the flash success message'
+              end
+
+              context 'personal access token is already expired' do
+                let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: maintainer).id }
+
+                it_behaves_like 'displays the flash success message'
+              end
+
+              context 'does not have permissions to revoke the credential' do
+                let_it_be(:token_id) { create(:personal_access_token, user: create(:user)).id }
+
+                it_behaves_like 'responds with 404'
+              end
+
+              context 'personal access token is already revoked' do
+                let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: maintainer).id }
+
+                it_behaves_like 'displays the flash success message'
+              end
+
+              context 'personal access token is already expired' do
+                let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: maintainer).id }
+
+                it_behaves_like 'displays the flash success message'
+              end
+
+              context 'personal access token is not revoked or expired' do
+                let_it_be(:token_id) { personal_access_token.id }
+
+                it_behaves_like 'displays the flash success message'
+
+                it 'informs the token owner' do
+                  expect(CredentialsInventoryMailer).to receive_message_chain(:personal_access_token_revoked_email, :deliver_later)
+
+                  put :revoke, params: { group_id: group_id.to_param, id: personal_access_token.id }
+                end
+
+                context 'when credentials_inventory_revocation_emails flag is disabled' do
+                  before do
+                    stub_feature_flags(credentials_inventory_revocation_emails: false)
+                  end
+
+                  it 'does not inform the token owner' do
+                    expect do
+                      put :revoke, params: { group_id: group_id.to_param, id: personal_access_token.id }
+                    end.not_to change { ActionMailer::Base.deliveries.size }
+                  end
+                end
+              end
+            end
+          end
+
+          context 'for a user without access to view credentials inventory' do
+            let_it_be(:token_id) { create(:personal_access_token, user: owner).id }
+
+            before do
+              sign_in(maintainer)
+            end
+
+            it_behaves_like 'responds with 404'
+          end
+        end
+
+        context 'when `revoke_managed_users_token` feature is disabled' do
+          before_all do
+            stub_feature_flags(revoke_managed_users_token: false)
+          end
+
+          context 'for a user with access to view credentials inventory' do
+            context 'non-existent personal access token specified' do
+              let(:token_id) { 999999999999999999999999999999999 }
+
+              it_behaves_like 'responds with 404'
+            end
+
+            context 'valid personal access token specified' do
+              let_it_be(:token_id) { create(:personal_access_token, user: create(:user)).id }
+
+              it_behaves_like 'responds with 404'
+            end
+          end
+
+          context 'for a user without access to view credentials inventory' do
+            let_it_be(:token_id) { create(:personal_access_token, user: owner).id }
+
+            before do
+              sign_in(maintainer)
+            end
+
+            it_behaves_like 'responds with 404'
+          end
+        end
+      end
+
+      context 'for a group that does not enforce group managed accounts' do
+        let_it_be(:token_id) { personal_access_token.id }
+        let_it_be(:group_id) { create(:group).id }
+
+        it_behaves_like 'responds with 404'
+      end
+    end
+
+    context 'when `credentials_inventory` feature is disabled' do
+      let_it_be(:token_id) { create(:personal_access_token, user: owner).id }
+
+      before do
+        stub_licensed_features(credentials_inventory: false)
+      end
+
+      it_behaves_like 'responds with 404'
+    end
   end
 end

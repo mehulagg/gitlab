@@ -10,6 +10,7 @@ fragment IssueNode on Issue {
   totalTimeSpent
   humanTimeEstimate
   humanTotalTimeSpent
+  emailsDisabled
   weight
   confidential
   webUrl
@@ -19,6 +20,10 @@ fragment IssueNode on Issue {
   relativePosition
   epic {
     id
+  }
+  milestone {
+    id
+    title
   }
   assignees {
     nodes {

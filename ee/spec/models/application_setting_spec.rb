@@ -102,6 +102,19 @@ RSpec.describe ApplicationSetting do
       it { is_expected.not_to allow_value("a" * (subject.email_additional_text_character_limit + 1)).for(:email_additional_text) }
     end
 
+    describe 'when secret detection token revocation is enabled' do
+      before do
+        stub_application_setting(secret_detection_token_revocation_enabled: true)
+      end
+
+      it { is_expected.to allow_value("http://test.com").for(:secret_detection_token_revocation_url) }
+      it { is_expected.to allow_value("AKVD34#$%56").for(:secret_detection_token_revocation_token) }
+      it { is_expected.to allow_value("http://test.com").for(:secret_detection_revocation_token_types_url) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_token_revocation_url) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_token_revocation_token) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_revocation_token_types_url) }
+    end
+
     context 'when validating allowed_ips' do
       where(:allowed_ips, :is_valid) do
         "192.1.1.1"                   | true

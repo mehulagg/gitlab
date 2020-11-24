@@ -1,8 +1,8 @@
+import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import * as actions from 'ee/analytics/productivity_analytics/store/modules/filters/actions';
 import * as types from 'ee/analytics/productivity_analytics/store/modules/filters/mutation_types';
-import testAction from 'helpers/vuex_action_helper';
-import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import getInitialState from 'ee/analytics/productivity_analytics/store/modules/filters/state';
+import testAction from 'helpers/vuex_action_helper';
 
 jest.mock('~/lib/utils/common_utils');
 jest.mock('~/lib/utils/url_utility');

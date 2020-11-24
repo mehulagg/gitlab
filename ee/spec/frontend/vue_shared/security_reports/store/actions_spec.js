@@ -61,13 +61,13 @@ import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import state from 'ee/vue_shared/security_reports/store/state';
 import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
+import toasted from '~/vue_shared/plugins/global_toast';
 import {
   dastFeedbacks,
   containerScanningFeedbacks,
   dependencyScanningFeedbacks,
   coverageFuzzingFeedbacks,
 } from '../mock_data';
-import toasted from '~/vue_shared/plugins/global_toast';
 
 // Mock bootstrap modal implementation
 jest.mock('jquery', () => () => ({

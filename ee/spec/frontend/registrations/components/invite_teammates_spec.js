@@ -1,5 +1,5 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlFormInput, GlButton } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 import Component from 'ee/registrations/components/invite_teammates.vue';
 
 describe('User invites', () => {

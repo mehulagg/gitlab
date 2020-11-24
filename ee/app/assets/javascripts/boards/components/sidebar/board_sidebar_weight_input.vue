@@ -23,13 +23,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ issue: 'activeIssue' }),
+    ...mapGetters({ issue: 'activeIssue', projectPathForActiveIssue: 'projectPathForActiveIssue' }),
     hasWeight() {
       return this.issue.weight > 0;
-    },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
     },
   },
   watch: {
@@ -56,7 +52,7 @@ export default {
       this.loading = true;
 
       try {
-        await this.setActiveIssueWeight({ weight, projectPath: this.projectPath });
+        await this.setActiveIssueWeight({ weight, projectPath: this.projectPathForActiveIssue });
         this.weight = weight;
       } catch (e) {
         this.weight = this.issue.weight;
@@ -82,7 +78,7 @@ export default {
         <span class="gl-mx-2">-</span>
         <gl-button
           variant="link"
-          class="gl-text-gray-400!"
+          class="gl-text-gray-500!"
           data-testid="reset-button"
           :disabled="loading"
           @click="setWeight(0)"

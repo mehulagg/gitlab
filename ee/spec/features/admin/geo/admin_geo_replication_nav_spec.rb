@@ -11,6 +11,7 @@ RSpec.describe 'admin Geo Replication Nav', :js, :geo do
   before do
     stub_licensed_features(geo: true)
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     stub_secondary_node
   end
 

@@ -9,6 +9,14 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
+import {
+  DAST_SITE_VALIDATION_STATUS,
+  DAST_SITE_VALIDATION_STATUS_PROPS,
+} from 'ee/security_configuration/dast_site_validation/constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
+const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
 
 export default {
   components: {
@@ -18,10 +26,12 @@ export default {
     GlModal,
     GlSkeletonLoader,
     GlTable,
+    DastSiteValidationModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     profiles: {
       type: Array,
@@ -55,12 +65,18 @@ export default {
       required: false,
       default: false,
     },
+    fullPath: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       toBeDeletedProfileId: null,
+      validatingProfile: null,
     };
   },
+  statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
   computed: {
     hasError() {
       return this.errorMessage !== '';
@@ -99,6 +115,24 @@ export default {
     handleCancel() {
       this.toBeDeletedProfileId = null;
     },
+    shouldShowValidationBtn(status) {
+      return (
+        this.glFeatures.securityOnDemandScansSiteValidation &&
+        (status === PENDING || status === FAILED)
+      );
+    },
+    shouldShowValidationStatus(status) {
+      return this.glFeatures.securityOnDemandScansSiteValidation && status !== PENDING;
+    },
+    showValidationModal() {
+      this.$refs['dast-site-validation-modal'].show();
+    },
+    setValidatingProfile(profile) {
+      this.validatingProfile = profile;
+      this.$nextTick(() => {
+        this.showValidationModal();
+      });
+    },
   },
 };
 </script>
@@ -133,28 +167,44 @@ export default {
         </template>
 
         <template #cell(validationStatus)="{ value }">
-          <span>
+          <template v-if="shouldShowValidationStatus(value)">
+            <span :class="$options.statuses[value].cssClass">
+              {{ $options.statuses[value].label }}
+            </span>
             <gl-icon
-              :size="16"
-              class="gl-vertical-align-text-bottom gl-text-gray-600"
-              name="information-o"
+              v-gl-tooltip
+              name="question-o"
+              class="gl-vertical-align-text-bottom gl-text-gray-300 gl-ml-2"
+              :title="$options.statuses[value].tooltipText"
             />
-            {{ value }}
-          </span>
+          </template>
         </template>
 
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
             <gl-button
+              v-if="shouldShowValidationBtn(item.validationStatus)"
+              variant="info"
+              category="secondary"
+              size="small"
+              @click="setValidatingProfile(item)"
+              >{{ s__('DastSiteValidation|Validate target site') }}</gl-button
+            >
+
+            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
+              __('Edit')
+            }}</gl-button>
+
+            <gl-button
               v-gl-tooltip.hover.focus
               icon="remove"
               variant="danger"
               category="secondary"
+              size="small"
               class="gl-mr-3"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />
-            <gl-button v-if="item.editPath" :href="item.editPath">{{ __('Edit') }}</gl-button>
           </div>
         </template>
 
@@ -196,6 +246,13 @@ export default {
       body-class="gl-display-none"
       @ok="handleDelete"
       @cancel="handleCancel"
+    />
+
+    <dast-site-validation-modal
+      v-if="validatingProfile"
+      ref="dast-site-validation-modal"
+      :full-path="fullPath"
+      :target-url="validatingProfile.targetUrl"
     />
   </section>
 </template>

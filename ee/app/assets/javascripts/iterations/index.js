@@ -85,5 +85,3 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
     },
   });
 }
-
-export default {};

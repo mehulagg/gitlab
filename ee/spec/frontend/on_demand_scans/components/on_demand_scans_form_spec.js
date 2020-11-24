@@ -1,6 +1,6 @@
-import { merge } from 'lodash';
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlForm, GlSkeletonLoader } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
@@ -47,7 +47,6 @@ describe('OnDemandScansForm', () => {
   const findByTestId = testId => subject.find(`[data-testid="${testId}"]`);
   const findAlert = () => findByTestId('on-demand-scan-error');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
-  const findCancelButton = () => findByTestId('on-demand-scan-cancel-button');
 
   const setFormData = () => {
     subject.find(OnDemandScansScannerProfileSelector).vm.$emit('input', scannerProfiles[0].id);
@@ -225,16 +224,6 @@ describe('OnDemandScansForm', () => {
           expect(alert.text()).toContain(error);
         });
       });
-    });
-  });
-
-  describe('cancel', () => {
-    it('emits cancel event on click', () => {
-      mountShallowSubject();
-      jest.spyOn(subject.vm, '$emit');
-      findCancelButton().vm.$emit('click');
-
-      expect(subject.vm.$emit).toHaveBeenCalledWith('cancel');
     });
   });
 });

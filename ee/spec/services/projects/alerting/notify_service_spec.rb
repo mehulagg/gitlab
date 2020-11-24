@@ -7,16 +7,16 @@ RSpec.describe Projects::Alerting::NotifyService do
 
   describe '#execute' do
     let(:service) { described_class.new(project, nil, payload) }
-    let(:token) { alerts_service.token }
+    let(:token) { integration.token }
     let(:payload) do
       {
         'title' => 'Test alert title'
       }
     end
 
-    let(:alerts_service) { create(:alerts_service, project: project) }
+    let(:integration) { create(:alert_management_http_integration, project: project) }
 
-    subject { service.execute(token) }
+    subject { service.execute(token, integration) }
 
     context 'existing alert with same payload fingerprint' do
       let(:existing_alert) { create(:alert_management_alert, :from_payload, project: project, payload: payload) }

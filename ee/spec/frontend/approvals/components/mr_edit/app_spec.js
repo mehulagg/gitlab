@@ -1,12 +1,12 @@
 import { mount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { createStoreOptions } from 'ee/approvals/stores';
-import MREditModule from 'ee/approvals/stores/modules/mr_edit';
+import Vuex from 'vuex';
 import MREditApp from 'ee/approvals/components/mr_edit/app.vue';
 import MRRules from 'ee/approvals/components/mr_edit/mr_rules.vue';
 import MRRulesHiddenInputs from 'ee/approvals/components/mr_edit/mr_rules_hidden_inputs.vue';
+import { createStoreOptions } from 'ee/approvals/stores';
+import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

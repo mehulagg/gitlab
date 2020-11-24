@@ -1,26 +1,23 @@
+import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
-import setWindowLocation from 'helpers/set_window_location_helper';
-
-import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
-
 import LicenseComplianceApp from 'ee/license_compliance/components/app.vue';
 import DetectedLicensesTable from 'ee/license_compliance/components/detected_licenses_table.vue';
 import PipelineInfo from 'ee/license_compliance/components/pipeline_info.vue';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
 
 import * as getters from 'ee/license_compliance/store/modules/list/getters';
 
+import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import {
   approvedLicense,
   blacklistedLicense,
 } from 'ee_jest/vue_shared/license_compliance/mock_data';
-
-import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import setWindowLocation from 'helpers/set_window_location_helper';
+import { TEST_HOST } from 'helpers/test_constants';
 
 Vue.use(Vuex);
 

@@ -1,6 +1,6 @@
-import Vue from 'vue';
-import { mount } from '@vue/test-utils';
 import { GlTooltip, GlIcon } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
 import { deployBoardMockData, environment } from './mock_data';
 

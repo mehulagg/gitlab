@@ -1,7 +1,7 @@
-import testAction from 'helpers/vuex_action_helper';
-import * as types from 'ee/pages/groups/saml_providers/saml_members/store/mutation_types';
 import { fetchPage } from 'ee/pages/groups/saml_providers/saml_members/store/actions';
+import * as types from 'ee/pages/groups/saml_providers/saml_members/store/mutation_types';
 import createInitialState from 'ee/pages/groups/saml_providers/saml_members/store/state';
+import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
 
 import { deprecatedCreateFlash as flash } from '~/flash';

@@ -17,6 +17,10 @@ module Types
             group.avatar_url(only_path: false)
           end
 
+    field :custom_emoji, Types::CustomEmojiType.connection_type, null: true,
+          description: 'Custom emoji within this namespace',
+          feature_flag: :custom_emoji
+
     field :share_with_group_lock, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if sharing a project with another group within this group is prevented'
 
@@ -82,9 +86,7 @@ module Types
           end
 
     field :group_members,
-          Types::GroupMemberType.connection_type,
           description: 'A membership of a user within this group',
-          extras: [:lookahead],
           resolver: Resolvers::GroupMembersResolver
 
     field :container_repositories,

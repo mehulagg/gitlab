@@ -193,4 +193,20 @@ RSpec.describe Gitlab::RepositorySizeChecker do
       include_examples 'checker size exceeded'
     end
   end
+
+  describe '#additional_repo_storage_available?' do
+    context 'when additional_repo_storage_by_namespace_enabled is true' do
+      it 'returns true' do
+        expect(subject.additional_repo_storage_available?).to eq(true)
+      end
+    end
+
+    context 'when additional_repo_storage_by_namespace_enabled is false' do
+      let(:additional_repo_storage_by_namespace_enabled) { false }
+
+      it 'returns false' do
+        expect(subject.additional_repo_storage_available?).to eq(false)
+      end
+    end
+  end
 end

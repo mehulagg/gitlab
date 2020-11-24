@@ -1,6 +1,6 @@
+import * as types from 'ee/geo_replicable/store/mutation_types';
 import mutations from 'ee/geo_replicable/store/mutations';
 import createState from 'ee/geo_replicable/store/state';
-import * as types from 'ee/geo_replicable/store/mutation_types';
 import {
   MOCK_BASIC_FETCH_DATA_MAP,
   MOCK_REPLICABLE_TYPE,

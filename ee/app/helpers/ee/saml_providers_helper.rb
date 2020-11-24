@@ -7,7 +7,7 @@ module EE
     end
 
     def show_saml_group_links_in_sidebar?(group)
-      ::Feature.enabled?(:saml_group_links, group) && can?(current_user, :admin_saml_group_links, group)
+      can?(current_user, :admin_saml_group_links, group)
     end
 
     def saml_link_for_provider(text, provider, **args)

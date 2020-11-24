@@ -198,8 +198,8 @@ RSpec.describe 'Pipeline', :js do
         it 'shows code quality issue with link to file' do
           wait_for_requests
 
-          expect(page).to have_content('Function `simulateEvent` has 28 lines of code (exceeds 25 allowed). Consider refactoring.')
-          expect(find_link('app/assets/javascripts/test_utils/simulate_drag.js:1')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'app/assets/javascripts/test_utils/simulate_drag.js')) + '#L1')
+          expect(page).to have_content('Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.')
+          expect(find_link('foo.rb:10')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'foo.rb')) + '#L10')
         end
 
         it 'contains events for data tracking', :aggregate_failures do

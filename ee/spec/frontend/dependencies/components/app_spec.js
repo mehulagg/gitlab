@@ -1,14 +1,14 @@
 import { GlEmptyState, GlLoadingIcon, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
-import createStore from 'ee/dependencies/store';
-import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
-import { REPORT_STATUS } from 'ee/dependencies/store/modules/list/constants';
 import DependenciesApp from 'ee/dependencies/components/app.vue';
 import DependenciesActions from 'ee/dependencies/components/dependencies_actions.vue';
 import DependencyListIncompleteAlert from 'ee/dependencies/components/dependency_list_incomplete_alert.vue';
 import DependencyListJobFailedAlert from 'ee/dependencies/components/dependency_list_job_failed_alert.vue';
 import PaginatedDependenciesTable from 'ee/dependencies/components/paginated_dependencies_table.vue';
+import createStore from 'ee/dependencies/store';
+import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
+import { REPORT_STATUS } from 'ee/dependencies/store/modules/list/constants';
+import { TEST_HOST } from 'helpers/test_constants';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 
 describe('DependenciesApp component', () => {

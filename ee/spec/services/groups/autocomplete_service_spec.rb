@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Groups::AutocompleteService do
-  let!(:group) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
-  let!(:sub_group) { create(:group, :private, parent: group) }
+  let_it_be(:group, refind: true) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
+  let_it_be(:sub_group) { create(:group, :private, parent: group) }
   let(:user) { create(:user) }
   let!(:epic) { create(:epic, group: group, author: user) }
 
@@ -115,6 +115,50 @@ RSpec.describe Groups::AutocompleteService do
 
       expect(epics.map(&:iid)).to contain_exactly(confidential_epic.iid)
       expect(epics.map(&:title)).to contain_exactly(confidential_epic.title)
+    end
+  end
+
+  describe '#vulnerability' do
+    let_it_be_with_refind(:project) { create(:project, group: group) }
+    let_it_be(:vulnerability) { create(:vulnerability, project: project) }
+    let_it_be(:guest) { create(:user) }
+
+    let(:autocomplete_user) { user }
+
+    subject { described_class.new(group, autocomplete_user).vulnerabilities.map(&:id) }
+
+    context 'when the feature is not available' do
+      context 'when the user is not allowed' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when the user is allowed' do
+        before do
+          project.add_developer(user)
+        end
+
+        it { is_expected.to be_empty }
+      end
+    end
+
+    context 'when the feature is available' do
+      before do
+        stub_licensed_features(security_dashboard: true)
+      end
+
+      context 'when the user is not allowed' do
+        let(:autocomplete_user) { guest }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'when the user is allowed' do
+        before do
+          project.add_developer(user)
+        end
+
+        it { is_expected.to contain_exactly(vulnerability.id) }
+      end
     end
   end
 

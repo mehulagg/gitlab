@@ -13,6 +13,7 @@ RSpec.describe "Admin::Users" do
 
   before do
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
   end
 
   describe "GET /admin/users" do
@@ -204,6 +205,56 @@ RSpec.describe "Admin::Users" do
         expect(page).to have_content(user.email)
       end
     end
+
+    context 'when blocking/unblocking a user' do
+      it 'shows confirmation and allows blocking and unblocking', :js do
+        expect(page).to have_content(user.email)
+
+        find("[data-testid='user-action-button-#{user.id}']").click
+
+        within find("[data-testid='user-action-dropdown-#{user.id}']") do
+          find('li button', text: 'Block').click
+        end
+
+        wait_for_requests
+
+        expect(page).to have_content('Block user')
+        expect(page).to have_content('Blocking user has the following effects')
+        expect(page).to have_content('User will not be able to login')
+        expect(page).to have_content('Owned groups will be left')
+
+        find('.modal-footer button', text: 'Block').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Successfully blocked')
+        expect(page).not_to have_content(user.email)
+
+        click_link 'Blocked'
+
+        wait_for_requests
+
+        expect(page).to have_content(user.email)
+
+        find("[data-testid='user-action-button-#{user.id}']").click
+
+        within find("[data-testid='user-action-dropdown-#{user.id}']") do
+          find('li button', text: 'Unblock').click
+        end
+
+        wait_for_requests
+
+        expect(page).to have_content('Unblock user')
+        expect(page).to have_content('You can always block their account again if needed.')
+
+        find('.modal-footer button', text: 'Unblock').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Successfully unblocked')
+        expect(page).not_to have_content(user.email)
+      end
+    end
   end
 
   describe "GET /admin/users/new" do
@@ -359,6 +410,40 @@ RSpec.describe "Admin::Users" do
         expect(page).to have_button('Block user')
         expect(page).to have_button('Delete user')
         expect(page).to have_button('Delete user and contributions')
+      end
+    end
+
+    context 'when blocking/unblocking the user' do
+      it 'shows confirmation and allows blocking and unblocking', :js do
+        visit admin_user_path(user)
+
+        find('button', text: 'Block user').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Block user')
+        expect(page).to have_content('You can always unblock their account, their data will remain intact.')
+
+        find('.modal-footer button', text: 'Block').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Successfully blocked')
+        expect(page).to have_content('This user is blocked')
+
+        find('button', text: 'Unblock user').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Unblock user')
+        expect(page).to have_content('You can always block their account again if needed.')
+
+        find('.modal-footer button', text: 'Unblock').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Successfully unblocked')
+        expect(page).to have_content('Block this user')
       end
     end
 

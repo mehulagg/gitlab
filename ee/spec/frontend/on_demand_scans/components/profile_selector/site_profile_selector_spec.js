@@ -1,7 +1,7 @@
-import { merge } from 'lodash';
 import { mount, shallowMount } from '@vue/test-utils';
-import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
+import { merge } from 'lodash';
 import ProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
+import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
 import { siteProfiles } from '../../mock_data';
 
 const TEST_LIBRARY_PATH = '/test/site/profiles/library/path';

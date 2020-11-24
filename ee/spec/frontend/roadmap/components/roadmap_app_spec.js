@@ -1,4 +1,5 @@
-import { GlLoadingIcon } from '@gitlab/ui';
+import Cookies from 'js-cookie';
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import EpicsListEmpty from 'ee/roadmap/components/epics_list_empty.vue';
@@ -14,6 +15,7 @@ import {
   basePath,
   epicsPath,
   mockFormattedEpic,
+  mockFormattedChildEpic2,
   mockGroupId,
   mockNewEpicEndpoint,
   mockSortedBy,
@@ -236,6 +238,31 @@ describe('RoadmapApp', () => {
             timeframe: wrapper.vm.extendedTimeframe,
           }),
         );
+      });
+    });
+  });
+
+  describe('roadmap epics limit warning', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+      store.commit(types.RECEIVE_EPICS_SUCCESS, [mockFormattedEpic, mockFormattedChildEpic2]);
+      window.gon.roadmap_epics_limit = 1;
+    });
+
+    it('displays warning when epics limit is reached', () => {
+      expect(wrapper.find(GlAlert).exists()).toBe(true);
+      expect(wrapper.find(GlAlert).text()).toContain(
+        'Roadmaps can display up to 1,000 epics. These appear in your selected sort order.',
+      );
+    });
+
+    it('sets epics_limit_warning_dismissed cookie to true when dismissing alert', () => {
+      wrapper.find(GlAlert).vm.$emit('dismiss');
+
+      expect(Cookies.get('epics_limit_warning_dismissed')).toBe('true');
+
+      return wrapper.vm.$nextTick(() => {
+        expect(wrapper.find(GlAlert).exists()).toBe(false);
       });
     });
   });

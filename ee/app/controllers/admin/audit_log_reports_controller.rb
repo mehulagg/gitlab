@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::AuditLogReportsController < Admin::ApplicationController
+  include AuditEvents::DateRange
+
   before_action :validate_audit_log_reports_available!
 
   feature_category :audit_events
@@ -10,11 +12,13 @@ class Admin::AuditLogReportsController < Admin::ApplicationController
 
     respond_to do |format|
       format.csv do
-        send_data(
-          csv_data,
-          type: 'text/csv; charset=utf-8; header=present',
-          filename: csv_filename
-        )
+        no_cache_headers
+        stream_headers
+
+        headers['Content-Type'] = 'text/csv; charset=utf-8; header=present'
+        headers['Content-Disposition'] = "attachment; filename=\"#{csv_filename}\""
+
+        self.response_body = csv_data
       end
     end
   end

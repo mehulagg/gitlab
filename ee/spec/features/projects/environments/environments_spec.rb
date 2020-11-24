@@ -15,6 +15,14 @@ RSpec.describe 'Environments page', :js do
     sign_in(user)
   end
 
+  def action_link_selector
+    '[data-testid="manual-action-link"]'
+  end
+
+  def actions_button_selector
+    '[data-testid="environment-actions-button"]'
+  end
+
   context 'when an environment is protected and user has access to it' do
     before do
       create(:protected_environment,
@@ -45,10 +53,9 @@ RSpec.describe 'Environments page', :js do
       end
 
       it 'shows an enabled play button' do
-        find('.js-environment-actions-dropdown').click
-        play_button = %q{button.js-manual-action-link}
+        find(actions_button_selector).click
 
-        expect(page).to have_selector(play_button)
+        expect(page).to have_selector(action_link_selector)
       end
 
       it 'shows a stop button' do
@@ -129,8 +136,8 @@ RSpec.describe 'Environments page', :js do
       end
 
       it 'show a disabled play button' do
-        find('.js-environment-actions-dropdown').click
-        disabled_play_button = %q{button.js-manual-action-link.disabled}
+        find(actions_button_selector).click
+        disabled_play_button = %Q{#{action_link_selector}[disabled="disabled"]}
 
         expect(page).to have_selector(disabled_play_button)
       end

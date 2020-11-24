@@ -1,12 +1,12 @@
 #import "ee/security_dashboard/graphql/project.fragment.graphql"
-#import "./vulnerability_severities_count.fragment.graphql"
+#import "ee/security_dashboard/graphql/project_vulnerability_severities_count.fragment.graphql"
 
 query projectsQuery {
   instanceSecurityDashboard {
     projects {
       nodes {
         ...Project
-        ...VulnerabilitySeveritiesCount
+        ...ProjectVulnerabilitySeveritiesCount
       }
     }
   }

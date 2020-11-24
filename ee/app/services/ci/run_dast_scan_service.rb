@@ -11,15 +11,20 @@ module Ci
       full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
     }.freeze
 
-    def self.ci_template_raw
-      @ci_template_raw ||= Gitlab::Template::GitlabCiYmlTemplate.find('DAST').content
+    def self.ci_template
+      @ci_template ||= YAML.safe_load(ci_template_raw)
     end
 
-    def self.ci_template
-      @ci_template ||= YAML.safe_load(ci_template_raw).tap do |template|
-        template['stages'] = ['dast']
-        template['dast'].delete('rules')
-      end
+    def self.ci_template_raw
+      <<~YAML
+        include:
+        - template: DAST.gitlab-ci.yml
+        stages:
+        - dast
+        dast:
+          rules:
+            - when: always
+      YAML
     end
 
     def execute(branch:, **args)

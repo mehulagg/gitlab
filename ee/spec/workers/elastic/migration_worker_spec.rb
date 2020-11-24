@@ -23,9 +23,9 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
       end
 
       it 'creates an index if it does not exist' do
-        Gitlab::Elastic::Helper.default.delete_index(index_name: @migrations_index_name)
+        Gitlab::Elastic::Helper.default.delete_index(index_name: es_helper.migrations_index_name)
 
-        expect { subject.perform }.to change { Gitlab::Elastic::Helper.default.index_exists?(index_name: @migrations_index_name) }.from(false).to(true)
+        expect { subject.perform }.to change { Gitlab::Elastic::Helper.default.index_exists?(index_name: es_helper.migrations_index_name) }.from(false).to(true)
       end
 
       context 'no unexecuted migrations' do
@@ -67,6 +67,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
             end
 
             expect(migration).to receive(:save!).with(completed: completed)
+            expect(Elastic::DataMigrationService).to receive(:drop_migration_has_finished_cache!).with(migration)
 
             subject.perform
           end

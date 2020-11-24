@@ -1,13 +1,13 @@
-import Vuex from 'vuex';
+import { createLocalVue, mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
-import { createLocalVue, mount } from '@vue/test-utils';
-import waitForPromises from 'helpers/wait_for_promises';
+import Vuex from 'vuex';
 import CustomStageForm, {
   initializeFormData,
 } from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
 import { STAGE_ACTIONS } from 'ee/analytics/cycle_analytics/constants';
+import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   endpoints,
   groupLabels,

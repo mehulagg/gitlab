@@ -1,11 +1,11 @@
-import { mount } from '@vue/test-utils';
 import { GlDrawer } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { mount } from '@vue/test-utils';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
-import { createStore } from '~/boards/stores';
 import { ISSUABLE } from '~/boards/constants';
+import { createStore } from '~/boards/stores';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;
@@ -24,6 +24,17 @@ describe('ee/BoardContentSidebar', () => {
         'board-sidebar-weight-input': '<div></div>',
         'board-sidebar-labels-select': '<div></div>',
         'board-sidebar-due-date': '<div></div>',
+        'board-sidebar-subscription': '<div></div>',
+        'board-sidebar-milestone-select': '<div></div>',
+      },
+      mocks: {
+        $apollo: {
+          queries: {
+            participants: {
+              loading: false,
+            },
+          },
+        },
       },
     });
   };
@@ -54,7 +65,7 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(IssuableTitle).text()).toContain('One');
   });
 
-  it('renders IssuableAssignees', () => {
+  it('renders BoardAssigneeDropdown', () => {
     expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
   });
 

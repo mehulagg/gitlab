@@ -1,7 +1,7 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_nav.vue';
-import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
 import AddStageButton from 'ee/analytics/cycle_analytics/components/add_stage_button.vue';
+import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
+import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_nav.vue';
 import { issueStage, allowedStages as stages, stageMedians as medians } from '../mock_data';
 
 describe('StageTableNav', () => {

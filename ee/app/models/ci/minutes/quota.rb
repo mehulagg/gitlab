@@ -43,15 +43,18 @@ module Ci
         100 * purchased_minutes_used.to_i / purchased_minutes
       end
 
+      def minutes_used_up?
+        namespace.shared_runners_minutes_limit_enabled? &&
+          total_minutes_used >= total_minutes
+      end
+
       private
 
-      # TODO: maps to Namespace#shared_runners_minutes_used?
       def monthly_minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
           monthly_minutes_used >= monthly_minutes
       end
 
-      # TODO: maps to Namespace#extra_shared_runners_minutes_used?
       def purchased_minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
           any_minutes_purchased? &&
@@ -60,18 +63,18 @@ module Ci
 
       # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: false)
       def monthly_minutes_used
-        minutes_used - purchased_minutes_used
+        total_minutes_used - purchased_minutes_used
       end
 
       def monthly_minutes_available?
-        minutes_used <= monthly_minutes
+        total_minutes_used <= monthly_minutes
       end
 
       # TODO: maps to NamespaceStatistics#extra_shared_runners_minutes
       def purchased_minutes_used
         return 0 if no_minutes_purchased? || monthly_minutes_available?
 
-        minutes_used - monthly_minutes
+        total_minutes_used - monthly_minutes
       end
 
       def no_minutes_purchased?
@@ -82,12 +85,17 @@ module Ci
         purchased_minutes > 0
       end
 
-      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
-      def minutes_used
-        @minutes_used ||= namespace.shared_runners_seconds.to_i / 60
+      # TODO: maps to Namespace#actual_shared_runners_minutes_limit(include_extra: true)
+      def total_minutes
+        @total_minutes ||= monthly_minutes + purchased_minutes
       end
 
-      # TODO: maps to Namespace#actual_shared_runners_minuts_limit(include_extra: false)
+      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
+      def total_minutes_used
+        @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
+      end
+
+      # TODO: maps to Namespace#actual_shared_runners_minutes_limit(include_extra: false)
       def monthly_minutes
         @monthly_minutes ||= (namespace.shared_runners_minutes_limit || ::Gitlab::CurrentSettings.shared_runners_minutes).to_i
       end

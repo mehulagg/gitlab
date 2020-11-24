@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline, GlPagination } from '@gitlab/ui';
-import store from 'ee/analytics/merge_request_analytics/store';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
 import {
   THROUGHPUT_TABLE_STRINGS,
   THROUGHPUT_TABLE_TEST_IDS as TEST_IDS,
 } from 'ee/analytics/merge_request_analytics/constants';
+import store from 'ee/analytics/merge_request_analytics/store';
 import {
   throughputTableData,
   startDate,

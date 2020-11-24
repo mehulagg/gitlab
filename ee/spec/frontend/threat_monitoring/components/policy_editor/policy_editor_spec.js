@@ -1,10 +1,6 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
-import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
-import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
-import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import { shallowMount } from '@vue/test-utils';
 import NetworkPolicyEditor from 'ee/threat_monitoring/components/network_policy_editor.vue';
-import createStore from 'ee/threat_monitoring/store';
 import {
   RuleDirectionInbound,
   PortMatchModeAny,
@@ -13,8 +9,12 @@ import {
   EndpointMatchModeLabel,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
 import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
+import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
+import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
+import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import createStore from 'ee/threat_monitoring/store';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility');

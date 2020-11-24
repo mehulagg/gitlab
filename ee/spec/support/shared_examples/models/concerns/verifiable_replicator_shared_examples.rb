@@ -39,6 +39,80 @@ RSpec.shared_examples 'a verifiable replicator' do
     end
   end
 
+  describe '.checksummed_count' do
+    context 'when verification is enabled' do
+      before do
+        allow(described_class).to receive(:verification_enabled?).and_return(true)
+      end
+
+      it 'returns the number of available replicables where verification succeeded' do
+        model_record.verification_started!
+        model_record.verification_succeeded_with_checksum!('some checksum', Time.current)
+
+        expect(described_class.checksummed_count).to eq(1)
+      end
+
+      it 'excludes other verification states' do
+        model_record.verification_started!
+
+        expect(described_class.checksummed_count).to eq(0)
+
+        model_record.verification_failed_with_message!('some error message')
+
+        expect(described_class.checksummed_count).to eq(0)
+
+        model_record.verification_pending!
+
+        expect(described_class.checksummed_count).to eq(0)
+      end
+    end
+
+    context 'when verification is disabled' do
+      it 'returns nil' do
+        allow(described_class).to receive(:verification_enabled?).and_return(false)
+
+        expect(described_class.checksummed_count).to be_nil
+      end
+    end
+  end
+
+  describe '.checksum_failed_count' do
+    context 'when verification is enabled' do
+      before do
+        allow(described_class).to receive(:verification_enabled?).and_return(true)
+      end
+
+      it 'returns the number of available replicables where verification failed' do
+        model_record.verification_started!
+        model_record.verification_failed_with_message!('some error message')
+
+        expect(described_class.checksum_failed_count).to eq(1)
+      end
+
+      it 'excludes other verification states' do
+        model_record.verification_started!
+
+        expect(described_class.checksum_failed_count).to eq(0)
+
+        model_record.verification_succeeded_with_checksum!('foo', Time.current)
+
+        expect(described_class.checksum_failed_count).to eq(0)
+
+        model_record.verification_pending!
+
+        expect(described_class.checksum_failed_count).to eq(0)
+      end
+    end
+
+    context 'when verification is disabled' do
+      it 'returns nil' do
+        allow(described_class).to receive(:verification_enabled?).and_return(false)
+
+        expect(described_class.checksum_failed_count).to be_nil
+      end
+    end
+  end
+
   describe '#after_verifiable_update' do
     it 'calls verify_async if needed' do
       expect(replicator).to receive(:verify_async)
@@ -48,29 +122,66 @@ RSpec.shared_examples 'a verifiable replicator' do
     end
   end
 
-  describe '#verify' do
+  describe '#verify_async' do
     before do
       model_record.save!
     end
 
-    it 'calculates the checksum' do
-      expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-
-      replicator.verify
-
-      expect(model_record.reload.verification_checksum).to eq('abc123')
-      expect(model_record.verified_at).not_to be_nil
-    end
-
-    it 'saves the error message and increments retry counter' do
-      allow(model_record).to receive(:calculate_checksum) do
-        raise StandardError.new('Failure to calculate checksum')
+    context 'on a Geo primary' do
+      before do
+        stub_primary_node
       end
 
-      replicator.verify
+      it 'calls verification_started! and enqueues VerificationWorker' do
+        expect(model_record).to receive(:verification_started!)
+        expect(Geo::VerificationWorker).to receive(:perform_async).with(replicator.replicable_name, model_record.id)
 
-      expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
-      expect(model_record.verification_retry_count).to be 1
+        replicator.verify_async
+      end
+    end
+  end
+
+  describe '#verify' do
+    context 'on a Geo primary' do
+      before do
+        stub_primary_node
+      end
+
+      context 'when verification was started' do
+        before do
+          model_record.verification_started!
+        end
+
+        context 'when the checksum succeeds' do
+          it 'delegates checksum calculation and the state change to model_record' do
+            expect(model_record).to receive(:calculate_checksum).and_return('abc123')
+            expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
+
+            replicator.verify
+          end
+        end
+
+        context 'when an error is raised during calculate_checksum' do
+          it 'passes the error message' do
+            error = StandardError.new('Some exception')
+            allow(model_record).to receive(:calculate_checksum) do
+              raise error
+            end
+
+            expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
+
+            replicator.verify
+          end
+        end
+      end
+
+      context 'when verification was not started' do
+        it 'does not call calculate_checksum!' do
+          expect(model_record).not_to receive(:calculate_checksum)
+
+          replicator.verify
+        end
+      end
     end
   end
 end

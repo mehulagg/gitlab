@@ -1,8 +1,8 @@
-import state from 'ee/vue_shared/security_reports/store/state';
-import mutations from 'ee/vue_shared/security_reports/store/mutations';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
-import { mockFindings } from '../mock_data';
+import mutations from 'ee/vue_shared/security_reports/store/mutations';
+import state from 'ee/vue_shared/security_reports/store/state';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { mockFindings } from '../mock_data';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),

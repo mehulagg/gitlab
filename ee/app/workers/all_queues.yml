@@ -299,6 +299,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: deployment:deployments_auto_rollback
+  :feature_category: :continuous_delivery
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 3
+  :idempotent: true
+  :tags: []
 - :name: epics:epics_update_epics_dates
   :feature_category: :epics
   :has_external_dependencies:
@@ -523,6 +531,14 @@
   :weight: 3
   :idempotent:
   :tags: []
+- :name: security_scans:scan_security_report_secrets
+  :feature_category: :static_application_security_testing
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent: true
+  :tags: []
 - :name: security_scans:security_store_scans
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -581,6 +597,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: approve_blocked_users
+  :feature_category: :users
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: ci_batch_reset_minutes
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -604,6 +628,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
+  :tags: []
+- :name: elastic_association_indexer
+  :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
   :tags: []
 - :name: elastic_commit_indexer
   :feature_category: :global_search
@@ -717,6 +749,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: project_template_export
+  :feature_category: :templates
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: refresh_license_compliance_checks
   :feature_category: :license_compliance
   :has_external_dependencies:
@@ -740,6 +780,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: requirements_management_import_requirements_csv
+  :feature_category: :requirements_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: requirements_management_process_requirements_reports
   :feature_category: :requirements_management

@@ -1,10 +1,4 @@
 import { mount } from '@vue/test-utils';
-import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
-import PolicyRuleEndpoint from 'ee/threat_monitoring/components/policy_editor/policy_rule_endpoint.vue';
-import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
-import PolicyRuleCIDR from 'ee/threat_monitoring/components/policy_editor/policy_rule_cidr.vue';
-import PolicyRuleFQDN from 'ee/threat_monitoring/components/policy_editor/policy_rule_fqdn.vue';
-import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   RuleDirectionOutbound,
   EndpointMatchModeAny,
@@ -14,6 +8,12 @@ import {
   RuleTypeFQDN,
   PortMatchModePortProtocol,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import PolicyRuleCIDR from 'ee/threat_monitoring/components/policy_editor/policy_rule_cidr.vue';
+import PolicyRuleEndpoint from 'ee/threat_monitoring/components/policy_editor/policy_rule_endpoint.vue';
+import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
+import PolicyRuleFQDN from 'ee/threat_monitoring/components/policy_editor/policy_rule_fqdn.vue';
 
 describe('PolicyRuleBuilder component', () => {
   let wrapper;

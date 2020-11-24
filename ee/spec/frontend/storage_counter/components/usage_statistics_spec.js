@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
 import UsageStatisticsCard from 'ee/storage_counter/components/usage_statistics_card.vue';
 import { withRootStorageStatistics } from '../mock_data';

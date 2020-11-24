@@ -1,6 +1,6 @@
+import { GlButton, GlDropdown, GlModal } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import VisualReviewAppLink from 'ee/vue_merge_request_widget/components/visual_review_app_link.vue';
-import { GlButton, GlDropdown, GlModal } from '@gitlab/ui';
 import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 

@@ -15,7 +15,8 @@ RSpec.describe Resolvers::NamespaceProjectsResolver do
     before do
       project_1.add_developer(current_user)
       project_2.add_developer(current_user)
-      create(:vulnerability, project: project_1)
+
+      project_1.project_setting.update!(has_vulnerabilities: true)
     end
 
     describe '#resolve' do

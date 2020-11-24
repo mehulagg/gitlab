@@ -1,6 +1,6 @@
+import { GlTabs } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
-import { GlTabs } from '@gitlab/ui';
 
 describe('PolicyPreview component', () => {
   let wrapper;

@@ -1,9 +1,9 @@
 import Vue from 'vue';
 
 import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/license_issue_body.vue';
+import createStore from 'ee/vue_shared/license_compliance/store';
 import { trimText } from 'helpers/text_helper';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import createStore from 'ee/vue_shared/license_compliance/store';
 import { licenseReport } from '../mock_data';
 
 describe('LicenseIssueBody', () => {
@@ -21,25 +21,13 @@ describe('LicenseIssueBody', () => {
     vm.$destroy();
   });
 
-  describe('interaction', () => {
-    it('clicking the button triggers openModal with the current license', () => {
-      const linkEl = vm.$el.querySelector('.license-item > .btn-link');
-
-      expect(store.state.licenseManagement.currentLicenseInModal).toBe(null);
-
-      linkEl.click();
-
-      expect(store.state.licenseManagement.currentLicenseInModal).toBe(issue);
-    });
-  });
-
   describe('template', () => {
     it('renders component container element with class `license-item`', () => {
       expect(vm.$el.classList.contains('license-item')).toBe(true);
     });
 
-    it('renders button to open modal', () => {
-      const linkEl = vm.$el.querySelector('.license-item > .btn-link');
+    it('renders link to view license', () => {
+      const linkEl = vm.$el.querySelector('.license-item > a');
 
       expect(linkEl).not.toBeNull();
       expect(linkEl.innerText.trim()).toBe(issue.name);

@@ -1,10 +1,10 @@
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import { LOADING, ERROR, SUCCESS } from 'ee/vue_shared/security_reports/store/constants';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { TEST_HOST } from 'spec/test_constants';
 import ReportItem from '~/reports/components/report_item.vue';
 import ReportSection from '~/reports/components/report_section.vue';
+import { LOADING, ERROR, SUCCESS } from '~/reports/constants';
 import {
   approvedLicense,
   blacklistedLicense,
@@ -331,12 +331,6 @@ describe('License Report MR Widget', () => {
 
       expect(wrapper.find(selector).exists()).toBe(false);
     });
-  });
-
-  it('should render set approval modal', () => {
-    mountComponent();
-
-    expect(wrapper.find('#modal-set-license-approval')).not.toBeNull();
   });
 
   it('should init store after mount', () => {

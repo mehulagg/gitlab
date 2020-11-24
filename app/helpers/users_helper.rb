@@ -110,6 +110,45 @@ module UsersHelper
     !user.confirmed?
   end
 
+  def user_block_data(user, message)
+    {
+      path: block_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Block user %{username}?') % { username: sanitize_name(user.name) },
+        messageHtml: message,
+        okVariant: 'warning',
+        okTitle: s_('AdminUsers|Block')
+      }.to_json
+    }
+  end
+
+  def unblock_user_modal_data(user)
+    {
+      path: unblock_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Unblock user %{username}?') % { username: sanitize_name(user.name) },
+        message: s_('AdminUsers|You can always block their account again if needed.'),
+        okVariant: 'info',
+        okTitle: s_('AdminUsers|Unblock')
+      }.to_json
+    }
+  end
+
+  def user_block_effects
+    header = tag.p s_('AdminUsers|Blocking user has the following effects:')
+
+    list = tag.ul do
+      concat tag.li s_('AdminUsers|User will not be able to login')
+      concat tag.li s_('AdminUsers|User will not be able to access git repositories')
+      concat tag.li s_('AdminUsers|Personal projects will be left')
+      concat tag.li s_('AdminUsers|Owned groups will be left')
+    end
+
+    header + list
+  end
+
   private
 
   def blocked_user_badge(user)

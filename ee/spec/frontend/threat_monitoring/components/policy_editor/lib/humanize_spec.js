@@ -1,5 +1,3 @@
-import humanizeNetworkPolicy from 'ee/threat_monitoring/components/policy_editor/lib/humanize';
-import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   EndpointMatchModeAny,
   EndpointMatchModeLabel,
@@ -9,6 +7,8 @@ import {
   RuleTypeCIDR,
   RuleTypeFQDN,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import humanizeNetworkPolicy from 'ee/threat_monitoring/components/policy_editor/lib/humanize';
+import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 
 describe('humanizeNetworkPolicy', () => {
   let policy;

@@ -1,8 +1,8 @@
+import { GlButton, GlDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import createStore from 'ee/security_dashboard/store';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlButton, GlDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

@@ -241,6 +241,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
         raw_metadata: metadata.to_json
       )
     end
+
     it 'returns the URL where the vulnerability was found' do
       location = subject.first['location']
 

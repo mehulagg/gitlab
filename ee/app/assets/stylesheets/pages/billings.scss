@@ -21,10 +21,6 @@
 
 .billing-plans {
   .card {
-    &-header {
-      line-height: $gl-line-height-20;
-    }
-
     &-active {
       background-color: $gray-light;
     }

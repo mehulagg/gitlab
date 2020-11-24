@@ -4,11 +4,12 @@ import {
   mockLists,
   mockListsById,
   mockIssue,
-  mockIssueWithModel,
-  mockIssue2WithModel,
+  mockIssue2,
   rawIssue,
   mockIssues,
+  mockMilestone,
   labels,
+  mockActiveIssue,
 } from '../mock_data';
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
@@ -498,8 +499,8 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssueWithModel,
-    '437': mockIssue2WithModel,
+    '436': mockIssue,
+    '437': mockIssue2,
   };
 
   const state = {
@@ -535,7 +536,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
           },
@@ -610,7 +611,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
           },
@@ -618,7 +619,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE_FAILURE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             originalIndex: 0,
@@ -830,6 +831,111 @@ describe('setActiveIssueDueDate', () => {
       .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
 
     await expect(actions.setActiveIssueDueDate({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
+describe('setActiveIssueSubscribed', () => {
+  const state = { issues: { [mockActiveIssue.id]: mockActiveIssue } };
+  const getters = { activeIssue: mockActiveIssue };
+  const subscribedState = true;
+  const input = {
+    subscribedState,
+    projectPath: 'gitlab-org/gitlab-test',
+  };
+
+  it('should commit subscribed status', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        issueSetSubscription: {
+          issue: {
+            subscribed: subscribedState,
+          },
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      issueId: getters.activeIssue.id,
+      prop: 'subscribed',
+      value: subscribedState,
+    };
+
+    testAction(
+      actions.setActiveIssueSubscribed,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { issueSetSubscription: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueSubscribed({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
+describe('setActiveIssueMilestone', () => {
+  const state = { issues: { [mockIssue.id]: mockIssue } };
+  const getters = { activeIssue: mockIssue };
+  const testMilestone = {
+    ...mockMilestone,
+    id: 'gid://gitlab/Milestone/1',
+  };
+  const input = {
+    milestoneId: testMilestone.id,
+    projectPath: 'h/b',
+  };
+
+  it('should commit milestone after setting the issue', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        updateIssue: {
+          issue: {
+            milestone: testMilestone,
+          },
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      issueId: getters.activeIssue.id,
+      prop: 'milestone',
+      value: testMilestone,
+    };
+
+    testAction(
+      actions.setActiveIssueMilestone,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueMilestone({ getters }, input)).rejects.toThrow(Error);
   });
 });
 

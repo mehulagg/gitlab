@@ -1,17 +1,20 @@
 import Vue from 'vue';
 import MainApp from 'ee/vulnerabilities/components/vulnerability.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 (function createMainApp() {
   const el = document.getElementById('js-vulnerability-main');
-  const vulnerability = JSON.parse(el.dataset.vulnerability);
+  const vulnerability = convertObjectPropsToCamelCase(JSON.parse(el.dataset.vulnerability), {
+    deep: true,
+  });
 
   return new Vue({
     el,
 
     provide: {
-      reportType: vulnerability.report_type,
-      createIssueUrl: vulnerability.create_issue_url,
-      projectFingerprint: vulnerability.project_fingerprint,
+      reportType: vulnerability.reportType,
+      createIssueUrl: vulnerability.createIssueUrl,
+      projectFingerprint: vulnerability.projectFingerprint,
       vulnerabilityId: vulnerability.id,
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
       permissionsHelpPath: vulnerability.permissionsHelpPath,

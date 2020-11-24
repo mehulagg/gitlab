@@ -17,6 +17,12 @@ export const groupNodes = [
   },
 ];
 
+export const nextGroupNode = {
+  __typename: 'Group',
+  full_name: 'Baz',
+  id: 'baz',
+};
+
 export const groupPageInfo = {
   nextPage: 2,
 };

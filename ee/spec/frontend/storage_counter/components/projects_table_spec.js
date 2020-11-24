@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import ProjectsTable from 'ee/storage_counter/components/projects_table.vue';
 import Project from 'ee/storage_counter/components/project.vue';
 import ProjectWithExcessStorage from 'ee/storage_counter/components/project_with_excess_storage.vue';
+import ProjectsTable from 'ee/storage_counter/components/projects_table.vue';
 import { projects } from '../mock_data';
 
 let wrapper;

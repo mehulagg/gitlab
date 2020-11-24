@@ -1,5 +1,5 @@
-import { membersJsonString, membersParsed } from 'jest/groups/members/mock_data';
 import { parseDataAttributes } from 'ee/groups/members/utils';
+import { membersJsonString, membersParsed } from 'jest/groups/members/mock_data';
 
 describe('group member utils', () => {
   describe('parseDataAttributes', () => {

@@ -46,7 +46,7 @@ module EE
       end
     end
 
-    def can_purchase_storage_for_namespace?(namespace)
+    def purchase_storage_link_enabled?(namespace)
       ::Feature.enabled?(:buy_storage_link) &&
         namespace.additional_repo_storage_by_namespace_enabled?
     end
@@ -57,11 +57,6 @@ module EE
       else
         profile_usage_quotas_path(anchor: 'storage-quota-tab')
       end
-    end
-
-    def can_purchase_storage?
-      ::Gitlab::CurrentSettings.enforce_namespace_storage_limit? &&
-        ::Feature.enabled?(:buy_storage_link)
     end
 
     def purchase_storage_url

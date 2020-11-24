@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix OAuth failure on primary'
-merge_request: 47178
-author:
-type: fixed

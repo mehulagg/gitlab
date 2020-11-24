@@ -1,5 +1,3 @@
-import createState from 'ee/analytics/productivity_analytics/store/modules/charts/state';
-import * as getters from 'ee/analytics/productivity_analytics/store/modules/charts/getters';
 import {
   metricTypes,
   chartKeys,
@@ -7,6 +5,8 @@ import {
   maxColumnChartItemsPerPage,
   scatterPlotAddonQueryDays,
 } from 'ee/analytics/productivity_analytics/constants';
+import * as getters from 'ee/analytics/productivity_analytics/store/modules/charts/getters';
+import createState from 'ee/analytics/productivity_analytics/store/modules/charts/state';
 import { getScatterPlotData, getMedianLineData } from 'ee/analytics/productivity_analytics/utils';
 import { mockHistogramData } from '../../../mock_data';
 

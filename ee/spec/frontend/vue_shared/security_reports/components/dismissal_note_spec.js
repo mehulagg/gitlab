@@ -1,5 +1,5 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 import component from 'ee/vue_shared/security_reports/components/dismissal_note.vue';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 

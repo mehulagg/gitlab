@@ -1,6 +1,6 @@
-import { shallowMount, mount } from '@vue/test-utils';
-import { getByText } from '@testing-library/dom';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { getByText } from '@testing-library/dom';
+import { shallowMount, mount } from '@vue/test-utils';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import { issueEvents, issueStage, allowedStages } from '../mock_data';
 

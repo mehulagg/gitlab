@@ -1,8 +1,8 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert, GlDropdown, GlDropdownItem, GlModal } from '@gitlab/ui';
-import { useFakeDate } from 'helpers/fake_date';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import DownloadTestCoverage from 'ee/analytics/repository_analytics/components/download_test_coverage.vue';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
+import { useFakeDate } from 'helpers/fake_date';
 
 const localVue = createLocalVue();
 
