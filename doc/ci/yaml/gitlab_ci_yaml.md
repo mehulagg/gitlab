@@ -4,8 +4,9 @@ group: Continuous Integration
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
-
+<!-- markdownlint-disable MD044 -->
 # The .gitlab-ci.yml file
+<!-- markdownlint-enable MD044 -->
 
 To use GitLab CI/CD, you need an application codebase hosted in a
 Git repository, and for your build, test, and deployment
