@@ -5,6 +5,7 @@ module Security
   #
   class TokenRevocationService < ::BaseService
     RevocationFailedError = Class.new(StandardError)
+    InvalidRevocationError = Class.new(StandardError)
 
     def initialize(revocable_keys:)
       @revocable_keys = revocable_keys
@@ -14,12 +15,14 @@ module Security
       return error('Token revocation is disabled') unless token_revocation_enabled?
 
       response = revoke_tokens
+      raise InvalidRevocationError, 'Invalid Revocation API call' if bad_request?(response)
+
       response.success? ? success : error('Failed to revoke tokens')
     rescue RevocationFailedError => exception
       error(exception.message)
     rescue StandardError => exception
       log_token_revocation_error(exception)
-      error(exception.message)
+      success
     end
 
     private
@@ -29,7 +32,7 @@ module Security
     end
 
     def revoke_tokens
-      raise RevocationFailedError, 'Missing revocation tokens data' if missing_token_data?
+      raise RevocationFailedError, 'Missing revocation tokens data' if missing_revocation_token_data?
 
       ::Gitlab::HTTP.post(
         token_revocation_url,
@@ -41,7 +44,7 @@ module Security
       )
     end
 
-    def missing_token_data?
+    def missing_revocation_token_data?
       token_revocation_url.blank? || token_types_url.blank? || revocation_api_token.blank?
     end
 
@@ -62,15 +65,20 @@ module Security
           'Authorization' => revocation_api_token
         }
       )
+      raise InvalidRevocationError, 'Invalid Revocation API call' if bad_request?(response)
       raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?
 
       token_types = ::Gitlab::Json.parse(response.body)['types']
-      raise RevocationFailedError, 'No token type is available' if token_types.blank?
+      raise InvalidRevocationError, 'No token type is available' if token_types.blank?
 
       @revocable_keys.filter! { |key| token_types.include?(key[:type]) }
-      raise RevocationFailedError, 'No revocable key is present' if @revocable_keys.blank?
+      raise InvalidRevocationError, 'No revocable key is present' if @revocable_keys.blank?
 
       @revocable_keys.to_json
+    end
+
+    def bad_request?(response)
+      response.code == 400
     end
 
     def token_types_url

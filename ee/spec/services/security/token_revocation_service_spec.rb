@@ -28,7 +28,9 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
     { 'types': %w(aws_key_id aws_secret gcp_key_id gcp_secret) }
   end
 
-  subject { described_class.new(revocable_keys: revocable_keys).execute }
+  let(:service) { described_class.new(revocable_keys: revocable_keys) }
+
+  subject { service.execute }
 
   before do
     stub_application_setting(secret_detection_revocation_token_types_url: revocation_token_types_url)
@@ -55,7 +57,10 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
       stub_invalid_token_types_api_with_success
     end
 
-    specify { expect(subject).to eql({ message: 'No token type is available', status: :error }) }
+    it 'logs the error but returns success' do
+      expect(service).to receive(:log_error)
+      expect(subject[:status]).to be(:success)
+    end
   end
 
   context 'when revocation service is disabled' do
@@ -112,7 +117,21 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
           { 'types': %w() }
         end
 
-        specify { expect(subject).to eql({ message: 'No token type is available', status: :error }) }
+        it 'logs the error but returns success' do
+          expect(service).to receive(:log_error)
+          expect(subject[:status]).to be(:success)
+        end
+      end
+
+      context 'when token revocation api returns :bad_request' do
+        before do
+          stub_revoke_token_api_with_bad_request
+        end
+
+        it 'logs the error but returns success' do
+          expect(service).to receive(:log_error)
+          expect(subject[:status]).to be(:success)
+        end
       end
     end
 
@@ -122,6 +141,17 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
       end
 
       specify { expect(subject).to eql({ message: 'Failed to get revocation token types', status: :error }) }
+    end
+
+    context 'when revocation token types API returns a response with :bad_request' do
+      before do
+        stub_revocation_token_types_api_with_bad_request
+      end
+
+      it 'logs the error but returns success' do
+        expect(service).to receive(:log_error)
+        expect(subject[:status]).to be(:success)
+      end
     end
   end
 
@@ -136,6 +166,16 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
   end
 
   def stub_revoke_token_api_with_failure
+    stub_request(:post, token_revocation_url)
+      .with(body: revocable_keys.to_json)
+      .to_return(
+        status: 500,
+        headers: { 'Content-Type' => 'application/json' },
+        body: {}.to_json
+      )
+  end
+
+  def stub_revoke_token_api_with_bad_request
     stub_request(:post, token_revocation_url)
       .with(body: revocable_keys.to_json)
       .to_return(
@@ -164,6 +204,15 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
   end
 
   def stub_revocation_token_types_api_with_failure
+    stub_request(:get, revocation_token_types_url)
+      .to_return(
+        status: 500,
+        headers: { 'Content-Type' => 'application/json' },
+        body: {}.to_json
+      )
+  end
+
+  def stub_revocation_token_types_api_with_bad_request
     stub_request(:get, revocation_token_types_url)
       .to_return(
         status: 400,
