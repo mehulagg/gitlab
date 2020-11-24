@@ -204,23 +204,29 @@ If you previously selected the "Busy" checkbox, remember to deselect it when you
 ## Busy status indicator
 
 > - Introduced in GitLab 13.6.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-busy-status-feature).
 
+To indicate to others that you are busy, you can set an indicator
+
 ![Busy status indicator](img/busy_status_indicator_v13_6.png)
 
-1. Click your avatar.
-1. Click **Set status**, or **Edit status** if you have already set a status.
-1. Select the **Busy** checkbox
+To set the busy status indicator, either:
 
-or
+- Set it directly:
 
-1. Click your avatar.
-1. Select **Profile**.
-1. Click **Edit profile** (pencil icon).
-1. Select the **Busy** checkbox
+  1. Click your avatar.
+  1. Click **Set status**, or **Edit status** if you have already set a status.
+  1. Select the **Busy** checkbox
+
+- Set it on your profile:
+
+  1. Click your avatar.
+  1. Select **Profile**.
+  1. Click **Edit profile** (**{pencil}**).
+  1. Select the **Busy** checkbox
 
 ### Enable busy status feature
 
