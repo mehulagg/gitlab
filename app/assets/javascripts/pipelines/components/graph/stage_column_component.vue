@@ -87,6 +87,7 @@ export default {
         v-for="(group, index) in groups"
         :id="groupId(group)"
         :key="group[getAccessor('groupId')]"
+        data-testid="stage-column-group"
         class="gl-relative gl-mb-3 gl-white-space-normal gl-pipeline-job-width"
       >
         <job-item
