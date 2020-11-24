@@ -1,6 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-
-import stageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
+import StageColumnComponentLegacy from '~/pipelines/components/graph/stage_column_component_legacy.vue';
 
 describe('stage column component', () => {
   const mockJob = {
@@ -31,7 +30,7 @@ describe('stage column component', () => {
       mockGroups.push(mockedJob);
     }
 
-    wrapper = shallowMount(stageColumnComponent, {
+    wrapper = shallowMount(StageColumnComponentLegacy, {
       propsData: {
         title: 'foo',
         groups: mockGroups,
@@ -57,7 +56,7 @@ describe('stage column component', () => {
 
   describe('jobId', () => {
     it('escapes job name', () => {
-      wrapper = shallowMount(stageColumnComponent, {
+      wrapper = shallowMount(StageColumnComponentLegacy, {
         propsData: {
           groups: [
             {
@@ -83,7 +82,7 @@ describe('stage column component', () => {
 
   describe('with action', () => {
     it('renders action button', () => {
-      wrapper = shallowMount(stageColumnComponent, {
+      wrapper = shallowMount(StageColumnComponentLegacy, {
         propsData: {
           groups: [
             {
@@ -112,7 +111,7 @@ describe('stage column component', () => {
 
   describe('without action', () => {
     it('does not render action button', () => {
-      wrapper = shallowMount(stageColumnComponent, {
+      wrapper = shallowMount(StageColumnComponentLegacy, {
         propsData: {
           groups: [
             {
