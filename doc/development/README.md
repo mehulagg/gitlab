@@ -98,7 +98,7 @@ If the MR proposes changes limited to a particular stage, group, or team:
 
 1. After the engineering review is complete, assign the MR to the
    Technical Writer [assigned to the group, stage, or team](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments).
-   - You can also request a consistency review from the
+   - If you have any questions or need further input, request a review from the
      technical writer assigned to [development guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines) (DRI).
 
 #### Broader changes
