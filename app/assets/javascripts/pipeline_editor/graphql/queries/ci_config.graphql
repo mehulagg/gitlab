@@ -1,0 +1,16 @@
+query getCiConfigData($content: String!, $includeMergedYaml: Boolean) {
+  ciConfig(content: $content, includeMergedYaml: $includeMergedYaml) {
+    stages {
+      name
+      groups {
+        name
+        jobs {
+          name
+          needs {
+            name
+          }
+        }
+      }
+    }
+  }
+}

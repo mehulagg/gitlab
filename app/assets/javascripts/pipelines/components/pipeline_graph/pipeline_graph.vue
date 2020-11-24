@@ -7,7 +7,7 @@ import StagePill from './stage_pill.vue';
 import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
 import { DRAW_FAILURE, DEFAULT } from '../../constants';
-import { generateJobNeedsDict } from '../../utils';
+import { generateJobNeedsDict, createJobsHash } from '../../utils';
 
 export default {
   components: {
@@ -80,6 +80,7 @@ export default {
     },
   },
   mounted() {
+    console.log('mount');
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
       this.drawJobLinks();
@@ -87,12 +88,21 @@ export default {
   },
   methods: {
     drawJobLinks() {
-      const { stages, jobs } = this.pipelineData;
+      console.log('====== START DRAW ======');
+      const jobs = createJobsHash(this.pipelineData);
+      console.log('====== Got jobs ======');
+      const { stages } = this.pipelineData;
+      console.log(stages);
       const unwrappedGroups = this.unwrapPipelineData(stages);
+      console.log(unwrappedGroups);
 
       try {
+        console.log('======= TRY ======');
         const parsedData = parseData(unwrappedGroups);
+        console.log('PARSE');
+        console.log(parsedData);
         this.links = generateLinksData(parsedData, jobs, this.$options.CONTAINER_ID);
+        console.log('LINK');
       } catch {
         this.reportFailure(DRAW_FAILURE);
       }
@@ -128,17 +138,23 @@ export default {
       this.highlightedJob = null;
     },
     unwrapPipelineData(stages) {
+      console.log('unwrap');
       return stages
         .map(({ name, groups }) => {
           return groups.map(group => {
-            return { category: name, ...group };
+            const newGroup = group.jobs.map(job => {
+              return {
+                jobs: { [job.name]: { ...job, needs: job.needs.map(need => need.name) } },
+              };
+            });
+            return { category: name, group: newGroup };
           });
         })
         .flat(2);
     },
     getGraphDimensions() {
-      this.width = `${this.$refs[this.$options.CONTAINER_REF].scrollWidth}px`;
-      this.height = `${this.$refs[this.$options.CONTAINER_REF].scrollHeight}px`;
+      this.width = `${this.$refs[this.$options.CONTAINER_REF].scrollWidth}`;
+      this.height = `${this.$refs[this.$options.CONTAINER_REF].scrollHeight}`;
     },
     reportFailure(errorType) {
       this.failureType = errorType;
@@ -210,7 +226,7 @@ export default {
           <job-pill
             v-for="group in stage.groups"
             :key="group.name"
-            :job-id="group.id"
+            :job-id="group.name"
             :job-name="group.name"
             :is-highlighted="hasHighlightedJob && isJobHighlighted(group.id)"
             :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"

@@ -5,6 +5,7 @@ export const validateParams = params => {
   return pickBy(params, (val, key) => SUPPORTED_FILTER_PARAMETERS.includes(key) && val);
 };
 
+// TODO: REMOVE THIS SINCE API NOW GUARANTEE UNIQUE JOBS
 export const createUniqueJobId = (stageName, jobName) => `${stageName}-${jobName}`;
 
 /**
@@ -47,6 +48,8 @@ export const preparePipelineGraphData = jsonData => {
     });
   });
 
+  console.log(jobs);
+
   const pipelineData = stages.map((stage, index) => {
     const stageJobs = arrayOfJobsByStage[index];
     return {
@@ -64,7 +67,31 @@ export const preparePipelineGraphData = jsonData => {
   return { stages: pipelineData, jobs };
 };
 
-export const generateJobNeedsDict = ({ jobs }) => {
+export const createJobsHash = ({ stages }) => {
+  const jobs = {};
+
+  stages.forEach(stage => {
+    stage.groups.forEach(group => {
+      group.jobs.forEach(job => {
+        // Flatten the needs to only keep an array of names
+        const needs = job.needs.map(need => need.name);
+        jobs[job.name] = { ...job, needs, id: createUniqueJobId(stage.name, job.name) };
+      });
+    });
+  });
+
+  return jobs;
+};
+
+/**
+ * This function takes the stages array and transform it
+ * into a hash where each key is a job and value is an array
+ * that stores all of its needs. This used to build the links
+ * between jobs.
+ * @param {Array} stages
+ * @returns {Object} - Hash of jobs and needs
+ */
+export const generateJobNeedsDict = jobs => {
   const arrOfJobNames = Object.keys(jobs);
 
   return arrOfJobNames.reduce((acc, value) => {
