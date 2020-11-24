@@ -69,7 +69,7 @@ describe('stage column component', () => {
 
   });
 
-  describe('jobId', () => {
+  describe('job', () => {
 
     beforeEach(() => {
       createComponent({
@@ -86,12 +86,18 @@ describe('stage column component', () => {
               },
             },
           ],
-          title: 'test',
+          title: 'test <img src=x onerror=alert(document.domain)>',
         },
       })
     });
 
-    it('escapes job name', () => {
+    it('capitalizes and escapes name', () => {
+      expect(findStageColumnTitle().text()).toBe(
+        'Test &lt;img src=x onerror=alert(document.domain)&gt;',
+      );
+    });
+
+    it('escapes id', () => {
       expect(findStageColumnGroup().attributes('id')).toBe(
         'ci-badge-&lt;img src=x onerror=alert(document.domain)&gt;',
       );
