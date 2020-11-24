@@ -138,6 +138,10 @@
   top: 50% !important;
 }
 
+.gl-active-text-decoration-none:active, .gl-focus-text-decoration-none:focus {
+  text-decoration: none;
+}
+
 // These are single-value classes to use with utility-class style CSS
 // but to still access this variable. Do not add other styles.
 .gl-pipeline-min-h {

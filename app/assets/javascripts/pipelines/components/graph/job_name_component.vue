@@ -29,9 +29,9 @@ export default {
 };
 </script>
 <template>
-  <span class="ci-job-name-component mw-100">
+  <span class="ci-job-name-component mw-100 gl-display-flex gl-align-items-center">
     <ci-icon :size="iconSize" :status="status" />
-    <span class="gl-text-truncate mw-70p gl-pl-2 gl-display-inline-block">
+    <span class="gl-text-truncate mw-70p gl-pl-3 gl-display-inline-block">
       {{ name }}
     </span>
   </span>

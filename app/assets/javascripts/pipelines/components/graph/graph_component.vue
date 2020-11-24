@@ -27,13 +27,6 @@ export default {
     graph() {
       return this.pipeline.stages;
     },
-    dummyAction() {
-      return {
-        icon: 'play',
-        title: 'play all',
-        path: '/cool/play'
-      }
-    },
   },
 };
 </script>
@@ -48,7 +41,7 @@ export default {
         :key="stage.name"
         :title="stage.name"
         :groups="stage.groups"
-        :action="dummyAction"
+        :action="stage.status.action"
       />
     </div>
   </div>
