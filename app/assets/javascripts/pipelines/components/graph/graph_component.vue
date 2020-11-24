@@ -28,13 +28,17 @@ export default {
       return this.pipeline.stages;
     },
   },
+  pipelineReplacementClasses: `
+    gl-white-space-nowrap
+
+  `
 };
 </script>
 <template>
   <div class="js-pipeline-graph">
     <div
-      class="pipeline-graph pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10"
-      :class="{ 'gl-py-5': !isLinkedPipeline }"
+      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10"
+      :class="{ 'gl-py-5': !isLinkedPipeline,  pipelineReplacementClasses: true}"
     >
       <stage-column-component
         v-for="(stage, index) in graph"
