@@ -13216,9 +13216,6 @@ msgstr ""
 msgid "Group by"
 msgstr ""
 
-msgid "Group description"
-msgstr ""
-
 msgid "Group description (optional)"
 msgstr ""
 
