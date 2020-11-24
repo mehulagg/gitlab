@@ -11,7 +11,7 @@ module Gitlab
         end
 
         def representation_class
-          Representation::Issue
+          Gitlab::GithubImport::Representation::Issue
         end
 
         def sidekiq_worker_class

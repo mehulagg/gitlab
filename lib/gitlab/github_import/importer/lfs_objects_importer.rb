@@ -31,6 +31,7 @@ module Gitlab
         rescue StandardError => e
           Gitlab::Import::Logger.error(
             message: 'The Lfs import process failed',
+            importer: importer_class.name,
             error: e.message
           )
         end

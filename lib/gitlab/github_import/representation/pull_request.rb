@@ -13,18 +13,16 @@ module Gitlab
                          :source_branch_sha, :target_branch, :target_branch_sha,
                          :milestone_number, :author, :assignee, :created_at,
                          :updated_at, :merged_at, :source_repository_id,
-                         :target_repository_id, :source_repository_owner
+                         :target_repository_id, :source_repository_owner, :merged_by
 
         # Builds a PR from a GitHub API response.
         #
         # issue - An instance of `Sawyer::Resource` containing the PR details.
         def self.from_api_response(pr)
-          assignee =
-            if pr.assignee
-              Representation::User.from_api_response(pr.assignee)
-            end
-
+          assignee = Representation::User.from_api_response(pr.assignee) if pr.assignee
           user = Representation::User.from_api_response(pr.user) if pr.user
+          merged_by = Representation::User.from_api_response(pr.merge_by) if pr.merged_by
+
           hash = {
             iid: pr.number,
             title: pr.title,
@@ -40,6 +38,7 @@ module Gitlab
             milestone_number: pr.milestone&.number,
             author: user,
             assignee: assignee,
+            merged_by: merged_by,
             created_at: pr.created_at,
             updated_at: pr.updated_at,
             merged_at: pr.merged_at
