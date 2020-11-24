@@ -47,6 +47,11 @@ module API
       def update_project_approval_rule(present_with:)
         authorize! :admin_project, user_project
 
+# KERRI IS THIS THE PLACE?!?!?
+#
+
+binding.pry
+
         params = declared_params(include_missing: false)
         approval_rule = user_project.approval_rules.find(params.delete(:approval_rule_id))
         result = ::ApprovalRules::UpdateService.new(approval_rule, current_user, params).execute
