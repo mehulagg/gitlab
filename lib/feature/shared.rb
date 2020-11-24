@@ -13,6 +13,7 @@ class Feature
     # deprecated: defines if a feature flag type that is deprecated and to be removed,
     #             the deprecated types are hidden from all interfaces
     # example: usage being shown when exception is raised
+    # auto_clean_up: defines if the feature flag can be cleaned up automatically.
     TYPES = {
       development: {
         description: 'Short lived, used to enable unfinished code to be deployed',
@@ -20,6 +21,7 @@ class Feature
         rollout_issue: true,
         ee_only: false,
         default_enabled: false,
+        auto_clean_up: false,
         example: <<-EOS
           Feature.enabled?(:my_feature_flag, project)
           Feature.enabled?(:my_feature_flag, project, type: :development)
@@ -32,6 +34,7 @@ class Feature
         rollout_issue: false,
         ee_only: false,
         default_enabled: false,
+        auto_clean_up: false,
         example: <<-EOS
           Feature.enabled?(:my_ops_flag, type: ops)
           push_frontend_feature_flag?(:my_ops_flag, project, type: :ops)
@@ -44,6 +47,7 @@ class Feature
         rollout_issue: false,
         ee_only: true,
         default_enabled: true,
+        auto_clean_up: false,
         example: <<-EOS
           project.feature_available?(:my_licensed_feature)
           namespace.feature_available?(:my_licensed_feature)
@@ -61,6 +65,7 @@ class Feature
       type
       group
       default_enabled
+      auto_clean_up
     ].freeze
   end
 end

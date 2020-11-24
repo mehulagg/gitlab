@@ -61,6 +61,14 @@ class Feature
       if default_enabled.nil?
         raise Feature::InvalidFeatureFlagError, "Feature flag '#{name}' is missing default_enabled. Ensure to update #{path}"
       end
+
+      if auto_clean_up.present?
+        raise NotImplementedError, "The Auto Clean Up feature is WIP. Please remove the option."
+      end
+
+      if auto_clean_up.present? && !can_auto_clean_up?
+        raise Feature::InvalidFeatureFlagError, "Feature flag '#{name}' is to be cleaned up automatically, but rollout has not been completed yet. Ensure to update #{path}"
+      end
     end
 
     def valid_usage!(type_in_code:, default_enabled_in_code:)
@@ -82,6 +90,24 @@ class Feature
 
     def to_h
       attributes
+    end
+
+    def can_auto_clean_up?
+      type == 'development' &&
+        default_enabled.present? &&
+        milestone.present? &&
+        introduced_by_mr_in_gitlab_canonical_project? &&
+        rollout_issue_in_gitlab_canonical_project?
+    end
+
+    def introduced_by_mr_in_gitlab_canonical_project?
+      introduced_by_url.present? &&
+        introduced_by_url.start_with?(Gitlab::CANONICAL_PROJECT_MERGE_REQUESTS_URL)
+    end
+
+    def rollout_issue_in_gitlab_canonical_project?
+      rollout_issue_url.present? &&
+        rollout_issue_url.start_with?(Gitlab::CANONICAL_PROJECT_ISSUES_URL)
     end
 
     class << self

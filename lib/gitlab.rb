@@ -42,6 +42,10 @@ module Gitlab
   VERSION = File.read(root.join("VERSION")).strip.freeze
   INSTALLATION_TYPE = File.read(root.join("INSTALLATION_TYPE")).strip.freeze
   HTTP_PROXY_ENV_VARS = %w(http_proxy https_proxy HTTP_PROXY HTTPS_PROXY).freeze
+  CANONICAL_PROJECT_PATH = "gitlab-org/gitlab"
+  CANONICAL_PROJECT_URL = "#{COM_URL}/#{CANONICAL_PROJECT_PATH}"
+  CANONICAL_PROJECT_ISSUES_URL = "#{CANONICAL_PROJECT_URL}/-/issues"
+  CANONICAL_PROJECT_MERGE_REQUESTS_URL = "#{CANONICAL_PROJECT_URL}/-/merge_requests"
 
   def self.com?
     # Check `gl_subdomain?` as well to keep parity with gitlab.com
