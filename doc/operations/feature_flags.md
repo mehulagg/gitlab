@@ -222,25 +222,6 @@ To remove users from a user list:
 1. Click on the **{pencil}** (edit) button next to the list you want to change.
 1. Click on the **{remove}** (remove) button next to the ID you want to remove.
 
-### Enable or disable feature flag strategies
-
-This feature is under development, but is ready for production use. It's
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can disable it for your instance.
-
-To disable it:
-
-```ruby
-Feature.disable(:feature_flags_new_version)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:feature_flags_new_version)
-```
-
 ## Rollout strategy (legacy)
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8240) in GitLab 12.2.

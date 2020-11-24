@@ -42,11 +42,7 @@ module FeatureFlags
     end
 
     def flag_version_enabled?
-      params[:version] != 'new_version_flag' || new_version_feature_flags_enabled?
-    end
-
-    def new_version_feature_flags_enabled?
-      ::Feature.enabled?(:feature_flags_new_version, project, default_enabled: true)
+      params[:version] != 'new_version_flag'
     end
   end
 end
