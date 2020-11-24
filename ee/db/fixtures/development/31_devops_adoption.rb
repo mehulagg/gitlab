@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# require './spec/support/sidekiq_middleware'
-
 Gitlab::Seeder.quiet do
   admin = User.where(admin: true).first
 
