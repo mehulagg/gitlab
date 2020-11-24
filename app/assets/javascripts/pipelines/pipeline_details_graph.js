@@ -22,7 +22,7 @@ const createPipelinesDetailApp = (selector, pipelineProjectPath, pipelineIid) =>
       pipelineIid,
     },
     render(createElement) {
-      return createElement('pipeline-graph-wrapper');
+      return createElement(PipelineGraphWrapper);
     },
   });
 };

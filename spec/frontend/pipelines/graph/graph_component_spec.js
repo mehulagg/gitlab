@@ -1,4 +1,3 @@
-import { capitalize } from 'lodash';
 import { shallowMount } from '@vue/test-utils';
 import PipelineGraph from '~/pipelines/components/graph/graph_component.vue';
 import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
@@ -11,8 +10,6 @@ describe('graph component', () => {
 
   const findLinkedColumns = () => wrapper.findAll(LinkedPipelinesColumn);
   const findStageColumns = () => wrapper.findAll(StageColumnComponent);
-  const findStageColumnTitleAt = idx =>
-    wrapper.findAll('[data-testid="stage-column-title"]').at(idx);
 
   const generateResponse = raw => unwrapPipelineData(raw.data.project.pipeline.id, raw.data);
 

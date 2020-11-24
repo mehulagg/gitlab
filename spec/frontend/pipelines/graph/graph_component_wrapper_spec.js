@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import PipelineGraphWrapper from '~/pipelines/components/graph/graph_component_wrapper.vue';
@@ -14,7 +14,6 @@ const defaultProvide = {
 };
 
 describe('Pipeline graph wrapper', () => {
-  const localVue = createLocalVue();
   Vue.use(VueApollo);
 
   let wrapper;
@@ -29,7 +28,6 @@ describe('Pipeline graph wrapper', () => {
     mountFn = shallowMount,
   } = {}) => {
     wrapper = mountFn(PipelineGraphWrapper, {
-      localVue,
       provide,
       apolloProvider,
       data() {
