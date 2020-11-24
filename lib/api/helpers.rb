@@ -550,9 +550,6 @@ module API
     def increment_unique_values(event_name, values)
       return unless values.present?
 
-      feature_name = "usage_data_#{event_name}"
-      return unless Feature.enabled?(feature_name)
-
       Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
     rescue => error
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")

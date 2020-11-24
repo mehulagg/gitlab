@@ -30,7 +30,6 @@ module RedisTracking
   private
 
   def track_unique_redis_hll_event(event_name, feature, feature_default_enabled)
-    return unless metric_feature_enabled?(feature, feature_default_enabled)
     return unless visitor_id
 
     Gitlab::UsageDataCounters::HLLRedisCounter.track_event(visitor_id, event_name)
@@ -38,10 +37,6 @@ module RedisTracking
 
   def trackable_request?
     request.format.html? && request.headers['DNT'] != '1'
-  end
-
-  def metric_feature_enabled?(feature, default_enabled)
-    Feature.enabled?(feature, default_enabled: default_enabled)
   end
 
   def visitor_id

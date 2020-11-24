@@ -120,6 +120,8 @@ module Gitlab
           event = event_for(event_name)
           raise UnknownEvent, "Unknown event #{event_name}" unless event.present?
 
+          return if event['feature_flag'].present? && Feature.disabled(event['feature_flag'])
+
           Gitlab::Redis::HLL.add(key: redis_key(event, time, context), value: value, expiry: expiry(event))
         end
 
