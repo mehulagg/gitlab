@@ -140,7 +140,7 @@ In these cases, use the following workflow:
 1. Once the reviews and appropriate approvals are complete, the
 [Technical writer assigned to development guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines)
 checks for required approvals, fixes any remaining [Trivial changes](#trivial-changes),
-reviews the content for consistency and adherence to documentation
+as well as fixes required to comply with documentation
 guidelines. That writer may also ask for additional approvals as suggested
 above, before merging the MR.
 
