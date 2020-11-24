@@ -17,6 +17,11 @@ class EnvironmentEntity < Grape::Entity
   expose :last_deployment, using: DeploymentEntity
   expose :stop_action_available?, as: :has_stop_action
 
+  expose :upcoming_deployment, expose_nil: false do |environment, ops|
+    DeploymentEntity.represent(environment.upcoming_deployment,
+      ops.merge(except: %i[manual_actions scheduled_actions playable_build cluster]))
+  end
+
   expose :metrics_path, if: -> (*) { environment.has_metrics? } do |environment|
     metrics_project_environment_path(environment.project, environment)
   end
