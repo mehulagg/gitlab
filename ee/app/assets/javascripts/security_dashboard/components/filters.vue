@@ -2,6 +2,7 @@
 import { mapState, mapActions } from 'vuex';
 import { severityFilter, scannerFilter } from 'ee/security_dashboard/helpers';
 import { GlToggle } from '@gitlab/ui';
+import { debounce } from 'lodash';
 import StandardFilter from './filters/standard_filter.vue';
 import { DISMISSAL_STATES } from '../store/modules/filters/constants';
 
@@ -21,6 +22,9 @@ export default {
   },
   methods: {
     ...mapActions('filters', ['setFilter', 'toggleHideDismissed']),
+    updateFilter: debounce(function updateFilter(filter) {
+      this.setFilter(filter);
+    }),
   },
 };
 </script>
@@ -33,7 +37,7 @@ export default {
         :key="filter.id"
         class="col-sm-6 col-md-4 col-lg-2 p-2 js-filter"
         :filter="filter"
-        @filter-changed="setFilter"
+        @filter-changed="updateFilter"
       />
       <div class="gl-display-flex ml-lg-auto p-2">
         <slot name="buttons"></slot>

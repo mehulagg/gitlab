@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'lodash';
+import { uniqueId, debounce } from 'lodash';
 import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
@@ -11,6 +11,7 @@ import {
   FEEDBACK_TYPE_ISSUE,
   FEEDBACK_TYPE_MERGE_REQUEST,
 } from '~/vue_shared/security_reports/constants';
+import { VULNERABILITIES_REQUEST_DEBOUNCE_TIME } from './constants';
 import * as types from './mutation_types';
 
 /**
@@ -23,6 +24,8 @@ import * as types from './mutation_types';
  */
 
 const hideModal = () => $('#modal-mrwidget-security-issue').modal('hide');
+let vulnerabilitiesSource;
+let isFirstVulnerabilitiesRequest = true;
 
 export const setPipelineId = ({ commit }, id) => commit(types.SET_PIPELINE_ID, id);
 
@@ -36,15 +39,22 @@ export const setVulnerabilitiesPage = ({ commit }, page) => {
   commit(types.SET_VULNERABILITIES_PAGE, page);
 };
 
-export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
+export const getVulnerabilities = ({ state, dispatch }, params = {}) => {
   if (!state.vulnerabilitiesEndpoint) {
     return;
   }
   dispatch('requestVulnerabilities');
+  // Cancel a pending request if there is one.
+  if (vulnerabilitiesSource) {
+    vulnerabilitiesSource.cancel();
+  }
+
+  vulnerabilitiesSource = axios.CancelToken.source();
 
   axios({
     method: 'GET',
     url: state.vulnerabilitiesEndpoint,
+    cancelToken: vulnerabilitiesSource.token,
     params,
   })
     .then(response => {
@@ -52,8 +62,24 @@ export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
       dispatch('receiveVulnerabilitiesSuccess', { headers, data });
     })
     .catch(error => {
-      dispatch('receiveVulnerabilitiesError', error?.response?.status);
+      // Don't show an error message if the request was cancelled through the cancel token.
+      if (!axios.isCancel(error)) {
+        dispatch('receiveVulnerabilitiesError', error?.response?.status);
+      }
     });
+};
+
+export const getVulnerabilitiesDebounced = debounce(({ dispatch }, params) => {
+  dispatch('getVulnerabilities', params);
+}, VULNERABILITIES_REQUEST_DEBOUNCE_TIME);
+
+export const fetchVulnerabilities = ({ dispatch }, params) => {
+  if (isFirstVulnerabilitiesRequest) {
+    dispatch('getVulnerabilities', params);
+    isFirstVulnerabilitiesRequest = false;
+  } else {
+    dispatch('getVulnerabilitiesDebounced', params);
+  }
 };
 
 export const requestVulnerabilities = ({ commit }) => {
@@ -67,7 +93,7 @@ export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => 
   // We need to add dummy IDs here to avoid rendering issues.
   const vulnerabilities = data.map(vulnerability => ({
     ...vulnerability,
-    id: vulnerability.id || _.uniqueId('client_'),
+    id: vulnerability.id || uniqueId('client_'),
   }));
 
   commit(types.RECEIVE_VULNERABILITIES_SUCCESS, { pageInfo, vulnerabilities });
