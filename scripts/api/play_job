@@ -10,7 +10,7 @@ class PlayJob
   DEFAULT_OPTIONS = {
     project: ENV['CI_PROJECT_ID'],
     pipeline_id: ENV['CI_PIPELINE_ID'],
-    api_token: ENV['GITLAB_BOT_MULTI_PROJECT_PIPELINE_POLLING_TOKEN']
+    api_token: ENV['CI_JOB_TOKEN']
   }.freeze
 
   def initialize(options)
