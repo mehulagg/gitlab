@@ -23,10 +23,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
           },
           filter: {
             bool: {
-              should: [
-                must_not_have_field('issues_access_level')
-              ],
-              minimum_should_match: 1,
+              must_not: field_exists('issues_access_level'),
               filter: issue_type_filter
             }
           }
@@ -63,10 +60,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
         issues: {
           filter: {
             bool: {
-              should: [
-                must_not_have_field('issues_access_level')
-              ],
-              minimum_should_match: 1,
+              must_not: field_exists('issues_access_level'),
               filter: issue_type_filter
             }
           }
@@ -91,16 +85,10 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
     }
   end
 
-  def must_not_have_field(field)
+  def field_exists(field)
     {
-      bool: {
-        must_not: [
-          {
-            exists: {
-              field: field
-            }
-          }
-        ]
+      exists: {
+        field: field
       }
     }
   end

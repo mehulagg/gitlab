@@ -3,7 +3,7 @@
 require 'spec_helper'
 require File.expand_path('ee/elastic/migrate/20201116142400_add_new_data_to_issues_documents.rb')
 
-RSpec.describe AddNewDataToIssuesDocuments, :elastic do
+RSpec.describe AddNewDataToIssuesDocuments do
   let(:logger) { double('Gitlab::Elasticsearch::Logger') }
   let(:version) { 20201116142400 }
   let(:migration) { described_class.new(version) }
@@ -28,7 +28,7 @@ RSpec.describe AddNewDataToIssuesDocuments, :elastic do
       end
 
       it 'logs a message and does not modify data', :aggregate_failures do
-        expect(logger).to receive(:info).with('[Elastic::Migration: 20201116142400] Skipping adding issues_access_level fields to issues documents migration since it is already applied')
+        expect(logger).to receive(:info).once
         expect(Gitlab::Elastic::Helper.default.client).not_to receive(:search)
 
         expect(subject).to be_falsey

@@ -3,6 +3,9 @@
 class ApplyMaxAnalyzedOffset < Elastic::Migration
   # Important: Any update to the Elastic index mappings should be replicated in Elastic::Latest::Config
 
+  # Uncomment the line below to set the migration to run in batch mode
+  # migration_options batched: true, throttle_time: 5.minutes
+
   def migrate
     if max_analyzed_offset_setting == current_max_analyzed_offset
       log "Skipping highlight.max_analyzed_offset migration since it is already applied"
