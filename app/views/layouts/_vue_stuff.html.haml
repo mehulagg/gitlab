@@ -1,0 +1,57 @@
+= javascript_tag nonce: true do
+  :plain
+
+    const eventHub = new EventTarget();
+    window.vueCountDefineReactive = 0;
+    window.vueCountDepSub = 0;
+    window.vueCountDepNotify = 0;
+    window.vueOnDefineReactive = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDefineReactive"));
+    };
+
+    window.vueOnDepSub = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDepSub"));
+    };
+    window.vueOnDepNotify = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDepNotify"));
+    };
+    window.vueOnDepRem = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDepRem"));
+    };
+
+    const createMirror = () => {
+    const container = document.createElement('div');
+    container.style.width = '100vw';
+    container.style['background-color'] = 'gray';
+    container.style['z-index'] = '100000';
+
+    container.style.position = 'fixed';
+    container.style.bottom = 0;
+
+    container.innerHTML = `
+      <ul>
+        <li>
+        Reactive Count : <span class="r-count-span"></span>
+        </li>
+        <li>
+        DepSub Count : <span class="d-count-span"></span>
+        </li>
+        <li>
+        Notify Count : <span class="n-count-span"></span>
+        </li>
+      </ul>
+    `;
+    const reactiveCount = container.querySelector('.r-count-span');
+    const depSubCount = container.querySelector('.d-count-span');
+    const notifyCount = container.querySelector('.n-count-span');
+
+    setInterval(() => {
+      reactiveCount.innerHTML = `${window.vueCountDefineReactive}   `;
+      depSubCount.innerHTML = `${window.vueCountDepSub}   `;
+      notifyCount.innerHTML = `${window.vueCountDepNotify}   `;
+    }, 100);
+
+    window.document.body.appendChild(container);
+  };
+
+  createMirror();
