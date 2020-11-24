@@ -97,8 +97,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
     end
 
     context 'when head report does not have an error' do
-      it 'returns the number of new errors' do
-        expect(errors_count).to eq(0)
+      it 'returns zero' do
+        expect(errors_count).to be_zero
       end
     end
   end
@@ -112,7 +112,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_2)
       end
 
-      it 'returns the resolved count' do
+      it 'counts the base report error as resolved' do
         expect(resolved_count).to eq(1)
       end
     end
@@ -122,7 +122,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         base_report.add_degradation(degradation_1)
       end
 
-      it 'returns the resolved count' do
+      it 'counts the base report errors as resolved' do
         expect(resolved_count).to eq(1)
       end
     end
@@ -143,8 +143,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_1)
       end
 
-      it 'returns the number of resolved errors' do
-        expect(resolved_count).to eq(0)
+      it 'returns zero' do
+        expect(resolved_count).to be_zero
       end
     end
   end
@@ -157,7 +157,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         base_report.add_degradation(degradation_1)
       end
 
-      it 'returns the total count' do
+      it 'includes the base report error in the count' do
         expect(total_count).to eq(1)
       end
     end
@@ -167,7 +167,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_1)
       end
 
-      it 'returns the total count' do
+      it 'includes the head report error in the count' do
         expect(total_count).to eq(1)
       end
     end
@@ -178,7 +178,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_2)
       end
 
-      it 'returns the total count' do
+      it 'includes both errors in the count' do
         expect(total_count).to eq(2)
       end
     end
@@ -193,9 +193,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_2)
       end
 
-      it 'returns the existing errors' do
-        expect(existing_errors.size).to eq(1)
-        expect(existing_errors.first["severity"]).to eq("major")
+      it 'includes the base report error' do
+        expect(existing_errors).to eq([degradation_1])
       end
     end
 
@@ -220,9 +219,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_2)
       end
 
-      it 'returns new errors between base and head report' do
-        expect(new_errors.size).to eq(1)
-        expect(new_errors.first["severity"]).to eq("minor")
+      it 'includes errors not found in the base report' do
+        expect(new_errors).to eq([degradation_2])
       end
     end
 
@@ -241,9 +239,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_1)
       end
 
-      it 'returns the new error' do
-        expect(new_errors.size).to eq(1)
-        expect(new_errors.first["severity"]).to eq("major")
+      it 'returns the head report error' do
+        expect(new_errors).to eq([degradation_1])
       end
     end
   end
@@ -251,7 +248,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
   describe '#resolved_errors' do
     subject(:resolved_errors) { comparer.resolved_errors }
 
-    context 'when base report has errors and head has more errors' do
+    context 'when base report errors are still found in the head report' do
       before do
         base_report.add_degradation(degradation_1)
         head_report.add_degradation(degradation_1)
@@ -269,9 +266,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         head_report.add_degradation(degradation_2)
       end
 
-      it 'returns the resolved errors' do
-        expect(resolved_errors.size).to eq(1)
-        expect(resolved_errors.first["severity"]).to eq("major")
+      it 'returns the base report error' do
+        expect(resolved_errors).to eq([degradation_1])
       end
     end
 

@@ -28,13 +28,21 @@ module Gitlab
 
         def new_errors
           strong_memoize(:new_errors) do
-            head_report.all_degradations - base_report.all_degradations
+            fingerprints = head_report.degradations.keys - base_report.degradations.keys
+
+            head_report.degradations.select do |key, _value|
+              fingerprints.include?(key)
+            end.values
           end
         end
 
         def resolved_errors
           strong_memoize(:resolved_errors) do
-            base_report.all_degradations - head_report.all_degradations
+            fingerprints = base_report.degradations.keys - head_report.degradations.keys
+
+            base_report.degradations.select do |key, _value|
+              fingerprints.include?(key)
+            end.values
           end
         end
 

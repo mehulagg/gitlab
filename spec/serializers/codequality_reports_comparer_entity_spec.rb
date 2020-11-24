@@ -67,7 +67,7 @@ RSpec.describe CodequalityReportsComparerEntity do
   describe '#as_json' do
     subject { entity.as_json }
 
-    context 'when base report has error and head has a different error' do
+    context 'when base and head report have errors' do
       before do
         base_report.add_degradation(degradation_1)
         head_report.add_degradation(degradation_2)
@@ -79,35 +79,6 @@ RSpec.describe CodequalityReportsComparerEntity do
         expect(subject[:new_errors].first).to include(:description, :severity, :file_path, :line)
         expect(subject[:existing_errors].first).to include(:description, :severity, :file_path, :line)
         expect(subject[:summary]).to include(total: 2, resolved: 1, errored: 1)
-      end
-    end
-
-    context 'when base report has error and head has the same error' do
-      before do
-        base_report.add_degradation(degradation_1)
-        head_report.add_degradation(degradation_1)
-      end
-
-      it 'contains correct compared accessibility report details', :aggregate_failures do
-        expect(subject[:status]).to eq(Gitlab::Ci::Reports::CodequalityReportsComparer::STATUS_FAILED)
-        expect(subject[:new_errors]).to be_empty
-        expect(subject[:resolved_errors]).to be_empty
-        expect(subject[:existing_errors].first).to include(:description, :severity, :file_path, :line)
-        expect(subject[:summary]).to include(total: 1, resolved: 0, errored: 1)
-      end
-    end
-
-    context 'when base report has no error and head has errors' do
-      before do
-        head_report.add_degradation(degradation_1)
-      end
-
-      it 'contains correct compared accessibility report details', :aggregate_failures do
-        expect(subject[:status]).to eq(Gitlab::Ci::Reports::CodequalityReportsComparer::STATUS_FAILED)
-        expect(subject[:resolved_errors]).to be_empty
-        expect(subject[:existing_errors]).to be_empty
-        expect(subject[:new_errors].first).to include(:description, :severity, :file_path, :line)
-        expect(subject[:summary]).to include(total: 1, resolved: 0, errored: 1)
       end
     end
   end
