@@ -316,7 +316,7 @@ export default {
       'setHighlightedRow',
       'cacheTreeListWidth',
       'scrollToFile',
-      'toggleShowTreeList',
+      'setShowTreeList',
       'navigateToDiffFileIndex',
     ]),
     navigateToDiffFileNumber(number) {
@@ -343,7 +343,7 @@ export default {
       this.fetchDiffFilesMeta()
         .then(({ real_size }) => {
           this.diffFilesLength = parseInt(real_size, 10);
-          if (toggleTree) this.hideTreeListIfJustOneFile();
+          if (toggleTree) this.setTreeDisplay();
 
           this.startDiffRendering();
         })
@@ -353,6 +353,7 @@ export default {
 
       this.fetchDiffFilesBatch()
         .then(() => {
+          if (toggleTree) this.setTreeDisplay();
           // Guarantee the discussions are assigned after the batch finishes.
           // Just watching the length of the discussions or the diff files
           // isn't enough, because with split diff loading, neither will
@@ -422,12 +423,20 @@ export default {
         this.scrollToFile(this.diffFiles[targetIndex].file_path);
       }
     },
-    hideTreeListIfJustOneFile() {
+    setTreeDisplay() {
       const storedTreeShow = localStorage.getItem(MR_TREE_SHOW_KEY);
+      let showTreeList = true;
 
-      if ((storedTreeShow === null && this.diffFiles.length <= 1) || storedTreeShow === 'false') {
-        this.toggleShowTreeList(false);
+      if (storedTreeShow !== null) {
+        showTreeList = Boolean(storedTreeShow);
+      } else if (
+        window.innerWidth <= 1100 ||
+        (!this.isBatchLoading && this.diffFiles.length <= 1)
+      ) {
+        showTreeList = false;
       }
+
+      return this.setShowTreeList({ showTreeList, saving: false });
     },
   },
   minTreeWidth: MIN_TREE_WIDTH,
