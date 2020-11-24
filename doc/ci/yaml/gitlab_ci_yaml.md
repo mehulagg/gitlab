@@ -66,4 +66,4 @@ At the end, if anything goes wrong, you can easily
 
 ![rollback button](img/rollback.png)
 
-[View the full syntax for the `.gitlab-ci.yml` file](readme.md).
+[View the full syntax for the `.gitlab-ci.yml` file](README.md).
