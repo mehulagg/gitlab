@@ -40,6 +40,13 @@ export default {
     },
   },
   accessors,
+  titleClasses: [
+    'gl-font-weight-bold',
+    'gl-pipeline-job-width',
+    'gl-text-truncate',
+    'gl-line-height-36',
+    'gl-pl-3',
+  ],
   computed: {
     formattedTitle() {
       return capitalize(escape(this.title));
@@ -61,14 +68,18 @@ export default {
 <template>
   <main-graph-wrapper>
     <template #stages>
-      {{ formattedTitle }}
-      <action-component
-        v-if="hasAction"
-        :action-icon="action.icon"
-        :tooltip-text="action.title"
-        :link="action.path"
-        class="js-stage-action stage-action rounded"
-      />
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-relative"
+        :class="$options.titleClasses">
+        <div class="xz">{{ formattedTitle }}</div>
+        <action-component
+          v-if="hasAction"
+          :action-icon="action.icon"
+          :tooltip-text="action.title"
+          :link="action.path"
+          class="js-stage-action stage-action rounded"
+        />
+      </div>
     </template>
     <template #jobs>
       <div
