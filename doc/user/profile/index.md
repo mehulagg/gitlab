@@ -231,7 +231,7 @@ To set the busy status indicator, either:
 ### Enable busy status feature
 
 The busy status feature is deployed behind a feature flag and is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../../administration/feature_flags.md#start-the-gitlab-rails-console).
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../administration/feature_flags.md#start-the-gitlab-rails-console).
 
 To enable it:
 
