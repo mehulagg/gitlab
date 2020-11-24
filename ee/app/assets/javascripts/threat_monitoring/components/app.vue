@@ -3,7 +3,7 @@ import { mapActions } from 'vuex';
 import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import ThreatAlerts from './threat_alerts.vue';
+import ThreatAlerts from './alerts/threat_alerts.vue';
 import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
 import ThreatMonitoringSection from './threat_monitoring_section.vue';
 import NetworkPolicyList from './network_policy_list.vue';
