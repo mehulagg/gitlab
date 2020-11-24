@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::AuditLogReportsController < Admin::ApplicationController
+  include AuditEvents::DateRange
+
   before_action :validate_audit_log_reports_available!
 
   feature_category :audit_events
@@ -33,6 +35,6 @@ class Admin::AuditLogReportsController < Admin::ApplicationController
   end
 
   def audit_log_reports_params
-    params.permit(:entity_type, :entity_id, :created_before, :created_after, :author_id)
+    params.permit(:entity_type, :entity_id, :created_before, :created_after, :author_id).to_h
   end
 end
