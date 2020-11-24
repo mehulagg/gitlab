@@ -1,5 +1,0 @@
----
-title: Add `include_descendant_groups` option to Epics GraphQL API
-merge_request: 46711
-author:
-type: changed

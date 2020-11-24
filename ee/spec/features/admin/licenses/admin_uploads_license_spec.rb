@@ -7,6 +7,7 @@ RSpec.describe "Admin uploads license", :js do
 
   before do
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   context 'default state' do

@@ -531,6 +531,14 @@
   :weight: 3
   :idempotent:
   :tags: []
+- :name: security_scans:scan_security_report_secrets
+  :feature_category: :static_application_security_testing
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent: true
+  :tags: []
 - :name: security_scans:security_store_scans
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -583,6 +591,14 @@
   :tags: []
 - :name: analytics_code_review_metrics
   :feature_category: :code_analytics
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: approve_blocked_users
+  :feature_category: :users
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -727,6 +743,14 @@
   :tags: []
 - :name: project_import_schedule
   :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: project_template_export
+  :feature_category: :templates
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown

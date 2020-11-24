@@ -1,5 +1,0 @@
----
-title: Removed DOMContentLoaded Eventlistener from Security Pages
-merge_request: 47542
-author:
-type: changed

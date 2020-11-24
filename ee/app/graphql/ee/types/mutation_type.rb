@@ -48,6 +48,7 @@ module EE
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Update
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
+        mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
 
         prepend(Types::DeprecatedMutations)
       end

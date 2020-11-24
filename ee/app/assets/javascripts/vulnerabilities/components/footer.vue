@@ -107,7 +107,7 @@ export default {
         .get(this.vulnerability.discussionsUrl)
         .then(({ data, headers: { date } }) => {
           this.discussionsDictionary = data.reduce((acc, discussion) => {
-            acc[discussion.id] = discussion;
+            acc[discussion.id] = convertObjectPropsToCamelCase(discussion, { deep: true });
             return acc;
           }, {});
 

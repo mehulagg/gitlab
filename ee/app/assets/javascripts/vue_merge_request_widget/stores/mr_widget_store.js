@@ -50,6 +50,17 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     super.setData(data, isRebased);
   }
 
+  setPaths(data) {
+    // Paths are set on the first load of the page and not auto-refreshed
+    super.setPaths(data);
+
+    // Security scan diff paths
+    this.containerScanningComparisonPath = data.container_scanning_comparison_path;
+    this.coverageFuzzingComparisonPath = data.coverage_fuzzing_comparison_path;
+    this.dastComparisonPath = data.dast_comparison_path;
+    this.dependencyScanningComparisonPath = data.dependency_scanning_comparison_path;
+  }
+
   initGeo(data) {
     this.isGeoSecondaryNode = this.isGeoSecondaryNode || data.is_geo_secondary_node;
     this.geoSecondaryHelpPath = this.geoSecondaryHelpPath || data.geo_secondary_help_path;

@@ -36,7 +36,7 @@ module Security
         body: message,
         headers: {
          'Content-Type' => 'application/json',
-         'X-Token' => revocation_api_token
+         'Authorization' => revocation_api_token
         }
       )
     end
@@ -59,7 +59,7 @@ module Security
         token_types_url,
         headers: {
           'Content-Type' => 'application/json',
-          'X-Token' => revocation_api_token
+          'Authorization' => revocation_api_token
         }
       )
       raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?

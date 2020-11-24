@@ -13,6 +13,7 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
+    it { is_expected.to have_many(:metric_images) }
   end
 
   describe 'modules' do

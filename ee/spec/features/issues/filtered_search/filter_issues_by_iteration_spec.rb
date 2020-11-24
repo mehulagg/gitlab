@@ -35,6 +35,10 @@ RSpec.describe 'Filter issues by iteration', :js do
         stub_licensed_features(iterations: true)
 
         visit page_path
+
+        page.has_content?(iteration_1_issue.title)
+        page.has_content?(iteration_2_issue.title)
+        page.has_content?(no_iteration_issue.title)
       end
 
       it 'filters by iteration' do

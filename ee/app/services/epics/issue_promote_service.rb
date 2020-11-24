@@ -35,10 +35,6 @@ module Epics
       ::Gitlab::Tracking.event(
         'epics', 'promote', property: 'issue_id', value: original_entity.id
       )
-
-      ::ProductAnalytics::Tracker.event(
-        'epics', 'promote', property: 'issue_id', value: original_entity.id
-      )
     end
 
     def create_new_entity

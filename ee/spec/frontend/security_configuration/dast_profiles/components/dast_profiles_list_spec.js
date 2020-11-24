@@ -4,6 +4,7 @@ import { mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { merge } from 'lodash';
 import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { siteProfiles as profiles } from './mock_data';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
 
@@ -18,6 +19,7 @@ describe('EE - DastProfilesList', () => {
       profilesPerPage: 10,
       errorMessage: '',
       errorDetails: [],
+      fullPath: '/namespace/project',
     };
 
     wrapper = mountFn(
@@ -25,6 +27,9 @@ describe('EE - DastProfilesList', () => {
       merge(
         {},
         {
+          provide: {
+            glFeatures: { securityOnDemandScansSiteValidation: true },
+          },
           propsData: defaultProps,
         },
         options,
@@ -108,30 +113,6 @@ describe('EE - DastProfilesList', () => {
   });
 
   describe('with existing profiles', () => {
-    const profiles = [
-      {
-        id: 1,
-        profileName: 'Profile 1',
-        targetUrl: 'http://example-1.com',
-        editPath: '/1/edit',
-        validationStatus: 'Pending',
-      },
-      {
-        id: 2,
-        profileName: 'Profile 2',
-        targetUrl: 'http://example-2.com',
-        editPath: '/2/edit',
-        validationStatus: 'Pending',
-      },
-      {
-        id: 3,
-        profileName: 'Profile 2',
-        targetUrl: 'http://example-2.com',
-        editPath: '/3/edit',
-        validationStatus: 'Pending',
-      },
-    ];
-
     const getTableRowForProfile = profile => getAllTableRows()[profiles.indexOf(profile)];
 
     describe('profiles list', () => {
@@ -149,21 +130,63 @@ describe('EE - DastProfilesList', () => {
       });
 
       it.each(profiles)('renders list item %# correctly', profile => {
-        const [
-          profileCell,
-          targetUrlCell,
-          validationStatusCell,
-          actionsCell,
-        ] = getTableRowForProfile(profile).cells;
+        const [profileCell, targetUrlCell, , actionsCell] = getTableRowForProfile(profile).cells;
 
         expect(profileCell.innerText).toContain(profile.profileName);
         expect(targetUrlCell.innerText).toContain(profile.targetUrl);
-        expect(validationStatusCell.innerText).toContain(profile.validationStatus);
         expect(within(actionsCell).getByRole('button', { name: /delete/i })).not.toBe(null);
 
         const editLink = within(actionsCell).getByRole('link', { name: /edit/i });
         expect(editLink).not.toBe(null);
         expect(editLink.getAttribute('href')).toBe(profile.editPath);
+      });
+
+      describe('with site validation enabled', () => {
+        describe.each`
+          status           | statusEnum                 | label                  | hasValidateButton
+          ${'pending'}     | ${'PENDING_VALIDATION'}    | ${''}                  | ${true}
+          ${'in-progress'} | ${'INPROGRESS_VALIDATION'} | ${'Validating...'}     | ${false}
+          ${'passed'}      | ${'PASSED_VALIDATION'}     | ${'Validated'}         | ${false}
+          ${'failed'}      | ${'FAILED_VALIDATION'}     | ${'Validation failed'} | ${true}
+        `('profile with validation $status', ({ statusEnum, label, hasValidateButton }) => {
+          const profile = profiles.find(({ validationStatus }) => validationStatus === statusEnum);
+
+          it(`should show correct label`, () => {
+            const validationStatusCell = getTableRowForProfile(profile).cells[2];
+            expect(validationStatusCell.innerText).toContain(label);
+          });
+
+          it(`should ${hasValidateButton ? '' : 'not '}render validate button`, () => {
+            const actionsCell = getTableRowForProfile(profile).cells[3];
+            const validateButton = within(actionsCell).queryByRole('button', {
+              name: /validate/i,
+            });
+
+            if (hasValidateButton) {
+              expect(validateButton).not.toBeNull();
+            } else {
+              expect(validateButton).toBeNull();
+            }
+          });
+        });
+      });
+
+      describe('without site validation enabled', () => {
+        beforeEach(() => {
+          createFullComponent({
+            provide: {
+              glFeatures: { securityOnDemandScansSiteValidation: false },
+            },
+            propsData: { profiles },
+          });
+        });
+
+        it.each(profiles)('profile %# should not have validate button and status', profile => {
+          const [, , validationStatusCell, actionsCell] = getTableRowForProfile(profile).cells;
+
+          expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);
+          expect(validationStatusCell.innerText).toBe('');
+        });
       });
     });
 

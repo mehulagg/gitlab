@@ -1,0 +1,5 @@
+---
+title: Fix functionality to add comments in the vulnerability details page
+merge_request: 48375
+author:
+type: fixed

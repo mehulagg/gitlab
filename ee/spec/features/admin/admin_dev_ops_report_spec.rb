@@ -8,7 +8,9 @@ RSpec.describe 'DevOps Report page', :js do
   active_tab_selector = '.nav-link.active'
 
   before do
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   context 'with devops_adoption_feature feature flag disabled' do

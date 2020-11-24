@@ -1,5 +1,0 @@
----
-title: Reject active on-demand DAST scan when unvalidated
-merge_request: 45423
-author:
-type: changed

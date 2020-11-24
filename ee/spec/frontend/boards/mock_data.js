@@ -1,9 +1,7 @@
-/* global ListIssue */
 /* global List */
 
 import Vue from 'vue';
 import '~/boards/models/list';
-import '~/boards/models/issue';
 
 export const mockLists = [
   {
@@ -95,7 +93,7 @@ export const rawIssue = {
 };
 
 export const mockIssue = {
-  id: 'gid://gitlab/Issue/436',
+  id: '436',
   iid: 27,
   title: 'Issue 1',
   referencePath: '#27',
@@ -111,10 +109,8 @@ export const mockIssue = {
   },
 };
 
-export const mockIssueWithModel = new ListIssue({ ...mockIssue, id: '436' });
-
 export const mockIssue2 = {
-  id: 'gid://gitlab/Issue/437',
+  id: '437',
   iid: 28,
   title: 'Issue 2',
   referencePath: '#28',
@@ -129,8 +125,6 @@ export const mockIssue2 = {
     id: 'gid://gitlab/Epic/40',
   },
 };
-
-export const mockIssue2WithModel = new ListIssue({ ...mockIssue2, id: '437' });
 
 export const mockIssue3 = {
   id: 'gid://gitlab/Issue/438',

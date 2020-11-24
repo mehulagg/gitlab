@@ -92,6 +92,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         expect_popen.with(
           [
             TestEnv.indexer_bin_path,
+            "--project-path=#{project.full_path}",
             project.id.to_s,
             "#{project.repository.disk_path}.git"
           ],
@@ -214,6 +215,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
             TestEnv.indexer_bin_path,
             '--blob-type=wiki_blob',
             '--skip-commits',
+            "--project-path=#{project.full_path}",
             project.id.to_s,
             "#{project.wiki.repository.disk_path}.git"
           ],

@@ -78,7 +78,7 @@ module EE
       end
 
       condition(:group_saml_group_sync_available, scope: :subject) do
-        @subject.feature_available?(:group_saml_group_sync)
+        @subject.saml_group_sync_available?
       end
 
       condition(:group_timelogs_available) do
@@ -205,7 +205,7 @@ module EE
 
       rule { group_saml_config_enabled & group_saml_available & (admin | owner) }.enable :admin_group_saml
 
-      rule { group_saml_group_sync_available & group_saml_enabled & can?(:admin_group_saml) }.policy do
+      rule { group_saml_config_enabled & group_saml_group_sync_available & (admin | owner) }.policy do
         enable :admin_saml_group_links
       end
 

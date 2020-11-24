@@ -25,6 +25,7 @@ describe('ee/BoardContentSidebar', () => {
         'board-sidebar-labels-select': '<div></div>',
         'board-sidebar-due-date': '<div></div>',
         'board-sidebar-subscription': '<div></div>',
+        'board-sidebar-milestone-select': '<div></div>',
       },
       mocks: {
         $apollo: {

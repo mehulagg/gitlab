@@ -1,4 +1,4 @@
-import subscriptionState from 'ee/billings/stores/modules/subscription/state';
+import subscriptionState from 'ee/billings/subscriptions/store/state';
 
 export const resetStore = store => {
   const newState = {

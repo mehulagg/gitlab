@@ -16,7 +16,8 @@ module BillingPlansHelper
       namespace_id: group.id,
       namespace_name: group.name,
       plan_upgrade_href: plan_upgrade_url(group, plan),
-      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
+      billable_seats_href: billable_seats_href(group)
     }
   end
 
@@ -92,5 +93,11 @@ module BillingPlansHelper
     return unless group && plan&.id
 
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+  end
+
+  def billable_seats_href(group)
+    return unless Feature.enabled?(:api_billable_member_list, group)
+
+    group_seat_usage_path(group)
   end
 end

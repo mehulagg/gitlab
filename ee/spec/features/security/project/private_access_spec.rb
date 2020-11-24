@@ -14,7 +14,8 @@ RSpec.describe '[EE] Private Project Access' do
 
     subject { project_insights_path(project) }
 
-    it { is_expected.to be_allowed_for(:admin) }
+    it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { is_expected.to be_allowed_for(:admin) }
+    it('is denied for admin when admin mode is disabled') { is_expected.to be_denied_for(:admin) }
     it { is_expected.to be_allowed_for(:auditor) }
     it { is_expected.to be_allowed_for(:owner).of(project) }
     it { is_expected.to be_allowed_for(:maintainer).of(project) }

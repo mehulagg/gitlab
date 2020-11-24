@@ -1,0 +1,5 @@
+---
+title: Ensure we don't show warning when there are <1000 epics on a roadmap
+merge_request: 47884
+author:
+type: fixed

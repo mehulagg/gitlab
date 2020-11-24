@@ -1342,6 +1342,58 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'Incident Management on-call schedules' do
+    using RSpec::Parameterized::TableSyntax
+
+    context ':read_incident_management_oncall_schedule' do
+      let(:policy) { :read_incident_management_oncall_schedule }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | true
+        :developer  | nil   | true
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+
+    context ':admin_incident_management_oncall_schedule' do
+      let(:policy) { :admin_incident_management_oncall_schedule }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | false
+        :developer  | nil   | false
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+  end
+
   context 'when project is readonly because the storage usage limit has been exceeded on the root namespace' do
     let(:current_user) { owner }
     let(:abilities) do

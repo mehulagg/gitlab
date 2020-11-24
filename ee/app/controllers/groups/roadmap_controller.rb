@@ -5,8 +5,6 @@ module Groups
     include IssuableCollections
     include EpicsActions
 
-    EPICS_ROADMAP_LIMIT = 1000
-
     before_action :check_epics_available!
     before_action :persist_roadmap_layout, only: [:show]
     before_action do
@@ -34,7 +32,7 @@ module Groups
       sort_value_start_date_soon
     end
 
-    def remember_sorting_key
+    def remember_sorting_key(field = nil)
       @remember_sorting_key ||= "roadmap_sort"
     end
 

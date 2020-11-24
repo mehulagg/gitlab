@@ -66,6 +66,8 @@ module EE
 
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
+      has_many :user_permission_export_uploads
+
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
         scope = scope.or(where.not(managing_group_id: group.id)) if group

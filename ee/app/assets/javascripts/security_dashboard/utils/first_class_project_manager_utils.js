@@ -25,5 +25,3 @@ export const createInvalidProjectMessage = invalidProjects => {
   }
   return firstProject;
 };
-
-export default {};

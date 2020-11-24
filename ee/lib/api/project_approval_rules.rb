@@ -33,6 +33,17 @@ module API
         end
 
         segment ':approval_rule_id' do
+          desc 'Get a single approval rule' do
+            success EE::API::Entities::ProjectApprovalRule
+          end
+          get do
+            authorize_create_merge_request_in_project
+
+            approval_rule = user_project.approval_rules.find(params[:approval_rule_id])
+
+            present approval_rule, with: EE::API::Entities::ProjectApprovalRule, current_user: current_user
+          end
+
           desc 'Update project approval rule' do
             success EE::API::Entities::ProjectApprovalRule
           end

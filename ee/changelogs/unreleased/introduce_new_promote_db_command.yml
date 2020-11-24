@@ -1,5 +1,0 @@
----
-title: 'Doc: Introduce new gitlab-ctl promote-db command'
-merge_request: 45941
-author:
-type: fixed

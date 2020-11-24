@@ -5,5 +5,3 @@ export function filterTokenOptionsValidator(filterTokenOptions) {
     .map(({ type }) => type)
     .every(type => AVAILABLE_TOKEN_TYPES.includes(type));
 }
-
-export default {};

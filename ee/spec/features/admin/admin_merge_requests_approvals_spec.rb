@@ -10,10 +10,12 @@ RSpec.describe 'Admin interacts with merge requests approvals settings' do
   let_it_be(:project) { create(:project, creator: user) }
 
   before do
+    sign_in(user)
+    gitlab_enable_admin_mode_sign_in(user)
+
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     allow(License).to receive(:feature_available?).and_return(true)
 
-    sign_in(user)
     visit(admin_push_rule_path)
   end
 

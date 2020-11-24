@@ -36,6 +36,12 @@ module EE
         },
         coverage_fuzzing: {
           name: :coverage_fuzzing_jobs
+        },
+        apifuzzer_fuzz: {
+          name: :api_fuzzing_jobs
+        },
+        apifuzzer_fuzz_dnd: {
+          name: :api_fuzzing_dnd_jobs
         }
       }.freeze
 
