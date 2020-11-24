@@ -26,6 +26,8 @@ module Gitlab
       end
 
       def execute
+        info(project.id)
+
         retval =
           if parallel?
             parallel_import
@@ -45,6 +47,8 @@ module Gitlab
         Gitlab::Cache::Import::Caching.expire(already_imported_cache_key, 15.minutes.to_i)
 
         retval
+      rescue => e
+        error(project.id, e)
       end
 
       # Imports all the objects in sequence in the current thread.
@@ -156,6 +160,36 @@ module Gitlab
       # import.
       def collection_options
         {}
+      end
+
+      private
+
+      def info(project_id)
+        logger.info(
+          message: "Github Import - starting importer",
+          importer: importer_class.name,
+          project_id: project_id,
+          parallel: parallel?
+        )
+      end
+
+      def error(project_id, exception)
+        logger.error(
+          message: "Github Import - importer failed",
+          stage: self.class.name,
+          project_id: project_id,
+          error: exception.message
+        )
+
+        Gitlab::ErrorTracking.track_and_raise_exception(
+          exception,
+          project_id: project_id,
+          stage: self.class.name
+        )
+      end
+
+      def logger
+        @logger ||= Gitlab::Import::Logger.build
       end
     end
   end

@@ -21,11 +21,14 @@ module Gitlab
       # client - An instance of `Gitlab::GithubImport::Client`
       # hash - A Hash containing the details of the object to import.
       def import(project, client, hash)
+        info(project.id)
         object = representation_class.from_json_hash(hash)
 
         importer_class.new(object, project, client).execute
 
         counter.increment
+      rescue => e
+        error(project.id, e)
       end
 
       def counter
@@ -51,6 +54,35 @@ module Gitlab
       # Returns the description (as a String) of the Prometheus counter.
       def counter_description
         raise NotImplementedError
+      end
+
+      private
+
+      def info(project_id)
+        logger.info(
+          message: "Github Import - starting importer",
+          importer: importer_class.name,
+          project_id: project_id
+        )
+      end
+
+      def error(project_id, exception)
+        logger.error(
+          message: "Github Import - importer failed",
+          importer: importer_class.name,
+          project_id: project_id,
+          error: exception.message
+        )
+
+        Gitlab::ErrorTracking.track_and_raise_exception(
+          exception,
+          project_id: project_id,
+          importer: importer_class.name,
+        )
+      end
+
+      def logger
+        @logger ||= Gitlab::Import::Logger.build
       end
     end
   end
