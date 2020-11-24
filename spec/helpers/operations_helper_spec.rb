@@ -31,9 +31,6 @@ RSpec.describe OperationsHelper do
 
       it 'returns the correct values' do
         expect(subject).to eq(
-          'activated' => 'false',
-          'url' => alerts_service.url,
-          'authorization_key' => nil,
           'form_path' => project_service_path(project, alerts_service),
           'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
           'alerts_usage_url' => project_alert_management_index_path(project),
@@ -100,33 +97,6 @@ RSpec.describe OperationsHelper do
           expect(subject).to include(
             'prometheus_authorization_key' => project_alerting_setting.token,
             'prometheus_api_url' => prometheus_service.api_url
-          )
-        end
-      end
-    end
-
-    context 'with generic alerts service configured' do
-      let_it_be(:alerts_service) { create(:alerts_service, project: project) }
-
-      context 'with generic alerts enabled' do
-        it 'returns the correct values' do
-          expect(subject).to include(
-            'activated' => 'true',
-            'authorization_key' => alerts_service.token,
-            'url' => alerts_service.url
-          )
-        end
-      end
-
-      context 'with generic alerts disabled' do
-        before do
-          alerts_service.update!(active: false)
-        end
-
-        it 'returns the correct values' do
-          expect(subject).to include(
-            'activated' => 'false',
-            'authorization_key' => alerts_service.token
           )
         end
       end
