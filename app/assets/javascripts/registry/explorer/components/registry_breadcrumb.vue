@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-// we are forced to use v-html till this gitlab-ui MR is merged: https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/1869
+// We are forced to use `v-html` untill this gitlab-ui MR is merged: https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/1869
 //  then we can re-write this to use gl-breadcrumb
 import { initial, first, last } from 'lodash';
 import { sanitize } from '~/lib/dompurify';
