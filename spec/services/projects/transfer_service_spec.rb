@@ -527,7 +527,7 @@ RSpec.describe Projects::TransferService do
       group.add_owner(user)
     end
 
-    it 'schedules a job  when pages are deployed' do
+    it 'schedules a job when pages are deployed' do
       project.mark_pages_as_deployed
 
       expect(PagesTransferWorker).to receive(:perform_async)
