@@ -87,41 +87,54 @@ class Feature
     end
 
     def enable(key, thing = true)
+      logger.info(key: key, thing: thing, action: __method__)
       get(key).enable(thing)
     end
 
     def disable(key, thing = false)
+      logger.info(key: key, thing: thing, action: __method__)
       get(key).disable(thing)
     end
 
     def enable_group(key, group)
+      logger.info(key: key, group: group, action: __method__)
       get(key).enable_group(group)
     end
 
     def disable_group(key, group)
+      logger.info(key: key, group: group, action: __method__)
       get(key).disable_group(group)
     end
 
     def enable_percentage_of_time(key, percentage)
+      logger.info(key: key, percentage: percentage, action: __method__)
       get(key).enable_percentage_of_time(percentage)
     end
 
     def disable_percentage_of_time(key)
+      logger.info(key: key, action: __method__)
       get(key).disable_percentage_of_time
     end
 
     def enable_percentage_of_actors(key, percentage)
+      logger.info(key: key, percentage: percentage, action: __method__)
       get(key).enable_percentage_of_actors(percentage)
     end
 
     def disable_percentage_of_actors(key)
+      logger.info(key: key, action: __method__)
       get(key).disable_percentage_of_actors
     end
 
     def remove(key)
       return unless persisted_name?(key)
 
+      logger.info(key: key, action: __method__)
       get(key).remove
+    end
+
+    def logger
+      @logger ||= Feature::Logger.build
     end
 
     def reset
