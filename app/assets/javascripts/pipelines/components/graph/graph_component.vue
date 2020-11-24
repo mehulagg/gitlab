@@ -27,17 +27,20 @@ export default {
     graph() {
       return this.pipeline.stages;
     },
+    dummyAction() {
+      return {
+        icon: 'play',
+        title: 'play all',
+        path: '/cool/play'
+      }
+    },
   },
-  pipelineReplacementClasses: `
-    gl-white-space-nowrap
-
-  `
 };
 </script>
 <template>
   <div class="js-pipeline-graph">
     <div
-      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10"
+      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
       :class="{ 'gl-py-5': !isLinkedPipeline,  pipelineReplacementClasses: true}"
     >
       <stage-column-component
@@ -45,7 +48,7 @@ export default {
         :key="stage.name"
         :title="stage.name"
         :groups="stage.groups"
-        :action="stage.status.action"
+        :action="dummyAction"
       />
     </div>
   </div>
