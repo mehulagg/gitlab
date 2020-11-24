@@ -53,19 +53,4 @@ describe('graph component', () => {
       expect(findLinkedColumns()).toHaveLength(0);
     });
   });
-
-  describe('capitalizeStageName', () => {
-    const firstStage = defaultProps.pipeline.stages[1].name;
-
-    beforeEach(() => {
-      const unescapedTitle = `${firstStage} &lt;img src=x onerror=alert(document.domain)&gt;`;
-      const dataCopy = { ...mockPipelineResponse };
-      dataCopy.data.project.pipeline.stages.nodes[1].name = unescapedTitle;
-      createComponent({ props: generateResponse(dataCopy), method: mount });
-    });
-
-    it('capitalizes and escapes stage name', () => {
-      expect(findStageColumnTitleAt(1).text()).toEqual(capitalize(firstStage));
-    });
-  });
 });
