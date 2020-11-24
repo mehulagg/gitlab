@@ -59,7 +59,7 @@ module Projects
         raise TransferError.new(s_("TransferProject|Root namespace can't be updated if project has NPM packages"))
       end
 
-      attempt_transfer_transaction
+      proceed_to_transfer
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -67,7 +67,7 @@ module Projects
       new_namespace.root_ancestor == project.namespace.root_ancestor
     end
 
-    def attempt_transfer_transaction
+    def proceed_to_transfer
       Project.transaction do
         project.expire_caches_before_rename(@old_path)
 
