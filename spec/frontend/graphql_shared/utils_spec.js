@@ -1,4 +1,8 @@
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import {
+  getIdFromGraphQLId,
+  convertToGraphQLId,
+  convertToGraphQLIds,
+} from '~/graphql_shared/utils';
 
 describe('getIdFromGraphQLId', () => {
   [
@@ -43,4 +47,26 @@ describe('getIdFromGraphQLId', () => {
       expect(getIdFromGraphQLId(input)).toBe(output);
     });
   });
+});
+
+describe('convertToGraphQLId', () => {
+  it.each`
+    type       | id      | result
+    ${'Group'} | ${12}   | ${`gid://gitlab/Group/12`}
+    ${'Group'} | ${null} | ${null}
+    ${null}    | ${12}   | ${null}
+  `('combines $type and $id into $result', ({ type, id, result }) =>
+    expect(convertToGraphQLId(type, id)).toBe(result),
+  );
+});
+
+describe('convertToGraphQLIds', () => {
+  it.each`
+    type       | ids       | result
+    ${'Group'} | ${[1, 2]} | ${[`gid://gitlab/Group/1`, `gid://gitlab/Group/2`]}
+    ${'Group'} | ${null}   | ${null}
+    ${null}    | ${12}     | ${null}
+  `('combines $type and $id into $result', ({ type, ids, result }) =>
+    expect(convertToGraphQLIds(type, ids)).toStrictEqual(result),
+  );
 });
