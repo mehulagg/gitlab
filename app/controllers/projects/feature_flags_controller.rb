@@ -15,8 +15,6 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   before_action do
     push_frontend_feature_flag(:feature_flag_permissions)
     push_frontend_feature_flag(:feature_flags_new_version, project, default_enabled: true)
-    push_frontend_feature_flag(:feature_flags_legacy_read_only, project, default_enabled: true)
-    push_frontend_feature_flag(:feature_flags_legacy_read_only_override, project)
   end
 
   feature_category :feature_flags
@@ -113,11 +111,7 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   end
 
   def ensure_legacy_flags_writable!
-    if ::Feature.enabled?(:feature_flags_legacy_read_only, project, default_enabled: true) &&
-        ::Feature.disabled?(:feature_flags_legacy_read_only_override, project) &&
-        feature_flag.legacy_flag?
-      render_error_json(['Legacy feature flags are read-only'])
-    end
+    feature_flag.legacy_flag? && render_error_json(['Legacy feature flags are read-only'])
   end
 
   def create_params
