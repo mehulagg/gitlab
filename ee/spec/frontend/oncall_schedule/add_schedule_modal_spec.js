@@ -52,7 +52,7 @@ describe('AddScheduleModal', () => {
   });
 
   describe('Timezone select', () => {
-    it('has options based on provided from BE data', () => {
+    it('has options based on provided BE data', () => {
       expect(findDropdownOptions().length).toBe(mockTimezones.length);
     });
 
@@ -78,7 +78,7 @@ describe('AddScheduleModal', () => {
       });
 
       it('should display no results item when there are no filter matches', async () => {
-        const searchTerm = 'someUnexistenteTZ';
+        const searchTerm = 'someUnexistentTZ';
         findTimezoneSearchBox().vm.$emit('input', searchTerm);
         await wrapper.vm.$nextTick();
         expect(findDropdownOptions().length).toBe(1);
@@ -90,11 +90,10 @@ describe('AddScheduleModal', () => {
       });
     });
 
-    it('should add a chekckmark to the selected option', async () => {
+    it('should add a checkmark to the selected option', async () => {
       const selectedTZOption = findDropdownOptions().at(0);
       selectedTZOption.vm.$emit('click');
       await wrapper.vm.$nextTick();
-
       expect(selectedTZOption.attributes('ischecked')).toBe('true');
     });
   });

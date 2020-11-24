@@ -180,7 +180,7 @@ export default {
           class="timezone-dropdown gl-w-full"
           :header-text="$options.i18n.selectTimezone"
         >
-          <gl-search-box-by-type v-model="tzSearchTerm" />
+          <gl-search-box-by-type v-model.trim="tzSearchTerm" />
           <gl-dropdown-item
             v-for="tz in filteredTimezones"
             :key="getFormattedTimezone(tz)"

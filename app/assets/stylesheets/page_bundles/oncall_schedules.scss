@@ -10,3 +10,7 @@
     @include gl-text-overflow-ellipsis;
   }
 }
+
+.modal-footer {
+  @include gl-bg-gray-10;
+}
