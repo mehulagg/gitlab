@@ -91,6 +91,12 @@ RSpec.describe Subscriptions::CreateService do
 
         subject.execute
       end
+
+      it 'creates an namespace onboarding action' do
+        subject.execute
+
+        expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(true)
+      end
     end
   end
 end

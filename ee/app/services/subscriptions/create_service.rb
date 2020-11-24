@@ -22,7 +22,11 @@ module Subscriptions
       billing_email = customer_data[:email]
       token = customer_data[:authentication_token]
 
-      client.create_subscription(create_subscription_params, billing_email, token)
+      response = client.create_subscription(create_subscription_params, billing_email, token)
+
+      NamespaceOnboardingAction.create_action(@group, :subscription_created) if response[:success]
+
+      response
     end
 
     private
