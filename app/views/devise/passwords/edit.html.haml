@@ -14,7 +14,7 @@
       .clearfix
         = f.submit "Change your password", class: "gl-button btn btn-primary", data: { qa_selector: 'change_password_button' }
 
-.clearfix.prepend-top-20
+.clearfix.gl-mt-6
   %p
     %span.light Didn't receive a confirmation email?
     = link_to "Request a new one", new_confirmation_path(:user)
