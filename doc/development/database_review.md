@@ -36,9 +36,14 @@ point out specific queries for review and there are no obviously
 complex queries, it is enough to concentrate on reviewing the
 migration only.
 
-It is preferable to review queries in SQL form and generally accepted
-to ask the author to translate any ActiveRecord queries in SQL form
-for review.
+### Required
+
+The following artifacts are required prior to submitting for a ~database review. If your merge request does not include these items the review will be reassigned back to the author.
+
+- Raw SQL queries (as translated from ActiveRecord queries)
+- Query plan
+
+Refer to [Preparation when adding or modifying queries](#preparation-when-adding-or-modifying-queries) for how to provide this information.
 
 ### Roles and process
 
@@ -47,9 +52,11 @@ A Merge Request **author**'s role is to:
 - Decide whether a database review is needed.
 - If database review is needed, add the ~database label.
 - [Prepare the merge request for a database review](#how-to-prepare-the-merge-request-for-a-database-review).
+- Provide the [required](#required) artifacts prior to submitting the MR
 
 A database **reviewer**'s role is to:
 
+- Ensure the [required](#required) artifacts are provided and in the proper format. If they are not, reassign the merge request back to the author.
 - Perform a first-pass review on the MR and suggest improvements to the author.
 - Once satisfied, relabel the MR with ~"database::reviewed", approve it, and
   reassign MR to the database **maintainer** suggested by Reviewer
