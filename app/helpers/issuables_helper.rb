@@ -187,10 +187,10 @@ module IssuablesHelper
 
   def issuable_meta(issuable, project, text)
     output = []
-    output << "Opened #{time_ago_with_tooltip(issuable.created_at)} by ".html_safe
+    output << "Opened #{time_ago_with_tooltip(issuable.created_at)} by "
 
     if issuable.is_a?(Issue) && issuable.service_desk_reply_to
-      output << "#{issuable.service_desk_reply_to} via ".html_safe
+      output << "#{html_escape(issuable.service_desk_reply_to)} via "
     end
 
     output << content_tag(:strong) do
@@ -200,7 +200,7 @@ module IssuablesHelper
       author_output << issuable_meta_author_slot(issuable.author, css_class: 'ml-1')
 
       if status = user_status(issuable.author)
-        author_output << "#{status}".html_safe
+        author_output << "#{status}"
       end
 
       author_output
