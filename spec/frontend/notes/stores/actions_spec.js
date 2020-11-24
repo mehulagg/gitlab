@@ -174,10 +174,10 @@ describe('Actions Notes Store', () => {
       axiosMock.onAny().reply(200, {});
     });
 
-    describe('closeMergeRequest', () => {
+    describe('closeIssue', () => {
       it('sets state as closed', done => {
         store
-          .dispatch('closeMergeRequest', { notesData: { closeIssuePath: '' } })
+          .dispatch('closeIssue', { notesData: { closeIssuePath: '' } })
           .then(() => {
             expect(store.state.noteableData.state).toEqual('closed');
             expect(store.state.isToggleStateButtonLoading).toEqual(false);
@@ -187,10 +187,10 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    describe('reopenMergeRequest', () => {
+    describe('reopenIssue', () => {
       it('sets state as reopened', done => {
         store
-          .dispatch('reopenMergeRequest', { notesData: { reopenIssuePath: '' } })
+          .dispatch('reopenIssue', { notesData: { reopenIssuePath: '' } })
           .then(() => {
             expect(store.state.noteableData.state).toEqual('reopened');
             expect(store.state.isToggleStateButtonLoading).toEqual(false);
@@ -247,6 +247,30 @@ describe('Actions Notes Store', () => {
         'reopened',
         {},
         [{ type: 'REOPEN_ISSUE' }],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('toggleBlockedIssueWarning', () => {
+    it('should set issue warning as true', done => {
+      testAction(
+        actions.toggleBlockedIssueWarning,
+        true,
+        {},
+        [{ type: 'TOGGLE_BLOCKED_ISSUE_WARNING', payload: true }],
+        [],
+        done,
+      );
+    });
+
+    it('should set issue warning as false', done => {
+      testAction(
+        actions.toggleBlockedIssueWarning,
+        false,
+        {},
+        [{ type: 'TOGGLE_BLOCKED_ISSUE_WARNING', payload: false }],
         [],
         done,
       );

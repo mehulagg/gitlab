@@ -7,7 +7,6 @@ import HeaderActions from '~/issue_show/components/header_actions.vue';
 import { IssuableStatus, IssueStateEvent } from '~/issue_show/constants';
 import promoteToEpicMutation from '~/issue_show/queries/promote_to_epic.mutation.graphql';
 import * as urlUtility from '~/lib/utils/url_utility';
-import eventHub from '~/notes/event_hub';
 import createStore from '~/notes/stores';
 
 jest.mock('~/flash');
@@ -83,10 +82,8 @@ describe('HeaderActions component', () => {
   } = {}) => {
     mutateMock = jest.fn().mockResolvedValue(mutateResponse);
 
-    store.dispatch('setNoteableData', {
-      blocked_by_issues: blockedByIssues,
-      state: issueState,
-    });
+    store.getters.getNoteableData.state = issueState;
+    store.getters.getNoteableData.blocked_by_issues = blockedByIssues;
 
     return shallowMount(HeaderActions, {
       localVue,
@@ -273,26 +270,6 @@ describe('HeaderActions component', () => {
           message: promoteToEpicMutationErrorResponse.data.promoteToEpic.errors.join('; '),
         });
       });
-    });
-  });
-
-  describe('when `toggle.issuable.state` event is emitted', () => {
-    it('invokes a method to toggle the issue state', () => {
-      wrapper = mountComponent({ mutateResponse: updateIssueMutationResponse });
-
-      eventHub.$emit('toggle.issuable.state');
-
-      expect(mutateMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          variables: {
-            input: {
-              iid: defaultProps.iid,
-              projectPath: defaultProps.projectPath,
-              stateEvent: IssueStateEvent.Close,
-            },
-          },
-        }),
-      );
     });
   });
 
