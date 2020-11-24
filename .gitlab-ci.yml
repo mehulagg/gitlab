@@ -1,111 +1,206 @@
 stages:
-  - sync
-  - prepare
-  - build-images
-  - fixtures
+  # - dast
+  # - prepare
   - test
-  - post-test
-  - review-prepare
-  - review
-  - dast
-  - qa
-  - post-qa
-  - pages
-  - notify
+# test:
+#   stage: test
+#   image: docker:19.03.0
+#   services:
+#   - docker:19.03.0-dind
+#   script:
+#     - docker run --detach --name gitlab --hostname gitlab --publish 443:443 --publish 80:80 --publish 22:22 gitlab/gitlab-ee:nightly
+#     - apk add curl
+#     - docker ps
+#     - docker inspect bridge
+#     - curl -fsSlvk http://gitlab
 
-# always use `gitlab-org` runners, however
-# in cases where jobs require Docker-in-Docker, the job
-# definition must be extended with `.use-docker-in-docker`
-default:
-  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-golang-1.14-git-2.29-lfs-2.9-chrome-85-node-12.18-yarn-1.22-postgresql-11-graphicsmagick-1.3.34"
-  tags:
-    - gitlab-org
-  # All jobs are interruptible by default
-  interruptible: true
-  # Default job timeout set to 90m https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10520
-  timeout: 90m
+# prepare-image:
+#   stage: test
+#   image: docker:19.03.0
+#   services:
+#     - docker:19.03.0-dind
+#   variables:
+#     GIT_STRATEGY: none
+#     DOCKER_DRIVER: overlay2
+#     DOCKER_TLS_CERTDIR: "/certs"
+#     REVIEW_APPS_ROOT_TOKEN: "q_hWiFjwDXhyD-EboRey"
+#     RUBY_CMD: "token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api], name: 'Token to disable sign-ups'); token.set_token('${REVIEW_APPS_ROOT_TOKEN}'); begin; token.save!; rescue(ActiveRecord::RecordNotUnique); end"
+#   script:
+#     - |
+#       set -x
+#       docker pull gitlab/gitlab-ee:nightly
+#       docker run --detach --name gitlab --hostname gitlab --publish 443:443 --publish 80:80 --publish 22:22 gitlab/gitlab-ee:nightly
+#       echo "waiting until GitLab docker image has started"
+#       timeout 250 docker logs -f gitlab || EXIT_CODE=$?
+#       docker ps
+#       [ $EXIT_CODE -ne 143 ] && echo "Unexpected exit code $EXIT_CODE from docker logs" && return $EXIT_CODE
+#       # docker exec gitlab gitlab-rails runner "${RUBY_CMD}"
+#       apk add curl
+#       docker exec gitlab curl http://localhost:80
+#       docker ps
+#       curl -fsSlvk http://gitlab
+#       docker stop gitlab
+#       docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#       'docker commit $(docker ps -q) registry.gitlab.com/ngeorge1/dast-test'
+#       docker push registry.gitlab.com/ngeorge1/dast-test
 
-workflow:
-  rules:
-    # If `$FORCE_GITLAB_CI` is set, create a pipeline.
-    - if: '$FORCE_GITLAB_CI'
-    # As part of the process of creating RCs automatically, we update stable
-    # branches with the changes of the most recent production deployment. The
-    # merge requests used for this merge a branch release-tools/X into a stable
-    # branch. For these merge requests we don't want to run any pipelines, as
-    # they serve no purpose and will run anyway when the changes are merged.
-    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^release-tools\/\d+\.\d+\.\d+-rc\d+$/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^[\d-]+-stable(-ee)?$/ && $CI_PROJECT_PATH == "gitlab-org/gitlab"'
-      when: never
-    # For merge requests, create a pipeline.
-    - if: '$CI_MERGE_REQUEST_IID'
-    # For `master` branch, create a pipeline (this includes on schedules, pushes, merges, etc.).
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    # For tags, create a pipeline.
-    - if: '$CI_COMMIT_TAG'
-    # If `$GITLAB_INTERNAL` isn't set, don't create a pipeline.
-    - if: '$GITLAB_INTERNAL == null'
-      when: never
-    # For stable, auto-deploy, and security branches, create a pipeline.
-    - if: '$CI_COMMIT_BRANCH =~ /^[\d-]+-stable(-ee)?$/'
-    - if: '$CI_COMMIT_BRANCH =~ /^\d+-\d+-auto-deploy-\d+$/'
-    - if: '$CI_COMMIT_BRANCH =~ /^security\//'
-
+# https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
 variables:
-  RAILS_ENV: "test"
-  NODE_ENV: "test"
-  SIMPLECOV: "true"
-  GIT_DEPTH: "20"
-  GIT_SUBMODULE_STRATEGY: "none"
-  GET_SOURCES_ATTEMPTS: "3"
-  KNAPSACK_RSPEC_SUITE_REPORT_PATH: knapsack/report-master.json
-  FLAKY_RSPEC_SUITE_REPORT_PATH: rspec_flaky/report-suite.json
-  RSPEC_TESTS_MAPPING_PATH: crystalball/mapping.json
-  RSPEC_PACKED_TESTS_MAPPING_PATH: crystalball/packed-mapping.json
-  BUILD_ASSETS_IMAGE: "false"
-  ES_JAVA_OPTS: "-Xms256m -Xmx256m"
-  ELASTIC_URL: "http://elastic:changeme@elasticsearch:9200"
-  DOCKER_VERSION: "19.03.0"
-  CACHE_CLASSES: "true"
+    GITLAB_OMNIBUS_CONFIG: "gitlab_rails['initial_root_password']='password'"
+    GITLAB_OMNIBUS_CONFIG: |
+      gitlab_rails['initial_root_password']='password'
+      gitlab_rails['monitoring_whitelist'] = ['192.168.0.1/0']
 
-  # Preparing custom clone path to reduce space used by all random forks
-  # on GitLab.com's Shared Runners. Our main forks - especially the security
-  # ones - will have this variable overwritten in the project settings, so that
-  # a security-related code or code using our protected variables will be never
-  # stored on the same path as the community forks.
-  # Part of the solution for the `no space left on device` problem described at
-  # https://gitlab.com/gitlab-org/gitlab/issues/197876.
-  #
-  # For this purpose the https://gitlab.com/gitlab-org-forks group was created
-  # to host a placeholder for the `/builds/gitlab-org-forks` path and ensure
-  # that no legitimate project will ever use it and - by mistake - execute its
-  # job on a shared working directory. It also requires proper configuration of
-  # the Runner that executes the job (which was prepared for our shared runners
-  # by https://ops.gitlab.net/gitlab-cookbooks/chef-repo/-/merge_requests/3977).
-  #
-  # Because of all of that PLEASE DO NOT CHANGE THE PATH.
-  #
-  # For more details and reasoning that brought this change please check
-  # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24887
-  GIT_CLONE_PATH: "/builds/gitlab-org-forks/${CI_PROJECT_NAME}"
+dast:
+  stage: test
+  services:
+    - gitlab/gitlab-ee:nightly
+  image:
+    name: "registry.gitlab.com/gitlab-org/security-products/analyzers/dast:1"
+  variables:
+    GIT_STRATEGY: none
+    DAST_USERNAME_FIELD: "user[login]"
+    DAST_PASSWORD_FIELD: "user[password]"
+    DAST_FULL_SCAN_ENABLED: "true"
+    DAST_WEBSITE: "http://gitlab-gitlab-ee"
+    DAST_PASSWORD: "password"
+    DAST_RULES: "41,42,43,10027,10032,10041,10042,10045,10047,10052,10053,10057,10061,10096,10097,10104,10106,20012,20014,20015,20016,20017,20018,40019,40020,40021,40024,40025,40027,40029,40032,90001,90019,10109,10026,10028,10029,10030,10031,10033,10034,10035,10036,10038,10039,10043,10044,10048,10050,10051,10058,10062,10095,10107,10108,30003,40013,40022,40023,40028,90021,90023,90024,90025,90027,90028,10003,50003,0,2,3,6,7,10010,10011,10015,10017,10019,10020,10021,10023,10024,10025,10037,10040,10054,10055,10056,10098,10105,10202,20019,30001,30002,40003,40008,40009,40012,40014,40016,40017,40018,50000,50001,90011,90020,90022,90033"
 
-include:
-  - local: .gitlab/ci/build-images.gitlab-ci.yml
-  - local: .gitlab/ci/cache-repo.gitlab-ci.yml
-  - local: .gitlab/ci/cng.gitlab-ci.yml
-  - local: .gitlab/ci/docs.gitlab-ci.yml
-  - local: .gitlab/ci/frontend.gitlab-ci.yml
-  - local: .gitlab/ci/global.gitlab-ci.yml
-  - local: .gitlab/ci/memory.gitlab-ci.yml
-  - local: .gitlab/ci/pages.gitlab-ci.yml
-  - local: .gitlab/ci/qa.gitlab-ci.yml
-  - local: .gitlab/ci/reports.gitlab-ci.yml
-  - local: .gitlab/ci/rails.gitlab-ci.yml
-  - local: .gitlab/ci/review.gitlab-ci.yml
-  - local: .gitlab/ci/rules.gitlab-ci.yml
-  - local: .gitlab/ci/setup.gitlab-ci.yml
-  - local: .gitlab/ci/dev-fixtures.gitlab-ci.yml
-  - local: .gitlab/ci/test-metadata.gitlab-ci.yml
-  - local: .gitlab/ci/yaml.gitlab-ci.yml
-  - local: .gitlab/ci/releases.gitlab-ci.yml
-  - local: .gitlab/ci/notify.gitlab-ci.yml
-  - local: .gitlab/ci/dast.gitlab-ci.yml
+  allow_failure: true
+  script:
+    # - curl -fsSlvk https://gitlab-gitlab-ee/-/health
+    # - curl -fsSlvk https://gitlab-gitlab-ee/-/readiness
+    # - curl -fsSlvk https://gitlab-gitlab-ee/-/liveness
+    - sleep 500
+    - curl -fsSlvk http://gitlab-gitlab-ee
+    - curl -fsSlvk http://gitlab-gitlab-ee/-/health
+    - curl -fsSlvk http://gitlab-gitlab-ee/-/readiness
+    - curl -fsSlvk http://gitlab-gitlab-ee/-/liveness
+    - 'export DAST_AUTH_EXCLUDE_URLS="${DAST_WEBSITE}/help/.*,${DAST_WEBSITE}/profile/two_factor_auth,${DAST_WEBSITE}/users/sign_out"'
+    - enable_rule () { read all_rules; rule=$1; echo $all_rules | sed -r "s/(,)?$rule(,)?/\1-1\2/" ; }
+    - 'DAST_RULES=$(echo $DAST_RULES | tr "," "\n" | sort -n | paste -sd ",")'
+    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 10019 | enable_rule 10020 | enable_rule 10021 | enable_rule 10023 | enable_rule 10024 | enable_rule 10025 | enable_rule 10037 | enable_rule 10040 | enable_rule 10054 | enable_rule 10055 | enable_rule 10056)
+    - /analyze -t $DAST_WEBSITE -d
+  artifacts:
+    reports:
+      dast: gl-dast-report.json
+
+# test:
+#   stage: test
+#   services:
+#     - name: gitlab/gitlab-ee:nightly
+#       alias: gitlab-test
+#   script: curl -fsSl http://gitlab-gitlab-ee:80
+
+
+# stages:
+#   - sync
+#   - prepare
+#   - build-images
+#   - fixtures
+#   - test
+#   - post-test
+#   - review-prepare
+#   - review
+#   - dast
+#   - qa
+#   - post-qa
+#   - pages
+#   - notify
+
+# # always use `gitlab-org` runners, however
+# # in cases where jobs require Docker-in-Docker, the job
+# # definition must be extended with `.use-docker-in-docker`
+# default:
+#   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-golang-1.14-git-2.29-lfs-2.9-chrome-85-node-12.18-yarn-1.22-postgresql-11-graphicsmagick-1.3.34"
+#   tags:
+#     - gitlab-org
+#   # All jobs are interruptible by default
+#   interruptible: true
+#   # Default job timeout set to 90m https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10520
+#   timeout: 90m
+
+# workflow:
+#   rules:
+#     # If `$FORCE_GITLAB_CI` is set, create a pipeline.
+#     - if: '$FORCE_GITLAB_CI'
+#     # As part of the process of creating RCs automatically, we update stable
+#     # branches with the changes of the most recent production deployment. The
+#     # merge requests used for this merge a branch release-tools/X into a stable
+#     # branch. For these merge requests we don't want to run any pipelines, as
+#     # they serve no purpose and will run anyway when the changes are merged.
+#     - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^release-tools\/\d+\.\d+\.\d+-rc\d+$/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^[\d-]+-stable(-ee)?$/ && $CI_PROJECT_PATH == "gitlab-org/gitlab"'
+#       when: never
+#     # For merge requests, create a pipeline.
+#     - if: '$CI_MERGE_REQUEST_IID'
+#     # For `master` branch, create a pipeline (this includes on schedules, pushes, merges, etc.).
+#     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#     # For tags, create a pipeline.
+#     - if: '$CI_COMMIT_TAG'
+#     # If `$GITLAB_INTERNAL` isn't set, don't create a pipeline.
+#     - if: '$GITLAB_INTERNAL == null'
+#       when: never
+#     # For stable, auto-deploy, and security branches, create a pipeline.
+#     - if: '$CI_COMMIT_BRANCH =~ /^[\d-]+-stable(-ee)?$/'
+#     - if: '$CI_COMMIT_BRANCH =~ /^\d+-\d+-auto-deploy-\d+$/'
+#     - if: '$CI_COMMIT_BRANCH =~ /^security\//'
+
+# variables:
+#   RAILS_ENV: "test"
+#   NODE_ENV: "test"
+#   SIMPLECOV: "true"
+#   GIT_DEPTH: "20"
+#   GIT_SUBMODULE_STRATEGY: "none"
+#   GET_SOURCES_ATTEMPTS: "3"
+#   KNAPSACK_RSPEC_SUITE_REPORT_PATH: knapsack/report-master.json
+#   FLAKY_RSPEC_SUITE_REPORT_PATH: rspec_flaky/report-suite.json
+#   RSPEC_TESTS_MAPPING_PATH: crystalball/mapping.json
+#   RSPEC_PACKED_TESTS_MAPPING_PATH: crystalball/packed-mapping.json
+#   BUILD_ASSETS_IMAGE: "false"
+#   ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+#   ELASTIC_URL: "http://elastic:changeme@elasticsearch:9200"
+#   DOCKER_VERSION: "19.03.0"
+#   CACHE_CLASSES: "true"
+
+#   # Preparing custom clone path to reduce space used by all random forks
+#   # on GitLab.com's Shared Runners. Our main forks - especially the security
+#   # ones - will have this variable overwritten in the project settings, so that
+#   # a security-related code or code using our protected variables will be never
+#   # stored on the same path as the community forks.
+#   # Part of the solution for the `no space left on device` problem described at
+#   # https://gitlab.com/gitlab-org/gitlab/issues/197876.
+#   #
+#   # For this purpose the https://gitlab.com/gitlab-org-forks group was created
+#   # to host a placeholder for the `/builds/gitlab-org-forks` path and ensure
+#   # that no legitimate project will ever use it and - by mistake - execute its
+#   # job on a shared working directory. It also requires proper configuration of
+#   # the Runner that executes the job (which was prepared for our shared runners
+#   # by https://ops.gitlab.net/gitlab-cookbooks/chef-repo/-/merge_requests/3977).
+#   #
+#   # Because of all of that PLEASE DO NOT CHANGE THE PATH.
+#   #
+#   # For more details and reasoning that brought this change please check
+#   # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24887
+#   GIT_CLONE_PATH: "/builds/gitlab-org-forks/${CI_PROJECT_NAME}"
+
+# include:
+#   - local: .gitlab/ci/build-images.gitlab-ci.yml
+#   - local: .gitlab/ci/cache-repo.gitlab-ci.yml
+#   - local: .gitlab/ci/cng.gitlab-ci.yml
+#   - local: .gitlab/ci/docs.gitlab-ci.yml
+#   - local: .gitlab/ci/frontend.gitlab-ci.yml
+#   - local: .gitlab/ci/global.gitlab-ci.yml
+#   - local: .gitlab/ci/memory.gitlab-ci.yml
+#   - local: .gitlab/ci/pages.gitlab-ci.yml
+#   - local: .gitlab/ci/qa.gitlab-ci.yml
+#   - local: .gitlab/ci/reports.gitlab-ci.yml
+#   - local: .gitlab/ci/rails.gitlab-ci.yml
+#   - local: .gitlab/ci/review.gitlab-ci.yml
+#   - local: .gitlab/ci/rules.gitlab-ci.yml
+#   - local: .gitlab/ci/setup.gitlab-ci.yml
+#   - local: .gitlab/ci/dev-fixtures.gitlab-ci.yml
+#   - local: .gitlab/ci/test-metadata.gitlab-ci.yml
+#   - local: .gitlab/ci/yaml.gitlab-ci.yml
+#   - local: .gitlab/ci/releases.gitlab-ci.yml
+#   - local: .gitlab/ci/notify.gitlab-ci.yml
+#   - local: .gitlab/ci/dast.gitlab-ci.yml
