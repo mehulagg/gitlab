@@ -67,7 +67,7 @@ Complementary reads:
 ### Development guidelines review
 
 When you submit a change to GitLab's development guidelines, the people
-you ask for reviews from depend on the level of change:
+you ask for reviews from depend on the level of change, as described below.
 
 #### Trivial changes
 
