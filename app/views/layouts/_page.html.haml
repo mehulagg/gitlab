@@ -1,3 +1,75 @@
+
+= javascript_tag nonce: true do
+  :plain
+
+    const eventHub = new EventTarget();
+
+    window.vueOnDefineReactive = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDefineReactive"));
+    };
+
+    window.vueOnDepSub = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDepSub"));
+    };
+    window.vueOnDepNotify = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDepNotify"));
+    };
+    window.vueOnDepRem = () => {
+      eventHub.dispatchEvent(new CustomEvent("onDepRem"));
+    };
+
+    const createMirror = () => {
+    const container = document.createElement('div');
+    container.style.width = '100vw';
+    container.style['background-color'] = 'gray';
+    container.style['z-index'] = '100000';
+
+    container.style.position = 'fixed';
+    container.style.bottom = 0;
+
+    container.innerHTML = `
+      <ul>
+        <li>
+        Reactive Count : <span class="r-count-span"></span>
+        </li>
+        <li>
+        DepSub Count : <span class="d-count-span"></span>
+        </li>
+        <li>
+        Notify Count : <span class="n-count-span"></span>
+        </li>
+      </ul>
+    `;
+    const reactiveCount = container.querySelector('.r-count-span');
+    const depSubCount = container.querySelector('.d-count-span');
+    const notifyCount = container.querySelector('.n-count-span');
+
+    let rCount = 0;
+    let dCount = 0;
+    let nCount = 0;
+
+    eventHub.addEventListener('onDefineReactive', () => {
+      rCount += 1;
+      reactiveCount.innerHTML = `${rCount}   `;
+    });
+    eventHub.addEventListener('onDepSub', () => {
+      dCount += 1;
+      depSubCount.innerHTML = `${dCount}   `;
+    });
+    eventHub.addEventListener('onDepNotify', () => {
+      nCount += 1;
+      notifyCount.innerHTML = `${nCount}   `;
+    });
+    eventHub.addEventListener('onDepRem', () => {
+      dCount -= 1;
+      notifyCount.innerHTML = `${dCount}   `;
+    });
+
+    window.document.body.appendChild(container);
+  };
+
+  createMirror();
+
 .layout-page{ class: page_with_sidebar_class }
   - if defined?(nav) && nav
     = render "layouts/nav/sidebar/#{nav}"
