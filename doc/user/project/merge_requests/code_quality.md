@@ -350,7 +350,7 @@ This can be due to multiple reasons:
   nothing is displayed.
 - The [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) CI/CD
   setting can cause the Code Quality artifact(s) to expire faster than desired.
-- If using the `REPORT_STDOUT: "1"` [environment variable](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables), no report file will be generated and nothing will be displayed on the merge request.
+- If you use the [`REPORT_STDOUT` environment variable](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables), no report file is generated and nothing displays in the merge request.
 - Large `codeclimate.json` files (esp. >10 MB) are [known to prevent the report from being displayed](https://gitlab.com/gitlab-org/gitlab/-/issues/2737).
   As a work-around, try removing [properties](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types)
   that are [ignored by GitLab](#implementing-a-custom-tool). You can:
