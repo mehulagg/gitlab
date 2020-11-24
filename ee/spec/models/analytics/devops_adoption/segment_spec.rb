@@ -47,6 +47,10 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
     let!(:latest_snapshot) { create(:devops_adoption_snapshot, segment: segment, recorded_at: 2.days.ago) }
     let!(:old_snapshot) { create(:devops_adoption_snapshot, segment: segment, recorded_at: 5.days.ago) }
 
+    let!(:snapshot_for_different_segment) do
+      create(:devops_adoption_snapshot, segment: create(:devops_adoption_segment), recorded_at: 1.hour.ago)
+    end
+
     it 'loads the latest snapshot' do
       expect(segment.latest_snapshot).to eq(latest_snapshot)
     end

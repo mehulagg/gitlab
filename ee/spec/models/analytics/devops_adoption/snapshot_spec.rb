@@ -23,4 +23,22 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
       expect(subject).to match_array([segment_1_latest_snapshot, segment_2_latest_snapshot])
     end
   end
+
+  describe '#end_time' do
+    subject { described_class.new(recorded_at: 5.days.ago) }
+
+    it 'equals to recorded_at' do
+      expect(subject.end_time).to eq(subject.recorded_at)
+    end
+  end
+
+  describe '#start_time' do
+    subject { described_class.new(recorded_at: 3.days.ago) }
+
+    it 'calcualtes a one-month period from end_time' do
+      expected_end_time = (subject.end_time - 1.month).at_beginning_of_day
+
+      expect(subject.start_time).to eq(expected_end_time)
+    end
+  end
 end

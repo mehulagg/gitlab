@@ -1115,14 +1115,16 @@ Snapshot.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `deploySucceeded` | Boolean! | A deployment was succeeded in the last 30 days |
-| `issueOpened` | Boolean! | An issue was opened in the last 30 days |
-| `mergeRequestApproved` | Boolean! | A merge request was opened in the last 30 days |
-| `mergeRequestOpened` | Boolean! | A merge request was opened in the last 30 days |
-| `pipelineSucceeded` | Boolean! | A pipeline was succeeded in the last 30 days |
+| `deploySucceeded` | Boolean! | At least one deployment succeeded |
+| `endTime` | Time! | The end time for the snapshot where the data points were collected |
+| `issueOpened` | Boolean! | At least one issue was opened |
+| `mergeRequestApproved` | Boolean! | At least one merge request was approved |
+| `mergeRequestOpened` | Boolean! | At least one merge request was opened |
+| `pipelineSucceeded` | Boolean! | At least one pipeline succeeded |
 | `recordedAt` | Time! | The time the snapshot was recorded |
-| `runnerConfigured` | Boolean! | A runner was used in the last 30 days |
-| `securityScanSucceeded` | Boolean! | A security scan was succeeded in the last 30 days |
+| `runnerConfigured` | Boolean! | At least one runner was used |
+| `securityScanSucceeded` | Boolean! | At least one security scan succeeded |
+| `startTime` | Time! | The start time for the snapshot where the data points were collected |
 
 ### DiffPosition
 

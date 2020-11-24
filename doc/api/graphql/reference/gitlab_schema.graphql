@@ -6597,27 +6597,32 @@ Snapshot
 """
 type DevopsAdoptionSnapshot {
   """
-  A deployment was succeeded in the last 30 days
+  At least one deployment succeeded
   """
   deploySucceeded: Boolean!
 
   """
-  An issue was opened in the last 30 days
+  The end time for the snapshot where the data points were collected
+  """
+  endTime: Time!
+
+  """
+  At least one issue was opened
   """
   issueOpened: Boolean!
 
   """
-  A merge request was opened in the last 30 days
+  At least one merge request was approved
   """
   mergeRequestApproved: Boolean!
 
   """
-  A merge request was opened in the last 30 days
+  At least one merge request was opened
   """
   mergeRequestOpened: Boolean!
 
   """
-  A pipeline was succeeded in the last 30 days
+  At least one pipeline succeeded
   """
   pipelineSucceeded: Boolean!
 
@@ -6627,14 +6632,19 @@ type DevopsAdoptionSnapshot {
   recordedAt: Time!
 
   """
-  A runner was used in the last 30 days
+  At least one runner was used
   """
   runnerConfigured: Boolean!
 
   """
-  A security scan was succeeded in the last 30 days
+  At least one security scan succeeded
   """
   securityScanSucceeded: Boolean!
+
+  """
+  The start time for the snapshot where the data points were collected
+  """
+  startTime: Time!
 }
 
 input DiffImagePositionInput {

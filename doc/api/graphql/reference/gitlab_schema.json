@@ -18237,7 +18237,7 @@
           "fields": [
             {
               "name": "deploySucceeded",
-              "description": "A deployment was succeeded in the last 30 days",
+              "description": "At least one deployment succeeded",
               "args": [
 
               ],
@@ -18254,8 +18254,26 @@
               "deprecationReason": null
             },
             {
+              "name": "endTime",
+              "description": "The end time for the snapshot where the data points were collected",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "issueOpened",
-              "description": "An issue was opened in the last 30 days",
+              "description": "At least one issue was opened",
               "args": [
 
               ],
@@ -18273,7 +18291,7 @@
             },
             {
               "name": "mergeRequestApproved",
-              "description": "A merge request was opened in the last 30 days",
+              "description": "At least one merge request was approved",
               "args": [
 
               ],
@@ -18291,7 +18309,7 @@
             },
             {
               "name": "mergeRequestOpened",
-              "description": "A merge request was opened in the last 30 days",
+              "description": "At least one merge request was opened",
               "args": [
 
               ],
@@ -18309,7 +18327,7 @@
             },
             {
               "name": "pipelineSucceeded",
-              "description": "A pipeline was succeeded in the last 30 days",
+              "description": "At least one pipeline succeeded",
               "args": [
 
               ],
@@ -18345,7 +18363,7 @@
             },
             {
               "name": "runnerConfigured",
-              "description": "A runner was used in the last 30 days",
+              "description": "At least one runner was used",
               "args": [
 
               ],
@@ -18363,7 +18381,7 @@
             },
             {
               "name": "securityScanSucceeded",
-              "description": "A security scan was succeeded in the last 30 days",
+              "description": "At least one security scan succeeded",
               "args": [
 
               ],
@@ -18373,6 +18391,24 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "startTime",
+              "description": "The start time for the snapshot where the data points were collected",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
                   "ofType": null
                 }
               },

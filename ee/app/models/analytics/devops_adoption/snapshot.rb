@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
+  SNAPSHOT_TIME_PERIOD = 1.month
+
   belongs_to :segment, inverse_of: :snapshots
 
   validates :segment, presence: true
@@ -21,5 +23,13 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
       .where(segment_id: ids)
 
     joins("INNER JOIN (#{inner_select.to_sql}) latest_snapshots ON latest_snapshots.id = analytics_devops_adoption_snapshots.id")
+  end
+
+  def start_time
+    (recorded_at - SNAPSHOT_TIME_PERIOD).at_beginning_of_day
+  end
+
+  def end_time
+    recorded_at
   end
 end
