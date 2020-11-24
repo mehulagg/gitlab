@@ -3,6 +3,7 @@ import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs 
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
 import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
+import IterationReportSummaryClosed from 'ee/iterations/components/iteration_report_summary_closed.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
 
@@ -105,6 +106,37 @@ describe('Iterations report', () => {
       it('hides actions dropdown', () => {
         expect(findActionsDropdown().exists()).toBe(false);
       });
+
+      it('renders IterationReportSummaryOpen for open iteration', () => {
+        expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
+          iterationId: iteration.id,
+          namespaceType: Namespace.Group,
+          fullPath: defaultProps.fullPath,
+        });
+      });
+
+      it('renders IterationReportSummaryClosed for closed iteration', async () => {
+        wrapper.setData({
+          iteration: {
+            ...iteration,
+            state: 'closed',
+          },
+        });
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find(IterationReportSummaryClosed).props()).toEqual({
+          iterationId: iteration.id,
+        });
+      });
+
+      it('shows IterationReportTabs component', () => {
+        const iterationReportTabs = wrapper.find(IterationReportTabs);
+
+        expect(iterationReportTabs.props('fullPath')).toBe(defaultProps.fullPath);
+        expect(iterationReportTabs.props('iterationId')).toBe(iteration.id);
+        expect(iterationReportTabs.props('namespaceType')).toBe(Namespace.Group);
+      });
     });
 
     describe('user with edit permission', () => {
@@ -135,22 +167,6 @@ describe('Iterations report', () => {
             null,
             '/edit',
           );
-        });
-
-        it('passes correct props to IterationReportSummary', () => {
-          expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
-            iterationId: iteration.id,
-            namespaceType: Namespace.Group,
-            fullPath: defaultProps.fullPath,
-          });
-        });
-
-        it('passes correct props to IterationReportTabs', () => {
-          const iterationReportTabs = wrapper.find(IterationReportTabs);
-
-          expect(iterationReportTabs.props('fullPath')).toBe(defaultProps.fullPath);
-          expect(iterationReportTabs.props('iterationId')).toBe(iteration.id);
-          expect(iterationReportTabs.props('namespaceType')).toBe(Namespace.Group);
         });
       });
 
