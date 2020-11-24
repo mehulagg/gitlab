@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import epicChildren from 'shared_queries/epic/epicChildren.query.graphql';
+import epicChildren from 'shared_queries/epic/epic_children.query.graphql';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,

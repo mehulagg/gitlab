@@ -1,4 +1,4 @@
-import epicDetailsQuery from 'shared_queries/epic/epicDetails.query.graphql';
+import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 
