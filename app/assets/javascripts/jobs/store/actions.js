@@ -65,7 +65,10 @@ export const fetchJob = ({ state, dispatch }) => {
     },
     data: state.jobEndpoint,
     method: 'getJob',
-    successCallback: ({ data }) => dispatch('receiveJobSuccess', data),
+    successCallback: ({ data }) => {
+      dispatch('receiveJobSuccess', data);
+      dispatch('fetchTrace', data);
+    },
     errorCallback: () => dispatch('receiveJobError'),
   });
 
@@ -157,22 +160,27 @@ export const toggleScrollisInBottom = ({ commit }, toggle) => {
 
 export const requestTrace = ({ commit }) => commit(types.REQUEST_TRACE);
 
-export const fetchTrace = ({ dispatch, state }) =>
-  axios
-    .get(`${state.traceEndpoint}/trace.json`, {
-      params: { state: state.traceState },
-    })
-    .then(({ data }) => {
-      dispatch('toggleScrollisInBottom', isScrolledToBottom());
-      dispatch('receiveTraceSuccess', data);
+export const fetchTrace = ({ dispatch, state }, job) => {
+  if (job) {
+    if (job.started && job.has_trace) {
+      axios
+        .get(`${state.traceEndpoint}/trace.json`, {
+          params: { state: state.traceState },
+        })
+        .then(({ data }) => {
+          dispatch('toggleScrollisInBottom', isScrolledToBottom());
+          dispatch('receiveTraceSuccess', data);
 
-      if (data.complete) {
-        dispatch('stopPollingTrace');
-      } else if (!state.traceTimeout) {
-        dispatch('startPollingTrace');
-      }
-    })
-    .catch(() => dispatch('receiveTraceError'));
+          if (data.complete) {
+            dispatch('stopPollingTrace');
+          } else if (!state.traceTimeout) {
+            dispatch('startPollingTrace');
+          }
+        })
+        .catch(() => dispatch('receiveTraceError'));
+    }
+  }
+};
 
 export const startPollingTrace = ({ dispatch, commit }) => {
   const traceTimeout = setTimeout(() => {
