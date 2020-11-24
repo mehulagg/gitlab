@@ -376,6 +376,48 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
         expect(response).to have_gitlab_http_status(:ok)
       end
+
+      context 'when user has view_diffs_file_by_file set to true' do
+        let(:tracking_params) do
+          {
+            event_names: 'i_code_review_viewed_diffs_file_by_file',
+            start_date: Date.yesterday,
+            end_date: Date.today
+          }
+        end
+
+        before do
+          user.update!(view_diffs_file_by_file: true)
+        end
+
+        it 'tracks i_code_review_viewed_diffs_file_by_file event' do
+          expect { subject }
+            .to change { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(**tracking_params) }
+            .by(1)
+        end
+
+        context 'when usage_data_i_code_review_viewed_diffs_file_by_file feature flag is disabled' do
+          before do
+            stub_feature_flags(usage_data_i_code_review_viewed_diffs_file_by_file: false)
+          end
+
+          it 'does not track i_code_review_viewed_diffs_file_by_file event' do
+            expect { subject }
+              .not_to change { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(**tracking_params) }
+          end
+        end
+
+        context 'when view_diffs_file_by_file feature flag is disabled' do
+          before do
+            stub_feature_flags(view_diffs_file_by_file: false)
+          end
+
+          it 'does not track i_code_review_viewed_diffs_file_by_file event' do
+            expect { subject }
+              .not_to change { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(**tracking_params) }
+          end
+        end
+      end
     end
 
     def collection_arguments(pagination_data = {})

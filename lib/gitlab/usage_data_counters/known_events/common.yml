@@ -408,3 +408,7 @@
   redis_slot: ci_secrets_management
   aggregation: weekly
   feature_flag: usage_data_i_ci_secrets_management_vault_build_created
+- name: i_code_review_viewed_diffs_file_by_file
+  redis_slot: code_review
+  category: code_review
+  aggregation: daily

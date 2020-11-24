@@ -11,6 +11,8 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
 
   around_action :allow_gitaly_ref_name_caching
 
+  after_action :track_viewed_diffs_file_by_file_event, only: [:diffs_batch]
+
   def show
     render_diffs
   end
@@ -187,5 +189,15 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
     return if @merge_request.has_any_diff_note_positions?
 
     Discussions::CaptureDiffNotePositionsService.new(@merge_request).execute
+  end
+
+  def track_viewed_diffs_file_by_file_event
+    return unless view_diffs_file_by_file?
+
+    Gitlab::UsageDataCounters::HLLRedisCounter
+      .track_usage_event(
+        'i_code_review_viewed_diffs_file_by_file',
+        @merge_request.id
+      )
   end
 end

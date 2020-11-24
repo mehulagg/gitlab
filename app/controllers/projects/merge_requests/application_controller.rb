@@ -9,6 +9,10 @@ class Projects::MergeRequests::ApplicationController < Projects::ApplicationCont
 
   private
 
+  def view_diffs_file_by_file?
+    Feature.enabled?(:view_diffs_file_by_file, default_enabled: true) && current_user&.view_diffs_file_by_file
+  end
+
   def merge_request
     @issuable =
       @merge_request ||=
