@@ -132,9 +132,9 @@ export default {
   <div class="ci-job-component" data-qa-selector="job_item_container">
     <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
       <gl-link
-        v-if="status.hasDetails"
+        v-if="status.has_details"
         v-gl-tooltip="{ boundary, placement: 'bottom', customClass: 'gl-pointer-events-none' }"
-        :href="status.detailsPath"
+        :href="status.details_path"
         :title="tooltipText"
         :class="jobClasses"
         class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none

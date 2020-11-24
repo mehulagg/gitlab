@@ -69,9 +69,10 @@ export default {
   <main-graph-wrapper>
     <template #stages>
       <div
+        data-testid="stage-column-title"
         class="gl-display-flex gl-justify-content-space-between gl-relative"
         :class="$options.titleClasses">
-        <div class="xz">{{ formattedTitle }}</div>
+        <div>{{ formattedTitle }}</div>
         <action-component
           v-if="hasAction"
           :action-icon="action.icon"
