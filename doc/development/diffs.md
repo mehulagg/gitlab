@@ -164,8 +164,6 @@ both options `master (base)` and `master (HEAD)` are available to be displayed i
 
 ![Merge ref head options](img/merge_ref_head_options_v13_6.png)
 
-The `master (HEAD)` option is meant to replace `master (base)` in the future.
-
 In order to support comments for both options, diff note positions are stored for
 both `master (base)` and `master (HEAD)` versions ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/198457) in 12.10).
 The position for `master (base)` version is stored in `Note#position` and
@@ -183,3 +181,11 @@ conflict has been
 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232484). However,
 there are more classes of merge conflicts that are to be
 [addressed](https://gitlab.com/groups/gitlab-org/-/epics/4893) in the future.
+
+The `master (HEAD)` option is meant to replace `master (base)` in the future.
+Currently, when `master (HEAD)` option is selected, we calculate the merge ref head diff.
+If, for some reason, we can't calculate merge ref head diff (an unsupported type of conflicts happened),
+then we fallback to master (base) diff. As long as we stick to this strategy, we're good to make the master (HEAD) mode the default,
+but in order to be on the safe side, we display the message that the merge request has conflicts and diff may be inaccurate:
+
+![Merge ref head with conflicts message](img/merge_ref_head_with_conflicts_message_v13_7.png)
