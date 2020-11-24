@@ -177,8 +177,6 @@ module Gitlab
           line.length > MAX_LINE_LENGTH
         when Integer
           line > MAX_LINE_LENGTH
-        else
-          raise ArgumentError, "The line argument (#{line}) should be a String or an Integer! #{line.class} given."
         end
       end
 
