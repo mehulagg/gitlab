@@ -75,14 +75,14 @@ export default {
         v-for="(group, index) in groups"
         :id="groupId(group)"
         :key="group[getAccessor('groupId')]"
-        class="build"
+        class="gl-relative gl-mb-3 gl-white-space-normal gl-pipeline-job-width"
       >
         <job-item
           v-if="group.size === 1"
           :job="group.jobs[0]"
           :job-hovered="jobHovered"
           :pipeline-expanded="pipelineExpanded"
-          css-class-job-name="build-content"
+          css-class-job-name="gl-build-content"
         />
         <job-group-dropdown
           v-else

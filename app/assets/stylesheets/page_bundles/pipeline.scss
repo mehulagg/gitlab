@@ -129,10 +129,59 @@
   overflow: auto;
 }
 
-// This is a single-value class to use with utility-class style CSS
+// Move to Gitlab UI
+.gl-font-weight-100 {
+  font-weight: 100;
+}
+
+.gl-top-half {
+  top: 50% !important;
+}
+
+// These are single-value classes to use with utility-class style CSS
 // but to still access this variable. Do not add other styles.
-.pipeline-min-h {
+.gl-pipeline-min-h {
   min-height: $dropdown-max-height-lg;
+}
+
+.gl-pipeline-job-width {
+  width: 186px;
+}
+
+.gl-build-content {
+  @include build-content();
+}
+
+.gl-ci-action-icon-container {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  // Action Icons in big pipeline-graph nodes
+  &.ci-action-icon-wrapper {
+    height: 30px;
+    width: 30px;
+    border-radius: 100%;
+    display: block;
+    padding: 0;
+    line-height: 0;
+
+    svg {
+      fill: $gl-text-color-secondary;
+    }
+
+    .spinner {
+      top: 2px;
+    }
+
+    &.play {
+      svg {
+        left: 1px;
+        top: 1px;
+      }
+    }
+  }
 }
 
 // Pipeline graph, used at
