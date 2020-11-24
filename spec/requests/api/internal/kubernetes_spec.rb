@@ -87,7 +87,38 @@ RSpec.describe API::Internal::Kubernetes do
     end
   end
 
-  describe "GET /internal/kubernetes/agent_info" do
+  describe 'POST /internal/kubernetes/network_alert' do
+    def send_request(headers: {}, params: {})
+      post api('/internal/kubernetes/network_alert'), params: params, headers: headers.reverse_merge(jwt_auth_headers)
+    end
+
+    # include_examples 'authorization'
+    # include_examples 'agent authentication'
+
+    context 'is authenticated for an agent' do
+      let!(:agent_token) { create(:cluster_agent_token) }
+      let!(:agent) { agent_token.agent }
+      let!(:project) { agent.project }
+
+      let(:payload) do
+        {
+          alert: {
+            title: 'minimal',
+            message: 'network problem',
+            evalMatches: [{ value: 1, metric: 'Count', tags: {} }]
+          }
+        }
+      end
+
+      it 'returns no_content for valid gitops_sync_count' do
+        send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+  end
+
+  describe 'GET /internal/kubernetes/agent_info' do
     def send_request(headers: {}, params: {})
       get api('/internal/kubernetes/agent_info'), params: params, headers: headers.reverse_merge(jwt_auth_headers)
     end

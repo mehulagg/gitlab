@@ -100,6 +100,25 @@ module API
           end
         end
 
+        namespace 'kubernetes/network_alert' do
+          before do
+            check_agent_token
+          end
+
+          desc 'POST network alerts' do
+            detail 'Creates network  alert'
+          end
+          params do
+            requires :alert, type: Hash, desc: 'Alert details'
+          end
+          route_setting :authentication, cluster_agent_token_allowed: true
+          post '/' do
+            result = AlertManagement::NetworkAlertService.new(agent.project, nil, params[:alert]).execute
+
+            status result.http_status
+          end
+        end
+
         namespace 'kubernetes/usage_metrics' do
           desc 'POST usage metrics' do
             detail 'Updates usage metrics for agent'
