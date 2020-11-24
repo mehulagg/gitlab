@@ -816,6 +816,6 @@ This problem comes from the permissions of the GitLab Pages OAuth application. T
 
 If the wildcard DNS [prerequisite](#prerequisites) can't be met, you can still use GitLab Pages in a limited fashion:
 
-1. [Move](../../user/project/settings.md#transferring-an-existing-project-into-another-namespace)
+1. [Move](../../user/project/settings/index.md#transferring-an-existing-project-into-another-namespace)
    all projects you need to use Pages with into a single group namespace, for example `pages`.
 1. Configure a [DNS entry](#dns-configuration) without the `*.`-wildcard, for example `pages.example.io`.
