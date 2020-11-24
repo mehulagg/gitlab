@@ -40,16 +40,36 @@ If applicable, any groups/projects that are happy to have this feature turned on
 - [ ] Announce on the issue an estimated time this will be enabled on GitLab.com
 - [ ] Enable on GitLab.com by running chatops command in `#production` (`/chatops run feature set feature_name true`)
 - [ ] Cross post chatops Slack command to `#support_gitlab-com` ([more guidance when this is necessary in the dev docs](https://docs.gitlab.com/ee/development/feature_flags/controls.html#where-to-run-commands)) and in your team channel
-- [ ] Announce on the issue that the flag has been enabled
-- [ ] Remove feature flag and add changelog entry
-- [ ] After the flag removal is deployed, [clean up the feature flag](https://docs.gitlab.com/ee/development/feature_flags/controls.html#cleaning-up) by running chatops command in `#production` channel
+- [ ] Announce on the issue that the flag has been enabled on gitlab.com
+- [ ] Enable the feature by default at source code level by setting `true` to the [`default_enabled`](https://docs.gitlab.com/ee/development/feature_flags/development.html#feature-flag-definition-and-validation).
+  - [ ] (Required) Add a [changelog](https://docs.gitlab.com/ee/development/changelog.html) entry
+  - [ ] (Optional) Enable [Auto Clean Up](#option-1-auto-cleanup-recommended) by setting `true` to the [`auto_clean_up`](https://docs.gitlab.com/ee/development/feature_flags/development.html#feature-flag-definition-and-validation) in the same merge request.
+- [ ] Congrats! :tada: Your feature can be officially mentioned in a monthly release blog post.
+      You can also close an associated feature implementation issue if any.
 
-## Rollback Steps
+### Rollback Steps
 
 - [ ] This feature can be disabled by running the following Chatops command:
 
 ```
 /chatops run feature set --project=gitlab-org/gitlab feature_name false
 ```
+
+## Clean up after roll out
+
+In order to close this rollout issue, you must remove the feature flag definition
+from the source code. There are several options to clean up this feature flag and associated data.
+Please choose one of them from the following options:
+
+### Option 1: Auto cleanup (Recommended)
+
+- [ ] Set `true` to [`auto_clean_up`](https://docs.gitlab.com/ee/development/feature_flags/development.html#feature-flag-definition-and-validation).
+      GitLab will take care of the cleanup for your feature flag.
+      For more information, see [the documentation](https://docs.gitlab.com/ee/development/feature_flags/controls.html#auto-clean-up)
+
+### Option 2: Manual cleanup
+
+- [ ] Remove feature flag and add changelog entry
+- [ ] After the flag removal is deployed, [clean up the feature flag](https://docs.gitlab.com/ee/development/feature_flags/controls.html#cleaning-up) by running chatops command in `#production` channel
 
 /label ~"feature flag"

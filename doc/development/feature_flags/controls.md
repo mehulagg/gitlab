@@ -280,3 +280,32 @@ Then, you can delete it from production after the MR is deployed to prod:
 ```shell
 /chatops run feature delete some_feature
 ```
+
+## Automation
+
+### Auto Clean Up
+
+> Introduced in [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/276170)
+
+GitLab runs a Sidekiq cron worker to periodically clean up feature flags that have been already enabled by default.
+Specifically, it does the following processes:
+
+- The worker removes [the overridings](#cleanup-chatops) for the feature flag after 3. has been deployed on production.
+- The worker creates a merge request that [deletes the feature flag YAML](development.md#delete-a-feature-flag)
+   and assign the developer who introduced the feature flag to delete feature flag occurences in code.
+   You make sure that the pipeline is green.
+   By merging this merge request, the rollout issue will automatically be closed.
+
+#### How to enable the automation for a feature flag
+
+Set `true` to [`auto_clean_up` field](development.md#feature-flag-definition-and-validation) in the YAML definition. There are few requirements:
+
+- `type` must be `development`
+- `default_enabled` must be `true`
+- `milestone` must be present.
+- `introduced_by_url` must be a merge request in [the GitLab Canonical Project](https://gitlab.com/gitlab-org/gitlab).
+- `rollout_issue_url` must be an issue in [the GitLab Canonical Project](https://gitlab.com/gitlab-org/gitlab).
+
+#### How to disable the automation for a feature flag
+
+Set `false` to [`auto_clean_up` field](development.md#feature-flag-definition-and-validation) in the YAML definition.
