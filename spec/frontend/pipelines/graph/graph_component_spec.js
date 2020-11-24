@@ -1,5 +1,5 @@
 import { capitalize } from 'lodash';
-import { mount, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import PipelineGraph from '~/pipelines/components/graph/graph_component.vue';
 import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 import LinkedPipelinesColumn from '~/pipelines/components/graph/linked_pipelines_column.vue';
@@ -51,21 +51,6 @@ describe('graph component', () => {
 
     it('should not render a linked pipelines column', () => {
       expect(findLinkedColumns()).toHaveLength(0);
-    });
-  });
-
-  describe('capitalizeStageName', () => {
-    const firstStage = defaultProps.pipeline.stages[1].name;
-
-    beforeEach(() => {
-      const unescapedTitle = `${firstStage} &lt;img src=x onerror=alert(document.domain)&gt;`;
-      const dataCopy = { ...mockPipelineResponse };
-      dataCopy.data.project.pipeline.stages.nodes[1].name = unescapedTitle;
-      createComponent({ props: generateResponse(dataCopy), method: mount });
-    });
-
-    it('capitalizes and escapes stage name', () => {
-      expect(findStageColumnTitleAt(1).text()).toEqual(capitalize(firstStage));
     });
   });
 });
