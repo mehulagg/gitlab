@@ -181,10 +181,10 @@ license_scanning:
     expire_in: 1 week  # GitLab-specific
   dependencies: []
 
-.secret-analyzer:
+secret_detection:
   extends:
     - .default-retry
-    - .reports:rules:sast
+    - .reports:rules:secret_detection
   stage: test
   needs: []
   artifacts:

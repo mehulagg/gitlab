@@ -715,6 +715,13 @@
       changes: *code-backstage-qa-patterns
       allow_failure: true
 
+.reports:rules:secret_detection:
+  rules:
+    - if: '$SECRET_DETECTION_DISABLED || $GITLAB_FEATURES !~ /\bsecret_detection\b/'
+      when: never
+    - <<: *if-default-refs
+      allow_failure: true
+
 .reports:rules:dast:
   rules:
     - if: '$DAST_DISABLED || $GITLAB_FEATURES !~ /\bdast\b/'
