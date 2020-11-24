@@ -127,9 +127,6 @@ In these cases, use the following workflow:
    1. If multiple groups are affected, you may need approvals at the
       EM/Staff Engineer level from each affected area.
 
-1. Request review and approval from the Technical Writer assigned
-   to [Development Guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines).
-
 1. Once these reviews are complete, consult with the EM/Staff Engineer
    author / approver of the MR. If the change affects multiple areas
    in a significant way:
