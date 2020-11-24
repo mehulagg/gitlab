@@ -15,7 +15,7 @@ RSpec.describe AddNewDataToIssuesDocuments do
   describe 'migration_options' do
     it 'has migration options set', :aggregate_failures do
       expect(described_class.get_migration_options[:batched]).to be_truthy
-      expect(described_class.get_migration_options[:throttle_time]).to eq(5.minutes)
+      expect(described_class.get_migration_options[:throttle_delay]).to eq(5.minutes)
     end
   end
 

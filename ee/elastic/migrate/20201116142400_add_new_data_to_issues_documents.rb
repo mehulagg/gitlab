@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AddNewDataToIssuesDocuments < Elastic::Migration
-  migration_options batched: true, throttle_time: 5.minutes
+  migration_options batched: true, throttle_delay: 5.minutes
 
   BATCH_SIZE = 5000
 

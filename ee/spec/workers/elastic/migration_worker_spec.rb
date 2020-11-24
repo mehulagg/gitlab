@@ -48,7 +48,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
         before do
           allow(migration).to receive(:persisted?).and_return(persisted)
           allow(migration).to receive(:completed?).and_return(completed)
-          allow(migration).to receive(:migration_options).and_return(batched: batched, throttle_time: 5.minutes)
+          allow(migration).to receive(:migration_options).and_return(batched: batched, throttle_delay: 5.minutes)
         end
 
         using RSpec::Parameterized::TableSyntax
