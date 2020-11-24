@@ -71,16 +71,14 @@ you ask for reviews from depend on the level of change, as described below.
 
 #### Trivial changes
 
-Changes are "trivial" if they do not require extensive review.
-For example, if the MR:
+Not all changes require extensive review. For example, MRs with the following
+"trivial" changes can be reviewed, approved, and merged by
+any maintainer or technical writer.
 
-- Fixes typos.
-- Includes clarifying links, such as to external programming language documentation.
-- Makes changes to comply with the [documentation style guide](documentation/index.md)
-  in a way that clearly does not change the intent of the documentation.
-
-Such "trivial" changes can be reviewed, approved, and merged by
-any maintainer or any technical writer.
+- Typo fixes.
+- Clarifying links, such as to external programming language documentation.
+- Changes to comply with the [documentation style guide](documentation/index.md),
+  as long as those changes clearly do not change the intent of the documentation.
 
 #### Specific changes
 
