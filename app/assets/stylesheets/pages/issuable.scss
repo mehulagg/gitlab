@@ -9,6 +9,12 @@
   line-height: $gl-line-height-24;
 }
 
+.repo-commit-content-class {
+  .flash-container {
+    @include fixed-width-container;
+  }
+}
+
 .limit-container-width {
   .detail-page-header,
   .page-content-header,
