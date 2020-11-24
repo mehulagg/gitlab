@@ -105,9 +105,10 @@ If the MR proposes changes limited to a particular stage, group, or team:
 
 Some changes affect more than one group. For example:
 
-- Changes to code review guidelines.
-- Changes to commit message guidelines.
-- Changes to feature flag guidelines.
+- Changes to [code review guidelines](code_review.md).
+- Changes to [commit message guidelines](contributing/merge_request_workflow.md#commit-messages-guidelines).
+- Changes to guidelines in [feature flags in development of GitLab](feature_flags/).
+- Changes to production [features deployed behind feature flags](documentation/feature_flags.md)
 
 In these cases, use the following workflow:
 
