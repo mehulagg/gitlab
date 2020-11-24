@@ -4,7 +4,6 @@ import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import Filters from './filters.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
-import VulnerabilityChart from './vulnerability_chart.vue';
 import FuzzingArtifactsDownload from './fuzzing_artifacts_download.vue';
 import LoadingError from './loading_error.vue';
 
@@ -14,7 +13,6 @@ export default {
     IssueModal,
     SecurityDashboardLayout,
     SecurityDashboardTable,
-    VulnerabilityChart,
     FuzzingArtifactsDownload,
     LoadingError,
   },
@@ -22,11 +20,6 @@ export default {
     vulnerabilitiesEndpoint: {
       type: String,
       required: true,
-    },
-    vulnerabilitiesHistoryEndpoint: {
-      type: String,
-      required: false,
-      default: '',
     },
     pipelineId: {
       type: Number,
@@ -67,19 +60,11 @@ export default {
     vulnerability() {
       return this.modal.vulnerability;
     },
-    shouldShowAside() {
-      return this.shouldShowChart;
-    },
-    shouldShowChart() {
-      return Boolean(this.vulnerabilitiesHistoryEndpoint);
-    },
   },
   created() {
     this.setPipelineId(this.pipelineId);
     this.setVulnerabilitiesEndpoint(this.vulnerabilitiesEndpoint);
-    this.setVulnerabilitiesHistoryEndpoint(this.vulnerabilitiesHistoryEndpoint);
     this.fetchVulnerabilities({ ...this.filters, page: this.pageInfo.page });
-    this.fetchVulnerabilitiesHistory(this.filters);
     this.fetchPipelineJobs();
   },
   methods: {
@@ -91,11 +76,9 @@ export default {
       'createMergeRequest',
       'dismissVulnerability',
       'fetchVulnerabilities',
-      'fetchVulnerabilitiesHistory',
       'openDismissalCommentBox',
       'setPipelineId',
       'setVulnerabilitiesEndpoint',
-      'setVulnerabilitiesHistoryEndpoint',
       'showDismissalDeleteButtons',
       'hideDismissalDeleteButtons',
       'undoDismiss',
@@ -133,10 +116,6 @@ export default {
             <slot name="empty-state"></slot>
           </template>
         </security-dashboard-table>
-
-        <template v-if="shouldShowAside" #aside>
-          <vulnerability-chart v-if="shouldShowChart" class="mb-3" />
-        </template>
       </security-dashboard-layout>
 
       <issue-modal

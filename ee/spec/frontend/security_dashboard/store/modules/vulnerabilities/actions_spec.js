@@ -1,6 +1,5 @@
 import MockAdapter from 'axios-mock-adapter';
 import * as actions from 'ee/security_dashboard/store/modules/vulnerabilities/actions';
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 import initialState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import testAction from 'helpers/vuex_action_helper';
@@ -10,7 +9,6 @@ import axios from '~/lib/utils/axios_utils';
 import toast from '~/vue_shared/plugins/global_toast';
 
 import mockDataVulnerabilities from './data/mock_data_vulnerabilities';
-import mockDataVulnerabilitiesHistory from './data/mock_data_vulnerabilities_history.json';
 
 const sourceBranch = 'feature-branch-1';
 
@@ -1345,189 +1343,13 @@ describe('revert vulnerability dismissal', () => {
       );
     });
   });
-});
-
-describe('vulnerabilities history actions', () => {
-  const data = mockDataVulnerabilitiesHistory;
-  const params = { filters: { severity: ['critical'] } };
-  const filteredData = mockDataVulnerabilitiesHistory.critical;
-  let state;
-
-  beforeEach(() => {
-    state = initialState();
-  });
-
-  describe('setVulnerabilitiesHistoryEndpoint', () => {
-    it('should commit the correct mutuation', done => {
-      const endpoint = 'fakepath.json';
-
-      testAction(
-        actions.setVulnerabilitiesHistoryEndpoint,
-        endpoint,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_HISTORY_ENDPOINT,
-            payload: endpoint,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('setVulnerabilitiesHistoryDayRange', () => {
-    it('should commit the number of past days to show', done => {
-      const days = DAYS.THIRTY;
-      testAction(
-        actions.setVulnerabilitiesHistoryDayRange,
-        days,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_HISTORY_DAY_RANGE,
-            payload: days,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('fetchVulnerabilitiesHistory', () => {
-    let mock;
-
-    beforeEach(() => {
-      state.vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilitIES_HISTORY.json`;
-      mock = new MockAdapter(axios);
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
-
-    describe('on success', () => {
-      beforeEach(() => {
-        mock
-          .onGet(state.vulnerabilitiesHistoryEndpoint, { params })
-          .replyOnce(200, filteredData)
-          .onGet(state.vulnerabilitiesHistoryEndpoint)
-          .replyOnce(200, data);
-      });
-
-      it('should dispatch the request and success actions', done => {
-        testAction(
-          actions.fetchVulnerabilitiesHistory,
-          {},
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesHistory' },
-            {
-              type: 'receiveVulnerabilitiesHistorySuccess',
-              payload: { data },
-            },
-          ],
-          done,
-        );
-      });
-
-      it('return the filtered results', done => {
-        testAction(
-          actions.fetchVulnerabilitiesHistory,
-          params,
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesHistory' },
-            {
-              type: 'receiveVulnerabilitiesHistorySuccess',
-              payload: { data: filteredData },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('on error', () => {
-      beforeEach(() => {
-        mock.onGet(state.vulnerabilitiesHistoryEndpoint).replyOnce(404, {});
-      });
-
-      it('should dispatch the request and error actions', done => {
-        testAction(
-          actions.fetchVulnerabilitiesHistory,
-          {},
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesHistory' },
-            { type: 'receiveVulnerabilitiesHistoryError' },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('with an empty endpoint', () => {
-      beforeEach(() => {
-        state.vulnerabilitiesHistoryEndpoint = '';
-      });
-
-      it('should not do anything', done => {
-        testAction(actions.fetchVulnerabilitiesHistory, {}, state, [], [], done);
-      });
-    });
-  });
-
-  describe('requestVulnerabilitiesHistory', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestVulnerabilitiesHistory,
-        {},
-        state,
-        [{ type: types.REQUEST_VULNERABILITIES_HISTORY }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveVulnerabilitiesHistorySuccess', () => {
-    it('should commit the success mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesHistorySuccess,
-        { data },
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS, payload: data }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveVulnerabilitiesHistoryError', () => {
-    it('should commit the error mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesHistoryError,
-        {},
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_HISTORY_ERROR }],
-        [],
-        done,
-      );
-    });
-  });
 
   describe('openDismissalCommentBox', () => {
     it('should commit the open comment mutation with a default payload', done => {
       testAction(
         actions.openDismissalCommentBox,
         undefined,
-        state,
+        undefined,
         [{ type: types.OPEN_DISMISSAL_COMMENT_BOX }],
         [],
         done,
@@ -1540,7 +1362,7 @@ describe('vulnerabilities history actions', () => {
       testAction(
         actions.closeDismissalCommentBox,
         {},
-        state,
+        undefined,
         [{ type: types.CLOSE_DISMISSAL_COMMENT_BOX }],
         [],
         done,
