@@ -3,7 +3,7 @@
 ## Summary
 
 The experiment is currently rolled out to 100% of users and has been deemed a success.
-This now needs to work as it does as part of the product.
+The changes need to become an official part of the product.
 
 ## Steps
 
