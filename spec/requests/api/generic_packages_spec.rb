@@ -182,8 +182,8 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :developer | false | :personal_access_token         | :not_found
         'PRIVATE' | :guest     | false | :personal_access_token         | :not_found
-        'PRIVATE' | :developer | false | :user_basic_auth               | :forbidden
-        'PRIVATE' | :guest     | false | :user_basic_auth               | :forbidden
+        'PRIVATE' | :developer | false | :user_basic_auth               | :not_found
+        'PRIVATE' | :guest     | false | :user_basic_auth               | :not_found
         'PRIVATE' | :developer | false | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | false | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :developer | false | :invalid_user_basic_auth       | :unauthorized
