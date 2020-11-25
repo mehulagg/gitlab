@@ -50,9 +50,6 @@ export default {
         id: this.iterationId,
       };
     },
-    showCards() {
-      return !this.$apollo.queries.issues.loading && Object.values(this.issues).every(a => a >= 0);
-    },
     columns() {
       return [
         {
@@ -70,5 +67,9 @@ export default {
 </script>
 
 <template>
-  <iteration-report-summary-cards v-if="showCards" :columns="columns" :total="issues.total" />
+  <iteration-report-summary-cards
+    :columns="columns"
+    :loading="this.$apollo.queries.issues.loading"
+    :total="issues.total"
+  />
 </template>

@@ -100,5 +100,9 @@ export default {
 </script>
 
 <template>
-  <iteration-report-summary-cards v-if="showCards" :columns="columns" :total="total" />
+  <iteration-report-summary-cards
+    :columns="columns"
+    :loading="this.$apollo.queries.issues.loading"
+    :total="total"
+  />
 </template>

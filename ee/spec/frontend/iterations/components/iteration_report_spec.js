@@ -116,14 +116,12 @@ describe('Iterations report', () => {
       });
 
       it('renders IterationReportSummaryClosed for closed iteration', async () => {
-        wrapper.setData({
+        await wrapper.setData({
           iteration: {
             ...iteration,
             state: 'closed',
           },
         });
-
-        await wrapper.vm.$nextTick();
 
         expect(wrapper.find(IterationReportSummaryClosed).props()).toEqual({
           iterationId: iteration.id,
@@ -133,9 +131,11 @@ describe('Iterations report', () => {
       it('shows IterationReportTabs component', () => {
         const iterationReportTabs = wrapper.find(IterationReportTabs);
 
-        expect(iterationReportTabs.props('fullPath')).toBe(defaultProps.fullPath);
-        expect(iterationReportTabs.props('iterationId')).toBe(iteration.id);
-        expect(iterationReportTabs.props('namespaceType')).toBe(Namespace.Group);
+        expect(iterationReportTabs.props()).toEqual({
+          fullPath: defaultProps.fullPath,
+          iterationId: iteration.id,
+          namespaceType: Namespace.Group,
+        });
       });
     });
 
