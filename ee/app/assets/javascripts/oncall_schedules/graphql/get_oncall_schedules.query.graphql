@@ -1,0 +1,12 @@
+query getOncallSchedules($projectPath: ID!) {
+    project(fullPath: $projectPath) {
+        incidentManagementOncallSchedules {
+            nodes {
+                iid
+                name
+                description
+                timezone
+            }
+        }
+    }
+}
