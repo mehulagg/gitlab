@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::GenericPackages do
+  include HttpBasicAuthHelpers
+
   let_it_be(:personal_access_token) { create(:personal_access_token) }
   let_it_be(:project, reload: true) { create(:project) }
   let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
@@ -22,6 +24,10 @@ RSpec.describe API::GenericPackages do
       personal_access_token_header('wrong token')
     when :invalid_job_token
       job_token_header('wrong token')
+    when :user_basic_auth
+      user_basic_auth_header(user)
+    when :invalid_user_basic_auth
+      basic_auth_header('invalid user', 'invalid password')
     end
   end
 
@@ -54,19 +60,35 @@ RSpec.describe API::GenericPackages do
         'PUBLIC'  | :guest     | true  | :personal_access_token         | :forbidden
         'PUBLIC'  | :developer | true  | :invalid_personal_access_token | :unauthorized
         'PUBLIC'  | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | true  | :user_basic_auth               | :success
+        'PUBLIC'  | :guest     | true  | :user_basic_auth               | :forbidden
+        'PUBLIC'  | :developer | true  | :invalid_user_basic_auth       | :unauthorized
+        'PUBLIC'  | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PUBLIC'  | :developer | false | :personal_access_token         | :forbidden
         'PUBLIC'  | :guest     | false | :personal_access_token         | :forbidden
         'PUBLIC'  | :developer | false | :invalid_personal_access_token | :unauthorized
         'PUBLIC'  | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | false | :user_basic_auth               | :forbidden
+        'PUBLIC'  | :guest     | false | :user_basic_auth               | :forbidden
+        'PUBLIC'  | :developer | false | :invalid_user_basic_auth       | :unauthorized
+        'PUBLIC'  | :guest     | false | :invalid_user_basic_auth       | :unauthorized
         'PUBLIC'  | :anonymous | false | :none                          | :unauthorized
         'PRIVATE' | :developer | true  | :personal_access_token         | :success
         'PRIVATE' | :guest     | true  | :personal_access_token         | :forbidden
         'PRIVATE' | :developer | true  | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | true  | :user_basic_auth               | :success
+        'PRIVATE' | :guest     | true  | :user_basic_auth               | :forbidden
+        'PRIVATE' | :developer | true  | :invalid_user_basic_auth       | :unauthorized
+        'PRIVATE' | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :developer | false | :personal_access_token         | :not_found
         'PRIVATE' | :guest     | false | :personal_access_token         | :not_found
         'PRIVATE' | :developer | false | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | false | :user_basic_auth               | :not_found
+        'PRIVATE' | :guest     | false | :user_basic_auth               | :not_found
+        'PRIVATE' | :developer | false | :invalid_user_basic_auth       | :unauthorized
+        'PRIVATE' | :guest     | false | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :anonymous | false | :none                          | :unauthorized
         'PUBLIC'  | :developer | true  | :job_token                     | :success
         'PUBLIC'  | :developer | true  | :invalid_job_token             | :unauthorized
@@ -138,20 +160,34 @@ RSpec.describe API::GenericPackages do
 
       where(:project_visibility, :user_role, :member?, :authenticate_with, :expected_status) do
         'PUBLIC'  | :guest     | true  | :personal_access_token         | :forbidden
+        'PUBLIC'  | :guest     | true  | :user_basic_auth               | :forbidden
         'PUBLIC'  | :developer | true  | :invalid_personal_access_token | :unauthorized
         'PUBLIC'  | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | true  | :invalid_user_basic_auth       | :unauthorized
+        'PUBLIC'  | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PUBLIC'  | :developer | false | :personal_access_token         | :forbidden
         'PUBLIC'  | :guest     | false | :personal_access_token         | :forbidden
+        'PUBLIC'  | :developer | false | :user_basic_auth               | :forbidden
+        'PUBLIC'  | :guest     | false | :user_basic_auth               | :forbidden
         'PUBLIC'  | :developer | false | :invalid_personal_access_token | :unauthorized
         'PUBLIC'  | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | false | :invalid_user_basic_auth       | :unauthorized
+        'PUBLIC'  | :guest     | false | :invalid_user_basic_auth       | :unauthorized
         'PUBLIC'  | :anonymous | false | :none                          | :unauthorized
         'PRIVATE' | :guest     | true  | :personal_access_token         | :forbidden
+        'PRIVATE' | :guest     | true  | :user_basic_auth               | :forbidden
         'PRIVATE' | :developer | true  | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | true  | :invalid_user_basic_auth       | :unauthorized
+        'PRIVATE' | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :developer | false | :personal_access_token         | :not_found
         'PRIVATE' | :guest     | false | :personal_access_token         | :not_found
+        'PRIVATE' | :developer | false | :user_basic_auth               | :forbidden
+        'PRIVATE' | :guest     | false | :user_basic_auth               | :forbidden
         'PRIVATE' | :developer | false | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | false | :invalid_user_basic_auth       | :unauthorized
+        'PRIVATE' | :guest     | false | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :anonymous | false | :none                          | :unauthorized
         'PUBLIC'  | :developer | true  | :invalid_job_token             | :unauthorized
         'PUBLIC'  | :developer | false | :job_token                     | :forbidden
@@ -184,6 +220,26 @@ RSpec.describe API::GenericPackages do
 
       it 'creates package and package file when valid personal access token is used' do
         headers = workhorse_header.merge(personal_access_token_header)
+
+        expect { upload_file(params, headers) }
+          .to change { project.packages.generic.count }.by(1)
+          .and change { Packages::PackageFile.count }.by(1)
+
+        aggregate_failures do
+          expect(response).to have_gitlab_http_status(:created)
+
+          package = project.packages.generic.last
+          expect(package.name).to eq('mypackage')
+          expect(package.version).to eq('0.0.1')
+          expect(package.original_build_info).to be_nil
+
+          package_file = package.package_files.last
+          expect(package_file.file_name).to eq('myfile.tar.gz')
+        end
+      end
+
+      it 'creates package and package file when valid basic auth is used' do
+        headers = workhorse_header.merge(user_basic_auth_header(user))
 
         expect { upload_file(params, headers) }
           .to change { project.packages.generic.count }.by(1)
@@ -309,21 +365,37 @@ RSpec.describe API::GenericPackages do
       where(:project_visibility, :user_role, :member?, :authenticate_with, :expected_status) do
         'PUBLIC'  | :developer | true  | :personal_access_token         | :success
         'PUBLIC'  | :guest     | true  | :personal_access_token         | :success
+        'PUBLIC'  | :developer | true  | :user_basic_auth               | :success
+        'PUBLIC'  | :guest     | true  | :user_basic_auth               | :success
         'PUBLIC'  | :developer | true  | :invalid_personal_access_token | :unauthorized
         'PUBLIC'  | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | true  | :invalid_user_basic_auth       | :unauthorized
+        'PUBLIC'  | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PUBLIC'  | :developer | false | :personal_access_token         | :success
         'PUBLIC'  | :guest     | false | :personal_access_token         | :success
+        'PUBLIC'  | :developer | false | :user_basic_auth               | :success
+        'PUBLIC'  | :guest     | false | :user_basic_auth               | :success
         'PUBLIC'  | :developer | false | :invalid_personal_access_token | :unauthorized
         'PUBLIC'  | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | false | :invalid_user_basic_auth       | :unauthorized
+        'PUBLIC'  | :guest     | false | :invalid_user_basic_auth       | :unauthorized
         'PUBLIC'  | :anonymous | false | :none                          | :unauthorized
         'PRIVATE' | :developer | true  | :personal_access_token         | :success
         'PRIVATE' | :guest     | true  | :personal_access_token         | :forbidden
+        'PRIVATE' | :developer | true  | :user_basic_auth               | :success
+        'PRIVATE' | :guest     | true  | :user_basic_auth               | :forbidden
         'PRIVATE' | :developer | true  | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | true  | :invalid_user_basic_auth       | :unauthorized
+        'PRIVATE' | :guest     | true  | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :developer | false | :personal_access_token         | :not_found
         'PRIVATE' | :guest     | false | :personal_access_token         | :not_found
+        'PRIVATE' | :developer | false | :user_basic_auth               | :not_found
+        'PRIVATE' | :guest     | false | :user_basic_auth               | :not_found
         'PRIVATE' | :developer | false | :invalid_personal_access_token | :unauthorized
         'PRIVATE' | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | false | :invalid_user_basic_auth       | :unauthorized
+        'PRIVATE' | :guest     | false | :invalid_user_basic_auth       | :unauthorized
         'PRIVATE' | :anonymous | false | :none                          | :unauthorized
         'PUBLIC'  | :developer | true  | :job_token                     | :success
         'PUBLIC'  | :developer | true  | :invalid_job_token             | :unauthorized
