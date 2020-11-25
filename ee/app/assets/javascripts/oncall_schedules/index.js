@@ -16,6 +16,7 @@ export default () => {
     defaultClient: createDefaultClient(),
   });
 
+  debugger
   return new Vue({
     el,
     apolloProvider,
