@@ -306,11 +306,12 @@ build_artifact:
   stage: build
   script:
     - <your build script goes here>
-    - <example: bundle exec jekyll build -d public>
   artifacts:
     paths:
       - <built artifact>
 ```
+
+A video walthrough on setting this up can be found [here](https://www.youtube.com/watch?v=4B-qSwKnacA).
 
 ### Deploy to Amazon EKS
 
