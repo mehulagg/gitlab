@@ -561,6 +561,7 @@ module.exports = {
     stats: 'errors-only',
     hot: DEV_SERVER_LIVERELOAD,
     inline: DEV_SERVER_LIVERELOAD,
+    clientLogLevel: 'warn',
   },
 
   devtool: NO_SOURCEMAPS ? false : devtool,
