@@ -1,7 +1,7 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
-import StatisticsHistory from 'ee/threat_monitoring/components/statistics_history.vue';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { TOTAL_REQUESTS, ANOMALOUS_REQUESTS } from 'ee/threat_monitoring/components/constants';
+import StatisticsHistory from 'ee/threat_monitoring/components/statistics_history.vue';
 import { mockNominalHistory, mockAnomalousHistory } from '../mock_data';
 
 let resizeCallback = null;

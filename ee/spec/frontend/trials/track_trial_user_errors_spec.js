@@ -1,5 +1,5 @@
-import { mockTracking } from 'helpers/tracking_helper';
 import trackTrialUserErrors from 'ee/trials/track_trial_user_errors';
+import { mockTracking } from 'helpers/tracking_helper';
 
 describe('trackTrialUserErrors', () => {
   let spy;

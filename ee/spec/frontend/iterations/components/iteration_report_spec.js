@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
-import IterationReport from 'ee/iterations/components/iteration_report.vue';
+import { shallowMount } from '@vue/test-utils';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
+import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';

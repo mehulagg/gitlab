@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import GeoNodeFormCore from 'ee/geo_node_form/components/geo_node_form_core.vue';
 import {
   VALIDATION_FIELD_KEYS,

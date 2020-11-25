@@ -1,6 +1,6 @@
+import { GlTable, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlTable, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import MembersApp from 'ee/pages/groups/saml_providers/saml_members/index.vue';
 import createInitialState from 'ee/pages/groups/saml_providers/saml_members/store/state';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';

@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
+import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
-import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import getters from 'ee/boards/stores/getters';
 import { mockEpic, mockListsWithModel, mockIssuesByListId, issues } from '../mock_data';
 

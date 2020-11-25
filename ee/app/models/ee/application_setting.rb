@@ -60,6 +60,18 @@ module EE
                 presence: { message: "can't be blank when indexing is enabled" },
                 if: ->(setting) { setting.elasticsearch_indexing? }
 
+      validates :secret_detection_revocation_token_types_url,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
+      validates :secret_detection_token_revocation_url,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
+      validates :secret_detection_token_revocation_token,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
       validate :check_elasticsearch_url_scheme, if: :elasticsearch_url_changed?
 
       validates :elasticsearch_aws_region,
@@ -150,6 +162,7 @@ module EE
           secret_detection_token_revocation_enabled: false,
           secret_detection_token_revocation_url: nil,
           secret_detection_token_revocation_token: nil,
+          secret_detection_revocation_token_types_url: nil,
           slack_app_enabled: false,
           slack_app_id: nil,
           slack_app_secret: nil,

@@ -1,5 +1,5 @@
-import createState from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/state';
 import * as getters from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/getters';
+import createState from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/state';
 
 describe('threatMonitoringStatistics module getters', () => {
   let state;

@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import FirstClassInstanceDashboardSettings from 'ee/security_dashboard/components/first_class_instance_security_dashboard_settings.vue';
 import ProjectManager from 'ee/security_dashboard/components/first_class_project_manager/project_manager.vue';
 

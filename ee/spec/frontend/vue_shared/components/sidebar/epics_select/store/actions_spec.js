@@ -1,11 +1,10 @@
 import Api from 'ee/api';
 
-import testAction from 'helpers/vuex_action_helper';
-
-import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 import * as actions from 'ee/vue_shared/components/sidebar/epics_select/store/actions';
 import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
+import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 import { noneEpic } from 'ee/vue_shared/constants';
+import testAction from 'helpers/vuex_action_helper';
 import boardsStore from '~/boards/stores/boards_store';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';

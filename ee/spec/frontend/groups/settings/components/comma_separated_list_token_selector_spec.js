@@ -1,6 +1,6 @@
-import { nextTick } from 'vue';
-import { mount } from '@vue/test-utils';
 import { GlToken, GlTokenSelector } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 
 import CommaSeparatedListTokenSelector from 'ee/groups/settings/components/comma_separated_list_token_selector.vue';
 

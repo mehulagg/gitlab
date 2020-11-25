@@ -1,11 +1,11 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header_new.vue';
-import { listObj } from 'jest/boards/mock_data';
 import getters from 'ee/boards/stores/getters';
-import List from '~/boards/models/list';
+import { listObj } from 'jest/boards/mock_data';
 import { ListType, inactiveId } from '~/boards/constants';
+import List from '~/boards/models/list';
 import sidebarEventHub from '~/sidebar/event_hub';
 
 // board_promotion_state tries to mount on the real DOM,

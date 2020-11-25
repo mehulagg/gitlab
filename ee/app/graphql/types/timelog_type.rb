@@ -6,13 +6,6 @@ module Types
 
     authorize :read_group_timelogs
 
-    field :date,
-          Types::TimeType,
-          null: false,
-          method: :spent_at,
-          deprecated: { reason: 'Use `spentAt`', milestone: '12.10' },
-          description: 'Timestamp of when the time tracked was spent at'
-
     field :spent_at,
           Types::TimeType,
           null: true,

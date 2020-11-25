@@ -65,7 +65,6 @@ RSpec.describe VulnerabilitiesHelper do
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",
         notes_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/notes",
-        vulnerability_feedback_help_path: kind_of(String),
         related_issues_help_path: kind_of(String),
         pipeline: anything,
         can_modify_related_issues: false
@@ -201,6 +200,17 @@ RSpec.describe VulnerabilitiesHelper do
 
       it 'generates url to create issue in Jira' do
         expect(subject[:create_jira_issue_url]).to eq('https://jira.example.com/new')
+      end
+
+      context 'when scan property is empty' do
+        before do
+          vulnerability.finding.scan = nil
+        end
+
+        it 'renders description using dedicated template without raising error' do
+          expect(ApplicationController).to receive(:render).with(template: 'vulnerabilities/jira_issue_description.md.erb', locals: { vulnerability: an_instance_of(VulnerabilityPresenter) })
+          expect {subject}.not_to raise_error
+        end
       end
     end
 

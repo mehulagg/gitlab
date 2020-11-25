@@ -5,10 +5,10 @@ RSpec.describe 'Kerberos clone instructions', :js do
   include MobileHelpers
 
   let(:project) { create(:project, :empty_repo) }
-  let(:admin) { create(:admin) }
+  let(:user) { project.owner }
 
   before do
-    sign_in(admin)
+    sign_in(user)
 
     allow(Gitlab.config.kerberos).to receive(:enabled).and_return(true)
   end

@@ -2,20 +2,19 @@ import Vue from 'vue';
 
 import epicsListEmptyComponent from 'ee/roadmap/components/epics_list_empty.vue';
 
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import {
   getTimeframeForQuartersView,
   getTimeframeForWeeksView,
   getTimeframeForMonthsView,
 } from 'ee/roadmap/utils/roadmap_utils';
 
-import { PRESET_TYPES } from 'ee/roadmap/constants';
-
-import mountComponent from 'helpers/vue_mount_component_helper';
 import {
   mockTimeframeInitialDate,
   mockSvgPath,
   mockNewEpicEndpoint,
 } from 'ee_jest/roadmap/mock_data';
+import mountComponent from 'helpers/vue_mount_component_helper';
 
 const mockTimeframeQuarters = getTimeframeForQuartersView(mockTimeframeInitialDate);
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);

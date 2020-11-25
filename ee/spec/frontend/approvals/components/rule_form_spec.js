@@ -1,12 +1,12 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { createStoreOptions } from 'ee/approvals/stores';
-import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
-import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
 import ApproversList from 'ee/approvals/components/approvers_list.vue';
+import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
 import RuleForm from 'ee/approvals/components/rule_form.vue';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from 'ee/approvals/constants';
+import { createStoreOptions } from 'ee/approvals/stores';
+import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
 
 const TEST_PROJECT_ID = '7';
 const TEST_RULE = {

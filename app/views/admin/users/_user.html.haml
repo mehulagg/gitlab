@@ -40,15 +40,14 @@
                     %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: user_block_data(user, user_block_effects) }
                       = s_('AdminUsers|Block')
                   - else
-                    = link_to _('Unblock'), unblock_admin_user_path(user), method: :put
+                    %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: unblock_user_modal_data(user) }
+                      = s_('AdminUsers|Unblock')
                 - else
                   %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: user_block_data(user, user_block_effects) }
                     = s_('AdminUsers|Block')
               - if user.can_be_deactivated?
                 %li
-                  %button.btn.btn-default-tertiary{ data: { 'gl-modal-action': 'deactivate',
-                    url: deactivate_admin_user_path(user),
-                    username: sanitize_name(user.name) } }
+                  %button.btn.btn-default-tertiary.js-confirm-modal-button{ data: user_deactivation_data(user, user_deactivation_effects) }
                     = s_('AdminUsers|Deactivate')
               - elsif user.deactivated?
                 %li

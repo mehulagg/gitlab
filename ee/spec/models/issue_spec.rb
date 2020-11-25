@@ -13,6 +13,7 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
+    it { is_expected.to have_many(:metric_images) }
   end
 
   describe 'modules' do
@@ -1004,6 +1005,22 @@ RSpec.describe Issue do
       it 'returns the expected value' do
         expect(subject).to eq(sla_available)
       end
+    end
+  end
+
+  describe '.with_issue_type' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:issue) { create(:issue, project: project) }
+    let_it_be(:test_case) { create(:quality_test_case, project: project) }
+
+    it 'gives issues with test case type' do
+      expect(described_class.with_issue_type('test_case'))
+        .to contain_exactly(test_case)
+    end
+
+    it 'gives issues with the given issue types list' do
+      expect(described_class.with_issue_type(%w(issue test_case)))
+        .to contain_exactly(issue, test_case)
     end
   end
 end

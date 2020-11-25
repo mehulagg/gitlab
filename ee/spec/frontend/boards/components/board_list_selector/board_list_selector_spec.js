@@ -5,9 +5,9 @@ import mountComponent from 'helpers/vue_mount_component_helper';
 
 import { mockAssigneesList } from 'jest/boards/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
-import axios from '~/lib/utils/axios_utils';
-import boardsStore from '~/boards/stores/boards_store';
 import { createStore } from '~/boards/stores';
+import boardsStore from '~/boards/stores/boards_store';
+import axios from '~/lib/utils/axios_utils';
 
 describe('BoardListSelector', () => {
   global.gon.features = {

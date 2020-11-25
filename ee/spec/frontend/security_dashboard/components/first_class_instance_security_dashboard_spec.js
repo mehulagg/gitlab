@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
-import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
+import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
 import FirstClassInstanceDashboard from 'ee/security_dashboard/components/first_class_instance_security_dashboard.vue';
 import FirstClassInstanceVulnerabilities from 'ee/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue';
-import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
+import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 
 describe('First Class Instance Dashboard Component', () => {
   let wrapper;

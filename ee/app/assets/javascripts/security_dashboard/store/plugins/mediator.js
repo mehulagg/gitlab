@@ -1,6 +1,6 @@
-import { SET_FILTER, TOGGLE_HIDE_DISMISSED } from '../modules/filters/mutation_types';
+import { SET_FILTER, SET_HIDE_DISMISSED } from '../modules/filters/mutation_types';
 
-const refreshTypes = [`filters/${SET_FILTER}`, `filters/${TOGGLE_HIDE_DISMISSED}`];
+const refreshTypes = [`filters/${SET_FILTER}`, `filters/${SET_HIDE_DISMISSED}`];
 
 export default store => {
   const refreshVulnerabilities = payload => {

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::AuditLogReportsController < Admin::ApplicationController
+  include AuditEvents::DateRange
+
   before_action :validate_audit_log_reports_available!
 
   feature_category :audit_events

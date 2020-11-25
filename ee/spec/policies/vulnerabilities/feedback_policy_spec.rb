@@ -56,8 +56,8 @@ RSpec.describe Vulnerabilities::FeedbackPolicy do
         end
       end
 
-      context 'when user does not have permission to create merge_request from project' do
-        # guest can create merge request IN but not FROM
+      context 'when user does not have developer permission' do
+        # guest can create merge request IN
         let(:guest) { create(:user) }
 
         subject { described_class.new(guest, vulnerability_feedback) }
@@ -68,7 +68,6 @@ RSpec.describe Vulnerabilities::FeedbackPolicy do
 
         it 'does not allow to create merge request feedback' do
           is_expected.to be_allowed(:create_merge_request_in)
-          is_expected.to be_disallowed(:create_merge_request_from)
           is_expected.to be_disallowed(:create_vulnerability_feedback)
         end
       end

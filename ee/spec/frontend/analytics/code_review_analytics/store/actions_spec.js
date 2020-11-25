@@ -1,5 +1,5 @@
-import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/analytics/code_review_analytics/store/actions';
+import testAction from 'helpers/vuex_action_helper';
 
 describe('Code review analytics actions', () => {
   let state;

@@ -3,10 +3,6 @@
 class Projects::IterationsController < Projects::ApplicationController
   before_action :check_iterations_available!
   before_action :authorize_show_iteration!
-  before_action do
-    push_frontend_feature_flag(:iteration_charts, project, default_enabled: true)
-    push_frontend_feature_flag(:burnup_charts, project, default_enabled: true)
-  end
 
   feature_category :issue_tracking
 

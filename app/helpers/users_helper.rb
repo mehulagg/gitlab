@@ -123,6 +123,19 @@ module UsersHelper
     }
   end
 
+  def unblock_user_modal_data(user)
+    {
+      path: unblock_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Unblock user %{username}?') % { username: sanitize_name(user.name) },
+        message: s_('AdminUsers|You can always block their account again if needed.'),
+        okVariant: 'info',
+        okTitle: s_('AdminUsers|Unblock')
+      }.to_json
+    }
+  end
+
   def user_block_effects
     header = tag.p s_('AdminUsers|Blocking user has the following effects:')
 
@@ -131,6 +144,35 @@ module UsersHelper
       concat tag.li s_('AdminUsers|User will not be able to access git repositories')
       concat tag.li s_('AdminUsers|Personal projects will be left')
       concat tag.li s_('AdminUsers|Owned groups will be left')
+    end
+
+    header + list
+  end
+
+  def user_deactivation_data(user, message)
+    {
+      path: deactivate_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Deactivate user %{username}?') % { username: sanitize_name(user.name) },
+        messageHtml: message,
+        okVariant: 'warning',
+        okTitle: s_('AdminUsers|Deactivate')
+      }.to_json
+    }
+  end
+
+  def user_deactivation_effects
+    header = tag.p s_('AdminUsers|Deactivating a user has the following effects:')
+
+    list = tag.ul do
+      concat tag.li s_('AdminUsers|The user will be logged out')
+      concat tag.li s_('AdminUsers|The user will not be able to access git repositories')
+      concat tag.li s_('AdminUsers|The user will not be able to access the API')
+      concat tag.li s_('AdminUsers|The user will not receive any notifications')
+      concat tag.li s_('AdminUsers|The user will not be able to use slash commands')
+      concat tag.li s_('AdminUsers|When the user logs back in, their account will reactivate as a fully active account')
+      concat tag.li s_('AdminUsers|Personal projects, group and user history will be left intact')
     end
 
     header + list

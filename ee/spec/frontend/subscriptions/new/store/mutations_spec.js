@@ -1,5 +1,5 @@
-import mutations from 'ee/subscriptions/new/store/mutations';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
+import mutations from 'ee/subscriptions/new/store/mutations';
 
 const state = () => ({
   currentStep: 'firstStep',

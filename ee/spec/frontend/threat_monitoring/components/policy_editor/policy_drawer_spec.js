@@ -1,8 +1,8 @@
 import { GlFormTextarea } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
+import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
+import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 
 describe('PolicyDrawer component', () => {
   let wrapper;

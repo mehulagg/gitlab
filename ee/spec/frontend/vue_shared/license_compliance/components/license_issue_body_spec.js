@@ -1,9 +1,9 @@
 import Vue from 'vue';
 
 import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/license_issue_body.vue';
+import createStore from 'ee/vue_shared/license_compliance/store';
 import { trimText } from 'helpers/text_helper';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import createStore from 'ee/vue_shared/license_compliance/store';
 import { licenseReport } from '../mock_data';
 
 describe('LicenseIssueBody', () => {

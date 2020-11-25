@@ -1,5 +1,5 @@
 ---
-title: Fix epic creation form submission as it was causing errors on Safari
-merge_request: 45721
+title: New epic button in epic list redirects the user to the new epic page
+merge_request: 37126
 author:
-type: fixed
+type: changed

@@ -1,8 +1,8 @@
 import { GlButton, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/roadmap/store';
 import EpicItemDetails from 'ee/roadmap/components/epic_item_details.vue';
 import eventHub from 'ee/roadmap/event_hub';
+import createStore from 'ee/roadmap/store';
 import {
   mockGroupId,
   mockFormattedEpic,

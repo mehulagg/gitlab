@@ -9,6 +9,9 @@ import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 import Filters from './first_class_vulnerability_filters.vue';
 import CsvExportButton from './csv_export_button.vue';
+import { vulnerabilitiesSeverityCountScopes } from '../constants';
+
+export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 
 export default {
   components: {
@@ -39,11 +42,11 @@ export default {
     },
   },
   data() {
-    const shouldShowAutoFixUserCallout =
+    const shoudShowAutoFixUserCallout =
       this.glFeatures.securityAutoFix && !Cookies.get('auto_fix_user_callout_dismissed');
     return {
       filters: {},
-      shouldShowAutoFixUserCallout,
+      shoudShowAutoFixUserCallout,
     };
   },
   inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
@@ -53,9 +56,10 @@ export default {
     },
     handleAutoFixUserCalloutClose() {
       Cookies.set('auto_fix_user_callout_dismissed', 'true');
-      this.shouldShowAutoFixUserCallout = false;
+      this.shoudShowAutoFixUserCallout = false;
     },
   },
+  vulnerabilitiesSeverityCountScopes,
 };
 </script>
 
@@ -63,21 +67,26 @@ export default {
   <div>
     <template v-if="pipeline.id">
       <auto-fix-user-callout
-        v-if="shouldShowAutoFixUserCallout"
+        v-if="shoudShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"
         @close="handleAutoFixUserCalloutClose"
       />
       <security-dashboard-layout>
         <template #header>
-          <div class="mt-4 d-flex">
-            <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
+          <div class="gl-mt-6 gl-display-flex">
+            <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
           <project-pipeline-status :pipeline="pipeline" />
-          <vulnerabilities-count-list :filters="filters" />
+          <vulnerabilities-count-list
+            class="gl-mt-6"
+            :scope="$options.vulnerabilitiesSeverityCountScopes.project"
+            :full-path="projectFullPath"
+            :filters="filters"
+          />
         </template>
         <template #sticky>
-          <filters :full-path="projectFullPath" @filterChange="handleFilterChange" />
+          <filters @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"

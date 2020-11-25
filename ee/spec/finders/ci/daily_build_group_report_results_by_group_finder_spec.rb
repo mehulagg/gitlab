@@ -39,7 +39,7 @@ RSpec.describe Ci::DailyBuildGroupReportResultsByGroupFinder do
     end
 
     subject do
-      described_class.new(attributes).execute
+      described_class.new(**attributes).execute
     end
 
     context 'when current user is allowed to :read_group_build_report_results' do

@@ -80,7 +80,6 @@ export default (el, dashboardType) => {
       notEnabledScannersHelpPath: el.dataset.notEnabledScannersHelpPath,
       noPipelineRunScannersHelpPath: el.dataset.noPipelineRunScannersHelpPath,
       hasVulnerabilities: parseBoolean(el.dataset.hasVulnerabilities),
-      dashboardType,
       ...provide,
     }),
     render(createElement) {

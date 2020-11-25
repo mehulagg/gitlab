@@ -8,6 +8,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     class="circle-icon-container gl-flex-shrink-0 gl-align-self-start ci-status-icon-success"
   >
     <svg
+      aria-hidden="true"
       class="gl-icon s16"
       data-testid="plus-icon"
     >
@@ -87,6 +88,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       <!---->
        
       <svg
+        aria-hidden="true"
         class="gl-button-icon gl-icon s16"
         data-testid="pencil-icon"
       >
@@ -105,6 +107,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       <!---->
        
       <svg
+        aria-hidden="true"
         class="gl-button-icon gl-icon s16"
         data-testid="remove-icon"
       >

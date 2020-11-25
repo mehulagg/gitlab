@@ -1,6 +1,7 @@
 import MergeRequestStore from 'ee/vue_merge_request_widget/stores/mr_widget_store';
 import mockData from 'ee_jest/vue_mr_widget/mock_data';
 import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
+import { convertToCamelCase } from '~/lib/utils/text_utility';
 
 describe('MergeRequestStore', () => {
   let store;
@@ -64,6 +65,25 @@ describe('MergeRequestStore', () => {
 
         expect(store.mergeTrainIndex).toBeUndefined();
       });
+    });
+  });
+
+  describe('setPaths', () => {
+    it.each([
+      'container_scanning_comparison_path',
+      'dependency_scanning_comparison_path',
+      'sast_comparison_path',
+      'dast_comparison_path',
+      'secret_scanning_comparison_path',
+      'coverage_fuzzing_comparison_path',
+    ])('should set %s path', property => {
+      // Ensure something is set in the mock data
+      expect(property in mockData).toBe(true);
+      const expectedValue = mockData[property];
+
+      store.setPaths({ ...mockData });
+
+      expect(store[convertToCamelCase(property)]).toBe(expectedValue);
     });
   });
 });

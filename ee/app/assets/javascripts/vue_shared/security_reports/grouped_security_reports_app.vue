@@ -3,13 +3,13 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
+import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
 import IssueModal from './components/modal.vue';
 import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
@@ -17,7 +17,15 @@ import createStore from './store';
 import { mrStates } from '~/mr_popover/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
-import SecuritySummary from './components/security_summary.vue';
+import {
+  MODULE_CONTAINER_SCANNING,
+  MODULE_COVERAGE_FUZZING,
+  MODULE_DAST,
+  MODULE_DEPENDENCY_SCANNING,
+  MODULE_SAST,
+  MODULE_SECRET_DETECTION,
+  trackMrSecurityReportDetails,
+} from './store/constants';
 
 export default {
   store: createStore(),
@@ -118,11 +126,6 @@ export default {
       required: false,
       default: '',
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     createVulnerabilityFeedbackIssuePath: {
       type: String,
       required: false,
@@ -182,16 +185,46 @@ export default {
       type: String,
       required: true,
     },
+    containerScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    coverageFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dependencyScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    sastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    secretScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   componentNames,
   computed: {
     ...mapState([
-      'sast',
-      'containerScanning',
-      'dast',
-      'coverageFuzzing',
-      'dependencyScanning',
-      'secretDetection',
+      MODULE_SAST,
+      MODULE_CONTAINER_SCANNING,
+      MODULE_DAST,
+      MODULE_COVERAGE_FUZZING,
+      MODULE_DEPENDENCY_SCANNING,
+      MODULE_SECRET_DETECTION,
       'summaryCounts',
       'modal',
       'isCreatingIssue',
@@ -214,8 +247,11 @@ export default {
       'canCreateMergeRequest',
       'canDismissVulnerability',
     ]),
-    ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
-    ...mapGetters('secretDetection', ['groupedSecretDetectionText', 'secretDetectionStatusIcon']),
+    ...mapGetters(MODULE_SAST, ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters(MODULE_SECRET_DETECTION, [
+      'groupedSecretDetectionText',
+      'secretDetectionStatusIcon',
+    ]),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
@@ -258,22 +294,22 @@ export default {
       return this.dastSummary?.scannedResourcesCsvPath || '';
     },
     hasCoverageFuzzingIssues() {
-      return this.hasIssuesForReportType('coverageFuzzing');
+      return this.hasIssuesForReportType(MODULE_COVERAGE_FUZZING);
     },
     hasSastIssues() {
-      return this.hasIssuesForReportType('sast');
+      return this.hasIssuesForReportType(MODULE_SAST);
     },
     hasDependencyScanningIssues() {
-      return this.hasIssuesForReportType('dependencyScanning');
+      return this.hasIssuesForReportType(MODULE_DEPENDENCY_SCANNING);
     },
     hasContainerScanningIssues() {
-      return this.hasIssuesForReportType('containerScanning');
+      return this.hasIssuesForReportType(MODULE_CONTAINER_SCANNING);
     },
     hasDastIssues() {
-      return this.hasIssuesForReportType('dast');
+      return this.hasIssuesForReportType(MODULE_DAST);
     },
     hasSecretDetectionIssues() {
-      return this.hasIssuesForReportType('secretDetection');
+      return this.hasIssuesForReportType(MODULE_SECRET_DETECTION);
     },
   },
 
@@ -284,7 +320,6 @@ export default {
 
     this.setCanReadVulnerabilityFeedback(this.canReadVulnerabilityFeedback);
     this.setVulnerabilityFeedbackPath(this.vulnerabilityFeedbackPath);
-    this.setVulnerabilityFeedbackHelpPath(this.vulnerabilityFeedbackHelpPath);
     this.setCreateVulnerabilityFeedbackIssuePath(this.createVulnerabilityFeedbackIssuePath);
     this.setCreateVulnerabilityFeedbackMergeRequestPath(
       this.createVulnerabilityFeedbackMergeRequestPath,
@@ -294,44 +329,33 @@ export default {
     this.setPipelineId(this.pipelineId);
     this.setPipelineJobsId(this.pipelineId);
 
-    const sastDiffEndpoint = gl?.mrWidgetData?.sast_comparison_path;
-
-    if (sastDiffEndpoint && this.hasSastReports) {
-      this.setSastDiffEndpoint(sastDiffEndpoint);
+    if (this.sastComparisonPath && this.hasSastReports) {
+      this.setSastDiffEndpoint(this.sastComparisonPath);
       this.fetchSastDiff();
     }
 
-    const containerScanningDiffEndpoint = gl?.mrWidgetData?.container_scanning_comparison_path;
-
-    if (containerScanningDiffEndpoint && this.hasContainerScanningReports) {
-      this.setContainerScanningDiffEndpoint(containerScanningDiffEndpoint);
+    if (this.containerScanningComparisonPath && this.hasContainerScanningReports) {
+      this.setContainerScanningDiffEndpoint(this.containerScanningComparisonPath);
       this.fetchContainerScanningDiff();
     }
 
-    const dastDiffEndpoint = gl?.mrWidgetData?.dast_comparison_path;
-
-    if (dastDiffEndpoint && this.hasDastReports) {
-      this.setDastDiffEndpoint(dastDiffEndpoint);
+    if (this.dastComparisonPath && this.hasDastReports) {
+      this.setDastDiffEndpoint(this.dastComparisonPath);
       this.fetchDastDiff();
     }
 
-    const dependencyScanningDiffEndpoint = gl?.mrWidgetData?.dependency_scanning_comparison_path;
-
-    if (dependencyScanningDiffEndpoint && this.hasDependencyScanningReports) {
-      this.setDependencyScanningDiffEndpoint(dependencyScanningDiffEndpoint);
+    if (this.dependencyScanningComparisonPath && this.hasDependencyScanningReports) {
+      this.setDependencyScanningDiffEndpoint(this.dependencyScanningComparisonPath);
       this.fetchDependencyScanningDiff();
     }
 
-    const secretDetectionDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
-    if (secretDetectionDiffEndpoint && this.hasSecretDetectionReports) {
-      this.setSecretDetectionDiffEndpoint(secretDetectionDiffEndpoint);
+    if (this.secretScanningComparisonPath && this.hasSecretDetectionReports) {
+      this.setSecretDetectionDiffEndpoint(this.secretScanningComparisonPath);
       this.fetchSecretDetectionDiff();
     }
 
-    const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
-
-    if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
-      this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
+    if (this.coverageFuzzingComparisonPath && this.hasCoverageFuzzingReports) {
+      this.setCoverageFuzzingDiffEndpoint(this.coverageFuzzingComparisonPath);
       this.fetchCoverageFuzzingDiff();
       this.fetchPipelineJobs();
     }
@@ -344,7 +368,6 @@ export default {
       'setSourceBranch',
       'setCanReadVulnerabilityFeedback',
       'setVulnerabilityFeedbackPath',
-      'setVulnerabilityFeedbackHelpPath',
       'setCreateVulnerabilityFeedbackIssuePath',
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
@@ -369,11 +392,11 @@ export default {
       'fetchCoverageFuzzingDiff',
       'setCoverageFuzzingDiffEndpoint',
     ]),
-    ...mapActions('sast', {
+    ...mapActions(MODULE_SAST, {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
     }),
-    ...mapActions('secretDetection', {
+    ...mapActions(MODULE_SECRET_DETECTION, {
       setSecretDetectionDiffEndpoint: 'setDiffEndpoint',
       fetchSecretDetectionDiff: 'fetchDiff',
     }),
@@ -595,7 +618,6 @@ export default {
 
         <issue-modal
           :modal="modal"
-          :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
           :can-create-issue="canCreateIssue"
           :can-create-merge-request="canCreateMergeRequest"
           :can-dismiss-vulnerability="canDismissVulnerability"

@@ -492,7 +492,7 @@ RSpec.describe EpicsFinder do
           let_it_be(:public_epic2) { create(:epic, :confidential, group: public_group1) }
           let(:execute_params) { {} }
 
-          subject { described_class.new(search_user, group_id: base_group.id).execute(execute_params) }
+          subject { described_class.new(search_user, group_id: base_group.id).execute(**execute_params) }
 
           it 'returns only public epics' do
             expect(subject).to match_array([base_epic2, public_epic1])
@@ -675,10 +675,6 @@ RSpec.describe EpicsFinder do
     end
 
     context 'when using group cte for search' do
-      before do
-        stub_feature_flags(use_subquery_for_group_issues_search: false)
-      end
-
       it 'returns correct counts when search string is used' do
         results = described_class.new(
           search_user,

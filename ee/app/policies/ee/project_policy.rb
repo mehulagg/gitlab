@@ -178,6 +178,7 @@ module EE
         enable :read_deploy_board
         enable :admin_epic_issue
         enable :read_group_timelogs
+        enable :read_incident_management_oncall_schedule
       end
 
       rule { can?(:developer_access) }.policy do
@@ -241,6 +242,7 @@ module EE
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
+        enable :admin_incident_management_oncall_schedule
       end
 
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
@@ -348,8 +350,6 @@ module EE
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
-
-      rule { public_project }.enable :view_embedded_analytics_report
 
       rule { over_storage_limit }.policy do
         prevent(*readonly_abilities)

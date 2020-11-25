@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
-import { setHTMLFixture } from 'helpers/fixtures';
 import UsernameSuggester from 'ee/pages/trial_registrations/new/username_suggester';
+import { setHTMLFixture } from 'helpers/fixtures';
 import axios from '~/lib/utils/axios_utils';
 
 describe('UsernameSuggester', () => {

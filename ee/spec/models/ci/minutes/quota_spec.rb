@@ -227,4 +227,32 @@ RSpec.describe Ci::Minutes::Quota do
       end
     end
   end
+
+  describe '#minutes_used_up?' do
+    subject { quota.minutes_used_up? }
+
+    where(:limit_enabled, :monthly_limit, :purchased_limit, :minutes_used, :result, :title) do
+      false | 0   | 0   | 40  | false | 'limit not enabled'
+      true  | 0   | 200 | 40  | false | 'monthly limit not set and purchased limit set and low usage'
+      true  | 200 | 0   | 40  | false | 'monthly limit set and purchased limit not set and usage below monthly'
+      true  | 200 | 0   | 240 | true  | 'monthly limit set and purchased limit not set and usage above monthly'
+      true  | 200 | 200 | 0   | false | 'monthly and purchased limits set and no usage'
+      true  | 200 | 200 | 40  | false | 'monthly and purchased limits set and usage below monthly'
+      true  | 200 | 200 | 200 | false | 'monthly and purchased limits set and monthly minutes maxed out'
+      true  | 200 | 200 | 300 | false | 'monthly and purchased limits set and some purchased minutes used'
+      true  | 200 | 200 | 400 | true  | 'monthly and purchased limits set and all minutes used'
+      true  | 200 | 200 | 430 | true  | 'monthly and purchased limits set and usage beyond all limits'
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(limit_enabled)
+        namespace.shared_runners_minutes_limit = monthly_limit
+        namespace.extra_shared_runners_minutes_limit = purchased_limit
+        namespace.namespace_statistics.shared_runners_seconds = minutes_used.minutes
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
 end

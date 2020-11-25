@@ -34,7 +34,6 @@ module Groups::SecurityFeaturesHelper
     {
       projects_endpoint: expose_url(api_v4_groups_projects_path(id: group.id)),
       group_full_path: group.full_path,
-      vulnerability_feedback_help_path: help_page_path("user/application_security/index", anchor: "interacting-with-the-vulnerabilities"),
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
       empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
       dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),

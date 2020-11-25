@@ -49,6 +49,8 @@ module Types
           description: 'ID of the merge request target project'
     field :source_branch, GraphQL::STRING_TYPE, null: false,
           description: 'Source branch of the merge request'
+    field :source_branch_protected, GraphQL::BOOLEAN_TYPE, null: false, calls_gitaly: true,
+          description: 'Indicates if the source branch is protected'
     field :target_branch, GraphQL::STRING_TYPE, null: false,
           description: 'Target branch of the merge request'
     field :work_in_progress, GraphQL::BOOLEAN_TYPE, method: :work_in_progress?, null: false,
@@ -88,9 +90,6 @@ module Types
           description: 'Rebase commit SHA of the merge request'
     field :rebase_in_progress, GraphQL::BOOLEAN_TYPE, method: :rebase_in_progress?, null: false, calls_gitaly: true,
           description: 'Indicates if there is a rebase currently in progress for the merge request'
-    field :merge_commit_message, GraphQL::STRING_TYPE, method: :default_merge_commit_message, null: true,
-          deprecated: { reason: 'Use `defaultMergeCommitMessage`', milestone: '11.8' },
-          description: 'Default merge commit message of the merge request'
     field :default_merge_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'Default merge commit message of the merge request'
     field :merge_ongoing, GraphQL::BOOLEAN_TYPE, method: :merge_ongoing?, null: false,
@@ -196,6 +195,10 @@ module Types
 
     def commit_count
       object&.metrics&.commits_count
+    end
+
+    def source_branch_protected
+      object.source_project.present? && ProtectedBranch.protected?(object.source_project, object.source_branch)
     end
   end
 end

@@ -1,5 +1,5 @@
-import InsightsChartError from 'ee/insights/components/insights_chart_error.vue';
 import { shallowMount } from '@vue/test-utils';
+import InsightsChartError from 'ee/insights/components/insights_chart_error.vue';
 
 describe('Insights chart error component', () => {
   const chartName = 'Test chart';

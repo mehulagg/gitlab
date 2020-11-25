@@ -1,10 +1,10 @@
-import Api from 'ee/api';
 import MockAdapter from 'axios-mock-adapter';
 import { createMockClient } from 'mock-apollo-client';
-import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
 import { resolvers } from 'ee/admin/dev_ops_report/graphql';
-import httpStatus from '~/lib/utils/http_status';
+import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
+import Api from 'ee/api';
 import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
 import { groupData, pageData, groupNodes, groupPageInfo } from '../mock_data';
 
 const fetchGroupsUrl = Api.buildUrl(Api.groupsPath);

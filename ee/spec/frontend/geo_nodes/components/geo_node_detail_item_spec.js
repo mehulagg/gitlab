@@ -1,10 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import GeoNodeDetailItemComponent from 'ee/geo_nodes/components/geo_node_detail_item.vue';
-import GeoNodeSyncSettings from 'ee/geo_nodes/components/geo_node_sync_settings.vue';
 import GeoNodeEventStatus from 'ee/geo_nodes/components/geo_node_event_status.vue';
 import GeoNodeSyncProgress from 'ee/geo_nodes/components/geo_node_sync_progress.vue';
+import GeoNodeSyncSettings from 'ee/geo_nodes/components/geo_node_sync_settings.vue';
 
 import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from 'ee/geo_nodes/constants';
 import { rawMockNodeDetails } from '../mock_data';

@@ -45,7 +45,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
         class="d-flex"
       >
         <gl-icon-stub
-          aria-label="Selected"
+          arialabel="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
           size="16"
@@ -69,7 +69,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
         class="d-flex"
       >
         <gl-icon-stub
-          aria-label="Selected"
+          arialabel="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
           size="16"

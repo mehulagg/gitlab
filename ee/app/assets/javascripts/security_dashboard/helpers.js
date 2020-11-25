@@ -30,17 +30,10 @@ export const severityFilter = {
   defaultOptions: [],
 };
 
-const scannerFilterOptions = parseOptions(REPORT_TYPES).map(option => ({
-  ...option,
-  id: `GitLab.${option.id}`,
-  reportType: option.id,
-  externalId: 'GitLab',
-}));
-
 export const scannerFilter = {
-  name: s__('Reports|Scanner'),
+  name: s__('SecurityReports|Scanner'),
   id: 'reportType',
-  options: scannerFilterOptions,
+  options: parseOptions(REPORT_TYPES),
   allOption: BASE_FILTERS.report_type,
   defaultOptions: [],
 };

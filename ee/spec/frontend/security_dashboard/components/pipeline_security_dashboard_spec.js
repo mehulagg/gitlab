@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline_security_dashboard.vue';
-import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

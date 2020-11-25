@@ -1,6 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
-
 import { GlTooltip } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import StateTooltip from 'ee/related_items_tree/components/state_tooltip.vue';
 

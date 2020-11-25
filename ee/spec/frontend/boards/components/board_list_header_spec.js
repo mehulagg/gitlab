@@ -1,14 +1,14 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
+import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header.vue';
+import getters from 'ee/boards/stores/getters';
 import { TEST_HOST } from 'helpers/test_constants';
 import { listObj } from 'jest/boards/mock_data';
-import getters from 'ee/boards/stores/getters';
-import List from '~/boards/models/list';
 import { ListType, inactiveId } from '~/boards/constants';
+import List from '~/boards/models/list';
 import axios from '~/lib/utils/axios_utils';
 import sidebarEventHub from '~/sidebar/event_hub';
 

@@ -31,6 +31,7 @@ describe('Storage Counter usage graph component', () => {
         pipelineArtifactsSize: 500,
         snippetsSize: 2000,
         storageSize: 17000,
+        uploadsSize: 1000,
       },
       limit: 2000,
     };
@@ -52,6 +53,7 @@ describe('Storage Counter usage graph component', () => {
       repositorySize,
       wikiSize,
       snippetsSize,
+      uploadsSize,
     } = data.rootStorageStatistics;
 
     expect(types.at(0).text()).toMatchInterpolatedText(`Wikis ${numberToHumanSize(wikiSize)}`);
@@ -70,6 +72,7 @@ describe('Storage Counter usage graph component', () => {
     expect(types.at(5).text()).toMatchInterpolatedText(
       `Artifacts ${numberToHumanSize(buildArtifactsSize + pipelineArtifactsSize)}`,
     );
+    expect(types.at(6).text()).toMatchInterpolatedText(`Uploads ${numberToHumanSize(uploadsSize)}`);
   });
 
   describe('when storage type is not used', () => {
@@ -108,6 +111,7 @@ describe('Storage Counter usage graph component', () => {
         '0.11764705882352941',
         '0.11764705882352941',
         '0.058823529411764705',
+        '0.058823529411764705',
       ]);
     });
   });
@@ -125,6 +129,7 @@ describe('Storage Counter usage graph component', () => {
         '0.17647058823529413',
         '0.11764705882352941',
         '0.11764705882352941',
+        '0.058823529411764705',
         '0.058823529411764705',
       ]);
     });

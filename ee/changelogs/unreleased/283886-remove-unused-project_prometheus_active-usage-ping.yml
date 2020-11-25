@@ -1,0 +1,5 @@
+---
+title: Remove projects_prometheus_active unused usage ping
+merge_request: 47792
+author:
+type: changed

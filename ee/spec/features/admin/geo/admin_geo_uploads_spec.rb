@@ -8,7 +8,9 @@ RSpec.describe 'admin Geo Uploads', :js, :geo do
 
   before do
     allow(Gitlab::Geo).to receive(:license_allows?).and_return(true)
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   describe 'visiting geo uploads initial page' do

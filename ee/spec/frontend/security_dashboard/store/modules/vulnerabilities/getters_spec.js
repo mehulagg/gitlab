@@ -1,6 +1,6 @@
-import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import * as getters from 'ee/security_dashboard/store/modules/vulnerabilities/getters';
+import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import mockHistoryData from './data/mock_data_vulnerabilities_history.json';
 
 describe('vulnerabilities module getters', () => {

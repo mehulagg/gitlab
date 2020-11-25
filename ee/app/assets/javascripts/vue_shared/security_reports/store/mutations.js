@@ -25,10 +25,6 @@ export default {
     state.vulnerabilityFeedbackPath = path;
   },
 
-  [types.SET_VULNERABILITY_FEEDBACK_HELP_PATH](state, path) {
-    state.vulnerabilityFeedbackHelpPath = path;
-  },
-
   [types.SET_CREATE_VULNERABILITY_FEEDBACK_ISSUE_PATH](state, path) {
     state.createVulnerabilityFeedbackIssuePath = path;
   },

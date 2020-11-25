@@ -5,10 +5,6 @@ require 'spec_helper'
 RSpec.describe GitlabSubscription do
   using RSpec::Parameterized::TableSyntax
 
-  before do
-    stub_feature_flags(elasticsearch_index_only_paid_groups: false)
-  end
-
   %i[free_plan bronze_plan silver_plan gold_plan].each do |plan|
     let_it_be(plan) { create(plan) }
   end

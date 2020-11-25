@@ -1,7 +1,7 @@
-import 'select2/select2';
 import $ from 'jquery';
 import { s__ } from '~/locale';
 import PersistentUserCallout from '~/persistent_user_callout';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);
@@ -52,20 +52,29 @@ $container
     ),
   );
 
-$container
-  .find('.js-elasticsearch-namespaces')
-  .select2(
-    getDropdownConfig(
-      s__('Elastic|None. Select namespaces to index.'),
-      '/-/autocomplete/namespace_routes.json',
-    ),
-  );
+import(/* webpackChunkName: 'select2' */ 'select2/select2')
+  .then(() => {
+    // eslint-disable-next-line promise/no-nesting
+    loadCSSFile(gon.select2_css_path)
+      .then(() => {
+        $container
+          .find('.js-elasticsearch-namespaces')
+          .select2(
+            getDropdownConfig(
+              s__('Elastic|None. Select namespaces to index.'),
+              '/-/autocomplete/namespace_routes.json',
+            ),
+          );
 
-$container
-  .find('.js-elasticsearch-projects')
-  .select2(
-    getDropdownConfig(
-      s__('Elastic|None. Select projects to index.'),
-      '/-/autocomplete/project_routes.json',
-    ),
-  );
+        $container
+          .find('.js-elasticsearch-projects')
+          .select2(
+            getDropdownConfig(
+              s__('Elastic|None. Select projects to index.'),
+              '/-/autocomplete/project_routes.json',
+            ),
+          );
+      })
+      .catch(() => {});
+  })
+  .catch(() => {});

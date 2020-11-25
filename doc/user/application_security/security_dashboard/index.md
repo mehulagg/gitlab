@@ -63,8 +63,6 @@ job finishes but the DAST job fails, the security dashboard doesn't show SAST re
 the analyzer outputs an
 [exit code](../../../development/integrations/secure.md#exit-code).
 
-You can filter the vulnerabilities list by selecting from the **Severity** and **Scanner** dropdowns.
-
 ## Project Security Dashboard
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235558) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
@@ -89,7 +87,7 @@ display all detected and confirmed vulnerabilities.
 
 The Vulnerability Report first displays the time at which the last pipeline completed on the project's
 default branch. There's also a link to view this in more detail. In the case of any pipeline failures,
-you will see the number of failures clearly indicated. The failure notification takes you directly to
+the number of failures is indicated. The failure notification takes you directly to
 the **Failed jobs** tab of the pipeline page.
 
 The Vulnerability Report next displays the total number of vulnerabilities by severity (for example,
@@ -106,11 +104,6 @@ You can filter the vulnerabilities by one or more of the following:
 | Status | Detected, Confirmed, Dismissed, Resolved |
 | Severity | Critical, High, Medium, Low, Info, Unknown |
 | Scanner | [Available Scanners](../index.md#security-scanning-tools) |
-
-You can filter the vulnerabilities list by selecting from the **Status**, **Severity**, and
-**Scanner** dropdowns. In the **Scanner** dropdown, select individual scanners or scanner groups to
-toggle those scanners. The **Scanner** dropdown includes both GitLab scanners, and in GitLab 13.6
-and later, custom scanners.
 
 You can also dismiss vulnerabilities in the table:
 
@@ -149,7 +142,7 @@ Next to the timeline chart is a list of projects, grouped and sorted by the seve
 | B | One or more "low" |
 | A | Zero vulnerabilities |
 
-Projects with no vulnerability tests configured will not appear in the list. Additionally, dismissed
+Projects with no vulnerability tests configured don't appear in the list. Additionally, dismissed
 vulnerabilities are excluded.
 
 Navigate to the group's [vulnerability report](#vulnerability-report-1) to view the vulnerabilities found.
@@ -232,7 +225,7 @@ are discovered.
 
 To ensure the information on the Security Dashboard is regularly updated,
 [configure a scheduled pipeline](../../../ci/pipelines/schedules.md) to run a
-daily security scan. This will update the information displayed on the Security
+daily security scan. This updates the information displayed on the Security
 Dashboard regardless of how often the default branch is updated.
 
 That way, reports are created even if no code change happens.
@@ -266,11 +259,6 @@ You can filter which vulnerabilities the vulnerability report displays by:
 | Severity | Critical, High, Medium, Low, Info, Unknown |
 | Scanner | [Available Scanners](../index.md#security-scanning-tools) |
 | Project | Projects configured in the Security Center settings |
-
-You can filter the vulnerabilities list by selecting from the **Status**, **Severity**, and
-**Scanner**, and **Project** dropdowns. In the **Scanner** dropdown, select individual scanners or
-scanner groups to toggle those scanners. The **Scanner** dropdown includes both GitLab scanners, and
-in GitLab 13.6 and later, custom scanners.
 
 Clicking any vulnerability in the table takes you to its
 [Vulnerability Details](../vulnerabilities) page to see more information on that vulnerability.

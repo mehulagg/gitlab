@@ -113,6 +113,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                 type="button"
               >
                 <svg
+                  aria-hidden="true"
                   class="gl-icon s16 gl-new-dropdown-item-check-icon"
                   data-testid="mobile-issue-close-icon"
                 >
@@ -152,6 +153,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                 type="button"
               >
                 <svg
+                  aria-hidden="true"
                   class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden"
                   data-testid="mobile-issue-close-icon"
                 >

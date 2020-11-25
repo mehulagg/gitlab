@@ -1,6 +1,6 @@
-import SharedRunnerLimitBlock from 'ee/jobs/components/shared_runner_limit_block.vue';
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import SharedRunnerLimitBlock from 'ee/jobs/components/shared_runner_limit_block.vue';
 import { trimText } from 'helpers/text_helper';
 
 describe('Shared Runner Limit Block', () => {

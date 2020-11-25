@@ -1,7 +1,7 @@
 - return unless merge_trains_available?
 
 .form-check
-  = form.check_box :merge_trains_enabled, class: 'form-check-input'
+  = form.check_box :merge_trains_enabled, class: 'form-check-input', data: { qa_selector: 'merge_trains_checkbox' }
   = form.label :merge_trains_enabled, class: 'form-check-label' do
     = s_('ProjectSettings|Enable merge trains.')
     .text-secondary.mb-2

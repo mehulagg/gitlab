@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import geoNodeDetailsComponent from 'ee/geo_nodes/components/geo_node_details.vue';
 import { mockNode, mockNodeDetails } from '../mock_data';

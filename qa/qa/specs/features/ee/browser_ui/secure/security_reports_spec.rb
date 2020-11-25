@@ -50,7 +50,7 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
         Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|
@@ -74,9 +74,9 @@ module QA
         end
       end
 
-      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
+      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
         Page::Project::Menu.perform(&:click_project)
-        Page::Project::Menu.perform(&:click_on_security_dashboard)
+        Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::Show.perform do |dashboard|
           filter_report_and_perform(dashboard, "Dependency Scanning") do
@@ -97,7 +97,7 @@ module QA
         end
       end
 
-      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/271547' } do
+      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567' do
         Page::Main::Menu.perform(&:go_to_groups)
         Page::Dashboard::Groups.perform do |groups|
           groups.click_group @project.group.path

@@ -10,9 +10,17 @@
 = form_for @license, url: admin_license_path, html: { multipart: true, class: 'fieldset-form' } do |f|
   - if @license.errors.any?
     #error_explanation
-      .alert.alert-danger
-        - @license.errors.full_messages.each do |msg|
-          %p= msg
+      .gl-alert.gl-alert-danger.gl-mb-5
+        = sprite_icon('warning', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+        .gl-alert-body
+          %p= _('The form contains the following errors:')
+          %details
+            %summary= n_('%d error found:', '%d errors found:', @license.errors.full_messages.length) % @license.errors.full_messages.length
+            %ul
+              - @license.errors.full_messages.each do |msg|
+                %li= msg
+
+
 
   .form-group.row
     .col-sm-2
