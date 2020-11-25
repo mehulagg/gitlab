@@ -56,7 +56,7 @@ export default {
     },
   },
   methods: {
-    getAccessor(property){
+    getAccessor(property) {
       return accessors[GRAPHQL][property];
     },
     groupId(group) {
@@ -71,7 +71,8 @@ export default {
       <div
         data-testid="stage-column-title"
         class="gl-display-flex gl-justify-content-space-between gl-relative"
-        :class="$options.titleClasses">
+        :class="$options.titleClasses"
+      >
         <div>{{ formattedTitle }}</div>
         <action-component
           v-if="hasAction"
@@ -84,7 +85,7 @@ export default {
     </template>
     <template #jobs>
       <div
-        v-for="(group, index) in groups"
+        v-for="group in groups"
         :id="groupId(group)"
         :key="group[getAccessor('groupId')]"
         data-testid="stage-column-group"
@@ -97,10 +98,7 @@ export default {
           :pipeline-expanded="pipelineExpanded"
           css-class-job-name="gl-build-content"
         />
-        <job-group-dropdown
-          v-else
-          :group="group"
-        />
+        <job-group-dropdown v-else :group="group" />
       </div>
     </template>
   </main-graph-wrapper>

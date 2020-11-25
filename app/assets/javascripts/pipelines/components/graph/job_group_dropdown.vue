@@ -50,17 +50,13 @@ export default {
         <span class="gl-display-flex gl-align-items-center">
           <ci-icon :status="group.status" :size="24" />
 
-          <span
-            class="gl-text-truncate mw-70p gl-pl-3 gl-display-inline-block"
-          >
+          <span class="gl-text-truncate mw-70p gl-pl-3 gl-display-inline-block">
             {{ group.name }}
           </span>
         </span>
 
         <span class="gl-font-weight-100 gl-font-size-lg gl-pr-2"> {{ group.size }} </span>
       </div>
-
-
     </button>
 
     <ul class="dropdown-menu big-pipeline-graph-dropdown-menu js-grouped-pipeline-dropdown">

@@ -34,10 +34,10 @@ export default {
   <div class="js-pipeline-graph">
     <div
       class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
-      :class="{ 'gl-py-5': !isLinkedPipeline,  pipelineReplacementClasses: true}"
+      :class="{ 'gl-py-5': !isLinkedPipeline }"
     >
       <stage-column-component
-        v-for="(stage, index) in graph"
+        v-for="stage in graph"
         :key="stage.name"
         :title="stage.name"
         :groups="stage.groups"

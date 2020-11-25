@@ -20,17 +20,18 @@ const mockJob = {
   },
 };
 
-const mockGroups = Array(4).fill(0).map((item, idx) => {
-  return { ...mockJob, id: idx, name: `fish-${idx}` };
-});
+const mockGroups = Array(4)
+  .fill(0)
+  .map((item, idx) => {
+    return { ...mockJob, id: idx, name: `fish-${idx}` };
+  });
 
 const defaultProps = {
   title: 'Fish',
   groups: mockGroups,
-}
+};
 
 describe('stage column component', () => {
-
   let wrapper;
 
   const findStageColumnTitle = () => wrapper.find('[data-testid="stage-column-title"]');
@@ -58,19 +59,15 @@ describe('stage column component', () => {
     });
 
     it('should render provided title', () => {
-      expect(findStageColumnTitle().text()).toBe(defaultProps.title)
+      expect(findStageColumnTitle().text()).toBe(defaultProps.title);
     });
 
     it('should render the provided groups', () => {
-      expect(findAllStageColumnGroups().length).toBe(
-        mockGroups.length,
-      );
+      expect(findAllStageColumnGroups().length).toBe(mockGroups.length);
     });
-
   });
 
   describe('job', () => {
-
     beforeEach(() => {
       createComponent({
         method: mount,
@@ -88,7 +85,7 @@ describe('stage column component', () => {
           ],
           title: 'test <img src=x onerror=alert(document.domain)>',
         },
-      })
+      });
     });
 
     it('capitalizes and escapes name', () => {
@@ -128,7 +125,7 @@ describe('stage column component', () => {
             path: 'action',
           },
         },
-      })
+      });
     });
 
     it('renders action button', () => {
@@ -155,7 +152,7 @@ describe('stage column component', () => {
           title: 'test',
           hasTriggeredBy: false,
         },
-      })
+      });
     });
 
     it('does not render action button', () => {
