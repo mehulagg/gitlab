@@ -16,6 +16,20 @@ module ExpandVariables
       end
     end
 
+    def each_variable_reference(value, variables)
+      raise ArgumentError, "`#{variables}` must be of type Hash or Proc, while it was: #{variables.class}" unless
+        variables.is_a?(Proc) || variables.is_a?(Hash)
+
+      value.scan(VARIABLES_REGEXP) do |var_ref|
+        # Lazily initialise variables
+        variables = variables.call if variables.is_a?(Proc)
+
+        ref_var_name = var_ref.compact.first
+        ref_var = variables.fetch(ref_var_name, nil)
+        yield ref_var if ref_var
+      end
+    end
+
     private
 
     def replace_with(value, variables)

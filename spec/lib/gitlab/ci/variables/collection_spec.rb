@@ -110,14 +110,33 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
         .to eq [{ key: 'TEST', value: '1', public: true, masked: false }]
     end
 
-    it 'does not resolve references to variables by default' do
-      collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' }, { key: 'CI_PIPELINE_ID', value: '102' }])
+    context 'when variable_inside_variable feature flag is disabled' do
+      before do
+        stub_feature_flags(variable_inside_variable: false)
+      end
 
-      expect(collection.to_runner_variables)
-        .to eq [
-          { key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID', public: true, masked: false },
-          { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false }
-        ]
+      context 'with cyclic dependency among variable values' do
+        let(:collection) do
+          described_class.new([
+            { key: 'VAR_1', value: 'ref-$VAR_2' },
+            { key: 'VAR_2', value: 'ref-$VAR_3' },
+            { key: 'VAR_3', value: 'ref-$VAR_1' }
+          ])
+        end
+
+        it 'does not resolve references to variables by default' do
+          expect(collection.to_runner_variables)
+            .to eq [
+              { key: 'VAR_1', value: 'ref-$VAR_2', public: true, masked: false },
+              { key: 'VAR_2', value: 'ref-$VAR_3', public: true, masked: false },
+              { key: 'VAR_3', value: 'ref-$VAR_1', public: true, masked: false }
+            ]
+        end
+
+        it 'does not raise' do
+          expect { collection.to_runner_variables }.not_to raise_error
+        end
+      end
     end
 
     context 'when variable_inside_variable feature flag is enabled' do
@@ -125,8 +144,26 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
         stub_feature_flags(variable_inside_variable: true)
       end
 
+      context 'with cyclic dependency among variable values' do
+        let(:collection) do
+          described_class.new([
+            { key: 'VAR_1', value: 'ref-$VAR_2' },
+            { key: 'VAR_2', value: 'ref-$VAR_3' },
+            { key: 'VAR_3', value: 'ref-$VAR_1' }
+          ])
+        end
+
+        it 'raises Gitlab::Ci::Variables::CyclicVariableReference' do
+          expect { collection.to_runner_variables }
+            .to raise_error(Gitlab::Ci::Variables::CyclicVariableReference)
+        end
+      end
+
       it 'resolves references to variables' do
-        collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' }, { key: 'CI_PIPELINE_ID', value: '102' }])
+        collection = described_class.new([
+          { key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' },
+          { key: 'CI_PIPELINE_ID', value: '102' }
+        ])
 
         expect(collection.to_runner_variables)
           .to eq [
@@ -136,13 +173,10 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
       end
 
       it 'does not resolve references to unknown variables' do
-        collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$PIPELINE_ID' }, { key: 'CI_PIPELINE_ID', value: '102' }])
+        collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' }])
 
         expect(collection.to_runner_variables)
-          .to eq [
-            { key: 'IMAGE_TAG', value: 'docker-image-$PIPELINE_ID', public: true, masked: false },
-            { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false }
-          ]
+          .to eq [{ key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID', public: true, masked: false }]
       end
     end
   end

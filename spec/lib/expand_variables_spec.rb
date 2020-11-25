@@ -224,4 +224,79 @@ RSpec.describe ExpandVariables do
       end
     end
   end
+
+  describe '#expand_existing' do
+    context 'table tests' do
+      it_behaves_like 'common variable expansion', described_class.method(:expand_existing)
+
+      context 'with missing variables' do
+        using RSpec::Parameterized::TableSyntax
+
+        where do
+          {
+            "missing variable": {
+              value: 'key$variable',
+              variables: [],
+              referenced_variables: []
+            },
+            "complex expansions with missing variable": {
+              value: 'key${variable}${variable2}${variable3}',
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable3', value: 'value3' }
+              ],
+              referenced_variables: %w[variable variable3]
+            },
+            "complex expansions with missing variable for Windows": {
+              value: 'key%variable%%variable2%',
+              variables: [
+                { key: 'variable', value: 'value' }
+              ],
+              referenced_variables: %w[variable]
+            }
+          }
+        end
+
+        with_them do
+          subject do
+            reported_variables = []
+            ExpandVariables.each_variable_reference(value, variables.index_by { |key:, **_| key }) { |key:, **_| reported_variables.push(key) }
+            reported_variables
+          end
+
+          it { is_expected.to eq(referenced_variables) }
+        end
+      end
+    end
+
+    context 'lazily inits variables' do
+      let(:variables) { -> { { 'variable' => { key: 'variable', value: 'result' } } } }
+
+      subject do
+        reported_variables = []
+        described_class.each_variable_reference(value, variables) { |key:, **_| reported_variables.push(key) }
+        reported_variables
+      end
+
+      context 'when expanding variable' do
+        let(:value) { 'key$variable$variable2' }
+
+        it 'calls block at most once' do
+          expect(variables).to receive(:call).once.and_call_original
+
+          is_expected.to eq(%w[variable])
+        end
+      end
+
+      context 'when no expansion is needed' do
+        let(:value) { 'key' }
+
+        it 'does not call block' do
+          expect(variables).not_to receive(:call)
+
+          is_expected.to be_empty
+        end
+      end
+    end
+  end
 end
