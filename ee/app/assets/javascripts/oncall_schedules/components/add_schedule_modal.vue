@@ -20,13 +20,21 @@ export const i18n = {
   cancel: __('Cancel'),
   addSchedule: s__('OnCallSchedules|Add schedule'),
   fields: {
-    name: { title: __('Name') },
-    description: { title: __('Description') },
+    name: {
+      title: __('Name'),
+      validation: {
+        empty: __("Can't be empty"),
+      },
+    },
+    description: { title: __('Description (optional)') },
     timezone: {
       title: __('Timezone'),
       description: s__(
         'OnCallSchedules|Sets the default timezone for the schedule, for all participants',
       ),
+      validation: {
+        empty: __("Can't be empty"),
+      },
     },
   },
   errorMsg: s__('OnCallSchedules|Failed to add schedule'),
@@ -69,7 +77,11 @@ export default {
       return {
         primary: {
           text: i18n.addSchedule,
-          attributes: [{ variant: 'info' }, { loading: this.loading }],
+          attributes: [
+            { variant: 'info' },
+            { loading: this.loading },
+            { disabled: this.isFormInvalid },
+          ],
         },
         cancel: {
           text: i18n.cancel,
@@ -91,6 +103,15 @@ export default {
       return isEmpty(this.form.timezone)
         ? i18n.selectTimezone
         : this.getFormattedTimezone(this.form.timezone);
+    },
+    isNameInvalid() {
+      return !this.form.name.length;
+    },
+    isTimezoneInvalid() {
+      return isEmpty(this.form.timezone);
+    },
+    isFormInvalid() {
+      return this.isNameInvalid || this.isTimezoneInvalid;
     },
   },
   methods: {
@@ -148,7 +169,12 @@ export default {
     :action-cancel="actionsProps.cancel"
     @primary="createSchedule"
   >
-    <gl-alert v-if="showErrorAlert" variant="danger" @dismiss="showErrorAlert = false">
+    <gl-alert
+      v-if="showErrorAlert"
+      variant="danger"
+      class="gl-mt-n3 gl-mb-3"
+      @dismiss="showErrorAlert = false"
+    >
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <gl-form @submit="createSchedule">
@@ -157,7 +183,13 @@ export default {
         label-size="sm"
         label-for="schedule-name"
       >
-        <gl-form-input id="schedule-name" v-model="form.name" />
+        <gl-form-input id="schedule-name" v-model="form.name" :state="!isNameInvalid" />
+        <span
+          v-if="isNameInvalid"
+          class="gl-text-red-500 gl-display-inline-block gl-mt-2"
+          data-testid="name-validation-error"
+          >{{ $options.i18n.fields.name.validation.empty }}</span
+        >
       </gl-form-group>
 
       <gl-form-group
@@ -179,6 +211,7 @@ export default {
           :text="selectedTimezone"
           class="timezone-dropdown gl-w-full"
           :header-text="$options.i18n.selectTimezone"
+          :class="{ 'invalid-dropdown': isTimezoneInvalid }"
         >
           <gl-search-box-by-type v-model.trim="tzSearchTerm" />
           <gl-dropdown-item
@@ -194,6 +227,12 @@ export default {
             {{ $options.i18n.noResults }}
           </gl-dropdown-item>
         </gl-dropdown>
+        <span
+          v-if="isTimezoneInvalid"
+          class="gl-text-red-500 gl-display-inline-block gl-mt-2"
+          data-testid="timezone-validation-error"
+          >{{ $options.i18n.fields.timezone.validation.empty }}</span
+        >
       </gl-form-group>
     </gl-form>
   </gl-modal>

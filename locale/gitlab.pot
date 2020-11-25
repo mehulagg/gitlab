@@ -4861,6 +4861,9 @@ msgstr ""
 msgid "Can't apply this suggestion."
 msgstr ""
 
+msgid "Can't be empty"
+msgstr ""
+
 msgid "Can't create snippet: %{err}"
 msgstr ""
 
@@ -9323,6 +9326,9 @@ msgid "Describe the requirement here"
 msgstr ""
 
 msgid "Description"
+msgstr ""
+
+msgid "Description (optional)"
 msgstr ""
 
 msgid "Description parsed with %{link_start}GitLab Flavored Markdown%{link_end}"

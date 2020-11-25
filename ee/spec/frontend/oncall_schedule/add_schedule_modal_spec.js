@@ -1,9 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlSearchBoxByType, GlDropdownItem, GlModal, GlAlert } from '@gitlab/ui';
+import { GlSearchBoxByType, GlDropdown, GlDropdownItem, GlModal, GlAlert } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
-import AddScheduleModal, {
-  i18n,
-} from '../../../app/assets/javascripts/oncall_schedules/components/add_schedule_modal.vue';
+import AddScheduleModal, { i18n } from 'ee/oncall_schedules/components/add_schedule_modal.vue';
 import mockTimezones from './mocks/mockTimezones.json';
 
 describe('AddScheduleModal', () => {
@@ -46,6 +44,10 @@ describe('AddScheduleModal', () => {
   const findDropdownOptions = () => wrapper.findAll(GlDropdownItem);
   const findTimezoneSearchBox = () => wrapper.find(GlSearchBoxByType);
   const findAlert = () => wrapper.find(GlAlert);
+  const findNameInput = () => wrapper.find('[id="schedule-name"]');
+  const findNameValidationErr = () => wrapper.find('[data-testid="name-validation-error"]');
+  const findTimezoneDropdown = () => wrapper.find(GlDropdown);
+  const findTimezoneValidationErr = () => wrapper.find('[data-testid="timezone-validation-error"]');
 
   it('renders modal layout', () => {
     expect(wrapper.element).toMatchSnapshot();
@@ -123,6 +125,36 @@ describe('AddScheduleModal', () => {
       expect(mockHideModal).not.toHaveBeenCalled();
       expect(findAlert().exists()).toBe(true);
       expect(findAlert().text()).toContain(error);
+    });
+  });
+
+  describe('Form validation', () => {
+    describe('Schedule name', () => {
+      it('shows error message under the name field when it is empty', async () => {
+        const input = findNameInput();
+        input.vm.$emit('input', '');
+
+        await wrapper.vm.$nextTick();
+        expect(findNameValidationErr().text()).toBe(i18n.fields.name.validation.empty);
+      });
+    });
+
+    describe('Timezone select', () => {
+      it('shows error message under the timezone field and adds red border when timezone is NOT selected', () => {
+        const dropdown = findTimezoneDropdown();
+        expect(dropdown.classes()).toContain('invalid-dropdown');
+        expect(findTimezoneValidationErr().text()).toBe(i18n.fields.timezone.validation.empty);
+      });
+
+      it("doesn't show error message and doesn't add red border when timezone is selected", async () => {
+        const dropdown = findTimezoneDropdown();
+        findDropdownOptions()
+          .at(1)
+          .vm.$emit('click');
+        await wrapper.vm.$nextTick();
+        expect(dropdown.classes()).not.toContain('invalid-dropdown');
+        expect(findTimezoneValidationErr().exists()).toBe(false);
+      });
     });
   });
 });

@@ -23,10 +23,17 @@ exports[`AddScheduleModal renders modal layout 1`] = `
         id="schedule-name"
         value=""
       />
+       
+      <span
+        class="gl-text-red-500 gl-display-inline-block gl-mt-2"
+        data-testid="name-validation-error"
+      >
+        Can't be empty
+      </span>
     </gl-form-group-stub>
      
     <gl-form-group-stub
-      label="Description"
+      label="Description (optional)"
       label-for="schedule-description"
       label-size="sm"
     >
@@ -44,7 +51,7 @@ exports[`AddScheduleModal renders modal layout 1`] = `
     >
       <gl-dropdown-stub
         category="tertiary"
-        class="timezone-dropdown gl-w-full"
+        class="timezone-dropdown gl-w-full invalid-dropdown"
         headertext="Select timezone"
         id="schedule-timezone"
         size="medium"
@@ -115,6 +122,13 @@ exports[`AddScheduleModal renders modal layout 1`] = `
          
         <!---->
       </gl-dropdown-stub>
+       
+      <span
+        class="gl-text-red-500 gl-display-inline-block gl-mt-2"
+        data-testid="timezone-validation-error"
+      >
+        Can't be empty
+      </span>
     </gl-form-group-stub>
   </gl-form-stub>
 </gl-modal-stub>
