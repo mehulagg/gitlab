@@ -23,6 +23,12 @@ Publish generic files, like release binaries, in your project’s Package Regist
 To authenticate to the Package Registry, you need either a [personal access token](../../../api/README.md#personalproject-access-tokens)
 or [CI job token](../../../api/README.md#gitlab-ci-job-token).
 
+In addition to the standard API authentication mechanisms, the generic package
+API allows authentication with HTTP Basic authentication for use with tools that
+do not support the other available mechanisms. The `user-id` is not checked and
+may be any value, and the `password` must be either a [personal access token](../../../api/README.md#personalproject-access-tokens)
+or [CI job token](../../../api/README.md#gitlab-ci-job-token).
+
 ## Publish a package file
 
 When you publish a package file, if the package does not exist, it is created.
@@ -90,6 +96,13 @@ Example request that uses a personal access token:
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
      "https://gitlab.example.com/api/v4/projects/24/packages/generic/my_package/0.0.1/file.txt"
+```
+
+Example request that uses HTTP Basic authentication:
+
+```shell
+curl --user "user:<your_access_token>" \
+     https://gitlab.example.com/api/v4/projects/24/packages/generic/my_package/0.0.1/file.txt
 ```
 
 ## Publish a generic package by using CI/CD
