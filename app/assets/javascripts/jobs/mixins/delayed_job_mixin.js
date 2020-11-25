@@ -20,8 +20,11 @@ export default {
 
   computed: {
     isDelayedJob() {
-      return this.job && this.job.scheduled;
+      return this.job?.scheduled || this.job?.scheduledAt;
     },
+    scheduledTime() {
+      return this.job.scheduled_at || this.job.scheduledAt;
+    }
   },
 
   watch: {
@@ -43,7 +46,7 @@ export default {
     },
 
     updateRemainingTime() {
-      const remainingMilliseconds = calculateRemainingMilliseconds(this.job.scheduled_at);
+      const remainingMilliseconds = calculateRemainingMilliseconds(this.scheduledTime);
       this.remainingTime = formatTime(remainingMilliseconds);
     },
   },
