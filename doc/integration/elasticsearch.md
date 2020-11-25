@@ -87,7 +87,7 @@ updated automatically.
 
 Since Elasticsearch can read and use indices created in the previous major version you don't need to change anything in Gitlab's configuration when doing an Elasticsearch major version upgrade.
 
-The only thing that is worth noting is that if you've create your current index before version 13.0 of Gitlab you might want to [Reclaim the Production Index Name](https://docs.gitlab.com/ee/integration/elasticsearch.html#reclaiming-the-gitlab-production-index-name) or by reindexing from scratch (which will implicitly create an alias). The latter might be faster depending on the instance size.
+The only thing that is worth noting is that if you've create your current index before version 13.0 of Gitlab you might want to [Reclaim the Production Index Name](#reclaiming-the-gitlab-production-index-name) or by reindexing from scratch (which will implicitly create an alias). The latter might be faster depending on the instance size.
 
 The reason for this would be that you'll be able from this point on to perform zero-downtime reindexing and will benefit from any future features that will make use of the alias.
 
