@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Rack Attack global throttles' do
   include RackAttackSpecHelpers
+  include HttpBasicAuthHelpers
 
   let(:settings) { Gitlab::CurrentSettings.current_application_settings }
 
@@ -150,6 +151,25 @@ RSpec.describe 'Rack Attack global throttles' do
 
         def do_request
           get url_that_does_not_require_authentication
+        end
+      end
+
+      context 'for git-http requests' do
+        let(:git_http_path) { "/gitlab-org/gitlab.git/git-upload-pack" }
+
+        it 'gets throttled without auth headers' do
+          (1 + requests_per_period).times do
+            post git_http_path
+          end
+
+          expect(response).to have_gitlab_http_status(:too_many_requests)
+        end
+
+        it 'does not get throttled when auth is provided' do
+          (1 + requests_per_period).times do
+            post git_http_path, headers: basic_auth_header('username', 'password')
+            expect(response).not_to have_gitlab_http_status(:too_many_requests)
+          end
         end
       end
     end
