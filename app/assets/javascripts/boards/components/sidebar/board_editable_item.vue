@@ -26,14 +26,19 @@ export default {
   },
   methods: {
     collapseWhenOffClick({ target }) {
-      if (!this.$el.contains(target)) {
+      // to do maybe use a ref?
+      // if (!this.$el.querySelector('.dropdown-menu').contains(target)) {
+      //   this.collapse();
+      // }
+      if (!this.$refs.test.contains(target)) {
         this.collapse();
       }
     },
-    expand() {
+    expand(e) {
       if (this.edit) {
         return;
       }
+      e.stopPropagation();
 
       this.edit = true;
       this.$emit('open');
@@ -50,11 +55,11 @@ export default {
       }
       window.removeEventListener('click', this.collapseWhenOffClick);
     },
-    toggle({ emitEvent = true } = {}) {
+    toggle(e) {
       if (this.edit) {
-        this.collapse({ emitEvent });
+        this.collapse();
       } else {
-        this.expand();
+        this.expand(e);
       }
     },
   },
@@ -78,11 +83,11 @@ export default {
         {{ __('Edit') }}
       </gl-button>
     </div>
-    <div v-show="!edit" class="gl-text-gray-500" data-testid="collapsed-content">
+    <div v-if="!edit" class="gl-text-gray-500" data-testid="collapsed-content">
       <slot name="collapsed">{{ __('None') }}</slot>
     </div>
-    <div v-show="edit" data-testid="expanded-content">
-      <slot :edit="edit"></slot>
+    <div v-if="edit" data-testid="expanded-content">
+      <slot ref="test" :edit="edit"></slot>
     </div>
   </div>
 </template>

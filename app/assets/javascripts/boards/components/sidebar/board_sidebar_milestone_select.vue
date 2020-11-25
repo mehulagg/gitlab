@@ -38,6 +38,7 @@ export default {
       query: groupMilestones,
       debounce: 250,
       skip() {
+        // todo can we rm?
         return !this.edit;
       },
       variables() {

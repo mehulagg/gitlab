@@ -1,6 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownForm } from '@gitlab/ui';
-
+// rename
 export default {
   components: {
     GlDropdownForm,
