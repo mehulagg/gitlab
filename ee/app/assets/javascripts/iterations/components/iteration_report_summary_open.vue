@@ -67,9 +67,6 @@ export default {
       }
       return ((closed / (open + closed)) * 100).toFixed(0);
     },
-    showCards() {
-      return !this.$apollo.queries.issues.loading && Object.values(this.issues).every(a => a >= 0);
-    },
     columns() {
       return [
         {
@@ -102,7 +99,7 @@ export default {
 <template>
   <iteration-report-summary-cards
     :columns="columns"
-    :loading="this.$apollo.queries.issues.loading"
+    :loading="$apollo.queries.issues.loading"
     :total="total"
   />
 </template>

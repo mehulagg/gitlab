@@ -1,14 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import {
-  GlAlert,
-  GlBadge,
-  GlLoadingIcon,
-  GlEmptyState,
-  GlIcon,
-  GlDropdown,
-  GlDropdownItem,
-} from '@gitlab/ui';
+import { GlAlert, GlBadge, GlDropdown, GlDropdownItem, GlEmptyState, GlIcon } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -36,11 +28,10 @@ export default {
     BurnCharts,
     GlAlert,
     GlBadge,
-    GlLoadingIcon,
-    GlEmptyState,
     GlIcon,
     GlDropdown,
     GlDropdownItem,
+    GlEmptyState,
     IterationForm,
     IterationReportSummaryClosed,
     IterationReportSummaryOpen,
@@ -115,8 +106,11 @@ export default {
     canEditIteration() {
       return this.canEdit && this.namespaceType === Namespace.Group;
     },
-    hasIteration() {
-      return !this.$apollo.queries.iteration.loading && this.iteration?.title;
+    loading() {
+      return this.$apollo.queries.iteration.loading;
+    },
+    showEmptyState() {
+      return !this.loading && this.iteration && !this.iteration.title;
     },
     status() {
       switch (this.iteration.state) {
@@ -173,9 +167,8 @@ export default {
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error }}
     </gl-alert>
-    <gl-loading-icon v-if="$apollo.queries.iteration.loading" class="gl-py-5" size="lg" />
     <gl-empty-state
-      v-else-if="!hasIteration"
+      v-else-if="showEmptyState"
       :title="__('Could not find iteration')"
       :compact="false"
     />

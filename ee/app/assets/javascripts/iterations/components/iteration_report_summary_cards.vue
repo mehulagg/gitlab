@@ -37,8 +37,9 @@ export default {
   <div class="row gl-mt-6">
     <div v-for="(column, index) in columns" :key="index" class="col-sm-4">
       <gl-card :class="$options.cardClass" :body-class="$options.cardBodyClass">
-        <gl-skeleton-loader v-if="loading" :width="100" :height="12">
-          <rect x="60" width="40" height="16" rx="4" />
+        <gl-skeleton-loader v-if="loading" :width="400" :height="24">
+          <rect x="100" y="4" width="120" height="20" rx="4" />
+          <rect x="200" y="4" width="86" height="20" rx="4" />
         </gl-skeleton-loader>
         <div v-else>
           <span class="gl-border-1 gl-border-r-solid gl-border-gray-100 gl-pr-3 gl-mr-2">
