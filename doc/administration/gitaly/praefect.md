@@ -1052,6 +1052,28 @@ current primary node is found to be unhealthy.
 
 We are likely to implement support for Consul, and a cloud native, strategy in the future.
 
+### Determining the lead Gitaly node without Grafana
+
+The easiest way to find the lead Gitaly node is using the `Shard Primary Election` table
+on the `Praefect` Grafana dashboard. However, if Grafana is not enabled the leader can be
+found by checking the `gitaly_praefect_primaries` Prometheus metric exported by Praefect.
+
+Assuming `praefect['prometheus_listen_addr']` is using port 9652, execute the following
+on your Prefect nodes:
+
+   ```shell
+   $ curl localhost:9652/metrics | grep gitaly_praefect_primaries
+   gitaly_praefect_primaries{gitaly_storage="gitaly-1",virtual_storage="default"} 0
+   gitaly_praefect_primaries{gitaly_storage="gitaly-2",virtual_storage="default"} 0
+   gitaly_praefect_primaries{gitaly_storage="gitaly-3",virtual_storage="default"} 1
+   ```
+
+In the example output `gitaly-3` is the primary, as noted by the trailing `1`.
+
+NOTE: **Note:**
+This should be performed on all Praefect nodes to confirm which primary is the consensus choice.
+Also keep in mind that the primary may change at any time.
+
 ## Primary Node Failure
 
 Gitaly Cluster recovers from a failing primary Gitaly node by promoting a healthy secondary as the
