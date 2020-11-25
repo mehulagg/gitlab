@@ -19,7 +19,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::DeleteService do
     stub_licensed_features(cycle_analytics_for_groups: true)
   end
 
-  it_behaves_like 'permission check for cycle analytics stage services', :cycle_analytics_for_groups
+  it_behaves_like 'permission check for Value Stream Analytics Stage services', :cycle_analytics_for_groups
 
   context 'when persisted stage is given' do
     it { expect(subject).to be_success }

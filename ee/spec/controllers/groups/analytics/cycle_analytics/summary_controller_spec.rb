@@ -22,7 +22,7 @@ RSpec.describe Groups::Analytics::CycleAnalytics::SummaryController do
       expect(response).to match_response_schema('analytics/cycle_analytics/summary', dir: 'ee')
     end
 
-    include_examples 'cycle analytics data endpoint examples'
+    include_examples 'Value Stream Analytics data endpoint examples'
     include_examples 'group permission check on the controller level'
   end
 

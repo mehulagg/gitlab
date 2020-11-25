@@ -7,5 +7,6 @@
     "ruby.lint": {
       "rubocop": true,
       "useBundler": true
-    }
+    },
+    "editor.autoSave": "on"
 }
