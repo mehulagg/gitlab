@@ -135,7 +135,9 @@ You can change the name of a project environment in your GitLab CI/CD configurat
 ## Example workflow
 
 Below is a simple fictional workflow of a single cycle that happens in a
-single day passing through all seven stages. Note that if a stage does not have
+single day through all noted stages. Note that if a stage does not include a start
+and a stop time, its data is not included in the median time. It is assumed that
+milestones are created and a CI for testing and setting environments is configured.
 a start and a stop mark, it is not measured and hence not calculated in the median
 time. It is assumed that milestones are created and CI for testing and setting
 environments is configured.
