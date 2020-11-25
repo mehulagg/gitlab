@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Variables::Collection do
+  before do
+    stub_feature_flags(variable_inside_variable: false)
+  end
+
   describe '.new' do
     it 'can be initialized with an array' do
       variable = { key: 'VAR', value: 'value', public: true, masked: false }
@@ -104,6 +108,42 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
 
       expect(collection.to_runner_variables)
         .to eq [{ key: 'TEST', value: '1', public: true, masked: false }]
+    end
+
+    it 'does not resolve references to variables by default' do
+      collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' }, { key: 'CI_PIPELINE_ID', value: '102' }])
+
+      expect(collection.to_runner_variables)
+        .to eq [
+          { key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID', public: true, masked: false },
+          { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false }
+        ]
+    end
+
+    context 'when variable_inside_variable feature flag is enabled' do
+      before do
+        stub_feature_flags(variable_inside_variable: true)
+      end
+
+      it 'resolves references to variables' do
+        collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' }, { key: 'CI_PIPELINE_ID', value: '102' }])
+
+        expect(collection.to_runner_variables)
+          .to eq [
+            { key: 'IMAGE_TAG', value: 'docker-image-102', public: true, masked: false },
+            { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false }
+          ]
+      end
+
+      it 'does not resolve references to unknown variables' do
+        collection = described_class.new([{ key: 'IMAGE_TAG', value: 'docker-image-$PIPELINE_ID' }, { key: 'CI_PIPELINE_ID', value: '102' }])
+
+        expect(collection.to_runner_variables)
+          .to eq [
+            { key: 'IMAGE_TAG', value: 'docker-image-$PIPELINE_ID', public: true, masked: false },
+            { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false }
+          ]
+      end
     end
   end
 

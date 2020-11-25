@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Ci::Build do
+  before do
+    stub_feature_flags(variable_inside_variable: variable_inside_variable_enabled)
+  end
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group, reload: true) { create(:group) }
   let_it_be(:project, reload: true) { create(:project, :repository, group: group) }
@@ -15,6 +19,7 @@ RSpec.describe Ci::Build do
   end
 
   let(:build) { create(:ci_build, pipeline: pipeline) }
+  let(:variable_inside_variable_enabled) { false }
 
   it { is_expected.to belong_to(:runner) }
   it { is_expected.to belong_to(:trigger_request) }
@@ -2559,7 +2564,7 @@ RSpec.describe Ci::Build do
                                  name: 'staging')
 
             build.yaml_variables = [{ key: 'YAML_VARIABLE',
-                                      value: 'var',
+                                      value: 'var-$CI_PIPELINE_ID',
                                       public: true }]
             build.environment = 'staging'
           end
@@ -2568,6 +2573,16 @@ RSpec.describe Ci::Build do
             received_variables = subject.map { |variable| variable.fetch(:key) }
 
             expect(received_variables).to eq expected_variables
+          end
+
+          context 'when variable_inside_variable feature flag is enabled' do
+            let(:variable_inside_variable_enabled) { true }
+
+            it 'YAML_VARIABLE value is expanded' do
+              yaml_variable = subject.find { |v| v[:key] == 'YAML_VARIABLE' }
+
+              expect(yaml_variable[:value]).to eq "var-#{pipeline.id}"
+            end
           end
         end
       end
