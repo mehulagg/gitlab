@@ -138,7 +138,8 @@
   top: 50% !important;
 }
 
-.gl-active-text-decoration-none:active, .gl-focus-text-decoration-none:focus {
+.gl-active-text-decoration-none:active,
+.gl-focus-text-decoration-none:focus {
   text-decoration: none;
 }
 
@@ -174,21 +175,6 @@
     display: block;
     padding: 0;
     line-height: 0;
-
-    svg {
-      fill: $gl-text-color-secondary;
-    }
-
-    .spinner {
-      top: 2px;
-    }
-
-    &.play {
-      svg {
-        left: 1px;
-        top: 1px;
-      }
-    }
   }
 }
 
