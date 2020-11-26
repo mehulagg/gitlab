@@ -23,3 +23,5 @@ class UserSerializer < BaseSerializer
     project.team.max_member_access_for_user_ids(users.map(&:id))
   end
 end
+
+UserSerializer.prepend_if_ee('EE::UserSerializer')
