@@ -550,7 +550,7 @@ module API
     def increment_unique_values(event_name, values)
       return unless values.present?
 
-      feature_name = "usage_data_#{event_name}"
+      feature_flag = "usage_data_#{event_name}"
 
       return unless Feature.enabled?(feature_flag, default_enabled: true)
 
