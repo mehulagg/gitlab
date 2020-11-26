@@ -89,7 +89,7 @@ describe('DelayedJobMixin', () => {
         hasDetails: true,
         detailsPath: '/root/abcd-dag/-/jobs/1515',
         group: 'success',
-        action: null
+        action: null,
       },
     };
 

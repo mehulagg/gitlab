@@ -20,6 +20,6 @@ const accessors = {
 
 const accessValue = (dataMethod, prop, item) => {
   return get(item, accessors[dataMethod][prop]);
-}
+};
 
 export { accessors, accessValue };

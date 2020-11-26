@@ -24,7 +24,7 @@ export default {
     },
     scheduledTime() {
       return this.job.scheduled_at || this.job.scheduledAt;
-    }
+    },
   },
 
   watch: {

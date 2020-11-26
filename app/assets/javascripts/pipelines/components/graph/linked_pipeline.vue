@@ -17,8 +17,8 @@ export default {
   },
   inject: {
     dataMethod: {
-      default: REST
-    }
+      default: REST,
+    },
   },
   props: {
     columnTitle: {
@@ -87,9 +87,7 @@ export default {
       return accessValue(this.dataMethod, 'sourceJob', this.pipeline);
     },
     sourceJobInfo() {
-      return this.isDownstream
-        ? sprintf(__('Created by %{job}'), { job: this.sourceJobName })
-        : '';
+      return this.isDownstream ? sprintf(__('Created by %{job}'), { job: this.sourceJobName }) : '';
     },
     expandedIcon() {
       if (this.isUpstream) {

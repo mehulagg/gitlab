@@ -45,8 +45,8 @@ export default {
   mixins: [delayedJobMixin],
   inject: {
     dataMethod: {
-      default: REST
-    }
+      default: REST,
+    },
   },
   props: {
     job: {
@@ -79,10 +79,10 @@ export default {
       return this.dropdownLength === 1 ? 'viewport' : 'scrollParent';
     },
     detailsPath() {
-      return this.status[accessors[this.dataMethod]['detailsPath']];
+      return this.status[accessors[this.dataMethod].detailsPath];
     },
     hasDetails() {
-      return this.status[accessors[this.dataMethod]['hasDetails']];
+      return this.status[accessors[this.dataMethod].hasDetails];
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};
