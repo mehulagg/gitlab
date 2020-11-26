@@ -11,8 +11,6 @@ link: https://about.gitlab.com/handbook/communication/#top-misused-terms
 level: warning
 ignorecase: true
 swap:
-  active user: billable user
-  active users: billable users
   code base: codebase
   config: configuration
   distro: distribution
