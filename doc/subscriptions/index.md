@@ -154,7 +154,7 @@ With a linked GitLab.com account:
 
 Subscription charges are calculated based on the total number of users in a group, including its subgroups and nested projects. If the total number of users exceeds the number of seats in your subscription, your account is charged for the additional users.
 
-### Change customer portal account password
+### Change Customers Portal account password
 
 To change the password for this customers portal account:
 
