@@ -44,6 +44,7 @@ describe('Iterations report summary', () => {
 
     it('passes data to cards component', () => {
       expect(wrapper.find(IterationReportSummaryCards).props()).toEqual({
+        loading: false,
         columns: [
           {
             title: 'Completed',

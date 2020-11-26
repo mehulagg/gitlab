@@ -1,6 +1,14 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlAlert, GlBadge, GlDropdown, GlDropdownItem, GlEmptyState, GlIcon } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlBadge,
+  GlDropdown,
+  GlDropdownItem,
+  GlEmptyState,
+  GlIcon,
+  GlLoadingIcon,
+} from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -32,6 +40,7 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlEmptyState,
+    GlLoadingIcon,
     IterationForm,
     IterationReportSummaryClosed,
     IterationReportSummaryOpen,
@@ -167,6 +176,7 @@ export default {
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error }}
     </gl-alert>
+    <gl-loading-icon v-else-if="$apollo.queries.iteration.loading" class="gl-py-5" size="lg" />
     <gl-empty-state
       v-else-if="showEmptyState"
       :title="__('Could not find iteration')"

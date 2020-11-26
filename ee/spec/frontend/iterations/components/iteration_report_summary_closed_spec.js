@@ -44,6 +44,7 @@ describe('Iterations report summary', () => {
 
     it('renders cards for each issue type', () => {
       expect(wrapper.find(IterationReportSummaryCards).props()).toEqual({
+        loading: false,
         columns: [
           {
             title: 'Completed',
