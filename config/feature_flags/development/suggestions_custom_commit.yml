@@ -1,0 +1,8 @@
+---
+name: suggestions_custom_commit
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/25381
+milestone: '13.7'
+type: development
+group: group::code review
+default_enabled: false
