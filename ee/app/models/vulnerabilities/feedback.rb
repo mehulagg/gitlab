@@ -88,7 +88,7 @@ module Vulnerabilities
     end
 
     def touch_pipeline
-      pipeline&.touch
+      pipeline&.touch if pipeline&.needs_touch?
     end
 
     def finding
