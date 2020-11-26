@@ -3,7 +3,7 @@ import { GlDropdown, GlFormTextarea, GlButton } from '@gitlab/ui';
 import ApplySuggestionComponent from '~/vue_shared/components/markdown/apply_suggestion.vue';
 
 describe('Apply Suggestion component', () => {
-  const propsData = { fileName: 'test.js', disabled: false };
+  const propsData = { filePath: 'test.js', disabled: false };
   let wrapper;
 
   const createWrapper = props => {
