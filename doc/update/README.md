@@ -311,9 +311,8 @@ installation-specific upgrade instructions, based on how you installed GitLab:
 - [Helm charts](https://docs.gitlab.com/charts/installation/upgrade.html)
 
 NOTE: **Note:**
-Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/).
-Omnibus package comes with appropriate Ruby and Git versions and is not using system binaries for Ruby and Git. There is no need to manually
-install Ruby nor Git when utilizing Omnibus approach.
+Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/)
+and [Helm Chart deployments](https://docs.gitlab.com/charts/). They come with appropriate Ruby and Git versions and are not using system binaries for Ruby and Git. There is no need to worry about installing Ruby nor Git when utilizing these two approaches.
 
 ### 13.6.0
 
