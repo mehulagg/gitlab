@@ -42,6 +42,7 @@ describe('SubscriptionTable component', () => {
         propsData: {
           namespaceName: TEST_NAMESPACE_NAME,
           planUpgradeHref: '/url/',
+          planRenewHref: '/url/for/renew',
           customerPortalUrl: CUSTOMER_PORTAL_URL,
         },
       });
@@ -89,22 +90,24 @@ describe('SubscriptionTable component', () => {
   });
 
   describe.each`
-    planName        | isFreePlan | upgradable | isTrialPlan | snapshotDesc
-    ${'free'}       | ${true}    | ${true}    | ${false}    | ${'has Upgrade and Manage buttons'}
-    ${'trial-gold'} | ${false}   | ${false}   | ${true}     | ${'has Manage button'}
-    ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Manage button'}
-    ${'bronze'}     | ${false}   | ${true}    | ${false}    | ${'has Upgrade and Manage buttons'}
-  `(
+      planName        | isFreePlan | upgradable | isTrialPlan | snapshotDesc
+      ${'free'}       | ${true}    | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
+      ${'trial-gold'} | ${false}   | ${false}   | ${true}     | ${'has Manage button'}
+      ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Manage button'}
+      ${'bronze'}     | ${false}   | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
+    `(
     'given a $planName plan with state: isFreePlan=$isFreePlan, upgradable=$upgradable, isTrialPlan=$isTrialPlan',
     ({ planName, isFreePlan, upgradable, snapshotDesc }) => {
       beforeEach(() => {
         const planUpgradeHref = `${TEST_HOST}/plan/upgrade/${planName}`;
+        const planRenewHref = `${TEST_HOST}/plan/renew`;
 
         factory({
           propsData: {
             namespaceName: TEST_NAMESPACE_NAME,
             customerPortalUrl: CUSTOMER_PORTAL_URL,
             planUpgradeHref,
+            planRenewHref,
           },
         });
 
