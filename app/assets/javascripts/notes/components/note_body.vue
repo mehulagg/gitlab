@@ -130,6 +130,7 @@ export default {
       :note-html="note.note_html"
       :line-type="lineType"
       :help-page-path="helpPagePath"
+      :file-path="note.position.new_path"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"
