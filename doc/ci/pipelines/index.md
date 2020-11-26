@@ -262,7 +262,7 @@ The union of A, B, and C is (1, 4) and (6, 7). Therefore, the total running time
 ```
 #### How pipeline quota usage is calculated
 
-Pipeline quota usage is calculated as the sum of the duration of each individual job. This is slightly different to how pipeline _duration_ is [calculated](https://docs.gitlab.com/ee/ci/pipelines.html#how-pipeline-duration-is-calculated). Pipeline quota usage doesn't consider the intersection of jobs.
+Pipeline quota usage is calculated as the sum of the duration of each individual job. This is slightly different to how pipeline _duration_ is [calculated](#how-pipeline-duration-is-calculated). Pipeline quota usage doesn't consider the intersection of jobs.
 
 A simple example is:
 
