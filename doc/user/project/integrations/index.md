@@ -25,4 +25,4 @@ a new issue is created. You can configure webhooks to listen for specific events
 like pushes, issues or merge requests. GitLab sends a POST request with data
 to the webhook URL.
 
-Learn more about [webhooks](webhooks.md).
+Learn more [about webhooks](webhooks.md).
