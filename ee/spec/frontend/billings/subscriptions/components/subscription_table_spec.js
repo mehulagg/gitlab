@@ -93,7 +93,7 @@ describe('SubscriptionTable component', () => {
       planName        | isFreePlan | upgradable | isTrialPlan | snapshotDesc
       ${'free'}       | ${true}    | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
       ${'trial-gold'} | ${false}   | ${false}   | ${true}     | ${'has Manage button'}
-      ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Manage button'}
+      ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Renew and Manage buttons'}
       ${'bronze'}     | ${false}   | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
     `(
     'given a $planName plan with state: isFreePlan=$isFreePlan, upgradable=$upgradable, isTrialPlan=$isTrialPlan',
