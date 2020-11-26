@@ -49,13 +49,13 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
     end
   end
 
-  context 'when revocation token API returns invalid token types' do
+  context 'when revocation token types API returns empty list of types' do
     before do
       stub_application_setting(secret_detection_token_revocation_enabled: true)
       stub_invalid_token_types_api_with_success
     end
 
-    specify { expect(subject).to eql({ message: 'No token type is available', status: :error }) }
+    specify { expect(subject).to eql({ status: :success }) }
   end
 
   context 'when revocation service is disabled' do
@@ -112,7 +112,7 @@ RSpec.describe Security::TokenRevocationService, '#execute' do
           { 'types': %w() }
         end
 
-        specify { expect(subject).to eql({ message: 'No token type is available', status: :error }) }
+        specify { expect(subject).to eql({ status: :success }) }
       end
     end
 

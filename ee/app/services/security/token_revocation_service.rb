@@ -11,8 +11,11 @@ module Security
     end
 
     def execute
-      return error('Token revocation is disabled') unless token_revocation_enabled?
+      raise RevocationFailedError, 'Missing revocation tokens data' if missing_token_data?
 
+      return error('Token revocation is disabled') unless token_revocation_enabled?
+      return success if message.blank?
+      
       response = revoke_tokens
       response.success? ? success : error('Failed to revoke tokens')
     rescue RevocationFailedError => exception
@@ -29,8 +32,6 @@ module Security
     end
 
     def revoke_tokens
-      raise RevocationFailedError, 'Missing revocation tokens data' if missing_token_data?
-
       ::Gitlab::HTTP.post(
         token_revocation_url,
         body: message,
@@ -55,6 +56,8 @@ module Security
     end
 
     def message
+      return @message if @message.present?
+
       response = ::Gitlab::HTTP.get(
         token_types_url,
         headers: {
@@ -65,12 +68,13 @@ module Security
       raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?
 
       token_types = ::Gitlab::Json.parse(response.body)['types']
-      raise RevocationFailedError, 'No token type is available' if token_types.blank?
+      return nil if token_types.blank?
 
       @revocable_keys.filter! { |key| token_types.include?(key[:type]) }
-      raise RevocationFailedError, 'No revocable key is present' if @revocable_keys.blank?
+      return nil if @revocable_keys.blank?
 
-      @revocable_keys.to_json
+      @message = @revocable_keys.to_json
+      @message
     end
 
     def token_types_url
