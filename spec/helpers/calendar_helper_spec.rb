@@ -21,7 +21,7 @@ RSpec.describe CalendarHelper do
 
     context 'when feed token disabled' do
       it "does not have a feed_token" do
-        allow_any_instance_of(ApplicationSetting).to receive(:feed_token_off).and_return(true)
+        allow(Gitlab::CurrentSettings).to receive(:feed_token_off).and_return(true)
         expect(helper.calendar_url_options[:feed_token]).to be_nil
       end
     end
