@@ -9,7 +9,6 @@ export default new VueApollo({
     {},
     {
       assumeImmutableResults: true,
-      baseUrl: 'http://localhost:4000',
     },
   ),
 });

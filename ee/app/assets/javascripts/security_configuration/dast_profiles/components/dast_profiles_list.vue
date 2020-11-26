@@ -1,4 +1,5 @@
 <script>
+import { produce } from 'immer';
 import { uniqueId } from 'lodash';
 import {
   GlAlert,
@@ -14,8 +15,9 @@ import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
 } from 'ee/security_configuration/dast_site_validation/constants';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
 
 const { PENDING, FAILED, INPROGRESS } = DAST_SITE_VALIDATION_STATUS;
 
@@ -31,6 +33,58 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+  },
+  apollo: {
+    validation: {
+      // Since this is only to showcase how we could write to the cache after a query, I've reused the existing
+      // dast_site_validation query here, but we'd need to adapt this to work with the newer dast_site_validations query
+      query: dastSiteValidationsQuery,
+      manual: true,
+      variables() {
+        return {
+          fullPath: this.fullPath,
+          targetUrl: 'http://gdk.test/',
+        };
+      },
+      pollInterval: 1000, // todo: make it a constant
+      skip() {
+        return false;
+      },
+      result() {
+        const store = this.$apolloProvider.defaultClient;
+        // We need to construct the body of the query that we want to modify
+        // This makes things potentially complex regarding pagination as I'm not sure if
+        // we'll be able to change the whole dataset in one pass, or wheter this forces us
+        // to modify each page individually...
+        // Note that I hardcoded `first: 10` for now.
+        const queryBody = {
+          query: dastSiteProfilesQuery,
+          variables: {
+            fullPath: this.fullPath,
+            first: 10,
+          },
+        };
+        // Retrieve the current data from the cache
+        const sourceData = store.readQuery(queryBody);
+        // Modify the data as needed, we'll only be chaning all site profiles' names for now
+        const data = produce(sourceData, draftState => {
+          // eslint-disable-next-line no-param-reassign
+          draftState.project.siteProfiles.edges = draftState.project.siteProfiles.edges.map(
+            edge => {
+              return {
+                ...edge,
+                node: {
+                  ...edge.node,
+                  profileName: 'optimistic update',
+                },
+              };
+            },
+          );
+        });
+        // Finally, write back to the cache
+        store.writeQuery({ ...queryBody, data });
+      },
+    },
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -117,9 +171,6 @@ export default {
       handler: 'validateTargets',
     },
   },
-  created() {
-    this.updateNonValidatedTargets();
-  },
   methods: {
     handleDelete() {
       this.$emit('delete-profile', this.toBeDeletedProfileId);
@@ -158,37 +209,6 @@ export default {
         .map(({ normalizedTargetUrl }) => normalizedTargetUrl);
 
       this.uniqueNonValidatedTargets = Array.from(new Set(nonValidatedTargets));
-    },
-    updateNonValidatedTargets() {
-      this.$apollo.addSmartQuery('validations', {
-        query: dastSiteValidationsQuery,
-        variables() {
-          return {
-            fullPath: this.fullPath,
-            urls: this.uniqueNonValidatedTargets,
-          };
-        },
-        pollInterval: 1000, // todo: make it a constant
-        manual: true,
-        skip() {
-          return !this.uniqueNonValidatedTargets.length;
-        },
-        result({ data, error }) {
-          debugger;
-          if (!error) {
-            const { project } = data;
-            const profileEdges = project?.validations?.edges ?? [];
-            const validationCompletedTargets = profileEdges.map(
-              ({ node: { normalizedTargetUrl } }) => status,
-            ); // fix
-
-            this.uniqueNonValidatedTargets =
-              this.uniqueNonValidatedTargets - validationCompletedTargets; // fix
-
-            // Loop through existing profiles and mutate the validation status by matching the normalised urls
-          }
-        },
-      });
     },
   },
 };

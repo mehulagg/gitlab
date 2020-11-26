@@ -1,10 +1,10 @@
 query project($fullPath: ID!, $urls: [String!]) {
   project(fullPath: $fullPath) {
-    validations: dastSiteValidations(normalizedTargetUrls: $urls) {
+    validations: dastSiteValidations(normalizedTargetUrls: $urls) @client {
       edges {
         node {
-          normalizedTargetUrl
-          status
+          normalizedTargetUrl @client
+          status @client
         }
       }
     }
