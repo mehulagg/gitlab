@@ -290,14 +290,32 @@ RSpec.describe User do
     describe 'name' do
       it { is_expected.to validate_presence_of(:name) }
       it { is_expected.to validate_length_of(:name).is_at_most(255) }
+
+      it 'rejects emojis' do
+        user = build(:user, name: 'Butterfly 🦋')
+
+        expect(user).not_to be_valid
+      end
     end
 
     describe 'first name' do
       it { is_expected.to validate_length_of(:first_name).is_at_most(127) }
+
+      it 'rejects emojis' do
+        user = build(:user, name: 'Butterfly 🦋')
+
+        expect(user).not_to be_valid
+      end
     end
 
     describe 'last name' do
       it { is_expected.to validate_length_of(:last_name).is_at_most(127) }
+
+      it 'rejects emojis' do
+        user = build(:user, name: 'Butterfly 🦋')
+
+        expect(user).not_to be_valid
+      end
     end
 
     describe 'preferred_language' do
@@ -326,6 +344,12 @@ RSpec.describe User do
 
         expect(user).not_to be_valid
         expect(user.errors.messages[:username]).to eq ['dashboard is a reserved name']
+      end
+
+      it 'rejects emojis' do
+        user = build(:user, name: 'Butterfly 🦋')
+
+        expect(user).not_to be_valid
       end
 
       it 'allows child names' do

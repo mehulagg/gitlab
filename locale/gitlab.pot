@@ -31754,6 +31754,9 @@ msgstr ""
 msgid "cannot contain HTML/XML tags, including any word between angle brackets (&lt;,&gt;)."
 msgstr ""
 
+msgid "cannot contain an emoji"
+msgstr ""
+
 msgid "cannot include leading slash or directory traversal."
 msgstr ""
 

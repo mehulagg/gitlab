@@ -194,9 +194,9 @@ class User < ApplicationRecord
   # Validations
   #
   # Note: devise :validatable above adds validations for :email and :password
-  validates :name, presence: true, length: { maximum: 255 }
-  validates :first_name, length: { maximum: 127 }
-  validates :last_name, length: { maximum: 127 }
+  validates :name, presence: true, length: { maximum: 255 }, restrict_emoji: true
+  validates :first_name, length: { maximum: 127 }, restrict_emoji: true
+  validates :last_name, length: { maximum: 127 }, restrict_emoji: true
   validates :email, confirmation: true
   validates :notification_email, presence: true
   validates :notification_email, devise_email: true, if: ->(user) { user.notification_email != user.email }
@@ -205,7 +205,7 @@ class User < ApplicationRecord
   validates :projects_limit,
     presence: true,
     numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: Gitlab::Database::MAX_INT_VALUE }
-  validates :username, presence: true
+  validates :username, presence: true, restrict_emoji: true
 
   validates :namespace, presence: true
   validate :namespace_move_dir_allowed, if: :username_changed?
