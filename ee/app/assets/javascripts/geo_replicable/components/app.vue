@@ -1,9 +1,9 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
+import { GlLoadingIcon } from '@gitlab/ui';
+import GeoReplicableFilterBar from './geo_replicable_filter_bar.vue';
 import GeoReplicable from './geo_replicable.vue';
 import GeoReplicableEmptyState from './geo_replicable_empty_state.vue';
-import GeoReplicableFilterBar from './geo_replicable_filter_bar.vue';
 
 export default {
   name: 'GeoReplicableApp',

@@ -1,9 +1,9 @@
-import $ from 'jquery';
-import Cookies from 'js-cookie';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
+import $ from 'jquery';
+import Cookies from 'js-cookie';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import createDefaultClient from '~/lib/graphql';
 import BurnCharts from './components/burn_charts.vue';
 
 Vue.use(VueApollo);

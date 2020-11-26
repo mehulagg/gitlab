@@ -2,8 +2,8 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import COLUMNS from '../constants';
 
-import TableBody from './table_body.vue';
 import TableHeader from './table_header.vue';
+import TableBody from './table_body.vue';
 
 export default {
   columns: COLUMNS,

@@ -1,7 +1,7 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
-import Pagination from '~/vue_shared/components/pagination_links.vue';
 import MergeRequestTableRow from './mr_table_row.vue';
+import Pagination from '~/vue_shared/components/pagination_links.vue';
 
 export default {
   components: {

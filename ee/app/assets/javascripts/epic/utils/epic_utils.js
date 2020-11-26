@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 
+import { __, s__, sprintf } from '~/locale';
+
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { dateInWords, parsePikadayDate } from '~/lib/utils/datetime_utility';
-import { __, s__, sprintf } from '~/locale';
 
 import { dateTypes } from '../constants';
 

@@ -1,9 +1,9 @@
 <script>
-import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import eventHub from '../event_hub';
 import { __, n__ } from '~/locale';
 import { EPIC_DETAILS_CELL_WIDTH, EPIC_ITEM_HEIGHT, TIMELINE_CELL_MIN_WIDTH } from '../constants';
-import eventHub from '../event_hub';
 import MilestoneTimeline from './milestone_timeline.vue';
 
 const EXPAND_BUTTON_EXPANDED = {

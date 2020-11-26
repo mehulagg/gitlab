@@ -1,4 +1,5 @@
 <script>
+import { mapActions } from 'vuex';
 import {
   GlTooltipDirective,
   GlDropdown,
@@ -8,9 +9,8 @@ import {
   GlButton,
   GlModalDirective,
 } from '@gitlab/ui';
-import { mapActions } from 'vuex';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
 import IssueStatusIcon from '~/reports/components/issue_status_icon.vue';
 

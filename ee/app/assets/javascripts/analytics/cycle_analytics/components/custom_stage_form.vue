@@ -1,4 +1,6 @@
 <script>
+import { mapGetters, mapState } from 'vuex';
+import { isEqual } from 'lodash';
 import {
   GlFormGroup,
   GlFormInput,
@@ -10,10 +12,9 @@ import {
   GlSprintf,
   GlButton,
 } from '@gitlab/ui';
-import { isEqual } from 'lodash';
-import { mapGetters, mapState } from 'vuex';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import LabelsSelector from './labels_selector.vue';
 import { STAGE_ACTIONS, DEFAULT_STAGE_NAMES } from '../constants';
 import {
   isStartEvent,
@@ -23,7 +24,6 @@ import {
   eventsByIdentifier,
   getLabelEventsIdentifiers,
 } from '../utils';
-import LabelsSelector from './labels_selector.vue';
 
 const defaultFields = {
   id: null,

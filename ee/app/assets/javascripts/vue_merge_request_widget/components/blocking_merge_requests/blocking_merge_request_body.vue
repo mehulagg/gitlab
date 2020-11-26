@@ -1,7 +1,7 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
-import { n__ } from '~/locale';
 import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_item.vue';
+import { n__ } from '~/locale';
 
 export default {
   name: 'BlockingMergeRequestsBody',

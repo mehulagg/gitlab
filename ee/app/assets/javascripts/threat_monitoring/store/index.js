@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import networkPolicies from './modules/network_policies';
 import threatMonitoring from './modules/threat_monitoring';
 import threatMonitoringStatistics from './modules/threat_monitoring_statistics';
+import networkPolicies from './modules/network_policies';
 
 Vue.use(Vuex);
 

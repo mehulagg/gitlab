@@ -1,8 +1,9 @@
 <script>
 import { getSundays } from '~/lib/utils/datetime_utility';
 
-import { PRESET_TYPES } from '../../constants';
 import CommonMixin from '../../mixins/common_mixin';
+
+import { PRESET_TYPES } from '../../constants';
 
 export default {
   mixins: [CommonMixin],

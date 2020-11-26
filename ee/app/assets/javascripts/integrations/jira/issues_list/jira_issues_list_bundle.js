@@ -1,7 +1,7 @@
 import Vue from 'vue';
 
-import { IssuableStates } from '~/issuable_list/constants';
 import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { IssuableStates } from '~/issuable_list/constants';
 
 import JiraIssuesListApp from './components/jira_issues_list_root.vue';
 

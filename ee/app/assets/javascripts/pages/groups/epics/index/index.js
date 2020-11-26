@@ -1,7 +1,7 @@
-import initEpicCreateApp from 'ee/epic/epic_bundle';
 import FilteredSearchTokenKeysEpics from 'ee/filtered_search/filtered_search_token_keys_epics';
-import issuableInitBulkUpdateSidebar from '~/issuable_init_bulk_update_sidebar';
+import initEpicCreateApp from 'ee/epic/epic_bundle';
 import initFilteredSearch from '~/pages/search/init_filtered_search';
+import issuableInitBulkUpdateSidebar from '~/issuable_init_bulk_update_sidebar';
 
 const EPIC_BULK_UPDATE_PREFIX = 'epic_';
 

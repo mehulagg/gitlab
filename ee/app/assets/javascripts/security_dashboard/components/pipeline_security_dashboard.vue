@@ -1,12 +1,12 @@
 <script>
-import { GlEmptyState } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import { fetchPolicies } from '~/lib/graphql';
+import { GlEmptyState } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import pipelineSecurityReportSummaryQuery from '../graphql/pipeline_security_report_summary.query.graphql';
-import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
+import SecurityDashboard from './security_dashboard_vuex.vue';
+import { fetchPolicies } from '~/lib/graphql';
+import pipelineSecurityReportSummaryQuery from '../graphql/pipeline_security_report_summary.query.graphql';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'PipelineSecurityDashboard',

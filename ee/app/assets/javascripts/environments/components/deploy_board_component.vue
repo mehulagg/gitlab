@@ -9,6 +9,7 @@
  * - Button Actions.
  * [Mockup](https://gitlab.com/gitlab-org/gitlab-foss/uploads/2f655655c0eadf655d0ae7467b53002a/environments__deploy-graphic.png)
  */
+import { isEmpty } from 'lodash';
 import {
   GlIcon,
   GlLoadingIcon,
@@ -17,7 +18,6 @@ import {
   GlTooltipDirective,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import { isEmpty } from 'lodash';
 import deployBoardSvg from 'ee_empty_states/icons/_deploy_board.svg';
 import { n__ } from '~/locale';
 import { STATUS_MAP, CANARY_STATUS } from '../constants';

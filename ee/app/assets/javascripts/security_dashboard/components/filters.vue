@@ -1,9 +1,9 @@
 <script>
-import { GlToggle } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { severityFilter, scannerFilter } from 'ee/security_dashboard/helpers';
-import { DISMISSAL_STATES } from '../store/modules/filters/constants';
+import { GlToggle } from '@gitlab/ui';
 import StandardFilter from './filters/standard_filter.vue';
+import { DISMISSAL_STATES } from '../store/modules/filters/constants';
 
 export default {
   components: {

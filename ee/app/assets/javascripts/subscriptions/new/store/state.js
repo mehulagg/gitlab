@@ -1,5 +1,5 @@
-import { parseBoolean } from '~/lib/utils/common_utils';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { STEPS, TAX_RATE } from '../constants';
 
 const parsePlanData = planData =>

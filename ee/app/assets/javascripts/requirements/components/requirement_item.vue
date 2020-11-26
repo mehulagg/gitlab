@@ -2,9 +2,10 @@
 import { GlPopover, GlLink, GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
-import { FilterState } from '../constants';
-import RequirementMeta from '../mixins/requirement_meta';
 import RequirementStatusBadge from './requirement_status_badge.vue';
+
+import RequirementMeta from '../mixins/requirement_meta';
+import { FilterState } from '../constants';
 
 export default {
   components: {

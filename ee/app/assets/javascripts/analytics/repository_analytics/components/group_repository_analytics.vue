@@ -1,9 +1,9 @@
 <script>
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import DownloadTestCoverage from './download_test_coverage.vue';
 import TestCoverageSummary from './test_coverage_summary.vue';
 import TestCoverageTable from './test_coverage_table.vue';
+import DownloadTestCoverage from './download_test_coverage.vue';
 
 export default {
   name: 'GroupRepositoryAnalytics',

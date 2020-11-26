@@ -1,8 +1,8 @@
 <script>
 import { GlTable, GlButton } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import { DEVOPS_ADOPTION_TABLE_TEST_IDS } from '../constants';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
+import { DEVOPS_ADOPTION_TABLE_TEST_IDS } from '../constants';
 
 const fieldOptions = {
   thClass: 'gl-bg-white! gl-text-gray-400',

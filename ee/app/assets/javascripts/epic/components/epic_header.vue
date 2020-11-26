@@ -1,14 +1,14 @@
 <script>
-import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
-import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
-import { statusType } from '../constants';
 import epicUtils from '../utils/epic_utils';
+import { statusType } from '../constants';
 
 export default {
   directives: {

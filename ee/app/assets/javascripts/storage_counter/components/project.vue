@@ -1,9 +1,9 @@
 <script>
 import { GlLink, GlIcon } from '@gitlab/ui';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { numberToHumanSize, isOdd } from '~/lib/utils/number_utils';
-import { s__ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import { numberToHumanSize, isOdd } from '~/lib/utils/number_utils';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { s__ } from '~/locale';
 import StorageRow from './storage_row.vue';
 
 export default {

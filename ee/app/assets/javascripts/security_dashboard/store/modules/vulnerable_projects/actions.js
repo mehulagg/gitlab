@@ -1,9 +1,9 @@
 import axios from 'axios';
 
+import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
 
 import { SET_LOADING, SET_PROJECTS, SET_HAS_ERROR } from './mutation_types';
 

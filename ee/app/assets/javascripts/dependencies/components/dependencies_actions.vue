@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
+import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
 import { SORT_FIELDS, SORT_ORDER } from '../store/modules/list/constants';
 

@@ -1,7 +1,7 @@
 <script>
-import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { camelCase } from 'lodash';
 import { mapState, mapActions } from 'vuex';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME, JOB_TYPES } from 'ee/approvals/constants';
 import { s__ } from '~/locale';
 import UnconfiguredSecurityRule from './unconfigured_security_rule.vue';

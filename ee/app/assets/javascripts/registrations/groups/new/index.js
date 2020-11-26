@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import InviteTeammates from '../../components/invite_teammates.vue';
+import { STEPS, ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS } from '../../constants';
 import ProgressBar from '../../components/progress_bar.vue';
 import VisibilityLevelDropdown from '../../components/visibility_level_dropdown.vue';
-import { STEPS, ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS } from '../../constants';
+import InviteTeammates from '../../components/invite_teammates.vue';
 
 function mountProgressBar() {
   const el = document.getElementById('progress-bar');

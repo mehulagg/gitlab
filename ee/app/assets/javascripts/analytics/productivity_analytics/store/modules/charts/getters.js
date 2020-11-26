@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
-import httpStatus from '~/lib/utils/http_status';
 import { s__ } from '~/locale';
+import httpStatus from '~/lib/utils/http_status';
 import {
   chartKeys,
   metricTypes,

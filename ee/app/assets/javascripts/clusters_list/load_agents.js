@@ -1,5 +1,5 @@
-import createDefaultClient from '~/lib/graphql';
 import Agents from './components/agents.vue';
+import createDefaultClient from '~/lib/graphql';
 import getAgentsQuery from './graphql/queries/get_agents.query.graphql';
 
 export default (Vue, VueApollo) => {

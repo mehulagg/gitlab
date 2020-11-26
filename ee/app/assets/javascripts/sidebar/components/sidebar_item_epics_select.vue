@@ -1,6 +1,6 @@
 <script>
-import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import { noneEpic } from 'ee/vue_shared/constants';
+import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default {

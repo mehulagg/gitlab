@@ -1,9 +1,9 @@
 <script>
-import { GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapState, mapActions } from 'vuex';
-import { s__ } from '~/locale';
+import { GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
+import { s__ } from '~/locale';
 import Step from './step.vue';
 
 export default {

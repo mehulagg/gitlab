@@ -1,6 +1,6 @@
 <script>
-import { MAX_DISPLAYED_VULNERABILITIES_PER_DEPENDENCY } from './constants';
 import DependencyVulnerability from './dependency_vulnerability.vue';
+import { MAX_DISPLAYED_VULNERABILITIES_PER_DEPENDENCY } from './constants';
 
 export default {
   name: 'DependencyVulnerabilities',

@@ -1,10 +1,12 @@
 <script>
 import { delay } from 'lodash';
 
-import { EPIC_HIGHLIGHT_REMOVE_AFTER } from '../constants';
-import CommonMixin from '../mixins/common_mixin';
 import EpicItemDetails from './epic_item_details.vue';
 import EpicItemTimeline from './epic_item_timeline.vue';
+
+import CommonMixin from '../mixins/common_mixin';
+
+import { EPIC_HIGHLIGHT_REMOVE_AFTER } from '../constants';
 
 export default {
   components: {

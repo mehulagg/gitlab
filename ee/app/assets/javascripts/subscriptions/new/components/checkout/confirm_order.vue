@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 export default {

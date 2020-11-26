@@ -1,6 +1,6 @@
 <script>
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import { __, s__ } from '~/locale';
+import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import getGroupTestCoverage from '../graphql/queries/get_group_test_coverage.query.graphql';
 
 export default {

@@ -1,4 +1,6 @@
 <script>
+import { mapState, mapActions } from 'vuex';
+
 import {
   GlAvatar,
   GlButton,
@@ -8,10 +10,9 @@ import {
   GlDropdownItem,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import { mapState, mapActions } from 'vuex';
+import { SEARCH_DEBOUNCE } from '../constants';
 
 import { __ } from '~/locale';
-import { SEARCH_DEBOUNCE } from '../constants';
 
 export default {
   components: {

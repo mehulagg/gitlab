@@ -1,14 +1,14 @@
 <script>
-import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
+import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
-import { dateInWords } from '~/lib/utils/datetime_utility';
 import { __, s__ } from '~/locale';
+import { dateInWords } from '~/lib/utils/datetime_utility';
 
+import popover from '~/vue_shared/directives/popover';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
 import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
-import popover from '~/vue_shared/directives/popover';
 
 const label = __('Date picker');
 const pickerLabel = __('Fixed date');

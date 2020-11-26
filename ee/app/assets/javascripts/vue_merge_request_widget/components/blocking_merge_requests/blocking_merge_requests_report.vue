@@ -1,9 +1,9 @@
 <script>
-import { GlSprintf } from '@gitlab/ui';
 import { componentNames } from 'ee/reports/components/issue_body';
-import { n__, sprintf } from '~/locale';
+import { GlSprintf } from '@gitlab/ui';
 import ReportSection from '~/reports/components/report_section.vue';
 import { status as reportStatus } from '~/reports/constants';
+import { n__, sprintf } from '~/locale';
 
 export default {
   name: 'BlockingMergeRequestsReport',

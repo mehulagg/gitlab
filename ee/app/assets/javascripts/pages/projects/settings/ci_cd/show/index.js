@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import ProtectedEnvironmentCreate from 'ee/protected_environments/protected_environment_create';
-import ProtectedEnvironmentEditList from 'ee/protected_environments/protected_environment_edit_list';
 import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import createStore from 'ee/vue_shared/license_compliance/store/index';
+import ProtectedEnvironmentCreate from 'ee/protected_environments/protected_environment_create';
+import ProtectedEnvironmentEditList from 'ee/protected_environments/protected_environment_edit_list';
 import showToast from '~/vue_shared/plugins/global_toast';
 import '~/pages/projects/settings/ci_cd/show/index';
 

@@ -1,12 +1,12 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { s__, sprintf, __ } from '~/locale';
+import { GlAlert } from '@gitlab/ui';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
-import { formattedDate } from '../../shared/utils';
-import { TASKS_BY_TYPE_SUBJECT_ISSUE } from '../constants';
 import TasksByTypeChart from './tasks_by_type/tasks_by_type_chart.vue';
 import TasksByTypeFilters from './tasks_by_type/tasks_by_type_filters.vue';
+import { s__, sprintf, __ } from '~/locale';
+import { formattedDate } from '../../shared/utils';
+import { TASKS_BY_TYPE_SUBJECT_ISSUE } from '../constants';
 
 export default {
   name: 'TypeOfWorkCharts',

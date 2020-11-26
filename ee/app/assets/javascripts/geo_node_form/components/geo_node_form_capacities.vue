@@ -2,8 +2,8 @@
 import { GlFormGroup, GlFormInput, GlLink } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
-import { VALIDATION_FIELD_KEYS, REVERIFICATION_MORE_INFO, BACKFILL_MORE_INFO } from '../constants';
 import { validateCapacity } from '../validations';
+import { VALIDATION_FIELD_KEYS, REVERIFICATION_MORE_INFO, BACKFILL_MORE_INFO } from '../constants';
 
 export default {
   name: 'GeoNodeFormCapacities',

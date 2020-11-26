@@ -1,5 +1,5 @@
-import { s__ } from '~/locale';
 import { STEPS, NEW_GROUP } from '../constants';
+import { s__ } from '~/locale';
 
 export const currentStep = state => state.currentStep;
 

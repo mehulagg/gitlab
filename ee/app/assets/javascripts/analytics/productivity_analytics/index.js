@@ -1,16 +1,16 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapState, mapActions } from 'vuex';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import store from './store';
+import FilterDropdowns from './components/filter_dropdowns.vue';
+import DateRange from '../shared/components/daterange.vue';
+import ProductivityAnalyticsApp from './components/app.vue';
+import FilteredSearchProductivityAnalytics from './filtered_search_productivity_analytics';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import DateRange from '../shared/components/daterange.vue';
-import { buildGroupFromDataset, buildProjectFromDataset } from '../shared/utils';
-import ProductivityAnalyticsApp from './components/app.vue';
-import FilterDropdowns from './components/filter_dropdowns.vue';
-import FilteredSearchProductivityAnalytics from './filtered_search_productivity_analytics';
-import store from './store';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { getLabelsEndpoint, getMilestonesEndpoint } from './utils';
+import { buildGroupFromDataset, buildProjectFromDataset } from '../shared/utils';
 
 Vue.use(VueApollo);
 

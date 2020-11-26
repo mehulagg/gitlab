@@ -1,9 +1,9 @@
 <script>
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
-import { DEVOPS_ADOPTION_STRINGS, MAX_REQUEST_COUNT } from '../constants';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
+import { DEVOPS_ADOPTION_STRINGS, MAX_REQUEST_COUNT } from '../constants';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
 
 export default {

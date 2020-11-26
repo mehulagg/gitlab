@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
-import GeoReplicableApp from './components/app.vue';
 import createStore from './store';
+import GeoReplicableApp from './components/app.vue';
 
 Vue.use(Translate);
 

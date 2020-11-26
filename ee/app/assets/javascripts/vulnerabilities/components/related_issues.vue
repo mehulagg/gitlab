@@ -1,13 +1,13 @@
 <script>
-import { GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
 import axios from 'axios';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
-import { sprintf, __, s__ } from '~/locale';
+import { GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import RelatedIssuesStore from '~/related_issues/stores/related_issues_store';
 import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
-import RelatedIssuesStore from '~/related_issues/stores/related_issues_store';
+import { sprintf, __, s__ } from '~/locale';
+import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
 import { RELATED_ISSUES_ERRORS } from '../constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
 export default {

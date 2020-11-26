@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Translate from '~/vue_shared/translate';
-import GeoNodeFormApp from './components/app.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import createStore from './store';
+import GeoNodeFormApp from './components/app.vue';
 
 Vue.use(Translate);
 

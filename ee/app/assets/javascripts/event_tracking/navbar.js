@@ -1,5 +1,5 @@
-import { mergeUrlParams } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
 
 const TRACKING_CATEGORY = 'navbar_top';
 const NAVSOURCE_KEY = 'nav_source';

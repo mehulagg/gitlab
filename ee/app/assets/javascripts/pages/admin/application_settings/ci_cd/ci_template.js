@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 import { __ } from '~/locale';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class CiTemplate {
   constructor() {

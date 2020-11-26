@@ -1,9 +1,9 @@
 <script>
-import { GlButton, GlIcon, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { GlButton, GlIcon, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
 import { __, n__ } from '~/locale';
-import { EPIC_LEVEL_MARGIN } from '../constants';
 import eventHub from '../event_hub';
+import { EPIC_LEVEL_MARGIN } from '../constants';
 
 export default {
   components: {

@@ -1,7 +1,8 @@
 import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 
-import { statusType } from '../constants';
 import epicUtils from '../utils/epic_utils';
+
+import { statusType } from '../constants';
 
 export const isEpicOpen = state => state.state === statusType.open;
 

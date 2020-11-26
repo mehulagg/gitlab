@@ -1,9 +1,9 @@
 <script>
-import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import $ from 'jquery';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import eventHub from '~/sidebar/event_hub';
 import Tracking from '~/tracking';
+import eventHub from '~/sidebar/event_hub';
 import { MAX_DISPLAY_WEIGHT } from '../../constants';
 
 export default {

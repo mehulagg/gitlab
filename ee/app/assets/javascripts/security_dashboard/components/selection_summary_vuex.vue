@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlFormSelect } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
+import { GlButton, GlFormSelect } from '@gitlab/ui';
 import { __, n__ } from '~/locale';
 
 const REASON_NONE = __('[No reason]');

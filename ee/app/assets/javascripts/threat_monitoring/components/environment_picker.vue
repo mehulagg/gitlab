@@ -1,6 +1,6 @@
 <script>
-import { GlFormGroup, GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { GlFormGroup, GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import { ALL_ENVIRONMENT_NAME } from '../constants';
 
 export default {

@@ -1,6 +1,6 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import { GlPagination } from '@gitlab/ui';
 import { PREV, NEXT } from '../constants';
 import GeoReplicableItem from './geo_replicable_item.vue';
 

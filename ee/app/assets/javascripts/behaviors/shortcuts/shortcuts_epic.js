@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import Cookies from 'js-cookie';
 import Mousetrap from 'mousetrap';
+import Cookies from 'js-cookie';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
 import { parseBoolean } from '~/lib/utils/common_utils';
 

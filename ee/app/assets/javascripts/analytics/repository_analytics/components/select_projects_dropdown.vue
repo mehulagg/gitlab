@@ -9,8 +9,8 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import produce from 'immer';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, n__ } from '~/locale';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import getGroupProjects from '../graphql/queries/get_group_projects.query.graphql';
 
 export default {

@@ -1,6 +1,6 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { transformRawStages } from '../utils';
 import * as types from './mutation_types';
+import { transformRawStages } from '../utils';
 
 export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {

@@ -1,11 +1,11 @@
 import { memoize, uniqBy, uniqueId, flatten } from 'lodash';
-import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
+import Api from '~/api';
+import axios from '~/lib/utils/axios_utils';
+import * as types from './mutation_types';
 import { RULE_TYPE_ANY_APPROVER } from '../../../constants';
 import { mapMRApprovalSettingsResponse } from '../../../mappers';
-import * as types from './mutation_types';
 
 const fetchGroupMembers = memoize(id => Api.groupMembers(id).then(response => response.data));
 

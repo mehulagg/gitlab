@@ -1,8 +1,8 @@
 <script>
 import { SCAN_TYPE_OPTIONS } from 'ee/security_configuration/dast_scanner_profiles/constants';
-import { __, s__ } from '~/locale';
 import ProfileSelector from './profile_selector.vue';
 import SummaryCell from './summary_cell.vue';
+import { __, s__ } from '~/locale';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',

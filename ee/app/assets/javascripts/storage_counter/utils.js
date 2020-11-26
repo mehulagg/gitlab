@@ -1,5 +1,5 @@
-import { numberToHumanSize, bytesToKiB } from '~/lib/utils/number_utils';
 import { getFormatter, SUPPORTED_FORMATS } from '~/lib/utils/unit_format';
+import { numberToHumanSize, bytesToKiB } from '~/lib/utils/number_utils';
 
 import { STORAGE_USAGE_THRESHOLDS } from './constants';
 

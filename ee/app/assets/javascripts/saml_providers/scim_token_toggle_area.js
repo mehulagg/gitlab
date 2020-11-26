@@ -1,5 +1,5 @@
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import SCIMTokenService from './scim_token_service';
 
 export default class SCIMTokenToggleArea {

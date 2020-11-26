@@ -2,11 +2,11 @@
 import { mapActions, mapState, mapGetters } from 'vuex';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import Filters from './filters.vue';
-import FuzzingArtifactsDownload from './fuzzing_artifacts_download.vue';
-import LoadingError from './loading_error.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
 import VulnerabilityChart from './vulnerability_chart.vue';
+import FuzzingArtifactsDownload from './fuzzing_artifacts_download.vue';
+import LoadingError from './loading_error.vue';
 
 export default {
   components: {

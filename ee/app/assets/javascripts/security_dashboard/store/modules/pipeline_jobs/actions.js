@@ -1,6 +1,6 @@
-import Api from '~/api';
-import axios from '~/lib/utils/axios_utils';
 import * as Sentry from '~/sentry/wrapper';
+import axios from '~/lib/utils/axios_utils';
+import Api from '~/api';
 import * as types from './mutation_types';
 
 export const setPipelineJobsPath = ({ commit }, path) => commit(types.SET_PIPELINE_JOBS_PATH, path);

@@ -1,6 +1,6 @@
 <script>
-import { GlDiscreteScatterChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
+import { GlDiscreteScatterChart } from '@gitlab/ui/dist/charts';
 import { scatterChartLineProps, dateFormats } from '../constants';
 
 export default {

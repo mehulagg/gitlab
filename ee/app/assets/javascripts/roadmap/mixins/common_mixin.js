@@ -1,10 +1,10 @@
+import { s__, sprintf } from '~/locale';
 import {
   dateInWords,
   totalDaysInMonth,
   dayInQuarter,
   totalDaysInQuarter,
 } from '~/lib/utils/datetime_utility';
-import { s__, sprintf } from '~/locale';
 
 import { PRESET_TYPES, DAYS_IN_WEEK } from '../constants';
 

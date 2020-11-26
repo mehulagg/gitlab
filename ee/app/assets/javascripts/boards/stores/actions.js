@@ -1,34 +1,34 @@
-import Cookies from 'js-cookie';
 import { pick } from 'lodash';
+import Cookies from 'js-cookie';
+import axios from '~/lib/utils/axios_utils';
+import boardsStore from '~/boards/stores/boards_store';
+import { __ } from '~/locale';
+import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
+import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
+import actionsCE from '~/boards/stores/actions';
+import { BoardType, ListType } from '~/boards/constants';
+import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
+import boardsStoreEE from './boards_store_ee';
+import * as types from './mutation_types';
+import * as typesCE from '~/boards/stores/mutation_types';
+import { fullEpicId } from '../boards_util';
 import {
   formatBoardLists,
   formatListIssues,
   formatListsPageInfo,
   fullBoardId,
 } from '~/boards/boards_util';
-import { BoardType, ListType } from '~/boards/constants';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
-import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
-import actionsCE from '~/boards/stores/actions';
-import boardsStore from '~/boards/stores/boards_store';
-import * as typesCE from '~/boards/stores/mutation_types';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import axios from '~/lib/utils/axios_utils';
-import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
-import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { __ } from '~/locale';
-import { fullEpicId } from '../boards_util';
-import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
-import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
 import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
 import issueSetWeight from '../queries/issue_set_weight.mutation.graphql';
+import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
+import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
 import listUpdateLimitMetrics from '../queries/list_update_limit_metrics.mutation.graphql';
 import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
-import boardsStoreEE from './boards_store_ee';
-import * as types from './mutation_types';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */

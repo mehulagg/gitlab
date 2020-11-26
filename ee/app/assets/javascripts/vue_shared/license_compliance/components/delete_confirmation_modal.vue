@@ -1,7 +1,7 @@
 <script>
-import { GlModal, GlSprintf } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { GlModal, GlSprintf } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 
 export default {

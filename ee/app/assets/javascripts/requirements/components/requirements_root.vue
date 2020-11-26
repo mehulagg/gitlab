@@ -1,14 +1,25 @@
 <script>
 import { GlPagination } from '@gitlab/ui';
+import { __, sprintf } from '~/locale';
 import Api from '~/api';
 import createFlash from '~/flash';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
-import { __, sprintf } from '~/locale';
 
-import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
+
+import RequirementsTabs from './requirements_tabs.vue';
+import RequirementsLoading from './requirements_loading.vue';
+import RequirementsEmptyState from './requirements_empty_state.vue';
+import RequirementItem from './requirement_item.vue';
+import RequirementForm from './requirement_form.vue';
+
+import projectRequirements from '../queries/projectRequirements.query.graphql';
+import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
+import createRequirement from '../queries/createRequirement.mutation.graphql';
+import updateRequirement from '../queries/updateRequirement.mutation.graphql';
 
 import {
   FilterState,
@@ -16,16 +27,6 @@ import {
   TestReportStatus,
   DEFAULT_PAGE_SIZE,
 } from '../constants';
-import createRequirement from '../queries/createRequirement.mutation.graphql';
-import projectRequirements from '../queries/projectRequirements.query.graphql';
-import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
-import updateRequirement from '../queries/updateRequirement.mutation.graphql';
-import RequirementForm from './requirement_form.vue';
-import RequirementItem from './requirement_item.vue';
-import RequirementsEmptyState from './requirements_empty_state.vue';
-
-import RequirementsLoading from './requirements_loading.vue';
-import RequirementsTabs from './requirements_tabs.vue';
 
 export default {
   DEFAULT_PAGE_SIZE,

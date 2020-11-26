@@ -1,6 +1,6 @@
 import { n__, s__, sprintf } from '~/locale';
-import { LICENSE_APPROVAL_STATUS, REPORT_GROUPS } from '../constants';
 import { addLicensesMatchingReportGroupStatus, reportGroupHasAtLeastOneLicense } from './utils';
+import { LICENSE_APPROVAL_STATUS, REPORT_GROUPS } from '../constants';
 
 export const isLoading = state =>
   state.isLoadingManagedLicenses ||

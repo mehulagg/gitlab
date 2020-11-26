@@ -1,9 +1,10 @@
 <script>
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+
+import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
 import { ChildType } from '../constants';
-import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
 export default {
   components: {

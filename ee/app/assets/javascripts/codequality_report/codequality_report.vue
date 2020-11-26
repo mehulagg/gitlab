@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { componentNames } from 'ee/reports/components/issue_body';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
-import { n__, s__, sprintf } from '~/locale';
+import { componentNames } from 'ee/reports/components/issue_body';
 import ReportSection from '~/reports/components/report_section.vue';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
+import { n__, s__, sprintf } from '~/locale';
 
 export default {
   components: {

@@ -1,4 +1,5 @@
 <script>
+import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlSprintf,
@@ -8,9 +9,8 @@ import {
   GlFormInput,
   GlFormCheckbox,
 } from '@gitlab/ui';
-import { mapActions, mapState } from 'vuex';
-import { __, s__ } from '~/locale';
 import { mapComputed } from '~/vuex_shared/bindings';
+import { __, s__ } from '~/locale';
 
 export default {
   components: {

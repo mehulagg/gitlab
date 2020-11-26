@@ -1,5 +1,5 @@
-import initConfirmModal from '~/confirm_modal';
 import initVueAlerts from '~/vue_alerts';
+import initConfirmModal from '~/confirm_modal';
 import showToast from '~/vue_shared/plugins/global_toast';
 
 initVueAlerts();

@@ -1,20 +1,20 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 import {
   DEFAULT_LABEL_NONE,
   DEFAULT_LABEL_ANY,
 } from '~/vue_shared/components/filtered_search_bar/constants';
-import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
   prepareTokens,
   processFilters,
   filterToQueryObject,
 } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
 
 export default {
   name: 'FilterBar',

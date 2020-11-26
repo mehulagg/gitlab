@@ -1,11 +1,13 @@
 <script>
-import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 import { mapGetters, mapActions, mapState } from 'vuex';
+
+import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
-import { ChildType } from '../constants';
 import TreeItemBody from './tree_item_body.vue';
+
+import { ChildType } from '../constants';
 
 export default {
   ChildType,

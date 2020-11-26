@@ -1,9 +1,9 @@
 import Vue from 'vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import AccessorUtilities from '~/lib/utils/accessor';
-import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import * as types from './mutation_types';
+import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 
 export const updatePageInfo = (state, headers) => {
   const pageInfo = parseIntPagination(normalizeHeaders(headers));

@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
-import ListContent from './list_content.vue';
 import ListFilter from './list_filter.vue';
+import ListContent from './list_content.vue';
 
 export default {
   components: {

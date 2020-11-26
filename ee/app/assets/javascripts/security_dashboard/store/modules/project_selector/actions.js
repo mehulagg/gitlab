@@ -1,9 +1,9 @@
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
-import * as types from './mutation_types';
 import addPageInfo from './utils/add_page_info';
+import * as types from './mutation_types';
 
 const API_MINIMUM_QUERY_LENGTH = 3;
 

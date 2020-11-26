@@ -1,4 +1,6 @@
 <script>
+import { mapState } from 'vuex';
+import dateFormat from 'dateformat';
 import {
   GlTable,
   GlLink,
@@ -11,12 +13,11 @@ import {
   GlIcon,
   GlPagination,
 } from '@gitlab/ui';
-import dateFormat from 'dateformat';
-import { mapState } from 'vuex';
-import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
 import { s__, n__ } from '~/locale';
+import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
+import throughputTableQuery from '../graphql/queries/throughput_table.query.graphql';
 import {
   THROUGHPUT_TABLE_STRINGS,
   MERGE_REQUEST_ID_PREFIX,
@@ -27,7 +28,6 @@ import {
   THROUGHPUT_TABLE_TEST_IDS,
   PIPELINE_STATUS_ICON_CLASSES,
 } from '../constants';
-import throughputTableQuery from '../graphql/queries/throughput_table.query.graphql';
 
 const TH_TEST_ID = { 'data-testid': THROUGHPUT_TABLE_TEST_IDS.TABLE_HEADERS };
 

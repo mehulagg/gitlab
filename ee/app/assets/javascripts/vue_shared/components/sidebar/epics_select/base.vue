@@ -1,21 +1,24 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
-import $ from 'jquery';
 import { mapState, mapGetters, mapActions } from 'vuex';
+
+import $ from 'jquery';
+import { GlLoadingIcon } from '@gitlab/ui';
 
 import { noneEpic } from 'ee/vue_shared/constants';
 import { __ } from '~/locale';
 
-import { DropdownVariant } from './constants';
-import DropdownButton from './dropdown_button.vue';
-import DropdownContents from './dropdown_contents.vue';
-import DropdownHeader from './dropdown_header.vue';
-import DropdownSearchInput from './dropdown_search_input.vue';
-import DropdownTitle from './dropdown_title.vue';
+import createStore from './store';
 
+import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
 import DropdownValueCollapsed from './dropdown_value_collapsed.vue';
-import createStore from './store';
+
+import DropdownButton from './dropdown_button.vue';
+import DropdownHeader from './dropdown_header.vue';
+import DropdownSearchInput from './dropdown_search_input.vue';
+import DropdownContents from './dropdown_contents.vue';
+
+import { DropdownVariant } from './constants';
 
 export default {
   store: createStore(),

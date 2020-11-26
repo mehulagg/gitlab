@@ -1,8 +1,8 @@
-import trackShowInviteMemberLink from 'ee/projects/track_invite_members';
 import initSidebarBundle from 'ee/sidebar/sidebar_bundle';
+import trackShowInviteMemberLink from 'ee/projects/track_invite_members';
 
-import initShow from '~/pages/projects/issues/show';
 import initRelatedIssues from '~/related_issues';
+import initShow from '~/pages/projects/issues/show';
 import UserCallout from '~/user_callout';
 
 initShow();

@@ -1,10 +1,10 @@
 <script>
 import Api from 'ee/api';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { sprintf, __, s__ } from '~/locale';
-import { OVERVIEW_METRICS } from '../constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import { removeFlash, prepareTimeMetricsData } from '../utils';
+import { OVERVIEW_METRICS } from '../constants';
 
 const I18N_TEXT = {
   'lead-time': s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),

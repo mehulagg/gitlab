@@ -1,5 +1,5 @@
-import { REPORT_STATUS, SORT_ORDER } from './constants';
 import * as types from './mutation_types';
+import { REPORT_STATUS, SORT_ORDER } from './constants';
 
 export default {
   [types.SET_DEPENDENCIES_ENDPOINT](state, payload) {

@@ -1,6 +1,6 @@
 <script>
-import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
+import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import { EMPTY_STATE_TITLE, EMPTY_STATE_DESCRIPTION, EMPTY_STATE_SVG_PATH } from '../constants';
 import InsightsPage from './insights_page.vue';
 

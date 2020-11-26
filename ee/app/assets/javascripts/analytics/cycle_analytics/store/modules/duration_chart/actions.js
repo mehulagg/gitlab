@@ -1,7 +1,7 @@
 import Api from 'ee/api';
 import { __ } from '~/locale';
-import { checkForDataError, flashErrorIfStatusNotOk } from '../../../utils';
 import * as types from './mutation_types';
+import { checkForDataError, flashErrorIfStatusNotOk } from '../../../utils';
 
 export const setLoading = ({ commit }, loading) => commit(types.SET_LOADING, loading);
 

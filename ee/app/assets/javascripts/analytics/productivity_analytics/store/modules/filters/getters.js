@@ -1,7 +1,7 @@
 import dateFormat from 'dateformat';
 import { getDateInPast, beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
-import { dateFormats } from '../../../../shared/constants';
 import { chartKeys, scatterPlotAddonQueryDays } from '../../../constants';
+import { dateFormats } from '../../../../shared/constants';
 
 /**
  * Returns an object of common filter parameters based on the filter's state

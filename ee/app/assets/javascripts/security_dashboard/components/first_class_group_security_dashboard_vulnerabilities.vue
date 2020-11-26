@@ -1,10 +1,10 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import produce from 'immer';
-import vulnerabilitiesQuery from '../graphql/group_vulnerabilities.graphql';
-import { preparePageInfo } from '../helpers';
-import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import VulnerabilityList from './vulnerability_list.vue';
+import vulnerabilitiesQuery from '../graphql/group_vulnerabilities.graphql';
+import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import { preparePageInfo } from '../helpers';
 
 export default {
   components: {

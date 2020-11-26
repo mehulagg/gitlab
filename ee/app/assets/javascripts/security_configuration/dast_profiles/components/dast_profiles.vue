@@ -1,12 +1,12 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
-import { getLocationHash } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
+import { s__ } from '~/locale';
+import { getLocationHash } from '~/lib/utils/url_utility';
+import ProfilesList from './dast_profiles_list.vue';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
-import ProfilesList from './dast_profiles_list.vue';
 
 export default {
   components: {

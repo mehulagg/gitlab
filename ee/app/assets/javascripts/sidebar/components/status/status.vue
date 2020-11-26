@@ -8,8 +8,8 @@ import {
   GlDropdown,
   GlDropdownDivider,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import Tracking from '~/tracking';
+import { s__ } from '~/locale';
 import { healthStatusTextMap } from '../../constants';
 
 export default {

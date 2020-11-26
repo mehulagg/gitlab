@@ -1,4 +1,5 @@
 <script>
+import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -8,7 +9,6 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { uniqueId } from 'lodash';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
 import {
   DAST_SITE_VALIDATION_STATUS,

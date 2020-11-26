@@ -1,12 +1,13 @@
-import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
+import { GlToast } from '@gitlab/ui';
 
-import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Translate from '~/vue_shared/translate';
+import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+import GeoNodesStore from './store/geo_nodes_store';
+import GeoNodesService from './service/geo_nodes_service';
 
 import geoNodesApp from './components/app.vue';
-import GeoNodesService from './service/geo_nodes_service';
-import GeoNodesStore from './store/geo_nodes_store';
 
 Vue.use(Translate);
 Vue.use(GlToast);

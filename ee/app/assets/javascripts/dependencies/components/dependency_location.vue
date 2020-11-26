@@ -1,8 +1,8 @@
 <script>
 import { GlIcon, GlLink, GlPopover, GlIntersperse } from '@gitlab/ui';
 import { n__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DependencyPathViewer from './dependency_path_viewer.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export const VISIBLE_DEPENDENCY_COUNT = 2;
 

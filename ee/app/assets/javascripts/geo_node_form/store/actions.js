@@ -1,8 +1,8 @@
-import { flatten } from 'lodash';
 import Api from 'ee/api';
+import { flatten } from 'lodash';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import * as types from './mutation_types';
 

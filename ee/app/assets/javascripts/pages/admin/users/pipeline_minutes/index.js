@@ -1,5 +1,5 @@
-import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
+import { GlToast } from '@gitlab/ui';
 import ResetButton from './reset_button.vue';
 
 Vue.use(GlToast);

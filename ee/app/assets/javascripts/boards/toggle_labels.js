@@ -1,8 +1,8 @@
-import { GlToggle } from '@gitlab/ui';
 import Vue from 'vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import store from '~/boards/stores';
+import { GlToggle } from '@gitlab/ui';
 import Tracking from '~/tracking';
+import store from '~/boards/stores';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 export default () =>

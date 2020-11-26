@@ -1,4 +1,6 @@
 <script>
+import { uniqueId } from 'lodash';
+
 import {
   GlButton,
   GlLink,
@@ -7,8 +9,6 @@ import {
   GlIntersperse,
   GlFriendlyWrap,
 } from '@gitlab/ui';
-import { uniqueId } from 'lodash';
-
 import { sprintf, s__ } from '~/locale';
 
 // If there are more licenses than this count, a counter will be displayed for the remaining licenses

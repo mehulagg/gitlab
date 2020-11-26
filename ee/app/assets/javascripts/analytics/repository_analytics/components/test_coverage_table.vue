@@ -1,12 +1,12 @@
 <script>
-import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import Vue from 'vue';
-import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
-import { joinPaths } from '~/lib/utils/url_utility';
+import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
+import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
 
 export default {
   name: 'TestCoverageTable',

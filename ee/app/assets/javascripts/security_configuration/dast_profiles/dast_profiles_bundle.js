@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import DastProfiles from './components/dast_profiles.vue';
 import apolloProvider from './graphql/provider';
+import DastProfiles from './components/dast_profiles.vue';
 
 export default () => {
   const el = document.querySelector('.js-dast-profiles');

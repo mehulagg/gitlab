@@ -1,8 +1,8 @@
 <script>
-import { GlButton } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import EmptyRuleName from './empty_rule_name.vue';
+import { GlButton } from '@gitlab/ui';
 import RuleInput from './mr_edit/rule_input.vue';
+import EmptyRuleName from './empty_rule_name.vue';
 import RuleBranches from './rule_branches.vue';
 
 export default {

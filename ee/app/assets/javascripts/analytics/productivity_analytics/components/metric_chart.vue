@@ -1,8 +1,8 @@
 <script>
-import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlAlert, GlIcon } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
-import httpStatusCodes from '~/lib/utils/http_status';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlAlert, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 export default {
   name: 'MetricChart',

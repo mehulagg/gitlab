@@ -1,5 +1,5 @@
-import { GlTooltipDirective } from '@gitlab/ui';
 import Vue from 'vue';
+import { GlTooltipDirective } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 
 export default boardsStore => {

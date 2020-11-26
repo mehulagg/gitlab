@@ -1,10 +1,10 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
+import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import GroupSecurityVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
-import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import vulnerableProjectsQuery from '../graphql/vulnerable_projects.query.graphql';
 import CsvExportButton from './csv_export_button.vue';
+import vulnerableProjectsQuery from '../graphql/vulnerable_projects.query.graphql';
 import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';

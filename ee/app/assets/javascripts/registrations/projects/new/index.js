@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import ProgressBar from '../../components/progress_bar.vue';
 import { STEPS, ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS } from '../../constants';
+import ProgressBar from '../../components/progress_bar.vue';
 
 export default () => {
   const el = document.getElementById('progress-bar');

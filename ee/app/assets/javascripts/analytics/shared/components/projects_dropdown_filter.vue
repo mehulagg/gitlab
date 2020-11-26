@@ -1,4 +1,5 @@
 <script>
+import { debounce } from 'lodash';
 import {
   GlIcon,
   GlLoadingIcon,
@@ -8,12 +9,11 @@ import {
   GlDropdownItem,
   GlSearchBoxByType,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { n__, s__, __ } from '~/locale';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { DATA_REFETCH_DELAY } from '../constants';
-import getProjects from '../graphql/projects.query.graphql';
 import { filterBySearchTerm } from '../utils';
+import getProjects from '../graphql/projects.query.graphql';
 
 export default {
   name: 'ProjectsDropdownFilter',

@@ -1,6 +1,6 @@
-import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import { mergeUrlParams } from '~/lib/utils/url_utility';
 import { PathIdSeparator } from '~/related_issues/constants';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
+import createGqClient, { fetchPolicies } from '~/lib/graphql';
 
 import { ChildType } from '../constants';
 

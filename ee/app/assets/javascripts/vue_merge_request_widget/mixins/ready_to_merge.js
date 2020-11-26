@@ -1,6 +1,6 @@
 import { isNumber, isString } from 'lodash';
-import { __ } from '~/locale';
 import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
+import { __ } from '~/locale';
 import base from '~/vue_merge_request_widget/mixins/ready_to_merge';
 
 export const MERGE_DISABLED_TEXT_UNAPPROVED = __(

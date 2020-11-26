@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import ProgressBar from 'ee/registrations/components/progress_bar.vue';
 import { STEPS, SUBSCRIPTON_FLOW_STEPS } from 'ee/registrations/constants';
+import ProgressBar from 'ee/registrations/components/progress_bar.vue';
 import UserCallout from '~/user_callout';
 
 export default () => {

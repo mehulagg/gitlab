@@ -1,9 +1,9 @@
-import { s__ } from '~/locale';
 import {
   MT_MERGE_STRATEGY,
   MTWPS_MERGE_STRATEGY,
   MWPS_MERGE_STRATEGY,
 } from '~/vue_merge_request_widget/constants';
+import { s__ } from '~/locale';
 
 export default {
   computed: {

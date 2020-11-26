@@ -1,4 +1,5 @@
 <script>
+import { debounce } from 'lodash';
 import {
   GlIcon,
   GlLoadingIcon,
@@ -9,9 +10,8 @@ import {
   GlSearchBoxByType,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
-import Api from '~/api';
 import { s__, __ } from '~/locale';
+import Api from '~/api';
 import { DATA_REFETCH_DELAY } from '../constants';
 import { filterBySearchTerm } from '../utils';
 

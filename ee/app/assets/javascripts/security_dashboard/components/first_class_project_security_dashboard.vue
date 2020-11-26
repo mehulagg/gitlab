@@ -1,15 +1,15 @@
 <script>
 import Cookies from 'js-cookie';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import AutoFixUserCallout from './auto_fix_user_callout.vue';
-import CsvExportButton from './csv_export_button.vue';
-import ReportsNotConfigured from './empty_states/reports_not_configured.vue';
-import Filters from './first_class_vulnerability_filters.vue';
 import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
+import ReportsNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
+import Filters from './first_class_vulnerability_filters.vue';
+import CsvExportButton from './csv_export_button.vue';
+import { vulnerabilitiesSeverityCountScopes } from '../constants';
 
 export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 

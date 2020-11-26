@@ -1,5 +1,5 @@
-import messages from '../../messages';
 import { statusIcon, groupedReportText } from '../../utils';
+import messages from '../../messages';
 
 export const groupedSecretDetectionText = state =>
   groupedReportText(

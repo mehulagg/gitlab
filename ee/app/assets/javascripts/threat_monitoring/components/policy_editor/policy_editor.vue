@@ -1,4 +1,5 @@
 <script>
+import { mapState, mapActions } from 'vuex';
 import {
   GlFormGroup,
   GlFormSelect,
@@ -11,25 +12,24 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { mapState, mapActions } from 'vuex';
-import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, sprintf } from '~/locale';
+import { redirectTo } from '~/lib/utils/url_utility';
 import EnvironmentPicker from '../environment_picker.vue';
 import NetworkPolicyEditor from '../network_policy_editor.vue';
+import PolicyRuleBuilder from './policy_rule_builder.vue';
+import PolicyPreview from './policy_preview.vue';
+import PolicyActionPicker from './policy_action_picker.vue';
+import DimDisableContainer from './dim_disable_container.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
   EndpointMatchModeAny,
   RuleTypeEndpoint,
 } from './constants';
-import DimDisableContainer from './dim_disable_container.vue';
-import fromYaml from './lib/from_yaml';
-import humanizeNetworkPolicy from './lib/humanize';
-import { buildRule } from './lib/rules';
 import toYaml from './lib/to_yaml';
-import PolicyActionPicker from './policy_action_picker.vue';
-import PolicyPreview from './policy_preview.vue';
-import PolicyRuleBuilder from './policy_rule_builder.vue';
+import fromYaml from './lib/from_yaml';
+import { buildRule } from './lib/rules';
+import humanizeNetworkPolicy from './lib/humanize';
 
 export default {
   components: {

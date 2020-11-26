@@ -1,8 +1,8 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
-import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
+import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import getSlaDueAt from './graphql/queries/get_sla_due_at.graphql';
 

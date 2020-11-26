@@ -11,10 +11,10 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, sprintf } from '~/locale';
-import { Namespace } from '../constants';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import query from '../queries/iteration_issues.query.graphql';
+import { Namespace } from '../constants';
 
 const states = {
   opened: 'opened',

@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
-import download from '~/lib/utils/downloader';
 import { s__, n__, sprintf } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 import {
   FEEDBACK_TYPE_DISMISSAL,

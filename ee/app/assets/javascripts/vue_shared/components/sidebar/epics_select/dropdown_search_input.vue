@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlIcon } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 
 export default {

@@ -1,6 +1,6 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
+import { GlIcon } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import formattingMixins from '../formatting_mixins';
 import SummaryDetails from './order_summary/summary_details.vue';

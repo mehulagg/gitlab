@@ -1,7 +1,7 @@
-import { deprecatedCreateFlash as createFlash, FLASH_TYPES } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { joinPaths } from '~/lib/utils/url_utility';
 import { s__, sprintf } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import { deprecatedCreateFlash as createFlash, FLASH_TYPES } from '~/flash';
+import { joinPaths } from '~/lib/utils/url_utility';
 import * as types from './mutation_types';
 
 export const setEndpoints = ({ commit }, endpoints) => {

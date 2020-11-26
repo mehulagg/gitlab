@@ -1,10 +1,10 @@
 <script>
 import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
+import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import { UPDATE_ISSUE_BY_ID } from '~/boards/stores/mutation_types';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
 import { RECEIVE_FIRST_EPICS_SUCCESS } from '../../stores/mutation_types';
 
 export default {

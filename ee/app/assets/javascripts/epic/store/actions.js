@@ -1,15 +1,20 @@
 import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
 import { deprecatedCreateFlash as flash } from '~/flash';
+import { __, s__, sprintf } from '~/locale';
 
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { __, s__, sprintf } from '~/locale';
 
+import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
+<<<<<<< HEAD
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
+=======
+import epicDetailsQuery from '../queries/epicDetails.query.graphql';
+>>>>>>> parent of 7893fb797e8 (Merge branch 'vs-ee-sort-imports-by-groups' into 'master')
 import updateEpic from '../queries/updateEpic.mutation.graphql';
-import epicUtils from '../utils/epic_utils';
+import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
 
 import * as types from './mutation_types';
 

@@ -1,5 +1,5 @@
-import { toLicenseObject } from '../../../utils/mappers';
 import * as types from './mutation_types';
+import { toLicenseObject } from '../../../utils/mappers';
 
 export default {
   [types.SET_LICENSES_ENDPOINT](state, payload) {

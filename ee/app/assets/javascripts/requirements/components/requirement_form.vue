@@ -1,5 +1,6 @@
 <script>
 import '~/behaviors/markdown/render_gfm';
+import $ from 'jquery';
 import {
   GlDrawer,
   GlFormGroup,
@@ -9,15 +10,15 @@ import {
   GlTooltipDirective,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import $ from 'jquery';
 import { isEmpty } from 'lodash';
 import { __, sprintf } from '~/locale';
-import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import ZenMode from '~/zen_mode';
+import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 
-import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
-import RequirementMeta from '../mixins/requirement_meta';
 import RequirementStatusBadge from './requirement_status_badge.vue';
+
+import RequirementMeta from '../mixins/requirement_meta';
+import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
 
 export default {
   events: {

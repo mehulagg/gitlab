@@ -1,6 +1,6 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
 import Cookies from 'js-cookie';
+import { GlAlert } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
 export const COOKIE_NAME = 'dismissed_resolution_alerts';

@@ -1,4 +1,5 @@
 <script>
+import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlIcon,
@@ -6,10 +7,9 @@ import {
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
 } from '@gitlab/ui';
-import { mapActions, mapState } from 'vuex';
 import { APPROVALS, APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
-import { s__ } from '~/locale';
 import ModalLicenseCompliance from './modal.vue';
+import { s__ } from '~/locale';
 
 export default {
   components: {

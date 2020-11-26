@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
-import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select/constants';
 import { placeholderEpic } from 'ee/vue_shared/constants';
+import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select/constants';
 
 export default () => {
   const el = document.getElementById('js-epic-select-root');

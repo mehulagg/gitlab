@@ -1,6 +1,6 @@
 <script>
-import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 
 import { isInViewport } from '~/lib/utils/common_utils';
 import { EXTEND_AS } from '../constants';

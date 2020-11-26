@@ -2,8 +2,8 @@
 import { GlButton, GlSafeHtmlDirective as SafeHtml, GlLoadingIcon } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 import { __, s__ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
 import HistoryCommentEditor from './history_comment_editor.vue';
 
 export default {

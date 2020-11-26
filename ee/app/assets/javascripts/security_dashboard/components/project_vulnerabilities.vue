@@ -1,12 +1,12 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import produce from 'immer';
+import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import { __ } from '~/locale';
-import securityScannersQuery from '../graphql/project_security_scanners.graphql';
-import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
-import { preparePageInfo } from '../helpers';
-import { VULNERABILITIES_PER_PAGE } from '../store/constants';
 import VulnerabilityList from './vulnerability_list.vue';
+import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
+import securityScannersQuery from '../graphql/project_security_scanners.graphql';
+import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import { preparePageInfo } from '../helpers';
 
 export default {
   name: 'ProjectVulnerabilitiesApp',

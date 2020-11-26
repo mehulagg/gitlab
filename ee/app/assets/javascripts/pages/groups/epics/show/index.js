@@ -1,9 +1,9 @@
 import ShortcutsEpic from 'ee/behaviors/shortcuts/shortcuts_epic';
-import initEpicApp from 'ee/epic/epic_bundle';
 import EpicTabs from 'ee/epic/epic_tabs';
-import loadAwardsHandler from '~/awards_handler';
+import initEpicApp from 'ee/epic/epic_bundle';
 import ZenMode from '~/zen_mode';
 import '~/notes/index';
+import loadAwardsHandler from '~/awards_handler';
 
 initEpicApp();
 

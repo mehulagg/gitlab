@@ -1,7 +1,10 @@
-import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
-import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
+import dateFormat from 'dateformat';
+import { s__, sprintf } from '~/locale';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import httpStatus from '~/lib/utils/http_status';
+import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
+import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   newDate,
   dayAfter,
@@ -9,9 +12,6 @@ import {
   getDatesInRange,
   parseSeconds,
 } from '~/lib/utils/datetime_utility';
-import httpStatus from '~/lib/utils/http_status';
-import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
-import { s__, sprintf } from '~/locale';
 import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
 

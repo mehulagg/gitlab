@@ -1,9 +1,9 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
 import { GlButton, GlIcon } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { __ } from '~/locale';
 
 import GitlabSlackService from '../services/gitlab_slack_service';
 

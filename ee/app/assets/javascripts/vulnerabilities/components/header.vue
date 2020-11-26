@@ -1,9 +1,8 @@
 <script>
 import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
-import { CancelToken } from 'axios';
 import Api from 'ee/api';
+import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
 import {
@@ -11,12 +10,13 @@ import {
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
-import UsersCache from '~/lib/utils/users_cache';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
-import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
+import UsersCache from '~/lib/utils/users_cache';
 import ResolutionAlert from './resolution_alert.vue';
-import StatusDescription from './status_description.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
+import StatusDescription from './status_description.vue';
+import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
 
 export default {
   name: 'VulnerabilityHeader',

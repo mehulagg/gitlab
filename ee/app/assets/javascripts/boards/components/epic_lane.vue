@@ -1,10 +1,10 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import createFlash from '~/flash';
-import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, n__, sprintf } from '~/locale';
+import createFlash from '~/flash';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
+import { formatDate } from '~/lib/utils/datetime_utility';
 import { statusType } from '../../epic/constants';
 import IssuesLaneList from './issues_lane_list.vue';
 

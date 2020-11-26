@@ -1,6 +1,6 @@
 <script>
-import CurrentDayIndicator from './current_day_indicator.vue';
 import MilestoneItem from './milestone_item.vue';
+import CurrentDayIndicator from './current_day_indicator.vue';
 
 export default {
   components: {

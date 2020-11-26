@@ -1,12 +1,12 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import { mapState, mapActions } from 'vuex';
+import { GlLoadingIcon } from '@gitlab/ui';
+import defaultSortableConfig from '~/sortable/sortable_config';
 import BoardCardLayout from '~/boards/components/board_card_layout.vue';
+import eventHub from '~/boards/eventhub';
 import BoardNewIssue from '~/boards/components/board_new_issue_new.vue';
 import { ISSUABLE } from '~/boards/constants';
-import eventHub from '~/boards/eventhub';
-import defaultSortableConfig from '~/sortable/sortable_config';
 
 export default {
   components: {

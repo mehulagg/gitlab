@@ -1,7 +1,7 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { escape } from 'lodash';
 import { mapActions, mapState } from 'vuex';
+import { escape } from 'lodash';
 import { sprintf, n__, s__ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 

@@ -1,6 +1,6 @@
 <script>
-import { GlLink, GlIntersperse, GlModal, GlButton, GlModalDirective } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
+import { GlLink, GlIntersperse, GlModal, GlButton, GlModalDirective } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 
 const MODAL_ID_PREFIX = 'license-component-link-modal-';

@@ -4,8 +4,8 @@ import {
   mapApprovalFallbackRuleRequest,
 } from 'ee/approvals/mappers';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
 import * as types from '../base/mutation_types';
 
 export const receiveRulesSuccess = ({ commit }, approvalSettings) => {

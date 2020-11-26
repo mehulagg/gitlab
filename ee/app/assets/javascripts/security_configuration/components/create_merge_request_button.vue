@@ -1,10 +1,10 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { redirectTo } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
+import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
+import { redirectTo } from '~/lib/utils/url_utility';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
   components: {

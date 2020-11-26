@@ -1,11 +1,11 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
-import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { mapState } from 'vuex';
-import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import { GlAreaChart } from '@gitlab/ui/dist/charts';
+import { GlAlert } from '@gitlab/ui';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
-import { THROUGHPUT_CHART_STRINGS } from '../constants';
+import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
+import { THROUGHPUT_CHART_STRINGS } from '../constants';
 import { formatThroughputChartData } from '../utils';
 
 export default {
