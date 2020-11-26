@@ -21,6 +21,7 @@ module Elastic
           end
 
         options[:features] = 'issues'
+        options[:no_join_project] = true
         context.name(:issue) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
@@ -37,10 +38,12 @@ module Elastic
       # set of projects for Group and Project searches, taking user access
       # rules for issues into account. Relies upon super for Global searches
       def project_ids_filter(query_hash, options)
+        # TODO: Replace join_project: false with checking if the migration finished
         return super if options[:public_and_internal_projects]
 
         current_user = options[:current_user]
         scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        # TODO: Replace join_project: false with checking if the migration finished
         return super if scoped_project_ids == :any
 
         context.name(:project) do
