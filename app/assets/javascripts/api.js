@@ -13,6 +13,7 @@ const Api = {
   groupMilestonesPath: '/api/:version/groups/:id/milestones',
   subgroupsPath: '/api/:version/groups/:id/subgroups',
   namespacesPath: '/api/:version/namespaces.json',
+  groupInvitationsPath: '/api/:version/groups/:id/invitations',
   groupPackagesPath: '/api/:version/groups/:id/packages',
   projectPackagesPath: '/api/:version/projects/:id/packages',
   projectPackagePath: '/api/:version/projects/:id/packages/:package_id',
@@ -23,6 +24,7 @@ const Api = {
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
   projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectInvitationsPath: '/api/:version/projects/:id/invitations',
   projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
@@ -133,6 +135,12 @@ const Api = {
     return axios.post(url, data);
   },
 
+  inviteNonMemberToGroup(id, data) {
+    const url = Api.buildUrl(this.groupInvitationsPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
   groupMilestones(id, options) {
     const url = Api.buildUrl(this.groupMilestonesPath).replace(':id', encodeURIComponent(id));
 
@@ -219,6 +227,12 @@ const Api = {
 
   inviteProjectMembers(id, data) {
     const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
+  inviteNonMemberToProject(id, data) {
+    const url = Api.buildUrl(this.projectInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
   },

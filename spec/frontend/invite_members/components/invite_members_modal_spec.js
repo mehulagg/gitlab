@@ -92,78 +92,192 @@ describe('InviteMembersModal', () => {
   });
 
   describe('submitting the invite form', () => {
-    const postData = {
-      user_id: '1',
-      access_level: '10',
-      expires_at: new Date(),
-      format: 'json',
-    };
+    const apiErrorMessage = 'Member already exists';
+    const genericErrorMessage = 'Some of the members could not be added';
 
-    describe('when the invite was sent successfully', () => {
-      beforeEach(() => {
-        wrapper = createComponent();
+    const toastMessageSuccessful = 'Members were successfully added';
 
-        wrapper.vm.$toast = { show: jest.fn() };
-        jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
+    describe('when inviting an existing user to group by user ID', () => {
+      const postData = {
+        user_id: '1',
+        email: '',
+        access_level: '10',
+        expires_at: undefined,
+        format: 'json',
+      };
 
-        wrapper.vm.submitForm(postData);
+      describe('when invites are sent successfully', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: '1' });
+
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
+
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('calls Api inviteGroupMember with the correct params', () => {
+          expect(Api.inviteGroupMember).toHaveBeenCalledWith(id, postData);
+        });
+
+        it('displays the successful toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            toastMessageSuccessful,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
 
-      it('displays the successful toastMessage', () => {
-        const toastMessageSuccessful = 'Members were successfully added';
+      describe('when the invite received an api error message', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: '123' });
 
-        expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
-          toastMessageSuccessful,
-          wrapper.vm.toastOptions,
-        );
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest
+            .spyOn(Api, 'inviteGroupMember')
+            .mockRejectedValue({ response: { data: { message: apiErrorMessage } } });
+
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('displays the apiErrorMessage in the toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            apiErrorMessage,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
 
-      it('calls Api inviteGroupMember with the correct params', () => {
-        expect(Api.inviteGroupMember).toHaveBeenCalledWith(id, postData);
+      describe('when any invite failed for any other reason', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: '123,456' });
+
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest
+            .spyOn(Api, 'inviteGroupMember')
+            .mockRejectedValue({ response: { data: { success: false } } });
+
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('displays the generic error toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            genericErrorMessage,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
     });
 
-    describe('when sending the invite for a single member returned an api error', () => {
-      const apiErrorMessage = 'Members already exists';
+    describe('when inviting a new user by email address', () => {
+      const postData = {
+        access_level: '10',
+        expires_at: undefined,
+        email: 'email@example.com',
+        user_id: '',
+        format: 'json',
+      };
 
-      beforeEach(() => {
-        wrapper = createComponent({ newUsersToInvite: '123' });
+      describe('when invites are sent successfully', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: 'email@example.com' });
 
-        wrapper.vm.$toast = { show: jest.fn() };
-        jest
-          .spyOn(Api, 'inviteGroupMember')
-          .mockRejectedValue({ response: { data: { message: apiErrorMessage } } });
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest.spyOn(Api, 'inviteNonMemberToGroup').mockResolvedValue({ data: postData });
 
-        findInviteButton().vm.$emit('click');
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('calls Api inviteNonMemberToGroup with the correct params', () => {
+          expect(Api.inviteNonMemberToGroup).toHaveBeenCalledWith(id, postData);
+        });
+
+        it('displays the successful toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            toastMessageSuccessful,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
 
-      it('displays the api error message for the toastMessage', () => {
-        expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
-          apiErrorMessage,
-          wrapper.vm.toastOptions,
-        );
+      describe('when any invite failed for any reason', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: '123,456' });
+
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest
+            .spyOn(Api, 'inviteGroupMember')
+            .mockRejectedValue({ response: { data: { success: false } } });
+
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('displays the generic error toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            genericErrorMessage,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
     });
 
-    describe('when sending the invite for multiple members returned any error', () => {
-      const genericErrorMessage = 'Some of the members could not be added';
+    describe('when inviting members and non-members in same click', () => {
+      const postData = {
+        user_id: '1',
+        access_level: '10',
+        expires_at: undefined,
+        email: 'email@example.com',
+        format: 'json',
+      };
 
-      beforeEach(() => {
-        wrapper = createComponent({ newUsersToInvite: '123' });
+      describe('when invites are sent successfully', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: 'email@example.com,1' });
 
-        wrapper.vm.$toast = { show: jest.fn() };
-        jest
-          .spyOn(Api, 'inviteGroupMember')
-          .mockRejectedValue({ response: { data: { success: false } } });
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest.spyOn(Api, 'inviteNonMemberToGroup').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
 
-        findInviteButton().vm.$emit('click');
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('calls Api inviteNonMemberToGroup with the correct params', () => {
+          expect(Api.inviteNonMemberToGroup).toHaveBeenCalledWith(id, postData);
+        });
+
+        it('calls Api inviteGroupMember with the correct params', () => {
+          expect(Api.inviteGroupMember).toHaveBeenCalledWith(id, postData);
+        });
+
+        it('displays the successful toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            toastMessageSuccessful,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
 
-      it('displays the expected toastMessage', () => {
-        expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
-          genericErrorMessage,
-          wrapper.vm.toastOptions,
-        );
+      describe('when any invite failed for any reason', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ newUsersToInvite: '0,email@example.com' });
+
+          wrapper.vm.$toast = { show: jest.fn() };
+
+          jest
+            .spyOn(Api, 'inviteNonMemberToGroup')
+            .mockRejectedValue({ response: { data: { success: false } } });
+
+          jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
+
+          findInviteButton().vm.$emit('click');
+        });
+
+        it('displays the generic error toastMessage', () => {
+          expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
+            genericErrorMessage,
+            wrapper.vm.toastOptions,
+          );
+        });
       });
     });
   });

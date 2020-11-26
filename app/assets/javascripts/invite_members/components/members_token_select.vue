@@ -32,9 +32,15 @@ export default {
     };
   },
   computed: {
+    emailIsValid() {
+      return this.emailMatches(this.query);
+    },
     newUsersToInvite() {
       return this.selectedTokens
-        .map((obj) => {
+        .map(obj => {
+          if (this.emailMatches(obj.name) && obj.id.includes('user-defined-token')) {
+            return obj.name;
+          }
           return obj.id;
         })
         .join(',');
@@ -47,6 +53,11 @@ export default {
     },
   },
   methods: {
+    emailMatches(value) {
+      const regex = /@/;
+
+      return value.match(regex) !== null;
+    },
     handleTextInput(query) {
       this.hideDropdownWithNoItems = false;
       this.query = query;
@@ -94,7 +105,7 @@ export default {
     v-model="selectedTokens"
     :dropdown-items="users"
     :loading="loading"
-    :allow-user-defined-tokens="false"
+    :allow-user-defined-tokens="emailIsValid"
     :hide-dropdown-with-no-items="hideDropdownWithNoItems"
     :placeholder="placeholderText"
     :aria-labelledby="ariaLabelledby"
