@@ -27,6 +27,10 @@ export default {
       type: String,
       required: true,
     },
+    filePath: {
+      type: String,
+      required: true,
+    },
     suggestionsCount: {
       type: Number,
       required: false,
@@ -74,6 +78,7 @@ export default {
       :is-applying-batch="suggestion.is_applying_batch"
       :batch-suggestions-count="batchSuggestionsCount"
       :help-page-path="helpPagePath"
+      :file-path="filePath"
       :inapplicable-reason="suggestion.inapplicable_reason"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"

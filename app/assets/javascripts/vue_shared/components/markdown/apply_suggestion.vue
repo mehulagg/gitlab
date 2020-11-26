@@ -10,7 +10,7 @@ export default {
       required: false,
       default: false,
     },
-    fileName: {
+    filePath: {
       type: String,
       required: true,
     },
@@ -24,7 +24,7 @@ export default {
   },
   computed: {
     placeholderText() {
-      return sprintf(__('Apply suggestion on %{fileName}'), { fileName: this.fileName });
+      return sprintf(__('Apply suggestion on %{filePath}'), { filePath: this.filePath });
     },
   },
   methods: {
@@ -41,7 +41,7 @@ export default {
     :header-text="headerText"
     :disabled="disabled"
     boundary="window"
-    right="true"
+    :right="true"
     menu-class="gl-w-full! gl-pb-0!"
   >
     <gl-dropdown-form class="gl-m-3!">

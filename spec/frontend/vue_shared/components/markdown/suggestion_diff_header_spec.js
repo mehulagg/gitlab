@@ -9,6 +9,7 @@ const DEFAULT_PROPS = {
   isBatched: false,
   isApplyingBatch: false,
   helpPagePath: 'path_to_docs',
+  filePath: 'test.js',
 };
 
 describe('Suggestion Diff component', () => {
