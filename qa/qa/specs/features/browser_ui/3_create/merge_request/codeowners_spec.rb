@@ -47,7 +47,7 @@ module QA
         Runtime::Feature.disable('gitaly_go_user_merge_branch')
       end
 
-      it 'creates a merge request with codeowners file and squashing commits enabled' do
+      it 'creates a merge request with codeowners file and squashing commits enabled', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1090' do
         target.visit!
 
         Resource::ProtectedBranch.unprotect_via_api! do |branch|
@@ -59,12 +59,22 @@ module QA
           branch.require_code_owner_approval = true
         end
 
-        Resource::MergeRequest.fabricate_via_api! do |mr|
+        merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.no_preparation = true
+          mr.project = project
           mr.source_branch = source.branch_name
           mr.target_branch = target.branch_name
           mr.title = 'merging two commits'
         end
+
+        merge_request.visit!
+
+        Page::MergeRequest::Show.perform do |mr|
+          mr.mark_to_squash
+          mr.merge!
+        end
+
+        expect(page).to have_content('The changes were merged')
       end
     end
   end
