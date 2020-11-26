@@ -3,7 +3,7 @@
 module Gitlab
   module GithubImport
     module Stage
-      class ImportPullRequestsWorker # rubocop:disable Scalability/IdempotentWorker
+      class ImportPullRequestsReviewsWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
         include GithubImport::Queue
         include StageMethods
@@ -11,7 +11,7 @@ module Gitlab
         # client - An instance of Gitlab::GithubImport::Client.
         # project - An instance of Project.
         def import(client, project)
-          waiter = Importer::PullRequestsImporter
+          waiter = Importer::PullRequestsReviewsImporter
             .new(project, client)
             .execute
 
@@ -20,7 +20,7 @@ module Gitlab
           AdvanceStageWorker.perform_async(
             project.id,
             { waiter.key => waiter.jobs_remaining },
-            :pull_request_reviews
+            :issues_and_diff_notes
           )
         end
       end
