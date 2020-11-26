@@ -16,6 +16,7 @@ export default (containerId = 'js-billing-plans') => {
     namespaceId,
     namespaceName,
     planUpgradeHref,
+    planRenewHref,
     customerPortalUrl,
     billableSeatsHref,
   } = containerEl.dataset;
@@ -27,6 +28,7 @@ export default (containerId = 'js-billing-plans') => {
       namespaceId,
       namespaceName,
       planUpgradeHref,
+      planRenewHref,
       customerPortalUrl,
       billableSeatsHref,
       apiBillableMemberListFeatureEnabled: gon?.features?.apiBillableMemberList || false,
