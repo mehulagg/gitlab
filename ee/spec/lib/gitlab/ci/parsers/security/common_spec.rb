@@ -8,13 +8,13 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
 
     before do
-      allow(parser).to receive(:create_location).and_return(nil)
-      artifact.each_blob do |blob|
-        parser.parse!(blob, report)
+      allow_next_instance_of(described_class) do |parser|
+        allow(parser).to receive(:create_location).and_return(nil)
       end
+
+      artifact.each_blob { |blob| described_class.new(blob, report).parse! }
     end
 
     context 'parsing remediations' do
@@ -70,12 +70,16 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         expect(scans.first).to be_a(::Gitlab::Ci::Reports::Security::Scan)
       end
 
-      it 'returns nil when scan is not a hash' do
-        parser =  described_class.new
-        empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
-        parser.parse!({}.to_json, empty_report)
+      context 'when the scan is not a hash' do
+        let(:empty_report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
 
-        expect(empty_report.scan).to be(nil)
+        subject(:parse_report) { described_class.new({}.to_json, empty_report).parse! }
+
+        it 'returns nil' do
+          parse_report
+
+          expect(empty_report.scan).to be_nil
+        end
       end
     end
 

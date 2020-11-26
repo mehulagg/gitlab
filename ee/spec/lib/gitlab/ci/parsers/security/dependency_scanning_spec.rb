@@ -8,11 +8,11 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
   describe '#parse!' do
     let(:project) { artifact.project }
     let(:pipeline) { artifact.job.pipeline }
-    let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
 
-    where(:report_format, :occurrence_count, :identifier_count, :scanner_count, :file_path, :package_name, :package_version, :version) do
+    subject(:parse_report) { artifact.each_blob { |blob| described_class.new(blob, report).parse! } }
+
+    where(:report_format, :finding_count, :identifier_count, :scanner_count, :file_path, :package_name, :package_version, :version) do
       :dependency_scanning             | 4 | 7 | 3 | 'app/pom.xml' | 'io.netty/netty' | '3.9.1.Final' | '1.3'
       :dependency_scanning_deprecated  | 4 | 7 | 2 | 'app/pom.xml' | 'io.netty/netty' | '3.9.1.Final' | '1.3'
       :dependency_scanning_remediation | 2 | 3 | 1 | 'yarn.lock'   | 'debug'          | '1.0.5'       | '2.0'
@@ -22,13 +22,11 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
       let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
       before do
-        artifact.each_blob do |blob|
-          parser.parse!(blob, report)
-        end
+        parse_report
       end
 
       it "parses all identifiers and findings" do
-        expect(report.findings.length).to eq(occurrence_count)
+        expect(report.findings.length).to eq(finding_count)
         expect(report.identifiers.length).to eq(identifier_count)
         expect(report.scanners.length).to eq(scanner_count)
       end
@@ -49,40 +47,40 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
       end
     end
 
-    context "when parsing a vulnerability with a missing location" do
+    context 'with missing data' do
+      let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
       let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
+      let(:mock_each_blob) { [report_with_missing_data].method(:each) }
 
       before do
-        report_hash[:vulnerabilities][0][:location] = nil
+        allow(artifact).to receive(:each_blob).and_return(mock_each_blob)
       end
 
-      it { expect { parser.parse!(report_hash.to_json, report) }.not_to raise_error }
-    end
+      context "when parsing a vulnerability with a missing location" do
+        let(:report_with_missing_data) { report_hash.tap { |h| h[:vulnerabilities][0][:location] = nil }.to_json }
 
-    context "when parsing a vulnerability with a missing cve" do
-      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
-
-      before do
-        report_hash[:vulnerabilities][0][:cve] = nil
+        it { expect { parse_report }.not_to raise_error }
       end
 
-      it { expect { parser.parse!(report_hash.to_json, report) }.not_to raise_error }
+      context "when parsing a vulnerability with a missing cve" do
+        let(:report_with_missing_data) { report_hash.tap { |h| h[:vulnerabilities][0][:cve] = nil }.to_json }
+
+        it { expect { parse_report }.not_to raise_error }
+      end
     end
 
     context "when vulnerabilities have remediations" do
       let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning_remediation) }
 
       before do
-        artifact.each_blob do |blob|
-          parser.parse!(blob, report)
-        end
+        parse_report
       end
 
-      it "generates occurrence with expected remediation" do
-        occurrence = report.findings.last
-        raw_metadata = Gitlab::Json.parse!(occurrence.raw_metadata)
+      it "generates finding with expected remediation" do
+        finding = report.findings.last
+        raw_metadata = Gitlab::Json.parse!(finding.raw_metadata)
 
-        expect(occurrence.name).to eq("Authentication bypass via incorrect DOM traversal and canonicalization in saml2-js")
+        expect(finding.name).to eq("Authentication bypass via incorrect DOM traversal and canonicalization in saml2-js")
         expect(raw_metadata["remediations"].first["summary"]).to eq("Upgrade saml2-js")
         expect(raw_metadata["remediations"].first["diff"]).to start_with("ZGlmZiAtLWdpdCBhL3lhcm4")
       end

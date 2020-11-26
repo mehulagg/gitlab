@@ -10,7 +10,8 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
     let(:pipeline) { artifact.job.pipeline }
     let(:artifact) { create(:ee_ci_job_artifact, :dast) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
+
+    subject(:parse_report) { artifact.each_blob { |blob| described_class.new(blob, report).parse! } }
 
     where(:report_format,
           :occurrence_count,
@@ -32,9 +33,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
       let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
       before do
-        artifact.each_blob do |blob|
-          parser.parse!(blob, report)
-        end
+        parse_report
       end
 
       it 'parses all identifiers, findings and scanned resources' do
@@ -72,39 +71,42 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
     end
 
     describe 'parses scanned_resources' do
-      let(:artifact) { create(:ee_ci_job_artifact, 'dast') }
-
-      before do
-        artifact.each_blob do |blob|
-          parser.parse!(blob, report)
-        end
-      end
-
-      let(:raw_json) do
-        {
-        "vulnerabilities": [],
-        "remediations": [],
-        "dependency_files": [],
-        "scan": {
-          "scanned_resources": [
-            {
-              "method": "GET",
-              "type": "url",
-              "url": "not a URL"
-            }
-          ]
-        }
-      }
-      end
-
-      it 'skips invalid URLs' do
-        parser.parse!(raw_json.to_json, report)
-        expect(report.scanned_resources).to be_empty
-      end
-
       it 'creates a scanned resource for each URL' do
+        parse_report
+
         expect(report.scanned_resources.length).to eq(6)
         expect(report.scanned_resources.first).to be_a(::Gitlab::Ci::Reports::Security::ScannedResource)
+      end
+
+      context 'when the report has invalid URLs' do
+        let(:raw_json) do
+          {
+            "vulnerabilities": [],
+            "remediations": [],
+            "dependency_files": [],
+            "scan": {
+              "scanned_resources": [
+                {
+                  "method": "GET",
+                  "type": "url",
+                  "url": "not a URL"
+                }
+              ]
+            }
+          }.to_json
+        end
+
+        let(:mock_each_blob) { [raw_json].method(:each) }
+
+        before do
+          allow(artifact).to receive(:each_blob).and_return(mock_each_blob)
+        end
+
+        it 'skips invalid URLs' do
+          parse_report
+
+          expect(report.scanned_resources).to be_empty
+        end
       end
     end
   end

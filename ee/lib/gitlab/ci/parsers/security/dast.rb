@@ -5,7 +5,7 @@ module Gitlab
     module Parsers
       module Security
         class Dast < Common
-          def parse!(json_data, report)
+          def parse!
             report_data = super
 
             report.scanned_resources = create_scanned_resources(report_data.dig('scan', 'scanned_resources'))

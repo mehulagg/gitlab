@@ -5,10 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Parsers::Security::SecretDetection do
   describe '#parse!' do
     let_it_be(:pipeline) { create(:ci_pipeline) }
-
-    let(:created_at) { 2.weeks.ago }
-
-    subject(:parser) { described_class.new }
+    let_it_be(:created_at) { 2.weeks.ago }
 
     context "when parsing valid reports" do
       where(report_format: %i(secret_detection))
@@ -18,9 +15,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::SecretDetection do
         let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
         before do
-          artifact.each_blob do |blob|
-            parser.parse!(blob, report)
-          end
+          artifact.each_blob { |blob| described_class.new(blob, report).parse! }
         end
 
         it "parses all identifiers and findings" do
@@ -52,7 +47,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::SecretDetection do
       let(:report) { Gitlab::Ci::Reports::Security::Report.new('secret_detection', pipeline, created_at) }
       let(:blob) { Gitlab::Json.generate({}) }
 
-      it { expect(parser.parse!(blob, report)).to be_empty }
+      it { expect(described_class.new('{}', report).parse!).to be_empty }
     end
   end
 end
