@@ -81,7 +81,7 @@ To understand Pages domains clearly, read the examples below.
 ## URLs and baseurls
 
 NOTE: **Note:**
-`baseurl` might be called differently in some static site generators.
+The `baseurl` option might be called named differently in some static site generators.
 
 Every Static Site Generator (SSG) default configuration expects
 to find your website under a (sub)domain (`example.com`), not
