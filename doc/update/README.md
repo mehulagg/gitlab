@@ -310,6 +310,11 @@ installation-specific upgrade instructions, based on how you installed GitLab:
 - [Linux packages (Omnibus GitLab)](https://docs.gitlab.com/omnibus/update/README.html#version-specific-changes)
 - [Helm charts](https://docs.gitlab.com/charts/installation/upgrade.html)
 
+NOTE: **Note:**
+Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/).
+Omnibus package comes with appropriate Ruby and Git versions and is not using system binaries for Ruby and Git. There is no need to manually
+install Ruby nor Git when utilising Omnibus approach.
+
 ### 13.6.0
 
 Ruby 2.7.2 is required. GitLab will not start with Ruby 2.6.6 or older versions.
