@@ -17,7 +17,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['totalAmount', 'name', 'usersPresent']),
+    ...mapGetters(['totalAmount', 'name', 'usersPresent', 'isSelectedGroupPresent']),
     titleWithName() {
       return sprintf(this.$options.i18n.title, { name: this.name });
     },
@@ -33,7 +33,10 @@ export default {
 };
 </script>
 <template>
-  <div class="order-summary d-flex flex-column flex-grow-1 gl-mt-2 mt-lg-5">
+  <div
+    v-if="isSelectedGroupPresent"
+    class="order-summary d-flex flex-column flex-grow-1 gl-mt-2 mt-lg-5"
+  >
     <div class="d-lg-none">
       <div @click="toggleCollapse">
         <h4 class="d-flex justify-content-between gl-font-lg" :class="{ 'gl-mb-7': !collapsed }">
