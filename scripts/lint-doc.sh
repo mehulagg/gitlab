@@ -56,9 +56,6 @@ then
   ((ERRORCODE++))
 fi
 
-echo "Output git diff"
-git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}"
-
 # Run Vale and Markdownlint only on changed files. Only works on merged results
 # pipelines, so first checks if a merged results CI variable is present. If not present,
 # runs test on all files.
@@ -66,16 +63,18 @@ if [ -z "${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}" ]
 then
   MD_DOC_PATH=${MD_DOC_PATH:-doc}
   echo "Merge request pipeline (detached) detected. Testing all files."
-elif git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" | grep -E "\.vale|\.markdownlint"
-then
-  MD_DOC_PATH=${MD_DOC_PATH:-doc}
-  echo "Vale or Markdownlint configuration changed. Testing all files."
 else
   MERGE_BASE=$(git merge-base ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA})
-  MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
-  if [ -n "${MD_DOC_PATH}" ]
+  if git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" | grep -E "\.vale|\.markdownlint"
   then
-    echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
+    MD_DOC_PATH=${MD_DOC_PATH:-doc}
+    echo "Vale or Markdownlint configuration changed. Testing all files."
+  elif
+    MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
+    if [ -n "${MD_DOC_PATH}" ]
+    then
+      echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
+    fi
   fi
 fi
 
