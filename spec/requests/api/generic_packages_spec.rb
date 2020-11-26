@@ -11,6 +11,12 @@ RSpec.describe API::GenericPackages do
   let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
   let(:user) { personal_access_token.user }
   let(:ci_build) { create(:ci_build, :running, user: user) }
+  let_it_be(:deploy_token_rw) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
+  let_it_be(:project_deploy_token_rw) { create(:project_deploy_token, deploy_token: deploy_token_rw, project: project) }
+  let_it_be(:deploy_token_ro) { create(:deploy_token, read_package_registry: true, write_package_registry: false) }
+  let_it_be(:project_deploy_token_ro) { create(:project_deploy_token, deploy_token: deploy_token_ro, project: project) }
+  let_it_be(:deploy_token_wo) { create(:deploy_token, read_package_registry: false, write_package_registry: true) }
+  let_it_be(:project_deploy_token_wo) { create(:project_deploy_token, deploy_token: deploy_token_wo, project: project) }
 
   def auth_header
     return {} if user_role == :anonymous
@@ -28,6 +34,12 @@ RSpec.describe API::GenericPackages do
       user_basic_auth_header(user)
     when :invalid_user_basic_auth
       basic_auth_header('invalid user', 'invalid password')
+    when :deploy_token_rw
+      deploy_token_header(deploy_token_rw)
+    when :deploy_token_ro
+      deploy_token_header(deploy_token_ro)
+    when :deploy_token_wo
+      deploy_token_header(deploy_token_wo)
     end
   end
 
@@ -37,6 +49,10 @@ RSpec.describe API::GenericPackages do
 
   def job_token_header(value = nil)
     { Gitlab::Auth::AuthFinders::JOB_TOKEN_HEADER => value || ci_build.token }
+  end
+
+  def deploy_token_header(value)
+    { Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => value }
   end
 
   shared_examples 'secure endpoint' do
@@ -111,6 +127,24 @@ RSpec.describe API::GenericPackages do
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
+      end
+
+      it 'authorizes workhorse with a read/write deploy token' do
+        authorize_upload_file(workhorse_header.merge(deploy_token_header(deploy_token_rw)))
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      it 'authorizes workhorse with a write-only deploy token' do
+        authorize_upload_file(workhorse_header.merge(deploy_token_header(deploy_token_wo)))
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      it 'does not authorize workhorse with a read-only deploy token' do
+        authorize_upload_file(workhorse_header.merge(deploy_token_header(deploy_token_ro)))
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
 
@@ -211,6 +245,30 @@ RSpec.describe API::GenericPackages do
           expect(response).to have_gitlab_http_status(expected_status)
         end
       end
+
+      it 'allows upload with a read/write deploy token' do
+        headers = workhorse_header.merge(deploy_token_header(deploy_token_rw))
+
+        upload_file(params, headers)
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      it 'allows upload with a write-only deploy token' do
+        headers = workhorse_header.merge(deploy_token_header(deploy_token_wo))
+
+        upload_file(params, headers)
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      it 'does not allow upload with a read-only deploy token' do
+        headers = workhorse_header.merge(deploy_token_header(deploy_token_ro))
+
+        upload_file(params, headers)
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
     end
 
     context 'when user can upload packages and has valid credentials' do
@@ -240,6 +298,26 @@ RSpec.describe API::GenericPackages do
 
       it 'creates package and package file when valid basic auth is used' do
         headers = workhorse_header.merge(user_basic_auth_header(user))
+
+        expect { upload_file(params, headers) }
+          .to change { project.packages.generic.count }.by(1)
+          .and change { Packages::PackageFile.count }.by(1)
+
+        aggregate_failures do
+          expect(response).to have_gitlab_http_status(:created)
+
+          package = project.packages.generic.last
+          expect(package.name).to eq('mypackage')
+          expect(package.version).to eq('0.0.1')
+          expect(package.original_build_info).to be_nil
+
+          package_file = package.package_files.last
+          expect(package_file.file_name).to eq('myfile.tar.gz')
+        end
+      end
+
+      it 'creates package and package file when valid deploy token is used' do
+        headers = workhorse_header.merge(deploy_token_header(deploy_token_wo))
 
         expect { upload_file(params, headers) }
           .to change { project.packages.generic.count }.by(1)
@@ -418,6 +496,24 @@ RSpec.describe API::GenericPackages do
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
+      end
+
+      it 'allows download with a read/write deploy token' do
+        download_file(deploy_token_header(deploy_token_rw))
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      it 'allows download with a write-only deploy token' do
+        download_file(deploy_token_header(deploy_token_wo))
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      it 'allows download with a read-only deploy token' do
+        download_file(deploy_token_header(deploy_token_ro))
+
+        expect(response).to have_gitlab_http_status(:success)
       end
     end
 
