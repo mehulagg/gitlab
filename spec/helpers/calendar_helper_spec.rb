@@ -18,5 +18,12 @@ RSpec.describe CalendarHelper do
         expect(helper.calendar_url_options[:feed_token]).to be_nil
       end
     end
+
+    context 'when feed token disabled' do
+      it "does not have a feed_token" do
+        allow(Settings).to receive(:[]).with(:feed_token_off).and_return(true)
+        expect(helper.calendar_url_options[:feed_token]).to be_nil
+      end
+    end
   end
 end
