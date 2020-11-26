@@ -157,7 +157,7 @@ git commit -m "PROJECT-1 Fix spelling and grammar"
 Jira issues can be closed directly from GitLab by using trigger words in
 commits and merge requests. When a commit which contains the trigger word
 followed by the Jira issue ID in the commit message is pushed, GitLab
-adds a comment in the mentioned Jira issue and immediately close it (provided
+adds a comment in the mentioned Jira issue and immediately closes it (provided
 the transition ID was set up correctly).
 
 There are currently three trigger words, and you can use either one to achieve
