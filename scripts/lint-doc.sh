@@ -56,6 +56,9 @@ then
   ((ERRORCODE++))
 fi
 
+echo "Output git diff"
+git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}"
+
 # Run Vale and Markdownlint only on changed files. Only works on merged results
 # pipelines, so first checks if a merged results CI variable is present. If not present,
 # runs test on all files.
