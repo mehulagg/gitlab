@@ -159,7 +159,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
         end
       end
 
-      it 'resolves references to variables' do
+      it 'resolves references to variables and topologically sorts result' do
         collection = described_class.new([
           { key: 'IMAGE_TAG', value: 'docker-image-$CI_PIPELINE_ID' },
           { key: 'CI_PIPELINE_ID', value: '102' }
@@ -167,8 +167,8 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
 
         expect(collection.to_runner_variables)
           .to eq [
-            { key: 'IMAGE_TAG', value: 'docker-image-102', public: true, masked: false },
-            { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false }
+            { key: 'CI_PIPELINE_ID', value: '102', public: true, masked: false },
+            { key: 'IMAGE_TAG', value: 'docker-image-102', public: true, masked: false }
           ]
       end
 
@@ -182,17 +182,42 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
   end
 
   describe '#to_hash' do
-    it 'returns regular hash in valid order without duplicates' do
-      collection = described_class.new
-        .append(key: 'TEST1', value: 'test-1')
-        .append(key: 'TEST2', value: 'test-2')
-        .append(key: 'TEST1', value: 'test-3')
+    context 'when variable_inside_variable feature flag is disabled' do
+      before do
+        stub_feature_flags(variable_inside_variable: false)
+      end
 
-      expect(collection.to_hash).to eq('TEST1' => 'test-3',
-                                       'TEST2' => 'test-2')
+      it 'returns regular hash in valid order without duplicates' do
+        collection = described_class.new
+          .append(key: 'TEST1', value: 'test-1')
+          .append(key: 'TEST2', value: 'test-2')
+          .append(key: 'TEST1', value: 'test-3')
 
-      expect(collection.to_hash).to include(TEST1: 'test-3')
-      expect(collection.to_hash).not_to include(TEST1: 'test-1')
+        expect(collection.to_hash).to eq('TEST1' => 'test-3',
+                                        'TEST2' => 'test-2')
+
+        expect(collection.to_hash).to include(TEST1: 'test-3')
+        expect(collection.to_hash).not_to include(TEST1: 'test-1')
+      end
+    end
+
+    context 'when variable_inside_variable feature flag is enabled' do
+      before do
+        stub_feature_flags(variable_inside_variable: true)
+      end
+
+      it 'returns regular hash in topological order without duplicates' do
+        collection = described_class.new
+          .append(key: 'TEST1', value: '${TEST2}-1')
+          .append(key: 'TEST2', value: 'test-2')
+          .append(key: 'TEST2', value: 'test-3')
+
+        expect(collection.to_hash).to eq('TEST2' => 'test-3',
+                                         'TEST1' => 'test-3-1')
+
+        expect(collection.to_hash).to include(TEST1: 'test-3-1')
+        expect(collection.to_hash).not_to include(TEST2: 'test-2')
+      end
     end
   end
 end

@@ -38,24 +38,24 @@ module Gitlab
           return runner_vars if Feature.disabled?(:variable_inside_variable)
 
           # Perform a topological sort and inline expansion on a variable hash
-          runner_vars_h = runner_vars.index_by { |env| env.fetch(:key) }
           begin
-            each_node = ->(&b) { runner_vars_h.each_value(&b) }
-            each_child = ->(env, &b) { ExpandVariables.each_variable_reference(env.fetch(:value), runner_vars_h, &b) }
-            runner_var_values_h = {}
+            input_vars = runner_vars.index_by { |env| env.fetch(:key) }
+            sorted_var_values = {}
+            runner_vars.clear
+            each_node = ->(&b) { input_vars.each_key(&b) }
+            each_child = ->(k, &b) { ExpandVariables.each_variable_reference(input_vars.dig(k, :value), input_vars, &b) }
 
-            TSort.tsort_each(each_node, each_child) do |key:, value:, **_|
-              new_value = ExpandVariables.expand_existing(value, runner_var_values_h)
-              runner_var_values_h.store(key, new_value)
-
-              # Update with new value
-              runner_vars_h[key][:value] = new_value if new_value != value
+            TSort.tsort(each_node, each_child).each do |key|
+              env = input_vars.fetch(key)
+              new_value = ExpandVariables.expand_existing(env[:value], sorted_var_values)
+              sorted_var_values.store(key, new_value)
+              runner_vars.push(env.merge({ value: new_value }))
             end
           rescue TSort::Cyclic => e
             raise CyclicVariableReference, e.message
           end
 
-          runner_vars_h.values
+          runner_vars
         end
 
         def to_hash

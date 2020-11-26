@@ -260,7 +260,7 @@ RSpec.describe ExpandVariables do
         with_them do
           subject do
             reported_variables = []
-            ExpandVariables.each_variable_reference(value, variables.index_by { |key:, **_| key }) { |key:, **_| reported_variables.push(key) }
+            ExpandVariables.each_variable_reference(value, variables.index_by { |key:, **_| key }) { |key| reported_variables.push(key) }
             reported_variables
           end
 
@@ -274,7 +274,7 @@ RSpec.describe ExpandVariables do
 
       subject do
         reported_variables = []
-        described_class.each_variable_reference(value, variables) { |key:, **_| reported_variables.push(key) }
+        described_class.each_variable_reference(value, variables) { |key| reported_variables.push(key) }
         reported_variables
       end
 

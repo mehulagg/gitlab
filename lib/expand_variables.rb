@@ -25,8 +25,7 @@ module ExpandVariables
         variables = variables.call if variables.is_a?(Proc)
 
         ref_var_name = var_ref.compact.first
-        ref_var = variables.fetch(ref_var_name, nil)
-        yield ref_var if ref_var
+        yield ref_var_name if variables.key?(ref_var_name)
       end
     end
 
