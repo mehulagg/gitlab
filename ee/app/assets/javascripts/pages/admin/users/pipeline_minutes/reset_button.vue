@@ -1,8 +1,8 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import statusCodes from '~/lib/utils/http_status';
+import { __ } from '~/locale';
 
 export default {
   components: {

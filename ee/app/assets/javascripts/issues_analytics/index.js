@@ -1,7 +1,7 @@
 import Vue from 'vue';
+import { urlParamsToObject } from '~/lib/utils/common_utils';
 import IssuesAnalytics from './components/issues_analytics.vue';
 import store from './stores';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
 
 export default () => {
   const el = document.querySelector('#js-issues-analytics');

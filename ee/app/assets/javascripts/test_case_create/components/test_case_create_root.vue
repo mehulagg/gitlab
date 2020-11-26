@@ -1,10 +1,10 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import createFlash from '~/flash';
+import IssuableCreate from '~/issuable_create/components/issuable_create_root.vue';
 import { redirectTo } from '~/lib/utils/url_utility';
 
-import IssuableCreate from '~/issuable_create/components/issuable_create_root.vue';
+import { s__ } from '~/locale';
 
 import createTestCase from '../queries/create_test_case.mutation.graphql';
 

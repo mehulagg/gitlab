@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import Api from 'ee/api';
-import axios from '~/lib/utils/axios_utils';
 import createDefaultClient from '~/lib/graphql';
+import axios from '~/lib/utils/axios_utils';
 
 Vue.use(VueApollo);
 

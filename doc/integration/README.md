@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
@@ -43,7 +43,7 @@ GitLab also provides features to improve the security of your own application. F
 
 GitLab can be integrated with the following external service for continuous integration:
 
-- [Jenkins](jenkins.md) CI. **(STARTER)**
+- [Jenkins](jenkins.md) CI.
 
 ## Feature enhancements
 

@@ -12,36 +12,10 @@ RSpec.describe 'Trial Capture Lead', :js do
   end
 
   context 'when user' do
-    let(:trial_form_phone_optional_feature_enabled) { false }
-
     before do
-      stub_feature_flags(trial_form_phone_optional: trial_form_phone_optional_feature_enabled)
-
       visit new_trial_path
 
       wait_for_requests
-    end
-
-    context 'phone number is optional' do
-      let(:trial_form_phone_optional_feature_enabled) { true }
-
-      context 'without phone number' do
-        it 'proceeds to the next step' do
-          expect_any_instance_of(GitlabSubscriptions::CreateLeadService).to receive(:execute) do
-            { success: true }
-          end
-
-          fill_in 'company_name', with: 'GitLab'
-          select2 '1-99', from: '#company_size'
-          fill_in 'number_of_users', with: '1'
-          select2 'US', from: '#country_select'
-
-          click_button 'Continue'
-
-          expect(page).not_to have_css('flash-container')
-          expect(current_path).to eq(select_trials_path)
-        end
-      end
     end
 
     context 'enters valid company information' do

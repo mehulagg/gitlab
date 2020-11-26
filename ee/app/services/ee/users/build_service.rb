@@ -22,6 +22,7 @@ module EE
         user = super
 
         build_smartcard_identity(user, params) if ::Gitlab::Auth::Smartcard.enabled?
+        set_pending_approval_state(user)
 
         user
       end
@@ -97,6 +98,12 @@ module EE
         scim_identity_params = params.slice(*scim_identity_attributes)
 
         user.scim_identities.build(scim_identity_params.merge(active: true))
+      end
+
+      def set_pending_approval_state(user)
+        return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+
+        user.state = ::User::BLOCKED_PENDING_APPROVAL_STATE
       end
     end
   end

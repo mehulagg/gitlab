@@ -23,7 +23,7 @@ RSpec.describe 'epics swimlanes', :js do
 
   context 'link to swimlanes view' do
     before do
-      stub_licensed_features(epics: true)
+      stub_licensed_features(epics: true, swimlanes: true)
       sign_in(user)
       visit_epics_swimlanes_page
     end

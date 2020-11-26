@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import apolloProvider from './graphql/provider';
 import InstanceSecurityDashboardSettings from './components/first_class_instance_security_dashboard_settings.vue';
+import apolloProvider from './graphql/provider';
 
 export default el => {
   if (!el) {

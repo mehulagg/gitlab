@@ -1,7 +1,7 @@
 <script>
 import BoardListHeaderFoss from '~/boards/components/board_list_header.vue';
-import { __, sprintf, s__ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
+import { __, sprintf, s__ } from '~/locale';
 
 export default {
   extends: BoardListHeaderFoss,

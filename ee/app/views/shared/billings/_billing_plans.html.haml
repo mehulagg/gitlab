@@ -5,9 +5,12 @@
   = render 'shared/billings/billing_plan_header', namespace: namespace, plan: current_plan
 
 - if show_plans?(namespace)
-  .billing-plans.mt-5.row
+  .billing-plans.gl-mt-5.row
     - plans_data.each do |plan|
-      = render 'shared/billings/billing_plan', namespace: namespace, plan: plan, current_plan: current_plan
+      - is_default_plan = current_plan.nil? && plan.default?
+      - is_current = plan.code == current_plan&.code || is_default_plan
+      .col-md-6.col-lg-3.gl-mb-5
+        = render 'shared/billings/billing_plan', namespace: namespace, plan: plan, is_current: is_current
 
 - if namespace.gitlab_subscription&.has_a_paid_hosted_plan?
   .center.gl-mb-7

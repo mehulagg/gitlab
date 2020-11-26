@@ -43,10 +43,17 @@ RSpec.describe Admin::AuditLogReportsController do
         end
 
         it 'invokes CSV export service with correct arguments' do
+          expected_params = {
+            entity_type: 'Project',
+            entity_id: '789',
+            created_before: Date.parse('2020-09-01').end_of_day,
+            created_after: '2020-08-01',
+            author_id: '67'
+          }
+
           subject
 
-          expect(AuditEvents::ExportCsvService).to have_received(:new)
-            .with(ActionController::Parameters.new(params).permit!)
+          expect(AuditEvents::ExportCsvService).to have_received(:new).with(expected_params.with_indifferent_access)
         end
 
         it 'returns success status with correct headers', :aggregate_failures do
@@ -73,6 +80,31 @@ RSpec.describe Admin::AuditLogReportsController do
             ["19", "Ru'by McRüb\"Face", "!@#$%^&*()`~ new project", "Project", "¯\\_(ツ)_/¯"],
             ["20", "sǝʇʎq ƃuᴉpoɔǝp", ",./;'[]\-= old project", "Project", "¯\\_(ツ)_/¯"]
           ])
+        end
+
+        context 'when date range params are not provided' do
+          let(:params) do
+            {
+              entity_type: 'Project',
+              entity_id: '789',
+              author_id: '67'
+            }
+          end
+
+          it 'passes the default date range filter to the CSV export service' do
+            current_time = Time.zone.local(2020, 9, 12, 1, 4, 44)
+            expected_date_range_params = {
+              created_before: current_time.end_of_day,
+              created_after: Date.parse('2020-09-01')
+            }
+
+            travel_to(current_time) do
+              subject
+
+              expect(AuditEvents::ExportCsvService).to have_received(:new)
+                .with(hash_including(expected_date_range_params))
+            end
+          end
         end
       end
 

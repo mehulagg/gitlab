@@ -4,13 +4,13 @@
   modify the passed parameter in conformity with non-ee BoardsStore.
 */
 
-import { sortBy } from 'lodash';
 import Cookies from 'js-cookie';
+import { sortBy } from 'lodash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { parseBoolean } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
 
 class BoardsStoreEE {
   initEESpecific(boardsStore) {

@@ -201,6 +201,54 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           'jobs:test:needs:need ref should be a string')
       end
     end
+
+    describe 'cross pipeline needs' do
+      context 'when job is not present' do
+        let(:config) do
+          {
+            rspec: {
+              stage: 'test',
+              script: 'rspec',
+              needs: [
+                { pipeline: '$UPSTREAM_PIPELINE_ID' }
+              ]
+            }
+          }
+        end
+
+        it 'returns an error' do
+          expect(subject).not_to be_valid
+          # This currently shows a confusing error message because a conflict of syntax
+          # with upstream pipeline status mirroring: https://gitlab.com/gitlab-org/gitlab/-/issues/280853
+          expect(subject.errors).to include(/:needs config uses invalid types: bridge/)
+        end
+      end
+    end
+
+    describe 'with cross project and cross pipeline needs' do
+      let(:config) do
+        {
+          rspec: {
+            stage: 'test',
+            script: 'rspec',
+            needs: [
+              { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'test' },
+              { project: 'org/the-project', ref: 'master', job: 'build', artifacts: true }
+            ]
+          }
+        }
+      end
+
+      it 'returns a valid specification' do
+        expect(subject).to be_valid
+
+        rspec = subject.builds.last
+        expect(rspec.dig(:options, :cross_dependencies)).to eq([
+          { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'test', artifacts: true },
+          { project: 'org/the-project', ref: 'master', job: 'build', artifacts: true }
+        ])
+      end
+    end
   end
 
   describe 'Secrets' do

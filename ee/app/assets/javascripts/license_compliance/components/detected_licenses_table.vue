@@ -1,8 +1,8 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
-import LicensesTable from './licenses_table.vue';
 import { LICENSE_LIST } from '../store/constants';
+import LicensesTable from './licenses_table.vue';
 
 export default {
   name: 'DetectedLicensesTable',

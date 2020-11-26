@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
+import * as types from './mutation_types';
 
 export * from '~/members/store/actions';
 

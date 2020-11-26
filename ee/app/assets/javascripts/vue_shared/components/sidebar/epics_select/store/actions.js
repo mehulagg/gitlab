@@ -1,14 +1,13 @@
 import Api from 'ee/api';
 import { noneEpic } from 'ee/vue_shared/constants';
+import boardsStore from '~/boards/stores/boards_store';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import { s__, __ } from '~/locale';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { formatDate, timeFor } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
 import * as types from './mutation_types';
-
-import boardsStore from '~/boards/stores/boards_store';
 
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
 export const setIssueId = ({ commit }, issueId) => commit(types.SET_ISSUE_ID, issueId);

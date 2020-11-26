@@ -1,0 +1,5 @@
+---
+title: Remove .issue-box element from Epics (list)
+merge_request: 48000
+author: Takuya Noguchi
+type: performance

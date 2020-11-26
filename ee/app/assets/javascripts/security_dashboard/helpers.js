@@ -1,6 +1,6 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
+import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
@@ -31,7 +31,7 @@ export const severityFilter = {
 };
 
 export const scannerFilter = {
-  name: s__('Reports|Scanner'),
+  name: s__('SecurityReports|Scanner'),
   id: 'reportType',
   options: parseOptions(REPORT_TYPES),
   allOption: BASE_FILTERS.report_type,

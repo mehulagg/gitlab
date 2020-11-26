@@ -1,22 +1,20 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
+import { GlButton, GlIcon, GlLink, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 
-import { __ } from '~/locale';
 import createFlash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
-
-import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
-
 import {
   IssuableStates,
   IssuableListTabs,
   AvailableSortOptions,
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+import { __ } from '~/locale';
+import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
 export default {
   name: 'JiraIssuesList',

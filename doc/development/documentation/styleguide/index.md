@@ -1,7 +1,7 @@
 ---
 stage: none
 group: Style Guide
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'Writing styles, markup, formatting, and other standards for GitLab Documentation.'
 ---
 
@@ -10,7 +10,7 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 This document defines the standards for GitLab's documentation content and
 files.
 
-For broader information about the documentation, see the [Documentation guidelines](index.md).
+For broader information about the documentation, see the [Documentation guidelines](../index.md).
 
 For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
 

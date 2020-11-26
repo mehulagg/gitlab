@@ -52,6 +52,42 @@ RSpec.describe Gitlab::Ci::Reports::Security::Identifier do
     end
   end
 
+  describe '#cve?' do
+    let(:identifier) { create(:ci_reports_security_identifier, external_type: external_type) }
+
+    subject { identifier.cve? }
+
+    context 'when has cve as external type' do
+      let(:external_type) { 'Cve' }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when does not have cve as external type' do
+      let(:external_type) { 'Cwe' }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#cwe?' do
+    let(:identifier) { create(:ci_reports_security_identifier, external_type: external_type) }
+
+    subject { identifier.cwe? }
+
+    context 'when has cwe as external type' do
+      let(:external_type) { 'Cwe' }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when does not have cwe as external type' do
+      let(:external_type) { 'Cve' }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
   describe '#to_hash' do
     let(:identifier) { create(:ci_reports_security_identifier) }
 

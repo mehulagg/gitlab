@@ -78,6 +78,44 @@ RSpec.describe Users::BuildService do
           end
         end
       end
+
+      context 'user signup cap' do
+        let(:new_user_signups_cap) { 10 }
+
+        before do
+          allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+        end
+
+        context 'when user signup cap is set' do
+          it 'sets the user state to blocked_pending_approval' do
+            user = service.execute
+
+            expect(user).to be_blocked_pending_approval
+          end
+        end
+
+        context 'when user signup cap is not set' do
+          let(:new_user_signups_cap) { nil }
+
+          it 'does not set the user state to blocked_pending_approval' do
+            user = service.execute
+
+            expect(user).to be_active
+          end
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_feature_flags(admin_new_user_signups_cap: false)
+          end
+
+          it 'does not set the user state to blocked_pending_approval' do
+            user = service.execute
+
+            expect(user).to be_active
+          end
+        end
+      end
     end
   end
 end

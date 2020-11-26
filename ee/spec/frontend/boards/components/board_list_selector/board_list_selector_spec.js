@@ -12,7 +12,6 @@ import axios from '~/lib/utils/axios_utils';
 describe('BoardListSelector', () => {
   global.gon.features = {
     ...(global.gon.features || {}),
-    boardsWithSwimlanes: false,
     graphqlBoardLists: false,
   };
 

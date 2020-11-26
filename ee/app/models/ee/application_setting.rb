@@ -348,6 +348,11 @@ module EE
       write_attribute(:compliance_frameworks, cleaned)
     end
 
+    def should_apply_user_signup_cap?
+      ::Feature.enabled?(:admin_new_user_signups_cap) &&
+        ::Gitlab::CurrentSettings.new_user_signups_cap.present?
+    end
+
     private
 
     def elasticsearch_limited_project_exists?(project)

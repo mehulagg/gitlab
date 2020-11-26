@@ -1,9 +1,9 @@
 <script>
 import { GlCard, GlIcon } from '@gitlab/ui';
-import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import query from '../queries/iteration_issues_summary.query.graphql';
+import { __ } from '~/locale';
 import { Namespace } from '../constants';
+import query from '../queries/iteration_issues_summary.query.graphql';
 
 export default {
   cardBodyClass: 'gl-text-center gl-py-3',

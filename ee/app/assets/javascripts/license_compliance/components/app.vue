@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   GlEmptyState,
   GlLoadingIcon,
@@ -10,13 +9,14 @@ import {
   GlBadge,
   GlAlert,
 } from '@gitlab/ui';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { getLocationHash } from '~/lib/utils/url_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { LICENSE_LIST } from '../store/constants';
 import DetectedLicensesTable from './detected_licenses_table.vue';
 import PipelineInfo from './pipeline_info.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { getLocationHash } from '~/lib/utils/url_utility';
 
 export default {
   name: 'LicenseComplianceApp',

@@ -1,10 +1,7 @@
-import { isNumber } from 'lodash';
 import dateFormat from 'dateformat';
-import { s__, sprintf } from '~/locale';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import httpStatus from '~/lib/utils/http_status';
-import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
+import { isNumber } from 'lodash';
 import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import {
   newDate,
   dayAfter,
@@ -12,6 +9,9 @@ import {
   getDatesInRange,
   parseSeconds,
 } from '~/lib/utils/datetime_utility';
+import httpStatus from '~/lib/utils/http_status';
+import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
+import { s__, sprintf } from '~/locale';
 import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
 
@@ -185,8 +185,8 @@ export const flattenDurationChartData = data =>
  * i[2] = date, used in the tooltip
  *
  * @param {Array} data - The duration data for selected stages
- * @param {Date} startDate - The globally selected cycle analytics start date
- * @param {Date} endDate - The globally selected cycle analytics end date
+ * @param {Date} startDate - The globally selected Value Stream Analytics start date
+ * @param {Date} endDate - The globally selected Value Stream Analytics end date
  * @returns {Array} An array with each item being another arry of three items (plottable date, computed total, tooltip display date)
  */
 export const getDurationChartData = (data, startDate, endDate) => {

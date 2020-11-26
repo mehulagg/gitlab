@@ -9,11 +9,59 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
     let(:parser) { described_class.new }
+    let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
 
     before do
-      allow(parser).to receive(:create_location).and_return(nil)
+      allow(parser).to receive(:create_location).and_return(location)
       artifact.each_blob do |blob|
         parser.parse!(blob, report)
+      end
+    end
+
+    context 'parsing finding.name' do
+      let(:artifact) { build(:ee_ci_job_artifact, :common_security_report_with_blank_names) }
+
+      context 'when message is provided' do
+        it 'sets message from the report as a finding name' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
+          expected_name = Gitlab::Json.parse(vulnerability.raw_metadata)['message']
+
+          expect(vulnerability.name).to eq(expected_name)
+        end
+      end
+
+      context 'when message is not provided' do
+        context 'and name is provided' do
+          it 'sets name from the report as a name' do
+            vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1030' }
+            expected_name = Gitlab::Json.parse(vulnerability.raw_metadata)['name']
+
+            expect(vulnerability.name).to eq(expected_name)
+          end
+        end
+
+        context 'and name is not provided' do
+          context 'when CVE identifier exists' do
+            it 'combines identifier with location to create name' do
+              vulnerability = report.findings.find { |x| x.compare_key == 'CVE-2017-11429' }
+              expect(vulnerability.name).to eq("CVE-2017-11429 in yarn.lock")
+            end
+          end
+
+          context 'when CWE identifier exists' do
+            it 'combines identifier with location to create name' do
+              vulnerability = report.findings.find { |x| x.compare_key == 'CWE-2017-11429' }
+              expect(vulnerability.name).to eq("CWE-2017-11429 in yarn.lock")
+            end
+          end
+
+          context 'when neither CVE nor CWE identifier exist' do
+            it 'combines identifier with location to create name' do
+              vulnerability = report.findings.find { |x| x.compare_key == 'OTHER-2017-11429' }
+              expect(vulnerability.name).to eq("other-2017-11429 in yarn.lock")
+            end
+          end
+        end
       end
     end
 

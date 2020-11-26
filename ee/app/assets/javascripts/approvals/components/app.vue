@@ -1,8 +1,8 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlLoadingIcon, GlButton } from '@gitlab/ui';
-import showToast from '~/vue_shared/plugins/global_toast';
+import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
+import showToast from '~/vue_shared/plugins/global_toast';
 import ModalRuleCreate from './modal_rule_create.vue';
 import ModalRuleRemove from './modal_rule_remove.vue';
 

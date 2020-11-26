@@ -1,10 +1,10 @@
 <script>
-import { __ } from '~/locale';
 import ListLabel from '~/boards/models/label';
+import { __ } from '~/locale';
 import BoardLabelsSelect from '~/vue_shared/components/sidebar/labels_select/base.vue';
+import AssigneeSelect from './assignee_select.vue';
 import BoardMilestoneSelect from './milestone_select.vue';
 import BoardWeightSelect from './weight_select.vue';
-import AssigneeSelect from './assignee_select.vue';
 
 export default {
   components: {

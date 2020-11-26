@@ -45,28 +45,74 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
       end
     end
 
-    context 'with too many cross dependencies' do
-      let(:limit) { described_class::NEEDS_CROSS_DEPENDENCIES_LIMIT }
+    context 'cross dependencies limit' do
+      context 'when enforcing limit for cross project dependencies' do
+        let(:limit) { described_class::NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT }
 
-      let(:config) do
-        Array.new(limit.next) do |index|
-          {
-            project: "project-#{index}",
-            job: 'job-1',
-            ref: 'master',
-            artifacts: true
-          }
+        context 'when limit is exceeded' do
+          let(:config) do
+            Array.new(limit.next) do |index|
+              {
+                project: "project-#{index}",
+                job: 'job-1',
+                ref: 'master',
+                artifacts: true
+              }
+            end
+          end
+
+          describe '#valid?' do
+            it { is_expected.not_to be_valid }
+          end
+
+          describe '#errors' do
+            it 'returns error about incorrect type' do
+              expect(needs.errors).to contain_exactly(
+                "needs config must be less than or equal to #{limit}")
+            end
+          end
+        end
+
+        context 'when limit is not exceeded' do
+          let(:config) do
+            Array.new(limit) do |index|
+              {
+                project: "project-#{index}",
+                job: 'job-1',
+                ref: 'master',
+                artifacts: true
+              }
+            end + [
+              { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'rspec' }
+            ]
+          end
+
+          it 'does not count cross pipeline dependencies' do
+            expect(subject).to be_valid
+          end
         end
       end
 
-      describe '#valid?' do
-        it { is_expected.not_to be_valid }
-      end
+      context 'when enforcing limit for cross pipeline dependencies' do
+        let(:limit) { described_class::NEEDS_CROSS_PIPELINE_DEPENDENCIES_LIMIT }
 
-      describe '#errors' do
-        it 'returns error about incorrect type' do
-          expect(needs.errors).to contain_exactly(
-            "needs config must be less than or equal to #{limit}")
+        context 'when limit is not exceeded' do
+          let(:config) do
+            Array.new(limit) do |index|
+              { pipeline: "$UPSTREAM_PIPELINE_#{index}", job: 'job-1' }
+            end + [
+              {
+                project: 'org/the-project',
+                job: 'build',
+                ref: 'master',
+                artifacts: true
+              }
+            ]
+          end
+
+          it 'does not count cross project dependencies' do
+            expect(subject).to be_valid
+          end
         end
       end
     end

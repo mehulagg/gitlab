@@ -1,7 +1,7 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
-import GeoNodeLastUpdated from './geo_node_last_updated.vue';
 import { HEALTH_STATUS_ICON, HEALTH_STATUS_CLASS } from '../constants';
+import GeoNodeLastUpdated from './geo_node_last_updated.vue';
 
 export default {
   components: {

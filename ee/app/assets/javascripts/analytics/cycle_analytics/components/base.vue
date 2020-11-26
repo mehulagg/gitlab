@@ -1,21 +1,21 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { PROJECTS_PER_PAGE } from '../constants';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
+import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
-import DateRange from '../../shared/components/daterange.vue';
-import StageTable from './stage_table.vue';
-import DurationChart from './duration_chart.vue';
-import TypeOfWorkCharts from './type_of_work_charts.vue';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { toYmd } from '../../shared/utils';
-import StageTableNav from './stage_table_nav.vue';
+import { PROJECTS_PER_PAGE } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
-import PathNavigation from './path_navigation.vue';
+import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
-import ValueStreamSelect from './value_stream_select.vue';
 import Metrics from './metrics.vue';
+import PathNavigation from './path_navigation.vue';
+import StageTable from './stage_table.vue';
+import StageTableNav from './stage_table_nav.vue';
+import TypeOfWorkCharts from './type_of_work_charts.vue';
+import ValueStreamSelect from './value_stream_select.vue';
 
 export default {
   name: 'CycleAnalytics',

@@ -3,6 +3,9 @@
 module Projects
   class ThreatMonitoringController < Projects::ApplicationController
     before_action :authorize_read_threat_monitoring!
+    before_action do
+      push_frontend_feature_flag(:threat_monitoring_alerts, project)
+    end
 
     feature_category :web_firewall
 

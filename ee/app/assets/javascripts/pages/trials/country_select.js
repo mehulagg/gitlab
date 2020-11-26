@@ -1,7 +1,7 @@
 import $ from 'jquery';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 
 const selectElement = document.getElementById('country_select');
 const { countriesEndPoint, selectedOption } = selectElement.dataset;

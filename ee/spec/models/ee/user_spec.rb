@@ -99,6 +99,46 @@ RSpec.describe User do
     end
   end
 
+  describe 'after_create' do
+    describe '#perform_user_cap_check' do
+      let(:new_user_signups_cap) { nil }
+
+      before do
+        allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(admin_new_user_signups_cap: false)
+        end
+
+        it 'does not call SetUserStatusBasedOnUserCapSettingWorker' do
+          expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)
+
+          create(:user, state: 'blocked_pending_approval')
+        end
+      end
+
+      context 'when user cap is not set' do
+        it 'does not call SetUserStatusBasedOnUserCapSettingWorker' do
+          expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)
+
+          create(:user, state: 'blocked_pending_approval')
+        end
+      end
+
+      context 'when user cap is set' do
+        let(:new_user_signups_cap) { 10 }
+
+        it 'enqueues SetUserStatusBasedOnUserCapSettingWorker' do
+          expect(SetUserStatusBasedOnUserCapSettingWorker).to receive(:perform_async).once
+
+          create(:user, state: 'blocked_pending_approval')
+        end
+      end
+    end
+  end
+
   describe '.find_by_smartcard_identity' do
     let!(:user) { create(:user) }
     let!(:smartcard_identity) { create(:smartcard_identity, user: user) }

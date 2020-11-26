@@ -139,6 +139,9 @@ export default {
     );
   },
   methods: {
+    show() {
+      this.$refs.modal.show();
+    },
     updateValidationPath() {
       this.validationPath = this.isTextFileValidation
         ? this.getTextFileValidationPath()

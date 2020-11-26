@@ -24,11 +24,11 @@ describe('History Comment', () => {
   const comment = {
     id: 'id',
     note: 'note',
-    note_html: '<p>note</p>',
+    noteHtml: '<p>note</p>',
     author: {},
-    updated_at: new Date().toISOString(),
-    current_user: {
-      can_edit: true,
+    updatedAt: new Date().toISOString(),
+    currentUser: {
+      canEdit: true,
     },
   };
 
@@ -142,8 +142,8 @@ describe('History Comment', () => {
     it('shows the comment with the correct user author and timestamp and the edit/delete buttons', () => {
       expectExistingCommentView();
       expect(eventItem().props('author')).toBe(comment.author);
-      expect(eventItem().props('createdAt')).toBe(comment.updated_at);
-      expect(eventItem().element.innerHTML).toContain(comment.note_html);
+      expect(eventItem().props('createdAt')).toBe(comment.updatedAt);
+      expect(eventItem().element.innerHTML).toContain(comment.noteHtml);
     });
 
     it('shows the comment editor when the edit button is clicked', () => {
@@ -161,7 +161,7 @@ describe('History Comment', () => {
         })
         .then(() => {
           expectExistingCommentView();
-          expect(eventItem().element.innerHTML).toContain(comment.note_html);
+          expect(eventItem().element.innerHTML).toContain(comment.noteHtml);
         });
     });
 
@@ -182,7 +182,7 @@ describe('History Comment', () => {
         })
         .then(() => {
           expectExistingCommentView();
-          expect(eventItem().element.innerHTML).toContain(comment.note_html);
+          expect(eventItem().element.innerHTML).toContain(comment.noteHtml);
         });
     });
 
@@ -262,7 +262,7 @@ describe('History Comment', () => {
 
   describe('no permission to edit existing comment', () => {
     it('does not show the edit/delete buttons if the current user has no edit permissions', () => {
-      createWrapper({ ...comment, current_user: { can_edit: false } });
+      createWrapper({ ...comment, currentUser: { canEdit: false } });
 
       expect(editButton().exists()).toBe(false);
       expect(deleteButton().exists()).toBe(false);

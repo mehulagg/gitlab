@@ -2,8 +2,8 @@
 
 import $ from 'jquery';
 import Api from 'ee/api';
-import { __ } from '~/locale';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { __ } from '~/locale';
 
 export default function initLDAPGroupsSelect() {
   const ldapGroupResult = function(group) {

@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Kubernetes Agent **(PREMIUM ONLY)**
@@ -161,23 +161,9 @@ gitops:
 ```
 
 GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
-supports manifest projects containing multiple directories (or subdirectories)
-of YAML files. To use multiple YAML files, specify a `paths` attribute:
-
-```yaml
-gitops:
-  manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  paths:
-      # Read all .yaml files from team1/app1 directory.
-      # See https://github.com/bmatcuk/doublestar#about and
-      # https://pkg.go.dev/github.com/bmatcuk/doublestar/v2#Match for globbing rules.
-    - glob: '/team1/app1/*.yaml'
-      # Read all .yaml files from team2/apps and all subdirectories
-    - glob: '/team2/apps/**/*.yaml'
-      # If 'paths' is not specified or is an empty list, the configuration below is used
-    - glob: '/**/*.{yaml,yml,json}'
-```
+supports manifest projects containing
+multiple directories (or subdirectories) of YAML files. For more information see our
+documentation on the [Kubernetes Agent configuration respository](repository.md).
 
 ### Create an Agent record in GitLab
 

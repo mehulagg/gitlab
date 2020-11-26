@@ -28,7 +28,7 @@ class SurveyResponsesController < ApplicationController
       response: params[:response]
     }.compact
 
-    track_self_describing_event(SURVEY_RESPONSE_SCHEMA_URL, data)
+    track_self_describing_event(SURVEY_RESPONSE_SCHEMA_URL, data: data)
   end
 
   def to_number(param)

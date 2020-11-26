@@ -58,7 +58,10 @@ module QA
       module Main
         autoload :Banner, 'qa/ee/page/main/banner'
         autoload :Menu, 'qa/ee/page/main/menu'
-        autoload :SignUp, 'qa/ee/page/main/sign_up'
+      end
+
+      module Registration
+        autoload :Welcome, 'qa/ee/page/registration/welcome'
       end
 
       module Admin
@@ -139,10 +142,6 @@ module QA
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
           autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
-
-          module Services
-            autoload :Jenkins, 'qa/ee/page/project/settings/services/jenkins'
-          end
         end
 
         module Operations
@@ -192,6 +191,7 @@ module QA
 
         module Epic
           autoload :Index, 'qa/ee/page/group/epic/index'
+          autoload :New, 'qa/ee/page/group/epic/new'
           autoload :Show, 'qa/ee/page/group/epic/show'
         end
 

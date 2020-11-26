@@ -1,9 +1,9 @@
 <script>
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Approvals from '~/vue_merge_request_widget/components/approvals/approvals.vue';
+import { FETCH_ERROR } from '~/vue_merge_request_widget/components/approvals/messages';
 import approvalsMixin from '~/vue_merge_request_widget/mixins/approvals';
 import ApprovalsAuth from './approvals_auth.vue';
-import { FETCH_ERROR } from '~/vue_merge_request_widget/components/approvals/messages';
 import ApprovalsFooter from './approvals_footer.vue';
 
 export default {

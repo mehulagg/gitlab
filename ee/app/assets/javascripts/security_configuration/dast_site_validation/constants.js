@@ -27,6 +27,26 @@ export const DAST_SITE_VALIDATION_STATUS = {
   FAILED: 'FAILED_VALIDATION',
 };
 
+export const DAST_SITE_VALIDATION_STATUS_PROPS = {
+  [DAST_SITE_VALIDATION_STATUS.INPROGRESS]: {
+    label: s__('DastSiteValidation|Validating...'),
+    cssClass: 'gl-text-blue-300',
+    tooltipText: s__('DastSiteValidation|The validation is in progress. Please wait...'),
+  },
+  [DAST_SITE_VALIDATION_STATUS.PASSED]: {
+    label: s__('DastSiteValidation|Validated'),
+    cssClass: 'gl-text-green-500',
+    tooltipText: s__(
+      'DastSiteValidation|Validation succeeded. Both active and passive scans can be run against the target site.',
+    ),
+  },
+  [DAST_SITE_VALIDATION_STATUS.FAILED]: {
+    label: s__('DastSiteValidation|Validation failed'),
+    cssClass: 'gl-text-red-500',
+    tooltipText: s__('DastSiteValidation|The validation has failed. Please try again.'),
+  },
+};
+
 export const DAST_SITE_VALIDATION_HTTP_HEADER_KEY = 'Gitlab-On-Demand-DAST';
 
 export const DAST_SITE_VALIDATION_MODAL_ID = 'dast-site-validation-modal';

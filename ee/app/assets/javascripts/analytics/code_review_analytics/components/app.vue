@@ -1,10 +1,10 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlBadge, GlLoadingIcon, GlEmptyState, GlPagination } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import MergeRequestTable from './merge_request_table.vue';
-import FilterBar from './filter_bar.vue';
 import FilteredSearchCodeReviewAnalytics from '../filtered_search_code_review_analytics';
+import FilterBar from './filter_bar.vue';
+import MergeRequestTable from './merge_request_table.vue';
 
 export default {
   components: {

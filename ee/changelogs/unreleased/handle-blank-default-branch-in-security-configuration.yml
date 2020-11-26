@@ -1,0 +1,5 @@
+---
+title: Use `master` when default branch is blank in security configuration
+merge_request: 48328
+author:
+type: fixed

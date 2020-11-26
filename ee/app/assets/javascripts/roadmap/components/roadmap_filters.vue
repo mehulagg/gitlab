@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlFormGroup,
   GlSegmentedControl,
@@ -7,12 +6,13 @@ import {
   GlDropdownItem,
   GlDropdownDivider,
 } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 
-import { __ } from '~/locale';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { visitUrl, mergeUrlParams, updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';

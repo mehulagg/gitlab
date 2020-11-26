@@ -1,5 +1,5 @@
-import { groupByDateRanges } from './utils';
 import { UNSCANNED_PROJECTS_DATE_RANGES } from '../../constants';
+import { groupByDateRanges } from './utils';
 
 export const untestedProjects = ({ projects }) =>
   projects.filter(({ securityTestsUnconfigured }) => securityTestsUnconfigured === true);

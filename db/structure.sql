@@ -11291,6 +11291,7 @@ CREATE TABLE compliance_management_frameworks (
     description text NOT NULL,
     color text NOT NULL,
     namespace_id integer NOT NULL,
+    regulated boolean DEFAULT true NOT NULL,
     CONSTRAINT check_08cd34b2c2 CHECK ((char_length(color) <= 10)),
     CONSTRAINT check_1617e0b87e CHECK ((char_length(description) <= 255)),
     CONSTRAINT check_ab00bc2193 CHECK ((char_length(name) <= 255))
@@ -12015,7 +12016,8 @@ CREATE TABLE experiment_users (
     user_id bigint NOT NULL,
     group_type smallint DEFAULT 0 NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    converted_at timestamp with time zone
 );
 
 CREATE SEQUENCE experiment_users_id_seq
@@ -17571,8 +17573,8 @@ CREATE TABLE webauthn_registrations (
     name text NOT NULL,
     public_key text NOT NULL,
     u2f_registration_id integer,
-    CONSTRAINT check_242f0cc65c CHECK ((char_length(credential_xid) <= 255)),
-    CONSTRAINT check_2f02e74321 CHECK ((char_length(name) <= 255))
+    CONSTRAINT check_2f02e74321 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_e54008d9ce CHECK ((char_length(credential_xid) <= 340))
 );
 
 CREATE SEQUENCE webauthn_registrations_id_seq
@@ -21769,6 +21771,8 @@ CREATE UNIQUE INDEX index_project_repositories_on_project_id ON project_reposito
 
 CREATE INDEX index_project_repositories_on_shard_id ON project_repositories USING btree (shard_id);
 
+CREATE INDEX index_project_repositories_on_shard_id_and_project_id ON project_repositories USING btree (shard_id, project_id);
+
 CREATE UNIQUE INDEX index_project_repository_states_on_project_id ON project_repository_states USING btree (project_id);
 
 CREATE INDEX index_project_repository_storage_moves_on_project_id ON project_repository_storage_moves USING btree (project_id);
@@ -21778,6 +21782,8 @@ CREATE INDEX index_project_settings_on_project_id_partially ON project_settings 
 CREATE UNIQUE INDEX index_project_settings_on_push_rule_id ON project_settings USING btree (push_rule_id);
 
 CREATE INDEX index_project_statistics_on_namespace_id ON project_statistics USING btree (namespace_id);
+
+CREATE INDEX index_project_statistics_on_packages_size_and_project_id ON project_statistics USING btree (packages_size, project_id);
 
 CREATE UNIQUE INDEX index_project_statistics_on_project_id ON project_statistics USING btree (project_id);
 

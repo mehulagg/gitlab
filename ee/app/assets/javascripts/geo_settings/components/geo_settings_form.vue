@@ -1,10 +1,10 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlFormGroup, GlFormInput, GlButton } from '@gitlab/ui';
-import { mapComputed } from '~/vuex_shared/bindings';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { validateTimeout, validateAllowedIp } from '../validations';
+import { mapComputed } from '~/vuex_shared/bindings';
 import { FORM_VALIDATION_FIELDS } from '../constants';
+import { validateTimeout, validateAllowedIp } from '../validations';
 
 export default {
   name: 'GeoSettingsForm',

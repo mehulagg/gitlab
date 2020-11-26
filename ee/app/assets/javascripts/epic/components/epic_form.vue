@@ -7,11 +7,11 @@ import {
   GlFormGroup,
   GlFormInput,
 } from '@gitlab/ui';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import createEpic from '../queries/createEpic.mutation.graphql';
 
 export default {
@@ -124,6 +124,7 @@ export default {
           id="epic-title"
           v-model="title"
           data-testid="epic-title"
+          data-qa-selector="epic_title_field"
           :placeholder="s__('Epics|Enter a title for your epic')"
           autocomplete="off"
           autofocus
@@ -162,6 +163,7 @@ export default {
           id="epic-confidentiality"
           v-model="confidential"
           data-testid="epic-confidentiality"
+          data-qa-selector="confidential_epic_checkbox"
         >
           {{ $options.i18n.confidentialityLabel }}
         </gl-form-checkbox>
@@ -226,6 +228,7 @@ export default {
           :loading="loading"
           :disabled="!title"
           data-testid="save-epic"
+          data-qa-selector="create_epic_button"
         >
           {{ __('Create epic') }}
         </gl-button>

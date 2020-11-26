@@ -30,7 +30,6 @@ RSpec.describe 'epics swimlanes', :js do
     project.add_maintainer(user)
     group.add_maintainer(user)
     stub_licensed_features(epics: true, swimlanes: true)
-    stub_feature_flags(epics: true, boards_with_swimlanes: true, swimlanes: true)
 
     sign_in(user)
     visit_board_page

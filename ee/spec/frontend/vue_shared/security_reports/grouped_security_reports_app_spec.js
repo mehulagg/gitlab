@@ -49,7 +49,6 @@ describe('Grouped security reports app', () => {
     secretScanningHelpPath: 'path',
     canReadVulnerabilityFeedbackPath: true,
     vulnerabilityFeedbackPath: 'vulnerability_feedback_path.json',
-    vulnerabilityFeedbackHelpPath: 'path',
     coverageFuzzingHelpPath: 'path',
     pipelineId: 123,
     projectId: 321,

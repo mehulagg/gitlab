@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import { parseDiff } from '~/vue_shared/security_reports/store/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { findIssueIndex } from './utils';
+import { parseDiff } from '~/vue_shared/security_reports/store/utils';
 import * as types from './mutation_types';
+import { findIssueIndex } from './utils';
 
 export default {
   [types.SET_HEAD_BLOB_PATH](state, path) {
@@ -23,10 +23,6 @@ export default {
 
   [types.SET_VULNERABILITY_FEEDBACK_PATH](state, path) {
     state.vulnerabilityFeedbackPath = path;
-  },
-
-  [types.SET_VULNERABILITY_FEEDBACK_HELP_PATH](state, path) {
-    state.vulnerabilityFeedbackHelpPath = path;
   },
 
   [types.SET_CREATE_VULNERABILITY_FEEDBACK_ISSUE_PATH](state, path) {

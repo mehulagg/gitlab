@@ -1,6 +1,4 @@
 <script>
-import Api from 'ee/api';
-import { debounce } from 'lodash';
 import {
   GlDropdown,
   GlDropdownItem,
@@ -9,11 +7,13 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
 } from '@gitlab/ui';
+import { debounce } from 'lodash';
 import { mapGetters } from 'vuex';
+import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
-import { removeFlash } from '../utils';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
+import { removeFlash } from '../utils';
 
 export default {
   name: 'LabelsSelector',

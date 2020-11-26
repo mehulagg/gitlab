@@ -90,6 +90,25 @@ describe('DastSiteValidationModal', () => {
     wrapper.destroy();
   });
 
+  it("calls GlModal's show method when own show method is called", () => {
+    const showMock = jest.fn();
+    createComponent({
+      mountOptions: {
+        stubs: {
+          GlModal: {
+            render: () => {},
+            methods: {
+              show: showMock,
+            },
+          },
+        },
+      },
+    });
+    wrapper.vm.show();
+
+    expect(showMock).toHaveBeenCalled();
+  });
+
   describe('rendering', () => {
     describe('loading', () => {
       beforeEach(() => {

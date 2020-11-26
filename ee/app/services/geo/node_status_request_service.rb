@@ -4,7 +4,13 @@ module Geo
   class NodeStatusRequestService < RequestService
     include Gitlab::Geo::LogHelpers
 
-    def execute(status)
+    attr_reader :status
+
+    def initialize(status)
+      @status = status
+    end
+
+    def execute
       return false unless primary_node.present?
 
       super(primary_status_url, payload(status))

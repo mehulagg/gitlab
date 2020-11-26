@@ -1,7 +1,5 @@
 - page_title _('Start your Free Gold Trial')
 - glm_params = { glm_source: params[:glm_source], glm_content: params[:glm_content] }
-- phone_number_required = Feature.disabled?(:trial_form_phone_optional, current_user)
-- phone_number_label = phone_number_required ? _('Telephone number') : _('Telephone number (Optional)')
 
 %h3.center.pt-6
   = _('Start your Free Gold Trial')
@@ -25,8 +23,8 @@
     = label_tag :company_size, _('Number of employees'), for: :company_size, class: 'col-form-label'
     = select_tag :company_size, company_size_options_for_select(params[:company_size]), include_blank: true, class: 'select2', required: true
   .form-group
-    = label_tag :phone_number, phone_number_label, for: :phone_number, class: 'col-form-label'
-    = text_field_tag :phone_number, params[:phone_number], class: 'form-control', required: phone_number_required
+    = label_tag :phone_number, _('Telephone number'), for: :phone_number, class: 'col-form-label'
+    = text_field_tag :phone_number, params[:phone_number], class: 'form-control', required: true
   .form-group
     = label_tag :number_of_users, _('How many users will be evaluating the trial?'), for: :number_of_users, class: 'col-form-label'
     = number_field_tag :number_of_users, params[:number_of_users], class: 'form-control', required: true, min: 1

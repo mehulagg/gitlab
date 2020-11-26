@@ -40,7 +40,7 @@ module Resolvers
       # Necessary for scopedPath computation in IterationPresenter
       context[:parent_object] = parent
 
-      Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(iterations)
+      offset_pagination(iterations)
     end
 
     private

@@ -1,0 +1,5 @@
+---
+title: Remove .issue-box from Issuable list Vue.js App
+merge_request: 47999
+author: Takuya Noguchi
+type: performance
