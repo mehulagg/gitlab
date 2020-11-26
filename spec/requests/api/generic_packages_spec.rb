@@ -37,7 +37,7 @@ RSpec.describe API::GenericPackages do
     when :deploy_token_rw
       deploy_token_header(deploy_token_rw.token)
     when :deploy_token_ro
-      deploy_token_header(deploy_token_r.token)
+      deploy_token_header(deploy_token_ro.token)
     when :deploy_token_wo
       deploy_token_header(deploy_token_wo.token)
     when :invalid_deploy_token
