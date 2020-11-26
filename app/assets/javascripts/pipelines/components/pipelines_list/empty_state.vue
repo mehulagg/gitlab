@@ -31,9 +31,11 @@ export default {
     <div class="col-12">
       <div class="text-content">
         <template v-if="canSetCi">
-          <h4 class="text-center">{{ s__('Pipelines|Build with confidence') }}</h4>
+          <h4 class="text-center" data-testid="header-text">
+            {{ s__('Pipelines|Build with confidence') }}
+          </h4>
 
-          <p>
+          <p data-testid="info-text">
             {{
               s__(`Pipelines|Continuous Integration can help
                 catch bugs by running your tests automatically,
@@ -47,7 +49,6 @@ export default {
               :href="helpPagePath"
               variant="info"
               category="primary"
-              class="js-get-started-pipelines"
               data-testid="get-started-pipelines"
             >
               {{ s__('Pipelines|Get started with Pipelines') }}
