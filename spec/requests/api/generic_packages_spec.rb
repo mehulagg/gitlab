@@ -7,16 +7,16 @@ RSpec.describe API::GenericPackages do
 
   let_it_be(:personal_access_token) { create(:personal_access_token) }
   let_it_be(:project, reload: true) { create(:project) }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
-  let(:user) { personal_access_token.user }
-  let(:ci_build) { create(:ci_build, :running, user: user) }
   let_it_be(:deploy_token_rw) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
   let_it_be(:project_deploy_token_rw) { create(:project_deploy_token, deploy_token: deploy_token_rw, project: project) }
   let_it_be(:deploy_token_ro) { create(:deploy_token, read_package_registry: true, write_package_registry: false) }
   let_it_be(:project_deploy_token_ro) { create(:project_deploy_token, deploy_token: deploy_token_ro, project: project) }
   let_it_be(:deploy_token_wo) { create(:deploy_token, read_package_registry: false, write_package_registry: true) }
   let_it_be(:project_deploy_token_wo) { create(:project_deploy_token, deploy_token: deploy_token_wo, project: project) }
+  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
+  let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+  let(:user) { personal_access_token.user }
+  let(:ci_build) { create(:ci_build, :running, user: user) }
 
   def auth_header
     return {} if user_role == :anonymous
