@@ -313,7 +313,7 @@ installation-specific upgrade instructions, based on how you installed GitLab:
 NOTE: **Note:**
 Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/).
 Omnibus package comes with appropriate Ruby and Git versions and is not using system binaries for Ruby and Git. There is no need to manually
-install Ruby nor Git when utilising Omnibus approach.
+install Ruby nor Git when utilizing Omnibus approach.
 
 ### 13.6.0
 
