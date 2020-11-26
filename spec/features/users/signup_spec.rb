@@ -14,12 +14,6 @@ RSpec.shared_examples 'Signup name validation' do |field, max_length, label|
       expect(find('.name')).not_to have_css '.gl-field-error-outline'
     end
 
-    it 'shows an error border if the user\'s fullname contains an emoji' do
-      simulate_input("##{field}", 'Ehsan 🦋')
-
-      expect(find('.name')).to have_css '.gl-field-error-outline'
-    end
-
     it "shows an error border if the user\'s fullname is longer than #{max_length} characters" do
       fill_in field, with: 'n' * (max_length + 1)
 
@@ -30,12 +24,6 @@ RSpec.shared_examples 'Signup name validation' do |field, max_length, label|
       fill_in field, with: 'n' * (max_length + 1)
 
       expect(page).to have_content("#{label} is too long (maximum is #{max_length} characters).")
-    end
-
-    it 'shows an error message if the username contains emojis' do
-      simulate_input("##{field}", 'Ehsan 🦋')
-
-      expect(page).to have_content("Invalid input, please avoid emojis")
     end
   end
 end
@@ -55,6 +43,16 @@ RSpec.describe 'Signup' do
     fill_in 'new_user_first_name', with: new_user.first_name
     fill_in 'new_user_last_name', with: new_user.last_name
     fill_in 'new_user_password', with: new_user.password
+  end
+
+  it 'shows an error message on submit if the name contains an emoji' do
+    visit new_user_registration_path
+    fill_in_signup_form
+    fill_in 'new_user_first_name', with: '🤔'
+
+    click_button "Register"
+
+    expect(page).to have_content("cannot contain an emoji")
   end
 
   describe 'username validation', :js do
@@ -134,18 +132,6 @@ RSpec.describe 'Signup' do
       click_button "Register"
 
       expect(page).to have_content("Please create a username with only alphanumeric characters.")
-    end
-
-    it 'shows an error border if the username contains emojis' do
-      simulate_input('#new_user_username', 'ehsan😀')
-
-      expect(find('.username')).to have_css '.gl-field-error-outline'
-    end
-
-    it 'shows an error message if the username contains emojis' do
-      simulate_input('#new_user_username', 'ehsan😀')
-
-      expect(page).to have_content("Invalid input, please avoid emojis")
     end
 
     it 'shows a pending message if the username availability is being fetched', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/31484' do

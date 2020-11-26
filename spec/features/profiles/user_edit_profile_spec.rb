@@ -50,14 +50,14 @@ RSpec.describe 'User edit profile' do
     expect(page).to have_content('Profile was successfully updated')
   end
 
-  it 'shows an error if the full name contains an emoji', :js do
-    simulate_input('#user_name', 'Martin 😀')
+  it 'shows an error if the full name contains an emoji' do
+    fill_in 'user_name', 'Martin 😀'
     submit_settings
 
     page.within('.rspec-full-name') do
       expect(page).to have_css '.gl-field-error-outline'
       expect(find('.gl-field-error')).not_to have_selector('.hidden')
-      expect(find('.gl-field-error')).to have_content('Using emojis in names seems fun, but please try to set a status message instead')
+      expect(find('.gl-field-error')).to have_content('cannot contain an emoji')
     end
   end
 
