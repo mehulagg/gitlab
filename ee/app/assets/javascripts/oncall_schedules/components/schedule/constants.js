@@ -1,6 +1,4 @@
-import { s__ } from '~/locale';
-
-export const EPIC_DETAILS_CELL_WIDTH = 320;
+export const EPIC_DETAILS_CELL_WIDTH = 150;
 
 export const EPIC_ITEM_HEIGHT = 50;
 
@@ -33,14 +31,6 @@ export const EXTEND_AS = {
   APPEND: 'append',
 };
 
-export const emptyStateDefault = s__(
-  'GroupRoadmap|To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from %{startDate} to %{endDate}.',
-);
-
-export const emptyStateWithFilters = s__(
-  'GroupRoadmap|To widen your search, change or remove filters; from %{startDate} to %{endDate}.',
-);
-
 export const PRESET_DEFAULTS = {
   QUARTERS: {
     TIMEFRAME_LENGTH: 21,
@@ -67,5 +57,3 @@ export const EPIC_LEVEL_MARGIN = {
 export const EPICS_LIMIT_DISMISSED_COOKIE_NAME = 'epics_limit_warning_dismissed';
 
 export const EPICS_LIMIT_DISMISSED_COOKIE_TIMEOUT = 365;
-
-// addded for oncallschedule

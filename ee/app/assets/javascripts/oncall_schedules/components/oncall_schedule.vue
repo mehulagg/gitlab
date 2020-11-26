@@ -1,18 +1,23 @@
 <script>
-  import {GlButton, GlCard} from '@gitlab/ui';
-  import {s__} from '~/locale';
+  import {GlSprintf, GlCard} from '@gitlab/ui';
+  import {s__, __} from '~/locale';
+  import ScheduleShell from './schedule/components/schedul_shell.vue';
+  import {getTimeframeForWeeksView} from './schedule/utils/roadmap_utils';
+  import {PRESET_TYPES} from "../../roadmap/constants";
 
   export const i18n = {
     title: s__('OnCallSchedules|On-call schedule'),
-    cardHeader: s__('OnCallSchedules|Dev on-call schedule'),
+    scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{tzShort}'),
   };
 
   export default {
     i18n,
-    inject: ['emptyOncallSchedulesSvgPath'],
+    presetType: PRESET_TYPES.WEEKS,
+    inject: ['timezones'],
     components: {
-      GlButton,
+      GlSprintf,
       GlCard,
+      ScheduleShell,
     },
     props: {
       schedule: {
@@ -20,21 +25,45 @@
         required: true,
       }
     },
-    directives: {},
-    methods: {},
-  };
+    computed: {
+      tzLong() {
+        const selectedTz = this.timezones.find(tz => tz.identifier === this.schedule.timezone);
+        return this.getFormattedTimezone(selectedTz);
+      },
+      timeframe() {
+        return getTimeframeForWeeksView(
+          PRESET_TYPES.WEEKS,
+         2,
+        );
+      },
+    },
+    methods: {
+      getFormattedTimezone(tz) {
+        return __(`(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`);
+      },
+    },
+  }
 </script>
 
 <template>
   <div>
-
-    <h4>{{$options.i18n.title}}</h4>
-
+    <h2 ref="title">{{$options.i18n.title}}</h2>
     <gl-card>
       <template #header>
-        <span class="gl-font-weight-bold gl-font-lg">{{$options.i18n.cardHeader}}</span>
+        <span class="gl-font-weight-bold gl-font-lg">{{schedule.name}}</span>
       </template>
-      Hello World
+
+      <div class="gl-text-gray-500 gl-mb-5">
+        <gl-sprintf :message="$options.i18n.scheduleForTz">
+          <template #tzShort><span>{{schedule.timezone}}</span></template>
+        </gl-sprintf>
+        | <span>{{ tzLong }}</span>
+      </div>
+
+      <div ref="scheduleContainer" class="gl-w-full">
+        <schedule-shell :preset-type="$options.presetType" :timeframe="timeframe" :epics="[]"/>
+      </div>
+
     </gl-card>
   </div>
 </template>

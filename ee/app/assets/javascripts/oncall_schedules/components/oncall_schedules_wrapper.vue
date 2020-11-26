@@ -1,6 +1,6 @@
 <script>
+  import {GlEmptyState, GlButton, GlLoadingIcon, GlModalDirective} from '@gitlab/ui';
   import * as Sentry from '~/sentry/wrapper';
-  import {GlEmptyState, GlButton, GlModalDirective} from '@gitlab/ui';
   import AddScheduleModal from './add_schedule_modal.vue';
   import OncallSchedule from './oncall_schedule.vue';
   import {s__} from '~/locale';
@@ -29,6 +29,7 @@
     components: {
       GlEmptyState,
       GlButton,
+      GlLoadingIcon,
       AddScheduleModal,
       OncallSchedule,
     },
@@ -53,13 +54,18 @@
         },
       },
     },
-    methods: {},
+    computed: {
+      isLoading() {
+        return this.$apollo.queries.schedule.loading;
+      },
+    },
   };
 </script>
 
 <template>
   <div>
-    <oncall-schedule v-if="schedule" :schedule="schedule"/>
+    <gl-loading-icon size="lg" class="gl-mt-3" v-if="isLoading" />
+    <oncall-schedule v-else-if="schedule" :schedule="schedule"/>
     <gl-empty-state
       v-else
       :title="$options.i18n.emptyState.title"
