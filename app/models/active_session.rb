@@ -1,5 +1,24 @@
 # frozen_string_literal: true
 
+# Backing store for GitLab session data.
+#
+# The raw session information is stored by the Rails session store
+# (config/initializers/session_store.rb). These entries are accessible by the
+# rack_key_name class method and consistute the base of the session data
+# entries. All other entries in the session store can be traced back to these
+# entries.
+#
+# After a user logs in (config/initializers/warden.rb) a further entry is made
+# in the session store. This entry holds a record of the user's logged in
+# session. These are accessible with the key_name(user_id, session_id) class
+# method. These entries will expire. Lookups to these entries are lazilly
+# cleaned on future user access.
+#
+# There is a reference to all sessions that belong to a specific user. A
+# user may login through multiple browsers/devices and thus record multiple
+# login sessions. These are accessible through the lookup_key_name(user_id)
+# class method.
+#
 class ActiveSession
   include ActiveModel::Model
 
