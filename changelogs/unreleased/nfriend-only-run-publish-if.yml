@@ -1,0 +1,6 @@
+---
+title: Update npm.gitlab-ci.yml to only run "npm publish" if necessary (along with
+  other improvements)
+merge_request: 48615
+author:
+type: changed
