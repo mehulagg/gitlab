@@ -154,7 +154,7 @@ export default {
             :aria-label="unassignedIssuesCountTooltipText"
             data-testid="issues-lane-issue-count"
           >
-            <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
+            <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
             <span aria-hidden="true">{{ unassignedIssuesCount }}</span>
           </span>
         </div>

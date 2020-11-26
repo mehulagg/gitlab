@@ -159,7 +159,7 @@ export default {
           :aria-label="issuesCountTooltipText"
           data-testid="epic-lane-issue-count"
         >
-          <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
+          <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
         <gl-loading-icon v-if="isLoading" class="gl-p-2" />
