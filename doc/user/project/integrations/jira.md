@@ -172,7 +172,7 @@ where `PROJECT-1` is the ID of the Jira issue.
 Note the following:
 
 - Only commits and merges into the project's default branch (usually `master`)
-  close an issue in Jira. You can change your projects default branch under
+  close an issue in Jira. You can change your project's default branch under
   [project settings](img/jira_project_settings.png).
 - The Jira issue is not transitioned if it has a resolution.
 
