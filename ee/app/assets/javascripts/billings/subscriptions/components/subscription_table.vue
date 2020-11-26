@@ -54,7 +54,7 @@ export default {
       };
     },
     renewButton() {
-      if (this.isFreePlan) {
+      if (this.isFreePlan && !this.plan.trial) {
         return null;
       }
 
