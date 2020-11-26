@@ -35,11 +35,13 @@ RSpec.describe API::GenericPackages do
     when :invalid_user_basic_auth
       basic_auth_header('invalid user', 'invalid password')
     when :deploy_token_rw
-      deploy_token_header(deploy_token_rw)
+      deploy_token_header(deploy_token_rw.token)
     when :deploy_token_ro
-      deploy_token_header(deploy_token_ro)
+      deploy_token_header(deploy_token_r.token)
     when :deploy_token_wo
-      deploy_token_header(deploy_token_wo)
+      deploy_token_header(deploy_token_wo.token)
+    when :invalid_deploy_token
+      deploy_token_header('wrong token')
     end
   end
 
@@ -114,6 +116,22 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
         'PRIVATE' | :developer | false | :job_token                     | :not_found
         'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
+        'PUBLIC'  | :developer | true  | :deploy_token_rw               | :success
+        'PUBLIC'  | :developer | true  | :deploy_token_wo               | :success
+        'PUBLIC'  | :developer | true  | :deploy_token_ro               | :forbidden
+        'PUBLIC'  | :developer | true  | :invalid_deploy_token          | :unauthorized
+        'PUBLIC'  | :developer | false | :deploy_token_rw               | :forbidden
+        'PUBLIC'  | :developer | false | :deploy_token_wo               | :forbidden
+        'PUBLIC'  | :developer | false | :deploy_token_ro               | :forbidden
+        'PUBLIC'  | :developer | false | :invalid_deploy_token          | :unauthorized
+        'PRIVATE' | :developer | true  | :deploy_token_rw               | :success
+        'PRIVATE' | :developer | true  | :deploy_token_wo               | :success
+        'PRIVATE' | :developer | true  | :deploy_token_ro               | :forbidden
+        'PRIVATE' | :developer | true  | :invalid_deploy_token          | :unauthorized
+        'PRIVATE' | :developer | false | :deploy_token_rw               | :not_found
+        'PRIVATE' | :developer | false | :deploy_token_wo               | :not_found
+        'PRIVATE' | :developer | false | :deploy_token_ro               | :not_found
+        'PRIVATE' | :developer | false | :invalid_deploy_token          | :unauthorized
       end
 
       with_them do
@@ -127,24 +145,6 @@ RSpec.describe API::GenericPackages do
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
-      end
-
-      it 'authorizes workhorse with a read/write deploy token' do
-        authorize_upload_file(workhorse_header.merge(deploy_token_header(deploy_token_rw)))
-
-        expect(response).to have_gitlab_http_status(:success)
-      end
-
-      it 'authorizes workhorse with a write-only deploy token' do
-        authorize_upload_file(workhorse_header.merge(deploy_token_header(deploy_token_wo)))
-
-        expect(response).to have_gitlab_http_status(:success)
-      end
-
-      it 'does not authorize workhorse with a read-only deploy token' do
-        authorize_upload_file(workhorse_header.merge(deploy_token_header(deploy_token_ro)))
-
-        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
 
@@ -229,6 +229,18 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
         'PRIVATE' | :developer | false | :job_token                     | :not_found
         'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
+        'PUBLIC'  | :developer | true  | :deploy_token_ro               | :forbidden
+        'PUBLIC'  | :developer | true  | :invalid_deploy_token          | :unauthorized
+        'PUBLIC'  | :developer | false | :deploy_token_rw               | :forbidden
+        'PUBLIC'  | :developer | false | :deploy_token_wo               | :forbidden
+        'PUBLIC'  | :developer | false | :deploy_token_ro               | :forbidden
+        'PUBLIC'  | :developer | false | :invalid_deploy_token          | :unauthorized
+        'PRIVATE' | :developer | true  | :deploy_token_ro               | :forbidden
+        'PRIVATE' | :developer | true  | :invalid_deploy_token          | :unauthorized
+        'PRIVATE' | :developer | false | :deploy_token_rw               | :not_found
+        'PRIVATE' | :developer | false | :deploy_token_wo               | :not_found
+        'PRIVATE' | :developer | false | :deploy_token_ro               | :not_found
+        'PRIVATE' | :developer | false | :invalid_deploy_token          | :unauthorized
       end
 
       with_them do
@@ -244,30 +256,6 @@ RSpec.describe API::GenericPackages do
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
-      end
-
-      it 'allows upload with a read/write deploy token' do
-        headers = workhorse_header.merge(deploy_token_header(deploy_token_rw))
-
-        upload_file(params, headers)
-
-        expect(response).to have_gitlab_http_status(:success)
-      end
-
-      it 'allows upload with a write-only deploy token' do
-        headers = workhorse_header.merge(deploy_token_header(deploy_token_wo))
-
-        upload_file(params, headers)
-
-        expect(response).to have_gitlab_http_status(:success)
-      end
-
-      it 'does not allow upload with a read-only deploy token' do
-        headers = workhorse_header.merge(deploy_token_header(deploy_token_ro))
-
-        upload_file(params, headers)
-
-        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
 
@@ -317,7 +305,7 @@ RSpec.describe API::GenericPackages do
       end
 
       it 'creates package and package file when valid deploy token is used' do
-        headers = workhorse_header.merge(deploy_token_header(deploy_token_wo))
+        headers = workhorse_header.merge(deploy_token_header(deploy_token_wo.token))
 
         expect { upload_file(params, headers) }
           .to change { project.packages.generic.count }.by(1)
@@ -483,6 +471,22 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
         'PRIVATE' | :developer | false | :job_token                     | :not_found
         'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
+        'PUBLIC'  | :developer | true  | :deploy_token_rw               | :success
+        'PUBLIC'  | :developer | true  | :deploy_token_wo               | :success
+        'PUBLIC'  | :developer | true  | :deploy_token_ro               | :success
+        'PUBLIC'  | :developer | true  | :invalid_deploy_token          | :unauthorized
+        'PUBLIC'  | :developer | false | :deploy_token_rw               | :success
+        'PUBLIC'  | :developer | false | :deploy_token_wo               | :success
+        'PUBLIC'  | :developer | false | :deploy_token_ro               | :success
+        'PUBLIC'  | :developer | false | :invalid_deploy_token          | :unauthorized
+        'PRIVATE' | :developer | true  | :deploy_token_rw               | :success
+        'PRIVATE' | :developer | true  | :deploy_token_wo               | :success
+        'PRIVATE' | :developer | true  | :deploy_token_ro               | :success
+        'PRIVATE' | :developer | true  | :invalid_deploy_token          | :unauthorized
+        'PRIVATE' | :developer | false | :deploy_token_rw               | :not_found
+        'PRIVATE' | :developer | false | :deploy_token_wo               | :not_found
+        'PRIVATE' | :developer | false | :deploy_token_ro               | :not_found
+        'PRIVATE' | :developer | false | :invalid_deploy_token          | :unauthorized
       end
 
       with_them do
@@ -496,24 +500,6 @@ RSpec.describe API::GenericPackages do
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
-      end
-
-      it 'allows download with a read/write deploy token' do
-        download_file(deploy_token_header(deploy_token_rw))
-
-        expect(response).to have_gitlab_http_status(:success)
-      end
-
-      it 'allows download with a write-only deploy token' do
-        download_file(deploy_token_header(deploy_token_wo))
-
-        expect(response).to have_gitlab_http_status(:success)
-      end
-
-      it 'allows download with a read-only deploy token' do
-        download_file(deploy_token_header(deploy_token_ro))
-
-        expect(response).to have_gitlab_http_status(:success)
       end
     end
 
