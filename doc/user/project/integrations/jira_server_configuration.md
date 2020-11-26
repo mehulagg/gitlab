@@ -27,7 +27,7 @@ access to your Jira projects. This is covered in the process below.
    Jira creates the username automatically by using the e-mail
    prefix. You can change it later, if needed. Our integration does not support SSO (such as SAML). You
    need to create an HTTP basic authentication password. You can do this by visiting the user
-   profile, looking up the username, and setting a password._
+   profile, looking up the username, and setting a password.
 
    ![Jira create new user](img/jira_create_new_user.png)
 
