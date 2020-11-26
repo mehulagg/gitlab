@@ -551,7 +551,8 @@ module API
       return unless values.present?
 
       feature_name = "usage_data_#{event_name}"
-      return unless Feature.enabled?(feature_name)
+
+      return unless Feature.enabled?(feature_flag, default_enabled: true)
 
       Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
     rescue => error
