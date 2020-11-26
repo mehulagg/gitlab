@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 We need to create a user in Jira to have access to all projects that need to integrate with GitLab.
 
-As an example,we create a user named `gitlab` and add it to a new group
+As an example, we create a user named `gitlab` and add it to a new group
 named `gitlab-developers`.
 
 NOTE: **Note:**
