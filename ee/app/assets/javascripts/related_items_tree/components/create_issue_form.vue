@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlButton,
   GlDeprecatedDropdown,
@@ -9,6 +8,7 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 
 import { __ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';

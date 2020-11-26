@@ -7,11 +7,11 @@ import {
   GlSprintf,
   GlLink,
 } from '@gitlab/ui';
+import securityDashboardImageUrl from 'ee_images/promotions/security-dashboard.png';
 import securityDependencyImageUrl from 'ee_images/promotions/security-dependencies.png';
 import securityScanningImageUrl from 'ee_images/promotions/security-scanning.png';
-import securityDashboardImageUrl from 'ee_images/promotions/security-dashboard.png';
-import Tracking from '~/tracking';
 import { s__ } from '~/locale';
+import Tracking from '~/tracking';
 
 export default {
   directives: {

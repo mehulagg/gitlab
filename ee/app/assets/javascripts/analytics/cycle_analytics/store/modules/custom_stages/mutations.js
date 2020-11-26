@@ -1,6 +1,6 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import * as types from './mutation_types';
 import { transformRawStages } from '../../../utils';
+import * as types from './mutation_types';
 
 const extractFormFields = (rawStage = {}) => {
   const [

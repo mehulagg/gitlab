@@ -1,12 +1,11 @@
 <script>
 import { GlLoadingIcon, GlModal } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import { __, s__ } from '~/locale';
 import SmartInterval from '~/smart_interval';
 
-import eventHub from '../event_hub';
-
 import { NODE_ACTIONS } from '../constants';
+import eventHub from '../event_hub';
 
 import GeoNodeItem from './geo_node_item.vue';
 

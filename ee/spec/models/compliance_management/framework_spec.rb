@@ -13,6 +13,7 @@ RSpec.describe ComplianceManagement::Framework do
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
     it { is_expected.to validate_length_of(:description).is_at_most(255) }
     it { is_expected.to validate_length_of(:color).is_at_most(10) }
+    it { is_expected.to validate_presence_of(:regulated) }
   end
 
   describe 'color' do

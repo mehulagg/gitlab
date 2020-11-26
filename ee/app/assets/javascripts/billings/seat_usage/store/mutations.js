@@ -6,6 +6,10 @@ import {
 import * as types from './mutation_types';
 
 export default {
+  [types.SET_NAMESPACE_ID](state, payload) {
+    state.namespaceId = payload;
+  },
+
   [types.REQUEST_BILLABLE_MEMBERS](state) {
     state.isLoading = true;
     state.hasError = false;

@@ -1,8 +1,8 @@
 <script>
 import { GlTooltip } from '@gitlab/ui';
 
-import { __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 export default {

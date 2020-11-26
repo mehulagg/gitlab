@@ -1,11 +1,11 @@
 <script>
-import { isEqual } from 'lodash';
 import { GlAlert, GlButton, GlForm, GlFormGroup, GlFormInput, GlModal } from '@gitlab/ui';
+import { isEqual } from 'lodash';
 import { initFormField } from 'ee/security_configuration/utils';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject } from '~/lib/utils/forms';
+import { redirectTo } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import validation from '~/vue_shared/directives/validation';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';

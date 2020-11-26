@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 import Members from '~/members';
 
 export default class MembersEE extends Members {

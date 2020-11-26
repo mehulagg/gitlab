@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlForm,
   GlFormInput,
@@ -8,6 +7,7 @@ import {
   GlButton,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 
 import { __ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';

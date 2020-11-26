@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import 'vendor/jquery.scrollTo';
 import { find } from 'lodash';
-import AccessDropdown from '~/projects/settings/access_dropdown';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
+import AccessDropdown from '~/projects/settings/access_dropdown';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedTagEdit {

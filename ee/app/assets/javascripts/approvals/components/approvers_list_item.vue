@@ -1,8 +1,8 @@
 <script>
 import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import Avatar from '~/vue_shared/components/project_avatar/default.vue';
-import HiddenGroupsItem from './hidden_groups_item.vue';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
+import HiddenGroupsItem from './hidden_groups_item.vue';
 
 const types = [TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS];
 

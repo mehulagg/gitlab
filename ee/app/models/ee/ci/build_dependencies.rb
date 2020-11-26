@@ -7,23 +7,23 @@ module EE
       extend ::Gitlab::Utils::Override
       include ::Gitlab::Utils::StrongMemoize
 
-      LIMIT = ::Gitlab::Ci::Config::Entry::Needs::NEEDS_CROSS_DEPENDENCIES_LIMIT
+      LIMIT = ::Gitlab::Ci::Config::Entry::Needs::NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT
 
-      override :cross_pipeline
-      def cross_pipeline
-        strong_memoize(:cross_pipeline) do
-          fetch_cross_pipeline
+      override :cross_project
+      def cross_project
+        strong_memoize(:cross_project) do
+          fetch_cross_project
         end
       end
 
       private
 
-      override :valid_cross_pipeline?
-      def valid_cross_pipeline?
-        cross_pipeline.size == specified_cross_pipeline_dependencies.size
+      override :valid_cross_project?
+      def valid_cross_project?
+        cross_project.size == specified_cross_project_dependencies.size
       end
 
-      def fetch_cross_pipeline
+      def fetch_cross_project
         return [] unless processable.user_id
         return [] unless project.feature_available?(:cross_project_pipelines)
 
@@ -33,7 +33,7 @@ module EE
       end
 
       def cross_dependencies_relationship
-        deps = specified_cross_pipeline_dependencies
+        deps = specified_cross_project_dependencies
         return model_class.none unless deps.any?
 
         relationship_fragments = build_cross_dependencies_fragments(deps, model_class.latest.success)
@@ -66,7 +66,11 @@ module EE
         -> { processable.simple_variables_without_dependencies }
       end
 
-      def specified_cross_pipeline_dependencies
+      def specified_cross_project_dependencies
+        specified_cross_dependencies.select { |dep| dep[:project] }
+      end
+
+      def specified_cross_dependencies
         Array(processable.options[:cross_dependencies])
       end
     end

@@ -1,9 +1,9 @@
 <script>
 import { GlIcon, GlLink, GlCard, GlFormCheckbox, GlSprintf } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {

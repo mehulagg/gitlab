@@ -1,6 +1,6 @@
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 
 export default class SidebarContext {
   constructor() {

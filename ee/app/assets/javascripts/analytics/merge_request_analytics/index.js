@@ -1,13 +1,13 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { ITEM_TYPE } from '~/groups/constants';
 import createDefaultClient from '~/lib/graphql';
-import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import { getParameterValues } from '~/lib/utils/url_utility';
-import createStore from './store';
+import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import MergeRequestAnalyticsApp from './components/app.vue';
-import { ITEM_TYPE } from '~/groups/constants';
 import { DEFAULT_NUMBER_OF_DAYS } from './constants';
+import createStore from './store';
 
 Vue.use(VueApollo);
 

@@ -3,11 +3,10 @@ import Vuex from 'vuex';
 
 import { parseBoolean } from '~/lib/utils/common_utils';
 
-import createStore from './store';
-
 import RelatedItemsTreeApp from './components/related_items_tree_app.vue';
-import TreeRoot from './components/tree_root.vue';
 import TreeItem from './components/tree_item.vue';
+import TreeRoot from './components/tree_root.vue';
+import createStore from './store';
 
 Vue.use(Vuex);
 

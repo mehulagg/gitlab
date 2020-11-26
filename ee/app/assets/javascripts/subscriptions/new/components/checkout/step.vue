@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
 import { GlFormGroup, GlDeprecatedButton } from '@gitlab/ui';
+import { mapActions, mapGetters } from 'vuex';
 import { convertToSnakeCase, dasherize } from '~/lib/utils/text_utility';
 import StepHeader from './step_header.vue';
 import StepSummary from './step_summary.vue';

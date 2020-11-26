@@ -3,8 +3,8 @@
 module QA
   module EE
     module Page
-      module Main
-        module SignUp
+      module Registration
+        module Welcome
           extend QA::Page::PageConcern
 
           def self.included(base)

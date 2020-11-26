@@ -5,16 +5,15 @@ import { mapState, mapActions } from 'vuex';
 import { __, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-import EpicsListEmpty from './epics_list_empty.vue';
-import RoadmapFilters from './roadmap_filters.vue';
-import RoadmapShell from './roadmap_shell.vue';
-
 import eventHub from '../event_hub';
 import {
   EXTEND_AS,
   EPICS_LIMIT_DISMISSED_COOKIE_NAME,
   EPICS_LIMIT_DISMISSED_COOKIE_TIMEOUT,
 } from '../constants';
+import EpicsListEmpty from './epics_list_empty.vue';
+import RoadmapFilters from './roadmap_filters.vue';
+import RoadmapShell from './roadmap_shell.vue';
 
 export default {
   i18n: {

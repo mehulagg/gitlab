@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import apolloProvider from './graphql';
 import DevopsAdoptionApp from './components/devops_adoption_app.vue';
+import apolloProvider from './graphql';
 
 export default () => {
   const el = document.querySelector('.js-devops-adoption');

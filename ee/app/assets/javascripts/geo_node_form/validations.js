@@ -1,5 +1,5 @@
-import { sprintf, s__ } from '~/locale';
 import { isSafeURL } from '~/lib/utils/url_utility';
+import { sprintf, s__ } from '~/locale';
 
 export const validateName = data => {
   if (!data) {

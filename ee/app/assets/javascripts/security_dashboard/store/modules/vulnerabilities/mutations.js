@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import { s__, __ } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
-import * as types from './mutation_types';
+import { s__, __ } from '~/locale';
 import { DAYS } from './constants';
+import * as types from './mutation_types';
 import { isSameVulnerability } from './utils';
 
 export default {

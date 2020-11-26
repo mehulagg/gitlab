@@ -11291,6 +11291,7 @@ CREATE TABLE compliance_management_frameworks (
     description text NOT NULL,
     color text NOT NULL,
     namespace_id integer NOT NULL,
+    regulated boolean DEFAULT true NOT NULL,
     CONSTRAINT check_08cd34b2c2 CHECK ((char_length(color) <= 10)),
     CONSTRAINT check_1617e0b87e CHECK ((char_length(description) <= 255)),
     CONSTRAINT check_ab00bc2193 CHECK ((char_length(name) <= 255))
@@ -21769,6 +21770,8 @@ CREATE UNIQUE INDEX index_project_repositories_on_disk_path ON project_repositor
 CREATE UNIQUE INDEX index_project_repositories_on_project_id ON project_repositories USING btree (project_id);
 
 CREATE INDEX index_project_repositories_on_shard_id ON project_repositories USING btree (shard_id);
+
+CREATE INDEX index_project_repositories_on_shard_id_and_project_id ON project_repositories USING btree (shard_id, project_id);
 
 CREATE UNIQUE INDEX index_project_repository_states_on_project_id ON project_repository_states USING btree (project_id);
 

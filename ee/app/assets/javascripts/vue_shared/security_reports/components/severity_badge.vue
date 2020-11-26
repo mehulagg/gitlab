@@ -1,6 +1,6 @@
 <script>
-import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { SEVERITY_CLASS_NAME_MAP, SEVERITY_TOOLTIP_TITLE_MAP } from './constants';
 
 export default {

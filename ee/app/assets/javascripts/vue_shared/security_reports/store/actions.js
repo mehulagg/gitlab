@@ -2,15 +2,15 @@ import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
-import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__, sprintf } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
-import { fetchDiffData } from '~/vue_shared/security_reports/store/utils';
 import {
   FEEDBACK_TYPE_DISMISSAL,
   FEEDBACK_TYPE_ISSUE,
   FEEDBACK_TYPE_MERGE_REQUEST,
 } from '~/vue_shared/security_reports/constants';
+import { fetchDiffData } from '~/vue_shared/security_reports/store/utils';
 import * as types from './mutation_types';
 
 /**

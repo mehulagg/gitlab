@@ -1,7 +1,7 @@
 ---
 stage: fulfillment
 group: fulfillment
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, reference
 ---
 
@@ -112,6 +112,7 @@ to the **Billing** section of the relevant namespace:
   | **Seats owed**              | If your maximum seats used exceeds the seats in your subscription, you owe an additional fee for the users you've added.             |
   | **Subscription start date** | Date your subscription started. If this is for a Free plan, is the date you transitioned off your group's paid plan.                    |
   | **Subscription end date**   | Date your current subscription ends. Does not apply to Free plans.                                                                  |
+  | **Billable users list**   | List of users that belong to your group subscription. Does not apply to Free plans.                                                       |
 
 ## Renew your GitLab.com subscription
 
@@ -215,6 +216,10 @@ To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
 
 When the purchase has been processed, you receive confirmation of your new subscription tier.
 
+## See your billable users list
+
+To see a list of your billable users on your GitLab group page go to **Settings > Billing**. This page provides information about your subscription and occupied seats for your group which is the list of billable users for your particular group.
+
 ## Subscription expiry
 
 When your subscription or trial expires, GitLab does not delete your data, but
@@ -296,9 +301,9 @@ Be aware that:
   be deducted from your Additional Minutes quota immediately after your purchase of additional
   minutes.
 
-## Customers portal
+## Customers Portal
 
-GitLab provides a [customer portal](../index.md#customers-portal) where you can
+GitLab provides the [Customers Portal](../index.md#customers-portal) where you can
 manage your subscriptions and your account details.
 
 ## Contact Support

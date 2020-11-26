@@ -1,8 +1,8 @@
 import ApiEe from 'ee/api';
 import Api from '~/api';
-import * as types from './mutation_types';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
+import * as types from './mutation_types';
 
 export const setNamespaceId = ({ commit }, namespaceId) => {
   commit(types.SET_NAMESPACE_ID, namespaceId);

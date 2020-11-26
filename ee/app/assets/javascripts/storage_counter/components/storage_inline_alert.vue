@@ -1,8 +1,8 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import { n__, s__, sprintf } from '~/locale';
-import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
 import { ALERT_THRESHOLD, ERROR_THRESHOLD, WARNING_THRESHOLD } from '../constants';
+import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
 
 export default {
   i18n: {

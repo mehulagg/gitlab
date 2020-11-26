@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Jenkins CI service **(STARTER)**
@@ -18,6 +18,7 @@ on the GitLab project's home page.
 To better understand GitLab's Jenkins integration, watch the following video:
 
 - [GitLab workflow with Jira issues and Jenkins pipelines](https://youtu.be/Jn-_fyra7xQ)
+
 Use the Jenkins integration with GitLab when:
 
 - You plan to migrate your CI from Jenkins to [GitLab CI/CD](../ci/README.md) in the future, but

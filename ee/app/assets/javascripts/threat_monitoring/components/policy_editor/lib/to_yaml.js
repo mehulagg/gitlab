@@ -1,7 +1,7 @@
 import { safeDump } from 'js-yaml';
+import { EndpointMatchModeAny, DisabledByLabel, CiliumNetworkPolicyKind } from '../constants';
 import { ruleSpec } from './rules';
 import { labelSelector } from './utils';
-import { EndpointMatchModeAny, DisabledByLabel, CiliumNetworkPolicyKind } from '../constants';
 
 /*
  Return kubernetes resource specification object for a policy.

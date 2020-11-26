@@ -1,12 +1,12 @@
 <script>
 import { GlFormGroup, GlFormInput, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { validateName, validateUrl } from '../validations';
 import {
   VALIDATION_FIELD_KEYS,
   NODE_NAME_MORE_INFO,
   NODE_INTERNAL_URL_MORE_INFO,
 } from '../constants';
+import { validateName, validateUrl } from '../validations';
 
 export default {
   name: 'GeoNodeFormCore',

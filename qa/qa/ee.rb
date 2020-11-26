@@ -58,7 +58,10 @@ module QA
       module Main
         autoload :Banner, 'qa/ee/page/main/banner'
         autoload :Menu, 'qa/ee/page/main/menu'
-        autoload :SignUp, 'qa/ee/page/main/sign_up'
+      end
+
+      module Registration
+        autoload :Welcome, 'qa/ee/page/registration/welcome'
       end
 
       module Admin

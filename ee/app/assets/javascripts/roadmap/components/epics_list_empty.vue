@@ -1,12 +1,11 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { s__, sprintf } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
-
-import CommonMixin from '../mixins/common_mixin';
-import { emptyStateDefault, emptyStateWithFilters } from '../constants';
+import { s__, sprintf } from '~/locale';
 
 import initEpicCreate from '../../epic/epic_bundle';
+import { emptyStateDefault, emptyStateWithFilters } from '../constants';
+import CommonMixin from '../mixins/common_mixin';
 
 export default {
   mixins: [CommonMixin],

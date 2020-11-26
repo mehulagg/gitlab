@@ -1,21 +1,21 @@
 import Api from 'ee/api';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { s__, __ } from '~/locale';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,
   pathIndeterminateErrorMap,
   relatedIssuesRemoveErrorMap,
 } from '~/related_issues/constants';
-import { deprecatedCreateFlash as flash } from '~/flash';
-import { s__, __ } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
-import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
 import { ChildType, ChildState, idProp, relativePositions } from '../constants';
 
 import epicChildren from '../queries/epicChildren.query.graphql';
 import epicChildReorder from '../queries/epicChildReorder.mutation.graphql';
+import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
 
 import * as types from './mutation_types';
 

@@ -8,9 +8,9 @@ import {
   GlSearchBoxByType,
   GlModalDirective,
 } from '@gitlab/ui';
-import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 import { s__, sprintf } from '~/locale';
+import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
+import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 
 export default {
   components: {

@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import AuditEventsExportButton from './audit_events_export_button.vue';
 import AuditEventsFilter from './audit_events_filter.vue';
+import AuditEventsTable from './audit_events_table.vue';
 import DateRangeField from './date_range_field.vue';
 import SortingField from './sorting_field.vue';
-import AuditEventsTable from './audit_events_table.vue';
-import AuditEventsExportButton from './audit_events_export_button.vue';
 
 export default {
   components: {

@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlDeprecatedButton,
   GlFormCheckbox,
@@ -7,12 +6,13 @@ import {
   GlSprintf,
   GlIcon,
 } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
+import { DASHBOARD_TYPES } from '../store/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
-import { DASHBOARD_TYPES } from '../store/constants';
 
 export default {
   name: 'SecurityDashboardTableRow',

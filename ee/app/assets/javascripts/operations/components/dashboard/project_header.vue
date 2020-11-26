@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlLink, GlTooltipDirective } from '@gitlab/ui';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { __ } from '~/locale';
+import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
   components: {

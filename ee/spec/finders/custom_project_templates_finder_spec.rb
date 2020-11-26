@@ -7,7 +7,7 @@ RSpec.describe CustomProjectTemplatesFinder do
   let(:base_params) { { current_user: user } }
   let(:params) { {} }
 
-  subject { described_class.new(base_params.merge(params)) }
+  subject { described_class.new(**base_params.merge(params)) }
 
   it 'returns an empty relation if group is not set' do
     expect(subject.execute).to be_empty
