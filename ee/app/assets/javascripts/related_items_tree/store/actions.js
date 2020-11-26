@@ -1,13 +1,5 @@
 import Api from 'ee/api';
-<<<<<<< HEAD
 import epicChildren from 'shared_queries/epic/epic_children.query.graphql';
-import { deprecatedCreateFlash as flash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import { s__, __ } from '~/locale';
-=======
->>>>>>> parent of 7893fb797e8 (Merge branch 'vs-ee-sort-imports-by-groups' into 'master')
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,

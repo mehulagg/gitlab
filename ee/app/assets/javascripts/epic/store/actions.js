@@ -8,11 +8,7 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
-<<<<<<< HEAD
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
-=======
-import epicDetailsQuery from '../queries/epicDetails.query.graphql';
->>>>>>> parent of 7893fb797e8 (Merge branch 'vs-ee-sort-imports-by-groups' into 'master')
 import updateEpic from '../queries/updateEpic.mutation.graphql';
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
 
