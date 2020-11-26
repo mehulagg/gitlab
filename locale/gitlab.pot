@@ -30112,9 +30112,6 @@ msgstr ""
 msgid "VisualReviewApp|Steps 1 and 2 (and sometimes 3) are performed once by the developer before requesting feedback. Steps 3 (if necessary), 4 is performed by the reviewer each time they perform a review."
 msgstr ""
 
-msgid "Visualization"
-msgstr ""
-
 msgid "Vulnerabilities"
 msgstr ""
 
