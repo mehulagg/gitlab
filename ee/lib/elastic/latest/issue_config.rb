@@ -26,8 +26,7 @@ module Elastic
         indexes :author_id, type: :integer
         indexes :confidential, type: :boolean
         indexes :assignee_id, type: :integer
-        # TODO: uncomment after https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47819 is merged
-        # indexes :issues_access_level, type: :integer
+        indexes :issues_access_level, type: :integer
       end
     end
   end
