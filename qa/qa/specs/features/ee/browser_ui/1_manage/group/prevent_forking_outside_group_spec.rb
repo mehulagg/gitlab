@@ -60,6 +60,8 @@ module QA
 
       after do
         project.group.sandbox.update_group_setting(group_setting: 'prevent_forking_outside_group', value: false)
+        project.remove_via_api!
+        group_for_fork.remove_via_api!
       end
     end
   end
