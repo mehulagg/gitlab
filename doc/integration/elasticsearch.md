@@ -83,7 +83,7 @@ After the data is added to the database or repository and [Elasticsearch is
 enabled in the Admin Area](#enabling-advanced-search) the search index will be
 updated automatically.
 
-## Upgrading Elasticsearch version
+## Upgrading to a new Elasticsearch major version
 
 Since Elasticsearch can read and use indices created in the previous major version you don't need to change anything in GitLab's configuration when doing an Elasticsearch major version upgrade.
 
