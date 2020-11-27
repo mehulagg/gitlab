@@ -92,7 +92,7 @@ module Gitlab
 
       def create_standalone_indices(with_alias: true, options: {})
         ES_SEPARATE_CLASSES.each do |class_name|
-          proxy = ::Elastic::Latest::ApplicationClassProxy.new(Issue, use_separate_indices: true)
+          proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
 
           new_index_name = "#{target_name}-#{proxy.index_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 

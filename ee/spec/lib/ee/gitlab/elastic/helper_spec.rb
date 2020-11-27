@@ -69,6 +69,22 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
+  describe '#create_standalone_indices' do
+    after do
+      @indices.each do |index|
+        helper.delete_index(index_name: index)
+      end
+    end
+
+    it 'creates standalone indices' do
+      @indices = helper.create_standalone_indices
+
+      @indices.each do |index|
+        helper.index_exists?(index_name: index)
+      end
+    end
+  end
+
   describe '#create_empty_index' do
     context 'with an empty cluster' do
       context 'with alias and index' do
