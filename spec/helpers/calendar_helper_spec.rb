@@ -23,7 +23,7 @@ RSpec.describe CalendarHelper do
       it "does not have a feed_token" do
         current_user = create(:user)
         allow(helper).to receive(:current_user).and_return(current_user)
-        allow(Gitlab::CurrentSettings).to receive(:feed_token_off).and_return(true)
+        allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(true)
         expect(helper.calendar_url_options[:feed_token]).to be_nil
       end
     end

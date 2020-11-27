@@ -29,6 +29,6 @@ class AddFeedTokenOffToSettings < ActiveRecord::Migration[6.0]
   # disable_ddl_transaction!
 
   def change
-    add_column :application_settings, :feed_token_off, :boolean, null: false, default: false
+    add_column :application_settings, :disable_feed_token, :boolean, null: false, default: false
   end
 end
