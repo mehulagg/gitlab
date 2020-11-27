@@ -96,8 +96,11 @@ module Types
           resolver: Resolvers::ContainerRepositoriesResolver,
           authorize: :read_container_image
 
+    field :container_repositories_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of container repositories in the project'
+
     def label(title:)
-      BatchLoader::GraphQL.for(title).batch(key: group) do |titles, loader, args|
+    BatchLoader::GraphQL.for(title).batch(key: group) do |titles, loader, args|
         LabelsFinder
           .new(current_user, group: args[:key], title: titles)
           .execute
@@ -118,6 +121,10 @@ module Types
       LabelsFinder
         .new(current_user, group: group, search: search_term)
         .execute
+    end
+
+    def container_repositories_count
+      group.container_repositories.size
     end
 
     private
